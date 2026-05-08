@@ -192,3 +192,250 @@ origin: .harness/specs/2026-05-08-jsc-283-packaged-skill-behavior-assurance-spec
 
     assert not result.passed
     assert "date-prefixed filenames must have matching frontmatter date" in result.errors
+
+
+# ---------------------------------------------------------------------------
+# Tests for new eval artifacts added in PR (harness control-plane refactor)
+# ---------------------------------------------------------------------------
+
+
+def test_valid_ask_control_plane_decomposition_eval_identity_passes() -> None:
+    """Frontmatter matching the new ask-control-plane-decomposition eval file passes."""
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-ask-control-plane-decomposition-eval
+artifact_type: he-eval-report
+type: he-eval-report
+canonical_slug: agent-skills-ask-control-plane-decomposition
+title: Agent Skills Ask Control Plane Decomposition Eval
+harness_stage: he-eval-report
+status: plan_ask_005_complete_linear_resolved
+date: 2026-05-08
+traceability_required: true
+origin: .harness/plan/agent-skills-ask-control-plane-decomposition-plan.md
+linear_issue: JSC-284
+---
+
+# Agent Skills Ask Control Plane Decomposition Eval
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/agent-skills-ask-control-plane-decomposition-eval.md"),
+        markdown,
+    )
+
+    assert result.passed, f"Unexpected errors: {result.errors}"
+
+
+def test_valid_jsc_284_eval_identity_passes() -> None:
+    """Frontmatter matching the new JSC-284 eval report passes validation."""
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-jsc-284-he-eval-report
+artifact_type: he-eval-report
+canonical_slug: agent-skills-jsc-284
+title: Agent Skills JSC-284 Eval Report
+harness_stage: he-eval-report
+status: complete
+traceability_required: true
+origin: .harness/plan/agent-skills-ask-control-plane-decomposition-plan.md
+linear_issue: JSC-284
+---
+
+# Agent Skills JSC-284 Eval Report
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/agent-skills-jsc-284-eval.md"),
+        markdown,
+    )
+
+    assert result.passed, f"Unexpected errors: {result.errors}"
+
+
+def test_eval_artifact_type_must_contain_harness_stage() -> None:
+    """artifact_type must contain the expected harness_stage (he-eval-report for evals/)."""
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-ask-control-plane-decomposition-eval
+artifact_type: he-plan
+canonical_slug: agent-skills-ask-control-plane-decomposition
+title: Agent Skills Ask Control Plane Decomposition Eval
+harness_stage: he-eval-report
+status: draft
+---
+
+# Agent Skills Ask Control Plane Decomposition Eval
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/agent-skills-ask-control-plane-decomposition-eval.md"),
+        markdown,
+    )
+
+    assert not result.passed
+    assert "frontmatter artifact_type must include the owning harness_stage" in result.errors
+
+
+def test_eval_missing_frontmatter_fails() -> None:
+    """Eval markdown without YAML frontmatter must fail with a clear error."""
+    markdown = """# Agent Skills Ask Control Plane Decomposition Eval
+
+Some content without frontmatter.
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/agent-skills-ask-control-plane-decomposition-eval.md"),
+        markdown,
+    )
+
+    assert not result.passed
+    assert "missing YAML frontmatter" in result.errors
+
+
+def test_eval_canonical_slug_must_be_in_artifact_id() -> None:
+    """canonical_slug must appear in artifact_id for eval artifacts."""
+    markdown = """---
+schema_version: 1
+artifact_id: unrelated-eval-identifier
+artifact_type: he-eval-report
+canonical_slug: agent-skills-ask-control-plane-decomposition
+title: Agent Skills Ask Control Plane Decomposition Eval
+harness_stage: he-eval-report
+status: draft
+---
+
+# Agent Skills Ask Control Plane Decomposition Eval
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/unrelated-eval-identifier.md"),
+        markdown,
+    )
+
+    assert not result.passed
+    assert "frontmatter artifact_id must contain canonical_slug" in result.errors
+
+
+def test_eval_jsc_284_canonical_slug_contains_issue_key() -> None:
+    """When linear_issue JSC-284 appears in path/artifact_id, canonical_slug must include jsc-284."""
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-jsc-284-he-eval-report
+artifact_type: he-eval-report
+canonical_slug: agent-skills-report
+title: Agent Skills JSC-284 Eval Report
+harness_stage: he-eval-report
+status: complete
+traceability_required: true
+origin: .harness/plan/agent-skills-ask-control-plane-decomposition-plan.md
+linear_issue: JSC-284
+---
+
+# Agent Skills JSC-284 Eval Report
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/agent-skills-jsc-284-eval.md"),
+        markdown,
+    )
+
+    assert not result.passed
+    assert "frontmatter canonical_slug must include lower-case linear_issue" in result.errors
+
+
+def test_eval_traceability_required_without_origin_fails() -> None:
+    """traceability_required: true without origin or source_artifacts must fail."""
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-ask-control-plane-decomposition-eval
+artifact_type: he-eval-report
+canonical_slug: agent-skills-ask-control-plane-decomposition
+title: Agent Skills Ask Control Plane Decomposition Eval
+harness_stage: he-eval-report
+status: complete
+traceability_required: true
+linear_issue: JSC-284
+---
+
+# Agent Skills Ask Control Plane Decomposition Eval
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/agent-skills-ask-control-plane-decomposition-eval.md"),
+        markdown,
+    )
+
+    assert not result.passed
+    assert "traceability_required artifacts need origin or source_artifacts" in result.errors
+
+
+def test_eval_title_must_match_h1_heading() -> None:
+    """frontmatter title must match the first H1 heading in eval artifacts."""
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-jsc-284-he-eval-report
+artifact_type: he-eval-report
+canonical_slug: agent-skills-jsc-284
+title: Agent Skills JSC-284 Eval Report
+harness_stage: he-eval-report
+status: complete
+---
+
+# Wrong Heading For JSC-284 Report
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/agent-skills-jsc-284-eval.md"),
+        markdown,
+    )
+
+    assert not result.passed
+    assert "frontmatter title must match the first H1 heading" in result.errors
+
+
+def test_eval_filename_must_contain_canonical_slug() -> None:
+    """The eval filename stem must contain the canonical_slug."""
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-ask-control-plane-decomposition-eval
+artifact_type: he-eval-report
+canonical_slug: agent-skills-ask-control-plane-decomposition
+title: Agent Skills Ask Control Plane Decomposition Eval
+harness_stage: he-eval-report
+status: complete
+---
+
+# Agent Skills Ask Control Plane Decomposition Eval
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/completely-different-name-eval.md"),
+        markdown,
+    )
+
+    assert not result.passed
+    assert "filename stem must contain canonical_slug" in result.errors
+
+
+def test_eval_schema_version_is_required() -> None:
+    """schema_version is a required field for eval artifacts."""
+    markdown = """---
+artifact_id: agent-skills-jsc-284-he-eval-report
+artifact_type: he-eval-report
+canonical_slug: agent-skills-jsc-284
+title: Agent Skills JSC-284 Eval Report
+harness_stage: he-eval-report
+status: complete
+---
+
+# Agent Skills JSC-284 Eval Report
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/agent-skills-jsc-284-eval.md"),
+        markdown,
+    )
+
+    assert not result.passed
+    assert "frontmatter schema_version is required" in result.errors
