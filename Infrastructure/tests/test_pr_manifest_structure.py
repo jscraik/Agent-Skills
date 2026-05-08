@@ -340,7 +340,7 @@ class TestGitignore(unittest.TestCase):
     def test_harness_curated_roots_are_trackable(self):
         """
         Asserts that specific curated `.harness/` root directories are marked as trackable in `.gitignore`.
-        
+
         Checks for the presence of negated ignore patterns that ensure the following curated roots are tracked: `!.harness/core/`, `!.harness/linear/`, `!.harness/refactors/`, `!.harness/specs/`, and `!.harness/review/`.
         """
         for entry in [
@@ -352,10 +352,98 @@ class TestGitignore(unittest.TestCase):
         ]:
             self.assertIn(entry, self._lines)
 
+    def test_plugins_zip_is_ignored(self):
+        """Plugins/*.zip archives must be ignored so built plugin zips are not tracked."""
+        self.assertIn("Plugins/*.zip", self._lines)
+
+    def test_harness_root_marker_is_trackable(self):
+        """The top-level !.harness/ negation must be present so the directory itself is trackable."""
+        self.assertIn("!.harness/", self._lines)
+
+    def test_harness_core_recursive_content_is_trackable(self):
+        """!.harness/core/** must be present so nested core policy files are tracked."""
+        self.assertIn("!.harness/core/**", self._lines)
+
+    def test_harness_decisions_are_trackable(self):
+        """ADR and decision files under .harness/decisions/ must be tracked."""
+        self.assertIn("!.harness/decisions/", self._lines)
+        self.assertIn("!.harness/decisions/**", self._lines)
+
+    def test_harness_features_are_trackable(self):
+        """Feature intent and moat files under .harness/features/ must be tracked."""
+        self.assertIn("!.harness/features/", self._lines)
+        self.assertIn("!.harness/features/**", self._lines)
+
+    def test_harness_plan_is_trackable(self):
+        """Plan artifacts under .harness/plan/ must be tracked."""
+        self.assertIn("!.harness/plan/", self._lines)
+        self.assertIn("!.harness/plan/**", self._lines)
+
+    def test_harness_memory_is_trackable(self):
+        """Memory learnings under .harness/memory/ must be tracked."""
+        self.assertIn("!.harness/memory/", self._lines)
+        self.assertIn("!.harness/memory/**", self._lines)
+
+    def test_harness_quality_is_trackable(self):
+        """Quality criteria under .harness/quality/ must be tracked."""
+        self.assertIn("!.harness/quality/", self._lines)
+        self.assertIn("!.harness/quality/**", self._lines)
+
+    def test_harness_json_files_are_trackable(self):
+        """Contract JSON files at .harness/*.json must be tracked."""
+        self.assertIn("!.harness/*.json", self._lines)
+
+    def test_harness_strategy_triage_ideate_brainstorm_are_trackable(self):
+        """Secondary reference dirs (strategy, triage, ideate, brainstorm) must be tracked."""
+        for entry in [
+            "!.harness/strategy/",
+            "!.harness/strategy/**",
+            "!.harness/triage/",
+            "!.harness/triage/**",
+            "!.harness/ideate/",
+            "!.harness/ideate/**",
+            "!.harness/brainstorm/",
+            "!.harness/brainstorm/**",
+        ]:
+            with self.subTest(entry=entry):
+                self.assertIn(entry, self._lines)
+
+    def test_harness_ignore_block_precedes_negation_block(self):
+        """Runtime-ignored entries must appear before the negation block in .gitignore."""
+        ignore_idx = next(
+            (i for i, line in enumerate(self._lines) if line == ".harness/backups/"), -1
+        )
+        negation_idx = next(
+            (i for i, line in enumerate(self._lines) if line == "!.harness/"), -1
+        )
+        self.assertGreater(ignore_idx, 0, ".harness/backups/ entry not found")
+        self.assertGreater(negation_idx, 0, "!.harness/ entry not found")
+        self.assertLess(
+            ignore_idx,
+            negation_idx,
+            "Runtime-ignore entries should precede the negation block",
+        )
+
+    def test_harness_db_ignore_precedes_json_negation(self):
+        """.harness/*.db must be ignored before !.harness/*.json is re-included."""
+        db_idx = next(
+            (i for i, line in enumerate(self._lines) if line == ".harness/*.db"), -1
+        )
+        json_neg_idx = next(
+            (i for i, line in enumerate(self._lines) if line == "!.harness/*.json"), -1
+        )
+        self.assertGreater(db_idx, 0, ".harness/*.db entry not found")
+        self.assertGreater(json_neg_idx, 0, "!.harness/*.json entry not found")
+        self.assertLess(
+            db_idx,
+            json_neg_idx,
+            ".harness/*.db should be ignored before .harness/*.json is re-included",
+        )
+
 
 # ---------------------------------------------------------------------------
 # .codex/environments/environment.toml
-# ---------------------------------------------------------------------------
+
 
 class TestEnvironmentToml(unittest.TestCase):
     def setUp(self):
