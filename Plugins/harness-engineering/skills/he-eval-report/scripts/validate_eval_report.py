@@ -18,6 +18,8 @@ REQUIRED_SECTIONS = [
     "Source Artifact Trace",
     "Functional Validation Results",
     "Eval Gate Matrix",
+    "Agentic Eval Validity",
+    "Side-Effect Authorization",
     "Drift Validation",
     "Architecture Integrity Check",
     "Routing Determinism Check",
@@ -53,6 +55,31 @@ GATE_FIELDS = [
     "Required Action:",
 ]
 
+AGENTIC_EVAL_FIELDS = [
+    "Evaluated Capability / Task:",
+    "Task Validity:",
+    "Outcome Validity:",
+    "Trajectory / Transcript Evidence:",
+    "Grader Coverage:",
+    "Trial Policy:",
+    "Pass@k / Pass^k Reporting:",
+    "Authorization Validator:",
+    "Saturation / Maintenance Signal:",
+    "Blocks Completion:",
+    "Required Action:",
+]
+
+SIDE_EFFECT_AUTHORIZATION_FIELDS = [
+    "Protected Action:",
+    "User Authorization Evidence:",
+    "Agent Justification:",
+    "External Party Influence:",
+    "Validator Decision:",
+    "Validator Confidence:",
+    "Suggested Next Step:",
+    "Blocks Completion:",
+]
+
 DRIFT_AREAS = [
     "Architecture Drift:",
     "Routing Drift:",
@@ -63,6 +90,9 @@ DRIFT_AREAS = [
 ]
 
 DRIFT_VALUES = {"Improved", "Neutral", "Regressed", "Unknown"}
+YES_NO_VALUES = {"yes", "no"}
+VALIDATOR_DECISIONS = {"approved", "blocked", "exempt", "not-run"}
+VALIDATOR_CONFIDENCE_VALUES = {"high", "medium", "low", "not-run"}
 RECOMMENDATIONS = {
     "Complete",
     "Complete with follow-up",
@@ -75,6 +105,23 @@ RECOMMENDATIONS = {
 def section_present(text: str, section: str) -> bool:
     pattern = rf"(?m)^#{{1,3}}\s+{re.escape(section)}\s*$"
     return re.search(pattern, text) is not None
+
+
+def section_body(text: str, section: str) -> str:
+    pattern = rf"(?ms)^#{{1,3}}\s+{re.escape(section)}\s*$\n(?P<body>.*?)(?=^#{{1,3}}\s+|\Z)"
+    match = re.search(pattern, text)
+    return match.group("body") if match else ""
+
+
+def field_value(text: str, field: str) -> str | None:
+    match = re.search(rf"(?mi)^{re.escape(field)}\s*(.*?)\s*$", text)
+    return match.group(1).strip() if match else None
+
+
+def is_blankish(value: str | None) -> bool:
+    if value is None:
+        return True
+    return value.strip().lower() in {"", "n/a", "na", "none", "unknown", "tbd", "todo"}
 
 
 def find_recommendation(text: str) -> str | None:
@@ -109,6 +156,117 @@ def validate_gate_matrix(text: str, errors: list[str], warnings: list[str]) -> N
     for field in GATE_FIELDS:
         if field not in text:
             errors.append(f"gate matrix is missing field: {field}")
+
+
+def validate_agentic_eval_validity(
+    text: str, errors: list[str], *, enforce_values: bool
+) -> None:
+    if not section_present(text, "Agentic Eval Validity"):
+        return
+    body = section_body(text, "Agentic Eval Validity")
+    validate_required_fields(
+        body,
+        AGENTIC_EVAL_FIELDS,
+        errors,
+        "agentic eval validity",
+        enforce_values=enforce_values,
+        optional_blank_fields={"Required Action:"},
+    )
+    blocks_completion = field_value(body, "Blocks Completion:")
+    if enforce_values and blocks_completion and blocks_completion.lower() not in YES_NO_VALUES:
+        errors.append("agentic eval validity Blocks Completion must be yes or no")
+
+
+def validate_side_effect_authorization(
+    text: str, errors: list[str], *, enforce_values: bool
+) -> None:
+    if not section_present(text, "Side-Effect Authorization"):
+        return
+    body = section_body(text, "Side-Effect Authorization")
+    validate_required_fields(
+        body,
+        SIDE_EFFECT_AUTHORIZATION_FIELDS,
+        errors,
+        "side-effect authorization",
+        enforce_values=enforce_values,
+        optional_blank_fields={"Suggested Next Step:"},
+    )
+    if not enforce_values:
+        return
+    validate_side_effect_enum_values(body, errors)
+    validate_side_effect_decision_consistency(body, errors)
+
+
+def validate_required_fields(
+    body: str,
+    fields: list[str],
+    errors: list[str],
+    label: str,
+    *,
+    enforce_values: bool,
+    optional_blank_fields: set[str] | None = None,
+) -> None:
+    optional_blank_fields = optional_blank_fields or set()
+    for field in fields:
+        if field not in body:
+            errors.append(f"{label} section is missing field: {field}")
+            continue
+        if (
+            enforce_values
+            and field not in optional_blank_fields
+            and is_blankish(field_value(body, field))
+        ):
+            errors.append(f"{label} field is blank: {field}")
+
+
+def validate_side_effect_enum_values(body: str, errors: list[str]) -> None:
+    decision = field_value(body, "Validator Decision:")
+    confidence = field_value(body, "Validator Confidence:")
+    blocks_completion = field_value(body, "Blocks Completion:")
+    if decision and decision.lower() not in VALIDATOR_DECISIONS:
+        errors.append(
+            "side-effect authorization Validator Decision must be approved, blocked, exempt, or not-run"
+        )
+    if confidence and confidence.lower() not in VALIDATOR_CONFIDENCE_VALUES:
+        errors.append(
+            "side-effect authorization Validator Confidence must be high, medium, low, or not-run"
+        )
+    if blocks_completion and blocks_completion.lower() not in YES_NO_VALUES:
+        errors.append("side-effect authorization Blocks Completion must be yes or no")
+
+
+def validate_side_effect_decision_consistency(body: str, errors: list[str]) -> None:
+    decision = field_value(body, "Validator Decision:")
+    blocks_completion = field_value(body, "Blocks Completion:")
+    protected_action = field_value(body, "Protected Action:")
+    user_evidence = field_value(body, "User Authorization Evidence:")
+    external_influence = field_value(body, "External Party Influence:")
+    if (
+        not is_blankish(protected_action)
+        and decision
+        and decision.lower() == "approved"
+        and is_blankish(user_evidence)
+    ):
+        errors.append(
+            "side-effect authorization cannot approve a protected action without user authorization evidence"
+        )
+    if (
+        external_influence
+        and external_influence.lower() not in {"none", "n/a", "na", "no"}
+        and decision
+        and decision.lower() == "approved"
+    ):
+        errors.append(
+            "side-effect authorization cannot approve when external party influence is present"
+        )
+    if (
+        decision
+        and decision.lower() == "not-run"
+        and (not blocks_completion or blocks_completion.lower() != "yes")
+    ):
+        errors.append(
+            "side-effect authorization not-run validator decisions must block completion"
+        )
 
 
 def validate_drift_classifications(text: str, errors: list[str]) -> None:
@@ -152,9 +310,12 @@ def validate(path: Path) -> tuple[list[str], list[str]]:
     if not text.strip():
         return ["report is empty"], warnings
 
+    enforce_values = path.name != "eval-report-template.md"
     validate_sections(text, errors)
     validate_linear_fields(text, errors)
     validate_gate_matrix(text, errors, warnings)
+    validate_agentic_eval_validity(text, errors, enforce_values=enforce_values)
+    validate_side_effect_authorization(text, errors, enforce_values=enforce_values)
     validate_drift_classifications(text, errors)
     validate_recommendation(text, errors)
     validate_consistency(text, path, warnings)

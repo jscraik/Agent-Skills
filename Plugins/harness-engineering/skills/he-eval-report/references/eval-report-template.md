@@ -78,6 +78,31 @@ Confidence:
 Blocks Closure: yes | no
 Required Action:
 
+# Agentic Eval Validity
+
+Evaluated Capability / Task:
+Task Validity:
+Outcome Validity:
+Trajectory / Transcript Evidence:
+Grader Coverage:
+Trial Policy:
+Pass@k / Pass^k Reporting:
+Authorization Validator:
+Saturation / Maintenance Signal:
+Blocks Completion: yes | no
+Required Action:
+
+# Side-Effect Authorization
+
+Protected Action:
+User Authorization Evidence:
+Agent Justification:
+External Party Influence:
+Validator Decision: approved | blocked | exempt | not-run
+Validator Confidence: high | medium | low | not-run
+Suggested Next Step:
+Blocks Completion: yes | no
+
 # Drift Validation
 
 Architecture Drift: Improved | Neutral | Regressed | Unknown
@@ -94,6 +119,11 @@ Interpretation:
 Assumption:
 Evidence:
 Affected Files/Modules:
+Action Parity:
+Capability Discovery:
+Context Injection:
+Shared Workspace / Truth Surface:
+Explicit Completion Or Resume Signal:
 Confidence:
 Operational Impact:
 Blocks Completion:

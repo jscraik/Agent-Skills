@@ -32,6 +32,8 @@ class TestAskGoldenPath(unittest.TestCase):
         self.assertTrue(payload["blocking"])
         self.assertEqual([item["id"] for item in payload["blockers"]], ["alpha", "zeta"])
         self.assertEqual(payload["next_command"], "ask alpha")
+        self.assertEqual(payload["next_command_kind"], "blocking_repair")
+        self.assertTrue(payload["next_command_blocks_task"])
 
     def test_all_pass_uses_normal_next_command(self) -> None:
         payload = build_golden_path_payload(
@@ -49,6 +51,45 @@ class TestAskGoldenPath(unittest.TestCase):
         self.assertEqual(payload["blockers"], [])
         self.assertEqual(payload["diagnostic_debt"], [])
         self.assertEqual(payload["next_command"], "./bin/ask repo status --json --robot")
+        self.assertEqual(payload["next_command_kind"], "normal_inspection")
+        self.assertFalse(payload["next_command_blocks_task"])
+
+    def test_diagnostic_warning_selects_advisory_next_command(self) -> None:
+        payload = build_golden_path_payload(
+            signals={
+                "repo_surface": {
+                    "state": "warn",
+                    "severity": "warning",
+                    "summary": "Repo surface has diagnostic debt.",
+                    "next_command": "./bin/ask repo surface --json --robot",
+                },
+            },
+            normal_next_command="./bin/ask repo status --json --robot",
+        )
+
+        self.assertFalse(payload["blocking"])
+        self.assertEqual(payload["blockers"], [])
+        self.assertEqual(payload["diagnostic_debt"][0]["id"], "repo_surface")
+        self.assertEqual(payload["next_command"], "./bin/ask repo surface --json --robot")
+        self.assertEqual(payload["next_command_kind"], "diagnostic_advisory")
+        self.assertFalse(payload["next_command_blocks_task"])
+
+    def test_blocker_without_recovery_is_classified_as_no_safe_command(self) -> None:
+        payload = build_golden_path_payload(
+            signals={
+                "catalog_parity": {
+                    "state": "block",
+                    "severity": "blocker",
+                    "summary": "Catalog parity blocked without recovery.",
+                },
+            },
+            normal_next_command="./bin/ask repo status --json --robot",
+        )
+
+        self.assertTrue(payload["blocking"])
+        self.assertEqual(payload["next_command"], None)
+        self.assertEqual(payload["next_command_kind"], "no_safe_command")
+        self.assertTrue(payload["next_command_blocks_task"])
 
     def test_render_summary_supports_success_and_error_shapes(self) -> None:
         payload = {

@@ -38,6 +38,24 @@ reasoning, hidden assumptions, missing machine-readable contracts, fragile promp
 dependency, and unsafe autonomous execution paths. A regression blocks closure
 when a future agent cannot reproduce the intended flow from local artifacts.
 
+Use the agent-native scorecard when the slice changes skills, plugins, CLIs,
+agent-facing docs, evals, routing, or generated projections:
+
+```text
+Action Parity:
+Capability Discovery:
+Context Injection:
+Shared Workspace / Truth Surface:
+Explicit Completion Or Resume Signal:
+Status: pass | fail | partial | not-run
+Evidence:
+Blocks Closure: yes | no
+```
+
+Do not make this a separate review stage. Fold it into `Agent-Native Check`,
+`Agent Discoverability`, `Routing Determinism`, or `Moat Protection` gates only
+when those gates are relevant to the evaluated slice.
+
 ## Moat Drift
 
 Check for weakened eval quality, weaker operational reliability, weaker

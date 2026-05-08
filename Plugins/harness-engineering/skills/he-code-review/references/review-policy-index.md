@@ -36,6 +36,9 @@ Before deep review, classify closed, draft, automated, trivial, already-reviewed
 - Relevant history, blame, previous PRs, review comments, and changed-file code comments.
 - Breaking API, CLI, configuration, serialization, migration, permission, or rollout changes.
 - Change-size, context-safety, focused testing, validation, and security/supply-chain evidence.
+- Agent-native scorecard for skill, plugin, CLI, agent-doc, eval, routing, or
+  projection changes: action parity, capability discovery, context injection,
+  shared workspace/truth surface, and explicit completion or resume signal.
 
 ## Confidence Calibration
 

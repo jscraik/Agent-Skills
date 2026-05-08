@@ -24,6 +24,16 @@ cases:
     prompt: "he-compound case project-brain-linkage: preserve traceability, evidence, validation, and safe routing."
     deterministic_checks: *safe
     acceptance: *accept_trace
+  - id: solution-discoverability
+    <<: *common
+    name: "Solution Discoverability"
+    category: edge
+    prompt: "Capture a solved problem under .harness/solutions and report whether active instruction surfaces make that root discoverable to future agents."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(\\.harness/solutions|solution)"}
+      - {type: regex, value: "(?is)(discoverability|AGENTS|README|instruction)"}
+      - {type: regex, value: "(?is)(evidence|blocked|traceability)"}
   - id: coding-harness-lifecycle-map
     <<: *common
     name: "Coding Harness Lifecycle Map"

@@ -16,4 +16,10 @@ Use `standard-spec` for system, service, workflow, backend, full-stack, plugin, 
 
 Use folded `he-deepen-spec` behavior when an existing spec has contradictions, vague acceptance criteria, unclear source parity, missing failure/observability/validation behavior, or targeted-confidence review needs.
 
+Preserve the old `ce-docs-review` value as a lightweight document review pass
+for existing specs: challenge contradictions, vague actors/flows, missing
+acceptance IDs, unsupported scope, and weak handoff evidence before `he-plan`.
+Use it to strengthen the current spec, not to create a parallel review artifact
+unless the user asks for one.
+
 For revisions, emit complete replacement sections or a complete replacement artifact. Do not hand `he-plan` a pile of deltas that require interpretation.

@@ -24,6 +24,7 @@ outputs:
   - durable plan artifact with stable plan IDs and acceptance IDs
   - resolved or created Linear issue key/URL for tracked plans, or linear_blocked status with missing fields and ready-to-create payload
   - Linear/spec/plan/PR traceability matrix for tracked work
+  - post_plan_handoff state: handoff_executed, explicit_stop, blocked, or awaiting_user_choice
   - coding_harness lifecycle block including plan-gate status when the repo is coding-harness-managed
   - requirements, dependencies, test scenarios, verification outcomes, rollback, and risk notes
   - subtractive compression units before additive metadata when first-contact or cockpit surfaces are in scope
@@ -59,6 +60,7 @@ risks:
   - plan/state drift; mitigate with stable IDs and complete-replacement revisions
   - missing Linear traceability; mitigate by requiring active issue resolution or issue creation for tracked work
   - missing Harness gate evidence in coding-harness-managed repos; mitigate by running or explicitly blocking plan-gate and transition commands
+  - plan-only drift after the user asked to continue; mitigate with the post-plan handoff contract and same-turn routing when authorized
   - weak tests; mitigate with behavior-focused scenarios and mock anti-pattern guidance
   - over-planning into implementation; mitigate with plan-only boundaries and deferred implementation notes
   - additive compatibility dominating subtractive clarity; mitigate by sequencing default-help budget, agent-catalog budget, docs front-door collapse, standalone-command admission tests, fresh-agent eval, and ablation proof as blocking units

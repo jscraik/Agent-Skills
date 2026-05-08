@@ -9,12 +9,14 @@ metadata:
 Make ambiguity useful without turning it into ceremony. Preserve what is stated, inferred, and out of scope so the next HE stage can continue without re-litigating context.
 ## When to Use
 Use before spec writing when intent is fuzzy; preserve Context preservation and assign `scope_tier`.
+Use folded `he-ideate` mode when the user asks what to improve, asks for options, or wants strong ideas before choosing one to brainstorm.
 ## Inputs
 User goal, repo evidence, Linear/project hints.
 ## Outputs
 Return schema_version when structured. Stated / Inferred / Out of scope, options, risks, warrant notes, blackboard_delta, durable artifact path when written, and next stage. Brainstorm markdown belongs under `.harness/brainstorm/**.md`; explicit folded `he-ideate` mode belongs under `.harness/ideate/**.md`.
 ## Procedure
-Explore first; separate evidence from guesses; before writing durable docs choose the routed `.harness` path from the artifact routing contract; for durable tracked work resolve/create the Linear issue before handoff; in coding-harness-managed repos load the command bridge and record the Harness transition.
+Explore first; require an identifiable subject before dispatching ideation or writing artifacts; separate evidence from guesses; before writing durable docs choose the routed `.harness` path from the artifact routing contract; for durable tracked work resolve/create the Linear issue before handoff; in coding-harness-managed repos load the command bridge and record the Harness transition.
+For `he-ideate`, ground in repo/Linear/session evidence and current web research unless explicitly skipped, generate many candidates internally, critique all candidates, surface only warranted survivors with rejection reasons, then route one selected survivor into `he-brainstorm` or the next HE stage.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check scope, traceability, and handoff clarity.
 ## Failure mode
@@ -34,6 +36,7 @@ Reference `assets/` only for skill packaging and browseability; workflow source 
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
+- Ideation mode: `Plugins/harness-engineering/skills/he-brainstorm/references/ideation-mode.md`
 - Linear tracker gate: `Plugins/harness-engineering/references/linear-tracker-gate.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Artifact routing: `Plugins/harness-engineering/references/artifact-routing-contract.md`

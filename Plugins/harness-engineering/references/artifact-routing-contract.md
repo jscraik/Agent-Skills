@@ -49,6 +49,21 @@ The first H1 must exactly match frontmatter `title`. If the title needs to
 change, update frontmatter, filename, and backlinks in the same edit or mark the
 artifact `superseded` and point at the successor.
 
+## Parser-Safe Frontmatter
+
+Traceable `.harness/**` artifacts are machine-readable contracts. Keep
+frontmatter conservative enough for simple parsers:
+
+- Start the file with a single YAML frontmatter block delimited by `---`.
+- Keep scalar values on one line unless the field is explicitly a YAML list.
+- Quote scalar values that contain `: `, ` #`, brackets, braces, or commas.
+- Keep `canonical_slug` lowercase kebab-case and stable across the chain.
+- Match date-prefixed filenames to frontmatter `date`.
+- Match frontmatter `title` to the first H1 exactly.
+- Do not mix dated filenames, Linear issue prefixes, and unrelated titles unless
+  `canonical_slug`, `artifact_id`, and frontmatter Linear identifiers connect
+  them deterministically.
+
 ## Durable Markdown Roots
 
 | Stage or mode | New artifact root |
@@ -90,8 +105,10 @@ created, updated, or selected as the current stage truth. If no durable artifact
 is written, set `artifact_status` to `none` or `not_applicable` and explain why.
 
 Run the identity lint before claiming a new or revised traceable artifact is
-ready:
+ready. Run the parser-safety lint when the artifact is intended to be consumed
+by another HE stage, Linear backlinking, Project Brain, or an eval report:
 
 ```bash
 python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <artifact-path>
+python3 Infrastructure/scripts/validation-and-linting/he_frontmatter_safety_lint.py <artifact-path>
 ```

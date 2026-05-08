@@ -1,6 +1,6 @@
 schema_version: "2.0"
 skill_name: "he-brainstorm"
-last_updated: "2026-05-07"
+last_updated: "2026-05-08"
 
 x_common: &common {eval_modes: [smoke, release], should_trigger: true, prepend_skill: false}
 x_negative: &negative {eval_modes: [smoke, release], category: negative, should_trigger: false, prepend_skill: false}
@@ -36,6 +36,29 @@ cases:
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(warranted|ideation|brainstorm|bounded)"}
+      - {type: regex, value: "(?is)(traceability|evidence|validation)"}
+      - {type: regex, value: "(?is)(safe|blocked|forbidden)"}
+  - id: he-ideate-ranked-survivors
+    <<: *common
+    name: "HE Ideate Ranked Survivors"
+    category: happy
+    prompt: "Run folded he-ideate mode for improving Harness Engineering artifact traceability. Ground ideas in repo evidence and default web research, generate candidates, reject weak ones, and present ranked survivors with basis tags, rejection reasons, traceability, validation, and safe routing."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(he-ideate|ideation|ranked|survivors)"}
+      - {type: regex, value: "(?is)(basis|direct|repo|external|reasoned)"}
+      - {type: regex, value: "(?is)(web research|external research|current external|unavailable|skipped)"}
+      - {type: regex, value: "(?is)(reject|rejection|cut)"}
+      - {type: regex, value: "(?is)(traceability|evidence|validation)"}
+      - {type: regex, value: "(?is)(safe|blocked|forbidden)"}
+  - id: he-ideate-vague-subject
+    <<: *common
+    name: "HE Ideate Vague Subject"
+    category: edge
+    prompt: "The user only says 'give me improvement ideas'; folded he-ideate mode must ask for or identify the subject before generating candidates, then preserve traceability, evidence, validation, and safe routing."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(subject|what.*ideate|clarify|ask)"}
       - {type: regex, value: "(?is)(traceability|evidence|validation)"}
       - {type: regex, value: "(?is)(safe|blocked|forbidden)"}
   - id: visual-communication-needed

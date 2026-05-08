@@ -513,7 +513,14 @@ schedule_check required plugin-shadowing "🪞 Checking plugin skill shadowing..
 schedule_check required provider-policy "🔒 Verifying OpenAI provider policy..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_provider_policy.py
 schedule_check required runtime-budget "📦 Verifying default skill runtime budget..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py
 # Detect active projection mode so the budget gate matches the live runtime.
-active_projection_mode="$(python3 Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py --json 2>/dev/null | python3 -c 'import sys, json; print(json.load(sys.stdin).get("projection_mode", "flat"))')"
+active_projection_mode="flat"
+if should_run_check "context-budget"; then
+  if detected_projection_mode="$(python3 Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py --json 2>/dev/null | python3 -c 'import sys, json; print(json.load(sys.stdin).get("projection_mode", "flat"))')"; then
+    active_projection_mode="${detected_projection_mode:-flat}"
+  else
+    echo "  ⚠️  Could not detect active projection mode; context-budget will use flat"
+  fi
+fi
 schedule_check required context-budget "🌳 Verifying context-budgeted skill tree gates..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection "${active_projection_mode:-flat}"
 schedule_check required projection-integrity "🧱 Verifying projection integrity..." env PROJECTION_INTEGRITY_MANIFEST="$projection_manifest" bash Infrastructure/scripts/validate_projection_integrity.sh
 schedule_check required path-ownership-boundaries "🧭 Enforcing path ownership boundaries..." bash Infrastructure/scripts/check_path_ownership_boundaries.sh

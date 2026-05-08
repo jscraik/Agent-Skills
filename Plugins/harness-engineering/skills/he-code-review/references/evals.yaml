@@ -84,6 +84,15 @@ cases:
     acceptance:
       - {type: regex, value: "(?is)(compression|context budget|budget)"}
       - {type: regex, value: "(?is)(traceability|evidence|validation)"}
+  - id: agent-native-scorecard
+    <<: *common
+    name: "Agent Native Scorecard"
+    category: edge
+    prompt: "Review this skill/plugin routing change and include the agent-native scorecard for action parity, discovery, context injection, shared truth surface, and completion signal."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(action parity|capability discovery|context injection|truth surface|completion|resume)"}
+      - {type: regex, value: "(?is)(traceability|evidence|validation)"}
   - id: he-code-review-security-subpass
     <<: *common
     name: "He Code Review Security Subpass"

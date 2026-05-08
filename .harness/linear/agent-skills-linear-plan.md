@@ -504,19 +504,18 @@ Do not create one-off labels such as `Moat-Critical`, `Context`, or `Routing` un
 
 | Project | Recommendation | Active-set limit | Rationale |
 |---|---|---|---|
-| `agent-skills` | Reactivate for the `Ask Control Plane Decomposition` slice under `Command surface and ask reliability` | Keep to 1 active milestone, 1 active parent, 2 active sub-issues; optionally 1 ADR issue | This creates forward motion without turning the review into a backlog dump. |
+| `agent-skills` | Keep active for the next command-surface slice under `Command surface and ask reliability` | Keep to 1 active milestone and 1 active parent issue for the next `$he-spec` handoff | `Ask Control Plane Decomposition` is complete in Linear; the next slice should preserve the same small-active-set discipline. |
 | `Portfolio Ops` | Do not reactivate solely for this repo plan | 0-1 coordination issue only if needed | Cross-repo work is not needed to start repo execution. |
 | `Dev Portfolio` | Use as parent initiative only | No new initiative | Existing initiative represents the repo execution surface. |
 
-Recommended first active objects:
+Recommended current active objects after Linear delta refresh:
 
 | Object | Activate now? | Reason |
 |---|---|---|
-| Milestone: Command surface and ask reliability / slice: Ask Control Plane Decomposition | Yes | Highest leverage and first blocker. |
-| Parent: `[agent-skills] Decompose skills command module into bounded services` | Yes | Gives the milestone a single owner and closure target. |
-| Sub-issue: `[agent-skills] Map skills command responsibilities and output contracts` | Yes | Required first migration step. |
-| Sub-issue: `[agent-skills] Extract plugin cache service behind existing behavior` | Yes, after map | First bounded extraction. |
-| Sub-issue: `[agent-skills] Write proof taxonomy and lifecycle ADR` | Yes, parallel | Strategic clarity without code churn. |
+| Milestone: Command surface and ask reliability / slice: Agent First Golden Path | Yes | This is the next unresolved command-surface slice after `JSC-284` closed. |
+| Parent: `JSC-246` `[agent-skills] Build repo surface contract and agent capability control-plane golden paths` | Yes | Single admitted parent issue for the next `$he-spec` handoff. |
+| Prior parent: `JSC-284` `[agent-skills] Decompose skills command module into bounded services` | No; keep closed | Completed with children `JSC-285`, `JSC-286`, and `JSC-287`; do not reopen for new work. |
+| Existing in-progress track: `JSC-230` Commandable Skill Trees | Do not fold into this slice | Already has its own active parent/child topology; folding it into `JSC-246` would blur ownership. |
 
 ## Portfolio Ops Items
 
@@ -556,7 +555,7 @@ Do not create the Portfolio Ops issue unless another repo needs the same reactiv
 
 Initial plan state: no Linear objects were created by the plan alone.
 
-Current tracker state: Linear objects were later created during the `$he-spec` tracker gate, then reconciled onto the canonical existing `agent-skills` project. The current live issue set is `JSC-284`, `JSC-285`, `JSC-286`, and `JSC-287`.
+Current tracker state: Linear objects were later created during the `$he-spec` tracker gate, then reconciled onto the canonical existing `agent-skills` project. Live delta refresh now shows `JSC-284`, `JSC-285`, `JSC-286`, and `JSC-287` are complete; the next admitted issue is `JSC-246`.
 
 Review confirmation received for this plan:
 
@@ -582,41 +581,52 @@ The only slice admitted for the current HE Spec lane is:
 
 | Field | Value |
 |---|---|
-| Slice type | Parent issue plus bounded milestone |
+| Slice type | Parent issue plus bounded command-surface spec slice |
 | Project | `agent-skills` |
 | Project ID currently holding issues | `791c2f12-5ffb-4644-8421-f4216ac6d805` |
 | Linear milestone | `Command surface and ask reliability` |
-| HE slice name | `Ask Control Plane Decomposition` |
-| Parent issue | `JSC-284` |
-| Child issues | `JSC-285`, `JSC-286`, `JSC-287` |
-| Selected refactor | `.harness/refactors/ask-control-plane-decomposition.md` |
-| Parallel decision slice | Proof taxonomy ADR from `.harness/refactors/proof-driven-skill-promotion.md` |
-| Execution route | Agent-assisted; human-review required for public command contract changes |
-| Planning blocker | None from Linear tracker hygiene; `he-plan` should verify this state before sequencing implementation. |
+| HE slice name | `Agent First Golden Path` |
+| Parent issue | `JSC-246` |
+| Child issues | None admitted yet; `$he-spec` should decide whether child issues are required after spec review. |
+| Selected refactor | `.harness/refactors/agent-first-golden-path.md` |
+| Parallel decision slice | None admitted for this handoff. |
+| Execution route | Agent-assisted; human-review required for public command contract and agent-facing workflow changes. |
+| Planning blocker | None from Linear tracker hygiene; `$he-spec` should start from `JSC-246` and avoid folding in `JSC-230`, `JSC-167`, or `JSC-169` unless explicitly re-approved. |
 
 No other review, strategy, triage, or Linear issue is admitted into this slice.
 
 ## Linear Delta Capture
 
-Last synced: `2026-05-08`
+Last synced: `2026-05-08` after live Linear refresh.
 
-Source: Linear project query for `agent-skills`, canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`, duplicate project `e6ad5ea3-28b0-4b07-b2e0-594ec1b9242f`, parent `JSC-284`, child issues `JSC-285`, `JSC-286`, and `JSC-287`.
+Source: Live Linear project query for `agent-skills`, canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`, milestone `Command surface and ask reliability`, completed parent `JSC-284`, completed child issues `JSC-285`, `JSC-286`, and `JSC-287`, and unresolved command-surface candidates in the same project.
 
-Label status: `resolved_mapped_to_existing_labels`
+Label status: `resolved_with_existing_labels`; no Linear label mutation is required for the next slice.
 
 | Issue | Title | Status | Priority | Classification | Reason |
 |---|---|---|---:|---|---|
-| JSC-284 | `[agent-skills] Decompose skills command module into bounded services` | Triage | 1 | already_covered | Parent issue exists in current slice and matches the approved milestone. |
-| JSC-285 | `[agent-skills] Map skills command responsibilities and output contracts` | Triage | 1 | already_covered | Child issue exists, points to the boundary-map phase, and blocks `JSC-286`. |
-| JSC-286 | `[agent-skills] Extract plugin cache service behind existing behavior` | Triage | 2 | already_covered | Child issue exists and remains the first extraction slice. |
-| JSC-287 | `[agent-skills] Write proof taxonomy and lifecycle ADR` | Triage | 1 | already_covered | Parallel ADR issue exists and must not become enforcement work in this slice. |
-| Project identity | Canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`; duplicate project `e6ad5ea3-28b0-4b07-b2e0-594ec1b9242f` canceled | Resolved | 1 | resolved | Current slice issues are on the canonical repo project; duplicate project has no active issues. |
-| Label contract | `JSC-284`, `JSC-285`, `JSC-286` use `architecture`, `Refactor`, `Agent`; `JSC-287` uses `CE: Spec`, `architecture`, `Agent`, `Policy` | Resolved | 2 | resolved_mapped_to_existing_labels | Missing specialty labels were not created; existing reusable labels now carry routing intent. |
+| Milestone | `Command surface and ask reliability` | Active; progress `37.5%` | n/a | already_covered | Correct milestone exists in the canonical project and remains the right container for the next command-surface slice. |
+| JSC-284 | `[agent-skills] Decompose skills command module into bounded services` | Done | 1 | already_covered | Prior approved parent is complete; keep as evidence, not active scope. |
+| JSC-285 | `[agent-skills] Map skills command responsibilities and output contracts` | Done | 1 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |
+| JSC-286 | `[agent-skills] Extract plugin cache service behind existing behavior` | Done | 2 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |
+| JSC-287 | `[agent-skills] Write proof taxonomy and lifecycle ADR` | Done | 1 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |
+| JSC-246 | `Build repo surface contract and agent capability control-plane golden paths` | Todo | 2 | candidate_next_slice | Best next `$he-spec` target: unresolved, in the canonical project, in the active command-surface milestone, and directly maps to the planned Agent First Golden Path slice. |
+| JSC-167 | `Harden ask bootstrap and command discoverability` | Backlog | 2 | candidate_next_slice | Valid later command-surface work, but narrower than `JSC-246` and not admitted while only one slice may advance. |
+| JSC-169 | `Refactor ask to lazy-load command dependencies by topic` | Backlog | 2 | candidate_next_slice | Valid later architecture work, but should follow or be explicitly scoped by the `JSC-246` spec rather than bypass it. |
+| JSC-230 | `Implement Commandable Skill Trees for rooted skill handles` | In Progress | 2 | already_covered | Separate active parent with its own child topology; do not merge into this handoff. |
+| JSC-231 | `Generate command-surface projection from rooted manifests` | In Progress | 2 | already_covered | Child of `JSC-230`; already owned by the commandable-skill-tree track. |
+| JSC-232 | `Generate thin runtime stubs for command-visible skill handles` | In Progress | 2 | already_covered | Child of `JSC-230`; already owned by the commandable-skill-tree track. |
+| JSC-233 | `Expose public ask handle and reviewer resolver commands` | In Progress | 2 | already_covered | Child of `JSC-230`; already owned by the commandable-skill-tree track. |
+| JSC-234 | `Add handle proof commands and artifact schema` | Todo | 2 | already_covered | Child of `JSC-230`; keep in that parent rather than duplicating into `JSC-246`. |
+| JSC-235 | `Add rooted command-handle regression tests` | Todo | 2 | already_covered | Child of `JSC-230`; keep in that parent rather than duplicating into `JSC-246`. |
+| JSC-236 | `Prove workspace/user sync and live Codex handle invocation` | In Progress | 2 | already_covered | Child of `JSC-230`; already owned by the commandable-skill-tree track. |
+| JSC-168 | `Add reproducible Python environment contract for ask CLI` | Backlog | 2 | needs_human_triage | May support command reliability, but it is environment-contract work and should not enter the golden-path spec without explicit approval. |
+| JSC-170 | `Fix Robot mode alias behavior to match documented examples` | Backlog | 2 | needs_human_triage | Potentially related to agent UX, but narrower than the admitted golden-path slice. |
+| JSC-174 | `Add ask start fast lane for first-contact agent workflows` | Backlog | 3 | needs_human_triage | May become a child of the golden-path program after spec review; do not admit before boundary definition. |
+| JSC-175 | `Split ask output profiles for humans vs agents` | Backlog | 4 | out_of_scope | Useful output polish, but not the next structural slice. |
 
 ## Approved Next Slice Queue
 
 | Order | Slice | Linear Issue | Route | Depends On | Notes |
 |---:|---|---|---|---|---|
-| 1 | Boundary map and baseline capture | JSC-285 | Agent-safe | Verify tracker hygiene still holds | First implementation-adjacent work after tracker hygiene is resolved. |
-| 2 | Plugin cache service extraction | JSC-286 | Agent-assisted | JSC-285 | Preserve command behavior and avoid shallow wrapper extraction. |
-| 3 | Proof taxonomy ADR | JSC-287 | Agent-assisted; human-review required | None; parallel to JSC-285 | Decision-only slice; do not implement enforcement. |
+| 1 | Agent First Golden Path spec | JSC-246 | Agent-assisted; human-review required for public command contract changes | `JSC-284` closure evidence; live Linear delta refresh | This is the single admitted next slice for `$he-spec`. Scope it to repo surface contract and golden-path control-plane behavior, not all pending command-surface tickets. |

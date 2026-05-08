@@ -52,8 +52,12 @@ def build_golden_path_payload(
     blocking = bool(blockers)
 
     next_command = None
+    next_command_kind = "normal_inspection"
+    next_command_blocks_task = False
     if blockers:
         next_command = blockers[0].get("next_command")
+        next_command_kind = "blocking_repair" if next_command else "no_safe_command"
+        next_command_blocks_task = True
     else:
         actionable_warnings = [
             item for item in diagnostic_debt
@@ -61,8 +65,14 @@ def build_golden_path_payload(
         ]
         if actionable_warnings:
             next_command = actionable_warnings[0]["next_command"]
+            next_command_kind = "diagnostic_advisory"
         else:
             next_command = normal_next_command
+            if next_command:
+                next_command_kind = "normal_inspection"
+            else:
+                next_command_kind = "no_safe_command"
+                next_command_blocks_task = True
 
     if blocking:
         agent_summary = f"Blocked: {blockers[0]['summary']}"
@@ -76,6 +86,8 @@ def build_golden_path_payload(
         "blocking": blocking,
         "blockers": blockers,
         "next_command": next_command,
+        "next_command_kind": next_command_kind,
+        "next_command_blocks_task": next_command_blocks_task,
         "signals": signals,
         "diagnostic_debt": diagnostic_debt,
     }

@@ -24,6 +24,10 @@ Keep HE routing compact without losing folded stage context. Folded names are co
 - Do not summarize or trim away mode details for token budget reasons. Move long material into references and add it to this map or `deferred-context-index.md`.
 - Keep branch pruning out of the HE parent-stage surface. Use `he-router` only to classify the request and hand off to `agent-ops` branch hygiene.
 - Keep folded names available through router aliases and parent modes. Re-add a picker entry only for a concrete standalone use case.
+- Preserve valid `ce-docs-review` behavior inside `he-spec` and `he-plan` as a
+  lightweight document review/deepening pass. It should strengthen source
+  coverage, contradictions, acceptance IDs, validation, sequencing, and handoff
+  evidence without creating another default stage.
 
 ## Parent Responsibilities
 

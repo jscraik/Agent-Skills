@@ -113,6 +113,10 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertFalse(doctor["blocking"])
         self.assertEqual(doctor["blockers"], [])
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
+        self.assertEqual(doctor["next_command_kind"], "normal_inspection")
+        self.assertFalse(doctor["next_command_blocks_task"])
+        self.assertEqual(result.data["next_command_kind"], doctor["next_command_kind"])
+        self.assertEqual(result.metadata["next_steps"], [])
 
     def test_closeout_without_changes_reports_ready_existing_next_command(self) -> None:
         with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
@@ -316,6 +320,9 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(doctor["blocking"])
         self.assertEqual(doctor["blockers"][0]["id"], "catalog_parity")
         self.assertEqual(doctor["next_command"], "./bin/ask repo doctor-catalog --json --robot")
+        self.assertEqual(doctor["next_command_kind"], "blocking_repair")
+        self.assertTrue(doctor["next_command_blocks_task"])
+        self.assertEqual(result.data["next_command_kind"], doctor["next_command_kind"])
         self.assertEqual(doctor["signals"]["repo_surface"]["state"], "warn")
         self.assertEqual(doctor["diagnostic_debt"][0]["id"], "repo_surface")
 
@@ -480,6 +487,8 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(doctor["blocking"])
         self.assertEqual(doctor["blockers"][0]["id"], "repo_status")
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
+        self.assertEqual(doctor["next_command_kind"], "blocking_repair")
+        self.assertTrue(doctor["next_command_blocks_task"])
         self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
         self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
 

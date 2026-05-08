@@ -6,6 +6,7 @@ purpose: >
 
 triggers:
   - user asks to brainstorm, ideate, compare, or sharpen a direction
+  - user asks what to improve, asks for strong options, or asks for surprising directions before selecting one
   - user asks for the HE brainstorm stage
   - scope, expected behavior, terminology, or success criteria are unclear
   - QA feedback is real but expected behavior is not clear enough to file
@@ -22,6 +23,8 @@ outputs:
   - problem frame and success criteria
   - mode and scope tier
   - options with tradeoffs, warrants, and recommendation
+  - for folded he-ideate mode: ranked survivors, basis tags, rejection summary, and selected handoff route
+  - web research status for folded he-ideate: ran, skipped, or unavailable
   - "`spec_required`, `risk_level`, and `complexity`"
   - pressure-test result: solve now, simplify, defer, reject, or split
   - domain-language note when terminology affects behavior
@@ -45,6 +48,8 @@ risks:
   - optional tracker drift; mitigate by running the Linear tracker gate before durable handoff
   - coding-harness state drift; mitigate by preserving Harness transition state and blocked command evidence
   - generic ideation; require warrants for survivor options
+  - scattered ideation; require an identifiable subject or explicit surprise/delegated focus before candidate generation
+  - hallucinated external context; mark web research unavailable when it cannot run and forbid external basis claims without evidence
   - stale evidence; verify repo or Linear claims before using as facts
 
 observability: >
