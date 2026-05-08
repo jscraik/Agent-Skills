@@ -76,11 +76,11 @@ This policy complements [Path Ownership Boundaries](/Docs/agents/14-path-ownersh
 | `.harness/ci-migrate-snapshots/**`                    | `historical_artifact`       | Ignore by default; track only an allowlisted fixture or retained summary.        |
 | `.harness/core/**`                                    | `policy`                    | Track repo invariants and operating rules.                                       |
 | `.harness/knowledge/**`                               | `reference` or `policy`     | Preserve Project Brain linkage when intentionally indexed.                       |
-| `.harness/decisions/**`                               | `reference` or `policy`     | Preserve decision records when intentionally indexed.                            |
+| `.harness/decisions/**`                               | `policy`                    | Preserve decision records as primary execution authority when intentionally indexed. |
 | `.harness/linear/**`                                  | `policy`                    | Track approved execution routing and Linear destination decisions.               |
 | `.harness/refactors/**`                               | `policy` or `reference`     | Track selected refactor routes, rollback rules, and anti-regression constraints. |
 | `.harness/ideate/**`                                  | `reference`                 | Track durable folded HE ideation artifacts.                                      |
-| `.harness/brainstorm/**`                              | `reference`                 | Track durable HE brainstorm artifacts.                                           |
+| `.harness/brainstorm/**`                              | `policy`                    | Track durable HE brainstorm artifacts as primary execution authority.            |
 | `.harness/specs/**`                                   | `reference`                 | Track durable HE spec artifacts.                                                 |
 | `.harness/plan/**`                                    | `reference`                 | Track durable HE plan artifacts.                                                 |
 | `.harness/features/**`                                | `reference`                 | Track curated repo intent and feature guardrails as secondary context.           |

@@ -43,6 +43,7 @@ Use this when compact stage files defer context. Do not trim silently: move dura
 `he-router`, `he-work`, and `he-heartbeat` preserve goal-continuity routing in:
 
 - `Plugins/harness-engineering/references/goal-continuity.md`
+- Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`
 
 `he-code-review` preserves repeated review-feedback routing in:
 
@@ -91,7 +92,7 @@ Return schema_version when structured. Heartbeat prompt, status, stop rule, `nex
 The 2026-05-07 agent-native compression and review-loop pass preserved these
 compact-entrypoint lines outside the runtime bodies while moving the expanded
 behavior into `references/agent-native-compression-contract.md` and
-`skills/he-code-review/references/review-loop-patterns.md`:
+`Plugins/harness-engineering/skills/he-code-review/references/review-loop-patterns.md`:
 
 ```text
 Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, repeated_failure when recurring, blackboard_delta, next handoff, repeated context-feedback candidates.
@@ -99,7 +100,7 @@ Read changed files; lead with file:line findings; check `Linear issue -> spec/so
 Inspect live state; pick stage order; keep Linear/spec/plan/PR links; in coding-harness-managed repos preserve Harness lifecycle state and refresh Project Brain when repository context changes.
 Before any new skill package is proposed, inspect existing surfaces; start with 2-3 focused surfaces at most, choose one primary target and at most two supporting references; label path fragments and bundle names as evidence labels; close coverage-gap items; translate external source material into invariants, evals, references, contracts, or an explicit rejection; for skill work, run the A/B/C spec-implementation-evaluation loop until the stop rule passes or a concrete blocker remains.
 Explore first, ask second; use update_plan only for live progress; before writing durable docs choose `.harness/plan/**.md` from the artifact routing contract; turn scope into ordered implementation units; run or explicitly block coding-harness plan gates when the repo exposes them.
-Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement. When the request explicitly asks for persistent continuation, `/goal`, resume-over-time, or keep-working-until-done behavior, apply the goal continuity contract after selecting the HE stage.
+Route through `./bin/ask skills route`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement. When the request explicitly asks for persistent continuation, `/goal`, resume-over-time, or keep-working-until-done behavior, apply the goal continuity contract after selecting the HE stage.
 Inspect session-collector evidence and repo truth; resolve/create the Linear tracker for non-trivial work; before writing durable docs choose `.harness/specs/**.md` from the artifact routing contract; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan with coding-harness state when applicable.
 ```
 
