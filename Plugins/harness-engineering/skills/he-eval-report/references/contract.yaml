@@ -1,26 +1,15 @@
 schema_version: 1
-purpose: >
-  Generate post-implementation Harness Engineering eval reports that prove
-  whether an approved Linear parent issue, milestone, refactor phase, or
-  execution slice is safe to close.
+purpose: "Post-implementation HE eval reports that decide whether an approved Linear slice is safe to close."
 triggers:
   - completed HE implementation needs closure proof
   - Linear issue, milestone, or execution slice is about to close
-  - drift validation or proof artifact linkage is requested
+  - drift validation or proof linkage is requested
 inputs:
-  - selected execution slice and governing source artifacts
-  - Linear project, milestone, parent issue, sub-issues, and status evidence
-  - implementation diff, affected files/modules/workflows, PR link, and commit
-  - validation commands, outputs, failures, exceptions, and proof artifacts
-  - related ADRs, core invariants, refactor program, and HE spec
+  - source slice, Linear identifiers, implementation diff, validation output, PR/commit evidence, ADR/core/refactor/spec links
 outputs:
   - .harness/evals/<repo-name>-<linear-parent-issue-or-milestone>-eval.md
   - closure recommendation: Complete, Complete with follow-up, Blocked, Needs rework, or Unsafe to close
-  - eval gate matrix with evidence, confidence, and closure blockers
-  - drift validation for architecture, routing, context, governance, agent-native, and moat areas
-  - agentic eval validity proof when the slice changes evals, agents, routing, review gates, or completion evidence
-  - side-effect authorization decision when the slice can affect external state
-  - classified follow-up work: Now, Next, Later, or Do Not Create
+  - gate matrix, drift validation, proof artifacts, follow-up classification, and core/ADR update decision
 required_validity_checks:
   - task_validity
   - outcome_validity
@@ -30,30 +19,13 @@ required_validity_checks:
   - maintenance_saturation
   - authorization_validation
 side_effect_authorization:
-  protected_actions:
-    - send or publish to third parties
-    - create calendar events or invites with attendees
-    - delete or mutate external resources
-    - approve financial, security, or data-exposure actions
-  exempt_actions:
-    - direct reply to the user
-    - draft-only work
-    - local read-only inspection
+  protected_actions: [send, publish, invite, delete, approve, external_comment]
+  exempt_actions: [direct_user_reply, draft_only, local_read_only]
   decisions: [approved, blocked, exempt, not-run]
-  rule: >
-    Only explicit user authorization can approve protected side effects; missing
-    validator evidence blocks closure.
-risks:
-  - missing validation evidence can create false closure confidence
-  - over-broad eval reports can evaluate adjacent work instead of the approved slice
-  - side-effectual agent features can be approved from agent claims or external-party requests
-  - repeated review or CI remediation can be dismissed as noise instead of becoming eval seeds
+  rule: "Only explicit user authorization can approve protected side effects; missing validator evidence blocks closure."
 non_goals:
   - repeat the implementation spec
   - create a second architecture review
   - generate generic QA notes
   - rubber-stamp implementation status
   - create Linear issue noise
-rollback_procedure: >
-  When closure is unsafe, state the minimum corrective action and keep the
-  Linear object open until the blocking gate is fixed or explicitly accepted.
