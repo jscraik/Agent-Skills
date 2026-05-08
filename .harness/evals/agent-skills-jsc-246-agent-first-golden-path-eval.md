@@ -191,7 +191,7 @@ diagnostic_advisory`; `next_command_blocks_task: false`; top-level
 | `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` | pass | Eval artifact identity is valid. |
 | `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` | pass | Eval Linear traceability is valid after adding the work-item contract. |
 | `git diff --check -- Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` | pass | No whitespace errors in the phase diff. |
-| `./bin/ask repo validate --changed-files Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md --json --robot` | pass | Required failures `0`; warn-only issues `0`; latest validation logs `Infrastructure/artifacts/validation/20260508T111954Z`. |
+| `./bin/ask repo validate --changed-files Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md --json --robot` | pass | Required failures `0`; warn-only issues `0`; latest validation logs `Infrastructure/artifacts/validation/20260508T112141Z`. |
 | `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py -q` | pass | `27 passed`; rerun after phase-gate review. |
 
 ## Blockers
