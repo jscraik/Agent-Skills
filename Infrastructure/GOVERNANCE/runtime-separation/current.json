@@ -1,15 +1,7 @@
 {
-  "issues": [
-    {
-      "blocker_id": "catalog:cc4eb19d4fe8",
-      "check": "repo_doctor_catalog",
-      "decision_status": "blocked_catalog_parity",
-      "drift_class": "command_exit_nonzero",
-      "returncode": 2
-    }
-  ],
+  "issues": [],
   "schema_version": "runtime-separation-current.v1",
-  "status": "degraded",
+  "status": "healthy",
   "summary": {
     "canonical_root_digest": "8c69fbfa81b8965806846e488987aa8c824f952c37c653bc0e7cdbd9f57fc83b",
     "command_checks": {

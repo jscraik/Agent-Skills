@@ -2,9 +2,9 @@
 
 Read when: writing or reviewing a Harness Engineering spec artifact.
 
-Durable spec markdown is written under `.harness/specs/**.md`. Legacy `Specs/`
-or docs paths may be read as source evidence, but replacement specs should move
-to the Harness artifact root.
+Durable spec markdown is written under `.harness/specs/**.md`. Read legacy
+`Specs/` or docs paths as source evidence only; write replacement specs to the
+Harness artifact root.
 
 ## Standard Spec
 

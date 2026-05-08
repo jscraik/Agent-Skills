@@ -15,8 +15,7 @@ cases:
     prompt: "he-compound case explicit-compound-stage: preserve traceability, evidence, validation, and safe routing."
     deterministic_checks: *safe
     acceptance:
-      - {type: regex, value: "(?is)he-spec"}
-      - {type: regex, value: "(?is)compression"}
+      - {type: regex, value: "(?is)(he-compound|compound stage)"}
       - {type: regex, value: "(?is)(traceability|evidence|blocked)"}
   - id: project-brain-linkage
     <<: *common

@@ -22,8 +22,10 @@
     "codex": {
       "runner": "codex",
       "exit_code": 0,
-      "passed": true,
-      "tier1_failures": [],
+      "passed": false,
+      "tier1_failures": [
+        "should_trigger expected skill to be selected, but selection evidence was unavailable."
+      ],
       "tier2_findings": [],
       "warnings": [
         "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
@@ -41,10 +43,12 @@
       "used_schema": false
     }
   },
-  "passed": true,
-  "tier1_failed": false,
+  "passed": false,
+  "tier1_failed": true,
   "tier2_failed": false,
-  "tier1_failures": [],
+  "tier1_failures": [
+    "[codex] should_trigger expected skill to be selected, but selection evidence was unavailable."
+  ],
   "tier2_findings": [],
   "warnings": [
     "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."

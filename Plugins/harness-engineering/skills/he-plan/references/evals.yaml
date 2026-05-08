@@ -62,9 +62,13 @@ cases:
     <<: *common
     name: "Compression Recovery Plan"
     category: edge
-    prompt: "he-plan case compression-recovery-plan: preserve traceability, evidence, validation, and safe routing."
+    prompt: "Recover this plan after a compression handoff; include context-budget notes, preserved evidence, concrete recovery steps, validation, and safe routing."
     deterministic_checks: *safe
-    acceptance: *accept_trace
+    acceptance:
+      - {type: regex, value: "(?is)(compression|context budget|budget)"}
+      - {type: regex, value: "(?is)(recover|rebuild|resume|recovery)"}
+      - {type: regex, value: "(?is)(traceability|evidence|validation)"}
+      - {type: regex, value: "(?is)(safe|blocked|forbidden)"}
   - id: visual-communication-needed
     <<: *common
     name: "Visual Communication Needed"

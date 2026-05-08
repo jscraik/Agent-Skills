@@ -92,7 +92,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
-        value: "(?i)(protected artifact|discard|\\.harness/plan|\\.harness/solutions)"
+        value: "(?is)(?=.*protected[- ]artifact)(?=.*(\\.harness/plan|\\.harness/solutions))"
 
   - id: domain-drift-readiness
     name: domain drift readiness finding
