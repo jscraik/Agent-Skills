@@ -329,6 +329,11 @@ skip_unwritable_sync_phase() {
   echo "[WARN] $dir is not writable; skipping $label to avoid sandbox rsync/cache cleanup noise."
 }
 
+# Flag semantics:
+# - flat_projection_rebuilt is pessimistic: downstream skill publication waits
+#   until the flat projection is confirmed rebuilt.
+# - runtime_cache_fresh is optimistic: downstream cache publication is allowed
+#   until a cache rebuild step is skipped or fails.
 skills_dir_writable=0
 flat_projection_rebuilt=0
 runtime_cache_fresh=1
