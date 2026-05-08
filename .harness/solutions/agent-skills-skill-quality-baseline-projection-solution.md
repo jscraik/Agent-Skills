@@ -78,17 +78,24 @@ closing HE execution slices.
 
 ## Recovery Command Pattern
 
-Use temporary artifact paths while diagnosing to avoid generated churn:
+The default Agent Operating Contract behavior is to use the repo wrapper:
+
+```bash
+./bin/ask repo validate --json --robot
+```
+
+For focused diagnostics when troubleshooting baseline projection issues, use
+temporary artifact paths to avoid generated churn:
 
 ```bash
 python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_repo_skill_quality.py \
   --root . \
-  --reports-dir /private/tmp/agent-skills-structure-gate-repro/reports \
+  --reports-dir ${TMPDIR:-/tmp}/agent-skills-structure-gate-repro/reports \
   --baseline-file Plugins/skill-factory/skills/code_quality_review/skill-builder/references/skill-quality-baseline.json \
   --benchmark-mode off \
   --benchmark-config Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json \
-  --benchmark-output-json /private/tmp/agent-skills-structure-gate-repro/industry-benchmark-latest.json \
-  --sarif-out /private/tmp/agent-skills-structure-gate-repro/skill-structure-gates.sarif \
+  --benchmark-output-json ${TMPDIR:-/tmp}/agent-skills-structure-gate-repro/industry-benchmark-latest.json \
+  --sarif-out ${TMPDIR:-/tmp}/agent-skills-structure-gate-repro/skill-structure-gates.sarif \
   --format text
 ```
 

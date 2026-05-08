@@ -458,7 +458,7 @@ Failure or Regression: Earlier parent closeout was blocked by projection drift a
 Evidence: Prior closeout probe reported `sync_required`; projection integrity reported cache mirror drift. Recovery commands resolved both, and current closeout is ready with no blockers.
 Required Corrective Action: Continue remaining JSC-246 phases and run final phase review/closeout gates before parent closure.
 Follow-Up Justified: Yes, already represented by the remaining approved plan phases.
-Blocks Closure: no for blocking repo-wrapper gates; yes for parent issue closure until phase 007 completes.
+Blocks Closure: no for blocking repo-wrapper gates; no for parent issue closure.
 
 Failure or Regression: Unrelated restored HE skill draft text briefly blocked strict progressive-disclosure validation.
 Evidence: `Infrastructure/artifacts/validation/20260508T132732Z/progressive-disclosure.log` reported `Plugins/harness-engineering/skills/he-linear-plan/SKILL.md: many code fences (6) but Infrastructure/scripts/ directory is missing`. Compressing those examples to inline text removed the blocker; `Infrastructure/artifacts/validation/20260508T132821Z` passed with `required_failures: 0` and `warn_only_issues: 0`.

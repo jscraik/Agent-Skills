@@ -8,12 +8,12 @@ harness_stage: he-compound
 status: complete
 date: 2026-05-08
 traceability_required: true
-origin: /Users/jamiecraik/dev/codex/.harness/review/2026-05-08-codex-agentic-workstation-original-prompt-gap-review.md
+origin: .harness/review/2026-05-08-codex-agentic-workstation-original-prompt-gap-review.md
 linear_issue: none
 linear_milestone: none
 asset_family: harness engineering source prompt preservation
 owner: Agent Skills Team
-source_artifact: /Users/jamiecraik/dev/codex/.harness/review/2026-05-08-codex-agentic-workstation-original-prompt-gap-review.md
+source_artifact: .harness/review/2026-05-08-codex-agentic-workstation-original-prompt-gap-review.md
 freshness_reviewed_on: 2026-05-08
 review_after_days: 90
 project_brain_status: not_applicable
@@ -98,18 +98,18 @@ finding:
 
 ## Evidence
 
-- `/Users/jamiecraik/dev/codex/.harness/features/2026-05-08-codex-agentic-workstation-intent.md`
+- `.harness/features/2026-05-08-codex-agentic-workstation-intent.md`
   correctly identified the local agentic workstation thesis and TUI hotspot
   risk, but it did not cover the full original prompt checklist.
-- `/Users/jamiecraik/dev/codex/.harness/review/2026-05-08-codex-agentic-workstation-architecture-review.md`
+- `.harness/review/2026-05-08-codex-agentic-workstation-architecture-review.md`
   was a useful sampled architecture review, but it did not deeply apply every
   requested lens from the original prompt method.
-- `/Users/jamiecraik/dev/codex/.harness/refactors/2026-05-08-codex-agentic-workstation-tui-hotspot-decomposition.md`
+- `.harness/refactors/2026-05-08-codex-agentic-workstation-tui-hotspot-decomposition.md`
   produced a strong first refactor program from the evidence available.
-- `/Users/jamiecraik/dev/codex/.harness/linear/2026-05-08-codex-agentic-workstation-tui-hotspot-decomposition-linear-plan.md`
+- `.harness/linear/2026-05-08-codex-agentic-workstation-tui-hotspot-decomposition-linear-plan.md`
   produced a disciplined Linear-ready active set, but correctly remained tied
   to the selected TUI refactor rather than claiming full repo-wide closure.
-- `/Users/jamiecraik/dev/codex/.harness/review/2026-05-08-codex-agentic-workstation-original-prompt-gap-review.md`
+- `.harness/review/2026-05-08-codex-agentic-workstation-original-prompt-gap-review.md`
   records the specific gaps and required future guardrails.
 
 ## Maintenance Ownership
