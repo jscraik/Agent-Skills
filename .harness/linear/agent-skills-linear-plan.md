@@ -283,7 +283,9 @@ Classify tracked non-source surfaces, quarantine stale/generated/history artifac
 Future agents pay token and reasoning cost for every stale surface that looks authoritative.
 
 ## Scope
-- Classify tracked non-source surfaces.
+- Classify tracked non-source surfaces: every tracked file must be assigned a file classification category.
+- The phase runs in a strict inventory mode which fails the run if any tracked file has unknown ownership and is not on the allowlist.
+- Every allowlist entry must include a non-empty owner, a non-empty reason, and an expiration or review date.
 - Resolve `.skillsets/**` ownership.
 - Quarantine raw historical artifacts where appropriate.
 - Remove tracked runtime state and stale generated reports where safe.

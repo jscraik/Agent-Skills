@@ -2,7 +2,7 @@
 Not quite safe to close yet if the milestone closeout needs the proof pack to be internally consistent. The implementation itself looks low-risk and essentially aligned, but the evidence trail still has drift.
 
 **What I checked**
-- [PR #154](https://github.com/jscraik/Agent-Skills/pull/154) is a one-file docs-only change.
+- [PR #153](https://github.com/jscraik/Agent-Skills/pull/154) is a one-file docs-only change.
 - The diff swaps the session-evidence order so `skill-refactor-handoffs.json` is read first, then aggregate evidence and supporting artifacts.
 - GitHub status for commit `695734b2fd6fda7e3d35da155f2469e0bde4b564` is green for CircleCI and CodeRabbit.
 - PR review threads are empty, and PR reviews/comments are empty.

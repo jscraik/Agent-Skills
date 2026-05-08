@@ -1,8 +1,10 @@
 {
   "runner": "codex",
   "exit_code": 0,
-  "passed": true,
-  "tier1_failures": [],
+  "passed": false,
+  "tier1_failures": [
+    "expected skill not selected"
+  ],
   "tier2_findings": [],
   "warnings": [
     "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
