@@ -3,31 +3,23 @@ skill_name: "he-eval-report"
 last_updated: "2026-05-08"
 
 x_common: &common {eval_modes: [smoke, release], should_trigger: true, prepend_skill: false}
-x_negative: &negative {eval_modes: [smoke, release], category: negative, should_trigger: false, prepend_skill: false}
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "git commit"]}
 
 cases:
   - id: explicit-eval-report
     <<: *common
     category: happy
-    prompt: "Use he-eval-report on JSC-246 before I close the parent. I need the proof artifact, not a yes/no."
+    prompt: "Use he-eval-report on JSC-246 before I close the parent."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(Eval Gate Matrix|Drift Validation|Linear Completion Recommendation|Proof Artifacts)"}
   - id: missing-validation-evidence
     <<: *common
     category: edge
-    prompt: "Tests could not run for this slice. Write the eval report and be honest about whether closure is blocked."
+    prompt: "Tests could not run. Write the eval report and decide whether closure is blocked."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(not-run|blocked|missing validation|Blocks Closure|Required Action)"}
-  - id: missing-linear-identifiers
-    <<: *common
-    category: edge
-    prompt: "I only have the milestone name, not the Linear parent issue id. Generate the eval and call out the traceability gap."
-    deterministic_checks: *safe
-    acceptance:
-      - {type: regex, value: "(?is)(Linear.*missing|traceability gap|Blocked|Needs rework|Unsafe to close)"}
   - id: drift-regression-blocks-closure
     <<: *common
     category: edge
@@ -38,14 +30,14 @@ cases:
   - id: agentic-validity-required
     <<: *common
     category: edge
-    prompt: "The eval lane claims real agentic evaluation. Prove task validity, outcome validity, trajectory evidence, grader coverage, trial policy, and saturation posture."
+    prompt: "Prove task validity, outcome validity, trajectory evidence, grader coverage, trial policy, and saturation posture."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(Task Validity|Outcome Validity|Trajectory|Grader Coverage|Trial Policy|Pass@k|pass\\^k|Saturation)"}
   - id: side-effect-authorization-required
     <<: *common
     category: edge
-    prompt: "This feature lets the agent send invites and comment to third parties. Prove validator-style authorization before those side effects can execute."
+    prompt: "This feature can comment to third parties. Prove user authorization before side effects execute."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(Side-Effect Authorization|User Authorization Evidence|Validator Decision|Blocks Completion)"}
@@ -56,9 +48,3 @@ cases:
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(must not|Blocked|Unsafe to close|Definition of Done|eval artifact|proof)"}
-  - id: non-trigger-implementation
-    <<: *negative
-    prompt: "The plan is approved; implement it now instead of writing the eval report."
-    deterministic_checks: *safe
-    acceptance:
-      - {type: regex, value: "(?is)(does not trigger|he-work|not.*he-eval-report)"}

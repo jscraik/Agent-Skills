@@ -17,20 +17,38 @@ linear_milestone: Command surface and ask reliability
 
 # Agent Skills JSC-246 Agent First Golden Path Eval
 
-## Status
+## Executive Eval Summary
+Status: `PLAN-JSC246-002` implementation is locally complete.
+Linear Completion Recommendation: Complete with follow-up
+Primary Blockers: No blocker for the `PLAN-JSC246-002` implementation slice; broader worktree closeout still requires projection sync before final PR closure.
+Confidence: Medium-high from focused tests, live CLI probes, harness identity lint, traceability lint, diff check, and scoped repo validation.
 
-`PLAN-JSC246-001` baseline evidence is captured.
+## Evaluated Slice
+Linear Project: `agent-skills`
+Linear Milestone: `Command surface and ask reliability`
+Linear Parent Issue: `JSC-246`
+Linear Sub-Issues: None admitted for this phase.
+Refactor Program: `.harness/refactors/agent-first-golden-path.md`
+Plugin Harness Engineering Spec: `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md`
+Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`, `Infrastructure/tests/test_ask_golden_path.py`, `Infrastructure/tests/test_ask_repo_doctor.py`, this eval artifact.
+Affected Workflows: `./bin/ask repo doctor --json --robot`, `./bin/ask repo surface --json --robot`, `./bin/ask repo closeout --changed --json --robot`.
+Related ADRs: Proof taxonomy ADR referenced by the JSC-246 plan; no new ADR required for this additive field change.
+Related Core Invariants: Agent-first golden path, deterministic command output, traceable closeout proof, no closure without validation evidence.
 
-`PLAN-JSC246-002` implementation is locally complete and phase-end review gates
-have no blocking findings.
+## Linear Definition of Done Status
+Artifact Path: `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md`
+Definition of Done Status: Satisfied for `PLAN-JSC246-002`; not sufficient for full JSC-246 closure until remaining plan phases and projection sync closeout pass.
+Closure Safety: Safe to continue the plan from phase 002; not a recommendation to close the entire parent issue.
 
-## Scope
-
-- Plan:
-  `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`
-- Linear issue: `JSC-246`
-- Current completed implementation unit: `PLAN-JSC246-002`
-- Current phase gate status: review pending
+## Linear Backlink Map
+Linear Project: `agent-skills`
+Linear Milestone: `Command surface and ask reliability`
+Linear Parent Issue: `JSC-246`
+Linear Sub-Issues: None admitted for this phase.
+Linear Status Recommendation: Leave parent issue open; record phase 002 proof as complete with follow-up.
+Proof Artifact Links: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`; `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md`; focused pytest and ask validation outputs listed below.
+Missing Identifiers: None for the local phase artifact.
+Traceability Repair: No repair required for this phase; live Linear mutation was not attempted from this eval.
 
 ## Linear Work Item Contract
 
@@ -46,197 +64,196 @@ have no blocking findings.
 | Status at plan time | `Todo` |
 | Execution route | Agent-assisted; human review required for public command output contracts |
 
-## Linear Delta Capture
-
-Live Linear refresh is blocked in this session.
-
-Command/tool attempted:
-`mcp__codex_apps__linear._research`
-
-Result:
-blocked
-
-Evidence:
-Linear connector returned `INVALID_ARGUMENT` with MCP error
-`Tool research not found`.
-
-Plan handling:
-continue from the approved local Linear snapshot in the plan because the current
-user explicitly approved `he-work`, and do not mutate Linear from this phase.
-
-## PLAN-JSC246-001 Baseline Evidence
-
-Command:
-`./bin/ask repo doctor --json --robot`
-
-Result:
-pass
-
-Summary:
-`status: success`; `blocking: false`; `metadata.next_steps: []`;
-`next_command: ./bin/ask repo surface --json --robot`; diagnostic debt present.
-
-Command:
-`./bin/ask repo surface --json --robot`
-
-Result:
-pass with warning
-
-Summary:
-`status: success`; `repo_surface.status: warning`; `total_paths: 7835`;
-`blocking_findings: 4585`.
-
-Command:
-`./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot`
-
-Result:
-pass
-
-Summary:
-`status: success`; `improvement.status: resolved_with_fallback`;
-recommended capability `$autofix`; `next_command:
-./bin/ask skills proof autofix --json --robot`.
-
-Command:
-`./bin/ask skills explain he-spec --json --robot`
-
-Result:
-pass
-
-Summary:
-`explanation.status: resolved`; canonical source
-`Plugins/harness-engineering/skills/he-spec/SKILL.md`; reachability proof
-command `./bin/ask skills proof he-spec --json --robot`.
-
-Command:
-`./bin/ask skills prove he-spec --json --robot`
-
-Result:
-pass
-
-Summary:
-`skill_proof.proof_status: reachable_without_outcome_proof`;
-`command_handle_proof.status: pass`; next command
-`./bin/ask workouts run harness-engineering/he-spec --json --robot`.
-
-Command:
-`./bin/ask repo closeout --changed --json --robot`
-
-Result:
-blocked
-
-Summary:
-`status: error`; `commit_readiness.blockers: [sync_required]`;
-`changed_file_count: 110`; next command
-`./bin/ask skills sync --scope workspace --projection rooted --json --robot`.
-
-Interpretation:
-closeout is blocked by broader dirty/generated surfaces in the current worktree,
-not by the `PLAN-JSC246-002` doctor continuation patch alone.
-
-## Handle Resolution Baseline
-
-| Handle | Result | Source |
-| --- | --- | --- |
-| `autofix` | pass | `Skills/agent-ops/autofix/SKILL.md` |
-| `he-spec` | pass | `Plugins/harness-engineering/skills/he-spec/SKILL.md` |
-| `he-heartbeat` | pass | `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md` |
-| `he-code-review` | pass | `Plugins/harness-engineering/skills/he-code-review/SKILL.md` |
-| `he-fix-bugs` | pass | `Plugins/harness-engineering/skills/he-fix-bugs/SKILL.md` |
-
-## PLAN-JSC246-002 Implementation Evidence
-
-Changed files:
-
-- `Infrastructure/scripts/lib/ask/golden_path.py`
-- `Infrastructure/tests/test_ask_golden_path.py`
-- `Infrastructure/tests/test_ask_repo_doctor.py`
-
-Behavior added:
-
-- `next_command_kind`
-- `next_command_blocks_task`
-- `no_safe_command` classification for missing recovery commands
-
-Compatibility preserved:
-
-- existing `next_command`
-- existing `blocking`
-- existing `blockers`
-- existing `diagnostic_debt`
-- existing `signals`
-- `repo_doctor` nested `data.doctor` payload and top-level
-  `result.data.update(payload)` mirrors
-
-Live command:
-`./bin/ask repo doctor --json --robot`
-
-Result:
-pass
-
-After-change summary:
-`status: success`; `blocking: false`; `next_command:
-./bin/ask repo surface --json --robot`; `next_command_kind:
-diagnostic_advisory`; `next_command_blocks_task: false`; top-level
-`data.next_command_kind` mirrors `data.doctor.next_command_kind`.
-
-## Validation
-
-| Command | Result | Notes |
-| --- | --- | --- |
-| `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py -q` | pass | `5 passed`; covers blocker sorting, normal inspection, diagnostic advisory, no-safe-command blocker, and summary rendering. |
-| `python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q` | pass | `22 passed`; covers doctor/closeout behavior plus additive field mirror checks. |
-| `./bin/ask repo doctor --json --robot` | pass | Doctor emits `next_command_kind: diagnostic_advisory` and `next_command_blocks_task: false` for non-blocking repo-surface debt. |
-| `./bin/ask repo surface --json --robot` | pass with warning | Repo surface remains diagnostic debt; `blocking_findings: 4585`. |
-| `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` | pass | Eval artifact identity is valid. |
-| `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` | pass | Eval Linear traceability is valid after adding the work-item contract. |
-| `git diff --check -- Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` | pass | No whitespace errors in the phase diff. |
-| `./bin/ask repo validate --changed-files Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md --json --robot` | pass | Required failures `0`; warn-only issues `0`; latest validation logs `Infrastructure/artifacts/validation/20260508T112141Z`. |
-| `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py -q` | pass | `27 passed`; rerun after phase-gate review. |
-
-## Blockers
-
-Current closeout blocker:
-`sync_required`
-
-Reason:
-the live worktree has broad unrelated generated/projection changes outside the
-current phase diff.
-
-Smallest recovery step:
-complete phase-end review gates for only the `PLAN-JSC246-002` diff, then decide
-whether to continue to `PLAN-JSC246-003` or run the projection-refresh lane as a
-separate explicitly scoped action.
-
-## Review Gates
-
-| Gate | Status | Notes |
-| --- | --- | --- |
-| `simplify` | pass | Manual simplify pass over `git diff HEAD` found no actionable behavior-preserving simplification for this small additive field/test change. One delegated reviewer accidentally inspected only the unstaged diff and is not used as approval evidence. |
-| `he-fix-bugs` | not triggered | Focused phase tests, eval lints, diff check, scoped repo validation, and live doctor probe pass. No phase-specific failing evidence remains. |
-| `he-code-review` | pass with residual risks | Correctness review found no blocking findings. Residual low-risk gaps are recorded below for later phases. |
-
-## Review Residuals
-
-These do not block `PLAN-JSC246-002`, but should be considered before final
-JSC-246 closure:
-
-- `no_safe_command` is covered at helper level. If later phases make callers
-  depend on this edge through `repo_closeout`, add an integration fixture.
-- `PLAN-JSC246-005` should cover strict closeout behavior when diagnostic debt
-  exists without a remediation command.
-- The eval intentionally records both `skills proof` and `skills prove` because
-  the plan's proof command boundary requires both commands to remain distinct.
-
 ## Linear Acceptance Traceability
 
-| Linear issue | Acceptance IDs | Evidence |
-| --- | --- | --- |
-| `JSC-246` | SA1, SA2 | Baseline command snapshots recorded above. |
-| `JSC-246` | SA3, SA4, SA5, SA6 | Doctor continuation fields implemented additively and focused tests pass. |
+| Linear issue | Acceptance IDs |
+| --- | --- |
+| `JSC-246` | `PLAN-JSC246-001`, `PLAN-JSC246-002` |
 
-## Next Step
+## Source Artifact Trace
+Linear Plan: `.harness/linear/agent-skills-linear-plan.md` and `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`.
+Refactor Program: `.harness/refactors/agent-first-golden-path.md`.
+Plugin HE Spec: `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md`.
+ADRs: Existing proof taxonomy decision referenced by the plan.
+Core Invariants: Deterministic routing, agent-visible proof, and no implementation-completion shortcut.
+Other Source Artifacts: Live command outputs from `./bin/ask repo doctor`, `./bin/ask repo surface`, `./bin/ask skills improve`, `./bin/ask skills explain`, `./bin/ask skills prove`, and `./bin/ask repo closeout`.
 
-Run phase-end review gates for `PLAN-JSC246-002`.
+## Functional Validation Results
+Command or Method: `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py -q`
+Result: pass; `27 passed`.
+Evidence: Focused tests cover blocker sorting, normal inspection, diagnostic advisory, no-safe-command blocker, summary rendering, doctor/closeout behavior, and additive field mirror checks.
+Confidence: High for the changed Python behavior.
+Blocks Closure: no for phase 002; parent closure remains open for later plan phases.
 
-If review gates pass, continue with `PLAN-JSC246-003` route-state compatibility.
+## Eval Gate Matrix
+Gate: Focused Tests
+Expected: Golden-path and repo-doctor tests pass after adding continuation metadata.
+Actual: `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py -q` passed with `27 passed`.
+Status: pass
+Evidence: Local pytest output recorded in this artifact.
+Confidence: High
+Blocks Closure: no
+Required Action: Continue to later JSC-246 phases before closing the parent.
+
+Gate: Live Doctor Probe
+Expected: `repo doctor` remains successful and exposes advisory continuation metadata without turning diagnostic debt into a blocking command.
+Actual: `./bin/ask repo doctor --json --robot` returned `status: success`, `blocking: false`, `next_command_kind: diagnostic_advisory`, and `next_command_blocks_task: false`.
+Status: pass
+Evidence: Live command output inspected during the phase.
+Confidence: Medium-high
+Blocks Closure: no
+Required Action: Preserve additive fields through remaining closeout work.
+
+Gate: Harness Traceability
+Expected: Eval artifact identity and Linear traceability lints pass.
+Actual: `he_artifact_identity_lint.py` and `he_linear_traceability_lint.py` passed for this eval artifact.
+Status: pass
+Evidence: Validation table captured in the prior phase artifact.
+Confidence: High
+Blocks Closure: no
+Required Action: Link this artifact back to Linear when updating the issue.
+
+## Agentic Eval Validity
+Evaluated Capability / Task: Validate the JSC-246 phase 002 agent-first golden-path continuation metadata.
+Task Validity: The task directly exercises the claimed capability: agent-facing command output now separates advisory next commands from blocking recovery commands.
+Outcome Validity: The outcome is valid when tests and live doctor output show `next_command_kind` and `next_command_blocks_task` while preserving existing `next_command`, `blocking`, and nested `data.doctor` payloads.
+Trajectory / Transcript Evidence: Evidence includes source diff inspection, focused pytest output, and live `./bin/ask repo doctor --json --robot` inspection.
+Grader Coverage: Deterministic tests, CLI state checks, diff check, artifact identity lint, and Linear traceability lint.
+Trial Policy: One deterministic local run is enough for this additive metadata phase; pass@k/pass^k reporting is not required because no stochastic model behavior is claimed.
+Pass@k / Pass^k Reporting: Not required for this deterministic CLI slice.
+Authorization Validator: No protected external side effect exists in phase 002.
+Saturation / Maintenance Signal: Later repeated review or CI failures in this command path should become eval seeds for the golden-path suite.
+Blocks Completion: no
+Required Action: Keep JSC-246 parent open for remaining plan phases.
+
+## Side-Effect Authorization
+Protected Action: No protected external side-effect; local code, tests, and harness artifacts only.
+User Authorization Evidence: User approved implementation and continuation in this repository; no external mutation is part of this phase.
+Agent Justification: The phase changes local CLI metadata and tests only.
+External Party Influence: No
+Validator Decision: exempt
+Validator Confidence: high
+Suggested Next Step: Continue local validation and link proof back to Linear during closeout.
+Blocks Completion: no
+
+## Drift Validation
+Architecture Drift: Neutral
+Routing Drift: Improved
+Context Drift: Neutral
+Governance Drift: Neutral
+Agent-Native Drift: Improved
+Moat Drift: Improved
+
+## Architecture Integrity Check
+Fact: The implementation adds metadata fields without removing existing fields.
+Interpretation: This preserves existing consumers while improving agent interpretation of next commands.
+Assumption: Downstream consumers tolerate additive JSON fields, which is already the repo command contract pattern.
+Evidence: Tests for existing doctor/closeout behavior pass.
+Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`, repo-doctor tests.
+Confidence: High
+Operational Impact: Lower risk of agents treating diagnostic advisory commands as blockers.
+Blocks Completion: no
+
+## Routing Determinism Check
+Fact: The doctor output now classifies the next command as diagnostic advisory and non-blocking.
+Interpretation: Agents get a deterministic routing signal instead of inferring urgency from free text.
+Assumption: Future plan phases will preserve this field through closeout and proof commands.
+Evidence: Live doctor probe and focused tests.
+Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`.
+Confidence: Medium-high
+Operational Impact: Better command selection in the agent-first loop.
+Blocks Completion: no
+
+## Context Load Check
+Fact: The change adds small structured fields rather than new long prompt text.
+Interpretation: Context load is neutral for agents and humans.
+Assumption: No additional generated projection bloat is introduced by the field itself.
+Evidence: Diff inspection.
+Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`.
+Confidence: Medium
+Operational Impact: No meaningful token or reading burden increase.
+Blocks Completion: no
+
+## Agent-Native Check
+Fact: The command output now exposes whether a suggested next command blocks the task.
+Interpretation: This improves action parity and completion/resume signaling for agents.
+Assumption: Later phases will add broader proof promotion checks.
+Evidence: `next_command_kind` and `next_command_blocks_task` in live doctor output.
+Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`, `Infrastructure/tests/test_ask_repo_doctor.py`.
+Confidence: High
+Operational Impact: Agents can continue work when repo-surface debt is advisory.
+Blocks Completion: no
+
+## Governance Simplicity Check
+Fact: No new governance stage or Linear issue explosion was introduced.
+Interpretation: The phase adds machine-readable clarity without process overhead.
+Assumption: Remaining JSC-246 phases stay within the approved plan.
+Evidence: Changed files are code/tests/eval artifact only.
+Affected Files/Modules: JSC-246 plan and eval artifacts.
+Confidence: Medium-high
+Operational Impact: Governance remains lightweight.
+Blocks Completion: no
+
+## Moat Protection Check
+Fact: The change strengthens deterministic agent command interpretation.
+Interpretation: This protects the harness moat by making proof and routing less dependent on agent guesswork.
+Assumption: The metadata remains visible in final closeout outputs.
+Evidence: Live doctor output and tests.
+Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`.
+Confidence: Medium-high
+Operational Impact: Better operational reliability and cognition quality.
+Blocks Completion: no
+
+## Proof Artifacts
+Produced: Focused pytest output, live ask doctor probe, repo surface probe, artifact identity lint, Linear traceability lint, diff check, scoped repo validation.
+Required: Link this eval artifact and command evidence back to the Linear parent or milestone summary.
+Missing: Final parent-issue closure proof for all JSC-246 phases.
+Blocks Completion: no for phase 002; yes for full parent closure.
+Attach or Link Back to Linear: Link this eval artifact when updating `JSC-246`.
+
+## Failures / Regressions
+Failure or Regression: Full parent closeout still has broader projection/sync work outside the phase 002 implementation.
+Evidence: Prior closeout probe reported `sync_required`.
+Required Corrective Action: Complete remaining JSC-246 phases and run the projection-refresh lane before parent closure.
+Follow-Up Justified: Yes, already represented by the remaining approved plan phases.
+Blocks Closure: no for phase 002; yes for parent issue closure.
+
+## Linear Completion Recommendation
+Classification: Complete with follow-up
+Recommended Linear Status: Keep `JSC-246` open; record phase 002 as complete.
+Required Linear Comment/Update: Note that phase 002 passed focused tests and live doctor proof, while full parent closure awaits remaining plan phases and final sync validation.
+Issues to Close: None.
+Issues to Reopen: None.
+Issues to Leave Open: `JSC-246`.
+New Follow-Up Issues: None; avoid issue explosion.
+Labels to Add/Remove: None.
+Milestone Completion: Not complete from this phase alone.
+Project Status Change: No change.
+Status Update Needed: Yes when the phase proof is linked.
+Proof Artifacts to Attach or Link: This eval artifact and validation command summary.
+
+## Follow-Up Work
+Classification: Next
+Target Linear Project: `agent-skills`
+Parent Issue or Milestone: `JSC-246` / `Command surface and ask reliability`
+Reason: Remaining plan phases must complete before parent closure.
+Priority: Existing Linear priority `2`.
+Labels: Existing labels `Roadmap: Next`, `Agent`, `Infra`, `Improvement`.
+Agent-Safe or Human Review Required: Agent-safe implementation with human review for public command output contract changes.
+
+## Core / ADR Update Recommendation
+Core Update: Not required for this phase.
+ADR Update: Not required for this phase.
+Reason: The phase implements an approved additive contract; it does not introduce a new irreversible architectural decision.
+
+## Evidence & Traceability Matrix
+Conclusion: Phase 002 is safe to mark complete with follow-up, but not enough to close the JSC-246 parent.
+Fact: Focused tests passed and live doctor output exposes advisory/non-blocking continuation metadata.
+Interpretation: The implementation improves routing determinism without breaking existing command fields.
+Assumption: Later phases will preserve the additive fields through closeout and proof surfaces.
+Evidence: `27 passed`; live `repo doctor` output; traceability and identity lints; scoped repo validation.
+Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`, `Infrastructure/tests/test_ask_golden_path.py`, `Infrastructure/tests/test_ask_repo_doctor.py`, this eval artifact.
+Command or Inspection Method: Pytest, live `./bin/ask` commands, harness lints, diff inspection.
+Confidence: Medium-high
+Operational Impact: Agents get a clearer safe next step and fewer false blockers.
+Blocks Completion: no for phase 002; yes for full parent issue closure until remaining plan phases complete.

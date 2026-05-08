@@ -13,13 +13,15 @@ linear_issue: <issue key when tracked>
 linear_milestone: <milestone when tracked>
 ---
 
-# Executive Eval Summary
+# <Title Matching Frontmatter>
+
+## Executive Eval Summary
 Status:
 Linear Completion Recommendation:
 Primary Blockers:
 Confidence:
 
-# Evaluated Slice
+## Evaluated Slice
 Linear Project:
 Linear Milestone:
 Linear Parent Issue:
@@ -31,12 +33,12 @@ Affected Workflows:
 Related ADRs:
 Related Core Invariants:
 
-# Linear Definition of Done Status
+## Linear Definition of Done Status
 Artifact Path:
 Definition of Done Status:
 Closure Safety:
 
-# Linear Backlink Map
+## Linear Backlink Map
 Linear Project:
 Linear Milestone:
 Linear Parent Issue:
@@ -46,7 +48,7 @@ Proof Artifact Links:
 Missing Identifiers:
 Traceability Repair:
 
-# Source Artifact Trace
+## Source Artifact Trace
 Linear Plan:
 Refactor Program:
 Plugin HE Spec:
@@ -54,14 +56,14 @@ ADRs:
 Core Invariants:
 Other Source Artifacts:
 
-# Functional Validation Results
+## Functional Validation Results
 Command or Method:
 Result:
 Evidence:
 Confidence:
 Blocks Closure:
 
-# Eval Gate Matrix
+## Eval Gate Matrix
 Gate:
 Expected:
 Actual:
@@ -71,7 +73,7 @@ Confidence:
 Blocks Closure: yes | no
 Required Action:
 
-# Agentic Eval Validity
+## Agentic Eval Validity
 Evaluated Capability / Task:
 Task Validity:
 Outcome Validity:
@@ -84,100 +86,82 @@ Saturation / Maintenance Signal:
 Blocks Completion: yes | no
 Required Action:
 
-# Side-Effect Authorization
+## Side-Effect Authorization
 Protected Action:
 User Authorization Evidence:
 Agent Justification:
 External Party Influence:
-Validator Decision: approved | blocked | exempt | not-run
-Validator Confidence: high | medium | low | not-run
+Validator Decision: exempt
+Validator Confidence: high
 Suggested Next Step:
-Blocks Completion: yes | no
+Blocks Completion: no
 
-# Drift Validation
-Architecture Drift: Improved | Neutral | Regressed | Unknown
-Routing Drift: Improved | Neutral | Regressed | Unknown
-Context Drift: Improved | Neutral | Regressed | Unknown
-Governance Drift: Improved | Neutral | Regressed | Unknown
-Agent-Native Drift: Improved | Neutral | Regressed | Unknown
-Moat Drift: Improved | Neutral | Regressed | Unknown
+## Drift Validation
+Architecture Drift: Unknown
+Routing Drift: Unknown
+Context Drift: Unknown
+Governance Drift: Unknown
+Agent-Native Drift: Unknown
+Moat Drift: Unknown
 
-# Architecture Integrity Check
-Fact:
-Interpretation:
-Assumption:
+## Architecture Integrity Check
+Conclusion:
 Evidence:
 Affected Files/Modules:
 Confidence:
-Operational Impact:
 Blocks Completion:
 
-# Routing Determinism Check
-Fact:
-Interpretation:
-Assumption:
+## Routing Determinism Check
+Conclusion:
 Evidence:
 Affected Files/Modules:
 Confidence:
-Operational Impact:
 Blocks Completion:
 
-# Context Load Check
-Fact:
-Interpretation:
-Assumption:
+## Context Load Check
+Conclusion:
 Evidence:
 Affected Files/Modules:
 Confidence:
-Operational Impact:
 Blocks Completion:
 
-# Agent-Native Check
-Fact:
-Interpretation:
-Assumption:
+## Agent-Native Check
+Conclusion:
 Evidence:
 Affected Files/Modules:
 Confidence:
-Operational Impact:
 Blocks Completion:
 
-# Governance Simplicity Check
-Fact:
-Interpretation:
-Assumption:
+## Governance Simplicity Check
+Conclusion:
 Evidence:
 Affected Files/Modules:
 Confidence:
-Operational Impact:
 Blocks Completion:
 
-# Moat Protection Check
-Fact:
-Interpretation:
-Assumption:
+## Moat Protection Check
+Conclusion:
 Evidence:
 Affected Files/Modules:
 Confidence:
-Operational Impact:
 Blocks Completion:
 
-# Proof Artifacts
+## Proof Artifacts
 Produced:
 Required:
 Missing:
 Blocks Completion:
 Attach or Link Back to Linear:
 
-# Failures / Regressions
+## Failures / Regressions
 Failure or Regression:
 Evidence:
 Required Corrective Action:
 Follow-Up Justified:
 Blocks Closure:
 
-# Linear Completion Recommendation
-Classification: Complete | Complete with follow-up | Blocked | Needs rework | Unsafe to close
+## Linear Completion Recommendation
+Classification: Blocked
 Recommended Linear Status:
 Required Linear Comment/Update:
 Issues to Close:
@@ -190,8 +174,8 @@ Project Status Change:
 Status Update Needed:
 Proof Artifacts to Attach or Link:
 
-# Follow-Up Work
-Classification: Now | Next | Later | Do Not Create
+## Follow-Up Work
+Classification: Do Not Create
 Target Linear Project:
 Parent Issue or Milestone:
 Reason:
@@ -199,12 +183,12 @@ Priority:
 Labels:
 Agent-Safe or Human Review Required:
 
-# Core / ADR Update Recommendation
+## Core / ADR Update Recommendation
 Core Update:
 ADR Update:
 Reason:
 
-# Evidence & Traceability Matrix
+## Evidence & Traceability Matrix
 Conclusion:
 Fact:
 Interpretation:

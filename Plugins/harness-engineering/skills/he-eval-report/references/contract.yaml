@@ -43,6 +43,11 @@ side_effect_authorization:
   rule: >
     Only explicit user authorization can approve protected side effects; missing
     validator evidence blocks closure.
+risks:
+  - missing validation evidence can create false closure confidence
+  - over-broad eval reports can evaluate adjacent work instead of the approved slice
+  - side-effectual agent features can be approved from agent claims or external-party requests
+  - repeated review or CI remediation can be dismissed as noise instead of becoming eval seeds
 non_goals:
   - repeat the implementation spec
   - create a second architecture review
