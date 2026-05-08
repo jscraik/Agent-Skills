@@ -8,23 +8,23 @@ execution, and review documents; keep local runtime output out of git.
 | Path | Classification | Authority |
 | --- | --- | --- |
 | `.harness/core/**.md` | policy | Non-negotiable repo invariants and operating rules. |
-| `.harness/decisions/**.md` | policy/reference | Architecture decisions and tradeoffs. |
-| `.harness/linear/**.md` | policy (execution-input authority) | Approved Linear destination, milestone, issue, priority, labels, dependencies, and execution route. |
-| `.harness/refactors/**.md` | policy (execution-input authority) | Selected refactor or migration route, rollback rules, and anti-regression constraints. |
-| `.harness/ideate/**.md` | lifecycle-artifact | Durable HE ideation output. |
-| `.harness/brainstorm/**.md` | lifecycle-artifact | Durable HE brainstorm output. |
-| `.harness/specs/**.md` | lifecycle-artifact | Durable HE spec output. |
-| `.harness/plan/**.md` | lifecycle-artifact | Durable HE plan output. |
-| `.harness/plan/**-ui-plan.md` | lifecycle-artifact | Dedicated UI implementation plans owned by `he-plan`. |
-| `.harness/solutions/**.md` | lifecycle-artifact/reference | Verified reusable HE solution captures owned by `he-compound`. |
-| `.harness/knowledge/**` | reference/policy | Project Brain knowledge synced from accepted solution captures and repo decisions. |
-| `.harness/features/**.md` | secondary-context | Repo intent and feature guardrails. |
-| `.harness/strategy/**.md` | secondary-context | Strategy and moat rationale. |
-| `.harness/triage/**.md` | secondary-context | Prioritization and discarded paths. |
-| `.harness/review/**.md` | secondary-context | Review evidence and critique. |
+| `.harness/decisions/**.md` | policy | Architecture decisions and tradeoffs with execution authority when intentionally indexed. |
+| `.harness/linear/**.md` | policy | Approved Linear destination, milestone, issue, priority, labels, dependencies, and execution route. |
+| `.harness/refactors/**.md` | policy | Selected refactor or migration route, rollback rules, and anti-regression constraints. |
+| `.harness/ideate/**.md` | reference | Durable HE ideation output used as non-authoritative context. |
+| `.harness/brainstorm/**.md` | policy | Durable HE brainstorm output with execution authority when admitted by slice. |
+| `.harness/specs/**.md` | reference | Durable HE spec output. |
+| `.harness/plan/**.md` | reference | Durable HE plan output. |
+| `.harness/plan/**-ui-plan.md` | reference | Dedicated UI implementation plans owned by `he-plan`. |
+| `.harness/solutions/**.md` | policy | Verified reusable HE solution captures owned by `he-compound`. |
+| `.harness/knowledge/**` | reference | Project Brain knowledge synced from accepted solution captures and repo decisions. |
+| `.harness/features/**.md` | reference | Repo intent and feature guardrails as secondary context. |
+| `.harness/strategy/**.md` | reference | Strategy and moat rationale as secondary context. |
+| `.harness/triage/**.md` | reference | Prioritization and discarded paths as secondary context. |
+| `.harness/review/**.md` | reference | Review evidence and critique as secondary context. |
 | `.harness/memory/LEARNINGS.md` | reference | Repo-local learned fixes and recurring operational knowledge. |
 | `.harness/quality/**` | policy | Quality criteria and scorecards. |
-| `.harness/*.json` | policy/generated-tracked | Contract JSON consumed by repo validators or Harness setup flows. |
+| `.harness/*.json` | policy or generated_tracked | Contract JSON consumed by repo validators or Harness setup flows. |
 
 Secondary context is not execution authority by itself. Implementation work must
 be admitted by the selected `.harness/linear/**` or `.harness/refactors/**`
@@ -66,6 +66,8 @@ pattern.
 | `.harness/*.db` | runtime_state | Do not track unless moved under fixtures with a documented consumer. |
 | `.harness/ci-migrate-snapshots/**` | historical_artifact | Do not track by default; preserve summaries or fixtures only. |
 
-When a new `.harness` path appears, classify it before staging it. If the path is
-not clearly policy, reference, execution input, lifecycle artifact, fixture, or a
-tracked contract JSON file, keep it local until ownership is resolved.
+When a new `.harness` path appears, classify it before staging it. Use canonical
+ownership classes: `source`, `fixture`, `policy`, `reference`,
+`intentional_archive`, `generated_tracked`, `generated_ignored`,
+`runtime_state`, `historical_artifact`, or `unknown`. Keep authority semantics
+in the Authority column and keep unresolved ownership local until classified.

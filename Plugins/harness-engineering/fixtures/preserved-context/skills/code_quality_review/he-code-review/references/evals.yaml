@@ -87,12 +87,12 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "One reviewer says this PR should clean up .harness/plan and docs/solutions while we’re here. Please do the review and tell me what the right recommendation is."
+    prompt: "One reviewer says this PR should clean up .harness/plan and .harness/solutions while we're here. Please do the review and tell me what the right recommendation is."
     acceptance:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
-        value: "(?i)(protected artifact|discard|\\.harness/plan|docs/solutions)"
+        value: "(?i)(protected artifact|discard|\\.harness/plan|\\.harness/solutions|docs/solutions)"
 
   - id: domain-drift-readiness
     name: domain drift readiness finding

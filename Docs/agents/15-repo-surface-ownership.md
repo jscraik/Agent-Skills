@@ -78,11 +78,12 @@ This policy complements [Path Ownership Boundaries](/Docs/agents/14-path-ownersh
 | `.harness/knowledge/**`                               | `reference` or `policy`     | Preserve Project Brain linkage when intentionally indexed.                       |
 | `.harness/decisions/**`                               | `policy`                    | Preserve decision records as primary execution authority when intentionally indexed. |
 | `.harness/linear/**`                                  | `policy`                    | Track approved execution routing and Linear destination decisions.               |
-| `.harness/refactors/**`                               | `policy` or `reference`     | Track selected refactor routes, rollback rules, and anti-regression constraints. |
+| `.harness/refactors/**`                               | `policy`                    | Track selected refactor routes, rollback rules, and anti-regression constraints. |
 | `.harness/ideate/**`                                  | `reference`                 | Track durable folded HE ideation artifacts.                                      |
 | `.harness/brainstorm/**`                              | `policy`                    | Track durable HE brainstorm artifacts as primary execution authority.            |
 | `.harness/specs/**`                                   | `reference`                 | Track durable HE spec artifacts.                                                 |
 | `.harness/plan/**`                                    | `reference`                 | Track durable HE plan artifacts.                                                 |
+| `.harness/solutions/**`                               | `policy`                    | Track verified reusable solved-pattern captures owned by HE lifecycle policy.    |
 | `.harness/features/**`                                | `reference`                 | Track curated repo intent and feature guardrails as secondary context.           |
 | `.harness/strategy/**`                                | `reference`                 | Track strategy and moat rationale as secondary context.                          |
 | `.harness/triage/**`                                  | `reference`                 | Track prioritization and discarded paths as secondary context.                   |
