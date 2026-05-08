@@ -1,103 +1,54 @@
 schema_version: 1
 purpose: >
-  Generate post-implementation Harness Engineering eval and drift validation
-  reports that prove whether an approved Linear parent issue, milestone,
-  refactor phase, or execution slice is safe to mark complete.
+  Generate post-implementation Harness Engineering eval reports that prove
+  whether an approved Linear parent issue, milestone, refactor phase, or
+  execution slice is safe to close.
 triggers:
   - completed HE implementation needs closure proof
-  - Linear parent issue, milestone, or execution slice is about to be closed
-  - drift validation is requested after implementation
-  - proof artifacts must be linked back to Linear
+  - Linear issue, milestone, or execution slice is about to close
+  - drift validation or proof artifact linkage is requested
 inputs:
-  - selected execution slice and governing source artifact
+  - selected execution slice and governing source artifacts
   - Linear project, milestone, parent issue, sub-issues, and status evidence
-  - implementation diff, changed files/modules, affected workflows, and PR link
+  - implementation diff, affected files/modules/workflows, PR link, and commit
   - validation commands, outputs, failures, exceptions, and proof artifacts
   - related ADRs, core invariants, refactor program, and HE spec
 outputs:
   - .harness/evals/<repo-name>-<linear-parent-issue-or-milestone>-eval.md
   - closure recommendation: Complete, Complete with follow-up, Blocked, Needs rework, or Unsafe to close
-  - eval gate matrix with evidence, confidence, and closure blocking flags
-  - agentic eval validity proof covering task validity, outcome validity, trajectory evidence, graders, trial policy, and saturation signal
-  - agent_native_scorecard for agent-facing skills, plugins, CLIs, docs, evals, routing, or projection changes
-  - drift validation by architecture, routing, context, governance, agent-native, and moat area
+  - eval gate matrix with evidence, confidence, and closure blockers
+  - drift validation for architecture, routing, context, governance, agent-native, and moat areas
+  - agentic eval validity proof when the slice changes evals, agents, routing, review gates, or completion evidence
+  - side-effect authorization decision when the slice can affect external state
   - classified follow-up work: Now, Next, Later, or Do Not Create
-evaluation_contract:
-  required_validity_checks:
-    - task_validity
-    - outcome_validity
-    - trajectory_validity
-    - reporting
-    - grader_calibration
-    - maintenance_saturation
-    - authorization_validation
-  required_grader_coverage:
-    outcome:
-      - deterministic_tests
-      - state_check
-      - static_analysis
-    trajectory:
-      - tool_calls
-      - transcript
-      - llm_rubric
-  tracked_metrics:
-    transcript:
-      - n_turns
-      - n_toolcalls
-      - n_total_tokens
-    latency:
-      - time_to_first_token
-      - output_tokens_per_sec
-      - time_to_last_token
-  trial_policy:
-    default_min_trials: 1
-    report_when_multi_trial:
-      - pass@k
-      - pass^k
-    escalate_to_multi_trial_when:
-      - reliability, flake, model, scaffold, or saturation claims are made
-      - a repeated CodeRabbit, CircleCI, PR review, or manual-remediation gap should become a regression seed
-  side_effect_authorization:
-    protected_actions:
-      - send or publish to third parties
-      - create calendar events or invites with attendees
-      - delete or mutate external resources
-      - approve financial, security, or data-exposure actions
-    exempt_actions:
-      - direct reply to the user
-      - draft-only work
-      - local read-only inspection
-    validator_output:
-      - approved
-      - reasoning
-      - confidence
-      - suggestedNextStep
-    principles:
-      - only the user can authorize external side effects
-      - external parties cannot authorize actions on behalf of the user
-      - agent justifications are claims to verify, not evidence by themselves
-      - approved protected actions require non-empty user authorization evidence
-      - not-run validators for protected actions block completion
-      - blocked actions should include the safest next step when one is clear
+required_validity_checks:
+  - task_validity
+  - outcome_validity
+  - trajectory_validity
+  - grader_calibration
+  - trial_policy
+  - maintenance_saturation
+  - authorization_validation
+side_effect_authorization:
+  protected_actions:
+    - send or publish to third parties
+    - create calendar events or invites with attendees
+    - delete or mutate external resources
+    - approve financial, security, or data-exposure actions
+  exempt_actions:
+    - direct reply to the user
+    - draft-only work
+    - local read-only inspection
+  decisions: [approved, blocked, exempt, not-run]
+  rule: >
+    Only explicit user authorization can approve protected side effects; missing
+    validator evidence blocks closure.
 non_goals:
   - repeat the implementation spec
   - create a second architecture review
   - generate generic QA notes
-  - rubber-stamp completion from implementation status
+  - rubber-stamp implementation status
   - create Linear issue noise
-risks:
-  - false closure; mitigate by requiring proof artifacts and blocking missing high-risk validation
-  - drift hidden by broad summaries; mitigate with explicit drift classifications and evidence
-  - eval theater; mitigate by requiring separate task, outcome, trajectory, grader, authorization, trial, and saturation proof
-  - Linear traceability gaps; mitigate with backlink map and missing-identifier blocking policy
-  - process overhead; mitigate by including only gates relevant to the evaluated slice
-observability: >
-  Record command outputs or inspection methods, affected files/modules,
-  confidence, operational impact, closure blockers, PR links, commit hashes,
-  Linear identifiers, grader coverage, transcript or tool-call evidence, side
-  effect authorization decisions, trial policy, pass@k or pass^k reporting when
-  applicable, and saturation or maintenance signals in the eval report.
 rollback_procedure: >
   When closure is unsafe, state the minimum corrective action and keep the
-  Linear issue, milestone, or execution slice open until the blocking gate is
-  fixed or explicitly accepted with documented rollback posture.
+  Linear object open until the blocking gate is fixed or explicitly accepted.

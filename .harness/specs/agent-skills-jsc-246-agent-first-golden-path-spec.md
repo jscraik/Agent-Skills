@@ -23,7 +23,7 @@ linear_project_id: 791c2f12-5ffb-4644-8421-f4216ac6d805
 linear_parent_initiative: Dev Portfolio
 linear_milestone: Command surface and ask reliability
 linear_parent_issue_title: "Build repo surface contract and agent capability control-plane golden paths"
-linear_labels: Roadmap: Next, Agent, Infra, Improvement
+linear_labels: "Roadmap: Next, Agent, Infra, Improvement"
 linear_label_status: resolved_with_existing_labels
 linear_priority: 2
 selected_refactor: .harness/refactors/agent-first-golden-path.md
