@@ -147,6 +147,8 @@ class TestAskSkillsGoal(unittest.TestCase):
         improvement = result.data["improvement"]
         self.assertEqual(improvement["schema_version"], "skill-improvement-recommendation.v1")
         self.assertEqual(improvement["status"], "resolved")
+        self.assertEqual(improvement["route_state"], "resolved")
+        self.assertEqual(improvement["goal_decision_status"], "resolved")
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
         self.assertEqual(improvement["reachability"]["status"], "pass")
         self.assertEqual(improvement["reachability"]["proof_status"], "pass")
@@ -175,6 +177,8 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(result.status, "error")
         improvement = result.data["improvement"]
         self.assertEqual(improvement["status"], "blocked")
+        self.assertEqual(improvement["route_state"], "blocked_ambiguity")
+        self.assertEqual(improvement["goal_decision_status"], "intent_unresolved")
         self.assertEqual(improvement["recommended_capability"], None)
         self.assertEqual(improvement["agent_summary"], "Narrow request.")
         self.assertIn("skills goal", improvement["next_command"])
@@ -217,6 +221,8 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(result.status, "success")
         improvement = result.data["improvement"]
         self.assertEqual(improvement["status"], "resolved_with_fallback")
+        self.assertEqual(improvement["route_state"], "resolved_with_fallback")
+        self.assertEqual(improvement["goal_decision_status"], "intent_unresolved")
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
         self.assertIn("fallback command-handle description match", improvement["why"])
 
@@ -253,8 +259,39 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(result.status, "success")
         improvement = result.data["improvement"]
         self.assertEqual(improvement["status"], "resolved_with_fallback")
+        self.assertEqual(improvement["route_state"], "resolved_with_fallback")
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
         self.assertIn("matched terms=autofix", improvement["why"])
+
+    def test_improve_marks_reachability_failure_as_route_state(self) -> None:
+        route_decision = {
+            "decision_status": "resolved",
+            "policy_identity": "abc123def4567890",
+            "selected_candidates": [
+                {
+                    "candidate_id": "skill:autofix",
+                    "candidate_type": "skill",
+                    "name": "autofix",
+                    "path": "Skills/agent-ops/autofix/SKILL.md",
+                    "confidence": 0.91,
+                    "rationale": ["Matches PR review feedback cleanup."],
+                }
+            ],
+            "considered_candidates": [],
+        }
+        with (
+            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills.skills_proof", return_value=_proof_result("autofix", status="fail")),
+        ):
+            result = improve_skills(REPO_ROOT, "fix PR review comments", top_k=3, considered_limit=20)
+
+        self.assertEqual(result.status, "error")
+        improvement = result.data["improvement"]
+        self.assertEqual(improvement["status"], "blocked")
+        self.assertEqual(improvement["route_state"], "blocked_reachability")
+        self.assertEqual(improvement["goal_decision_status"], "resolved")
+        self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
+        self.assertEqual(improvement["reachability"]["status"], "fail")
 
     def test_skill_audit_target_normalizes_absolute_source_path(self) -> None:
         resolution = {
@@ -302,6 +339,7 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(result.status, "error")
         improvement = result.data["improvement"]
         self.assertEqual(improvement["status"], "blocked")
+        self.assertEqual(improvement["route_state"], "blocked_dependency")
         self.assertEqual(improvement["recommended_capability"], None)
 
 

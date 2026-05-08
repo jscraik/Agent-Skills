@@ -1970,6 +1970,19 @@ def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str
     }
 
 
+def _improvement_route_state(route_decision_status: str | None, *, proof_failed: bool = False) -> tuple[str, str]:
+    """Return the stable agent-facing route state for a skills improvement result."""
+    if proof_failed:
+        return "blocked_reachability", "selected capability failed reachability proof"
+    if route_decision_status == "resolved":
+        return "resolved", "goal routing selected one reachable capability"
+    if route_decision_status == "unresolved_ambiguity":
+        return "blocked_ambiguity", "goal routing could not select one capability"
+    if route_decision_status in {"blocked_policy_drift", "blocked_catalog_parity", "degraded_no_candidates"}:
+        return "blocked_dependency", f"goal routing returned {route_decision_status}"
+    return "blocked_dependency", "goal routing did not produce a usable decision"
+
+
 def improve_skills(
     repo_root: Path,
     goal_text: str,
@@ -1988,11 +2001,14 @@ def improve_skills(
     goal_decision = goal_result.data.get("goal_decision", {})
     route_decision_status = goal_result.data.get("route_decision_status")
     recommended = goal_decision.get("recommended_candidate")
+    initial_route_state, initial_route_state_reason = _improvement_route_state(route_decision_status)
 
     improvement: dict[str, Any] = {
         "schema_version": "skill-improvement-recommendation.v1",
         "goal": goal_text,
         "status": "resolved" if goal_result.status == "success" and recommended else "blocked",
+        "route_state": initial_route_state,
+        "route_state_reason": initial_route_state_reason,
         "agent_summary": "",
         "recommended_capability": None,
         "why": [],
@@ -2005,6 +2021,7 @@ def improve_skills(
         "proof": None,
         "alternatives": goal_decision.get("alternative_candidates", []),
         "next_command": None,
+        "goal_decision_status": goal_decision.get("decision_status"),
         "goal_decision": goal_decision,
     }
 
@@ -2060,7 +2077,8 @@ def improve_skills(
     improvement["why"] = rationale
     if fallback_used:
         improvement["status"] = "resolved_with_fallback"
-        improvement["goal_decision_status"] = goal_decision.get("decision_status")
+        improvement["route_state"] = "resolved_with_fallback"
+        improvement["route_state_reason"] = "fallback command-handle description match selected one reachable capability"
     improvement["reachability"] = {
         "status": "pass" if proof_result.status == "success" else "fail",
         "proof_status": proof.get("status") if isinstance(proof, dict) else "fail",
@@ -2080,7 +2098,11 @@ def improve_skills(
     if proof_result.status == "success":
         return result
 
-    improvement["status"] = "blocked_reachability"
+    improvement["status"] = "blocked"
+    improvement["route_state"], improvement["route_state_reason"] = _improvement_route_state(
+        route_decision_status,
+        proof_failed=True,
+    )
     result.status = "error"
     result.errors.extend(proof_result.errors)
     if not result.errors:

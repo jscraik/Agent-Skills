@@ -2,64 +2,44 @@ from pathlib import Path
 import sys
 
 
-SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
+SKILL_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_DIR = SKILL_ROOT / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from report_sections import REQUIRED_SECTIONS  # noqa: E402
+from agentic_validity import AGENTIC_EVAL_FIELDS  # noqa: E402
+from report_sections import DRIFT_AREAS, GATE_FIELDS, LINEAR_FIELDS, REQUIRED_SECTIONS  # noqa: E402
 from validate_eval_report import validate  # noqa: E402
 
 
-BASE_FIELDS = """Linear Project: Harness
-Linear Milestone: Eval hardening
-Linear Parent Issue: JSC-1
-Linear Sub-Issues: none
-Linear Status Recommendation: Complete
-Proof Artifact Links: local
+FIELD_VALUES = {
+    "Blocks Closure:": "no",
+    "Blocks Completion:": "no",
+    "Status:": "pass",
+    "Linear Completion Recommendation:": "Complete",
+}
 
-Gate: eval
-Expected: pass
-Actual: pass
-Status: pass
-Evidence: command output
-Confidence: high
-Blocks Closure: no
-Required Action: none
 
-Evaluated Capability / Task: authorization validator
-Task Validity: task exercises protected side effects
-Outcome Validity: blocked actions cannot pass
-Trajectory / Transcript Evidence: transcript reviewed
-Grader Coverage: deterministic and transcript
-Trial Policy: single deterministic run
-Pass@k / Pass^k Reporting: not applicable
-Authorization Validator: enabled
-Saturation / Maintenance Signal: no saturation
-Blocks Completion: no
-Required Action: none
+def render_fields(fields: list[str], default: str = "ok") -> str:
+    return "\n".join(f"{field} {FIELD_VALUES.get(field, default)}" for field in fields)
 
-Architecture Drift: Neutral
-Routing Drift: Neutral
-Context Drift: Neutral
-Governance Drift: Neutral
-Agent-Native Drift: Neutral
-Moat Drift: Neutral
 
-Linear Completion Recommendation: Complete"""
+BASE_FIELDS = "\n".join(
+    [
+        render_fields(LINEAR_FIELDS),
+        render_fields(GATE_FIELDS),
+        render_fields(AGENTIC_EVAL_FIELDS),
+        "\n".join(f"{area} Neutral" for area in DRIFT_AREAS),
+        "Linear Completion Recommendation: Complete",
+    ]
+)
 
 
 def write_minimal_report(tmp_path: Path, side_effect_block: str) -> Path:
     report = tmp_path / ".harness" / "evals" / "report.md"
     report.parent.mkdir(parents=True)
-    bodies = {
-        "Linear Backlink Map": BASE_FIELDS,
-        "Eval Gate Matrix": BASE_FIELDS,
-        "Agentic Eval Validity": BASE_FIELDS,
-        "Drift Validation": BASE_FIELDS,
-        "Linear Completion Recommendation": BASE_FIELDS,
-        "Side-Effect Authorization": side_effect_block,
-    }
+    bodies = {"Side-Effect Authorization": side_effect_block}
     sections = "\n\n".join(
-        f"# {section}\n\n{bodies.get(section, 'Checked.')}" for section in REQUIRED_SECTIONS
+        f"# {section}\n\n{bodies.get(section, BASE_FIELDS)}" for section in REQUIRED_SECTIONS
     )
     report.write_text(
         sections,
@@ -68,13 +48,23 @@ def write_minimal_report(tmp_path: Path, side_effect_block: str) -> Path:
     return report
 
 
-def test_template_report_passes_with_path_warning() -> None:
-    report = Path(__file__).resolve().parents[1] / "references" / "eval-report-template.md"
+def test_minimal_report_passes(tmp_path: Path) -> None:
+    report = write_minimal_report(
+        tmp_path,
+        """Protected Action: no protected external side effect
+User Authorization Evidence: local-only work
+Agent Justification: local validation
+External Party Influence: no external request
+Validator Decision: exempt
+Validator Confidence: high
+Suggested Next Step: none
+Blocks Completion: no""",
+    )
 
     errors, warnings = validate(report)
 
     assert errors == []
-    assert warnings == ["report path is outside .harness/evals/"]
+    assert warnings == []
 
 
 def test_missing_sections_fail(tmp_path: Path) -> None:

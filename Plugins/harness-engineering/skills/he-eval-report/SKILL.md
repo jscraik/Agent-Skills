@@ -43,3 +43,4 @@ Reference `assets/` only for skill packaging and browseability. Eval proof belon
 - Artifact identity: `Plugins/harness-engineering/references/artifact-routing-contract.md`
 - Local contract: `Plugins/harness-engineering/skills/he-eval-report/references/contract.yaml`
 - Eval cases: `Plugins/harness-engineering/skills/he-eval-report/references/evals.yaml`
+- Shared eval case projection: `Plugins/harness-engineering/references/he-eval-report-evals.yaml`

@@ -28,6 +28,8 @@ risks:
   - over-broad reports can evaluate adjacent work instead of the approved slice
   - protected side effects can be approved from agent claims or external-party requests
   - repeated review or CI remediation can be dismissed as noise instead of becoming eval seeds
+observability: "Track validator status, warning count, first blocking error, report-linked command outcomes, and side-effect authorization evidence fields."
+rollback_procedure: "Keep Linear open, classify the report as Blocked or Needs rework, patch or revert the failing implementation slice, and rerun the report validator plus the narrowest implementation validation before closeout."
 non_goals:
   - repeat the implementation spec
   - create a second architecture review
