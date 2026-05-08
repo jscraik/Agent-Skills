@@ -15,7 +15,7 @@
       "approval_required",
       "lint_failure"
     ],
-    "validation": "2 validation gate(s)",
+    "validation_gate_count": 2,
     "canonical_problems": [
       "approval_required",
       "lint_failure",
