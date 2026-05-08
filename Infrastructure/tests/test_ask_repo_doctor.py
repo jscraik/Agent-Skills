@@ -208,6 +208,29 @@ class TestAskRepoDoctor(unittest.TestCase):
             [command["command"] for command in closeout["focused_validation"]],
         )
 
+    def test_closeout_generated_projection_with_other_changes_prioritizes_handles(self) -> None:
+        changed_files = [
+            ".skillsets/command-surface.json",
+            "Docs/agents/04-validation.md",
+        ]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        self.assertFalse(closeout["sync"]["needed"])
+        self.assertEqual(
+            closeout["next_command"],
+            "./bin/ask skills handles --check --json --robot",
+        )
+        self.assertEqual(
+            [command["id"] for command in closeout["focused_validation"]],
+            ["repo_doctor", "skill_handles", "changed_validation"],
+        )
+
     def test_closeout_skips_changed_file_detection_without_changed_flag(self) -> None:
         changed_files = ["Skills/product-strategy/example/SKILL.md"]
         with patch("ask.commands.repo.collect_changed_files", return_value=changed_files) as collect_mock, patch(
