@@ -6,7 +6,7 @@ type: he-eval-report
 canonical_slug: agent-skills-jsc-246-agent-first-golden-path
 title: Agent Skills JSC-246 Agent First Golden Path Eval
 harness_stage: he-eval-report
-status: phase_004_complete
+status: phase_005_complete
 date: 2026-05-08
 traceability_required: true
 origin: .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md
@@ -18,9 +18,9 @@ linear_milestone: Command surface and ask reliability
 # Agent Skills JSC-246 Agent First Golden Path Eval
 
 ## Executive Eval Summary
-Status: `PLAN-JSC246-004` implementation and local review gates are complete after resolving the prior projection-closeout blocker.
+Status: `PLAN-JSC246-005` implementation and local review gates are complete after `PLAN-JSC246-004` completed and committed.
 Linear Completion Recommendation: Complete with follow-up
-Primary Blockers: No current phase-004 blocker. Full parent closure still requires remaining phases `PLAN-JSC246-005` through `PLAN-JSC246-007`.
+Primary Blockers: No current closeout-fixture behavior blocker. Full parent closure still requires remaining phases `PLAN-JSC246-006` and `PLAN-JSC246-007`.
 Confidence: Medium-high from focused tests, live CLI probes, harness identity lint, traceability lint, diff check, scoped repo validation, projection integrity, and closeout readiness evidence.
 
 ## Evaluated Slice
@@ -37,15 +37,15 @@ Related Core Invariants: Agent-first golden path, deterministic command output, 
 
 ## Linear Definition of Done Status
 Artifact Path: `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md`
-Definition of Done Status: Satisfied for `PLAN-JSC246-002`, `PLAN-JSC246-003`, and `PLAN-JSC246-004`.
-Closure Safety: Safe to continue the plan from phase 005; not a recommendation to close the entire parent issue.
+Definition of Done Status: Satisfied for `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, and `PLAN-JSC246-005`.
+Closure Safety: Safe to continue the plan from phase 006; not a recommendation to close the entire parent issue.
 
 ## Linear Backlink Map
 Linear Project: `agent-skills`
 Linear Milestone: `Command surface and ask reliability`
 Linear Parent Issue: `JSC-246`
 Linear Sub-Issues: None admitted for this phase.
-Linear Status Recommendation: Leave parent issue open; record phase 002 doctor proof, phase 003 route-state proof, and phase 004 explain/prove taxonomy proof as complete.
+Linear Status Recommendation: Leave parent issue open; record phase 002 doctor proof, phase 003 route-state proof, phase 004 explain/prove taxonomy proof, and phase 005 closeout isolation proof as complete.
 Proof Artifact Links: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`; `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md`; focused pytest and ask validation outputs listed below.
 Missing Identifiers: None for the local phase artifact.
 Traceability Repair: No repair required for this phase; live Linear mutation was not attempted from this eval.
@@ -68,7 +68,7 @@ Traceability Repair: No repair required for this phase; live Linear mutation was
 
 | Linear issue | Acceptance IDs |
 | --- | --- |
-| `JSC-246` | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004` |
+| `JSC-246` | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005` |
 
 ## Source Artifact Trace
 Linear Plan: `.harness/linear/agent-skills-linear-plan.md` and `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`.
@@ -96,6 +96,12 @@ Result: pass; `15 passed, 42 deselected, 2 subtests passed`.
 Evidence: Focused tests cover `skills explain` source/runtime/validation/proof handoff fields for `he-spec` and `simplify`, plus `skills prove` reachability, structural quality, analytics, and outcome-proof taxonomy for `he-spec`.
 Confidence: High for the phase 004 explain/prove assertion behavior.
 Blocks Closure: no for phase 004 focused behavior; parent closure remains open for later plan phases.
+
+Command or Method: `python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q`
+Result: pass; `24 passed`.
+Evidence: Closeout fixture tests cover no-change readiness, canonical skill sync blockers, generated projection handle validation, mixed projection/non-projection changes, non-skill scoped validation, strict diagnostic debt, doctor blockers, and changed-file detection failure.
+Confidence: High for the phase 005 closeout isolation fixture behavior.
+Blocks Closure: no for phase 005 focused behavior; parent closure remains open for later plan phases.
 
 ## Eval Gate Matrix
 Gate: Focused Tests
@@ -135,22 +141,40 @@ Blocks Closure: no for phase 003
 Required Action: Keep parent issue open for later phases and final wrapper validation.
 
 Gate: Repo Wrapper Validation
-Expected: `./bin/ask repo validate --changed-files .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md Infrastructure/tests/test_ask_cli.py --json --robot` passes.
-Actual: Earlier blocked wrapper validation was resolved by the projection-refresh lane and a closeout-loop fix. `./bin/ask repo doctor --json --robot` returned `status: success`, `blocking: false`, and `next_command_blocks_task: false`; `./bin/ask repo closeout --changed --json --robot` returned `status: success`, `ready: true`, `blockers: []`.
+Expected: `./bin/ask repo validate --changed-files .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md Infrastructure/tests/test_ask_repo_doctor.py --json --robot` passes.
+Actual: Earlier blocked wrapper validation was resolved by the projection-refresh lane and a closeout-loop fix. Current phase validation command passed with `required_failures: 0` and `warn_only_issues: 0`.
 Status: pass for blocking gates; non-blocking repo-surface advisory remains.
 Evidence: Projection sync, projection-tree sync, projection integrity, handle check, changed-file validation, repo doctor, and repo closeout were run during the blocker recovery.
 Confidence: High that the old `SKILLSET_SOURCE_HASH_STALE` / projection drift blocker is resolved.
-Blocks Closure: no for current blocking gates; parent closure still waits for remaining phases and end-of-phase review gates.
+Blocks Closure: no for current blocking gates; parent closure still waits for remaining phases.
 Required Action: Keep `repo surface` diagnostic debt as advisory unless strict closeout is requested.
 
 Gate: Phase Review Loop
 Expected: Run simplify, bug-fix classification when validation fails, and HE code-review before commit.
-Actual: Phase 004 simplify and correctness reviews found no actionable findings and only low residual risk from hard-coded command-contract strings and exact source/owner mappings. Focused validation passed, so `he-fix-bugs` was not invoked. The delegated HE code-review subagent did not execute the review task and was replaced by direct scoped review of the phase diff; no blocking API-contract, traceability, validation, or agent-native workflow issue was found.
+Actual: Phase 005 simplify and correctness reviews found no blocking findings. Simplify noted low residual maintenance risk from repeated multi-patch setup in closeout tests; correctness noted low residual staleness risk for live eval snapshots and the absence of a full real-git integration assertion. Focused validation passed, so `he-fix-bugs` was not invoked. The delegated HE code-review subagent did not execute the review task and was replaced by direct scoped review of the phase diff; no blocking API-contract, traceability, validation, or agent-native workflow issue was found.
 Status: pass with noted reviewer-tool limitation
-Evidence: Simplify maintainability review returned `findings: []`; correctness review returned `findings: []`; focused tests and wrapper validation passed; direct review inspected the added `skills prove` / `skills explain` assertions and this eval artifact for stale phase wording, validation evidence, and Linear closure risk.
+Evidence: Simplify maintainability review returned `findings: []`; correctness review returned `findings: []`; focused tests and wrapper validation passed; direct review inspected the closeout fixture assertions and this eval artifact for stale phase wording, validation evidence, public closeout contract risk, and Linear closure risk.
 Confidence: Medium-high
-Blocks Closure: no for phase 004; parent closure remains open for later phases.
-Required Action: Continue with `PLAN-JSC246-005`.
+Blocks Closure: no for phase 005; parent closure remains open for later phases.
+Required Action: Continue with `PLAN-JSC246-006`.
+
+Gate: Closeout Isolation Fixtures
+Expected: Helper-level closeout fixture tests prove readiness without relying on the current dirty worktree as the clean fixture.
+Actual: `python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q` passed with `24 passed`. The non-skill changed-file fixture now asserts changed files, sync state, focused validation commands, surface policy, runtime budget, commit readiness, blockers, and next command.
+Status: pass
+Evidence: Focused closeout fixture test output and diff inspection.
+Confidence: High
+Blocks Closure: no for focused phase behavior; parent closure remains open for later phases.
+Required Action: Continue with `PLAN-JSC246-006`.
+
+Gate: Live Changed-Worktree Closeout Probe
+Expected: Live `./bin/ask repo closeout --changed --json --robot` records current dirty-worktree state without serving as the clean fixture.
+Actual: Live closeout returned `status: success`, `commit_readiness.ready: true`, `blockers: []`, `changed_files: [".harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md", "Infrastructure/tests/test_ask_repo_doctor.py"]`, and next command `./bin/ask repo validate --changed-files .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md Infrastructure/tests/test_ask_repo_doctor.py --json --robot`; repo-surface diagnostic debt remained advisory.
+Status: pass
+Evidence: Live closeout probe during phase 005.
+Confidence: Medium-high
+Blocks Closure: no.
+Required Action: Keep live dirty-worktree evidence as classification only.
 
 ## PLAN-JSC246-003 Route-State Evidence
 
@@ -289,6 +313,25 @@ Phase 004 proves that explain/proof/prove already expose the required golden-pat
 Operational Impact: Agents can inspect source/runtime/proof readiness without guessing which command to run next.
 Blocks Completion: no for phase 004; yes for full parent closure until later phases complete.
 
+## PLAN-JSC246-005 Closeout Isolation Fixture Evidence
+
+Implementation:
+
+- Strengthened the existing non-skill changed-file closeout fixture to assert the full readiness payload agents depend on.
+- Verified changed files, sync requirements, focused validation, surface policy, runtime budget, commit readiness, blocker state, and next command from mocked changed-file state.
+- Kept live closeout evidence as dirty-worktree classification only; the clean/ready fixture remains mocked.
+
+Live probe:
+
+| Command | Result | Key evidence |
+| --- | --- | --- |
+| `./bin/ask repo closeout --changed --json --robot` | success | `commit_readiness.ready: true`; `blockers: []`; changed files limited to this eval artifact and `Infrastructure/tests/test_ask_repo_doctor.py`; next command is scoped changed-file validation; repo-surface debt remains advisory. |
+
+Interpretation:
+Phase 005 proves closeout readiness through deterministic helper-level fixture state instead of depending on whatever files happen to be dirty in the working tree. The live command is still useful, but only as current-state classification.
+Operational Impact: Future agents can trust closeout fixture tests for readiness semantics and use live closeout as evidence of the present branch state.
+Blocks Completion: no for phase 005; yes for full parent closure until later phases complete.
+
 ## Moat Protection Check
 Fact: The change strengthens deterministic agent command interpretation.
 Interpretation: This protects the harness moat by making proof and routing less dependent on agent guesswork.
@@ -300,10 +343,10 @@ Operational Impact: Better operational reliability and cognition quality.
 Blocks Completion: no
 
 ## Proof Artifacts
-Produced: Focused pytest output, live ask doctor probe, repo surface probe, live skills improve route-state probes, live skills explain/proof/prove probes, artifact identity lint, Linear traceability lint, diff check, scoped repo validation.
+Produced: Focused pytest output, live ask doctor probe, repo surface probe, live skills improve route-state probes, live skills explain/proof/prove probes, live repo closeout changed-worktree probe, artifact identity lint, Linear traceability lint, diff check, scoped repo validation.
 Required: Link this eval artifact and command evidence back to the Linear parent or milestone summary.
 Missing: Final parent-issue closure proof for all JSC-246 phases.
-Blocks Completion: no for phases 002 through 004; yes for full parent closure.
+Blocks Completion: no for phases 002 through 005 focused behavior; yes for full parent closure.
 Attach or Link Back to Linear: Link this eval artifact when updating `JSC-246`.
 
 ## Failures / Regressions
@@ -311,12 +354,12 @@ Failure or Regression: Earlier parent closeout was blocked by projection drift a
 Evidence: Prior closeout probe reported `sync_required`; projection integrity reported cache mirror drift. Recovery commands resolved both, and current closeout is ready with no blockers.
 Required Corrective Action: Continue remaining JSC-246 phases and run final phase review/closeout gates before parent closure.
 Follow-Up Justified: Yes, already represented by the remaining approved plan phases.
-Blocks Closure: no for blocking repo-wrapper gates; yes for parent issue closure until phases 005-007 complete.
+Blocks Closure: no for blocking repo-wrapper gates; yes for parent issue closure until phases 006-007 complete.
 
 ## Linear Completion Recommendation
 Classification: Complete with follow-up
-Recommended Linear Status: Keep `JSC-246` open; record phases 002, 003, and 004 as complete.
-Required Linear Comment/Update: Note that phase 002 passed focused tests and live doctor proof; phase 003 passed focused route-state tests and live skills-improve probes after review gates; phase 004 passed focused explain/prove tests, live probes, and local review gates; full parent closure awaits phases 005-007 and final closeout.
+Recommended Linear Status: Keep `JSC-246` open; record phases 002 through 005 as complete.
+Required Linear Comment/Update: Note that phase 002 passed focused tests and live doctor proof; phase 003 passed focused route-state tests and live skills-improve probes after review gates; phase 004 passed focused explain/prove tests, live probes, and local review gates; phase 005 passed focused closeout fixture tests, live closeout classification, scoped repo validation, and local review gates; full parent closure awaits phases 006-007 and final closeout.
 Issues to Close: None.
 Issues to Reopen: None.
 Issues to Leave Open: `JSC-246`.
@@ -331,7 +374,7 @@ Proof Artifacts to Attach or Link: This eval artifact and validation command sum
 Classification: Next
 Target Linear Project: `agent-skills`
 Parent Issue or Milestone: `JSC-246` / `Command surface and ask reliability`
-Reason: Remaining plan phases `PLAN-JSC246-005` through `PLAN-JSC246-007` must complete before parent closure.
+Reason: Remaining plan phases `PLAN-JSC246-006` through `PLAN-JSC246-007` must complete before parent closure.
 Priority: Existing Linear priority `2`.
 Labels: Existing labels `Roadmap: Next`, `Agent`, `Infra`, `Improvement`.
 Agent-Safe or Human Review Required: Agent-safe implementation with human review for public command output contract changes.
@@ -342,13 +385,13 @@ ADR Update: Not required for this phase.
 Reason: The phase implements an approved additive contract; it does not introduce a new irreversible architectural decision.
 
 ## Evidence & Traceability Matrix
-Conclusion: Phases 002, 003, and 004 are safe to mark complete with follow-up; the JSC-246 parent must remain open for phases 005-007.
-Fact: Focused tests passed and live command output exposes advisory/non-blocking continuation metadata, deterministic skills-improve route states, and explain/prove taxonomy fields.
-Interpretation: The implementation improves routing/proof determinism without breaking existing command fields or adding proof schema.
+Conclusion: Phases 002 through 005 are safe to mark complete with follow-up. The JSC-246 parent must remain open for phases 006-007.
+Fact: Focused tests passed and live command output exposes advisory/non-blocking continuation metadata, deterministic skills-improve route states, explain/prove taxonomy fields, and closeout changed-file readiness classification.
+Interpretation: The implementation improves routing/proof/closeout determinism without breaking existing command fields or adding proof schema.
 Assumption: Later phases will preserve the additive fields through closeout, docs compression, and fresh-agent evaluation.
-Evidence: `27 passed` for phase 002 tests; `12 passed, 53 deselected` for phase 003 focused tests; `15 passed, 42 deselected, 2 subtests passed` for phase 004 focused tests; live `repo doctor`, `skills improve`, `skills explain`, `skills proof`, and `skills prove` probes; traceability and identity lints; scoped repo validation.
+Evidence: `27 passed` for phase 002 tests; `12 passed, 53 deselected` for phase 003 focused tests; `15 passed, 42 deselected, 2 subtests passed` for phase 004 focused tests; `24 passed` for phase 005 focused closeout tests; live `repo doctor`, `skills improve`, `skills explain`, `skills proof`, `skills prove`, and `repo closeout --changed` probes; traceability and identity lints; scoped repo validation.
 Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`, `Infrastructure/scripts/lib/ask/commands/skills.py`, `Infrastructure/tests/test_ask_golden_path.py`, `Infrastructure/tests/test_ask_repo_doctor.py`, `Infrastructure/tests/test_ask_skills_goal.py`, `Infrastructure/tests/test_ask_cli.py`, this eval artifact.
 Command or Inspection Method: Pytest, live `./bin/ask` commands, harness lints, diff inspection.
 Confidence: Medium-high
 Operational Impact: Agents get a clearer safe next step, explicit fallback/dependency/reachability states, and fewer false blockers.
-Blocks Completion: no for phases 002 through 004; yes for full parent issue closure until remaining plan phases complete.
+Blocks Completion: no for phases 002 through 005; yes for full parent issue closure until remaining plan phases complete.

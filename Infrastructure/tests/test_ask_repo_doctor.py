@@ -97,6 +97,31 @@ def _surface_result(warning_count: int = 0) -> CallResult:
     )
 
 
+def _closeout_doctor_payload(warning_count: int = 0, diagnostic_debt: list[dict] | None = None) -> dict:
+    return {
+        "blocking": False,
+        "diagnostic_debt": diagnostic_debt or [],
+        "signals": {
+            "runtime_budget": {
+                "details": {
+                    "status": "pass",
+                    "default_visible_count": 10,
+                    "estimated_description_tokens": 1000,
+                    "violation_count": 0,
+                }
+            },
+            "repo_surface": {
+                "details": {
+                    "status": "warning" if warning_count else "success",
+                    "blocking_findings": warning_count,
+                    "total_paths": 20,
+                    "counts_by_code": {"tracked_historical_artifact": warning_count},
+                }
+            },
+        },
+    }
+
+
 class TestAskRepoDoctor(unittest.TestCase):
     def test_all_pass_returns_existing_inspection_next_command(self) -> None:
         with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
@@ -300,13 +325,26 @@ class TestAskRepoDoctor(unittest.TestCase):
         changed_files = ["Infrastructure/scripts/lib/ask/commands/repo.py"]
         with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
             "ask.commands.repo.repo_doctor",
-            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+            return_value=_result(data={"doctor": _closeout_doctor_payload(warning_count=7)}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
 
         closeout = result.data["repo_closeout"]
         self.assertEqual(result.status, "success")
+        self.assertEqual(closeout["changed_files"], changed_files)
+        self.assertEqual(closeout["changed_file_count"], 1)
+        self.assertFalse(closeout["sync"]["needed"])
+        self.assertEqual(closeout["sync"]["commands"], [])
+        self.assertEqual(closeout["sync"]["validation_commands"], [])
+        self.assertEqual(
+            [command["id"] for command in closeout["focused_validation"]],
+            ["repo_doctor", "changed_validation"],
+        )
+        self.assertEqual(closeout["surface_policy"]["status"], "warning")
+        self.assertEqual(closeout["surface_policy"]["blocking_findings"], 7)
+        self.assertEqual(closeout["runtime_budget"]["status"], "pass")
         self.assertTrue(closeout["commit_readiness"]["ready"])
+        self.assertEqual(closeout["commit_readiness"]["blockers"], [])
         self.assertEqual(
             closeout["next_command"],
             "./bin/ask repo validate --changed-files "
