@@ -119,6 +119,7 @@ def _read_yaml_mapping(path: Path) -> Dict[str, Any]:
     return obj
 
 
+# Space and colon variants support case-insensitive `contains foo` and `contains: foo` shorthand matching.
 _ACCEPTANCE_STRING_PREFIXES = ("contains ", "not_contains ", "regex ", "not_regex ", "contains:", "not_contains:", "regex:", "not_regex:")
 
 
@@ -1350,6 +1351,7 @@ def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require
                                             f"Case #{i} acceptance #{j} is a bare string, which the live runner treats as an exact contains assertion. "
                                             "Use a typed assertion such as `{type: regex, value: ...}` or explicit `contains:` shorthand."
                                         ),
+                                        evidence=str(assertion)[:120],
                                     ))
 
                         # v2 optional fields (backward compatible)
