@@ -202,6 +202,15 @@ def he_row_for_stage(rows: list[dict[str, Any]], stage_id: str) -> tuple[dict[st
     return row_by_id(rows, resolved_stage_id), resolved_stage_id
 
 
+def is_he_phase_heartbeat_request(task_text: str, task_tokens: set[str]) -> bool:
+    recurring_tokens = {"heartbeat", "monitor", "wake", "wakeup", "recurring", "continue"}
+    phase_tokens = {"phase", "phases", "plan", "slice", "slices", "unit", "units"}
+    gate_tokens = {"commit", "review", "reviewed", "gate", "gates", "simplify", "validation"}
+    return bool(task_tokens & recurring_tokens) and bool(task_tokens & phase_tokens) and bool(
+        task_tokens & gate_tokens or "he-work" in task_text
+    )
+
+
 def selected_payload(row: dict[str, Any], confidence: float) -> dict[str, Any]:
     return {
         "id": row.get("id"),
@@ -281,6 +290,13 @@ def harness_engineering_override(
             "row": router_row,
             "confidence": 0.9,
             "reason": "matched multi-stage HE rule 'stage-correctness-question'",
+        }
+    phase_heartbeat_row = row_by_id(rows, "he-phase-heartbeat")
+    if phase_heartbeat_row and is_he_phase_heartbeat_request(task_text, task_tokens):
+        return {
+            "row": phase_heartbeat_row,
+            "confidence": 0.97,
+            "reason": "matched deterministic HE rule 'phase-heartbeat-control-loop'",
         }
     if distinct_mentioned_stages:
         stage_id = distinct_mentioned_stages[0]

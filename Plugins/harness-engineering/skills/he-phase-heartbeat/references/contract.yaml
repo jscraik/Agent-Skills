@@ -1,0 +1,45 @@
+schema_version: 1
+
+purpose: >
+  Continue an approved Harness Engineering plan phase-by-phase under a heartbeat,
+  using session-collector evidence and pre-commit review gates to keep long
+  execution loops traceable.
+
+triggers:
+  - user asks to monitor HE plan phases over time
+  - user asks to keep he-work going until reviewed or committed
+  - user asks for a heartbeat that runs simplify, bug fixing, or code review before commit
+  - repeated session-collector evidence shows the same HE phase workflow recurs
+
+inputs:
+  - workspace path, plan path or issue/PR target, cadence, stop condition
+  - session-collector bundle path or permission to generate one from ~/.agents/session-collector
+  - dirty worktree state and expected validation commands
+  - selected phase and review gate policy
+
+outputs:
+  - heartbeat id, cadence, destination, target, and stop condition
+  - collector bundle path and evidence artifacts used
+  - active phase, changed files, review gates, validation, and commit status
+  - blocker, smallest recovery step, blackboard_delta, and next wake-up
+
+non_goals:
+  - creating implementation plans from vague requirements
+  - replacing he-work, he-heartbeat, he-fix-bugs, he-code-review, or simplify
+  - unattended merge, deploy, tracker closure, force-push, or destructive cleanup
+
+risks:
+  - stale chat memory; mitigate by reading live plan, git state, and collector bundle first
+  - duplicate heartbeats; mitigate by searching existing automations before creating one
+  - broad commits; mitigate by staging only the completed phase diff
+  - review gate theater; mitigate by making he-fix-bugs conditional on failing evidence
+
+observability: >
+  Record target, cadence, heartbeat id, collector bundle path, active phase,
+  validation commands and outcomes, review gate results, commit status, blocker,
+  and stop rule status.
+
+rollback_procedure: >
+  Pause or delete the heartbeat, preserve the last bundle path and phase evidence,
+  revert only the phase diff if rollback is required, and reroute the remaining
+  work through he-router or he-work.

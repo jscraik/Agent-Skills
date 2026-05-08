@@ -120,8 +120,9 @@ Stop or revert the active extraction if command output changes without an intent
 
 ## Linear Routing
 Project: agent-skills
-Milestone: Ask Control Plane Decomposition
-Labels: Architecture, Refactor, Drift-Risk, Developer Experience
+Milestone: Command surface and ask reliability
+HE slice: Ask Control Plane Decomposition
+Labels: architecture, Refactor, Agent
 Priority: 1
 Blocks: Proof-driven skill promotion implementation; agent-first routing changes
 Blocked by: None
@@ -503,7 +504,7 @@ Do not create one-off labels such as `Moat-Critical`, `Context`, or `Routing` un
 
 | Project | Recommendation | Active-set limit | Rationale |
 |---|---|---|---|
-| `agent-skills` | Reactivate for `Ask Control Plane Decomposition` only | Keep to 1 active milestone, 1 active parent, 2 active sub-issues; optionally 1 ADR issue | This creates forward motion without turning the review into a backlog dump. |
+| `agent-skills` | Reactivate for the `Ask Control Plane Decomposition` slice under `Command surface and ask reliability` | Keep to 1 active milestone, 1 active parent, 2 active sub-issues; optionally 1 ADR issue | This creates forward motion without turning the review into a backlog dump. |
 | `Portfolio Ops` | Do not reactivate solely for this repo plan | 0-1 coordination issue only if needed | Cross-repo work is not needed to start repo execution. |
 | `Dev Portfolio` | Use as parent initiative only | No new initiative | Existing initiative represents the repo execution surface. |
 
@@ -511,7 +512,7 @@ Recommended first active objects:
 
 | Object | Activate now? | Reason |
 |---|---|---|
-| Milestone: Ask Control Plane Decomposition | Yes | Highest leverage and first blocker. |
+| Milestone: Command surface and ask reliability / slice: Ask Control Plane Decomposition | Yes | Highest leverage and first blocker. |
 | Parent: `[agent-skills] Decompose skills command module into bounded services` | Yes | Gives the milestone a single owner and closure target. |
 | Sub-issue: `[agent-skills] Map skills command responsibilities and output contracts` | Yes | Required first migration step. |
 | Sub-issue: `[agent-skills] Extract plugin cache service behind existing behavior` | Yes, after map | First bounded extraction. |
@@ -553,7 +554,9 @@ Do not create the Portfolio Ops issue unless another repo needs the same reactiv
 
 ## Creation Confirmation Gate
 
-No Linear objects have been created by this plan.
+Initial plan state: no Linear objects were created by the plan alone.
+
+Current tracker state: Linear objects were later created during the `$he-spec` tracker gate, then reconciled onto the canonical existing `agent-skills` project. The current live issue set is `JSC-284`, `JSC-285`, `JSC-286`, and `JSC-287`.
 
 Review confirmation received for this plan:
 
@@ -571,3 +574,49 @@ Final workflow decision (after the subsequent `$he-spec` flow):
   - `JSC-285` child: `[agent-skills] Map skills command responsibilities and output contracts`
   - `JSC-286` child: `[agent-skills] Extract plugin cache service behind existing behavior`
   - `JSC-287` child: `[agent-skills] Write proof taxonomy and lifecycle ADR`
+- During Linear hygiene follow-up, the duplicate project `e6ad5ea3-28b0-4b07-b2e0-594ec1b9242f` was canceled and the issue set was moved to canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`.
+
+## Approved Current Slice
+
+The only slice admitted for the current HE Spec lane is:
+
+| Field | Value |
+|---|---|
+| Slice type | Parent issue plus bounded milestone |
+| Project | `agent-skills` |
+| Project ID currently holding issues | `791c2f12-5ffb-4644-8421-f4216ac6d805` |
+| Linear milestone | `Command surface and ask reliability` |
+| HE slice name | `Ask Control Plane Decomposition` |
+| Parent issue | `JSC-284` |
+| Child issues | `JSC-285`, `JSC-286`, `JSC-287` |
+| Selected refactor | `.harness/refactors/ask-control-plane-decomposition.md` |
+| Parallel decision slice | Proof taxonomy ADR from `.harness/refactors/proof-driven-skill-promotion.md` |
+| Execution route | Agent-assisted; human-review required for public command contract changes |
+| Planning blocker | None from Linear tracker hygiene; `he-plan` should verify this state before sequencing implementation. |
+
+No other review, strategy, triage, or Linear issue is admitted into this slice.
+
+## Linear Delta Capture
+
+Last synced: `2026-05-08`
+
+Source: Linear project query for `agent-skills`, canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`, duplicate project `e6ad5ea3-28b0-4b07-b2e0-594ec1b9242f`, parent `JSC-284`, child issues `JSC-285`, `JSC-286`, and `JSC-287`.
+
+Label status: `resolved_mapped_to_existing_labels`
+
+| Issue | Title | Status | Priority | Classification | Reason |
+|---|---|---|---:|---|---|
+| JSC-284 | `[agent-skills] Decompose skills command module into bounded services` | Triage | 1 | already_covered | Parent issue exists in current slice and matches the approved milestone. |
+| JSC-285 | `[agent-skills] Map skills command responsibilities and output contracts` | Triage | 1 | already_covered | Child issue exists, points to the boundary-map phase, and blocks `JSC-286`. |
+| JSC-286 | `[agent-skills] Extract plugin cache service behind existing behavior` | Triage | 2 | already_covered | Child issue exists and remains the first extraction slice. |
+| JSC-287 | `[agent-skills] Write proof taxonomy and lifecycle ADR` | Triage | 1 | already_covered | Parallel ADR issue exists and must not become enforcement work in this slice. |
+| Project identity | Canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`; duplicate project `e6ad5ea3-28b0-4b07-b2e0-594ec1b9242f` canceled | Resolved | 1 | resolved | Current slice issues are on the canonical repo project; duplicate project has no active issues. |
+| Label contract | `JSC-284`, `JSC-285`, `JSC-286` use `architecture`, `Refactor`, `Agent`; `JSC-287` uses `CE: Spec`, `architecture`, `Agent`, `Policy` | Resolved | 2 | resolved_mapped_to_existing_labels | Missing specialty labels were not created; existing reusable labels now carry routing intent. |
+
+## Approved Next Slice Queue
+
+| Order | Slice | Linear Issue | Route | Depends On | Notes |
+|---:|---|---|---|---|---|
+| 1 | Boundary map and baseline capture | JSC-285 | Agent-safe | Verify tracker hygiene still holds | First implementation-adjacent work after tracker hygiene is resolved. |
+| 2 | Plugin cache service extraction | JSC-286 | Agent-assisted | JSC-285 | Preserve command behavior and avoid shallow wrapper extraction. |
+| 3 | Proof taxonomy ADR | JSC-287 | Agent-assisted; human-review required | None; parallel to JSC-285 | Decision-only slice; do not implement enforcement. |

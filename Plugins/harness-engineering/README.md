@@ -10,6 +10,7 @@
 - `he-plan`
 - `he-work`
 - `he-code-review`
+- `he-eval-report`
 - `he-fix-bugs`
 - `he-improve`
 - `he-compound`
@@ -50,6 +51,12 @@ artifacts under `.harness/solutions/**` using
 are source evidence and overlap/freshness inputs. When the repo uses Project
 Brain, solution capture also syncs or explicitly blocks the matching
 `.harness/knowledge/**` update.
+
+Post-implementation closure proof belongs to `he-eval-report` and writes
+`.harness/evals/<repo-name>-<linear-parent-issue-or-milestone>-eval.md`.
+Do not recommend Linear parent issue, milestone, project, or execution-slice
+closure from implementation status alone; use the eval artifact to record
+validation evidence, drift posture, proof artifacts, and completion safety.
 
 Dedicated UI plans are `he-plan` artifacts. New UI plans use
 `.harness/plan/**-ui-plan.md`; legacy `docs/ui-plan/**` and

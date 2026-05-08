@@ -1,0 +1,41 @@
+schema_version: 1
+purpose: >
+  Generate post-implementation Harness Engineering eval and drift validation
+  reports that prove whether an approved Linear parent issue, milestone,
+  refactor phase, or execution slice is safe to mark complete.
+triggers:
+  - completed HE implementation needs closure proof
+  - Linear parent issue, milestone, or execution slice is about to be closed
+  - drift validation is requested after implementation
+  - proof artifacts must be linked back to Linear
+inputs:
+  - selected execution slice and governing source artifact
+  - Linear project, milestone, parent issue, sub-issues, and status evidence
+  - implementation diff, changed files/modules, affected workflows, and PR link
+  - validation commands, outputs, failures, exceptions, and proof artifacts
+  - related ADRs, core invariants, refactor program, and HE spec
+outputs:
+  - .harness/evals/<repo-name>-<linear-parent-issue-or-milestone>-eval.md
+  - closure recommendation: Complete, Complete with follow-up, Blocked, Needs rework, or Unsafe to close
+  - eval gate matrix with evidence, confidence, and closure blocking flags
+  - drift validation by architecture, routing, context, governance, agent-native, and moat area
+  - classified follow-up work: Now, Next, Later, or Do Not Create
+non_goals:
+  - repeat the implementation spec
+  - create a second architecture review
+  - generate generic QA notes
+  - rubber-stamp completion from implementation status
+  - create Linear issue noise
+risks:
+  - false closure; mitigate by requiring proof artifacts and blocking missing high-risk validation
+  - drift hidden by broad summaries; mitigate with explicit drift classifications and evidence
+  - Linear traceability gaps; mitigate with backlink map and missing-identifier blocking policy
+  - process overhead; mitigate by including only gates relevant to the evaluated slice
+observability: >
+  Record command outputs or inspection methods, affected files/modules,
+  confidence, operational impact, closure blockers, PR links, commit hashes,
+  and Linear identifiers in the eval report.
+rollback_procedure: >
+  When closure is unsafe, state the minimum corrective action and keep the
+  Linear issue, milestone, or execution slice open until the blocking gate is
+  fixed or explicitly accepted with documented rollback posture.
