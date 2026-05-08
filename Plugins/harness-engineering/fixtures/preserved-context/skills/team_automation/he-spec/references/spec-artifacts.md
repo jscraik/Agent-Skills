@@ -112,12 +112,12 @@ Run these checks immediately after writing and patch failures before handoff:
 Suggested commands:
 
 ```bash
-rg 'SA[0-9]+' .harness/specs/<filename>.md
-rg 'VAC[0-9]+' .harness/specs/<filename>.md
-rg 'Problem Statement|Failure Model|Observability|Acceptance and Test Matrix' .harness/specs/<filename>.md
-rg 'Component Inventory|Interaction States|Accessibility Requirements|Visual Acceptance Criteria' .harness/specs/<filename>.md
-rg 'schema_version|ui_required|spec_depth|risk|wcag_level' <spec-path>
-python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>
+./bin/ask rg 'SA[0-9]+' .harness/specs/<filename>.md
+./bin/ask rg 'VAC[0-9]+' .harness/specs/<filename>.md
+./bin/ask rg 'Problem Statement|Failure Model|Observability|Acceptance and Test Matrix' .harness/specs/<filename>.md
+./bin/ask rg 'Component Inventory|Interaction States|Accessibility Requirements|Visual Acceptance Criteria' .harness/specs/<filename>.md
+./bin/ask rg 'schema_version|ui_required|spec_depth|risk|wcag_level' <spec-path>
+./bin/ask python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>
 ```
 
 ## Notes for full service specs

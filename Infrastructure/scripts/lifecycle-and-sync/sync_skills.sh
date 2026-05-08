@@ -316,7 +316,9 @@ can_mutate_sync_dir() {
     return 1
   fi
 
-  rm -f -- "$probe" 2>/dev/null || true
+  if ! rm -f -- "$probe" 2>/dev/null; then
+    return 1
+  fi
   return 0
 }
 

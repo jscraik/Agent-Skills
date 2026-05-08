@@ -445,13 +445,13 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         or _starts_with(normalized, ".harness/linear")
         or _starts_with(normalized, ".harness/refactors")
         or _starts_with(normalized, ".harness/quality")
+        or _starts_with(normalized, ".harness/solutions")
         or normalized in {
             ".agents/PLANS.md",
             ".harness/README.md",
             ".harness/ci-provider-transition-status.json",
             ".harness/ci-required-checks.json",
             ".harness/restore-manifest.json",
-            ".harness/solutions/README.md",
             ".harness/upgrade-manifest.json",
             "CODEOWNERS",
             "GOVERNANCE",

@@ -83,6 +83,7 @@ def test_harness_curated_context_paths_are_classified() -> None:
         ".harness/refactors/ask-control-plane-decomposition.md": ("policy", "policy_surface"),
         ".harness/brainstorm/he-routing.md": ("policy", "policy_surface"),
         ".harness/solutions/README.md": ("policy", "policy_surface"),
+        ".harness/solutions/repeated-ci-blocker.md": ("policy", "policy_surface"),
         ".harness/specs/agent-skills-ask-control-plane-decomposition-spec.md": (
             "reference",
             "harness_reference_surface",
