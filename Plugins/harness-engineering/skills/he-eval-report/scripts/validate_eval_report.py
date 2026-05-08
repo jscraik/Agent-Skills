@@ -102,29 +102,29 @@ RECOMMENDATIONS = {
 }
 
 
-def section_present(text: str, section: str) -> bool:
+def section_present(text: str, section: str):
     pattern = rf"(?m)^#{{1,3}}\s+{re.escape(section)}\s*$"
     return re.search(pattern, text) is not None
 
 
-def section_body(text: str, section: str) -> str:
+def section_body(text: str, section: str):
     pattern = rf"(?ms)^#{{1,3}}\s+{re.escape(section)}\s*$\n(?P<body>.*?)(?=^#{{1,3}}\s+|\Z)"
     match = re.search(pattern, text)
     return match.group("body") if match else ""
 
 
-def field_value(text: str, field: str) -> str | None:
+def field_value(text: str, field: str):
     match = re.search(rf"(?mi)^{re.escape(field)}\s*(.*?)\s*$", text)
     return match.group(1).strip() if match else None
 
 
-def is_blankish(value: str | None) -> bool:
+def is_blankish(value: str | None):
     if value is None:
         return True
     return value.strip().lower() in {"", "n/a", "na", "none", "unknown", "tbd", "todo"}
 
 
-def find_recommendation(text: str) -> str | None:
+def find_recommendation(text: str):
     match = re.search(r"(?mi)^Classification:\s*(.+?)\s*$", text)
     if not match:
         match = re.search(r"(?mi)^Linear Completion Recommendation:\s*(.+?)\s*$", text)
@@ -137,19 +137,19 @@ def find_recommendation(text: str) -> str | None:
     return value
 
 
-def validate_sections(text: str, errors: list[str]) -> None:
+def validate_sections(text: str, errors: list[str]):
     for section in REQUIRED_SECTIONS:
         if not section_present(text, section):
             errors.append(f"missing required section: {section}")
 
 
-def validate_linear_fields(text: str, errors: list[str]) -> None:
+def validate_linear_fields(text: str, errors: list[str]):
     for field in LINEAR_FIELDS:
         if field not in text:
             errors.append(f"missing Linear backlink field: {field}")
 
 
-def validate_gate_matrix(text: str, errors: list[str], warnings: list[str]) -> None:
+def validate_gate_matrix(text: str, errors: list[str], warnings: list[str]):
     if "Gate:" not in text:
         warnings.append("no Gate: entries found in eval gate matrix")
         return
@@ -160,7 +160,7 @@ def validate_gate_matrix(text: str, errors: list[str], warnings: list[str]) -> N
 
 def validate_agentic_eval_validity(
     text: str, errors: list[str], *, enforce_values: bool
-) -> None:
+):
     if not section_present(text, "Agentic Eval Validity"):
         return
     body = section_body(text, "Agentic Eval Validity")
@@ -179,7 +179,7 @@ def validate_agentic_eval_validity(
 
 def validate_side_effect_authorization(
     text: str, errors: list[str], *, enforce_values: bool
-) -> None:
+):
     if not section_present(text, "Side-Effect Authorization"):
         return
     body = section_body(text, "Side-Effect Authorization")
@@ -205,7 +205,7 @@ def validate_required_fields(
     *,
     enforce_values: bool,
     optional_blank_fields: set[str] | None = None,
-) -> None:
+):
     optional_blank_fields = optional_blank_fields or set()
     for field in fields:
         if field not in body:
@@ -219,7 +219,7 @@ def validate_required_fields(
             errors.append(f"{label} field is blank: {field}")
 
 
-def validate_side_effect_enum_values(body: str, errors: list[str]) -> None:
+def validate_side_effect_enum_values(body: str, errors: list[str]):
     decision = field_value(body, "Validator Decision:")
     confidence = field_value(body, "Validator Confidence:")
     blocks_completion = field_value(body, "Blocks Completion:")
@@ -235,7 +235,7 @@ def validate_side_effect_enum_values(body: str, errors: list[str]) -> None:
         errors.append("side-effect authorization Blocks Completion must be yes or no")
 
 
-def validate_side_effect_decision_consistency(body: str, errors: list[str]) -> None:
+def validate_side_effect_decision_consistency(body: str, errors: list[str]):
     decision = field_value(body, "Validator Decision:")
     blocks_completion = field_value(body, "Blocks Completion:")
     protected_action = field_value(body, "Protected Action:")
@@ -269,7 +269,7 @@ def validate_side_effect_decision_consistency(body: str, errors: list[str]) -> N
         )
 
 
-def validate_drift_classifications(text: str, errors: list[str]) -> None:
+def validate_drift_classifications(text: str, errors: list[str]):
     for area in DRIFT_AREAS:
         match = re.search(rf"(?mi)^{re.escape(area)}\s*([A-Za-z -]+)", text)
         if not match:
@@ -280,7 +280,7 @@ def validate_drift_classifications(text: str, errors: list[str]) -> None:
             errors.append(f"invalid drift classification for {area} {value!r}")
 
 
-def validate_recommendation(text: str, errors: list[str]) -> None:
+def validate_recommendation(text: str, errors: list[str]):
     recommendation = find_recommendation(text)
     if recommendation is None:
         errors.append("missing Linear completion recommendation classification")
@@ -288,7 +288,7 @@ def validate_recommendation(text: str, errors: list[str]) -> None:
         errors.append(f"invalid Linear completion recommendation: {recommendation!r}")
 
 
-def validate_consistency(text: str, path: Path, warnings: list[str]) -> None:
+def validate_consistency(text: str, path: Path, warnings: list[str]):
     has_not_run = re.search(r"(?i)\bnot[- ]run\b", text)
     has_pass_status = re.search(r"(?mi)^Status:\s*pass\s*$", text)
     if has_not_run and has_pass_status:
@@ -297,7 +297,7 @@ def validate_consistency(text: str, path: Path, warnings: list[str]) -> None:
         warnings.append("report path is outside .harness/evals/")
 
 
-def validate(path: Path) -> tuple[list[str], list[str]]:
+def validate(path: Path):
     errors: list[str] = []
     warnings: list[str] = []
 
@@ -323,7 +323,7 @@ def validate(path: Path) -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
-def main() -> int:
+def main():
     parser = argparse.ArgumentParser(description="Validate a Harness Engineering eval report.")
     parser.add_argument("report", type=Path, help="Path to the eval report markdown file.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
