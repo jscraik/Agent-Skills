@@ -49,7 +49,7 @@ If `ui_required: true` is set and no explicit UI contract exists yet, recommend 
 ## Compatibility notes
 Prefer `.harness/specs/` for dedicated UI specs.
 
-Support the older `.harness/specs/YYYY-MM-DD-<topic>-ui-spec.md` form only when:
+Support the older `Docs/specs/YYYY-MM-DD-<topic>-ui-spec.md` form only when:
 - the repo already uses that convention
 - the user explicitly requests compatibility
 - another downstream workflow still depends on the older location

@@ -68,12 +68,12 @@ def test_active_stage_entrypoints_name_their_durable_roots() -> None:
 
 def test_active_templates_do_not_default_to_legacy_doc_roots() -> None:
     """
-    Verify that active Harness Engineering template documents reference the current durable-root paths and do not default to the legacy `docs/brainstorms/` path.
+    Verify that active Harness Engineering template documents reference the current durable-root paths and do not default to legacy `docs/` roots.
     
     Reads the four template/reference markdown files for brainstorm, spec, plan, and the brainstorm doctrine, and asserts:
     - the durable brainstorm root `.harness/brainstorm/` is declared,
     - durable spec and plan roots `.harness/specs/**.md` and `.harness/plan/**.md` are declared,
-    - the legacy `docs/brainstorms/` default path does not appear.
+    - legacy `docs/` default paths do not appear.
     """
     active_text = "\n".join(
         read(path)
@@ -88,7 +88,13 @@ def test_active_templates_do_not_default_to_legacy_doc_roots() -> None:
     assert "Default path: `.harness/brainstorm/" in active_text
     assert "Durable spec markdown is written under `.harness/specs/**.md`" in active_text
     assert "Durable plan markdown is written under `.harness/plan/**.md`" in active_text
-    assert "Default path: `docs/brainstorms/" not in active_text
+    for legacy_default in [
+        "Default path: `docs/brainstorms/",
+        "Default path: `docs/ideate/",
+        "Durable spec markdown is written under `docs/specs/**.md`",
+        "Durable plan markdown is written under `docs/plan/**.md`",
+    ]:
+        assert legacy_default not in active_text
 
 
 def test_artifact_routing_is_listed_in_deferred_index() -> None:
