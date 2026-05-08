@@ -27,7 +27,7 @@ Redact secrets; do not invent requirements. Do not remove important context for 
 - Weakening Linear traceability because a local spec already exists.
 - Treating classification, metadata, docs routing, or command existence as compression proof.
 - Letting secondary review, strategy, triage, or feature material drive implementation beyond the selected Linear/refactor slice.
-- Writing a giant programme spec instead of a bounded spec for one approved execution slice.
+- Writing a giant programme spec instead of a bounded spec for one approved milestone, parent issue, refactor phase, or execution slice.
 ## Examples
 - For `JSC-246`, convert a QA report about the account settings flow into a complete replacement spec section with Linear Acceptance Traceability, acceptance IDs, assumptions, validation, and rollback notes.
 - When a current spec exists but the latest session evidence changes scope, compare current-vs-latest spec status before adding requirements.
