@@ -5,6 +5,16 @@ from pathlib import Path
 from typing import Any
 
 
+import json
+import os
+import shutil
+import logging
+from pathlib import Path
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+
 def load_local_marketplace(repo_root: Path) -> tuple[Path, list[dict[str, Any]]]:
     """Load local plugin entries from the repository marketplace manifest."""
     marketplace_path = repo_root / "Plugins" / "marketplace.json"
@@ -19,15 +29,18 @@ def load_local_marketplace(repo_root: Path) -> tuple[Path, list[dict[str, Any]]]
     entries: list[dict[str, Any]] = []
     for item in raw_plugins:
         if not isinstance(item, dict):
+            logger.warning("Skipping non-dict marketplace entry: %r", item)
             continue
         name = item.get("name")
         source = item.get("source", {})
         if not isinstance(name, str) or not isinstance(source, dict):
+            logger.warning("Skipping malformed marketplace entry (invalid name or source): %r", item)
             continue
         if source.get("source") != "local":
             continue
         path = source.get("path")
         if not isinstance(path, str):
+            logger.warning("Skipping local plugin '%s' with non-string path: %r", name, source)
             continue
         entries.append({"name": name, "path": path})
     return marketplace_path, entries
