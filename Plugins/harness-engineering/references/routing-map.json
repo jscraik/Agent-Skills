@@ -2,6 +2,13 @@
   "schema_version": 1,
   "plugin": "harness-engineering",
   "entrypoint": "he-router",
+  "route_samples": {
+    "he-router": "This HE request could be he-spec, he-plan, or he-work; choose the right stage without guessing.",
+    "he-eval-report": "Generate the eval report and drift validation before Linear completion.",
+    "he-strategy": "Create a repository intent and architecture review with moat analysis.",
+    "he-refactor": "Generate a high-leverage refactor program with rollback conditions.",
+    "he-linear-plan": "Create a Linear execution plan with Now / Next / Later and Portfolio Ops routing."
+  },
   "deterministic_decision_order": [
     {
       "priority": 10,

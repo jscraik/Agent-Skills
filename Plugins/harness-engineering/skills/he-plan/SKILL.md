@@ -1,6 +1,6 @@
 ---
 name: he-plan
-description: "WHAT: Generate HE plans from approved specs, Linear issues, or source artifacts. Use when sequencing, tests, rollback, or traceability need planning."
+description: "Create traceable HE execution plans. Use when approved intent needs implementation units and validation gates."
 metadata:
   skill-type: team_automation
 ---
@@ -8,17 +8,29 @@ metadata:
 ## Philosophy
 Plans are execution contracts, not chat checklists. They should let another agent implement the work from source evidence while preserving Linear/spec/plan/PR traceability.
 ## When to Use
-Use after approved spec/issue; do non-mutating inspection before planning.
+Use when after approved spec/issue; do non-mutating inspection before planning.
 ## Inputs
 Spec, Linear issue, repo state, constraints, product blockers.
 ## Outputs
 Return schema_version when structured. `.harness/plan/**.md` durable plan, complete replacement plan when revising, repo-relative file paths, risks, validation, Linear/spec/plan/PR traceability matrix, post_plan_handoff, slack_policy, and blackboard_delta.
 ## Procedure
-Explore first, ask second; use update_plan only for live progress; before writing durable docs choose `.harness/plan/**.md` from the artifact routing contract, classify existing artifacts by content shape before path, and apply Artifact Identity frontmatter so `artifact_id`, `canonical_slug`, `title`, H1, origin, and Linear identifiers trace to the same slice; for dedicated UI plans use `.harness/plan/**-ui-plan.md` and the UI plan routing contract, treating `docs/ui-plan/**` and `docs/ui-plans/**` as legacy source evidence and reporting Project Brain sync/defer/block status when `.harness/knowledge/**` is in use; when planning coding-harness-managed work load the execution slice contract, run the Linear Delta Capture Gate for existing tracked plans, and keep the plan inside the selected milestone, parent issue, refactor phase, or execution slice; classify review-derived plan changes with the document-review finding tiers; apply the specialist skill steering contract when the approved slice proves a domain need that can improve sequencing, validation gates, rollback, or implementation-unit boundaries; turn scope into ordered implementation units; run or explicitly block coding-harness plan gates when the repo exposes them. Treat `.harness/strategy/*.md`, `.harness/triage/*.md`, `.harness/review/*.md`, and `.harness/features/*.md` as context unless the approved Linear/refactor slice admits them. End with the post-plan handoff state, apply the interactive steering contract when multiple valid next stages remain, and route to the next authorized HE stage in the same run only when the user has already asked to continue. For cockpit, golden-path, command-catalog, or agent-native compression work, plan subtractive proof before additive compatibility: name the exact first-contact budget, shrink default help, demote plumbing commands, require full catalogs to use an advanced/all flag, rewrite the README front door around the golden path, add admission tests, add fresh-agent eval, and require ablation decisions for every still-visible command family.
+1. Explore first and resolve the stage context contract; use `update_plan` only for live progress.
+2. Confirm the plan stays inside one selected milestone, parent issue, refactor phase, or execution slice; run the Linear Delta Capture Gate when consuming existing tracked plans.
+3. Route durable output to `.harness/plan/**.md`, or `.harness/plan/**-ui-plan.md` for dedicated UI plans, and apply Artifact Identity frontmatter.
+4. Load UI, coding-harness, document-review, and specialist-skill references only when the selected slice proves the trigger.
+5. Convert scope into ordered implementation units with acceptance traceability, dependencies, validation gates, rollback, risks, and out-of-scope boundaries.
+6. Treat strategy, triage, review, and feature docs as context unless the approved Linear/refactor slice admits them.
+7. End with `post_plan_handoff`; ask before continuing when multiple valid next stages remain, and continue only when the user already authorized it.
+8. For cockpit, golden-path, command-catalog, or agent-native compression work, plan subtractive proof before additive compatibility.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check dependencies, tests, rollback, and handoff readiness.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
+## Execution Boundaries
+Planning is non-mutating except for approved durable plan artifacts. Do not implement, commit, create Linear objects, or advance stages unless the user already authorized continuation.
+## Gotchas
+- A chat `update_plan` is not the durable HE plan artifact.
+- Multiple valid next stages require interactive steering before execution.
 ## Constraints
 Redact secrets; do not mutate files in planning. Do not remove important context for budget trimming; move deep context to references.
 ## Anti-Patterns
@@ -36,6 +48,7 @@ Redact secrets; do not mutate files in planning. Do not remove important context
 Reference `assets/` only for skill packaging and browseability; durable plans and diagrams belong in repo artifacts or references.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
 - Document review tiers: `Plugins/harness-engineering/references/document-review-finding-tiers.md`

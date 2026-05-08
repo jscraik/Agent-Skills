@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reject generated clutter in the Harness Engineering plugin tree."""
+"""Reject generated clutter and packaging-only artifacts in the HE plugin tree."""
 
 from __future__ import annotations
 
@@ -9,8 +9,18 @@ import sys
 from pathlib import Path
 
 
-BLOCKED_NAMES = {".DS_Store", "__pycache__"}
-BLOCKED_SUFFIXES = {".pyc", ".pyo"}
+BLOCKED_NAMES = {
+    ".DS_Store",
+    ".coverage",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    "__pycache__",
+    "build",
+    "dist",
+    "node_modules",
+}
+BLOCKED_SUFFIXES = {".log", ".pyc", ".pyo", ".tmp"}
 
 
 def find_blockers(root: Path) -> list[str]:

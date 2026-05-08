@@ -1,6 +1,6 @@
 ---
 name: he-compound
-description: "WHAT: Analyze and route HE lifecycle state across Linear, stages, PRs, and Project Brain. Use when work must resume or refresh."
+description: "Analyze evidence and refresh HE artifacts. Use when session or repo truth changes harness state."
 metadata:
   skill-type: team_automation
 ---
@@ -14,11 +14,22 @@ Goal, Linear/project-brain state, specs, plans, PRs, session evidence, solved-pr
 ## Outputs
 Return schema_version when structured. Stage map, active owner, blockers, next action, blackboard_delta, retained references, `.harness/solutions/**` capture status, and Project Brain status.
 ## Procedure
-Inspect live state; pick stage order; keep Linear/spec/plan/PR links; apply the interactive steering contract when earliest incomplete stage, resume target, or refresh route conflicts across evidence; in coding-harness-managed repos preserve Harness lifecycle state and refresh Project Brain when repository context changes. For solved-problem capture, use the solution capture contract: search `.harness/solutions/**` and legacy `docs/solutions/**`, refresh high-overlap entries, write new captures under `.harness/solutions/**`, verify discoverability from active instruction surfaces, and sync or explicitly block Project Brain when `.harness/knowledge/**` is in use. When UI-plan artifacts are present, use the UI plan routing contract, verify Project Brain status for plan/decision context, and hand off to `he-plan`, `he-work`, or `he-code-review` as appropriate. When diagnosis says product compression is the blocker, especially `active_stage: spec_refresh_required`, route to `he-spec` with the compression contract instead of approving another additive implementation pass.
+1. Reconstruct lifecycle state from live repo evidence, Linear, specs, plans, PRs, validation, session evidence, and Project Brain.
+2. Resolve the stage context contract enough to identify the earliest incomplete, stale, or conflicted stage.
+3. Ask before choosing when earliest incomplete stage, resume target, or refresh route conflicts across evidence.
+4. Preserve Harness lifecycle state in coding-harness-managed repos and refresh or explicitly block Project Brain only when repository context changed.
+5. Use solution capture only for solved-problem evidence; write new captures under `.harness/solutions/**`, not legacy `docs/solutions/**`.
+6. Use UI plan routing only when UI-plan artifacts are present, then hand off to `he-plan`, `he-work`, or `he-code-review`.
+7. Route product-compression blockers such as `active_stage: spec_refresh_required` to `he-spec` instead of approving another additive implementation pass.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check routing, stage artifacts, and handoff evidence.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
+## Execution Boundaries
+Compound reconstructs lifecycle state and routes the next stage. Do not collapse multi-stage work into execution or refresh Project Brain unless source evidence proves a context change.
+## Gotchas
+- Compound owns state reconstruction, not implementation.
+- Legacy docs may be source evidence, but new solved-problem captures belong under `.harness/solutions/**`.
 ## Constraints
 Redact secrets; never collapse multi-stage work into one vague task. Do not remove important context for budget trimming; move deep context to references.
 ## Anti-Patterns
@@ -35,6 +46,7 @@ Redact secrets; never collapse multi-stage work into one vague task. Do not remo
 Reference `assets/` only for skill packaging and browseability; lifecycle state belongs in structured handoff evidence.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`

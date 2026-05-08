@@ -1,6 +1,6 @@
 ---
 name: he-brainstorm
-description: "WHAT: Analyze fuzzy HE intent into options and handoff. Use when behavior, success criteria, Linear, or evidence is ambiguous."
+description: "Analyze HE options and choose survivor routes. Use when direction is unsettled before spec or plan work."
 metadata:
   skill-type: team_automation
 ---
@@ -8,19 +8,29 @@ metadata:
 ## Philosophy
 Make ambiguity useful without turning it into ceremony. Preserve what is stated, inferred, and out of scope so the next HE stage can continue without re-litigating context.
 ## When to Use
-Use before spec writing when intent is fuzzy; preserve Context preservation and assign `scope_tier`.
+Use when before spec writing when intent is fuzzy; preserve Context preservation and assign `scope_tier`.
 Use folded `he-ideate` mode when the user asks what to improve, asks for options, or wants strong ideas before choosing one to brainstorm.
 ## Inputs
 User goal, repo evidence, Linear/project hints.
 ## Outputs
 Return schema_version when structured. Stated / Inferred / Out of scope, options, risks, warrant notes, blackboard_delta, durable artifact path when written, and next stage. Brainstorm markdown belongs under `.harness/brainstorm/**.md`; explicit folded `he-ideate` mode belongs under `.harness/ideate/**.md`.
 ## Procedure
-Explore first; require an identifiable subject before dispatching ideation or writing artifacts; separate evidence from guesses; before writing durable docs choose the routed `.harness` path from the artifact routing contract; for durable tracked work resolve/create the Linear issue before handoff; in coding-harness-managed repos load the command bridge and record the Harness transition.
-For `he-ideate`, ground in repo/Linear/session evidence and current web research unless explicitly skipped, apply the specialist skill steering contract when a proven knowledge domain can improve option quality, derive topic axes from the evidence, generate many candidates internally, critique all candidates, run bounded coverage recovery for missing high-value axes, surface only warranted survivors with rejection reasons, then apply the interactive steering contract when survivor selection would shape the downstream spec, plan, Linear work, or implementation slice.
+1. Explore first and require an identifiable subject before dispatching ideation or writing artifacts.
+2. Resolve only the stage context fields needed for tracker, artifact route, evidence freshness, and coding-harness handoff.
+3. Separate stated facts, interpretations, guesses, and out-of-scope work.
+4. Route durable brainstorm artifacts to `.harness/brainstorm/**.md`; route explicit folded `he-ideate` artifacts to `.harness/ideate/**.md`.
+5. Resolve or block the Linear tracker before durable handoff for tracked work.
+6. In folded `he-ideate` mode, use `skills/he-brainstorm/references/ideation-mode.md` for candidate generation, critique, coverage recovery, survivor selection, web research, and specialist-skill steering.
+7. Ask before survivor selection when the chosen survivor would shape downstream spec, plan, Linear work, or implementation scope.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check scope, traceability, and handoff clarity.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
+## Execution Boundaries
+Brainstorming is non-mutating except for approved `.harness/brainstorm/**` or `.harness/ideate/**` artifacts. Do not convert survivors into specs, plans, or Linear work without handoff authority.
+## Gotchas
+- Guesses must stay labeled as guesses.
+- Survivor selection can be a blocking user choice when it shapes downstream scope.
 ## Constraints
 Redact secrets; do not turn brainstorming into execution. Do not remove important context for budget trimming; move deep context to references.
 ## Anti-Patterns
@@ -35,6 +45,7 @@ Redact secrets; do not turn brainstorming into execution. Do not remove importan
 Reference `assets/` only for skill packaging and browseability; workflow source of truth stays in this SKILL and references.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
 - Topic coverage: `Plugins/harness-engineering/references/brainstorm-topic-coverage-contract.md`

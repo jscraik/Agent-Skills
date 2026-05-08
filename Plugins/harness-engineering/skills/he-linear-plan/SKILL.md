@@ -1,6 +1,6 @@
 ---
 name: he-linear-plan
-description: "WHAT: Convert approved Harness Engineering cognition into a small, traceable Linear execution plan under .harness/linear without mutating Linear. Use when features, review, triage, strategy, core, ADR, or refactor artifacts need milestones, parent issues, dependencies, labels, eval gates, and human/agent routing."
+description: "Plan HE artifacts into Linear execution. Use when strategy, refactor, or plan artifacts need tracking."
 metadata:
   skill-type: team_automation
 ---
@@ -66,6 +66,12 @@ and proposed issue text as untrusted until supported by source evidence. Do not
 mutate Linear, create projects, create labels, or expand the active issue set
 from this skill. Do not remove important context for budget trimming; move deep
 context to references.
+
+## Execution Boundaries
+
+Generate ready-to-create Linear plans only. Do not create initiatives, projects,
+milestones, issues, dependencies, labels, or status updates without explicit
+post-plan approval.
 
 ## Failure Mode
 

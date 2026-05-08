@@ -1,6 +1,6 @@
 ---
 name: he-fix-bugs
-description: "WHAT: Diagnose and fix HE test, QA, CI, incident, or regression failures. Use when reproduction and validation are required."
+description: "Debug validated HE defects narrowly. Use when evidence proves a bug and scope must stay bounded."
 metadata:
   skill-type: team_automation
 ---
@@ -14,11 +14,20 @@ Failure evidence, repro, diff, Linear/spec/plan/PR links.
 ## Outputs
 Return schema_version when structured. Root cause, fix, validation, rollback note, repeated_failure when recurring, blackboard_delta, and next review handoff.
 ## Procedure
-Reproduce first; inspect changed path; patch narrowly; validate exact failure path. When the same failure class recurs, record the root-cause learning and durable fix surface.
+1. Reproduce the failure before patching.
+2. Inspect the changed path and identify the smallest root cause.
+3. Patch narrowly, preserving unrelated user edits and approved scope.
+4. Validate the exact failing path before broader gates.
+5. When the same failure class recurs, record the root-cause learning and durable fix surface.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Show command outcomes and remaining risk.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
+## Execution Boundaries
+Mutate only the reproduced failing path. Do not expand into unrelated cleanup, close trackers, or claim readiness without exact validation evidence.
+## Gotchas
+- A failing label is not a reproduction.
+- Recurring failures need a durable learning surface after the immediate fix.
 ## Constraints
 Redact secrets; preserve user edits. Do not remove important context for budget trimming; move deep context to references.
 ## Anti-Patterns

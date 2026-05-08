@@ -1,6 +1,6 @@
 ---
 name: he-spec
-description: "WHAT: Generate Linear-backed HE specs with acceptance IDs and validation. Use when requirements or traceability are needed before planning."
+description: "Create evidence-backed HE specs. Use when approved intent needs acceptance criteria before implementation."
 metadata:
   skill-type: product_verification
 ---
@@ -14,11 +14,22 @@ Problem, approved execution slice as one milestone, one parent issue, one refact
 ## Outputs
 Return schema_version when structured. schema_version: 1, bounded implementation spec for one milestone, parent issue, refactor phase, or execution slice; complete replacement spec section or `.harness/specs/**.md` artifact; Linear Acceptance Traceability, acceptance IDs, validation plan, and blackboard_delta.
 ## Procedure
-Inspect session-collector evidence and repo truth; when session evidence is used, pre-resolve repo, branch, PR, Linear, artifact-chain, and currentness from the session evidence trace context; for coding-harness-managed work load the execution slice contract before writing requirements; consume the approved `.harness/linear/<repo-name>-linear-plan.md`, selected `.harness/refactors/<selected-refactor>.md` when applicable, `.harness/decisions/*.md`, `.harness/core/*.md`, and `.harness/brainstorm/*.md` as primary inputs; use `.harness/strategy/*.md`, `.harness/triage/*.md`, `.harness/review/*.md`, and `.harness/features/*.md` only for evidence or context; classify review-derived spec improvements with the document-review finding tiers before applying them; apply the specialist skill steering contract when a proven domain need can sharpen acceptance criteria, validation, non-goals, or risk; apply the interactive steering contract when behavior, scope boundary, acceptance authority, or selected slice remains unresolved after source inspection; stop if no selected milestone, parent issue, refactor phase, or execution slice is identified. Resolve/create the Linear tracker for non-trivial work; for existing tracked plans run the Linear Delta Capture Gate before consuming the approved slice, reconcile required labels, classify new or changed Linear issues, and promote at most one admitted item into the spec scope; require Linear project, milestone, parent issue, sub-issues when present, labels, priority, dependencies, and agent/human route for tracked specs; before writing durable docs choose `.harness/specs/**.md` from the artifact routing contract, classify existing artifacts by content shape before path, and apply Artifact Identity frontmatter so `artifact_id`, `canonical_slug`, `title`, H1, origin, and Linear identifiers trace to the same slice; define scope, assumptions, assets/icon-small.png if packaging matters, explicit In Scope and Out of Scope boundaries, and handoff to plan with coding-harness state when applicable. When feedback says a prior cockpit, golden-path, or agent-native plan was too additive, load the compression contract and make first-contact budget, standalone command admission, docs deletion budget, fresh-agent eval, ablation proof, and evidence-backed metric gates blocking acceptance criteria.
+1. Resolve the stage context contract first; stop if no milestone, parent issue, refactor phase, or execution slice is selected.
+2. Load primary source artifacts for the selected slice: Linear plan, selected refactor when applicable, decisions, core invariants, and brainstorm artifacts. Treat strategy, triage, review, and feature docs as evidence only unless the slice admits them.
+3. Apply document-review tiers, specialist skill steering, and interactive steering only when their trigger conditions are proven by source inspection.
+4. Resolve or block the Linear tracker; run the Linear Delta Capture Gate for existing tracked plans before admitting changed Linear work into scope.
+5. Route durable output to `.harness/specs/**.md`, classify existing artifacts by content shape before path, and apply Artifact Identity frontmatter.
+6. Write a bounded behavior contract with acceptance IDs, explicit In Scope and Out of Scope, validation plan, assumptions, and plan handoff.
+7. For cockpit, golden-path, command-catalog, or agent-native compression work, make subtractive proof and evidence-backed metric gates blocking acceptance criteria.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check traceability, tests, observability, rollback, and owner evidence.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
+## Execution Boundaries
+Non-mutating until the user authorizes artifact writes. Do not create, close, or mutate Linear objects unless the current task explicitly grants that authority.
+## Gotchas
+- Stage context is required before writing specs; local docs do not replace Linear/source traceability.
+- Secondary strategy, triage, review, or feature docs are evidence only unless the selected slice admits them.
 ## Constraints
 Redact secrets; do not invent requirements. Do not remove important context for budget trimming; move deep context to references.
 ## Anti-Patterns
@@ -37,6 +48,7 @@ Redact secrets; do not invent requirements. Do not remove important context for 
 Reference `assets/` only for skill packaging and browseability; spec source material belongs in references, not generated images.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
 - Document review tiers: `Plugins/harness-engineering/references/document-review-finding-tiers.md`

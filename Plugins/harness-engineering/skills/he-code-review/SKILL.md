@@ -1,6 +1,6 @@
 ---
 name: he-code-review
-description: "WHAT: Review HE PRs, diffs, CI, traceability, repeated review feedback, and autofix loops. Use when merge readiness or review fixes need evidence."
+description: "Review HE diffs for closure risk. Use when PR, commit, or readiness evidence is needed."
 metadata:
   skill-type: code_quality_review
 ---
@@ -8,17 +8,29 @@ metadata:
 ## Philosophy
 Find introduced risk before summaries. Code review should be precise enough for Codex inline findings and broad enough to catch traceability, validation, readiness gaps, and repeated context failures.
 ## When to Use
-Use for PRs, branches, diffs, commits, readiness, and disputed review feedback.
+Use when handling PRs, branches, diffs, commits, readiness, and disputed review feedback.
 ## Inputs
 Diff, repo guidance, Linear issue, spec, plan, PR evidence, validation output.
 ## Outputs
 Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, reproduction_status, security_review, real_behavior_proof, work_candidate, repeated_failure, blackboard_delta, next handoff, repeated context-feedback candidates. If writing a durable review artifact, use `.harness/review/**.md` with Artifact Identity frontmatter.
 ## Procedure
-Select mode first: review-only, readiness, repair/autofix, commit review, or investigation; review-only mode stays byte-clean, and ambiguous mode that could mutate files or PR state uses the interactive steering contract before proceeding. Read changed files and relevant review threads/comments; lead with file:line findings; Codex-compatible findings must be tight; check `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`; in coding-harness-managed repos also check Project Brain, north-star evidence, and Harness review gates; use `evidence_ladder`. For disputed behavior or repeated bot feedback, require a proof loop before hypothesizing; see review loop patterns. For skill, plugin, CLI, agent-doc, eval, routing, or projection changes, apply the agent-native audit scorecard through the policy index. Apply the specialist skill steering contract when domain-specific review evidence would materially improve risk detection or proof quality; when changed-scope simplification is warranted, route to the external `simplify` specialist as a review lens and do not copy its simplification doctrine into HE. For cockpit, golden-path, or command-catalog work, block readiness when the diff proves implementation presence but not first-contact compression, fresh-agent usability, or ablation. Do not approve readiness from green CI alone when real behavior proof, security review, or live PR-thread state is missing. When writing `.harness/review/**`, classify the artifact by content shape before path, preserve date and Linear issue prefixes when the repo already uses them, and keep the same `canonical_slug` as the spec/plan/eval chain. Then approve/request/autofix. If feedback repeats across PRs, classify whether HE context, evals, or skill routing should adapt after the immediate review.
+1. Select mode first: review-only, readiness, repair/autofix, commit review, or investigation. Review-only mode stays byte-clean.
+2. Resolve the stage context contract when the review will write artifacts, mutate files, update PR state, or hand off to another stage; ask before mutation when mode is ambiguous.
+3. Read changed files plus relevant review threads, CI, Linear, spec, plan, PR, and validation evidence. Lead with severity-ranked `file:line` findings.
+4. Use the evidence ladder for disputed behavior or repeated bot feedback; require proof before hypothesizing.
+5. Apply policy-index, specialist-skill, external `simplify`, coding-harness, and agent-native compression lenses only when the diff proves their trigger.
+6. Do not approve readiness from green CI alone when real behavior proof, security review, live PR-thread state, or traceability evidence is missing.
+7. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, and keep the canonical slug aligned with the spec/plan/eval chain.
+8. End with approve, request changes, autofix candidate, or follow-up lane for repeated feedback.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Verify gates, references, subagent evidence, and command outcomes.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
+## Execution Boundaries
+Review-only mode must remain byte-clean. Autofix, PR mutation, thread resolution, or tracker updates require explicit repair or mutation authority.
+## Gotchas
+- Green CI is not readiness when behavior proof, live review state, security, or traceability is missing.
+- Repeated feedback may require skill/eval follow-up after the immediate review verdict.
 ## Constraints
 Redact secrets. Do not remove important context for budget trimming; move deep context to references.
 ## Anti-Patterns
@@ -39,6 +51,7 @@ Redact secrets. Do not remove important context for budget trimming; move deep c
 Reference `assets/` only for skill packaging and browseability; review evidence belongs in findings, commands, and PR/thread links.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

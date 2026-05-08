@@ -1,6 +1,6 @@
 ---
 name: he-work
-description: "WHAT: Build approved HE changes in verified slices with traceability. Use when execution is approved or bounded delegation is needed."
+description: "Build approved HE plan slices. Use when a bounded plan authorizes code changes and validation."
 metadata:
   skill-type: team_automation
 ---
@@ -14,12 +14,23 @@ Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees, optiona
 ## Outputs
 Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff, slack_policy, and blackboard_delta.
 ## Procedure
-Mark current active state; if `/goal` is active, confirm it matches the branch, issue, plan, or PR before editing and treat mismatches as blockers rather than overwriting project truth. Explore first, ask second; apply the interactive steering contract when branch, goal, plan, Linear issue, or selected slice conflicts before editing; apply the specialist skill steering contract only when implementing the approved slice requires a proven domain skill and does not reopen scope; `update_plan` is live checklist only; for UI-plan work load the UI plan routing contract, preserve Project Brain status, and require visual/accessibility verification evidence; for coding-harness-managed work load the execution slice contract, run the Linear Delta Capture Gate for existing tracked plans, and verify the plan/todo maps to one selected milestone, parent issue, refactor phase, or execution slice before editing; before external-delegate or parallel work, run the delegation overlap safety check from the work contract; use external-delegate only for bounded non-overlapping slices or isolated worktrees; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
+1. Mark live state before editing: branch, dirty worktree, active `/goal`, plan, Linear issue, PR, and selected slice.
+2. Resolve the stage context contract; stop on conflicts between branch, goal, plan, Linear issue, or selected slice.
+3. Load specialist, UI-plan, coding-harness, and Linear Delta references only when the approved slice proves the trigger.
+4. Keep `update_plan` as a live checklist; execute only the approved implementation unit.
+5. Before delegation or parallel work, run the work contract overlap check and use external delegation only for bounded non-overlapping slices or isolated worktrees.
+6. Run or explicitly block the smallest relevant validation gates, preserving exact command/path, actor, timestamp, recovery step, and rollback posture when blocked.
+7. Handoff to `he-code-review` mode `autofix` when review or validation evidence requires repair.
 For blocked coding-harness gates, preserve exact failing command/path, actor, timestamp, recovery step, and rollback posture in the handoff.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Run exact gates for changed paths and report outcomes.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
+## Execution Boundaries
+Mutate only files in the approved implementation slice. Do not stage, commit, push, resolve review threads, or close trackers unless separately authorized.
+## Gotchas
+- Dirty worktree ownership and active `/goal` conflicts are blockers, not context to overwrite.
+- Validation must run against the touched production path or be recorded as blocked with the smallest recovery step.
 ## Constraints
 Redact secrets; preserve user edits. Do not remove important context for budget trimming; move deep context to references.
 ## Anti-Patterns
@@ -36,6 +47,7 @@ Redact secrets; preserve user edits. Do not remove important context for budget 
 Reference `assets/` only for skill packaging and browseability; execution evidence belongs in validation output, PRs, and handoff notes.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

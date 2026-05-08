@@ -19,7 +19,7 @@ linear_milestone: Command surface and ask reliability
 
 ## Executive Eval Summary
 Status: `PLAN-JSC246-007` fresh-agent eval and closure evidence are complete.
-Linear Completion Recommendation: Ready for human-reviewed Linear closure
+Linear Completion Recommendation: Complete
 Primary Blockers: None for the JSC-246 implementation slice. Remaining repo-surface debt is advisory diagnostic debt, not a blocking gate.
 Confidence: High from focused tests, deterministic fresh-agent command snapshots, live CLI probes, harness identity lint, traceability lint, diff check, scoped repo validation, projection integrity, and closeout readiness evidence.
 
@@ -45,7 +45,7 @@ Linear Project: `agent-skills`
 Linear Milestone: `Command surface and ask reliability`
 Linear Parent Issue: `JSC-246`
 Linear Sub-Issues: None admitted for this phase.
-Linear Status Recommendation: Leave parent issue open; record phase 002 doctor proof, phase 003 route-state proof, phase 004 explain/prove taxonomy proof, and phase 005 closeout isolation proof as complete.
+Linear Status Recommendation: Close `JSC-246` after human review and after linking this eval artifact plus the fresh-agent evidence bundle. Do not infer completion for unrelated milestone work.
 Proof Artifact Links: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`; `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md`; focused pytest and ask validation outputs listed below.
 Missing Identifiers: None for the local phase artifact.
 Traceability Repair: No repair required for this phase; live Linear mutation was not attempted from this eval.
@@ -467,7 +467,7 @@ Follow-Up Justified: Yes, but as separate HE skill lifecycle work rather than JS
 Blocks Closure: no for phase 006 after the local draft fix.
 
 ## Linear Completion Recommendation
-Classification: Ready for human-reviewed closure
+Classification: Complete
 Recommended Linear Status: Close `JSC-246` after linking this eval artifact and the fresh-agent evidence bundle.
 Required Linear Comment/Update: Note that phase 002 passed focused tests and live doctor proof; phase 003 passed focused route-state tests and live skills-improve probes after review gates; phase 004 passed focused explain/prove tests, live probes, and local review gates; phase 005 passed focused closeout fixture tests, live closeout classification, scoped repo validation, and local review gates; phase 006 passed first-contact compression validation and review gates; phase 007 passed deterministic fresh-agent command evidence and final closeout readiness.
 Issues to Close: `JSC-246` after human review.

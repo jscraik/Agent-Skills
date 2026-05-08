@@ -10,31 +10,6 @@ import sys
 from pathlib import Path
 
 
-EXPECTED_TRACER_STAGES = {
-    "he-brainstorm",
-    "he-code-review",
-    "he-compound",
-    "he-eval-report",
-    "he-fix-bugs",
-    "he-heartbeat",
-    "he-improve",
-    "he-linear-plan",
-    "he-plan",
-    "he-refactor",
-    "he-spec",
-    "he-strategy",
-    "he-work",
-}
-
-ROUTE_SAMPLES = {
-    "he-router": "This HE request could be he-spec, he-plan, or he-work; choose the right stage without guessing.",
-    "he-eval-report": "Generate the eval report and drift validation before Linear completion.",
-    "he-strategy": "Create a repository intent and architecture review with moat analysis.",
-    "he-refactor": "Generate a high-leverage refactor program with rollback conditions.",
-    "he-linear-plan": "Create a Linear execution plan with Now / Next / Later and Portfolio Ops routing.",
-}
-
-
 def load_yaml_stage_names(path: Path) -> set[str]:
     stages: set[str] = set()
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -59,22 +34,35 @@ def validate_map(plugin_root: Path, *, run_router_samples: bool) -> tuple[list[s
         errors.append(f"duplicate routing priorities: {duplicates}")
 
     templates = data.get("stage_invocation_templates", {})
-    for stage in EXPECTED_TRACER_STAGES:
+    expected_stages = set(templates)
+    skill_stages = {
+        path.parent.name
+        for path in (plugin_root / "skills").glob("he-*/SKILL.md")
+        if path.parent.name not in {"he-phase-heartbeat", "he-router"}
+    }
+    for stage in sorted(expected_stages):
         if stage not in templates:
             errors.append(f"missing stage invocation template: {stage}")
         if not (plugin_root / "skills" / stage / "SKILL.md").exists():
             errors.append(f"missing routed skill entrypoint: {stage}")
+    missing_templates = sorted(skill_stages - expected_stages)
+    if missing_templates:
+        errors.append(f"routed skill entrypoints without stage invocation template: {missing_templates}")
 
     tracer_path = plugin_root / "references" / "lifecycle-tracer-evals.yaml"
     tracer_stages = load_yaml_stage_names(tracer_path)
-    missing_tracers = sorted(EXPECTED_TRACER_STAGES - tracer_stages)
+    missing_tracers = sorted(expected_stages - tracer_stages)
     if missing_tracers:
         errors.append(f"missing lifecycle tracer stages: {missing_tracers}")
 
     if run_router_samples:
+        route_samples = data.get("route_samples", {})
+        if not route_samples:
+            warnings.append("router sample execution requested but routing-map.json has no route_samples")
+            return errors, warnings
         repo_root = plugin_root.parents[1]
         route_script = repo_root / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "route_skillset.py"
-        for expected_stage, prompt in ROUTE_SAMPLES.items():
+        for expected_stage, prompt in route_samples.items():
             result = subprocess.run(
                 [sys.executable, str(route_script), "--skill-set", "harness-engineering", "--task", prompt, "--json"],
                 cwd=repo_root,

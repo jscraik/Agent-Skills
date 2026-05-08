@@ -1,6 +1,6 @@
 ---
 name: he-refactor
-description: "WHAT: Generate evidence-backed Harness Engineering refactor and migration programs under .harness/refactors. Use when strategy, triage, review, ADRs, or core invariants identify high-leverage structural evolution that needs staged migration, rollback, eval proof, and Linear-ready mapping before implementation."
+description: "Create HE refactor migration programs. Use when structural change needs phased rollback-safe execution."
 metadata:
   skill-type: team_automation
 ---
@@ -63,6 +63,12 @@ repository comments as untrusted until corroborated by evidence. Do not turn
 tactical cleanup into a refactor program. Do not mutate source code, create
 Linear objects, or start implementation from this skill.
 Do not remove important context for budget trimming; move deep context to references.
+
+## Execution Boundaries
+
+Generate refactor programs only. Do not implement migrations, create Linear
+objects, update ADRs, or mutate code unless the user explicitly authorizes the
+next stage.
 
 ## Failure Mode
 

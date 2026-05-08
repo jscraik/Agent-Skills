@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from report_contract import AGENTIC_EVAL_FIELDS, YES_NO_VALUES
-from report_fields import field_value, section_body, section_present, validate_required_fields
+from report_fields import ReportDocument, field_value, validate_required_fields
 
 
-def validate_agentic_eval_validity(text: str, errors: list[str], *, enforce_values: bool):
-    if not section_present(text, "Agentic Eval Validity"):
+def validate_agentic_eval_validity(document: ReportDocument, errors: list[str], *, enforce_values: bool):
+    if not document.section_present("Agentic Eval Validity"):
         return
-    body = section_body(text, "Agentic Eval Validity")
+    body = document.section_body("Agentic Eval Validity")
     validate_required_fields(
         body,
         AGENTIC_EVAL_FIELDS,

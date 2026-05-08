@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from agentic_validity import validate_agentic_eval_validity
+from report_fields import ReportDocument
 from report_recommendation import validate_consistency, validate_recommendation
 from report_sections import (
     validate_drift_classifications,
@@ -33,14 +34,15 @@ def validate(path: Path):
         return ["report is empty"], warnings
 
     enforce_values = path.name != "eval-report-template.md"
-    validate_sections(text, errors)
-    validate_linear_fields(text, errors)
-    validate_gate_matrix(text, errors, warnings)
-    validate_agentic_eval_validity(text, errors, enforce_values=enforce_values)
-    validate_side_effect_authorization(text, errors, enforce_values=enforce_values)
-    validate_drift_classifications(text, errors)
-    validate_recommendation(text, errors)
-    validate_consistency(text, path, warnings)
+    document = ReportDocument.parse(text)
+    validate_sections(document, errors)
+    validate_linear_fields(document, errors)
+    validate_gate_matrix(document, errors, warnings)
+    validate_agentic_eval_validity(document, errors, enforce_values=enforce_values)
+    validate_side_effect_authorization(document, errors, enforce_values=enforce_values)
+    validate_drift_classifications(document, errors)
+    validate_recommendation(document, errors)
+    validate_consistency(document, path, warnings)
 
     return errors, warnings
 

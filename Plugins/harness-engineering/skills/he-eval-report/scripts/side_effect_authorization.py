@@ -8,14 +8,14 @@ from report_contract import (
     VALIDATOR_DECISIONS,
     YES_NO_VALUES,
 )
-from report_fields import field_value, section_body, section_present, validate_required_fields
+from report_fields import ReportDocument, field_value, validate_required_fields
 from side_effect_consistency import validate_side_effect_decision_consistency
 
 
-def validate_side_effect_authorization(text: str, errors: list[str], *, enforce_values: bool):
-    if not section_present(text, "Side-Effect Authorization"):
+def validate_side_effect_authorization(document: ReportDocument, errors: list[str], *, enforce_values: bool):
+    if not document.section_present("Side-Effect Authorization"):
         return
-    body = section_body(text, "Side-Effect Authorization")
+    body = document.section_body("Side-Effect Authorization")
     validate_required_fields(
         body,
         SIDE_EFFECT_AUTHORIZATION_FIELDS,

@@ -10,6 +10,8 @@ Each HE stage should be a deep module: a small caller-facing contract with enoug
 
 Prefer changing shared contracts, evals, or references when the same rule would otherwise need to be copied across multiple stage entrypoints.
 
+Use `references/stage-context-contract.md` when the repeated rule is lifecycle state resolution. Stage entrypoints should name the context contract and keep only stage-specific decisions in their procedures.
+
 ## Complexity Red Flags
 
 Classify at least one red flag before changing HE skill behavior:
