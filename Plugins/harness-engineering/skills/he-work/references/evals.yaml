@@ -145,13 +145,13 @@ cases:
     <<: *negative
     should_trigger: false
     name: "Non Trigger Spec Request"
-    prompt: "This belongs outside he-work; route to the correct HE stage and do not trigger this skill."
+    prompt: "Write the spec for these requirements before implementation; route to he-spec and do not trigger he-work."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(does not trigger|should_trigger.*false|not.*he-).*(route|stage|evidence)"}]
   - id: non-trigger-review-request
     <<: *negative
     should_trigger: false
     name: "Non Trigger Review Request"
-    prompt: "This belongs outside he-work; route to the correct HE stage and do not trigger this skill."
+    prompt: "Review the PR and summarize merge blockers; route to he-code-review and do not trigger he-work."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(does not trigger|should_trigger.*false|not.*he-).*(route|stage|evidence)"}]

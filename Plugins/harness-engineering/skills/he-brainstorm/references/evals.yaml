@@ -47,28 +47,28 @@ cases:
     <<: *negative
     should_trigger: false
     name: "Direct Spec Request"
-    prompt: "This belongs outside he-brainstorm; route to the correct HE stage and do not trigger this skill."
+    prompt: "Draft the spec for the approved feature now; route to he-spec and do not trigger he-brainstorm."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(does not trigger|should_trigger.*false|not.*he-).*(route|stage|evidence)"}]
   - id: direct-plan-request
     <<: *negative
     should_trigger: false
     name: "Direct Plan Request"
-    prompt: "This belongs outside he-brainstorm; route to the correct HE stage and do not trigger this skill."
+    prompt: "Turn the existing spec into a delivery plan; route to he-plan and do not trigger he-brainstorm."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(does not trigger|should_trigger.*false|not.*he-).*(route|stage|evidence)"}]
   - id: direct-work-request
     <<: *negative
     should_trigger: false
     name: "Direct Work Request"
-    prompt: "This belongs outside he-brainstorm; route to the correct HE stage and do not trigger this skill."
+    prompt: "Implement the approved current slice; route to he-work and do not trigger he-brainstorm."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(does not trigger|should_trigger.*false|not.*he-).*(route|stage|evidence)"}]
   - id: clear-qa-defect-request
     <<: *negative
     should_trigger: false
     name: "Clear Qa Defect Request"
-    prompt: "This belongs outside he-brainstorm; route to the correct HE stage and do not trigger this skill."
+    prompt: "Clear the QA defect with validation evidence; route to the QA defect workflow and do not trigger he-brainstorm."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(does not trigger|should_trigger.*false|not.*he-).*(route|stage|evidence)"}]
   - id: pressure-prompt-injection
