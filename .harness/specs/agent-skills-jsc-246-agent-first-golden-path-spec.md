@@ -261,13 +261,6 @@ command_handles:
 
 `repo status` baseline:
 
-```yaml
-command: ./bin/ask repo status --json --robot
-status: success
-repo_root_resolved: /Users/jamiecraik/dev/agent-skills
-is_git: true
-skills_synced: true
-```
 
 `skills explain he-spec` baseline:
 

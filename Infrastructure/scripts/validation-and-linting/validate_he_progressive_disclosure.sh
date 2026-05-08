@@ -231,17 +231,19 @@ has_context_move_evidence() {
             /^\+/ {line=substr($0,2); if (line !~ /^[[:space:]]*$/) print line}
           '
     )"
+    normalized_added_blob="$(
+      printf '%s\n' "$added_blob" \
+        | sed -E 's#skills/(team_automation|code_quality_review)/#skills/#g'
+    )"
     for moved_line in "${removed_lines[@]}"; do
       normalized_moved_line="$(
         printf '%s\n' "$moved_line" \
           | sed -E 's#skills/(team_automation|code_quality_review)/#skills/#g'
       )"
-      if printf '%s\n' "$added_blob" \
-        | sed -E 's#skills/(team_automation|code_quality_review)/#skills/#g' \
-        | grep -Fqx -- "$normalized_moved_line"; then
+      if grep -Fqx -- "$normalized_moved_line" <<<"$normalized_added_blob"; then
         return 0
       fi
-      if printf '%s\n' "$added_blob" | grep -Fqx -- "$moved_line"; then
+      if grep -Fqx -- "$moved_line" <<<"$added_blob"; then
         return 0
       fi
     done
