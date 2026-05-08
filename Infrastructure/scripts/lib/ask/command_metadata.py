@@ -38,14 +38,17 @@ VALID_ACTIONS = {
 
 TOPIC_EXAMPLES: Dict[str, List[str]] = {
     "repo": [
-        "ask repo status",
-        "ask repo doctor --json",
-        "ask repo closeout --changed --json",
+        "ask repo doctor --json --robot",
+        "ask repo closeout --changed --json --robot",
         "ask repo validate --ephemeral",
-        "ask repo doctor-catalog --strict",
+        "ask repo status",
         "ask repo surface --json",
+        "ask repo doctor-catalog --strict",
     ],
     "skills": [
+        "ask skills improve \"fix PR review comments faster\" --json --robot",
+        "ask skills explain he-heartbeat --json --robot",
+        "ask skills prove he-heartbeat --json --robot",
         "ask skills list",
         "ask skills budget --json",
         "ask skills handles --check --json",
@@ -55,10 +58,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
             "\"use $skill-builder to validate $he-heartbeat with @skillinspector\" --json"
         ),
         "ask skills proof he-heartbeat --json",
-        "ask skills prove he-heartbeat --json",
-        "ask skills explain he-heartbeat --json",
         "ask skills route \"find the right security skill\"",
-        "ask skills improve \"fix PR review comments faster\" --json",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
     ],
     "reviewers": [

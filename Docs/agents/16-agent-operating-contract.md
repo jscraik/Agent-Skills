@@ -15,6 +15,7 @@ All agents should use `./bin/ask` for repo operations.
 | Improve agents  | `./bin/ask skills improve "<goal>" --json --robot` |
 | Explain skill   | `./bin/ask skills explain <handle> --json --robot` |
 | Prove skill     | `./bin/ask skills prove <handle> --json --robot`   |
+| Closeout        | `./bin/ask repo closeout --changed --json --robot` |
 | Full validation | `./bin/ask repo validate`                          |
 | List skills     | `./bin/ask skills list --category <topic>`         |
 | Audit skill     | `./bin/ask skills audit <path> --level strict`     |
@@ -29,12 +30,17 @@ inspection:
 
 ```bash
 ./bin/ask repo doctor --json --robot
-./bin/ask skills improve "autofix" --json --robot
-./bin/ask skills explain autofix --json --robot
-./bin/ask skills prove autofix --json --robot
-./bin/ask repo doctor-catalog --json --robot
-./bin/ask repo surface --json --robot
+./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot
+./bin/ask skills explain <recommended_capability> --json --robot
+./bin/ask skills prove <recommended_capability> --json --robot
+./bin/ask repo closeout --changed --json --robot
 ```
+
+Use the `recommended_capability` returned by `skills improve` as the handle for
+`skills explain` and `skills prove`.
+
+Run `repo doctor-catalog` or `repo surface` only when `repo doctor` names them
+as diagnostic follow-up commands.
 
 `repo doctor` is the first health entrypoint. It composes repo status, catalog
 parity, runtime budget, command-handle health, and repo-surface diagnostic debt
