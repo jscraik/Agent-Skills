@@ -50,9 +50,19 @@ Linear Completion Recommendation: Complete"""
 def write_minimal_report(tmp_path: Path, side_effect_block: str) -> Path:
     report = tmp_path / ".harness" / "evals" / "report.md"
     report.parent.mkdir(parents=True)
-    sections = "\n\n".join(f"# {section}\n\nChecked." for section in REQUIRED_SECTIONS)
+    bodies = {
+        "Linear Backlink Map": BASE_FIELDS,
+        "Eval Gate Matrix": BASE_FIELDS,
+        "Agentic Eval Validity": BASE_FIELDS,
+        "Drift Validation": BASE_FIELDS,
+        "Linear Completion Recommendation": BASE_FIELDS,
+        "Side-Effect Authorization": side_effect_block,
+    }
+    sections = "\n\n".join(
+        f"# {section}\n\n{bodies.get(section, 'Checked.')}" for section in REQUIRED_SECTIONS
+    )
     report.write_text(
-        f"{sections}\n\n{BASE_FIELDS}\n\n# Side-Effect Authorization\n\n{side_effect_block}\n",
+        sections,
         encoding="utf-8",
     )
     return report
