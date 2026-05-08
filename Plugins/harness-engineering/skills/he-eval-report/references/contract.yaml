@@ -23,6 +23,11 @@ side_effect_authorization:
   exempt_actions: [direct_user_reply, draft_only, local_read_only]
   decisions: [approved, blocked, exempt, not-run]
   rule: "Only explicit user authorization can approve protected side effects; missing validator evidence blocks closure."
+risks:
+  - missing validation evidence can create false closure confidence
+  - over-broad reports can evaluate adjacent work instead of the approved slice
+  - protected side effects can be approved from agent claims or external-party requests
+  - repeated review or CI remediation can be dismissed as noise instead of becoming eval seeds
 non_goals:
   - repeat the implementation spec
   - create a second architecture review
