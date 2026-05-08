@@ -10,16 +10,16 @@ reasoning summaries: concise
 session id: 019e0407-7437-7743-b74c-a4d849698113
 --------
 user
-The hook pack only sets codex_hooks and the current runtime warns that it is deprecated. Review whether to move to features.hooks while preserving compatibility only for older runtimes.
+The hook pack only sets codex_hooks and the target docs or runtime still accept it. Review whether to keep codex_hooks, move to features.hooks, or support both while preserving compatibility.
 
 warning: Ignored unsupported project-local config keys in /Users/jamiecraik/dev/agent-skills/.codex/config.toml: model_provider, model_providers, notify, profile, profiles. If you want these settings to apply, manually set them in your user-level config.toml.
 codex
-I’m going to trace the hook pack shape in the repo, check what the current runtime expects, and then verify whether `features.hooks` is already supported so we can keep `codex_hooks` only as a compatibility fallback for older runtimes.
+I’m going to trace the hook pack shape in the repo, check what the current runtime expects, and then verify whether `features.hooks` is also supported so we can preserve `codex_hooks` compatibility without treating it as obsolete.
 2026-05-07T20:01:11.750865Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(IncompleteMessage)) }\")" Failed during the export process
 codex
 The shell wrapper is failing before I can read the tree, so I’m switching to the available repo connectors to recover the relevant files and runtime docs without guessing.
 codex
-I found GitHub search tools, so I’m using those to inspect the canonical repo contents and confirm whether the hook pack currently emits only the deprecated key or already includes the new `features.hooks` shape.
+I found GitHub search tools, so I’m using those to inspect the canonical repo contents and confirm whether the hook pack currently emits only `codex_hooks` or already includes the `features.hooks` shape too.
 mcp: codex_apps/github_search_installed_repositories_v2 started
 mcp: codex_apps/github_search_installed_repositories_v2 (completed)
 mcp: codex_apps/github_search started

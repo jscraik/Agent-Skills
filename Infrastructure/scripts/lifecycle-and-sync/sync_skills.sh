@@ -332,11 +332,16 @@ skip_unwritable_sync_phase() {
 # Flag semantics:
 # - flat_projection_rebuilt is pessimistic: downstream skill publication waits
 #   until the flat projection is confirmed rebuilt.
-# - runtime_cache_fresh is optimistic: downstream cache publication is allowed
-#   until a cache rebuild step is skipped or fails.
+# - runtime_cache_fresh is pessimistic: downstream cache publication waits
+#   until every runtime cache rebuild/projection step confirms it can run.
 skills_dir_writable=0
 flat_projection_rebuilt=0
-runtime_cache_fresh=1
+runtime_cache_fresh=0
+runtime_cache_rebuild_blocked=0
+mark_runtime_cache_stale() {
+  runtime_cache_fresh=0
+  runtime_cache_rebuild_blocked=1
+}
 if can_mutate_sync_dir "$skills_dir"; then
   skills_dir_writable=1
 else
@@ -1430,6 +1435,7 @@ normalize_plugin_copy() {
   local handle_name=""
   local skill_entry=""
   local nested_link=""
+  local nested_link_abs=""
   local nested_resolved=""
   local command_surface_file="$repo_root/.skillsets/command-surface.json"
 
@@ -1556,6 +1562,19 @@ normalize_plugin_copy() {
         echo "[WARN] Could not resolve ${label} symlink before fixture pruning: $nested_link"
         continue
       fi
+      nested_link_abs="$(
+        nested_link_dir="$(dirname "$nested_link")"
+        nested_link_base="$(basename "$nested_link")"
+        if cd "$nested_link_dir" 2>/dev/null; then
+          printf '%s/%s\n' "$(pwd -P)" "$nested_link_base"
+        fi
+      )"
+      case "$nested_link_abs" in
+        "$nested_resolved"|"$nested_resolved"/*)
+          echo "[WARN] Refusing to materialize ${label} symlink whose destination is inside its source tree: nested_link=$nested_link nested_resolved=$nested_resolved"
+          continue
+          ;;
+      esac
       case "$nested_resolved" in
         "$plugin_dir_real"|"$plugin_dir_real"/*) ;;
         *)
@@ -1833,13 +1852,13 @@ sync_local_marketplace_cache() {
 
   if [ ! -f "$marketplace_file" ]; then
     echo "[WARN] Marketplace file missing: $marketplace_file (skipping local marketplace cache sync)."
-    runtime_cache_fresh=0
+    mark_runtime_cache_stale
     return 0
   fi
 
   if ! can_mutate_sync_dir "$cache_root"; then
     skip_unwritable_sync_phase "local marketplace cache sync" "$cache_root"
-    runtime_cache_fresh=0
+    mark_runtime_cache_stale
     return 0
   fi
 
@@ -2115,7 +2134,7 @@ sync_repo_cache_snapshots_to_runtime_cache() {
 
   if ! can_mutate_sync_dir "$target_cache_root"; then
     skip_unwritable_sync_phase "repository plugin cache snapshot sync" "$target_cache_root"
-    runtime_cache_fresh=0
+    mark_runtime_cache_stale
     return 0
   fi
 
@@ -2142,7 +2161,7 @@ materialize_plugin_cache_roots() {
   [ -d "$cache_root" ] || return 0
   if ! can_mutate_sync_dir "$cache_root"; then
     skip_unwritable_sync_phase "plugin cache root materialization" "$cache_root"
-    runtime_cache_fresh=0
+    mark_runtime_cache_stale
     return 0
   fi
 
@@ -2295,12 +2314,12 @@ sync_plugin_cache_projections() {
 
   if [ ! -f "$projection_script" ]; then
     echo "[WARN] Projection integrity script missing; skipping plugin-cache header sync."
-    runtime_cache_fresh=0
+    mark_runtime_cache_stale
     return 0
   fi
   if ! can_mutate_sync_dir "$runtime_cache_root"; then
     skip_unwritable_sync_phase "plugin-cache projection sync" "$runtime_cache_root"
-    runtime_cache_fresh=0
+    mark_runtime_cache_stale
     return 0
   fi
 
@@ -2314,6 +2333,9 @@ materialize_plugin_cache_roots "$runtime_cache_root"
 cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/local"
 cleanup_legacy_local_marketplace_cache "$runtime_cache_root/local"
 sync_plugin_cache_projections
+if [ "$runtime_cache_rebuild_blocked" = "0" ]; then
+  runtime_cache_fresh=1
+fi
 sync_versioned_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"
 # On case-insensitive filesystems (e.g. default macOS), "skills" aliases
 # "Skills"; forcing a lowercase symlink would replace the canonical tracked

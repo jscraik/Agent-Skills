@@ -23,8 +23,8 @@ outputs:
 runtime_contract:
   feature_keys:
     current: hooks
-    legacy_alias: codex_hooks
-    requirement: "Prefer hooks for all new configs. Treat codex_hooks as deprecated and preserve it only for a proven older runtime or compatibility fixture."
+    compatibility_alias: codex_hooks
+    requirement: "Check the target runtime and official Codex docs before choosing a feature flag. Treat hooks and codex_hooks as compatibility aliases when both are accepted, and do not remove codex_hooks unless the target runtime or docs explicitly deprecate it."
     conflict_rule: "When official docs and local runtime/schema evidence disagree, state the conflict and follow the target runtime's schema or validator."
   events:
     - SessionStart
@@ -54,12 +54,7 @@ runtime_contract:
       - UserPromptSubmit
       - Stop
   compact_lifecycle:
-    source_files:
-      - "codex-rs/hooks/src/events/compact.rs"
-      - "codex-rs/hooks/schema/generated/pre-compact.command.input.schema.json"
-      - "codex-rs/hooks/schema/generated/pre-compact.command.output.schema.json"
-      - "codex-rs/hooks/schema/generated/post-compact.command.input.schema.json"
-      - "codex-rs/hooks/schema/generated/post-compact.command.output.schema.json"
+    source_evidence: "Target Codex checkout compact event implementation and generated pre-compact/post-compact schemas, when that checkout is available."
     input_fields:
       - session_id
       - turn_id

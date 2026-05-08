@@ -1038,6 +1038,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             'whole_plugin_dir_symlinks_materialized=$((whole_plugin_dir_symlinks_materialized + 1))',
             content,
         )
+        self.assertIn("Refusing to materialize ${label} symlink whose destination is inside its source tree", content)
 
     def test_sync_script_skips_downstream_publication_when_sources_are_stale(self) -> None:
         """
@@ -1049,7 +1050,10 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("flat_projection_rebuilt=0", content)
-        self.assertIn("runtime_cache_fresh=1", content)
+        self.assertIn("runtime_cache_fresh=0", content)
+        self.assertIn("runtime_cache_rebuild_blocked=0", content)
+        self.assertIn("mark_runtime_cache_stale()", content)
+        self.assertIn('if [ "$runtime_cache_rebuild_blocked" = "0" ]; then', content)
         self.assertIn("flat_projection_rebuilt=1", content)
         self.assertIn('if [ "$flat_projection_rebuilt" = "1" ]; then', content)
         self.assertIn('if [ "$runtime_cache_fresh" != "1" ]; then', content)
