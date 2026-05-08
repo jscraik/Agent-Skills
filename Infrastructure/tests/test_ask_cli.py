@@ -219,6 +219,27 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(skill_proof["analytics"]["status"], "unavailable_or_legacy")
         self.assertIn("command_handle_proof", output["data"])
 
+    def test_skills_prove_maps_golden_path_taxonomy_for_he_handle(self):
+        """Verify prove exposes the stable proof taxonomy without adding schemas."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-spec", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        skill_proof = output["data"]["skill_proof"]
+        self.assertEqual(skill_proof["schema_version"], "skill-proof-scorecard.v1")
+        self.assertEqual(skill_proof["handle"], "he-spec")
+        self.assertEqual(skill_proof["reachability"]["status"], "pass")
+        self.assertEqual(skill_proof["reachability"]["source"], "command_handle_proof")
+        self.assertEqual(skill_proof["structural_quality"]["status"], "pass")
+        self.assertEqual(skill_proof["analytics"]["evidence_class"], "native_skill_invocation_projection")
+        self.assertEqual(skill_proof["outcome_proof"]["evidence_class"], "outcome_proof")
+        self.assertIn(
+            skill_proof["proof_status"],
+            {"reachable_without_outcome_proof", "pass"},
+        )
+        self.assertIn("command_handle_proof", output["data"])
+
     def test_skills_prove_uses_skill_invocation_projection(self):
         """Verify ask skills prove consumes ASK-local skill invocation analytics."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -557,6 +578,44 @@ class TestAskCLI(unittest.TestCase):
         ):
             self.assertIn(field, explanation)
         self.assertIsInstance(explanation["reachability"], dict)
+
+    def test_skills_explain_golden_path_fields_for_he_and_non_he_handles(self):
+        """Verify explain exposes source, runtime, validation, and proof handoff."""
+        for handle, canonical_source, owner in (
+            ("he-spec", "Plugins/harness-engineering/skills/he-spec/SKILL.md", "harness-engineering"),
+            ("simplify", "Skills/agent-ops/simplify/SKILL.md", "agent-ops"),
+        ):
+            with self.subTest(handle=handle):
+                cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", handle, "--json", "--robot"]
+                result = _run_cli(cmd)
+
+                self.assertEqual(result.returncode, 0, result.stderr)
+                output = json.loads(result.stdout)
+                skills_explain = output["data"]["skills_explain"]
+                self.assertEqual(skills_explain["query"], handle)
+                self.assertEqual(skills_explain["canonical_source"], canonical_source)
+                self.assertEqual(skills_explain["generated_handle"], f".agents/skills/{handle}/SKILL.md")
+                self.assertEqual(skills_explain["runtime_projection"], "rooted")
+                self.assertEqual(skills_explain["runtime_visibility"], "latent")
+                self.assertEqual(skills_explain["owner"], owner)
+                self.assertIn("validation", skills_explain)
+                self.assertIn("ambiguity_notes", skills_explain)
+
+                explanation = output["data"]["explanation"]
+                self.assertEqual(explanation["canonical_source_path"], canonical_source)
+                self.assertEqual(explanation["runtime_projection_path"], f".agents/skills/{handle}/SKILL.md")
+                self.assertEqual(
+                    explanation["command_handles"],
+                    [{"handle": handle, "path": f".agents/skills/{handle}/SKILL.md", "invoke_via": owner}],
+                )
+                self.assertTrue(explanation["validation_commands"])
+                self.assertIn("known_limitations", explanation)
+                self.assertEqual(explanation["reachability"]["status"], "pass")
+                self.assertEqual(
+                    explanation["reachability"]["proof_command"],
+                    f"./bin/ask skills proof {handle} --json --robot",
+                )
+                self.assertEqual(explanation["next_command"], f"./bin/ask skills proof {handle} --json --robot")
 
     def test_skills_explain_rejects_out_of_repo_source_path(self):
         """Verify explain validates resolved skill paths before reading skill files."""
