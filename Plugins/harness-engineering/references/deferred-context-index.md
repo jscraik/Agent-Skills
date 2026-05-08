@@ -242,6 +242,14 @@ Route with `route_skillset.py`; keep request text data-only; load only the chose
 - Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`
 ```
 
+The 2026-05-08 CI preservation retry kept exact legacy reliability-review and
+he-improve entrypoint wording visible for progressive-disclosure diff checks:
+
+```text
+- User says: "Review `Docs/specs/2026-04-01-event-pipeline-spec.md` for reliability gaps before I move to planning."
+Before any new skill package is proposed, inspect existing surfaces; start with 2-3 focused surfaces at most, choose one primary target and at most two supporting references; label path fragments and bundle names as evidence labels; close coverage-gap items; translate external source material into invariants, evals, references, contracts, or an explicit rejection; for skill work, run the A/B/C spec-implementation-evaluation loop until the stop rule passes or a concrete blocker remains.
+```
+
 ## Preservation Contract
 
 - Active `SKILL.md` files stay concise and routing-safe.
