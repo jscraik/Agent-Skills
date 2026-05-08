@@ -33,9 +33,9 @@ out_of_scope
 needs_human_triage
 ```
 
-7. Update the `.harness/linear/**` plan's delta section when writing is in
+1. Update the `.harness/linear/**` plan's delta section when writing is in
    scope; otherwise return the exact delta table as the handoff.
-8. Promote at most one item into `Approved Current Slice` or
+2. Promote at most one item into `Approved Current Slice` or
    `Approved Next Slice Queue` per HE stage handoff.
 
 ## Label Reconciliation

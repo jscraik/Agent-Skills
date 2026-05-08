@@ -387,7 +387,6 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         _starts_with(normalized, "Infrastructure/references")
         or _starts_with(normalized, "Wiki")
         or _starts_with(normalized, ".harness/knowledge")
-        or _starts_with(normalized, ".harness/decisions")
         or _starts_with(normalized, ".harness/memory")
     ):
         return _make_finding(
@@ -403,15 +402,13 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         )
 
     if (
-        _starts_with(normalized, ".harness/decisions")
-        or _starts_with(normalized, ".harness/knowledge")
+        _starts_with(normalized, ".harness/knowledge")
         or _starts_with(normalized, ".harness/memory")
         or _starts_with(normalized, ".harness/features")
         or _starts_with(normalized, ".harness/strategy")
         or _starts_with(normalized, ".harness/triage")
         or _starts_with(normalized, ".harness/review")
         or _starts_with(normalized, ".harness/ideate")
-        or _starts_with(normalized, ".harness/brainstorm")
         or _starts_with(normalized, ".harness/specs")
         or _starts_with(normalized, ".harness/plan")
     ):
@@ -442,12 +439,16 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         or _starts_with(normalized, "Infrastructure/config")
         or _starts_with(normalized, "Infrastructure/catalog")
         or _starts_with(normalized, "Infrastructure/policy")
+        or _starts_with(normalized, ".harness/brainstorm")
         or _starts_with(normalized, ".harness/core")
+        or _starts_with(normalized, ".harness/decisions")
         or _starts_with(normalized, ".harness/linear")
         or _starts_with(normalized, ".harness/refactors")
         or _starts_with(normalized, ".harness/quality")
+        or _starts_with(normalized, ".harness/solutions")
         or normalized in {
             ".agents/PLANS.md",
+            ".harness/README.md",
             ".harness/ci-provider-transition-status.json",
             ".harness/ci-required-checks.json",
             ".harness/restore-manifest.json",

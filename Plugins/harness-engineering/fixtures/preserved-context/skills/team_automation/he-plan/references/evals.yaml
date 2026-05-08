@@ -53,7 +53,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
-        value: "(?i)(.harness/plan/|standard-plan|ui-enhanced-plan)"
+        value: "(?i)(\\.harness/plan/|standard-plan|ui-enhanced-plan)"
 
   - id: brainstorm-lite-blocks-plan
     name: brainstorm says lite spec required
@@ -105,7 +105,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-plan"
       - type: regex
-        value: "(?i)(.harness/specs/.+-ui-spec\\.md|compatibility|docs/ui-plans/|.harness/plan/.+-ui-plan\\.md)"
+        value: "(?i)(\\.harness/specs/.+-ui-spec\\.md|compatibility|docs/ui-plans/|\\.harness/plan/.+-ui-plan\\.md)"
 
   - id: local-research-needed
     name: local research needed

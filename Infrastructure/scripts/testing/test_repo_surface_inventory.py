@@ -76,9 +76,14 @@ def test_harness_database_is_runtime_state_violation() -> None:
 
 def test_harness_curated_context_paths_are_classified() -> None:
     cases = {
+        ".harness/README.md": ("policy", "policy_surface"),
         ".harness/core/architecture-invariants.md": ("policy", "policy_surface"),
+        ".harness/decisions/jsc-001.md": ("policy", "policy_surface"),
         ".harness/linear/agent-skills-linear-plan.md": ("policy", "policy_surface"),
         ".harness/refactors/ask-control-plane-decomposition.md": ("policy", "policy_surface"),
+        ".harness/brainstorm/he-routing.md": ("policy", "policy_surface"),
+        ".harness/solutions/README.md": ("policy", "policy_surface"),
+        ".harness/solutions/repeated-ci-blocker.md": ("policy", "policy_surface"),
         ".harness/specs/agent-skills-ask-control-plane-decomposition-spec.md": (
             "reference",
             "harness_reference_surface",

@@ -316,7 +316,9 @@ can_mutate_sync_dir() {
     return 1
   fi
 
-  rm -f -- "$probe" 2>/dev/null || true
+  if ! rm -f -- "$probe" 2>/dev/null; then
+    return 1
+  fi
   return 0
 }
 
@@ -327,7 +329,19 @@ skip_unwritable_sync_phase() {
   echo "[WARN] $dir is not writable; skipping $label to avoid sandbox rsync/cache cleanup noise."
 }
 
+# Flag semantics:
+# - flat_projection_rebuilt is pessimistic: downstream skill publication waits
+#   until the flat projection is confirmed rebuilt.
+# - runtime_cache_fresh is pessimistic: downstream cache publication waits
+#   until every runtime cache rebuild/projection step confirms it can run.
 skills_dir_writable=0
+flat_projection_rebuilt=0
+runtime_cache_fresh=0
+runtime_cache_rebuild_blocked=0
+mark_runtime_cache_stale() {
+  runtime_cache_fresh=0
+  runtime_cache_rebuild_blocked=1
+}
 if can_mutate_sync_dir "$skills_dir"; then
   skills_dir_writable=1
 else
@@ -368,7 +382,7 @@ if [ -d "$skills_dir/.system" ] && [ ! -L "$skills_dir/.system" ]; then
       fi
     else
       mkdir -p "$system_skills_dir"
-      cp -R "$skills_dir/.system"/. "$system_skills_dir"/ 2>/dev/null || true
+      cp -a "$skills_dir/.system"/. "$system_skills_dir"/ 2>/dev/null || true
     fi
     if ! rm -rf "$skills_dir/.system"; then
       echo "[WARN] Unable to remove $skills_dir/.system after preservation (continuing anyway)."
@@ -711,6 +725,7 @@ if [ "$skills_dir_writable" = "1" ]; then
 
     echo "Bridge skill kept under .system: $bridge_skill -> $bridge_source"
   done
+  flat_projection_rebuilt=1
 else
   echo "[INFO] Skipped flat runtime skill projection because $skills_dir is not writable."
 fi
@@ -1420,6 +1435,7 @@ normalize_plugin_copy() {
   local handle_name=""
   local skill_entry=""
   local nested_link=""
+  local nested_link_abs=""
   local nested_resolved=""
   local command_surface_file="$repo_root/.skillsets/command-surface.json"
 
@@ -1535,44 +1551,62 @@ normalize_plugin_copy() {
     done < <(find "$skills_dir" -type l -print0)
   fi
 
-  while IFS= read -r -d '' nested_link; do
-    [ -n "$nested_link" ] || continue
-    [ -L "$nested_link" ] || continue
-    nested_resolved="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$nested_link" 2>/dev/null || true)"
-    if [ -z "$nested_resolved" ] || [ ! -e "$nested_resolved" ]; then
-      echo "[WARN] Could not resolve ${label} symlink before fixture pruning: $nested_link"
-      continue
-    fi
-    case "$nested_resolved" in
-      "$plugin_dir_real"|"$plugin_dir_real"/*) ;;
-      *)
-        echo "[WARN] Refusing to materialize ${label} symlink outside plugin copy: nested_link=$nested_link nested_resolved=$nested_resolved"
+  local whole_plugin_dir_symlinks_materialized=1
+  while [ "$whole_plugin_dir_symlinks_materialized" -gt 0 ]; do
+    whole_plugin_dir_symlinks_materialized=0
+    while IFS= read -r -d '' nested_link; do
+      [ -n "$nested_link" ] || continue
+      [ -L "$nested_link" ] || continue
+      nested_resolved="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$nested_link" 2>/dev/null || true)"
+      if [ -z "$nested_resolved" ] || [ ! -e "$nested_resolved" ]; then
+        echo "[WARN] Could not resolve ${label} symlink before fixture pruning: $nested_link"
         continue
-        ;;
-    esac
-    if [ -d "$nested_resolved" ]; then
-      local tmp_dir
-      tmp_dir="$(mktemp -d)"
-      if cp -a "$nested_resolved/." "$tmp_dir/"; then
-        rm -f -- "$nested_link"
-        mv "$tmp_dir" "$nested_link"
-        echo "[OK] Materialized ${label} directory symlink before fixture pruning: $nested_link"
-      else
-        rm -rf -- "$tmp_dir"
-        echo "[WARN] Failed to materialize ${label} directory symlink before fixture pruning: $nested_link"
       fi
-    elif [ -f "$nested_resolved" ]; then
-      tmp_file="$(mktemp)"
-      if cp -- "$nested_resolved" "$tmp_file"; then
-        rm -f -- "$nested_link"
-        mv "$tmp_file" "$nested_link"
-        echo "[OK] Materialized ${label} file symlink before fixture pruning: $nested_link"
-      else
-        rm -f -- "$tmp_file"
-        echo "[WARN] Failed to materialize ${label} file symlink before fixture pruning: $nested_link"
+      nested_link_abs="$(
+        nested_link_dir="$(dirname "$nested_link")"
+        nested_link_base="$(basename "$nested_link")"
+        if cd "$nested_link_dir" 2>/dev/null; then
+          printf '%s/%s\n' "$(pwd -P)" "$nested_link_base"
+        fi
+      )"
+      case "$nested_link_abs" in
+        "$nested_resolved"|"$nested_resolved"/*)
+          echo "[WARN] Refusing to materialize ${label} symlink whose destination is inside its source tree: nested_link=$nested_link nested_resolved=$nested_resolved"
+          continue
+          ;;
+      esac
+      case "$nested_resolved" in
+        "$plugin_dir_real"|"$plugin_dir_real"/*) ;;
+        *)
+          echo "[WARN] Refusing to materialize ${label} symlink outside plugin copy: nested_link=$nested_link nested_resolved=$nested_resolved"
+          continue
+          ;;
+      esac
+      if [ -d "$nested_resolved" ]; then
+        local tmp_dir
+        tmp_dir="$(mktemp -d)"
+        if cp -a "$nested_resolved/." "$tmp_dir/"; then
+          rm -f -- "$nested_link"
+          mv "$tmp_dir" "$nested_link"
+          echo "[OK] Materialized ${label} directory symlink before fixture pruning: $nested_link"
+          whole_plugin_dir_symlinks_materialized=$((whole_plugin_dir_symlinks_materialized + 1))
+        else
+          rm -rf -- "$tmp_dir"
+          echo "[WARN] Failed to materialize ${label} directory symlink before fixture pruning: $nested_link"
+        fi
+      elif [ -f "$nested_resolved" ]; then
+        tmp_file="$(mktemp)"
+        if cp -- "$nested_resolved" "$tmp_file"; then
+          rm -f -- "$nested_link"
+          mv "$tmp_file" "$nested_link"
+          echo "[OK] Materialized ${label} file symlink before fixture pruning: $nested_link"
+        else
+          rm -f -- "$tmp_file"
+          echo "[WARN] Failed to materialize ${label} file symlink before fixture pruning: $nested_link"
+        fi
       fi
-    fi
-  done < <(find "$plugin_dir" -type l -print0)
+    done < <(find "$plugin_dir" -type l -print0)
+  done
 
   if [ -d "${plugin_dir:?}/fixtures" ]; then
     rm -rf -- "${plugin_dir:?}/fixtures"
@@ -1818,11 +1852,13 @@ sync_local_marketplace_cache() {
 
   if [ ! -f "$marketplace_file" ]; then
     echo "[WARN] Marketplace file missing: $marketplace_file (skipping local marketplace cache sync)."
+    mark_runtime_cache_stale
     return 0
   fi
 
   if ! can_mutate_sync_dir "$cache_root"; then
     skip_unwritable_sync_phase "local marketplace cache sync" "$cache_root"
+    mark_runtime_cache_stale
     return 0
   fi
 
@@ -1910,7 +1946,7 @@ sync_local_marketplace_cache() {
     else
       rm -rf -- "$target_plugin_dir"
       mkdir -p "$target_plugin_dir"
-      cp -R "$source_dir"/. "$target_plugin_dir"/
+      cp -a "$source_dir"/. "$target_plugin_dir"/
       rm -rf -- "$target_plugin_dir/.git" "$target_plugin_dir/node_modules" "$target_plugin_dir/__pycache__"
       find "$target_plugin_dir" -name '.DS_Store' -type f -delete
     fi
@@ -2059,7 +2095,7 @@ sync_versioned_local_marketplace_cache() {
     else
       rm -rf -- "$target_dir"
       mkdir -p "$target_dir"
-      cp -R "$source_dir"/. "$target_dir"/
+      cp -a "$source_dir"/. "$target_dir"/
       rm -rf -- "$target_dir/.git" "$target_dir/node_modules" "$target_dir/__pycache__"
       find "$target_dir" -name '.DS_Store' -type f -delete
     fi
@@ -2098,6 +2134,7 @@ sync_repo_cache_snapshots_to_runtime_cache() {
 
   if ! can_mutate_sync_dir "$target_cache_root"; then
     skip_unwritable_sync_phase "repository plugin cache snapshot sync" "$target_cache_root"
+    mark_runtime_cache_stale
     return 0
   fi
 
@@ -2106,7 +2143,7 @@ sync_repo_cache_snapshots_to_runtime_cache() {
   else
     rm -rf -- "$target_cache_root"
     mkdir -p "$target_cache_root"
-    cp -R "$source_cache_root"/. "$target_cache_root"/
+    cp -a "$source_cache_root"/. "$target_cache_root"/
   fi
 }
 
@@ -2124,6 +2161,7 @@ materialize_plugin_cache_roots() {
   [ -d "$cache_root" ] || return 0
   if ! can_mutate_sync_dir "$cache_root"; then
     skip_unwritable_sync_phase "plugin cache root materialization" "$cache_root"
+    mark_runtime_cache_stale
     return 0
   fi
 
@@ -2156,24 +2194,24 @@ materialize_plugin_cache_roots() {
         local tmp_copy_dir=""
         tmp_copy_dir="$(mktemp -d)"
         cleanup_paths+=("$tmp_copy_dir")
-        cp -R "$candidate_dir"/. "$tmp_copy_dir"/
+        cp -a "$candidate_dir"/. "$tmp_copy_dir"/
         while IFS= read -r child_dir; do
           [ -n "$child_dir" ] || continue
           rm -rf -- "$child_dir"
         done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -print)
-        cp -R "$tmp_copy_dir"/. "$plugin_dir"/
+        cp -a "$tmp_copy_dir"/. "$plugin_dir"/
       elif command -v rsync >/dev/null 2>&1; then
         rsync -a --delete --force "$candidate_dir/" "$plugin_dir/"
       else
         local tmp_copy_dir=""
         tmp_copy_dir="$(mktemp -d)"
         cleanup_paths+=("$tmp_copy_dir")
-        cp -R "$candidate_dir"/. "$tmp_copy_dir"/
+        cp -a "$candidate_dir"/. "$tmp_copy_dir"/
         while IFS= read -r child_dir; do
           [ -n "$child_dir" ] || continue
           rm -rf -- "$child_dir"
         done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -print)
-        cp -R "$tmp_copy_dir"/. "$plugin_dir"/
+        cp -a "$tmp_copy_dir"/. "$plugin_dir"/
       fi
 
       while IFS= read -r child_dir; do
@@ -2210,7 +2248,11 @@ sync_codex_profile_homes() {
     [ -n "$profile_home" ] || continue
     [ -d "$profile_home" ] || continue
 
-    sync_user_skills "$skills_dir" "$profile_home/skills"
+    if [ "$flat_projection_rebuilt" = "1" ]; then
+      sync_user_skills "$skills_dir" "$profile_home/skills"
+    else
+      echo "[INFO] Skipping profile skills sync because flat runtime skill projection was not rebuilt."
+    fi
 
     profile_plugins="$profile_home/plugins"
     profile_plugins_root="$profile_home/Plugins"
@@ -2222,13 +2264,17 @@ sync_codex_profile_homes() {
     profile_cache_target="$profile_plugins_root/cache"
     cache_source_real="$(cd "$cache_source" 2>/dev/null && pwd -P || true)"
     profile_cache_target_real="$(cd "$profile_cache_target" 2>/dev/null && pwd -P || true)"
-    if [ -n "$cache_source_real" ] && [ -n "$profile_cache_target_real" ] && [ "$cache_source_real" = "$profile_cache_target_real" ]; then
+    if [ "$runtime_cache_fresh" != "1" ]; then
+      echo "[INFO] Skipping profile cache publication because runtime cache rebuild was not fresh."
+    elif [ -n "$cache_source_real" ] && [ -n "$profile_cache_target_real" ] && [ "$cache_source_real" = "$profile_cache_target_real" ]; then
       echo "[INFO] Skipping profile cache copy for identical source/target: $profile_cache_target"
     else
       sync_user_skills "$cache_source" "$profile_cache_target" 0 copy
       materialize_plugin_cache_roots "$profile_cache_target"
     fi
-    if [ -f "$marketplace_file" ]; then
+    if [ "$runtime_cache_fresh" != "1" ]; then
+      echo "[INFO] Skipping profile marketplace publication because runtime cache rebuild was not fresh."
+    elif [ -f "$marketplace_file" ]; then
       marketplace_target="$profile_plugins_root/marketplace.json"
       if [ -e "$marketplace_target" ] && cmp -s "$marketplace_file" "$marketplace_target"; then
         echo "[INFO] Profile marketplace manifest already points at canonical source: $marketplace_target"
@@ -2268,10 +2314,12 @@ sync_plugin_cache_projections() {
 
   if [ ! -f "$projection_script" ]; then
     echo "[WARN] Projection integrity script missing; skipping plugin-cache header sync."
+    mark_runtime_cache_stale
     return 0
   fi
   if ! can_mutate_sync_dir "$runtime_cache_root"; then
     skip_unwritable_sync_phase "plugin-cache projection sync" "$runtime_cache_root"
+    mark_runtime_cache_stale
     return 0
   fi
 
@@ -2285,19 +2333,28 @@ materialize_plugin_cache_roots "$runtime_cache_root"
 cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/local"
 cleanup_legacy_local_marketplace_cache "$runtime_cache_root/local"
 sync_plugin_cache_projections
+if [ "$runtime_cache_rebuild_blocked" = "0" ]; then
+  runtime_cache_fresh=1
+fi
 sync_versioned_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"
 # On case-insensitive filesystems (e.g. default macOS), "skills" aliases
 # "Skills"; forcing a lowercase symlink would replace the canonical tracked
 # Skills/ tree and can introduce symlink loops.
 if [ -d "$repo_root/Skills" ] && [ ! -L "$repo_root/Skills" ]; then
   echo "[INFO] Skipping repo-local skills symlink projection because canonical Skills/ exists."
-else
+elif [ "$flat_projection_rebuilt" = "1" ]; then
   sync_user_skills "$skills_dir" "$repo_root/skills" 1
+else
+  echo "[INFO] Skipping repo-local skills symlink projection because flat runtime skill projection was not rebuilt."
 fi
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
 if [[ "$sync_scope" == "user" ]]; then
   remove_legacy_home_skill_symlinks
-  sync_user_skills "$skills_dir" "$HOME/.agents/skills"
+  if [ "$flat_projection_rebuilt" = "1" ]; then
+    sync_user_skills "$skills_dir" "$HOME/.agents/skills"
+  else
+    echo "[INFO] Skipping home skills sync because flat runtime skill projection was not rebuilt."
+  fi
   sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"
   sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
   ensure_real_home_plugin_root "$HOME/plugins" "$plugins_dir" "home plugin root"

@@ -666,37 +666,37 @@ Token-expensive workflows:
 
 4. Replace proof prose with typed proof payloads:
 
-- reachability;
-- structural;
-- quality;
-- outcome.
+   - reachability;
+   - structural;
+   - quality;
+   - outcome.
 
 5. Replace repo-surface warning sprawl with a burn-down dashboard:
 
-- unclassified generated;
-- runtime state;
-- duplicate infrastructure;
-- historical archive;
-- deletion candidates.
+   - unclassified generated;
+   - runtime state;
+   - duplicate infrastructure;
+   - historical archive;
+   - deletion candidates.
 
 6. Replace compatibility comments with deprecation records:
 
-- owner;
-- caller;
-- removal condition;
-- expiry date;
-- validation.
+   - owner;
+   - caller;
+   - removal condition;
+   - expiry date;
+   - validation.
 
 7. Replace CI provider lore with a generated ownership matrix.
 
 8. Replace high-level moat talk with a small metric set:
 
-- skill first-choice accuracy;
-- closeout success rate;
-- validation pass after agent edits;
-- context tokens per successful task;
-- catalog parity drift duration;
-- repo-surface unclassified count.
+   - skill first-choice accuracy;
+   - closeout success rate;
+   - validation pass after agent edits;
+   - context tokens per successful task;
+   - catalog parity drift duration;
+   - repo-surface unclassified count.
 
 ## 20. Evidence & Traceability Matrix
 

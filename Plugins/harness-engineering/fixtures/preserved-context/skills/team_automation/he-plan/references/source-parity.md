@@ -62,8 +62,8 @@ This document maps the original planning prompt families to `he-plan` so the pro
 - `/prompts:...` references were translated into workflow-stage guidance so the skill remains usable while prompt surfaces are being deprecated.
 - The learnings lookup was modernized to check `.harness/memory/LEARNINGS.md` first when present, while keeping `instructions/Learnings.md` as a compatibility fallback.
 - UI artifact path handling was made explicit:
-  - prefer `docs/ui-plans/` for dedicated UI plans
-  - preserve the older `.harness/plan/...-ui-plan.md` form as a compatibility mode when the repo or user requires it
+  - prefer `.harness/plan/` for dedicated UI plans
+  - preserve legacy `docs/ui-plans/` paths only as compatibility input when existing repo artifacts require it
 - Prototype planning differences were preserved as mode-specific rules rather than flattened away:
   - 3 variants for dedicated UI-direction planning
   - 4-variant Prototype Pack brief for broader UI+technical delivery plans

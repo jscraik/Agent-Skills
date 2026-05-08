@@ -57,6 +57,7 @@ def test_active_he_spec_consumes_approved_execution_slice() -> None:
     text = read(HE_ROOT / "skills/he-spec/SKILL.md")
 
     for phrase in [
+        "approved execution slice as one milestone, one parent issue, one refactor phase, or one execution slice",
         "bounded implementation spec for one milestone, parent issue, refactor phase, or execution slice",
         ".harness/linear/<repo-name>-linear-plan.md",
         ".harness/refactors/<selected-refactor>.md",
@@ -70,6 +71,7 @@ def test_active_he_spec_consumes_approved_execution_slice() -> None:
         "stop if no selected milestone, parent issue, refactor phase, or execution slice is identified",
         "Linear project, milestone, parent issue, sub-issues when present, labels, priority, dependencies, and agent/human route",
         "explicit In Scope and Out of Scope boundaries",
+        "bounded spec for one approved milestone, parent issue, refactor phase, or execution slice",
     ]:
         assert phrase in text
 

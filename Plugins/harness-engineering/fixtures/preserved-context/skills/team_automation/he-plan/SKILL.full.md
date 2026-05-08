@@ -118,8 +118,8 @@ Do not proceed until the user has supplied a usable planning source.
 - a concise planning summary focused on execution order, dependencies, validation, and rollout
 - a written plan artifact at one of:
   - `.harness/plan/YYYY-MM-DD-<type>-<descriptive-name>-plan.md`
-  - `docs/ui-plans/YYYY-MM-DD-<descriptive-name>-ui-plan.md`
-  - compatibility mode: `.harness/plan/YYYY-MM-DD-<topic>-ui-plan.md` only when the repo already uses that convention or the user explicitly requests it
+  - `.harness/plan/YYYY-MM-DD-<descriptive-name>-ui-plan.md`
+  - compatibility mode: `docs/ui-plans/YYYY-MM-DD-<topic>-ui-plan.md` only when the repo already uses that convention or the user explicitly requests it
 - explicit implementation phases with stable IDs:
   - `P0`, `P1`, `P2` for general plans
   - `UP0`, `UP1`, `UP2` for dedicated UI plans
@@ -263,7 +263,7 @@ For services or high blast-radius work, include explicit failure-domain and reco
 ### Phase 7: Write the plan artifact
 Ensure the destination directory exists before writing:
 - `.harness/plan/` for general plans
-- `docs/ui-plans/` for dedicated UI plans
+- `.harness/plan/` for dedicated UI plans
 
 Use the canonical frontmatter, required sections, and template details in `Infrastructure/references/plan-artifacts.md`.
 - keep the current stable filename convention unless the repo or user explicitly requires a compatibility variant
