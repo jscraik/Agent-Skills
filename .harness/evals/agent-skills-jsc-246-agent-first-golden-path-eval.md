@@ -6,7 +6,7 @@ type: he-eval-report
 canonical_slug: agent-skills-jsc-246-agent-first-golden-path
 title: Agent Skills JSC-246 Agent First Golden Path Eval
 harness_stage: he-eval-report
-status: phase_002_in_review
+status: phase_002_complete
 date: 2026-05-08
 traceability_required: true
 origin: .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md
@@ -21,8 +21,8 @@ linear_milestone: Command surface and ask reliability
 
 `PLAN-JSC246-001` baseline evidence is captured.
 
-`PLAN-JSC246-002` implementation is locally complete and pending phase-end
-review gates before any local commit.
+`PLAN-JSC246-002` implementation is locally complete and phase-end review gates
+have no blocking findings.
 
 ## Scope
 
@@ -191,7 +191,8 @@ diagnostic_advisory`; `next_command_blocks_task: false`; top-level
 | `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` | pass | Eval artifact identity is valid. |
 | `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` | pass | Eval Linear traceability is valid after adding the work-item contract. |
 | `git diff --check -- Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` | pass | No whitespace errors in the phase diff. |
-| `./bin/ask repo validate --changed-files Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md --json --robot` | pass | Required failures `0`; warn-only issues `0`; validation logs `Infrastructure/artifacts/validation/20260508T111638Z`. |
+| `./bin/ask repo validate --changed-files Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md --json --robot` | pass | Required failures `0`; warn-only issues `0`; latest validation logs `Infrastructure/artifacts/validation/20260508T111954Z`. |
+| `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py -q` | pass | `27 passed`; rerun after phase-gate review. |
 
 ## Blockers
 
@@ -211,9 +212,21 @@ separate explicitly scoped action.
 
 | Gate | Status | Notes |
 | --- | --- | --- |
-| `simplify` | pending | Must review the `PLAN-JSC246-002` diff before commit. |
-| `he-fix-bugs` | not triggered yet | Focused phase tests, eval lints, diff check, scoped repo validation, and live doctor probe pass; run only if review finds phase-specific failing evidence. |
-| `he-code-review` | pending | Must review public robot-output contract risk before commit. |
+| `simplify` | pass | Manual simplify pass over `git diff HEAD` found no actionable behavior-preserving simplification for this small additive field/test change. One delegated reviewer accidentally inspected only the unstaged diff and is not used as approval evidence. |
+| `he-fix-bugs` | not triggered | Focused phase tests, eval lints, diff check, scoped repo validation, and live doctor probe pass. No phase-specific failing evidence remains. |
+| `he-code-review` | pass with residual risks | Correctness review found no blocking findings. Residual low-risk gaps are recorded below for later phases. |
+
+## Review Residuals
+
+These do not block `PLAN-JSC246-002`, but should be considered before final
+JSC-246 closure:
+
+- `no_safe_command` is covered at helper level. If later phases make callers
+  depend on this edge through `repo_closeout`, add an integration fixture.
+- `PLAN-JSC246-005` should cover strict closeout behavior when diagnostic debt
+  exists without a remediation command.
+- The eval intentionally records both `skills proof` and `skills prove` because
+  the plan's proof command boundary requires both commands to remain distinct.
 
 ## Linear Acceptance Traceability
 
