@@ -5,7 +5,7 @@ last_updated: "2026-05-07"
 x_common: &common {eval_modes: [smoke, release], should_trigger: true, prepend_skill: false}
 x_negative: &negative {eval_modes: [smoke, release], category: negative, should_trigger: false, prepend_skill: false}
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
-x_accept_trace: &accept_trace [{type: regex, value: "(?is)(?=.*\\b(route|stage|traceability)\\b)(?=.*\\b(evidence|traceability)\\b)(?=.*\\b(blocked|safe|forbidden)\\b)"}]
+x_accept_trace: &accept_trace [{type: regex, value: "(?is)(?=.*\\b(route|stage)\\b)(?=.*\\b(evidence|traceability)\\b)(?=.*\\b(blocked|safe|forbidden)\\b)"}]
 
 cases:
   - id: explicit-compound-stage
@@ -16,7 +16,7 @@ cases:
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(he-compound|compound stage)"}
-      - {type: regex, value: "(?is)(traceability|evidence|blocked)"}
+      - {type: regex, value: "(?is)(?=.*\\b(evidence|traceability)\\b)(?=.*\\bblocked\\b)"}
   - id: project-brain-linkage
     <<: *common
     name: "Project Brain Linkage"

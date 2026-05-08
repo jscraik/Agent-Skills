@@ -53,7 +53,7 @@ cases:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
-        value: "(?i)(headless|plan:\\.harness/plan/2026-03-23-001-feat-example-plan.md|Review complete|structured)"
+        value: "(?is)(?=.*headless)(?=.*plan:\\.harness/plan/2026-03-23-001-feat-example-plan\\.md)(?=.*(Review complete|structured))"
 
   - id: latest-pr-target
     name: latest pr target
