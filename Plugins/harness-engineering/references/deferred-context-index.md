@@ -223,6 +223,25 @@ Explore first, ask second; use update_plan only for live progress; before writin
 Inspect session-collector evidence and repo truth; for coding-harness-managed work load the execution slice contract before writing requirements; consume the approved `.harness/linear/<repo-name>-linear-plan.md`, selected `.harness/refactors/<selected-refactor>.md` when applicable, `.harness/decisions/*.md`, `.harness/core/*.md`, and `.harness/brainstorm/*.md` as primary inputs; use `.harness/strategy/*.md`, `.harness/triage/*.md`, `.harness/review/*.md`, and `.harness/features/*.md` only for evidence or context; stop if no selected milestone, parent issue, refactor phase, or execution slice is identified. Resolve/create the Linear tracker for non-trivial work; for existing tracked plans run the Linear Delta Capture Gate before consuming the approved slice, reconcile required labels, classify new or changed Linear issues, and promote at most one admitted item into the spec scope; require Linear project, milestone, parent issue, sub-issues when present, labels, priority, dependencies, and agent/human route for tracked specs; before writing durable docs choose `.harness/specs/**.md` from the artifact routing contract; define scope, assumptions, assets/icon-small.png if packaging matters, explicit In Scope and Out of Scope boundaries, and handoff to plan with coding-harness state when applicable. When feedback says a prior cockpit, golden-path, or agent-native plan was too additive, load the compression contract and make first-contact budget, standalone command admission, docs deletion budget, fresh-agent eval, ablation proof, and evidence-backed metric gates blocking acceptance criteria.
 ```
 
+The 2026-05-08 route-canonicalization pass preserved legacy path examples and
+compact entrypoint wording while keeping `.harness/**` as the active artifact
+home. These lines remain reference-only context for migration comparison and
+progressive-disclosure auditability:
+
+```text
+- User says: "Review `Docs/specs/2026-04-01-event-pipeline-spec.md` for reliability gaps before I move to planning."
+- `Docs/specs/*.md`
+- `Docs/plans/*.md`
+- `docs/ui-specs/*.md`
+  - one or more existing artifact paths under `docs/brainstorms/`, `Docs/specs/`, `Docs/plans/`, `docs/ui-plans/`, or `docs/solutions/`
+- Which plan should I deepen? You can give me the path directly from `Docs/plans/`.
+- Which spec should I deepen? You can give me a path from `Docs/specs/` or `docs/ui-specs/`.
+Goal, Linear/project-brain state, specs, plans, PRs, session evidence.
+Return schema_version when structured. Stage map, active owner, blockers, next action, blackboard_delta, and retained references.
+Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement. When the request explicitly asks for persistent continuation, `/goal`, resume-over-time, or keep-working-until-done behavior, apply the goal continuity contract after selecting the HE stage.
+- Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`
+```
+
 ## Preservation Contract
 
 - Active `SKILL.md` files stay concise and routing-safe.
