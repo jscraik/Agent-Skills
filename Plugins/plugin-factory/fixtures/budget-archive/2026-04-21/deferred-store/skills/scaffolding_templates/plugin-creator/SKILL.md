@@ -28,6 +28,14 @@ Return: `schema_version`, `plugin_name`, `plugin_path`, `validation`, optional `
 
 For non-trivial plugins, also return `factory_governance` with plugin posture, visibility policy, traceability mode, budget posture, and risks.
 
+## Execution Boundaries
+
+Create or adopt plugin-owned canonical source only. Do not edit generated runtime mirrors, user-level plugin copies, or marketplace projections as the source of truth.
+
+Keep plugin scaffolding separate from skill hardening. Route detailed skill quality work to [[skill-builder]] after the plugin package has deterministic ownership, manifest policy, and validation evidence.
+
+If the destination plugin root, marketplace ownership, or skill-adoption move semantics are ambiguous, stop and ask before writing.
+
 ## Workflow
 
 Use the detailed scaffold procedure in `references/workflow.md`.
@@ -77,6 +85,17 @@ Fail fast: stop at first failed gate and report blocker text.
 
 - redact secrets and tokens in generated examples
 - do not overwrite existing plugin roots unless force semantics are explicit
+
+## Failure mode
+
+- Stop on unclear plugin ownership, destination conflicts, manifest policy gaps, or ambiguous adoption semantics.
+- Report the exact blocker and the smallest safe next action instead of creating a partial plugin surface.
+
+## Gotchas
+
+- A plugin scaffold is not a release claim; it still needs skill hardening and eval evidence before distribution.
+- Copying a skill into a plugin without moving canonical ownership creates drift.
+- Marketplace metadata is a policy surface. Keep it explicit and deterministic.
 
 ## References
 

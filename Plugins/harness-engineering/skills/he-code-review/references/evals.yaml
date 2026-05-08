@@ -93,6 +93,26 @@ cases:
     acceptance:
       - {type: regex, value: "(?is)(action parity|capability discovery|context injection|truth surface|completion|resume)"}
       - {type: regex, value: "(?is)(traceability|evidence|validation)"}
+  - id: external-simplify-specialist-route
+    <<: *common
+    name: "External Simplify Specialist Route"
+    category: edge
+    prompt: "Review this changed scope for behavior-preserving simplification opportunities. Use the external simplify skill as a specialist lens instead of baking simplification rules into HE."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(simplify|external.*specialist|specialist skill)"}
+      - {type: regex, value: "(?is)(behavior-preserving|changed scope|review lens)"}
+      - {type: regex, value: "(?is)(do not copy|not duplicate|HE.*traceability|review verdict)"}
+  - id: expanded-agent-native-audit-scorecard
+    <<: *common
+    name: "Expanded Agent Native Audit Scorecard"
+    category: edge
+    prompt: "Review this plugin routing change with the expanded agent-native audit scorecard, including action parity, entity completion, integration feedback, and deterministic completion."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(agent-native audit|scorecard|action parity)"}
+      - {type: regex, value: "(?is)(entity completion|integration feedback|deterministic completion)"}
+      - {type: regex, value: "(?is)(pass|partial|fail|unknown|blocks closure)"}
   - id: he-code-review-security-subpass
     <<: *common
     name: "He Code Review Security Subpass"

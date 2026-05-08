@@ -36,9 +36,16 @@ Before deep review, classify closed, draft, automated, trivial, already-reviewed
 - Relevant history, blame, previous PRs, review comments, and changed-file code comments.
 - Breaking API, CLI, configuration, serialization, migration, permission, or rollout changes.
 - Change-size, context-safety, focused testing, validation, and security/supply-chain evidence.
-- Agent-native scorecard for skill, plugin, CLI, agent-doc, eval, routing, or
+- Agent-native audit scorecard for skill, plugin, CLI, agent-doc, eval, routing, or
   projection changes: action parity, capability discovery, context injection,
-  shared workspace/truth surface, and explicit completion or resume signal.
+  shared workspace/truth surface, entity completion, integration feedback,
+  prompt-native composability, and explicit completion or resume signal. Use
+  `Plugins/harness-engineering/references/agent-native-audit-scorecard.md` for
+  dimensions, closure rules, and output fields.
+- Changed-scope simplification review should route to the external `simplify`
+  specialist through `specialist-skill-steering-contract.md`; HE keeps the
+  review verdict, traceability, and risk classification rather than duplicating
+  simplification doctrine.
 
 ## Confidence Calibration
 

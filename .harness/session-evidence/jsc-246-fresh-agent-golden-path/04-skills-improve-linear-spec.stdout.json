@@ -1,0 +1,238 @@
+{
+  "status": "success",
+  "trace_id": "090cb0ab-8212-4e4e-b1a6-a876603fb1cf",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills improve write a Linear-backed HE spec --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "improvement": {
+      "schema_version": "skill-improvement-recommendation.v1",
+      "goal": "write a Linear-backed HE spec",
+      "status": "resolved",
+      "route_state": "resolved",
+      "route_state_reason": "goal routing selected one reachable capability",
+      "agent_summary": "Recommended $he-spec for this goal.",
+      "recommended_capability": {
+        "handle": "he-spec",
+        "name": "he-spec",
+        "path": ".agents/skills/he-spec",
+        "candidate_id": "skill:he-spec::.agents/skills/he-spec",
+        "candidate_type": "skill",
+        "confidence": 0.4545
+      },
+      "why": [
+        "skill phrase match",
+        "keyword overlap=2"
+      ],
+      "reachability": {
+        "status": "pass",
+        "proof_status": "pass",
+        "required_gates_passed": true,
+        "user_runtime_ready": true
+      },
+      "proof": {
+        "schema_version": "command-handle-proof.v1",
+        "handle": "he-spec",
+        "status": "pass",
+        "gates": {
+          "resolver": true,
+          "generated_command_handle_check": true,
+          "workspace_command_handle_exists": true,
+          "codex_user_link": false,
+          "agents_user_link": true,
+          "codex_user_command_handle_exists": false,
+          "agents_user_command_handle_exists": true
+        },
+        "gate_policy": {
+          "required": [
+            "resolver",
+            "generated_command_handle_check",
+            "workspace_command_handle_exists"
+          ],
+          "user_runtime_any_of": [
+            "codex_user_link",
+            "agents_user_link"
+          ]
+        },
+        "resolution": {
+          "status": "ok",
+          "handle": "he-spec",
+          "kind": "skill",
+          "command_visibility": "target",
+          "runtime_visibility": "latent",
+          "source_path": "Plugins/harness-engineering/skills/he-spec/SKILL.md",
+          "command_handle_path": ".agents/skills/he-spec/SKILL.md",
+          "owner": "harness-engineering",
+          "description": "WHAT: Generate Linear-backed HE specs with acceptance IDs and validation. Use when requirements or traceability are needed before planning.",
+          "invoke_via": "harness-engineering",
+          "level": "molecule",
+          "provenance": {
+            "generator": "context-budgeted-skillsets.v1",
+            "projection_mode": "rooted",
+            "policy_identity": "8c69fbfa81b89658",
+            "source_revision": "c81d593cb",
+            "source_sha256": "ff07c3e0e4bdb4f4f4c1748c0e1999551b3c863d21423897a91f51dccbe3f240"
+          }
+        },
+        "command_handle_check": {
+          "schema_version": "command-handle-check.v1",
+          "status": "pass",
+          "command_handle_count": 98,
+          "checked_count": 196
+        },
+        "workspace_runtime": {
+          "path": "/Users/jamiecraik/dev/agent-skills/.agents/skills",
+          "command_handle_path": "/Users/jamiecraik/dev/agent-skills/.agents/skills/he-spec/SKILL.md",
+          "command_handle_exists": true
+        },
+        "user_runtime_links": {
+          "codex_skills": {
+            "path": "/Users/jamiecraik/.codex/skills",
+            "exists": true,
+            "is_symlink": true,
+            "target": "/Users/jamiecraik/dev/configs/.codex/skills",
+            "points_to_workspace_runtime": false
+          },
+          "agents_skills": {
+            "path": "/Users/jamiecraik/.agents/skills",
+            "exists": true,
+            "is_symlink": true,
+            "target": "/Users/jamiecraik/dev/agent-skills/.agents/skills",
+            "points_to_workspace_runtime": true
+          }
+        },
+        "user_runtime_command_handles": {
+          "codex_handle": "/Users/jamiecraik/.codex/skills/he-spec/SKILL.md",
+          "codex_handle_exists": false,
+          "agents_handle": "/Users/jamiecraik/.agents/skills/he-spec/SKILL.md",
+          "agents_handle_exists": true
+        },
+        "live_codex_invocation": {
+          "status": "manual_session_gate",
+          "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle."
+        }
+      },
+      "alternatives": [
+        {
+          "candidate_id": "skill:cli-spec::.agents/skills/cli-spec",
+          "candidate_type": "skill",
+          "name": "cli-spec",
+          "path": ".agents/skills/cli-spec",
+          "confidence": 0.1136,
+          "rationale": [
+            "keyword overlap=1"
+          ],
+          "scope_rank": 2
+        },
+        {
+          "candidate_id": "skill:he-brainstorm::.agents/skills/he-brainstorm",
+          "candidate_type": "skill",
+          "name": "he-brainstorm",
+          "path": ".agents/skills/he-brainstorm",
+          "confidence": 0.1136,
+          "rationale": [
+            "keyword overlap=1"
+          ],
+          "scope_rank": 2
+        }
+      ],
+      "next_command": "./bin/ask skills proof he-spec --json --robot",
+      "goal_decision_status": "resolved",
+      "goal_decision": {
+        "schema_version": "goal-decision.v1",
+        "policy_identity": "8c69fbfa81b89658",
+        "decision_status": "resolved",
+        "failure_class": null,
+        "operator_action": null,
+        "recommended_candidate": {
+          "candidate_id": "skill:he-spec::.agents/skills/he-spec",
+          "candidate_type": "skill",
+          "name": "he-spec",
+          "path": ".agents/skills/he-spec",
+          "confidence": 0.4545,
+          "rationale": [
+            "skill phrase match",
+            "keyword overlap=2"
+          ],
+          "scope_rank": 2
+        },
+        "alternative_candidates": [
+          {
+            "candidate_id": "skill:cli-spec::.agents/skills/cli-spec",
+            "candidate_type": "skill",
+            "name": "cli-spec",
+            "path": ".agents/skills/cli-spec",
+            "confidence": 0.1136,
+            "rationale": [
+              "keyword overlap=1"
+            ],
+            "scope_rank": 2
+          },
+          {
+            "candidate_id": "skill:he-brainstorm::.agents/skills/he-brainstorm",
+            "candidate_type": "skill",
+            "name": "he-brainstorm",
+            "path": ".agents/skills/he-brainstorm",
+            "confidence": 0.1136,
+            "rationale": [
+              "keyword overlap=1"
+            ],
+            "scope_rank": 2
+          }
+        ],
+        "disambiguation_prompts": []
+      }
+    },
+    "goal_decision": {
+      "schema_version": "goal-decision.v1",
+      "policy_identity": "8c69fbfa81b89658",
+      "decision_status": "resolved",
+      "failure_class": null,
+      "operator_action": null,
+      "recommended_candidate": {
+        "candidate_id": "skill:he-spec::.agents/skills/he-spec",
+        "candidate_type": "skill",
+        "name": "he-spec",
+        "path": ".agents/skills/he-spec",
+        "confidence": 0.4545,
+        "rationale": [
+          "skill phrase match",
+          "keyword overlap=2"
+        ],
+        "scope_rank": 2
+      },
+      "alternative_candidates": [
+        {
+          "candidate_id": "skill:cli-spec::.agents/skills/cli-spec",
+          "candidate_type": "skill",
+          "name": "cli-spec",
+          "path": ".agents/skills/cli-spec",
+          "confidence": 0.1136,
+          "rationale": [
+            "keyword overlap=1"
+          ],
+          "scope_rank": 2
+        },
+        {
+          "candidate_id": "skill:he-brainstorm::.agents/skills/he-brainstorm",
+          "candidate_type": "skill",
+          "name": "he-brainstorm",
+          "path": ".agents/skills/he-brainstorm",
+          "confidence": 0.1136,
+          "rationale": [
+            "keyword overlap=1"
+          ],
+          "scope_rank": 2
+        }
+      ],
+      "disambiguation_prompts": []
+    }
+  },
+  "telemetry": {
+    "latency_ms": 294
+  },
+  "errors": []
+}

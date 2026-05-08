@@ -1983,6 +1983,15 @@ def _improvement_route_state(route_decision_status: str | None, *, proof_failed:
     return "blocked_dependency", "goal routing did not produce a usable decision"
 
 
+def _proof_missing_workspace_command_handle(proof: dict[str, Any]) -> bool:
+    if not isinstance(proof, dict):
+        return False
+    gates = proof.get("gates")
+    if not isinstance(gates, dict):
+        return False
+    return gates.get("resolver") is False or gates.get("workspace_command_handle_exists") is False
+
+
 def improve_skills(
     repo_root: Path,
     goal_text: str,
@@ -2097,6 +2106,65 @@ def improve_skills(
     result.data["goal_decision"] = goal_decision
     if proof_result.status == "success":
         return result
+
+    fallback_after_unreachable_route = (
+        not fallback_used
+        and route_decision_status == "resolved"
+        and _proof_missing_workspace_command_handle(proof)
+    )
+    if fallback_after_unreachable_route:
+        fallback = _fallback_improvement_candidate(repo_root, goal_text)
+        fallback_handle = _candidate_handle(fallback or {})
+        if fallback and fallback_handle and fallback_handle != handle:
+            fallback_proof_result = skills_proof(repo_root, handle=fallback_handle)
+            fallback_proof = fallback_proof_result.data.get("proof", {})
+            if fallback_proof_result.status == "success":
+                fallback_gates = fallback_proof.get("gates", {}) if isinstance(fallback_proof, dict) else {}
+                fallback_required = (
+                    fallback_proof.get("gate_policy", {}).get("required", [])
+                    if isinstance(fallback_proof, dict)
+                    else []
+                )
+                fallback_required_gates_passed = all(bool(fallback_gates.get(gate)) for gate in fallback_required)
+                fallback_user_runtime_ready = bool(
+                    (
+                        fallback_gates.get("codex_user_link")
+                        and fallback_gates.get("codex_user_command_handle_exists")
+                    )
+                    or (
+                        fallback_gates.get("agents_user_link")
+                        and fallback_gates.get("agents_user_command_handle_exists")
+                    )
+                )
+                improvement["status"] = "resolved_with_fallback"
+                improvement["route_state"] = "resolved_with_fallback"
+                improvement["route_state_reason"] = (
+                    "fallback command-handle description match replaced an unreachable routed capability"
+                )
+                improvement["recommended_capability"] = {
+                    "handle": fallback_handle,
+                    "name": fallback.get("name"),
+                    "path": fallback.get("path"),
+                    "candidate_id": fallback.get("candidate_id"),
+                    "candidate_type": fallback.get("candidate_type"),
+                    "confidence": fallback.get("confidence"),
+                }
+                improvement["why"] = [
+                    *list(fallback.get("rationale") or []),
+                    f"initial routed capability unreachable={handle}",
+                ]
+                improvement["reachability"] = {
+                    "status": "pass",
+                    "proof_status": fallback_proof.get("status") if isinstance(fallback_proof, dict) else "pass",
+                    "required_gates_passed": fallback_required_gates_passed,
+                    "user_runtime_ready": fallback_user_runtime_ready,
+                }
+                improvement["proof"] = fallback_proof
+                improvement["agent_summary"] = (
+                    f"Recommended ${fallback_handle} after routed ${handle} failed reachability."
+                )
+                improvement["next_command"] = f"./bin/ask skills proof {shlex.quote(fallback_handle)} --json --robot"
+                return result
 
     improvement["status"] = "blocked"
     improvement["route_state"], improvement["route_state_reason"] = _improvement_route_state(

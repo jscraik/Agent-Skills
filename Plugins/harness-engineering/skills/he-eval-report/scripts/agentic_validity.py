@@ -2,22 +2,8 @@
 
 from __future__ import annotations
 
-from report_fields import YES_NO_VALUES, field_value, section_body, section_present, validate_required_fields
-
-
-AGENTIC_EVAL_FIELDS = [
-    "Evaluated Capability / Task:",
-    "Task Validity:",
-    "Outcome Validity:",
-    "Trajectory / Transcript Evidence:",
-    "Grader Coverage:",
-    "Trial Policy:",
-    "Pass@k / Pass^k Reporting:",
-    "Authorization Validator:",
-    "Saturation / Maintenance Signal:",
-    "Blocks Completion:",
-    "Required Action:",
-]
+from report_contract import AGENTIC_EVAL_FIELDS, YES_NO_VALUES
+from report_fields import field_value, section_body, section_present, validate_required_fields
 
 
 def validate_agentic_eval_validity(text: str, errors: list[str], *, enforce_values: bool):

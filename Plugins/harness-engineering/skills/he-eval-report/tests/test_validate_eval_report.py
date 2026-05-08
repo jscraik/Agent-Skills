@@ -6,8 +6,13 @@ SKILL_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_DIR = SKILL_ROOT / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from agentic_validity import AGENTIC_EVAL_FIELDS  # noqa: E402
-from report_sections import DRIFT_AREAS, GATE_FIELDS, LINEAR_FIELDS, REQUIRED_SECTIONS  # noqa: E402
+from report_contract import (  # noqa: E402
+    AGENTIC_EVAL_FIELDS,
+    DRIFT_AREAS,
+    GATE_FIELDS,
+    LINEAR_FIELDS,
+    REQUIRED_SECTIONS,
+)
 from validate_eval_report import validate  # noqa: E402
 
 
@@ -145,3 +150,13 @@ Blocks Completion: no""",
         "side-effect authorization not-run validator decisions must block completion"
         in errors
     )
+
+
+def test_template_uses_schema_sections() -> None:
+    template = SKILL_ROOT / "references" / "eval-report-template.md"
+    errors, _warnings = validate(template)
+
+    missing_schema_sections = [
+        error for error in errors if error.startswith("missing required section:")
+    ]
+    assert missing_schema_sections == []

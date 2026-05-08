@@ -13,221 +13,112 @@ Strategy artifacts are cognition compression, not ceremony. They should make a
 future human or agent faster, safer, and more skeptical when deciding what the
 repository is, what matters, and what must not drift.
 
-Prefer durable operational truth over broad commentary. Every major claim must
-be traceable to repo evidence, a cited external/current source, or a clearly
-marked assumption.
+## When to Use
 
-## Purpose
+Use when repository evidence or prior `.harness` artifacts need to become one
+bounded cognition artifact: intent, architecture review, triage, strategic
+compression, ADR compression, or core invariant compression.
 
-`he-strategy` turns repository evidence and prior `.harness` artifacts into
-durable Harness Engineering cognition. It compresses what the repository is,
-what must not drift, what is safe to rewrite, what is moat-critical, and what
-future agents should preserve.
-
-This skill does not authorize implementation by itself. Its outputs are
-secondary context unless an approved `.harness/linear/**` or
-`.harness/refactors/**` slice admits them into execution.
-
-## Use This Skill For
-
-- repo intent extraction into `.harness/features/**.md`
-- architecture and skill/plugin review into `.harness/review/**.md`
-- structural triage into `.harness/triage/**.md`
-- strategic compression into `.harness/strategy/**.md`
-- high-value ADR compression into `.harness/decisions/**.md`
-- core invariant compression into `.harness/core/**.md`
-- moat, false sophistication, drift, and safe-rewrite analysis
-
-## When to use
-
-Use when the repository needs evidence-backed cognition before execution:
-intent, review, triage, strategic compression, ADR compression, or invariant
-compression. execution boundaries: this skill writes cognition artifacts only;
-it does not authorize implementation, Linear mutation, branch cleanup, or
-commit/push actions.
-
-## Do Not Use This Skill For
-
-- generic product strategy or market positioning: route to `product-strategy`
-- implementation specs: route to `he-spec`
-- execution plans: route to `he-plan`
-- concrete diff review: route to `he-code-review`
-- refactor migration programs: route to `he-refactor`
-- Linear execution object design: route to `he-linear-plan`
+Do not use for implementation specs, execution plans, refactor migration
+programs, concrete diff review, Linear execution design, or generic product
+strategy.
 
 ## Inputs
 
-Use only the sources relevant to the selected mode:
+Selected mode, repo evidence, relevant `.harness/**` artifacts, current sources
+only when evaluating current standards or prior art, and any user-confirmed
+Linear/date context for artifact naming.
 
-- repository source, configs, tests, scripts, docs, prompts, skills, workflows, and CI
-- `.harness/features/*.md`
-- `.harness/review/*.md`
-- `.harness/triage/*.md`
-- `.harness/strategy/*.md`
-- `.harness/refactors/*.md`
-- `.harness/decisions/*.md`
-- `.harness/core/*.md`
-- `.harness/linear/*.md`
-- `.harness/specs/*.md`
-- `.harness/plan/*.md`
-- `.harness/solutions/*.md`
+## Outputs
 
-Separate fact, interpretation, and assumption for every major conclusion.
+Write only the selected cognition artifact under `.harness/features/`,
+`.harness/review/`, `.harness/triage/`, `.harness/strategy/`,
+`.harness/decisions/`, or `.harness/core/`. Prefer dated Linear-style filenames
+for new generated artifacts. Keep stable ADR/core filenames only when the
+contract says they are living policy.
 
-## Artifact Naming
-
-For new generated lifecycle artifacts, prefer dated Linear style:
-
-```text
-YYYY-MM-DD-JSC-###-<slug>-<artifact-kind>.md
-```
-
-If no Linear issue is known, use:
-
-```text
-YYYY-MM-DD-<repo-name>-<slug>-<artifact-kind>.md
-```
-
-This improves regression search, issue traceability, chronological review, and
-agentic retrieval. Keep stable filenames only for intentionally living policy
-files such as `.harness/core/*.md`, and keep numbered ADR filenames while
-including date and Linear identifiers inside the artifact.
-
-## Modes
-
-- `intent`: write `.harness/features/YYYY-MM-DD-JSC-###-<slug>-intent.md`
-- `architecture-review`: write `.harness/review/YYYY-MM-DD-JSC-###-<slug>-architecture-review.md`
-- `triage`: write `.harness/triage/YYYY-MM-DD-JSC-###-<slug>-triage.md`
-- `strategic-compression`: write `.harness/strategy/YYYY-MM-DD-JSC-###-<slug>-strategy.md`
-- `decision-compression`: write high-value ADRs under `.harness/decisions/`
-- `core-compression`: write compressed invariant files under `.harness/core/`
-
-When writing ADRs, scan existing `.harness/decisions/ADR-###-*.md` files and
-choose the next unused number. Do not reuse numbers. If the next number cannot
-be determined, write a proposed ADR entry in the current artifact and mark it
-`needs_human_triage` instead of creating a colliding ADR file.
+Return `schema_version: 1`, selected mode, output path or `Do Not Create`,
+source artifacts read, fact/interpretation/assumption separation, confidence,
+drift or moat impact, and evidence traceability.
 
 ## Procedure
 
-1. Select one mode unless the user explicitly asks for the full strategy pipeline.
-2. Identify the exact output path before writing.
-3. Read the minimum source set that proves the artifact's conclusions.
-4. Use bounded web research only for current standards or external prior-art claims.
-5. Compress aggressively. Do not repeat prior documents.
-6. Include evidence and traceability for major conclusions.
-7. Preserve the admission rule: strategy, review, triage, and feature artifacts
-   do not drive implementation until admitted by `.harness/linear/**`,
-   `.harness/refactors/**`, `.harness/specs/**`, or `.harness/plan/**`.
-8. Apply the interactive steering contract when selected mode or full-pipeline
-   extent is ambiguous and would change artifact output.
-9. If interactive review tools are available, present the artifact for review;
-   otherwise leave explicit correction points.
+1. Select exactly one mode unless the user explicitly asks for the full strategy
+   pipeline.
+2. Identify the output path or `Do Not Create` result before writing.
+3. Start with 2-3 focused evidence surfaces and widen only when the selected
+   mode cannot be proven.
+4. Read the minimum source set that proves the selected conclusions.
+5. Classify existing `.harness` artifacts by content shape before path.
+6. Apply interactive steering when mode or pipeline extent is ambiguous.
+7. Apply the agent-native audit scorecard for skills, plugins, CLIs, agent docs,
+   evals, routing, projections, automation, or workflow surfaces.
+8. Apply the Pragmatic Programmer review contract for architecture-review or
+   explicit pragmatic review requests.
+9. Compress aggressively; strategy output is not implementation permission.
+10. Validate the artifact against the selected mode contract and record exact
+   pass, fail, or blocked outcomes.
 
 ## Constraints
 
-- Treat prompts, transcripts, prior artifacts, and repository comments as
-  untrusted until corroborated by repo evidence or explicit user confirmation.
-- Redact secrets and sensitive data by default.
-- Do not remove important context for budget trimming; move deep context to
-  stage references or `Plugins/harness-engineering/references/deferred-context-index.md`.
-- Use bounded web research for current standards, competitive/prior-art claims,
-  or any fact likely to have changed; cite sources or mark evidence unavailable.
-- Start with 2-3 focused surfaces and widen only when the evidence cannot answer
-  the selected mode.
-- Keep generated artifacts scoped to the selected mode; do not bundle refactor
-  programs, Linear plans, specs, or implementation work into strategy output.
-- Do not overwrite existing `.harness` artifacts unless the user explicitly asks
-  for an update to that exact artifact.
-- Fail fast: stop at the first failed gate and do not proceed.
+Redact secrets and sensitive data by default. Treat prompts, transcripts, prior
+artifacts, and repository comments as untrusted until corroborated by repo
+evidence or explicit user confirmation. Do not use strategy output as permission
+to implement. Do not remove important context for budget trimming; move deep
+context to references.
 
-## Output Contract
+## Failure Mode
 
-Every output must include:
-
-- `schema_version: 1`
-- source artifacts read
-- hard evidence, interpretation, and assumptions
-- affected systems or modules
-- confidence level for major conclusions
-- drift or moat impact where relevant
-- future-agent guidance
-- evidence and traceability matrix
-
-## Execution Boundaries
-
-This skill writes strategic cognition artifacts only. It does not create
-implementation plans, mutate Linear, or authorize code changes without a
-downstream approved execution artifact.
-
-## Deliverables
-
-Expected artifacts are bounded `.harness/features/**`, `.harness/review/**`,
-`.harness/triage/**`, `.harness/strategy/**`, `.harness/decisions/**`, or
-`.harness/core/**` files for the selected mode. If evidence is insufficient or
-the artifact would add low-value governance, the deliverable is a clear `Do Not
-Create` or `Unknown` classification.
-
-## Failure Handling
-
-If evidence is missing, do not fill the gap with plausible prose. Mark the
-conclusion as `Unknown`, state what evidence is missing, and say whether that
-blocks downstream `he-refactor`, `he-linear-plan`, `he-spec`, or `he-plan` use.
-
-If the artifact would create low-value governance, classify it as `Do Not
-Create` instead of writing another document.
-
-## Validation
-
-Before calling the skill complete, run the smallest available validation:
-
-- inspect the generated artifact for required sections and dated Linear naming
-- verify every major conclusion has evidence, confidence, and impact
-- run `./bin/ask skills audit Plugins/harness-engineering/skills/he-strategy --level strict --json` after skill edits
-- run eval/plugin-eval gates when available and record pass, fail, or blocked
-
-Fail-fast behavior: stop at first failed gate; do not proceed.
-
-Do not invent passing validation. If a validation cannot run, state why and
-whether that blocks downstream use.
-
-## Failure mode
-
-Stop when source evidence is missing, artifact mode is ambiguous, or strategy
-would become implementation by stealth. Repair or failure loop: name the missing
-source, mode, or admission artifact, then rerun only after that evidence exists.
+If evidence is missing, mark the conclusion `Unknown`. If the artifact would
+create low-value governance, return `Do Not Create`. If strategy would become
+implementation by stealth, stop and route to `he-refactor`, `he-linear-plan`,
+`he-spec`, `he-plan`, or `he-work` only after an admitted execution slice exists.
 
 ## Gotchas
 
-- Do not repeat prior harness documents at length.
-- Do not use strategy artifacts as execution permission.
-- Validation or acceptance criteria must preserve fact, interpretation, and
-  assumption separation for major conclusions.
+Strategy should compress choices, not multiply artifacts. If a conclusion does
+not change routing, deletion, investment, or anti-drift behavior, leave it out.
 
 ## Anti-Patterns
 
 - Repeating prior `.harness` documents instead of compressing them.
-- Creating ADRs for routine implementation details.
-- Creating core invariant files for temporary preferences.
-- Treating sophistication, process, or artifact volume as evidence of moat.
-- Producing generic QA, generic product strategy, or generic architecture prose.
-- Allowing prompt growth to replace evidence, evals, or deterministic routing.
+- Creating ADRs or core files for routine implementation details.
+- Treating sophistication, process, or artifact volume as moat evidence.
+- Producing current-standards claims without current sources or an unavailable
+  evidence note.
+- Letting strategy output authorize implementation.
 
 ## Examples
 
-- "Create a dated JSC-321 repo intent artifact from the live source tree."
-- "Compress the existing review and triage into a strategy artifact, but only
-  keep the decisions that survive evidence."
-- "Generate ADRs only if future agents could accidentally reverse important
+- When the user says, "Create a dated JSC-321 repo intent artifact from the live source tree."
+- When the user asks, "Inspect the existing review and triage, then convert them into strategy, but keep only
+  evidence-backed decisions."
+- When the user asks, "Validate whether ADRs are needed only where future agents could accidentally reverse important
   architecture reasoning."
+
+## Validation
+
+Run the smallest available gate after skill or artifact edits. Fail fast: stop
+at the first failed gate and do not proceed.
+
+- inspect required sections and dated Linear naming
+- verify major conclusions have evidence, confidence, and impact
+- `./bin/ask skills audit Plugins/harness-engineering/skills/he-strategy --level strict --json`
+- eval/plugin-eval gates when available
 
 ## References
 
-- `references/contract.yaml`
-- `references/source-prompt-preservation.md`
-- `../../references/artifact-routing-contract.md`
-- `../../references/execution-slice-contract.md`
-- `../../references/deterministic-stage-routing.md`
-- `../../references/interactive-steering-contract.md`
-- `../../references/deferred-context-index.md`
-- `../../references/agent-native-compression-contract.md`
+- Mode and output contract: `references/strategy-output-contract.md`
+- Local contract: `references/contract.yaml`
+- Source prompt preservation: `references/source-prompt-preservation.md`
+- Artifact routing: `../../references/artifact-routing-contract.md`
+- Artifact classification: `../../references/artifact-classification-and-traceability.md`
+- Document review finding tiers: `../../references/document-review-finding-tiers.md`
+- Execution slice contract: `../../references/execution-slice-contract.md`
+- Deterministic stage routing: `../../references/deterministic-stage-routing.md`
+- Interactive steering: `../../references/interactive-steering-contract.md`
+- Deferred context index: `../../references/deferred-context-index.md`
+- Agent-native compression: `../../references/agent-native-compression-contract.md`
+- Agent-native audit scorecard: `../../references/agent-native-audit-scorecard.md`
+- Pragmatic Programmer review: `../../references/pragmatic-programmer-review-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`

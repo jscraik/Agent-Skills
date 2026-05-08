@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import re
 
-
-YES_NO_VALUES = {"yes", "no"}
+from report_contract import YES_NO_VALUES
 
 
 def section_present(text: str, section: str):

@@ -6,7 +6,7 @@ type: he-eval-report
 canonical_slug: agent-skills-jsc-246-agent-first-golden-path
 title: Agent Skills JSC-246 Agent First Golden Path Eval
 harness_stage: he-eval-report
-status: phase_006_complete
+status: phase_007_complete
 date: 2026-05-08
 traceability_required: true
 origin: .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md
@@ -18,10 +18,10 @@ linear_milestone: Command surface and ask reliability
 # Agent Skills JSC-246 Agent First Golden Path Eval
 
 ## Executive Eval Summary
-Status: `PLAN-JSC246-006` first-contact compression implementation and local review gates are complete.
-Linear Completion Recommendation: Complete with follow-up
-Primary Blockers: No current docs/metadata blocker identified. Full parent closure still requires `PLAN-JSC246-007`.
-Confidence: Medium-high from focused tests, live CLI probes, harness identity lint, traceability lint, diff check, scoped repo validation, projection integrity, and closeout readiness evidence.
+Status: `PLAN-JSC246-007` fresh-agent eval and closure evidence are complete.
+Linear Completion Recommendation: Ready for human-reviewed Linear closure
+Primary Blockers: None for the JSC-246 implementation slice. Remaining repo-surface debt is advisory diagnostic debt, not a blocking gate.
+Confidence: High from focused tests, deterministic fresh-agent command snapshots, live CLI probes, harness identity lint, traceability lint, diff check, scoped repo validation, projection integrity, and closeout readiness evidence.
 
 ## Evaluated Slice
 Linear Project: `agent-skills`
@@ -37,8 +37,8 @@ Related Core Invariants: Agent-first golden path, deterministic command output, 
 
 ## Linear Definition of Done Status
 Artifact Path: `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md`
-Definition of Done Status: Satisfied for `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, and `PLAN-JSC246-006`.
-Closure Safety: Safe to continue the plan from phase 007; not a recommendation to close the entire parent issue.
+Definition of Done Status: Satisfied for `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006`, and `PLAN-JSC246-007`.
+Closure Safety: Safe to close `JSC-246` after human review and any required Linear status/comment update.
 
 ## Linear Backlink Map
 Linear Project: `agent-skills`
@@ -68,7 +68,7 @@ Traceability Repair: No repair required for this phase; live Linear mutation was
 
 | Linear issue | Acceptance IDs |
 | --- | --- |
-| `JSC-246` | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006` |
+| `JSC-246` | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006`, `PLAN-JSC246-007` |
 
 ## Source Artifact Trace
 Linear Plan: `.harness/linear/agent-skills-linear-plan.md` and `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`.
@@ -396,6 +396,46 @@ Phase review gate:
 - The delegated command-contract reviewer returned only the generated handle acknowledgement; direct scoped contract review replaced it and found no remaining blocker after `repo onboard` / `repo next` were demoted and no unsupported command was added to `VALID_ACTIONS`.
 - During commit preparation, repo validation surfaced unrelated working-tree skill draft debt in `Plugins/harness-engineering/skills/he-linear-plan/SKILL.md`: six fence markers without an `Infrastructure/scripts/` directory. The local draft was compressed to inline path examples and left outside the phase 006 staged set. Final changed-file validation then passed with zero required failures.
 
+## PLAN-JSC246-007 Fresh-Agent Eval Evidence
+Command or Method: `bash .harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh`
+Result: pass; all 11 deterministic steps exited `0`.
+Evidence: Command snapshots are stored under `.harness/session-evidence/jsc-246-fresh-agent-golden-path/` with one stdout JSON, stderr text, and exit-code file per step.
+Confidence: High for command-surface closure behavior because the runner starts with `./bin/ask repo doctor --json --robot` and then follows the golden path without opening docs.
+Blocks Closure: no.
+
+Fresh-agent command sequence:
+
+| Step | Command | Exit | Key result |
+| --- | --- | ---: | --- |
+| 01 | `./bin/ask repo doctor --json --robot` | 0 | `blocking: false`; `next_command: ./bin/ask repo surface --json --robot`; `next_command_kind: diagnostic_advisory`; `next_command_blocks_task: false`; advisory debt recorded as `Repo surface has 4586 diagnostic finding(s).` |
+| 02 | `./bin/ask repo surface --json --robot` | 0 | Repo-surface diagnostic debt was inspectable and did not block continuation. |
+| 03 | `./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot` | 0 | `resolved_with_fallback`; recommended `autofix`; next command `./bin/ask skills proof autofix --json --robot`. |
+| 04 | `./bin/ask skills improve "write a Linear-backed HE spec" --json --robot` | 0 | `resolved`; recommended `he-spec`; next command `./bin/ask skills proof he-spec --json --robot`. |
+| 05 | `./bin/ask skills improve "monitor a long-running HE work phase" --json --robot` | 0 | `resolved`; recommended `he-work`; next command `./bin/ask skills proof he-work --json --robot`. |
+| 06 | `./bin/ask skills improve "review this implementation against the spec" --json --robot` | 0 | `resolved_with_fallback`; recommended `triage`; next command `./bin/ask skills proof triage --json --robot`. |
+| 07 | `./bin/ask skills improve "fix validation blockers after review" --json --robot` | 0 | `resolved_with_fallback`; initial routed `validation` capability was unreachable as a command handle, then fallback selected reachable `autofix`. |
+| 08 | `./bin/ask skills explain he-spec --json --robot` | 0 | Explanation resolved `he-spec`, exposed canonical source, runtime projection, validation command, reachability, and proof handoff. |
+| 09 | `./bin/ask skills proof he-spec --json --robot` | 0 | Command-handle proof passed for `he-spec`. |
+| 10 | `./bin/ask skills prove he-spec --json --robot` | 0 | Skill proof scorecard reported `reachable_without_outcome_proof`, structural quality pass, and workout handoff. |
+| 11 | `./bin/ask repo closeout --changed --json --robot` | 0 | Closeout reported `Ready: no closeout blockers detected`; sync not needed; runtime budget passed; changed-file validation and doctor were recommended. |
+
+Closure metrics:
+
+| Metric | Value | Evidence |
+| --- | ---: | --- |
+| Commands to ready-or-blocked | 11 | Runner step count; final closeout exited `0` and reported ready. |
+| Docs opened for basic navigation | 0 | Deterministic runner uses only `./bin/ask` commands and stored JSON output; no docs command is invoked. |
+| Route ambiguity count | 0 blocking ambiguities | `skills improve` results were either `resolved` or `resolved_with_fallback`; no `blocked_ambiguity` remained in the captured path. |
+| Diagnostic debt continuation | pass | Doctor emitted advisory repo-surface debt with `next_command_blocks_task: false`; runner followed `repo surface`, then continued into skills and closeout commands. |
+| `next_command` followed without manual repo browsing | pass | The doctor `next_command` was executed as step 02; subsequent skill handoffs expose `skills proof <handle>`. |
+
+Implemented closure fix:
+
+- While producing the phase 007 evidence, `./bin/ask skills improve "fix validation blockers after review" --json --robot` initially selected the Codex Security `validation` skill and then failed reachability because `validation` is not a generated command handle in this workspace.
+- The fix keeps normal proof failures blocking, but when a resolved routed capability is missing resolver or workspace command-handle reachability, `skills improve` attempts one command-handle-description fallback and only accepts it if that fallback passes `skills proof`.
+- Regression coverage: `Infrastructure/tests/test_ask_skills_goal.py::TestAskSkillsGoal::test_improve_falls_back_when_routed_skill_is_not_command_reachable` and `Infrastructure/tests/test_ask_skills_goal.py::TestAskSkillsGoal::test_improve_does_not_fallback_when_proof_error_has_no_gates`.
+- This is intentionally narrow: a reachable command handle with a failing proof still returns `blocked_reachability`, and malformed proof output without explicit missing-handle gates does not trigger fallback.
+
 ## Moat Protection Check
 Fact: The change strengthens deterministic agent command interpretation.
 Interpretation: This protects the harness moat by making proof and routing less dependent on agent guesswork.
@@ -427,27 +467,27 @@ Follow-Up Justified: Yes, but as separate HE skill lifecycle work rather than JS
 Blocks Closure: no for phase 006 after the local draft fix.
 
 ## Linear Completion Recommendation
-Classification: Complete with follow-up
-Recommended Linear Status: Keep `JSC-246` open; record phases 002 through 006 as complete.
-Required Linear Comment/Update: Note that phase 002 passed focused tests and live doctor proof; phase 003 passed focused route-state tests and live skills-improve probes after review gates; phase 004 passed focused explain/prove tests, live probes, and local review gates; phase 005 passed focused closeout fixture tests, live closeout classification, scoped repo validation, and local review gates; phase 006 passed first-contact compression validation and review gates; full parent closure awaits phase 007 and final closeout.
-Issues to Close: None.
+Classification: Ready for human-reviewed closure
+Recommended Linear Status: Close `JSC-246` after linking this eval artifact and the fresh-agent evidence bundle.
+Required Linear Comment/Update: Note that phase 002 passed focused tests and live doctor proof; phase 003 passed focused route-state tests and live skills-improve probes after review gates; phase 004 passed focused explain/prove tests, live probes, and local review gates; phase 005 passed focused closeout fixture tests, live closeout classification, scoped repo validation, and local review gates; phase 006 passed first-contact compression validation and review gates; phase 007 passed deterministic fresh-agent command evidence and final closeout readiness.
+Issues to Close: `JSC-246` after human review.
 Issues to Reopen: None.
-Issues to Leave Open: `JSC-246`.
+Issues to Leave Open: None identified for this slice.
 New Follow-Up Issues: None; avoid issue explosion.
 Labels to Add/Remove: None.
-Milestone Completion: Not complete from this phase alone.
+Milestone Completion: Complete for the JSC-246 slice; do not infer completion for unrelated milestone work.
 Project Status Change: No change.
 Status Update Needed: Yes when the phase proof is linked.
 Proof Artifacts to Attach or Link: This eval artifact and validation command summary.
 
 ## Follow-Up Work
-Classification: Next
+Classification: None for JSC-246 closure
 Target Linear Project: `agent-skills`
 Parent Issue or Milestone: `JSC-246` / `Command surface and ask reliability`
-Reason: Remaining plan phase `PLAN-JSC246-007` must complete before parent closure.
+Reason: The approved plan phases are complete; residual repo-surface debt is already classified as advisory and belongs to separate surface-governance work, not this parent issue.
 Priority: Existing Linear priority `2`.
 Labels: Existing labels `Roadmap: Next`, `Agent`, `Infra`, `Improvement`.
-Agent-Safe or Human Review Required: Agent-safe implementation with human review for public command output contract changes.
+Agent-Safe or Human Review Required: Human review required before mutating Linear closure state.
 
 ## Core / ADR Update Recommendation
 Core Update: Not required for this phase.
@@ -455,13 +495,13 @@ ADR Update: Not required for this phase.
 Reason: The phase implements an approved additive contract; it does not introduce a new irreversible architectural decision.
 
 ## Evidence & Traceability Matrix
-Conclusion: Phases 002 through 006 are safe to mark complete with follow-up. The JSC-246 parent must remain open for phase 007.
-Fact: Focused tests passed and live command output exposes advisory/non-blocking continuation metadata, deterministic skills-improve route states, explain/prove taxonomy fields, closeout changed-file readiness classification, and compressed first-contact docs/metadata.
+Conclusion: Phases 002 through 007 are safe to mark complete. `JSC-246` is ready for human-reviewed Linear closure.
+Fact: Focused tests passed and live command output exposes advisory/non-blocking continuation metadata, deterministic skills-improve route states, explain/prove taxonomy fields, closeout changed-file readiness classification, compressed first-contact docs/metadata, and fresh-agent command evidence that starts with `repo doctor`.
 Interpretation: The implementation improves routing/proof/closeout determinism without breaking existing command fields or adding proof schema.
-Assumption: Phase 007 will preserve the additive fields through final fresh-agent evaluation.
-Evidence: `27 passed` for phase 002 tests; `12 passed, 53 deselected` for phase 003 focused tests; `15 passed, 42 deselected, 2 subtests passed` for phase 004 focused tests; `24 passed` for phase 005 focused closeout tests; `21 passed, 36 deselected, 2 subtests passed` for phase 006 focused CLI tests; live `repo doctor`, `skills improve`, `skills explain`, `skills proof`, `skills prove`, and `repo closeout --changed` probes; traceability and identity lints; scoped repo validation.
-Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`, `Infrastructure/scripts/lib/ask/commands/skills.py`, `Infrastructure/scripts/lib/ask/command_metadata.py`, `Infrastructure/tests/test_ask_golden_path.py`, `Infrastructure/tests/test_ask_repo_doctor.py`, `Infrastructure/tests/test_ask_skills_goal.py`, `Infrastructure/tests/test_ask_cli.py`, `README.md`, `AGENTS.md`, `Docs/agents/16-agent-operating-contract.md`, `Docs/agents/5-minute-success-path.md`, `Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md`, this eval artifact.
+Assumption: Human review of the closure evidence is still required before mutating Linear issue state.
+Evidence: `27 passed` for phase 002 tests; `12 passed, 53 deselected` for phase 003 focused tests; `15 passed, 42 deselected, 2 subtests passed` for phase 004 focused tests; `24 passed` for phase 005 focused closeout tests; `21 passed, 36 deselected, 2 subtests passed` for phase 006 focused CLI tests; phase 007 deterministic runner exited `0` for all 11 commands; live `repo doctor`, `repo surface`, `skills improve`, `skills explain`, `skills proof`, `skills prove`, and `repo closeout --changed` probes; traceability and identity lints; scoped repo validation.
+Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`, `Infrastructure/scripts/lib/ask/commands/skills.py`, `Infrastructure/scripts/lib/ask/command_metadata.py`, `Infrastructure/tests/test_ask_golden_path.py`, `Infrastructure/tests/test_ask_repo_doctor.py`, `Infrastructure/tests/test_ask_skills_goal.py`, `Infrastructure/tests/test_ask_cli.py`, `README.md`, `AGENTS.md`, `Docs/agents/16-agent-operating-contract.md`, `Docs/agents/5-minute-success-path.md`, `Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md`, `.harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh`, this eval artifact.
 Command or Inspection Method: Pytest, live `./bin/ask` commands, harness lints, diff inspection.
-Confidence: Medium-high
+Confidence: High
 Operational Impact: Agents get a clearer safe next step, explicit fallback/dependency/reachability states, and fewer false blockers.
-Blocks Completion: no for phases 002 through 006; yes for full parent issue closure until phase 007 completes.
+Blocks Completion: no.

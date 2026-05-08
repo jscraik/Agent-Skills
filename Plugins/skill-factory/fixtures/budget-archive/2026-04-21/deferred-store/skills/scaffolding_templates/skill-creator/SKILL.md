@@ -15,6 +15,7 @@ Create and evolve Codex skills that are reusable, auditable, and easy for anothe
 - [Philosophy](#philosophy)
 - [Inputs](#inputs)
 - [Agent Injection](#agent-injection)
+- [Execution Boundaries](#execution-boundaries)
 - [Outputs](#outputs)
 - [Procedure](#procedure)
 - [Validation](#validation)
@@ -89,6 +90,14 @@ bash Skills/codex-agent-creator/scripts/install_role.sh --agent-name <name> --ag
 ```
 
 5. Include the agent route in handoff notes as `agent_injection_mode: reuse-existing|create-purpose-built`.
+
+## Execution Boundaries
+
+Create or reshape only canonical skill source packages, not generated runtime projections or command handles.
+
+The entrypoint must keep execution ownership visible: who writes files, which artifacts are expected, when a subagent or external skill may be used, and which validation gate proves the package is ready for hardening.
+
+Do not hide boundary decisions only in references. `SKILL.md` must expose enough boundary, artifact, repair, and validation guidance for another agent to run the workflow without guessing.
 
 ## Deliverables
 

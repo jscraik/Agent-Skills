@@ -5,14 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-
-RECOMMENDATIONS = {
-    "Complete",
-    "Complete with follow-up",
-    "Blocked",
-    "Needs rework",
-    "Unsafe to close",
-}
+from report_contract import RECOMMENDATIONS
 
 
 def find_recommendation(text: str):

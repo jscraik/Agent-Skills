@@ -55,6 +55,17 @@ cases:
       - {type: regex, value: "(?is)(survivor|warranted|ranked)"}
       - {type: regex, value: "(?is)(interactive steering|request_user_input|blocking question|ask once|choose)"}
       - {type: regex, value: "(?is)(downstream spec|plan|Linear|implementation slice|interactive_status)"}
+  - id: topic-axes-coverage-recovery
+    <<: *common
+    name: "Topic Axes Coverage Recovery"
+    category: edge
+    prompt: "Run he-ideate for improving Harness eval quality. Use topic axes, recover any missing high-value axis once, and surface only warranted survivors."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(topic axes|axis|axes|coverage)"}
+      - {type: regex, value: "(?is)(coverage recovery|recovered|missing axis|bounded recovery)"}
+      - {type: regex, value: "(?is)(warranted survivor|survivors|rejection reason)"}
+      - {type: regex, value: "(?is)(direct|repo|external|reasoned)"}
   - id: he-ideate-vague-subject
     <<: *common
     name: "HE Ideate Vague Subject"

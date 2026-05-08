@@ -652,6 +652,9 @@ def check_required_sections(doc: SkillDoc, *, require_philosophy: bool) -> List[
         "validation": ["validation", "checks", "verify", "acceptance", "gates"],
         "antipatterns": ["anti-pattern", "anti patterns", "what to avoid", "pitfalls"],
         "constraints": ["constraints", "safety"],
+        "execution_boundaries": ["execution boundaries", "boundary map", "ownership boundaries"],
+        "failure_mode": ["failure mode", "failure behavior", "repair behavior", "repair loop"],
+        "gotchas": ["gotchas"],
     }
 
     if require_philosophy:
@@ -670,6 +673,30 @@ def check_required_sections(doc: SkillDoc, *, require_philosophy: bool) -> List[
                 Level.FAIL,
                 f"SEC_{key.upper()}_MISSING",
                 f"Missing required section: {key.replace('_', ' ')} (add a ## heading).",
+            ))
+
+    critical_content: Dict[str, List[str]] = {
+        "execution_boundaries": required["execution_boundaries"],
+        "failure_mode": required["failure_mode"],
+        "gotchas": required["gotchas"],
+    }
+    placeholder_pattern = re.compile(r"^(?:n/?a|none|tbd|todo|coming soon|placeholder)\.?\s*$", re.IGNORECASE)
+    for key, aliases in critical_content.items():
+        text = _find_section_text(doc.body, aliases).strip()
+        if not text:
+            # The missing-section finding above is already clearer when the heading is absent.
+            if present(aliases):
+                out.append(Finding(
+                    Level.FAIL,
+                    f"SEC_{key.upper()}_EMPTY",
+                    f"Required section has no content: {key.replace('_', ' ')}.",
+                ))
+            continue
+        if len(text) < 20 or placeholder_pattern.fullmatch(text):
+            out.append(Finding(
+                Level.FAIL,
+                f"SEC_{key.upper()}_THIN",
+                f"Required section is too thin to be operational: {key.replace('_', ' ')}.",
             ))
 
     for key, aliases in should.items():

@@ -224,8 +224,8 @@ assert_security_eval_contract() {
     --pi-high-fail \
     --require-fail-fast \
     --format json >"$report_file"; then
-    # skill_gate can return non-zero for non-contract style findings.
-    # We still parse JSON and fail only on contract/eval/security benchmark findings.
+    # skill_gate can return non-zero for findings that this family gate
+    # classifies below. Parse JSON so we can print precise blocking evidence.
     :
   fi
 
@@ -252,6 +252,7 @@ for finding in findings:
     if level == "FAIL" and (
         code.startswith("CONTRACT_")
         or code.startswith("EVALS_")
+        or code.startswith("SEC_")
         or code.startswith("SEC_EVALS_")
         or code.startswith("PI_")
         or code.startswith("SCRIPT_SECURITY_")

@@ -31,6 +31,13 @@ only by suffix, such as `Intent`, `Strategy`, `Refactor`, `Spec`, `Plan`,
 `Eval`, or `Technical Review`; the shared `canonical_slug` and `artifact_id`
 must make the relationship machine-readable.
 
+Classify existing artifacts by content shape before path. Frontmatter,
+`artifact_type`, `harness_stage`, H1, required sections, source links, and Linear
+identifiers outrank the directory name. If path and content disagree, record a
+traceability defect and use
+`references/artifact-classification-and-traceability.md` before routing or
+renaming.
+
 New tracked issue artifacts should prefer dated Linear filenames:
 
 ```text

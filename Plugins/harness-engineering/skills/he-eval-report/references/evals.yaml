@@ -49,6 +49,26 @@ cases:
       - {type: regex, value: "(?is)(interactive steering|request_user_input|ask once|blocking question|interactive_status)"}
       - {type: regex, value: "(?is)(Linear Completion Recommendation|closure|Complete with follow-up|before recommending)"}
 
+  - id: eval-content-shape-classification
+    <<: *common
+    name: "Eval Content Shape Classification"
+    category: edge
+    prompt: "The source artifacts have mismatched paths and titles: one .harness/review file is actually the active plan and one dated eval has a different Linear title. Classify by content shape before recommending closure."
+    acceptance:
+      - {type: regex, value: "(?is)(content shape|frontmatter|H1|path|title)"}
+      - {type: regex, value: "(?is)(artifact_classification_status|traceability defect|canonical_slug)"}
+      - {type: regex, value: "(?is)(Linear Completion Recommendation|closure|Blocked|Needs rework|Unsafe)"}
+
+  - id: eval-agent-native-audit-scorecard
+    <<: *common
+    name: "Eval Agent Native Audit Scorecard"
+    category: edge
+    prompt: "This completed slice changed a skill, plugin projection, and eval routing. Include the agent-native audit scorecard before closure."
+    acceptance:
+      - {type: regex, value: "(?is)(agent-native audit|scorecard|action parity|capability discovery)"}
+      - {type: regex, value: "(?is)(context injection|shared truth surface|entity completion|deterministic completion)"}
+      - {type: regex, value: "(?is)(pass|partial|fail|unknown|Blocks Closure)"}
+
   - id: agentic-validity-required
     <<: *common
     name: "Agentic Validity Required"

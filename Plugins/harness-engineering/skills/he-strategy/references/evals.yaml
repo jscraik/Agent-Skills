@@ -11,7 +11,7 @@ cases:
     <<: *common
     name: "Strategy Intent Artifact"
     category: happy
-    prompt: "Create a durable repo intent document for JSC-321 using the Harness Engineering style."
+    prompt: "Can you create a durable repo intent document for JSC-321 using the Harness Engineering style?"
     acceptance:
       - {type: regex, value: "(?is)(\\.harness/features/\\d{4}-\\d{2}-\\d{2}-JSC-321.*intent\\.md|Project Intent|Evidence & Traceability Matrix|fact|interpretation|assumption)"}
 
@@ -19,7 +19,7 @@ cases:
     <<: *common
     name: "Strategy Compression Artifact"
     category: happy
-    prompt: "Compress the review and triage outputs into a strategic direction document."
+    prompt: "Please compress the review and triage outputs into a strategic direction document."
     acceptance:
       - {type: regex, value: "(?is)(\\.harness/strategy/|Actual Moat|False Moat Signals|Architectural Non-Negotiables|Safe To Rewrite)"}
 
@@ -27,7 +27,7 @@ cases:
     <<: *common
     name: "Strategy Versus Refactor Boundary"
     category: edge
-    prompt: "This architecture review says duplicated routing is causing drift. Decide what actually matters strategically, but do not create the migration program yet."
+    prompt: "Can you inspect this architecture review where duplicated routing is causing drift, decide what matters strategically, and avoid creating the migration program yet?"
     acceptance:
       - {type: regex, value: "(?is)(strategic|direction|he-refactor|migration program|does not create|not.*implementation)"}
 
@@ -35,7 +35,7 @@ cases:
     <<: *common
     name: "Architecture Review Artifact"
     category: edge
-    prompt: "Review this repo architecture and skill/plugin system without turning it into implementation tickets."
+    prompt: "Please inspect this repo architecture and skill/plugin system without turning it into implementation tickets."
     acceptance:
       - {type: regex, value: "(?is)(\\.harness/review/|Deep vs Shallow|Agent-Native|Moat Analysis|Evidence & Traceability Matrix)"}
 
@@ -43,7 +43,7 @@ cases:
     <<: *common
     name: "Triage Artifact Filtering"
     category: edge
-    prompt: "Turn these review findings into triage, but explicitly filter out false sophistication and low-value work."
+    prompt: "Can you convert these review findings into triage, but explicitly filter out false sophistication and low-value work?"
     acceptance:
       - {type: regex, value: "(?is)(\\.harness/triage/|High-Leverage|Low-Leverage|False Sophistication|Do Not Create)"}
 
@@ -51,7 +51,7 @@ cases:
     <<: *common
     name: "ADR And Core Noise Rejection"
     category: edge
-    prompt: "Generate ADRs and core invariants from these artifacts, but only when they are durable and high-value."
+    prompt: "Can you validate these artifacts and generate ADRs or core invariants only when they are durable and high-value?"
     acceptance:
       - {type: regex, value: "(?is)(ADR-|\\.harness/core/|Do Not Create|durable|routine implementation details|next unused number|needs_human_triage)"}
 
@@ -59,9 +59,29 @@ cases:
     <<: *common
     name: "Current Standards Web Research"
     category: edge
-    prompt: "Compare this repo against current May 2026 agent-native standards and cite sources or mark unavailable evidence."
+    prompt: "Please compare this repo against current May 2026 agent-native standards and cite sources or mark unavailable evidence."
     acceptance:
       - {type: regex, value: "(?is)(current|2026|source|citation|unavailable|Unknown|evidence)"}
+
+  - id: strategy-agent-native-scorecard
+    <<: *common
+    name: "Strategy Agent Native Scorecard"
+    category: edge
+    prompt: "Can you create an architecture review for a plugin and include the agent-native audit scorecard without turning the review into implementation work?"
+    acceptance:
+      - {type: regex, value: "(?is)(agent-native audit|scorecard|action parity|capability discovery)"}
+      - {type: regex, value: "(?is)(shared truth surface|deterministic completion|Evidence & Traceability Matrix)"}
+      - {type: regex, value: "(?is)(does not authorize|not implementation|admitted)"}
+
+  - id: strategy-content-shape-before-path
+    <<: *common
+    name: "Strategy Content Shape Before Path"
+    category: edge
+    prompt: "Please inspect existing .harness artifacts for strategy input where paths, titles, and Linear issue numbers disagree."
+    acceptance:
+      - {type: regex, value: "(?is)(content shape|frontmatter|H1|Linear)"}
+      - {type: regex, value: "(?is)(artifact_classification_status|traceability defect|canonical_slug)"}
+      - {type: regex, value: "(?is)(path|title|date|mismatch)"}
 
   - id: prompt-injection-close-work
     <<: *common

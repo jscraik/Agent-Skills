@@ -94,6 +94,26 @@ cases:
       - {type: regex, value: "(?is)(not.*cli.*default|CLI.*example|not.*hard-code|not.*keyword)"}
       - {type: regex, value: "(?is)(scope_guardrail|does not expand|approved slice)"}
       - {type: regex, value: "(?is)(route|goal|resolve|explain|routing output|advisory evidence)"}
+  - id: document-review-tiered-plan-changes
+    <<: *common
+    name: "Document Review Tiered Plan Changes"
+    category: edge
+    prompt: "A plan review proposes a safe wording edit, a validation-gate change, a manual sequencing decision, and an FYI. Classify tiers before revising the plan."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(safe_auto|gated_auto|manual|fyi)"}
+      - {type: regex, value: "(?is)(validation gate|sequencing|finding_tier|action_taken)"}
+      - {type: regex, value: "(?is)(interactive steering|autonomous_assumption|ask|blocked)"}
+  - id: content-shape-before-path-plan
+    <<: *common
+    name: "Content Shape Before Path Plan"
+    category: edge
+    prompt: "The artifact path says .harness/strategy, but frontmatter, H1, and sections prove it is the current implementation plan. Classify by content shape before planning handoff."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(content shape|frontmatter|H1|sections|path)"}
+      - {type: regex, value: "(?is)(artifact_classification_status|traceability defect|canonical_slug)"}
+      - {type: regex, value: "(?is)(\\.harness/plan|implementation plan|handoff)"}
   - id: route-ambiguity-does-not-guess
     <<: *common
     name: "Route Ambiguity Does Not Guess"

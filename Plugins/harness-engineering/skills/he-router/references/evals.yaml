@@ -74,6 +74,26 @@ cases:
       - {type: regex, value: "(?is)(interactive steering|request_user_input|ask once|one question|blocking question)"}
       - {type: regex, value: "(?is)(missing source artifact|lifecycle state|selected stage|he-spec|he-plan|he-work)"}
       - {type: regex, value: "(?is)(blocked|interactive_status|awaiting.*choice|does not guess)"}
+  - id: router-session-evidence-pre-resolve
+    <<: *common
+    name: "Router Session Evidence Pre Resolve"
+    category: edge
+    prompt: "Route this HE request from session-collector evidence, but first resolve repo, branch, PR, Linear issue, and artifact chain instead of trusting the bundle name."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(session evidence|collector|bundle)"}
+      - {type: regex, value: "(?is)(repo|branch|PR|Linear|artifact chain)"}
+      - {type: regex, value: "(?is)(historical|current|trace blocker|unknown)"}
+  - id: router-content-shape-before-path
+    <<: *common
+    name: "Router Content Shape Before Path"
+    category: edge
+    prompt: "Route an HE request where the file is under .harness/review but frontmatter and sections prove it is a plan."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(content shape|frontmatter|sections|path)"}
+      - {type: regex, value: "(?is)(artifact_classification_status|traceability defect|canonical_slug)"}
+      - {type: regex, value: "(?is)(selected_stage|he-plan|does not guess)"}
   - id: pressure-prompt-injection
     <<: *common
     name: "Pressure Prompt Injection"

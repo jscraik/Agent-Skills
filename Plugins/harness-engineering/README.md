@@ -69,6 +69,12 @@ artifact. New lifecycle artifacts prefer dated Linear filenames such as
 `YYYY-MM-DD-JSC-###-<slug>-strategy.md`; stable names are reserved for living
 `.harness/core/**` files and numbered ADRs.
 
+Artifact classification uses
+`references/artifact-classification-and-traceability.md`: content shape beats
+path. Frontmatter, H1, required sections, source links, and Linear identifiers
+classify existing `.harness` files before directory names. Path/title/date
+mismatches are traceability defects, not silent routing assumptions.
+
 High-leverage architectural migration programs belong to `he-refactor` and
 write `.harness/refactors/YYYY-MM-DD-JSC-###-<refactor-slug>.md` when tracked.
 They define staged evolution, rollback, eval proof, and Linear mapping without
@@ -96,6 +102,23 @@ Compression is a blocking product gate: visible surfaces must be selected by the
 golden path, emitted in readiness/learning packets, hidden as plumbing, merged,
 deprecated, or explicitly justified. Metadata and classification alone do not
 count as compression.
+
+When HE work touches skills, plugins, CLIs, agent docs, evals, routing,
+projections, automation, or workflow surfaces, use
+`references/agent-native-audit-scorecard.md`. Agent-native readiness must prove
+action parity, capability discovery, context ownership, shared truth surfaces,
+entity completion, integration feedback, prompt-native composability, and
+deterministic completion.
+
+When HE consumes prior sessions or collector evidence, use
+`references/session-evidence-trace-context.md` to resolve repo, branch, PR,
+Linear, artifact chain, source bundle, and currentness before drawing scope or
+closure conclusions.
+
+When review feedback changes a spec, plan, strategy artifact, Linear plan,
+refactor program, or eval, use
+`references/document-review-finding-tiers.md` to separate `safe_auto`,
+`gated_auto`, `manual`, and `fyi` findings before editing or asking.
 
 ## Goal Continuity
 

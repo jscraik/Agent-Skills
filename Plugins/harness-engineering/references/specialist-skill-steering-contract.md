@@ -34,6 +34,9 @@ Examples:
 
 - CLI behavior needs command tree, JSON contract, exit-code, dry-run, or
   agent-safe error handling expertise.
+- Changed-scope review needs behavior-preserving simplification evidence; route
+  to the external `simplify` / `agent-ops:simplify` skill as a specialist lens
+  from `he-code-review` instead of copying simplification rules into HE.
 - Frontend work needs interaction states, responsive behavior, accessibility, or
   visual verification.
 - Security-sensitive work needs threat-model or validation review.
@@ -119,7 +122,9 @@ Reject candidates when:
 - `he-work`: use a specialist only when implementing the approved slice in that
   domain; do not let the specialist reopen scope.
 - `he-code-review`: use a specialist as a review lens for domain-specific risks
-  or missing proof.
+  or missing proof. When changed-scope simplification is the need, select the
+  external `simplify` skill through this contract and keep HE responsible for
+  traceability, risk, and review verdict.
 - `he-eval-report`: use a specialist as an eval lens when closure depends on
   domain-specific proof.
 

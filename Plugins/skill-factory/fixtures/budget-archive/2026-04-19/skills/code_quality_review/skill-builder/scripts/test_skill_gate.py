@@ -19,6 +19,7 @@ from skill_gate import (
     _build_sarif_payload,
     _default_prompt_patterns,
     _sarif_artifact_uri,
+    check_required_sections,
     check_path_safety,
 )
 
@@ -79,6 +80,59 @@ class SkillGateHeuristicTests(unittest.TestCase):
         self.assertFalse(uri.startswith("/"))
         self.assertNotIn("..", uri)
         self.assertTrue(uri.endswith("skill-builder/SKILL.md"))
+
+    def test_required_sections_enforce_entrypoint_surfaces(self) -> None:
+        skill_md = Path(__file__).resolve().parents[1] / "SKILL.md"
+        doc = SkillDoc(
+            path=skill_md,
+            raw="---\nname: skill-builder\ndescription: test\n---\nbody",
+            frontmatter={"name": "skill-builder", "description": "test"},
+            body=(
+                "## When to use\n"
+                "## Inputs\n"
+                "## Outputs\n"
+                "## Workflow\n"
+                "## Validation\n"
+                "## Anti-patterns\n"
+                "## Constraints\n"
+            ),
+            fm_start_line=1,
+            fm_end_line=4,
+        )
+
+        codes = {finding.code for finding in check_required_sections(doc, require_philosophy=False)}
+
+        self.assertIn("SEC_EXECUTION_BOUNDARIES_MISSING", codes)
+        self.assertIn("SEC_FAILURE_MODE_MISSING", codes)
+        self.assertIn("SEC_GOTCHAS_MISSING", codes)
+
+    def test_required_sections_accept_standard_entrypoint_surfaces(self) -> None:
+        skill_md = Path(__file__).resolve().parents[1] / "SKILL.md"
+        doc = SkillDoc(
+            path=skill_md,
+            raw="---\nname: skill-builder\ndescription: test\n---\nbody",
+            frontmatter={"name": "skill-builder", "description": "test"},
+            body=(
+                "## When to use\n"
+                "## Inputs\n"
+                "## Outputs\n"
+                "## Workflow\n"
+                "## Validation\n"
+                "## Anti-patterns\n"
+                "## Constraints\n"
+                "## Execution Boundaries\n"
+                "## Failure mode\n"
+                "## Gotchas\n"
+            ),
+            fm_start_line=1,
+            fm_end_line=4,
+        )
+
+        codes = {finding.code for finding in check_required_sections(doc, require_philosophy=False)}
+
+        self.assertNotIn("SEC_EXECUTION_BOUNDARIES_MISSING", codes)
+        self.assertNotIn("SEC_FAILURE_MODE_MISSING", codes)
+        self.assertNotIn("SEC_GOTCHAS_MISSING", codes)
 
 
 if __name__ == "__main__":

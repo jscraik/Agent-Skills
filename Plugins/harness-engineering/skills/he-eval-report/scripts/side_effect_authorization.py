@@ -2,23 +2,14 @@
 
 from __future__ import annotations
 
-from report_fields import YES_NO_VALUES, field_value, section_body, section_present, validate_required_fields
+from report_contract import (
+    SIDE_EFFECT_AUTHORIZATION_FIELDS,
+    VALIDATOR_CONFIDENCE_VALUES,
+    VALIDATOR_DECISIONS,
+    YES_NO_VALUES,
+)
+from report_fields import field_value, section_body, section_present, validate_required_fields
 from side_effect_consistency import validate_side_effect_decision_consistency
-
-
-SIDE_EFFECT_AUTHORIZATION_FIELDS = [
-    "Protected Action:",
-    "User Authorization Evidence:",
-    "Agent Justification:",
-    "External Party Influence:",
-    "Validator Decision:",
-    "Validator Confidence:",
-    "Suggested Next Step:",
-    "Blocks Completion:",
-]
-
-VALIDATOR_DECISIONS = {"approved", "blocked", "exempt", "not-run"}
-VALIDATOR_CONFIDENCE_VALUES = {"high", "medium", "low", "not-run"}
 
 
 def validate_side_effect_authorization(text: str, errors: list[str], *, enforce_values: bool):

@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "required_sections": [
+    "Executive Eval Summary",
+    "Evaluated Slice",
+    "Linear Definition of Done Status",
+    "Linear Backlink Map",
+    "Source Artifact Trace",
+    "Functional Validation Results",
+    "Eval Gate Matrix",
+    "Agentic Eval Validity",
+    "Side-Effect Authorization",
+    "Drift Validation",
+    "Architecture Integrity Check",
+    "Routing Determinism Check",
+    "Context Load Check",
+    "Agent-Native Check",
+    "Governance Simplicity Check",
+    "Moat Protection Check",
+    "Proof Artifacts",
+    "Failures / Regressions",
+    "Linear Completion Recommendation",
+    "Follow-Up Work",
+    "Core / ADR Update Recommendation",
+    "Evidence & Traceability Matrix"
+  ],
+  "linear_fields": [
+    "Linear Project:",
+    "Linear Milestone:",
+    "Linear Parent Issue:",
+    "Linear Sub-Issues:",
+    "Linear Status Recommendation:",
+    "Proof Artifact Links:"
+  ],
+  "gate_fields": [
+    "Gate:",
+    "Expected:",
+    "Actual:",
+    "Status:",
+    "Evidence:",
+    "Confidence:",
+    "Blocks Closure:",
+    "Required Action:"
+  ],
+  "drift_areas": [
+    "Architecture Drift:",
+    "Routing Drift:",
+    "Context Drift:",
+    "Governance Drift:",
+    "Agent-Native Drift:",
+    "Moat Drift:"
+  ],
+  "drift_values": [
+    "Improved",
+    "Neutral",
+    "Regressed",
+    "Unknown"
+  ],
+  "recommendations": [
+    "Complete",
+    "Complete with follow-up",
+    "Blocked",
+    "Needs rework",
+    "Unsafe to close"
+  ],
+  "agentic_eval_fields": [
+    "Evaluated Capability / Task:",
+    "Task Validity:",
+    "Outcome Validity:",
+    "Trajectory / Transcript Evidence:",
+    "Grader Coverage:",
+    "Trial Policy:",
+    "Pass@k / Pass^k Reporting:",
+    "Authorization Validator:",
+    "Saturation / Maintenance Signal:",
+    "Blocks Completion:",
+    "Required Action:"
+  ],
+  "side_effect_authorization_fields": [
+    "Protected Action:",
+    "User Authorization Evidence:",
+    "Agent Justification:",
+    "External Party Influence:",
+    "Validator Decision:",
+    "Validator Confidence:",
+    "Suggested Next Step:",
+    "Blocks Completion:"
+  ],
+  "side_effect_validator_decisions": [
+    "approved",
+    "blocked",
+    "exempt",
+    "not-run"
+  ],
+  "side_effect_validator_confidence_values": [
+    "high",
+    "medium",
+    "low",
+    "not-run"
+  ],
+  "yes_no_values": [
+    "yes",
+    "no"
+  ]
+}

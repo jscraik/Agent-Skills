@@ -79,10 +79,4 @@ authority:
 safety:
   redact_by_default: true
   fail_fast: true
-  forbidden_commands:
-    - curl
-    - wget
-    - rm -rf
-    - nc
-    - git commit
-    - git push
+  command_policy_ref: "Use repository approval policy and plugin safety gates; this skill does not run network, destructive filesystem, git write, or Linear mutation commands without explicit authorization."

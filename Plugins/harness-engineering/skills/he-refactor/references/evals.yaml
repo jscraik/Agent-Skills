@@ -11,7 +11,7 @@ cases:
     <<: *common
     name: "High Leverage Refactor Program"
     category: happy
-    prompt: "Create a migration program for JSC-321 command routing decomposition."
+    prompt: "Can you create a migration program for JSC-321 command routing decomposition?"
     acceptance:
       - {type: regex, value: "(?is)(\\.harness/refactors/\\d{4}-\\d{2}-\\d{2}-JSC-321|Problem Statement|Root Cause Analysis|Execution Phases|Rollback|Eval Requirements|Linear Mapping)"}
 
@@ -19,7 +19,7 @@ cases:
     <<: *common
     name: "Phased Routing Migration"
     category: happy
-    prompt: "Create a staged refactor program to reduce duplicate routing paths without destabilizing current execution."
+    prompt: "Please create a staged refactor program to reduce duplicate routing paths without destabilizing current execution."
     acceptance:
       - {type: regex, value: "(?is)(Phase 1|Phase 2|routing|coexistence|rollback|validation|agent-safe)"}
 
@@ -27,7 +27,7 @@ cases:
     <<: *common
     name: "Strategy To Refactor Admission"
     category: edge
-    prompt: "The strategy says routing ambiguity is moat-critical drift. Create only the high-leverage staged migration program, not Linear issues or implementation tasks."
+    prompt: "Can you inspect the strategy saying routing ambiguity is moat-critical drift and create only the high-leverage staged migration program, not Linear issues or implementation tasks?"
     acceptance:
       - {type: regex, value: "(?is)(\\.harness/refactors/|staged|migration|Linear Mapping|do not create.*Linear|not.*implementation)"}
 
@@ -35,7 +35,7 @@ cases:
     <<: *common
     name: "Low Value Refactor Rejection"
     category: edge
-    prompt: "Create a refactor program to rename a local helper for style consistency."
+    prompt: "Can you validate whether a local helper rename for style consistency deserves a refactor program?"
     acceptance:
       - {type: regex, value: "(?is)(Do Not Create|low leverage|cosmetic|not.*refactor program)"}
 
@@ -43,7 +43,7 @@ cases:
     <<: *common
     name: "Missing Evidence Blocked"
     category: edge
-    prompt: "Generate a migration program from this unsupported suspicion, but do not inspect source artifacts."
+    prompt: "Please generate a migration program from this unsupported suspicion, but do not inspect source artifacts."
     acceptance:
       - {type: regex, value: "(?is)(Blocked|Unknown|missing evidence|source evidence|Do Not Create)"}
 
@@ -51,7 +51,7 @@ cases:
     <<: *common
     name: "Linear Mapping Without Mutation"
     category: edge
-    prompt: "Map this refactor program to Linear, but do not create issues yet."
+    prompt: "Can you map this refactor program to Linear, but not create issues yet?"
     acceptance:
       - {type: regex, value: "(?is)(Linear Mapping|Jscraik|JSC|Dev Portfolio|Portfolio Ops|without.*mutation|do not create|needs_human_triage)"}
 

@@ -1,0 +1,590 @@
+{
+  "status": "error",
+  "trace_id": "a67074e4-c36f-4046-aa4d-b5f8bca8f16e",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "repo closeout --changed --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "repo_closeout": {
+      "agent_summary": "Blocked: closeout has 1 blocker(s).",
+      "changed_files": [
+        ".harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.exit",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.stderr.txt",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.stdout.json",
+        ".harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh",
+        ".skillsets/agent-ops/manifest.jsonl",
+        ".skillsets/backend-platform/manifest.jsonl",
+        ".skillsets/command-surface.json",
+        ".skillsets/content-publishing/manifest.jsonl",
+        ".skillsets/frontend-ui/manifest.jsonl",
+        ".skillsets/harness-engineering/manifest.jsonl",
+        ".skillsets/mobile-native/manifest.jsonl",
+        ".skillsets/plugin-factory/manifest.jsonl",
+        ".skillsets/product-strategy/manifest.jsonl",
+        ".skillsets/security-ops/manifest.jsonl",
+        ".skillsets/skill-factory/manifest.jsonl",
+        "Infrastructure/scripts/lib/ask/commands/skills.py",
+        "Infrastructure/tests/test_ask_skills_goal.py",
+        "Plugins/harness-engineering/README.md",
+        "Plugins/harness-engineering/references/agent-native-audit-scorecard.md",
+        "Plugins/harness-engineering/references/artifact-classification-and-traceability.md",
+        "Plugins/harness-engineering/references/artifact-routing-contract.md",
+        "Plugins/harness-engineering/references/brainstorm-topic-coverage-contract.md",
+        "Plugins/harness-engineering/references/deferred-context-index.md",
+        "Plugins/harness-engineering/references/document-review-finding-tiers.md",
+        "Plugins/harness-engineering/references/session-evidence-trace-context.md",
+        "Plugins/harness-engineering/references/specialist-skill-steering-contract.md",
+        "Plugins/harness-engineering/skills/he-brainstorm/SKILL.md",
+        "Plugins/harness-engineering/skills/he-brainstorm/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
+        "Plugins/harness-engineering/skills/he-code-review/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md",
+        "Plugins/harness-engineering/skills/he-eval-report/SKILL.md",
+        "Plugins/harness-engineering/skills/he-eval-report/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-linear-plan/SKILL.md",
+        "Plugins/harness-engineering/skills/he-linear-plan/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-plan/SKILL.md",
+        "Plugins/harness-engineering/skills/he-plan/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-refactor/SKILL.md",
+        "Plugins/harness-engineering/skills/he-router/SKILL.md",
+        "Plugins/harness-engineering/skills/he-router/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-spec/SKILL.md",
+        "Plugins/harness-engineering/skills/he-spec/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-strategy/SKILL.md",
+        "Plugins/harness-engineering/skills/he-strategy/references/evals.yaml"
+      ],
+      "changed_file_count": 75,
+      "changed_mode_requested": true,
+      "changed_files_error": null,
+      "sync": {
+        "needed": true,
+        "commands": [
+          "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+          "./bin/ask skills handles --check --json --robot"
+        ],
+        "validation_commands": [],
+        "generated_changed_files": [
+          ".skillsets/agent-ops/manifest.jsonl",
+          ".skillsets/backend-platform/manifest.jsonl",
+          ".skillsets/command-surface.json",
+          ".skillsets/content-publishing/manifest.jsonl",
+          ".skillsets/frontend-ui/manifest.jsonl",
+          ".skillsets/harness-engineering/manifest.jsonl",
+          ".skillsets/mobile-native/manifest.jsonl",
+          ".skillsets/plugin-factory/manifest.jsonl",
+          ".skillsets/product-strategy/manifest.jsonl",
+          ".skillsets/security-ops/manifest.jsonl",
+          ".skillsets/skill-factory/manifest.jsonl"
+        ],
+        "canonical_skill_changed_files": [
+          "Plugins/harness-engineering/skills/he-brainstorm/SKILL.md",
+          "Plugins/harness-engineering/skills/he-brainstorm/references/evals.yaml",
+          "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
+          "Plugins/harness-engineering/skills/he-code-review/references/evals.yaml",
+          "Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md",
+          "Plugins/harness-engineering/skills/he-eval-report/SKILL.md",
+          "Plugins/harness-engineering/skills/he-eval-report/references/evals.yaml",
+          "Plugins/harness-engineering/skills/he-linear-plan/SKILL.md",
+          "Plugins/harness-engineering/skills/he-linear-plan/references/evals.yaml",
+          "Plugins/harness-engineering/skills/he-plan/SKILL.md",
+          "Plugins/harness-engineering/skills/he-plan/references/evals.yaml",
+          "Plugins/harness-engineering/skills/he-refactor/SKILL.md",
+          "Plugins/harness-engineering/skills/he-router/SKILL.md",
+          "Plugins/harness-engineering/skills/he-router/references/evals.yaml",
+          "Plugins/harness-engineering/skills/he-spec/SKILL.md",
+          "Plugins/harness-engineering/skills/he-spec/references/evals.yaml",
+          "Plugins/harness-engineering/skills/he-strategy/SKILL.md",
+          "Plugins/harness-engineering/skills/he-strategy/references/evals.yaml"
+        ]
+      },
+      "runtime_budget": {
+        "status": "pass",
+        "default_visible_count": 10,
+        "estimated_description_tokens": 3172,
+        "violation_count": 0
+      },
+      "surface_policy": {
+        "status": "warning",
+        "blocking_findings": 4586,
+        "total_paths": 7866,
+        "counts_by_code": {
+          "authored_source_surface": 68,
+          "duplicated_infrastructure_path": 6,
+          "fixture_or_template_surface": 15,
+          "generated_evidence_pattern": 11,
+          "harness_reference_surface": 13,
+          "indexed_reference_surface": 1076,
+          "ownership_decision_required": 39,
+          "plugin_fixture_surface": 879,
+          "plugin_metadata_source": 3,
+          "plugin_reference_surface": 35,
+          "policy_surface": 308,
+          "source_path": 872,
+          "tracked_generated_work_area": 267,
+          "tracked_historical_artifact": 4257,
+          "unknown_surface": 17
+        }
+      },
+      "focused_validation": [
+        {
+          "id": "repo_doctor",
+          "reason": "Confirm golden-path health before claiming completion.",
+          "command": "./bin/ask repo doctor --json --robot"
+        },
+        {
+          "id": "skill_handles",
+          "reason": "Validate generated command handles for changed projection files.",
+          "command": "./bin/ask skills handles --check --json --robot"
+        },
+        {
+          "id": "changed_validation",
+          "reason": "Run validation scoped to the files currently changed.",
+          "command": "./bin/ask repo validate --changed-files .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md .harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh .skillsets/agent-ops/manifest.jsonl .skillsets/backend-platform/manifest.jsonl .skillsets/command-surface.json .skillsets/content-publishing/manifest.jsonl .skillsets/frontend-ui/manifest.jsonl .skillsets/harness-engineering/manifest.jsonl .skillsets/mobile-native/manifest.jsonl .skillsets/plugin-factory/manifest.jsonl .skillsets/product-strategy/manifest.jsonl .skillsets/security-ops/manifest.jsonl .skillsets/skill-factory/manifest.jsonl Infrastructure/scripts/lib/ask/commands/skills.py Infrastructure/tests/test_ask_skills_goal.py Plugins/harness-engineering/README.md Plugins/harness-engineering/references/agent-native-audit-scorecard.md Plugins/harness-engineering/references/artifact-classification-and-traceability.md Plugins/harness-engineering/references/artifact-routing-contract.md Plugins/harness-engineering/references/brainstorm-topic-coverage-contract.md Plugins/harness-engineering/references/deferred-context-index.md Plugins/harness-engineering/references/document-review-finding-tiers.md Plugins/harness-engineering/references/session-evidence-trace-context.md Plugins/harness-engineering/references/specialist-skill-steering-contract.md Plugins/harness-engineering/skills/he-brainstorm/SKILL.md Plugins/harness-engineering/skills/he-brainstorm/references/evals.yaml Plugins/harness-engineering/skills/he-code-review/SKILL.md Plugins/harness-engineering/skills/he-code-review/references/evals.yaml Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md Plugins/harness-engineering/skills/he-eval-report/SKILL.md Plugins/harness-engineering/skills/he-eval-report/references/evals.yaml Plugins/harness-engineering/skills/he-linear-plan/SKILL.md Plugins/harness-engineering/skills/he-linear-plan/references/evals.yaml Plugins/harness-engineering/skills/he-plan/SKILL.md Plugins/harness-engineering/skills/he-plan/references/evals.yaml Plugins/harness-engineering/skills/he-refactor/SKILL.md Plugins/harness-engineering/skills/he-router/SKILL.md Plugins/harness-engineering/skills/he-router/references/evals.yaml Plugins/harness-engineering/skills/he-spec/SKILL.md Plugins/harness-engineering/skills/he-spec/references/evals.yaml Plugins/harness-engineering/skills/he-strategy/SKILL.md Plugins/harness-engineering/skills/he-strategy/references/evals.yaml --json --robot"
+        }
+      ],
+      "diagnostic_debt": [
+        {
+          "id": "repo_surface",
+          "severity": "warning",
+          "summary": "Repo surface has 4586 diagnostic finding(s).",
+          "next_command": "./bin/ask repo surface --json --robot"
+        }
+      ],
+      "commit_readiness": {
+        "ready": false,
+        "blockers": [
+          "sync_required"
+        ],
+        "strict": false
+      },
+      "doctor": {
+        "agent_summary": "Usable with diagnostic debt: Repo surface has 4586 diagnostic finding(s).",
+        "blocking": false,
+        "blockers": [],
+        "next_command": "./bin/ask repo surface --json --robot",
+        "next_command_kind": "diagnostic_advisory",
+        "next_command_blocks_task": false,
+        "signals": {
+          "repo_status": {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Repository status is readable.",
+            "source": "repo_status",
+            "details": {
+              "repo_root": ".",
+              "is_git": true
+            }
+          },
+          "projection_sync": {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Workspace skill runtime appears synced.",
+            "source": "repo_status",
+            "details": {
+              "skills_synced": true
+            }
+          },
+          "catalog_parity": {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Catalog parity is resolved.",
+            "source": "doctor_catalog",
+            "details": {
+              "decision_status": "resolved",
+              "canonical_count": 21,
+              "policy_identity": "8c69fbfa81b89658"
+            }
+          },
+          "runtime_budget": {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Runtime budget is within policy.",
+            "source": "skills_budget",
+            "details": {
+              "status": "pass",
+              "default_visible_count": 10,
+              "estimated_description_tokens": 3172,
+              "violation_count": 0
+            }
+          },
+          "command_handles": {
+            "state": "pass",
+            "severity": "info",
+            "summary": "Command handles validate cleanly.",
+            "source": "skills_handles",
+            "details": {
+              "status": "pass",
+              "handle_count": 98,
+              "violation_count": 0
+            }
+          },
+          "repo_surface": {
+            "state": "warn",
+            "severity": "warning",
+            "summary": "Repo surface has 4586 diagnostic finding(s).",
+            "source": "repo_surface",
+            "next_command": "./bin/ask repo surface --json --robot",
+            "details": {
+              "status": "warning",
+              "total_paths": 7866,
+              "blocking_findings": 4586,
+              "counts_by_code": {
+                "authored_source_surface": 68,
+                "duplicated_infrastructure_path": 6,
+                "fixture_or_template_surface": 15,
+                "generated_evidence_pattern": 11,
+                "harness_reference_surface": 13,
+                "indexed_reference_surface": 1076,
+                "ownership_decision_required": 39,
+                "plugin_fixture_surface": 879,
+                "plugin_metadata_source": 3,
+                "plugin_reference_surface": 35,
+                "policy_surface": 308,
+                "source_path": 872,
+                "tracked_generated_work_area": 267,
+                "tracked_historical_artifact": 4257,
+                "unknown_surface": 17
+              }
+            }
+          }
+        },
+        "diagnostic_debt": [
+          {
+            "id": "repo_surface",
+            "severity": "warning",
+            "summary": "Repo surface has 4586 diagnostic finding(s).",
+            "next_command": "./bin/ask repo surface --json --robot"
+          }
+        ]
+      },
+      "next_command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot"
+    },
+    "agent_summary": "Blocked: closeout has 1 blocker(s).",
+    "changed_files": [
+      ".harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.exit",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.stderr.txt",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.stdout.json",
+      ".harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh",
+      ".skillsets/agent-ops/manifest.jsonl",
+      ".skillsets/backend-platform/manifest.jsonl",
+      ".skillsets/command-surface.json",
+      ".skillsets/content-publishing/manifest.jsonl",
+      ".skillsets/frontend-ui/manifest.jsonl",
+      ".skillsets/harness-engineering/manifest.jsonl",
+      ".skillsets/mobile-native/manifest.jsonl",
+      ".skillsets/plugin-factory/manifest.jsonl",
+      ".skillsets/product-strategy/manifest.jsonl",
+      ".skillsets/security-ops/manifest.jsonl",
+      ".skillsets/skill-factory/manifest.jsonl",
+      "Infrastructure/scripts/lib/ask/commands/skills.py",
+      "Infrastructure/tests/test_ask_skills_goal.py",
+      "Plugins/harness-engineering/README.md",
+      "Plugins/harness-engineering/references/agent-native-audit-scorecard.md",
+      "Plugins/harness-engineering/references/artifact-classification-and-traceability.md",
+      "Plugins/harness-engineering/references/artifact-routing-contract.md",
+      "Plugins/harness-engineering/references/brainstorm-topic-coverage-contract.md",
+      "Plugins/harness-engineering/references/deferred-context-index.md",
+      "Plugins/harness-engineering/references/document-review-finding-tiers.md",
+      "Plugins/harness-engineering/references/session-evidence-trace-context.md",
+      "Plugins/harness-engineering/references/specialist-skill-steering-contract.md",
+      "Plugins/harness-engineering/skills/he-brainstorm/SKILL.md",
+      "Plugins/harness-engineering/skills/he-brainstorm/references/evals.yaml",
+      "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
+      "Plugins/harness-engineering/skills/he-code-review/references/evals.yaml",
+      "Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md",
+      "Plugins/harness-engineering/skills/he-eval-report/SKILL.md",
+      "Plugins/harness-engineering/skills/he-eval-report/references/evals.yaml",
+      "Plugins/harness-engineering/skills/he-linear-plan/SKILL.md",
+      "Plugins/harness-engineering/skills/he-linear-plan/references/evals.yaml",
+      "Plugins/harness-engineering/skills/he-plan/SKILL.md",
+      "Plugins/harness-engineering/skills/he-plan/references/evals.yaml",
+      "Plugins/harness-engineering/skills/he-refactor/SKILL.md",
+      "Plugins/harness-engineering/skills/he-router/SKILL.md",
+      "Plugins/harness-engineering/skills/he-router/references/evals.yaml",
+      "Plugins/harness-engineering/skills/he-spec/SKILL.md",
+      "Plugins/harness-engineering/skills/he-spec/references/evals.yaml",
+      "Plugins/harness-engineering/skills/he-strategy/SKILL.md",
+      "Plugins/harness-engineering/skills/he-strategy/references/evals.yaml"
+    ],
+    "changed_file_count": 75,
+    "changed_mode_requested": true,
+    "changed_files_error": null,
+    "sync": {
+      "needed": true,
+      "commands": [
+        "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        "./bin/ask skills handles --check --json --robot"
+      ],
+      "validation_commands": [],
+      "generated_changed_files": [
+        ".skillsets/agent-ops/manifest.jsonl",
+        ".skillsets/backend-platform/manifest.jsonl",
+        ".skillsets/command-surface.json",
+        ".skillsets/content-publishing/manifest.jsonl",
+        ".skillsets/frontend-ui/manifest.jsonl",
+        ".skillsets/harness-engineering/manifest.jsonl",
+        ".skillsets/mobile-native/manifest.jsonl",
+        ".skillsets/plugin-factory/manifest.jsonl",
+        ".skillsets/product-strategy/manifest.jsonl",
+        ".skillsets/security-ops/manifest.jsonl",
+        ".skillsets/skill-factory/manifest.jsonl"
+      ],
+      "canonical_skill_changed_files": [
+        "Plugins/harness-engineering/skills/he-brainstorm/SKILL.md",
+        "Plugins/harness-engineering/skills/he-brainstorm/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
+        "Plugins/harness-engineering/skills/he-code-review/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md",
+        "Plugins/harness-engineering/skills/he-eval-report/SKILL.md",
+        "Plugins/harness-engineering/skills/he-eval-report/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-linear-plan/SKILL.md",
+        "Plugins/harness-engineering/skills/he-linear-plan/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-plan/SKILL.md",
+        "Plugins/harness-engineering/skills/he-plan/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-refactor/SKILL.md",
+        "Plugins/harness-engineering/skills/he-router/SKILL.md",
+        "Plugins/harness-engineering/skills/he-router/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-spec/SKILL.md",
+        "Plugins/harness-engineering/skills/he-spec/references/evals.yaml",
+        "Plugins/harness-engineering/skills/he-strategy/SKILL.md",
+        "Plugins/harness-engineering/skills/he-strategy/references/evals.yaml"
+      ]
+    },
+    "runtime_budget": {
+      "status": "pass",
+      "default_visible_count": 10,
+      "estimated_description_tokens": 3172,
+      "violation_count": 0
+    },
+    "surface_policy": {
+      "status": "warning",
+      "blocking_findings": 4586,
+      "total_paths": 7866,
+      "counts_by_code": {
+        "authored_source_surface": 68,
+        "duplicated_infrastructure_path": 6,
+        "fixture_or_template_surface": 15,
+        "generated_evidence_pattern": 11,
+        "harness_reference_surface": 13,
+        "indexed_reference_surface": 1076,
+        "ownership_decision_required": 39,
+        "plugin_fixture_surface": 879,
+        "plugin_metadata_source": 3,
+        "plugin_reference_surface": 35,
+        "policy_surface": 308,
+        "source_path": 872,
+        "tracked_generated_work_area": 267,
+        "tracked_historical_artifact": 4257,
+        "unknown_surface": 17
+      }
+    },
+    "focused_validation": [
+      {
+        "id": "repo_doctor",
+        "reason": "Confirm golden-path health before claiming completion.",
+        "command": "./bin/ask repo doctor --json --robot"
+      },
+      {
+        "id": "skill_handles",
+        "reason": "Validate generated command handles for changed projection files.",
+        "command": "./bin/ask skills handles --check --json --robot"
+      },
+      {
+        "id": "changed_validation",
+        "reason": "Run validation scoped to the files currently changed.",
+        "command": "./bin/ask repo validate --changed-files .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md .harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/01-repo-doctor.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/02-repo-surface.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/03-skills-improve-pr-review.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/04-skills-improve-linear-spec.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/05-skills-improve-heartbeat.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/06-skills-improve-code-review.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/07-skills-improve-fix-blockers.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/08-skills-explain-he-spec.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/09-skills-proof-he-spec.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/10-skills-prove-he-spec.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.exit .harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.stderr.txt .harness/session-evidence/jsc-246-fresh-agent-golden-path/11-repo-closeout-changed.stdout.json .harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh .skillsets/agent-ops/manifest.jsonl .skillsets/backend-platform/manifest.jsonl .skillsets/command-surface.json .skillsets/content-publishing/manifest.jsonl .skillsets/frontend-ui/manifest.jsonl .skillsets/harness-engineering/manifest.jsonl .skillsets/mobile-native/manifest.jsonl .skillsets/plugin-factory/manifest.jsonl .skillsets/product-strategy/manifest.jsonl .skillsets/security-ops/manifest.jsonl .skillsets/skill-factory/manifest.jsonl Infrastructure/scripts/lib/ask/commands/skills.py Infrastructure/tests/test_ask_skills_goal.py Plugins/harness-engineering/README.md Plugins/harness-engineering/references/agent-native-audit-scorecard.md Plugins/harness-engineering/references/artifact-classification-and-traceability.md Plugins/harness-engineering/references/artifact-routing-contract.md Plugins/harness-engineering/references/brainstorm-topic-coverage-contract.md Plugins/harness-engineering/references/deferred-context-index.md Plugins/harness-engineering/references/document-review-finding-tiers.md Plugins/harness-engineering/references/session-evidence-trace-context.md Plugins/harness-engineering/references/specialist-skill-steering-contract.md Plugins/harness-engineering/skills/he-brainstorm/SKILL.md Plugins/harness-engineering/skills/he-brainstorm/references/evals.yaml Plugins/harness-engineering/skills/he-code-review/SKILL.md Plugins/harness-engineering/skills/he-code-review/references/evals.yaml Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md Plugins/harness-engineering/skills/he-eval-report/SKILL.md Plugins/harness-engineering/skills/he-eval-report/references/evals.yaml Plugins/harness-engineering/skills/he-linear-plan/SKILL.md Plugins/harness-engineering/skills/he-linear-plan/references/evals.yaml Plugins/harness-engineering/skills/he-plan/SKILL.md Plugins/harness-engineering/skills/he-plan/references/evals.yaml Plugins/harness-engineering/skills/he-refactor/SKILL.md Plugins/harness-engineering/skills/he-router/SKILL.md Plugins/harness-engineering/skills/he-router/references/evals.yaml Plugins/harness-engineering/skills/he-spec/SKILL.md Plugins/harness-engineering/skills/he-spec/references/evals.yaml Plugins/harness-engineering/skills/he-strategy/SKILL.md Plugins/harness-engineering/skills/he-strategy/references/evals.yaml --json --robot"
+      }
+    ],
+    "diagnostic_debt": [
+      {
+        "id": "repo_surface",
+        "severity": "warning",
+        "summary": "Repo surface has 4586 diagnostic finding(s).",
+        "next_command": "./bin/ask repo surface --json --robot"
+      }
+    ],
+    "commit_readiness": {
+      "ready": false,
+      "blockers": [
+        "sync_required"
+      ],
+      "strict": false
+    },
+    "doctor": {
+      "agent_summary": "Usable with diagnostic debt: Repo surface has 4586 diagnostic finding(s).",
+      "blocking": false,
+      "blockers": [],
+      "next_command": "./bin/ask repo surface --json --robot",
+      "next_command_kind": "diagnostic_advisory",
+      "next_command_blocks_task": false,
+      "signals": {
+        "repo_status": {
+          "state": "pass",
+          "severity": "info",
+          "summary": "Repository status is readable.",
+          "source": "repo_status",
+          "details": {
+            "repo_root": ".",
+            "is_git": true
+          }
+        },
+        "projection_sync": {
+          "state": "pass",
+          "severity": "info",
+          "summary": "Workspace skill runtime appears synced.",
+          "source": "repo_status",
+          "details": {
+            "skills_synced": true
+          }
+        },
+        "catalog_parity": {
+          "state": "pass",
+          "severity": "info",
+          "summary": "Catalog parity is resolved.",
+          "source": "doctor_catalog",
+          "details": {
+            "decision_status": "resolved",
+            "canonical_count": 21,
+            "policy_identity": "8c69fbfa81b89658"
+          }
+        },
+        "runtime_budget": {
+          "state": "pass",
+          "severity": "info",
+          "summary": "Runtime budget is within policy.",
+          "source": "skills_budget",
+          "details": {
+            "status": "pass",
+            "default_visible_count": 10,
+            "estimated_description_tokens": 3172,
+            "violation_count": 0
+          }
+        },
+        "command_handles": {
+          "state": "pass",
+          "severity": "info",
+          "summary": "Command handles validate cleanly.",
+          "source": "skills_handles",
+          "details": {
+            "status": "pass",
+            "handle_count": 98,
+            "violation_count": 0
+          }
+        },
+        "repo_surface": {
+          "state": "warn",
+          "severity": "warning",
+          "summary": "Repo surface has 4586 diagnostic finding(s).",
+          "source": "repo_surface",
+          "next_command": "./bin/ask repo surface --json --robot",
+          "details": {
+            "status": "warning",
+            "total_paths": 7866,
+            "blocking_findings": 4586,
+            "counts_by_code": {
+              "authored_source_surface": 68,
+              "duplicated_infrastructure_path": 6,
+              "fixture_or_template_surface": 15,
+              "generated_evidence_pattern": 11,
+              "harness_reference_surface": 13,
+              "indexed_reference_surface": 1076,
+              "ownership_decision_required": 39,
+              "plugin_fixture_surface": 879,
+              "plugin_metadata_source": 3,
+              "plugin_reference_surface": 35,
+              "policy_surface": 308,
+              "source_path": 872,
+              "tracked_generated_work_area": 267,
+              "tracked_historical_artifact": 4257,
+              "unknown_surface": 17
+            }
+          }
+        }
+      },
+      "diagnostic_debt": [
+        {
+          "id": "repo_surface",
+          "severity": "warning",
+          "summary": "Repo surface has 4586 diagnostic finding(s).",
+          "next_command": "./bin/ask repo surface --json --robot"
+        }
+      ]
+    },
+    "next_command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot"
+  },
+  "telemetry": {
+    "latency_ms": 689
+  },
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "message": "Blocked: closeout has 1 blocker(s).",
+      "fix_suggestion": "./bin/ask skills sync --scope workspace --projection rooted --json --robot"
+    }
+  ]
+}

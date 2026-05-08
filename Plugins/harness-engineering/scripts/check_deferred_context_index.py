@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""Detect stale active-procedure snapshots in the HE deferred context index."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+
+
+PROCEDURE_PATTERNS = [
+    re.compile(r"(?mi)^Return schema_version when structured\."),
+    re.compile(r"(?mi)^Inspect session-collector evidence"),
+    re.compile(r"(?mi)^Explore first, ask second"),
+    re.compile(r"(?mi)^Mark current active state"),
+    re.compile(r"(?mi)^Route with `route_skillset\.py`"),
+]
+
+
+def validate(path: Path) -> list[str]:
+    text = path.read_text(encoding="utf-8")
+    errors: list[str] = []
+    if "```" in text:
+        errors.append("deferred context index must not contain copied code fences")
+    for pattern in PROCEDURE_PATTERNS:
+        if pattern.search(text):
+            errors.append(f"deferred context index contains active procedure text: {pattern.pattern}")
+    if text.count("references/goal-continuity.md") > 1:
+        errors.append("goal-continuity reference appears more than once")
+    return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "path",
+        nargs="?",
+        type=Path,
+        default=Path(__file__).resolve().parents[1] / "references" / "deferred-context-index.md",
+    )
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args()
+
+    errors = validate(args.path)
+    result = {
+        "schema_version": 1,
+        "path": str(args.path),
+        "status": "pass" if not errors else "fail",
+        "errors": errors,
+    }
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print(f"status: {result['status']}")
+        for error in errors:
+            print(f"error: {error}")
+    return 0 if not errors else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

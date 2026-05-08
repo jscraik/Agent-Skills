@@ -53,6 +53,14 @@ bash Skills/codex-agent-creator/Infrastructure/scripts/install_role.sh --agent-n
 
 5. Report one explicit mode in the closeout: `reuse-existing` or `create-purpose-built`.
 
+## Execution Boundaries
+
+Install only into the canonical git source tree or an explicitly approved destination. Do not patch generated runtime projections as the source of truth.
+
+Separate acquisition, installation, role wiring, and runtime visibility checks in the report. If destination, replacement behavior, credentials, or network scope is ambiguous, stop before writing.
+
+The installer proves install state; release hardening remains owned by [[skill-builder]], and first-draft package design remains owned by [[skill-creator]].
+
 ## Deliverables
 
 - A clear summary of what was listed or installed.

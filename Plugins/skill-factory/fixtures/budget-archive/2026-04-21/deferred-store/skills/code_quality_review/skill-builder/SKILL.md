@@ -29,7 +29,7 @@ Use for existing skill or plugin quality work: audit fixes, routing, budget redu
 
 Do not use for first-draft scaffolding (`skill-creator`), runtime install/listing work (`skill-installer`), plugin conversion (`plugin-builder`), or portfolio/session failure analysis (`skill-refactor`).
 
-## Boundary map
+## Execution Boundaries
 
 Creator designs the first usable shape. Builder hardens an existing skill with edits, evidence, and residual risk. Installer proves runtime visibility for an already valid skill. Refactor decides keep, merge, split, retire, or redirect from usage evidence.
 

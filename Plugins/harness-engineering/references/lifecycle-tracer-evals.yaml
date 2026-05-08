@@ -1,0 +1,94 @@
+schema_version: "1.0"
+purpose: "Realistic tracer-bullet fixtures proving Harness Engineering can route from user request to stage, artifact, and validation expectation."
+
+cases:
+  - id: tracer-brainstorm
+    stage: he-brainstorm
+    prompt: "Explore this fuzzy agent workflow idea, identify survivors, and ask me to choose before spec."
+    expected_route: he-brainstorm
+    expected_artifact_root: .harness/brainstorm
+    proof: "blocking survivor-selection question or recorded autonomous assumption"
+
+  - id: tracer-spec
+    stage: he-spec
+    prompt: "Turn the selected JSC-321 brainstorm into an implementation-grade spec with acceptance IDs."
+    expected_route: he-spec
+    expected_artifact_root: .harness/specs
+    proof: "Linear acceptance traceability and validation plan"
+
+  - id: tracer-plan
+    stage: he-plan
+    prompt: "Create the execution plan for the selected spec and ask before handoff when multiple next stages are valid."
+    expected_route: he-plan
+    expected_artifact_root: .harness/plan
+    proof: "ordered units, validation commands, rollback, and post-plan handoff steering"
+
+  - id: tracer-work
+    stage: he-work
+    prompt: "Implement only the approved plan units and preserve dirty user edits."
+    expected_route: he-work
+    expected_artifact_root: repository-diff
+    proof: "changed files, exact validation, rollback, next review handoff"
+
+  - id: tracer-fix-bugs
+    stage: he-fix-bugs
+    prompt: "Reproduce this failing test, identify root cause, patch narrowly, and validate the failing path."
+    expected_route: he-fix-bugs
+    expected_artifact_root: repository-diff
+    proof: "reproduction evidence, root cause, fix, focused validation"
+
+  - id: tracer-improve
+    stage: he-improve
+    prompt: "Use session evidence to improve an existing HE skill instead of creating a new skill."
+    expected_route: he-improve
+    expected_artifact_root: skill-or-reference-diff
+    proof: "A/B/C loop status, warnings remaining, stop-rule status"
+
+  - id: tracer-code-review
+    stage: he-code-review
+    prompt: "Review this HE PR for readiness, repeated feedback, and missing proof before merge."
+    expected_route: he-code-review
+    expected_artifact_root: .harness/review
+    proof: "severity findings first, traceability, blockers, verdict"
+
+  - id: tracer-heartbeat
+    stage: he-heartbeat
+    prompt: "Wake this thread every 30 minutes until the PR is green or the stop rule triggers."
+    expected_route: he-heartbeat
+    expected_artifact_root: automation
+    proof: "heartbeat prompt, cadence, stop rule, residual risk"
+
+  - id: tracer-compound
+    stage: he-compound
+    prompt: "Inspect live state and pick the next HE stage from Linear, spec, plan, PR, and validation evidence."
+    expected_route: he-compound
+    expected_artifact_root: stage-map
+    proof: "stage map, active owner, blockers, next action"
+
+  - id: tracer-eval-report
+    stage: he-eval-report
+    prompt: "Generate the eval and drift validation report before recommending Linear closure."
+    expected_route: he-eval-report
+    expected_artifact_root: .harness/evals
+    proof: "eval gate matrix, drift validation, closure recommendation"
+
+  - id: tracer-strategy
+    stage: he-strategy
+    prompt: "Create a dated architecture review and strategic compression artifact from repo evidence."
+    expected_route: he-strategy
+    expected_artifact_root: .harness/review
+    proof: "evidence matrix, moat/drift analysis, fact/interpretation/assumption separation"
+
+  - id: tracer-refactor
+    stage: he-refactor
+    prompt: "Generate a high-leverage migration program with phases, rollback, Linear mapping, and eval proof."
+    expected_route: he-refactor
+    expected_artifact_root: .harness/refactors
+    proof: "migration phases, rollback conditions, eval requirements"
+
+  - id: tracer-linear-plan
+    stage: he-linear-plan
+    prompt: "Convert approved refactor programs into a small Linear execution plan without mutating Linear."
+    expected_route: he-linear-plan
+    expected_artifact_root: .harness/linear
+    proof: "Now/Next/Later/Do Not Create, eval gates, human/agent route"

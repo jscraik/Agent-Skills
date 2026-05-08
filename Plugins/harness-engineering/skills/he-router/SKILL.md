@@ -15,7 +15,7 @@ Request text, repo root, optional Linear/session evidence.
 ## Outputs
 Return `schema_version` when structured, plus `selected_stage`, `source_path`, `folded_mode`, `blocker`, `blackboard_delta`, and `lifecycle_exit_status`.
 ## Procedure
-Route using `./bin/ask` (wrapping the routing operation); keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement. When deterministic routing leaves one consequential stage or source choice, apply the interactive steering contract before guessing. When the request explicitly asks for persistent continuation, `/goal`, resume-over-time, or keep-working-until-done behavior, apply the goal continuity contract after selecting the HE stage and hand off durable board governance to `Skills/agent-ops/goal-governor`. When a diagnosis names compression as the missing acceptance gate or says `spec_refresh_required`, route to `he-spec` and include the compression contract.
+Route using `./bin/ask` (wrapping the routing operation); keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement. When session evidence is used, apply the session evidence trace context so repo, branch, PR, Linear, and artifact-chain identity are known or explicitly blocked. When existing `.harness` artifacts drive routing, classify by content shape before path and record path/title/Linear mismatches as traceability defects. When deterministic routing leaves one consequential stage or source choice, apply the interactive steering contract before guessing. When the request explicitly asks for persistent continuation, `/goal`, resume-over-time, or keep-working-until-done behavior, apply the goal continuity contract after selecting the HE stage and hand off durable board governance to `Skills/agent-ops/goal-governor`. When a diagnosis names compression as the missing acceptance gate or says `spec_refresh_required`, route to `he-spec` and include the compression contract.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check deterministic aliases and subagent role availability.
 ## Failure mode
@@ -36,6 +36,9 @@ Redact secrets; never enumerate every child skill to the model. Do not remove im
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`; durable goal boards: `Skills/agent-ops/goal-governor`
 - Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`
+- Session evidence trace: `Plugins/harness-engineering/references/session-evidence-trace-context.md`
+- Artifact classification: `Plugins/harness-engineering/references/artifact-classification-and-traceability.md`
 - Preserved router rules: `references/context-preservation.md`
+- Lifecycle tracer evals: `Plugins/harness-engineering/references/lifecycle-tracer-evals.yaml`
 - Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
 - XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

@@ -22,6 +22,16 @@ cases:
     prompt: "Write the HE spec using session-collector evidence and Linear Acceptance Traceability."
     deterministic_checks: *safe
     acceptance: *accept_trace
+  - id: session-evidence-trace-context
+    <<: *common
+    name: "Session Evidence Trace Context"
+    category: edge
+    prompt: "Write the HE spec from session-collector evidence, but first resolve repo, branch, PR, Linear parent, artifact chain, and whether the evidence is historical or current."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(session_evidence_status|session evidence|collector)"}
+      - {type: regex, value: "(?is)(repo|branch|PR|Linear|artifact chain|currentness)"}
+      - {type: regex, value: "(?is)(historical|current|unknown|trace blocker)"}
   - id: current-vs-latest-spec
     <<: *common
     name: "Current Vs Latest Spec"
@@ -113,6 +123,26 @@ cases:
     prompt: "he-spec case scope-boundaries: preserve traceability, evidence, validation, and safe routing."
     deterministic_checks: *safe
     acceptance: *accept_trace
+  - id: document-review-tiered-spec-changes
+    <<: *common
+    name: "Document Review Tiered Spec Changes"
+    category: edge
+    prompt: "A docs review suggests one wording fix, one acceptance change, one human product decision, and one FYI note for this spec. Classify the changes before applying them."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(safe_auto|gated_auto|manual|fyi)"}
+      - {type: regex, value: "(?is)(acceptance|human|FYI|finding_tier)"}
+      - {type: regex, value: "(?is)(interactive steering|autonomous_assumption|ask|blocked)"}
+  - id: content-shape-before-path-spec
+    <<: *common
+    name: "Content Shape Before Path Spec"
+    category: edge
+    prompt: "The source artifact sits under .harness/review but its frontmatter and H1 prove it is the current spec. Classify by content shape before path and preserve canonical_slug."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(content shape|frontmatter|H1|path)"}
+      - {type: regex, value: "(?is)(artifact_classification_status|traceability defect|canonical_slug)"}
+      - {type: regex, value: "(?is)(\\.harness/specs|spec|source artifact)"}
   - id: assumption-ledger
     <<: *common
     name: "Assumption Ledger"
