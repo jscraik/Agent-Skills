@@ -1,0 +1,73 @@
+schema_version: 1
+purpose: "Generate deterministic, evidence-backed Harness Engineering architectural refactor programs."
+
+triggers:
+  - structural complexity reduction
+  - orchestration simplification
+  - routing redesign
+  - cognition compression
+  - governance simplification
+  - execution determinism improvement
+  - context-load reduction
+  - anti-drift hardening
+  - moat-critical stabilization
+  - skill or plugin boundary correction
+  - eval reliability improvement
+  - Linear execution hygiene where migration ordering matters
+
+inputs:
+  - .harness/features/*.md
+  - .harness/review/*.md
+  - .harness/triage/*.md
+  - .harness/strategy/*.md
+  - .harness/decisions/*.md
+  - .harness/core/*.md
+  - .harness/linear/*.md
+  - relevant source files
+  - validation commands and test evidence
+  - existing skill, plugin, routing, and workflow contracts
+
+outputs:
+  - root: .harness/refactors
+    pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<refactor-slug>.md"
+    pattern_without_linear: "YYYY-MM-DD-<repo-name>-<refactor-slug>.md"
+    legacy_supported_pattern: "<refactor-slug>.md"
+    note: "Dated Linear identifiers are preferred for new programs."
+
+non_goals:
+  - cosmetic cleanup
+  - isolated one-file tactical fixes
+  - generic best-practice recommendations
+  - speculative rewrites
+  - implementation tickets
+  - routine dependency updates
+  - Linear object creation
+  - source code mutation
+
+risks:
+  - refactor theater
+  - big-bang rewrites
+  - issue explosion
+  - hidden migration coupling
+  - rollback-free architecture changes
+  - eval-free closure
+  - creating new abstraction before deleting old abstraction
+
+observability: "Record source artifacts read, affected systems and blast radius, fact/interpretation/assumption separation, migration phases, validation requirements, rollback conditions, Linear mapping without mutation, expected eval artifact pattern .harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<slug>-eval.md, dated output path or Do Not Create classification, required sections present, and validation outcomes recorded as pass, fail, or blocked."
+
+rollback_procedure: "If evidence is weak, do not create the refactor program; if migration cannot be staged safely, mark the program Blocked; if a phase regresses routing, context load, eval quality, or rollback safety, stop the migration and keep legacy behavior active; do not delete legacy paths until eval and drift proof pass."
+
+authority:
+  artifact_root: .harness/refactors
+  execution_rule: "A refactor program becomes execution input only when selected by the user or .harness/linear."
+
+safety:
+  redact_by_default: true
+  fail_fast: true
+  forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+    - git commit
+    - git push

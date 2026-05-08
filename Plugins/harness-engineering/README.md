@@ -11,6 +11,9 @@
 - `he-work`
 - `he-code-review`
 - `he-eval-report`
+- `he-strategy`
+- `he-refactor`
+- `he-linear-plan`
 - `he-fix-bugs`
 - `he-improve`
 - `he-compound`
@@ -53,10 +56,30 @@ Brain, solution capture also syncs or explicitly blocks the matching
 `.harness/knowledge/**` update.
 
 Post-implementation closure proof belongs to `he-eval-report` and writes
-`.harness/evals/<repo-name>-<linear-parent-issue-or-milestone>-eval.md`.
+`.harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-milestone>-eval.md`
+when Linear context is known, or the dated repo fallback when it is not.
 Do not recommend Linear parent issue, milestone, project, or execution-slice
 closure from implementation status alone; use the eval artifact to record
 validation evidence, drift posture, proof artifacts, and completion safety.
+
+Strategy, architectural review, triage, ADR compression, and core invariant
+compression belong to `he-strategy`. These artifacts are cognition context, not
+implementation authority, until admitted by a refactor, Linear, spec, or plan
+artifact. New lifecycle artifacts prefer dated Linear filenames such as
+`YYYY-MM-DD-JSC-###-<slug>-strategy.md`; stable names are reserved for living
+`.harness/core/**` files and numbered ADRs.
+
+High-leverage architectural migration programs belong to `he-refactor` and
+write `.harness/refactors/YYYY-MM-DD-JSC-###-<refactor-slug>.md` when tracked.
+They define staged evolution, rollback, eval proof, and Linear mapping without
+editing implementation code or creating Linear objects.
+
+Linear execution mapping belongs to `he-linear-plan` and writes
+`.harness/linear/YYYY-MM-DD-JSC-###-<repo-name>-<slice-slug>-linear-plan.md`
+when tracked.
+It maps `.harness` cognition into small Now/Next/Later/Do Not Create execution
+sets, milestones, parent issues, dependencies, eval gates, and human/agent
+routing, but never mutates Linear without explicit confirmation.
 
 Dedicated UI plans are `he-plan` artifacts. New UI plans use
 `.harness/plan/**-ui-plan.md`; legacy `docs/ui-plan/**` and

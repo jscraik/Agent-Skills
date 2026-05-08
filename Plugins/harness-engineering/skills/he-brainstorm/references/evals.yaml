@@ -45,6 +45,16 @@ cases:
       - {type: regex, value: "(?is)(web research|external research|current external|unavailable|skipped)"}
       - {type: regex, value: "(?is)(reject|rejection|cut)"}
       - {type: regex, value: "(?is)(traceability|evidence|validation)"}
+  - id: survivor-selection-blocking-question
+    <<: *common
+    name: "Survivor Selection Blocking Question"
+    category: edge
+    prompt: "Run he-ideate for Harness routing improvements. Two warranted survivors remain: a router contract and a Linear workflow contract. Do not choose one silently if it would shape the downstream spec."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(survivor|warranted|ranked)"}
+      - {type: regex, value: "(?is)(interactive steering|request_user_input|blocking question|ask once|choose)"}
+      - {type: regex, value: "(?is)(downstream spec|plan|Linear|implementation slice|interactive_status)"}
   - id: he-ideate-vague-subject
     <<: *common
     name: "HE Ideate Vague Subject"

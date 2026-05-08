@@ -1,0 +1,75 @@
+schema_version: 1
+purpose: "Map approved Harness Engineering cognition into a small, traceable Linear execution plan without mutating Linear."
+
+triggers:
+  - Linear execution orchestration
+  - mapping .harness refactors into milestones and parent issues
+  - repo-specific versus Portfolio Ops routing
+  - Now / Next / Later / Do Not Create classification
+  - dependency and eval gate planning
+  - human versus agent execution routing
+  - label and priority recommendations
+  - project reactivation recommendations
+
+inputs:
+  - .harness/features/*.md
+  - .harness/review/*.md
+  - .harness/triage/*.md
+  - .harness/strategy/*.md
+  - .harness/core/*.md
+  - .harness/decisions/*.md
+  - .harness/refactors/*.md
+  - existing .harness/linear/*.md
+  - Linear issue, project, milestone, and initiative identifiers when available
+
+outputs:
+  - root: .harness/linear
+    pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<repo-name>-<slice-slug>-linear-plan.md"
+    pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slice-slug>-linear-plan.md"
+    legacy_supported_pattern: "<repo-name>-linear-plan.md"
+    note: "Dated Linear identifiers are preferred for new plans."
+  - ready_to_create_payloads: "Included in the artifact only; not applied without explicit confirmation."
+
+non_goals:
+  - create Linear labels
+  - create milestones
+  - create issues
+  - update issue statuses
+  - close or reopen work
+  - write strategy artifacts
+  - write refactor programs
+  - implement code
+
+risks:
+  - Linear issue explosion
+  - creating new initiatives or projects unnecessarily
+  - treating every finding as work
+  - hiding cross-repo work in a repo-specific project
+  - closure without eval proof
+  - ready-to-create payloads being mistaken for applied changes
+
+observability: "Record source artifacts read, target Linear destination, existing project match or needs_human_triage reason, Now / Next / Later / Do Not Create classification, dependency map, eval gate map, human versus agent execution route, evidence and traceability matrix, dated output path or Do Not Create classification, no Linear mutations performed, and validation outcomes recorded as pass, fail, or blocked."
+
+rollback_procedure: "If the destination is wrong, mark needs_human_triage and do not create objects; if the plan creates backlog noise, collapse to fewer parent issues or classify as Do Not Create; if a Linear object was accidentally created, stop and ask the user before modifying or deleting it; do not recommend closure unless eval and drift proof are present."
+
+linear_operating_model:
+  authority: "Use this model only when existing artifacts, connector context, or the user request confirms Jamie/JSC-managed work; otherwise mark needs_human_triage."
+  workspace_team: Jscraik
+  team_key: JSC
+  top_level_initiative: Dev Portfolio
+  cross_repo_project: Portfolio Ops
+  repo_specific_project: "<repo-name>"
+  default_new_initiative_policy: "do not create unless existing structure cannot represent the work cleanly"
+  active_set_rule: "keep active sets intentionally small"
+  confirmation_required_when_unverified: true
+
+safety:
+  redact_by_default: true
+  fail_fast: true
+  forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+    - git commit
+    - git push

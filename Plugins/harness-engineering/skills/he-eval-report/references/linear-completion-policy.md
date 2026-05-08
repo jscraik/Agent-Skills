@@ -4,7 +4,13 @@ Every HE parent issue, milestone, or approved execution slice needs a matching
 artifact before closure:
 
 ```text
-.harness/evals/<repo-name>-<linear-parent-issue-or-milestone>-eval.md
+.harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-milestone>-eval.md
+
+When no Linear issue is known, use the dated repo fallback:
+
+```text
+.harness/evals/YYYY-MM-DD-<repo-name>-<linear-parent-issue-or-milestone>-eval.md
+```
 ```
 
 Do not recommend closure unless the eval confirms scope satisfaction, passed or

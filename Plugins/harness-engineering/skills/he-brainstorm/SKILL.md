@@ -16,7 +16,7 @@ User goal, repo evidence, Linear/project hints.
 Return schema_version when structured. Stated / Inferred / Out of scope, options, risks, warrant notes, blackboard_delta, durable artifact path when written, and next stage. Brainstorm markdown belongs under `.harness/brainstorm/**.md`; explicit folded `he-ideate` mode belongs under `.harness/ideate/**.md`.
 ## Procedure
 Explore first; require an identifiable subject before dispatching ideation or writing artifacts; separate evidence from guesses; before writing durable docs choose the routed `.harness` path from the artifact routing contract; for durable tracked work resolve/create the Linear issue before handoff; in coding-harness-managed repos load the command bridge and record the Harness transition.
-For `he-ideate`, ground in repo/Linear/session evidence and current web research unless explicitly skipped, generate many candidates internally, critique all candidates, surface only warranted survivors with rejection reasons, then route one selected survivor into `he-brainstorm` or the next HE stage.
+For `he-ideate`, ground in repo/Linear/session evidence and current web research unless explicitly skipped, apply the specialist skill steering contract when a proven knowledge domain can improve option quality, generate many candidates internally, critique all candidates, surface only warranted survivors with rejection reasons, then apply the interactive steering contract when survivor selection would shape the downstream spec, plan, Linear work, or implementation slice.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check scope, traceability, and handoff clarity.
 ## Failure mode
@@ -35,6 +35,8 @@ Redact secrets; do not turn brainstorming into execution. Do not remove importan
 Reference `assets/` only for skill packaging and browseability; workflow source of truth stays in this SKILL and references.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
+- Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Ideation mode: `Plugins/harness-engineering/skills/he-brainstorm/references/ideation-mode.md`
 - Linear tracker gate: `Plugins/harness-engineering/references/linear-tracker-gate.md`

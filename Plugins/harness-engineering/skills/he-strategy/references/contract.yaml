@@ -1,0 +1,88 @@
+schema_version: 1
+purpose: "Evidence-backed Harness Engineering strategy and architecture cognition."
+
+triggers:
+  - repo intent extraction
+  - architecture review
+  - structural triage
+  - strategic compression
+  - ADR compression
+  - core invariant compression
+  - moat and drift analysis
+  - future-agent guidance
+
+inputs:
+  - repository source, configs, scripts, tests, CI, docs, prompts, skills, and workflows
+  - .harness/features/*.md
+  - .harness/review/*.md
+  - .harness/triage/*.md
+  - .harness/strategy/*.md
+  - .harness/refactors/*.md
+  - .harness/decisions/*.md
+  - .harness/core/*.md
+  - .harness/linear/*.md
+  - .harness/specs/*.md
+  - .harness/plan/*.md
+  - .harness/solutions/*.md
+  - current external sources only when evaluating modern standards or prior art
+
+outputs:
+  - root: .harness/features
+    mode: intent
+    pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-intent.md"
+    pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slug>-intent.md"
+  - root: .harness/review
+    mode: architecture-review
+    pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-architecture-review.md"
+    pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slug>-architecture-review.md"
+  - root: .harness/triage
+    mode: triage
+    pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-triage.md"
+    pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slug>-triage.md"
+  - root: .harness/strategy
+    mode: strategic-compression
+    pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-strategy.md"
+    pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slug>-strategy.md"
+  - root: .harness/decisions
+    mode: decision-compression
+    pattern: "ADR-###-<slug>.md"
+    note: "Keep ADR filenames stable; include date and Linear identifiers in the body; choose the next unused ADR number by scanning existing .harness/decisions/ADR-###-*.md files and mark needs_human_triage if numbering cannot be proven."
+  - root: .harness/core
+    mode: core-compression
+    pattern: "<invariant-domain>.md"
+    note: "Core invariant files are living policy and keep stable canonical names."
+
+non_goals:
+  - authorize implementation
+  - create or mutate Linear objects
+  - write implementation specs
+  - write migration programs
+  - create generic product strategy
+  - produce architecture theater or review repetition
+
+risks:
+  - hallucinated repository intent
+  - treating strategy as execution permission
+  - ADR or core artifact sprawl
+  - prompt growth replacing proof
+  - uncited current-standards claims
+  - leaking private or sensitive repository data
+
+observability: "Record source artifacts read, inspection method or command, affected systems or modules, confidence level, operational impact, drift or moat impact when relevant, fact/interpretation/assumption separation, dated output path or Do Not Create classification, evidence and traceability matrix, and validation outcomes recorded as pass, fail, or blocked."
+
+rollback_procedure: "If an artifact is wrong, identify unsupported conclusions, move them to Unknown or remove them, replace low-value governance with Do Not Create, and never delete existing .harness artifacts without explicit user approval."
+
+authority:
+  default: secondary-context
+  execution_rule: "he-strategy outputs do not authorize implementation unless admitted by .harness/linear, .harness/refactors, .harness/specs, or .harness/plan."
+
+safety:
+  redact_by_default: true
+  fail_fast: true
+  forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+    - git commit
+    - git push

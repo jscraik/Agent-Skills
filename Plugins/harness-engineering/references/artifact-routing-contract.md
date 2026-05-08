@@ -13,7 +13,7 @@ artifact_id: <canonical-slug>-<stage-suffix>
 artifact_type: <he-stage-or-index-type>
 canonical_slug: <repo-name>-<linear-parent-issue-or-milestone>
 title: <human title matching first H1>
-harness_stage: he-spec|he-plan|he-eval-report|he-brainstorm|he-compound
+harness_stage: he-spec|he-plan|he-eval-report|he-brainstorm|he-compound|he-strategy|he-refactor|he-linear-plan
 status: draft|active|blocked|complete|superseded
 date: YYYY-MM-DD
 traceability_required: true|false
@@ -22,19 +22,27 @@ linear_issue: <issue key when tracked>
 linear_milestone: <milestone when tracked>
 ```
 
-Use `canonical_slug` as the chain key across `.harness/linear`,
-`.harness/specs`, `.harness/plan`, `.harness/evals`, `.harness/review`, and
-related proof artifacts. Stage-specific titles may differ only by suffix, such
-as `Spec`, `Plan`, `Eval`, or `Technical Review`; the shared `canonical_slug`
-and `artifact_id` must make the relationship machine-readable.
+Use `canonical_slug` as the chain key across `.harness/features`,
+`.harness/review`, `.harness/triage`, `.harness/strategy`,
+`.harness/refactors`, `.harness/decisions`, `.harness/core`,
+`.harness/linear`, `.harness/specs`, `.harness/plan`, `.harness/solutions`,
+`.harness/evals`, and related proof artifacts. Stage-specific titles may differ
+only by suffix, such as `Intent`, `Strategy`, `Refactor`, `Spec`, `Plan`,
+`Eval`, or `Technical Review`; the shared `canonical_slug` and `artifact_id`
+must make the relationship machine-readable.
 
-Tracked issue artifacts may use either stable or dated filenames:
+New tracked issue artifacts should prefer dated Linear filenames:
 
 ```text
-.harness/specs/<canonical-slug>-spec.md
-.harness/plan/YYYY-MM-DD-<optional-category>-<canonical-slug>-plan.md
-.harness/review/YYYY-MM-DD-<canonical-slug>-technical-review.md
-.harness/evals/<repo-name>-<canonical-slug>-eval.md
+.harness/features/YYYY-MM-DD-JSC-###-<canonical-slug>-intent.md
+.harness/review/YYYY-MM-DD-JSC-###-<canonical-slug>-architecture-review.md
+.harness/triage/YYYY-MM-DD-JSC-###-<canonical-slug>-triage.md
+.harness/strategy/YYYY-MM-DD-JSC-###-<canonical-slug>-strategy.md
+.harness/refactors/YYYY-MM-DD-JSC-###-<refactor-slug>.md
+.harness/linear/YYYY-MM-DD-JSC-###-<repo-name>-<slice-slug>-linear-plan.md
+.harness/specs/YYYY-MM-DD-JSC-###-<canonical-slug>-spec.md
+.harness/plan/YYYY-MM-DD-JSC-###-<canonical-slug>-plan.md
+.harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<canonical-slug>-eval.md
 ```
 
 When an artifact filename or `artifact_id` uses a Linear issue key, the shared
@@ -70,6 +78,14 @@ frontmatter conservative enough for simple parsers:
 | --- | --- |
 | `he-ideate` folded mode | `.harness/ideate/**.md` |
 | `he-brainstorm` | `.harness/brainstorm/**.md` |
+| `he-strategy` intent mode | `.harness/features/**.md` |
+| `he-strategy` architecture-review mode | `.harness/review/**.md` |
+| `he-strategy` triage mode | `.harness/triage/**.md` |
+| `he-strategy` strategic-compression mode | `.harness/strategy/**.md` |
+| `he-strategy` decision-compression mode | `.harness/decisions/**.md` |
+| `he-strategy` core-compression mode | `.harness/core/**.md` |
+| `he-refactor` | `.harness/refactors/**.md` |
+| `he-linear-plan` | `.harness/linear/**.md` |
 | `he-spec` | `.harness/specs/**.md` |
 | `he-plan` | `.harness/plan/**.md` |
 | `he-plan` dedicated UI plan | `.harness/plan/**-ui-plan.md` |

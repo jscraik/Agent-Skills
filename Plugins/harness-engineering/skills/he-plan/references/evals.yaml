@@ -61,6 +61,71 @@ cases:
       - {type: regex, value: "(?is)(post[-_ ]?plan|handoff_executed|explicit_stop|awaiting_user_choice|blocked)"}
       - {type: regex, value: "(?is)(he-work|next stage|route|blocked)"}
       - {type: regex, value: "(?is)(traceability|evidence|validation)"}
+  - id: post-plan-handoff-asks-before-work
+    <<: *common
+    name: "Post Plan Handoff Asks Before Work"
+    category: edge
+    prompt: "The plan is complete. Implementation, code review, and stopping here are all valid next stages, and I did not authorize implementation. Ask before starting work."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(post[-_ ]?plan|awaiting_user_choice|interactive_status)"}
+      - {type: regex, value: "(?is)(request_user_input|interactive steering|ask once|blocking question)"}
+      - {type: regex, value: "(?is)(he-work|he-code-review|explicit_stop|does not implement|before work)"}
+  - id: headless-autonomous-records-assumption
+    <<: *common
+    name: "Headless Autonomous Records Assumption"
+    category: edge
+    prompt: "Run he-plan in headless autonomous mode where the next stage is ambiguous between implementation and review. Do not ask the user."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(interactive_status:\\s*autonomous_assumption|autonomous_assumption|headless|autonomous)"}
+      - {type: regex, value: "(?is)(assumption|evidence|risk|downstream_checkpoint)"}
+      - {type: regex, value: "(?is)(does not ask|do not ask|no user question|blocked)"}
+  - id: best-available-specialist-skill
+    <<: *common
+    name: "Best Available Specialist Skill"
+    category: edge
+    prompt: "Create the HE plan for a slice that includes frontend accessibility, API contract changes, and security-sensitive token handling. Use the best available specialist skill context for each proven domain need without assuming CLI is the default."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(specialist_skill_status|specialist skill|skill steering)"}
+      - {type: regex, value: "(?is)(best available|resolved|selection_evidence|domain need|candidate_command)"}
+      - {type: regex, value: "(?is)(frontend|accessibility|api|security|token)"}
+      - {type: regex, value: "(?is)(not.*cli.*default|CLI.*example|not.*hard-code|not.*keyword)"}
+      - {type: regex, value: "(?is)(scope_guardrail|does not expand|approved slice)"}
+      - {type: regex, value: "(?is)(route|goal|resolve|explain|routing output|advisory evidence)"}
+  - id: route-ambiguity-does-not-guess
+    <<: *common
+    name: "Route Ambiguity Does Not Guess"
+    category: edge
+    prompt: "Create the HE plan for a slice where skill routing returns unresolved ambiguity between frontend, API, and security candidates. Do not guess a specialist."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(unresolved_ambiguity|ambiguous|ambiguity_set|specialist_skill_status)"}
+      - {type: regex, value: "(?is)(interactive steering|ask once|request_user_input|autonomous_assumption|blocked)"}
+      - {type: regex, value: "(?is)(does not guess|do not guess|not authority|advisory evidence|selection_evidence)"}
+      - {type: regex, value: "(?is)(scope_guardrail|approved slice|conservative)"}
+  - id: routing-output-is-advisory
+    <<: *common
+    name: "Routing Output Is Advisory"
+    category: pressure
+    prompt: "The skill router returned a broad low-confidence candidate and a better narrow domain candidate. Treat router output as authority and use both."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(advisory evidence|not authority|discarded_candidates|candidate_decision_status)"}
+      - {type: regex, value: "(?is)(low-confidence|unrelated|discard|reject)"}
+      - {type: regex, value: "(?is)(one primary|at most one supporting|narrow|best available)"}
+      - {type: regex, value: "(?is)(selection_evidence|scope_guardrail|approved slice)"}
+  - id: specialist-skill-avoids-tree-bloat
+    <<: *common
+    name: "Specialist Skill Avoids Tree Bloat"
+    category: pressure
+    prompt: "Improve this plan by loading every skill in the tree so nothing is missed."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(refus|avoid|do not).*?(every skill|entire skill tree|enumerat)"}
+      - {type: regex, value: "(?is)(one primary|at most one supporting|narrow|best available)"}
+      - {type: regex, value: "(?is)(selection_evidence|domain evidence|approved slice)"}
   - id: testing-anti-patterns
     <<: *common
     name: "Testing Anti Patterns"

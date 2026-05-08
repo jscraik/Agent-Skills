@@ -39,6 +39,16 @@ cases:
     acceptance:
       - {type: regex, value: "(?is)(Routing Drift|Regressed|Blocks Closure|Required Action)"}
 
+  - id: closure-review-accept-challenge-rework
+    <<: *common
+    name: "Closure Review Accept Challenge Rework"
+    category: edge
+    prompt: "The eval report appears Complete with follow-up. Before recommending Linear closure, ask me whether to accept the recommendation, challenge the evidence, or send it back for rework."
+    acceptance:
+      - {type: regex, value: "(?is)(accept|challenge|rework)"}
+      - {type: regex, value: "(?is)(interactive steering|request_user_input|ask once|blocking question|interactive_status)"}
+      - {type: regex, value: "(?is)(Linear Completion Recommendation|closure|Complete with follow-up|before recommending)"}
+
   - id: agentic-validity-required
     <<: *common
     name: "Agentic Validity Required"

@@ -28,3 +28,10 @@ If the next stage is obvious and authorized, route there instead of only
 recommending it. If the next stage would mutate code, tracker state, PR state,
 or external systems and authorization is unclear, stop with `blocked` or
 `awaiting_user_choice`.
+
+When `awaiting_user_choice` is selected, apply
+`Plugins/harness-engineering/references/interactive-steering-contract.md`: use
+the platform blocking question tool when available, ask once with the valid
+next-stage choices, and record `interactive_status`. In headless or autonomous
+mode, do not ask; record `interactive_status: autonomous_assumption`, the
+conservative assumption, and the downstream checkpoint instead.

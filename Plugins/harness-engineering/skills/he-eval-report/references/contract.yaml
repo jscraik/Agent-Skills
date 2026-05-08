@@ -7,7 +7,8 @@ triggers:
 inputs:
   - source slice, Linear identifiers, implementation diff, validation output, PR/commit evidence, ADR/core/refactor/spec links
 outputs:
-  - .harness/evals/<repo-name>-<linear-parent-issue-or-milestone>-eval.md
+  - .harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-milestone>-eval.md
+  - .harness/evals/YYYY-MM-DD-<repo-name>-<linear-parent-issue-or-milestone>-eval.md when no Linear issue is known
   - closure recommendation: Complete, Complete with follow-up, Blocked, Needs rework, or Unsafe to close
   - gate matrix, drift validation, proof artifacts, follow-up classification, and core/ADR update decision
 required_validity_checks:
