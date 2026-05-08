@@ -5,43 +5,16 @@ import sys
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
 
+from report_sections import REQUIRED_SECTIONS  # noqa: E402
 from validate_eval_report import validate  # noqa: E402
 
 
-def write_minimal_report(tmp_path: Path, side_effect_block: str) -> Path:
-    report = tmp_path / ".harness" / "evals" / "report.md"
-    report.parent.mkdir(parents=True)
-    report.write_text(
-        f"""# Executive Eval Summary
-
-Classification: Complete
-
-# Evaluated Slice
-
-Slice: JSC-1
-
-# Linear Definition of Done Status
-
-Linear Project: Harness
+BASE_FIELDS = """Linear Project: Harness
 Linear Milestone: Eval hardening
 Linear Parent Issue: JSC-1
 Linear Sub-Issues: none
 Linear Status Recommendation: Complete
 Proof Artifact Links: local
-
-# Linear Backlink Map
-
-Mapped.
-
-# Source Artifact Trace
-
-Traced.
-
-# Functional Validation Results
-
-Validated.
-
-# Eval Gate Matrix
 
 Gate: eval
 Expected: pass
@@ -51,8 +24,6 @@ Evidence: command output
 Confidence: high
 Blocks Closure: no
 Required Action: none
-
-# Agentic Eval Validity
 
 Evaluated Capability / Task: authorization validator
 Task Validity: task exercises protected side effects
@@ -66,12 +37,6 @@ Saturation / Maintenance Signal: no saturation
 Blocks Completion: no
 Required Action: none
 
-# Side-Effect Authorization
-
-{side_effect_block}
-
-# Drift Validation
-
 Architecture Drift: Neutral
 Routing Drift: Neutral
 Context Drift: Neutral
@@ -79,54 +44,15 @@ Governance Drift: Neutral
 Agent-Native Drift: Neutral
 Moat Drift: Neutral
 
-# Architecture Integrity Check
+Linear Completion Recommendation: Complete"""
 
-Checked.
 
-# Routing Determinism Check
-
-Checked.
-
-# Context Load Check
-
-Checked.
-
-# Agent-Native Check
-
-Checked.
-
-# Governance Simplicity Check
-
-Checked.
-
-# Moat Protection Check
-
-Checked.
-
-# Proof Artifacts
-
-Artifacts listed.
-
-# Failures / Regressions
-
-None.
-
-# Linear Completion Recommendation
-
-Linear Completion Recommendation: Complete
-
-# Follow-Up Work
-
-None.
-
-# Core / ADR Update Recommendation
-
-None.
-
-# Evidence & Traceability Matrix
-
-Evidence listed.
-""",
+def write_minimal_report(tmp_path: Path, side_effect_block: str) -> Path:
+    report = tmp_path / ".harness" / "evals" / "report.md"
+    report.parent.mkdir(parents=True)
+    sections = "\n\n".join(f"# {section}\n\nChecked." for section in REQUIRED_SECTIONS)
+    report.write_text(
+        f"{sections}\n\n{BASE_FIELDS}\n\n# Side-Effect Authorization\n\n{side_effect_block}\n",
         encoding="utf-8",
     )
     return report
