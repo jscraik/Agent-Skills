@@ -5,7 +5,7 @@ artifact_type: he-eval-report
 canonical_slug: agent-skills-first-principles-contract
 title: First-Principles Contract Eval
 harness_stage: he-eval-report
-status: draft
+status: accepted
 date: 2026-05-09
 traceability_required: false
 origin: .harness/plan/2026-05-09-agent-skills-first-principles-contract-plan.md
@@ -19,13 +19,14 @@ linear_milestone: HE First-Principles Gate (proposed)
 
 Status: Complete with follow-up.
 
-Linear Completion Recommendation: Do not close Linear work because no Linear
-issue exists and no accept/challenge/rework confirmation has happened. The
-implementation slice itself is safe to hand off for review.
+Linear Completion Recommendation: no Linear mutation is required because no
+Linear issue exists. The user accepted this eval on 2026-05-09, so if a Linear
+issue is created later this slice may use `Complete with follow-up` with the
+caveats below.
 
-Primary Blockers: no implementation blocker found. Closure is blocked only by
-the required human accept/challenge/rework step and the known workspace plugin
-picker cache permission warning from sync.
+Primary Blockers: no implementation blocker found. Full runtime picker-cache
+freshness remains caveated by the known workspace plugin picker cache permission
+warning from sync.
 
 Confidence: high for the selected implementation slice; medium for runtime
 picker freshness because `.agents/plugins-runtime/cache/**` refresh still
@@ -76,12 +77,11 @@ use evidence.
 Artifact Path:
 `.harness/evals/2026-05-09-agent-skills-first-principles-contract-eval.md`.
 
-Definition of Done Status: partial. The implementation proof exists, but no
-Linear object exists and human accept/challenge/rework steering has not yet
-happened.
+Definition of Done Status: satisfied for the selected implementation slice. No
+Linear object exists, and the user accepted this eval on 2026-05-09.
 
-Closure Safety: safe to review; unsafe to close as Linear work until the user
-accepts this eval or requests rework.
+Closure Safety: safe to review. Linear closure is not applicable unless a Linear
+issue or milestone is created.
 
 ## Linear Backlink Map
 
@@ -94,8 +94,8 @@ Linear Parent Issue: missing because not created.
 Linear Sub-Issues: missing because not created.
 
 Linear Status Recommendation: leave uncreated unless the user wants tracked
-execution state. If created later, use `Complete with follow-up` only after
-accept/challenge/rework steering.
+execution state. If created later, use `Complete with follow-up` and preserve
+the picker-cache caveat.
 
 Proof Artifact Links:
 
@@ -153,8 +153,8 @@ Interpretation: the selected phase met its planned implementation proof.
 
 Blocks Closure: no.
 
-Closure Caveat: Linear closure remains blocked until accept/challenge/rework
-steering is complete.
+Closure Caveat: Linear closure remains not applicable because no Linear issue
+exists.
 
 ## Functional Validation Results
 
@@ -411,8 +411,8 @@ Validator Decision: exempt
 
 Validator Confidence: high
 
-Suggested Next Step: ask accept/challenge/rework before any Linear closure or
-commit.
+Suggested Next Step: preserve the accepted eval caveats before any Linear
+closure or commit.
 
 Blocks Completion: no
 
@@ -587,7 +587,7 @@ Produced:
 
 Required:
 
-- accept/challenge/rework steering before closure recommendation is applied
+- accepted eval steering before closure recommendation is applied
 - optional plugin-wide release eval lane before plugin-wide confidence claims
 
 Missing:
@@ -600,8 +600,8 @@ Planned Before Implementation: yes.
 
 Blocks Completion: no
 
-Closure Caveat: external closure remains blocked until user steering accepts the
-eval result.
+Closure Caveat: external closure remains blocked only if new external tracking
+is introduced without preserving this accepted eval result.
 
 Attach or Link Back to Linear: attach this eval only if the proposed Linear issue
 is created.
@@ -643,7 +643,8 @@ Blocks Closure: no.
 Classification: Complete with follow-up.
 
 Recommended Linear Status: do not mutate Linear. If a Linear issue is created
-later, mark it review-ready only after user accepts this eval.
+later, mark it `Complete with follow-up` only with this eval linked and the
+picker-cache caveat preserved.
 
 Required Linear Comment/Update: "First-principles contract implementation
 completed for the selected HE slice. Static wiring, eval case presence, YAML
