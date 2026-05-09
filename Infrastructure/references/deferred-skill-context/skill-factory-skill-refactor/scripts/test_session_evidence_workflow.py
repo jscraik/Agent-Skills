@@ -84,8 +84,9 @@ class TestHandoffsJsonPrimaryArtifact(unittest.TestCase):
 
     def test_handoffs_json_includes_root_causes_and_evidence_labels(self):
         """handoffs.json guidance must mention root causes and evidence labels."""
-        self.assertIn("root cause", self._text)
-        self.assertIn("evidence", self._text)
+        text = self._text.lower()
+        self.assertIn("root cause", text)
+        self.assertIn("evidence labels", text)
 
 
 class TestHandoffsJsonExistenceVerification(unittest.TestCase):
