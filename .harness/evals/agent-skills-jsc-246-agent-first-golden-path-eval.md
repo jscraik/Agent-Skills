@@ -6,8 +6,8 @@ type: he-eval-report
 canonical_slug: agent-skills-jsc-246-agent-first-golden-path
 title: Agent Skills JSC-246 Agent First Golden Path Eval
 harness_stage: he-eval-report
-status: phase_007_complete
-date: 2026-05-08
+status: phase_003_refresh_complete
+date: 2026-05-09
 traceability_required: true
 origin: .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md
 linear_issue: JSC-246
@@ -18,10 +18,10 @@ linear_milestone: Command surface and ask reliability
 # Agent Skills JSC-246 Agent First Golden Path Eval
 
 ## Executive Eval Summary
-Status: `PLAN-JSC246-007` phase evidence complete; parent closure pending Linear state verification.
-Linear Completion Recommendation: Pending Linear state verification
-Primary Blockers: None for the JSC-246 implementation slice. Remaining repo-surface debt is advisory diagnostic debt, not a blocking gate.
-Confidence: High from focused tests, deterministic fresh-agent command snapshots, live CLI probes, harness identity lint, traceability lint, diff check, scoped repo validation, projection integrity, and closeout readiness evidence.
+Status: `PLAN-JSC246-001`, `PLAN-JSC246-002`, and `PLAN-JSC246-003` heartbeat evidence refreshed for the current dirty worktree; later historical phase evidence remains below but is not treated as fresh closeout proof.
+Linear Completion Recommendation: Do not mutate Linear from this heartbeat pass; continue the approved phase loop after human review of the refreshed baseline and doctor contract evidence.
+Primary Blockers: None for phase-001, phase-002, or phase-003 evidence capture. Remaining repo-surface debt is advisory diagnostic debt, and the live dirty worktree is explicitly not a clean JSC-246 closeout fixture.
+Confidence: High for the refreshed phase-001 command evidence, phase-002 doctor next-action contract evidence, and phase-003 skills-improve route-state evidence; medium for parent closure until later phase evidence is rechecked against current worktree state.
 
 ## Evaluated Slice
 Linear Project: `agent-skills`
@@ -37,15 +37,15 @@ Related Core Invariants: Agent-first golden path, deterministic command output, 
 
 ## Linear Definition of Done Status
 Artifact Path: `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md`
-Definition of Done Status: Satisfied for `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006`, and `PLAN-JSC246-007`.
-Closure Safety: Safe to close `JSC-246` after human review and any required Linear status/comment update.
+Definition of Done Status: Freshly satisfied for `PLAN-JSC246-001`, `PLAN-JSC246-002`, and `PLAN-JSC246-003`; historical evidence for later phases remains below and must be rechecked before any renewed closure recommendation.
+Closure Safety: Do not close `JSC-246` from this heartbeat pass alone.
 
 ## Linear Backlink Map
 Linear Project: `agent-skills`
 Linear Milestone: `Command surface and ask reliability`
 Linear Parent Issue: `JSC-246`
 Linear Sub-Issues: None admitted for this phase.
-Linear Status Recommendation: Close `JSC-246` after human review and after linking this eval artifact plus the fresh-agent evidence bundle. Do not infer completion for unrelated milestone work.
+Linear Status Recommendation: Keep `JSC-246` open from this heartbeat pass; later historical evidence must be rechecked before any renewed closure recommendation. Do not infer completion for unrelated milestone work.
 Proof Artifact Links: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`; `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md`; focused pytest and ask validation outputs listed below.
 Missing Identifiers: None for the local phase artifact.
 Traceability Repair: No repair required for this phase; live Linear mutation was not attempted from this eval.
@@ -68,7 +68,8 @@ Traceability Repair: No repair required for this phase; live Linear mutation was
 
 | Linear issue | Acceptance IDs |
 | --- | --- |
-| `JSC-246` | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006`, `PLAN-JSC246-007` |
+| `JSC-246` full approved plan | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006`, `PLAN-JSC246-007` |
+| Freshly revalidated in this heartbeat pass | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003` |
 
 ## Source Artifact Trace
 Linear Plan: `.harness/linear/agent-skills-linear-plan.md` and `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`.
@@ -77,6 +78,97 @@ Plugin HE Spec: `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spe
 ADRs: Existing proof taxonomy decision referenced by the plan.
 Core Invariants: Deterministic routing, agent-visible proof, and no implementation-completion shortcut.
 Other Source Artifacts: Live command outputs from `./bin/ask repo doctor`, `./bin/ask repo surface`, `./bin/ask skills improve`, `./bin/ask skills explain`, `./bin/ask skills prove`, and `./bin/ask repo closeout`.
+
+## Heartbeat Phase 001 Rebaseline - 2026-05-09
+
+Status: `PLAN-JSC246-001` complete for current-run evidence capture.
+Heartbeat Route: `$he-phase-heartbeat`
+Plan Source: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`
+Collector Bundle: `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509`
+Collector Evidence: `harness-engineering-evidence.json`, `skillify-candidates.json`, `index.json`, and `redaction-report.json` were present before phase selection.
+Git State: `codex/goal-governor-independent-skill...origin/codex/goal-governor-independent-skill [ahead 1]` with broad dirty worktree state from JSC-246 artifacts, HE strategy/refactor artifacts, media artifacts, heartbeat evidence bundles, and skill artifact outputs.
+Dirty-Worktree Classification: Baseline evidence only. The current tree is not a clean JSC-246 closeout fixture, and unrelated user/generated artifacts were preserved.
+Phase Selection: First incomplete or evidence-stale unit selected: `PLAN-JSC246-001`. No phase 002/003/004/005/006/007 implementation was admitted in this heartbeat pass.
+
+### Phase 001 Command Snapshot
+
+| Command | Result | Classification | Key evidence |
+| --- | --- | --- | --- |
+| `./bin/ask repo doctor --json --robot` | pass | advisory diagnostic | Trace `8b0fc30d-adf6-4e51-81fb-e9c9eef254c5`; `blocking: false`; `next_command: ./bin/ask repo surface --json --robot`; summary reported 7461 repo-surface diagnostic findings with task continuation allowed. |
+| `./bin/ask repo surface --json --robot` | pass | advisory diagnostic | Trace `c8bb1020-2371-4dc2-8f7a-48144638f9b6`; status `warning`; `total_paths: 10833`; `blocking_findings: 7461`; strict mode false; follow-up inventory commands emitted. |
+| `./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot` | pass | normal with baseline drift | Trace `191c17cb-2a1e-4d0b-a4cc-431387ea164a`; top-level improvement status `resolved_with_fallback`; recommended handle `autofix`; `next_command: ./bin/ask skills proof autofix --json --robot`; nested goal decision remained `intent_unresolved`, recorded as current baseline drift rather than phase-001 implementation scope. |
+| `./bin/ask skills explain he-spec --json --robot` | pass | normal continuation | Trace `7dfe8d1c-3762-45de-ac04-b500f0fb0eff`; status `resolved`; source `Plugins/harness-engineering/skills/he-spec/SKILL.md`; generated handle `.agents/skills/he-spec/SKILL.md`; next command `./bin/ask skills proof he-spec --json --robot`. |
+| `./bin/ask skills prove he-spec --json --robot` | pass | proof reachable without outcome proof | Trace `bdbb8847-f5df-415e-abcd-9d40aed9d422`; `proof_status: reachable_without_outcome_proof`; reachability and compat structural quality passed; outcome proof candidate `harness-engineering/he-spec` was available but not run. |
+| `./bin/ask repo closeout --changed --json --robot` | pass | ready with broad dirty tree | Trace `24ef9450-df91-4b77-8e24-20a87cec0ca8`; agent summary `Ready: no closeout blockers detected`; changed-file list includes many unrelated HE artifacts and JSC-246 support artifacts, so this is recorded as dirty-worktree baseline behavior, not a clean closure fixture. |
+| `./bin/ask runtime budget --json --robot` | pass | budget baseline | Trace `f701af7a-51b3-48f8-89e4-8a08f7423d7b`; `budget_status: pass`; `status: pass`; default visible count 10; duplicate default names empty; unresolved scope collisions empty; advanced count warning remains advisory. |
+
+### Phase 001 Handle Resolution Snapshot
+
+| Handle | Result | Source | Owner | Classification |
+| --- | --- | --- | --- | --- |
+| `autofix` | pass | `Skills/agent-ops/autofix/SKILL.md` | `agent-ops` | reachable command handle |
+| `he-spec` | pass | `Plugins/harness-engineering/skills/he-spec/SKILL.md` | `harness-engineering` | reachable command handle |
+| `he-heartbeat` | pass | `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md` | `harness-engineering` | reachable command handle |
+| `he-code-review` | pass | `Plugins/harness-engineering/skills/he-code-review/SKILL.md` | `harness-engineering` | reachable command handle |
+| `he-fix-bugs` | pass | `Plugins/harness-engineering/skills/he-fix-bugs/SKILL.md` | `harness-engineering` | reachable command handle |
+
+### Phase 001 Lint Snapshot
+
+| Artifact | Command | Result |
+| --- | --- | --- |
+| `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md` | `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md` | pass |
+| `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md` | `python3 Infrastructure/scripts/validation-and-linting/he_frontmatter_safety_lint.py .harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md` | pass |
+| `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md` | `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md` | pass |
+| `.harness/review/agent-skills-jsc-246-agent-first-golden-path-technical-review.md` | `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/review/agent-skills-jsc-246-agent-first-golden-path-technical-review.md` | pass |
+| `.harness/review/agent-skills-jsc-246-agent-first-golden-path-technical-review.md` | `python3 Infrastructure/scripts/validation-and-linting/he_frontmatter_safety_lint.py .harness/review/agent-skills-jsc-246-agent-first-golden-path-technical-review.md` | pass |
+| `.harness/review/agent-skills-jsc-246-agent-first-golden-path-technical-review.md` | `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/review/agent-skills-jsc-246-agent-first-golden-path-technical-review.md` | pass |
+
+### Phase 001 Decision
+
+`PLAN-JSC246-001` is complete for fresh baseline evidence. The next heartbeat should select the next incomplete or stale evidence unit only after preserving current dirty-worktree ownership. Do not treat the older clean-worktree phase evidence below as current closure proof without rerunning the relevant phase gates.
+
+## Heartbeat Phase 002 Refresh - 2026-05-09
+
+Status: `PLAN-JSC246-002` complete for current-run doctor next-action evidence.
+Heartbeat Route: `$he-phase-heartbeat`
+Plan Source: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`
+Dirty-Worktree Classification: Baseline evidence only. The phase refreshed command and test proof without absorbing unrelated dirty artifacts or changing implementation code.
+
+### Phase 002 Command Snapshot
+
+| Command | Result | Classification | Key evidence |
+| --- | --- | --- | --- |
+| `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py` | pass | focused phase tests | `38 passed in 0.06s`; covers golden-path next-action selection and repo-doctor contract behavior. |
+| `./bin/ask repo doctor --json --robot` | pass | advisory diagnostic | Trace `45c2a694-fcf7-46e8-b57d-4e9f114fd818`; `blocking: false`; `next_command: ./bin/ask repo surface --json --robot`; additive fields present as `next_command_kind: diagnostic_advisory`, `next_command_blocks_task: false`, and `selected_next_command.blocks_task: false`; duplicate mirror fields are present under `data.doctor` and top-level `data`. |
+| `./bin/ask repo surface --json --robot` | pass | non-strict warning inventory | Trace `3af2c715-58d2-4e00-ad66-50c94aa1f642`; `status: warning`; `strict: false`; `total_paths: 10833`; `blocking_findings: 7461`; metadata next steps remain policy/inventory guidance. |
+| `./bin/ask runtime budget --json --robot` | pass | regression check | Trace `9d16279e-ccb0-4899-8918-e52c1d914cae`; `budget_status: pass`; `status: pass`; default visible count 10; unresolved scope collisions empty; advanced visibility advisory remains informational. |
+
+### Phase 002 Decision
+
+`PLAN-JSC246-002` is complete for refreshed evidence. The doctor next-action contract is still additive and deterministic in the current run: `next_command` is preserved, advisory repo-surface debt is not elevated to a task blocker, and the selected command exposes both kind and blocking semantics for agents. Do not treat this as parent closure proof because phases 004-007 require their own refreshed proof relative to the current dirty worktree.
+
+## Heartbeat Phase 003 Refresh - 2026-05-09
+
+Status: `PLAN-JSC246-003` complete for current-run `skills improve` route-state evidence.
+Heartbeat Route: `$he-phase-heartbeat`
+Plan Source: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`
+Dirty-Worktree Classification: Baseline evidence only. The phase refreshed route-state tests and live representative goal probes without absorbing unrelated dirty artifacts or changing implementation code.
+
+### Phase 003 Command Snapshot
+
+| Command | Result | Classification | Key evidence |
+| --- | --- | --- | --- |
+| `python3 -m pytest Infrastructure/tests/test_ask_skills_goal.py` | pass | focused phase tests | `13 passed in 0.11s`; covers safe `skills improve` route states for resolved, fallback, blocked ambiguity, blocked dependency, and blocked reachability paths. |
+| `python3 -m pytest Infrastructure/tests/test_ask_cli.py -k "skills_improve or skills_goal"` | pass | focused CLI contract tests | `2 passed, 55 deselected in 1.17s`; preserves CLI JSON route-state contract exposure. |
+| `./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot` | pass | fallback route | Trace `78da518f-ea03-4836-bb52-38905e7ce0d5`; `status: resolved_with_fallback`; `route_state: resolved_with_fallback`; recommended handle `autofix`; `goal_decision_status: intent_unresolved`; proof and reachability passed. |
+| `./bin/ask skills improve "write a Linear-backed HE spec" --json --robot` | pass | direct resolved route | Trace `7a1f22de-4e93-4aa7-8fd1-c9b6ba618cf9`; `status: resolved`; `route_state: resolved`; recommended handle `he-spec`; `goal_decision_status: resolved`; proof and reachability passed. |
+| `./bin/ask skills improve "monitor a long-running HE work phase" --json --robot` | pass | direct resolved route | Trace `db463c96-a926-40b4-8628-a3b5068d0fc9`; `status: resolved`; `route_state: resolved`; recommended handle `he-work`; `he-phase-heartbeat` preserved as the first alternative; proof and reachability passed. |
+| `./bin/ask skills improve "review this implementation against the spec" --json --robot` | pass | fallback route | Trace `4862779c-f30a-479a-b883-d08659472140`; `status: resolved_with_fallback`; `route_state: resolved_with_fallback`; recommended handle `he-code-review`; rationale includes `fallback HE implementation-review intent hint`; `goal_decision_status: intent_unresolved`; proof and reachability passed. |
+| `./bin/ask skills improve "fix validation blockers after review" --json --robot` | pass | fallback replacing unreachable route | Trace `297e531c-6127-43d9-8bfe-d352019dd9c0`; `status: resolved_with_fallback`; `route_state: resolved_with_fallback`; initial routed `validation` capability was unreachable as a command handle; reachable fallback selected `he-fix-bugs`; proof and reachability passed. |
+
+### Phase 003 Decision
+
+`PLAN-JSC246-003` is complete for refreshed evidence. The route-state contract is explicit in both focused tests and live command output while preserving existing `status` compatibility. Direct HE routes remain direct, fallback routes remain inspectable, and unreachable routed capabilities do not silently masquerade as successful recommendations. Do not treat this as parent closure proof because phases 004-007 remain historical relative to the current dirty worktree.
 
 ## PLAN-JSC246-001 Baseline Snapshot Evidence
 
@@ -569,18 +661,18 @@ Operational Impact: Better operational reliability and cognition quality.
 Blocks Completion: no
 
 ## Proof Artifacts
-Produced: Focused pytest output, live ask doctor probe, repo surface probe, live skills improve route-state probes, live skills explain/proof/prove probes, live repo closeout changed-worktree probe, artifact identity lint, Linear traceability lint, diff check, scoped repo validation.
-Required: Link this eval artifact and command evidence back to the Linear parent or milestone summary.
-Missing: None; all phases 002–007 are complete and closure evidence is present in this eval artifact.
-Blocks Completion: no.
-Attach or Link Back to Linear: Link this eval artifact and the fresh-agent evidence bundle to JSC-246 to complete closure.
+Produced: Focused pytest output, live ask doctor probe, repo surface probe, live skills improve route-state probes, live skills explain/proof/prove probes, live repo closeout changed-worktree probe, artifact identity lint, Linear traceability lint, diff check, scoped repo validation, plus the fresh phase-001, phase-002, and phase-003 heartbeat evidence above.
+Required: Link this eval artifact and command evidence back to the Linear parent or milestone summary after the remaining phase evidence is refreshed.
+Missing: Fresh current-run proof for phases 004-007 in the dirty worktree context.
+Blocks Completion: yes for parent closure; no for phase-001 through phase-003 evidence capture.
+Attach or Link Back to Linear: Link this artifact as phase-001 through phase-003 heartbeat evidence, not as closure proof.
 
 ## Failures / Regressions
 Failure or Regression: Earlier parent closeout was blocked by projection drift and a generated-only `sync_required` loop.
 Evidence: Prior closeout probe reported `sync_required`; projection integrity reported cache mirror drift. Recovery commands resolved both, and current closeout is ready with no blockers.
 Required Corrective Action: Continue remaining JSC-246 phases and run final phase review/closeout gates before parent closure.
 Follow-Up Justified: Yes, already represented by the remaining approved plan phases.
-Blocks Closure: no for blocking repo-wrapper gates; no for parent issue closure.
+Blocks Closure: no for blocking repo-wrapper gates in the historical snapshot; yes for current parent closure until later phase gates are refreshed.
 
 Failure or Regression: Unrelated restored HE skill draft text briefly blocked strict progressive-disclosure validation.
 Evidence: `Infrastructure/artifacts/validation/20260508T132732Z/progressive-disclosure.log` reported `Plugins/harness-engineering/skills/he-linear-plan/SKILL.md: many code fences (6) but Infrastructure/scripts/ directory is missing`. Compressing those examples to inline text removed the blocker; `Infrastructure/artifacts/validation/20260508T132821Z` passed with `required_failures: 0` and `warn_only_issues: 0`.
@@ -589,24 +681,24 @@ Follow-Up Justified: Yes, but as separate HE skill lifecycle work rather than JS
 Blocks Closure: no for phase 006 after the local draft fix.
 
 ## Linear Completion Recommendation
-Classification: Pending Linear state verification
-Recommended Linear Status: Close `JSC-246` after linking this eval artifact, the fresh-agent evidence bundle, and confirming Linear shows the issue as completed.
-Required Linear Comment/Update: Note that phase 002 passed focused tests and live doctor proof; phase 003 passed focused route-state tests and live skills-improve probes after review gates; phase 004 passed focused explain/prove tests, live probes, and local review gates; phase 005 passed focused closeout fixture tests, live closeout classification, scoped repo validation, and local review gates; phase 006 passed first-contact compression validation and review gates; phase 007 passed deterministic fresh-agent command evidence and final closeout readiness.
-Issues to Close: `JSC-246` after human review.
+Classification: Phase-001 through phase-003 heartbeat refresh only
+Recommended Linear Status: Keep `JSC-246` open until phases 004-007 are refreshed or explicitly accepted as still-current by human review.
+Required Linear Comment/Update: If updating Linear now, note only that phases 001 through 003 were refreshed on 2026-05-09 against a dirty worktree and that later closure evidence is historical pending refresh.
+Issues to Close: None from this heartbeat pass.
 Issues to Reopen: None.
-Issues to Leave Open: None identified for this slice.
+Issues to Leave Open: `JSC-246` remains open from this heartbeat pass until phases 004-007 are refreshed or explicitly accepted as still-current by human review.
 New Follow-Up Issues: None; avoid issue explosion.
 Labels to Add/Remove: None.
-Milestone Completion: Complete for the JSC-246 slice; do not infer completion for unrelated milestone work.
+Milestone Completion: Not newly asserted by this heartbeat pass; do not infer completion for unrelated milestone work.
 Project Status Change: No change.
 Status Update Needed: Yes when the phase proof is linked.
 Proof Artifacts to Attach or Link: This eval artifact and validation command summary.
 
 ## Follow-Up Work
-Classification: None for JSC-246 closure
+Classification: Continue phase refresh before JSC-246 closure
 Target Linear Project: `agent-skills`
 Parent Issue or Milestone: `JSC-246` / `Command surface and ask reliability`
-Reason: The approved plan phases are complete; residual repo-surface debt is already classified as advisory and belongs to separate surface-governance work, not this parent issue.
+Reason: Phases 001, 002, and 003 are freshly rebaselined, while later phase evidence is historical relative to the current dirty worktree.
 Priority: Existing Linear priority `2`.
 Labels: Existing labels `Roadmap: Next`, `Agent`, `Infra`, `Improvement`.
 Agent-Safe or Human Review Required: Human review required before mutating Linear closure state.
@@ -617,13 +709,13 @@ ADR Update: Not required for this phase.
 Reason: The phase implements an approved additive contract; it does not introduce a new irreversible architectural decision.
 
 ## Evidence & Traceability Matrix
-Conclusion: Phases 002 through 007 are complete. `JSC-246` is ready for human-reviewed Linear closure pending Linear state verification.
+Conclusion: Phases 001, 002, and 003 are freshly complete. Historical phases 004 through 007 may still be useful evidence, but `JSC-246` is not ready for closure from this heartbeat pass alone.
 Fact: Focused tests passed and live command output exposes advisory/non-blocking continuation metadata, deterministic skills-improve route states, explain/prove taxonomy fields, closeout changed-file readiness classification, compressed first-contact docs/metadata, and fresh-agent command evidence that starts with `repo doctor`.
 Interpretation: The implementation improves routing/proof/closeout determinism without breaking existing command fields or adding proof schema.
-Assumption: Human review of the closure evidence is still required before mutating Linear issue state.
-Evidence: `27 passed` for phase 002 tests; `12 passed, 53 deselected` for phase 003 focused tests; `15 passed, 42 deselected, 2 subtests passed` for phase 004 focused tests; `24 passed` for phase 005 focused closeout tests; `21 passed, 36 deselected, 2 subtests passed` for phase 006 focused CLI tests; phase 007 deterministic runner exited `0` for all 11 commands; live `repo doctor`, `repo surface`, `skills improve`, `skills explain`, `skills proof`, `skills prove`, and `repo closeout --changed` probes; traceability and identity lints; scoped repo validation.
+Assumption: Human review or refreshed phase gates are required before mutating Linear issue state.
+Evidence: Fresh current-run proof includes phase-001 command snapshots, phase-002 `38 passed` focused doctor/golden-path tests, phase-003 `13 passed` skills-goal tests, phase-003 `2 passed, 55 deselected` CLI route-state tests, five live phase-003 `skills improve` probes, HE artifact lints, diff check, and scoped repo validation. Historical proof retained below includes phase-004 through phase-007 focused tests, live `skills explain`, `skills proof`, `skills prove`, and `repo closeout --changed` probes, plus the phase-007 deterministic runner.
 Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`, `Infrastructure/scripts/lib/ask/commands/skills.py`, `Infrastructure/scripts/lib/ask/command_metadata.py`, `Infrastructure/tests/test_ask_golden_path.py`, `Infrastructure/tests/test_ask_repo_doctor.py`, `Infrastructure/tests/test_ask_skills_goal.py`, `Infrastructure/tests/test_ask_cli.py`, `README.md`, `AGENTS.md`, `Docs/agents/16-agent-operating-contract.md`, `Docs/agents/5-minute-success-path.md`, `Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md`, `.harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh`, this eval artifact.
 Command or Inspection Method: Pytest, live `./bin/ask` commands, harness lints, diff inspection.
 Confidence: High
 Operational Impact: Agents get a clearer safe next step, explicit fallback/dependency/reachability states, and fewer false blockers.
-Blocks Completion: no.
+Blocks Completion: yes for parent closure; no for phase-001 through phase-003 rebaseline.
