@@ -1107,7 +1107,7 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         return result
     try:
         sections = _skill_sections(source_path)
-    except OSError as exc:
+    except OSError:
         result.status = "error"
         result.errors.append(
             ErrorObject(
@@ -1911,14 +1911,39 @@ _IMPROVE_STOPWORDS = frozenset({
     "a",
     "an",
     "and",
+    "against",
     "at",
     "better",
     "for",
     "make",
     "of",
+    "this",
     "the",
     "to",
 })
+
+_IMPROVE_HANDLE_HINTS = (
+    (
+        frozenset({"validation", "blockers", "fix"}),
+        "he-fix-bugs",
+        "fallback HE validation-blocker intent hint",
+    ),
+    (
+        frozenset({"review", "implementation", "spec"}),
+        "he-code-review",
+        "fallback HE implementation-review intent hint",
+    ),
+    (
+        frozenset({"monitor", "long", "running", "phase"}),
+        "he-phase-heartbeat",
+        "fallback HE phase-monitoring intent hint",
+    ),
+    (
+        frozenset({"linear", "backed", "spec"}),
+        "he-spec",
+        "fallback HE spec intent hint",
+    ),
+)
 
 
 def _improve_tokens(text: str) -> set[str]:
@@ -1938,6 +1963,27 @@ def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str
         handles = handles_report(repo_root_path=repo_root, include_handles=True).get("handles", [])
     except (OSError, RuntimeError, ValueError, KeyError, TypeError):
         return None
+    handle_rows = {
+        str(row.get("handle") or "").strip().lower().lstrip("$"): row
+        for row in handles
+        if isinstance(row, dict) and row.get("handle")
+    }
+    for required_tokens, hinted_handle, rationale in _IMPROVE_HANDLE_HINTS:
+        normalized_hint = hinted_handle.strip().lower().lstrip("$")
+        row = handle_rows.get(normalized_hint)
+        if required_tokens.issubset(request_tokens) and row:
+            return {
+                "candidate_id": f"skill:{row.get('handle')}::{row.get('command_handle_path')}",
+                "candidate_type": row.get("kind", "skill"),
+                "name": row.get("handle"),
+                "path": row.get("command_handle_path"),
+                "confidence": 0.85,
+                "rationale": [
+                    rationale,
+                    "matched terms=" + ",".join(sorted(required_tokens)),
+                ],
+                "scope_rank": 2,
+            }
     scored: list[tuple[int, str, dict[str, Any], set[str]]] = []
     for row in handles:
         if not isinstance(row, dict):

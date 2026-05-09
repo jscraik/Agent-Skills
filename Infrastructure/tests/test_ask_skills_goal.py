@@ -377,6 +377,63 @@ class TestAskSkillsGoal(unittest.TestCase):
             "./bin/ask skills proof he-fix-bugs --json --robot",
         )
 
+    def test_improve_fallback_routes_he_review_intent_to_code_review(self) -> None:
+        route_decision = {
+            "decision_status": "unresolved_ambiguity",
+            "policy_identity": "abc123def4567890",
+            "failure_class": "AMBIGUITY_UNRESOLVED",
+            "operator_action": "Narrow request.",
+            "selected_candidates": [],
+            "considered_candidates": [],
+            "ambiguity_set": [],
+        }
+        handles = {
+            "handles": [
+                {
+                    "handle": "triage",
+                    "kind": "skill",
+                    "command_handle_path": ".agents/skills/triage/SKILL.md",
+                    "owner": "agent-ops",
+                    "description": "Review file-based todo findings into ready, skipped, customized, or blocked states.",
+                    "invoke_via": "agent-ops",
+                    "source_path": "Skills/agent-ops/triage/SKILL.md",
+                },
+                {
+                    "handle": "he-code-review",
+                    "kind": "skill",
+                    "command_handle_path": ".agents/skills/he-code-review/SKILL.md",
+                    "owner": "harness-engineering",
+                    "description": "Review HE diffs for closure risk. Use when PR, commit, or readiness evidence is needed.",
+                    "invoke_via": "harness-engineering",
+                    "source_path": "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
+                },
+            ]
+        }
+        with (
+            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills.handles_report", return_value=handles),
+            patch("ask.commands.skills.skills_proof", return_value=_proof_result("he-code-review")),
+        ):
+            result = improve_skills(
+                REPO_ROOT,
+                "review this implementation against the spec",
+                top_k=3,
+                considered_limit=20,
+            )
+
+        self.assertEqual(result.status, "success")
+        improvement = result.data["improvement"]
+        self.assertEqual(improvement["status"], "resolved_with_fallback")
+        self.assertEqual(improvement["route_state"], "resolved_with_fallback")
+        self.assertEqual(improvement["goal_decision_status"], "intent_unresolved")
+        self.assertEqual(improvement["recommended_capability"]["handle"], "he-code-review")
+        self.assertEqual(improvement["reachability"]["status"], "pass")
+        self.assertIn("fallback HE implementation-review intent hint", improvement["why"])
+        self.assertEqual(
+            improvement["next_command"],
+            "./bin/ask skills proof he-code-review --json --robot",
+        )
+
     def test_improve_does_not_fallback_when_proof_error_has_no_gates(self) -> None:
         route_decision = {
             "decision_status": "resolved",
