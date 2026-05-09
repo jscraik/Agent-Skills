@@ -78,6 +78,53 @@ ADRs: Existing proof taxonomy decision referenced by the plan.
 Core Invariants: Deterministic routing, agent-visible proof, and no implementation-completion shortcut.
 Other Source Artifacts: Live command outputs from `./bin/ask repo doctor`, `./bin/ask repo surface`, `./bin/ask skills improve`, `./bin/ask skills explain`, `./bin/ask skills prove`, and `./bin/ask repo closeout`.
 
+## PLAN-JSC246-001 Baseline Snapshot Evidence
+
+Captured At: 2026-05-09T03:32Z heartbeat wake-up.
+Branch State Before Edit: `codex/goal-governor-independent-skill...origin/codex/goal-governor-independent-skill [ahead 2]`, clean worktree.
+Collector Bundle: `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509`; manifest generated `2026-05-09T01:08:54.246555Z`, confidence `medium`, redaction applied.
+
+Command snapshot table:
+
+| Command | Status | Metadata command | Metadata next_steps | Primary next command | Classification |
+| --- | --- | --- | --- | --- | --- |
+| `./bin/ask repo doctor --json --robot` | success | `repo doctor --json --robot` | `[]` | `./bin/ask repo surface --json --robot` | Advisory diagnostic; `blocking: false`, `next_command_kind: diagnostic_advisory`, `next_command_blocks_task: false`. |
+| `./bin/ask repo surface --json --robot` | success | `repo surface --json --robot` | `[]` | none | Advisory diagnostic inventory; `status: warning`, `total_paths: 9820`, `blocking_findings: 6501`, not a closeout blocker in non-strict mode. |
+| `./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot` | success | `skills improve make agents better at fixing PR review comments --json --robot` | `[]` | `./bin/ask skills proof autofix --json --robot` | Normal continuation with fallback; recommends `autofix`, `route_state: resolved_with_fallback`, reachability pass. |
+| `./bin/ask skills explain he-spec --json --robot` | success | `skills explain he-spec --json --robot` | `[]` | `./bin/ask skills proof he-spec --json --robot` | Normal continuation; resolved source/runtime/proof handoff for `he-spec`. |
+| `./bin/ask skills prove he-spec --json --robot` | success | `skills prove he-spec --json --robot` | `[]` | `./bin/ask workouts run harness-engineering/he-spec --json --robot` | Normal proof continuation; `proof_status: reachable_without_outcome_proof`, structural quality pass, outcome proof available but not run. |
+| `./bin/ask repo closeout --changed --json --robot` | success | `repo closeout --changed --json --robot` | `[]` | `./bin/ask repo status --json --robot` | Ready closeout; `commit_readiness.ready: true`, no blockers, changed files empty. |
+
+Handle resolution table:
+
+| Handle | Status | Source path | Runtime handle | Owner | Runtime visibility |
+| --- | --- | --- | --- | --- | --- |
+| `autofix` | ok | `Skills/agent-ops/autofix/SKILL.md` | `.agents/skills/autofix/SKILL.md` | `agent-ops` | `latent` |
+| `he-spec` | ok | `Plugins/harness-engineering/skills/he-spec/SKILL.md` | `.agents/skills/he-spec/SKILL.md` | `harness-engineering` | `latent` |
+| `he-heartbeat` | ok | `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md` | `.agents/skills/he-heartbeat/SKILL.md` | `harness-engineering` | `latent` |
+| `he-code-review` | ok | `Plugins/harness-engineering/skills/he-code-review/SKILL.md` | `.agents/skills/he-code-review/SKILL.md` | `harness-engineering` | `latent` |
+| `he-fix-bugs` | ok | `Plugins/harness-engineering/skills/he-fix-bugs/SKILL.md` | `.agents/skills/he-fix-bugs/SKILL.md` | `harness-engineering` | `latent` |
+
+Baseline facts:
+
+- Runtime budget is resolved and baselined: `default_visible_count: 10`, `estimated_description_tokens: 3172`, `violation_count: 0`.
+- Projection sync, catalog parity, and command handles pass in `repo doctor`.
+- Repo-surface debt remains diagnostic and non-blocking in the golden path: `6501` findings across `9820` tracked paths in this snapshot.
+- The prior dirty-worktree `sync_required` blocker is not active in this snapshot; closeout reports no changed files and no blockers. Earlier dirty closeout evidence remains useful only as historical classification of unrelated skill/projection work, not as a clean JSC-246 fixture.
+
+Focused fixture map:
+
+| Acceptance IDs | Existing evidence surface |
+| --- | --- |
+| SA1, SA2, SA3 | `Infrastructure/tests/test_ask_golden_path.py` and live `repo doctor` / `repo surface` snapshots. |
+| SA5, SA8, SA11 | `Infrastructure/tests/test_ask_skills_goal.py`, `Infrastructure/tests/test_ask_cli.py`, and live `skills improve` / `skills explain` / `skills prove` snapshots. |
+| SA16, SA19, SA20 | `Infrastructure/tests/test_ask_repo_doctor.py`, live `repo closeout --changed`, and this eval artifact. |
+
+Interpretation:
+The PLAN-JSC246-001 baseline now separates live command facts from implementation conclusions. It confirms the golden path is currently executable from a clean worktree, while preserving repo-surface debt as advisory and outcome proof absence as an explicit continuation rather than a hidden failure.
+Operational Impact: Future phases can use this section as the deterministic baseline instead of reconstructing command semantics from large JSON transcripts.
+Blocks Completion: no for phase 001.
+
 ## Functional Validation Results
 Command or Method: `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py -q`
 Result: pass; `27 passed`.
