@@ -571,16 +571,16 @@ Blocks Completion: no
 ## Proof Artifacts
 Produced: Focused pytest output, live ask doctor probe, repo surface probe, live skills improve route-state probes, live skills explain/proof/prove probes, live repo closeout changed-worktree probe, artifact identity lint, Linear traceability lint, diff check, scoped repo validation.
 Required: Link this eval artifact and command evidence back to the Linear parent or milestone summary.
-Missing: Final parent-issue closure proof for all JSC-246 phases.
-Blocks Completion: no for phases 002 through 006 focused behavior; yes for full parent closure.
-Attach or Link Back to Linear: Link this eval artifact when updating `JSC-246`.
+Missing: None; all phases 002–007 are complete and closure evidence is present in this eval artifact.
+Blocks Completion: no.
+Attach or Link Back to Linear: Link this eval artifact and the fresh-agent evidence bundle to JSC-246 to complete closure.
 
 ## Failures / Regressions
 Failure or Regression: Earlier parent closeout was blocked by projection drift and a generated-only `sync_required` loop.
 Evidence: Prior closeout probe reported `sync_required`; projection integrity reported cache mirror drift. Recovery commands resolved both, and current closeout is ready with no blockers.
 Required Corrective Action: Continue remaining JSC-246 phases and run final phase review/closeout gates before parent closure.
 Follow-Up Justified: Yes, already represented by the remaining approved plan phases.
-Blocks Closure: no for blocking repo-wrapper gates; yes for parent issue closure until phase 007 completes.
+Blocks Closure: no for blocking repo-wrapper gates; no for parent issue closure.
 
 Failure or Regression: Unrelated restored HE skill draft text briefly blocked strict progressive-disclosure validation.
 Evidence: `Infrastructure/artifacts/validation/20260508T132732Z/progressive-disclosure.log` reported `Plugins/harness-engineering/skills/he-linear-plan/SKILL.md: many code fences (6) but Infrastructure/scripts/ directory is missing`. Compressing those examples to inline text removed the blocker; `Infrastructure/artifacts/validation/20260508T132821Z` passed with `required_failures: 0` and `warn_only_issues: 0`.
