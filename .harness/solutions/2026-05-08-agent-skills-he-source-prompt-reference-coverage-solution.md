@@ -64,8 +64,8 @@ Minimum future handling:
 1. Treat the original prompt text as source evidence, not chat noise.
 2. Load the stage-specific source prompt preservation reference before
    compressing.
-3. Load the output contract for the selected stage.
-4. Load the stage context contract before handoff.
+3. Retrieve the output contract for the selected stage.
+4. Apply the stage context contract before handoff.
 5. Record `evidence_depth`, `coverage_scope`, `coverage_gaps`,
    `original_prompt_coverage`, and `downstream_confidence`.
 6. If the user wants equivalence to the original prompt method, route to a deep
