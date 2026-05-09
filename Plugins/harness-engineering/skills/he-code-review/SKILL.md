@@ -19,9 +19,13 @@ Return schema_version when structured. schema_version: 1, severity findings, tra
 3. Read changed files plus relevant review threads, CI, Linear, spec, plan, PR, and validation evidence. Lead with severity-ranked `file:line` findings.
 4. Use the evidence ladder for disputed behavior or repeated bot feedback; require proof before hypothesizing.
 5. Apply policy-index, specialist-skill, external `simplify`, coding-harness, and agent-native compression lenses only when the diff proves their trigger.
-6. Do not approve readiness from green CI alone when real behavior proof, security review, live PR-thread state, or traceability evidence is missing.
-7. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, and keep the canonical slug aligned with the spec/plan/eval chain.
-8. End with approve, request changes, autofix candidate, or follow-up lane for repeated feedback.
+6. For diffs that change HE routing, lifecycle gates, closure recommendations,
+   specialist selection, domain semantics, security-sensitive behavior, or eval
+   proof, apply the gate selection contract; treat missing, keyword-only, or
+   over-broad gate profiles as readiness findings.
+7. Do not approve readiness from green CI alone when real behavior proof, security review, live PR-thread state, or traceability evidence is missing.
+8. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, and keep the canonical slug aligned with the spec/plan/eval chain.
+9. End with approve, request changes, autofix candidate, or follow-up lane for repeated feedback.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Verify gates, references, subagent evidence, and command outcomes.
 ## Failure mode
@@ -55,6 +59,9 @@ Reference `assets/` only for skill packaging and browseability; review evidence 
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- Domain context: `Plugins/harness-engineering/references/domain-context-contract.md`
+- Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
+- Gate selection: `Plugins/harness-engineering/references/gate-selection-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`

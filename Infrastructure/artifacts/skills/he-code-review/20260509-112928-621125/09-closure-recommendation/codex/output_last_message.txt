@@ -1,0 +1,22 @@
+I can, but I can’t honestly attach evidence yet because this session’s shell access is blocked by the sandbox, so I’m unable to inspect the repo, diff, or validation output directly.
+
+If you paste the relevant diff or the output of `git status`, `git diff --stat`, and any test/validation results, I’ll turn it into this exact format:
+
+**Pass**
+- `item`: `evidence`
+  Example evidence: file path + line, test name, command output, or observable behavior.
+
+**Blocked**
+- `item`: `evidence`
+  Use this for anything that depends on missing info, failing infrastructure, or an unresolved prerequisite.
+
+**Needs Rework**
+- `item`: `evidence`
+  Use this for correctness gaps, missing coverage, weak error handling, contract mismatches, or maintainability issues.
+
+If you want, send me:
+1. `git diff --stat`
+2. The relevant files or patch
+3. Any test output
+
+and I’ll return a concise completion recommendation with concrete evidence under each bucket.

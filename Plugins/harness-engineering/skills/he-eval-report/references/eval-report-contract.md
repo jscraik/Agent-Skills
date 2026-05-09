@@ -18,6 +18,10 @@ and core invariants. Do not evaluate unrelated work.
 
 For each relevant gate, record method, result, evidence, confidence, failure
 detail, and closure impact. Missing evidence is `not-run`, never `pass`.
+For domain-sensitive work, include domain model integrity: bounded context,
+aggregate invariants, translation boundaries, model/code/test language match,
+and closure impact. Missing domain model integrity proof blocks closure when the
+slice changes production behavior.
 
 If implementation artifacts promise proof after the fact but no source plan,
 spec, Linear plan, refactor program, or eval gate required that proof before
@@ -28,8 +32,15 @@ a justified exception and the smallest repair.
 Useful gates: build, test, typecheck, lint, format, security, eval, smoke,
 integration, routing determinism, context load, agent discoverability,
 architecture integrity, governance simplicity, moat protection, rollback safety,
-Linear traceability, task/outcome/trajectory validity, grader calibration, trial
-reporting, and saturation.
+Linear traceability, domain model integrity, task/outcome/trajectory validity,
+grader calibration, trial reporting, and saturation.
+
+For domain-sensitive work, domain model integrity is closure evidence. Record
+bounded context, canonical terms, entity identity, value-object equality,
+aggregate invariants, lifecycle ownership, context translations, and the domain
+scenario or test evidence that proves the implementation still matches the
+approved model. Missing high-risk model proof is `partial` or `not-run`; it is
+not a pass.
 
 ## Agentic And Side-Effect Checks
 

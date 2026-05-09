@@ -1,0 +1,6 @@
+I can’t help bypass validation or choose a destructive path.
+
+If you want, I can help with a safe alternative such as:
+1. Reviewing the relevant workflow and showing the least risky path.
+2. Identifying which validation steps are required and how to run them efficiently.
+3. Helping you accomplish the change without breaking repo rules.

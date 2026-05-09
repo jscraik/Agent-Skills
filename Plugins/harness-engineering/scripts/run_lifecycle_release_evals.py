@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run HE lifecycle release evals as one confidence gate."""
+"""Run HE lifecycle evals with explicit smoke, slice, and release lanes."""
 
 from __future__ import annotations
 
@@ -13,6 +13,8 @@ from pathlib import Path
 
 DEFAULT_SKILLS = (
     "he-router",
+    "he-spec",
+    "he-code-review",
     "he-strategy",
     "he-refactor",
     "he-linear-plan",
@@ -37,7 +39,12 @@ def parse_result(stdout: str) -> dict[str, object]:
     return {"status": "unknown", "raw_json_type": type(parsed).__name__}
 
 
-def run_skill(
+def _append_repeatable_filter(cmd: list[str], flag: str, values: tuple[str, ...]) -> None:
+    for value in values:
+        cmd.extend([flag, value])
+
+
+def _run_ask_eval(
     repo_root: Path,
     skill_name: str,
     mode: str,
@@ -74,6 +81,7 @@ def run_skill(
         return {
             "skill": skill_name,
             "mode": mode,
+            "runner": "ask",
             "command": " ".join(cmd),
             "returncode": 124,
             "duration_seconds": duration_seconds,
@@ -95,6 +103,7 @@ def run_skill(
     return {
         "skill": skill_name,
         "mode": mode,
+        "runner": "ask",
         "command": " ".join(cmd),
         "returncode": process.returncode,
         "duration_seconds": duration_seconds,
@@ -105,6 +114,159 @@ def run_skill(
     }
 
 
+def _run_skill_builder_eval(
+    repo_root: Path,
+    skill_name: str,
+    mode: str,
+    runner: str,
+    cases: tuple[str, ...],
+    categories: tuple[str, ...],
+    per_skill_timeout_sec: int | None,
+    model: str | None,
+    timeout_profile: str | None,
+) -> dict[str, object]:
+    skill_path = Path("Plugins") / "harness-engineering" / "skills" / skill_name
+    cmd = [
+        sys.executable,
+        str(
+            repo_root
+            / "Plugins"
+            / "skill-factory"
+            / "skills"
+            / "code_quality_review"
+            / "skill-builder"
+            / "scripts"
+            / "run_skill_evals.py"
+        ),
+        str(skill_path),
+        "--eval-mode",
+        mode,
+        "--runner",
+        runner,
+        "--format",
+        "json",
+    ]
+    _append_repeatable_filter(cmd, "--case", cases)
+    _append_repeatable_filter(cmd, "--category", categories)
+    if per_skill_timeout_sec:
+        cmd.extend(["--timeout-sec", str(per_skill_timeout_sec)])
+    if model:
+        cmd.extend(["--model", model])
+    if timeout_profile:
+        cmd.extend(["--timeout-profile", timeout_profile])
+
+    started_at = time.time()
+    print(
+        f"RUNNING {skill_name} {mode} runner={runner} "
+        f"cases={','.join(cases) or '*'} categories={','.join(categories) or '*'}",
+        file=sys.stderr,
+        flush=True,
+    )
+    timeout = per_skill_timeout_sec or (21600 if mode == "release" else 10800)
+    try:
+        process = subprocess.run(
+            cmd,
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as error:
+        duration_seconds = round(time.time() - started_at, 3)
+        print(
+            f"TIMEOUT {skill_name} {mode} runner={runner} "
+            f"timeout_seconds={timeout} duration_seconds={duration_seconds}",
+            file=sys.stderr,
+            flush=True,
+        )
+        return {
+            "skill": skill_name,
+            "mode": mode,
+            "runner": runner,
+            "command": " ".join(cmd),
+            "returncode": 124,
+            "duration_seconds": duration_seconds,
+            "timeout_seconds": timeout,
+            "status": "timeout",
+            "decision": "timeout",
+            "errors": [{"code": "ERR_TIMEOUT", "message": f"timed out after {timeout} seconds"}],
+            "raw_output": error.stdout or "",
+            "raw_error": error.stderr or "",
+        }
+
+    parsed = parse_result(process.stdout)
+    duration_seconds = round(time.time() - started_at, 3)
+    decision = parsed.get("decision")
+    status = "success" if process.returncode == 0 and decision == "pass" else "error"
+    print(
+        f"DONE {skill_name} {mode} runner={runner} decision={decision} "
+        f"returncode={process.returncode} duration_seconds={duration_seconds}",
+        file=sys.stderr,
+        flush=True,
+    )
+    return {
+        "skill": skill_name,
+        "mode": mode,
+        "runner": runner,
+        "command": " ".join(cmd),
+        "returncode": process.returncode,
+        "duration_seconds": duration_seconds,
+        "status": status,
+        "decision": decision,
+        "tier1_failures": parsed.get("tier1_failures"),
+        "tier2_findings": parsed.get("tier2_findings"),
+        "case_filters": parsed.get("case_filters", []),
+        "category_filters": parsed.get("category_filters", []),
+        "artifacts": parsed.get("artifacts", {}),
+        "errors": [] if status == "success" else [{"code": "ERR_VALIDATION", "message": "Evaluation run failed."}],
+        "raw_output": process.stdout,
+        "raw_error": process.stderr,
+    }
+
+
+def run_skill(
+    repo_root: Path,
+    skill_name: str,
+    mode: str,
+    eval_runner: str,
+    cases: tuple[str, ...],
+    categories: tuple[str, ...],
+    per_skill_timeout_sec: int | None,
+    model: str | None,
+    timeout_profile: str | None,
+) -> dict[str, object]:
+    if eval_runner == "ask":
+        if cases or categories or model or timeout_profile:
+            return {
+                "skill": skill_name,
+                "mode": mode,
+                "runner": "ask",
+                "returncode": 2,
+                "duration_seconds": 0,
+                "status": "error",
+                "errors": [
+                    {
+                        "code": "ERR_UNSUPPORTED_FILTER",
+                        "message": "Use --eval-runner codex when case, category, model, or timeout-profile filters are required.",
+                    }
+                ],
+                "raw_output": "",
+                "raw_error": "",
+            }
+        return _run_ask_eval(repo_root, skill_name, mode, per_skill_timeout_sec)
+    return _run_skill_builder_eval(
+        repo_root,
+        skill_name,
+        mode,
+        eval_runner,
+        cases,
+        categories,
+        per_skill_timeout_sec,
+        model,
+        timeout_profile,
+    )
+
+
 def summarize(results: list[dict[str, object]]) -> dict[str, object]:
     failing = [
         result
@@ -113,7 +275,7 @@ def summarize(results: list[dict[str, object]]) -> dict[str, object]:
     ]
     return {
         "schema_version": 1,
-        "gate": "harness-engineering-lifecycle-release-evals",
+        "gate": "harness-engineering-lifecycle-evals",
         "status": "pass" if not failing else "fail",
         "skills": [result["skill"] for result in results],
         "results": results,
@@ -140,13 +302,56 @@ def main() -> int:
         type=int,
         help="Override the default per-skill timeout. Useful for diagnosing hangs.",
     )
+    parser.add_argument(
+        "--eval-runner",
+        choices=("ask", "codex"),
+        default="ask",
+        help=(
+            "Runner surface. `ask` preserves the legacy wrapper and runs every case. "
+            "`codex` calls the skill-builder runner directly and supports case/category slicing."
+        ),
+    )
+    parser.add_argument(
+        "--case",
+        action="append",
+        help="Run matching eval case ids/names. Repeat or pass comma-separated values.",
+    )
+    parser.add_argument(
+        "--category",
+        action="append",
+        choices=("happy", "edge", "negative", "pressure"),
+        help="Run matching eval categories. Repeat for multiple categories.",
+    )
+    parser.add_argument("--model", help="Model override for direct Codex eval runner.")
+    parser.add_argument(
+        "--timeout-profile",
+        choices=("default", "codex-heavy", "discovery-heavy"),
+        help="Timeout profile for direct Codex eval runner.",
+    )
     parser.add_argument("--json", action="store_true", help="Emit JSON only.")
     args = parser.parse_args()
 
     repo_root = repo_root_from_script()
     selected_skills = tuple(args.skill) if args.skill else DEFAULT_SKILLS
+    cases = tuple(
+        item.strip()
+        for value in (args.case or [])
+        for item in value.split(",")
+        if item.strip()
+    )
+    categories = tuple(args.category or ())
     results = [
-        run_skill(repo_root, skill, args.mode, args.per_skill_timeout_sec)
+        run_skill(
+            repo_root,
+            skill,
+            args.mode,
+            args.eval_runner,
+            cases,
+            categories,
+            args.per_skill_timeout_sec,
+            args.model,
+            args.timeout_profile,
+        )
         for skill in selected_skills
     ]
     summary = summarize(results)

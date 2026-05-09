@@ -29,6 +29,9 @@ Return `schema_version` when structured, plus `selected_stage`, `source_path`, `
 9. When the selected stage exposes a domain-specific knowledge gap, use the
    specialist skill steering contract to resolve the narrowest available skill;
    record discarded candidates and do not expand the approved HE scope.
+10. When routing words could trigger broad domain, strategy, refactor, Linear,
+    security, specialist, or eval gates, apply the gate selection contract and
+    record the smallest sufficient gate profile before loading adjacent context.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check deterministic aliases and subagent role availability.
 ## Failure mode
@@ -57,6 +60,12 @@ Redact secrets; never enumerate every child skill to the model. Do not remove im
   `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Specialist skill steering:
   `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- Domain model routing:
+  `Plugins/harness-engineering/references/domain-model-routing.md`
+- Domain model production:
+  `Plugins/harness-engineering/references/domain-model-production-contract.md`
+- Gate selection:
+  `Plugins/harness-engineering/references/gate-selection-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`; durable goal boards: `Skills/agent-ops/goal-governor`
 - Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`

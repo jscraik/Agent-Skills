@@ -615,7 +615,8 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
     ]
     commands = []
     validation_commands = []
-    if canonical_skill_changed:
+    projection_update_present = bool(canonical_skill_changed and generated_changed)
+    if canonical_skill_changed and not projection_update_present:
         commands.extend(
             [
                 "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
@@ -630,6 +631,7 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
         "validation_commands": validation_commands,
         "generated_changed_files": generated_changed,
         "canonical_skill_changed_files": canonical_skill_changed,
+        "projection_update_present": projection_update_present,
     }
 
 

@@ -14,15 +14,24 @@ Completed implementation, selected execution slice, source harness artifacts und
 ## Outputs
 Write `.harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-milestone>-eval.md` when Linear context is known, or `.harness/evals/YYYY-MM-DD-<repo-name>-<linear-parent-issue-or-milestone>-eval.md` when no issue is known. Return schema_version when structured with evaluated_slice, validation_results, agentic_eval_validity, agent_native_scorecard when relevant, drift_validation, proof_artifacts, closure_recommendation, follow_up_work, core_adr_update_recommendation, blocked_by, and next_handoff. Apply Artifact Identity frontmatter from `Plugins/harness-engineering/references/artifact-routing-contract.md` so the eval shares the same `canonical_slug` as the Linear/spec/plan chain.
 ## Procedure
+0. If the request asks to mark Linear complete, close work, or recommend
+   completion from implementation status alone, stop and classify closure as
+   blocked until the eval artifact, validation gates, drift proof, and
+   accept/challenge/rework steering are complete. Do not ask only for the
+   Linear issue identifier as the missing step.
 1. Resolve the stage context contract and identify exactly one evaluated slice; do not evaluate adjacent work.
 2. Load the eval report contract, schema, template, drift taxonomy, Linear completion policy, and relevant source artifacts for the selected slice.
 3. Classify source artifacts by content shape before path so mismatched titles, dates, or Linear identifiers become traceability findings.
 4. Compare implementation against the Linear plan, refactor program, plugin HE spec, ADRs, core invariants, and proof artifacts.
 5. Prove agentic eval validity before closure, including task validity, outcome validity, trajectory/process evidence, grader coverage, trial policy, side-effect authorization, and saturation or maintenance signal.
 6. Apply the XP operating contract: verify the promised proof was planned before closure, keep quality gates intact, classify missing proof as feedback, and name the smallest accepted-responsibility repair.
-7. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
-8. Run or explicitly block relevant validation gates; never invent passing results.
-9. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
+7. Apply the gate selection contract for closure-sensitive slices; block full
+   release-confidence or Linear completion recommendations when required
+   risk-specific proof, lifecycle release evals, security proof, or explicit
+   non-applicability is missing.
+8. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
+9. Run or explicitly block relevant validation gates; never invent passing results.
+10. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
 ## Validation
 Fail fast: stop at the first failed gate. Run `python3 Plugins/harness-engineering/skills/he-eval-report/scripts/validate_eval_report.py <report-path>`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <report-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_frontmatter_safety_lint.py <report-path>`; record exact command results. If the eval artifact is missing, incomplete, untraceable, or materially failing, closure recommendation must be `Blocked`, `Needs rework`, or `Unsafe to close`.
 ## Failure mode
@@ -52,6 +61,9 @@ Reference `assets/` only for skill packaging and browseability. Eval proof belon
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- Domain context: `Plugins/harness-engineering/references/domain-context-contract.md`
+- Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
+- Gate selection: `Plugins/harness-engineering/references/gate-selection-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Agent-native audit scorecard: `Plugins/harness-engineering/references/agent-native-audit-scorecard.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

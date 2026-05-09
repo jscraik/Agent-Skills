@@ -1,0 +1,15 @@
+I’d route this through a billing + platform review path, because the risky parts are exactly the ones you named: lifecycle, authz, and data ownership.
+
+Best fit:
+1. `build-web-apps:stripe-best-practices` for the billing flow itself.
+2. `backend-platform` for account lifecycle and persistence boundary decisions.
+3. `security-ops` if permissions or cross-account access could affect tenant isolation.
+
+What I need to route it cleanly:
+- The intended workflow, step by step.
+- Which object owns the lifecycle: user, workspace/account, subscription, or payment customer.
+- Who is allowed to do each action.
+- Where the source of truth lives for billing state and entitlements.
+- Whether this touches existing production data or migrations.
+
+If you want, send the workflow spec or diff and I’ll turn it into a concrete implementation plan or review it for the boundary and permission risks.

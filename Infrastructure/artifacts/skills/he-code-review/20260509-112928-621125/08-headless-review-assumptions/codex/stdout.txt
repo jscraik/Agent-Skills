@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0c4d-31bf-74c1-90bb-d820eb16410b"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. For unattended reviews, I’ll record:\n\n- Assumptions I had to make\n- Confidence level for each notable point\n- Any non-blocking uncertainties as notes, instead of interrupting with questions\n\nI’ll still surface truly blocking issues as blocking, but for everything else I’ll keep the review moving and make the uncertainty explicit in the write-up."}}
+{"type":"turn.completed","usage":{"input_tokens":29723,"cached_input_tokens":29568,"output_tokens":144,"reasoning_output_tokens":65}}

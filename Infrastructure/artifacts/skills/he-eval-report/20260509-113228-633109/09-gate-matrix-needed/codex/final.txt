@@ -1,0 +1,8 @@
+I can build it, but I can’t ground it in actual evidence from this workspace right now because the repo shell is blocked by the sandbox and there are no mounted workspace resources to inspect.
+
+If you want, send me one of these and I’ll turn it into a real gate matrix:
+1. The eval results files or logs
+2. The relevant skill/report markdown
+3. A pasted `./bin/ask skills prove ...` or `./bin/ask repo doctor --json --robot` output
+
+Once I have that evidence, I’ll produce a matrix with `pass`, `fail`, `partial`, and `not-run` statuses tied to specific source lines or outputs.

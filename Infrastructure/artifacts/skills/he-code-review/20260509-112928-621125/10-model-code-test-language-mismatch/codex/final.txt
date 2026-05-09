@@ -1,0 +1,10 @@
+I can’t inspect the repo diff from this session because the shell is currently blocked by the sandbox, so I can’t give you trustworthy file-and-line findings yet.
+
+Based on the mismatch you described, the review concern is real:
+
+- The spec says `Workspace`, the implementation says `Account`, and the tests assert `Customer`. That is a strong signal the three layers are not describing the same domain object.
+- The risk is that the change can “pass” tests while shipping the wrong behavior, because the tests may be validating a different entity than the one the spec intends.
+- If this is just a terminology rename, the rename needs to be made consistently across spec, code, and tests.
+- If these are genuinely different concepts, the diff needs an explicit mapping or adapter so the behavior under test matches the requested domain.
+
+If you want, send me the diff or the relevant files and I’ll do a proper review with concrete findings, severity ordering, and exact references.

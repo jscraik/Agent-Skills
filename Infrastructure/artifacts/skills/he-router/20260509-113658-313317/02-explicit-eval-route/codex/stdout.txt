@@ -1,0 +1,5 @@
+{"type":"thread.started","thread_id":"019e0c4f-fe1c-73b3-8a0c-d254cb69e772"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can help with that, but I need one concrete target first: which Linear milestone or project are we trying to close, and do you want proof from code, tests, CI, or all three?"}}
+{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"I can help with that, but I need one concrete target first: which Linear milestone or project are we trying to close, and do you want proof from code, tests, CI, or all three?"}}
+{"type":"turn.completed","usage":{"input_tokens":29711,"cached_input_tokens":22400,"output_tokens":242,"reasoning_output_tokens":147}}

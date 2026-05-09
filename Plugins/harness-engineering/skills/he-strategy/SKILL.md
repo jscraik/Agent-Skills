@@ -129,6 +129,7 @@ at the first failed gate and do not proceed.
 - Deferred context index: `../../references/deferred-context-index.md`
 - Agent-native compression: `../../references/agent-native-compression-contract.md`
 - Agent-native audit scorecard: `../../references/agent-native-audit-scorecard.md`
+- Domain model production: `../../references/domain-model-production-contract.md`
 - Pragmatic Programmer review: `../../references/pragmatic-programmer-review-contract.md`
 - XP operating contract: `../../references/xp-operating-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`

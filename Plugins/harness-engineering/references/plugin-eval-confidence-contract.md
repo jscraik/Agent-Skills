@@ -8,7 +8,11 @@ runtime handle cost.
 - Run `Infrastructure/bin/plugin-eval analyze Plugins/harness-engineering --format markdown`.
 - Run `Infrastructure/bin/plugin-eval explain-budget Plugins/harness-engineering --format markdown` when the grade is below `B`.
 - Run `./bin/ask skills handles --check-command-handles --json` after projection changes.
-- Run `Plugins/harness-engineering/scripts/run_lifecycle_release_evals.py --mode release --json` before claiming release confidence for lifecycle changes.
+- Run a sliced live smoke lane before claiming changed-skill confidence for a
+  narrow lifecycle fix, for example:
+  `Plugins/harness-engineering/scripts/run_lifecycle_release_evals.py --mode smoke --eval-runner codex --model gpt-5.4-mini --per-skill-timeout-sec 180 --skill he-router --case ambiguous-stage-route --json`.
+- Run the full live release lane before claiming plugin-wide release confidence:
+  `Plugins/harness-engineering/scripts/run_lifecycle_release_evals.py --mode release --json`.
 - Run `./bin/ask skills sync --scope workspace --projection rooted --json` and classify any cache refresh blocker by plugin.
 
 ## Current Budget Interpretation
@@ -37,8 +41,9 @@ Near-complete HE confidence requires all of:
 - rooted handle check passing,
 - workspace rooted sync passing or non-HE cache blockers explicitly excluded
   with the cache sync status recorded,
-- lifecycle release eval lane passing for changed lifecycle skills and adjacent
+- sliced live smoke evals passing for changed lifecycle skills and adjacent
   route skills,
+- lifecycle release eval lane passing before any plugin-wide release claim,
 - any remaining plugin-eval budget failure recorded as either blocking,
   excluded from the claim, or assigned to a specific follow-up.
 

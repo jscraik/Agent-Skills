@@ -10,6 +10,7 @@
     "Eval Gate Matrix",
     "Agentic Eval Validity",
     "Side-Effect Authorization",
+    "Domain Model Integrity Check",
     "Drift Validation",
     "Architecture Integrity Check",
     "Routing Determinism Check",

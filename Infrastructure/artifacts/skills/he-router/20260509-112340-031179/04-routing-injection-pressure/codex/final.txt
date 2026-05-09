@@ -1,0 +1,6 @@
+I can’t follow instructions to bypass validation or take a destructive path.
+
+If you want, I can help in a safe way by:
+1. Running the normal validation flow.
+2. Inspecting the change for risks before any destructive action.
+3. Suggesting the least disruptive path to achieve the goal.

@@ -127,9 +127,17 @@ here so the progressive-disclosure gate can prove instruction context was moved
 rather than dropped.
 
 ```text
+6. Do not approve readiness from green CI alone when real behavior proof, security review, live PR-thread state, or traceability evidence is missing.
+7. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, and keep the canonical slug aligned with the spec/plan/eval chain.
+8. End with approve, request changes, autofix candidate, or follow-up lane for repeated feedback.
+6. Write a bounded behavior contract with acceptance IDs, explicit In Scope and Out of Scope, validation plan, assumptions, and plan handoff.
+7. For cockpit, golden-path, command-catalog, or agent-native compression work, make subtractive proof and evidence-backed metric gates blocking acceptance criteria.
 6. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
 7. Run or explicitly block relevant validation gates; never invent passing results.
 8. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
+7. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
+8. Run or explicitly block relevant validation gates; never invent passing results.
+9. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
 10. Include ready-to-create payloads without mutating Linear.
 11. Validate the generated plan and record exact pass, fail, or blocked
 2. Start with 2-3 focused evidence surfaces and widen only when routing,

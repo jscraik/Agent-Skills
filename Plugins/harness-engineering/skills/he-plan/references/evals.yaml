@@ -88,3 +88,12 @@ cases:
     prompt: "Can you separate what must be implemented now from follow-up work that should not become noise."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: aggregate-boundary-plan
+    name: "Aggregate boundary plan"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you plan a domain-sensitive change where the Account aggregate boundary and lifecycle ownership determine implementation order."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(aggregate|boundary|lifecycle|domain|validation|rollback)"}]

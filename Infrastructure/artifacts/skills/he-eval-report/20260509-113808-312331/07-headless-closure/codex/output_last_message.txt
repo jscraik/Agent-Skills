@@ -1,0 +1,8 @@
+I can make that behavior change, but I can’t complete it from this session because the workspace shell is failing before I can inspect or edit the repo.
+
+What I’d change once the repo is accessible:
+- In autonomous mode, replace the user prompt for a status choice with an assumption log entry.
+- Record the closure assumption explicitly in the canonical workflow/docs source.
+- Keep the interactive choice only for non-autonomous mode.
+
+If you want, I can take another pass as soon as the workspace shell is available and patch the exact file for you.

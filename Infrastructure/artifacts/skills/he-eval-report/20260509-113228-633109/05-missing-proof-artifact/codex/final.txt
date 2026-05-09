@@ -1,0 +1,9 @@
+Closure is **not safe**.
+
+If validation was only partially completed and the required proof artifact is missing, then the work is still **unverified**. Under normal closeout standards, that should be classified as:
+
+- `unsafe to close`
+- `validation incomplete`
+- `needs follow-up before closure`
+
+If you want, I can help you turn that into a precise closeout note or a pass/fail classification line for the report.

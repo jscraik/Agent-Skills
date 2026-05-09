@@ -1,18 +1,18 @@
 # Domain Model Routing
 
-Read when: a Harness Engineering request mentions project terminology, ubiquitous language, `CONTEXT.md`, `CONTEXT-MAP.md`, glossary, naming conflicts, domain-model drift, or a Linear issue whose wording changes product meaning.
+Read when: a Harness Engineering request mentions project terminology, ubiquitous language, `CONTEXT.md`, `CONTEXT-MAP.md`, glossary, naming conflicts, domain-model drift, production-grade behavior, or a Linear issue whose wording changes product meaning.
 
-Harness Engineering treats domain language as part of the delivery contract. Resolve project-specific terms before downstream stages harden behavior, but keep the active `SKILL.md` files as concise maps and use this reference for the deeper workflow.
+Harness Engineering treats domain language as part of the delivery contract. Resolve project-specific terms before downstream stages harden behavior, but keep the active `SKILL.md` files as concise maps and use this reference for the deeper workflow. Use `domain-model-production-contract.md` when product behavior, workflow state, integration, persistence, or closure confidence depends on the model.
 
 ## Routing
 
 - Use `he-brainstorm` when language is still fuzzy, several words may name the same concept, or the team needs one focused question at a time before picking direction.
 - Use `he-spec` when the work needs its first implementation-grade behavior contract and domain terms shape acceptance criteria.
-- Use `he-deepen-spec` when an existing spec, code path, or Linear issue disagrees with `CONTEXT.md`, or when two concepts overlap and need scenario testing before planning.
+- Use folded `he-deepen-spec` mode through `he-spec` when an existing spec, code path, or Linear issue disagrees with `CONTEXT.md`, or when two concepts overlap and need scenario testing before planning.
 - Use `he-plan` only after canonical terms, relationships, and required context updates are stable enough for task decomposition.
 - Use `he-work` when approved execution uncovers domain drift; stop and update the governing artifact or linked Linear issue before coding past the drift.
 - Use `he-fix-bugs` when tracker wording may be using the wrong project term; reproduce only after confirming the issue meaning matches the domain model.
-- Use `he-code-review` or `he-technical-review` when a diff, PR, spec, or plan introduces new terms, renamed concepts, or code/document mismatches.
+- Use `he-code-review` or folded `he-technical-review` mode when a diff, PR, spec, or plan introduces new terms, renamed concepts, or code/document mismatches.
 
 ## Context Files
 

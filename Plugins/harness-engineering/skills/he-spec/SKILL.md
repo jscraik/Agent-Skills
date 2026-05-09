@@ -19,8 +19,12 @@ Return schema_version when structured. schema_version: 1, bounded implementation
 3. Apply document-review tiers, specialist skill steering, and interactive steering only when their trigger conditions are proven by source inspection.
 4. Resolve or block the Linear tracker; run the Linear Delta Capture Gate for existing tracked plans before admitting changed Linear work into scope.
 5. Route durable output to `.harness/specs/**.md`, classify existing artifacts by content shape before path, and apply Artifact Identity frontmatter.
-6. Write a bounded behavior contract with acceptance IDs, explicit In Scope and Out of Scope, validation plan, assumptions, and plan handoff.
-7. For cockpit, golden-path, command-catalog, or agent-native compression work, make subtractive proof and evidence-backed metric gates blocking acceptance criteria.
+6. When a slice could trigger broad domain, strategy, refactor, Linear,
+   security, specialist, or eval gates, apply the gate selection contract and
+   turn the selected risk class, required contracts, skipped contracts, and
+   minimum proof into acceptance criteria.
+7. Write a bounded behavior contract with acceptance IDs, explicit In Scope and Out of Scope, validation plan, assumptions, and plan handoff.
+8. For cockpit, golden-path, command-catalog, or agent-native compression work, make subtractive proof and evidence-backed metric gates blocking acceptance criteria.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check traceability, tests, observability, rollback, and owner evidence.
 ## Failure mode
@@ -52,6 +56,10 @@ Reference `assets/` only for skill packaging and browseability; spec source mate
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- Domain context: `Plugins/harness-engineering/references/domain-context-contract.md`
+- Domain model routing: `Plugins/harness-engineering/references/domain-model-routing.md`
+- Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
+- Gate selection: `Plugins/harness-engineering/references/gate-selection-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Document review tiers: `Plugins/harness-engineering/references/document-review-finding-tiers.md`
 - Session evidence trace: `Plugins/harness-engineering/references/session-evidence-trace-context.md`

@@ -104,6 +104,16 @@ Validator Confidence: high
 Suggested Next Step:
 Blocks Completion: no
 
+## Domain Model Integrity Check
+Domain Model Status:
+Bounded Context:
+Aggregate / Invariant Proof:
+Model-Code-Test Language Match:
+Translation Boundary:
+Closure Impact:
+Evidence:
+Blocks Completion:
+
 ## Drift Validation
 Architecture Drift: Unknown
 Routing Drift: Unknown
@@ -116,6 +126,17 @@ Moat Drift: Unknown
 Conclusion:
 Evidence:
 Affected Files/Modules:
+Confidence:
+Blocks Completion:
+
+## Domain Model Integrity Check
+Conclusion:
+Bounded Context:
+Canonical Terms:
+Aggregate Invariants:
+Lifecycle Ownership:
+Translation Evidence:
+Scenario or Test Evidence:
 Confidence:
 Blocks Completion:
 

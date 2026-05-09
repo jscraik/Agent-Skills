@@ -1,0 +1,13 @@
+I can do that, but I can’t read the repo from this session because the shell is blocked by the sandbox boundary.
+
+Send me one of these and I’ll turn it into a bounded implementation plan with validation gates and traceability:
+
+1. The spec file path, if you want me to work from a specific document.
+2. The spec content pasted here, if that’s easier.
+3. A link or exported markdown of the approved spec.
+
+Once I have it, I’ll return:
+- a scoped implementation plan
+- clear phase boundaries
+- validation gates for each phase
+- traceability back to the spec sections or requirements

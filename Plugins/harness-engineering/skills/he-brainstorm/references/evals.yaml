@@ -7,6 +7,15 @@ x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"
 x_accept: &accept [{type: regex, value: "(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)"}]
 x_steer: &steer [{type: regex, value: "(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)"}]
 cases:
+  - id: domain-survivor-selection
+    name: "Domain survivor selection"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you brainstorm whether Customer, Account, and Workspace are the same concept; choose the survivor only after the blocking domain question."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(blocking question|domain|canonical term|bounded context|survivor|ask)"}]
   - id: direction-options-needed
     name: "Direction options needed"
     category: happy

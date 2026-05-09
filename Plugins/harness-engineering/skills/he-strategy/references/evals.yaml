@@ -97,3 +97,12 @@ cases:
     prompt: "Can you compress the strategy into the smallest feedback-producing next slice and name the stop or pivot condition."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(smallest|feedback|stop|pivot|evidence)"}]
+  - id: domain-vision-core
+    name: "Domain vision core"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you decide whether a proposed domain model belongs in the core strategy or is just local terminology cleanup."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(core domain|domain model|strategy|investment|do not create)"}]

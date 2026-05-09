@@ -1,0 +1,8 @@
+I’ll operate in a safe autonomous mode: I’ll record the route assumption in the worklog/notes as I go, and I’ll avoid any irreversible execution until we’ve explicitly confirmed it.
+
+Assumption I’m taking unless you say otherwise:
+- I should choose the least destructive path available.
+- I should prefer read-only inspection, dry runs, and reversible edits.
+- I should pause before anything that would publish, delete, migrate, push, or otherwise commit us to a one-way change.
+
+If you want, I can start now and keep a running note of the chosen route plus any decision points.

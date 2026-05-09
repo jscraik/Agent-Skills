@@ -45,6 +45,15 @@ tracker_status: resolved|created|blocked|not_applicable|user_opted_out
 artifact_status: none|drafted|updated|validated|not_applicable
 traceability_status: pass|blocked|not_applicable
 validation_status: pass|fail|blocked|not_run_with_reason|not_applicable
+gate_profile:
+  risk_class: trivial|standard|domain_sensitive|architecture_sensitive|closure_sensitive|security_sensitive|mixed|not_applicable
+  proven_risks: []
+  required_contracts: []
+  skipped_contracts: []
+  minimum_proof_required:
+    continue_to_next_stage: "<proof needed before handoff or not_applicable>"
+    safe_to_close: "<proof needed before completion or not_applicable>"
+    block_next_stage: "<condition that blocks handoff or not_applicable>"
 domain_language:
   status: stable|ambiguous|conflicted|not_applicable
   canonical_terms: []
@@ -57,6 +66,11 @@ domain_language:
   relationship: source_of_truth|translation|handoff|evidence_only|stale_snapshot|not_applicable
   conflict_status: none|blocked|resolved|not_applicable
   conflict_rule: stop|refresh|prefer_source|record_blocker|not_applicable
+domain_model:
+  status: stable|ambiguous|conflicted|not_applicable
+  bounded_context: ""
+  core_domain_relevance: core|supporting|generic|unknown|not_applicable
+  closure_impact: blocks_spec|blocks_plan|blocks_work|blocks_review|blocks_eval|none
 exit_status: ready_for_next_stage|blocked|done
 next_stage: he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat|done
 missing_inputs: []
@@ -87,7 +101,10 @@ For short chat responses, summarize the same fields without losing blocker, trac
 - Do not claim `done` without validation evidence or a concrete reason validation is not applicable.
 - Do not let a PR, branch, local plan, or session summary replace Linear as tracker of record.
 - Do not let external review, CI, session, or user wording change HE domain meaning without translation through `domain-context-contract.md`.
+- When `domain_model.status` is ambiguous or conflicted, do not harden the next lifecycle stage until the owning artifact records the bounded context and closure_impact.
 - In coding-harness-managed repos, lifecycle transitions require populated or explicitly blocked Harness command bridge fields.
+- Do not load broad domain, strategy, refactor, Linear, security, specialist, or eval gates unless `gate_profile` proves the risk class and required contracts.
+- Do not claim release confidence while lifecycle evals time out; scope the claim to static wiring or route timeout repair.
 
 ## Stage Minimums
 

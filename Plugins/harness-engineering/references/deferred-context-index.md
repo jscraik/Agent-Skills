@@ -15,7 +15,9 @@ the reference below, and let validators catch stale duplicated procedure text.
   - `references/deterministic-stage-routing.md`
   - `references/domain-model-routing.md`
   - `references/domain-context-contract.md`
+  - `references/domain-model-production-contract.md`
   - `references/design-complexity-contract.md`
+  - `references/gate-selection-contract.md`
 - Lifecycle, artifact, slice, and tracker gates:
   - `references/stage-context-contract.md`
   - `references/lifecycle-exit-contract.md`
@@ -58,6 +60,7 @@ Load references by trigger instead of by habit:
 | Non-trivial tracked work | `references/linear-tracker-gate.md` | resolved, created, blocked, or user-opted-out tracker status |
 | Existing tracked plan or Linear-backed slice is consumed | `references/linear-delta-capture-gate.md` | delta admitted, rejected, or blocked before scope changes |
 | Coding-harness-managed repo | `references/coding-harness-command-bridge.md`, `references/execution-slice-contract.md` | command evidence or explicit blocked bridge fields |
+| Stage could load broad domain, strategy, refactor, Linear, security, specialist, or eval gates | `references/gate-selection-contract.md` | smallest gate profile, required contracts, skipped contracts, and minimum proof |
 | Domain-specific knowledge could sharpen output | `references/specialist-skill-steering-contract.md` | chosen specialist, skipped reason, or blocker |
 | User choice affects downstream scope | `references/interactive-steering-contract.md` | asked choice, headless assumption, or blocked state |
 | Product compression is the blocker | `references/agent-native-compression-contract.md` | subtractive proof, fresh-agent eval, and ablation gate |

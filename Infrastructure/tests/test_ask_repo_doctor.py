@@ -245,6 +245,32 @@ class TestAskRepoDoctor(unittest.TestCase):
             "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
         )
 
+    def test_closeout_changed_skill_source_with_projection_update_requires_handle_validation(self) -> None:
+        changed_files = [
+            ".skillsets/harness-engineering/manifest.jsonl",
+            "Plugins/harness-engineering/skills/he-router/SKILL.md",
+        ]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        self.assertTrue(closeout["commit_readiness"]["ready"])
+        self.assertFalse(closeout["sync"]["needed"])
+        self.assertTrue(closeout["sync"]["projection_update_present"])
+        self.assertEqual(closeout["sync"]["commands"], [])
+        self.assertEqual(
+            closeout["sync"]["validation_commands"],
+            ["./bin/ask skills handles --check --json --robot"],
+        )
+        self.assertEqual(
+            closeout["next_command"],
+            "./bin/ask skills handles --check --json --robot",
+        )
+
     def test_closeout_generated_projection_only_requires_handle_validation(self) -> None:
         changed_files = [".skillsets/command-surface.json"]
         with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(

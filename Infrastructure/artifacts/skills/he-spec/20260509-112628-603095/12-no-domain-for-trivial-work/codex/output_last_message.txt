@@ -1,0 +1,35 @@
+**Spec: Trivial Skill Wording Cleanup**
+
+**Goal**
+- Make a small wording-only cleanup to improve clarity and consistency in the target skill docs.
+- Keep the change strictly editorial: no behavioral changes, no scope expansion, no structural refactor.
+
+**In Scope**
+- Update phrasing for a few awkward or inconsistent sentences in the skill wording.
+- Standardize terminology where the current wording uses slightly different labels for the same concept.
+- Preserve the existing intent, ordering, and level of detail.
+- Keep edits minimal so the result reads more cleanly without changing meaning.
+
+**Out of Scope**
+- No functional changes.
+- No new guidance, constraints, or workflows.
+- No path ownership changes.
+- No runtime projection edits unless the canonical source explicitly requires them.
+- No domain model changes.
+
+**Domain Model Gates**
+- **Not applicable.**
+- This cleanup is wording-only and does not introduce, modify, or depend on domain model behavior, entity boundaries, or data contracts.
+
+**Acceptance Criteria**
+- The updated wording reads more clearly and consistently.
+- The original meaning remains unchanged.
+- The diff is small and limited to the targeted copy.
+- Any domain model gate or review step is explicitly marked **not applicable**.
+
+**Validation**
+- Manual review for clarity and preservation of meaning.
+- No behavioral test changes expected.
+- If the repo has a documentation or wording lint/check, run only that applicable lightweight validation.
+
+If you want, I can turn this into a tighter repo-ready implementation brief with file-level placeholders and a short checklist.

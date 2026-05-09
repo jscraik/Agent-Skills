@@ -1,0 +1,9 @@
+I can route it, but I need one concrete anchor first because “billing workflow change” spans a few different paths here.
+
+Please pick the best fit:
+1. `Product / spec routing` for clarifying the account lifecycle, roles, and what data owns the billing state.
+2. `Implementation routing` for changing code once the contract is clear.
+3. `Security / permissions routing` if the main risk is who can create, update, cancel, or transfer billing state.
+4. `Persistence routing` if the main uncertainty is which service or database is the system of record.
+
+If you want, send me the intended workflow in one sentence, and I’ll route it to the right path and surface the missing lifecycle, permission, and persistence decisions.

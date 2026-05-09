@@ -49,6 +49,8 @@ Reference `assets/` only for skill packaging and browseability; workflow source 
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- Domain context: `Plugins/harness-engineering/references/domain-context-contract.md`
+- Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Topic coverage: `Plugins/harness-engineering/references/brainstorm-topic-coverage-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

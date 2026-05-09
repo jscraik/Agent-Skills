@@ -1,6 +1,6 @@
 schema_version: "2.0"
 skill_name: "he-spec"
-last_updated: "2026-05-08"
+last_updated: "2026-05-09"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-spec/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
@@ -88,3 +88,30 @@ cases:
     prompt: "Can you define validation gates and rollback conditions before planning implementation."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: domain-model-acceptance-gate
+    name: "Domain model acceptance gate"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you write a spec for a workflow-state change where entity identity and aggregate invariants must become acceptance criteria."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(domain_model|bounded context|aggregate|invariant|acceptance)"}]
+  - id: gate-selection-minimum-proof
+    name: "Gate selection minimum proof"
+    category: happy
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you write acceptance criteria for gate selection so standard work records minimum proof and skipped heavy gates."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(minimum_proof|required_contracts|skipped_contracts|standard|acceptance)"}]
+  - id: no-domain-for-trivial-work
+    name: "No domain for trivial work"
+    category: negative
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you spec a trivial skill wording cleanup and explicitly keep domain model gates not applicable."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(not_applicable|trivial|domain|skipped|gate_profile)"}]
