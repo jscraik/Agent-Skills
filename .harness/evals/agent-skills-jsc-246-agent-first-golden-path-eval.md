@@ -421,10 +421,16 @@ Blocks Completion: no
 
 Implementation:
 
-- Added CLI contract tests for `skills explain he-spec` and `skills explain simplify`.
-- Added CLI contract tests for `skills prove he-spec`.
+- Verified existing CLI contract tests for `skills explain he-spec` and `skills explain simplify`.
+- Verified existing CLI contract tests for `skills prove he-spec`.
 - Preserved existing proof schemas: `command-handle-proof.v1`, `skill-proof-scorecard.v1`, `skills-explain.v1`, and `skill-explanation.v1`.
 - Did not introduce lifecycle promotion states, proof artifact schemas, or trusted/default-visible status.
+
+Focused validation:
+
+| Command | Result | Evidence |
+| --- | --- | --- |
+| `python3 -m pytest Infrastructure/tests/test_ask_cli.py -k "skills_prove or explain"` | pass | `15 passed, 42 deselected in 3.59s`. |
 
 Live representative probes:
 
@@ -433,10 +439,10 @@ Live representative probes:
 | `./bin/ask skills explain he-spec --json --robot` | success | canonical source `Plugins/harness-engineering/skills/he-spec/SKILL.md`; generated handle `.agents/skills/he-spec/SKILL.md`; projection `rooted`; visibility `latent`; next command `./bin/ask skills proof he-spec --json --robot`. |
 | `./bin/ask skills explain simplify --json --robot` | success | canonical source `Skills/agent-ops/simplify/SKILL.md`; generated handle `.agents/skills/simplify/SKILL.md`; projection `rooted`; visibility `latent`; validation command present. |
 | `./bin/ask skills proof he-spec --json --robot` | success | reachability gates pass for resolver, generated command handle, workspace handle, and `.agents` user link. |
-| `./bin/ask skills prove he-spec --json --robot` | success | proof status `reachable_without_outcome_proof`; reachability `pass`; structural quality `pass`; analytics evidence class `native_skill_invocation_projection`; outcome evidence class `outcome_proof`. |
+| `./bin/ask skills prove he-spec --json --robot` | success | proof status `reachable_without_outcome_proof`; reachability `pass`; structural quality `pass`; analytics evidence class `native_skill_invocation_projection`; outcome evidence class `outcome_proof`; next command `./bin/ask workouts run harness-engineering/he-spec --json --robot`. |
 
 Interpretation:
-Phase 004 proves that explain/proof/prove already expose the required golden-path taxonomy using existing command contracts. The remaining gap is not schema shape; it is the expected absence of outcome proof until a workout is run or explicitly linked.
+Phase 004 proves that explain/proof/prove already expose the required golden-path taxonomy using existing command contracts. No production schema or lifecycle-state change was needed. The remaining gap is not schema shape; it is the expected absence of executed outcome proof until the suggested workout is run or explicitly linked.
 Operational Impact: Agents can inspect source/runtime/proof readiness without guessing which command to run next.
 Blocks Completion: no for phase 004; yes for full parent closure until later phases complete.
 
