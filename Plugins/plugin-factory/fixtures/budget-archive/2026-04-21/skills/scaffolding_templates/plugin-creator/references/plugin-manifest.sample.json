@@ -12,7 +12,7 @@
   "license": "MIT",
   "keywords": ["orchestration", "agent-workflow"],
   "skills": "./skills/",
-  "hooks": "./hooks.json",
+  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "apps": "./.app.json",
   "interface": {

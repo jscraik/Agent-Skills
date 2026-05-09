@@ -5,6 +5,7 @@ timeout_seconds="${SYNC_SKILLS_TIMEOUT_SECONDS:-300}"
 lock_stale_after_seconds="${SYNC_SKILLS_LOCK_STALE_AFTER_SECONDS:-900}"
 sync_scope="${SYNC_SKILLS_SCOPE:-workspace}"
 projection_mode_cli=""
+plugin_cache_refresh="${SYNC_SKILLS_PLUGIN_CACHE_REFRESH:-auto}"
 dry_run=0
 lock_dir="${TMPDIR:-/tmp}/agent-skills-sync.lock"
 lock_pid_file="$lock_dir/pid"
@@ -15,7 +16,7 @@ timeout_marker="${TMPDIR:-/tmp}/agent-skills-sync-timeout.$$"
 usage() {
   cat <<'USAGE'
 Usage:
-  Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh [--timeout-seconds <int>] [--workspace|--user|--project-local] [--projection <mode>] [--dry-run]
+  Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh [--timeout-seconds <int>] [--workspace|--user|--project-local] [--projection <mode>] [--plugin-cache-refresh <auto|skip|only>] [--dry-run]
 
 Regenerates skill/plugin symlinks and SKILL.md index for this repository.
 USAGE
@@ -53,6 +54,15 @@ while [[ $# -gt 0 ]]; do
       projection_mode_cli="${2:-}"
       shift 2
       ;;
+    --plugin-cache-refresh)
+      if [[ -z "${2:-}" ]] || [[ "${2:-}" == --* ]]; then
+        echo "Missing value for --plugin-cache-refresh" >&2
+        usage
+        exit 2
+      fi
+      plugin_cache_refresh="${2:-}"
+      shift 2
+      ;;
     --dry-run)
       dry_run=1
       shift
@@ -88,6 +98,15 @@ case "$sync_scope" in
     ;;
   *)
     echo "Invalid sync scope: $sync_scope (expected workspace or user; project-local is a legacy alias for workspace)" >&2
+    exit 2
+    ;;
+esac
+
+case "$plugin_cache_refresh" in
+  auto|skip|only)
+    ;;
+  *)
+    echo "Invalid --plugin-cache-refresh value: $plugin_cache_refresh (expected auto, skip, or only)" >&2
     exit 2
     ;;
 esac
@@ -260,16 +279,17 @@ fi
 # Keep the shell entrypoint as a compatibility wrapper while the projection-aware
 # ask implementation owns dry-run previews and rooted runtime mutation. Flat
 # workspace/user non-dry-run sync remains on the legacy shell path below.
-if [[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
+if [[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" || "$plugin_cache_refresh" != "auto" ]]; then
   ask_sync_args=(skills sync --scope "$sync_scope" --projection "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}")
   if [[ "$dry_run" == "1" ]]; then
     ask_sync_args+=(--dry-run)
   fi
+  ask_sync_args+=(--plugin-cache-refresh "$plugin_cache_refresh")
   cleanup_delegated_sync() {
     stop_watchdog
     release_sync_lock
   }
-  if [[ "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]; then
+  if [[ "$dry_run" != "1" ]]; then
     acquire_sync_lock
   fi
   trap cleanup_delegated_sync EXIT

@@ -32,7 +32,7 @@ Route elsewhere:
 
 ## Execution Boundaries
 
-Plugin Builder owns plugin contract review, deterministic remediation guidance, validation evidence, and the final hardening handoff.
+Plugin Builder owns plugin contract review, bundled hook validation, deterministic remediation guidance, validation evidence, and the final hardening handoff.
 
 Delegate first-draft plugin shell creation to `[[plugin-creator]]` and runtime install or visibility checks to `[[plugin-installer]]`. Do not execute third-party install scripts, mutate marketplace policy fields, or package a plugin for release without explicit validation evidence.
 
@@ -63,6 +63,7 @@ Fail fast: stop at first failed gate and report blocker text.
 ## Anti-Patterns
 
 - skipping `validate` before package handoff
+- treating plugin hooks as documentation instead of executable runtime behavior
 - changing marketplace policy fields without explicit request
 
 ## Examples

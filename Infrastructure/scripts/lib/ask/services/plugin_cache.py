@@ -18,6 +18,10 @@ if str(LIFECYCLE_SYNC_ROOT) not in sys.path:
 
 from command_surface import handles_report
 
+RUNTIME_CACHE_RELATIVE_ROOT = Path(".agents/plugins-runtime/cache")
+PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED = "PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED"
+PLUGIN_CACHE_PERMISSION_RERUN = "rerun with write access to .agents/plugins-runtime/cache."
+
 
 @dataclass
 class PluginCacheRefreshReport:
@@ -30,6 +34,19 @@ class PluginCacheRefreshReport:
 
 class PluginCacheRefreshError(RuntimeError):
     """Raised when command-handle pruning cannot safely complete."""
+
+
+def plugin_cache_permission_declaration(repo_root: Path, *, mode: str = "auto") -> dict[str, str]:
+    """Return the write declaration required to refresh repo-local plugin runtime caches."""
+    runtime_cache_root = repo_root / RUNTIME_CACHE_RELATIVE_ROOT
+    return {
+        "mode": mode,
+        "status": "not_run",
+        "runtime_cache_root": str(runtime_cache_root),
+        "runtime_cache_root_relative": str(RUNTIME_CACHE_RELATIVE_ROOT),
+        "permission_requirement": "write access to .agents/plugins-runtime/cache",
+        "rerun": PLUGIN_CACHE_PERMISSION_RERUN,
+    }
 
 
 def prune_command_handle_skill_entries(
@@ -125,9 +142,15 @@ def refresh_workspace_plugin_caches(
     dry_run: bool,
 ) -> ErrorObject | None:
     """Refresh repo-local plugin caches that Codex picker paths may scan."""
+    refresh_state = plan.setdefault(
+        "plugin_cache_refresh",
+        plugin_cache_permission_declaration(repo_root),
+    )
+    refresh_state["status"] = "running"
     try:
         marketplace_path, entries = load_local_marketplace(repo_root)
     except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
+        refresh_state["status"] = "skipped"
         logs.append(f"Skipped workspace plugin cache refresh: {exc}")
         return None
 
@@ -139,7 +162,7 @@ def refresh_workspace_plugin_caches(
     if "/" in marketplace_name or ".." in marketplace_name:
         marketplace_name = "agent-skills-local"
 
-    runtime_cache_root = repo_root / ".agents" / "plugins-runtime" / "cache" / marketplace_name
+    runtime_cache_root = repo_root / RUNTIME_CACHE_RELATIVE_ROOT / marketplace_name
     versioned_cache_root = repo_root / "Plugins" / "cache" / marketplace_name
     plan.setdefault("plugin_cache_writes", [])
     plan.setdefault("writes", [])
@@ -164,6 +187,7 @@ def refresh_workspace_plugin_caches(
             plan["plugin_cache_writes"].extend(planned_writes)
             plan["writes"].extend(planned_writes)
             if dry_run:
+                refresh_state["status"] = "planned"
                 logs.append(f"Would replace local plugin cache: {runtime_target} <- {source_dir}")
                 logs.append(f"Would replace local plugin cache: {versioned_target} <- {source_dir}")
                 for target in (runtime_target, versioned_target):
@@ -201,12 +225,13 @@ def refresh_workspace_plugin_caches(
                 shutil.rmtree(child)
                 logs.append(f"Removed stale local plugin cache: {child}")
     except PermissionError as exc:
-        plan["warnings"].append("PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED")
+        refresh_state["status"] = "blocked"
+        refresh_state["warning"] = PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED
+        plan["warnings"].append(PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED)
         logs.append(
             "Skipped workspace plugin cache refresh after permission failure: "
             f"{exc}. Rooted skill projections and manifests may still be current; "
-            "rerun sync in an environment that can mutate .agents/plugins-runtime/cache "
-            "to refresh Codex picker cache copies."
+            f"{PLUGIN_CACHE_PERMISSION_RERUN}"
         )
         return None
     except (OSError, ValueError, PluginCacheRefreshError) as exc:
@@ -215,4 +240,5 @@ def refresh_workspace_plugin_caches(
             message=f"Workspace plugin cache refresh failed: {exc}",
             fix_suggestion="Check local plugin cache permissions and rerun `./bin/ask skills sync --scope workspace --robot --json`.",
         )
+    refresh_state["status"] = "planned" if dry_run else "refreshed"
     return None

@@ -17,7 +17,11 @@ if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
-from ask.services.plugin_cache import refresh_workspace_plugin_caches  # noqa: E402
+from ask.services.plugin_cache import (  # noqa: E402
+    PLUGIN_CACHE_PERMISSION_RERUN,
+    plugin_cache_permission_declaration,
+    refresh_workspace_plugin_caches,
+)
 from ask.services.plugin_sources import (  # noqa: E402
     copy_directory_contents as _copy_directory_contents,
     load_local_marketplace as _load_local_marketplace,
@@ -2714,6 +2718,7 @@ def sync_skills(
     scope: str = "workspace",
     dry_run: bool = False,
     projection: Optional[str] = None,
+    plugin_cache_refresh: str = "auto",
 ) -> CallResult:
     """
     Synchronizes derived skill views for either the repository workspace or the user environment.
@@ -2726,6 +2731,10 @@ def sync_skills(
         dry_run (bool): If True, no filesystem mutations are performed; actions are reported only.
         projection (Optional[str]): Explicit runtime projection mode. When omitted,
             SYNC_SKILLS_PROJECTION_MODE is honored before the flat default.
+        plugin_cache_refresh (str): Plugin runtime cache refresh mode:
+            "auto" refreshes best-effort during workspace sync, "skip" runs
+            normal projection sync without cache mutation, and "only" refreshes
+            plugin runtime caches without changing skill projections.
     
     Returns:
         CallResult: Success result contains a `data` object with:
@@ -2756,6 +2765,15 @@ def sync_skills(
         result.data["requested_projection_mode"] = getattr(exc, "requested_mode", projection or "")
         return result
 
+    if plugin_cache_refresh not in {"auto", "skip", "only"}:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Invalid plugin cache refresh mode: '{plugin_cache_refresh}'.",
+            fix_suggestion="Use --plugin-cache-refresh auto, skip, or only.",
+        ))
+        return result
+
     if scope not in {"workspace", "user"}:
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -2781,10 +2799,47 @@ def sync_skills(
             "symlinks": 0,
         },
         "warnings": [],
+        "plugin_cache_refresh": plugin_cache_permission_declaration(repo_root, mode=plugin_cache_refresh),
     }
     logs = []
     skills_dir = repo_root / ".agents" / "skills"
     system_skills_dir = repo_root / "skills-system"
+
+    if plugin_cache_refresh == "only":
+        if scope != "workspace":
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_INVALID_SCOPE",
+                message="Plugin runtime cache refresh is workspace-scoped.",
+                fix_suggestion="Use `./bin/ask skills sync --scope workspace --plugin-cache-refresh only`.",
+            ))
+            return result
+        logs.append(
+            "Running plugin runtime cache refresh only; normal rooted projection sync skipped. "
+            f"If the cache path is blocked, {PLUGIN_CACHE_PERMISSION_RERUN}"
+        )
+        cache_error = refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        if cache_error:
+            result.errors.append(cache_error)
+            return _finalize_skill_sync_result(
+                result,
+                plan,
+                logs,
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                status="error",
+            )
+        plan["validation_status"] = "pass"
+        return _finalize_skill_sync_result(
+            result,
+            plan,
+            logs,
+            projection_decision,
+            scope=scope,
+            dry_run=dry_run,
+            status="success",
+        )
 
     if system_skills_dir.is_dir():
         plan["preserved_system_lane_entries"] = sorted(
@@ -2868,7 +2923,15 @@ def sync_skills(
             return result
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
-        cache_error = refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        cache_error = None
+        if plugin_cache_refresh == "skip":
+            plan["plugin_cache_refresh"]["status"] = "skipped"
+            logs.append(
+                "Skipped plugin runtime cache refresh (--plugin-cache-refresh skip); "
+                f"{PLUGIN_CACHE_PERMISSION_RERUN}"
+            )
+        else:
+            cache_error = refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
         if cache_error:
             result.errors.append(cache_error)
             return _finalize_skill_sync_result(
@@ -2918,7 +2981,15 @@ def sync_skills(
         projection_logs = _refresh_catalog_projections(repo_root, dry_run)
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
-        cache_error = refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        cache_error = None
+        if plugin_cache_refresh == "skip":
+            plan["plugin_cache_refresh"]["status"] = "skipped"
+            logs.append(
+                "Skipped plugin runtime cache refresh (--plugin-cache-refresh skip); "
+                f"{PLUGIN_CACHE_PERMISSION_RERUN}"
+            )
+        else:
+            cache_error = refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
         if cache_error:
             result.errors.append(cache_error)
             return _finalize_skill_sync_result(

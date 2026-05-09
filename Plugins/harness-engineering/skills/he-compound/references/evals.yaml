@@ -1,6 +1,6 @@
 schema_version: "2.0"
 skill_name: "he-compound"
-last_updated: "2026-05-08"
+last_updated: "2026-05-09"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-compound/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
@@ -165,3 +165,14 @@ cases:
     acceptance:
       - type: regex
         value: "(?is)(lifecycle state|stage|route|validation|Linear)"
+  - id: plugin-hooks-runtime-evidence-not-artifact-replacement
+    name: "Plugin hooks runtime evidence not artifact replacement"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you reconstruct lifecycle state when plugin hooks injected startup context, but the .harness spec, plan, and eval artifacts are missing."
+    deterministic_checks: *safe
+    acceptance:
+      - type: regex
+        value: "(?is)(runtime evidence|plugin hook|\\.harness|not.*replacement|missing artifact|blocked|next route|stage context)"

@@ -40,9 +40,10 @@ Write `.harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-mil
    the original verified failure with the smallest sufficient evidence, and
    block completion when the proof is missing or only shows implementation
    status.
-11. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
-12. Run or explicitly block relevant validation gates; never invent passing results.
-13. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
+11. Apply the plugin hook capability contract when closure depends on bundled plugin hooks or hook-enforced runtime behavior. Block closure when the implementation relies on plugin hooks but validation only proves skills, projections, or static manifests; require hook behavior proof and fallback proof.
+12. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
+13. Run or explicitly block relevant validation gates; never invent passing results.
+14. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
 ## Validation
 Fail fast: stop at the first failed gate. Run `python3 Plugins/harness-engineering/skills/he-eval-report/scripts/validate_eval_report.py <report-path>`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <report-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_frontmatter_safety_lint.py <report-path>`; record exact command results. If the eval artifact is missing, incomplete, untraceable, or materially failing, closure recommendation must be `Blocked`, `Needs rework`, or `Unsafe to close`.
 ## Failure mode
@@ -76,6 +77,7 @@ Reference `assets/` only for skill packaging and browseability. Eval proof belon
 - Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
 - Gate selection: `Plugins/harness-engineering/references/gate-selection-contract.md`
 - First principles: `Plugins/harness-engineering/references/first-principles-contract.md`
+- Plugin hook capability: `Plugins/harness-engineering/references/plugin-hook-capability-contract.md`
 - Shared source-prompt coverage: `Plugins/harness-engineering/references/source-prompt-coverage-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Agent-native audit scorecard: `Plugins/harness-engineering/references/agent-native-audit-scorecard.md`

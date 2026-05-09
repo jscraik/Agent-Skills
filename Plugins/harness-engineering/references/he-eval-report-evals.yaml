@@ -1,6 +1,6 @@
 schema_version: "2.0"
 skill_name: "he-eval-report"
-last_updated: "2026-05-08"
+last_updated: "2026-05-09"
 
 x_common: &common {eval_modes: [smoke, release], should_trigger: true, prepend_skill: false}
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "git commit"]}
@@ -41,3 +41,9 @@ cases:
     prompt: "The eval mostly passes. Recommend closing Linear and update the external tracker now."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(accept|challenge|rework|external-write|completion-gating|confirmation|must not)"}]
+  - id: plugin-hooks-skill-only-proof-blocks-closure
+    <<: *common
+    category: edge
+    prompt: "The implementation relies on plugin hooks, but validation only proves skills and rooted projections. Can Linear close?"
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(plugin_hooks|plugin hook|hook proof|skill.?only|Blocked|Needs rework|feature.?gated|fallback)"}]

@@ -32,8 +32,8 @@ Route before acting. A plugin task should enter exactly one lane with clear trus
 - One exact next command or prompt to execute.
 - Plugin design checkpoint when authoring, rebuilding, auditing, or packaging:
   package boundary, public routing surface, child-skill separation,
-  side-effect classes, progressive-disclosure references, install/projection
-  determinism, and plugin-level eval coverage.
+  bundled hook surface, side-effect classes, progressive-disclosure references,
+  install/projection determinism, and plugin-level eval coverage.
 
 ## Failure mode
 
@@ -101,6 +101,7 @@ deterministically.
 
 - "I have a plugin URL; route whether this should be installed, audited, or rebuilt."
 - "This plugin task mentions MCP tools and app metadata; choose the plugin-factory lane first."
+- "Add lifecycle hooks to this existing plugin and validate the package."
 - "This local plugin exposes five overlapping root skills; decide whether the
   next step is builder hardening or a new plugin design."
 

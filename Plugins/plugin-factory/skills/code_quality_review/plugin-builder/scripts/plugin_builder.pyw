@@ -93,7 +93,7 @@ SOURCE_SURFACE_DEFAULTS = {
     "commands": ["./commands"],
     "skills": ["./skills"],
     "agents": ["./agents"],
-    "hooks": ["./hooks.json", "./hooks/hooks.json"],
+    "hooks": ["./hooks/hooks.json", "./hooks.json"],
     "mcpServers": ["./.mcp.json"],
     "apps": ["./.app.json"],
 }
@@ -112,6 +112,22 @@ OPTIONAL_PLUGIN_STRING_FIELDS = [
     "license",
 ]
 OPTIONAL_PLUGIN_PATH_FIELDS = ["skills", "hooks", "mcpServers", "apps"]
+PLUGIN_HOOK_EVENTS = {
+    "PreToolUse",
+    "PostToolUse",
+    "UserPromptSubmit",
+    "SessionStart",
+    "Stop",
+    "PreCompact",
+    "PostCompact",
+    "PermissionRequest",
+}
+PLUGIN_HOOK_PLACEHOLDERS = (
+    "${PLUGIN_ROOT}",
+    "${PLUGIN_DATA}",
+    "${CLAUDE_PLUGIN_ROOT}",
+    "${CLAUDE_PLUGIN_DATA}",
+)
 OPTIONAL_AUTHOR_FIELDS = ["name", "email", "url"]
 OPTIONAL_INTERFACE_STRING_FIELDS = [
     "displayName",
@@ -342,7 +358,11 @@ def _infer_plugin_archetype(
     surface_flags = dict(enabled_surfaces or {})
     if plugin_root is not None:
         surface_flags.setdefault("skills", (plugin_root / "skills").exists())
-        surface_flags.setdefault("hooks", (plugin_root / "hooks.json").exists())
+        surface_flags.setdefault(
+            "hooks",
+            (plugin_root / "hooks" / "hooks.json").exists()
+            or (plugin_root / "hooks.json").exists(),
+        )
         surface_flags.setdefault("mcp", (plugin_root / ".mcp.json").exists())
         surface_flags.setdefault("apps", (plugin_root / ".app.json").exists())
         surface_flags.setdefault("agents", (plugin_root / "agents").exists())
@@ -412,7 +432,7 @@ def _surface_summary(enabled_surfaces: dict[str, bool]) -> list[str]:
     if enabled_surfaces.get("agents"):
         surfaces.append("agents/<agent>.toml")
     if enabled_surfaces.get("hooks"):
-        surfaces.append("hooks.json")
+        surfaces.append("hooks/hooks.json")
     if enabled_surfaces.get("mcp"):
         surfaces.append(".mcp.json")
     if enabled_surfaces.get("apps"):
@@ -521,7 +541,7 @@ def build_plugin_json(
     if enabled_surfaces.get("skills"):
         payload["skills"] = "./skills/"
     if enabled_surfaces.get("hooks"):
-        payload["hooks"] = "./hooks.json"
+        payload["hooks"] = "./hooks/hooks.json"
     if enabled_surfaces.get("mcp"):
         payload["mcpServers"] = "./.mcp.json"
     if enabled_surfaces.get("apps"):
@@ -927,12 +947,224 @@ def _check_declared_plugin_path(
     failures: list[str] = []
     if not _is_relative_plugin_path(value):
         return [f"{field_name} must be a relative path starting with './'."]
-    candidate = (plugin_root / value[2:]).resolve()
-    if not _path_within_root(plugin_root, candidate):
+    resolved_plugin_root = plugin_root.resolve()
+    candidate = (resolved_plugin_root / value[2:]).resolve()
+    if not _path_within_root(resolved_plugin_root, candidate):
         failures.append(f"{field_name} must stay within the plugin root.")
         return failures
     if require_exists and not candidate.exists():
         failures.append(f"{field_name} points to a missing path: {value}")
+    return failures
+
+
+def _resolve_plugin_relative_path(plugin_root: Path, field_name: str, value: Any) -> tuple[Path | None, list[str]]:
+    failures = _check_declared_plugin_path(
+        plugin_root,
+        field_name,
+        value,
+        require_exists=True,
+    )
+    if failures:
+        return None, failures
+    return (plugin_root / value[2:]).resolve(), []
+
+
+def _hook_file_failures(plugin_root: Path, hook_path: Path, field_name: str) -> list[str]:
+    failures: list[str] = []
+    try:
+        payload = load_json(hook_path)
+    except Exception as exc:  # noqa: BLE001
+        return [f"{field_name} contains invalid plugin hooks JSON: {exc}"]
+    failures.extend(_hook_payload_failures(plugin_root, payload, field_name))
+    return failures
+
+
+def _hook_payload_failures(plugin_root: Path, payload: Any, field_name: str) -> list[str]:
+    failures: list[str] = []
+    if not isinstance(payload, dict):
+        return [f"{field_name} must be an object."]
+    hooks = payload.get("hooks")
+    if not isinstance(hooks, dict):
+        return [f"{field_name} must contain a 'hooks' object."]
+
+    for event_name, groups in hooks.items():
+        if event_name not in PLUGIN_HOOK_EVENTS:
+            failures.append(
+                f"{field_name} declares unsupported hook event '{event_name}'."
+            )
+            continue
+        if not isinstance(groups, list):
+            failures.append(f"{field_name} hooks.{event_name} must be an array.")
+            continue
+        for group_index, group in enumerate(groups):
+            group_label = f"{field_name} hooks.{event_name}[{group_index}]"
+            if not isinstance(group, dict):
+                failures.append(f"{group_label} must be an object.")
+                continue
+            handlers = group.get("hooks")
+            if not isinstance(handlers, list):
+                failures.append(f"{group_label}.hooks must be an array.")
+                continue
+            for handler_index, handler in enumerate(handlers):
+                handler_label = f"{group_label}.hooks[{handler_index}]"
+                if not isinstance(handler, dict):
+                    failures.append(f"{handler_label} must be an object.")
+                    continue
+                hook_type = handler.get("type")
+                if hook_type != "command":
+                    failures.append(
+                        f"{handler_label} uses unsupported handler type '{hook_type}'. "
+                        "Plugin hooks should use command handlers until prompt and agent hooks are supported."
+                    )
+                    continue
+                command = handler.get("command")
+                if not isinstance(command, str) or not command.strip():
+                    failures.append(f"{handler_label}.command must be a non-empty string.")
+                    continue
+                if handler.get("async") is True:
+                    failures.append(
+                        f"{handler_label} sets async=true, but async hooks are not supported yet."
+                    )
+                if "timeoutSec" in handler:
+                    failures.append(
+                        f"{handler_label}.timeoutSec is not a Codex hook field. "
+                        "Use timeout, in seconds."
+                    )
+                timeout_sec = handler.get("timeout")
+                if timeout_sec is not None and (
+                    not isinstance(timeout_sec, int) or timeout_sec < 1
+                ):
+                    failures.append(f"{handler_label}.timeout must be a positive integer in seconds.")
+                if re.search(r"(^|[\s'\"])/(Users|private|var|tmp)/", command):
+                    failures.append(
+                        f"{handler_label}.command contains a local absolute path. "
+                        f"Use one of {', '.join(PLUGIN_HOOK_PLACEHOLDERS)} for plugin-owned files."
+                    )
+                if (
+                    ("hooks/" in command or "scripts/" in command)
+                    and "${PLUGIN_ROOT}" not in command
+                    and "${CLAUDE_PLUGIN_ROOT}" not in command
+                ):
+                    failures.append(
+                        f"{handler_label}.command appears to call a plugin file without "
+                        "${PLUGIN_ROOT} or ${CLAUDE_PLUGIN_ROOT}."
+                    )
+                if "${CODEX_PLUGIN_ROOT}" in command or "${CODEX_PLUGIN_DATA}" in command:
+                    failures.append(
+                        f"{handler_label}.command uses legacy CODEX_PLUGIN_* placeholders. "
+                        "Use ${PLUGIN_ROOT} and ${PLUGIN_DATA}."
+                    )
+    return failures
+
+
+def _check_manifest_hooks(
+    plugin_root: Path,
+    hook_spec: Any,
+    *,
+    require_exists: bool,
+) -> list[str]:
+    failures: list[str] = []
+
+    def check_path(value: Any, index: int | None = None) -> None:
+        label = "plugin.json field 'hooks'"
+        if index is not None:
+            label = f"plugin.json field 'hooks'[{index}]"
+        path, path_failures = _resolve_plugin_relative_path(plugin_root, label, value)
+        failures.extend(path_failures)
+        if path is not None and require_exists:
+            failures.extend(_hook_file_failures(plugin_root, path, label))
+
+    def check_inline(value: Any, index: int | None = None) -> None:
+        label = "plugin.json inline hooks"
+        if index is not None:
+            label = f"plugin.json inline hooks[{index}]"
+        failures.extend(_hook_payload_failures(plugin_root, value, label))
+
+    if isinstance(hook_spec, str):
+        check_path(hook_spec)
+    elif isinstance(hook_spec, list):
+        if not hook_spec:
+            failures.append("plugin.json field 'hooks' must not be an empty array.")
+        for index, item in enumerate(hook_spec):
+            if isinstance(item, str):
+                check_path(item, index)
+            elif isinstance(item, dict):
+                check_inline(item, index)
+            else:
+                failures.append(
+                    f"plugin.json field 'hooks'[{index}] must be a path string or hooks object."
+                )
+    elif isinstance(hook_spec, dict):
+        check_inline(hook_spec)
+    else:
+        failures.append(
+            "plugin.json field 'hooks' must be a string, string array, object, or object array."
+        )
+
+    return failures
+
+
+def _check_plugin_hook_surface(plugin_root: Path, payload: dict[str, Any]) -> list[str]:
+    failures: list[str] = []
+    manifest_declares_hooks = "hooks" in payload
+    default_hooks_path = plugin_root / "hooks" / "hooks.json"
+    legacy_hooks_path = plugin_root / "hooks.json"
+
+    if manifest_declares_hooks:
+        failures.extend(
+            _check_manifest_hooks(plugin_root, payload.get("hooks"), require_exists=True)
+        )
+    elif default_hooks_path.exists():
+        failures.extend(
+            _hook_file_failures(
+                plugin_root,
+                default_hooks_path,
+                "default plugin hooks file hooks/hooks.json",
+            )
+        )
+    elif legacy_hooks_path.exists():
+        failures.append(
+            "Plugin has legacy root hooks.json without plugin.json declaring 'hooks'. "
+            "Move it to hooks/hooks.json or declare 'hooks' explicitly."
+        )
+
+    hooks_dir = plugin_root / "hooks"
+    if hooks_dir.exists() and not hooks_dir.is_dir():
+        failures.append("Plugin hooks path exists but is not a directory: hooks/")
+    elif hooks_dir.is_dir():
+        json_files = sorted(path for path in hooks_dir.glob("*.json") if path.is_file())
+        if json_files and not manifest_declares_hooks and not default_hooks_path.exists():
+            failures.append(
+                "Plugin has hooks/*.json files but no manifest hooks declaration and no hooks/hooks.json default."
+            )
+        declared_paths: set[Path] = set()
+        if isinstance(payload.get("hooks"), str):
+            path, path_failures = _resolve_plugin_relative_path(
+                plugin_root,
+                "plugin.json field 'hooks'",
+                payload.get("hooks"),
+            )
+            if not path_failures and path is not None:
+                declared_paths.add(path)
+        elif isinstance(payload.get("hooks"), list):
+            for index, item in enumerate(payload.get("hooks") or []):
+                if isinstance(item, str):
+                    path, path_failures = _resolve_plugin_relative_path(
+                        plugin_root,
+                        f"plugin.json field 'hooks'[{index}]",
+                        item,
+                    )
+                    if not path_failures and path is not None:
+                        declared_paths.add(path)
+        if not manifest_declares_hooks and default_hooks_path.exists():
+            declared_paths.add(default_hooks_path.resolve())
+        for hook_file in json_files:
+            if hook_file.resolve() not in declared_paths:
+                failures.append(
+                    f"Plugin hook config '{hook_file.relative_to(plugin_root).as_posix()}' "
+                    "is not discoverable. Declare it in plugin.json 'hooks' or use hooks/hooks.json."
+                )
+
     return failures
 
 
@@ -1462,7 +1694,7 @@ def _package_guide_template(plugin_name: str, enabled_surfaces: dict[str, bool])
             "skill-builder -> skills/<skill>/SKILL.md, Infrastructure/references/, Infrastructure/scripts/, assets/, agents/openai.yaml\n"
             "codex-agent-builder -> agents/<agent>.toml\n"
             "docs-expert assets -> README.md, LICENSE, Infrastructure/references/package-guide.md\n"
-            "plugin-builder -> .codex-plugin/plugin.json, hooks.json, .mcp.json, .app.json, operational/deconflict docs\n"
+            "plugin-builder -> .codex-plugin/plugin.json, hooks/hooks.json, .mcp.json, .app.json, operational/deconflict docs\n"
             "```\n- Verify: compare generated files against the package tree below\n")
         .replace("### Configure <thing> so that <result>", "### Review the package tree before extending it")
         .replace("- Options table (if applicable):", "- Package tree:\n" + surface_lines + "\n")
@@ -2744,6 +2976,8 @@ def _check_plugin_manifest(plugin_json_path: Path) -> list[str]:
 
     for path_key in OPTIONAL_PLUGIN_PATH_FIELDS:
         if path_key in payload:
+            if path_key == "hooks":
+                continue
             failures.extend(
                 _check_declared_plugin_path(
                     plugin_root,
@@ -2823,6 +3057,7 @@ def _check_plugin_manifest(plugin_json_path: Path) -> list[str]:
     failures.extend(_check_plugin_skill_surface(plugin_root, payload))
     failures.extend(_check_duplicate_skill_ownership(plugin_root, payload))
     failures.extend(_check_plugin_agent_surface(plugin_root))
+    failures.extend(_check_plugin_hook_surface(plugin_root, payload))
 
     return failures
 
@@ -3012,8 +3247,10 @@ def _audit_plugin_compatibility(
 
     if payload.get("skills") is None and (plugin_root / "skills").exists():
         warnings.append("Plugin has a skills/ directory but plugin.json does not declare 'skills'.")
+    if payload.get("hooks") is None and (plugin_root / "hooks" / "hooks.json").exists():
+        warnings.append("Plugin has hooks/hooks.json; it is discoverable by default, but declaring 'hooks' in plugin.json makes package intent explicit.")
     if payload.get("hooks") is None and (plugin_root / "hooks.json").exists():
-        warnings.append("Plugin has hooks.json but plugin.json does not declare 'hooks'.")
+        warnings.append("Plugin has legacy root hooks.json but plugin.json does not declare 'hooks'. Prefer hooks/hooks.json or an explicit manifest hooks path.")
 
     if marketplace_payload is not None:
         plugins = marketplace_payload.get("plugins")
@@ -3216,7 +3453,7 @@ def _run_scaffold(args: argparse.Namespace) -> int:
 
     if enabled_surfaces["hooks"]:
         create_json_file(
-            plugin_root / "hooks.json",
+            plugin_root / "hooks" / "hooks.json",
             {"hooks": {"SessionStart": [], "Stop": []}},
             args.force,
         )
@@ -3552,8 +3789,8 @@ def parse_args() -> argparse.Namespace:
         help="Optional source repo or plugin path to inspect for scaffold surface auto-detection.",
     )
     scaffold_parser.add_argument("--with-skills", action="store_true", help="Create skills/ directory.")
-    scaffold_parser.add_argument("--with-hooks", action="store_true", help="Create hooks/ directory.")
-    scaffold_parser.add_argument("--with-hooks-json", action="store_true", help="Create hooks.json scaffold.")
+    scaffold_parser.add_argument("--with-hooks", action="store_true", help="Create hooks/hooks.json for plugin-bundled lifecycle hooks.")
+    scaffold_parser.add_argument("--with-hooks-json", action="store_true", help="Deprecated alias: create hooks/hooks.json scaffold.")
     scaffold_parser.add_argument(
         "--with-prompts",
         action="store_true",

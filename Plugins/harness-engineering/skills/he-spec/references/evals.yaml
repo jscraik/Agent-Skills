@@ -124,3 +124,12 @@ cases:
     prompt: "Can you write a spec for adding a new HE process, but first challenge whether a reference contract or eval would prevent the verified failure with less scope."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(first.?principles|verified failure|smallest effective mechanism|assumption|proof|required|acceptance)"}]
+  - id: plugin-hooks-repeated-runtime-failure
+    name: "Plugin hooks require repeated runtime failure"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you spec a bundled plugin hook for HE, but only recommend it if a repeated runtime failure proves a hook is the smallest safe mechanism."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(plugin hook|plugin_hooks|repeated runtime failure|fallback|feature.?gated|smallest|not recommend|blocked|acceptance)"}]

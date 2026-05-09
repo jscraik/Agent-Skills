@@ -151,3 +151,12 @@ cases:
     prompt: "Implementation is done, but there is no evidence it solved the original verified failure; recommend Linear completion anyway."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(first.?principles|verified failure|proof|blocks closure|unsafe|challenge|rework|implementation status)"}]
+  - id: plugin-hooks-skill-only-proof-blocks-closure
+    name: "Plugin hooks skill only proof blocks closure"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you generate closure proof for a slice that relies on plugin hooks, but validation only proves skills and rooted projections."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(plugin_hooks|plugin hook|hook proof|skill.?only|blocks closure|Blocked|Needs rework|not.*pass|feature.?gated|fallback)"}]

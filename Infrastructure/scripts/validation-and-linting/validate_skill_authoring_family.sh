@@ -468,20 +468,25 @@ fi
 run_skill_gate_unittest=1
 run_family_benchmark_pytest=1
 run_projection_pytest=1
+run_plugin_hooks_pytest=1
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   run_skill_gate_unittest=0
   run_family_benchmark_pytest=0
   run_projection_pytest=0
+  run_plugin_hooks_pytest=0
 
   if changed_files_match "Plugins/skill-factory/skills/code_quality_review/skill-builder/*" || \
      changed_files_match "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/*" || \
      changed_files_match "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/*" || \
+     changed_files_match "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/*" || \
      changed_files_match "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/*" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py" || \
-     changed_files_match "Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py"; then
+     changed_files_match "Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py" || \
+     changed_files_match "Infrastructure/tests/test_plugin_bundled_hooks_contract.py"; then
     run_skill_gate_unittest=1
     run_family_benchmark_pytest=1
+    run_plugin_hooks_pytest=1
   fi
 
   if changed_files_match "Infrastructure/scripts/lifecycle-and-sync/*" || \
@@ -497,6 +502,9 @@ if [[ "$run_family_benchmark_pytest" -eq 1 ]]; then
 fi
 if [[ "$run_projection_pytest" -eq 1 ]]; then
   selected_pytest_targets+=(Infrastructure/scripts/testing/test_projection_integrity.py)
+fi
+if [[ "$run_plugin_hooks_pytest" -eq 1 ]]; then
+  selected_pytest_targets+=(Infrastructure/tests/test_plugin_bundled_hooks_contract.py)
 fi
 
 if [[ "$run_skill_gate_unittest" -eq 1 ]]; then

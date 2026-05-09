@@ -1,6 +1,6 @@
 schema_version: "2.0"
 skill_name: "he-plan"
-last_updated: "2026-05-08"
+last_updated: "2026-05-09"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-plan/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
@@ -115,3 +115,12 @@ cases:
     prompt: "Can you plan a reversible local wording fix without forcing the full architecture review pipeline."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(Type 2|reversible|fast|smallest|not required|skipped|first.?principles)"}]
+  - id: plugin-hooks-feature-gated-plan
+    name: "Plugin hooks feature gated plan"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you plan adding bundled plugin hooks and treat plugin_hooks as optional feature-gated behavior, with fallback validation because hooks may be disabled."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(plugin_hooks|plugin hook|feature.?gated|default.?off|optional|fallback|validation|not guaranteed|proof)"}]

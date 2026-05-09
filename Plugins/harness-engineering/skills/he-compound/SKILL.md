@@ -24,6 +24,7 @@ Return schema_version when structured. Stage map, active owner, blockers, next a
 7. Use solution capture only for solved-problem evidence; write new captures under `.harness/solutions/**`, not legacy `docs/solutions/**`.
 8. Use UI plan routing only when UI-plan artifacts are present, then hand off to `he-plan`, `he-work`, or `he-code-review`.
 9. Route product-compression blockers such as `active_stage: spec_refresh_required` to `he-spec` instead of approving another additive implementation pass.
+10. Apply the plugin hook capability contract when plugin hook state may affect startup context, guardrail behavior, or handoff evidence. Treat hook output as runtime evidence only; it can inform `.harness` artifacts but cannot replace missing specs, plans, evals, or traceability.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check routing, stage artifacts, and handoff evidence.
 ## Failure mode
@@ -57,6 +58,7 @@ Reference `assets/` only for skill packaging and browseability; lifecycle state 
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Solution capture: `Plugins/harness-engineering/references/solution-capture-contract.md`
 - Source prompt coverage: `Plugins/harness-engineering/references/source-prompt-coverage-contract.md`
+- Plugin hook capability: `Plugins/harness-engineering/references/plugin-hook-capability-contract.md`
 - UI plan routing: `Plugins/harness-engineering/references/ui-plan-routing-contract.md`
 - Artifact routing: `Plugins/harness-engineering/references/artifact-routing-contract.md`
 - Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`

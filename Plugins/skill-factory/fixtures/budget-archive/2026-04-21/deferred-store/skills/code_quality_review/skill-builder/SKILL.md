@@ -54,8 +54,9 @@ If a missing input changes the safe edit path, ask one direct question. If risk 
 4. Preserve context by relocation, not deletion. Add `Read when:` signposts whenever important detail moves.
 5. Enforce agent-native operation: name ownership boundaries, expected artifacts, the smallest repair loop, and completion criteria in the entrypoint.
 6. Apply the OpenAI-style design checkpoint: primary user intent, trigger precision, side-effect class, progressive-disclosure boundary, structured output shape, and validation/eval evidence.
-7. Preserve local contract/eval/profile files when they already exist.
-8. Record exact validation commands with `pass`, `fail`, or `blocked`.
+7. If a plugin-owned skill asks users to paste global `hooks.json` snippets or depends on lifecycle automation, hand off to `plugin-builder` so the behavior can be packaged as plugin-bundled hooks.
+8. Preserve local contract/eval/profile files when they already exist.
+9. Record exact validation commands with `pass`, `fail`, or `blocked`.
 
 ## Deliverables
 
@@ -140,5 +141,6 @@ Preserve important context in references; do not delete it for budget alone.
 | [[skill-refactor]] | Evidence-backed keep, improve, merge, or retire decisions from session data |
 | [[skill-installer]] | Listing, installing, or checking runtime visibility for already-valid skills |
 | [[codex-agent-creator]] | Reuse or create agent roles for skill-linked delegation |
+| [[plugin-builder]] | Package plugin-owned lifecycle automation as bundled hooks instead of manual global hook config |
 
 **Topic map:** [[agent-ops]]

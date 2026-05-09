@@ -558,7 +558,64 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertIsNone(error)
         self.assertIn("PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED", plan["warnings"])
+        self.assertEqual(plan["plugin_cache_refresh"]["status"], "blocked")
         self.assertTrue(any("Skipped workspace plugin cache refresh after permission failure" in log for log in logs))
+        self.assertTrue(any("rerun with write access to .agents/plugins-runtime/cache." in log for log in logs))
+
+    def test_sync_skills_can_skip_plugin_runtime_cache_refresh(self) -> None:
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(skills_commands, "discover_catalog_entries", return_value=[]),
+            mock.patch.object(skills_commands, "refresh_workspace_plugin_caches", side_effect=AssertionError("should not refresh cache")),
+        ):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                plugin_cache_refresh="skip",
+            )
+
+        self.assertEqual(result.status, "success")
+        plan = result.data["plan"]
+        self.assertEqual(plan["plugin_cache_refresh"]["mode"], "skip")
+        self.assertEqual(plan["plugin_cache_refresh"]["status"], "skipped")
+        self.assertTrue(any("rerun with write access to .agents/plugins-runtime/cache." in log for log in result.data["logs"]))
+
+    def test_sync_skills_can_refresh_plugin_runtime_cache_only(self) -> None:
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", side_effect=AssertionError("should not sync skills")),
+            mock.patch.object(skills_commands, "refresh_workspace_plugin_caches") as refresh_mock,
+        ):
+            refresh_mock.side_effect = lambda plan, logs, repo_root, dry_run: (
+                plan["plugin_cache_refresh"].__setitem__("status", "refreshed")
+                or logs.append("cache only refresh")
+                or None
+            )
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                plugin_cache_refresh="only",
+            )
+
+        self.assertEqual(result.status, "success")
+        refresh_mock.assert_called_once()
+        plan = result.data["plan"]
+        self.assertEqual(plan["validation_status"], "pass")
+        self.assertEqual(plan["plugin_cache_refresh"]["mode"], "only")
+        self.assertEqual(plan["plugin_cache_refresh"]["status"], "refreshed")
+        self.assertIn("cache only refresh", result.data["logs"])
+
+    def test_sync_skills_rejects_invalid_plugin_cache_refresh_mode(self) -> None:
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=True,
+            plugin_cache_refresh="sometimes",
+        )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
 
     def test_sync_skills_user_scope_does_not_write_repo_local_lowercase_skills(self) -> None:
         with (

@@ -36,7 +36,7 @@ Keep plugin scaffolding separate from skill hardening. Route detailed skill qual
 
 If the destination plugin root, marketplace ownership, or skill-adoption move semantics are ambiguous, stop and ask before writing.
 
-Apply the OpenAI-style plugin design contract during scaffold shape decisions: keep the root-visible surface small, split child skills by distinct user intent, declare side-effect classes early, and leave confirmation behavior for install, external write, destructive, or completion-gating actions.
+Apply the OpenAI-style plugin design contract during scaffold shape decisions: keep the root-visible surface small, split child skills by distinct user intent, declare side-effect classes early, and leave confirmation behavior for install, external write, destructive, or completion-gating actions. Add bundled hooks only when lifecycle behavior is explicitly requested, and prefer `hooks/hooks.json`.
 
 ## Workflow
 
@@ -81,6 +81,7 @@ Fail fast: stop at first failed gate and report blocker text.
 ## Anti-Patterns to Avoid
 
 - missing `.codex-plugin/plugin.json`
+- adding hook config when no lifecycle behavior was requested
 - partial marketplace policy fields
 - copying existing skills instead of moving canonical ownership
 
