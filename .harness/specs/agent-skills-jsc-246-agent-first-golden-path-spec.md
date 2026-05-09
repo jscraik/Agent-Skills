@@ -261,6 +261,13 @@ command_handles:
 
 `repo status` baseline:
 
+```yaml
+command: ./bin/ask repo status --json --robot
+status: success
+repo_root_resolved: /home/jailuser/git
+skills_synced: true
+```
+
 
 `skills explain he-spec` baseline:
 

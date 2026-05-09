@@ -19,7 +19,7 @@ Recommended active set:
 | Window | Linear objects |
 |---|---|
 | Now | 1 repo milestone, 1 parent issue, 2 sub-issues, plus 1 parallel proof taxonomy ADR issue. |
-| Next | Proof-driven skill promotion and agent-first golden path. |
+| Next | Proof-driven skill promotion and agent-first golden path—post-refresh/admitted (JSC-246). |
 | Later | Repository cognition burn-down and governance compression after the command plane is less fragile. |
 | Do Not Create | Any issue that merely repeats a review finding without execution proof, owner, or validation gate. |
 
@@ -55,7 +55,7 @@ Review decisions applied:
 
 | Object type | Name/title | Target project | Parent initiative | Priority | Labels | Execution route | Blocks | Blocked by | Source artifacts | Reason |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Milestone | Ask Control Plane Decomposition | `agent-skills` | `Dev Portfolio` | 1 | Architecture, Refactor, Drift-Risk, Developer Experience | Agent-assisted, human-review required | Proof gates that would otherwise deepen `skills.py`; golden-path command routing | None | `.harness/refactors/ask-control-plane-decomposition.md`, `.harness/triage/agent-skills-triage.md`, `.harness/strategy/agent-skills-strategy.md` | The overgrown `./bin/ask` skills command plane is the first structural bottleneck. |
+| Milestone | Ask Control Plane Decomposition (Linear milestone: Command surface and ask reliability) | `agent-skills` | `Dev Portfolio` | 1 | Architecture, Refactor, Drift-Risk, Developer Experience | Agent-assisted, human-review required | Proof gates that would otherwise deepen `skills.py`; golden-path command routing | None | `.harness/refactors/ask-control-plane-decomposition.md`, `.harness/triage/agent-skills-triage.md`, `.harness/strategy/agent-skills-strategy.md` | The overgrown `./bin/ask` skills command plane is the first structural bottleneck. |
 | Milestone | Proof-Driven Skill Core | `agent-skills` | `Dev Portfolio` | 2 | Eval, Governance, Agent-Native | Agent-assisted, human-review required | Trusted/default-visible skill promotion; proof-backed lifecycle gates | Proof taxonomy ADR | `.harness/refactors/proof-driven-skill-promotion.md`, `.harness/core/moat-invariants.md` | Skill trust is moat-critical only if promotion is evidence-backed. |
 | Milestone | Agent First Golden Path | `agent-skills` | `Dev Portfolio` | 2 | Agent-Native, Developer Experience, Reliability | Agent-assisted | Agent onboarding compression; deterministic repo operation loop | Ask control-plane boundary clarification | `.harness/refactors/agent-first-golden-path.md`, `.harness/core/agent-operating-rules.md` | Future agents need a single obvious loop: doctor, route, execute, prove, close out. |
 | Milestone | Repository Cognition Burn-Down | `agent-skills` | `Dev Portfolio` | 2 | Drift-Risk, Governance, Refactor | Agent-assisted, human-review required for deletions | Lower context load and safer skill discovery | Classification pass | `.harness/refactors/repository-cognition-burndown.md`, `.harness/core/cognition-principles.md` | Tracked stale/generated/history surfaces are becoming cognition debt. |
@@ -71,7 +71,7 @@ Review decisions applied:
 | Name/title | `[agent-skills] Decompose skills command module into bounded services` |
 | Target project | `agent-skills` |
 | Parent initiative | `Dev Portfolio` |
-| Milestone | Ask Control Plane Decomposition |
+| Milestone | Ask Control Plane Decomposition (Linear milestone: Command surface and ask reliability) |
 | Priority | 1 |
 | Labels | Architecture, Refactor, Drift-Risk, Developer Experience |
 | Execution route | Agent-assisted; human-review required for public command contract changes |
@@ -122,7 +122,7 @@ Stop or revert the active extraction if command output changes without an intent
 Project: agent-skills
 Milestone: Command surface and ask reliability
 HE slice: Ask Control Plane Decomposition
-Labels: architecture, Refactor, Agent
+Labels: Architecture, Refactor, Agent-Native
 Priority: 1
 Blocks: Proof-driven skill promotion implementation; agent-first routing changes
 Blocked by: None
@@ -406,7 +406,7 @@ Blocked by: Governance inventory
 | Now | Ask Control Plane Decomposition | 1 milestone, 1 parent, first 2 sub-issues | Highest structural leverage and blocks safer proof/golden-path implementation. |
 | Now | Proof taxonomy and lifecycle ADR | 1 sub-issue under Proof-Driven Skill Core | ADR can clarify promotion semantics without deepening the command module. |
 | Next | Proof-Driven Skill Core implementation | 1 milestone, 1 parent, 2-3 sub-issues | Moat-critical but safer after taxonomy and command boundaries. |
-| Next | Agent First Golden Path | 1 milestone, 1 parent, 2-3 sub-issues | High leverage for future agents, but should not fight command-plane migration. |
+| Next | Agent First Golden Path—baseline planning state | 1 milestone, 1 parent, 2-3 sub-issues | High leverage for future agents, but should not fight command-plane migration. |
 | Next | Repository Cognition Burn-Down classification | 1 parent plus classification/ownership sub-issues | Reduces context cost; deletion waits for classification. |
 | Later | Governance Compression | 1 parent plus inventory/deprecation sub-issues | Important, but premature until proof/control-plane boundaries stabilize. |
 | Do Not Create | New `Dev Portfolio` initiative | None | Existing initiative is sufficient. |
@@ -514,7 +514,7 @@ Recommended current active objects after Linear delta refresh:
 
 | Object | Activate now? | Reason |
 |---|---|---|
-| Milestone: Command surface and ask reliability / slice: Agent First Golden Path | Yes | This is the next unresolved command-surface slice after `JSC-284` closed. |
+| Milestone: Command surface and ask reliability / slice: Agent First Golden Path—post-refresh/admitted (JSC-246) | Yes | This is the next unresolved command-surface slice after `JSC-284` closed. |
 | Parent: `JSC-246` `[agent-skills] Build repo surface contract and agent capability control-plane golden paths` | Yes | Single admitted parent issue for the next `$he-spec` handoff. |
 | Prior parent: `JSC-284` `[agent-skills] Decompose skills command module into bounded services` | No; keep closed | Completed with children `JSC-285`, `JSC-286`, and `JSC-287`; do not reopen for new work. |
 | Existing in-progress track: `JSC-230` Commandable Skill Trees | Do not fold into this slice | Already has its own active parent/child topology; folding it into `JSC-246` would blur ownership. |
