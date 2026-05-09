@@ -276,21 +276,21 @@ Required Action: Isolate unrelated dirty HE work before staging/commit validatio
 
 Gate: Closeout Isolation Fixtures
 Expected: Helper-level closeout fixture tests prove readiness without relying on the current dirty worktree as the clean fixture.
-Actual: `python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q` passed with `24 passed`. The non-skill changed-file fixture now asserts changed files, sync state, focused validation commands, surface policy, runtime budget, commit readiness, blockers, and next command.
+Actual: `python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py` passed with `27 passed in 0.04s`. Existing closeout fixtures assert no-change readiness, canonical skill sync blockers, plugin reference non-sync behavior, plugin skill sync behavior, generated projection handle validation, mixed projection/non-projection prioritization, non-skill scoped validation, strict diagnostic debt, doctor blockers, git startup normalization, and changed-file detection failure.
 Status: pass
 Evidence: Focused closeout fixture test output and diff inspection.
 Confidence: High
 Blocks Closure: no for focused phase behavior; parent closure remains open for later phases.
-Required Action: Continue with `PLAN-JSC246-007`.
+Required Action: Use the live closeout command only as current-state classification while unrelated HE dirty work remains.
 
 Gate: Live Changed-Worktree Closeout Probe
 Expected: Live `./bin/ask repo closeout --changed --json --robot` records current dirty-worktree state without serving as the clean fixture.
-Actual: Live closeout returned `status: success`, `commit_readiness.ready: true`, `blockers: []`, `changed_files: [".harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md", "Infrastructure/tests/test_ask_repo_doctor.py"]`, and next command `./bin/ask repo validate --changed-files .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md Infrastructure/tests/test_ask_repo_doctor.py --json --robot`; repo-surface diagnostic debt remained advisory.
-Status: pass
-Evidence: Live closeout probe during phase 005.
-Confidence: Medium-high
-Blocks Closure: no.
-Required Action: Keep live dirty-worktree evidence as classification only.
+Actual: Live closeout exited `2` with `status: error`, `agent_summary: Blocked: closeout has 1 blocker(s).`, `changed_file_count: 32`, `commit_readiness.ready: false`, `commit_readiness.blockers: ["sync_required"]`, and next command `./bin/ask skills sync --scope workspace --projection rooted --json --robot`. Runtime budget still passed; repo doctor was non-blocking with diagnostic-advisory next command `./bin/ask repo surface --json --robot`; surface policy remained warning with diagnostic debt.
+Status: blocked as expected for live dirty-worktree state
+Evidence: Live closeout probe during phase 005 after unrelated HE skill-source draft work was present in the worktree.
+Confidence: High that this is unrelated to JSC-246 closeout fixture behavior because the blocker is driven by current HE skill-source changes, not by the JSC-246 closeout fixture tests.
+Blocks Closure: no for phase 005; it blocks live repo closeout until the unrelated HE sync lane is handled or isolated.
+Required Action: Preserve unrelated HE dirty work and keep it out of the JSC-246 phase commit.
 
 ## PLAN-JSC246-003 Route-State Evidence
 
@@ -450,18 +450,25 @@ Blocks Completion: no for phase 004; yes for full parent closure until later pha
 
 Implementation:
 
-- Strengthened the existing non-skill changed-file closeout fixture to assert the full readiness payload agents depend on.
-- Verified changed files, sync requirements, focused validation, surface policy, runtime budget, commit readiness, blocker state, and next command from mocked changed-file state.
-- Kept live closeout evidence as dirty-worktree classification only; the clean/ready fixture remains mocked.
+- Verified existing closeout fixtures rather than treating the current dirty worktree as the clean fixture.
+- Fixture coverage includes no-change readiness, skill-source sync blockers, plugin reference non-sync behavior, plugin skill sync behavior, generated projection handle validation, mixed generated/non-generated prioritization, strict diagnostic debt, doctor blockers, non-skill scoped validation, git startup normalization, and changed-file detection failure.
+- Confirmed closeout output includes changed files, sync needs, focused validation, surface policy, runtime budget, commit readiness, blocker state, and next command across helper-level fixture states.
+- Kept live closeout evidence as current-state classification only; the clean/ready evidence remains fixture-backed.
+
+Focused validation:
+
+| Command | Result | Evidence |
+| --- | --- | --- |
+| `python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py` | pass | `27 passed in 0.04s`. |
 
 Live probe:
 
 | Command | Result | Key evidence |
 | --- | --- | --- |
-| `./bin/ask repo closeout --changed --json --robot` | success | `commit_readiness.ready: true`; `blockers: []`; changed files limited to this eval artifact and `Infrastructure/tests/test_ask_repo_doctor.py`; next command is scoped changed-file validation; repo-surface debt remains advisory. |
+| `./bin/ask repo closeout --changed --json --robot` | blocked, expected for current worktree | Exit code `2`; `commit_readiness.ready: false`; blocker `sync_required`; `changed_file_count: 32`; `sync.needed: true`; next command `./bin/ask skills sync --scope workspace --projection rooted --json --robot`; runtime budget passed; doctor was non-blocking; repo-surface debt remained advisory diagnostic debt. |
 
 Interpretation:
-Phase 005 proves closeout readiness through deterministic helper-level fixture state instead of depending on whatever files happen to be dirty in the working tree. The live command is still useful, but only as current-state classification.
+Phase 005 proves closeout readiness through deterministic helper-level fixture state instead of depending on whatever files happen to be dirty in the working tree. The live command is still useful, but only as current-state classification: in this snapshot it correctly blocks on unrelated HE skill-source changes that need projection sync before live repo closeout can be ready.
 Operational Impact: Future agents can trust closeout fixture tests for readiness semantics and use live closeout as evidence of the present branch state.
 Blocks Completion: no for phase 005; yes for full parent closure until later phases complete.
 
