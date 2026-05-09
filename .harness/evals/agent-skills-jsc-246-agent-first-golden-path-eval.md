@@ -449,9 +449,9 @@ Blocks Completion: no
 ## Proof Artifacts
 Produced: Focused pytest output, live ask doctor probe, repo surface probe, live skills improve route-state probes, live skills explain/proof/prove probes, live repo closeout changed-worktree probe, artifact identity lint, Linear traceability lint, diff check, scoped repo validation.
 Required: Link this eval artifact and command evidence back to the Linear parent or milestone summary.
-Missing: Final parent-issue closure proof for all JSC-246 phases.
-Blocks Completion: no for phases 002 through 006 focused behavior; yes for full parent closure.
-Attach or Link Back to Linear: Link this eval artifact when updating `JSC-246`.
+Missing: None; all phases 002–007 are complete and closure evidence is present in this eval artifact.
+Blocks Completion: no.
+Attach or Link Back to Linear: Link this eval artifact and the fresh-agent evidence bundle to JSC-246 to complete closure.
 
 ## Failures / Regressions
 Failure or Regression: Earlier parent closeout was blocked by projection drift and a generated-only `sync_required` loop.

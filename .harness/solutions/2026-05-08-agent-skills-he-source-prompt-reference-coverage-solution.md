@@ -12,7 +12,7 @@ origin: .harness/review/2026-05-08-codex-agentic-workstation-original-prompt-gap
 linear_issue: none
 linear_milestone: none
 asset_family: harness engineering source prompt preservation
-owner: Agent Skills Team
+owner: Harness Engineering
 source_artifact: .harness/review/2026-05-08-codex-agentic-workstation-original-prompt-gap-review.md
 freshness_reviewed_on: 2026-05-08
 review_after_days: 90
@@ -99,18 +99,23 @@ finding:
 ## Evidence
 
 - `.harness/features/2026-05-08-codex-agentic-workstation-intent.md`
-  correctly identified the local agentic workstation thesis and TUI hotspot
-  risk, but it did not cover the full original prompt checklist.
+  (not present in current workspace) correctly identified the local agentic
+  workstation thesis and TUI hotspot risk, but it did not cover the full
+  original prompt checklist.
 - `.harness/review/2026-05-08-codex-agentic-workstation-architecture-review.md`
-  was a useful sampled architecture review, but it did not deeply apply every
-  requested lens from the original prompt method.
+  (not present in current workspace) was a useful sampled architecture review,
+  but it did not deeply apply every requested lens from the original prompt
+  method.
 - `.harness/refactors/2026-05-08-codex-agentic-workstation-tui-hotspot-decomposition.md`
-  produced a strong first refactor program from the evidence available.
+  (not present in current workspace) produced a strong first refactor program
+  from the evidence available.
 - `.harness/linear/2026-05-08-codex-agentic-workstation-tui-hotspot-decomposition-linear-plan.md`
-  produced a disciplined Linear-ready active set, but correctly remained tied
-  to the selected TUI refactor rather than claiming full repo-wide closure.
+  (not present in current workspace) produced a disciplined Linear-ready active
+  set, but correctly remained tied to the selected TUI refactor rather than
+  claiming full repo-wide closure.
 - `.harness/review/2026-05-08-codex-agentic-workstation-original-prompt-gap-review.md`
-  records the specific gaps and required future guardrails.
+  (not present in current workspace) records the specific gaps and required
+  future guardrails.
 
 ## Maintenance Ownership
 
