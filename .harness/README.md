@@ -26,8 +26,8 @@ execution, and review documents; keep local runtime output out of git.
 | `.harness/quality/**` | policy | Quality criteria and scorecards. |
 | `.harness/evals/**.md` | intentional_archive | Harness engineering eval reports and execution evidence. |
 | `.harness/session-evidence/**` | intentional_archive | Deterministic command snapshots and session evidence bundles for harness engineering closure proof. |
-| `.harness/*.json` (policy contracts) | policy | Contract JSON consumed by repo validators or Harness setup flows. |
-| `.harness/*.json` (generated outputs) | generated_tracked | Generated contract JSON tracked for downstream consumers. |
+| `.harness/*-contract.json` | policy | Contract JSON consumed by repo validators or Harness setup flows. |
+| `.harness/*-generated.json` | generated_tracked | Generated contract JSON tracked for downstream consumers. |
 
 Secondary context is not execution authority by itself. Implementation work must
 be admitted by the selected `.harness/linear/**` or `.harness/refactors/**`
