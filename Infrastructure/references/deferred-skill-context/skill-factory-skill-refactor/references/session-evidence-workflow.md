@@ -49,7 +49,23 @@ uv run --python 3.12 python main.py \
   --verbose
 ```
 
-Consume `${TEMP_PREFIX}/skill-refactor-evidence.json` for skill-health signals, `${TEMP_PREFIX}/solved-problems.json` for repeated solved workflows, `${TEMP_PREFIX}/index.json` for redacted session labels, and `${TEMP_PREFIX}/redaction-report.json` before producing recommendations. Add explicit `--codex-sessions-dir` values only when the user asks for archived or non-default session roots.
+Consume `${TEMP_PREFIX}/skill-refactor-handoffs.json` first for
+keep/improve/skillify/route-to-he decisions with root causes and evidence
+labels. Use `${TEMP_PREFIX}/skill-refactor-evidence.json` for aggregate
+skill-health signals, `${TEMP_PREFIX}/solved-problems.json` for repeated solved
+workflows, `${TEMP_PREFIX}/index.json` for redacted session labels, and
+`${TEMP_PREFIX}/redaction-report.json` before producing recommendations. Add
+explicit `--codex-sessions-dir` values only when the user asks for archived or
+non-default session roots.
+
+Before using `${TEMP_PREFIX}/skill-refactor-handoffs.json`, verify that it
+exists. If it is missing, report collector contract drift with the missing
+artifact path. Strict validation flows must stop there; non-strict recommendation
+flows may continue with provisional recommendations from
+`${TEMP_PREFIX}/skill-refactor-evidence.json`, `${TEMP_PREFIX}/index.json`, and
+`${TEMP_PREFIX}/redaction-report.json`, with a warning that operators should
+pass explicit `--codex-sessions-dir` values for archived or non-default session
+roots.
 
 ## Output Shape
 
