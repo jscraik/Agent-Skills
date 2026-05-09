@@ -1,6 +1,6 @@
 ---
 name: he-eval-report
-description: "Generate HE eval and drift proof. Use when Linear or milestone closure needs validation."
+description: "Generate closure-grade HE eval and drift proof for one execution slice. Use when Linear, milestone, or source-prompt closure needs validation evidence."
 metadata:
   skill-type: code_quality_review
 ---
@@ -22,16 +22,27 @@ Write `.harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-mil
 1. Resolve the stage context contract and identify exactly one evaluated slice; do not evaluate adjacent work.
 2. Load the eval report contract, schema, template, drift taxonomy, Linear completion policy, and relevant source artifacts for the selected slice.
 3. Classify source artifacts by content shape before path so mismatched titles, dates, or Linear identifiers become traceability findings.
-4. Compare implementation against the Linear plan, refactor program, plugin HE spec, ADRs, core invariants, and proof artifacts.
-5. Prove agentic eval validity before closure, including task validity, outcome validity, trajectory/process evidence, grader coverage, trial policy, side-effect authorization, and saturation or maintenance signal.
-6. Apply the XP operating contract: verify the promised proof was planned before closure, keep quality gates intact, classify missing proof as feedback, and name the smallest accepted-responsibility repair.
-7. Apply the gate selection contract for closure-sensitive slices; block full
+4. Keep scope tight: start with the selected slice and only 2-3 focused
+   surfaces unless closure explicitly depends on broader release evidence.
+5. If source artifacts came from an original prompt comparison or sampled
+   upstream review, apply the shared source-prompt coverage contract; inherit
+   evidence depth, coverage gaps, not-inspected surfaces, repo-specific drift
+   signals, authority limits, and downstream confidence before recommending
+   closure.
+6. Compare implementation against the Linear plan, refactor program, plugin HE spec, ADRs, core invariants, source-prompt coverage limits, and proof artifacts.
+7. Prove agentic eval validity before closure, including task validity, outcome validity, trajectory/process evidence, grader coverage, trial policy, side-effect authorization, and saturation or maintenance signal.
+8. Apply the XP operating contract: verify the promised proof was planned before closure, keep quality gates intact, classify missing proof as feedback, and name the smallest accepted-responsibility repair.
+9. Apply the gate selection contract for closure-sensitive slices; block full
    release-confidence or Linear completion recommendations when required
    risk-specific proof, lifecycle release evals, security proof, or explicit
    non-applicability is missing.
-8. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
-9. Run or explicitly block relevant validation gates; never invent passing results.
-10. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
+10. Apply the first-principles contract before closure: prove the change solved
+   the original verified failure with the smallest sufficient evidence, and
+   block completion when the proof is missing or only shows implementation
+   status.
+11. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
+12. Run or explicitly block relevant validation gates; never invent passing results.
+13. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
 ## Validation
 Fail fast: stop at the first failed gate. Run `python3 Plugins/harness-engineering/skills/he-eval-report/scripts/validate_eval_report.py <report-path>`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <report-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_frontmatter_safety_lint.py <report-path>`; record exact command results. If the eval artifact is missing, incomplete, untraceable, or materially failing, closure recommendation must be `Blocked`, `Needs rework`, or `Unsafe to close`.
 ## Failure mode
@@ -64,6 +75,8 @@ Reference `assets/` only for skill packaging and browseability. Eval proof belon
 - Domain context: `Plugins/harness-engineering/references/domain-context-contract.md`
 - Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
 - Gate selection: `Plugins/harness-engineering/references/gate-selection-contract.md`
+- First principles: `Plugins/harness-engineering/references/first-principles-contract.md`
+- Shared source-prompt coverage: `Plugins/harness-engineering/references/source-prompt-coverage-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Agent-native audit scorecard: `Plugins/harness-engineering/references/agent-native-audit-scorecard.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

@@ -1,6 +1,6 @@
 ---
 name: he-strategy
-description: "Summarize HE findings into strategy. Use when cognition artifacts need direction, moat clarity, or simplification."
+description: "Compress HE cognition artifacts into evidence-backed strategy. Use when intent, review, triage, ADR, core, or source-prompt comparison evidence needs durable direction."
 metadata:
   skill-type: team_automation
 ---
@@ -51,13 +51,23 @@ drift or moat impact, and evidence traceability.
 4. Read the minimum source set that proves the selected conclusions.
 5. Classify existing `.harness` artifacts by content shape before path.
 6. Apply interactive steering when mode or pipeline extent is ambiguous.
-7. Apply the agent-native audit scorecard for skills, plugins, CLIs, agent docs,
+7. When an original prompt, external workflow, old manual method, or plugin
+   comparison is the baseline, apply the shared source-prompt coverage contract
+   before writing the strategy artifact; record source prompt status, prompt
+   family coverage, evidence depth, coverage gaps, not-inspected surfaces,
+   authority limits, downstream confidence, and whether a deeper strategy
+   refresh is required.
+8. Apply the agent-native audit scorecard for skills, plugins, CLIs, agent docs,
    evals, routing, projections, automation, or workflow surfaces.
-8. Apply the Pragmatic Programmer review contract for architecture-review or
+9. Apply the Pragmatic Programmer review contract for architecture-review or
    explicit pragmatic review requests.
-9. Apply the XP operating contract: identify the smallest feedback-producing next slice, the signal it should produce, and the stop/pivot condition; omit conclusions that cannot change a decision.
-10. Compress aggressively; strategy output is not implementation permission.
-11. Validate the artifact against the selected mode contract and record exact
+10. Apply the first-principles contract when strategy would preserve, create,
+   delete, or expand lifecycle, governance, routing, Linear, or artifact
+   surfaces; separate irreducible core, copied assumptions, false moat signals,
+   deletion candidates, and safe rewrite zones.
+11. Apply the XP operating contract: identify the smallest feedback-producing next slice, the signal it should produce, and the stop/pivot condition; omit conclusions that cannot change a decision.
+12. Compress aggressively; strategy output is not implementation permission.
+13. Validate the artifact against the selected mode contract and record exact
    pass, fail, or blocked outcomes.
 
 ## Constraints
@@ -119,6 +129,7 @@ at the first failed gate and do not proceed.
 - Mode and output contract: `references/strategy-output-contract.md`
 - Local contract: `references/contract.yaml`
 - Source prompt preservation: `references/source-prompt-preservation.md`
+- Shared source-prompt coverage: `../../references/source-prompt-coverage-contract.md`
 - Artifact routing: `../../references/artifact-routing-contract.md`
 - Artifact classification: `../../references/artifact-classification-and-traceability.md`
 - Document review finding tiers: `../../references/document-review-finding-tiers.md`
@@ -130,6 +141,7 @@ at the first failed gate and do not proceed.
 - Agent-native compression: `../../references/agent-native-compression-contract.md`
 - Agent-native audit scorecard: `../../references/agent-native-audit-scorecard.md`
 - Domain model production: `../../references/domain-model-production-contract.md`
+- First principles: `../../references/first-principles-contract.md`
 - Pragmatic Programmer review: `../../references/pragmatic-programmer-review-contract.md`
 - XP operating contract: `../../references/xp-operating-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`

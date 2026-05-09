@@ -14,6 +14,11 @@ strategy prompts without loading the full prompt text into `SKILL.md`.
 
 These are modes inside `he-strategy`, not separate top-level skills.
 
+When the user asks whether HE output is equivalent to one of these original
+prompt workflows, load the shared source-prompt coverage contract at
+`Plugins/harness-engineering/references/source-prompt-coverage-contract.md`.
+Do not answer equivalence from the existence of matching artifacts alone.
+
 ## Preserved Requirements
 
 - infer intent from implementation reality, not marketing language
@@ -34,6 +39,9 @@ These are modes inside `he-strategy`, not separate top-level skills.
 - generate only high-value ADRs and only durable core invariant files
 - prevent ADR, governance, and artifact explosion
 - include an Evidence & Traceability Matrix for durable artifacts
+- record source prompt family coverage, evidence depth, coverage gaps,
+  not-inspected surfaces, authority limits, original prompt coverage, and
+  downstream confidence when comparing against an original prompt method
 
 ## Real Output Patterns Observed
 
@@ -64,3 +72,8 @@ review observation into a work item, ADR, core rule, or Linear issue.
 Feature, review, triage, and strategy documents are secondary context. ADRs and
 core invariants may carry policy or decision weight, but implementation still
 requires admission through an execution slice.
+
+If source-prompt coverage is `partial`, `weak`, `sampled`, or `unknown`, the
+strategy artifact may still be useful as local cognition, but it must not be
+used as repo-wide authority for refactor, Linear, ADR, core, or closure claims
+without a deeper refresh.

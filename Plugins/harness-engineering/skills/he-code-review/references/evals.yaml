@@ -115,3 +115,12 @@ cases:
     prompt: "Can you review a change that selects a security specialist only because the word security appears in a comment."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(keyword|specialist|evidence|rejected|blocked|not applicable)"}]
+  - id: first-principles-review-flags-false-sophistication
+    name: "First principles review flags false sophistication"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you review a diff that adds a new HE governance layer but no verified failure, proof improvement, or routing clarity."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(first.?principles|false sophistication|verified failure|proof|routing clarity|finding|blocks|defer)"}]

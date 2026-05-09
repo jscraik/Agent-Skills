@@ -23,9 +23,12 @@ Return schema_version when structured. schema_version: 1, severity findings, tra
    specialist selection, domain semantics, security-sensitive behavior, or eval
    proof, apply the gate selection contract; treat missing, keyword-only, or
    over-broad gate profiles as readiness findings.
-7. Do not approve readiness from green CI alone when real behavior proof, security review, live PR-thread state, or traceability evidence is missing.
-8. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, and keep the canonical slug aligned with the spec/plan/eval chain.
-9. End with approve, request changes, autofix candidate, or follow-up lane for repeated feedback.
+7. Apply the first-principles contract to HE routing, lifecycle, governance,
+   Linear, eval, or artifact-surface diffs; flag false sophistication when a
+   change lacks verified-failure evidence or proof impact.
+8. Do not approve readiness from green CI alone when real behavior proof, security review, live PR-thread state, or traceability evidence is missing.
+9. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, and keep the canonical slug aligned with the spec/plan/eval chain.
+10. End with approve, request changes, autofix candidate, or follow-up lane for repeated feedback.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Verify gates, references, subagent evidence, and command outcomes.
 ## Failure mode
@@ -62,6 +65,7 @@ Reference `assets/` only for skill packaging and browseability; review evidence 
 - Domain context: `Plugins/harness-engineering/references/domain-context-contract.md`
 - Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
 - Gate selection: `Plugins/harness-engineering/references/gate-selection-contract.md`
+- First principles: `Plugins/harness-engineering/references/first-principles-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`

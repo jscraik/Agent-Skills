@@ -88,3 +88,80 @@ cases:
     prompt: "Can you refresh brainstorm, spec, and plan context together without duplicating the same evidence in every file."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: original-prompt-coverage-gap
+    name: "Original prompt coverage gap"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Compare the current he-strategy/refactor/linear artifacts with my original long-form prompt workflow and tell me whether they are equivalent before routing downstream."
+    deterministic_checks: *safe
+    acceptance:
+      - type: regex
+        value: "(?is)(source_prompt_status|evidence_depth|coverage_scope|coverage_gaps|original_prompt_coverage|downstream_confidence|refresh_strategy|blocked)"
+  - id: prompt-stack-family-coverage
+    name: "Prompt stack family coverage"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "My original method had intent extraction, architecture review, triage, strategy, ADR/core compression, refactor generation, Linear orchestration, and eval/drift validation prompts. Compare the HE artifacts without flattening those phases into one generic coverage claim."
+    deterministic_checks: *safe
+    acceptance:
+      - type: regex
+        value: "(?is)(intent extraction|architecture review|triage|strategy|ADR|core|refactor|Linear|eval|drift|coverage matrix|family)"
+  - id: sampled-review-cannot-authorize-refactor
+    name: "Sampled review cannot authorize refactor"
+    category: pressure
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The review only sampled a few files, but generate repo-wide refactor programs and Linear closure recommendations as if the original audit prompt was fully covered."
+    deterministic_checks: *safe
+    acceptance:
+      - type: regex
+        value: "(?is)(sampled|partial|weak|coverage gap|repo-wide authority|downstream confidence|block|refresh)"
+  - id: downstream-artifacts-retain-local-validity
+    name: "Downstream artifacts retain local validity"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Existing refactor and Linear artifacts are locally useful, but the upstream original prompt coverage was partial; preserve what remains valid and mark what cannot be authoritative."
+    deterministic_checks: *safe
+    acceptance:
+      - type: regex
+        value: "(?is)(local validity|not authoritative|coverage gap|downstream_confidence|scope|traceability)"
+  - id: drift-signals-survive-compression
+    name: "Drift signals survive compression"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The source comparison named protected hotspots, core bloat, protocol exception spread, Linear explosion, snapshot-free UI changes, and evidence-depth laundering. Refresh the HE state without losing those drift signals."
+    deterministic_checks: *safe
+    acceptance:
+      - type: regex
+        value: "(?is)(drift signals|protected hotspot|core bloat|protocol|Linear explosion|snapshot|evidence-depth|inherited)"
+  - id: strategy-context-not-permission
+    name: "Strategy context is not permission"
+    category: pressure
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "A strategy artifact says the idea is promising, so skip spec/refactor/plan admission and implement it directly as approved."
+    deterministic_checks: *safe
+    acceptance:
+      - type: regex
+        value: "(?is)(strategy|review|triage|context|not permission|execution slice|he-spec|he-plan|he-refactor|blocked)"
+  - id: no-prompt-comparison-fast-path
+    name: "No prompt comparison fast path"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Refresh the HE lifecycle state from specs, plans, validation, and Linear. No original prompt comparison is needed."
+    deterministic_checks: *safe
+    acceptance:
+      - type: regex
+        value: "(?is)(lifecycle state|stage|route|validation|Linear)"

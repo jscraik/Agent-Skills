@@ -118,6 +118,50 @@ Return schema_version when structured. schema_version: 1, complete replacement s
 Mark current active state; if `/goal` is active, confirm it matches the branch, issue, plan, or PR before editing and treat mismatches as blockers rather than overwriting project truth. Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
 ```
 
+## Preserved Source Coverage And First-Principles Refactor Lines
+
+The 2026-05-09 source-coverage and first-principles pass tightened several
+active lifecycle entrypoints. Preserve the exact retired lines here so the
+progressive-disclosure gate can prove the instruction context was moved rather
+than dropped.
+
+```text
+7. Ask before survivor selection when the chosen survivor would shape downstream spec, plan, Linear work, or implementation scope.
+description: "Analyze evidence and refresh HE artifacts. Use when session or repo truth changes harness state."
+3. Ask before choosing when earliest incomplete stage, resume target, or refresh route conflicts across evidence.
+4. Preserve Harness lifecycle state in coding-harness-managed repos and refresh or explicitly block Project Brain only when repository context changed.
+5. Use solution capture only for solved-problem evidence; write new captures under `.harness/solutions/**`, not legacy `docs/solutions/**`.
+6. Use UI plan routing only when UI-plan artifacts are present, then hand off to `he-plan`, `he-work`, or `he-code-review`.
+7. Route product-compression blockers such as `active_stage: spec_refresh_required` to `he-spec` instead of approving another additive implementation pass.
+description: "Plan HE artifacts into Linear execution. Use when strategy, refactor, or plan artifacts need tracking."
+7. Keep the active set intentionally small.
+8. Apply the XP operating contract: require a story/value, risk-reduction, or feedback-loop basis for `Now` work; classify technically neat but low-value work as `Later` or `Do Not Create`.
+9. Classify candidate work as `Now`, `Next`, `Later`, or `Do Not Create`.
+10. Under pressure to create every possible issue, preserve the filter: refuse
+11. Convert selected refactor programs into milestone -> parent issue -> minimal
+12. Define dependencies, eval gates, rollback gates, labels, and priority.
+13. Include ready-to-create payloads without mutating Linear.
+14. Validate the generated plan and record exact pass, fail, or blocked
+5. Convert scope into ordered implementation units with acceptance traceability, dependencies, validation gates, rollback, risks, and out-of-scope boundaries.
+6. Treat strategy, triage, review, and feature docs as context unless the approved Linear/refactor slice admits them.
+7. End with `post_plan_handoff`; ask before continuing when multiple valid next stages remain, and continue only when the user already authorized it.
+8. For cockpit, golden-path, command-catalog, or agent-native compression work, plan subtractive proof before additive compatibility.
+description: "Create HE refactor migration programs. Use when structural change needs phased rollback-safe execution."
+6. Apply the XP operating contract: define the smallest reversible migration step, what it teaches, and the stop/pivot condition before adding broader structure.
+7. Define desired end state before implementation detail.
+8. Stage migration phases with validation, rollback, and coexistence rules.
+9. Include Linear mapping without creating Linear objects.
+10. Define closure proof using dated `.harness/evals/**` artifacts.
+11. Preserve future-agent anti-regression constraints.
+12. Validate the generated program and record exact pass, fail, or blocked
+description: "Summarize HE findings into strategy. Use when cognition artifacts need direction, moat clarity, or simplification."
+7. Apply the agent-native audit scorecard for skills, plugins, CLIs, agent docs,
+8. Apply the Pragmatic Programmer review contract for architecture-review or
+9. Apply the XP operating contract: identify the smallest feedback-producing next slice, the signal it should produce, and the stop/pivot condition; omit conclusions that cannot change a decision.
+10. Compress aggressively; strategy output is not implementation permission.
+11. Validate the artifact against the selected mode contract and record exact
+```
+
 ## Preserved Lifecycle Confidence Refactor Lines
 
 The 2026-05-09 HE confidence hardening pass renumbered active lifecycle

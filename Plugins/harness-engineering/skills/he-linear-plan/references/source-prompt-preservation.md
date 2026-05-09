@@ -3,6 +3,12 @@
 This reference preserves the behavior of the original user-proposed Linear
 Execution Orchestration Prompt.
 
+When a Linear plan consumes artifacts produced from an original prompt
+comparison, also load
+`Plugins/harness-engineering/references/source-prompt-coverage-contract.md`.
+Linear plans must inherit upstream source-prompt coverage limits instead of
+turning partial cognition into broad execution authority.
+
 ## Preserved Requirements
 
 - read `.harness/features`, `.harness/review`, `.harness/triage`,
@@ -29,6 +35,8 @@ Execution Orchestration Prompt.
 - include validation gates, rollback conditions, dependency maps, labels,
   priority, and human/agent execution routing
 - do not mutate Linear without explicit confirmation
+- preserve upstream evidence depth, coverage gaps, not-inspected surfaces,
+  repo-specific drift signals, authority limits, and downstream confidence
 
 ## Real Output Patterns Observed
 
@@ -52,6 +60,11 @@ are better for regression detection and agentic search.
 Do not create one issue per finding. Prefer one milestone and one parent issue
 per coherent execution phase, with sub-issues only where work is independently
 verifiable.
+
+If upstream coverage is partial, sampled, weak, inferred, or unknown, keep the
+Linear plan local to the selected slice and classify uninspected prompt-method
+concerns as `Next`, `Later`, `Do Not Create`, or `Blocked` instead of treating
+them as closed.
 
 ## Confirmation Gate
 

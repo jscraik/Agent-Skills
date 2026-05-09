@@ -1,6 +1,6 @@
 ---
 name: he-compound
-description: "Analyze evidence and refresh HE artifacts. Use when session or repo truth changes harness state."
+description: "Analyze session, repo, Linear, and harness evidence to refresh HE lifecycle state. Use when multi-stage HE work needs source-prompt coverage, resume routing, or earliest-stage recovery."
 metadata:
   skill-type: team_automation
 ---
@@ -16,11 +16,14 @@ Return schema_version when structured. Stage map, active owner, blockers, next a
 ## Procedure
 1. Reconstruct lifecycle state from live repo evidence, Linear, specs, plans, PRs, validation, session evidence, and Project Brain.
 2. Resolve the stage context contract enough to identify the earliest incomplete, stale, or conflicted stage.
-3. Ask before choosing when earliest incomplete stage, resume target, or refresh route conflicts across evidence.
-4. Preserve Harness lifecycle state in coding-harness-managed repos and refresh or explicitly block Project Brain only when repository context changed.
-5. Use solution capture only for solved-problem evidence; write new captures under `.harness/solutions/**`, not legacy `docs/solutions/**`.
-6. Use UI plan routing only when UI-plan artifacts are present, then hand off to `he-plan`, `he-work`, or `he-code-review`.
-7. Route product-compression blockers such as `active_stage: spec_refresh_required` to `he-spec` instead of approving another additive implementation pass.
+3. When an original prompt, external workflow, old manual method, or plugin comparison is the baseline, apply source-prompt coverage before routing downstream; preserve source prompt status, evidence depth, coverage gaps, not-inspected evidence classes, repo-specific drift signals, original prompt coverage, downstream confidence, and next route.
+4. Keep scope tight: start with 2-3 focused surfaces that prove lifecycle state
+   before loading broader repo or session evidence.
+5. Ask before choosing when earliest incomplete stage, resume target, refresh route, or source-prompt coverage conflicts across evidence.
+6. Preserve Harness lifecycle state in coding-harness-managed repos and refresh or explicitly block Project Brain only when repository context changed.
+7. Use solution capture only for solved-problem evidence; write new captures under `.harness/solutions/**`, not legacy `docs/solutions/**`.
+8. Use UI plan routing only when UI-plan artifacts are present, then hand off to `he-plan`, `he-work`, or `he-code-review`.
+9. Route product-compression blockers such as `active_stage: spec_refresh_required` to `he-spec` instead of approving another additive implementation pass.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check routing, stage artifacts, and handoff evidence.
 ## Failure mode
@@ -53,6 +56,7 @@ Reference `assets/` only for skill packaging and browseability; lifecycle state 
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Solution capture: `Plugins/harness-engineering/references/solution-capture-contract.md`
+- Source prompt coverage: `Plugins/harness-engineering/references/source-prompt-coverage-contract.md`
 - UI plan routing: `Plugins/harness-engineering/references/ui-plan-routing-contract.md`
 - Artifact routing: `Plugins/harness-engineering/references/artifact-routing-contract.md`
 - Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`

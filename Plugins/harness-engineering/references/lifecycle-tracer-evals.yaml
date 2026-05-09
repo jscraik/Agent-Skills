@@ -134,3 +134,10 @@ cases:
     expected_route: he-phase-heartbeat
     expected_artifact_root: automation
     proof: "XP lens applied: slack_policy, cadence, stale-evidence stop rule, and gated continuation"
+
+  - id: first-principles-records-assumptions-headless
+    stage: he-router
+    prompt: "Run the HE lifecycle in headless mode where a first-principles gate would normally ask whether a copied pattern prevents a real failure."
+    expected_route: he-router
+    expected_artifact_root: stage-map
+    proof: "first-principles headless assumption records selected assumption, confidence, overturning evidence, and recovery path instead of asking optional questions"

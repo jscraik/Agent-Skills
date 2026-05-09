@@ -1,6 +1,6 @@
 ---
 name: he-refactor
-description: "Create HE refactor migration programs. Use when structural change needs phased rollback-safe execution."
+description: "Create evidence-backed HE refactor migration programs. Use when structural drift, routing ambiguity, or source-prompt gaps need phased rollback-safe execution."
 metadata:
   skill-type: team_automation
 ---
@@ -48,13 +48,18 @@ future-agent anti-regression guidance.
 4. Classify source `.harness` artifacts by content shape before path.
 5. Apply interactive steering when the correct artifact is refactor, Linear
    issue, ADR, or `Do Not Create`.
-6. Apply the XP operating contract: define the smallest reversible migration step, what it teaches, and the stop/pivot condition before adding broader structure.
-7. Define desired end state before implementation detail.
-8. Stage migration phases with validation, rollback, and coexistence rules.
-9. Include Linear mapping without creating Linear objects.
-10. Define closure proof using dated `.harness/evals/**` artifacts.
-11. Preserve future-agent anti-regression constraints.
-12. Validate the generated program and record exact pass, fail, or blocked
+6. If the refactor depends on an original prompt comparison or sampled upstream
+   strategy/review artifact, apply the shared source-prompt coverage contract;
+   inherit evidence depth, coverage gaps, not-inspected surfaces, repo-specific
+   drift signals, authority limits, and downstream confidence before deciding
+   whether a refactor program is allowed.
+7. Apply the XP operating contract: define the smallest reversible migration step, what it teaches, and the stop/pivot condition before adding broader structure.
+8. Define desired end state before implementation detail.
+9. Stage migration phases with validation, rollback, and coexistence rules.
+10. Include Linear mapping without creating Linear objects.
+11. Define closure proof using dated `.harness/evals/**` artifacts.
+12. Preserve future-agent anti-regression constraints.
+13. Validate the generated program and record exact pass, fail, or blocked
     outcomes.
 
 ## Constraints
@@ -116,6 +121,7 @@ at the first failed gate and do not proceed.
 - Refactor program contract: `references/refactor-program-contract.md`
 - Local contract: `references/contract.yaml`
 - Source prompt preservation: `references/source-prompt-preservation.md`
+- Shared source-prompt coverage: `../../references/source-prompt-coverage-contract.md`
 - Execution slice contract: `../../references/execution-slice-contract.md`
 - Artifact routing: `../../references/artifact-routing-contract.md`
 - Artifact classification: `../../references/artifact-classification-and-traceability.md`

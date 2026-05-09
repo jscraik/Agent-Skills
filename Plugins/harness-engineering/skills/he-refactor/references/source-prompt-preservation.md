@@ -3,6 +3,12 @@
 This reference preserves the behavior of the original user-proposed Refactor
 Program Generation & Architectural Migration prompt.
 
+When a refactor candidate comes from an HE strategy/review that was compared
+against an original prompt method, also load
+`Plugins/harness-engineering/references/source-prompt-coverage-contract.md`.
+The refactor program must inherit upstream evidence depth and coverage gaps
+instead of converting sampled cognition into repo-wide migration authority.
+
 ## Preserved Requirements
 
 - read `.harness/features`, `.harness/review`, `.harness/triage`,
@@ -22,6 +28,8 @@ Program Generation & Architectural Migration prompt.
 - require eval proof before recommending closure
 - optimize for incremental execution, reversibility, low blast radius,
   deterministic evolution, and reduced architectural entropy
+- preserve upstream source-prompt coverage status, not-inspected surfaces,
+  repo-specific drift signals, authority limits, and downstream confidence
 
 ## Real Output Patterns Observed
 
@@ -47,3 +55,9 @@ changing the internals of an individual skill package.
 If the proposed program cannot identify measurable architectural improvement,
 eval proof, rollback safety, and downstream execution value, classify it as
 `Do Not Create`.
+
+If upstream source-prompt coverage is sampled, partial, weak, inferred, or
+unknown, generate only a scope-limited refactor program or return `Blocked`
+pending deeper strategy/review refresh. Do not claim the selected migration is
+the highest repo-wide priority unless the source prompt coverage supports that
+claim.

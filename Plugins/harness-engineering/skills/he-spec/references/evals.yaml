@@ -115,3 +115,12 @@ cases:
     prompt: "Can you spec a trivial skill wording cleanup and explicitly keep domain model gates not applicable."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(not_applicable|trivial|domain|skipped|gate_profile)"}]
+  - id: first-principles-spec-smallest-mechanism
+    name: "First principles spec smallest mechanism"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you write a spec for adding a new HE process, but first challenge whether a reference contract or eval would prevent the verified failure with less scope."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(first.?principles|verified failure|smallest effective mechanism|assumption|proof|required|acceptance)"}]

@@ -1,6 +1,6 @@
 ---
 name: he-linear-plan
-description: "Plan HE artifacts into Linear execution. Use when strategy, refactor, or plan artifacts need tracking."
+description: "Convert approved HE cognition into a small Linear execution plan. Use when strategy, refactor, plan, or source-prompt evidence needs scoped tracking."
 metadata:
   skill-type: team_automation
 ---
@@ -54,19 +54,27 @@ traceability.
    context; do not assume JSC for unrelated workspaces.
 6. Apply interactive steering when destination, active set, project, milestone,
    or mutation authority cannot be proven.
-7. Keep the active set intentionally small.
-8. Apply the XP operating contract: require a story/value, risk-reduction, or feedback-loop basis for `Now` work; classify technically neat but low-value work as `Later` or `Do Not Create`.
-9. Classify candidate work as `Now`, `Next`, `Later`, or `Do Not Create`.
-10. Under pressure to create every possible issue, preserve the filter: refuse
+7. If the Linear plan consumes artifacts from an original prompt comparison or
+   sampled upstream review, apply the shared source-prompt coverage contract;
+   inherit evidence depth, coverage gaps, not-inspected surfaces, repo-specific
+   drift signals, authority limits, and downstream confidence into the Linear
+   plan before recommending active work.
+8. Keep the active set intentionally small.
+9. Apply the first-principles contract before drafting payloads: create Linear
+   objects only when execution state must be tracked; keep cognition-only or
+   copied-process observations in `.harness`, `Later`, or `Do Not Create`.
+10. Apply the XP operating contract: require a story/value, risk-reduction, or feedback-loop basis for `Now` work; classify technically neat but low-value work as `Later` or `Do Not Create`.
+11. Classify candidate work as `Now`, `Next`, `Later`, or `Do Not Create`.
+12. Under pressure to create every possible issue, preserve the filter: refuse
    one-issue-per-observation expansion and ask for the source observations plus
    a selected slice before producing payloads. If observations are provided,
    filter, collapse, and classify them first; never offer to turn each
    observation into a separate issue, even as an optional escape hatch.
-11. Convert selected refactor programs into milestone -> parent issue -> minimal
+13. Convert selected refactor programs into milestone -> parent issue -> minimal
    sub-issues, never one issue per observation.
-12. Define dependencies, eval gates, rollback gates, labels, and priority.
-13. Include ready-to-create payloads without mutating Linear.
-14. Validate the generated plan and record exact pass, fail, or blocked
+14. Define dependencies, eval gates, rollback gates, labels, and priority.
+15. Include ready-to-create payloads without mutating Linear.
+16. Validate the generated plan and record exact pass, fail, or blocked
     outcomes.
 
 ## Constraints
@@ -149,6 +157,7 @@ at the first failed gate and do not proceed.
 - Linear plan output contract: `references/linear-plan-output-contract.md`
 - Local contract: `references/contract.yaml`
 - Source prompt preservation: `references/source-prompt-preservation.md`
+- Shared source-prompt coverage: `../../references/source-prompt-coverage-contract.md`
 - Linear tracker gate: `../../references/linear-tracker-gate.md`
 - Linear delta capture gate: `../../references/linear-delta-capture-gate.md`
 - Execution slice contract: `../../references/execution-slice-contract.md`
@@ -157,6 +166,7 @@ at the first failed gate and do not proceed.
 - Interactive steering: `../../references/interactive-steering-contract.md`
 - OpenAI-style plugin design: `../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `../../references/deferred-context-index.md`
+- First principles: `../../references/first-principles-contract.md`
 - Pragmatic Programmer review: `../../references/pragmatic-programmer-review-contract.md`
 - XP operating contract: `../../references/xp-operating-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`

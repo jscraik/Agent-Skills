@@ -21,7 +21,8 @@ Return schema_version when structured. Stated / Inferred / Out of scope, options
 4. Route durable brainstorm artifacts to `.harness/brainstorm/**.md`; route explicit folded `he-ideate` artifacts to `.harness/ideate/**.md`.
 5. Resolve or block the Linear tracker before durable handoff for tracked work.
 6. In folded `he-ideate` mode, use `skills/he-brainstorm/references/ideation-mode.md` for candidate generation, critique, coverage recovery, survivor selection, web research, and specialist-skill steering.
-7. Ask before survivor selection when the chosen survivor would shape downstream spec, plan, Linear work, or implementation scope.
+7. Apply the first-principles contract before survivor selection: prefer ideas that prevent verified HE failures or reduce ambiguity; defer copied patterns that lack HE-specific failure evidence.
+8. Ask before survivor selection when the chosen survivor would shape downstream spec, plan, Linear work, or implementation scope.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check scope, traceability, and handoff clarity.
 ## Failure mode
@@ -53,6 +54,7 @@ Reference `assets/` only for skill packaging and browseability; workflow source 
 - Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Topic coverage: `Plugins/harness-engineering/references/brainstorm-topic-coverage-contract.md`
+- First principles: `Plugins/harness-engineering/references/first-principles-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Ideation mode: `Plugins/harness-engineering/skills/he-brainstorm/references/ideation-mode.md`
 - Linear tracker gate: `Plugins/harness-engineering/references/linear-tracker-gate.md`

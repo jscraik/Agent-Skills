@@ -18,6 +18,7 @@ the reference below, and let validators catch stale duplicated procedure text.
   - `references/domain-model-production-contract.md`
   - `references/design-complexity-contract.md`
   - `references/gate-selection-contract.md`
+  - `references/first-principles-contract.md`
 - Lifecycle, artifact, slice, and tracker gates:
   - `references/stage-context-contract.md`
   - `references/lifecycle-exit-contract.md`
@@ -29,6 +30,7 @@ the reference below, and let validators catch stale duplicated procedure text.
   - `references/goal-continuity.md`
 - Intake and evidence:
   - `references/qa-intake-routing.md`
+  - `references/source-prompt-coverage-contract.md`
   - `references/session-evidence-contract.md`
   - `references/session-evidence-skillify-triage.md`
   - `references/session-evidence-trace-context.md`
@@ -59,8 +61,10 @@ Load references by trigger instead of by habit:
 | `.harness` artifacts determine scope | `references/artifact-classification-and-traceability.md`, `references/artifact-routing-contract.md` | content-shape classification and Artifact Identity status |
 | Non-trivial tracked work | `references/linear-tracker-gate.md` | resolved, created, blocked, or user-opted-out tracker status |
 | Existing tracked plan or Linear-backed slice is consumed | `references/linear-delta-capture-gate.md` | delta admitted, rejected, or blocked before scope changes |
+| Original prompt, external workflow, old manual method, or plugin comparison is the baseline | `references/source-prompt-coverage-contract.md` | source_prompt_status, evidence_depth, coverage_scope, not_inspected, repo-specific drift signals, authority limits, downstream_confidence, and next route |
 | Coding-harness-managed repo | `references/coding-harness-command-bridge.md`, `references/execution-slice-contract.md` | command evidence or explicit blocked bridge fields |
 | Stage could load broad domain, strategy, refactor, Linear, security, specialist, or eval gates | `references/gate-selection-contract.md` | smallest gate profile, required contracts, skipped contracts, and minimum proof |
+| Stage would copy external process, add lifecycle surface area, expand governance, or preserve complexity without proven HE-specific failure evidence | `references/first-principles-contract.md` | first_principles_check with verified failure, smallest mechanism, decision type, rejected analogy, and proceed/ask/defer/reject/delete outcome |
 | Domain-specific knowledge could sharpen output | `references/specialist-skill-steering-contract.md` | chosen specialist, skipped reason, or blocker |
 | User choice affects downstream scope | `references/interactive-steering-contract.md` | asked choice, headless assumption, or blocked state |
 | Product compression is the blocker | `references/agent-native-compression-contract.md` | subtractive proof, fresh-agent eval, and ablation gate |
@@ -117,22 +121,26 @@ Load references by trigger instead of by habit:
 - `skills/he-eval-report/references/eval-report-schema.json`
 - `skills/he-eval-report/references/drift-taxonomy.md`
 - `skills/he-eval-report/references/linear-completion-policy.md`
+- `references/source-prompt-coverage-contract.md`
 
 `he-strategy`:
 
 - `skills/he-strategy/references/strategy-output-contract.md`
 - `skills/he-strategy/references/source-prompt-preservation.md`
+- `references/source-prompt-coverage-contract.md`
 - `references/pragmatic-programmer-review-contract.md`
 
 `he-refactor`:
 
 - `skills/he-refactor/references/refactor-program-contract.md`
 - `skills/he-refactor/references/source-prompt-preservation.md`
+- `references/source-prompt-coverage-contract.md`
 
 `he-linear-plan`:
 
 - `skills/he-linear-plan/references/linear-plan-output-contract.md`
 - `skills/he-linear-plan/references/source-prompt-preservation.md`
+- `references/source-prompt-coverage-contract.md`
 
 ## Historical Context Policy
 

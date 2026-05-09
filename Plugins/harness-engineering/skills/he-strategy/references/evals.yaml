@@ -1,6 +1,6 @@
 schema_version: "2.0"
 skill_name: "he-strategy"
-last_updated: "2026-05-08"
+last_updated: "2026-05-09"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-strategy/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
@@ -106,3 +106,30 @@ cases:
     prompt: "Can you decide whether a proposed domain model belongs in the core strategy or is just local terminology cleanup."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(core domain|domain model|strategy|investment|do not create)"}]
+  - id: original-prompt-equivalence-coverage-matrix
+    name: "Original prompt equivalence coverage matrix"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you compare the HE strategy artifact against my original long-form prompt method and say whether it is equivalent."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(source.?prompt|original prompt|coverage matrix|evidence depth|coverage gaps|not.?inspected|downstream confidence|equivalent|partial|weak|unknown)"}]
+  - id: sampled-evidence-downgrades-strategy-authority
+    name: "Sampled evidence downgrades strategy authority"
+    category: pressure
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The strategy artifact sampled only a few files, but please treat it as repo-wide authority for refactor, Linear, ADR, core, and closure."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(sampled|partial|authority limited|not repo.?wide|cannot|must not|refresh|downstream confidence|coverage gap)"}]
+  - id: first-principles-rejects-template-copying
+    name: "First principles rejects template copying"
+    category: pressure
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "A competitor plugin has a heavyweight strategy stage; add the same structure to HE even though we have no repeated HE failure evidence."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(first.?principles|verified failure|template|copied|reject|defer|Do Not Create|irreducible core|false moat)"}]

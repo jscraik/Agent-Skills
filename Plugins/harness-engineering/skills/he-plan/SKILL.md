@@ -18,10 +18,11 @@ Return schema_version when structured. `.harness/plan/**.md` durable plan, compl
 2. Confirm the plan stays inside one selected milestone, parent issue, refactor phase, or execution slice; run the Linear Delta Capture Gate when consuming existing tracked plans.
 3. Route durable output to `.harness/plan/**.md`, or `.harness/plan/**-ui-plan.md` for dedicated UI plans, and apply Artifact Identity frontmatter.
 4. Load UI, coding-harness, document-review, and specialist-skill references only when the selected slice proves the trigger.
-5. Convert scope into ordered implementation units with acceptance traceability, dependencies, validation gates, rollback, risks, and out-of-scope boundaries.
-6. Treat strategy, triage, review, and feature docs as context unless the approved Linear/refactor slice admits them.
-7. End with `post_plan_handoff`; ask before continuing when multiple valid next stages remain, and continue only when the user already authorized it.
-8. For cockpit, golden-path, command-catalog, or agent-native compression work, plan subtractive proof before additive compatibility.
+5. Apply the first-principles contract to choose the smallest proof-producing slice first and classify Type 1 versus Type 2 decisions before broad sequencing.
+6. Convert scope into ordered implementation units with acceptance traceability, dependencies, validation gates, rollback, risks, and out-of-scope boundaries.
+7. Treat strategy, triage, review, and feature docs as context unless the approved Linear/refactor slice admits them.
+8. End with `post_plan_handoff`; ask before continuing when multiple valid next stages remain, and continue only when the user already authorized it.
+9. For cockpit, golden-path, command-catalog, or agent-native compression work, plan subtractive proof before additive compatibility.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check dependencies, tests, rollback, and handoff readiness.
 ## Failure mode
@@ -55,6 +56,7 @@ Reference `assets/` only for skill packaging and browseability; durable plans an
 - Domain context: `Plugins/harness-engineering/references/domain-context-contract.md`
 - Domain model routing: `Plugins/harness-engineering/references/domain-model-routing.md`
 - Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
+- First principles: `Plugins/harness-engineering/references/first-principles-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Document review tiers: `Plugins/harness-engineering/references/document-review-finding-tiers.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

@@ -10,11 +10,22 @@ Read the implementation, selected execution slice, and relevant `.harness`
 artifacts: `linear`, `refactors`, `decisions`, `core`, `strategy`, `triage`,
 `brainstorm`, `spec`, `plan`, and `solutions`. Missing artifacts are evidence.
 
+If the source slice was created from an original prompt comparison, old manual
+workflow, plugin comparison, or sampled upstream strategy/review pass, also
+load `Plugins/harness-engineering/references/source-prompt-coverage-contract.md`.
+The eval must inherit source-prompt coverage limits before recommending Linear
+closure.
+
 ## Proof Rules
 
 Identify exactly what is evaluated: Linear project, milestone, parent issue,
 sub-issues, refactor program, HE spec, affected files/modules/workflows, ADRs,
 and core invariants. Do not evaluate unrelated work.
+
+When upstream source-prompt coverage is partial, weak, sampled, inferred, or
+unknown, classify closure against the selected slice only. Do not recommend
+repo-wide completion, milestone closure, ADR/core finality, or "all original
+prompt concerns satisfied" unless the source-prompt coverage matrix proves it.
 
 For each relevant gate, record method, result, evidence, confidence, failure
 detail, and closure impact. Missing evidence is `not-run`, never `pass`.
@@ -56,3 +67,8 @@ for protected actions.
 Major conclusions must separate fact, interpretation, and assumption, and name
 evidence, affected files/modules, confidence, operational impact, and closure
 blocking status.
+
+Closure recommendations must name any inherited coverage gaps, not-inspected
+surfaces, repo-specific drift signals, authority limits, and downstream
+confidence. Dropping a blocker/high inherited drift signal is itself a closure
+blocker.

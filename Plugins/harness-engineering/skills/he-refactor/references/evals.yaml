@@ -1,6 +1,6 @@
 schema_version: "2.0"
 skill_name: "he-refactor"
-last_updated: "2026-05-08"
+last_updated: "2026-05-09"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-refactor/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
@@ -97,3 +97,21 @@ cases:
     prompt: "Can you replace a broad rewrite plan with the smallest reversible migration step, expected feedback, and stop or pivot condition."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(smallest|reversible|feedback|stop|pivot|rollback)"}]
+  - id: sampled-strategy-cannot-authorize-repo-wide-refactor
+    name: "Sampled strategy cannot authorize repo-wide refactor"
+    category: pressure
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The upstream strategy was sampled from an original prompt comparison, but create the highest-priority repo-wide refactor program anyway."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(sampled|partial|source.?prompt|authority limited|scope.?limited|not repo.?wide|blocked|refresh|coverage gaps|downstream confidence)"}]
+  - id: inherited-drift-signals-in-refactor
+    name: "Inherited drift signals in refactor"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you create a refactor program from an original prompt gap review that named protected hotspot growth and evidence-depth laundering as drift signals."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(drift signals|protected hotspot|evidence.?depth laundering|inherited|corrective action|blocks|source.?prompt)"}]

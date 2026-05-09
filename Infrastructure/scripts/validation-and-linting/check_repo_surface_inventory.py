@@ -246,14 +246,14 @@ def classify_path(path: str | Path) -> SurfaceFinding:
     if _starts_with(normalized, ".skillsets"):
         return _make_finding(
             normalized,
-            classification="unknown",
-            status="unknown",
-            code="ownership_decision_required",
-            severity="error",
-            blocking=True,
-            reason=".skillsets ownership is explicitly unresolved by policy.",
-            recommendation="Decide whether this is generated output, a fixture subset, or canonical source.",
-            metadata={"next_steps": ["identify_generator", "document_owner"]},
+            classification="generated_tracked",
+            status="ok",
+            code="generated_skillset_projection",
+            severity="info",
+            blocking=False,
+            reason=".skillsets contains rooted skill manifests and command-surface projections generated from canonical skill sources.",
+            recommendation="Regenerate through skills sync rather than hand-editing.",
+            metadata={"next_steps": ["validate_projection_if_changed"]},
         )
 
     if _starts_with(normalized, "skills-system"):

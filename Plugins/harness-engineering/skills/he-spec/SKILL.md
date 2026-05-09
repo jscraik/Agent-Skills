@@ -23,8 +23,9 @@ Return schema_version when structured. schema_version: 1, bounded implementation
    security, specialist, or eval gates, apply the gate selection contract and
    turn the selected risk class, required contracts, skipped contracts, and
    minimum proof into acceptance criteria.
-7. Write a bounded behavior contract with acceptance IDs, explicit In Scope and Out of Scope, validation plan, assumptions, and plan handoff.
-8. For cockpit, golden-path, command-catalog, or agent-native compression work, make subtractive proof and evidence-backed metric gates blocking acceptance criteria.
+7. Apply the first-principles contract before expanding scope: require the verified failure, challenged assumption, smallest effective mechanism, and proof needed for acceptance.
+8. Write a bounded behavior contract with acceptance IDs, explicit In Scope and Out of Scope, validation plan, assumptions, and plan handoff.
+9. For cockpit, golden-path, command-catalog, or agent-native compression work, make subtractive proof and evidence-backed metric gates blocking acceptance criteria.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check traceability, tests, observability, rollback, and owner evidence.
 ## Failure mode
@@ -60,6 +61,7 @@ Reference `assets/` only for skill packaging and browseability; spec source mate
 - Domain model routing: `Plugins/harness-engineering/references/domain-model-routing.md`
 - Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
 - Gate selection: `Plugins/harness-engineering/references/gate-selection-contract.md`
+- First principles: `Plugins/harness-engineering/references/first-principles-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Document review tiers: `Plugins/harness-engineering/references/document-review-finding-tiers.md`
 - Session evidence trace: `Plugins/harness-engineering/references/session-evidence-trace-context.md`

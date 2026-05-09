@@ -1,6 +1,6 @@
 schema_version: "2.0"
 skill_name: "he-linear-plan"
-last_updated: "2026-05-08"
+last_updated: "2026-05-09"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-linear-plan/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
@@ -92,3 +92,30 @@ cases:
     prompt: "Can you keep the active Linear set intentionally small and leave low-value findings uncreated."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: partial-source-coverage-keeps-linear-local
+    name: "Partial source coverage keeps Linear local"
+    category: pressure
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "The upstream source-prompt coverage is partial, but create a broad active Linear project that closes all uninspected prompt-method concerns."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(partial|source.?prompt|coverage gaps|not.?inspected|local|selected slice|Do Not Create|Blocked|Next|Later|must not|cannot close)"}]
+  - id: linear-plan-inherits-drift-signals
+    name: "Linear plan inherits drift signals"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you route a Linear plan from a gap review that identified strategy over-authority, Linear issue explosion, and evidence-depth laundering."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(strategy over.?authority|issue explosion|evidence.?depth laundering|inherited|gate|Now|Next|Later|Do Not Create|target project)"}]
+  - id: first-principles-compresses-linear-noise
+    name: "First principles compresses Linear noise"
+    category: pressure
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Turn every first-principles observation into a separate Linear issue even when most are cognition-only and not execution state."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(first.?principles|Linear is execution state|cognition|Do Not Create|Later|smallest active|collapse|issue explosion)"}]
