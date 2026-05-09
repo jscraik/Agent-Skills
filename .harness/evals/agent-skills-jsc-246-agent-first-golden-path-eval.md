@@ -312,7 +312,7 @@ Live representative probes:
 | `write a Linear-backed HE spec` | success | `resolved` | `resolved` | `he-spec` | Direct HE spec routing works; `goal_decision_status: resolved`; reachability pass; next command `./bin/ask skills proof he-spec --json --robot`. |
 | `monitor a long-running HE work phase` | success | `resolved` | `resolved` | `he-work` | Live ranking selected reachable HE work-family route with `he-phase-heartbeat` preserved as the first alternative; exact heartbeat ownership is not forced while resolved route semantics remain compatible. |
 | `review this implementation against the spec` | success | `resolved_with_fallback` | `resolved_with_fallback` | `he-code-review` | HE review hint selected reachable `he-code-review`; `goal_decision_status: intent_unresolved`; rationale includes `fallback HE implementation-review intent hint`. |
-| `fix validation blockers after review` | success | `resolved_with_fallback` | `resolved_with_fallback` | `he-fix-bugs` | Initial routed `validation` capability was not command-handle reachable; HE validation-blocker hint selected reachable `he-fix-bugs`; rationale preserves `initial routed capability unreachable=validation`. |
+| `fix validation blockers after review` | success | `resolved_with_fallback` | `resolved_with_fallback` | `he-fix-bugs` | (superseded by phase-007; final route: autofix) Initial routed `validation` capability was not command-handle reachable; HE validation-blocker hint selected reachable `he-fix-bugs`; rationale preserves `initial routed capability unreachable=validation`. |
 
 Focused validation:
 
@@ -535,7 +535,7 @@ Fresh-agent command sequence:
 | 04 | `./bin/ask skills improve "write a Linear-backed HE spec" --json --robot` | 0 | `resolved`; recommended `he-spec`; next command `./bin/ask skills proof he-spec --json --robot`. |
 | 05 | `./bin/ask skills improve "monitor a long-running HE work phase" --json --robot` | 0 | `resolved`; recommended `he-work`; next command `./bin/ask skills proof he-work --json --robot`. |
 | 06 | `./bin/ask skills improve "review this implementation against the spec" --json --robot` | 0 | `resolved_with_fallback`; recommended `triage`; next command `./bin/ask skills proof triage --json --robot`. |
-| 07 | `./bin/ask skills improve "fix validation blockers after review" --json --robot` | 0 | `resolved_with_fallback`; initial routed `validation` capability was unreachable as a command handle, then fallback selected reachable `autofix`. |
+| 07 | `./bin/ask skills improve "fix validation blockers after review" --json --robot` | 0 | (authoritative final route; phase-007) `resolved_with_fallback`; initial routed `validation` capability was unreachable as a command handle, then fallback selected reachable `autofix` (phase-003 route he-fix-bugs superseded). |
 | 08 | `./bin/ask skills explain he-spec --json --robot` | 0 | Explanation resolved `he-spec`, exposed canonical source, runtime projection, validation command, reachability, and proof handoff. |
 | 09 | `./bin/ask skills proof he-spec --json --robot` | 0 | Command-handle proof passed for `he-spec`. |
 | 10 | `./bin/ask skills prove he-spec --json --robot` | 0 | Skill proof scorecard reported `reachable_without_outcome_proof`, structural quality pass, and workout handoff. |

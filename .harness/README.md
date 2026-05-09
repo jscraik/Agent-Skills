@@ -24,6 +24,8 @@ execution, and review documents; keep local runtime output out of git.
 | `.harness/review/**.md` | reference | Review evidence and critique as secondary context. |
 | `.harness/memory/LEARNINGS.md` | reference | Repo-local learned fixes and recurring operational knowledge. |
 | `.harness/quality/**` | policy | Quality criteria and scorecards. |
+| `.harness/evals/**.md` | intentional_archive | Harness engineering eval reports and execution evidence. |
+| `.harness/session-evidence/**` | intentional_archive | Deterministic command snapshots and session evidence bundles for harness engineering closure proof. |
 | `.harness/*.json` | policy or generated_tracked | Contract JSON consumed by repo validators or Harness setup flows. |
 
 Secondary context is not execution authority by itself. Implementation work must
