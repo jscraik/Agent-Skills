@@ -6,7 +6,7 @@ type: he-eval-report
 canonical_slug: agent-skills-jsc-246-agent-first-golden-path
 title: Agent Skills JSC-246 Agent First Golden Path Eval
 harness_stage: he-eval-report
-status: phase_003_refresh_complete
+status: phase_004_refresh_complete
 date: 2026-05-09
 traceability_required: true
 origin: .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md
@@ -18,10 +18,10 @@ linear_milestone: Command surface and ask reliability
 # Agent Skills JSC-246 Agent First Golden Path Eval
 
 ## Executive Eval Summary
-Status: `PLAN-JSC246-001`, `PLAN-JSC246-002`, and `PLAN-JSC246-003` heartbeat evidence refreshed for the current dirty worktree; later historical phase evidence remains below but is not treated as fresh closeout proof.
+Status: `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, and `PLAN-JSC246-004` heartbeat evidence refreshed for the current dirty worktree; later historical phase evidence remains below but is not treated as fresh closeout proof.
 Linear Completion Recommendation: Do not mutate Linear from this heartbeat pass; continue the approved phase loop after human review of the refreshed baseline and doctor contract evidence.
-Primary Blockers: None for phase-001, phase-002, or phase-003 evidence capture. Remaining repo-surface debt is advisory diagnostic debt, and the live dirty worktree is explicitly not a clean JSC-246 closeout fixture.
-Confidence: High for the refreshed phase-001 command evidence, phase-002 doctor next-action contract evidence, and phase-003 skills-improve route-state evidence; medium for parent closure until later phase evidence is rechecked against current worktree state.
+Primary Blockers: None for phase-001 through phase-004 evidence capture. Remaining repo-surface debt is advisory diagnostic debt, and the live dirty worktree is explicitly not a clean JSC-246 closeout fixture.
+Confidence: High for the refreshed phase-001 command evidence, phase-002 doctor next-action contract evidence, phase-003 skills-improve route-state evidence, and phase-004 explain/prove taxonomy evidence; medium for parent closure until later phase evidence is rechecked against current worktree state.
 
 ## Evaluated Slice
 Linear Project: `agent-skills`
@@ -37,7 +37,7 @@ Related Core Invariants: Agent-first golden path, deterministic command output, 
 
 ## Linear Definition of Done Status
 Artifact Path: `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md`
-Definition of Done Status: Freshly satisfied for `PLAN-JSC246-001`, `PLAN-JSC246-002`, and `PLAN-JSC246-003`; historical evidence for later phases remains below and must be rechecked before any renewed closure recommendation.
+Definition of Done Status: Freshly satisfied for `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, and `PLAN-JSC246-004`; historical evidence for later phases remains below and must be rechecked before any renewed closure recommendation.
 Closure Safety: Do not close `JSC-246` from this heartbeat pass alone.
 
 ## Linear Backlink Map
@@ -69,7 +69,7 @@ Traceability Repair: No repair required for this phase; live Linear mutation was
 | Linear issue | Acceptance IDs |
 | --- | --- |
 | `JSC-246` full approved plan | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006`, `PLAN-JSC246-007` |
-| Freshly revalidated in this heartbeat pass | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003` |
+| Freshly revalidated in this heartbeat pass | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004` |
 
 ## Source Artifact Trace
 Linear Plan: `.harness/linear/agent-skills-linear-plan.md` and `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`.
@@ -145,7 +145,7 @@ Dirty-Worktree Classification: Baseline evidence only. The phase refreshed comma
 
 ### Phase 002 Decision
 
-`PLAN-JSC246-002` is complete for refreshed evidence. The doctor next-action contract is still additive and deterministic in the current run: `next_command` is preserved, advisory repo-surface debt is not elevated to a task blocker, and the selected command exposes both kind and blocking semantics for agents. Do not treat this as parent closure proof because phases 004-007 require their own refreshed proof relative to the current dirty worktree.
+`PLAN-JSC246-002` is complete for refreshed evidence. The doctor next-action contract is still additive and deterministic in the current run: `next_command` is preserved, advisory repo-surface debt is not elevated to a task blocker, and the selected command exposes both kind and blocking semantics for agents. Do not treat this section alone as parent closure proof because later phases require their own refreshed proof relative to the current dirty worktree.
 
 ## Heartbeat Phase 003 Refresh - 2026-05-09
 
@@ -168,7 +168,28 @@ Dirty-Worktree Classification: Baseline evidence only. The phase refreshed route
 
 ### Phase 003 Decision
 
-`PLAN-JSC246-003` is complete for refreshed evidence. The route-state contract is explicit in both focused tests and live command output while preserving existing `status` compatibility. Direct HE routes remain direct, fallback routes remain inspectable, and unreachable routed capabilities do not silently masquerade as successful recommendations. Do not treat this as parent closure proof because phases 004-007 remain historical relative to the current dirty worktree.
+`PLAN-JSC246-003` is complete for refreshed evidence. The route-state contract is explicit in both focused tests and live command output while preserving existing `status` compatibility. Direct HE routes remain direct, fallback routes remain inspectable, and unreachable routed capabilities do not silently masquerade as successful recommendations. Do not treat this as parent closure proof because phases 005-007 remain historical relative to the current dirty worktree.
+
+## Heartbeat Phase 004 Refresh - 2026-05-09
+
+Status: `PLAN-JSC246-004` complete for current-run explain/prove taxonomy evidence.
+Heartbeat Route: `$he-phase-heartbeat`
+Plan Source: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`
+Dirty-Worktree Classification: Baseline evidence only. The phase refreshed command and test proof without absorbing unrelated dirty artifacts or changing implementation code.
+
+### Phase 004 Command Snapshot
+
+| Command | Result | Classification | Key evidence |
+| --- | --- | --- | --- |
+| `python3 -m pytest Infrastructure/tests/test_ask_cli.py -k "skills_prove or explain"` | pass | focused phase tests | `15 passed, 42 deselected in 4.15s`; covers `skills explain` source/runtime/validation/proof handoff and `skills prove` reachability/structural/outcome taxonomy assertions. |
+| `./bin/ask skills explain he-spec --json --robot` | pass | HE explain contract | Trace `97af507c-a89f-4c74-bedd-342bc1438bc2`; canonical source `Plugins/harness-engineering/skills/he-spec/SKILL.md`; generated handle `.agents/skills/he-spec/SKILL.md`; projection `rooted`; visibility `latent`; validation command present; next command `./bin/ask skills proof he-spec --json --robot`. |
+| `./bin/ask skills explain simplify --json --robot` | pass | non-HE explain contract | Trace `b846aa20-79ca-43fc-b7f7-f4e31bfe11f9`; canonical source `Skills/agent-ops/simplify/SKILL.md`; generated handle `.agents/skills/simplify/SKILL.md`; projection `rooted`; visibility `latent`; validation command present; next command `./bin/ask skills proof simplify --json --robot`. |
+| `./bin/ask skills proof he-spec --json --robot` | pass | compatibility reachability proof | Trace `b92e72a1-c957-46ff-8bba-60ea579bdc19`; schema `command-handle-proof.v1`; resolver, generated command-handle check, workspace command handle, and `.agents` user runtime link passed. |
+| `./bin/ask skills prove he-spec --json --robot` | pass | golden-path scorecard proof | Trace `c500e166-dd70-48fb-bdf1-d6214145a37b`; schema `skill-proof-scorecard.v1`; `proof_status: reachable_without_outcome_proof`; reachability pass; structural quality pass; analytics evidence class `native_skill_invocation_projection`; outcome proof `available_not_run`; next command `./bin/ask workouts run harness-engineering/he-spec --json --robot`. |
+
+### Phase 004 Decision
+
+`PLAN-JSC246-004` is complete for refreshed evidence. The existing explain/proof/prove contracts expose the taxonomy the golden path needs without adding a new proof schema, trusted/default-visible lifecycle state, promotion gate, or command-handle proof artifact. The remaining outcome gap is explicit and safe: `skills prove he-spec` reports `reachable_without_outcome_proof` and offers the workout command instead of implying outcome proof has been run. Do not treat this as parent closure proof because phases 005-007 remain historical relative to the current dirty worktree.
 
 ## PLAN-JSC246-001 Baseline Snapshot Evidence
 
@@ -661,11 +682,11 @@ Operational Impact: Better operational reliability and cognition quality.
 Blocks Completion: no
 
 ## Proof Artifacts
-Produced: Focused pytest output, live ask doctor probe, repo surface probe, live skills improve route-state probes, live skills explain/proof/prove probes, live repo closeout changed-worktree probe, artifact identity lint, Linear traceability lint, diff check, scoped repo validation, plus the fresh phase-001, phase-002, and phase-003 heartbeat evidence above.
+Produced: Focused pytest output, live ask doctor probe, repo surface probe, live skills improve route-state probes, live skills explain/proof/prove probes, live repo closeout changed-worktree probe, artifact identity lint, Linear traceability lint, diff check, scoped repo validation, plus the fresh phase-001 through phase-004 heartbeat evidence above.
 Required: Link this eval artifact and command evidence back to the Linear parent or milestone summary after the remaining phase evidence is refreshed.
-Missing: Fresh current-run proof for phases 004-007 in the dirty worktree context.
-Blocks Completion: yes for parent closure; no for phase-001 through phase-003 evidence capture.
-Attach or Link Back to Linear: Link this artifact as phase-001 through phase-003 heartbeat evidence, not as closure proof.
+Missing: Fresh current-run proof for phases 005-007 in the dirty worktree context.
+Blocks Completion: yes for parent closure; no for phase-001 through phase-004 evidence capture.
+Attach or Link Back to Linear: Link this artifact as phase-001 through phase-004 heartbeat evidence, not as closure proof.
 
 ## Failures / Regressions
 Failure or Regression: Earlier parent closeout was blocked by projection drift and a generated-only `sync_required` loop.
@@ -681,12 +702,12 @@ Follow-Up Justified: Yes, but as separate HE skill lifecycle work rather than JS
 Blocks Closure: no for phase 006 after the local draft fix.
 
 ## Linear Completion Recommendation
-Classification: Phase-001 through phase-003 heartbeat refresh only
-Recommended Linear Status: Keep `JSC-246` open until phases 004-007 are refreshed or explicitly accepted as still-current by human review.
-Required Linear Comment/Update: If updating Linear now, note only that phases 001 through 003 were refreshed on 2026-05-09 against a dirty worktree and that later closure evidence is historical pending refresh.
+Classification: Phase-001 through phase-004 heartbeat refresh only
+Recommended Linear Status: Keep `JSC-246` open until phases 005-007 are refreshed or explicitly accepted as still-current by human review.
+Required Linear Comment/Update: If updating Linear now, note only that phases 001 through 004 were refreshed on 2026-05-09 against a dirty worktree and that later closure evidence is historical pending refresh.
 Issues to Close: None from this heartbeat pass.
 Issues to Reopen: None.
-Issues to Leave Open: `JSC-246` remains open from this heartbeat pass until phases 004-007 are refreshed or explicitly accepted as still-current by human review.
+Issues to Leave Open: `JSC-246` remains open from this heartbeat pass until phases 005-007 are refreshed or explicitly accepted as still-current by human review.
 New Follow-Up Issues: None; avoid issue explosion.
 Labels to Add/Remove: None.
 Milestone Completion: Not newly asserted by this heartbeat pass; do not infer completion for unrelated milestone work.
@@ -698,7 +719,7 @@ Proof Artifacts to Attach or Link: This eval artifact and validation command sum
 Classification: Continue phase refresh before JSC-246 closure
 Target Linear Project: `agent-skills`
 Parent Issue or Milestone: `JSC-246` / `Command surface and ask reliability`
-Reason: Phases 001, 002, and 003 are freshly rebaselined, while later phase evidence is historical relative to the current dirty worktree.
+Reason: Phases 001 through 004 are freshly rebaselined, while later phase evidence is historical relative to the current dirty worktree.
 Priority: Existing Linear priority `2`.
 Labels: Existing labels `Roadmap: Next`, `Agent`, `Infra`, `Improvement`.
 Agent-Safe or Human Review Required: Human review required before mutating Linear closure state.
@@ -709,13 +730,13 @@ ADR Update: Not required for this phase.
 Reason: The phase implements an approved additive contract; it does not introduce a new irreversible architectural decision.
 
 ## Evidence & Traceability Matrix
-Conclusion: Phases 001, 002, and 003 are freshly complete. Historical phases 004 through 007 may still be useful evidence, but `JSC-246` is not ready for closure from this heartbeat pass alone.
+Conclusion: Phases 001 through 004 are freshly complete. Historical phases 005 through 007 may still be useful evidence, but `JSC-246` is not ready for closure from this heartbeat pass alone.
 Fact: Focused tests passed and live command output exposes advisory/non-blocking continuation metadata, deterministic skills-improve route states, explain/prove taxonomy fields, closeout changed-file readiness classification, compressed first-contact docs/metadata, and fresh-agent command evidence that starts with `repo doctor`.
 Interpretation: The implementation improves routing/proof/closeout determinism without breaking existing command fields or adding proof schema.
 Assumption: Human review or refreshed phase gates are required before mutating Linear issue state.
-Evidence: Fresh current-run proof includes phase-001 command snapshots, phase-002 `38 passed` focused doctor/golden-path tests, phase-003 `13 passed` skills-goal tests, phase-003 `2 passed, 55 deselected` CLI route-state tests, five live phase-003 `skills improve` probes, HE artifact lints, diff check, and scoped repo validation. Historical proof retained below includes phase-004 through phase-007 focused tests, live `skills explain`, `skills proof`, `skills prove`, and `repo closeout --changed` probes, plus the phase-007 deterministic runner.
+Evidence: Fresh current-run proof includes phase-001 command snapshots, phase-002 `38 passed` focused doctor/golden-path tests, phase-003 `13 passed` skills-goal tests, phase-003 `2 passed, 55 deselected` CLI route-state tests, five live phase-003 `skills improve` probes, phase-004 `15 passed, 42 deselected` CLI explain/prove tests, live phase-004 `skills explain`, `skills proof`, and `skills prove` probes, HE artifact lints, diff check, and scoped repo validation. Historical proof retained below includes phase-005 through phase-007 focused tests, live `repo closeout --changed` probes, plus the phase-007 deterministic runner.
 Affected Files/Modules: `Infrastructure/scripts/lib/ask/golden_path.py`, `Infrastructure/scripts/lib/ask/commands/skills.py`, `Infrastructure/scripts/lib/ask/command_metadata.py`, `Infrastructure/tests/test_ask_golden_path.py`, `Infrastructure/tests/test_ask_repo_doctor.py`, `Infrastructure/tests/test_ask_skills_goal.py`, `Infrastructure/tests/test_ask_cli.py`, `README.md`, `AGENTS.md`, `Docs/agents/16-agent-operating-contract.md`, `Docs/agents/5-minute-success-path.md`, `Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md`, `.harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh`, this eval artifact.
 Command or Inspection Method: Pytest, live `./bin/ask` commands, harness lints, diff inspection.
 Confidence: High
 Operational Impact: Agents get a clearer safe next step, explicit fallback/dependency/reachability states, and fewer false blockers.
-Blocks Completion: yes for parent closure; no for phase-001 through phase-003 rebaseline.
+Blocks Completion: yes for parent closure; no for phase-001 through phase-004 rebaseline.
