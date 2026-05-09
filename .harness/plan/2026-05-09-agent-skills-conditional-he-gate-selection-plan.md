@@ -67,10 +67,10 @@ Acceptance:
 
 Validation:
 
-- Manual inspection until P5 creates
-  `Plugins/harness-engineering/scripts/check_gate_selection_wiring.py`.
-- After P5 exists:
-  `python3 Plugins/harness-engineering/scripts/check_gate_selection_wiring.py --json`
+Validation:
+
+- P1 acceptance: manual inspection of contract file structure and content
+- P5 retroactive proof: `python3 Plugins/harness-engineering/scripts/check_gate_selection_wiring.py --json`
 
 Rollback:
 
