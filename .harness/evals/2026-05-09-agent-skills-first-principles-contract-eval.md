@@ -474,7 +474,7 @@ Confidence: high.
 
 Blocks Completion: no
 
-## Domain Model Integrity Check
+## Domain Model Semantics Check
 
 Conclusion: not applicable to production domain behavior.
 
