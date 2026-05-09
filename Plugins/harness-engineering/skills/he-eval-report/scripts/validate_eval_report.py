@@ -10,7 +10,7 @@ from pathlib import Path
 
 from agentic_validity import validate_agentic_eval_validity
 from report_fields import ReportDocument
-from report_recommendation import validate_consistency, validate_recommendation
+from report_recommendation import find_recommendation, validate_consistency, validate_recommendation
 from report_sections import (
     validate_drift_classifications,
     validate_gate_matrix,
@@ -18,6 +18,26 @@ from report_sections import (
     validate_sections,
 )
 from side_effect_authorization import validate_side_effect_authorization
+
+
+NOT_RUN_PASS_WARNING = (
+    "report contains both not-run evidence and pass statuses; verify gates are not overstated"
+)
+
+
+def validate_not_run_pass_consistency(document: ReportDocument, warnings: list[str]) -> None:
+    if not document.section_present("Side-Effect Authorization"):
+        return
+    decision = document.field_value("Validator Decision:", section="Side-Effect Authorization")
+    if not decision or decision.strip().lower() != "not-run":
+        return
+
+    status = document.field_value("Status:")
+    recommendation = find_recommendation(document)
+    status_pass = bool(status and status.strip().lower() == "pass")
+    recommendation_complete = recommendation in {"Complete", "Complete with follow-up"}
+    if status_pass or recommendation_complete:
+        warnings.append(NOT_RUN_PASS_WARNING)
 
 
 def validate(path: Path):
@@ -43,6 +63,8 @@ def validate(path: Path):
     validate_drift_classifications(document, errors)
     validate_recommendation(document, errors)
     validate_consistency(document, path, warnings)
+    if enforce_values:
+        validate_not_run_pass_consistency(document, warnings)
 
     return errors, warnings
 

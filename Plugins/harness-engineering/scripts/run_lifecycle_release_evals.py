@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -44,6 +45,41 @@ def _append_repeatable_filter(cmd: list[str], flag: str, values: tuple[str, ...]
         cmd.extend([flag, value])
 
 
+def _ask_unavailable_reason(repo_root: Path) -> str | None:
+    ask_path = repo_root / "bin" / "ask"
+    if not ask_path.exists():
+        return "./bin/ask is missing"
+    if not ask_path.is_file():
+        return "./bin/ask is not a file"
+    if not os.access(ask_path, os.X_OK):
+        return "./bin/ask is not executable"
+    return None
+
+
+def _blocked_result(
+    *,
+    skill_name: str,
+    mode: str,
+    runner: str,
+    command: list[str],
+    message: str,
+    started_at: float,
+) -> dict[str, object]:
+    return {
+        "skill": skill_name,
+        "mode": mode,
+        "runner": runner,
+        "command": " ".join(command),
+        "returncode": 126,
+        "duration_seconds": round(time.time() - started_at, 3),
+        "status": "blocked",
+        "decision": "blocked",
+        "errors": [{"code": "ERR_ASK_UNAVAILABLE", "message": message}],
+        "raw_output": "",
+        "raw_error": "",
+    }
+
+
 def _run_ask_eval(
     repo_root: Path,
     skill_name: str,
@@ -61,6 +97,16 @@ def _run_ask_eval(
         "--json",
     ]
     started_at = time.time()
+    unavailable_reason = _ask_unavailable_reason(repo_root)
+    if unavailable_reason:
+        return _blocked_result(
+            skill_name=skill_name,
+            mode=mode,
+            runner="ask",
+            command=cmd,
+            message=unavailable_reason,
+            started_at=started_at,
+        )
     print(f"RUNNING {skill_name} {mode}", file=sys.stderr, flush=True)
     timeout = per_skill_timeout_sec or (21600 if mode == "release" else 10800)
     try:
@@ -70,6 +116,24 @@ def _run_ask_eval(
             capture_output=True,
             text=True,
             timeout=timeout,
+        )
+    except FileNotFoundError as error:
+        return _blocked_result(
+            skill_name=skill_name,
+            mode=mode,
+            runner="ask",
+            command=cmd,
+            message=f"./bin/ask could not be executed: {error}",
+            started_at=started_at,
+        )
+    except PermissionError as error:
+        return _blocked_result(
+            skill_name=skill_name,
+            mode=mode,
+            runner="ask",
+            command=cmd,
+            message=f"./bin/ask could not be executed: {error}",
+            started_at=started_at,
         )
     except subprocess.TimeoutExpired as error:
         duration_seconds = round(time.time() - started_at, 3)
@@ -267,19 +331,81 @@ def run_skill(
     )
 
 
-def summarize(results: list[dict[str, object]]) -> dict[str, object]:
+def run_router_sample_gate(repo_root: Path, timeout_sec: int = 300) -> dict[str, object]:
+    cmd = [
+        sys.executable,
+        str(
+            repo_root
+            / "Plugins"
+            / "harness-engineering"
+            / "scripts"
+            / "validate_routing_map.py"
+        ),
+        "--run-router-samples",
+        "--json",
+    ]
+    started_at = time.time()
+    try:
+        process = subprocess.run(
+            cmd,
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=timeout_sec,
+        )
+    except subprocess.TimeoutExpired as error:
+        return {
+            "required": True,
+            "gate": "router_samples",
+            "command": " ".join(cmd),
+            "returncode": 124,
+            "duration_seconds": round(time.time() - started_at, 3),
+            "timeout_seconds": timeout_sec,
+            "status": "timeout",
+            "errors": [{"code": "ERR_TIMEOUT", "message": f"timed out after {timeout_sec} seconds"}],
+            "raw_output": error.stdout or "",
+            "raw_error": error.stderr or "",
+        }
+
+    parsed = parse_result(process.stdout)
+    return {
+        "required": True,
+        "gate": "router_samples",
+        "command": " ".join(cmd),
+        "returncode": process.returncode,
+        "duration_seconds": round(time.time() - started_at, 3),
+        "status": "pass" if process.returncode == 0 and parsed.get("status") == "pass" else "fail",
+        "errors": parsed.get("errors", []),
+        "warnings": parsed.get("warnings", []),
+        "raw_output": process.stdout,
+        "raw_error": process.stderr,
+    }
+
+
+def summarize(
+    results: list[dict[str, object]],
+    *,
+    router_sample_gate: dict[str, object] | None = None,
+) -> dict[str, object]:
     failing = [
         result
         for result in results
         if result.get("returncode") != 0 or result.get("status") != "success"
     ]
+    failing_gates: list[str] = []
+    if router_sample_gate is not None and (
+        router_sample_gate.get("returncode") != 0 or router_sample_gate.get("status") != "pass"
+    ):
+        failing_gates.append("router_samples")
     return {
         "schema_version": 1,
         "gate": "harness-engineering-lifecycle-evals",
-        "status": "pass" if not failing else "fail",
+        "status": "pass" if not failing and not failing_gates else "fail",
         "skills": [result["skill"] for result in results],
         "results": results,
         "failing_skills": [result["skill"] for result in failing],
+        "failing_gates": failing_gates,
+        "router_sample_gate": router_sample_gate,
     }
 
 
@@ -328,6 +454,11 @@ def main() -> int:
         choices=("default", "codex-heavy", "discovery-heavy"),
         help="Timeout profile for direct Codex eval runner.",
     )
+    parser.add_argument(
+        "--require-router-samples",
+        action="store_true",
+        help="Fail release confidence unless router sample execution passes.",
+    )
     parser.add_argument("--json", action="store_true", help="Emit JSON only.")
     args = parser.parse_args()
 
@@ -354,7 +485,8 @@ def main() -> int:
         )
         for skill in selected_skills
     ]
-    summary = summarize(results)
+    router_sample_gate = run_router_sample_gate(repo_root) if args.require_router_samples else None
+    summary = summarize(results, router_sample_gate=router_sample_gate)
 
     if args.json:
         print(json.dumps(summary, indent=2, sort_keys=True))
