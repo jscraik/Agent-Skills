@@ -32,6 +32,42 @@ FACTORY_PLUGIN_ROOTS = (
     REPO_ROOT / "Plugins" / "plugin-factory",
     REPO_ROOT / "Plugins" / "skill-factory",
 )
+FACTORY_GATE_REFERENCE = (
+    REPO_ROOT / "Infrastructure" / "references" / "first-principles-factory-gate.md"
+)
+FACTORY_GATE_LANE_RELS = (
+    "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
+    "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+    "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md",
+    "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md",
+    "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
+    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
+    "Plugins/plugin-factory/skills/team_automation/plugin-router/SKILL.md",
+)
+FACTORY_GATE_LANES = tuple(REPO_ROOT / rel for rel in FACTORY_GATE_LANE_RELS)
+FACTORY_GATE_DECISIONS = (
+    "BUILD_SKILL",
+    "BUILD_PLUGIN",
+    "ADD_HOOK",
+    "ADD_MCP_TOOL",
+    "ADD_APP",
+    "ADD_EVAL",
+    "IMPROVE_EXISTING",
+    "DOCS_ONLY",
+    "DO_NOT_BUILD",
+)
+FACTORY_GATE_SCHEMA_KEYS = (
+    "desired_outcome",
+    "user_specific_constraints",
+    "copied_assumption_rejected",
+    "fundamental_constraints",
+    "smallest_effective_mechanism",
+    "artifact_decision",
+    "rejected_alternatives",
+    "evidence_required",
+    "validation_proof",
+    "stop_or_pivot_condition",
+)
 
 
 builder = runpy.run_path(str(PLUGIN_BUILDER))
@@ -205,6 +241,13 @@ class PluginBundledHooksContractTests(unittest.TestCase):
                 self.assertNotIn("timeoutSec", command_hook)
 
     def test_factory_session_start_scripts_emit_context(self) -> None:
+        gate_fragments = (
+            "first-principles factory gate",
+            "artifact decision",
+            "smallest effective mechanism",
+            "IMPROVE_EXISTING",
+            "DO_NOT_BUILD",
+        )
         scripts = (
             (
                 REPO_ROOT
@@ -212,7 +255,13 @@ class PluginBundledHooksContractTests(unittest.TestCase):
                 / "plugin-factory"
                 / "hooks"
                 / "session_start_contract.py",
-                ("hooks/hooks.json", "timeout", "plugin_hooks"),
+                (
+                    "hooks/hooks.json",
+                    "timeout",
+                    "plugin_hooks",
+                    "${PLUGIN_ROOT}",
+                    "${PLUGIN_DATA}",
+                ),
             ),
             (
                 REPO_ROOT
@@ -220,7 +269,13 @@ class PluginBundledHooksContractTests(unittest.TestCase):
                 / "skill-factory"
                 / "hooks"
                 / "session_start_routing.py",
-                ("skill-creator", "skill-builder", "skill-refactor"),
+                (
+                    "skill-creator",
+                    "skill-builder",
+                    "skill-installer",
+                    "skill-refactor",
+                    "skillify",
+                ),
             ),
         )
         for script, expected_fragments in scripts:
@@ -236,8 +291,30 @@ class PluginBundledHooksContractTests(unittest.TestCase):
 
                 self.assertTrue(payload["continue"])
                 self.assertTrue(payload["suppressOutput"])
-                for expected_fragment in expected_fragments:
+                self.assertEqual(
+                    "SessionStart",
+                    payload["hookSpecificOutput"]["hookEventName"],
+                )
+                for expected_fragment in (*expected_fragments, *gate_fragments):
                     self.assertIn(expected_fragment, context)
+
+    def test_first_principles_factory_gate_reference_and_lane_wiring(self) -> None:
+        reference = FACTORY_GATE_REFERENCE.read_text(encoding="utf-8")
+
+        for decision in FACTORY_GATE_DECISIONS:
+            with self.subTest(decision=decision):
+                self.assertIn(decision, reference)
+        for schema_key in FACTORY_GATE_SCHEMA_KEYS:
+            with self.subTest(schema_key=schema_key):
+                self.assertIn(schema_key, reference)
+
+        for lane in FACTORY_GATE_LANES:
+            with self.subTest(lane=lane.relative_to(REPO_ROOT).as_posix()):
+                self.assertFalse(lane.is_symlink())
+                lane_text = lane.read_text(encoding="utf-8")
+                self.assertIn("first-principles-factory-gate.md", lane_text)
+                self.assertNotIn(str(REPO_ROOT / ".agents"), lane_text)
+                self.assertNotIn(str(REPO_ROOT / ".skillsets"), lane_text)
 
 
 if __name__ == "__main__":

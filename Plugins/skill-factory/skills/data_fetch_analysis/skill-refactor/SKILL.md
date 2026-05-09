@@ -36,6 +36,10 @@ Evidence first. Every recommendation should trace to a concrete session, artifac
 7. Rank findings by impact, confidence, and implementation cost.
 8. Return keep, improve, merge, and retire actions with evidence anchors.
 
+Read when: choosing whether the requested factory work should build a new artifact, improve an existing one, stay docs-only, or stop: [First-principles factory gate](../../../../../Infrastructure/references/first-principles-factory-gate.md).
+
+For non-trivial factory work, include `first_principles_gate` or an explicit `first_principles_gate_status: not_applicable` with the reason in the output or handoff before claiming readiness.
+
 Reference scripts are preserved in deferred context:
 
 - `Infrastructure/references/deferred-skill-context/skill-factory-skill-refactor/scripts/scan_codex_sessions.py`

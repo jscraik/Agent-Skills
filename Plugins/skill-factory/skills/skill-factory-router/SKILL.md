@@ -44,6 +44,13 @@ Route skill lifecycle requests to one primary lane before execution.
 4. Return lane + rationale + next step.
 5. If ambiguity is material, request clarification.
 
+## First-Principles Gate
+
+Before create, harden, refactor, or skillify handoff, identify the user
+outcome, copied assumption, smallest effective mechanism, artifact decision,
+and proof needed. Prefer `IMPROVE_EXISTING`, `DOCS_ONLY`, or `DO_NOT_BUILD`
+when a new skill would only copy a template or increase context load.
+
 ## Deterministic Decision Order
 
 1. Explicit lane names (`skill-creator`, `skill-builder`, `skill-installer`, `skill-refactor`, `skillify`) win unless multiple lanes are named; multiple named lanes stay with this router.

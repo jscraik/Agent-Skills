@@ -13,6 +13,8 @@ CONTEXT = """Plugin Factory bundled hook contract:
 - Plugin-owned commands should reference ${PLUGIN_ROOT} or ${PLUGIN_DATA}; avoid local absolute paths.
 - Prompt, agent, and async hooks are not runtime-supported for plugin hooks yet; scaffold command hooks for behavior.
 - plugin_hooks must be enabled alongside plugins and hooks before bundled plugin hooks load.
+- Run the first-principles factory gate before plugin creation, hardening, refactor, or package-design work: identify the user outcome, copied assumption, smallest effective mechanism, artifact decision, and proof needed.
+- Prefer IMPROVE_EXISTING, DOCS_ONLY, or DO_NOT_BUILD when a new plugin, hook, MCP tool, app, or eval would only copy a template or increase context load.
 - Run plugin_builder.pyw validate before handing off a plugin package."""
 
 
@@ -23,6 +25,7 @@ def main() -> None:
                 "continue": True,
                 "suppressOutput": True,
                 "hookSpecificOutput": {
+                    "hookEventName": "SessionStart",
                     "additionalContext": CONTEXT,
                 },
             },

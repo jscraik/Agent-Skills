@@ -394,6 +394,7 @@ if command -v "$ruff_bin" >/dev/null 2>&1; then
   # Lint only the family validator scripts; legacy utility scripts in scripts/
   # are excluded to avoid pre-existing E401 violations in unrelated tooling.
   family_py_scripts=(
+    Infrastructure/scripts/validation-and-linting/validate_first_principles_gate.py
     Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py
     "${skill_builder_scripts_dir}/yaml_frontmatter.py"
     "${skill_builder_scripts_dir}/skill_gate.py"
@@ -469,11 +470,13 @@ run_skill_gate_unittest=1
 run_family_benchmark_pytest=1
 run_projection_pytest=1
 run_plugin_hooks_pytest=1
+run_first_principles_gate_pytest=1
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   run_skill_gate_unittest=0
   run_family_benchmark_pytest=0
   run_projection_pytest=0
   run_plugin_hooks_pytest=0
+  run_first_principles_gate_pytest=0
 
   if changed_files_match "Plugins/skill-factory/skills/code_quality_review/skill-builder/*" || \
      changed_files_match "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/*" || \
@@ -487,6 +490,14 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
     run_skill_gate_unittest=1
     run_family_benchmark_pytest=1
     run_plugin_hooks_pytest=1
+  fi
+
+  if changed_files_match "Plugins/skill-factory/skills/*" || \
+     changed_files_match "Plugins/plugin-factory/skills/*" || \
+     changed_files_match "Infrastructure/scripts/validation-and-linting/validate_first_principles_gate.py" || \
+     changed_files_match "Infrastructure/scripts/testing/test_validate_first_principles_gate.py" || \
+     changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh"; then
+    run_first_principles_gate_pytest=1
   fi
 
   if changed_files_match "Infrastructure/scripts/lifecycle-and-sync/*" || \
@@ -505,6 +516,26 @@ if [[ "$run_projection_pytest" -eq 1 ]]; then
 fi
 if [[ "$run_plugin_hooks_pytest" -eq 1 ]]; then
   selected_pytest_targets+=(Infrastructure/tests/test_plugin_bundled_hooks_contract.py)
+fi
+if [[ "$run_first_principles_gate_pytest" -eq 1 ]]; then
+  selected_pytest_targets+=(Infrastructure/scripts/testing/test_validate_first_principles_gate.py)
+fi
+
+first_principles_gate_files=()
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  for changed_file in "${changed_files[@]}"; do
+    if [[ "$changed_file" == Plugins/skill-factory/skills/* ]] || \
+       [[ "$changed_file" == Plugins/plugin-factory/skills/* ]]; then
+      first_principles_gate_files+=("$changed_file")
+    fi
+  done
+fi
+
+if [[ ${#first_principles_gate_files[@]} -gt 0 ]]; then
+  echo "[family-gate] validating first-principles factory gate evidence (warning-first)"
+  "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_first_principles_gate.py "${first_principles_gate_files[@]}"
+else
+  echo "[family-gate] first-principles factory gate validation skipped: no active factory output/readiness paths selected"
 fi
 
 if [[ "$run_skill_gate_unittest" -eq 1 ]]; then

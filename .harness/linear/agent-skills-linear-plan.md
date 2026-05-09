@@ -599,18 +599,18 @@ No other review, strategy, triage, or Linear issue is admitted into this slice.
 
 ## Linear Delta Capture
 
-Last synced: `2026-05-08 23:40 BST` after live Linear refresh.
+Last synced: `2026-05-09 21:31 BST` after live Linear refresh.
 
-Source: Live Linear project query for `agent-skills`, canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`, issue-level milestone `Command surface and ask reliability`, completed parent `JSC-284`, completed child issues `JSC-285`, `JSC-286`, and `JSC-287`, unresolved command-surface candidates in the same project, and milestone-list lookup for the project.
+Source: Live Linear project query for canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`, project milestone lookup by ID, issue-level milestone `Command surface and ask reliability`, completed parent `JSC-284`, completed child issues `JSC-285`, `JSC-286`, and `JSC-287`, unresolved command-surface candidates in the same project, team label lookup, and targeted search/fetch for first-principles issues returned by Linear full-text search.
 
-Tracker hygiene note: issue-level Linear reads still attach `JSC-246`, `JSC-284`, `JSC-285`, `JSC-286`, `JSC-287`, and the `JSC-230` child topology to milestone ID `1c091ac7-b2ef-4321-ab05-7779841aaf2a` named `Command surface and ask reliability`. The project milestone list endpoint now exposes only `Ask Control Plane Decomposition` (`f83822cf-c826-49c1-b039-57e96c4eee49`, progress `0`). Treat this as a non-blocking tracker-surface discrepancy for the next spec lane: do not mutate Linear or migrate issues without explicit approval, and continue selecting from the issue-level graph because it is the surface carrying the actual parent issues.
+Tracker hygiene note: milestone lookup by canonical project ID now resolves the active milestone as `Command surface and ask reliability` (`1c091ac7-b2ef-4321-ab05-7779841aaf2a`, progress `37.5%`). If a name-only Linear lookup surfaces the canceled duplicate project's `Ask Control Plane Decomposition` milestone, treat that as stale duplicate-project noise and continue using the canonical project ID.
 
-Label status: `resolved_with_existing_labels`; no Linear label mutation is required for the next slice.
+Label status: `resolved_with_existing_labels`; no Linear label mutation is required for the next slice. Existing labels available for the selected slice include `Roadmap: Next`, `Agent`, `Infra`, and `Improvement`, with higher-order HE labels such as `Agent-Native`, `Eval`, `Drift-Risk`, `Routing`, and `Context` available if the later spec recommends applying them.
 
 | Issue | Title | Status | Priority | Classification | Reason |
 |---|---|---|---:|---|---|
-| Milestone | `Command surface and ask reliability` | Active at issue level; hidden from milestone-list lookup | n/a | already_covered | Issue-level reads still show this as the parent container for `JSC-246`, `JSC-284`, `JSC-285`, `JSC-286`, `JSC-287`, and `JSC-230` children. Use as the tracker source for this delta until explicitly cleaned up. |
-| Milestone | `Ask Control Plane Decomposition` | Listed milestone; progress `0%` | n/a | needs_human_triage | Project milestone list exposes this newer milestone, but no live issue read in this delta returned it as the issue-level milestone. Do not route the next spec here without an approved Linear hygiene mutation. |
+| Milestone | `Command surface and ask reliability` | Active; progress `38%` | n/a | already_covered | Canonical project-ID milestone lookup and issue-level reads agree that this milestone owns `JSC-246`, `JSC-284`, `JSC-285`, `JSC-286`, `JSC-287`, and the `JSC-230` child topology. |
+| Milestone | `Ask Control Plane Decomposition` | Stale duplicate-project lookup result | n/a | out_of_scope | Name-only lookup can surface this milestone from the canceled duplicate project; do not route the next spec here. |
 | JSC-284 | `[agent-skills] Decompose skills command module into bounded services` | Done | 1 | already_covered | Prior approved parent is complete; keep as evidence, not active scope. |
 | JSC-285 | `[agent-skills] Map skills command responsibilities and output contracts` | Done | 1 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |
 | JSC-286 | `[agent-skills] Extract plugin cache service behind existing behavior` | Done | 2 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |
@@ -629,9 +629,13 @@ Label status: `resolved_with_existing_labels`; no Linear label mutation is requi
 | JSC-170 | `Fix Robot mode alias behavior to match documented examples` | Backlog | 2 | needs_human_triage | Potentially related to agent UX, but narrower than the admitted golden-path slice. |
 | JSC-174 | `Add ask start fast lane for first-contact agent workflows` | Backlog | 3 | needs_human_triage | May become a child of the golden-path program after spec review; do not admit before boundary definition. |
 | JSC-175 | `Split ask output profiles for humans vs agents` | Backlog | 4 | out_of_scope | Useful output polish, but not the next structural slice. |
+| JSC-291 | `Install first-principles gate for X-writer serious briefs` | Done | 2 | out_of_scope | Search hit only; belongs to the `X-writer` project, not this repo's `agent-skills` queue. |
+| JSC-292 | `Add advisory first-principles fields to serious brief template` | Done | 2 | out_of_scope | Child of `JSC-291` in `X-writer`; no `agent-skills` Linear mutation required. |
+| JSC-293 | `Add worked example and eval proof for first-principles gate` | Done | 2 | out_of_scope | Child of `JSC-291` in `X-writer`; useful as external evidence but not a candidate next slice here. |
+| JSC-294 | `Align x-content-writer route after example proves useful` | Done | 3 | out_of_scope | Child of `JSC-291` in `X-writer`; do not mix into the `agent-skills` HE spec handoff. |
 
 ## Approved Next Slice Queue
 
 | Order | Slice | Linear Issue | Route | Depends On | Notes |
 |---:|---|---|---|---|---|
-| 1 | Agent First Golden Path spec | JSC-246 | Agent-assisted; human-review required for public command contract changes | `JSC-284` closure evidence; live Linear delta refresh complete; non-blocking milestone-list discrepancy recorded | This is the single admitted next slice for `$he-spec`. Scope it to repo surface contract and golden-path control-plane behavior, not all pending command-surface tickets. |
+| 1 | Agent First Golden Path spec | JSC-246 | Agent-assisted; human-review required for public command contract changes | `JSC-284` closure evidence; live Linear delta refresh complete; canonical project milestone verified by ID | This is the single admitted next slice for `$he-spec`. Scope it to repo surface contract and golden-path control-plane behavior, not all pending command-surface tickets. |

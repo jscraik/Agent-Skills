@@ -193,6 +193,7 @@ Hook interface:
   "continue": true,
   "suppressOutput": true,
   "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
     "additionalContext": "..."
   }
 }
@@ -200,6 +201,8 @@ Hook interface:
 
 - Additional context should include the compact gate wording once per hook
   output.
+- `hookSpecificOutput.hookEventName` must be `SessionStart`, matching the live
+  Codex `SessionStart` command output schema.
 - Hook text must stay advisory. It must not imply that hooks enforce readiness
   or that `plugin_hooks` is enabled in every runtime.
 - Hook text must keep the existing domain-specific context: `skill-factory`
@@ -211,6 +214,8 @@ Test interface:
 - Extend existing factory hook tests to assert that hook context includes gate
   terms such as `first-principles`, `artifact decision`, and at least one
   non-build decision term such as `DO_NOT_BUILD` or `IMPROVE_EXISTING`.
+- Assert both hook scripts emit `hookSpecificOutput.hookEventName` as
+  `SessionStart`, not only generic JSON with `additionalContext`.
 - Keep tests close to current hook-script output tests so Phase 1 proves the
   runtime context path without inventing a new validator.
 - Suggested minimum assertions:
@@ -231,6 +236,8 @@ DO_NOT_BUILD
   library.
 - Hook scripts must remain executable through the existing manifest-declared
   command paths and continue to use `${PLUGIN_ROOT}` in hook config.
+- Hook output must match the live Codex `SessionStart` output shape by
+  including `hookSpecificOutput.hookEventName: "SessionStart"`.
 - Router edits must preserve read-only router execution boundaries.
 - Test updates must not require `plugin_hooks` to be enabled at runtime; tests
   execute the scripts directly and validate JSON output.
@@ -275,6 +282,8 @@ Minimum observable signals:
 
 - Hook scripts compile.
 - Hook scripts emit valid JSON.
+- Hook scripts emit Codex-compatible `SessionStart` hook output, including
+  `hookSpecificOutput.hookEventName: "SessionStart"`.
 - Hook context includes compact first-principles gate terms.
 - Existing factory hook contract tests continue to pass.
 - Authoring-family changed-file validation either passes or records an exact
@@ -310,9 +319,9 @@ bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_fami
 | --- | --- | --- |
 | SA-001 | `skill-factory-router` requires a compact first-principles gate before create, harden, refactor, or skillify decisions. | Diff in `Plugins/skill-factory/skills/skill-factory-router/SKILL.md` plus review against this spec. |
 | SA-002 | `plugin-factory-router` requires the same compact gate before create, harden, refactor, or package-design decisions. | Diff in `Plugins/plugin-factory/skills/plugin-factory-router/SKILL.md` plus review against this spec. |
-| SA-003 | `skill-factory` SessionStart context includes the compact gate and remains valid hook JSON output. | `python3 -m py_compile ...` and focused pytest pass. |
-| SA-004 | `plugin-factory` SessionStart context includes the compact gate and remains valid hook JSON output. | `python3 -m py_compile ...` and focused pytest pass. |
-| SA-005 | Tests assert concrete gate terms, including at least one non-build decision. | Diff in `Infrastructure/tests/test_plugin_bundled_hooks_contract.py`; focused pytest pass. |
+| SA-003 | `skill-factory` SessionStart context includes the compact gate and remains Codex-compatible hook JSON output. | `python3 -m py_compile ...` and focused pytest pass, including `hookEventName` assertion. |
+| SA-004 | `plugin-factory` SessionStart context includes the compact gate and remains Codex-compatible hook JSON output. | `python3 -m py_compile ...` and focused pytest pass, including `hookEventName` assertion. |
+| SA-005 | Tests assert concrete gate terms, at least one non-build decision, and `hookSpecificOutput.hookEventName`. | Diff in `Infrastructure/tests/test_plugin_bundled_hooks_contract.py`; focused pytest pass. |
 | SA-006 | Phase 1 does not add schema/procedure wiring, validator enforcement, eval fixtures, MCP tools, apps, or Linear mutation. | Git diff inspection confirms only Phase 1 files changed. |
 | SA-007 | Broader readiness remains blocked until the eval artifact exists. | `.harness/evals/2026-05-09-agent-skills-first-principles-factory-gate-eval.md` remains required for closure. |
 | SA-008 | Router and hook wording preserve the advisory/enforcement split: hooks inject context, validators/evals enforce readiness. | Diff inspection confirms no hook text claims enforcement and no validator/eval files are changed in Phase 1. |

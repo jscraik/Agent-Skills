@@ -35,6 +35,14 @@ Route before acting. A plugin task should enter exactly one lane with clear trus
   bundled hook surface, side-effect classes, progressive-disclosure references,
   install/projection determinism, and plugin-level eval coverage.
 
+## First-Principles Gate
+
+Before plugin creation, hardening, refactor, or package-design handoff, identify
+the user outcome, copied assumption, smallest effective mechanism, artifact
+decision, and proof needed. Prefer `IMPROVE_EXISTING`, `DOCS_ONLY`, or
+`DO_NOT_BUILD` when a new plugin, hook, MCP tool, app, or eval would only copy a
+template or increase context load.
+
 ## Failure mode
 
 - If lane choice is materially ambiguous, ask one blocking clarification instead of guessing.
