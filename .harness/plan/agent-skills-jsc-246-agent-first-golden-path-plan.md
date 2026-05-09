@@ -30,7 +30,7 @@ linear_labels: "Roadmap: Next, Agent, Infra, Improvement"
 linear_label_status: resolved_with_existing_labels
 linear_priority: 2
 selected_refactor: .harness/refactors/agent-first-golden-path.md
-source_spec: Docs/specs/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-spec.md
+source_spec: .harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md
 eval_artifact: .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md
 technical_review: .harness/review/agent-skills-jsc-246-agent-first-golden-path-technical-review.md
 plan_technical_review: .harness/review/agent-skills-jsc-246-agent-first-golden-path-plan-technical-review.md
