@@ -16,11 +16,17 @@ import re
 import unittest
 from pathlib import Path
 
-REPO_ROOT = next(
-    p
-    for p in Path(__file__).resolve().parents
-    if (p / "Infrastructure").is_dir()
-)
+def _find_repo_root() -> Path:
+    for parent in Path(__file__).resolve().parents:
+        if (parent / "Infrastructure").is_dir() and (parent / "CODESTYLE.md").is_file():
+            return parent
+    raise RuntimeError(
+        "Could not locate repository root containing 'Infrastructure' "
+        f"from {Path(__file__).resolve()}"
+    )
+
+
+REPO_ROOT = _find_repo_root()
 
 WORKFLOW_DOC = (
     REPO_ROOT
@@ -84,7 +90,7 @@ class TestHandoffsJsonPrimaryArtifact(unittest.TestCase):
 
     def test_handoffs_json_includes_root_causes_and_evidence_labels(self):
         """handoffs.json guidance must mention root causes and evidence labels."""
-        text = self._text.lower()
+        text = " ".join(self._text.lower().split())
         self.assertIn("root cause", text)
         self.assertIn("evidence labels", text)
 
@@ -152,13 +158,10 @@ class TestStrictValidationFlowBehavior(unittest.TestCase):
 
     def test_strict_flow_stops_on_missing_handoffs(self):
         """The document must state that strict flows stop when handoffs.json is missing."""
-        # Find "strict" in the context of "stop"
-        idx = self._text.lower().find("strict")
-        self.assertGreater(idx, -1)
-        segment = self._text[idx: idx + 300]
-        self.assertIn(
-            "stop",
-            segment.lower(),
+        text = self._text.lower()
+        match = re.search(r"(?<!-)strict\b.{0,400}\bstop\b", text, flags=re.DOTALL)
+        self.assertIsNotNone(
+            match,
             "Strict flows must be described as stopping when handoffs.json is absent",
         )
 
@@ -289,15 +292,18 @@ class TestHandoffsJsonOrderingInDocument(unittest.TestCase):
 
     def test_handoffs_json_appears_before_evidence_json_in_consume_section(self):
         """In the 'Consume' paragraph, handoffs.json position must precede evidence.json."""
-        idx_handoffs = self._text.find("skill-refactor-handoffs.json")
-        idx_evidence = self._text.find("skill-refactor-evidence.json")
-        self.assertGreater(idx_handoffs, -1, "skill-refactor-handoffs.json must exist in doc")
-        self.assertGreater(idx_evidence, -1, "skill-refactor-evidence.json must exist in doc")
+        idx_consume = self._text.lower().find("consume `${temp_prefix}/skill-refactor-handoffs.json`")
+        self.assertGreater(idx_consume, -1, "'Consume' paragraph must be present")
+        segment = self._text[idx_consume: idx_consume + 600]
+        idx_handoffs = segment.find("skill-refactor-handoffs.json")
+        idx_evidence = segment.find("skill-refactor-evidence.json")
+        self.assertGreater(idx_handoffs, -1, "skill-refactor-handoffs.json must exist in consume paragraph")
+        self.assertGreater(idx_evidence, -1, "skill-refactor-evidence.json must exist in consume paragraph")
         self.assertLess(
             idx_handoffs,
             idx_evidence,
             "skill-refactor-handoffs.json must appear before skill-refactor-evidence.json "
-            "in the document (it is the primary artifact consumed first)",
+            "in the consume paragraph (it is the primary artifact consumed first)",
         )
 
     def test_verification_block_follows_consume_guidance(self):
