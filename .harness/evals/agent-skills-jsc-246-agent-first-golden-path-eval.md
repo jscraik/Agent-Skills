@@ -18,8 +18,8 @@ linear_milestone: Command surface and ask reliability
 # Agent Skills JSC-246 Agent First Golden Path Eval
 
 ## Executive Eval Summary
-Status: `PLAN-JSC246-007` fresh-agent eval and closure evidence are complete.
-Linear Completion Recommendation: Complete
+Status: `PLAN-JSC246-007` phase evidence complete; parent closure pending Linear state verification.
+Linear Completion Recommendation: Pending Linear state verification
 Primary Blockers: None for the JSC-246 implementation slice. Remaining repo-surface debt is advisory diagnostic debt, not a blocking gate.
 Confidence: High from focused tests, deterministic fresh-agent command snapshots, live CLI probes, harness identity lint, traceability lint, diff check, scoped repo validation, projection integrity, and closeout readiness evidence.
 
@@ -589,8 +589,8 @@ Follow-Up Justified: Yes, but as separate HE skill lifecycle work rather than JS
 Blocks Closure: no for phase 006 after the local draft fix.
 
 ## Linear Completion Recommendation
-Classification: Complete
-Recommended Linear Status: Close `JSC-246` after linking this eval artifact and the fresh-agent evidence bundle.
+Classification: Pending Linear state verification
+Recommended Linear Status: Close `JSC-246` after linking this eval artifact, the fresh-agent evidence bundle, and confirming Linear shows the issue as completed.
 Required Linear Comment/Update: Note that phase 002 passed focused tests and live doctor proof; phase 003 passed focused route-state tests and live skills-improve probes after review gates; phase 004 passed focused explain/prove tests, live probes, and local review gates; phase 005 passed focused closeout fixture tests, live closeout classification, scoped repo validation, and local review gates; phase 006 passed first-contact compression validation and review gates; phase 007 passed deterministic fresh-agent command evidence and final closeout readiness.
 Issues to Close: `JSC-246` after human review.
 Issues to Reopen: None.
@@ -617,7 +617,7 @@ ADR Update: Not required for this phase.
 Reason: The phase implements an approved additive contract; it does not introduce a new irreversible architectural decision.
 
 ## Evidence & Traceability Matrix
-Conclusion: Phases 002 through 007 are safe to mark complete. `JSC-246` is ready for human-reviewed Linear closure.
+Conclusion: Phases 002 through 007 are complete. `JSC-246` is ready for human-reviewed Linear closure pending Linear state verification.
 Fact: Focused tests passed and live command output exposes advisory/non-blocking continuation metadata, deterministic skills-improve route states, explain/prove taxonomy fields, closeout changed-file readiness classification, compressed first-contact docs/metadata, and fresh-agent command evidence that starts with `repo doctor`.
 Interpretation: The implementation improves routing/proof/closeout determinism without breaking existing command fields or adding proof schema.
 Assumption: Human review of the closure evidence is still required before mutating Linear issue state.
