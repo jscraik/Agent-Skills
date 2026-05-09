@@ -49,8 +49,15 @@ Use the detailed routing protocol in `references/workflow.md`.
 
 Required operational context is never removed; detailed guidance is relocated to references, not trimmed.
 
+## Execution Boundaries
+
+Apply the OpenAI-style plugin design contract when ambiguity affects side-effect class, package boundary, child-skill separation, user steering, or plugin output shape. Route once; do not execute lane logic from this helper.
+
+Plugin Router owns lane selection, missing-input reporting, and handoff shape. It does not scaffold, harden, install, refresh projections, mutate marketplace state, or make release-readiness claims.
+
 Read when:
 - You need full lane-selection and handoff protocol details: [references/workflow.md](./references/workflow.md).
+- You need side-effect, context-minimization, or user-control routing checks: [OpenAI-style plugin design contract](../../../../../Infrastructure/references/openai-style-plugin-design-contract.md).
 
 ## Examples
 
@@ -77,9 +84,21 @@ Fail fast: stop at first failed gate and report blocker text.
 - routing by preference instead of explicit intent evidence
 - emitting a handoff without required inputs/missing data
 
+## Failure Mode
+
+- Stop when one request can validly route to multiple lanes with different side-effect classes, ownership boundaries, or validation gates.
+- Ask one blocking question or return `blocked_by` instead of guessing the lane.
+
+## Gotchas
+
+- Router confidence is not execution authorization.
+- A plugin lifecycle request may contain skill work; route the plugin boundary first, then hand off skill hardening only when ownership is explicit.
+- Marketplace or install intent changes the side-effect class even if the user phrases it as a review.
+
 ## References
 
 - `references/workflow.md`
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/task-profile.json`
+- `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`

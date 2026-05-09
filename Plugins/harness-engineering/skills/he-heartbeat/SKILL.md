@@ -32,6 +32,7 @@ Fail fast: stop at the first failed gate and do not proceed. Confirm schedule, d
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Execution Boundaries
 Heartbeats schedule wakeups and checks. Do not use a heartbeat prompt as authority to merge, deploy, close trackers, or perform destructive actions.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 ## Gotchas
 - Duplicate automations create noisy state and must be avoided.
 - A stop rule is mandatory before scheduling.
@@ -47,6 +48,7 @@ Redact secrets; do not create cron workarounds for short thread follow-up. Do no
 - "Keep watching JSC-246 after the merge queue starts and wake this thread with the next required action."
 - "Rotate across the open coding-harness PRs with GitHub, CircleCI, CodeRabbit, and Codex comments; use `git-project-triage` when available, wake every 30 minutes, and stop only once the PRs are green, merged, or explicitly blocked."
 ## References
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`

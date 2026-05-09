@@ -27,6 +27,7 @@ Fail fast: stop at the first failed gate and do not proceed. Check routing, stag
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Execution Boundaries
 Compound reconstructs lifecycle state and routes the next stage. Do not collapse multi-stage work into execution or refresh Project Brain unless source evidence proves a context change.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 ## Gotchas
 - Compound owns state reconstruction, not implementation.
 - Legacy docs may be source evidence, but new solved-problem captures belong under `.harness/solutions/**`.
@@ -48,6 +49,7 @@ Reference `assets/` only for skill packaging and browseability; lifecycle state 
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Solution capture: `Plugins/harness-engineering/references/solution-capture-contract.md`

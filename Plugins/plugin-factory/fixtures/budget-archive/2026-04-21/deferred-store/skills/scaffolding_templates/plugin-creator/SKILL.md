@@ -36,6 +36,8 @@ Keep plugin scaffolding separate from skill hardening. Route detailed skill qual
 
 If the destination plugin root, marketplace ownership, or skill-adoption move semantics are ambiguous, stop and ask before writing.
 
+Apply the OpenAI-style plugin design contract during scaffold shape decisions: keep the root-visible surface small, split child skills by distinct user intent, declare side-effect classes early, and leave confirmation behavior for install, external write, destructive, or completion-gating actions.
+
 ## Workflow
 
 Use the detailed scaffold procedure in `references/workflow.md`.
@@ -47,6 +49,7 @@ Classify reusable, delivery-oriented, visible-family, or `coding-harness` plugin
 Read when:
 - You need full plugin scaffold and marketplace update flow: [references/workflow.md](./references/workflow.md).
 - You need plugin posture, visibility, budget, traceability, or session-evidence rules: [references/factory-governance-spine.md](./references/factory-governance-spine.md).
+- You need side-effect, context-minimization, user-control, or output-shape guidance: [OpenAI-style plugin design contract](../../../../../Infrastructure/references/openai-style-plugin-design-contract.md).
 
 ## Required Behavior
 
@@ -105,6 +108,7 @@ Fail fast: stop at first failed gate and report blocker text.
 - `references/evals.yaml`
 - `references/task-profile.json`
 - `references/plugin-json-spec.md`
+- `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
 - `assets/`
 
 ## Remember

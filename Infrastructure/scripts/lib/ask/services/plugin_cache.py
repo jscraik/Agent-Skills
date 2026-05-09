@@ -108,8 +108,7 @@ def replace_plugin_cache_copy(
         deletes.append(str(target_dir))
         target_dir.unlink()
     elif target_dir.exists():
-        deletes.append(str(target_dir))
-        shutil.rmtree(target_dir)
+        deletes.extend(str(child) for child in target_dir.iterdir())
     copy_directory_contents(source_dir, target_dir)
     materialize_first_level_skill_aliases(target_dir)
     logs, prune_deletes = prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
@@ -145,6 +144,7 @@ def refresh_workspace_plugin_caches(
     plan.setdefault("plugin_cache_writes", [])
     plan.setdefault("writes", [])
     plan.setdefault("deletes", [])
+    plan.setdefault("warnings", [])
 
     keep_plugin_names = {entry["name"] for entry in entries}
     try:
@@ -200,6 +200,15 @@ def refresh_workspace_plugin_caches(
                     continue
                 shutil.rmtree(child)
                 logs.append(f"Removed stale local plugin cache: {child}")
+    except PermissionError as exc:
+        plan["warnings"].append("PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED")
+        logs.append(
+            "Skipped workspace plugin cache refresh after permission failure: "
+            f"{exc}. Rooted skill projections and manifests may still be current; "
+            "rerun sync in an environment that can mutate .agents/plugins-runtime/cache "
+            "to refresh Codex picker cache copies."
+        )
+        return None
     except (OSError, ValueError, PluginCacheRefreshError) as exc:
         return ErrorObject(
             code="ERR_RUNTIME",

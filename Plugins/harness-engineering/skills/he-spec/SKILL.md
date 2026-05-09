@@ -27,6 +27,7 @@ Fail fast: stop at the first failed gate and do not proceed. Check traceability,
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Execution Boundaries
 Non-mutating until the user authorizes artifact writes. Do not create, close, or mutate Linear objects unless the current task explicitly grants that authority.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 ## Gotchas
 - Stage context is required before writing specs; local docs do not replace Linear/source traceability.
 - Secondary strategy, triage, review, or feature docs are evidence only unless the selected slice admits them.
@@ -51,6 +52,7 @@ Reference `assets/` only for skill packaging and browseability; spec source mate
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Document review tiers: `Plugins/harness-engineering/references/document-review-finding-tiers.md`
 - Session evidence trace: `Plugins/harness-engineering/references/session-evidence-trace-context.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

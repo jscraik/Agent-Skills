@@ -22,12 +22,20 @@ Return `schema_version` when structured, plus `selected_stage`, `source_path`, `
 5. Ask once before guessing when deterministic routing leaves one consequential stage or source choice unresolved.
 6. After selecting the stage, hand persistent `/goal`, resume-over-time, or keep-working-until-done behavior to the goal continuity contract and `Skills/agent-ops/goal-governor`.
 7. Route compression blockers such as `spec_refresh_required` to `he-spec` with the compression contract.
+8. Apply the OpenAI-style design contract to lifecycle routing: separate
+   read-only analysis, `.harness` artifact writes, repo edits, external tracker
+   updates, destructive actions, and completion recommendations before
+   continuing.
+9. When the selected stage exposes a domain-specific knowledge gap, use the
+   specialist skill steering contract to resolve the narrowest available skill;
+   record discarded candidates and do not expand the approved HE scope.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check deterministic aliases and subagent role availability.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Execution Boundaries
 Routing is non-mutating. Do not continue into implementation, planning, review repair, or tracker updates unless the selected stage is authorized.
+Do not continue into artifact writes, destructive actions, or completion-gating recommendations unless the selected stage is authorized.
 ## Gotchas
 - Folded aliases are modes, not missing skills.
 - The router owns stage selection, not lifecycle execution.
@@ -45,6 +53,10 @@ Redact secrets; never enumerate every child skill to the model. Do not remove im
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
+- OpenAI-style plugin design:
+  `Infrastructure/references/openai-style-plugin-design-contract.md`
+- Specialist skill steering:
+  `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`; durable goal boards: `Skills/agent-ops/goal-governor`
 - Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`

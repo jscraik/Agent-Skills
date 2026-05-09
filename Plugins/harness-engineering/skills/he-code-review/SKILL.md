@@ -28,6 +28,7 @@ Fail fast: stop at the first failed gate and do not proceed. Verify gates, refer
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Execution Boundaries
 Review-only mode must remain byte-clean. Autofix, PR mutation, thread resolution, or tracker updates require explicit repair or mutation authority.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 ## Gotchas
 - Green CI is not readiness when behavior proof, live review state, security, or traceability is missing.
 - Repeated feedback may require skill/eval follow-up after the immediate review verdict.
@@ -54,6 +55,7 @@ Reference `assets/` only for skill packaging and browseability; review evidence 
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Review policy index: `Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md`

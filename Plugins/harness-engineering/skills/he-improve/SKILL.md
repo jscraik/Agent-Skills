@@ -26,6 +26,7 @@ Fail fast: stop at the first failed gate and do not proceed. Compare before/afte
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Execution Boundaries
 Improve only the selected skill or shared contract surface. Do not create new visible skills, broaden scope, or mutate runtime projections without explicit authority.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 ## Gotchas
 - Path fragments and bundle names are evidence labels, not routing authority.
 - Product-surface compression usually belongs in shared contracts and evals before new skill surfaces.
@@ -42,6 +43,7 @@ Redact secrets; preserve important context in references. Do not broaden into un
 ## Assets
 Reference `assets/` only for skill packaging and browseability; experiment logs and loop artifacts belong in references or repo artifacts.
 ## References
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Session evidence: `Plugins/harness-engineering/references/session-evidence-skillify-triage.md`

@@ -25,6 +25,7 @@ Fail fast: stop at the first failed gate and do not proceed. Show command outcom
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Execution Boundaries
 Mutate only the reproduced failing path. Do not expand into unrelated cleanup, close trackers, or claim readiness without exact validation evidence.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 ## Gotchas
 - A failing label is not a reproduction.
 - Recurring failures need a durable learning surface after the immediate fix.
@@ -39,6 +40,7 @@ Redact secrets; preserve user edits. Do not remove important context for budget 
 ## Assets
 Reference `assets/` only for skill packaging and browseability; bug evidence belongs in logs, tests, and handoff notes.
 ## References
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`

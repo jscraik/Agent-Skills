@@ -28,6 +28,7 @@ Fail fast: stop at the first failed gate and do not proceed. Run exact gates for
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Execution Boundaries
 Mutate only files in the approved implementation slice. Do not stage, commit, push, resolve review threads, or close trackers unless separately authorized.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 ## Gotchas
 - Dirty worktree ownership and active `/goal` conflicts are blockers, not context to overwrite.
 - Validation must run against the touched production path or be recorded as blocked with the smallest recovery step.
@@ -50,6 +51,7 @@ Reference `assets/` only for skill packaging and browseability; execution eviden
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`
 - Execution slice contract: `Plugins/harness-engineering/references/execution-slice-contract.md`

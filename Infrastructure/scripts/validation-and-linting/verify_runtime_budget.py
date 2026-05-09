@@ -55,6 +55,28 @@ BASELINED_SCOPE_COLLISIONS = {
         "agents-sdk skill. Keep this explicit so unrelated same-scope collisions "
         "continue to block runtime-budget validation."
     ),
+    (
+        "build-chatgpt-app",
+        (
+            "Plugins/cache/openai-curated/chatgpt-apps/skills/build-chatgpt-app",
+            "Plugins/cache/openai-curated/openai-developers/skills/build-chatgpt-app",
+        ),
+    ): (
+        "Curated ChatGPT Apps and OpenAI Developers plugins both ship the same "
+        "ChatGPT Apps SDK build skill. Keep this explicit so unrelated "
+        "same-scope collisions continue to block runtime-budget validation."
+    ),
+    (
+        "chatgpt-app-submission",
+        (
+            "Plugins/cache/openai-curated/chatgpt-apps/skills/chatgpt-app-submission",
+            "Plugins/cache/openai-curated/openai-developers/skills/chatgpt-app-submission",
+        ),
+    ): (
+        "Curated ChatGPT Apps and OpenAI Developers plugins both ship the same "
+        "ChatGPT Apps submission skill. Keep this explicit so unrelated "
+        "same-scope collisions continue to block runtime-budget validation."
+    ),
 }
 
 

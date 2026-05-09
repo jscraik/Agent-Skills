@@ -28,6 +28,7 @@ Fail fast: stop at the first failed gate and do not proceed. Check scope, tracea
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Execution Boundaries
 Brainstorming is non-mutating except for approved `.harness/brainstorm/**` or `.harness/ideate/**` artifacts. Do not convert survivors into specs, plans, or Linear work without handoff authority.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 ## Gotchas
 - Guesses must stay labeled as guesses.
 - Survivor selection can be a blocking user choice when it shapes downstream scope.
@@ -48,6 +49,7 @@ Reference `assets/` only for skill packaging and browseability; workflow source 
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Topic coverage: `Plugins/harness-engineering/references/brainstorm-topic-coverage-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Ideation mode: `Plugins/harness-engineering/skills/he-brainstorm/references/ideation-mode.md`

@@ -13,6 +13,7 @@ sys.path.append(str(REPO_ROOT / "scripts"))
 
 from ask.commands import plugins as plugins_commands  # noqa: E402
 from ask.commands import skills as skills_commands  # noqa: E402
+from ask.services import plugin_cache  # noqa: E402
 
 sys.path.append(str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
 from check_context_budget import DEFAULTS  # noqa: E402
@@ -514,6 +515,50 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.status, "success")
         self.assertTrue(system_link.is_symlink())
         self.assertEqual(os.readlink(system_link), "../../skills-system")
+
+    def test_create_symlink_preserves_current_target_without_unlinking(self) -> None:
+        target = self.repo_root / ".agents" / "skills" / ".system"
+        target.symlink_to(Path("../../skills-system"))
+
+        with mock.patch.object(Path, "unlink", side_effect=AssertionError("should not unlink current symlink")):
+            result = skills_commands._create_symlink(Path("../../skills-system"), target)
+
+        self.assertEqual(result, f"Symlink already current: {target} -> ../../skills-system")
+        self.assertTrue(target.is_symlink())
+        self.assertEqual(os.readlink(target), "../../skills-system")
+
+    def test_plugin_cache_refresh_preserves_existing_directory_root(self) -> None:
+        source = self.repo_root / "Plugins" / "harness-engineering"
+        source.mkdir(parents=True)
+        (source / "README.md").write_text("fresh\n", encoding="utf-8")
+        target = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "harness-engineering"
+        target.mkdir(parents=True)
+        (target / "README.md").write_text("stale\n", encoding="utf-8")
+
+        with mock.patch.object(plugin_cache.shutil, "rmtree", side_effect=AssertionError("should not remove cache root")):
+            report = plugin_cache.replace_plugin_cache_copy(self.repo_root, "harness-engineering", source, target)
+
+        self.assertEqual((target / "README.md").read_text(encoding="utf-8"), "fresh\n")
+        self.assertIn(str(target / "README.md"), report.deletes)
+
+    def test_plugin_cache_permission_failure_warns_without_failing_sync(self) -> None:
+        marketplace = self.repo_root / "Plugins" / "marketplace.json"
+        marketplace.parent.mkdir(parents=True)
+        marketplace.write_text(
+            '{"name":"agent-skills-local","plugins":[{"name":"harness-engineering","source":{"source":"local","path":"./Plugins/harness-engineering"}}]}',
+            encoding="utf-8",
+        )
+        source = self.repo_root / "Plugins" / "harness-engineering"
+        source.mkdir(parents=True)
+
+        plan: dict[str, list[str]] = {}
+        logs: list[str] = []
+        with mock.patch.object(plugin_cache, "copy_directory_contents", side_effect=PermissionError("blocked")):
+            error = plugin_cache.refresh_workspace_plugin_caches(plan, logs, self.repo_root, dry_run=False)
+
+        self.assertIsNone(error)
+        self.assertIn("PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED", plan["warnings"])
+        self.assertTrue(any("Skipped workspace plugin cache refresh after permission failure" in log for log in logs))
 
     def test_sync_skills_user_scope_does_not_write_repo_local_lowercase_skills(self) -> None:
         with (

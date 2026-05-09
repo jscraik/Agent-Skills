@@ -28,6 +28,7 @@ Fail fast: stop at the first failed gate. Run `python3 Plugins/harness-engineeri
 If Linear identifiers, source artifacts, validation evidence, or the evaluated slice cannot be resolved, write the gap into the report, classify closure safety, and state the smallest repair before completion.
 ## Execution Boundaries
 Eval reporting writes proof artifacts only. Do not close Linear work, update tracker status, or recommend closure from `Complete` classifications until accept/challenge/rework steering is complete.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 ## Gotchas
 - Missing validation is not a pass.
 - Eval scope is the selected slice only; adjacent work belongs in follow-up classification.
@@ -50,6 +51,7 @@ Reference `assets/` only for skill packaging and browseability. Eval proof belon
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Agent-native audit scorecard: `Plugins/harness-engineering/references/agent-native-audit-scorecard.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Eval report contract: `Plugins/harness-engineering/skills/he-eval-report/references/eval-report-contract.md`

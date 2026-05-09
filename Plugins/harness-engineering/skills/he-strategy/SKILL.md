@@ -72,6 +72,7 @@ context to references.
 Generate strategy, review, triage, decision, or core cognition artifacts only.
 Do not create Linear work, implement recommendations, or mutate unrelated
 pipeline artifacts without explicit next-stage authority.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 
 ## Failure Mode
 
@@ -123,6 +124,7 @@ at the first failed gate and do not proceed.
 - Execution slice contract: `../../references/execution-slice-contract.md`
 - Deterministic stage routing: `../../references/deterministic-stage-routing.md`
 - Interactive steering: `../../references/interactive-steering-contract.md`
+- OpenAI-style plugin design: `../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `../../references/deferred-context-index.md`
 - Agent-native compression: `../../references/agent-native-compression-contract.md`
 - Agent-native audit scorecard: `../../references/agent-native-audit-scorecard.md`

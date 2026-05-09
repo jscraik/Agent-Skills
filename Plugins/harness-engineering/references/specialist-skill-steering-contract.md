@@ -15,6 +15,12 @@ workflow, review, plugin, skill, and product strategy skills are all candidates
 only when the current slice proves that their knowledge area materially improves
 the brainstorm, spec, plan, work, review, or eval.
 
+Apply `Infrastructure/references/openai-style-plugin-design-contract.md` when
+the specialist choice changes side-effect class, context loading, validation
+gates, or user steering. Specialist selection is a progressive-disclosure step:
+resolve the narrowest useful capability, use only the relevant contract, and
+record how it strengthened the current HE artifact.
+
 ## When to Use
 
 Use specialist steering when the current HE stage has a concrete knowledge gap

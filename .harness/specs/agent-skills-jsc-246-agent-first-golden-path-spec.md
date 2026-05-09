@@ -6,8 +6,8 @@ type: he-spec
 canonical_slug: agent-skills-jsc-246-agent-first-golden-path
 title: Agent Skills JSC-246 Agent First Golden Path Spec
 harness_stage: he-spec
-status: draft
-date: 2026-05-08
+status: ready_for_plan
+date: 2026-05-09
 origin: .harness/linear/agent-skills-linear-plan.md
 risk: medium-high
 depth: bounded-execution-slice
@@ -28,6 +28,8 @@ linear_label_status: resolved_with_existing_labels
 linear_priority: 2
 selected_refactor: .harness/refactors/agent-first-golden-path.md
 source_spec: Docs/specs/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-spec.md
+linear_delta_status: pass
+live_baseline_status: runtime_budget_pass_with_sync_required
 ---
 
 # Agent Skills JSC-246 Agent First Golden Path Spec
@@ -180,18 +182,19 @@ loop makes task completion worse.
 
 | Evidence | Result | Why It Matters |
 | --- | --- | --- |
-| `./bin/ask skills resolve he-spec --json` | Resolved `he-spec` to `Plugins/harness-engineering/skills/he-spec/SKILL.md` with source revision `cec4b3a59`. | Confirms this spec used the canonical HE Spec workflow. |
+| `./bin/ask skills resolve he-spec --json` | Resolved `he-spec` to `Plugins/harness-engineering/skills/he-spec/SKILL.md` with source revision `9105a11e1` and source SHA `aa2559ee6e392f0357285323b8ca1b5075dc9f5d1c0ef817389a792580e4461d`. | Confirms this spec used the canonical HE Spec workflow and records the live skill revision used for this refresh. |
 | Live Linear issue `JSC-246` | Status `Todo`, priority `High`, labels `Roadmap: Next`, `Agent`, `Infra`, `Improvement`, project `agent-skills`. | Confirms the selected issue exists and is not already complete. |
-| `.harness/linear/agent-skills-linear-plan.md` | Approved current slice is `JSC-246` / Agent First Golden Path. | Establishes this spec's allowed scope. |
+| `.harness/linear/agent-skills-linear-plan.md` | Approved current slice is `JSC-246` / Agent First Golden Path; delta gate status is `pass`. | Establishes this spec's allowed scope and confirms no new Linear work was admitted into this slice. |
 | `.harness/refactors/agent-first-golden-path.md` | Defines the product spine as `repo doctor`, `skills improve`, `skills explain`, `skills prove`, `repo closeout`. | Establishes the intended architecture and migration pressure. |
-| `./bin/ask repo doctor --json --robot` | Succeeded; reported non-blocking diagnostic debt and next command `./bin/ask repo surface --json --robot`. | Shows `repo doctor` already behaves as a live health and next-action surface. |
+| `./bin/ask repo doctor --json --robot` | Succeeded with non-blocking diagnostic debt; emitted next command `./bin/ask repo surface --json --robot`; runtime budget passed with `default_visible_count: 10`, `estimated_description_tokens: 3172`, and `violation_count: 0`; command handles passed with `handle_count: 98`; repo surface remained warning-only with `4620` diagnostic findings. | Shows `repo doctor` already behaves as the first truth and correctly distinguishes advisory diagnostic debt from blocking repair. |
 | `./bin/ask repo status --json --robot` | Succeeded; repo root readable and `skills_synced: true`. | Confirms baseline repo state is readable through `ask`. |
 | `./bin/ask skills explain he-spec --json --robot` | Succeeded; reports canonical source, generated handle, runtime visibility, validation command, and reachability proof command. | Shows `skills explain` already has the right shape for the golden path. |
 | `Infrastructure/bin/ask` command registration | Registers `repo doctor`, `repo closeout`, `repo surface`, `skills improve`, `skills explain`, and `skills prove`; no `repo onboard` or `repo next` action was found. | Prevents the spec from hallucinating currently implemented commands. |
 | `.harness/decisions/agent-skills-proof-taxonomy-and-lifecycle-adr.md` | Accepted ADR defines proof levels: `reachability`, `structural`, `quality`, `outcome`. | Gives `skills prove` semantics for acceptance. |
 | `./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot` | Succeeded with `status: resolved_with_fallback`, recommended `$autofix`, and also reported nested `goal_decision_status: intent_unresolved`. | Shows the command is useful but not yet cleanly deterministic enough to treat fallback routing as proof-quality routing. |
 | `./bin/ask skills prove he-spec --json --robot` | Succeeded with `proof_status: reachable_without_outcome_proof`, structural audit pass, outcome workout available but not run. | Confirms proof semantics are already honest and should be preserved, then strengthened with proof-level assertions. |
-| `./bin/ask repo closeout --changed --json --robot` | Failed with `sync_required` because unrelated canonical skill and generated projection files were already changed; emitted next command `./bin/ask skills sync --scope workspace --projection rooted --json --robot`. | Shows closeout already catches sync readiness, but also that eval fixtures must isolate spec-slice changes from unrelated worktree churn. |
+| `./bin/ask runtime budget --json --robot` | Succeeded with no violations and no unresolved scope collisions; baselined same-scope collisions are `agents-sdk`, `build-chatgpt-app`, and `chatgpt-app-submission`; retained informational advisory `ADVANCED_SKILL_VISIBILITY_HIGH` for advanced-mode skill count. | Confirms the prior curated runtime-budget collision is resolved/baselined and must not remain an active JSC-246 blocker. |
+| `./bin/ask repo closeout --changed --json --robot` | Failed with `sync_required`; reported `changed_file_count: 53`, runtime budget pass, generated projection churn, repo surface warning, and next command `./bin/ask skills sync --scope workspace --projection rooted --json --robot`. | Shows closeout catches sync readiness while preserving runtime-budget and diagnostic-debt truth; eval fixtures must isolate spec-slice changes from unrelated worktree churn. |
 
 ### Interpretation
 
@@ -212,7 +215,9 @@ loop makes task completion worse.
 
 ## Current-State Baseline
 
-Captured on `2026-05-08` from live commands.
+Captured on `2026-05-09` from live commands. The worktree already contained
+unrelated skill/projection changes before this spec refresh, so closeout
+evidence is useful as blocker evidence but not a clean JSC-246 fixture.
 
 `repo doctor` baseline:
 
@@ -220,8 +225,11 @@ Captured on `2026-05-08` from live commands.
 command: ./bin/ask repo doctor --json --robot
 status: success
 blocking: false
-agent_summary: "Usable with diagnostic debt: Repo surface has 4537 diagnostic finding(s)."
+agent_summary: "Usable with diagnostic debt: Repo surface has 4620 diagnostic finding(s)."
+blockers: []
 next_command: ./bin/ask repo surface --json --robot
+next_command_kind: diagnostic_advisory
+next_command_blocks_task: false
 signals:
   repo_status: pass
   projection_sync: pass
@@ -234,15 +242,24 @@ signals:
 Repo surface diagnostic debt from doctor:
 
 ```yaml
-total_paths: 7779
-blocking_findings: 4537
+total_paths: 7935
+blocking_findings: 4620
 counts_by_code:
-  tracked_historical_artifact: 4223
-  indexed_reference_surface: 1076
+  authored_source_surface: 72
+  duplicated_infrastructure_path: 6
+  fixture_or_template_surface: 15
+  generated_evidence_pattern: 11
+  harness_reference_surface: 13
+  indexed_reference_surface: 1091
   tracked_generated_work_area: 267
   ownership_decision_required: 39
-  duplicated_infrastructure_path: 6
-  unknown_surface: 2
+  plugin_fixture_surface: 879
+  plugin_metadata_source: 3
+  plugin_reference_surface: 43
+  policy_surface: 310
+  source_path: 878
+  tracked_historical_artifact: 4257
+  unknown_surface: 51
 ```
 
 Runtime and handle baseline:
@@ -253,14 +270,29 @@ runtime_budget:
   default_visible_count: 10
   estimated_description_tokens: 3172
   violation_count: 0
+  baselined_scope_collisions:
+    - agents-sdk
+    - build-chatgpt-app
+    - chatgpt-app-submission
+  unresolved_scope_collisions: []
+  advisory_codes:
+    - ADVANCED_SKILL_VISIBILITY_HIGH
 command_handles:
   status: pass
-  handle_count: 95
+  handle_count: 98
   violation_count: 0
 ```
 
 `repo status` baseline:
 
+```yaml
+command: ./bin/ask repo status --json --robot
+status: success
+repo_root: .
+repo_root_resolved: /Users/jamiecraik/dev/agent-skills
+is_git: true
+skills_synced: true
+```
 
 `skills explain he-spec` baseline:
 
@@ -273,7 +305,7 @@ runtime_projection: rooted
 runtime_visibility: latent
 validation:
   - ./bin/ask skills audit Plugins/harness-engineering/skills/he-spec --level strict --json --robot
-next_command: ./bin/ask skills proof he-spec --json --robot
+next_command: ./bin/ask skills prove he-spec --json --robot
 ```
 
 Command registration baseline:
@@ -305,7 +337,7 @@ why:
   - matched terms=pr,review
 goal_decision_status: intent_unresolved
 goal_decision.failure_class: INTENT_UNRESOLVED
-next_command: ./bin/ask skills proof autofix --json --robot
+next_command: ./bin/ask skills prove autofix --json --robot
 ```
 
 This is useful behavior, but not enough proof for deterministic routing. The
@@ -338,8 +370,14 @@ commit_readiness.ready: false
 commit_readiness.blockers:
   - sync_required
 next_command: ./bin/ask skills sync --scope workspace --projection rooted --json --robot
-changed_file_count: 57
-note: output included unrelated pre-existing he-brainstorm and he-eval-report changes plus generated .skillsets projections
+changed_file_count: 53
+sync.needed: true
+sync.commands:
+  - ./bin/ask skills sync --scope workspace --projection rooted --json --robot
+  - ./bin/ask skills handles --check --json --robot
+runtime_budget.status: pass
+surface_policy.status: warning
+note: output included unrelated pre-existing canonical skill, plugin-factory, skill-factory, harness reference, and generated .skillsets projection changes
 ```
 
 Closeout is already doing the right kind of pressure work. The next plan must
@@ -373,6 +411,19 @@ Required priority order for this slice:
 5. Command-handle validation failure.
 6. Repo surface diagnostic debt.
 7. Healthy repo status command.
+
+Tie-breaker rule:
+
+- If multiple signals exist inside the same priority class, the command must
+  choose one deterministic primary `next_command` by stable signal id order and
+  put the rest in `diagnostic_debt`, `blockers`, or equivalent secondary
+  arrays.
+- Blocking signals must outrank advisory signals even when an advisory has a
+  larger count.
+- Advisory repo-surface fields named `blocking_findings` are repo-surface
+  classification counts, not global closeout blockers unless `repo doctor`
+  reports `blocking: true` or `commit_readiness.blockers` includes a matching
+  blocker id.
 
 Diagnostic debt continuation rule:
 
@@ -517,6 +568,17 @@ eval, such as:
 - misroute or ambiguity count from `skills improve` fixtures;
 - whether the agent followed command-emitted `next_command` without manual repo
   browsing.
+
+Minimum fresh-agent metric thresholds:
+
+- basic navigation opens `0` docs before running the first command;
+- first command is `./bin/ask repo doctor --json --robot`;
+- command-emitted `next_command` is followed or explicitly recorded as advisory;
+- misroute count is `0` for the admitted golden-path command family;
+- closure reaches either ready, validation-ready, or explicitly blocked state in
+  no more than `5` command decisions after `repo doctor`;
+- any threshold miss is a failed eval unless the eval records a repo-state
+  blocker with exact command evidence.
 
 Minimum docs to inspect during planning:
 
@@ -775,6 +837,66 @@ Minimum evidence:
 - Fresh-agent eval transcript or deterministic script starting from
   `repo doctor`.
 
+## Fixture And Test Strategy
+
+The plan must prove behavior at the smallest stable layer before changing
+command prose.
+
+Required fixture classes:
+
+- `repo doctor` priority fixtures: unreadable repo, projection sync required,
+  catalog/runtime blocker, command-handle blocker, repo surface advisory, and
+  healthy usable state. If a fixture cannot be constructed safely, the plan must
+  record the blocked fixture and cover the branch with helper-level tests.
+- `skills improve` routing fixtures: clean resolved route, fallback route with
+  confidence, ambiguous route, unreachable route, and unsupported goal. Exact
+  handle assertions are allowed only when backed by `skills resolve` evidence.
+- `skills explain` surface fixtures: one HE skill, one non-HE local skill or
+  plugin skill, and one missing handle. Outputs must expose canonical source,
+  generated handle when present, runtime projection, visibility, validation,
+  limitations, and next proof command.
+- `skills prove` taxonomy fixtures: reachability-only, structural pass,
+  outcome-available-not-run, and unavailable proof. The fixture must map to the
+  accepted proof taxonomy without inventing a new lifecycle state.
+- `repo closeout --changed` fixtures: generated sync required, validation-ready
+  changed file set, and blocker case. Live dirty worktree evidence is advisory;
+  closure requires isolated or scoped proof.
+- Documentation compression fixture: first-contact docs before/after line count,
+  command count, docs-opened count in fresh-agent eval, and removed/demoted
+  competing first commands.
+
+## Technical Review Focus
+
+Before `he-work`, the plan or implementation review must explicitly check:
+
+- No runtime-budget blocker remains in JSC-246 scope after the current passing
+  `./bin/ask runtime budget --json --robot` evidence.
+- Non-blocking repo-surface diagnostic debt is recorded without expanding the
+  slice into broad repo cleanup.
+- `sync_required` remains a closeout readiness blocker, not a reason to mutate
+  unrelated canonical skill work owned by another slice.
+- New command names, aliases, proof levels, or lifecycle states are rejected
+  unless the ablation proof shows existing command output cannot carry the
+  behavior.
+- Documentation changes are subtractive or compressive; additive prose alone
+  cannot satisfy acceptance.
+- Fresh-agent proof is measured. A subjective review that the docs "look
+  clearer" is insufficient.
+- Dirty worktree evidence is not used as clean success evidence.
+
+## Plan Readiness Gate
+
+`he-plan` is allowed to proceed only if it keeps this execution shape:
+
+1. Characterize live behavior and helper seams.
+2. Add priority/routing/proof/closeout fixtures around current behavior.
+3. Make minimal command-output changes only where fixtures prove ambiguity.
+4. Compress first-contact docs after behavior is stable.
+5. Run fresh-agent eval and closeout proof.
+
+The plan is not ready if it starts with docs rewrites, broad repo-surface
+cleanup, a new top-level command, a new proof schema, or Linear issue expansion.
+
 ## Acceptance Matrix
 
 | ID | Acceptance Criteria | Verification |
@@ -797,6 +919,8 @@ Minimum evidence:
 | SA16 | Neighboring Linear issues `JSC-230`, `JSC-167`, and `JSC-169` are not implemented in this slice unless a later delta gate admits them. | Plan scope check and final diff review. |
 | SA17 | Product language frames Agent Skills Kit as an agent capability control plane, but does not add branding prose without executable command support. | README/docs diff plus command-evidence references. |
 | SA18 | Closure evidence records exact pass/fail/blocked commands and does not close the parent issue without the eval artifact. | `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` exists and references exact commands. |
+| SA19 | The implementation keeps prior runtime-budget collision debt out of active JSC-246 blocker scope unless the live budget command regresses. | `./bin/ask runtime budget --json --robot` returns pass, or the plan records the new regression with exact blocker evidence. |
+| SA20 | The plan includes the technical review focus items above and rejects docs-only, cleanup-only, or new-command-first execution. | `he-plan` technical review artifact or final review notes reference this section and list pass/fail findings. |
 
 ## Linear Acceptance Traceability
 
@@ -807,7 +931,7 @@ Minimum evidence:
 | `JSC-246` | SA7, SA8, SA9, SA10 | Capability route, fixture grounding, explanation, and proof loop. |
 | `JSC-246` | SA11 | Closeout as completion-readiness gate. |
 | `JSC-246` | SA12, SA13, SA14, SA15 | Agent-native compression and fresh-agent proof. |
-| `JSC-246` | SA16, SA17, SA18 | Scope control, product framing, and eval-backed closure. |
+| `JSC-246` | SA16, SA17, SA18, SA19, SA20 | Scope control, product framing, eval-backed closure, runtime-budget freshness, and technical-review readiness. |
 
 Legacy Linear issue acceptance from `JSC-246` maps as follows:
 
@@ -877,10 +1001,14 @@ Use this artifact as the source contract for `$he-plan`.
 Required planning constraints:
 
 - Start with live behavior characterization.
+- Treat current runtime-budget collision debt as resolved/baselined unless live
+  command evidence regresses.
 - Keep `repo doctor` first.
 - Preserve `repo surface` as diagnostic lane, not first-contact replacement.
 - Treat `skills improve`, `skills explain`, `skills prove`, and
   `repo closeout --changed` as the loop.
+- Keep `sync_required` as closeout readiness evidence and avoid absorbing
+  unrelated projection churn into JSC-246.
 - Sequence subtractive and compression work before additive docs or aliases.
 - Require fresh-agent eval and ablation proof before closure.
 - Keep the active set small: one parent issue, no speculative sub-issue
@@ -902,6 +1030,27 @@ finding:
   prior_slice: JSC-284
   prior_slice_status: complete
   next_stage: he-plan
+  live_blockers:
+    - id: sync_required
+      next_commands:
+        - ./bin/ask skills sync --scope workspace --projection rooted --json --robot
+        - ./bin/ask skills handles --check --json --robot
+  resolved_live_blockers:
+    - id: runtime_budget
+      command: ./bin/ask runtime budget --json --robot
+      status: pass
+      unresolved_scope_collisions: []
+      baselined_scope_collisions:
+        - agents-sdk
+        - build-chatgpt-app
+        - chatgpt-app-submission
+      advisory_codes:
+        - ADVANCED_SKILL_VISIBILITY_HIGH
+  diagnostic_debt:
+    - id: repo_surface
+      next_command: ./bin/ask repo surface --json --robot
+      blocking: false
+      finding_count: 4620
   golden_path:
     - ./bin/ask repo doctor --json --robot
     - ./bin/ask skills improve "<goal>" --json --robot

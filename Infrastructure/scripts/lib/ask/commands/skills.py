@@ -2199,6 +2199,8 @@ def _create_symlink(source: Path, target: Path, dry_run: bool = False, *, replac
     Returns:
         action (str): Human-readable summary, e.g. "Created symlink: <target> -> <source>", "Updated symlink: <target> -> <source>", or "Skipped existing non-symlink path: <target>".
     """
+    if target.is_symlink() and target.readlink() == source:
+        return f"Symlink already current: {target} -> {source}"
     if target.exists() and not target.is_symlink() and not replace_existing:
         return f"Skipped existing non-symlink path: {target}"
     action = "Created" if not target.exists() else "Updated"

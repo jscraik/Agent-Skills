@@ -31,6 +31,12 @@ Route elsewhere:
 
 Return: `schema_version`, `installed_plugin`, `install_path`, `validation`, `artifacts`, optional `blocked_by`.
 
+## Execution Boundaries
+
+Classify install work as an external or repo write before acting. Use the OpenAI-style plugin design contract to separate preview/quarantine validation from install, projection refresh, rollback, and marketplace or user-level mutation.
+
+Plugin Installer owns provenance checks, quarantine validation, install evidence, visibility checks, and rollback notes. It does not own plugin scaffolding, plugin hardening, marketplace policy invention, or source-of-truth rewrites outside the requested install destination.
+
 ## Workflow
 
 Use the staged install protocol in `references/workflow.md`.
@@ -39,6 +45,7 @@ Required operational context is never removed; detailed guidance is relocated to
 
 Read when:
 - You need full install, provenance, and rollback flow details: [references/workflow.md](./references/workflow.md).
+- You need confirmation boundaries for write, destructive, open-world, or completion-gating actions: [OpenAI-style plugin design contract](../../../../../Infrastructure/references/openai-style-plugin-design-contract.md).
 
 ## Validation
 
@@ -60,10 +67,28 @@ Fail fast: stop at first failed gate and report blocker text.
 - do not skip trust policy checks by default
 - allow network access only for explicit allowlisted source hosts: `https://github.com`, `https://api.github.com`, `https://raw.githubusercontent.com`
 
+## Failure Mode
+
+- Stop when the source is unpinned, provenance is unclear, trust policy is missing, destination ownership is ambiguous, validation fails, or rollback cannot be described.
+- Report the exact blocker and the smallest safe repair instead of partially installing, refreshing projections, or claiming visibility.
+
+## Gotchas
+
+- Quarantine validation is read/prep work; install, projection refresh, rollback, and user-level marketplace changes are stronger side-effect classes.
+- A GitHub URL without a pinned ref is not provenance.
+- Visibility recovery should not rewrite canonical plugin source unless the source path is explicitly part of the request.
+
+## Examples
+
+- "Install this validated plugin from a pinned GitHub ref and prove it is visible."
+- "Quarantine this plugin package first, then tell me whether it is safe to install."
+- "Recover plugin visibility without changing the canonical plugin source."
+
 ## References
 
 - `references/workflow.md`
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/task-profile.json`
+- `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
 - `assets/`

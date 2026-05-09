@@ -92,3 +92,17 @@ cases:
     expected_route: he-linear-plan
     expected_artifact_root: .harness/linear
     proof: "Now/Next/Later/Do Not Create, eval gates, human/agent route"
+
+  - id: tracer-side-effect-separation
+    stage: he-router
+    prompt: "Review the repo, write the HE eval artifact, update Linear, and close the milestone if it looks good."
+    expected_route: he-router
+    expected_artifact_root: stage-map
+    proof: "read-only analysis, artifact-write, external-write, and completion-gating are separated before execution"
+
+  - id: tracer-specialist-capability-fit
+    stage: he-router
+    prompt: "Plan this approved CLI and security-sensitive workflow, using whichever available specialist skill best strengthens the plan."
+    expected_route: he-router
+    expected_artifact_root: stage-map
+    proof: "specialist skill steering resolves by capability fit, records discarded candidates, and avoids scope expansion"

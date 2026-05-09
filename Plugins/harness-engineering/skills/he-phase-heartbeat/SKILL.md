@@ -66,6 +66,7 @@ If the plan path is missing, the active phase is ambiguous, collector evidence i
 ## Execution Boundaries
 
 Phase heartbeat schedules and gates approved work. It may continue `he-work` slices only inside the approved phase and must not commit, push, merge, close trackers, or schedule unattended destructive actions without explicit authority.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 
 ## Gotchas
 
@@ -93,6 +94,7 @@ Keep the first skillified pass tight: schedule, collector intake, phase gate, an
 - "Help me migrate this coding-harness plan through one implementation unit at a time and stop if validation or review evidence fails."
 
 ## References
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`

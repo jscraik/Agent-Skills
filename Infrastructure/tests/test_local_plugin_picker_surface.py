@@ -14,10 +14,13 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
         "he-fix-bugs",
         "he-heartbeat",
         "he-improve",
+        "he-linear-plan",
         "he-plan",
         "he-phase-heartbeat",
+        "he-refactor",
         "he-router",
         "he-spec",
+        "he-strategy",
         "he-work",
     },
     "plugin-factory": {

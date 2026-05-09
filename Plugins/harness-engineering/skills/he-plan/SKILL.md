@@ -28,6 +28,7 @@ Fail fast: stop at the first failed gate and do not proceed. Check dependencies,
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
 ## Execution Boundaries
 Planning is non-mutating except for approved durable plan artifacts. Do not implement, commit, create Linear objects, or advance stages unless the user already authorized continuation.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 ## Gotchas
 - A chat `update_plan` is not the durable HE plan artifact.
 - Multiple valid next stages require interactive steering before execution.
@@ -51,6 +52,7 @@ Reference `assets/` only for skill packaging and browseability; durable plans an
 - Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
 - Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
 - Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Document review tiers: `Plugins/harness-engineering/references/document-review-finding-tiers.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Linear tracker gate: `Plugins/harness-engineering/references/linear-tracker-gate.md`

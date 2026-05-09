@@ -69,6 +69,7 @@ Do not remove important context for budget trimming; move deep context to refere
 Generate refactor programs only. Do not implement migrations, create Linear
 objects, update ADRs, or mutate code unless the user explicitly authorizes the
 next stage.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 
 ## Failure Mode
 
@@ -119,6 +120,7 @@ at the first failed gate and do not proceed.
 - Artifact classification: `../../references/artifact-classification-and-traceability.md`
 - Linear tracker gate: `../../references/linear-tracker-gate.md`
 - Interactive steering: `../../references/interactive-steering-contract.md`
+- OpenAI-style plugin design: `../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `../../references/deferred-context-index.md`
 - Agent-native compression: `../../references/agent-native-compression-contract.md`
 - Pragmatic Programmer review: `../../references/pragmatic-programmer-review-contract.md`

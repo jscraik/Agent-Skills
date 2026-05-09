@@ -72,6 +72,7 @@ context to references.
 Generate ready-to-create Linear plans only. Do not create initiatives, projects,
 milestones, issues, dependencies, labels, or status updates without explicit
 post-plan approval.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
 
 ## Failure Mode
 
@@ -124,6 +125,7 @@ at the first failed gate and do not proceed.
 - Artifact routing: `../../references/artifact-routing-contract.md`
 - Artifact classification: `../../references/artifact-classification-and-traceability.md`
 - Interactive steering: `../../references/interactive-steering-contract.md`
+- OpenAI-style plugin design: `../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `../../references/deferred-context-index.md`
 - Pragmatic Programmer review: `../../references/pragmatic-programmer-review-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`
