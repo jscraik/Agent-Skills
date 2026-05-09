@@ -599,15 +599,18 @@ No other review, strategy, triage, or Linear issue is admitted into this slice.
 
 ## Linear Delta Capture
 
-Last synced: `2026-05-08` after live Linear refresh.
+Last synced: `2026-05-08 23:40 BST` after live Linear refresh.
 
-Source: Live Linear project query for `agent-skills`, canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`, milestone `Command surface and ask reliability`, completed parent `JSC-284`, completed child issues `JSC-285`, `JSC-286`, and `JSC-287`, and unresolved command-surface candidates in the same project.
+Source: Live Linear project query for `agent-skills`, canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`, issue-level milestone `Command surface and ask reliability`, completed parent `JSC-284`, completed child issues `JSC-285`, `JSC-286`, and `JSC-287`, unresolved command-surface candidates in the same project, and milestone-list lookup for the project.
+
+Tracker hygiene note: issue-level Linear reads still attach `JSC-246`, `JSC-284`, `JSC-285`, `JSC-286`, `JSC-287`, and the `JSC-230` child topology to milestone ID `1c091ac7-b2ef-4321-ab05-7779841aaf2a` named `Command surface and ask reliability`. The project milestone list endpoint now exposes only `Ask Control Plane Decomposition` (`f83822cf-c826-49c1-b039-57e96c4eee49`, progress `0`). Treat this as a non-blocking tracker-surface discrepancy for the next spec lane: do not mutate Linear or migrate issues without explicit approval, and continue selecting from the issue-level graph because it is the surface carrying the actual parent issues.
 
 Label status: `resolved_with_existing_labels`; no Linear label mutation is required for the next slice.
 
 | Issue | Title | Status | Priority | Classification | Reason |
 |---|---|---|---:|---|---|
-| Milestone | `Command surface and ask reliability` | Active; progress `37.5%` | n/a | already_covered | Correct milestone exists in the canonical project and remains the right container for the next command-surface slice. |
+| Milestone | `Command surface and ask reliability` | Active at issue level; hidden from milestone-list lookup | n/a | already_covered | Issue-level reads still show this as the parent container for `JSC-246`, `JSC-284`, `JSC-285`, `JSC-286`, `JSC-287`, and `JSC-230` children. Use as the tracker source for this delta until explicitly cleaned up. |
+| Milestone | `Ask Control Plane Decomposition` | Listed milestone; progress `0%` | n/a | needs_human_triage | Project milestone list exposes this newer milestone, but no live issue read in this delta returned it as the issue-level milestone. Do not route the next spec here without an approved Linear hygiene mutation. |
 | JSC-284 | `[agent-skills] Decompose skills command module into bounded services` | Done | 1 | already_covered | Prior approved parent is complete; keep as evidence, not active scope. |
 | JSC-285 | `[agent-skills] Map skills command responsibilities and output contracts` | Done | 1 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |
 | JSC-286 | `[agent-skills] Extract plugin cache service behind existing behavior` | Done | 2 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |
@@ -631,4 +634,4 @@ Label status: `resolved_with_existing_labels`; no Linear label mutation is requi
 
 | Order | Slice | Linear Issue | Route | Depends On | Notes |
 |---:|---|---|---|---|---|
-| 1 | Agent First Golden Path spec | JSC-246 | Agent-assisted; human-review required for public command contract changes | `JSC-284` closure evidence; live Linear delta refresh | This is the single admitted next slice for `$he-spec`. Scope it to repo surface contract and golden-path control-plane behavior, not all pending command-surface tickets. |
+| 1 | Agent First Golden Path spec | JSC-246 | Agent-assisted; human-review required for public command contract changes | `JSC-284` closure evidence; live Linear delta refresh complete; non-blocking milestone-list discrepancy recorded | This is the single admitted next slice for `$he-spec`. Scope it to repo surface contract and golden-path control-plane behavior, not all pending command-surface tickets. |

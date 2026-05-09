@@ -1,0 +1,1 @@
+Which mode should I use for the harness request: brainstorm, spec, or plan?

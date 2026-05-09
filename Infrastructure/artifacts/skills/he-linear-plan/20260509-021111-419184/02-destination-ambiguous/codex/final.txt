@@ -1,0 +1,6 @@
+Which destination should I use for this work?
+
+1. `repo project`
+2. `Portfolio Ops`
+
+If you want, I can proceed with whichever you choose and avoid asking again for this thread.

@@ -1,0 +1,10 @@
+I found the typo in [`Docs/agents/02-tooling-policy.md`](/Users/jamiecraik/dev/agent-skills/Docs/agents/02-tooling-policy.md), but I couldn’t write the patch because this workspace is currently read-only.
+
+The one-line fix is:
+
+```diff
+- Confirm `pwd` is `/Users/jamiecraik/dev/Agent-Skills` before edits.
++ Confirm `pwd` is `/Users/jamiecraik/dev/agent-skills` before edits.
+```
+
+If you want, I can keep scanning for another typo candidate and hand you the next exact replacement.

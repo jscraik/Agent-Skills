@@ -1,0 +1,14 @@
+I can make that change, but this session is blocking every repo command, so I can’t inspect or edit the tree yet.
+
+The likely places for this policy are:
+
+- [Docs/agents/04-validation.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/04-validation.md)
+- [Docs/agents/16-agent-operating-contract.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/16-agent-operating-contract.md)
+
+If you point me at the exact file or paste the relevant section, I’ll update it so the rule is:
+
+- when heartbeat evidence is stale, stop repeating the same phase ritual
+- send a Slack handoff/update instead
+- do not keep cycling the cadence without fresh evidence
+
+If you want, send me the target path and I’ll apply the edit directly.

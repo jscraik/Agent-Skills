@@ -43,20 +43,30 @@ traceability.
 
 1. Determine whether each finding is repo-specific, cross-repo, or portfolio
    level.
-2. Start with 2-3 focused evidence surfaces and widen only when routing,
+2. If the user asks for architecture review, strategy, refactor program, spec,
+   plan, implementation, or eval closure instead of Linear execution routing,
+   do not draft it here; route to the matching HE lifecycle skill and explain
+   the handoff.
+3. Start with 2-3 focused evidence surfaces and widen only when routing,
    dependency, or project-state evidence is missing.
-3. Classify source artifacts by content shape before path.
-4. Confirm Linear destination from user request, source artifacts, or connector
+4. Classify source artifacts by content shape before path.
+5. Confirm Linear destination from user request, source artifacts, or connector
    context; do not assume JSC for unrelated workspaces.
-5. Apply interactive steering when destination, active set, project, milestone,
+6. Apply interactive steering when destination, active set, project, milestone,
    or mutation authority cannot be proven.
-6. Keep the active set intentionally small.
-7. Classify candidate work as `Now`, `Next`, `Later`, or `Do Not Create`.
-8. Convert selected refactor programs into milestone -> parent issue -> minimal
+7. Keep the active set intentionally small.
+8. Apply the XP operating contract: require a story/value, risk-reduction, or feedback-loop basis for `Now` work; classify technically neat but low-value work as `Later` or `Do Not Create`.
+9. Classify candidate work as `Now`, `Next`, `Later`, or `Do Not Create`.
+10. Under pressure to create every possible issue, preserve the filter: refuse
+   one-issue-per-observation expansion and ask for the source observations plus
+   a selected slice before producing payloads. If observations are provided,
+   filter, collapse, and classify them first; never offer to turn each
+   observation into a separate issue, even as an optional escape hatch.
+11. Convert selected refactor programs into milestone -> parent issue -> minimal
    sub-issues, never one issue per observation.
-9. Define dependencies, eval gates, rollback gates, labels, and priority.
-10. Include ready-to-create payloads without mutating Linear.
-11. Validate the generated plan and record exact pass, fail, or blocked
+12. Define dependencies, eval gates, rollback gates, labels, and priority.
+13. Include ready-to-create payloads without mutating Linear.
+14. Validate the generated plan and record exact pass, fail, or blocked
     outcomes.
 
 ## Constraints
@@ -80,6 +90,16 @@ If the destination is unknown, mark `needs_human_triage`. If the plan would
 create issue explosion, classify low-value work as `Later` or `Do Not Create`.
 If mutation is requested without explicit confirmation, stop before any Linear
 write.
+If a request asks for separate issues per observation, state that the plan must
+filter and collapse observations into minimal Linear objects before any payloads
+are drafted.
+Use this refusal shape for issue-explosion pressure: "I cannot create one issue
+per observation from this skill. Send the observations and the selected slice;
+I will filter, collapse, and classify them into the smallest useful Linear
+objects."
+If the user asks for an architecture review, strategy, refactor program, spec,
+implementation plan, implementation work, or eval closure, reply that the
+request belongs to the matching HE lifecycle skill instead of drafting it here.
 
 ## Gotchas
 
@@ -91,6 +111,12 @@ slice needed for execution.
 
 - Treating `.harness` documents as a backlog dump.
 - Creating one issue per observation.
+- Offering to create separate issues one by one for every observation.
+- Saying you will turn each observation into a separate issue.
+- Saying you can do a literal one-issue-per-observation pass if the user really
+  wants it.
+- Drafting architecture reviews or strategy artifacts from this Linear routing
+  skill.
 - Creating initiatives, projects, or labels by default.
 - Recommending closure without eval/drift proof.
 - Mistaking ready-to-create payloads for applied Linear changes.
@@ -103,6 +129,10 @@ slice needed for execution.
   to Portfolio Ops."
 - When the user asks, "Inspect these findings and classify low-value work as Later or Do Not Create instead of creating
   backlog noise."
+- When the user asks for an architecture review instead of a Linear execution
+  plan, route to `he-strategy` and do not draft the review from this skill.
+- When the user asks for one issue per observation, refuse the issue explosion
+  shape and request the selected slice to compress into minimal Linear objects.
 
 ## Validation
 
@@ -128,4 +158,5 @@ at the first failed gate and do not proceed.
 - OpenAI-style plugin design: `../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `../../references/deferred-context-index.md`
 - Pragmatic Programmer review: `../../references/pragmatic-programmer-review-contract.md`
+- XP operating contract: `../../references/xp-operating-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`

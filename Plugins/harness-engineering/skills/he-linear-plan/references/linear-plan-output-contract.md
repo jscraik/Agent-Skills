@@ -25,6 +25,7 @@ Linear.
 - Dependency Map
 - Eval Gate Map
 - Human vs Agent Execution Map
+- Story / Value Basis
 - Recommended Labels
 - Priority Mapping
 - Project Reactivation Recommendation
@@ -58,6 +59,9 @@ Use this template for proposed issues. Do not create them during the plan.
   changes without explicit user confirmation after plan review.
 - If destination cannot be proven, mark `needs_human_triage` and ask once when
   interactive steering is available.
+- User pressure to create one issue per observation must preserve the filter:
+  request the source observations and selected slice, then collapse work into
+  the smallest useful milestone, parent issue, or `Do Not Create` classification.
 
 ## Priority Rules
 
@@ -67,3 +71,10 @@ Use this template for proposed issues. Do not create them during the plan.
 - `3` Normal: useful work with clear value but no immediate blocker.
 - `4` Low: cleanup or non-blocking documentation support.
 - `0` No priority: backlog placeholder only.
+
+## XP Value Filter
+
+Every proposed `Now` item must state its story or value basis, expected feedback
+signal, and risk-reduction reason. Work that is technically tidy but cannot
+name a user/operator value, feedback loop, or risk reduction must be classified
+as `Later` or `Do Not Create`.

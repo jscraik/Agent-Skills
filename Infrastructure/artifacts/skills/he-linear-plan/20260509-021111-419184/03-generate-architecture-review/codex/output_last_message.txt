@@ -1,0 +1,296 @@
+Yes. A Linear execution plan is about sequencing work. An architecture review should answer a different set of questions: what problem we are solving, what design we are choosing, why that design is the right one, what it depends on, what can go wrong, and how we will roll it out safely.
+
+Here’s a full architecture review document format you can use instead of a Linear plan.
+
+---
+
+# Architecture Review: `[Project / Feature Name]`
+
+**Status:** Draft
+**Decision:** `[Proposed / Approved / Rejected / Needs Revision]`
+**Owner:** `[Name]`
+**Date:** `[YYYY-MM-DD]`
+**Reviewers:** `[Names / Teams]`
+
+## 1. Executive Summary
+
+This proposal introduces `[feature/system change]` to address `[problem or opportunity]`.
+
+The recommended approach is `[short architecture choice]` because it offers the best balance of `[scalability / complexity / maintainability / safety / cost / delivery speed]`. The main tradeoff is `[primary tradeoff]`, which we mitigate by `[mitigation]`.
+
+### Recommendation
+Approve the design with the following constraints:
+- `[constraint 1]`
+- `[constraint 2]`
+- `[constraint 3]`
+
+## 2. Background
+
+### Current State
+Today, the system works like this:
+- `[describe current architecture or workflow]`
+- `[describe how data flows today]`
+- `[describe current limitations]`
+
+### Problem Statement
+We need to solve:
+- `[user/business/technical problem]`
+- `[why the current approach is insufficient]`
+- `[what happens if we do nothing]`
+
+### Goals
+This architecture should:
+- `[goal 1]`
+- `[goal 2]`
+- `[goal 3]`
+
+### Non-Goals
+This architecture explicitly does not:
+- `[non-goal 1]`
+- `[non-goal 2]`
+- `[non-goal 3]`
+
+## 3. Requirements
+
+### Functional Requirements
+- `[requirement 1]`
+- `[requirement 2]`
+- `[requirement 3]`
+
+### Non-Functional Requirements
+- **Reliability:** `[expected uptime / failure tolerance]`
+- **Performance:** `[latency / throughput targets]`
+- **Scalability:** `[expected growth or load profile]`
+- **Security:** `[authn/authz/data protection needs]`
+- **Maintainability:** `[operational or codebase constraints]`
+
+### Constraints
+- `[legacy dependency / platform limit / contract requirement]`
+- `[timeline / staffing / migration constraint]`
+- `[compatibility constraint]`
+
+## 4. Proposed Architecture
+
+### Overview
+The proposed design is:
+
+`[one-paragraph description of the architecture]`
+
+### Components
+The system consists of:
+- **`[Component A]`**: `[responsibility]`
+- **`[Component B]`**: `[responsibility]`
+- **`[Component C]`**: `[responsibility]`
+
+### Data Flow
+1. `[step 1 in request/event flow]`
+2. `[step 2]`
+3. `[step 3]`
+4. `[final outcome]`
+
+### Control Flow
+- `[who initiates the action]`
+- `[where validation happens]`
+- `[where persistence happens]`
+- `[how errors propagate]`
+
+### Interfaces
+- **Input:** `[API/event/job/message]`
+- **Output:** `[response/event/state change]`
+- **Dependencies:** `[upstream/downstream systems]`
+
+## 5. Design Rationale
+
+### Why This Design
+We are choosing this design because it:
+- `[reason 1]`
+- `[reason 2]`
+- `[reason 3]`
+
+### Why Not Simpler
+A simpler approach, such as `[alternative]`, was considered but rejected because:
+- `[it would not scale]`
+- `[it would be too coupled]`
+- `[it would create hidden operational risk]`
+
+### Why Not More Complex
+A more elaborate architecture, such as `[alternative]`, was rejected because:
+- `[too much abstraction]`
+- `[premature optimization]`
+- `[operational overhead]`
+
+## 6. Alternatives Considered
+
+### Option A: `[Alternative Name]`
+**Description:** `[what it is]`
+**Pros:**
+- `[pro 1]`
+- `[pro 2]`
+
+**Cons:**
+- `[con 1]`
+- `[con 2]`
+
+**Decision:** `[reject / accept / defer]`
+
+### Option B: `[Alternative Name]`
+**Description:** `[what it is]`
+**Pros:**
+- `[pro 1]`
+
+**Cons:**
+- `[con 1]`
+
+**Decision:** `[reject / accept / defer]`
+
+### Option C: `[Alternative Name]`
+**Description:** `[what it is]`
+**Pros:**
+- `[pro 1]`
+
+**Cons:**
+- `[con 1]`
+
+**Decision:** `[reject / accept / defer]`
+
+## 7. Tradeoffs
+
+This design intentionally trades off:
+
+- **Simplicity for flexibility:** `[explain]`
+- **Speed of implementation for long-term maintainability:** `[explain]`
+- **Immediate consistency for eventual consistency:** `[explain, if applicable]`
+- **Centralization for autonomy:** `[explain, if applicable]`
+
+The most important tradeoff is `[primary tradeoff]`. We accept it because `[reason]`, and we reduce the downside by `[mitigation]`.
+
+## 8. Risks and Mitigations
+
+| Risk | Impact | Likelihood | Mitigation |
+|---|---:|---:|---|
+| `[risk 1]` | `[high/med/low]` | `[high/med/low]` | `[mitigation]` |
+| `[risk 2]` | `[high/med/low]` | `[high/med/low]` | `[mitigation]` |
+| `[risk 3]` | `[high/med/low]` | `[high/med/low]` | `[mitigation]` |
+
+### Key Risks
+- `[risk statement with concrete failure mode]`
+- `[risk statement with concrete failure mode]`
+
+### Failure Modes
+If this architecture fails, it is most likely to fail by:
+- `[failure mode 1]`
+- `[failure mode 2]`
+- `[failure mode 3]`
+
+## 9. Security and Privacy Considerations
+
+### Authentication and Authorization
+- `[who can access the system]`
+- `[what permissions are required]`
+- `[where authorization is enforced]`
+
+### Data Handling
+- `[what data is stored]`
+- `[what data is sensitive]`
+- `[retention / deletion concerns]`
+
+### Abuse and Misuse Cases
+- `[abuse case 1]`
+- `[abuse case 2]`
+
+### Security Controls
+- `[input validation]`
+- `[rate limiting]`
+- `[audit logging]`
+- `[encryption / secrets handling]`
+
+## 10. Reliability and Operations
+
+### Runtime Behavior
+- `[how the system behaves under normal load]`
+- `[how it behaves under partial failure]`
+- `[how it recovers]`
+
+### Observability
+We should monitor:
+- `[metric 1]`
+- `[metric 2]`
+- `[metric 3]`
+
+We should alert on:
+- `[alert condition 1]`
+- `[alert condition 2]`
+
+### Rollback / Recovery
+- `[how to disable or revert the change]`
+- `[what state needs to be cleaned up]`
+- `[how to verify recovery]`
+
+## 11. Migration Plan
+
+If this change affects existing data, contracts, or behavior:
+- `[migration step 1]`
+- `[migration step 2]`
+- `[migration step 3]`
+
+### Compatibility Strategy
+- `[backward compatibility approach]`
+- `[forward compatibility approach]`
+- `[deprecation timeline]`
+
+### Cutover Strategy
+- `[big bang / phased rollout / dual-write / shadow mode]`
+- `[how traffic shifts]`
+- `[how to validate before full rollout]`
+
+## 12. Testing Strategy
+
+We should validate this architecture with:
+- **Unit tests:** `[what to cover]`
+- **Integration tests:** `[what boundaries to verify]`
+- **Contract tests:** `[what APIs/events/contracts matter]`
+- **Load tests:** `[what scaling behavior to validate]`
+- **Failure tests:** `[what failures to simulate]`
+
+### Test Scenarios
+- `[happy path]`
+- `[expected failure path]`
+- `[edge case]`
+- `[rollback scenario]`
+
+## 13. Open Questions
+
+These items need final confirmation:
+- `[question 1]`
+- `[question 2]`
+- `[question 3]`
+
+## 14. Decision Criteria
+
+This design should be approved if:
+- `[criterion 1]`
+- `[criterion 2]`
+- `[criterion 3]`
+
+This design should be revised or rejected if:
+- `[criterion 1]`
+- `[criterion 2]`
+- `[criterion 3]`
+
+## 15. Appendix
+
+### Glossary
+- `[term]`: `[definition]`
+
+### References
+- `[link or doc reference 1]`
+- `[link or doc reference 2]`
+- `[link or doc reference 3]`
+
+---
+
+If you want, I can also turn this into one of these more tailored versions:
+
+1. A **repo-ready architecture review doc** written for your specific project.
+2. A **PR review style architecture memo** with decision sections and risks.
+3. A **template aligned to your repo’s docs conventions** if you paste the current Linear execution plan text.

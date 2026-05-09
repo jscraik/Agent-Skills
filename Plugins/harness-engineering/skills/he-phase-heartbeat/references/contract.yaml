@@ -21,7 +21,7 @@ outputs:
   - heartbeat id, cadence, destination, target, and stop condition
   - collector bundle path and evidence artifacts used
   - active phase, changed files, review gates, validation, and commit status
-  - blocker, smallest recovery step, blackboard_delta, and next wake-up
+  - blocker, smallest recovery step, slack_policy, blackboard_delta, and next wake-up
 
 non_goals:
   - creating implementation plans from vague requirements
@@ -33,11 +33,12 @@ risks:
   - duplicate heartbeats; mitigate by searching existing automations before creating one
   - broad commits; mitigate by staging only the completed phase diff
   - review gate theater; mitigate by making he-fix-bugs conditional on failing evidence
+  - unsustainable cadence; mitigate by setting slack_policy and stopping when evidence is stale or gates are blocked
 
 observability: >
   Record target, cadence, heartbeat id, collector bundle path, active phase,
   validation commands and outcomes, review gate results, commit status, blocker,
-  and stop rule status.
+  slack_policy, and stop rule status.
 
 rollback_procedure: >
   Pause or delete the heartbeat, preserve the last bundle path and phase evidence,

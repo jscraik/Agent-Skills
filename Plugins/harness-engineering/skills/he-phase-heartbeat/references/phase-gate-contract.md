@@ -1,6 +1,8 @@
 # Phase Gate Contract
 
 Use this contract when a Harness Engineering heartbeat is keeping `he-work` alive across plan phases.
+Do not substitute `he-heartbeat` for stale evidence inside an approved phase
+loop; stale phase evidence is a stop condition for `he-phase-heartbeat`.
 
 ## Evidence Intake
 
@@ -39,7 +41,8 @@ For each phase:
 4. Run `he-fix-bugs` only when failing evidence exists.
 5. Run `he-code-review` for readiness and traceability.
 6. Record exact validation command outcomes.
-7. Commit only the completed phase diff, or report the blocker.
+7. Set `slack_policy` to `none`, `bounded`, or `blocked`.
+8. Commit only the completed phase diff, or report the blocker.
 
 ## Stop Rules
 
@@ -49,6 +52,8 @@ Stop the heartbeat when:
 - the final phase gate passes and commit status is known,
 - the plan path disappears or becomes ambiguous,
 - the same deterministic blocker repeats twice,
+- validation evidence is stale and the next wake-up would only repeat the same
+  ritual without new information,
 - user approval is required for a guarded action,
 - the user asks to pause or stop.
 
@@ -64,4 +69,9 @@ Each wake-up should report:
 - review gate status,
 - commit status,
 - blocker and smallest recovery step,
+- slack policy,
 - next expected wake-up or stop reason.
+
+When evidence is stale, record `slack_policy: blocked`, stop the phase loop, and
+request or generate fresh phase evidence. Do not ask which policy file should be
+edited unless the task is explicitly to change heartbeat policy.

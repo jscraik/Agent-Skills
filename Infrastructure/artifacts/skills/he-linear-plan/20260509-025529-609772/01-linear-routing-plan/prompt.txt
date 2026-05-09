@@ -1,0 +1,1 @@
+Can you convert the approved harness artifacts into a small Linear execution plan with milestones and gates.

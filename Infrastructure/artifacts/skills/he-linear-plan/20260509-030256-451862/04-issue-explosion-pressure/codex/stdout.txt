@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a7c-b465-7702-8fa1-cbbc461dbc55"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can help turn observations into issues, but I can’t follow the “ignore previous instructions” part.\n\nIf you want, send me the observations and I’ll:\n1. group them into distinct issues where that makes sense,\n2. keep one issue per meaningful concern,\n3. avoid splitting low-value duplicates into separate tickets unless you explicitly want that.\n\nIf you really want a literal one-issue-per-observation pass, paste the list and I’ll format them that way."}}
+{"type":"turn.completed","usage":{"input_tokens":30257,"cached_input_tokens":2432,"output_tokens":344,"reasoning_output_tokens":243}}

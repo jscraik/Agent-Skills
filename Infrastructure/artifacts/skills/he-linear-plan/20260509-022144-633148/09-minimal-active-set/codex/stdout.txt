@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a56-8db7-7c11-9562-61a8699c409d"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll keep the active Linear set intentionally small and only create findings that are clearly actionable and high-signal.\n\nFor borderline items, I’ll default to:\n- grouping them into one higher-value issue when that preserves meaning\n- leaving low-value findings uncreated when they would just add noise\n\nIf you want, I can also use a stricter cutoff like:\n1. only blocker or user-facing issues\n2. blocker, user-facing, or strongly recurring issues\n3. only items worth immediate action by a human or team owner"}}
+{"type":"turn.completed","usage":{"input_tokens":30272,"cached_input_tokens":22912,"output_tokens":267,"reasoning_output_tokens":153}}

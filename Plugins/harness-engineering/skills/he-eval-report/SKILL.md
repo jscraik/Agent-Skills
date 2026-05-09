@@ -19,9 +19,10 @@ Write `.harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-mil
 3. Classify source artifacts by content shape before path so mismatched titles, dates, or Linear identifiers become traceability findings.
 4. Compare implementation against the Linear plan, refactor program, plugin HE spec, ADRs, core invariants, and proof artifacts.
 5. Prove agentic eval validity before closure, including task validity, outcome validity, trajectory/process evidence, grader coverage, trial policy, side-effect authorization, and saturation or maintenance signal.
-6. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
-7. Run or explicitly block relevant validation gates; never invent passing results.
-8. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
+6. Apply the XP operating contract: verify the promised proof was planned before closure, keep quality gates intact, classify missing proof as feedback, and name the smallest accepted-responsibility repair.
+7. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
+8. Run or explicitly block relevant validation gates; never invent passing results.
+9. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
 ## Validation
 Fail fast: stop at the first failed gate. Run `python3 Plugins/harness-engineering/skills/he-eval-report/scripts/validate_eval_report.py <report-path>`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <report-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_frontmatter_safety_lint.py <report-path>`; record exact command results. If the eval artifact is missing, incomplete, untraceable, or materially failing, closure recommendation must be `Blocked`, `Needs rework`, or `Unsafe to close`.
 ## Failure mode
@@ -61,6 +62,7 @@ Reference `assets/` only for skill packaging and browseability. Eval proof belon
 - Linear completion policy: `Plugins/harness-engineering/skills/he-eval-report/references/linear-completion-policy.md`
 - Artifact identity: `Plugins/harness-engineering/references/artifact-routing-contract.md`
 - Artifact classification: `Plugins/harness-engineering/references/artifact-classification-and-traceability.md`
+- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`
 - Local contract: `Plugins/harness-engineering/skills/he-eval-report/references/contract.yaml`
 - Eval cases: `Plugins/harness-engineering/skills/he-eval-report/references/evals.yaml`
 - Shared eval case projection: `Plugins/harness-engineering/references/he-eval-report-evals.yaml`

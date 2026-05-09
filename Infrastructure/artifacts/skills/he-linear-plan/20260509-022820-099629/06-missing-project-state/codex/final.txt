@@ -1,0 +1,6 @@
+I can handle that either way, but I need one choice from you first:
+
+1. `Interactive` - I’ll pause for your input at decision points.
+2. `Headless` - I’ll make reasonable assumptions and record them as I go.
+
+Reply with `interactive` or `headless`.

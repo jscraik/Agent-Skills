@@ -1,0 +1,13 @@
+I couldn’t unambiguously identify the specific “approved harness artifacts” from the repo/Slack/Linear context I could access, so I don’t want to invent the plan shape.
+
+If you want, send me one of these and I’ll turn it into a tight Linear execution plan with milestones and gates:
+
+1. The artifact link or pasted content
+2. The Linear project name or issue key to attach it to
+3. A “draft from repo lifecycle” version, and I’ll map it to the canonical `define → plan → build → verify → review → ship` flow from the repo’s agent guidance
+
+If helpful, I can also draft the default milestone structure now:
+- Milestone 1: Scope and spec lock
+- Milestone 2: Implementation slices
+- Milestone 3: Verification and review gates
+- Milestone 4: Ship readiness and launch

@@ -1,0 +1,24 @@
+I wasn’t able to persist the Linear write in this session because the Linear write calls are being canceled by the connector, but I did convert the approved harness artifacts into a compact execution plan for the canonical `agent-skills` project.
+
+Source set I used:
+- [.harness/quality/criteria.md](/Users/jamiecraik/dev/agent-skills/.harness/quality/criteria.md)
+- [.harness/ci-required-checks.json](/Users/jamiecraik/dev/agent-skills/.harness/ci-required-checks.json)
+- [.harness/ci-provider-transition-status.json](/Users/jamiecraik/dev/agent-skills/.harness/ci-provider-transition-status.json)
+- [.harness/restore-manifest.json](/Users/jamiecraik/dev/agent-skills/.harness/restore-manifest.json)
+- [.harness/upgrade-manifest.json](/Users/jamiecraik/dev/agent-skills/.harness/upgrade-manifest.json)
+
+**Linear execution plan**
+1. Milestone 1: `Harness baseline and gate wiring`
+   Entry gate: approved artifact set is stable, required checks are mapped into the execution flow, and quality criteria have explicit owners or verifiers.
+   Exit gate: baseline evidence is recorded, required checks are represented in the execution path, and the CI provider transition is unambiguous.
+
+2. Milestone 2: `Harness transition and closeout`
+   Entry gate: Milestone 1 is green, provider transition state is resolved or explicitly accepted, and restore/upgrade manifests are ready to apply or confirm.
+   Exit gate: transition work is complete, approved quality criteria are satisfied, and closeout evidence is published.
+
+**Operating constraints**
+- Keep the active scope small.
+- Do not start transition work before the baseline gate passes.
+- Treat any failed gate as a blocker until the related evidence or fix is in place.
+
+If you want, I can retry the Linear write once the connector accepts writes, or I can reshape this into a project document plus issue breakdown for a different Linear project target.

@@ -117,3 +117,41 @@ Return schema_version when structured. schema_version: 1, complete replacement s
 - "Inspect JSC-246 and implement only the units in `Plans/JSC-246-account-settings.md`, preserve my dirty edits, then run `bash scripts/run-harness-setup-checks.sh`."
 Mark current active state; if `/goal` is active, confirm it matches the branch, issue, plan, or PR before editing and treat mismatches as blockers rather than overwriting project truth. Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
 ```
+
+## Preserved Lifecycle Confidence Refactor Lines
+
+The 2026-05-09 HE confidence hardening pass renumbered active lifecycle
+entrypoint procedures so XP proof, release-eval confidence, and explicit
+routing boundaries could sit in the hot path. Preserve the exact retired lines
+here so the progressive-disclosure gate can prove instruction context was moved
+rather than dropped.
+
+```text
+6. Apply agent-native audit and specialist-skill steering only when closure depends on those proof areas.
+7. Run or explicitly block relevant validation gates; never invent passing results.
+8. Generate and validate the report, then ask accept/challenge/rework before using `Complete` or `Complete with follow-up` as a Linear closure recommendation.
+10. Include ready-to-create payloads without mutating Linear.
+11. Validate the generated plan and record exact pass, fail, or blocked
+2. Start with 2-3 focused evidence surfaces and widen only when routing,
+3. Classify source artifacts by content shape before path.
+4. Confirm Linear destination from user request, source artifacts, or connector
+5. Apply interactive steering when destination, active set, project, milestone,
+6. Keep the active set intentionally small.
+7. Classify candidate work as `Now`, `Next`, `Later`, or `Do Not Create`.
+8. Convert selected refactor programs into milestone -> parent issue -> minimal
+9. Define dependencies, eval gates, rollback gates, labels, and priority.
+4. Search for an existing matching heartbeat before creating another one. Prefer a thread heartbeat for short recurring continuation. Include cadence, live checks, stop rules, reporting policy, and forbidden unattended actions.
+5. At each wake-up, select the first incomplete, reopened, or evidence-missing phase from the plan. Continue only that phase through `he-work`; do not pull scope from adjacent specs, review notes, or tempting follow-up ideas.
+6. At phase end, before any local commit, run the phase review gates over the changed diff:
+7. Commit locally only after the applicable gates have no blocking findings and exact validation outcomes are recorded in the plan, eval artifact, handoff, or PR body. Stage only files belonging to the completed phase.
+8. Stop the heartbeat when all phases are complete with evidence, the final gate has passed, the commit is done or explicitly blocked, or a stop condition fires.
+Return `schema_version: 1` when structured, plus `heartbeat_id`, `target`, `active_phase`, `collector_bundle`, `live_state_checked`, `review_gates`, `validation`, `commit_status`, `blockers`, `stop_rule_status`, `blackboard_delta`, and `next_wakeup`.
+10. Preserve future-agent anti-regression constraints.
+11. Validate the generated program and record exact pass, fail, or blocked
+6. Define desired end state before implementation detail.
+7. Stage migration phases with validation, rollback, and coexistence rules.
+8. Include Linear mapping without creating Linear objects.
+9. Define closure proof using dated `.harness/evals/**` artifacts.
+10. Validate the artifact against the selected mode contract and record exact
+9. Compress aggressively; strategy output is not implementation permission.
+```

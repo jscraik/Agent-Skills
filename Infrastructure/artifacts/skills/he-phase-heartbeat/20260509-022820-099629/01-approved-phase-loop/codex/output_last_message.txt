@@ -1,0 +1,10 @@
+I can’t run the approved phase loop from this session because every repo command is currently failing at the sandbox wrapper with `sandbox-exec: sandbox_apply: Operation not permitted`.
+
+What I was able to verify:
+- The workspace instructions point to repo-owned process docs and `./bin/ask`.
+- I could not read those docs or execute the loop because shell access is blocked before any command runs.
+
+If you want, I can pick this back up as soon as one of these is true:
+1. The sandbox wrapper issue is fixed and shell commands work again.
+2. You paste the specific phase-loop instructions here.
+3. You point me to the exact doc path and provide a way to read it from this environment.

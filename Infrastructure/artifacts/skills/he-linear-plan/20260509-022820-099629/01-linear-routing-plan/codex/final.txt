@@ -1,0 +1,43 @@
+I pulled the plan from the approved harness artifacts in the registry and rollout docs, but the Linear write calls in this session were cancelling, so I couldn’t persist it into Linear directly.
+
+**Small Linear execution plan**
+
+**Source artifacts**
+- `linear-production-workflow`
+- `workflow-contract-v1-spec`
+- `review-gate-workflow-contract`
+- `review-gate-operational-spec`
+- `linear-workflow-operational-spec`
+- `agent-testing-gates-operational-spec`
+- `docs-gate-rollout-operational-spec`
+- `release-change-control-operational-spec`
+
+**Milestone 1: Contract lock and workflow mapping**
+- Scope: confirm the canonical Linear workflow contract, reconcile state transitions and label handling, and keep the approved registry as the source of truth.
+- Gate: workflow contract validated, no state-model contradictions, artifact provenance checks pass for workflow-facing files.
+
+**Milestone 2: Review and testing gates**
+- Scope: align the review gate contract and operational spec, and align agent testing gates with pre-handoff expectations.
+- Gate: review gate only accepts the current head SHA, required checks are consistent, and evidence artifacts are machine-readable in dry-run first.
+
+**Milestone 3: Docs, rollout, and release control**
+- Scope: align docs-gate rollout behavior with the approved workflow docs, and align release change control with versioning, tagging, and publish behavior.
+- Gate: docs drift checks pass, release/change-control checks pass, and rollout only proceeds after the prior two milestones are complete.
+
+**Cross-cutting gates**
+- Dry-run first for any stateful or multi-issue operation.
+- Fail closed on stale review evidence or mismatched SHA.
+- Keep artifact provenance and docs drift checks on the critical path.
+- Require explicit confirmation for any write path that touches more than one issue or artifact.
+
+**Done when**
+- The approved artifacts are represented as a compact ordered plan.
+- Each milestone has one clear gate.
+- The rollout can be executed without inventing new workflow rules.
+
+Sources:
+- [workflow-artifact-registry.json](https://github.com/jscraik/coding-harness/blob/2fabe5897f68bae3d66ce04c97cd88c8443d1cd3/docs/workflow-artifact-registry.json)
+- [HARNESS_IMPLEMENTATION_PLAN.md](https://github.com/jscraik/coding-harness/blob/2fabe5897f68bae3d66ce04c97cd88c8443d1cd3/docs/HARNESS_IMPLEMENTATION_PLAN.md)
+- [symphony-linear-setup.md](https://github.com/jscraik/coding-harness/blob/2fabe5897f68bae3d66ce04c97cd88c8443d1cd3/docs/symphony-linear-setup.md)
+
+If you want, I can next turn this into a tighter Linear issue tree with one parent issue and 3 child issues keyed to those milestones.

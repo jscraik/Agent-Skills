@@ -1,0 +1,7 @@
+Yes. Send me one of these and I’ll turn it into a full architecture review document:
+
+1. The Linear execution plan text
+2. The file path to the plan in the repo
+3. A short description of the system or feature if you want me to draft it from scratch
+
+If you paste the plan here, I can rewrite it immediately into an architecture review with sections like scope, current state, proposed design, tradeoffs, risks, rollout, and open questions.

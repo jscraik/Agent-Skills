@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a6d-b9e4-76d2-8d16-00928df99fe1"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. We can treat the plan as having multiple valid next stages, then pause and ask you which one to take before doing any work.\n\nIf you want, I can follow that pattern for the current task and present the next-stage options first."}}
+{"type":"turn.completed","usage":{"input_tokens":30269,"cached_input_tokens":2432,"output_tokens":221,"reasoning_output_tokens":166}}

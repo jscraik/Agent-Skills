@@ -1,0 +1,8 @@
+Yes. In headless mode I’ll:
+
+- record assumptions explicitly instead of stopping to ask
+- prefer reversible, low-risk actions
+- avoid irreversible changes unless you clearly request them
+- call out any uncertainty or tradeoffs in the notes as I go
+
+If you want, I can also treat that as the default for the rest of this session.

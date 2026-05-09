@@ -30,6 +30,8 @@ Every output must include:
 - hard evidence, interpretation, and assumptions
 - affected systems or modules
 - confidence level for major conclusions
+- smallest feedback-producing next slice
+- stop or pivot condition for the next slice
 - drift or moat impact where relevant
 - future-agent guidance
 - evidence and traceability matrix
@@ -45,6 +47,8 @@ Every output must include:
   or any fact likely to have changed; cite sources or mark evidence unavailable.
 - Classify low-value governance as `Do Not Create` instead of writing another
   document.
+- Exclude strategic conclusions that cannot change a decision, alter routing,
+  reduce risk, or create a near-term feedback signal.
 
 ## Required Sections By Common Mode
 

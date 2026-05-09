@@ -7,7 +7,7 @@ canonical_slug: agent-skills-jsc-246-agent-first-golden-path
 title: Agent Skills JSC-246 Agent First Golden Path Plan Technical Review
 harness_stage: he-code-review
 status: complete
-date: 2026-05-08
+date: 2026-05-09
 origin: .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md
 reviewed_artifact: .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md
 traceability_required: true
@@ -27,6 +27,56 @@ review_result: approved_with_residual_risks
 ## Findings
 
 No open blocking findings remain after the plan-deepening pass.
+
+### Remediated Finding 0: Plan Misclassified Live Closeout Scope
+
+Severity: High
+Status: Fixed in plan
+
+The plan and spec were not precise enough about live closeout. The current
+`./bin/ask repo closeout --changed --json --robot` gate reports
+`sync_required`, but the blocker is caused by unrelated dirty
+harness-engineering skill files and related reference/script work outside this
+JSC-246 plan/spec slice. Treating that as either clean JSC-246 readiness or as
+JSC-246 implementation scope would steer `he-work` into the wrong recovery
+lane.
+
+Fix applied:
+
+- Updated `spec_live_baseline_status` to
+  `runtime_budget_pass_with_unrelated_sync_required`.
+- Replaced the source-evidence claim that closeout is clean with the current
+  blocked state and ownership classification.
+- Reclassified `sync_required` as a live blocker that is not a JSC-246 scope
+  blocker.
+- Kept the implementation-phase warning that future closeout proof must still
+  isolate clean and blocked closeout fixtures from unrelated worktree churn.
+
+Why it matters:
+
+Plans are execution contracts. A stale blocker in the blackboard delta is not
+harmless prose; it steers the next agent toward the wrong first recovery step.
+
+### Remediated Finding 0.1: Plan Overstated `skills prove` Migration
+
+Severity: High
+Status: Fixed in plan
+
+Live command output and existing tests still use `./bin/ask skills proof
+<handle> --json --robot` as the current reachability next command surfaced by
+`skills explain` and `skills improve`. The plan previously pushed too hard
+toward making `skills prove` the immediate next command from `skills explain`.
+That would fight the existing tested contract unless the migration also updated
+consumers and tests in one reviewed phase.
+
+Fix applied:
+
+- Preserved `skills proof` as the existing reachability command in current
+  explain/improve output.
+- Kept `skills prove` as the golden-path proof scorecard and proof-taxonomy
+  validation command.
+- Required any future `skills proof` to `skills prove` next-command change to
+  be handled as an explicit compatibility migration.
 
 ### Remediated Finding 1: `skills improve` State Change Could Break Consumers
 
@@ -227,16 +277,19 @@ that the current plan can safely drive `he-work`.
 
 ## Residual Risks
 
-### Residual Risk 1: Live Dirty Worktree Still Blocks Clean Closeout Evidence
+### Residual Risk 1: Clean Closeout Evidence Must Stay Slice-Scoped
 
-The plan correctly treats current live `repo closeout --changed` as a blocked
-dirty-worktree case. Implementation must still avoid pulling unrelated
-projection churn into this slice.
+Current live closeout is blocked by unrelated dirty harness-engineering skill
+work requiring projection sync. Implementation must not absorb that unrelated
+work into JSC-246, and it must still prove JSC-246 closeout behavior through
+controlled fixtures or an isolated changed-file scenario.
 
 Required response:
 
-- Use helper-level fixtures or an isolated branch for clean closeout proof.
-- Record live closeout as blocked evidence only when unrelated changes remain.
+- Use helper-level fixtures or an isolated branch for clean and blocked
+  closeout proof.
+- Record live closeout as blocked evidence when the command actually reports a
+  blocker, and classify whether the blocker belongs to JSC-246 scope.
 
 ### Residual Risk 2: Route Fixtures May Need Route-Family Assertions
 
@@ -280,9 +333,16 @@ Required response:
 | `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md` | pass | Plan artifact identity remains valid after deepening. |
 | `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md` | pass | Plan Linear traceability remains valid after deepening. |
 | `git diff --check -- .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md` | pass | No whitespace errors in the deepened plan. |
-| `./bin/ask repo validate --help` | pass | Confirmed repo wrapper supports `--changed-files` and JSON/robot flags required by the closure gate. |
-| `./bin/ask repo validate --changed-files .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md .harness/review/agent-skills-jsc-246-agent-first-golden-path-plan-technical-review.md --json --robot` | blocked | Plan/docs lint and lifecycle checks passed, but existing required failures remain: `SKILLSET_SOURCE_HASH_STALE` in `context-budget.log` and projection drift in cache mirrors. This validates the wrapper route and confirms closure still depends on resolving or explicitly classifying repo-surface projection debt. |
-| `./bin/ask repo doctor --json --robot` | pass | Repo is usable with non-blocking diagnostic debt: `blocking: false`, next command `./bin/ask repo surface --json --robot`, 4537 repo-surface diagnostic findings. |
+| `./bin/ask repo validate --changed-files .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md .harness/review/agent-skills-jsc-246-agent-first-golden-path-plan-technical-review.md --json --robot` | pass | Required failures `0`, warn-only issues `0`; scoped validation logs at `Infrastructure/artifacts/validation/20260509T004256Z`. |
+| `./bin/ask repo doctor --json --robot` | pass | Repo is usable with non-blocking diagnostic debt: `blocking: false`, next command `./bin/ask repo surface --json --robot`, 4620 repo-surface diagnostic findings. |
+| `./bin/ask runtime budget --json --robot` | pass | Runtime budget passes with `default_visible_count: 10`, `estimated_description_tokens: 3172`, no unresolved scope collisions, and explicit baselines for `agents-sdk`, `build-chatgpt-app`, and `chatgpt-app-submission`. |
+| `./bin/ask repo closeout --changed --json --robot` | blocked | Current dirty worktree reports `sync_required` because unrelated harness-engineering skill files require projection sync; runtime budget still passes and repo-surface debt remains non-blocking. |
+| `./bin/ask skills explain he-spec --json --robot` | pass | Current output reports canonical source, generated handle, runtime visibility, validation command, reachability `proof_command`, and `next_command: ./bin/ask skills proof he-spec --json --robot`. |
+| `./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot` | pass | Current output recommends `$autofix` via `resolved_with_fallback` and emits `next_command: ./bin/ask skills proof autofix --json --robot`; nested goal decision remains `intent_unresolved`. |
+| stale-marker `rg` scan over spec/plan/review | pass | No stale ready-closeout, obsolete runtime-budget baseline, or pre-review handoff markers remain in the spec/plan/review artifacts. |
+| `git diff --check -- .harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md .harness/review/agent-skills-jsc-246-agent-first-golden-path-plan-technical-review.md` | pass | No whitespace errors in the updated spec, plan, or review artifacts. |
+| `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py ...` | blocked | Local approval/usage gate rejected execution before the validator ran. Do not route around this rejection; rerun when the gate is available. |
+| `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py ...` | blocked | Local approval/usage gate rejected execution before the validator ran. Do not route around this rejection; rerun when the gate is available. |
 
 ## Linear Acceptance Traceability
 
@@ -303,6 +363,6 @@ Required response:
 | Doctor diagnostic continuation is now testable without breaking current fields. | source-code, plan review | `Infrastructure/scripts/lib/ask/golden_path.py`; plan diagnostic design section | High | Existing doctor output can be extended additively while preserving robot consumers. |
 | Proof command scope is bounded. | source-code, plan review | `Infrastructure/bin/ask`; plan proof command boundary | High | Avoids accidental proof-system migration in `JSC-246`. |
 | Fresh-agent proof cannot be prose-only. | plan review | `PLAN-JSC246-007`; eval requirements | Medium-high | Forces closure to use command output, not narrative confidence. |
-| Wrapper validation is now required for closure. | command contract, plan review | `./bin/ask repo validate --help`; validation routing design | High | Prevents the plan from bypassing the repo-native control plane. |
+| Wrapper validation is now required for closure. | command contract, plan review | changed-file validation; validation routing design | High | Prevents the plan from bypassing the repo-native control plane. |
 | Doctor next-step semantics now avoid false contradictions and null recovery guidance. | plan review | diagnostic continuation design; `PLAN-JSC246-002` | High | Makes the first-contact continuation contract testable without over-constraining empty metadata. |
 | Fresh-agent evidence must be isolated. | plan review | `PLAN-JSC246-007` | High | Prevents context-warmed planning evidence from masquerading as first-contact usability proof. |

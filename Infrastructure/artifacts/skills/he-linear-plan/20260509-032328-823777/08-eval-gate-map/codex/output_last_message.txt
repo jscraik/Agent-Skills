@@ -1,0 +1,31 @@
+I mapped the currently open parent issues I could verify in [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills/issues) to the gate types based on each issue body. This is an inference from the issue descriptions, not an existing label system in the repo.
+
+**Gate legend**
+- **Build**: package/release hygiene, artifact validity, repo publishability
+- **Test**: validation, fail-fast checks, example correctness, runtime safety
+- **Drift**: docs vs reality, stale duplication, provenance mismatch
+- **Routing**: discovery, naming, skill selection, task-to-skill matching
+- **Rollback**: update/revert path, provenance, lifecycle safety after publish
+
+| Parent issue | Relevant gates | Why |
+|---|---|---|
+| [#235 Some skills do not match their folder name's](https://github.com/vercel-labs/agent-skills/issues/235) | Drift, Routing | Frontmatter `name` diverges from folder name, which creates naming drift and can confuse skill selection. |
+| [#232 Post-task skill lifecycle management with SkillClaw](https://github.com/vercel-labs/agent-skills/issues/232) | Drift, Rollback | The issue is about cleaning up duplicated, stale, and fragmented skills over time. |
+| [#230 Add LICENSE file](https://github.com/vercel-labs/agent-skills/issues/230) | Build, Drift | The repo advertises MIT but lacks the license file, so publish/legal metadata is out of sync. |
+| [#224 Claude Code plugin using agent-skills for web design guidelines](https://github.com/vercel-labs/agent-skills/issues/224) | Routing | This is about surfacing the skill through a plugin and making the skill discoverable in the right workflow. |
+| [#216 `ssr: false` used without `use client`](https://github.com/vercel-labs/agent-skills/issues/216) | Build, Test | The example is invalid in a Server Component context, so it should fail validation before shipping. |
+| [#214 Upload fails with `SKILL.md description cannot contain XML tags`](https://github.com/vercel-labs/agent-skills/issues/214) | Build, Test | The upload artifact is rejected by the platform, so this is a packaging/validation failure. |
+| [#207 Add a description to improve Dispatch discoverability](https://github.com/vercel-labs/agent-skills/issues/207) | Routing | The skill needs a description so external routing/recommendation systems can surface it correctly. |
+| [#182 Why there are some files `metadata.json` in skill folder](https://github.com/vercel-labs/agent-skills/issues/182) | Build, Drift | Unexpected files in a skill folder usually point to packaging hygiene or repository-content drift. |
+| [#169 `AGENTS.md` wastes context, restructure for progressive disclosure](https://github.com/vercel-labs/agent-skills/issues/169) | Drift, Routing | The issue is about duplicated guidance, context leakage, and a routing doc that points agents at the wrong level of detail. |
+| [#168 How to update an already published skill](https://github.com/vercel-labs/agent-skills/issues/168) | Rollback | This is fundamentally about the post-publish update path, which is the operational side of rollback/revision control. |
+| [#162 Strict Runtime Environment Checks for Agent Skills](https://github.com/vercel-labs/agent-skills/issues/162) | Test | This proposes a pre-execution guard that verifies environment constraints before a skill runs. |
+| [#156 `npx skills list` should show origin of each skill](https://github.com/vercel-labs/agent-skills/issues/156) | Routing, Rollback | Provenance helps users and agents trace where a skill came from and safely revert or refresh it later. |
+
+**Short read**
+- The strongest **routing** issues are [#235](https://github.com/vercel-labs/agent-skills/issues/235), [#207](https://github.com/vercel-labs/agent-skills/issues/207), [#224](https://github.com/vercel-labs/agent-skills/issues/224), and [#169](https://github.com/vercel-labs/agent-skills/issues/169).
+- The strongest **drift** issues are [#230](https://github.com/vercel-labs/agent-skills/issues/230), [#235](https://github.com/vercel-labs/agent-skills/issues/235), [#169](https://github.com/vercel-labs/agent-skills/issues/169), and [#182](https://github.com/vercel-labs/agent-skills/issues/182).
+- The strongest **build/test** issues are [#214](https://github.com/vercel-labs/agent-skills/issues/214), [#216](https://github.com/vercel-labs/agent-skills/issues/216), and [#162](https://github.com/vercel-labs/agent-skills/issues/162).
+- The clearest **rollback** issues are [#168](https://github.com/vercel-labs/agent-skills/issues/168), [#156](https://github.com/vercel-labs/agent-skills/issues/156), and [#232](https://github.com/vercel-labs/agent-skills/issues/232).
+
+If you want, I can turn this into a stricter gate matrix with `must-pass` versus `nice-to-have` status for each issue.

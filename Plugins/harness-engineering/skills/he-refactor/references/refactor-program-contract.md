@@ -21,6 +21,7 @@ implementation spec or backlog dump.
 - Architectural Impact
 - Desired End State
 - Migration Strategy
+- Smallest Reversible Step
 - Execution Phases
 - Linear Mapping
 - Anti-Regression Constraints
@@ -37,6 +38,8 @@ Each phase must include:
 - Objective
 - Affected systems
 - Expected risk
+- Feedback expected from this phase
+- Stop or pivot condition
 - Can run in parallel: `yes` or `no`
 - Validation requirements
 - Rollback conditions
@@ -52,6 +55,12 @@ quality, moat protection, or Linear execution hygiene.
 
 Classify as `Do Not Create` when the finding is cosmetic, speculative, local
 cleanup, routine dependency work, or better handled by one small Linear issue.
+
+## XP Migration Constraint
+
+Prefer the smallest reversible migration step that produces observable
+feedback. Do not propose a broad rewrite when a baby-step phase can test the
+same architectural claim with lower blast radius.
 
 ## Closure Proof
 

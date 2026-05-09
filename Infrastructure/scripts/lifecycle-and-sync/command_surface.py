@@ -177,14 +177,16 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
             "",
             "When invoked:",
             (
-                "1. If this is the Agent Skills Kit repo and `./bin/ask` exists, "
-                f"run `./bin/ask skills resolve {handle.handle} --json`."
+                "1. In Agent Skills Kit with `./bin/ask`, run "
+                f"`./bin/ask skills resolve {handle.handle} --json`."
             ),
             f"2. Otherwise, load `{source_path}` directly.",
             "3. Follow the loaded module contract.",
             (
-                "4. If the source path is missing, search only the owner skill tree "
-                "for this exact handle name."
+                "4. If missing, search only the owner skill tree for this exact handle."
+            ),
+            (
+                "5. If the contract cannot load, fail closed: report the blocker and do not perform the workflow."
             ),
             "",
             "When used as another skill's target, pass the resolved card to the active orchestrator and wait for orchestration.",

@@ -1,0 +1,3 @@
+I’m blocked by the current read-only sandbox, so I can’t inspect or edit the repo from here yet.
+
+If you point me at the exact file or line with the typo, I can patch just that one spot.

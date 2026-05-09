@@ -1,0 +1,12 @@
+The best provisional choice is `strategy`.
+
+Why:
+- I do not have a defensible repo read right now because direct shell access is blocked in this session.
+- The explorer probe confirmed the same thing: it could not read `git status` or run `./bin/ask repo doctor --json --robot`.
+- With no verified implementation diff, no active goal, and no evidence of an in-flight task queue, `refactor`, `Linear plan`, and `eval` are all harder to justify than `strategy`.
+
+What would change the call:
+- If you paste `git status --short --branch`, I can usually separate `strategy` from `refactor` immediately.
+- If you paste `./bin/ask repo doctor --json --robot`, I can give you a much firmer stage recommendation.
+
+So: `strategy` for now, but this is a provisional call, not a fully evidenced one.

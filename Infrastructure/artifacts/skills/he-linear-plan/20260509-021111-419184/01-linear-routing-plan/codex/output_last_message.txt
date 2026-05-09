@@ -1,0 +1,40 @@
+I couldn’t save this into Linear from the session because the Linear write path is currently rejecting the MCP call, so I’m giving you the exact plan text ready to paste.
+
+**Suggested Linear placement**
+- Project: `agent-skills`
+- Milestone: `Ask Control Plane Decomposition`
+- Parent: `JSC-284`
+- Labels: `Architecture`, `Refactor`, `Drift-Risk`, `Developer Experience`
+- Priority: `1`
+
+**Harness Execution Plan: Ask Control Plane Decomposition**
+
+**Source artifacts**
+- `.harness/linear/agent-skills-linear-plan.md`
+- `.harness/specs/agent-skills-ask-control-plane-decomposition-spec.md`
+- `.harness/refactors/ask-control-plane-decomposition.md`
+- `.harness/refactors/proof-driven-skill-promotion.md`
+- `.harness/core/architecture-invariants.md`
+- `.harness/core/routing-invariants.md`
+- `.harness/core/execution-invariants.md`
+
+**Milestone 1: Analysis and proof framing**
+- Goal: lock the behavioral baseline and proof vocabulary before any code movement.
+- Deliverables: responsibility map for `Infrastructure/scripts/lib/ask/commands/skills.py`; representative baseline outputs for `./bin/ask` commands; proof taxonomy and lifecycle ADR.
+- Gates: `JSC-285` complete; `JSC-287` complete; `./bin/ask skills resolve he-spec --json`; `./bin/ask skills list --json`; `./bin/ask skills sync --scope workspace --dry-run --json`; `./bin/ask repo doctor --json --robot` with any pre-existing catalog parity blocker classified separately; `he_linear_traceability_lint` passes for the spec; docs lint passes for touched harness artifacts.
+
+**Milestone 2: Behavior-preserving extraction**
+- Goal: move plugin-cache behavior behind an internal service without changing public command behavior.
+- Deliverables: plugin cache refresh/report/error behavior extracted behind a service boundary; public `./bin/ask` command behavior preserved; cache root layout preserved.
+- Gates: `JSC-286` complete; before/after `./bin/ask skills sync --scope workspace --dry-run --json`; before/after representative `./bin/ask skills resolve` and `./bin/ask skills list` outputs; `./bin/ask repo doctor --json --robot` still classifies any existing catalog parity drift separately; focused tests pass for the extracted seam; no shallow pass-through wrapper remains as the end state.
+
+**Milestone 3: Verification and closeout**
+- Goal: prove the slice, capture rollback notes, and make the work ready for merge and release tracking.
+- Deliverables: eval artifact under `.harness/evals/`; rollback conditions recorded with command evidence; Linear tracker updated with the final state of the slice.
+- Gates: `SA-ASK-008` eval artifact exists; `SA-ASK-009` rollback conditions recorded; `SA-ASK-010` existing catalog parity drift remains separately classified; `SA-ASK-011` cache root layout preserved; `SA-ASK-012` no later extraction phase accidentally started; `SA-ASK-013` extraction does not preserve command-module coupling through a wrapper.
+
+**Notes**
+- The plan is intentionally small: analyze first, extract one seam, then verify with explicit command gates.
+- That keeps the command surface stable while still giving the harness enough evidence to trust the slice.
+
+If you want, I can also turn this into a tighter parent issue body plus 3 child issues so it matches Linear execution more closely.

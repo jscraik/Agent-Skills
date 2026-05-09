@@ -1,0 +1,26 @@
+2026-05-09T01:44:04.155570Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(Io, Os { code: 54, kind: ConnectionReset, message: \\\"Connection reset by peer\\\" })) }\")" Failed during the export process
+2026-05-09T01:44:34.191932Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(IncompleteMessage)) }\")" Failed during the export process
+2026-05-09T01:44:44.203209Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(IncompleteMessage)) }\")" Failed during the export process
+2026-05-09T01:44:54.214627Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(IncompleteMessage)) }\")" Failed during the export process
+2026-05-09T01:45:18.167098Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in /Users/jamiecraik/dev/agent-skills/Docs/plans/2026-04-14-feat-llm-wiki-runtime-pivot-plan.md:
+## Documentation / Operational Notes
+
+- Operational runbooks should explicitly separate:
+  - promotion blockers (hard stop),
+  - compatibility findings in degraded visibility state (visible but non-blocking unless registry-matched),
+  - informational diagnostics (non-gating).
+- Operational runbooks should include rollout-state annotations for each gate family (`pivot_rollout_mode=shadow|warn_visible|enforce`, `privacy_rollout_mode=observe|enforce`) so operators can interpret promotion outcomes correctly.
+- Closeout reporting runbooks must document mandatory evidence redaction and allowlist rules for sensitive fields.
+- Recovery sequencing from spec must be retained in operational guidance:
+  1. lane 1 freshness blockers,
+  2. lane 2 parity blockers,
+  3. lane 4 contract blockers,
+  4. compatibility findings in degraded visibility state.
+
+## Execution Ledger (Planning Mode)
+
+| STEP_ID | status (pending | in_progress | completed)                                           | owner | evidence |
+| ------- | --------------- | ----------- | ---------------------------------------------------- | ----- | -------- |
+| P0      | pending         | codex       | Artifact/schema wiring not yet implemented           |
+2026-05-09T01:45:20.414894Z ERROR codex_core::tools::router: error=patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings
+2026-05-09T01:45:24.256414Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(BodyWrite, Os { code: 54, kind: ConnectionReset, message: \\\"Connection reset by peer\\\" })) }\")" Failed during the export process

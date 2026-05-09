@@ -56,6 +56,14 @@ ADRs:
 Core Invariants:
 Other Source Artifacts:
 
+## Planned Proof Check
+Promised Proof From Source Artifacts:
+Proof Planned Before Implementation: yes | no | unknown
+Proof Produced:
+Proof Missing:
+Interpretation:
+Blocks Closure: yes | no
+
 ## Functional Validation Results
 Command or Method:
 Result:
@@ -150,6 +158,7 @@ Blocks Completion:
 Produced:
 Required:
 Missing:
+Planned Before Implementation:
 Blocks Completion:
 Attach or Link Back to Linear:
 

@@ -19,6 +19,12 @@ and core invariants. Do not evaluate unrelated work.
 For each relevant gate, record method, result, evidence, confidence, failure
 detail, and closure impact. Missing evidence is `not-run`, never `pass`.
 
+If implementation artifacts promise proof after the fact but no source plan,
+spec, Linear plan, refactor program, or eval gate required that proof before
+implementation, classify the result as a planned-proof gap. Planned-proof gaps
+block closure for high-risk or closure-critical work unless the report records
+a justified exception and the smallest repair.
+
 Useful gates: build, test, typecheck, lint, format, security, eval, smoke,
 integration, routing determinism, context load, agent discoverability,
 architecture integrity, governance simplicity, moat protection, rollback safety,

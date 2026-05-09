@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a9a-c0fe-7a13-91bb-d7dc9d3ee604"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"The target project state is unknown, so I need a quick choice before I proceed:\n\n1. `Interactive` - I inspect the repo and confirm the current state first.\n2. `Headless assumption` - I proceed as if the project is in a clean, non-interactive state and record that assumption.\n\nReply with `1` or `2`."}}
+{"type":"turn.completed","usage":{"input_tokens":30268,"cached_input_tokens":30080,"output_tokens":231,"reasoning_output_tokens":154}}

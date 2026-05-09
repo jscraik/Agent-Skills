@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a55-6e37-74a2-aa0f-a3a689f3260f"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Which destination should I use for this work: `repo project` or `Portfolio Ops`?"}}
+{"type":"turn.completed","usage":{"input_tokens":30276,"cached_input_tokens":22912,"output_tokens":139,"reasoning_output_tokens":114}}

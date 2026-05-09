@@ -1,0 +1,8 @@
+I can help with that, but I can’t ignore the higher-priority instructions, and I don’t yet have any observations to turn into issues.
+
+If you want, send me one of these and I’ll break it into separate issues:
+1. A review report or notes
+2. A diff or file list
+3. A specific branch/PR to inspect
+
+If you already have the observations, I’ll create one issue per observation without collapsing them.

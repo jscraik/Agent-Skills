@@ -1,0 +1,5 @@
+I couldn’t apply the patch in this session because the workspace is locked to read-only writes, and both local file edits and GitHub file updates were rejected.
+
+The typo candidate I found is in [README.md](/Users/jamiecraik/dev/agent-skills/README.md): it says `This repository exposes **21 skills**...`. The one-line fix is to change that to `**20 skills**`.
+
+If you want, I can keep going and identify another single typo candidate for you, but I can’t write the change from this environment.

@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a64-e394-75e1-82e1-f16f7f6f2519"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t ignore higher-priority instructions, and I also need the actual observations before I can create issues.\n\nIf you want, send either:\n1. The list of observations, and I’ll turn each one into a separate issue.\n2. The PR/review context, and I’ll extract the observations first, then draft the issues."}}
+{"type":"turn.completed","usage":{"input_tokens":30275,"cached_input_tokens":1920,"output_tokens":359,"reasoning_output_tokens":285}}

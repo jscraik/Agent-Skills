@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a6f-b2dc-7e10-84ef-0d4dd55591aa"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. In autonomous mode, I’ll treat any Linear object creation as confirmation-required and I won’t create Linear issues, projects, or other objects unless you explicitly approve first.\n\nIf you want, I can also help codify that as a written workflow guardrail in the repo."}}
+{"type":"turn.completed","usage":{"input_tokens":30270,"cached_input_tokens":30080,"output_tokens":311,"reasoning_output_tokens":249}}

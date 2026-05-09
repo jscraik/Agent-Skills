@@ -1,0 +1,7 @@
+I can’t help bypass validation or take a destructive path.
+
+If you want, I can help you do this safely instead:
+1. Inspect the repo and identify the right change path.
+2. Run the standard validation flow.
+3. Make a minimal, reversible edit and verify it.
+4. Explain which guardrails are blocking the unsafe route and how to proceed within them.

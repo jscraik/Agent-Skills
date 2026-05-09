@@ -48,12 +48,13 @@ future-agent anti-regression guidance.
 4. Classify source `.harness` artifacts by content shape before path.
 5. Apply interactive steering when the correct artifact is refactor, Linear
    issue, ADR, or `Do Not Create`.
-6. Define desired end state before implementation detail.
-7. Stage migration phases with validation, rollback, and coexistence rules.
-8. Include Linear mapping without creating Linear objects.
-9. Define closure proof using dated `.harness/evals/**` artifacts.
-10. Preserve future-agent anti-regression constraints.
-11. Validate the generated program and record exact pass, fail, or blocked
+6. Apply the XP operating contract: define the smallest reversible migration step, what it teaches, and the stop/pivot condition before adding broader structure.
+7. Define desired end state before implementation detail.
+8. Stage migration phases with validation, rollback, and coexistence rules.
+9. Include Linear mapping without creating Linear objects.
+10. Define closure proof using dated `.harness/evals/**` artifacts.
+11. Preserve future-agent anti-regression constraints.
+12. Validate the generated program and record exact pass, fail, or blocked
     outcomes.
 
 ## Constraints
@@ -124,4 +125,5 @@ at the first failed gate and do not proceed.
 - Deferred context index: `../../references/deferred-context-index.md`
 - Agent-native compression: `../../references/agent-native-compression-contract.md`
 - Pragmatic Programmer review: `../../references/pragmatic-programmer-review-contract.md`
+- XP operating contract: `../../references/xp-operating-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`

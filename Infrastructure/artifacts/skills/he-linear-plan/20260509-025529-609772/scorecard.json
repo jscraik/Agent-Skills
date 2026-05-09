@@ -1,0 +1,667 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-09T01:55:29Z",
+  "skill": "he-linear-plan",
+  "skill_path": "Plugins/harness-engineering/skills/he-linear-plan",
+  "skill_release": {
+    "name": "he-linear-plan",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "c773295fc8defcca9cdef4147c4fad23f2dfa406",
+    "source_branch": "codex/goal-governor-independent-skill"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "smoke",
+  "tier2_mode": "warn",
+  "run_id": "20260509-025529-609772",
+  "case_filters": [],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 600.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "linear-routing-plan",
+      "name": "Linear routing plan",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/01-linear-routing-plan",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/01-linear-routing-plan/codex",
+            "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/01-linear-routing-plan/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/01-linear-routing-plan/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/01-linear-routing-plan/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/01-linear-routing-plan/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 74,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 1281093,
+                "output_tokens": 11415,
+                "reasoning_tokens": 0,
+                "total_tokens": 1292508
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "destination-ambiguous",
+      "name": "Destination ambiguous",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/02-destination-ambiguous",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": false,
+          "tier1_failures": [
+            "regex failed: /(?is)(ask once|ask you|route this work|one choice|interactive.*headless|which destination|before proceeding|record a headless assumption|confirmation-gated|confirmation-required|explicitly confirm|explicitly approve|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked|without confirmation)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/02-destination-ambiguous/codex",
+            "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/02-destination-ambiguous/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/02-destination-ambiguous/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/02-destination-ambiguous/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/02-destination-ambiguous/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 4,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 30244,
+                "output_tokens": 109,
+                "reasoning_tokens": 0,
+                "total_tokens": 30353
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] regex failed: /(?is)(ask once|ask you|route this work|one choice|interactive.*headless|which destination|before proceeding|record a headless assumption|confirmation-gated|confirmation-required|explicitly confirm|explicitly approve|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked|without confirmation)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "generate-architecture-review",
+      "name": "Generate architecture review",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/03-generate-architecture-review",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/03-generate-architecture-review/codex",
+            "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/03-generate-architecture-review/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/03-generate-architecture-review/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/03-generate-architecture-review/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/03-generate-architecture-review/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 7,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 124012,
+                "output_tokens": 1864,
+                "reasoning_tokens": 0,
+                "total_tokens": 125876
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "issue-explosion-pressure",
+      "name": "Issue explosion pressure",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/04-issue-explosion-pressure",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/04-issue-explosion-pressure/codex",
+            "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/04-issue-explosion-pressure/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/04-issue-explosion-pressure/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/04-issue-explosion-pressure/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/04-issue-explosion-pressure/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 4,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 30239,
+                "output_tokens": 244,
+                "reasoning_tokens": 0,
+                "total_tokens": 30483
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "now-next-later",
+      "name": "Now next later",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/05-now-next-later",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/05-now-next-later/codex",
+            "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/05-now-next-later/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/05-now-next-later/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/05-now-next-later/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/05-now-next-later/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 4,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 30240,
+                "output_tokens": 569,
+                "reasoning_tokens": 0,
+                "total_tokens": 30809
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "missing-project-state",
+      "name": "Missing project state",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/06-missing-project-state",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/06-missing-project-state/codex",
+            "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/06-missing-project-state/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/06-missing-project-state/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/06-missing-project-state/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/06-missing-project-state/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 4,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 30242,
+                "output_tokens": 194,
+                "reasoning_tokens": 0,
+                "total_tokens": 30436
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "headless-linear-assumption",
+      "name": "Headless Linear assumption",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/07-headless-linear-assumption",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/07-headless-linear-assumption/codex",
+            "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/07-headless-linear-assumption/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/07-headless-linear-assumption/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/07-headless-linear-assumption/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/07-headless-linear-assumption/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 92146,
+                "output_tokens": 1172,
+                "reasoning_tokens": 0,
+                "total_tokens": 93318
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "eval-gate-map",
+      "name": "Eval gate map",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/08-eval-gate-map",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/08-eval-gate-map/codex",
+            "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/08-eval-gate-map/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/08-eval-gate-map/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/08-eval-gate-map/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/08-eval-gate-map/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 84,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 1593987,
+                "output_tokens": 12070,
+                "reasoning_tokens": 0,
+                "total_tokens": 1606057
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "minimal-active-set",
+      "name": "Minimal active set",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/09-minimal-active-set",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/09-minimal-active-set/codex",
+            "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/09-minimal-active-set/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/09-minimal-active-set/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/09-minimal-active-set/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/09-minimal-active-set/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 5,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 60946,
+                "output_tokens": 835,
+                "reasoning_tokens": 0,
+                "total_tokens": 61781
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 1,
+  "tier2_findings": 0,
+  "preflight_warnings": [
+    "Using isolated CODEX_HOME for live eval session writes: /private/tmp/skill-evals-codex-home-22fjimor"
+  ],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 9
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 9
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "fail",
+  "exit_code": 2,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772",
+    "summary": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-linear-plan/20260509-025529-609772/junit.xml"
+  }
+}

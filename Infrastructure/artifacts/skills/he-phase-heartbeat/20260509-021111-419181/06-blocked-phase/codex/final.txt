@@ -1,0 +1,5 @@
+Blocked: the phase cannot proceed because required validation is missing.
+
+Minimum corrective action: add the missing validation, rerun the validation step, then continue the phase only after it passes.
+
+If you want, I can turn that into a one-line status note or a checklist entry for the relevant doc.

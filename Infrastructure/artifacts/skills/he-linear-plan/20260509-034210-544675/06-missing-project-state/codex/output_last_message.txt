@@ -1,0 +1,6 @@
+Yes. When the target project state is unknown, I’ll either:
+
+1. Ask whether you want an interactive check, or
+2. Proceed with a headless assumption and record that assumption explicitly.
+
+If you want, I can default to headless for this run unless you say otherwise.

@@ -70,7 +70,7 @@ cases:
     prompt: "Generate the eval and drift validation report before recommending Linear closure."
     expected_route: he-eval-report
     expected_artifact_root: .harness/evals
-    proof: "eval gate matrix, drift validation, closure recommendation"
+    proof: "eval gate matrix, drift validation, promised proof check, closure recommendation"
 
   - id: tracer-strategy
     stage: he-strategy
@@ -84,14 +84,14 @@ cases:
     prompt: "Generate a high-leverage migration program with phases, rollback, Linear mapping, and eval proof."
     expected_route: he-refactor
     expected_artifact_root: .harness/refactors
-    proof: "migration phases, rollback conditions, eval requirements"
+    proof: "baby-step migration phases, rollback conditions, stop/pivot condition, eval requirements"
 
   - id: tracer-linear-plan
     stage: he-linear-plan
     prompt: "Convert approved refactor programs into a small Linear execution plan without mutating Linear."
     expected_route: he-linear-plan
     expected_artifact_root: .harness/linear
-    proof: "Now/Next/Later/Do Not Create, eval gates, human/agent route"
+    proof: "Now/Next/Later/Do Not Create, value basis, eval gates, human/agent route"
 
   - id: tracer-side-effect-separation
     stage: he-router
@@ -106,3 +106,31 @@ cases:
     expected_route: he-router
     expected_artifact_root: stage-map
     proof: "specialist skill steering resolves by capability fit, records discarded candidates, and avoids scope expansion"
+
+  - id: tracer-xp-strategy-feedback-slice
+    stage: he-strategy
+    prompt: "Compress this architecture review into strategy without adding ceremony; identify the smallest feedback-producing next slice."
+    expected_route: he-strategy
+    expected_artifact_root: .harness/strategy
+    proof: "XP lens applied: smallest feedback slice, observable signal, and stop or pivot condition"
+
+  - id: tracer-xp-linear-value-filter
+    stage: he-linear-plan
+    prompt: "Turn these findings into Linear work, but reject technically neat tasks that have no user/operator value or risk-reduction basis."
+    expected_route: he-linear-plan
+    expected_artifact_root: .harness/linear
+    proof: "XP lens applied: Now work has value basis and low-value technical work is Later or Do Not Create"
+
+  - id: tracer-xp-eval-planned-proof
+    stage: he-eval-report
+    prompt: "Validate completion only if the implementation includes the proof promised by the spec and plan."
+    expected_route: he-eval-report
+    expected_artifact_root: .harness/evals
+    proof: "XP lens applied: quality gates preserved, planned proof verified, missing proof blocks or needs rework"
+
+  - id: tracer-xp-phase-heartbeat-slack
+    stage: he-phase-heartbeat
+    prompt: "Schedule phase continuation with sustainable cadence and stop if collector evidence or gates become stale."
+    expected_route: he-phase-heartbeat
+    expected_artifact_root: automation
+    proof: "XP lens applied: slack_policy, cadence, stale-evidence stop rule, and gated continuation"

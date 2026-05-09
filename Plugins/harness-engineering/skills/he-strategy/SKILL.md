@@ -55,8 +55,9 @@ drift or moat impact, and evidence traceability.
    evals, routing, projections, automation, or workflow surfaces.
 8. Apply the Pragmatic Programmer review contract for architecture-review or
    explicit pragmatic review requests.
-9. Compress aggressively; strategy output is not implementation permission.
-10. Validate the artifact against the selected mode contract and record exact
+9. Apply the XP operating contract: identify the smallest feedback-producing next slice, the signal it should produce, and the stop/pivot condition; omit conclusions that cannot change a decision.
+10. Compress aggressively; strategy output is not implementation permission.
+11. Validate the artifact against the selected mode contract and record exact
    pass, fail, or blocked outcomes.
 
 ## Constraints
@@ -129,4 +130,5 @@ at the first failed gate and do not proceed.
 - Agent-native compression: `../../references/agent-native-compression-contract.md`
 - Agent-native audit scorecard: `../../references/agent-native-audit-scorecard.md`
 - Pragmatic Programmer review: `../../references/pragmatic-programmer-review-contract.md`
+- XP operating contract: `../../references/xp-operating-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`

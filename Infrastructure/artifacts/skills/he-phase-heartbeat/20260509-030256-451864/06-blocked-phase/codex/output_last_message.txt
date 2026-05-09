@@ -1,0 +1,5 @@
+Blocked by missing validation.
+
+Minimum corrective action:
+- Add the missing validation step or evidence gate.
+- Re-run the phase only after that validation passes.

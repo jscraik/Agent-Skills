@@ -1,0 +1,6 @@
+I’ll keep the phase open and won’t close it until either:
+
+- the eval proof artifact exists, or
+- the blocker is explicitly stated.
+
+If you want, I can also help check for the artifact or surface the blocker now.

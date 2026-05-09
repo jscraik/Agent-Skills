@@ -1,0 +1,18 @@
+I interpreted “parent issue” as the issue-tree roots in the `agent-skills` project, and the two clear roots I found are:
+
+| Parent issue | Build | Test | Drift | Routing | Rollback | Fit |
+|---|---|---|---|---|---|---|
+| [JSC-230: Implement Commandable Skill Trees for rooted skill handles](https://linear.app/jscraik/issue/JSC-230/implement-commandable-skill-trees-for-rooted-skill-handles) | Yes | Yes | Yes | Yes | No explicit rollback gate | This is the strongest routing-oriented parent. Its child work covers command-surface projection, thin runtime stubs, regression tests, and live invocation proof. |
+| [JSC-284: Decompose skills command module into bounded services](https://linear.app/jscraik/issue/JSC-284/agent-skills-decompose-skills-command-module-into-bounded-services) | Yes | Partial | Partial | Yes | No explicit rollback gate | This is the broader build/routing parent for the `./bin/ask` skills plane. Its children focus on responsibility maps, service extraction, and proof taxonomy. |
+
+Related gate-focused issues in `agent-skills` that are not parents, but help complete the picture:
+
+| Issue | Gate focus |
+|---|---|
+| [JSC-246: Build repo surface contract and agent capability control-plane golden paths](https://linear.app/jscraik/issue/JSC-246/build-repo-surface-contract-and-agent-capability-control-plane-golden) | Build, drift |
+| [JSC-171: Add executable docs contract tests for CLI examples](https://linear.app/jscraik/issue/JSC-171/add-executable-docs-contract-tests-for-cli-examples) | Test, drift |
+| [JSC-173: Implement unified skill-surface doctor for projection parity](https://linear.app/jscraik/issue/JSC-173/implement-unified-skill-surface-doctor-for-projection-parity) | Drift |
+| [JSC-172: Add `ask doctor --fix` for first-run remediation](https://linear.app/jscraik/issue/JSC-172/add-ask-doctor-fix-for-first-run-remediation) | Drift remediation |
+| [JSC-98: Relax coding-harness release eval timeout for update lifecycle case](https://linear.app/jscraik/issue/JSC-98/relax-coding-harness-release-eval-timeout-for-update-lifecycle-case) | Rollback-adjacent, but not a parent issue |
+
+If you want, I can turn this into a cleaner parent/sub-issue crosswalk, or expand it to the broader workspace instead of just `agent-skills`.

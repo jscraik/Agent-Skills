@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a7d-245a-7fb1-8e74-8e696adac28e"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Is this meant to run interactively, or should I record a headless assumption for the project state? If you don’t specify, I’ll proceed assuming headless."}}
+{"type":"turn.completed","usage":{"input_tokens":30260,"cached_input_tokens":22912,"output_tokens":236,"reasoning_output_tokens":196}}

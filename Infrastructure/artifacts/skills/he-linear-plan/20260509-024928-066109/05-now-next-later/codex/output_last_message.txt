@@ -1,0 +1,16 @@
+Yes. A clean way to classify proposed work is:
+
+| Bucket | What belongs here | Decision test |
+|---|---|---|
+| `Now` | Highest-value, highest-urgency work that should be started immediately | If we had capacity today, would this be the first thing we do? |
+| `Next` | Important work that is ready soon, but not the current focus | Is this clearly valuable and likely to be the next priority after `Now` items finish? |
+| `Later` | Good ideas with value, but not ready or not important enough yet | Does this make sense eventually, but need more evidence, timing, or dependency work first? |
+| `Do Not Create` | Ideas we should not turn into work at all | Would this add unnecessary scope, duplicate existing work, or solve a problem we should not be solving? |
+
+A practical rubric:
+- `Now`: urgent, aligned, feasible, and clearly worth doing.
+- `Next`: valuable and feasible, but not as time-sensitive.
+- `Later`: potentially useful, but missing urgency, clarity, or dependencies.
+- `Do Not Create`: out of scope, redundant, low value, or harmful complexity.
+
+If you want, send me the proposed items and I’ll sort them into these four buckets for you.

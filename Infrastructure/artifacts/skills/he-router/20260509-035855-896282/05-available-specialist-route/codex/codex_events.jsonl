@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0aad-f5f0-7032-9e8b-a75f344944c8"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’d route this through `backend-platform` first, and add `build-web-apps:supabase-postgres-best-practices` if the harness plan touches Postgres schema, queries, migrations, or transaction design.\n\nIf you send the harness plan text or point me at the file, I’ll use the best-fit specialist path and keep the review grounded in database-specific constraints."}}
+{"type":"turn.completed","usage":{"input_tokens":29726,"cached_input_tokens":29568,"output_tokens":599,"reasoning_output_tokens":516}}

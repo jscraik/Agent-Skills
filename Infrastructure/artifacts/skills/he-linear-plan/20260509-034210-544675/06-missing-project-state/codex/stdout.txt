@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a9f-86bc-7283-9b75-ce0d5e20d323"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. When the target project state is unknown, I’ll either:\n\n1. Ask whether you want an interactive check, or\n2. Proceed with a headless assumption and record that assumption explicitly.\n\nIf you want, I can default to headless for this run unless you say otherwise."}}
+{"type":"turn.completed","usage":{"input_tokens":30269,"cached_input_tokens":2432,"output_tokens":363,"reasoning_output_tokens":299}}

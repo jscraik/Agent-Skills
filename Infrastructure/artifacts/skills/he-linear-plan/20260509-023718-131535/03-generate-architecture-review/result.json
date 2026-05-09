@@ -1,0 +1,67 @@
+{
+  "id": "generate-architecture-review",
+  "name": "Generate architecture review",
+  "category": "negative",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": false,
+  "prepend_skill": false,
+  "baseline_type": null,
+  "comparison_inputs": null,
+  "iteration_round_state": null,
+  "metric_availability": null,
+  "readiness_state": null,
+  "comparison_review_artifact": null,
+  "neutral_baseline_approval": null,
+  "timeout_profile": "default",
+  "timeout_sec": 600.0,
+  "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-023718-131535/03-generate-architecture-review",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": true,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+      ],
+      "artifacts": {
+        "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-023718-131535/03-generate-architecture-review/codex",
+        "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-023718-131535/03-generate-architecture-review/codex/final.txt",
+        "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-023718-131535/03-generate-architecture-review/codex/stdout.txt",
+        "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-023718-131535/03-generate-architecture-review/codex/stderr.txt",
+        "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-023718-131535/03-generate-architecture-review/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 10,
+          "command_count": 0,
+          "unique_command_count": 0,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 0,
+          "turn_count": 1,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 157341,
+            "output_tokens": 3889,
+            "reasoning_tokens": 0,
+            "total_tokens": 161230
+          }
+        },
+        "selected_skill": null
+      },
+      "used_schema": false
+    }
+  },
+  "passed": true,
+  "tier1_failed": false,
+  "tier2_failed": false,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [
+    "[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+  ]
+}

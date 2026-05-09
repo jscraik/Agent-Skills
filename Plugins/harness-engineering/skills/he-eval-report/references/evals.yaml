@@ -88,3 +88,12 @@ cases:
     prompt: "Can you build an eval gate matrix with pass, fail, partial, and not-run status from actual evidence."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: planned-proof-gap
+    name: "Planned proof gap"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Can you the implementation claims proof after the fact, but the source plan did not require that proof before work; classify the planned-proof gap before closure."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(planned proof|planned-proof|source plan|before implementation|blocks closure|repair)"}]

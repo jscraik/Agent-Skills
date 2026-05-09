@@ -29,7 +29,7 @@ linear_priority: 2
 selected_refactor: .harness/refactors/agent-first-golden-path.md
 source_spec: Docs/specs/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-spec.md
 linear_delta_status: pass
-live_baseline_status: runtime_budget_pass_with_sync_required
+live_baseline_status: runtime_budget_pass_with_unrelated_sync_required
 ---
 
 # Agent Skills JSC-246 Agent First Golden Path Spec
@@ -194,7 +194,7 @@ loop makes task completion worse.
 | `./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot` | Succeeded with `status: resolved_with_fallback`, recommended `$autofix`, and also reported nested `goal_decision_status: intent_unresolved`. | Shows the command is useful but not yet cleanly deterministic enough to treat fallback routing as proof-quality routing. |
 | `./bin/ask skills prove he-spec --json --robot` | Succeeded with `proof_status: reachable_without_outcome_proof`, structural audit pass, outcome workout available but not run. | Confirms proof semantics are already honest and should be preserved, then strengthened with proof-level assertions. |
 | `./bin/ask runtime budget --json --robot` | Succeeded with no violations and no unresolved scope collisions; baselined same-scope collisions are `agents-sdk`, `build-chatgpt-app`, and `chatgpt-app-submission`; retained informational advisory `ADVANCED_SKILL_VISIBILITY_HIGH` for advanced-mode skill count. | Confirms the prior curated runtime-budget collision is resolved/baselined and must not remain an active JSC-246 blocker. |
-| `./bin/ask repo closeout --changed --json --robot` | Failed with `sync_required`; reported `changed_file_count: 53`, runtime budget pass, generated projection churn, repo surface warning, and next command `./bin/ask skills sync --scope workspace --projection rooted --json --robot`. | Shows closeout catches sync readiness while preserving runtime-budget and diagnostic-debt truth; eval fixtures must isolate spec-slice changes from unrelated worktree churn. |
+| `./bin/ask repo closeout --changed --json --robot` | Failed with `sync_required`; reported `changed_file_count: 14`, runtime budget pass, canonical skill changes outside this JSC-246 plan/spec slice, repo surface warning, and next command `./bin/ask skills sync --scope workspace --projection rooted --json --robot`. | Shows closeout catches current unrelated sync readiness while preserving runtime-budget and diagnostic-debt truth; eval fixtures must isolate JSC-246 changes from unrelated worktree churn. |
 
 ### Interpretation
 
@@ -215,9 +215,10 @@ loop makes task completion worse.
 
 ## Current-State Baseline
 
-Captured on `2026-05-09` from live commands. The worktree already contained
-unrelated skill/projection changes before this spec refresh, so closeout
-evidence is useful as blocker evidence but not a clean JSC-246 fixture.
+Captured on `2026-05-09` from live commands. The worktree currently contains
+unrelated harness-engineering skill changes outside this JSC-246 plan/spec
+slice, so closeout evidence is useful as live blocker evidence but not a clean
+JSC-246 fixture.
 
 `repo doctor` baseline:
 
@@ -305,7 +306,9 @@ runtime_projection: rooted
 runtime_visibility: latent
 validation:
   - ./bin/ask skills audit Plugins/harness-engineering/skills/he-spec --level strict --json --robot
-next_command: ./bin/ask skills prove he-spec --json --robot
+reachability.proof_command: ./bin/ask skills proof he-spec --json --robot
+next_command: ./bin/ask skills proof he-spec --json --robot
+compatibility_note: current explain output still uses skills proof as the reachability next command
 ```
 
 Command registration baseline:
@@ -337,7 +340,8 @@ why:
   - matched terms=pr,review
 goal_decision_status: intent_unresolved
 goal_decision.failure_class: INTENT_UNRESOLVED
-next_command: ./bin/ask skills prove autofix --json --robot
+next_command: ./bin/ask skills proof autofix --json --robot
+compatibility_note: current improve output still uses skills proof as the reachability next command
 ```
 
 This is useful behavior, but not enough proof for deterministic routing. The
@@ -370,15 +374,25 @@ commit_readiness.ready: false
 commit_readiness.blockers:
   - sync_required
 next_command: ./bin/ask skills sync --scope workspace --projection rooted --json --robot
-changed_file_count: 53
+changed_file_count: 14
 sync.needed: true
 sync.commands:
   - ./bin/ask skills sync --scope workspace --projection rooted --json --robot
   - ./bin/ask skills handles --check --json --robot
 runtime_budget.status: pass
 surface_policy.status: warning
-note: output included unrelated pre-existing canonical skill, plugin-factory, skill-factory, harness reference, and generated .skillsets projection changes
+note: output included unrelated dirty harness-engineering skill, reference, script, and prompt-artifact changes outside this JSC-246 plan/spec slice
 ```
+
+Fresh confidence-loop note on `2026-05-09`: the current live closeout still
+blocks on `sync_required`, but the blocker is owned by unrelated dirty
+harness-engineering skill files (`he-eval-report`, `he-linear-plan`,
+`he-phase-heartbeat`, `he-refactor`, `he-strategy`) and related reference/script
+changes, not by the JSC-246 plan/spec artifacts alone. The implementation plan
+must not treat that blocker as JSC-246 implementation scope. It must prove
+closeout through controlled fixtures or an isolated changed-file scenario and
+record live closeout as blocked only when the command actually reports a
+blocker.
 
 Closeout is already doing the right kind of pressure work. The next plan must
 avoid treating the current dirty worktree as a clean golden-path fixture. Use an
@@ -392,7 +406,7 @@ proving `repo closeout --changed`.
 | `repo doctor` | Composes repo status, sync, catalog parity, runtime budget, handles, repo surface, diagnostic debt, and one `next_command`. | Next-action priority ordering is implicit in implementation, not yet asserted as a contract with fixtures. | Plan must characterize and test next-action ordering before changing output. |
 | `repo surface` | Already reachable and selected by doctor for current diagnostic debt. | Surface debt count is high and can dominate the loop; spec must keep it diagnostic rather than letting it become cleanup scope. | Plan may use surface output as evidence but must not delete or archive paths. |
 | `skills improve` | Can recommend a useful capability and prove reachability. | Fallback can coexist with `intent_unresolved`; that is valuable but ambiguous for agents. | Plan must define clean resolved vs fallback-resolved vs blocked routing states. |
-| `skills explain` | Already reports canonical source, generated handle, runtime projection, visibility, validation, and next proof command. | Needs representative coverage beyond `he-spec` and stable assertions for required fields. | Plan must add fixtures for at least one generated handle and one non-HE handle. |
+| `skills explain` | Already reports canonical source, generated handle, runtime projection, visibility, validation, reachability `proof_command`, and `next_command`. | Current tested output still emits `skills proof` as the next command for reachability. | Plan must preserve the current `skills proof` compatibility contract unless it updates tests and consumers in an explicit compatibility migration. |
 | `skills prove` | Already separates reachability/structural validity from missing outcome proof. | Needs explicit proof-level fields aligned with the ADR, not only prose-like `proof_status` strings. | Plan must assert proof taxonomy mapping without overbuilding promotion gates. |
 | `repo closeout --changed` | Detects sync-required blocker, focused validation, runtime budget, surface policy, and next command. | Live dirty worktree makes proof noisy; unrelated user work can pollute closeout evidence. | Plan must prove closeout in an isolated fixture or tightly scoped branch. |
 | Docs/front door | README already shows the five-command loop. | Some docs still expose adjacent commands and older command names before proving first-contact compression. | Plan must budget docs deletion/demotion, not just add new copy. |
@@ -873,8 +887,12 @@ Before `he-work`, the plan or implementation review must explicitly check:
   `./bin/ask runtime budget --json --robot` evidence.
 - Non-blocking repo-surface diagnostic debt is recorded without expanding the
   slice into broad repo cleanup.
-- `sync_required` remains a closeout readiness blocker, not a reason to mutate
-  unrelated canonical skill work owned by another slice.
+- `sync_required` remains a closeout readiness blocker when the command reports
+  it, not a reason to mutate unrelated canonical skill work owned by another
+  slice.
+- Current `skills explain` / `skills improve` `next_command` compatibility with
+  `skills proof` is respected unless the implementation explicitly migrates
+  tests and consumers to `skills prove` in the same reviewed phase.
 - New command names, aliases, proof levels, or lifecycle states are rejected
   unless the ablation proof shows existing command output cannot carry the
   behavior.
@@ -1007,8 +1025,12 @@ Required planning constraints:
 - Preserve `repo surface` as diagnostic lane, not first-contact replacement.
 - Treat `skills improve`, `skills explain`, `skills prove`, and
   `repo closeout --changed` as the loop.
-- Keep `sync_required` as closeout readiness evidence and avoid absorbing
-  unrelated projection churn into JSC-246.
+- Keep `sync_required` as live closeout readiness evidence when present and
+  avoid absorbing unrelated projection churn into JSC-246.
+- Preserve the `skills proof` / `skills prove` boundary: `skills proof` is the
+  existing reachability command surfaced by current explain/improve output;
+  `skills prove` is the agent-facing proof scorecard. Do not force that
+  compatibility migration unless the tests and consumers are updated together.
 - Sequence subtractive and compression work before additive docs or aliases.
 - Require fresh-agent eval and ablation proof before closure.
 - Keep the active set small: one parent issue, no speculative sub-issue

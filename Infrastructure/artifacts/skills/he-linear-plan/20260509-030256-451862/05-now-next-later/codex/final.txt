@@ -1,0 +1,21 @@
+Yes. A simple way to classify proposed work is:
+
+- `Now`: work that is required immediately, unblocks the current goal, or has to happen in this cycle.
+- `Next`: work that is clearly valuable and ready to queue up, but not urgent right now.
+- `Later`: work worth keeping, but dependent on other decisions, resources, or time.
+- `Do Not Create`: work that should not be added to the backlog at all because it is out of scope, duplicative, too speculative, or low value.
+
+A practical decision rule:
+
+- Put it in `Now` if delaying it would block delivery or create immediate risk.
+- Put it in `Next` if it is the logical follow-on after `Now`.
+- Put it in `Later` if it is plausible and useful, but not needed soon.
+- Put it in `Do Not Create` if you would not want to spend time on it even if capacity opened up.
+
+If you want, I can also turn this into a stricter rubric, for example with decision questions like:
+- Is it required for the current objective?
+- Is it dependent on unfinished work?
+- Would we still want this in 30 days?
+- Is this actually worth tracking?
+
+Or, if you have a list of proposed items, send them over and I’ll classify each one into the four buckets.

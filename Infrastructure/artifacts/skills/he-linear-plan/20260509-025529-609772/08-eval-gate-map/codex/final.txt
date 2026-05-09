@@ -1,0 +1,26 @@
+Based on the Linear issue text, here’s the gate map I’d use. I’m inferring the gate tags from each issue’s scope and validation, so a few rows are naturally multi-gate.
+
+**Design-system parent epic: `JSC-238`**
+| Issue | Relevant gates | Why |
+|---|---|---|
+| [JSC-239](https://linear.app/jscraik/issue/JSC-239/agent-native-design-system-contract-wiring) | Build, Test | It changes `DESIGN.md` / `.design-system-guidance.json` and validates with `type-check`, `build`, `check:ci`, and `lint`. |
+| [JSC-240](https://linear.app/jscraik/issue/JSC-240/agent-native-design-system-routing-table-contract) | Build, Test, Drift, Routing | It authors `AGENT_UI_ROUTING.json`, exports route resolution APIs, and explicitly adds drift detection against routing docs, lifecycle, coverage, and examples. |
+| [JSC-241](https://linear.app/jscraik/issue/JSC-241/agent-native-design-system-prepare-payload-model) | Build, Test, Drift, Routing | It digests routing JSON, lifecycle, coverage, and contract data, and fails closed on missing or ambiguous route inputs. |
+| [JSC-242](https://linear.app/jscraik/issue/JSC-242/agent-native-design-system-read-only-cli-commands) | Build, Test | It adds the public CLI command surface and validates command fixtures, selector conflicts, and read-only behavior. |
+| [JSC-243](https://linear.app/jscraik/issue/JSC-243/agent-native-design-system-actionable-remediation-output) | Build, Test, Routing | It uses the route facade APIs and extends remediation output only when route, remediation, and example coverage exist. |
+| [JSC-244](https://linear.app/jscraik/issue/JSC-244/agent-native-design-system-gold-example-inventory-wave-1) | Test, Drift, Routing | It adds example inventory metadata, validates examples, and connects example paths into `AGENT_UI_ROUTING.json`. |
+| [JSC-245](https://linear.app/jscraik/issue/JSC-245/agent-native-design-system-abstraction-proposal-gate) | Test, Routing, Rollback | It is explicitly a promotion gate, with typed waivers, rollback-safe checks, and blocked promotion without approved proposal coverage. |
+
+**Gate infrastructure parent issues**
+| Issue | Relevant gates | Why |
+|---|---|---|
+| [JSC-117](https://linear.app/jscraik/issue/JSC-117/enforce-ci-responsibility-split-between-circleci-and-github-actions) | Build, Test | CircleCI owns the primary build and test matrix, and the issue forbids duplicated build/test gates. |
+| [JSC-24](https://linear.app/jscraik/issue/JSC-24/make-trust-tests-hermetic-and-prove-no-mutation-of-operational-state) | Test | It is specifically about hermetic test behavior and proving tests do not mutate operational state. |
+| [JSC-63](https://linear.app/jscraik/issue/JSC-63/drift-gate-add-per-project-check-suppressions) | Drift | It is directly about suppressing inapplicable `drift-gate` checks per project. |
+| [JSC-64](https://linear.app/jscraik/issue/JSC-64/drift-gate-auto-seed-baseline-on-first-run) | Drift | It is directly about baseline seeding for `drift-gate`. |
+| [JSC-65](https://linear.app/jscraik/issue/JSC-65/document-all-gate-prerequisites-and-add-harness-doctor-command) | Drift | It documents gate prerequisites and calls out drift-gate’s missing status doc and baseline requirements. |
+| [JSC-82](https://linear.app/jscraik/issue/JSC-82/route-existing-installs-to-version-aware-harness-upgrade-instead-of) | Routing, Rollback | It redirects users to the safer upgrade path and avoids destructive `init --update` behavior. |
+| [JSC-212](https://linear.app/jscraik/issue/JSC-212/m3-add-guidance-wrapper-migration-and-rollback-safety) | Rollback | It is explicitly about migration and rollback safety, rollback metadata, and resume handling. |
+| [JSC-219](https://linear.app/jscraik/issue/JSC-219/pre-ga-authenticate-rollback-metadata-and-compatibility-checks) | Rollback | It focuses on rollback metadata authenticity, compatibility checks, and fail-closed rollback behavior. |
+
+If you want, I can turn this into a compact CSV-style matrix next, or I can narrow it to just the `JSC-238` epic so it reads like a handoff note.

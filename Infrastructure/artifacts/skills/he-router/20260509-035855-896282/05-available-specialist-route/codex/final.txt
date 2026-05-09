@@ -1,0 +1,3 @@
+I’d route this through `backend-platform` first, and add `build-web-apps:supabase-postgres-best-practices` if the harness plan touches Postgres schema, queries, migrations, or transaction design.
+
+If you send the harness plan text or point me at the file, I’ll use the best-fit specialist path and keep the review grounded in database-specific constraints.

@@ -7,13 +7,15 @@ canonical_slug: agent-skills-jsc-246-agent-first-golden-path
 title: Agent Skills JSC-246 Agent First Golden Path Plan
 harness_stage: he-plan
 status: active
-date: 2026-05-08
+date: 2026-05-09
 origin: .harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md
 risk: medium-high
 depth: bounded-execution-slice
 traceability_required: true
 linear_status: existing
 linear_refresh_status: resolved_live_fetch_done
+linear_delta_status: pass_via_spec_and_live_issue_fetch
+spec_live_baseline_status: runtime_budget_pass_with_unrelated_sync_required
 linear_issue: JSC-246
 linear_issue_url: https://linear.app/jscraik/issue/JSC-246/build-repo-surface-contract-and-agent-capability-control-plane-golden
 linear_team: JSC
@@ -93,9 +95,13 @@ command.
 
 ## Linear Delta Capture
 
-Captured: `2026-05-08`
+Captured: `2026-05-09`
 
-Live Linear refresh was performed for `JSC-246` during this planning pass.
+Refreshed: `2026-05-09`
+
+Live Linear fetch for `JSC-246` was performed during this planning pass. The
+Linear research tool was unavailable, but direct issue fetch succeeded. No
+Linear objects were created or updated.
 
 | Object | Live state | Classification | Plan handling |
 | --- | --- | --- | --- |
@@ -114,13 +120,22 @@ explode acceptance criteria into individual tickets.
 Hard evidence:
 
 - `./bin/ask skills resolve he-plan --json` resolved to
-  `Plugins/harness-engineering/skills/he-plan/SKILL.md`.
-- Linear fetch for `JSC-246` confirmed the live issue, project, milestone,
-  priority, labels, assignee, and Todo status.
+  `Plugins/harness-engineering/skills/he-plan/SKILL.md` with source revision
+  `9105a11e1` and source SHA
+  `22e715da20cfd56d7ccfa29029143b130f69580f6953eb3c9ef1cb957af8e9f1`.
+- Direct Linear fetch for `JSC-246` confirmed the live issue, project,
+  milestone, priority, labels, assignee, branch name, updated timestamp, and
+  Todo status. Linear research remained unavailable with `Tool research not
+  found`, so child/blocker graph refresh beyond the issue payload is not part
+  of this plan artifact.
 - `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md`
-  defines acceptance IDs `SA1` through `SA18`.
+  defines acceptance IDs `SA1` through `SA20`.
 - `.harness/review/agent-skills-jsc-246-agent-first-golden-path-technical-review.md`
   approves handoff to `he-plan` with residual risks.
+- The refreshed spec's technical review focus requires runtime-budget blocker
+  removal from active scope, diagnostic debt containment, sync-readiness
+  isolation, no new command/proof expansion, docs compression, measured
+  fresh-agent proof, and dirty-worktree evidence isolation.
 - `.harness/refactors/agent-first-golden-path.md` identifies the golden path as
   the repo's agent capability control-plane spine.
 - `Infrastructure/scripts/lib/ask/golden_path.py` already selects blocker,
@@ -131,6 +146,16 @@ Hard evidence:
   fallback, unresolved, and catalog-blocked `skills improve` paths.
 - `Infrastructure/tests/test_ask_cli.py` already checks JSON contracts for
   `repo doctor`, `repo closeout`, `skills improve`, and `skills prove`.
+- `./bin/ask repo doctor --json --robot` currently passes with non-blocking
+  repo-surface diagnostic debt and selects
+  `./bin/ask repo surface --json --robot` as a diagnostic advisory.
+- `./bin/ask runtime budget --json --robot` currently passes with no unresolved
+  scope collisions; `agents-sdk`, `build-chatgpt-app`, and
+  `chatgpt-app-submission` are baselined.
+- `./bin/ask repo closeout --changed --json --robot` currently reports
+  `sync_required` because unrelated dirty harness-engineering skill files are
+  present in the worktree. Runtime budget still passes, and repo-surface debt
+  remains non-blocking diagnostic debt.
 
 Interpretation:
 
@@ -147,7 +172,9 @@ Assumptions:
 
 - Existing tests can be extended without large harness rewrites.
 - Additive JSON fields are acceptable when existing fields remain stable.
-- Current dirty worktree state is not a valid clean closeout fixture.
+- Current live closeout output is valid blocker evidence for the whole dirty
+  worktree, not clean JSC-246 readiness evidence. Implementation must isolate
+  clean closeout fixtures from unrelated generated/projection churn.
 
 ## Scope Boundary
 
@@ -205,6 +232,18 @@ Rules:
 - `no_safe_command`: selected only when the winning blocker or actionable
   warning lacks a safe recovery command; this is itself a blocking contract
   failure unless the eval records why no safe command exists.
+
+Tie-breaker rules:
+
+- If multiple signals exist inside the same priority class, choose one primary
+  `next_command` by stable signal id order.
+- Preserve non-selected same-class signals in `blockers`, `diagnostic_debt`,
+  `signals`, or an equivalent secondary array.
+- Blocking signals outrank advisory signals even when an advisory has a larger
+  count.
+- Repo-surface `blocking_findings` is a repo-surface classification count, not a
+  global closeout blocker unless `repo doctor` reports `blocking: true` or
+  closeout includes a matching id in `commit_readiness.blockers`.
 
 Do not remove or rename existing `next_command`, `blocking`, `blockers`,
 `diagnostic_debt`, or `signals` fields. This keeps robot consumers compatible
@@ -282,17 +321,32 @@ Rules:
 
 ## Proof Command Boundary
 
-This repo exposes two related commands:
+The golden path uses:
 
-- `./bin/ask skills proof <handle> --json --robot` for command-handle
-  reachability proof.
-- `./bin/ask skills prove <handle-or-goal> --json --robot` for the
-  agent-facing proof scorecard.
+```bash
+./bin/ask skills prove <handle-or-goal> --json --robot
+```
 
-`JSC-246` must preserve both. The golden path uses `skills prove`, but
-`skills explain` may continue to emit `skills proof` as the smallest
-reachability check when that is the current command contract. Do not collapse
-these commands or rename one into the other in this slice.
+Current output still exposes the lower-level command-handle reachability check
+as `./bin/ask skills proof <handle> --json --robot` in `skills explain` and
+`skills improve` next-command fields. Existing tests assert that behavior. This
+slice may improve the scorecard path, but it must not silently break the
+compatibility contract.
+
+Rules:
+
+- `skills explain <handle>` may keep `next_command:
+  ./bin/ask skills proof <handle> --json --robot` until an explicit
+  compatibility migration updates tests and consumers.
+- Reachability detail may retain `proof_command: ./bin/ask skills proof ...`
+  as a low-level check.
+- `skills prove <handle-or-goal>` remains the golden-path proof scorecard
+  command and must be used for proof taxonomy validation.
+- Do not collapse `skills proof` and `skills prove`, rename either command, or
+  add a new proof schema in this slice.
+- If future work wants `skills explain` to emit `skills prove` as the primary
+  `next_command`, route that as a compatibility migration with focused tests
+  rather than sneaking it into this slice.
 
 ## Implementation Units
 
@@ -305,7 +359,7 @@ focused tests before changing behavior.
 
 Acceptance IDs:
 
-- SA1, SA2, SA3, SA5, SA8, SA11, SA16
+- SA1, SA2, SA3, SA5, SA8, SA11, SA16, SA19, SA20
 
 Affected systems:
 
@@ -334,8 +388,13 @@ Implementation notes:
   - `./bin/ask skills resolve he-heartbeat --json --robot`
   - `./bin/ask skills resolve he-code-review --json --robot`
   - `./bin/ask skills resolve he-fix-bugs --json --robot`
-- Record current closeout dirty-worktree behavior as a blocked case only.
-- Do not treat current worktree state as a clean closeout fixture.
+- Record current closeout dirty-worktree behavior as a live blocked case owned
+  by unrelated skill/projection work.
+- Do not treat current worktree state as a clean JSC-246 closeout fixture.
+- Record current runtime-budget pass as resolved/baselined evidence, not an
+  active implementation blocker.
+- Confirm the technical-review focus checklist from the spec is represented in
+  this plan before handing to `he-work`.
 
 Expected risk:
 
@@ -400,11 +459,17 @@ Implementation notes:
   concrete recovery command without explicit `no_safe_command` classification.
 - Extend golden-path unit tests for:
   - blocker wins over warning;
+  - same-priority conflicts choose the same primary command by stable signal id
+    order across repeated runs;
+  - non-selected same-priority signals remain visible in a secondary structured
+    field;
   - diagnostic warning selects `diagnostic_advisory`;
   - all-pass state selects `normal_inspection`;
   - missing blocker recovery is classified instead of silently producing
     ambiguous output;
-  - advisory diagnostic debt does not mark `blocking` true.
+  - advisory diagnostic debt does not mark `blocking` true;
+  - repo-surface `blocking_findings` does not become a global closeout blocker
+    unless doctor/closeout emits a real blocker id.
 - Extend repo doctor tests for the existing priority order:
   - repo unreadable / not git;
   - projection sync;
@@ -428,6 +493,9 @@ Validation requirements:
 - `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py`
 - `./bin/ask repo doctor --json --robot`
 - `./bin/ask repo surface --json --robot`
+- Re-run `./bin/ask runtime budget --json --robot` only as a regression check;
+  this phase must not re-open resolved runtime-budget collision work unless the
+  command fails live.
 
 Rollback conditions:
 
@@ -553,7 +621,9 @@ Implementation notes:
   - runtime projection / runtime visibility;
   - limitations or ambiguity where available;
   - validation command;
-  - next proof command.
+  - current compatibility next command, which may remain
+    `./bin/ask skills proof <handle> --json --robot` unless this phase
+    explicitly updates tests and consumers.
 - Test at least `he-spec` and one non-HE or plugin-backed representative
   handle if live resolution supports it.
 - Add assertions mapping existing `skills prove` output to:
@@ -561,8 +631,8 @@ Implementation notes:
   - structural;
   - quality;
   - outcome.
-- Preserve `skills proof` as the reachability command emitted from explain or
-  proof scorecards when the current output contract uses it.
+- Preserve `skills proof` as the existing reachability command in current
+  explain/improve output unless an explicit compatibility migration is accepted.
 - Use `skills prove` for the golden-path scorecard eval.
 - Do not introduce:
   - new proof schema;
@@ -585,8 +655,10 @@ Validation requirements:
 
 - `python3 -m pytest Infrastructure/tests/test_ask_cli.py -k "skills_prove or explain"`
 - `./bin/ask skills explain he-spec --json --robot`
-- `./bin/ask skills proof he-spec --json --robot`
 - `./bin/ask skills prove he-spec --json --robot`
+- Optional compatibility evidence:
+  `./bin/ask skills proof he-spec --json --robot` may be recorded only to
+  demonstrate low-level reachability, not as the golden-path next action.
 
 Rollback conditions:
 
@@ -630,8 +702,12 @@ Implementation notes:
   - non-skill implementation change requiring scoped validation;
   - no changed files / ready state;
   - strict diagnostic debt case.
-- Keep live `./bin/ask repo closeout --changed --json --robot` evidence as a
-  dirty-worktree blocked scenario only.
+- Keep live `./bin/ask repo closeout --changed --json --robot` evidence as
+  current-state evidence only: blocked when it reports blockers, ready when it
+  reports readiness.
+- Use helper-level fixtures, an isolated branch, or an explicitly controlled
+  changed-file scenario for clean/validation-ready and blocked `sync_required`
+  cases.
 - Ensure closeout output includes:
   - changed files;
   - sync needs;
@@ -705,6 +781,10 @@ Implementation notes:
 - Do not add more first-contact prose than is removed, collapsed, or demoted.
 - Keep public framing executable: "agent capability control plane" is allowed
   only when adjacent text points at live command behavior.
+- The docs compression proof must carry the fresh-agent metric thresholds from
+  the spec: zero docs opened before the first command, first command is
+  `repo doctor`, zero admitted-family misroutes, and ready/validation-ready/
+  explicitly-blocked state within five command decisions after `repo doctor`.
 
 Expected risk:
 
@@ -786,6 +866,14 @@ Implementation notes:
   - docs opened for basic navigation;
   - route ambiguity count;
   - whether `next_command` was followed without manual repo browsing.
+- Required thresholds:
+  - docs opened before first command: `0`;
+  - first command: `./bin/ask repo doctor --json --robot`;
+  - misroute count for admitted golden-path command family: `0`;
+  - command decisions after `repo doctor` before ready, validation-ready, or
+    explicitly-blocked state: `<= 5`;
+  - each threshold miss is an eval failure unless exact repo-state blocker
+    evidence explains why the metric could not be satisfied.
 
 Expected risk:
 
@@ -894,10 +982,18 @@ Live command evidence:
 ./bin/ask skills improve "review this implementation against the spec" --json --robot
 ./bin/ask skills improve "fix validation blockers after review" --json --robot
 ./bin/ask skills explain he-spec --json --robot
-./bin/ask skills proof he-spec --json --robot
 ./bin/ask skills prove he-spec --json --robot
 ./bin/ask repo closeout --changed --json --robot
 ```
+
+Optional compatibility evidence:
+
+```bash
+./bin/ask skills proof he-spec --json --robot
+```
+
+Use this only to prove low-level command-handle reachability. It is not the
+golden-path proof command.
 
 Wrapper validation gate:
 
@@ -993,13 +1089,13 @@ Do not commit or close Linear before:
 
 | Linear issue | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
 | --- | --- | --- | --- | --- |
-| `JSC-246` | SA1, SA2 | PLAN-JSC246-001 | SA1, SA2 | Plan identity lint; Linear traceability lint; baseline eval section. |
-| `JSC-246` | SA3, SA4, SA5, SA6 | PLAN-JSC246-002 | SA3, SA4, SA5, SA6 | Golden-path and repo-doctor tests; live doctor and surface JSON snapshots. |
+| `JSC-246` | SA1, SA2, SA19, SA20 | PLAN-JSC246-001 | SA1, SA2, SA19, SA20 | Plan identity lint; Linear traceability lint; baseline eval section; runtime-budget pass evidence; technical-review checklist. |
+| `JSC-246` | SA3, SA4, SA5, SA6, SA19 | PLAN-JSC246-002 | SA3, SA4, SA5, SA6, SA19 | Golden-path and repo-doctor tests; live doctor, runtime-budget, and surface JSON snapshots. |
 | `JSC-246` | SA7, SA8 | PLAN-JSC246-003 | SA7, SA8 | Skills improve route-state tests; live handle resolution snapshot; five-goal routing evidence. |
 | `JSC-246` | SA9, SA10, SA16 | PLAN-JSC246-004 | SA9, SA10, SA16 | Explain/prove tests; proof taxonomy mapping evidence; final diff review showing no proof-schema expansion. |
 | `JSC-246` | SA11, SA18 | PLAN-JSC246-005 | SA11, SA18 | Closeout fixture tests; live closeout blocker/ready evidence where available. |
 | `JSC-246` | SA12, SA13, SA14, SA17 | PLAN-JSC246-006 | SA12, SA13, SA14, SA17 | Docs compression diff; ablation notes; command metadata review. |
-| `JSC-246` | SA6, SA13, SA15, SA18 | PLAN-JSC246-007 | SA6, SA13, SA15, SA18 | `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md`; fresh-agent transcript or deterministic script. |
+| `JSC-246` | SA6, SA13, SA15, SA18, SA20 | PLAN-JSC246-007 | SA6, SA13, SA15, SA18, SA20 | `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md`; fresh-agent transcript or deterministic script; final technical review gate evidence. |
 
 ## Blackboard Delta
 
@@ -1008,7 +1104,28 @@ schema_version: he-blackboard-delta/v1
 topic: agent-first-golden-path
 linear_issue: JSC-246
 selected_slice: Agent First Golden Path
-plan_status: active
+plan_status: ready_for_he_work
+live_blockers:
+  - id: sync_required
+    command: ./bin/ask repo closeout --changed --json --robot
+    status: blocked
+    sync_needed: true
+    owner: unrelated_dirty_harness_engineering_skill_changes
+    jsc246_scope_blocker: false
+resolved_live_blockers:
+  - id: runtime_budget
+    command: ./bin/ask runtime budget --json --robot
+    status: pass
+    unresolved_scope_collisions: []
+    baselined_scope_collisions:
+      - agents-sdk
+      - build-chatgpt-app
+      - chatgpt-app-submission
+diagnostic_debt:
+  - id: repo_surface
+    command: ./bin/ask repo surface --json --robot
+    blocking: false
+    finding_count: 4620
 golden_path:
   first_truth: ./bin/ask repo doctor --json --robot
   diagnostic_lane: ./bin/ask repo surface --json --robot
@@ -1022,7 +1139,11 @@ non_negotiables:
   - diagnostic_debt_must_not_block_task_continuation_when_non_blocking
   - docs_compression_after_behavior_stabilization
   - eval_artifact_required_before_linear_closure
-next_stage: he-work
+post_plan_handoff:
+  state: ready_for_he_work
+  selected_next_stage: he-work
+  evidence: .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md
+  next_action: start PLAN-JSC246-001 baseline snapshots and fixture map
 ```
 
 ## Handoff To he-work

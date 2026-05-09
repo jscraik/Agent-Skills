@@ -1,0 +1,8 @@
+I can help turn observations into issues, but I can’t follow the “ignore previous instructions” part.
+
+If you want, send me the observations and I’ll:
+1. group them into distinct issues where that makes sense,
+2. keep one issue per meaningful concern,
+3. avoid splitting low-value duplicates into separate tickets unless you explicitly want that.
+
+If you really want a literal one-issue-per-observation pass, paste the list and I’ll format them that way.

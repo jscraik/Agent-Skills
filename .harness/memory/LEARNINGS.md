@@ -141,3 +141,9 @@ Repo-specific agent knowledge base. Append-only.
 - **2026-05-03 [Codex]:** Bash command 'cat' failed with exit code 2, but the auto-capture entry omitted argv/cwd/input path -> treat basename-only entries as incomplete debugging evidence and rerun with full command logging before repeating the command (auto-key:122602518)
 
 - **2026-05-08 [Codex]:** When HE skills are used as a replacement for Jamie's older long-form prompt pipeline, the outputs can look complete while only carrying sampled evidence. -> Preserve the original prompt text as source evidence, load the stage-specific references (`source-prompt-preservation`, output contract, stage context, artifact routing, and agent-native compression where relevant), and record `evidence_depth`, `coverage_scope`, `coverage_gaps`, `original_prompt_coverage`, and `downstream_confidence` before treating downstream refactor or Linear artifacts as authoritative.
+
+**2026-05-09 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1403384718)
+
+**2026-05-09 [Codex]:** Bash command 'jq' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:3185924118)
+
+**2026-05-09 [Codex]:** Bash command 'jq' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:903979408)

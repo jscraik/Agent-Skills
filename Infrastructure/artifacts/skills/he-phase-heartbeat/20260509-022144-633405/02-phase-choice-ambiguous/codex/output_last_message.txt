@@ -1,0 +1,1 @@
+Yes. If the plan reaches a point where more than one next stage is valid, I’ll pause and ask you which path you want before doing any work.

@@ -1,0 +1,38 @@
+Here’s a small Linear-ready execution plan built from the approved harness artifacts.
+
+**Milestone 1: Scope and source-of-truth**
+- Purpose: lock the problem, success criteria, and canonical sources before any implementation work.
+- In scope: `project-init.md`, `roadmap.md`, `state-management.md`, `session-handoff.md`
+- Gates:
+  - Problem statement is written and unambiguous.
+  - Success criteria are explicit and testable.
+  - Canonical sources are identified, and runtime projections are not treated as source.
+  - Open questions are either answered or explicitly deferred.
+
+**Milestone 2: Plan and break down**
+- Purpose: turn the approved artifacts into an ordered, dependency-aware task set.
+- In scope: `brownfield-mapping.md`, `code-analysis.md`, `concerns.md`, `coding-principles.md`, `context-limits.md`, `specify.md`, `discuss.md`, `design.md`, `tasks.md`
+- Gates:
+  - Tasks are small enough to complete in a single pass.
+  - Dependencies are ordered clearly.
+  - Any design decisions that affect shape or scope are captured before implementation.
+  - Verification is attached to each task, not deferred to the end.
+
+**Milestone 3: Execute and verify**
+- Purpose: implement the plan and prove it is safe to ship.
+- In scope: `implement.md`, `validate.md`, `quick-mode.md`
+- Gates:
+  - Implementation is complete against the agreed scope.
+  - Required validation passes, including repo-specific checks.
+  - Any skipped checks are called out with reasons.
+  - Closeout notes capture decisions, blockers, and deferred follow-ups.
+
+**Suggested issue breakdown**
+1. Confirm canonical sources and scope
+2. Capture open questions and constraints
+3. Break work into Linear-sized tasks
+4. Implement the agreed changes
+5. Run validation and record results
+6. Close out with handoff notes
+
+If you want, I can turn this into actual Linear milestones and issues next, but I’d need the target Linear project or team to place them in.
