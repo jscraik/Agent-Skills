@@ -11,6 +11,14 @@ from ask.commands.skills import skills_budget, skills_handles
 from ask.golden_path import build_golden_path_payload
 
 SCRIPT_TIMEOUT_SECONDS = 60
+DOCTOR_SIGNAL_PRIORITY = {
+    "repo_status": 10,
+    "projection_sync": 20,
+    "catalog_parity": 30,
+    "runtime_budget": 40,
+    "command_handles": 50,
+    "repo_surface": 60,
+}
 GENERATED_SURFACE_PREFIXES = (
     ".agents/skills/",
     ".skillsets/",
@@ -529,6 +537,7 @@ def repo_doctor(repo_root: Path) -> CallResult:
     payload = build_golden_path_payload(
         signals=signals,
         normal_next_command="./bin/ask repo status --json --robot",
+        signal_priorities=DOCTOR_SIGNAL_PRIORITY,
     )
     result.data["doctor"] = payload
     result.data.update(payload)

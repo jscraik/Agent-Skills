@@ -143,6 +143,44 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(result.data["next_command_kind"], doctor["next_command_kind"])
         self.assertEqual(result.metadata["next_steps"], [])
 
+    def test_repo_surface_warning_is_diagnostic_advisory_not_blocker(self) -> None:
+        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo.skills_handles",
+            return_value=_handles_result(),
+        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result(7)):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        self.assertEqual(result.status, "success")
+        self.assertFalse(doctor["blocking"])
+        self.assertEqual(doctor["blockers"], [])
+        self.assertEqual(doctor["diagnostic_debt"][0]["id"], "repo_surface")
+        self.assertEqual(doctor["next_command"], "./bin/ask repo surface --json --robot")
+        self.assertEqual(doctor["next_command_kind"], "diagnostic_advisory")
+        self.assertFalse(doctor["next_command_blocks_task"])
+        self.assertEqual(doctor["selected_next_command"]["id"], "repo_surface")
+        self.assertEqual(result.data["selected_next_command"], doctor["selected_next_command"])
+        self.assertEqual(result.metadata["next_steps"], [])
+
+    def test_repo_doctor_leaves_metadata_next_steps_empty_to_avoid_conflicts(self) -> None:
+        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo.doctor_catalog",
+            return_value=_catalog_result(drift=True),
+        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo.skills_handles",
+            return_value=_handles_result(),
+        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        self.assertEqual(
+            result.data["doctor"]["next_command"],
+            "./bin/ask repo doctor-catalog --json --robot",
+        )
+        self.assertEqual(result.metadata["next_steps"], [])
+
     def test_closeout_without_changes_reports_ready_existing_next_command(self) -> None:
         with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
             "ask.commands.repo.repo_doctor",
@@ -410,8 +448,29 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["next_command_kind"], "blocking_repair")
         self.assertTrue(doctor["next_command_blocks_task"])
         self.assertEqual(result.data["next_command_kind"], doctor["next_command_kind"])
+        self.assertEqual(doctor["selected_next_command"]["id"], "catalog_parity")
         self.assertEqual(doctor["signals"]["repo_surface"]["state"], "warn")
         self.assertEqual(doctor["diagnostic_debt"][0]["id"], "repo_surface")
+
+    def test_runtime_budget_priority_beats_command_handle_blocker(self) -> None:
+        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result(violations=2)), patch(
+            "ask.commands.repo.skills_handles",
+            return_value=_handles_result(violations=3),
+        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(doctor["blockers"][0]["id"], "runtime_budget")
+        self.assertEqual(doctor["next_command"], "./bin/ask runtime budget --json --robot")
+        self.assertEqual(doctor["selected_next_command"]["id"], "runtime_budget")
+        self.assertEqual(
+            [item["id"] for item in doctor["secondary_next_commands"]],
+            ["command_handles"],
+        )
 
     def test_non_git_root_prioritizes_repo_status_before_projection_sync(self) -> None:
         with patch(

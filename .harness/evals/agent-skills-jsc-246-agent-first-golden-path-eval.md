@@ -125,6 +125,57 @@ The PLAN-JSC246-001 baseline now separates live command facts from implementatio
 Operational Impact: Future phases can use this section as the deterministic baseline instead of reconstructing command semantics from large JSON transcripts.
 Blocks Completion: no for phase 001.
 
+## PLAN-JSC246-002 Doctor Next-Action Continuation Evidence
+
+Captured At: 2026-05-09T09:19Z continuation pass.
+Branch State Before Phase-002 Commit: `codex/goal-governor-independent-skill...origin/codex/goal-governor-independent-skill [ahead 3]`.
+Changed Files For This Phase: `Infrastructure/scripts/lib/ask/golden_path.py`, `Infrastructure/scripts/lib/ask/commands/repo.py`, `Infrastructure/tests/test_ask_golden_path.py`, `Infrastructure/tests/test_ask_repo_doctor.py`, and this eval artifact.
+
+Behavior implemented:
+
+- `next_command`, `next_command_kind`, and `next_command_blocks_task` remain present and mirrored between `data.doctor` and top-level `data`.
+- New additive `selected_next_command` exposes the selected signal id, command kind, command string, and blocking flag.
+- New additive `secondary_next_commands` preserves non-selected same-priority recovery commands instead of hiding them behind the primary command.
+- Repo doctor next-command selection now uses explicit internal priority order: `repo_status`, `projection_sync`, `catalog_parity`, `runtime_budget`, `command_handles`, `repo_surface`.
+- Internal priority data is used only for ordering; public `signals`, `blockers`, and `diagnostic_debt` entries do not expose repo-doctor priority fields.
+- Generic golden-path ordering still falls back to stable signal id order when no explicit priority is supplied.
+
+Command snapshot table:
+
+| Command | Result | Evidence |
+| --- | --- | --- |
+| `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py` | pass | `37 passed in 0.05s`. |
+| `./bin/ask repo doctor --json --robot` | pass | `status: success`; `blocking: false`; `next_command: ./bin/ask repo surface --json --robot`; `next_command_kind: diagnostic_advisory`; `next_command_blocks_task: false`; selected command id `repo_surface`; repo-surface diagnostic debt `6501` findings across `9820` tracked paths. |
+| `./bin/ask repo surface --json --robot` | pass with advisory debt | `status: success`; `repo_surface.status: warning`; `blocking_findings: 6501`; `total_paths: 9820`. This remains diagnostic inventory, not a doctor blocker. |
+| `./bin/ask runtime budget --json --robot` | pass | `runtime_budget.status: pass`; `budget_status: pass`; `default_visible_count: 10`; `estimated_description_tokens: 3172`; no unresolved scope collisions. |
+| `python3 -m ruff check Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/scripts/lib/ask/commands/repo.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py` | blocked | Local `python3` environment had no `ruff` module. |
+| `uv run --python 3.12 ruff check Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/scripts/lib/ask/commands/repo.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py` | pass after cache permission retry | First attempt was blocked by `/Users/jamiecraik/.cache/uv` sandbox write denial; retry with scoped cache write permission passed with `All checks passed!`. |
+| `./bin/ask repo validate --changed-files Infrastructure/scripts/lib/ask/golden_path.py Infrastructure/scripts/lib/ask/commands/repo.py Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md --json --robot` | blocked by unrelated projection drift | `required_failures: 2`; logs `Infrastructure/artifacts/validation/20260509T091904Z`; context-budget log reported repeated `SKILLSET_SOURCE_HASH_STALE`; projection-integrity log reported `cache-harness-engineering (mirror): drift`, `manifest_mismatch: true`, `missing_in_projection: 2`, `mismatched_files: 6`. This matches the known unrelated harness-engineering projection debt, not the phase-002 Python diff. |
+| `git commit` without bypass | blocked by unrelated projection drift | Pre-commit ran `bash Infrastructure/scripts/validate_all.sh --ephemeral` from both hook scopes and failed on projection integrity, with logs `/tmp/agent-skills-validate-all.N9Hjct` and `/tmp/agent-skills-validate-all.QhVBMh`; both reported projection drift and blocked downstream checks. |
+
+Fixture assertions added:
+
+- Blocker next command wins over warning next command.
+- Same-priority conflicts select the same primary command across input orders.
+- Non-selected same-priority recovery commands remain in `secondary_next_commands`.
+- Explicit priority beats stable id fallback when a domain supplies a priority ladder.
+- Repo-surface warning selects `diagnostic_advisory`, keeps `blocking: false`, and mirrors `selected_next_command`.
+- `metadata.next_steps` is checked for command-bearing contradiction with `data.doctor.next_command` when both are present.
+- Runtime-budget blockers outrank command-handle blockers under the repo-doctor priority ladder.
+- Non-numeric priority values fall back to deterministic identifier ordering instead of raising.
+- All-pass payloads without a normal command explicitly report `no_safe_command`.
+
+Review gate outcomes:
+
+- API contract review found public priority leakage and compatibility risk in changed next-command ordering; fixed by keeping repo-doctor priority internal through `signal_priorities`, stripping internal sort keys before public output, and documenting the additive fields.
+- Correctness review found a possible non-numeric priority crash; fixed with defensive priority parsing and regression coverage.
+- Testing review found a vacuous metadata assertion and missing all-pass/no-normal-command branch coverage; fixed with deterministic repo-doctor metadata coverage and generic golden-path branch coverage.
+- Simplicity pass found no blocking simplification after keeping ordering in the shared golden-path helper and repo-doctor-specific priority in `repo.py`.
+
+Interpretation:
+PLAN-JSC246-002 behavior is implemented and focused checks pass. The remaining wrapper-validation blocker is the pre-existing projection/context-budget drift from unrelated harness-engineering skill work; it should be cleared by the canonical projection sync lane or excluded from this JSC-246 commit, not absorbed into the doctor next-action contract change.
+Blocks Completion: no for phase-002 behavior; normal hook-backed commit remains blocked by unrelated projection drift until the projection sync lane runs.
+
 ## Functional Validation Results
 Command or Method: `python3 -m pytest Infrastructure/tests/test_ask_golden_path.py Infrastructure/tests/test_ask_repo_doctor.py -q`
 Result: pass; `27 passed`.
