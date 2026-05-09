@@ -18,8 +18,8 @@ linear_milestone: Command surface and ask reliability
 # Agent Skills JSC-246 Agent First Golden Path Eval
 
 ## Executive Eval Summary
-Status: `PLAN-JSC246-007` fresh-agent eval and closure evidence are complete.
-Linear Completion Recommendation: Complete
+Status: `PLAN-JSC246-007` phase evidence complete; parent closure pending Linear state verification.
+Linear Completion Recommendation: Pending Linear state verification
 Primary Blockers: None for the JSC-246 implementation slice. Remaining repo-surface debt is advisory diagnostic debt, not a blocking gate.
 Confidence: High from focused tests, deterministic fresh-agent command snapshots, live CLI probes, harness identity lint, traceability lint, diff check, scoped repo validation, projection integrity, and closeout readiness evidence.
 
@@ -312,7 +312,7 @@ Live representative probes:
 | `write a Linear-backed HE spec` | success | `resolved` | `resolved` | `he-spec` | Direct HE spec routing works; `goal_decision_status: resolved`; reachability pass; next command `./bin/ask skills proof he-spec --json --robot`. |
 | `monitor a long-running HE work phase` | success | `resolved` | `resolved` | `he-work` | Live ranking selected reachable HE work-family route with `he-phase-heartbeat` preserved as the first alternative; exact heartbeat ownership is not forced while resolved route semantics remain compatible. |
 | `review this implementation against the spec` | success | `resolved_with_fallback` | `resolved_with_fallback` | `he-code-review` | HE review hint selected reachable `he-code-review`; `goal_decision_status: intent_unresolved`; rationale includes `fallback HE implementation-review intent hint`. |
-| `fix validation blockers after review` | success | `resolved_with_fallback` | `resolved_with_fallback` | `he-fix-bugs` | Initial routed `validation` capability was not command-handle reachable; HE validation-blocker hint selected reachable `he-fix-bugs`; rationale preserves `initial routed capability unreachable=validation`. |
+| `fix validation blockers after review` | success | `resolved_with_fallback` | `resolved_with_fallback` | `he-fix-bugs` | (superseded by phase-007; final route: autofix) Initial routed `validation` capability was not command-handle reachable; HE validation-blocker hint selected reachable `he-fix-bugs`; rationale preserves `initial routed capability unreachable=validation`. |
 
 Focused validation:
 
@@ -535,7 +535,7 @@ Fresh-agent command sequence:
 | 04 | `./bin/ask skills improve "write a Linear-backed HE spec" --json --robot` | 0 | `resolved`; recommended `he-spec`; next command `./bin/ask skills proof he-spec --json --robot`. |
 | 05 | `./bin/ask skills improve "monitor a long-running HE work phase" --json --robot` | 0 | `resolved`; recommended `he-work`; next command `./bin/ask skills proof he-work --json --robot`. |
 | 06 | `./bin/ask skills improve "review this implementation against the spec" --json --robot` | 0 | `resolved_with_fallback`; recommended `triage`; next command `./bin/ask skills proof triage --json --robot`. |
-| 07 | `./bin/ask skills improve "fix validation blockers after review" --json --robot` | 0 | `resolved_with_fallback`; initial routed `validation` capability was unreachable as a command handle, then fallback selected reachable `autofix`. |
+| 07 | `./bin/ask skills improve "fix validation blockers after review" --json --robot` | 0 | (authoritative final route; phase-007) `resolved_with_fallback`; initial routed `validation` capability was unreachable as a command handle, then fallback selected reachable `autofix` (phase-003 route he-fix-bugs superseded). |
 | 08 | `./bin/ask skills explain he-spec --json --robot` | 0 | Explanation resolved `he-spec`, exposed canonical source, runtime projection, validation command, reachability, and proof handoff. |
 | 09 | `./bin/ask skills proof he-spec --json --robot` | 0 | Command-handle proof passed for `he-spec`. |
 | 10 | `./bin/ask skills prove he-spec --json --robot` | 0 | Skill proof scorecard reported `reachable_without_outcome_proof`, structural quality pass, and workout handoff. |
@@ -589,8 +589,8 @@ Follow-Up Justified: Yes, but as separate HE skill lifecycle work rather than JS
 Blocks Closure: no for phase 006 after the local draft fix.
 
 ## Linear Completion Recommendation
-Classification: Complete
-Recommended Linear Status: Close `JSC-246` after linking this eval artifact and the fresh-agent evidence bundle.
+Classification: Pending Linear state verification
+Recommended Linear Status: Close `JSC-246` after linking this eval artifact, the fresh-agent evidence bundle, and confirming Linear shows the issue as completed.
 Required Linear Comment/Update: Note that phase 002 passed focused tests and live doctor proof; phase 003 passed focused route-state tests and live skills-improve probes after review gates; phase 004 passed focused explain/prove tests, live probes, and local review gates; phase 005 passed focused closeout fixture tests, live closeout classification, scoped repo validation, and local review gates; phase 006 passed first-contact compression validation and review gates; phase 007 passed deterministic fresh-agent command evidence and final closeout readiness.
 Issues to Close: `JSC-246` after human review.
 Issues to Reopen: None.
@@ -617,7 +617,7 @@ ADR Update: Not required for this phase.
 Reason: The phase implements an approved additive contract; it does not introduce a new irreversible architectural decision.
 
 ## Evidence & Traceability Matrix
-Conclusion: Phases 002 through 007 are safe to mark complete. `JSC-246` is ready for human-reviewed Linear closure.
+Conclusion: Phases 002 through 007 are complete. `JSC-246` is ready for human-reviewed Linear closure pending Linear state verification.
 Fact: Focused tests passed and live command output exposes advisory/non-blocking continuation metadata, deterministic skills-improve route states, explain/prove taxonomy fields, closeout changed-file readiness classification, compressed first-contact docs/metadata, and fresh-agent command evidence that starts with `repo doctor`.
 Interpretation: The implementation improves routing/proof/closeout determinism without breaking existing command fields or adding proof schema.
 Assumption: Human review of the closure evidence is still required before mutating Linear issue state.

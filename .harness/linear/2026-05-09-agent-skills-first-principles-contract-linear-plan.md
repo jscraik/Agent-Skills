@@ -129,8 +129,8 @@ entrypoints compact and move durable details to references.
 ## Validation Gates
 - `./bin/ask skills sync --scope workspace --projection rooted --json --robot`
 - `./bin/ask skills handles --check --json --robot`
-- `./bin/ask skills audit Plugins/harness-engineering/skills/he-strategy --level strict --json`
-- `./bin/ask skills audit Plugins/harness-engineering/skills/he-linear-plan --level strict --json`
+- `./bin/ask skills audit Plugins/harness-engineering/skills/he-strategy --level strict --json --robot`
+- `./bin/ask skills audit Plugins/harness-engineering/skills/he-linear-plan --level strict --json --robot`
 - `bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh`
 - `python3 Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py verify --scope all`
 - targeted lifecycle eval cases for first-principles restraint
