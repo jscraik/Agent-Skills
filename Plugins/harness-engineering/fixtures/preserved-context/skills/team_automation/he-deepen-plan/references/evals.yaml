@@ -118,7 +118,7 @@ cases:
       - type: regex
         value: "(?i)(he-deepen-plan)"
       - type: regex
-        value: "(?i)(Which plan should I deepen\\?|Docs/plans/)"
+        value: "(?i)(Which plan should I deepen\\?|\\.harness/plan/)"
 
   - id: direct-implementation-request
     name: direct implementation request

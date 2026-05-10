@@ -119,6 +119,19 @@ def _read_yaml_mapping(path: Path) -> Dict[str, Any]:
     return obj
 
 
+# Space and colon variants support case-insensitive `contains foo` and `contains: foo` shorthand matching.
+_ACCEPTANCE_STRING_PREFIXES = ("contains ", "not_contains ", "regex ", "not_regex ", "contains:", "not_contains:", "regex:", "not_regex:")
+
+
+def _is_bare_acceptance_string(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    text = value.strip()
+    if not text:
+        return False
+    return not text.lower().startswith(_ACCEPTANCE_STRING_PREFIXES)
+
+
 def _extract_h2_blocks(body: str) -> List[Tuple[str, str]]:
     matches = list(re.finditer(r"(?m)^##\s+(.+?)\s*$", body))
     blocks: List[Tuple[str, str]] = []
@@ -1328,6 +1341,18 @@ def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require
                                 out.append(Finding(Level.FAIL, "EVALS_CASE_KEYS", f"Case #{i} missing `{k}`."))
                         if "acceptance" in c and not isinstance(c["acceptance"], list):
                             out.append(Finding(Level.FAIL, "EVALS_ACCEPTANCE_SHAPE", f"Case #{i} `acceptance` must be a list."))
+                        elif isinstance(c.get("acceptance"), list):
+                            for j, assertion in enumerate(c["acceptance"], 1):
+                                if _is_bare_acceptance_string(assertion):
+                                    out.append(Finding(
+                                        Level.FAIL,
+                                        "EVALS_ACCEPTANCE_BARE_STRING",
+                                        (
+                                            f"Case #{i} acceptance #{j} is a bare string, which the live runner treats as an exact contains assertion. "
+                                            "Use a typed assertion such as `{type: regex, value: ...}` or explicit `contains:` shorthand."
+                                        ),
+                                        evidence=str(assertion)[:120],
+                                    ))
 
                         # v2 optional fields (backward compatible)
                         if "id" in c and not isinstance(c["id"], str):

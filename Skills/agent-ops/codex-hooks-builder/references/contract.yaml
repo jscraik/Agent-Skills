@@ -13,6 +13,7 @@ inputs:
   - "validation commands"
   - "current Codex hook runtime docs or schema evidence"
   - "effective hook sources: user, project, managed, plugin-bundled, or inline config"
+  - "compact lifecycle source evidence when using PreCompact or PostCompact"
 outputs:
   - "hook pack changes"
   - "scaffold or audit notes"
@@ -22,13 +23,16 @@ outputs:
 runtime_contract:
   feature_keys:
     current: hooks
-    legacy_alias: codex_hooks
-    requirement: "Prefer hooks and preserve codex_hooks when compatibility validators or installed configs still require it."
+    compatibility_alias: codex_hooks
+    requirement: "Check the target runtime and official Codex docs before choosing a feature flag. Treat hooks and codex_hooks as compatibility aliases when both are accepted, and do not remove codex_hooks unless the target runtime or docs explicitly deprecate it."
+    conflict_rule: "When official docs and local runtime/schema evidence disagree, state the conflict and follow the target runtime's schema or validator."
   events:
     - SessionStart
     - PreToolUse
     - PermissionRequest
     - PostToolUse
+    - PreCompact
+    - PostCompact
     - UserPromptSubmit
     - Stop
   matcher_rules:
@@ -36,6 +40,12 @@ runtime_contract:
       - PreToolUse
       - PermissionRequest
       - PostToolUse
+    compact_trigger_events:
+      - PreCompact
+      - PostCompact
+    compact_triggers:
+      - manual
+      - auto
     session_start_sources:
       - startup
       - resume
@@ -43,6 +53,25 @@ runtime_contract:
     ignored_matcher_events:
       - UserPromptSubmit
       - Stop
+  compact_lifecycle:
+    source_evidence: "Target Codex checkout compact event implementation and generated pre-compact/post-compact schemas, when that checkout is available."
+    input_fields:
+      - session_id
+      - turn_id
+      - cwd
+      - transcript_path
+      - model
+      - trigger
+      - hook_event_name
+    output_fields:
+      - continue
+      - stopReason
+      - suppressOutput
+      - systemMessage
+    behavior:
+      pre_compact: "continue=false stops before compaction; decision=block is invalid."
+      post_compact: "runs after compaction and can stop later continuation, but should be used mainly for audit, indexing, and telemetry."
+      stdout: "Plain stdout is ignored; use schema-bound JSON only for intentional warning or stop behavior."
   hook_sources:
     - user_hooks_json
     - user_config_inline_hooks

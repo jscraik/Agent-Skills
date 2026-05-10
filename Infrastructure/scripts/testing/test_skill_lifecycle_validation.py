@@ -1033,6 +1033,32 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn('cp -a "$resolved" "$skill_entry"', content)
         self.assertIn('normalize_plugin_copy "$1" "runtime"', content)
         self.assertIn('normalize_plugin_copy "$1" "cached"', content)
+        self.assertIn("whole_plugin_dir_symlinks_materialized=1", content)
+        self.assertIn(
+            'whole_plugin_dir_symlinks_materialized=$((whole_plugin_dir_symlinks_materialized + 1))',
+            content,
+        )
+        self.assertIn("Refusing to materialize ${label} symlink whose destination is inside its source tree", content)
+
+    def test_sync_script_skips_downstream_publication_when_sources_are_stale(self) -> None:
+        """
+        Ensure sync does not publish stale flat skills or runtime caches downstream.
+
+        When sandbox or permission boundaries prevent regenerating a source
+        projection, downstream home/profile copies should be skipped instead of
+        republishing whatever stale content happens to be present.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("flat_projection_rebuilt=0", content)
+        self.assertIn("runtime_cache_fresh=0", content)
+        self.assertIn("runtime_cache_rebuild_blocked=0", content)
+        self.assertIn("mark_runtime_cache_stale()", content)
+        self.assertIn('if [ "$runtime_cache_rebuild_blocked" = "0" ]; then', content)
+        self.assertIn("flat_projection_rebuilt=1", content)
+        self.assertIn('if [ "$flat_projection_rebuilt" = "1" ]; then', content)
+        self.assertIn('if [ "$runtime_cache_fresh" != "1" ]; then', content)
+        self.assertIn("Skipping home skills sync because flat runtime skill projection was not rebuilt.", content)
+        self.assertIn("Skipping profile cache publication because runtime cache rebuild was not fresh.", content)
 
     def test_sync_script_regenerates_versioned_visible_local_cache_roots(self) -> None:
         """

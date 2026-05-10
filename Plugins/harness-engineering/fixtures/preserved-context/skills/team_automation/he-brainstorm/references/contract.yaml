@@ -10,7 +10,7 @@ triggers:
   - the user wants to brainstorm a feature, improvement, or product direction before planning
   - the user wants the Harness Engineering brainstorm stage explicitly
   - the user needs help deciding whether a spec is required
-  - the user wants a durable brainstorm or requirements artifact written to docs/brainstorms
+  - the user wants a durable brainstorm or requirements artifact written to .harness/brainstorm
   - the request is vague or ambitious enough that scope, behavior, or success criteria still need to be shaped
 
 inputs:
@@ -23,7 +23,7 @@ outputs:
   - 2-3 approaches with trade-offs and a recommendation
   - explicit `spec_required`, `risk_level`, and `complexity` values
   - exact parallel research support via `repo-research-analyst` and `learnings-researcher` when repo context matters
-  - a requirements document in `docs/brainstorms/*-requirements.md` for new substantial work, with compatibility-safe updates to legacy `*-brainstorm.md` files when resuming
+  - a requirements document in `.harness/brainstorm/*-requirements.md` for new substantial work, with compatibility-safe updates to legacy `*-brainstorm.md` files when resuming
   - a recommended next workflow stage, and immediate handoff guidance when the runtime supports it
 
 non_goals:

@@ -1,0 +1,21 @@
+version: 2
+goal:
+  slug: invalid-zero-active-parallel
+  status: active
+  objective: "Reject parallel boards without active workers."
+rules:
+  one_active_task: false
+  parallel_workers: true
+tasks:
+  - id: T001
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement one scoped change."
+    allowed_files:
+      - "Skills/agent-ops/goal-governor/scripts/check_goal_board.py"
+    verify:
+      - "python3 scripts/check_goal_board.py tests/fixtures/valid"
+    stop_if:
+      - "Validation fails."
+    receipt_id: null

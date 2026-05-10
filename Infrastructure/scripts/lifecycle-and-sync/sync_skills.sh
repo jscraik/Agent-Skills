@@ -300,6 +300,54 @@ mkdir -p "$plugins_dir"
 
 repo_root_real="$(cd "$repo_root" && pwd -P)"
 
+# Return success when sync phases can create and remove a file in the target
+# directory. Plain `-w` checks can be misleading in sandboxed runs, so use the
+# can_mutate_sync_dir verifies the given directory can be created and written to by creating the directory, writing a probe file inside it, and removing that probe file.
+can_mutate_sync_dir() {
+  local dir="$1"
+  local probe=""
+
+  if ! mkdir -p "$dir" 2>/dev/null; then
+    return 1
+  fi
+
+  probe="$dir/.sync-skills-write-test.$$"
+  if ! ( : > "$probe" ) 2>/dev/null; then
+    return 1
+  fi
+
+  if ! rm -f -- "$probe" 2>/dev/null; then
+    return 1
+  fi
+  return 0
+}
+
+# skip_unwritable_sync_phase logs a warning that the given directory is not writable and that the named sync phase will be skipped to avoid sandbox rsync/cache cleanup noise.
+skip_unwritable_sync_phase() {
+  local label="$1"
+  local dir="$2"
+  echo "[WARN] $dir is not writable; skipping $label to avoid sandbox rsync/cache cleanup noise."
+}
+
+# Flag semantics:
+# - flat_projection_rebuilt is pessimistic: downstream skill publication waits
+#   until the flat projection is confirmed rebuilt.
+# - runtime_cache_fresh is pessimistic: downstream cache publication waits
+#   until every runtime cache rebuild/projection step confirms it can run.
+skills_dir_writable=0
+flat_projection_rebuilt=0
+runtime_cache_fresh=0
+runtime_cache_rebuild_blocked=0
+mark_runtime_cache_stale() {
+  runtime_cache_fresh=0
+  runtime_cache_rebuild_blocked=1
+}
+if can_mutate_sync_dir "$skills_dir"; then
+  skills_dir_writable=1
+else
+  skip_unwritable_sync_phase "flat runtime skill projection" "$skills_dir"
+fi
+
 # Remove legacy aggregation directories that could cause duplicate skills in IDE panels.
 # sync-symlink/ was created by an older version of this script under a different name.
 if [ -d "$repo_root/sync-symlink" ]; then
@@ -334,7 +382,7 @@ if [ -d "$skills_dir/.system" ] && [ ! -L "$skills_dir/.system" ]; then
       fi
     else
       mkdir -p "$system_skills_dir"
-      cp -R "$skills_dir/.system"/. "$system_skills_dir"/ 2>/dev/null || true
+      cp -a "$skills_dir/.system"/. "$system_skills_dir"/ 2>/dev/null || true
     fi
     if ! rm -rf "$skills_dir/.system"; then
       echo "[WARN] Unable to remove $skills_dir/.system after preservation (continuing anyway)."
@@ -346,11 +394,15 @@ fi
 # `skills-system/`. Without this, preserved runtime copies can replace the
 # canonical plugin/skill-factory aliases with real directories and leave
 # projection integrity in drift until a manual repair pass.
-python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py" sync --scope skill-factory >/dev/null
-python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py" sync --scope plugin-factory >/dev/null
+if [ "$skills_dir_writable" = "1" ]; then
+  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py" sync --scope skill-factory >/dev/null
+  python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py" sync --scope plugin-factory >/dev/null
+else
+  echo "[INFO] Skipped bridge alias projection repair because $skills_dir is not writable."
+fi
 
 # Remove stale symlinks only (keep any real files that might be intentional).
-if [ -w "$skills_dir" ]; then
+if [ "$skills_dir_writable" = "1" ]; then
   find "$skills_dir" -maxdepth 1 -type l -exec rm -f {} +
 else
   echo "[WARN] $skills_dir is not writable; skipping stale symlink cleanup."
@@ -405,7 +457,8 @@ is_plugin_hidden_lane_skill_name() {
   esac
 }
 # register_plugin_router_skill_source registers a mapping from a router-visible plugin skill name to its discovered directory and detects name collisions.
-# Returns 0 on success; returns 1 and prints collision details to stderr if the same skill name is already registered with a different directory.
+# register_plugin_router_skill_source registers a plugin-visible router skill name with its discovered directory and detects collisions.
+# If the same skill name is already registered with a different directory, prints collision details to stderr and returns 1; returns 0 on success.
 register_plugin_router_skill_source() {
   local skill_name="$1"
   local discovered_dir="$2"
@@ -426,17 +479,19 @@ register_plugin_router_skill_source() {
   plugin_router_skill_dirs+=("$discovered_dir")
   return 0
 }
-for hidden_skill in "${hidden_flat_skills[@]}"; do
-  if [ -e "$skills_dir/$hidden_skill" ]; then
-    if rm -rf -- "${skills_dir:?}/${hidden_skill:?}"; then
-      echo "Removed hidden flat skill: $hidden_skill"
-    else
-      echo "[WARN] Could not remove hidden skill $hidden_skill at $skills_dir (continuing anyway)."
+if [ "$skills_dir_writable" = "1" ]; then
+  for hidden_skill in "${hidden_flat_skills[@]}"; do
+    if [ -e "$skills_dir/$hidden_skill" ]; then
+      if rm -rf -- "${skills_dir:?}/${hidden_skill:?}"; then
+        echo "Removed hidden flat skill: $hidden_skill"
+      else
+        echo "[WARN] Could not remove hidden skill $hidden_skill at $skills_dir (continuing anyway)."
+      fi
     fi
-  fi
-done
+  done
+fi
 
-# Recreate symlinks for all discovered SKILL.md directories (with exclusions).
+# find_skill_files_with_policy lists SKILL.md files under the given root while excluding any paths that match SELECTION_POLICY_EXCLUDED_SEGMENTS and prints matching paths to stdout.
 find_skill_files_with_policy() {
   local root="$1"
   local segment=""
@@ -557,7 +612,7 @@ extract_skill_type() {
 
 # Return success when a discovered skill path resolves to a plugin-owned bundle
 # under Plugins/<plugin>/skills/<skill>. These should not appear as standalone
-# entries in the flat runtime skill list.
+# is_plugin_owned_skill_path determines whether a SKILL.md path belongs to a plugin's skills directory under the repository's Plugins/<plugin>/skills tree and returns 0 if it does, 1 otherwise.
 is_plugin_owned_skill_path() {
   local skill_path="$1"
   local skill_dir_rel=""
@@ -576,101 +631,107 @@ is_plugin_owned_skill_path() {
   esac
 }
 
-while IFS= read -r skill_path; do
-  # Skip the root index.
-  if [ "$skill_path" = "./SKILL.md" ]; then
-    continue
-  fi
-  skill_dir="$(dirname "$skill_path")"
-  skill_name="$(basename "$skill_dir")"
-  if is_hidden_flat_skill_name "$skill_name"; then
-    echo "Skipping hidden flat skill: $skill_name"
-    continue
-  fi
-  skill_dir_abs="$repo_root/$skill_dir"
-  discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
-  if is_plugin_owned_skill_path "$skill_path"; then
-    if ! is_plugin_visible_router_skill_name "$skill_name"; then
-      echo "Skipping plugin-owned skill from flat projection: $skill_name"
+if [ "$skills_dir_writable" = "1" ]; then
+  while IFS= read -r skill_path; do
+    # Skip the root index.
+    if [ "$skill_path" = "./SKILL.md" ]; then
       continue
     fi
-    if is_plugin_hidden_lane_skill_name "$skill_name"; then
-      echo "Skipping hidden plugin lane skill: $skill_name"
+    skill_dir="$(dirname "$skill_path")"
+    skill_name="$(basename "$skill_dir")"
+    if is_hidden_flat_skill_name "$skill_name"; then
+      echo "Skipping hidden flat skill: $skill_name"
       continue
     fi
-    if ! register_plugin_router_skill_source "$skill_name" "$discovered_dir"; then
-      router_collision_count=$((router_collision_count + 1))
-      continue
-    fi
-    echo "Including plugin-owned skill in flat runtime list: $skill_name"
-  elif ! is_default_visible_flat_skill_name "$skill_name"; then
-    echo "Skipping non-default flat skill: $skill_name"
-    continue
-  fi
-  # Relative path from $skills_dir (.agents/skills/) back to the skill source.
-  # Strip the leading './' from skill_dir to get e.g. 'auth/create-auth',
-  # then prepend '../..' to escape .agents/skills/ back to repo root.
-  skill_dir_rel="../../${skill_dir#./}"
-  if [ -e "$skills_dir/$skill_name" ]; then
-    existing_dir="$(cd "$skills_dir/$skill_name" 2>/dev/null && pwd || true)"
+    skill_dir_abs="$repo_root/$skill_dir"
     discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
-    # If the discovered skill already lives directly in the flat skills view
-    # (for example ./skills/sentry), skip without duplicate noise.
-    if [ -n "$existing_dir" ] && [ "$existing_dir" = "$discovered_dir" ]; then
-      continue
-    fi
-    # Canonical category-folder skills win precedence over stale/generated flat
-    # copies so the loader view stays aligned with the source-of-truth skill.
-    if [ -d "$skills_dir/$skill_name" ] && [ "${skill_dir#./.agents/skills/}" = "$skill_dir" ]; then
-      echo "Replacing conflicting flat skill dir: $skill_name -> $skill_dir_rel"
-      if ! rm -rf -- "${skills_dir:?}/${skill_name:?}"; then
-        echo "[WARN] Could not replace existing $skill_name in $skills_dir; skipping $skill_dir_rel."
+    if is_plugin_owned_skill_path "$skill_path"; then
+      if ! is_plugin_visible_router_skill_name "$skill_name"; then
+        echo "Skipping plugin-owned skill from flat projection: $skill_name"
         continue
       fi
-    else
-      echo "Duplicate skill name: $skill_name (skip $skill_dir_rel)"
+      if is_plugin_hidden_lane_skill_name "$skill_name"; then
+        echo "Skipping hidden plugin lane skill: $skill_name"
+        continue
+      fi
+      if ! register_plugin_router_skill_source "$skill_name" "$discovered_dir"; then
+        router_collision_count=$((router_collision_count + 1))
+        continue
+      fi
+      echo "Including plugin-owned skill in flat runtime list: $skill_name"
+    elif ! is_default_visible_flat_skill_name "$skill_name"; then
+      echo "Skipping non-default flat skill: $skill_name"
       continue
     fi
+    # Relative path from $skills_dir (.agents/skills/) back to the skill source.
+    # Strip the leading './' from skill_dir to get e.g. 'auth/create-auth',
+    # then prepend '../..' to escape .agents/skills/ back to repo root.
+    skill_dir_rel="../../${skill_dir#./}"
+    if [ -e "$skills_dir/$skill_name" ]; then
+      existing_dir="$(cd "$skills_dir/$skill_name" 2>/dev/null && pwd || true)"
+      discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
+      # If the discovered skill already lives directly in the flat skills view
+      # (for example ./skills/sentry), skip without duplicate noise.
+      if [ -n "$existing_dir" ] && [ "$existing_dir" = "$discovered_dir" ]; then
+        continue
+      fi
+      # Canonical category-folder skills win precedence over stale/generated flat
+      # copies so the loader view stays aligned with the source-of-truth skill.
+      if [ -d "$skills_dir/$skill_name" ] && [ "${skill_dir#./.agents/skills/}" = "$skill_dir" ]; then
+        echo "Replacing conflicting flat skill dir: $skill_name -> $skill_dir_rel"
+        if ! rm -rf -- "${skills_dir:?}/${skill_name:?}"; then
+          echo "[WARN] Could not replace existing $skill_name in $skills_dir; skipping $skill_dir_rel."
+          continue
+        fi
+      else
+        echo "Duplicate skill name: $skill_name (skip $skill_dir_rel)"
+        continue
+      fi
+    fi
+    ln -s "$skill_dir_rel" "$skills_dir/$skill_name"
+  done < <(all_skill_files_cmd)
+
+  if [ "$router_collision_count" -gt 0 ]; then
+    echo "[ERROR] Aborting sync due to plugin-visible router skill collisions." >&2
+    exit 1
   fi
-  ln -s "$skill_dir_rel" "$skills_dir/$skill_name"
-done < <(all_skill_files_cmd)
 
-if [ "$router_collision_count" -gt 0 ]; then
-  echo "[ERROR] Aborting sync due to plugin-visible router skill collisions." >&2
-  exit 1
-fi
+  # Re-expose preserved system skills through the hidden `.system` path without
+  # bringing them back into the flat runtime skill list.
+  if [ -e "$skills_dir/.system" ] && [ ! -L "$skills_dir/.system" ]; then
+    echo "[WARN] $skills_dir/.system exists as a non-symlink; leaving it in place."
+  elif [ ! -e "$skills_dir/.system" ]; then
+    ln -s "../../skills-system" "$skills_dir/.system"
+  fi
 
-# Re-expose preserved system skills through the hidden `.system` path without
-# bringing them back into the flat runtime skill list.
-if [ -e "$skills_dir/.system" ] && [ ! -L "$skills_dir/.system" ]; then
-  echo "[WARN] $skills_dir/.system exists as a non-symlink; leaving it in place."
-elif [ ! -e "$skills_dir/.system" ]; then
-  ln -s "../../skills-system" "$skills_dir/.system"
-fi
+  # Keep approved bridge skills available only through the hidden `.system`
+  # lane. First-level aliases make lifecycle helper skills appear as duplicate
+  # user-facing skills in Codex, so remove stale aliases instead of creating them.
+  for bridge_skill in "${system_bridge_skills[@]}"; do
+    bridge_source=".system/$bridge_skill"
+    if [ ! -e "$skills_dir/$bridge_source" ]; then
+      echo "[WARN] Missing system bridge source: $skills_dir/$bridge_source"
+      if [ -e "$skills_dir/$bridge_skill" ] || [ -L "$skills_dir/$bridge_skill" ]; then
+        rm -rf -- "${skills_dir:?}/${bridge_skill:?}"
+        echo "Removed stale first-level bridge skill alias: $bridge_skill"
+      fi
+      continue
+    fi
 
-# Keep approved bridge skills available only through the hidden `.system`
-# lane. First-level aliases make lifecycle helper skills appear as duplicate
-# user-facing skills in Codex, so remove stale aliases instead of creating them.
-for bridge_skill in "${system_bridge_skills[@]}"; do
-  bridge_source=".system/$bridge_skill"
-  if [ ! -e "$skills_dir/$bridge_source" ]; then
-    echo "[WARN] Missing system bridge source: $skills_dir/$bridge_source"
     if [ -e "$skills_dir/$bridge_skill" ] || [ -L "$skills_dir/$bridge_skill" ]; then
       rm -rf -- "${skills_dir:?}/${bridge_skill:?}"
-      echo "Removed stale first-level bridge skill alias: $bridge_skill"
+      echo "Removed first-level bridge skill alias: $bridge_skill"
     fi
-    continue
-  fi
 
-  if [ -e "$skills_dir/$bridge_skill" ] || [ -L "$skills_dir/$bridge_skill" ]; then
-    rm -rf -- "${skills_dir:?}/${bridge_skill:?}"
-    echo "Removed first-level bridge skill alias: $bridge_skill"
-  fi
+    echo "Bridge skill kept under .system: $bridge_skill -> $bridge_source"
+  done
+  flat_projection_rebuilt=1
+else
+  echo "[INFO] Skipped flat runtime skill projection because $skills_dir is not writable."
+fi
 
-  echo "Bridge skill kept under .system: $bridge_skill -> $bridge_source"
-done
-
-# generate_skill_index regenerates the repository root SKILL.md index from skills' YAML frontmatter, grouping skills by category and extracting short descriptions where available.
+# generate_skill_index regenerates the repository SKILL.md index from discovered SKILL.md frontmatter, grouping skills by category and using `metadata.short-description` (falling back to `description`) for each entry.
+# index_file is the path to write the generated index (overwrites or creates the file).
 generate_skill_index() {
   local index_file="$1"
   local temp_dir=""
@@ -1180,7 +1241,7 @@ remove_legacy_home_skill_symlinks() {
   remove_legacy_symlink "$HOME/.cursor/skills"
 }
 
-# sync_user_skills synchronises a source skills directory into a user's target directory by creating or updating a symlink (default) or by copying contents, with optional force replacement of existing non-symlink targets.
+# sync_user_skills synchronizes a source skills directory into a user's target directory by creating or updating a symlink (default) or by copying contents when mode="copy"; when `force` is `1` an existing non-symlink target will be replaced.
 sync_user_skills() {
   local source_dir="$1"
   local target_dir="$2"
@@ -1217,7 +1278,7 @@ sync_user_skills() {
   mkdir -p "$(dirname "$target_dir")"
   if [ -L "$target_dir" ]; then
     # Update existing symlink
-    if ln -sfn "$source_dir" "$target_dir"; then
+    if ln -sfn "$source_dir" "$target_dir" 2>/dev/null; then
       echo "[OK] Updated symlink: $target_dir -> $source_dir"
     else
       echo "[WARN] Unable to update symlink $target_dir -> $source_dir (continuing)."
@@ -1225,7 +1286,7 @@ sync_user_skills() {
   elif [ -e "$target_dir" ] && [ ! -L "$target_dir" ]; then
     if [ "$force" = "1" ]; then
       if rm -rf "$target_dir"; then
-        if ln -s "$source_dir" "$target_dir"; then
+        if ln -s "$source_dir" "$target_dir" 2>/dev/null; then
           echo "[OK] Replaced existing path with symlink: $target_dir -> $source_dir"
         else
           echo "[WARN] Unable to create symlink $target_dir -> $source_dir (continuing)."
@@ -1240,8 +1301,11 @@ sync_user_skills() {
     fi
   else
     # Create new symlink
-    ln -s "$source_dir" "$target_dir"
-    echo "[OK] Created symlink: $target_dir -> $source_dir"
+    if ln -s "$source_dir" "$target_dir" 2>/dev/null; then
+      echo "[OK] Created symlink: $target_dir -> $source_dir"
+    else
+      echo "[WARN] Unable to create symlink $target_dir -> $source_dir (continuing)."
+    fi
   fi
 }
 
@@ -1352,7 +1416,12 @@ resolve_marketplace_source_dir() {
 # normalize_plugin_copy materializes top-level skill alias symlink directories
 # and symlinked skill files inside copied plugin skills/ trees, then removes
 # fixtures and duplicate category lanes.
-# `label` is used only for log context (for example "runtime" or "cached").
+# normalize_plugin_copy materializes symlinked skills and nested symlinks inside a plugin copy, removes fixtures and duplicate category lanes, and prunes command-handle duplicate entries so the plugin copy becomes a self-contained, real directory tree.
+# 
+# It replaces first-level skill symlinks under <plugin_dir>/skills with copied directories when the symlink target resolves inside the plugin copy, recursively materializes nested directory and file symlinks within those copies, materializes stray symlinks elsewhere in the plugin before pruning fixtures, removes configured duplicate category lanes, and removes duplicate command-handle skill entries according to the repository command-surface index.
+# 
+# plugin_dir - path to the plugin copy root to normalize.
+# label - optional short context string used in log messages (default: "runtime").
 normalize_plugin_copy() {
   local plugin_dir="$1"
   local label="${2:-runtime}"
@@ -1365,6 +1434,9 @@ normalize_plugin_copy() {
   local duplicate_category=""
   local handle_name=""
   local skill_entry=""
+  local nested_link=""
+  local nested_link_abs=""
+  local nested_resolved=""
   local command_surface_file="$repo_root/.skillsets/command-surface.json"
 
   plugin_dir_real="$(cd "$plugin_dir" 2>/dev/null && pwd -P || true)"
@@ -1478,6 +1550,63 @@ normalize_plugin_copy() {
       fi
     done < <(find "$skills_dir" -type l -print0)
   fi
+
+  local whole_plugin_dir_symlinks_materialized=1
+  while [ "$whole_plugin_dir_symlinks_materialized" -gt 0 ]; do
+    whole_plugin_dir_symlinks_materialized=0
+    while IFS= read -r -d '' nested_link; do
+      [ -n "$nested_link" ] || continue
+      [ -L "$nested_link" ] || continue
+      nested_resolved="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$nested_link" 2>/dev/null || true)"
+      if [ -z "$nested_resolved" ] || [ ! -e "$nested_resolved" ]; then
+        echo "[WARN] Could not resolve ${label} symlink before fixture pruning: $nested_link"
+        continue
+      fi
+      nested_link_abs="$(
+        nested_link_dir="$(dirname "$nested_link")"
+        nested_link_base="$(basename "$nested_link")"
+        if cd "$nested_link_dir" 2>/dev/null; then
+          printf '%s/%s\n' "$(pwd -P)" "$nested_link_base"
+        fi
+      )"
+      case "$nested_link_abs" in
+        "$nested_resolved"|"$nested_resolved"/*)
+          echo "[WARN] Refusing to materialize ${label} symlink whose destination is inside its source tree: nested_link=$nested_link nested_resolved=$nested_resolved"
+          continue
+          ;;
+      esac
+      case "$nested_resolved" in
+        "$plugin_dir_real"|"$plugin_dir_real"/*) ;;
+        *)
+          echo "[WARN] Refusing to materialize ${label} symlink outside plugin copy: nested_link=$nested_link nested_resolved=$nested_resolved"
+          continue
+          ;;
+      esac
+      if [ -d "$nested_resolved" ]; then
+        local tmp_dir
+        tmp_dir="$(mktemp -d)"
+        if cp -a "$nested_resolved/." "$tmp_dir/"; then
+          rm -f -- "$nested_link"
+          mv "$tmp_dir" "$nested_link"
+          echo "[OK] Materialized ${label} directory symlink before fixture pruning: $nested_link"
+          whole_plugin_dir_symlinks_materialized=$((whole_plugin_dir_symlinks_materialized + 1))
+        else
+          rm -rf -- "$tmp_dir"
+          echo "[WARN] Failed to materialize ${label} directory symlink before fixture pruning: $nested_link"
+        fi
+      elif [ -f "$nested_resolved" ]; then
+        tmp_file="$(mktemp)"
+        if cp -- "$nested_resolved" "$tmp_file"; then
+          rm -f -- "$nested_link"
+          mv "$tmp_file" "$nested_link"
+          echo "[OK] Materialized ${label} file symlink before fixture pruning: $nested_link"
+        else
+          rm -f -- "$tmp_file"
+          echo "[WARN] Failed to materialize ${label} file symlink before fixture pruning: $nested_link"
+        fi
+      fi
+    done < <(find "$plugin_dir" -type l -print0)
+  done
 
   if [ -d "${plugin_dir:?}/fixtures" ]; then
     rm -rf -- "${plugin_dir:?}/fixtures"
@@ -1723,10 +1852,16 @@ sync_local_marketplace_cache() {
 
   if [ ! -f "$marketplace_file" ]; then
     echo "[WARN] Marketplace file missing: $marketplace_file (skipping local marketplace cache sync)."
+    mark_runtime_cache_stale
     return 0
   fi
 
-  mkdir -p "$cache_root"
+  if ! can_mutate_sync_dir "$cache_root"; then
+    skip_unwritable_sync_phase "local marketplace cache sync" "$cache_root"
+    mark_runtime_cache_stale
+    return 0
+  fi
+
   cache_state_dir="$(mktemp -d)"
   cleanup_paths+=("$cache_state_dir")
   keep_file="$cache_state_dir/cache.keep"
@@ -1811,7 +1946,7 @@ sync_local_marketplace_cache() {
     else
       rm -rf -- "$target_plugin_dir"
       mkdir -p "$target_plugin_dir"
-      cp -R "$source_dir"/. "$target_plugin_dir"/
+      cp -a "$source_dir"/. "$target_plugin_dir"/
       rm -rf -- "$target_plugin_dir/.git" "$target_plugin_dir/node_modules" "$target_plugin_dir/__pycache__"
       find "$target_plugin_dir" -name '.DS_Store' -type f -delete
     fi
@@ -1856,7 +1991,7 @@ sync_local_marketplace_cache() {
 
 # sync_versioned_local_marketplace_cache keeps the legacy repository-local
 # cache shape aligned for Codex builds that still inspect
-# <repo>/Plugins/cache/<marketplace>/<plugin>/<version>/skills directly.
+# sync_versioned_local_marketplace_cache synchronizes local marketplace plugins listed in a marketplace JSON into a versioned cache at the given cache root, installing each plugin under <cache_root>/<marketplace>/<plugin>/<version>, normalizing copied plugin content, and pruning stale versions and plugin directories.
 sync_versioned_local_marketplace_cache() {
   local marketplace_file="$1"
   local cache_root="$2"
@@ -1881,7 +2016,11 @@ sync_versioned_local_marketplace_cache() {
     return 0
   fi
 
-  mkdir -p "$cache_root"
+  if ! can_mutate_sync_dir "$cache_root"; then
+    skip_unwritable_sync_phase "versioned local marketplace cache sync" "$cache_root"
+    return 0
+  fi
+
   state_dir="$(mktemp -d)"
   cleanup_paths+=("$state_dir")
   plugin_rows_file="$state_dir/versioned_plugin_rows.tsv"
@@ -1947,7 +2086,7 @@ sync_versioned_local_marketplace_cache() {
 
     mkdir -p "$target_dir"
     if command -v rsync >/dev/null 2>&1; then
-      rsync -aL --delete --force \
+      rsync -a --delete --force \
         --exclude '.git' \
         --exclude 'node_modules' \
         --exclude '__pycache__' \
@@ -1956,7 +2095,7 @@ sync_versioned_local_marketplace_cache() {
     else
       rm -rf -- "$target_dir"
       mkdir -p "$target_dir"
-      cp -RL "$source_dir"/. "$target_dir"/
+      cp -a "$source_dir"/. "$target_dir"/
       rm -rf -- "$target_dir/.git" "$target_dir/node_modules" "$target_dir/__pycache__"
       find "$target_dir" -name '.DS_Store' -type f -delete
     fi
@@ -1993,17 +2132,25 @@ sync_repo_cache_snapshots_to_runtime_cache() {
     return 0
   fi
 
-  mkdir -p "$target_cache_root"
+  if ! can_mutate_sync_dir "$target_cache_root"; then
+    skip_unwritable_sync_phase "repository plugin cache snapshot sync" "$target_cache_root"
+    mark_runtime_cache_stale
+    return 0
+  fi
+
   if command -v rsync >/dev/null 2>&1; then
     rsync -a --delete --force "$source_cache_root/" "$target_cache_root/"
   else
     rm -rf -- "$target_cache_root"
     mkdir -p "$target_cache_root"
-    cp -R "$source_cache_root"/. "$target_cache_root"/
+    cp -a "$source_cache_root"/. "$target_cache_root"/
   fi
 }
 
-# materialize_plugin_cache_roots ensures each plugin directory under the given cache_root has a flattened `.codex-plugin` root by locating a nested candidate (preferentially `local/`), copying or rsyncing that candidate into the plugin directory, and removing nested duplicate plugin roots.
+# materialize_plugin_cache_roots ensures each plugin directory under `cache_root` contains a top-level `.codex-plugin` root by locating a nested candidate (preferentially `local/`) and promoting it into the plugin directory, removing other nested `.codex-plugin` roots.
+# 
+# Arguments:
+#   cache_root - path to the runtime cache root containing marketplace/plugin subdirectories.
 materialize_plugin_cache_roots() {
   local cache_root="$1"
   local marketplace_dir=""
@@ -2012,6 +2159,11 @@ materialize_plugin_cache_roots() {
   local child_dir=""
 
   [ -d "$cache_root" ] || return 0
+  if ! can_mutate_sync_dir "$cache_root"; then
+    skip_unwritable_sync_phase "plugin cache root materialization" "$cache_root"
+    mark_runtime_cache_stale
+    return 0
+  fi
 
   while IFS= read -r marketplace_dir; do
     [ -n "$marketplace_dir" ] || continue
@@ -2042,24 +2194,24 @@ materialize_plugin_cache_roots() {
         local tmp_copy_dir=""
         tmp_copy_dir="$(mktemp -d)"
         cleanup_paths+=("$tmp_copy_dir")
-        cp -R "$candidate_dir"/. "$tmp_copy_dir"/
+        cp -a "$candidate_dir"/. "$tmp_copy_dir"/
         while IFS= read -r child_dir; do
           [ -n "$child_dir" ] || continue
           rm -rf -- "$child_dir"
         done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -print)
-        cp -R "$tmp_copy_dir"/. "$plugin_dir"/
+        cp -a "$tmp_copy_dir"/. "$plugin_dir"/
       elif command -v rsync >/dev/null 2>&1; then
         rsync -a --delete --force "$candidate_dir/" "$plugin_dir/"
       else
         local tmp_copy_dir=""
         tmp_copy_dir="$(mktemp -d)"
         cleanup_paths+=("$tmp_copy_dir")
-        cp -R "$candidate_dir"/. "$tmp_copy_dir"/
+        cp -a "$candidate_dir"/. "$tmp_copy_dir"/
         while IFS= read -r child_dir; do
           [ -n "$child_dir" ] || continue
           rm -rf -- "$child_dir"
         done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -print)
-        cp -R "$tmp_copy_dir"/. "$plugin_dir"/
+        cp -a "$tmp_copy_dir"/. "$plugin_dir"/
       fi
 
       while IFS= read -r child_dir; do
@@ -2096,7 +2248,11 @@ sync_codex_profile_homes() {
     [ -n "$profile_home" ] || continue
     [ -d "$profile_home" ] || continue
 
-    sync_user_skills "$skills_dir" "$profile_home/skills"
+    if [ "$flat_projection_rebuilt" = "1" ]; then
+      sync_user_skills "$skills_dir" "$profile_home/skills"
+    else
+      echo "[INFO] Skipping profile skills sync because flat runtime skill projection was not rebuilt."
+    fi
 
     profile_plugins="$profile_home/plugins"
     profile_plugins_root="$profile_home/Plugins"
@@ -2108,13 +2264,17 @@ sync_codex_profile_homes() {
     profile_cache_target="$profile_plugins_root/cache"
     cache_source_real="$(cd "$cache_source" 2>/dev/null && pwd -P || true)"
     profile_cache_target_real="$(cd "$profile_cache_target" 2>/dev/null && pwd -P || true)"
-    if [ -n "$cache_source_real" ] && [ -n "$profile_cache_target_real" ] && [ "$cache_source_real" = "$profile_cache_target_real" ]; then
+    if [ "$runtime_cache_fresh" != "1" ]; then
+      echo "[INFO] Skipping profile cache publication because runtime cache rebuild was not fresh."
+    elif [ -n "$cache_source_real" ] && [ -n "$profile_cache_target_real" ] && [ "$cache_source_real" = "$profile_cache_target_real" ]; then
       echo "[INFO] Skipping profile cache copy for identical source/target: $profile_cache_target"
     else
       sync_user_skills "$cache_source" "$profile_cache_target" 0 copy
       materialize_plugin_cache_roots "$profile_cache_target"
     fi
-    if [ -f "$marketplace_file" ]; then
+    if [ "$runtime_cache_fresh" != "1" ]; then
+      echo "[INFO] Skipping profile marketplace publication because runtime cache rebuild was not fresh."
+    elif [ -f "$marketplace_file" ]; then
       marketplace_target="$profile_plugins_root/marketplace.json"
       if [ -e "$marketplace_target" ] && cmp -s "$marketplace_file" "$marketplace_target"; then
         echo "[INFO] Profile marketplace manifest already points at canonical source: $marketplace_target"
@@ -2135,21 +2295,31 @@ sync_codex_profile_homes() {
 }
 
 # cleanup_legacy_local_marketplace_cache removes a legacy visible local marketplace
-# cache directory or symlink if it exists.
+# cleanup_legacy_local_marketplace_cache removes a legacy local marketplace cache directory or symlink if it exists, skipping the operation when the parent directory cannot be safely mutated.
 cleanup_legacy_local_marketplace_cache() {
   local legacy_cache_root="$1"
   if [ -d "$legacy_cache_root" ] || [ -L "$legacy_cache_root" ]; then
+    if ! can_mutate_sync_dir "$(dirname "$legacy_cache_root")"; then
+      skip_unwritable_sync_phase "legacy local marketplace cache cleanup" "$(dirname "$legacy_cache_root")"
+      return 0
+    fi
     rm -rf -- "$legacy_cache_root"
     echo "[OK] Removed legacy visible local marketplace cache: $legacy_cache_root"
   fi
 }
 
-# sync_plugin_cache_projections runs Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py to synchronise plugin-cache projections; if the script is missing it logs a warning and skips.
+# sync_plugin_cache_projections synchronizes plugin-cache projections by invoking Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py; if that script is missing or the runtime cache root cannot be mutated, it logs a warning and skips the sync.
 sync_plugin_cache_projections() {
   local projection_script="$repo_root/Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py"
 
   if [ ! -f "$projection_script" ]; then
     echo "[WARN] Projection integrity script missing; skipping plugin-cache header sync."
+    mark_runtime_cache_stale
+    return 0
+  fi
+  if ! can_mutate_sync_dir "$runtime_cache_root"; then
+    skip_unwritable_sync_phase "plugin-cache projection sync" "$runtime_cache_root"
+    mark_runtime_cache_stale
     return 0
   fi
 
@@ -2163,19 +2333,28 @@ materialize_plugin_cache_roots "$runtime_cache_root"
 cleanup_legacy_local_marketplace_cache "$plugins_dir/cache/local"
 cleanup_legacy_local_marketplace_cache "$runtime_cache_root/local"
 sync_plugin_cache_projections
+if [ "$runtime_cache_rebuild_blocked" = "0" ]; then
+  runtime_cache_fresh=1
+fi
 sync_versioned_local_marketplace_cache "$plugins_dir/marketplace.json" "$plugins_dir/cache"
 # On case-insensitive filesystems (e.g. default macOS), "skills" aliases
 # "Skills"; forcing a lowercase symlink would replace the canonical tracked
 # Skills/ tree and can introduce symlink loops.
 if [ -d "$repo_root/Skills" ] && [ ! -L "$repo_root/Skills" ]; then
   echo "[INFO] Skipping repo-local skills symlink projection because canonical Skills/ exists."
-else
+elif [ "$flat_projection_rebuilt" = "1" ]; then
   sync_user_skills "$skills_dir" "$repo_root/skills" 1
+else
+  echo "[INFO] Skipping repo-local skills symlink projection because flat runtime skill projection was not rebuilt."
 fi
 sync_user_skills "$plugins_dir" "$repo_root/.agents/plugins" 1
 if [[ "$sync_scope" == "user" ]]; then
   remove_legacy_home_skill_symlinks
-  sync_user_skills "$skills_dir" "$HOME/.agents/skills"
+  if [ "$flat_projection_rebuilt" = "1" ]; then
+    sync_user_skills "$skills_dir" "$HOME/.agents/skills"
+  else
+    echo "[INFO] Skipping home skills sync because flat runtime skill projection was not rebuilt."
+  fi
   sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"
   sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
   ensure_real_home_plugin_root "$HOME/plugins" "$plugins_dir" "home plugin root"

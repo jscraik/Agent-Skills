@@ -43,8 +43,8 @@ This document maps the original specification prompts in `/Users/jamiecraik/dev/
 - Prompt references were translated into skill-stage guidance so the workflow stays usable while prompt surfaces are being deprecated.
 - The learnings lookup was modernized to check `.harness/memory/LEARNINGS.md` first when present, while keeping `instructions/Learnings.md` as a compatibility fallback.
 - UI artifact path handling was made explicit:
-  - prefer `docs/ui-specs/` for dedicated UI specs
-  - preserve the older `Docs/specs/...-ui-spec.md` form as a compatibility mode when the repo or user requires it
+  - prefer `.harness/specs/` for dedicated UI specs
+  - preserve the older `.harness/specs/...-ui-spec.md` form as a compatibility mode when the repo or user requires it
 - `Infrastructure/references/contract.yaml` and `Infrastructure/references/evals.yaml` were added to meet current skill quality requirements and strengthen routing reliability.
 - Pressure and prompt-injection evals were added because the original prompts relied more on ambient scaffolding than a packaged skill can safely assume.
 

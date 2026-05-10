@@ -46,7 +46,7 @@ In headless mode, compose the synthesis for auditability but do not ask for conf
 
 ## Requirements Artifact
 
-Default path: `docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md`. Use repo-relative paths inside artifacts.
+Default path: `.harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md`. Use repo-relative paths inside artifacts.
 
 Frontmatter: `schema_version`, `source: he-brainstorm`, `created`, `mode`, `scope_tier`, `spec_required`, `risk_level`, `complexity`, and `next_stage`.
 

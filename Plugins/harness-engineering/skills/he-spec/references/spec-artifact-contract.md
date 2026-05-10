@@ -2,6 +2,10 @@
 
 Read when: writing or reviewing a Harness Engineering spec artifact.
 
+Durable spec markdown is written under `.harness/specs/**.md`. Read legacy
+`Specs/` or docs paths as source evidence only; write replacement specs to the
+Harness artifact root.
+
 ## Standard Spec
 
 Frontmatter: `schema_version: 1`, title/type/status/date/origin/risk/depth/UI flags; add Linear fields and `traceability_required: true` for tracked work.

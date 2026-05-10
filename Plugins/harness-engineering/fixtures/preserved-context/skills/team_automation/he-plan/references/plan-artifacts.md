@@ -34,12 +34,12 @@ python3 Plugins/harness-engineering/skills/he-plan/Infrastructure/scripts/check_
 Validate tracked-work traceability:
 
 ```bash
-python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py Docs/plans/<filename>.md
+./bin/ask python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/<filename>.md
 ```
 
 ## General plan template
 Preferred path:
-- `Docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md`
+- `.harness/plan/YYYY-MM-DD-<type>-<descriptive-name>-plan.md`
 
 Suggested frontmatter:
 
@@ -50,12 +50,12 @@ title: <plan title>
 type: feat|fix|refactor
 status: active
 date: YYYY-MM-DD
-origin: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md # if applicable; resume legacy *-brainstorm.md only when that is the source artifact
-requirements: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md  # if applicable
-spec: Docs/specs/YYYY-MM-DD-<topic>-spec.md                 # if applicable
-source_spec: docs/specs/YYYY-MM-DD-<topic>-spec.md          # compatibility alias if repo uses it
-ui_spec: docs/ui-specs/YYYY-MM-DD-<name>-ui-spec.md         # if applicable
-parent_plan: Docs/plans/YYYY-MM-DD-<name>-plan.md           # if applicable
+origin: .harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md # if applicable; resume legacy *-brainstorm.md only when that is the source artifact
+requirements: .harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md  # if applicable
+spec: .harness/specs/YYYY-MM-DD-<topic>-spec.md                 # if applicable
+source_spec: .harness/specs/YYYY-MM-DD-<topic>-spec.md          # compatibility alias if repo uses it
+ui_spec: .harness/specs/YYYY-MM-DD-<name>-ui-spec.md         # if applicable
+parent_plan: .harness/plan/YYYY-MM-DD-<name>-plan.md           # if applicable
 deepened: YYYY-MM-DD                                        # if applicable
 linear_project: TEAM|project-slug                           # required for non-trivial tracked work
 linear_issue: ABC-123                                       # required for non-trivial tracked work
@@ -120,11 +120,11 @@ title: <plan title>
 type: feat|fix|refactor
 status: active
 date: YYYY-MM-DD
-origin: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md
-requirements: docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md
-spec: Docs/specs/YYYY-MM-DD-<topic>-spec.md
-source_spec: docs/specs/YYYY-MM-DD-<topic>-spec.md
-ui_spec: docs/ui-specs/YYYY-MM-DD-<name>-ui-spec.md
+origin: .harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md
+requirements: .harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md
+spec: .harness/specs/YYYY-MM-DD-<topic>-spec.md
+source_spec: .harness/specs/YYYY-MM-DD-<topic>-spec.md
+ui_spec: .harness/specs/YYYY-MM-DD-<name>-ui-spec.md
 deepened: YYYY-MM-DD
 linear_project: <team-or-project>
 linear_issue: <ABC-123>
@@ -325,7 +325,7 @@ Preferred path:
 - `docs/ui-plans/YYYY-MM-DD-<descriptive-name>-ui-plan.md`
 
 Compatibility path:
-- `Docs/plans/YYYY-MM-DD-<topic>-ui-plan.md`
+- `.harness/plan/YYYY-MM-DD-<topic>-ui-plan.md`
 
 Suggested frontmatter:
 
@@ -335,8 +335,8 @@ title: <ui plan title>
 type: feat|fix|refactor
 status: active
 date: YYYY-MM-DD
-ui_spec: docs/ui-specs/YYYY-MM-DD-<name>-ui-spec.md  # if applicable
-parent_plan: Docs/plans/YYYY-MM-DD-<name>-plan.md    # if applicable
+ui_spec: .harness/specs/YYYY-MM-DD-<name>-ui-spec.md  # if applicable
+parent_plan: .harness/plan/YYYY-MM-DD-<name>-plan.md    # if applicable
 ---
 ```
 

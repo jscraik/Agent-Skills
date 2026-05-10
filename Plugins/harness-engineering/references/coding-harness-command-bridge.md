@@ -31,10 +31,10 @@ In managed repos, `project_brain_status: not_applicable` is valid only when `.ha
 
 | Stage | Required coding-harness behavior |
 | --- | --- |
-| `he-brainstorm` | Resolve/create Linear before durable handoff; run `harness brainstorm-gate --json` when present; if blocked, return a ready-to-create Linear payload. |
-| `he-spec` | Resolve/create Linear before tracked specs; include Linear Work Item Contract and acceptance traceability; run or block any repo spec/Linear gate. |
-| `he-plan` | Run or block `harness plan-gate --require-plan-id --require-traceability --json`; preserve acceptance IDs, plan IDs, Linear keys, and future PR evidence. |
-| `he-work` | Inspect branch, dirty state, and Harness artifacts; run/block `blast-radius`, `policy-gate`, `preflight-gate`, and `validation-plan`. |
+| `he-brainstorm` | Resolve/create Linear before durable handoff; write brainstorm docs under `.harness/brainstorm/**.md` or folded ideation docs under `.harness/ideate/**.md`; run `harness brainstorm-gate --json` when present; if blocked, return a ready-to-create Linear payload. |
+| `he-spec` | Consume only the approved execution slice before writing tracked specs: `.harness/linear/<repo-name>-linear-plan.md`, the selected `.harness/refactors/<selected-refactor>.md` when applicable, `.harness/decisions/*.md`, `.harness/core/*.md`, and `.harness/brainstorm/*.md`; use strategy, triage, review, and feature docs only as secondary context; write specs under `.harness/specs/**.md`; include Linear Work Item Contract and acceptance traceability; run or block any repo spec/Linear gate. |
+| `he-plan` | Plan only the selected milestone, parent issue, refactor phase, or execution slice; write plans under `.harness/plan/**.md`; run or block `harness plan-gate --require-plan-id --require-traceability --json`; preserve acceptance IDs, plan IDs, Linear keys, and future PR evidence. |
+| `he-work` | Inspect branch, dirty state, and Harness artifacts; verify work maps to the selected execution slice; run/block `blast-radius`, `policy-gate`, `preflight-gate`, and `validation-plan`. |
 | `he-code-review` | Review `Linear -> spec/source IDs -> plan -> PR -> validation`; run/block docs, review, CodeRabbit, learnings, context, and north-star gates. |
 | `he-compound` | Map earliest incomplete HE stage plus Harness lifecycle state; refresh Project Brain when `.harness/knowledge/**`, `.harness/decisions/**`, or `.harness/review-log.md` changed. |
 

@@ -48,8 +48,8 @@ This document maps the legacy brainstorm prompt plus the current Harness Enginee
   - clearer software-domain classification language so topical software mentions do not misroute non-software brainstorms.
 - The same refresh also pulled optional Slack-context guidance into Phase 1.1, but kept it opt-in and non-blocking so the local workflow still runs cleanly without Slack tooling.
 - Prompt-only control syntax such as `argument-hint` and slash-command handoffs were translated into durable skill guidance plus local `he-spec`, `he-plan`, and `he-work` handoff language.
-- The upstream `requirements doc` contract was adopted for new substantial work because local `he-plan` already prefers `docs/brainstorms/*-requirements.md` as the primary planning source.
-- Legacy `docs/brainstorms/*-brainstorm.md` artifacts remain supported for resume-in-place compatibility rather than forced renames.
+- The upstream `requirements doc` contract was adopted for new substantial work because local `he-plan` already prefers `.harness/brainstorm/*-requirements.md` as the primary planning source.
+- Legacy `.harness/brainstorm/*-brainstorm.md` artifacts remain supported for resume-in-place compatibility rather than forced renames.
 - The upstream `document-review` step was preserved via the local `Infrastructure/references/document-review-pass.md` adaptation, matching how other HE skills in this repo keep lightweight review behavior without creating a duplicate sibling skill.
 - Internal delegation guidance was retained, but made explicit that it only applies when the runtime and session policy permit it.
 - Detailed pressure-test prompts, output closeout templates, and validation checklist remain preserved in `Infrastructure/references/brainstorm-workflow-details.md` to keep `SKILL.md` routing-focused without context loss.
@@ -64,6 +64,6 @@ This document maps the legacy brainstorm prompt plus the current Harness Enginee
 - Optional bounded internal support is still constrained by explicit approval and runtime policy.
 - The product pressure test is now preserved explicitly.
 - `spec_required`, `risk_level`, and `complexity` are still required.
-- Durable output is still captured in `docs/brainstorms/`, now aligned to local requirements-doc naming for new work.
+- Durable output is still captured in `.harness/brainstorm/`, now aligned to local requirements-doc naming for new work.
 - Lightweight document review is explicitly preserved before handoff.
 - The original "do not do" boundaries still exist, now under anti-patterns and constraints.

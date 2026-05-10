@@ -7,5 +7,5 @@ Canonical source: `../../shared/Infrastructure/references/document-review-pass.m
 Maintained as the lightweight review pass used by `he-brainstorm` before `he-spec` or `he-plan` handoff.
 
 Brainstorm-specific notes:
-- default search location prefers `docs/brainstorms/` and `*-requirements.md`
+- default search location prefers `.harness/brainstorm/` and `*-requirements.md`
 - review should verify readiness for `he-spec` or `he-plan` handoff

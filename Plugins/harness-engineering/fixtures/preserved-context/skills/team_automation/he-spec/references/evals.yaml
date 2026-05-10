@@ -27,7 +27,7 @@ cases:
       - type: regex
         value: "(?i)(?:\\$he-spec\\b|\\b(?:skill|route)\\s*[:=]\\s*he-spec\\b|\\busing\\s+\\$?he-spec\\b|\\bselected\\s+he-spec\\b)"
       - type: regex
-        value: "(?i)(Problem Statement|System Boundary|Acceptance and Test Matrix|Docs/specs/)"
+        value: "(?i)(Problem Statement|System Boundary|Acceptance and Test Matrix|\\.harness/specs/)"
 
   - id: linear-spec-traceability
     name: Linear issue to spec acceptance traceability
@@ -105,7 +105,7 @@ cases:
       - type: regex
         value: "(?i)(?:\\$he-spec\\b|\\b(?:skill|route)\\s*[:=]\\s*he-spec\\b|\\busing\\s+\\$?he-spec\\b|\\bselected\\s+he-spec\\b)"
       - type: regex
-        value: "(?i)(dedicated-ui-spec|docs/ui-specs/|VAC1|Component Inventory|Accessibility Requirements)"
+        value: "(?i)(dedicated-ui-spec|\\.harness/specs/|VAC1|Component Inventory|Accessibility Requirements)"
 
   - id: legacy-ui-spec-path-compatibility
     name: legacy ui spec path compatibility
@@ -113,12 +113,12 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Please keep compatibility with our older Docs/specs/...-ui-spec.md workflow while writing the UI contract."
+    prompt: "Please keep compatibility with our older .harness/specs/...-ui-spec.md workflow while writing the UI contract."
     acceptance:
       - type: regex
         value: "(?i)(?:\\$he-spec\\b|\\b(?:skill|route)\\s*[:=]\\s*he-spec\\b|\\busing\\s+\\$?he-spec\\b|\\bselected\\s+he-spec\\b)"
       - type: regex
-        value: "(?i)(compatibility|Docs/specs/.+-ui-spec\\.md|docs/ui-specs/)"
+        value: "(?i)(compatibility|\\.harness/specs/[^/]+-ui-spec\\.md|\\.harness/specs/)"
 
   - id: local-research-needed
     name: local research grounding

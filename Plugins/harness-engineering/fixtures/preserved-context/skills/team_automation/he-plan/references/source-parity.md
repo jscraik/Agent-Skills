@@ -62,8 +62,8 @@ This document maps the original planning prompt families to `he-plan` so the pro
 - `/prompts:...` references were translated into workflow-stage guidance so the skill remains usable while prompt surfaces are being deprecated.
 - The learnings lookup was modernized to check `.harness/memory/LEARNINGS.md` first when present, while keeping `instructions/Learnings.md` as a compatibility fallback.
 - UI artifact path handling was made explicit:
-  - prefer `docs/ui-plans/` for dedicated UI plans
-  - preserve the older `Docs/plans/...-ui-plan.md` form as a compatibility mode when the repo or user requires it
+  - prefer `.harness/plan/` for dedicated UI plans
+  - preserve legacy `docs/ui-plans/` paths only as compatibility input when existing repo artifacts require it
 - Prototype planning differences were preserved as mode-specific rules rather than flattened away:
   - 3 variants for dedicated UI-direction planning
   - 4-variant Prototype Pack brief for broader UI+technical delivery plans
@@ -71,7 +71,7 @@ This document maps the original planning prompt families to `he-plan` so the pro
 - Pressure and prompt-injection evals were added because the original prompts relied more on ambient scaffolding than a packaged skill can safely assume.
 - Tracker creation was modernized into an explicit Linear workflow handoff so plan generation and issue mutation stay separated while still preserving the original post-plan issue workflow intent.
 - The archived plan-deepening fast path was intentionally separated into `he-deepen-plan` in this repository so `he-plan` stays focused on initial plan creation and safe plan revision, while holistic plan-confidence passes route to the dedicated deepening stage.
-- The archived sequenced `Docs/plans/YYYY-MM-DD-NNN-...` filename convention was adapted to the repo's stable `Docs/plans/YYYY-MM-DD-<type>-<descriptive-name>-plan.md` convention. This preserves durability without forcing filename churn across existing local plan artifacts.
+- The archived sequenced `.harness/plan/YYYY-MM-DD-NNN-...` filename convention was adapted to the repo's stable `.harness/plan/YYYY-MM-DD-<type>-<descriptive-name>-plan.md` convention. This preserves durability without forcing filename churn across existing local plan artifacts.
 - The beta prompt's `-beta-plan.md` filename pattern was not adopted into stable `he-plan`; the canonical skill keeps the existing stable plan filename convention to avoid unnecessary artifact churn across the repo. This is an intentional portability decision, not a loss of planning behavior.
 - The beta prompt's inline Proof-share and tracker-mutation branches were not moved into the core planning skill. `he-plan` remains focused on producing the plan artifact, then handing off to the installed Linear workflow for tracker mutation when requested.
 - Progressive-disclosure hardening keeps `SKILL.md` route-critical while relocating standards rationale and planning philosophy to `Infrastructure/references/style-and-operating-guidance.md` with explicit read-when signposting.

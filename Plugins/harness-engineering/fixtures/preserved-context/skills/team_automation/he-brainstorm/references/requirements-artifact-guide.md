@@ -5,10 +5,10 @@ Read when: you are writing or updating the durable output from `he-brainstorm` a
 ## Default path
 
 For new substantial work, write:
-- `docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
+- `.harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md`
 
 Compatibility:
-- if resuming an existing legacy `docs/brainstorms/YYYY-MM-DD-<topic>-brainstorm.md` document, update it in place unless the user explicitly wants to rename it
+- if resuming an existing legacy `.harness/brainstorm/YYYY-MM-DD-<topic>-brainstorm.md` document, update it in place unless the user explicitly wants to rename it
 
 ## Frontmatter
 

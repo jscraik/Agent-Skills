@@ -48,7 +48,7 @@ Use at least one non-obvious angle when helpful (inversion, constraint removal, 
 
 Completion closeout:
 - `Brainstorm complete!`
-- requirements path under `docs/brainstorms/` (when one exists)
+- requirements path under `.harness/brainstorm/` (when one exists)
 - chosen `spec_required`, `risk_level`, `complexity`
 - recommended next workflow stage
 

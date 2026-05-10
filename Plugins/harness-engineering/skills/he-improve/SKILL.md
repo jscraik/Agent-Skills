@@ -14,7 +14,7 @@ Current artifact, evidence, session-collector evidence, metrics, constraints.
 ## Outputs
 Return schema_version when structured. Gap list, red_signal, prioritized improvements, validation, blackboard_delta, retained references.
 ## Procedure
-Before any new skill package is proposed, inspect existing surfaces; start with 2-3 focused surfaces at most, choose one primary target and at most two supporting references; label path fragments and bundle names as evidence labels; close coverage-gap items; translate external source material into invariants, evals, references, contracts, or an explicit rejection; for skill work, run the A/B/C spec-implementation-evaluation loop until the stop rule passes or a concrete blocker remains.
+Before any new skill package is proposed, inspect existing surfaces; start with 2-3 focused surfaces at most, choose one primary target and at most two supporting references; label path fragments and bundle names as evidence labels; close coverage-gap items; translate external source material into invariants, evals, references, contracts, or an explicit rejection; for skill work, run the A/B/C spec-implementation-evaluation loop until the stop rule passes or a concrete blocker remains. When improvement evidence is really about product-surface compression, update the shared compression contract and the stage evals that enforce it before creating another visible skill.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Compare before/after behavior and command outcomes.
 ## Failure mode
@@ -25,6 +25,7 @@ Redact secrets; preserve important context in references. Do not broaden into un
 - Creating a new skill before checking whether an existing stage should be improved.
 - Treating session evidence as a raw transcript dump instead of a bounded bundle.
 - Slimming prompts by deleting behavior that should have moved to references.
+- Adding a new surface when the durable fix is to hide, merge, demote, or gate an existing one.
 ## Examples
 - "Inspect the session collector `skill-refactor-evidence.json` bundle and harden `Plugins/harness-engineering/skills/he-plan` until strict audit has no warnings."
 - "Inspect `Plugins/harness-engineering/skills/he-code-review`, then run the A/B/C loop using the current `SKILL.md`, `contract.yaml`, `evals.yaml`, and latest audit output."
@@ -35,5 +36,6 @@ Reference `assets/` only for skill packaging and browseability; experiment logs 
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Session evidence: `Plugins/harness-engineering/references/session-evidence-skillify-triage.md`
 - Skill improvement loop: `Plugins/harness-engineering/references/skill-improvement-loop.md`
+- Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`
 - Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
 - XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

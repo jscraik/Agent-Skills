@@ -15,7 +15,7 @@ Request text, repo root, optional Linear/session evidence.
 ## Outputs
 Return `schema_version` when structured, plus `selected_stage`, `source_path`, `folded_mode`, `blocker`, `blackboard_delta`, and `lifecycle_exit_status`.
 ## Procedure
-Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement. When the request explicitly asks for persistent continuation, `/goal`, resume-over-time, or keep-working-until-done behavior, apply the goal continuity contract after selecting the HE stage.
+Route using `./bin/ask` (wrapping the routing operation); keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement. When the request explicitly asks for persistent continuation, `/goal`, resume-over-time, or keep-working-until-done behavior, apply the goal continuity contract after selecting the HE stage and hand off durable board governance to `Skills/agent-ops/goal-governor`. When a diagnosis names compression as the missing acceptance gate or says `spec_refresh_required`, route to `he-spec` and include the compression contract.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check deterministic aliases and subagent role availability.
 ## Failure mode
@@ -33,7 +33,8 @@ Redact secrets; never enumerate every child skill to the model. Do not remove im
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
-- Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`
+- Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`; durable goal boards: `Skills/agent-ops/goal-governor`
+- Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`
 - Preserved router rules: `references/context-preservation.md`
 - Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
 - XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`
