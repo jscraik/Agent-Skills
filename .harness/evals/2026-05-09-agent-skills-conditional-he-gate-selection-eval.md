@@ -428,7 +428,7 @@ Missing or blocked:
 
 - Passing full lifecycle smoke output for the changed lifecycle skills.
 - Fully refreshed plugin picker cache copy.
-- Linear backlink.
+- Passing Linear closure state after plugin-wide release proof.
 
 ## Failures / Regressions
 
@@ -517,4 +517,4 @@ this validation-hardening phase.
 | Sliced changed-surface smoke passes | runtime eval | `run_lifecycle_release_evals.py --mode smoke --eval-runner codex ... --case ambiguous-stage-route --case implementation-only-status` | high | supports narrow repair confidence |
 | Plugin-wide release confidence is blocked | runtime eval | legacy full `run_lifecycle_release_evals.py --mode smoke ...` | high | blocks closure |
 | Plugin picker cache proof is incomplete | sync output | `PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED` | high | blocks cache freshness claim |
-| Linear traceability is missing | artifact inspection | no Linear issue in source spec/plan | high | blocks Linear closure |
+| Linear traceability is linked but closure remains blocked | artifact inspection | `JSC-299` is present in frontmatter and the Linear backlink map | high | blocks closure until release-confidence proof passes |

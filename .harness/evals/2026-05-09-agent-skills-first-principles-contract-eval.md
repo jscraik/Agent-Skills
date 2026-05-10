@@ -295,7 +295,7 @@ Actual: parse passed with the PyYAML virtualenv.
 Status: pass.
 
 Evidence:
-`/Users/jamiecraik/.venvs/pyyaml/bin/python -c "...yaml.safe_load..."`.
+`python3 -c "...yaml.safe_load..."` using an environment with PyYAML installed.
 
 Confidence: high.
 
