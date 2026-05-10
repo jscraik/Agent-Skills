@@ -170,11 +170,11 @@ Dirty-Worktree Classification: Baseline evidence only. The phase refreshed route
 
 `PLAN-JSC246-003` is complete for refreshed evidence. The route-state contract is explicit in both focused tests and live command output while preserving existing `status` compatibility. Direct HE routes remain direct, fallback routes remain inspectable, and unreachable routed capabilities do not silently masquerade as successful recommendations. Do not treat this as parent closure proof because phases 005-007 remain historical relative to the current dirty worktree.
 
-Routing difference note: phase 003 selected `he-code-review` for the
-implementation-review prompt under the route-state fallback contract; phase 007
-later selected `triage` from a fresh-agent command run in a different branch
-state. The phase 007 row is retained as historical evidence, while phase 003 is
-the current authoritative implementation-review route for this eval.
+Routing difference note: phase 007 has two evidence classes. The current-run
+refresh selected `he-code-review` for the implementation-review prompt under the
+route-state fallback contract. The older fresh-agent row selected `triage` from
+a different branch state and is retained as historical-only evidence, not as the
+authoritative route for this eval.
 
 ## Heartbeat Phase 004 Refresh - 2026-05-09
 

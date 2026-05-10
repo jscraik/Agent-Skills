@@ -160,7 +160,7 @@ Patch:
 | --- | --- | --- |
 | `simplify` | No actionable simplification finding. The ADR is short, uses one taxonomy table and one lifecycle table, and does not duplicate the global glossary. Subagent dispatch was attempted but returned only an instruction acknowledgment, so it is not counted as review evidence. | No patch required. |
 | `he-fix-bugs` | No blocker found. Required acceptance terms are present; the ADR does not mutate `UBIQUITOUS_LANGUAGE.md`, command behavior, selection policy, or promotion gates. Subagent dispatch was attempted but returned only an instruction acknowledgment, so it is not counted as review evidence. | No patch required. |
-| `he-code-review` | No readiness blocker found. Traceability is coherent: `JSC-287` -> `SA-ASK-007` -> `PLAN-ASK-004` -> ADR/eval evidence. Linear freshness remains explicitly blocked and no Linear mutation is claimed. | No patch required. |
+| `he-code-review` | No readiness blocker found. Traceability is coherent: `JSC-287` -> `SA-ASK-007` -> `PLAN-ASK-004` -> ADR/eval evidence. Linear freshness was resolved by the later live refresh and proof-posting step, so no blocked Linear freshness claim remains. | No patch required. |
 
 ## Resolved Blockers
 

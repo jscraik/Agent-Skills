@@ -506,7 +506,7 @@ Do not create one-off labels such as `Moat-Critical`, `Context`, or `Routing` un
 
 | Project | Recommendation | Active-set limit | Rationale |
 |---|---|---|---|
-| `agent-skills` | Keep active for the next command-surface slice under `Command surface and ask reliability` | Keep to 1 active milestone and 1 active parent issue for the next `$he-spec` handoff | `Ask Control Plane Decomposition` is complete in Linear; the next slice should preserve the same small-active-set discipline. |
+| `agent-skills` | Keep active for the next command-surface slice under `Command surface and ask reliability` | Keep the next HE spec handoff lane to 1 active milestone and 1 active parent issue | `Ask Control Plane Decomposition` is complete in Linear; the next slice should preserve the same small-active-set discipline without treating existing independent tracks as violations. |
 | `Portfolio Ops` | Do not reactivate solely for this repo plan | 0-1 coordination issue only if needed | Cross-repo work is not needed to start repo execution. |
 | `Dev Portfolio` | Use as parent initiative only | No new initiative | Existing initiative represents the repo execution surface. |
 

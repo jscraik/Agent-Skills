@@ -357,7 +357,7 @@ Evidence: source `.harness/linear/**` plan and this eval.
 
 Confidence: high.
 
-Blocks Closure: yes.
+Blocks Closure: no unless external Linear tracking is created for this slice.
 
 Required Action: create or confirm Linear issue only if external tracking is
 desired.
