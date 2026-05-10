@@ -52,12 +52,12 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 # Git short-hash format used by the skillset generator.
-_REVISION_PATTERN = re.compile(r"^[0-9a-f]{7,}", re.IGNORECASE)
+_REVISION_PATTERN = re.compile(r"^[0-9a-f]{9}$", re.IGNORECASE)
 
 
 def _current_source_revision() -> str:
     return subprocess.check_output(
-        ["git", "rev-parse", "--short", "HEAD"],
+        ["git", "rev-parse", "--short=9", "HEAD"],
         cwd=REPO_ROOT,
         text=True,
     ).strip()
