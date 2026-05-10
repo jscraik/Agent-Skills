@@ -1,8 +1,0 @@
-I can generate the eval report, but I’m missing the one field I need to make it concrete: the milestone name itself.
-
-What I can already call out clearly is the traceability gap:
-- The handoff does not include the Linear parent issue ID.
-- That means the milestone cannot be mapped back to the canonical tracking record.
-- As a result, the eval report would be less auditable and harder to reconcile with acceptance criteria, status history, or downstream follow-up.
-
-Send me the milestone name, and I’ll turn it into a finished eval report with the traceability gap stated explicitly.

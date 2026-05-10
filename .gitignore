@@ -101,6 +101,7 @@ Infrastructure/reports/data/candidates.json
 /Infrastructure/artifacts/skill-graphs/runs/**/events.jsonl
 
 # Harness runtime/scratch outputs
+.harness/
 .harness/backups/
 .harness/*.db
 .harness/ci-migrate-snapshots/

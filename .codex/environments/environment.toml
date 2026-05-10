@@ -20,7 +20,8 @@ fi
 if [[ -f scripts/prepare-worktree.sh ]]; then
   bash scripts/prepare-worktree.sh
 else
-  npm install
+  echo "[codex] scripts/prepare-worktree.sh is required for this repo; root package-manager install is intentionally unsupported."
+  exit 1
 fi
 '''
 
@@ -44,7 +45,8 @@ fi
 if [[ -f scripts/prepare-worktree.sh ]]; then
   bash scripts/prepare-worktree.sh
 else
-  npm install
+  echo "[codex] scripts/prepare-worktree.sh is required for this repo; root package-manager install is intentionally unsupported."
+  exit 1
 fi
 '''
 
@@ -165,6 +167,13 @@ name = "Mise"
 icon = "tool"
 command = '''
 set -euo pipefail
+
+for candidate in "$HOME/.local/share/mise/shims" "$HOME/.local/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "/usr/local/bin" "/usr/sbin" "/sbin"; do
+  if [[ -d "$candidate" && ":$PATH:" != *":$candidate:"* ]]; then
+    PATH="$candidate:$PATH"
+  fi
+done
+export PATH
 
 command -v mise >/dev/null 2>&1
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then

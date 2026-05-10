@@ -348,7 +348,7 @@ Confidence: High
 
 Operational Impact: Better local reasoning around plugin cache behavior with no observed command drift.
 
-Blocks Completion: no for local implementation; yes for Linear closure until live tracker refresh is complete.
+Blocks Completion: no for local implementation; no for Linear closure because the live tracker refresh and closure mutation are complete.
 
 # Routing Determinism Check
 
@@ -523,7 +523,7 @@ Target Linear Project: `agent-skills`
 
 Parent Issue or Milestone: `JSC-284`
 
-Reason: live Linear refresh is required before closure/status mutation.
+Reason: live Linear refresh and closure/status mutation are complete for `JSC-284` through `JSC-287`.
 
 Priority: High for closure; not a code blocker.
 
@@ -553,7 +553,7 @@ ADR Update: no ADR update required for this slice.
 
 Rationale: the proof taxonomy ADR is present, and existing core invariants already cover source/projection separation, command contract preservation, staged reversible execution, and proof-backed closure.
 
-Required Action: none before local closure; refresh Linear before tracker closure.
+Required Action: none before local closure; Linear tracker closure is already refreshed and complete.
 
 # Evidence & Traceability Matrix
 

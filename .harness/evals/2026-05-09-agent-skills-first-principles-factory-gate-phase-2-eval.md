@@ -397,7 +397,7 @@ Confidence: high.
 
 Blocks Completion: no
 
-## Domain Model Integrity Check
+## Domain Model Translation Evidence
 
 Conclusion: sufficient for Phase 2.
 

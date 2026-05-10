@@ -4,7 +4,11 @@ last_updated: "2026-05-09"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-compound/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
-x_accept: &accept [{type: regex, value: "(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)"}]
+x_accept: &accept
+  - type: regex
+    value: "(?is)(evidence|traceability|validation|route|stage|safe|redact|scope|forbidden)"
+  - type: regex
+    value: "(?is)(blocked|safe_to_continue|blocked_reason|smallest_recovery_step)"
 x_steer: &steer [{type: regex, value: "(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)"}]
 cases:
   - id: refresh-harness-state

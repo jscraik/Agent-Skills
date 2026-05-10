@@ -409,6 +409,8 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         or _starts_with(normalized, ".harness/triage")
         or _starts_with(normalized, ".harness/review")
         or _starts_with(normalized, ".harness/ideate")
+        or _starts_with(normalized, ".harness/evals")
+        or _starts_with(normalized, ".harness/session-evidence")
         or _starts_with(normalized, ".harness/specs")
         or _starts_with(normalized, ".harness/plan")
     ):

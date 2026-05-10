@@ -73,7 +73,7 @@ Review decisions applied:
 | Parent initiative | `Dev Portfolio` |
 | Milestone | Ask Control Plane Decomposition (Linear milestone: Command surface and ask reliability) |
 | Priority | 1 |
-| Labels | Architecture, Refactor, Drift-Risk, Developer Experience |
+| Labels | Architecture, Refactor, Agent-Native |
 | Execution route | Agent-assisted; human-review required for public command contract changes |
 | Blocks | Proof implementation in skills commands; golden-path routing changes |
 | Blocked by | None |
@@ -609,7 +609,7 @@ Label status: `resolved_with_existing_labels`; no Linear label mutation is requi
 
 | Issue | Title | Status | Priority | Classification | Reason |
 |---|---|---|---:|---|---|
-| Milestone | `Command surface and ask reliability` | Active; progress `38%` | n/a | already_covered | Canonical project-ID milestone lookup and issue-level reads agree that this milestone owns `JSC-246`, `JSC-284`, `JSC-285`, `JSC-286`, `JSC-287`, and the `JSC-230` child topology. |
+| Milestone | `Command surface and ask reliability` | Active; progress `37.5%` | n/a | already_covered | Canonical project-ID milestone lookup and issue-level reads agree that this milestone owns `JSC-246`, `JSC-284`, `JSC-285`, `JSC-286`, `JSC-287`, and the `JSC-230` child topology. |
 | Milestone | `Ask Control Plane Decomposition` | Stale duplicate-project lookup result | n/a | out_of_scope | Name-only lookup can surface this milestone from the canceled duplicate project; do not route the next spec here. |
 | JSC-284 | `[agent-skills] Decompose skills command module into bounded services` | Done | 1 | already_covered | Prior approved parent is complete; keep as evidence, not active scope. |
 | JSC-285 | `[agent-skills] Map skills command responsibilities and output contracts` | Done | 1 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |

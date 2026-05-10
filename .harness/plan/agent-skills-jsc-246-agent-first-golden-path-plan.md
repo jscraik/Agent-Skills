@@ -66,15 +66,15 @@ and closeout-ready:
 
 ```bash
 ./bin/ask repo doctor --json --robot
-./bin/ask repo surface --json --robot
 ./bin/ask skills improve "<goal>" --json --robot
 ./bin/ask skills explain <handle> --json --robot
 ./bin/ask skills prove <handle-or-goal> --json --robot
 ./bin/ask repo closeout --changed --json --robot
 ```
 
-`repo surface` remains a doctor-selected diagnostic lane, not a competing first
-command.
+If `repo doctor` reports repo-surface diagnostic debt, run
+`./bin/ask repo surface --json --robot` as the doctor-selected diagnostic lane.
+It is not a competing first command or unconditional golden-path step.
 
 ## HE Gate Profile
 

@@ -358,6 +358,7 @@ class TestGitignore(unittest.TestCase):
 
     def test_harness_root_marker_is_trackable(self):
         """The top-level !.harness/ negation must be present so the directory itself is trackable."""
+        self.assertIn(".harness/", self._lines)
         self.assertIn("!.harness/", self._lines)
 
     def test_harness_core_recursive_content_is_trackable(self):
@@ -416,8 +417,8 @@ class TestGitignore(unittest.TestCase):
         negation_idx = next(
             (i for i, line in enumerate(self._lines) if line == "!.harness/"), -1
         )
-        self.assertGreater(ignore_idx, 0, ".harness/backups/ entry not found")
-        self.assertGreater(negation_idx, 0, "!.harness/ entry not found")
+        self.assertGreaterEqual(ignore_idx, 0, ".harness/backups/ entry not found")
+        self.assertGreaterEqual(negation_idx, 0, "!.harness/ entry not found")
         self.assertLess(
             ignore_idx,
             negation_idx,
@@ -432,8 +433,8 @@ class TestGitignore(unittest.TestCase):
         json_neg_idx = next(
             (i for i, line in enumerate(self._lines) if line == "!.harness/*.json"), -1
         )
-        self.assertGreater(db_idx, 0, ".harness/*.db entry not found")
-        self.assertGreater(json_neg_idx, 0, "!.harness/*.json entry not found")
+        self.assertGreaterEqual(db_idx, 0, ".harness/*.db entry not found")
+        self.assertGreaterEqual(json_neg_idx, 0, "!.harness/*.json entry not found")
         self.assertLess(
             db_idx,
             json_neg_idx,
