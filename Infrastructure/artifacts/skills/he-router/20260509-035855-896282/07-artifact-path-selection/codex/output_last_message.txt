@@ -1,0 +1,3 @@
+I can choose it, but I need one missing piece of context to do it safely: either the Linear issue link/ID or the candidate artifact paths you’re choosing between.
+
+If you paste those, I’ll tell you the correct dated harness artifact path and why it’s the right one.

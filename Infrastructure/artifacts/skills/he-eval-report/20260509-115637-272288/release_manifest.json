@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-09T10:56:37Z",
+  "skill": {
+    "name": "he-eval-report",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "cf174fe5f500a67e8f08c666c9d8716be4c2a86b",
+    "source_branch": "codex/goal-governor-independent-skill"
+  },
+  "run": {
+    "run_id": "20260509-115637-272288",
+    "eval_mode": "smoke",
+    "runner_mode": "codex",
+    "tier2_mode": "warn",
+    "capture_jsonl": true,
+    "readiness_summary": {
+      "comparison_blocked": 0,
+      "comparison_incomplete": 0,
+      "downstream_ready": 0,
+      "starter_valid": 0,
+      "unknown": 1
+    },
+    "round_state_summary": {
+      "blocked": 0,
+      "decision_recorded": 0,
+      "evidence_captured": 0,
+      "prepared": 0,
+      "reviewed": 0,
+      "running": 0,
+      "unknown": 1
+    },
+    "neutral_baseline_approvals_used": [],
+    "reports_base": "Infrastructure/artifacts/skills/he-eval-report/20260509-115637-272288"
+  },
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-eval-report/20260509-115637-272288",
+    "summary": "Infrastructure/artifacts/skills/he-eval-report/20260509-115637-272288/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-eval-report/20260509-115637-272288/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-eval-report/20260509-115637-272288/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-eval-report/20260509-115637-272288/junit.xml"
+  }
+}

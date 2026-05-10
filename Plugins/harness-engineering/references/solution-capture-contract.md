@@ -45,6 +45,21 @@ Before writing a new solution:
 4. Create a new `.harness/solutions/**` entry only when no high-overlap solution
    exists.
 
+## Discoverability Check
+
+Before marking a solution capture complete, verify whether future agents can
+find the solution root from the repo's active instruction surfaces:
+
+- Search applicable `AGENTS.md`, README/front-door docs, instruction maps, and
+  `.harness/knowledge/**` guidance when Project Brain exists.
+- Confirm `.harness/solutions/**` is named as the canonical solved-problem
+  surface or that the handoff explicitly records a `discoverability_blocked`
+  status with the missing doc path.
+- Confirm legacy `docs/solutions/**` is described as source evidence or
+  compatibility only when both roots exist.
+- Do not create broad governance docs only to mention solutions. Patch the
+  smallest active instruction surface that future agents already read.
+
 ## Project Brain Sync
 
 When the repo has `.harness/knowledge/**` or an explicit Project Brain contract,
@@ -82,5 +97,6 @@ solution_artifact: ".harness/solutions/<file>.md"
 legacy_sources:
   - "docs/solutions/<file>.md"
 project_brain_status: updated|blocked|not_applicable|explicitly_deferred
+discoverability_status: visible|blocked|not_applicable|explicitly_deferred
 next_action: "<one next HE stage or none>"
 ```

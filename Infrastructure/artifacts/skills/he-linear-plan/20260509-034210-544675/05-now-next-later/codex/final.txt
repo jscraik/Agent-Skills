@@ -1,0 +1,8 @@
+Yes. Send me the proposed work items, and I’ll sort each one into:
+
+- `Now` = should be done immediately
+- `Next` = important, but after the current highest-priority work
+- `Later` = useful, but not time-sensitive
+- `Do Not Create` = we should not start this work at all
+
+If you want, I can also apply a simple decision rule set while classifying, so the buckets are consistent.

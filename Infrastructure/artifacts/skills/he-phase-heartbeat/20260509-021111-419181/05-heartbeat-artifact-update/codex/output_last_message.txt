@@ -1,0 +1,11 @@
+I wasn’t able to complete the repo write in this session because the GitHub file-write calls were being cancelled by the connector, so no files were changed.
+
+What I confirmed:
+- The dated harness bundle is [here](/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z)
+- The bundle already has the core evidence in [README.md](/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/README.md), [index.json](/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/index.json), and [checksums.sha256](/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/validation/context-budget-rooted-soak/20260425T073146Z/checksums.sha256)
+
+The safest update I was about to add was an append-only phase-boundary journal alongside that bundle, so the existing soak evidence stays untouched.
+
+If you want, I can try again as soon as repo write access is available, and I’ll add:
+1. a phase-boundary ledger file, and
+2. a checksum companion for that ledger.

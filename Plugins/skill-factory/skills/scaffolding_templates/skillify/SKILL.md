@@ -37,6 +37,10 @@ Package context only when the workflow has a path through generate, test, distri
 6. Add references, contract, evals, and task profile needed by governance gates.
 7. Run structure and quality validation until clean.
 
+Read when: choosing whether the requested factory work should build a new artifact, improve an existing one, stay docs-only, or stop: [First-principles factory gate](../../../../../Infrastructure/references/first-principles-factory-gate.md).
+
+For non-trivial factory work, include `first_principles_gate` or an explicit `first_principles_gate_status: not_applicable` with the reason in the output or handoff before claiming readiness.
+
 ## Deliverables
 
 Return the skill path, package files created or changed, context routes, findings, validations, and any missing inputs. Structured output should include `schema_version: 1`.

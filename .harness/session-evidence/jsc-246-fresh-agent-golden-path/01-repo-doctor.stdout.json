@@ -1,0 +1,230 @@
+{
+  "status": "success",
+  "trace_id": "9c19d177-b8e3-4749-9efb-85b602318016",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "repo doctor --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "doctor": {
+      "agent_summary": "Usable with diagnostic debt: Repo surface has 7461 diagnostic finding(s).",
+      "blocking": false,
+      "blockers": [],
+      "next_command": "./bin/ask repo surface --json --robot",
+      "next_command_kind": "diagnostic_advisory",
+      "next_command_blocks_task": false,
+      "selected_next_command": {
+        "id": "repo_surface",
+        "kind": "diagnostic_advisory",
+        "command": "./bin/ask repo surface --json --robot",
+        "blocks_task": false
+      },
+      "secondary_next_commands": [],
+      "signals": {
+        "repo_status": {
+          "state": "pass",
+          "severity": "info",
+          "summary": "Repository status is readable.",
+          "source": "repo_status",
+          "details": {
+            "repo_root": ".",
+            "is_git": true
+          }
+        },
+        "projection_sync": {
+          "state": "pass",
+          "severity": "info",
+          "summary": "Workspace skill runtime appears synced.",
+          "source": "repo_status",
+          "details": {
+            "skills_synced": true
+          }
+        },
+        "catalog_parity": {
+          "state": "pass",
+          "severity": "info",
+          "summary": "Catalog parity is resolved.",
+          "source": "doctor_catalog",
+          "details": {
+            "decision_status": "resolved",
+            "canonical_count": 21,
+            "policy_identity": "8c69fbfa81b89658"
+          }
+        },
+        "runtime_budget": {
+          "state": "pass",
+          "severity": "info",
+          "summary": "Runtime budget is within policy.",
+          "source": "skills_budget",
+          "details": {
+            "status": "pass",
+            "default_visible_count": 10,
+            "estimated_description_tokens": 3172,
+            "violation_count": 0
+          }
+        },
+        "command_handles": {
+          "state": "pass",
+          "severity": "info",
+          "summary": "Command handles validate cleanly.",
+          "source": "skills_handles",
+          "details": {
+            "status": "pass",
+            "handle_count": 98,
+            "violation_count": 0
+          }
+        },
+        "repo_surface": {
+          "state": "warn",
+          "severity": "warning",
+          "summary": "Repo surface has 7461 diagnostic finding(s).",
+          "source": "repo_surface",
+          "next_command": "./bin/ask repo surface --json --robot",
+          "details": {
+            "status": "warning",
+            "total_paths": 10833,
+            "blocking_findings": 7461,
+            "counts_by_code": {
+              "authored_source_surface": 81,
+              "duplicated_infrastructure_path": 6,
+              "fixture_or_template_surface": 15,
+              "generated_evidence_pattern": 11,
+              "generated_skillset_projection": 11,
+              "harness_reference_surface": 32,
+              "indexed_reference_surface": 1094,
+              "ownership_decision_required": 28,
+              "plugin_fixture_surface": 879,
+              "plugin_metadata_source": 3,
+              "plugin_reference_surface": 49,
+              "policy_surface": 315,
+              "source_path": 882,
+              "tracked_generated_work_area": 267,
+              "tracked_historical_artifact": 7072,
+              "unknown_surface": 88
+            }
+          }
+        }
+      },
+      "diagnostic_debt": [
+        {
+          "id": "repo_surface",
+          "severity": "warning",
+          "summary": "Repo surface has 7461 diagnostic finding(s).",
+          "next_command": "./bin/ask repo surface --json --robot"
+        }
+      ]
+    },
+    "agent_summary": "Usable with diagnostic debt: Repo surface has 7461 diagnostic finding(s).",
+    "blocking": false,
+    "blockers": [],
+    "next_command": "./bin/ask repo surface --json --robot",
+    "next_command_kind": "diagnostic_advisory",
+    "next_command_blocks_task": false,
+    "selected_next_command": {
+      "id": "repo_surface",
+      "kind": "diagnostic_advisory",
+      "command": "./bin/ask repo surface --json --robot",
+      "blocks_task": false
+    },
+    "secondary_next_commands": [],
+    "signals": {
+      "repo_status": {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Repository status is readable.",
+        "source": "repo_status",
+        "details": {
+          "repo_root": ".",
+          "is_git": true
+        }
+      },
+      "projection_sync": {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Workspace skill runtime appears synced.",
+        "source": "repo_status",
+        "details": {
+          "skills_synced": true
+        }
+      },
+      "catalog_parity": {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Catalog parity is resolved.",
+        "source": "doctor_catalog",
+        "details": {
+          "decision_status": "resolved",
+          "canonical_count": 21,
+          "policy_identity": "8c69fbfa81b89658"
+        }
+      },
+      "runtime_budget": {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Runtime budget is within policy.",
+        "source": "skills_budget",
+        "details": {
+          "status": "pass",
+          "default_visible_count": 10,
+          "estimated_description_tokens": 3172,
+          "violation_count": 0
+        }
+      },
+      "command_handles": {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Command handles validate cleanly.",
+        "source": "skills_handles",
+        "details": {
+          "status": "pass",
+          "handle_count": 98,
+          "violation_count": 0
+        }
+      },
+      "repo_surface": {
+        "state": "warn",
+        "severity": "warning",
+        "summary": "Repo surface has 7461 diagnostic finding(s).",
+        "source": "repo_surface",
+        "next_command": "./bin/ask repo surface --json --robot",
+        "details": {
+          "status": "warning",
+          "total_paths": 10833,
+          "blocking_findings": 7461,
+          "counts_by_code": {
+            "authored_source_surface": 81,
+            "duplicated_infrastructure_path": 6,
+            "fixture_or_template_surface": 15,
+            "generated_evidence_pattern": 11,
+            "generated_skillset_projection": 11,
+            "harness_reference_surface": 32,
+            "indexed_reference_surface": 1094,
+            "ownership_decision_required": 28,
+            "plugin_fixture_surface": 879,
+            "plugin_metadata_source": 3,
+            "plugin_reference_surface": 49,
+            "policy_surface": 315,
+            "source_path": 882,
+            "tracked_generated_work_area": 267,
+            "tracked_historical_artifact": 7072,
+            "unknown_surface": 88
+          }
+        }
+      }
+    },
+    "diagnostic_debt": [
+      {
+        "id": "repo_surface",
+        "severity": "warning",
+        "summary": "Repo surface has 7461 diagnostic finding(s).",
+        "next_command": "./bin/ask repo surface --json --robot"
+      }
+    ]
+  },
+  "telemetry": {
+    "latency_ms": 553
+  },
+  "errors": []
+}

@@ -58,15 +58,6 @@ workflows, `${TEMP_PREFIX}/index.json` for redacted session labels, and
 explicit `--codex-sessions-dir` values only when the user asks for archived or
 non-default session roots.
 
-Before using `${TEMP_PREFIX}/skill-refactor-handoffs.json`, verify that it
-exists. If it is missing, report collector contract drift with the missing
-artifact path. Strict validation flows must stop there; non-strict recommendation
-flows may continue with provisional recommendations from
-`${TEMP_PREFIX}/skill-refactor-evidence.json`, `${TEMP_PREFIX}/index.json`, and
-`${TEMP_PREFIX}/redaction-report.json`, with a warning that operators should
-pass explicit `--codex-sessions-dir` values for archived or non-default session
-roots.
-
 ## Output Shape
 
 Use this concise structure for recommendations:

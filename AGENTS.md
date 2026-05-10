@@ -21,10 +21,11 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
 ## Common Commands
 
 ```bash
-./bin/ask repo status
-./bin/ask repo validate
-./bin/ask skills list
-./bin/ask skills audit <path> --level strict
+./bin/ask repo doctor --json --robot
+./bin/ask skills improve "<goal>" --json --robot
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
 ```
 
 ## Further Guidance

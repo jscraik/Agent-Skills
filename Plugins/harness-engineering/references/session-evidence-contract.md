@@ -9,6 +9,14 @@ Use the highest-confidence available source first:
 3. `~/.codex/session_index.jsonl` and `~/.codex/history.jsonl` phrase checks.
 4. `~/.codex/sessions` current runtime state.
 
+When `~/.agents/session-collector` is available, prefer normalized inventory and
+targeted extraction over raw transcript scanning. The minimum useful inventory
+row includes `platform`, `file`, `size`, `ts`, `session`, `cwd`, `branch`,
+`last_ts`, `match_count`, `keyword_matches`, and `_meta.parse_errors` when
+parsing was lossy. Use narrow extraction modes such as `skeleton`, `errors`, or
+`he-signals`; avoid broad summarization unless a source artifact or user request
+requires it. Detailed extraction rules: [session evidence extraction](session-evidence-extraction.md).
+
 Interpret collector output conservatively:
 
 - Confirm every `selected_he_stage` against `stage_invocation_templates` in [routing map](routing-map.json) before treating it as a stage. Unknown `he-*` tokens remain `unmapped_signal` evidence until a route is added intentionally.

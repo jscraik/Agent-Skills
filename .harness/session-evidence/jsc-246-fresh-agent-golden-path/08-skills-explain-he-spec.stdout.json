@@ -1,0 +1,95 @@
+{
+  "status": "success",
+  "trace_id": "70d9191e-9e38-4bfa-bf39-bde6d8d57198",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills explain he-spec --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_explain": {
+      "schema_version": "skills-explain.v1",
+      "query": "he-spec",
+      "canonical_source": "Plugins/harness-engineering/skills/he-spec/SKILL.md",
+      "generated_handle": ".agents/skills/he-spec/SKILL.md",
+      "runtime_projection": "rooted",
+      "runtime_visibility": "latent",
+      "owner": "harness-engineering",
+      "root_router": "harness-engineering",
+      "loaded_references": [],
+      "when_to_use": [
+        "Use when requirements are needed before plan/work; Explore first and ask second."
+      ],
+      "when_not_to_use": [],
+      "validation": [
+        "./bin/ask skills audit Plugins/harness-engineering/skills/he-spec --level strict --json --robot"
+      ],
+      "overlaps": [],
+      "ambiguity_notes": []
+    },
+    "explanation": {
+      "schema_version": "skill-explanation.v1",
+      "status": "resolved",
+      "handle": "he-spec",
+      "agent_summary": "$he-spec is for Create evidence-backed HE specs. Use when approved intent needs acceptance criteria before implementation.",
+      "what_it_is": "Create evidence-backed HE specs. Use when approved intent needs acceptance criteria before implementation.",
+      "when_to_use": [
+        "Use when requirements are needed before plan/work; Explore first and ask second."
+      ],
+      "when_not_to_use": [],
+      "canonical_source_path": "Plugins/harness-engineering/skills/he-spec/SKILL.md",
+      "runtime_projection_path": ".agents/skills/he-spec/SKILL.md",
+      "command_handles": [
+        {
+          "handle": "he-spec",
+          "path": ".agents/skills/he-spec/SKILL.md",
+          "invoke_via": "harness-engineering"
+        }
+      ],
+      "required_validation": [
+        "Fail fast: stop at the first failed gate and do not proceed. Check traceability, tests, observability, rollback, and owner evidence."
+      ],
+      "validation_commands": [
+        "./bin/ask skills audit Plugins/harness-engineering/skills/he-spec --level strict --json --robot"
+      ],
+      "known_limitations": [
+        "If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.",
+        "Inventing acceptance criteria that are not grounded in source evidence.",
+        "Writing task sequences instead of behavior contracts.",
+        "Weakening Linear traceability because a local spec already exists."
+      ],
+      "overlaps": [],
+      "ambiguity_notes": [],
+      "reachability": {
+        "status": "pass",
+        "proof_command": "./bin/ask skills proof he-spec --json --robot"
+      },
+      "resolution": {
+        "status": "ok",
+        "handle": "he-spec",
+        "kind": "skill",
+        "command_visibility": "target",
+        "runtime_visibility": "latent",
+        "source_path": "Plugins/harness-engineering/skills/he-spec/SKILL.md",
+        "command_handle_path": ".agents/skills/he-spec/SKILL.md",
+        "owner": "harness-engineering",
+        "description": "Create evidence-backed HE specs. Use when approved intent needs acceptance criteria before implementation.",
+        "invoke_via": "harness-engineering",
+        "level": "atom",
+        "provenance": {
+          "generator": "context-budgeted-skillsets.v1",
+          "projection_mode": "rooted",
+          "policy_identity": "8c69fbfa81b89658",
+          "source_revision": "3c3e7f92c",
+          "source_sha256": "82837f2eac47eb560ed7d42fc130eae49f46027f831d5143ad8668b1d5d65802"
+        }
+      },
+      "next_command": "./bin/ask skills proof he-spec --json --robot"
+    }
+  },
+  "telemetry": {
+    "latency_ms": 156
+  },
+  "errors": []
+}

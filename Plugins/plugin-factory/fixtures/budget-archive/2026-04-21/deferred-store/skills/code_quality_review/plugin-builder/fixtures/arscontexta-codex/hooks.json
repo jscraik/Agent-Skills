@@ -7,7 +7,7 @@
         "args": [
           "Fixture SessionStart hook"
         ],
-        "timeoutSec": 3
+        "timeout": 3
       }
     ],
     "Stop": []

@@ -181,7 +181,7 @@ def _build_canonical_plugin_json(
     if enabled_surfaces.get("skills"):
         payload["skills"] = "./skills/"
     if enabled_surfaces.get("hooks"):
-        payload["hooks"] = "./hooks.json"
+        payload["hooks"] = "./hooks/hooks.json"
     if enabled_surfaces.get("mcp"):
         payload["mcpServers"] = "./.mcp.json"
     if enabled_surfaces.get("apps"):
@@ -490,7 +490,11 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument("--with-skills", action="store_true", help="Create skills/ directory")
-    parser.add_argument("--with-hooks", action="store_true", help="Create hooks/ directory")
+    parser.add_argument(
+        "--with-hooks",
+        action="store_true",
+        help="Create hooks/hooks.json for plugin-bundled lifecycle hooks",
+    )
     parser.add_argument("--with-scripts", action="store_true", help="Create Infrastructure/scripts/ directory")
     parser.add_argument("--with-assets", action="store_true", help="Create assets/ directory")
     parser.add_argument("--with-mcp", action="store_true", help="Create .mcp.json manifest scaffold")
@@ -616,6 +620,13 @@ def main() -> None:
     for folder, enabled in optional_directories.items():
         if enabled:
             (plugin_root / folder).mkdir(parents=True, exist_ok=True)
+
+    if args.with_hooks:
+        create_json_file(
+            plugin_root / "hooks" / "hooks.json",
+            {"hooks": {"SessionStart": [], "Stop": []}},
+            args.force,
+        )
 
     if args.with_mcp:
         create_json_file(

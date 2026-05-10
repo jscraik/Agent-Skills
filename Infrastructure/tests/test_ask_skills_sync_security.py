@@ -13,6 +13,7 @@ sys.path.append(str(REPO_ROOT / "scripts"))
 
 from ask.commands import plugins as plugins_commands  # noqa: E402
 from ask.commands import skills as skills_commands  # noqa: E402
+from ask.services import plugin_cache  # noqa: E402
 
 sys.path.append(str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
 from check_context_budget import DEFAULTS  # noqa: E402
@@ -514,6 +515,107 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.status, "success")
         self.assertTrue(system_link.is_symlink())
         self.assertEqual(os.readlink(system_link), "../../skills-system")
+
+    def test_create_symlink_preserves_current_target_without_unlinking(self) -> None:
+        target = self.repo_root / ".agents" / "skills" / ".system"
+        target.symlink_to(Path("../../skills-system"))
+
+        with mock.patch.object(Path, "unlink", side_effect=AssertionError("should not unlink current symlink")):
+            result = skills_commands._create_symlink(Path("../../skills-system"), target)
+
+        self.assertEqual(result, f"Symlink already current: {target} -> ../../skills-system")
+        self.assertTrue(target.is_symlink())
+        self.assertEqual(os.readlink(target), "../../skills-system")
+
+    def test_plugin_cache_refresh_preserves_existing_directory_root(self) -> None:
+        source = self.repo_root / "Plugins" / "harness-engineering"
+        source.mkdir(parents=True)
+        (source / "README.md").write_text("fresh\n", encoding="utf-8")
+        target = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "harness-engineering"
+        target.mkdir(parents=True)
+        (target / "README.md").write_text("stale\n", encoding="utf-8")
+
+        with mock.patch.object(plugin_cache.shutil, "rmtree", side_effect=AssertionError("should not remove cache root")):
+            report = plugin_cache.replace_plugin_cache_copy(self.repo_root, "harness-engineering", source, target)
+
+        self.assertEqual((target / "README.md").read_text(encoding="utf-8"), "fresh\n")
+        self.assertIn(str(target / "README.md"), report.deletes)
+
+    def test_plugin_cache_permission_failure_warns_without_failing_sync(self) -> None:
+        marketplace = self.repo_root / "Plugins" / "marketplace.json"
+        marketplace.parent.mkdir(parents=True)
+        marketplace.write_text(
+            '{"name":"agent-skills-local","plugins":[{"name":"harness-engineering","source":{"source":"local","path":"./Plugins/harness-engineering"}}]}',
+            encoding="utf-8",
+        )
+        source = self.repo_root / "Plugins" / "harness-engineering"
+        source.mkdir(parents=True)
+
+        plan: dict[str, list[str]] = {}
+        logs: list[str] = []
+        with mock.patch.object(plugin_cache, "copy_directory_contents", side_effect=PermissionError("blocked")):
+            error = plugin_cache.refresh_workspace_plugin_caches(plan, logs, self.repo_root, dry_run=False)
+
+        self.assertIsNone(error)
+        self.assertIn("PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED", plan["warnings"])
+        self.assertEqual(plan["plugin_cache_refresh"]["status"], "blocked")
+        self.assertTrue(any("Skipped workspace plugin cache refresh after permission failure" in log for log in logs))
+        self.assertTrue(any("rerun with write access to .agents/plugins-runtime/cache." in log for log in logs))
+
+    def test_sync_skills_can_skip_plugin_runtime_cache_refresh(self) -> None:
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(skills_commands, "discover_catalog_entries", return_value=[]),
+            mock.patch.object(skills_commands, "refresh_workspace_plugin_caches", side_effect=AssertionError("should not refresh cache")),
+        ):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                plugin_cache_refresh="skip",
+            )
+
+        self.assertEqual(result.status, "success")
+        plan = result.data["plan"]
+        self.assertEqual(plan["plugin_cache_refresh"]["mode"], "skip")
+        self.assertEqual(plan["plugin_cache_refresh"]["status"], "skipped")
+        self.assertTrue(any("rerun with write access to .agents/plugins-runtime/cache." in log for log in result.data["logs"]))
+
+    def test_sync_skills_can_refresh_plugin_runtime_cache_only(self) -> None:
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", side_effect=AssertionError("should not sync skills")),
+            mock.patch.object(skills_commands, "refresh_workspace_plugin_caches") as refresh_mock,
+        ):
+            refresh_mock.side_effect = lambda plan, logs, repo_root, dry_run: (
+                plan["plugin_cache_refresh"].__setitem__("status", "refreshed")
+                or logs.append("cache only refresh")
+                or None
+            )
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                plugin_cache_refresh="only",
+            )
+
+        self.assertEqual(result.status, "success")
+        refresh_mock.assert_called_once()
+        plan = result.data["plan"]
+        self.assertEqual(plan["validation_status"], "pass")
+        self.assertEqual(plan["plugin_cache_refresh"]["mode"], "only")
+        self.assertEqual(plan["plugin_cache_refresh"]["status"], "refreshed")
+        self.assertIn("cache only refresh", result.data["logs"])
+
+    def test_sync_skills_rejects_invalid_plugin_cache_refresh_mode(self) -> None:
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=True,
+            plugin_cache_refresh="sometimes",
+        )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
 
     def test_sync_skills_user_scope_does_not_write_repo_local_lowercase_skills(self) -> None:
         with (

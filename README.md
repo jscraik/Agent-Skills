@@ -28,8 +28,8 @@ and keep the human and agent command surface small enough to use.
 - **Prove quality** - Use `ask` for audits, runtime budget checks, repo surface
   ownership, workout/eval evidence, and machine-readable closeout.
 
-Start with the product framing and proof contract:
-[Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md).
+Start with the executable agent path below. The product framing and proof
+contract live in [Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md).
 
 ## Quick start
 
@@ -123,10 +123,10 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 ./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot
 
 # How do I use this capability?
-./bin/ask skills explain he-heartbeat --json --robot
+./bin/ask skills explain <recommended_capability> --json --robot
 
 # What proof exists?
-./bin/ask skills prove he-heartbeat --json --robot
+./bin/ask skills prove <recommended_capability> --json --robot
 
 # What must pass before I claim done?
 ./bin/ask repo closeout --changed --json --robot

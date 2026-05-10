@@ -1,0 +1,8 @@
+I’ll treat this as an autonomy constraint for the session:
+
+- I’ll record the route assumption before taking action.
+- I’ll avoid irreversible execution unless you explicitly approve it.
+- I’ll prefer reversible, inspectable steps and stop to sanity-check if a choice has meaningful risk.
+
+If you want, I can also make that assumption explicit in the next work update as:
+`Chosen route assumption: proceed with reversible actions only unless the user authorizes irreversible execution.`

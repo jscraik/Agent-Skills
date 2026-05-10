@@ -1,0 +1,13 @@
+I can do that, but I need the specific requirement set or document first.
+
+Right now I can’t inspect the repo files from this session because the workspace commands are blocked by the sandbox, so I can’t reliably attach each requirement to:
+- a source artifact in the repo,
+- a Linear identifier, or
+- an explicit assumption.
+
+If you point me at one of these, I can map it precisely:
+1. The document or file that contains the requirements
+2. A Linear issue or project ID
+3. A pasted requirements list
+
+If you want, I can also give you a traceability template you can drop into the doc right away, with columns for `Requirement`, `Source artifact`, `Linear ID`, and `Assumption`.

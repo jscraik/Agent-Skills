@@ -81,6 +81,31 @@ def make_fake_home(root: Path) -> dict[str, Path]:
     }
 
 
+def make_fake_home_with_sqlite_dir(root: Path) -> dict[str, Path]:
+    paths = make_fake_home(root)
+    codex_home = paths["codex_home"]
+    sqlite_dir = codex_home / "sqlite"
+    sqlite_dir.mkdir()
+
+    live_state = sqlite_dir / "state_5.sqlite"
+    paths["state_db"].rename(live_state)
+    stale_root_state = paths["state_db"]
+    conn = sqlite3.connect(stale_root_state)
+    conn.execute(
+        "create table threads ("
+        "id text primary key, title text, rollout_path text, cwd text, "
+        "updated_at integer, archived_at integer, archived integer)"
+    )
+    conn.commit()
+    conn.close()
+
+    live_log = sqlite_dir / "logs_2.sqlite"
+    live_log.write_text("live-log", encoding="utf-8")
+    live_wal = sqlite_dir / "logs_2.sqlite-wal"
+    live_wal.write_text("wal", encoding="utf-8")
+    return {**paths, "live_state_db": live_state, "live_log": live_log, "live_wal": live_wal}
+
+
 def run_text(module, argv: list[str]) -> tuple[int, str]:
     output = io.StringIO()
     with contextlib.redirect_stdout(output):
@@ -127,6 +152,27 @@ def assert_apply_blocks_unverified_process_state(module) -> None:
         assert paths["rollout"].exists()
 
 
+def assert_sqlite_dir_state_and_logs_are_reported(module) -> None:
+    with tempfile.TemporaryDirectory() as td:
+        paths = make_fake_home_with_sqlite_dir(Path(td))
+        code, text = run_text(
+            module,
+            [
+                "report",
+                "--codex-home",
+                str(paths["codex_home"]),
+                "--top-n",
+                "1",
+            ],
+        )
+        assert code == 0
+        assert "state_db sqlite/state_5.sqlite" in text
+        assert "log_file_001_mb" in text
+        assert "sqlite/logs_2.sqlite" in text
+        assert "logs_2.sqlite-wal" in text
+        assert text.count("large_session_mb") == 1
+
+
 def assert_apply_mode(module) -> None:
     with tempfile.TemporaryDirectory() as td:
         paths = make_fake_home(Path(td))
@@ -160,6 +206,8 @@ def main() -> int:
     assert_report_mode(module)
     assert_apply_requires_confirmation(module)
     assert_apply_blocks_unverified_process_state(module)
+    module = load_module()
+    assert_sqlite_dir_state_and_logs_are_reported(module)
     module = load_module()
     assert_apply_mode(module)
     print("keep-codex-fast smoke tests passed")

@@ -1,0 +1,5 @@
+{"type":"thread.started","thread_id":"019e0a78-94ff-7d23-a15a-882293509eb4"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m going to check where the Linear guidance lives so I can make this precise and keep the active set lean without accidentally changing the wrong policy surface."}}
+{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"Understood. I’ll keep the active Linear set intentionally small and avoid creating low-value findings unless they clearly add signal or unblock action."}}
+{"type":"turn.completed","usage":{"input_tokens":60946,"cached_input_tokens":32512,"output_tokens":835,"reasoning_output_tokens":598}}

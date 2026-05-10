@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a5e-8b06-73e2-bf4d-4fdb6b75ec5f"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. In headless mode, I’ll:\n\n- record reasonable assumptions explicitly instead of stopping to ask\n- avoid irreversible actions unless you clearly ask for them\n- prefer reversible, inspectable steps and report any tradeoffs\n\nIf something is ambiguous and the assumption could materially change the outcome, I’ll note the assumption and proceed conservatively."}}
+{"type":"turn.completed","usage":{"input_tokens":30253,"cached_input_tokens":30080,"output_tokens":131,"reasoning_output_tokens":57}}

@@ -25,6 +25,10 @@ only after baseline friction evidence proves a command will reduce real
 decision cost.
 ```
 
+Admitted JSC-246 path: `repo doctor` -> `skills improve` -> `skills explain`
+-> `skills prove` -> `repo closeout --changed`. `repo onboard` and `repo
+next` are deferred candidates.
+
 ## Baseline Friction Evidence
 
 Captured on 2026-05-01 against branch
@@ -41,9 +45,8 @@ Captured on 2026-05-01 against branch
 | `./bin/ask skills goal "continue implementing the Agent Skills Kit repo surface control-plane plan" --json --robot`        | Returns `intent_unresolved` with `route_decision_status: unresolved_ambiguity`.                                              | Broad goals can remain too ambiguous even after catalog parity is healthy; product flows need sharper repair prompts and next-command guidance.              |
 | `./bin/ask skills goal "use he-work to implement P4 namespace-first product command contracts for JSC-246" --json --robot` | Resolves `he-work` with confidence `0.938`.                                                                                  | Goal routing works when the user names the workflow and phase, which supports a future `skills improve` contract that asks for narrower context when needed. |
 
-P4 therefore implements contracts only. The first executable candidate should be
-`ask repo doctor`, but it should ship only with a focused test proving that it
-reduces this multi-command operator path into one stable envelope.
+P4 therefore started as contracts only. The first admitted executable route is
+`ask repo doctor`, followed by the capability and closeout commands above.
 
 ## Shared Envelope
 
@@ -153,7 +156,7 @@ Measurable improvement target:
 - Replace at least three separate diagnostic calls with one JSON envelope:
   `repo status`, `runtime budget`, and `repo surface`.
 
-## `ask repo onboard`
+## Deferred Candidate: `ask repo onboard`
 
 Purpose: explain current repo and runtime state, then recommend one next action.
 
@@ -308,7 +311,7 @@ Required behavior:
 - Separate reachability from quality evidence.
 - Do not claim outcome proof when only structural proof was run.
 
-## `ask repo next`
+## Deferred Candidate: `ask repo next`
 
 Purpose: return one machine-readable next action for agents.
 
@@ -388,13 +391,13 @@ Required behavior:
 - Never create a commit itself; report readiness and the exact suggested commit
   command class only.
 
-## First Implementation Candidate
+## Current Implementation Path
 
-This command (`ask repo doctor`) should be implemented first because the baseline evidence
-shows current health checks are fragmented across repo, runtime, and surface
-commands.
+The admitted first-contact route starts with `ask repo doctor` because the
+baseline evidence showed health checks fragmented across repo, runtime, and
+surface commands.
 
-Executable implementation is deferred until a focused slice can add:
+Executable expansion should remain bounded to:
 
 - one route under the existing `repo` namespace;
 - standard JSON envelope tests;
@@ -407,7 +410,7 @@ Executable implementation is deferred until a focused slice can add:
 | Plan AC | Covered By                                                      |
 | ------- | --------------------------------------------------------------- |
 | AC13    | `ask repo doctor` contract                                      |
-| AC14    | `ask repo onboard` contract                                     |
+| AC14    | `ask repo onboard` deferred candidate contract                  |
 | AC15    | `ask skills improve` contract                                   |
 | AC16    | `ask skills explain` contract                                   |
 | AC17    | `ask repo closeout --changed` contract                          |

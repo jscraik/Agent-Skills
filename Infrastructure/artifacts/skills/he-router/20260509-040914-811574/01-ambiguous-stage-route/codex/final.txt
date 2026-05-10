@@ -1,0 +1,7 @@
+Which kind of harness work is this?
+
+1. `brainstorm` - explore ideas and tradeoffs
+2. `spec` - define requirements and edge cases
+3. `plan` - turn an agreed direction into an execution plan
+
+Reply with `1`, `2`, or `3`.

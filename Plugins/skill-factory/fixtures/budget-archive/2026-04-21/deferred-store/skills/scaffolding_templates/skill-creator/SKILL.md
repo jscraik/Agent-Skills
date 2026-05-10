@@ -15,6 +15,7 @@ Create and evolve Codex skills that are reusable, auditable, and easy for anothe
 - [Philosophy](#philosophy)
 - [Inputs](#inputs)
 - [Agent Injection](#agent-injection)
+- [Execution Boundaries](#execution-boundaries)
 - [Outputs](#outputs)
 - [Procedure](#procedure)
 - [Validation](#validation)
@@ -67,6 +68,8 @@ Assumptions and requirements:
 - The skill body is navigation-first and delegates deep detail to `references/`.
 - Every skill must satisfy the enforced agent-native contract: execution boundaries, expected artifacts, repair/failure behavior, and validation or acceptance criteria.
   Read when: applying that contract to generated artifacts, CLIs, subagents, credentials, or multi-phase repair: [agent-native skill contract](../../../../../Infrastructure/references/agent-native-skill-contract.md).
+- Every non-trivial skill must satisfy the OpenAI-style design contract: one primary user intent, explicit side-effect class, minimized context surface, stable output contract, and confirmation behavior for consequential writes.
+  Read when: shaping triggers, side effects, structured output, or headless assumptions: [OpenAI-style plugin design contract](../../../../../Infrastructure/references/openai-style-plugin-design-contract.md).
 
 ## Agent Injection
 
@@ -89,6 +92,14 @@ bash Skills/codex-agent-creator/scripts/install_role.sh --agent-name <name> --ag
 ```
 
 5. Include the agent route in handoff notes as `agent_injection_mode: reuse-existing|create-purpose-built`.
+
+## Execution Boundaries
+
+Create or reshape only canonical skill source packages, not generated runtime projections or command handles.
+
+The entrypoint must keep execution ownership visible: who writes files, which artifacts are expected, when a subagent or external skill may be used, and which validation gate proves the package is ready for hardening.
+
+Do not hide boundary decisions only in references. `SKILL.md` must expose enough boundary, artifact, repair, and validation guidance for another agent to run the workflow without guessing.
 
 ## Deliverables
 
@@ -136,6 +147,7 @@ python3 scripts/init_skill.py <skill-name> --path <output-directory> [--resource
 4. Implement reusable resources first, then update `SKILL.md` so it points to those resources.
    - If slimming `SKILL.md`, move required detail to `references/` before deleting prose and add a `Read when: <condition>` signpost from `SKILL.md`.
    - Keep the agent-native contract explicit in `SKILL.md`; do not hide ownership boundaries, artifact expectations, repair behavior, or acceptance criteria only in deep references.
+   - Keep the OpenAI-style design checkpoint explicit for non-trivial skills: primary intent, side-effect class, output shape, steering behavior, and validation evidence.
 5. Generate or refresh `agents/openai.yaml` when needed:
 
 ```bash

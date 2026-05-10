@@ -3,6 +3,9 @@
 Read when: Harness Engineering work depends on project terminology, cross-artifact meaning, external review/log input, or a handoff between Linear, specs, plans, PRs, validation, Project Brain, heartbeats, goals, or session evidence.
 
 This contract translates domain-driven design practices into agent-native HE checks. Use it to preserve meaning without expanding every active `SKILL.md`.
+For production-sensitive behavior, pair this vocabulary layer with
+`domain-model-production-contract.md` so term stability is checked against
+Production Model Integrity, bounded context ownership, and aggregate invariants.
 
 ## Core Rule
 
@@ -77,6 +80,8 @@ The HE core domain is preserving intent, evidence, and lifecycle truth across ag
 - blocked exit
 - next stage
 - domain language and term drift
+- Production Model Integrity
+- aggregate invariants
 
 Supporting docs, examples, reviewer fanout, and implementation sketches are secondary. Move them to references or artifacts when context pressure rises.
 

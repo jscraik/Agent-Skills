@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a6b-8a07-7341-b942-d2d54b1c01d5"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. In headless mode, I’ll do the following:\n\n- Record assumptions explicitly instead of interrupting you with questions whenever the choice is low-risk.\n- Avoid irreversible actions unless you clearly ask for them.\n- If something is genuinely blocking or high-impact, I’ll surface the tradeoff and make the safest conservative move first.\n\nIf you want, I can also keep a short “assumptions log” in my updates while I work."}}
+{"type":"turn.completed","usage":{"input_tokens":30269,"cached_input_tokens":30080,"output_tokens":190,"reasoning_output_tokens":95}}

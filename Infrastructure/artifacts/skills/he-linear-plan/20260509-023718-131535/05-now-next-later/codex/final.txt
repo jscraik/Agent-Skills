@@ -1,0 +1,8 @@
+Yes. Send me the proposed work items, and I’ll bucket each one into:
+
+- `Now` - do immediately
+- `Next` - do after the current priorities
+- `Later` - worth doing, but not soon
+- `Do Not Create` - should not be added
+
+If you want, I can also return it in a table with a short reason for each classification.

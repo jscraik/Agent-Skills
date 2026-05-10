@@ -1,0 +1,5387 @@
+[
+  {
+    "blockers": {},
+    "candidate_tags": [],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-09T01:05:23.254000Z",
+    "he_stage_mentions": {},
+    "label": "session-001",
+    "last_seen_at": "2026-05-09T01:08:48.177000Z",
+    "outcome": "unknown",
+    "plugins_mentioned": {},
+    "project_hints": {},
+    "session_id_hash": "ca4229ad9575ffe9",
+    "skills_mentioned": {},
+    "source_type": "codex_conversation",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {},
+    "candidate_tags": [],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-09T01:07:55.528000Z",
+    "he_stage_mentions": {},
+    "label": "session-002",
+    "last_seen_at": "2026-05-09T01:08:47.897000Z",
+    "outcome": "unknown",
+    "plugins_mentioned": {},
+    "project_hints": {},
+    "session_id_hash": "dba4cf819c363d1d",
+    "skills_mentioned": {},
+    "source_type": "codex_conversation",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {},
+    "candidate_tags": [],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-09T01:05:08.383000Z",
+    "he_stage_mentions": {},
+    "label": "session-003",
+    "last_seen_at": "2026-05-09T01:06:20.505000Z",
+    "outcome": "unknown",
+    "plugins_mentioned": {},
+    "project_hints": {},
+    "session_id_hash": "1c2e5e52270ccbcb",
+    "skills_mentioned": {},
+    "source_type": "codex_conversation",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 3,
+      "missing_file": 4,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 10,
+      "zsh gh pr checks 231": 1
+    },
+    "first_seen_at": "2026-05-09T00:42:58.176000Z",
+    "he_stage_mentions": {
+      "he-plan": 2
+    },
+    "label": "session-004",
+    "last_seen_at": "2026-05-09T00:42:58.176000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "487fda8f180829a9",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 3,
+      "timeout": 6
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-09T00:41:58.768000Z",
+    "he_stage_mentions": {
+      "he-work": 2
+    },
+    "label": "session-005",
+    "last_seen_at": "2026-05-09T00:41:58.768000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "5f46e32660bd971a",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 6
+    },
+    "first_seen_at": "2026-05-09T00:30:48.011000Z",
+    "he_stage_mentions": {
+      "he-plan": 4,
+      "he-spec": 6,
+      "he-work": 1
+    },
+    "label": "session-006",
+    "last_seen_at": "2026-05-09T00:30:48.011000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "5ec9c4794e3d4290",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 61,
+      "git_state": 2,
+      "lint_failure": 47,
+      "missing_file": 30,
+      "network": 19,
+      "permission": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-09T00:28:30.946000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 1,
+      "he-code-review": 24,
+      "he-compound": 22,
+      "he-fix-bugs": 21,
+      "he-heartbeat": 21,
+      "he-plan": 22,
+      "he-spec": 22,
+      "he-work": 21
+    },
+    "label": "session-007",
+    "last_seen_at": "2026-05-09T00:28:30.946000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 63
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "bb503f83b634d102",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 5,
+      "missing_file": 9,
+      "network": 4
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-09T00:28:12.205000Z",
+    "he_stage_mentions": {
+      "he-code-review": 7,
+      "he-compound": 7,
+      "he-fix-bugs": 7,
+      "he-heartbeat": 7,
+      "he-plan": 7,
+      "he-spec": 7,
+      "he-work": 7
+    },
+    "label": "session-008",
+    "last_seen_at": "2026-05-09T00:28:12.205000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 9
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "16a4eddc94715c11",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 7,
+      "missing_file": 9,
+      "network": 6
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-09T00:17:47.060000Z",
+    "he_stage_mentions": {
+      "he-code-review": 7,
+      "he-compound": 7,
+      "he-fix-bugs": 7,
+      "he-heartbeat": 7,
+      "he-plan": 7,
+      "he-spec": 7,
+      "he-work": 7
+    },
+    "label": "session-009",
+    "last_seen_at": "2026-05-09T00:17:47.060000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 9
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "1bf08f647087d253",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 5,
+      "missing_file": 9,
+      "network": 2
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-09T00:15:44.992000Z",
+    "he_stage_mentions": {
+      "he-code-review": 7,
+      "he-compound": 7,
+      "he-fix-bugs": 7,
+      "he-heartbeat": 7,
+      "he-plan": 7,
+      "he-spec": 7,
+      "he-work": 7
+    },
+    "label": "session-010",
+    "last_seen_at": "2026-05-09T00:15:44.992000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 9
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "96c838d4e08e6fec",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 27,
+      "lint_failure": 31,
+      "missing_file": 21,
+      "network": 3,
+      "timeout": 3
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-09T00:15:27.615000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 1,
+      "he-code-review": 13,
+      "he-compound": 31,
+      "he-fix-bugs": 1,
+      "he-heartbeat": 1,
+      "he-improve": 1,
+      "he-plan": 51,
+      "he-router": 1,
+      "he-spec": 53,
+      "he-work": 37
+    },
+    "label": "session-011",
+    "last_seen_at": "2026-05-09T00:15:27.615000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 29
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "4a26b83b583c655e",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 115,
+      "git_state": 2,
+      "lint_failure": 10,
+      "missing_file": 41,
+      "network": 14,
+      "permission": 8,
+      "test_failure": 3
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "for f in <redacted>": 1,
+      "test <path> && stat": 1
+    },
+    "first_seen_at": "2026-05-09T00:10:50.570000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 38,
+      "he-code-review": 6,
+      "he-compound": 5,
+      "he-fix-bugs": 6,
+      "he-heartbeat": 6,
+      "he-improve": 6,
+      "he-plan": 7,
+      "he-router": 6,
+      "he-spec": 4,
+      "he-work": 7
+    },
+    "label": "session-012",
+    "last_seen_at": "2026-05-09T00:10:50.570000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 147
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "3bcad11f5deb72b8",
+    "skills_mentioned": {
+      "simplify": 9
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 1,
+    "validation_gates": {
+      "test <path> && stat": 1
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 3,
+      "missing_file": 9,
+      "network": 3,
+      "permission": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-09T00:10:29.503000Z",
+    "he_stage_mentions": {
+      "he-code-review": 7,
+      "he-compound": 7,
+      "he-fix-bugs": 7,
+      "he-heartbeat": 7,
+      "he-plan": 7,
+      "he-spec": 7,
+      "he-work": 7
+    },
+    "label": "session-013",
+    "last_seen_at": "2026-05-09T00:10:29.503000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 9
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "91e34c3c10e6fed7",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 3,
+      "lint_failure": 1,
+      "missing_file": 6,
+      "network": 2,
+      "permission": 1,
+      "test_failure": 1
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T23:10:47.369000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 8,
+      "he-code-review": 1,
+      "he-compound": 1,
+      "he-fix-bugs": 1,
+      "he-heartbeat": 1,
+      "he-improve": 1,
+      "he-plan": 6,
+      "he-router": 1,
+      "he-spec": 1,
+      "he-work": 1
+    },
+    "label": "session-014",
+    "last_seen_at": "2026-05-08T23:10:47.369000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 9
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "61bdade4803016aa",
+    "skills_mentioned": {
+      "simplify": 2
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 49,
+      "lint_failure": 3,
+      "missing_file": 16,
+      "network": 8,
+      "permission": 8,
+      "timeout": 2
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T23:05:52.940000Z",
+    "he_stage_mentions": {
+      "he-code-review": 16,
+      "he-fix-bugs": 16,
+      "he-work": 18
+    },
+    "label": "session-015",
+    "last_seen_at": "2026-05-08T23:05:52.940000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 6
+    },
+    "project_hints": {
+      "use-pr-green-sweep-users-jamiecraik": 1
+    },
+    "session_id_hash": "9342d121f674c11d",
+    "skills_mentioned": {
+      "simplify": 6
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 4,
+      "missing_file": 9,
+      "network": 8,
+      "permission": 2
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T23:02:08.564000Z",
+    "he_stage_mentions": {
+      "he-code-review": 7,
+      "he-compound": 7,
+      "he-fix-bugs": 7,
+      "he-heartbeat": 7,
+      "he-plan": 7,
+      "he-spec": 7,
+      "he-work": 7
+    },
+    "label": "session-016",
+    "last_seen_at": "2026-05-08T23:02:08.564000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 9
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "3c9548ebb47c44e4",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 3,
+      "missing_file": 9,
+      "network": 2,
+      "permission": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T23:01:38.904000Z",
+    "he_stage_mentions": {
+      "he-code-review": 7,
+      "he-compound": 7,
+      "he-fix-bugs": 7,
+      "he-heartbeat": 7,
+      "he-plan": 7,
+      "he-spec": 7,
+      "he-work": 7
+    },
+    "label": "session-017",
+    "last_seen_at": "2026-05-08T23:01:38.904000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 9
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "c70e96ee4579ef1b",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 6,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 4
+    },
+    "first_seen_at": "2026-05-08T22:27:21.483000Z",
+    "he_stage_mentions": {},
+    "label": "session-018",
+    "last_seen_at": "2026-05-08T22:27:21.483000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "9256cf7a7c521c7d",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 2,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 6
+    },
+    "first_seen_at": "2026-05-08T22:27:20.705000Z",
+    "he_stage_mentions": {},
+    "label": "session-019",
+    "last_seen_at": "2026-05-08T22:27:20.705000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "393816a8ba4f3c54",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 455,
+      "git_state": 4,
+      "lint_failure": 117,
+      "missing_file": 23,
+      "network": 121,
+      "permission": 8,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T22:08:14.160000Z",
+    "he_stage_mentions": {
+      "he-code-review": 9,
+      "he-fix-bugs": 9,
+      "he-work": 10
+    },
+    "label": "session-020",
+    "last_seen_at": "2026-05-08T22:08:14.160000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 3
+    },
+    "project_hints": {
+      "use-pr-green-sweep-users-jamiecraik": 1
+    },
+    "session_id_hash": "dbe01c64bfa33a3d",
+    "skills_mentioned": {
+      "simplify": 4
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 2
+    },
+    "first_seen_at": "2026-05-08T22:06:36.047000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1,
+      "he-plan": 2
+    },
+    "label": "session-021",
+    "last_seen_at": "2026-05-08T22:06:36.047000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "2329343eda66f220",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 4
+    },
+    "first_seen_at": "2026-05-08T22:05:47.931000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1,
+      "he-plan": 2
+    },
+    "label": "session-022",
+    "last_seen_at": "2026-05-08T22:05:47.931000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "234ce1bd3485fb68",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 10,
+      "missing_file": 2,
+      "network": 3,
+      "timeout": 4
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 11,
+      "zsh git diff --check": 1,
+      "zsh pwd && git status --short --branch": 1
+    },
+    "first_seen_at": "2026-05-08T22:04:03.748000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1,
+      "he-plan": 2
+    },
+    "label": "session-023",
+    "last_seen_at": "2026-05-08T22:04:03.748000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "7dfac304fb999e1a",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 1,
+      "missing_file": 6,
+      "network": 2,
+      "timeout": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 9,
+      "zsh git status --short --branch": 1
+    },
+    "first_seen_at": "2026-05-08T22:01:07.281000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1,
+      "he-plan": 2
+    },
+    "label": "session-024",
+    "last_seen_at": "2026-05-08T22:01:07.281000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 5
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "fe897d9edb64625f",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 2,
+    "validation_gates": {
+      "zsh <redacted>": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 3,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T22:00:38.077000Z",
+    "he_stage_mentions": {},
+    "label": "session-025",
+    "last_seen_at": "2026-05-08T22:00:38.077000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "7a45c71e0fed4976",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 4,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 3
+    },
+    "first_seen_at": "2026-05-08T21:57:02.982000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1,
+      "he-plan": 2
+    },
+    "label": "session-026",
+    "last_seen_at": "2026-05-08T21:57:02.982000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "5924605c122fec8d",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 5,
+      "network": 1,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 3
+    },
+    "first_seen_at": "2026-05-08T21:56:37.739000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1,
+      "he-plan": 2
+    },
+    "label": "session-027",
+    "last_seen_at": "2026-05-08T21:56:37.739000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "c26afc2d11abdb5e",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 2,
+      "timeout": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 3
+    },
+    "first_seen_at": "2026-05-08T21:56:37.129000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1,
+      "he-plan": 2
+    },
+    "label": "session-028",
+    "last_seen_at": "2026-05-08T21:56:37.129000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "66a85ec9b0de60ee",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 3
+    },
+    "first_seen_at": "2026-05-08T21:33:47.544000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1,
+      "he-plan": 2
+    },
+    "label": "session-029",
+    "last_seen_at": "2026-05-08T21:33:47.544000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "b3ebfb35e6095284",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 2,
+      "lint_failure": 1,
+      "missing_file": 7,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 7,
+      "zsh cat AGENTS.md": 1,
+      "zsh cat CODESTYLE.md": 1
+    },
+    "first_seen_at": "2026-05-08T21:30:28.757000Z",
+    "he_stage_mentions": {
+      "he-code-review": 2,
+      "he-plan": 2
+    },
+    "label": "session-030",
+    "last_seen_at": "2026-05-08T21:30:28.757000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "36798c73ad8da341",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 1,
+    "validation_gates": {
+      "zsh <redacted>": 1
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 4,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 1
+    },
+    "first_seen_at": "2026-05-08T21:30:28.078000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1
+    },
+    "label": "session-031",
+    "last_seen_at": "2026-05-08T21:30:28.078000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "e5ece6c0cf22d664",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 2
+    },
+    "first_seen_at": "2026-05-08T21:28:27.220000Z",
+    "he_stage_mentions": {
+      "he-code-review": 2
+    },
+    "label": "session-032",
+    "last_seen_at": "2026-05-08T21:28:27.220000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "a8dadbac1ac82cc6",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T21:28:05.294000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1
+    },
+    "label": "session-033",
+    "last_seen_at": "2026-05-08T21:28:05.294000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "27a9e580e7fa43ea",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 2,
+      "timeout": 3
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T21:28:04.592000Z",
+    "he_stage_mentions": {},
+    "label": "session-034",
+    "last_seen_at": "2026-05-08T21:28:04.592000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "9e7945d323f806f6",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 32,
+      "lint_failure": 41,
+      "missing_file": 11,
+      "network": 10,
+      "permission": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "find <redacted> he_frontmatter_safety_lint.py he_artifact_identity_lint.py": 1,
+      "ls <redacted> | sed": 1,
+      "python <<PY import os": 1,
+      "python <redacted>": 1,
+      "sed 1,220p <redacted>": 1,
+      "sed 1,240p <redacted>": 1,
+      "sed 1,260p <redacted>": 1
+    },
+    "first_seen_at": "2026-05-08T21:23:48.521000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 3,
+      "he-code-review": 4,
+      "he-compound": 12,
+      "he-plan": 3,
+      "he-spec": 10
+    },
+    "label": "session-035",
+    "last_seen_at": "2026-05-08T21:23:48.521000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 25
+    },
+    "project_hints": {
+      "codex": 1
+    },
+    "session_id_hash": "abde3887207613f2",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 178,
+      "lint_failure": 12,
+      "missing_file": 7,
+      "network": 83,
+      "permission": 3
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T21:22:45.505000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 2,
+      "he-code-review": 6,
+      "he-compound": 3,
+      "he-compound-refresh": 1,
+      "he-deepen-plan": 2,
+      "he-deepen-spec": 2,
+      "he-ideate": 2,
+      "he-improve": 1,
+      "he-refine": 1,
+      "he-reliability-review": 5,
+      "he-spec": 1,
+      "he-technical-review": 4,
+      "he-work": 2
+    },
+    "label": "session-036",
+    "last_seen_at": "2026-05-08T21:22:45.505000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 21
+    },
+    "project_hints": {
+      "use-pr-green-sweep-users-jamiecraik": 1
+    },
+    "session_id_hash": "b5938adfb852e3aa",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 2,
+      "missing_file": 3,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 8
+    },
+    "first_seen_at": "2026-05-08T21:13:01.460000Z",
+    "he_stage_mentions": {},
+    "label": "session-037",
+    "last_seen_at": "2026-05-08T21:13:01.460000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "17e68acb171f14ad",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 5,
+    "validation_gates": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 4
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 10,
+      "lint_failure": 56,
+      "missing_file": 19,
+      "network": 6,
+      "test_failure": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "fd . <redacted> f": 2,
+      "fd <redacted> . <redacted>": 2,
+      "git status": 4,
+      "mkdir <path>": 2,
+      "pnpm exec prettier <path>": 6,
+      "python <redacted> .harness": 4,
+      "python <redacted> <redacted>": 5,
+      "python <redacted> <redacted> <path>": 4,
+      "sed 1,180p <redacted>": 2,
+      "sed 1,220p <redacted>": 9,
+      "sed 1,240p <redacted>": 5,
+      "sed 1,260p <redacted>": 6,
+      "sed 1,320p <redacted>": 2,
+      "sed 1,360p <redacted>": 2,
+      "sed 1,80p <redacted>": 3,
+      "test <path> && <path>": 2,
+      "zsh <path>": 11,
+      "zsh <redacted>": 54,
+      "zsh find .harness -type f | sort": 2,
+      "zsh git status --short --branch": 5
+    },
+    "first_seen_at": "2026-05-08T21:08:36.592000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 6,
+      "he-code-review": 12,
+      "he-compound": 40,
+      "he-fix-bugs": 1,
+      "he-heartbeat": 1,
+      "he-improve": 1,
+      "he-plan": 6,
+      "he-router": 1,
+      "he-spec": 15,
+      "he-work": 2
+    },
+    "label": "session-038",
+    "last_seen_at": "2026-05-08T21:08:36.592000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 41
+    },
+    "project_hints": {
+      "codex": 8
+    },
+    "session_id_hash": "06f73ab98d5d20bb",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 2,
+    "validation_gates": {
+      "test <path> && <path>": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 1,
+      "missing_file": 5,
+      "network": 2,
+      "timeout": 3
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T21:07:58.914000Z",
+    "he_stage_mentions": {},
+    "label": "session-039",
+    "last_seen_at": "2026-05-08T21:07:58.914000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "4fb4f5741366ded7",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 175,
+      "git_state": 3,
+      "lint_failure": 12,
+      "missing_file": 53,
+      "network": 36,
+      "permission": 3,
+      "test_failure": 6
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T21:07:43.088000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 89,
+      "he-code-review": 37,
+      "he-compound": 28,
+      "he-deepen-plan": 1,
+      "he-deepen-spec": 1,
+      "he-fix-bugs": 23,
+      "he-heartbeat": 17,
+      "he-ideate": 6,
+      "he-improve": 13,
+      "he-plan": 21,
+      "he-refine": 1,
+      "he-router": 29,
+      "he-spec": 20,
+      "he-tdd": 1,
+      "he-technical-review": 1,
+      "he-work": 19
+    },
+    "label": "session-040",
+    "last_seen_at": "2026-05-08T21:07:43.088000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 316
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "51a3a9ccbff03fa0",
+    "skills_mentioned": {
+      "simplify": 17
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 453,
+      "git_state": 6,
+      "lint_failure": 117,
+      "missing_file": 60,
+      "network": 129,
+      "permission": 13,
+      "test_failure": 9
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "rg write_text|open\\(|unlink|mkdir|rename|replace|touch|dump\\(|safe_dump|json.dump|yaml.safe_dump|subprocess|os\\.system <redacted> <redacted>": 1,
+      "sed 1,220p <redacted>": 1,
+      "sed 1320,1415p <redacted>": 1,
+      "sed 220,420p <redacted>": 1
+    },
+    "first_seen_at": "2026-05-08T21:07:38.655000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 107,
+      "he-code-review": 39,
+      "he-compound": 104,
+      "he-fix-bugs": 21,
+      "he-heartbeat": 18,
+      "he-ideate": 4,
+      "he-improve": 12,
+      "he-plan": 75,
+      "he-router": 16,
+      "he-spec": 87,
+      "he-work": 253
+    },
+    "label": "session-041",
+    "last_seen_at": "2026-05-08T21:07:38.655000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 391
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "31215de34eeb10b5",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 3
+    },
+    "first_seen_at": "2026-05-08T21:07:04.701000Z",
+    "he_stage_mentions": {},
+    "label": "session-042",
+    "last_seen_at": "2026-05-08T21:07:04.701000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "ce9bd949bac14a65",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 3,
+    "validation_gates": {
+      "zsh <redacted>": 3
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T21:06:35.589000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1
+    },
+    "label": "session-043",
+    "last_seen_at": "2026-05-08T21:06:35.589000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "a39183b1bee7ab6f",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 2,
+      "missing_file": 2,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 2
+    },
+    "first_seen_at": "2026-05-08T21:06:34.749000Z",
+    "he_stage_mentions": {},
+    "label": "session-044",
+    "last_seen_at": "2026-05-08T21:06:34.749000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "602def870082f063",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 3,
+    "validation_gates": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 135,
+      "git_state": 2,
+      "lint_failure": 31,
+      "missing_file": 12,
+      "network": 37,
+      "permission": 11,
+      "test_failure": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T21:00:09.883000Z",
+    "he_stage_mentions": {},
+    "label": "session-045",
+    "last_seen_at": "2026-05-08T21:00:09.883000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "use-pr-green-sweep-users-jamiecraik": 1
+    },
+    "session_id_hash": "88dd801837230ae8",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 3,
+      "missing_file": 1,
+      "network": 6
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T20:56:48.664000Z",
+    "he_stage_mentions": {},
+    "label": "session-046",
+    "last_seen_at": "2026-05-08T20:56:48.664000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "codex": 1
+    },
+    "session_id_hash": "adcb0b499233a2e1",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 49,
+      "git_state": 1,
+      "lint_failure": 6,
+      "missing_file": 9,
+      "network": 11,
+      "permission": 7,
+      "timeout": 2
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T20:54:40.076000Z",
+    "he_stage_mentions": {},
+    "label": "session-047",
+    "last_seen_at": "2026-05-08T20:54:40.076000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "codex": 1
+    },
+    "session_id_hash": "942b890ac59746fd",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 166,
+      "git_state": 9,
+      "lint_failure": 137,
+      "missing_file": 74,
+      "network": 30,
+      "permission": 4,
+      "timeout": 19
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 3,
+      "zsh <redacted>": 8
+    },
+    "first_seen_at": "2026-05-08T20:54:37.316000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 2,
+      "he-code-review": 54,
+      "he-compound": 44,
+      "he-fix-bugs": 56,
+      "he-heartbeat": 42,
+      "he-plan": 48,
+      "he-spec": 44,
+      "he-work": 46
+    },
+    "label": "session-048",
+    "last_seen_at": "2026-05-08T20:54:37.316000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 81
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "c4741648efe13407",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 3,
+    "validation_gates": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 3,
+      "lint_failure": 1,
+      "missing_file": 4,
+      "network": 4,
+      "permission": 1,
+      "timeout": 6
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T20:40:11.398000Z",
+    "he_stage_mentions": {},
+    "label": "session-049",
+    "last_seen_at": "2026-05-08T20:40:11.398000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "codex": 1
+    },
+    "session_id_hash": "4fa4a071be207021",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 14,
+      "lint_failure": 1,
+      "missing_file": 4,
+      "network": 1,
+      "permission": 2
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T18:20:15.258000Z",
+    "he_stage_mentions": {},
+    "label": "session-050",
+    "last_seen_at": "2026-05-08T18:20:15.258000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "use-pr-green-sweep-users-jamiecraik": 1
+    },
+    "session_id_hash": "239c6e3a72fafd88",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 3,
+      "missing_file": 1,
+      "network": 9
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T17:39:34.669000Z",
+    "he_stage_mentions": {},
+    "label": "session-051",
+    "last_seen_at": "2026-05-08T17:39:34.669000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "codex": 1
+    },
+    "session_id_hash": "a1dcb4ca910b7f81",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 88,
+      "git_state": 2,
+      "missing_file": 9,
+      "network": 35,
+      "permission": 8,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T17:05:18.635000Z",
+    "he_stage_mentions": {},
+    "label": "session-052",
+    "last_seen_at": "2026-05-08T17:05:18.635000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 6
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "ad45d797b35ded84",
+    "skills_mentioned": {
+      "simplify": 10
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 2,
+      "permission": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh": 1,
+      "zsh <redacted>": 7,
+      "zsh git status --short --branch": 1
+    },
+    "first_seen_at": "2026-05-08T17:02:00.737000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 1,
+      "he-code-review": 2
+    },
+    "label": "session-053",
+    "last_seen_at": "2026-05-08T17:02:00.737000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 1
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "2f764af4028633c8",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 5,
+    "validation_gates": {
+      "zsh": 1,
+      "zsh <redacted>": 4
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 2,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 8
+    },
+    "first_seen_at": "2026-05-08T16:57:38.728000Z",
+    "he_stage_mentions": {},
+    "label": "session-054",
+    "last_seen_at": "2026-05-08T16:57:38.728000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "58d56257c18d7ebb",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 3,
+    "validation_gates": {
+      "zsh <redacted>": 3
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 2
+    },
+    "first_seen_at": "2026-05-08T16:56:53.821000Z",
+    "he_stage_mentions": {},
+    "label": "session-055",
+    "last_seen_at": "2026-05-08T16:56:53.821000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "e85f8fbad3ec442f",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 1,
+    "validation_gates": {
+      "zsh <redacted>": 1
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T16:56:53Z",
+    "he_stage_mentions": {},
+    "label": "session-056",
+    "last_seen_at": "2026-05-08T16:56:53Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "c53103cb8cb5135b",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T16:56:52.126000Z",
+    "he_stage_mentions": {},
+    "label": "session-057",
+    "last_seen_at": "2026-05-08T16:56:52.126000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "6c02acf3a2f8de5e",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 279,
+      "git_state": 15,
+      "lint_failure": 63,
+      "missing_file": 43,
+      "network": 49,
+      "permission": 11,
+      "test_failure": 4,
+      "timeout": 3
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T16:51:34.158000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 24,
+      "he-code-review": 23,
+      "he-compound": 3,
+      "he-fix-bugs": 13,
+      "he-heartbeat": 2,
+      "he-ideate": 8,
+      "he-improve": 2,
+      "he-plan": 54,
+      "he-router": 4,
+      "he-spec": 107,
+      "he-work": 161
+    },
+    "label": "session-058",
+    "last_seen_at": "2026-05-08T16:51:34.158000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 196
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "8dce15c492d86292",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 198,
+      "git_state": 3,
+      "lint_failure": 62,
+      "missing_file": 29,
+      "network": 72,
+      "permission": 7,
+      "test_failure": 8
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T16:47:20.013000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 2,
+      "he-code-review": 1,
+      "he-compound": 5,
+      "he-deepen-plan": 6,
+      "he-deepen-spec": 5,
+      "he-ideate": 2,
+      "he-improve": 12,
+      "he-plan": 8,
+      "he-refine": 1,
+      "he-reliability-review": 13,
+      "he-router": 3,
+      "he-spec": 1,
+      "he-technical-review": 4,
+      "he-work": 2
+    },
+    "label": "session-059",
+    "last_seen_at": "2026-05-08T16:47:20.013000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 56
+    },
+    "project_hints": {
+      "use-pr-green-sweep-users-jamiecraik": 1
+    },
+    "session_id_hash": "2be8a1701b3c3343",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 120,
+      "git_state": 7,
+      "lint_failure": 50,
+      "missing_file": 37,
+      "network": 34,
+      "permission": 7
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 2
+    },
+    "first_seen_at": "2026-05-08T16:42:19.342000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 1,
+      "he-code-review": 38,
+      "he-compound": 33,
+      "he-fix-bugs": 28,
+      "he-heartbeat": 28,
+      "he-plan": 35,
+      "he-spec": 37,
+      "he-work": 32
+    },
+    "label": "session-060",
+    "last_seen_at": "2026-05-08T16:42:19.342000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 41
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "f718ddfd48bf1cb6",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 142,
+      "git_state": 6,
+      "lint_failure": 8,
+      "missing_file": 33,
+      "network": 38,
+      "permission": 10,
+      "test_failure": 5,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T16:40:10.840000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 56,
+      "he-code-review": 13,
+      "he-ideate": 2,
+      "he-plan": 10,
+      "he-router": 12,
+      "he-spec": 11
+    },
+    "label": "session-061",
+    "last_seen_at": "2026-05-08T16:40:10.840000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 239
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "d8e771e8591844b2",
+    "skills_mentioned": {
+      "simplify": 9
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 3,
+      "missing_file": 7,
+      "network": 3,
+      "timeout": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 21,
+      "zsh git status --short --branch": 1
+    },
+    "first_seen_at": "2026-05-08T15:21:40.621000Z",
+    "he_stage_mentions": {},
+    "label": "session-062",
+    "last_seen_at": "2026-05-08T15:21:40.621000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "why-are-we-having-this-problem": 1
+    },
+    "session_id_hash": "40b6c037fb102177",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 3,
+    "validation_gates": {
+      "zsh <redacted>": 3
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 3,
+      "git_state": 1,
+      "lint_failure": 6,
+      "missing_file": 1,
+      "network": 1,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 3,
+      "zsh <redacted>": 16,
+      "zsh jq -r \".scripts | keys[]\" package.json | rg \"markdown|check|typecheck|test:related|codestyle|docs:ubiquitous\"": 1,
+      "zsh jq -r \".scripts\" package.json": 1,
+      "zsh pwd": 1
+    },
+    "first_seen_at": "2026-05-08T14:53:33.012000Z",
+    "he_stage_mentions": {
+      "he-plan": 5,
+      "he-spec": 2
+    },
+    "label": "session-063",
+    "last_seen_at": "2026-05-08T14:53:33.012000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "f67b1928f0de26b0",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 4,
+    "validation_gates": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 2,
+      "zsh jq -r \".scripts | keys[]\" package.json | rg \"markdown|check|typecheck|test:related|codestyle|docs:ubiquitous\"": 1
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 4,
+      "missing_file": 2,
+      "network": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 19,
+      "zsh cat package.json | jq \".scripts\"": 1,
+      "zsh rg --files src | rg \"command-specs-core.*test|registry.*test|ci-migrate.*registry\"": 1
+    },
+    "first_seen_at": "2026-05-08T14:48:02.684000Z",
+    "he_stage_mentions": {
+      "he-plan": 2,
+      "he-spec": 2
+    },
+    "label": "session-064",
+    "last_seen_at": "2026-05-08T14:48:02.684000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "c2a824bb64bc6663",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 6,
+    "validation_gates": {
+      "zsh <redacted>": 5,
+      "zsh rg --files src | rg \"command-specs-core.*test|registry.*test|ci-migrate.*registry\"": 1
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 2,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T14:48:01.902000Z",
+    "he_stage_mentions": {},
+    "label": "session-065",
+    "last_seen_at": "2026-05-08T14:48:01.902000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "f109922dcc5d22e5",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 2,
+      "missing_file": 1,
+      "network": 3
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 12,
+      "zsh git diff --name-only": 1,
+      "zsh git status --short": 1
+    },
+    "first_seen_at": "2026-05-08T14:23:18.987000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 1
+    },
+    "label": "session-066",
+    "last_seen_at": "2026-05-08T14:23:18.987000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 23
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "58293f0ba04a73a5",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 476,
+      "git_state": 33,
+      "lint_failure": 260,
+      "missing_file": 52,
+      "network": 76,
+      "permission": 13,
+      "timeout": 2
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T14:13:09.615000Z",
+    "he_stage_mentions": {
+      "he-plan": 2,
+      "he-spec": 2,
+      "he-technical-review": 4
+    },
+    "label": "session-067",
+    "last_seen_at": "2026-05-08T14:13:09.615000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 4
+    },
+    "project_hints": {
+      "use-pr-green-sweep-users-jamiecraik": 1
+    },
+    "session_id_hash": "8409b6af9cef4faa",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 3,
+      "network": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "for d in <redacted>": 1,
+      "for f in <redacted>": 2,
+      "git status": 1,
+      "nl <redacted> && echo": 1,
+      "nl <redacted> | sed": 1,
+      "pwd && rg |": 1,
+      "rg he-strategy|he-refactor|he-linear-plan <redacted> <redacted>": 1,
+      "zsh <redacted>": 1
+    },
+    "first_seen_at": "2026-05-08T14:11:27.655000Z",
+    "he_stage_mentions": {
+      "he-code-review": 1,
+      "he-heartbeat": 4,
+      "he-router": 1
+    },
+    "label": "session-068",
+    "last_seen_at": "2026-05-08T14:11:27.655000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 19
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "54b387268e259195",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 1,
+    "validation_gates": {
+      "zsh <redacted>": 1
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T13:50:46.014000Z",
+    "he_stage_mentions": {},
+    "label": "session-069",
+    "last_seen_at": "2026-05-08T13:50:46.014000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "9abeffe8a098ce31",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T13:50:45.409000Z",
+    "he_stage_mentions": {},
+    "label": "session-070",
+    "last_seen_at": "2026-05-08T13:50:45.409000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "3b233c4ccaba382e",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 5,
+      "zsh pwd && git status --short --branch": 1
+    },
+    "first_seen_at": "2026-05-08T13:44:31.319000Z",
+    "he_stage_mentions": {
+      "he-code-review": 2,
+      "he-plan": 2
+    },
+    "label": "session-071",
+    "last_seen_at": "2026-05-08T13:44:31.319000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "8e81604c62342966",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 9,
+      "zsh git diff --name-only": 1,
+      "zsh pwd && git status --short --branch": 1
+    },
+    "first_seen_at": "2026-05-08T13:39:59.752000Z",
+    "he_stage_mentions": {
+      "he-code-review": 2,
+      "he-plan": 2,
+      "he-work": 10
+    },
+    "label": "session-072",
+    "last_seen_at": "2026-05-08T13:39:59.752000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "5dc2864f954807f1",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 2,
+    "validation_gates": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 1
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T13:39:58.835000Z",
+    "he_stage_mentions": {},
+    "label": "session-073",
+    "last_seen_at": "2026-05-08T13:39:58.835000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "e4653e5a2c6b9916",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 117,
+      "lint_failure": 12,
+      "missing_file": 42,
+      "network": 96,
+      "permission": 4,
+      "test_failure": 9,
+      "timeout": 5
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T13:19:35.360000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 100,
+      "he-code-review": 15,
+      "he-compound": 6,
+      "he-fix-bugs": 3,
+      "he-heartbeat": 3,
+      "he-ideate": 7,
+      "he-improve": 2,
+      "he-plan": 48,
+      "he-prune-branches": 1,
+      "he-router": 30,
+      "he-spec": 20,
+      "he-work": 17
+    },
+    "label": "session-074",
+    "last_seen_at": "2026-05-08T13:19:35.360000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 329
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "7b5bea153ab66a48",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 2,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T13:19:14.386000Z",
+    "he_stage_mentions": {},
+    "label": "session-075",
+    "last_seen_at": "2026-05-08T13:19:14.386000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "2d43571cb0490815",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 134,
+      "git_state": 2,
+      "lint_failure": 191,
+      "missing_file": 87,
+      "network": 19,
+      "permission": 1,
+      "test_failure": 4,
+      "timeout": 6
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T13:18:01.485000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 5,
+      "he-code-review": 79,
+      "he-compound": 71,
+      "he-fix-bugs": 49,
+      "he-heartbeat": 49,
+      "he-plan": 107,
+      "he-review": 2,
+      "he-spec": 134,
+      "he-work": 62
+    },
+    "label": "session-076",
+    "last_seen_at": "2026-05-08T13:18:01.485000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 88
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "36e51e21f5c7380d",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 143,
+      "git_state": 9,
+      "lint_failure": 23,
+      "missing_file": 21,
+      "network": 42,
+      "permission": 9
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T13:11:04.538000Z",
+    "he_stage_mentions": {},
+    "label": "session-077",
+    "last_seen_at": "2026-05-08T13:11:04.538000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 4
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "7c6a090daa05daf2",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T13:10:03.687000Z",
+    "he_stage_mentions": {},
+    "label": "session-078",
+    "last_seen_at": "2026-05-08T13:10:03.687000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "becb79ba71dc387f",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 8,
+      "zsh pwd && git status --short --branch": 1
+    },
+    "first_seen_at": "2026-05-08T13:10:02.940000Z",
+    "he_stage_mentions": {
+      "he-heartbeat": 6
+    },
+    "label": "session-079",
+    "last_seen_at": "2026-05-08T13:10:02.940000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "052830db386c857d",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 1,
+      "missing_file": 1,
+      "network": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 10
+    },
+    "first_seen_at": "2026-05-08T13:10:01.917000Z",
+    "he_stage_mentions": {},
+    "label": "session-080",
+    "last_seen_at": "2026-05-08T13:10:01.917000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "848d807b78c91798",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T13:00:25.029000Z",
+    "he_stage_mentions": {},
+    "label": "session-081",
+    "last_seen_at": "2026-05-08T13:00:25.029000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "df6b0c6041d0760b",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 6,
+      "zsh pwd && git status --short --branch": 1
+    },
+    "first_seen_at": "2026-05-08T13:00:24.356000Z",
+    "he_stage_mentions": {},
+    "label": "session-082",
+    "last_seen_at": "2026-05-08T13:00:24.356000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "01fb310d3ccc2b13",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 2,
+    "validation_gates": {
+      "zsh <redacted>": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 2
+    },
+    "first_seen_at": "2026-05-08T13:00:23.374000Z",
+    "he_stage_mentions": {},
+    "label": "session-083",
+    "last_seen_at": "2026-05-08T13:00:23.374000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "8664d6238f66d646",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 1,
+    "validation_gates": {
+      "zsh <redacted>": 1
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 4,
+      "timeout": 4
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 3
+    },
+    "first_seen_at": "2026-05-08T12:44:02.273000Z",
+    "he_stage_mentions": {},
+    "label": "session-084",
+    "last_seen_at": "2026-05-08T12:44:02.273000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "0387a9ca732ed528",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 3,
+    "validation_gates": {
+      "zsh <redacted>": 3
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T12:44:01.458000Z",
+    "he_stage_mentions": {},
+    "label": "session-085",
+    "last_seen_at": "2026-05-08T12:44:01.458000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "ab3ed297f1865675",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 3
+    },
+    "first_seen_at": "2026-05-08T12:44:00.519000Z",
+    "he_stage_mentions": {
+      "he-heartbeat": 1
+    },
+    "label": "session-086",
+    "last_seen_at": "2026-05-08T12:44:00.519000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "f0c621ef5ba84781",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 2,
+    "validation_gates": {
+      "zsh <redacted>": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 168,
+      "git_state": 4,
+      "lint_failure": 23,
+      "missing_file": 58,
+      "network": 37,
+      "permission": 7,
+      "test_failure": 3,
+      "timeout": 5
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T12:42:10.969000Z",
+    "he_stage_mentions": {
+      "he-code-review": 37,
+      "he-compound": 35,
+      "he-deepen-plan": 1,
+      "he-fix-bugs": 38,
+      "he-heartbeat": 47,
+      "he-plan": 36,
+      "he-spec": 70,
+      "he-work": 88
+    },
+    "label": "session-087",
+    "last_seen_at": "2026-05-08T12:42:10.969000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 171
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "d9c6bdc042baa1a6",
+    "skills_mentioned": {
+      "simplify": 2
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 9
+    },
+    "first_seen_at": "2026-05-08T12:39:44.391000Z",
+    "he_stage_mentions": {
+      "he-plan": 4,
+      "he-spec": 2
+    },
+    "label": "session-088",
+    "last_seen_at": "2026-05-08T12:39:44.391000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "29d0fafd6368426b",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 8
+    },
+    "first_seen_at": "2026-05-08T12:37:14.010000Z",
+    "he_stage_mentions": {
+      "he-plan": 4,
+      "he-spec": 2
+    },
+    "label": "session-089",
+    "last_seen_at": "2026-05-08T12:37:14.010000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "0585d60708c3468c",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T12:36:45.780000Z",
+    "he_stage_mentions": {
+      "he-work": 1
+    },
+    "label": "session-090",
+    "last_seen_at": "2026-05-08T12:36:45.780000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "8d9e0f39eaf804a7",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T12:34:36.631000Z",
+    "he_stage_mentions": {},
+    "label": "session-091",
+    "last_seen_at": "2026-05-08T12:34:36.631000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "2e21cb170f1a7dc9",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 4,
+      "zsh git status --short": 1
+    },
+    "first_seen_at": "2026-05-08T12:34:36.015000Z",
+    "he_stage_mentions": {},
+    "label": "session-092",
+    "last_seen_at": "2026-05-08T12:34:36.015000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "e583c1fe9f4e05f3",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 3,
+    "validation_gates": {
+      "zsh <redacted>": 3
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T12:25:00.160000Z",
+    "he_stage_mentions": {
+      "he-plan": 3
+    },
+    "label": "session-093",
+    "last_seen_at": "2026-05-08T12:25:00.160000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "0533cff598029c73",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T12:24:37.948000Z",
+    "he_stage_mentions": {},
+    "label": "session-094",
+    "last_seen_at": "2026-05-08T12:24:37.948000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "77e29503bb1403e6",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 5
+    },
+    "first_seen_at": "2026-05-08T12:14:35.462000Z",
+    "he_stage_mentions": {
+      "he-heartbeat": 2,
+      "he-spec": 3
+    },
+    "label": "session-095",
+    "last_seen_at": "2026-05-08T12:14:35.462000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 1
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "063a75537e5db653",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 3,
+    "validation_gates": {
+      "zsh <redacted>": 3
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 5,
+      "zsh git status --short && git diff --name-only": 1
+    },
+    "first_seen_at": "2026-05-08T12:11:59.896000Z",
+    "he_stage_mentions": {
+      "he-heartbeat": 1,
+      "he-spec": 1
+    },
+    "label": "session-096",
+    "last_seen_at": "2026-05-08T12:11:59.896000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 2
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "da51751f7ae87a7a",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 3,
+    "validation_gates": {
+      "zsh <redacted>": 3
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 2,
+      "network": 1,
+      "timeout": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 4,
+      "zsh pwd; git status --short; git rev-parse --show-toplevel": 1
+    },
+    "first_seen_at": "2026-05-08T12:11:59.018000Z",
+    "he_stage_mentions": {},
+    "label": "session-097",
+    "last_seen_at": "2026-05-08T12:11:59.018000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 1
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "9966cd37848681b2",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 2,
+    "validation_gates": {
+      "zsh <redacted>": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 4
+    },
+    "first_seen_at": "2026-05-08T12:11:58.409000Z",
+    "he_stage_mentions": {
+      "he-heartbeat": 3,
+      "he-spec": 4
+    },
+    "label": "session-098",
+    "last_seen_at": "2026-05-08T12:11:58.409000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 1
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "086646f614b20d37",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 3,
+    "validation_gates": {
+      "zsh <redacted>": 3
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T11:59:49.767000Z",
+    "he_stage_mentions": {},
+    "label": "session-099",
+    "last_seen_at": "2026-05-08T11:59:49.767000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "b98d04c9c64dc62c",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 4
+    },
+    "first_seen_at": "2026-05-08T11:59:47.960000Z",
+    "he_stage_mentions": {},
+    "label": "session-100",
+    "last_seen_at": "2026-05-08T11:59:47.960000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 1
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "bb3180dcc90b5ca0",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 2,
+    "validation_gates": {
+      "zsh <redacted>": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 4,
+      "zsh git status --short": 1
+    },
+    "first_seen_at": "2026-05-08T11:59:46.620000Z",
+    "he_stage_mentions": {},
+    "label": "session-101",
+    "last_seen_at": "2026-05-08T11:59:46.620000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 2
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "3408aed3aa439391",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 2,
+    "validation_gates": {
+      "zsh <redacted>": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T11:37:10.489000Z",
+    "he_stage_mentions": {},
+    "label": "session-102",
+    "last_seen_at": "2026-05-08T11:37:10.489000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "68cfc1fb72adbf22",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 11
+    },
+    "first_seen_at": "2026-05-08T11:37:09.613000Z",
+    "he_stage_mentions": {},
+    "label": "session-103",
+    "last_seen_at": "2026-05-08T11:37:09.613000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "4ce580fc08253c95",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 5,
+    "validation_gates": {
+      "zsh <redacted>": 5
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 8
+    },
+    "first_seen_at": "2026-05-08T11:37:08.782000Z",
+    "he_stage_mentions": {},
+    "label": "session-104",
+    "last_seen_at": "2026-05-08T11:37:08.782000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 1
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "2ee925c9a5fa9532",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 4,
+    "validation_gates": {
+      "zsh <redacted>": 4
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 639,
+      "git_state": 14,
+      "lint_failure": 63,
+      "missing_file": 45,
+      "network": 227,
+      "permission": 27,
+      "test_failure": 6,
+      "timeout": 16
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T11:22:04.780000Z",
+    "he_stage_mentions": {},
+    "label": "session-105",
+    "last_seen_at": "2026-05-08T11:22:04.780000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "use-pr-green-sweep-users-jamiecraik": 1
+    },
+    "session_id_hash": "84799e7020f5a498",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 11
+    },
+    "first_seen_at": "2026-05-08T11:17:38.075000Z",
+    "he_stage_mentions": {},
+    "label": "session-106",
+    "last_seen_at": "2026-05-08T11:17:38.075000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 2
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "8ac2132fa37fec95",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 6,
+    "validation_gates": {
+      "zsh <redacted>": 6
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 1
+    },
+    "first_seen_at": "2026-05-08T11:17:37.350000Z",
+    "he_stage_mentions": {},
+    "label": "session-107",
+    "last_seen_at": "2026-05-08T11:17:37.350000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "113f6aba1494305c",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 1,
+    "validation_gates": {
+      "zsh <redacted>": 1
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T11:08:05.531000Z",
+    "he_stage_mentions": {},
+    "label": "session-108",
+    "last_seen_at": "2026-05-08T11:08:05.531000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 1
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "9a6603ca54e77ee4",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T11:08:04.764000Z",
+    "he_stage_mentions": {},
+    "label": "session-109",
+    "last_seen_at": "2026-05-08T11:08:04.764000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "e2804915564c061c",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 9,
+      "zsh pwd && git status --short": 1
+    },
+    "first_seen_at": "2026-05-08T11:04:07.119000Z",
+    "he_stage_mentions": {},
+    "label": "session-110",
+    "last_seen_at": "2026-05-08T11:04:07.119000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "614d70f209088ba3",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 2,
+    "validation_gates": {
+      "zsh <redacted>": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 1,
+      "missing_file": 1,
+      "network": 4
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 17,
+      "zsh pwd && git status --short": 1
+    },
+    "first_seen_at": "2026-05-08T11:03:59.549000Z",
+    "he_stage_mentions": {},
+    "label": "session-111",
+    "last_seen_at": "2026-05-08T11:03:59.549000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "cbd59ed4d79a3355",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 2,
+    "validation_gates": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 1
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 16,
+      "missing_file": 9,
+      "network": 9,
+      "permission": 2
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T10:54:00.171000Z",
+    "he_stage_mentions": {},
+    "label": "session-112",
+    "last_seen_at": "2026-05-08T10:54:00.171000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "there-is-a-serious-mise-leak": 1
+    },
+    "session_id_hash": "ed2aa1f5d9dc27a1",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 15,
+      "missing_file": 4,
+      "network": 3,
+      "permission": 6,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T10:48:38.265000Z",
+    "he_stage_mentions": {},
+    "label": "session-113",
+    "last_seen_at": "2026-05-08T10:48:38.265000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "why-is-the-codex-app-processes": 1
+    },
+    "session_id_hash": "fafb5d086542b333",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 10,
+      "lint_failure": 60,
+      "missing_file": 50,
+      "network": 10,
+      "permission": 14,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "<path> repo validate": 4,
+      "<path> skills audit <redacted>": 3,
+      "brew list mise": 2,
+      "brew outdated mise": 2,
+      "cat <redacted>": 16,
+      "git diff <redacted> <redacted>": 4,
+      "git status": 6,
+      "ls <redacted>": 3,
+      "mise": 3,
+      "mise doctor": 3,
+      "nl <redacted> | sed": 3,
+      "wc <redacted>": 3,
+      "zsh <path>": 11,
+      "zsh <redacted>": 49,
+      "zsh mise doctor": 3,
+      "zsh mise list ffmpeg zellij pnpm uv ripgrep gitleaks": 2,
+      "zsh pnpm lint": 2,
+      "zsh pnpm test": 2,
+      "zsh pnpm typecheck": 2,
+      "zsh test_validate_codex_config.py": 4
+    },
+    "first_seen_at": "2026-05-08T10:42:53.292000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 2,
+      "he-heartbeat": 1,
+      "he-router": 1
+    },
+    "label": "session-114",
+    "last_seen_at": "2026-05-08T10:42:53.292000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 11
+    },
+    "project_hints": {
+      "there-is-a-serious-mise-leak": 1
+    },
+    "session_id_hash": "d12ecfd0141f10ea",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 50,
+    "validation_gates": {
+      "<path> repo validate": 4,
+      "<path> repo validate <redacted>": 2,
+      "<path> skills audit <redacted>": 3,
+      "git diff <redacted> <redacted>": 3,
+      "nl <redacted> | sed": 2,
+      "rg <redacted> <path> <path>": 1,
+      "rg schedule_check|required|warn <redacted>": 1,
+      "sed 1,140p <redacted>": 2,
+      "sed 1,80p <redacted>": 1,
+      "sed 130,230p <redacted>": 1,
+      "sed 230,320p <redacted>": 1,
+      "sed 300,380p <redacted>": 1,
+      "sed 460,525p <redacted>": 1,
+      "sed 525,604p <redacted>": 1,
+      "sed 600,660p <redacted>": 1,
+      "zsh": 1,
+      "zsh <path>": 2,
+      "zsh <redacted>": 16,
+      "zsh pnpm test": 2,
+      "zsh test_validate_codex_config.py": 4
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T10:40:01.477000Z",
+    "he_stage_mentions": {},
+    "label": "session-115",
+    "last_seen_at": "2026-05-08T10:40:01.477000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "jamiecraik": 1
+    },
+    "session_id_hash": "56a503c80d7ad8d7",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 6,
+      "lint_failure": 7,
+      "missing_file": 16,
+      "network": 7,
+      "permission": 5,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "cat <redacted>": 4,
+      "git <redacted> diff <redacted>": 2,
+      "git <redacted> status <redacted>": 2,
+      "rg <redacted> <redacted>": 1,
+      "rg keep_codex_fast|keep-codex-fast <redacted> <path>": 1,
+      "sed 1,220p <redacted>": 3,
+      "sed 1,240p <redacted>": 1,
+      "sed 1,260p <redacted>": 2,
+      "sed 1,560p <redacted>": 1,
+      "sed 260,620p <redacted>": 1,
+      "sed 645,692p <redacted>": 1,
+      "zsh <path>": 5,
+      "zsh <redacted>": 111,
+      "zsh <redacted> <redacted> <redacted>": 2,
+      "zsh git diff --stat": 5,
+      "zsh git status --short": 2,
+      "zsh git status --short --branch": 12,
+      "zsh pgrep -fl sqlite3": 1,
+      "zsh pkill -f \"max(length(ifnull(feedback_log_body\" || true": 1,
+      "zsh pwd; ls": 1
+    },
+    "first_seen_at": "2026-05-08T10:35:39.521000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 1,
+      "he-compound": 1
+    },
+    "label": "session-116",
+    "last_seen_at": "2026-05-08T10:35:39.521000Z",
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 78
+    },
+    "project_hints": {
+      "why-is-the-codex-app-processes": 1
+    },
+    "session_id_hash": "781e77b33357eea1",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 29,
+    "validation_gates": {
+      "git <redacted> diff <redacted>": 2,
+      "git <redacted> status <redacted>": 2,
+      "python <redacted>": 1,
+      "python <redacted> <redacted>": 1,
+      "sed 1,260p <redacted>": 1,
+      "zsh <redacted>": 22
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T10:15:46.949000Z",
+    "he_stage_mentions": {},
+    "label": "session-117",
+    "last_seen_at": "2026-05-08T10:15:46.949000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "006342bb921bd480",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T10:14:57.744000Z",
+    "he_stage_mentions": {},
+    "label": "session-118",
+    "last_seen_at": "2026-05-08T10:14:57.744000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "95c35f3664385e06",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 2,
+      "missing_file": 3,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T10:02:34.581000Z",
+    "he_stage_mentions": {
+      "he-code-review": 9,
+      "he-compound": 2,
+      "he-fix-bugs": 6,
+      "he-heartbeat": 6,
+      "he-plan": 13,
+      "he-spec": 4,
+      "he-work": 11
+    },
+    "label": "session-119",
+    "last_seen_at": "2026-05-08T10:02:34.581000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 4
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "e6b7d5e786e5e957",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T10:02:08.887000Z",
+    "he_stage_mentions": {},
+    "label": "session-120",
+    "last_seen_at": "2026-05-08T10:02:08.887000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "0cdb1d458147bce1",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 3,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 10,
+      "zsh cat AGENTS.md": 1
+    },
+    "first_seen_at": "2026-05-08T09:50:14.471000Z",
+    "he_stage_mentions": {
+      "he-spec": 9
+    },
+    "label": "session-121",
+    "last_seen_at": "2026-05-08T09:50:14.471000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 1
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "3f12235d48087273",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 6,
+      "lint_failure": 1,
+      "missing_file": 9,
+      "network": 1,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T09:49:33.081000Z",
+    "he_stage_mentions": {},
+    "label": "session-122",
+    "last_seen_at": "2026-05-08T09:49:33.081000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {
+      "harness-engineering": 30
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "967879a8f606851d",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "lint_failure": 3,
+      "missing_file": 2,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 9,
+      "zsh pwd && git status --short": 1
+    },
+    "first_seen_at": "2026-05-08T09:42:56.829000Z",
+    "he_stage_mentions": {},
+    "label": "session-123",
+    "last_seen_at": "2026-05-08T09:42:56.829000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "411f829ab6667195",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 6,
+    "validation_gates": {
+      "zsh <path>": 1,
+      "zsh <redacted>": 5
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 158,
+      "git_state": 7,
+      "lint_failure": 65,
+      "missing_file": 39,
+      "network": 34,
+      "permission": 6,
+      "test_failure": 3,
+      "timeout": 4
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T09:19:28.083000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 2,
+      "he-code-review": 65,
+      "he-compound": 25,
+      "he-deepen-spec": 2,
+      "he-fix-bugs": 44,
+      "he-heartbeat": 44,
+      "he-plan": 58,
+      "he-router": 6,
+      "he-spec": 43,
+      "he-work": 61
+    },
+    "label": "session-124",
+    "last_seen_at": "2026-05-08T09:19:28.083000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 86
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "e475416e74d3f78b",
+    "skills_mentioned": {
+      "simplify": 2
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 202,
+      "git_state": 19,
+      "lint_failure": 73,
+      "missing_file": 16,
+      "network": 58,
+      "permission": 10,
+      "test_failure": 3
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T09:18:26.646000Z",
+    "he_stage_mentions": {
+      "he-brainstorm": 197,
+      "he-code-review": 15,
+      "he-compound": 6,
+      "he-fix-bugs": 1,
+      "he-heartbeat": 5,
+      "he-ideate": 32,
+      "he-plan": 23,
+      "he-reliability-review": 1,
+      "he-router": 3,
+      "he-spec": 20,
+      "he-work": 11
+    },
+    "label": "session-125",
+    "last_seen_at": "2026-05-08T09:18:26.646000Z",
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 172
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "b8216040f6cbf730",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T08:51:45.758000Z",
+    "he_stage_mentions": {},
+    "label": "session-126",
+    "last_seen_at": "2026-05-08T08:51:45.758000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "codex-updates": 1
+    },
+    "session_id_hash": "f6604c7d7cab70a4",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 3,
+      "network": 3
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 4
+    },
+    "first_seen_at": "2026-05-08T01:34:54.908000Z",
+    "he_stage_mentions": {
+      "he-work": 1
+    },
+    "label": "session-127",
+    "last_seen_at": "2026-05-08T01:34:54.908000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "fb2086dae56ac19b",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 2,
+      "network": 4
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 3
+    },
+    "first_seen_at": "2026-05-08T01:33:03.413000Z",
+    "he_stage_mentions": {
+      "he-work": 1
+    },
+    "label": "session-128",
+    "last_seen_at": "2026-05-08T01:33:03.413000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "07172f40e4180228",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 4,
+      "network": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 3
+    },
+    "first_seen_at": "2026-05-08T01:30:15.118000Z",
+    "he_stage_mentions": {
+      "he-work": 3
+    },
+    "label": "session-129",
+    "last_seen_at": "2026-05-08T01:30:15.118000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "532acf30e58d6174",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 8
+    },
+    "first_seen_at": "2026-05-08T01:26:29.523000Z",
+    "he_stage_mentions": {
+      "he-plan": 1,
+      "he-spec": 2,
+      "he-work": 1
+    },
+    "label": "session-130",
+    "last_seen_at": "2026-05-08T01:26:29.523000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "00cc3da4d798f94c",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 9
+    },
+    "first_seen_at": "2026-05-08T01:26:28.992000Z",
+    "he_stage_mentions": {},
+    "label": "session-131",
+    "last_seen_at": "2026-05-08T01:26:28.992000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "67c6c803273f92c5",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 5,
+    "validation_gates": {
+      "zsh <redacted>": 5
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 5
+    },
+    "first_seen_at": "2026-05-08T01:21:52.492000Z",
+    "he_stage_mentions": {
+      "he-plan": 2,
+      "he-work": 5
+    },
+    "label": "session-132",
+    "last_seen_at": "2026-05-08T01:21:52.492000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "d510d4f2258c562e",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {},
+    "candidate_tags": [],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T01:13:12.343000Z",
+    "he_stage_mentions": {},
+    "label": "session-133",
+    "last_seen_at": "2026-05-08T01:13:12.343000Z",
+    "outcome": "unknown",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "7fd82b55a80d84f1",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 2,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T01:12:45.019000Z",
+    "he_stage_mentions": {
+      "he-fix-bugs": 1
+    },
+    "label": "session-134",
+    "last_seen_at": "2026-05-08T01:12:45.019000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "a2678fcc6f98d19f",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1,
+      "missing_file": 1,
+      "network": 1
+    },
+    "candidate_tags": [
+      "insight-report"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": "2026-05-08T01:12:44.347000Z",
+    "he_stage_mentions": {},
+    "label": "session-135",
+    "last_seen_at": "2026-05-08T01:12:44.347000Z",
+    "outcome": "blocked_environment",
+    "plugins_mentioned": {},
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "88185ba1e1ba8fda",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 169,
+      "git_state": 33,
+      "lint_failure": 721,
+      "missing_file": 364,
+      "network": 155,
+      "permission": 32,
+      "test_failure": 18,
+      "timeout": 93
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "<path> repo doctor": 28,
+      "<path> skills sync workspace": 41,
+      "bash <redacted>": 42,
+      "bash <redacted> all": 31,
+      "cat <redacted>": 124,
+      "git add": 26,
+      "git diff": 112,
+      "git diff <redacted>": 28,
+      "git diff <redacted> <redacted>": 59,
+      "git status": 159,
+      "nl <redacted> | sed": 38,
+      "python <redacted>": 44,
+      "python <redacted> <redacted>": 79,
+      "python <redacted> warn <redacted>": 35,
+      "rg <redacted> <redacted>": 41,
+      "rg <redacted> <redacted> <redacted>": 46,
+      "sed 1,220p <redacted>": 82,
+      "sed 1,260p <redacted>": 36,
+      "zsh <path>": 86,
+      "zsh <redacted>": 566
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 194,
+      "he-code-review": 392,
+      "he-compound": 141,
+      "he-deepen-plan": 2,
+      "he-deepen-spec": 3,
+      "he-fix-bugs": 300,
+      "he-heartbeat": 246,
+      "he-ideate": 22,
+      "he-improve": 26,
+      "he-plan": 440,
+      "he-review": 9,
+      "he-router": 38,
+      "he-spec": 792,
+      "he-work": 1312
+    },
+    "label": "session-136",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 1399
+    },
+    "project_hints": {
+      "agent-skills": 75
+    },
+    "session_id_hash": "dba4cf819c363d1d",
+    "skills_mentioned": {
+      "simplify": 22
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 361,
+    "validation_gates": {
+      "<path> repo validate": 13,
+      "<path> repo validate <redacted>": 16,
+      "<path> repo validate README.md": 6,
+      "bash <path>": 20,
+      "bash <redacted>": 27,
+      "cat <redacted>": 24,
+      "git add <redacted> <redacted>": 7,
+      "git commit": 18,
+      "git diff <redacted> <redacted>": 15,
+      "nl <redacted> | sed": 4,
+      "python <redacted>": 37,
+      "python <redacted> . <path>": 5,
+      "python <redacted> <redacted>": 10,
+      "python <redacted> <redacted> <redacted>": 13,
+      "python <redacted> baseline": 5,
+      "python <redacted> skills_prove or explain": 4,
+      "rg <redacted> <redacted>": 4,
+      "rg <redacted> <redacted> <redacted>": 11,
+      "sed 1,220p <redacted>": 5,
+      "zsh <redacted>": 117
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 90,
+      "git_state": 29,
+      "lint_failure": 233,
+      "missing_file": 316,
+      "network": 102,
+      "permission": 43,
+      "test_failure": 31,
+      "timeout": 20
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "<path> repo validate": 19,
+      "<path> skills audit <redacted>": 130,
+      "<path> skills sync workspace": 55,
+      "bash <redacted> all": 24,
+      "cat <redacted>": 86,
+      "git commit": 25,
+      "git diff": 49,
+      "git diff <redacted> <redacted>": 30,
+      "git status": 108,
+      "nl <redacted> | sed": 98,
+      "python <redacted>": 47,
+      "python <redacted> <redacted>": 44,
+      "rg <redacted> <redacted> <redacted>": 25,
+      "sed 1,120p <redacted>": 31,
+      "sed 1,180p <redacted>": 27,
+      "sed 1,220p <redacted>": 123,
+      "sed 1,240p <redacted>": 20,
+      "sed 1,260p <redacted>": 36,
+      "zsh <path>": 26,
+      "zsh <redacted>": 364
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 662,
+      "he-code-review": 295,
+      "he-compound": 155,
+      "he-deepen-plan": 5,
+      "he-deepen-spec": 10,
+      "he-fix-bugs": 87,
+      "he-heartbeat": 102,
+      "he-ideate": 120,
+      "he-improve": 86,
+      "he-plan": 394,
+      "he-prune-branches": 8,
+      "he-refine": 4,
+      "he-reliability-review": 10,
+      "he-router": 237,
+      "he-spec": 285,
+      "he-tdd": 4,
+      "he-technical-review": 7,
+      "he-work": 221
+    },
+    "label": "session-137",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 2917
+    },
+    "project_hints": {
+      "agent-skills": 56
+    },
+    "session_id_hash": "ca4229ad9575ffe9",
+    "skills_mentioned": {
+      "simplify": 21
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 429,
+    "validation_gates": {
+      "<path> repo validate": 19,
+      "<path> skills audit <redacted>": 130,
+      "bash <path>": 4,
+      "bash <redacted>": 12,
+      "cat <redacted>": 21,
+      "for f in <path>": 8,
+      "for skill in <redacted>": 9,
+      "for skill in he-brainstorm": 3,
+      "git commit": 22,
+      "git diff <redacted> <redacted>": 6,
+      "nl <redacted> | sed": 7,
+      "python <<PY from pathlib": 6,
+      "python <redacted>": 20,
+      "python <redacted> <redacted>": 26,
+      "python <redacted> audit-marketplace <redacted>": 3,
+      "python <redacted> validate <redacted>": 9,
+      "rg <redacted> <path>": 4,
+      "sed 1,260p <redacted>": 4,
+      "zsh <path>": 12,
+      "zsh <redacted>": 104
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 107,
+      "git_state": 31,
+      "lint_failure": 845,
+      "missing_file": 410,
+      "network": 159,
+      "permission": 30,
+      "test_failure": 9,
+      "timeout": 87
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "cat <redacted>": 27,
+      "git diff": 77,
+      "git diff <path> <path>": 17,
+      "git log": 20,
+      "git status": 129,
+      "nl <path> | sed": 39,
+      "nl <redacted> | sed": 16,
+      "pnpm exec tsx <path>": 29,
+      "pwd": 15,
+      "python <redacted> <path>": 24,
+      "python <redacted> <redacted>": 59,
+      "python <redacted> <redacted> <redacted>": 25,
+      "rg <redacted> <path> <path>": 16,
+      "rg <redacted> <redacted>": 18,
+      "sed 1,220p <path>": 18,
+      "sed 1,220p <redacted>": 65,
+      "sed 1,260p <redacted>": 50,
+      "zsh <path>": 151,
+      "zsh <redacted>": 1173,
+      "zsh git status --short --branch": 63
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 22,
+      "he-code-review": 142,
+      "he-compound": 136,
+      "he-fix-bugs": 66,
+      "he-heartbeat": 40,
+      "he-ideate": 4,
+      "he-improve": 1,
+      "he-plan": 310,
+      "he-review": 6,
+      "he-router": 11,
+      "he-spec": 400,
+      "he-work": 362
+    },
+    "label": "session-138",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 406
+    },
+    "project_hints": {
+      "coding-harness": 62
+    },
+    "session_id_hash": "1c2e5e52270ccbcb",
+    "skills_mentioned": {
+      "simplify": 31
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 316,
+    "validation_gates": {
+      "bash <path>": 9,
+      "git checkout HEAD validate_reference_contracts.py": 3,
+      "git commit": 13,
+      "git diff <path>": 3,
+      "git diff <path> <path>": 8,
+      "nl <path> | sed": 16,
+      "pnpm exec tsx <path>": 3,
+      "pnpm exec vitest run": 5,
+      "pnpm run test:related": 7,
+      "pnpm vitest run <path>": 7,
+      "python <<PY from pathlib": 5,
+      "python <redacted> <path>": 7,
+      "rg <redacted> <path>": 4,
+      "rg <redacted> <path> <path>": 9,
+      "rg <redacted> <redacted>": 3,
+      "sed 1,260p <path>": 3,
+      "zsh": 6,
+      "zsh <path>": 39,
+      "zsh <redacted>": 155,
+      "zsh pnpm skill:validate": 11
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 793,
+      "git_state": 107,
+      "lint_failure": 1366,
+      "missing_file": 675,
+      "network": 625,
+      "permission": 209,
+      "test_failure": 69,
+      "timeout": 254
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "bash <path>": 53,
+      "cat <redacted>": 60,
+      "gh api graphql <redacted>": 38,
+      "gh api graphql owner=jscraik": 131,
+      "gh pr checks 152": 28,
+      "gh pr checks 229": 29,
+      "gh pr checks 231": 25,
+      "gh search prs jscraik": 29,
+      "git commit": 40,
+      "git diff": 125,
+      "git log": 25,
+      "git push origin <redacted>": 55,
+      "git status": 202,
+      "nl <path> | sed": 66,
+      "nl <redacted> | sed": 60,
+      "sed 1,220p <redacted>": 27,
+      "zsh": 124,
+      "zsh <path>": 39,
+      "zsh <redacted>": 983,
+      "zsh git status --short --branch": 31
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 71,
+      "he-code-review": 127,
+      "he-compound": 61,
+      "he-compound-refresh": 3,
+      "he-deepen-plan": 12,
+      "he-deepen-spec": 28,
+      "he-fix-bugs": 11,
+      "he-heartbeat": 66,
+      "he-ideate": 8,
+      "he-improve": 17,
+      "he-plan": 80,
+      "he-prune-branches": 2,
+      "he-refine": 3,
+      "he-reliability-review": 17,
+      "he-router": 39,
+      "he-spec": 192,
+      "he-technical-review": 11,
+      "he-work": 77
+    },
+    "label": "session-139",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 576
+    },
+    "project_hints": {
+      "use-pr-green-sweep-users-jamiecraik": 1
+    },
+    "session_id_hash": "b3fba93ef08bed11",
+    "skills_mentioned": {
+      "simplify": 6
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 596,
+    "validation_gates": {
+      "bash <path>": 14,
+      "bash <redacted>": 12,
+      "env pnpm exec vitest": 19,
+      "env python <redacted> <redacted>": 10,
+      "gh api graphql <redacted>": 20,
+      "gh api graphql owner=jscraik": 46,
+      "gh pr view 152": 9,
+      "gh pr view 229": 11,
+      "gh pr view 231": 16,
+      "git add <path> <path>": 9,
+      "git commit": 17,
+      "git diff <path> <path>": 11,
+      "nl <path> | sed": 13,
+      "pnpm exec vitest run": 9,
+      "python <redacted>": 18,
+      "sed 1,220p <redacted>": 12,
+      "uv run pytest pytest": 12,
+      "zsh": 50,
+      "zsh <path>": 15,
+      "zsh <redacted>": 273
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 164,
+      "git_state": 12,
+      "lint_failure": 200,
+      "missing_file": 183,
+      "network": 115,
+      "permission": 107,
+      "test_failure": 7,
+      "timeout": 77
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "bash <path>": 14,
+      "cat <redacted>": 19,
+      "git diff": 6,
+      "git status": 10,
+      "rg <redacted> <redacted> <redacted>": 5,
+      "sed 1,220p <redacted>": 14,
+      "sed 1,90p <redacted>": 4,
+      "zsh": 39,
+      "zsh <path>": 158,
+      "zsh <redacted>": 713,
+      "zsh git diff --cached --stat": 8,
+      "zsh git diff --check": 7,
+      "zsh git diff --stat": 6,
+      "zsh git push": 7,
+      "zsh git status --short": 8,
+      "zsh git status --short --branch": 31,
+      "zsh git status --short --branch --untracked-files=no": 27,
+      "zsh pnpm lint": 7,
+      "zsh pnpm test": 10,
+      "zsh pnpm typecheck": 7
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 1,
+      "he-code-review": 1,
+      "he-fix-bugs": 1,
+      "he-heartbeat": 4,
+      "he-plan": 1,
+      "he-router": 2,
+      "he-spec": 1,
+      "he-tdd": 1,
+      "he-work": 7
+    },
+    "label": "session-140",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 15
+    },
+    "project_hints": {
+      "codex": 19
+    },
+    "session_id_hash": "eb1438382173bc7b",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 288,
+    "validation_gates": {
+      "bash <path>": 10,
+      "bash <path> <redacted>": 2,
+      "gh pr view number,title,url,state,isDraft,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup,latestReviews,comments": 1,
+      "git commit": 1,
+      "git diff <path> <path>": 2,
+      "python validate-codex-config.py": 3,
+      "rm <redacted>": 2,
+      "sed 1,140p <path>": 1,
+      "sed 130,180p test_validate_codex_config.py": 1,
+      "sed 320,370p validate-codex-config.py": 1,
+      "sed 780,830p validate-codex-config.py": 1,
+      "test <path> && <path>": 1,
+      "test <redacted> = 0a": 1,
+      "zsh": 21,
+      "zsh <path>": 45,
+      "zsh <redacted>": 179,
+      "zsh <redacted> == 1.0": 2,
+      "zsh pnpm lint && pnpm typecheck && pnpm test": 2,
+      "zsh pnpm run test:deep": 2,
+      "zsh pnpm test": 10
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 42,
+      "lint_failure": 37,
+      "missing_file": 61,
+      "network": 19,
+      "permission": 13,
+      "test_failure": 4,
+      "timeout": 2
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "fd ^AGENTS\\.md$ <redacted>": 1,
+      "find .. AGENTS.md": 1,
+      "git commit": 3,
+      "git diff 7b15ff392..38962e6a9": 2,
+      "git diff <path>": 2,
+      "git log": 3,
+      "git status": 8,
+      "nl <path> | sed": 8,
+      "nl <redacted> | sed": 8,
+      "pwd": 1,
+      "sed 1,220p <redacted>": 10,
+      "sed 1,240p AGENTS.md": 1,
+      "sed 1,260p <path>": 1,
+      "zsh <path>": 7,
+      "zsh <redacted>": 133,
+      "zsh git status --short --branch": 5,
+      "zsh ls -la": 1,
+      "zsh pnpm lint": 2,
+      "zsh pnpm test": 2,
+      "zsh pnpm typecheck": 2
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 10,
+      "he-code-review": 4,
+      "he-compound": 2,
+      "he-fix-bugs": 2,
+      "he-heartbeat": 2,
+      "he-improve": 2,
+      "he-plan": 2,
+      "he-router": 2,
+      "he-spec": 2,
+      "he-work": 14
+    },
+    "label": "session-141",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 81
+    },
+    "project_hints": {
+      "codex": 3
+    },
+    "session_id_hash": "4acf90b7f70c38ec",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 56,
+    "validation_gates": {
+      "git add <path> <path>": 1,
+      "git commit": 2,
+      "git diff <path> <path>": 1,
+      "git diff <path> validate-codex-config.py": 1,
+      "git diff test_validate_codex_config.py": 1,
+      "git diff validate-codex-config.py": 1,
+      "rg <redacted> <path> validate-codex-config.py": 1,
+      "rg project-override-audit-cache|override-audit|state <path> <path>": 1,
+      "rg session-start|persist_project_override_audit_cache|project-override-audit-cache codex": 1,
+      "rg validate_goal_feature|\\[feature\\]|goals|goal validate-codex-config.py test_validate_codex_config.py": 1,
+      "sed 1,180p <path>": 1,
+      "sed 220,260p validate-codex-config.py": 1,
+      "sed 380,450p <path>": 1,
+      "sed 45,80p test_validate_codex_config.py": 1,
+      "stat %Sp %Su:%Sg %N <redacted> <redacted>": 1,
+      "zsh <path>": 2,
+      "zsh <redacted>": 36,
+      "zsh pnpm test": 2
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 26,
+      "git_state": 7,
+      "lint_failure": 6,
+      "missing_file": 13,
+      "network": 53,
+      "permission": 8
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <path>": 4,
+      "zsh <redacted>": 40,
+      "zsh git commit --no-edit": 1,
+      "zsh git ls-files -u": 1,
+      "zsh git pull": 2,
+      "zsh git pull --no-rebase": 20,
+      "zsh git status": 1,
+      "zsh git status --short --branch": 15,
+      "zsh git status -sb": 2,
+      "zsh ls -la": 1
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-router": 4
+    },
+    "label": "session-142",
+    "last_seen_at": null,
+    "outcome": "blocked_permission",
+    "plugins_mentioned": {
+      "harness-engineering": 2
+    },
+    "project_hints": {
+      "codex": 3
+    },
+    "session_id_hash": "74aca5f1e0c453e3",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 4,
+    "validation_gates": {
+      "zsh <redacted>": 4
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 96,
+      "git_state": 14,
+      "lint_failure": 139,
+      "missing_file": 303,
+      "network": 163,
+      "permission": 14,
+      "test_failure": 8,
+      "timeout": 93
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "bash <path>": 8,
+      "git commit": 12,
+      "git diff": 22,
+      "git diff <path>": 13,
+      "git diff <path> <path>": 10,
+      "git diff <redacted>": 13,
+      "git push origin <redacted>": 15,
+      "git stash push": 8,
+      "git status": 46,
+      "git status && git": 9,
+      "jq <redacted> <path>": 13,
+      "pnpm exec biome check": 17,
+      "pnpm test:artifacts:evals": 15,
+      "pnpm typecheck": 19,
+      "sed 1,220p <path>": 13,
+      "sed 1,220p <redacted>": 17,
+      "zsh": 15,
+      "zsh <path>": 50,
+      "zsh <redacted>": 518,
+      "zsh pnpm test:artifacts:evals": 10
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 1,
+      "he-fix-bugs": 3,
+      "he-router": 3
+    },
+    "label": "session-143",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 477
+    },
+    "project_hints": {
+      "coding-harness": 23
+    },
+    "session_id_hash": "f9624231f9b9ecc7",
+    "skills_mentioned": {
+      "simplify": 7
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 269,
+    "validation_gates": {
+      "bash <path>": 5,
+      "git add <redacted> <redacted>": 4,
+      "git commit": 6,
+      "git diff <path> <path>": 8,
+      "git status <path> <path>": 3,
+      "pnpm exec biome check": 12,
+      "pnpm exec tsc NodeNext": 6,
+      "pnpm exec vitest run": 4,
+      "pnpm test <path>": 3,
+      "pnpm test:artifacts:evals": 15,
+      "pnpm vitest run <path>": 4,
+      "pnpm vitest run <redacted>": 4,
+      "rg <redacted> <redacted> <redacted>": 3,
+      "sed 1,220p <path>": 6,
+      "test <path> && jq": 3,
+      "uv run pytest <redacted>": 5,
+      "zsh": 8,
+      "zsh <path>": 30,
+      "zsh <redacted>": 130,
+      "zsh pnpm test:artifacts:evals": 10
+    }
+  },
+  {
+    "blockers": {
+      "approval_required": 274,
+      "git_state": 2,
+      "lint_failure": 102,
+      "missing_file": 138,
+      "network": 35,
+      "permission": 3,
+      "test_failure": 2,
+      "timeout": 14
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "sed 1,240p <redacted>": 1,
+      "sed 241,420p <redacted>": 1
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 3,
+      "he-code-review": 93,
+      "he-compound": 42,
+      "he-fix-bugs": 93,
+      "he-heartbeat": 78,
+      "he-ideate": 2,
+      "he-plan": 122,
+      "he-spec": 139,
+      "he-work": 99
+    },
+    "label": "session-144",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 104
+    },
+    "project_hints": {
+      "coding-harness": 1
+    },
+    "session_id_hash": "c1903d3dd6fc83a0",
+    "skills_mentioned": {
+      "simplify": 14
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 1017,
+      "git_state": 9,
+      "lint_failure": 171,
+      "missing_file": 63,
+      "network": 389,
+      "permission": 26,
+      "test_failure": 17,
+      "timeout": 11
+    },
+    "candidate_tags": [
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "zsh <redacted>": 2
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 53,
+      "he-code-review": 92,
+      "he-compound": 42,
+      "he-deepen-spec": 17,
+      "he-heartbeat": 9,
+      "he-plan": 61,
+      "he-prune-branches": 2,
+      "he-router": 20,
+      "he-spec": 88,
+      "he-work": 41
+    },
+    "label": "session-145",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 222
+    },
+    "project_hints": {
+      "use-pr-green-sweep-users-jamiecraik": 1
+    },
+    "session_id_hash": "d95312dd29fa09ef",
+    "skills_mentioned": {},
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 391,
+      "lint_failure": 312,
+      "missing_file": 137,
+      "network": 17,
+      "permission": 2,
+      "test_failure": 4,
+      "timeout": 14
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {},
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 7,
+      "he-code-review": 114,
+      "he-compound": 42,
+      "he-fix-bugs": 110,
+      "he-heartbeat": 87,
+      "he-improve": 4,
+      "he-plan": 97,
+      "he-router": 3,
+      "he-spec": 204,
+      "he-work": 203
+    },
+    "label": "session-146",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 164
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "e0bfa8e8205f7dee",
+    "skills_mentioned": {
+      "simplify": 10
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  },
+  {
+    "blockers": {
+      "approval_required": 158,
+      "git_state": 1,
+      "lint_failure": 62,
+      "missing_file": 15,
+      "network": 19,
+      "permission": 9,
+      "test_failure": 1,
+      "timeout": 1
+    },
+    "candidate_tags": [
+      "skill-refactor",
+      "workflow-capture",
+      "insight-report",
+      "harness-engineering"
+    ],
+    "command_fingerprints": {
+      "python <<PY from pathlib": 1,
+      "sed 1,220p <redacted>": 1
+    },
+    "first_seen_at": null,
+    "he_stage_mentions": {
+      "he-brainstorm": 8,
+      "he-code-review": 40,
+      "he-compound": 7,
+      "he-deepen-spec": 2,
+      "he-fix-bugs": 5,
+      "he-heartbeat": 5,
+      "he-ideate": 2,
+      "he-improve": 5,
+      "he-plan": 29,
+      "he-prune-branches": 1,
+      "he-refine": 1,
+      "he-reliability-review": 3,
+      "he-router": 8,
+      "he-spec": 29,
+      "he-tdd": 1,
+      "he-technical-review": 2,
+      "he-work": 14
+    },
+    "label": "session-147",
+    "last_seen_at": null,
+    "outcome": "failed_validation",
+    "plugins_mentioned": {
+      "harness-engineering": 171
+    },
+    "project_hints": {
+      "agent-skills": 1
+    },
+    "session_id_hash": "5fe3b859a96862c7",
+    "skills_mentioned": {
+      "simplify": 1
+    },
+    "source_type": "codex_rollout",
+    "validation_gate_count": 0,
+    "validation_gates": {}
+  }
+]

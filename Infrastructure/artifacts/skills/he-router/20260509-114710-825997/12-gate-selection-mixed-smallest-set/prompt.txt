@@ -1,0 +1,1 @@
+Can you route a request that mentions domain, security, and refactor words but only the approved slice changes docs wording; prove why mixed does not load everything.

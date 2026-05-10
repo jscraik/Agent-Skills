@@ -59,6 +59,37 @@ def _proof_result(handle: str, status: str = "pass") -> CallResult:
     return result
 
 
+def _unreachable_catalog_proof(handle: str) -> CallResult:
+    result = CallResult()
+    result.status = "error"
+    result.data["proof"] = {
+        "schema_version": "command-handle-proof.v1",
+        "handle": handle,
+        "status": "fail",
+        "gates": {
+            "resolver": False,
+            "generated_command_handle_check": True,
+            "workspace_command_handle_exists": False,
+            "codex_user_link": False,
+            "agents_user_link": True,
+            "codex_user_command_handle_exists": False,
+            "agents_user_command_handle_exists": False,
+        },
+        "gate_policy": {
+            "required": [
+                "resolver",
+                "generated_command_handle_check",
+                "workspace_command_handle_exists",
+            ],
+            "user_runtime_any_of": [
+                "codex_user_link",
+                "agents_user_link",
+            ],
+        },
+    }
+    return result
+
+
 class TestAskSkillsGoal(unittest.TestCase):
     def test_goal_resolved_returns_recommendation_and_alternatives(self) -> None:
         """
@@ -147,6 +178,8 @@ class TestAskSkillsGoal(unittest.TestCase):
         improvement = result.data["improvement"]
         self.assertEqual(improvement["schema_version"], "skill-improvement-recommendation.v1")
         self.assertEqual(improvement["status"], "resolved")
+        self.assertEqual(improvement["route_state"], "resolved")
+        self.assertEqual(improvement["goal_decision_status"], "resolved")
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
         self.assertEqual(improvement["reachability"]["status"], "pass")
         self.assertEqual(improvement["reachability"]["proof_status"], "pass")
@@ -175,6 +208,8 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(result.status, "error")
         improvement = result.data["improvement"]
         self.assertEqual(improvement["status"], "blocked")
+        self.assertEqual(improvement["route_state"], "blocked_ambiguity")
+        self.assertEqual(improvement["goal_decision_status"], "intent_unresolved")
         self.assertEqual(improvement["recommended_capability"], None)
         self.assertEqual(improvement["agent_summary"], "Narrow request.")
         self.assertIn("skills goal", improvement["next_command"])
@@ -217,6 +252,8 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(result.status, "success")
         improvement = result.data["improvement"]
         self.assertEqual(improvement["status"], "resolved_with_fallback")
+        self.assertEqual(improvement["route_state"], "resolved_with_fallback")
+        self.assertEqual(improvement["goal_decision_status"], "intent_unresolved")
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
         self.assertIn("fallback command-handle description match", improvement["why"])
 
@@ -253,8 +290,194 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(result.status, "success")
         improvement = result.data["improvement"]
         self.assertEqual(improvement["status"], "resolved_with_fallback")
+        self.assertEqual(improvement["route_state"], "resolved_with_fallback")
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
         self.assertIn("matched terms=autofix", improvement["why"])
+
+    def test_improve_marks_reachability_failure_as_route_state(self) -> None:
+        route_decision = {
+            "decision_status": "resolved",
+            "policy_identity": "abc123def4567890",
+            "selected_candidates": [
+                {
+                    "candidate_id": "skill:autofix",
+                    "candidate_type": "skill",
+                    "name": "autofix",
+                    "path": "Skills/agent-ops/autofix/SKILL.md",
+                    "confidence": 0.91,
+                    "rationale": ["Matches PR review feedback cleanup."],
+                }
+            ],
+            "considered_candidates": [],
+        }
+        with (
+            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills.skills_proof", return_value=_proof_result("autofix", status="fail")),
+        ):
+            result = improve_skills(REPO_ROOT, "fix PR review comments", top_k=3, considered_limit=20)
+
+        self.assertEqual(result.status, "error")
+        improvement = result.data["improvement"]
+        self.assertEqual(improvement["status"], "blocked")
+        self.assertEqual(improvement["route_state"], "blocked_reachability")
+        self.assertEqual(improvement["goal_decision_status"], "resolved")
+        self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
+        self.assertEqual(improvement["reachability"]["status"], "fail")
+
+    def test_improve_falls_back_when_routed_skill_is_not_command_reachable(self) -> None:
+        route_decision = {
+            "decision_status": "resolved",
+            "policy_identity": "abc123def4567890",
+            "selected_candidates": [
+                {
+                    "candidate_id": "skill:validation::plugins/cache/openai-curated/codex-security/skills/validation",
+                    "candidate_type": "skill",
+                    "name": "validation",
+                    "path": "Plugins/cache/openai-curated/codex-security/skills/validation",
+                    "confidence": 0.86,
+                    "rationale": ["keyword overlap=1"],
+                }
+            ],
+            "considered_candidates": [],
+        }
+        handles = {
+            "handles": [
+                {
+                    "handle": "he-fix-bugs",
+                    "kind": "skill",
+                    "command_handle_path": ".agents/skills/he-fix-bugs/SKILL.md",
+                    "owner": "harness-engineering",
+                    "description": "Diagnose and fix HE test, QA, CI, validation, or regression blockers.",
+                    "invoke_via": "harness-engineering",
+                    "source_path": "Plugins/harness-engineering/skills/he-fix-bugs/SKILL.md",
+                }
+            ]
+        }
+
+        def proof_for_handle(_repo_root: Path, handle: str, status: str = "pass") -> CallResult:
+            if handle == "validation":
+                return _unreachable_catalog_proof(handle)
+            return _proof_result(handle, status=status)
+
+        with (
+            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills.handles_report", return_value=handles),
+            patch("ask.commands.skills.skills_proof", side_effect=proof_for_handle),
+        ):
+            result = improve_skills(REPO_ROOT, "fix validation blockers after review", top_k=3, considered_limit=20)
+
+        self.assertEqual(result.status, "success")
+        improvement = result.data["improvement"]
+        self.assertEqual(improvement["status"], "resolved_with_fallback")
+        self.assertEqual(improvement["route_state"], "resolved_with_fallback")
+        self.assertEqual(improvement["recommended_capability"]["handle"], "he-fix-bugs")
+        self.assertIn("initial routed capability unreachable=validation", improvement["why"])
+        self.assertEqual(
+            improvement["next_command"],
+            "./bin/ask skills proof he-fix-bugs --json --robot",
+        )
+
+    def test_improve_fallback_routes_he_review_intent_to_code_review(self) -> None:
+        route_decision = {
+            "decision_status": "unresolved_ambiguity",
+            "policy_identity": "abc123def4567890",
+            "failure_class": "AMBIGUITY_UNRESOLVED",
+            "operator_action": "Narrow request.",
+            "selected_candidates": [],
+            "considered_candidates": [],
+            "ambiguity_set": [],
+        }
+        handles = {
+            "handles": [
+                {
+                    "handle": "triage",
+                    "kind": "skill",
+                    "command_handle_path": ".agents/skills/triage/SKILL.md",
+                    "owner": "agent-ops",
+                    "description": "Review file-based todo findings into ready, skipped, customized, or blocked states.",
+                    "invoke_via": "agent-ops",
+                    "source_path": "Skills/agent-ops/triage/SKILL.md",
+                },
+                {
+                    "handle": "he-code-review",
+                    "kind": "skill",
+                    "command_handle_path": ".agents/skills/he-code-review/SKILL.md",
+                    "owner": "harness-engineering",
+                    "description": "Review HE diffs for closure risk. Use when PR, commit, or readiness evidence is needed.",
+                    "invoke_via": "harness-engineering",
+                    "source_path": "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
+                },
+            ]
+        }
+        with (
+            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills.handles_report", return_value=handles),
+            patch("ask.commands.skills.skills_proof", return_value=_proof_result("he-code-review")),
+        ):
+            result = improve_skills(
+                REPO_ROOT,
+                "review this implementation against the spec",
+                top_k=3,
+                considered_limit=20,
+            )
+
+        self.assertEqual(result.status, "success")
+        improvement = result.data["improvement"]
+        self.assertEqual(improvement["status"], "resolved_with_fallback")
+        self.assertEqual(improvement["route_state"], "resolved_with_fallback")
+        self.assertEqual(improvement["goal_decision_status"], "intent_unresolved")
+        self.assertEqual(improvement["recommended_capability"]["handle"], "he-code-review")
+        self.assertEqual(improvement["reachability"]["status"], "pass")
+        self.assertIn("fallback HE implementation-review intent hint", improvement["why"])
+        self.assertEqual(
+            improvement["next_command"],
+            "./bin/ask skills proof he-code-review --json --robot",
+        )
+
+    def test_improve_does_not_fallback_when_proof_error_has_no_gates(self) -> None:
+        route_decision = {
+            "decision_status": "resolved",
+            "policy_identity": "abc123def4567890",
+            "selected_candidates": [
+                {
+                    "candidate_id": "skill:autofix",
+                    "candidate_type": "skill",
+                    "name": "autofix",
+                    "path": "Skills/agent-ops/autofix/SKILL.md",
+                    "confidence": 0.91,
+                    "rationale": ["Matches PR review feedback cleanup."],
+                }
+            ],
+            "considered_candidates": [],
+        }
+        proof_error = CallResult(status="error")
+        proof_error.data["proof"] = {"status": "fail"}
+        handles = {
+            "handles": [
+                {
+                    "handle": "he-fix-bugs",
+                    "kind": "skill",
+                    "command_handle_path": ".agents/skills/he-fix-bugs/SKILL.md",
+                    "owner": "harness-engineering",
+                    "description": "Diagnose and fix HE test, QA, CI, validation, or regression blockers.",
+                    "invoke_via": "harness-engineering",
+                    "source_path": "Plugins/harness-engineering/skills/he-fix-bugs/SKILL.md",
+                }
+            ]
+        }
+
+        with (
+            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills.handles_report", return_value=handles),
+            patch("ask.commands.skills.skills_proof", return_value=proof_error),
+        ):
+            result = improve_skills(REPO_ROOT, "fix validation blockers after review", top_k=3, considered_limit=20)
+
+        self.assertEqual(result.status, "error")
+        improvement = result.data["improvement"]
+        self.assertEqual(improvement["status"], "blocked")
+        self.assertEqual(improvement["route_state"], "blocked_reachability")
+        self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
 
     def test_skill_audit_target_normalizes_absolute_source_path(self) -> None:
         resolution = {
@@ -302,6 +525,7 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(result.status, "error")
         improvement = result.data["improvement"]
         self.assertEqual(improvement["status"], "blocked")
+        self.assertEqual(improvement["route_state"], "blocked_dependency")
         self.assertEqual(improvement["recommended_capability"], None)
 
 

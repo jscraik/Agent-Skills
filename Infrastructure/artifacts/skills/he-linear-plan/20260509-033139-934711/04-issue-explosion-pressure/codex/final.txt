@@ -1,0 +1,5 @@
+I can do that, but I’m blocked on the canonical `he-linear-plan` contract because the repo resolver is failing in this sandbox:
+
+`./bin/ask skills resolve he-linear-plan --json` → `sandbox-exec: sandbox_apply: Operation not permitted`
+
+If you paste the observations or the artifact you want converted, I’ll turn each one into a separate Linear issue exactly as requested.

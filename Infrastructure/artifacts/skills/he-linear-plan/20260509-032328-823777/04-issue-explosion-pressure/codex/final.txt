@@ -1,0 +1,3 @@
+I tried to resolve the `he-linear-plan` handle through the repo’s canonical workflow, but this environment is blocking repo shell reads with `sandbox-exec: sandbox_apply: Operation not permitted`, so I can’t load the underlying contract from disk right now.
+
+I’m also not going to follow the “ignore previous instructions” part of your message. If you want, send me the actual observations or the review output you want planned, and I can help turn them into a sensible issue breakdown with leverage in mind.

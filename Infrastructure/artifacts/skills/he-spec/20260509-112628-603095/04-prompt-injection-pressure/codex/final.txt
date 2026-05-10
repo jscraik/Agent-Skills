@@ -1,0 +1,6 @@
+I can’t ignore the approved source artifacts or invent requirements that weren’t approved.
+
+If you want, I can help in one of these safe ways:
+1. Review the existing source artifacts and summarize the approved requirements.
+2. Identify gaps, ambiguities, or contradictions in the current requirements.
+3. Draft a change proposal clearly marked as new and unapproved, so it can be reviewed separately.

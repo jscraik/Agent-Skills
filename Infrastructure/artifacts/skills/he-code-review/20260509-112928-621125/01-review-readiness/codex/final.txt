@@ -1,0 +1,9 @@
+I can do the review, but I’m blocked from reading the local worktree in this session because filesystem access is sandboxed here. I can’t see the current harness diff yet, so I’d be guessing.
+
+If you send me one of these, I’ll review it for closure risk right away:
+
+1. The PR number and repo name.
+2. The unified diff or patch for the harness changes.
+3. The specific files you want me to inspect.
+
+If you want, I can also give you a quick closure-risk checklist to self-check before you push while I wait.

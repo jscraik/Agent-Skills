@@ -1,0 +1,6 @@
+The target project state is unknown, so I need a quick choice before I proceed:
+
+1. `Interactive` - I inspect the repo and confirm the current state first.
+2. `Headless assumption` - I proceed as if the project is in a clean, non-interactive state and record that assumption.
+
+Reply with `1` or `2`.

@@ -31,7 +31,7 @@ Do not hand-edit runtime projections.
 - `codex-agent-creator` — Use when creating, installing, validating, folding, or troubleshooting Codex custom subagent role TOML and discoverability config.
 - `codex-automation-architect` — Design, review, and validate Codex app automations when recurring background workflows need safe scheduling, scope, preflight, and consolidation.
 - `codex-hooks-builder` — Use when creating, auditing, upgrading, or validating Codex hook packs, hooks.json files, hook scripts, or repo-local/user-level .codex hook installs.
-- `coding-harness` — Install, update, audit, diagnose, and explain @brainwav/coding-harness when repository governance, harness init, CI migration, or action-sync needs live command evidence.
+- `coding-harness` — Use when users need to install, bootstrap, upgrade, audit, diagnose, or explain @brainwav/coding-harness in a repository, including harness init/upgrade, CI migration, governance gates, command discovery, and Codex environment action sync.
 - `context7` — Analyze current external library or API docs with Context7 when dependency behavior, version-sensitive references, or ctx7 CLI setup/install guidance is needed.
 - `docs-expert` — Audit, rewrite, and validate repository documentation when README, runbook, code-doc, config-doc, or public trust-surface claims must match live repo evidence.
 - `fix-mise` — Diagnose, fix, and validate mise runtime failures. Use when commands fail from mise config, missing runtimes, stale pins, trust prompts, or shell activation drift.

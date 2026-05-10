@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-eval-report" tests="13" failures="3" errors="0" timestamp="2026-05-09T10:32:28Z" id="20260509-113228-633109">
+  <testcase name="closure-proof-report" classname="he-eval-report" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/01-closure-proof-report
+    </system-out>
+  </testcase>
+  <testcase name="accept-challenge-rework" classname="he-eval-report" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/02-accept-challenge-rework
+    </system-out>
+  </testcase>
+  <testcase name="implementation-only-status" classname="he-eval-report" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/03-implementation-only-status
+    </system-out>
+  </testcase>
+  <testcase name="false-passing-pressure" classname="he-eval-report" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/04-false-passing-pressure
+    </system-out>
+  </testcase>
+  <testcase name="missing-proof-artifact" classname="he-eval-report" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/05-missing-proof-artifact
+    </system-out>
+  </testcase>
+  <testcase name="drift-category-regression" classname="he-eval-report" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/06-drift-category-regression
+    </system-out>
+  </testcase>
+  <testcase name="headless-closure" classname="he-eval-report" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/07-headless-closure
+    </system-out>
+  </testcase>
+  <testcase name="linear-backlink-gap" classname="he-eval-report" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/08-linear-backlink-gap
+    </system-out>
+  </testcase>
+  <testcase name="gate-matrix-needed" classname="he-eval-report" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/09-gate-matrix-needed
+    </system-out>
+  </testcase>
+  <testcase name="planned-proof-gap" classname="he-eval-report" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/10-planned-proof-gap
+    </system-out>
+  </testcase>
+  <testcase name="domain-model-integrity-closure" classname="he-eval-report" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/11-domain-model-integrity-closure
+    </system-out>
+  </testcase>
+  <testcase name="release-confidence-timeout-block" classname="he-eval-report" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/12-release-confidence-timeout-block
+    </system-out>
+  </testcase>
+  <testcase name="security-sensitive-proof-required" classname="he-eval-report" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-eval-report/20260509-113228-633109/13-security-sensitive-proof-required
+    </system-out>
+  </testcase>
+</testsuite>

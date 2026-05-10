@@ -1,0 +1,24 @@
+This slice should **not be considered closed yet**.
+
+For a domain-sensitive change, closure is missing two things that are usually non-negotiable:
+
+1. `Bounded context` is not explicit
+   - Without a clearly named boundary, it is hard to tell what language, rules, and ownership the slice is meant to preserve.
+   - That leaves room for scope drift and accidental coupling to adjacent domains.
+
+2. `Aggregate invariant proof` is not present
+   - If the slice mutates an aggregate, there needs to be evidence that the invariants still hold across all allowed paths.
+   - A change can look locally correct and still violate the domain model under edge cases, concurrency, or alternate entry points.
+
+My evaluation: **closure is incomplete** until both are documented and verified.
+
+What would make it closable:
+- A short bounded-context statement with inputs, outputs, and exclusions.
+- An explicit aggregate boundary and the invariant(s) it protects.
+- A proof sketch or test evidence showing every mutation path preserves those invariants.
+- Any rejected approaches or assumptions called out, especially if they affect domain semantics.
+
+If you want, I can turn this into a tighter review verdict format, for example:
+- `blocker`
+- `missing evidence`
+- `acceptable with follow-up`

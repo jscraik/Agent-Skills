@@ -1,0 +1,98 @@
+{
+  "status": "success",
+  "trace_id": "57e6c415-5906-4a43-9f78-31b170e85558",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills proof he-spec --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "proof": {
+      "schema_version": "command-handle-proof.v1",
+      "handle": "he-spec",
+      "status": "pass",
+      "gates": {
+        "resolver": true,
+        "generated_command_handle_check": true,
+        "workspace_command_handle_exists": true,
+        "codex_user_link": false,
+        "agents_user_link": true,
+        "codex_user_command_handle_exists": false,
+        "agents_user_command_handle_exists": true
+      },
+      "gate_policy": {
+        "required": [
+          "resolver",
+          "generated_command_handle_check",
+          "workspace_command_handle_exists"
+        ],
+        "user_runtime_any_of": [
+          "codex_user_link",
+          "agents_user_link"
+        ]
+      },
+      "resolution": {
+        "status": "ok",
+        "handle": "he-spec",
+        "kind": "skill",
+        "command_visibility": "target",
+        "runtime_visibility": "latent",
+        "source_path": "Plugins/harness-engineering/skills/he-spec/SKILL.md",
+        "command_handle_path": ".agents/skills/he-spec/SKILL.md",
+        "owner": "harness-engineering",
+        "description": "Create evidence-backed HE specs. Use when approved intent needs acceptance criteria before implementation.",
+        "invoke_via": "harness-engineering",
+        "level": "atom",
+        "provenance": {
+          "generator": "context-budgeted-skillsets.v1",
+          "projection_mode": "rooted",
+          "policy_identity": "8c69fbfa81b89658",
+          "source_revision": "3c3e7f92c",
+          "source_sha256": "82837f2eac47eb560ed7d42fc130eae49f46027f831d5143ad8668b1d5d65802"
+        }
+      },
+      "command_handle_check": {
+        "schema_version": "command-handle-check.v1",
+        "status": "pass",
+        "command_handle_count": 98,
+        "checked_count": 196
+      },
+      "workspace_runtime": {
+        "path": "/Users/jamiecraik/dev/agent-skills/.agents/skills",
+        "command_handle_path": "/Users/jamiecraik/dev/agent-skills/.agents/skills/he-spec/SKILL.md",
+        "command_handle_exists": true
+      },
+      "user_runtime_links": {
+        "codex_skills": {
+          "path": "/Users/jamiecraik/.codex/skills",
+          "exists": true,
+          "is_symlink": true,
+          "target": "/Users/jamiecraik/dev/configs/.codex/skills",
+          "points_to_workspace_runtime": false
+        },
+        "agents_skills": {
+          "path": "/Users/jamiecraik/.agents/skills",
+          "exists": true,
+          "is_symlink": true,
+          "target": "/Users/jamiecraik/dev/agent-skills/.agents/skills",
+          "points_to_workspace_runtime": true
+        }
+      },
+      "user_runtime_command_handles": {
+        "codex_handle": "/Users/jamiecraik/.codex/skills/he-spec/SKILL.md",
+        "codex_handle_exists": false,
+        "agents_handle": "/Users/jamiecraik/.agents/skills/he-spec/SKILL.md",
+        "agents_handle_exists": true
+      },
+      "live_codex_invocation": {
+        "status": "manual_session_gate",
+        "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle."
+      }
+    }
+  },
+  "telemetry": {
+    "latency_ms": 109
+  },
+  "errors": []
+}

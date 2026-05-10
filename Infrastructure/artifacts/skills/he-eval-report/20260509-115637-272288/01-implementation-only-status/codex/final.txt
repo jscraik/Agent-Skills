@@ -1,0 +1,6 @@
+I can mark it complete, but I shouldn’t do that without at least some validation or a clear record of what was changed.
+
+If you want, send me the Linear issue link or ID and I can:
+1. Review the implementation quickly.
+2. Do the lightest safe validation available.
+3. Mark the issue complete if it checks out.

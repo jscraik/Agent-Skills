@@ -1,0 +1,29 @@
+I can follow that loop, but I can’t literally execute it from this turn because the shell bridge is currently blocked in this sandbox.
+
+The approved flow I recovered is:
+
+- Load project state first: `STATE.md`
+- Load the roadmap: `ROADMAP.md`
+- For each phase, run `Research -> Plan -> Verify`
+- Treat verification as a proof gate, not a “looks good” check
+- If verification finds gaps, enter the gap-closure loop:
+  - `Planner` in gaps mode
+  - `Coder` to fix the gaps
+  - `Verifier` to re-check
+  - Repeat up to 3 times
+- Stop or escalate when any of these hit:
+  - natural completion
+  - round limit
+  - turn limit
+  - host abort
+- Checkpoints are structured as:
+  - `human-verify`
+  - `decision`
+  - `human-action`
+  - `auth-gate`
+
+Sources I used:
+- [agent-skills lifecycle overview](https://github.com/addyosmani/agent-skills)
+- [phase loop and checkpoint spec](https://gist.github.com/japperJ/cdeaa98b5d7dd612d525d73bdc456e28)
+
+If you want me to actually drive the loop next, send me the phase target or the relevant `ROADMAP.md` / `STATE.md` content and I’ll run it step by step.

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess as sp
 import sys
@@ -173,10 +174,19 @@ def _load_allowed_structure_failures_from_baseline(baseline_path: Path) -> List[
     if not archive_rel:
         return []
 
-    archive_candidate = (baseline_path.parent / str(archive_rel)).resolve()
-    if not archive_candidate.exists():
-        archive_candidate = (baseline_path.parent.parent / str(archive_rel)).resolve()
-    if not archive_candidate.exists():
+    archive_candidates = [
+        Path(os.path.normpath(os.fspath(baseline_path.parent / str(archive_rel)))),
+        Path(os.path.normpath(os.fspath(baseline_path.parent.parent / str(archive_rel)))),
+    ]
+    resolved_baseline_parent = baseline_path.parent.resolve()
+    archive_candidates.extend(
+        [
+            resolved_baseline_parent / str(archive_rel),
+            resolved_baseline_parent.parent / str(archive_rel),
+        ]
+    )
+    archive_candidate = next((candidate for candidate in archive_candidates if candidate.exists()), None)
+    if archive_candidate is None:
         return []
 
     try:
@@ -268,7 +278,7 @@ def main() -> int:
 
     baseline_allowed: List[str] = []
     if args.baseline_file:
-        baseline_path = Path(args.baseline_file).expanduser().resolve()
+        baseline_path = Path(args.baseline_file).expanduser()
         if baseline_path.exists():
             baseline_allowed = _load_allowed_structure_failures_from_baseline(baseline_path)
 
@@ -334,7 +344,7 @@ def main() -> int:
     resolved_structure_failures = sorted(set(baseline_allowed) - set(current_structure_failures))
 
     if args.write_baseline and args.baseline_file:
-        baseline_path = Path(args.baseline_file).expanduser().resolve()
+        baseline_path = Path(args.baseline_file).expanduser()
         baseline_path.parent.mkdir(parents=True, exist_ok=True)
         baseline_payload = {
             "allowed_structure_failures": sorted(set(current_structure_failures)),

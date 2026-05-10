@@ -28,6 +28,16 @@ Return: `schema_version`, `plugin_name`, `plugin_path`, `validation`, optional `
 
 For non-trivial plugins, also return `factory_governance` with plugin posture, visibility policy, traceability mode, budget posture, and risks.
 
+## Execution Boundaries
+
+Create or adopt plugin-owned canonical source only. Do not edit generated runtime mirrors, user-level plugin copies, or marketplace projections as the source of truth.
+
+Keep plugin scaffolding separate from skill hardening. Route detailed skill quality work to [[skill-builder]] after the plugin package has deterministic ownership, manifest policy, and validation evidence.
+
+If the destination plugin root, marketplace ownership, or skill-adoption move semantics are ambiguous, stop and ask before writing.
+
+Apply the OpenAI-style plugin design contract during scaffold shape decisions: keep the root-visible surface small, split child skills by distinct user intent, declare side-effect classes early, and leave confirmation behavior for install, external write, destructive, or completion-gating actions. Add bundled hooks only when lifecycle behavior is explicitly requested, and prefer `hooks/hooks.json`.
+
 ## Workflow
 
 Use the detailed scaffold procedure in `references/workflow.md`.
@@ -39,6 +49,7 @@ Classify reusable, delivery-oriented, visible-family, or `coding-harness` plugin
 Read when:
 - You need full plugin scaffold and marketplace update flow: [references/workflow.md](./references/workflow.md).
 - You need plugin posture, visibility, budget, traceability, or session-evidence rules: [references/factory-governance-spine.md](./references/factory-governance-spine.md).
+- You need side-effect, context-minimization, user-control, or output-shape guidance: [OpenAI-style plugin design contract](../../../../../Infrastructure/references/openai-style-plugin-design-contract.md).
 
 ## Required Behavior
 
@@ -70,6 +81,7 @@ Fail fast: stop at first failed gate and report blocker text.
 ## Anti-Patterns to Avoid
 
 - missing `.codex-plugin/plugin.json`
+- adding hook config when no lifecycle behavior was requested
 - partial marketplace policy fields
 - copying existing skills instead of moving canonical ownership
 
@@ -77,6 +89,17 @@ Fail fast: stop at first failed gate and report blocker text.
 
 - redact secrets and tokens in generated examples
 - do not overwrite existing plugin roots unless force semantics are explicit
+
+## Failure mode
+
+- Stop on unclear plugin ownership, destination conflicts, manifest policy gaps, or ambiguous adoption semantics.
+- Report the exact blocker and the smallest safe next action instead of creating a partial plugin surface.
+
+## Gotchas
+
+- A plugin scaffold is not a release claim; it still needs skill hardening and eval evidence before distribution.
+- Copying a skill into a plugin without moving canonical ownership creates drift.
+- Marketplace metadata is a policy surface. Keep it explicit and deterministic.
 
 ## References
 
@@ -86,6 +109,7 @@ Fail fast: stop at first failed gate and report blocker text.
 - `references/evals.yaml`
 - `references/task-profile.json`
 - `references/plugin-json-spec.md`
+- `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
 - `assets/`
 
 ## Remember

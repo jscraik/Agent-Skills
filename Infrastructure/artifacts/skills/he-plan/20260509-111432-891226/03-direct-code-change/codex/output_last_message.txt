@@ -1,0 +1,1 @@
+I can jump straight into implementation, but I still need the actual change request first. Tell me which behavior, file, or skill you want modified, and I’ll make the edit without a planning pass.

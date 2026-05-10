@@ -1,0 +1,13 @@
+I can review it, but I’m blocked on the actual code right now: the workspace shell is refusing read access, so I can’t inspect the routing files or the diff from this environment.
+
+If you send either of these, I can give you a proper review focused on discoverability and determinism:
+
+1. The PR number or branch name in GitHub.
+2. The changed files or diff for the new skill routing.
+3. The specific routing docs/files you want checked, for example `SKILL.md`, dispatcher tables, or agent selection rules.
+
+Once I have that, I’ll check for:
+- whether the routing path is easy for future agents to find from the repo’s canonical docs
+- whether there is a single, deterministic precedence order
+- whether overlapping triggers can resolve to different skills depending on phrasing or context
+- whether fallback behavior is explicit and stable across turns

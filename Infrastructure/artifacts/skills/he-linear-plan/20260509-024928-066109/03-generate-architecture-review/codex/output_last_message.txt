@@ -1,0 +1,21 @@
+Yes. I can turn a Linear-style execution plan into a full architecture review document.
+
+I’m blocked from inspecting the repo directly in this session because the shell wrapper is unavailable here, so I need one of these from you to do it accurately:
+
+1. The current Linear execution plan text
+2. The file path to the plan in the repo
+3. A pasted excerpt of the main proposal
+
+Once you send that, I’ll rewrite it as a proper architecture review with sections like:
+- Executive summary
+- Problem statement
+- Current state
+- Proposed architecture
+- Key decisions and tradeoffs
+- Alternatives considered
+- Risks and mitigations
+- Operational impact
+- Implementation phases
+- Open questions
+
+If you want, I can also draft the architecture review structure first in a polished, repo-ready form, and then we can fill it in together from the plan.

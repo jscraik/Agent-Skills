@@ -17,10 +17,15 @@ if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
-from ask.commands.plugins import (  # noqa: E402
-    _copy_directory_contents,
-    _load_local_marketplace,
-    _materialize_first_level_skill_aliases,
+from ask.services.plugin_cache import (  # noqa: E402
+    PLUGIN_CACHE_PERMISSION_RERUN,
+    plugin_cache_permission_declaration,
+    refresh_workspace_plugin_caches,
+)
+from ask.services.plugin_sources import (  # noqa: E402
+    copy_directory_contents as _copy_directory_contents,
+    load_local_marketplace as _load_local_marketplace,
+    materialize_first_level_skill_aliases as _materialize_first_level_skill_aliases,
 )
 from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index  # noqa: E402
 from selection_policy import REPO_SCAN_ROOTS, SYSTEM_BRIDGE_SKILL_NAMES  # noqa: E402
@@ -51,19 +56,6 @@ from ask.selection_contract import (  # noqa: E402
     canonical_sort_key,
 )
 from ask.skill_analytics import skill_invocation_analytics  # noqa: E402
-
-
-@dataclass
-class PluginCacheRefreshReport:
-    """Mutation report for repo-local plugin cache refreshes."""
-
-    writes: list[str]
-    deletes: list[str]
-    logs: list[str]
-
-
-class PluginCacheRefreshError(RuntimeError):
-    """Raised when command-handle pruning cannot safely complete."""
 
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
@@ -1119,7 +1111,7 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         return result
     try:
         sections = _skill_sections(source_path)
-    except OSError as exc:
+    except OSError:
         result.status = "error"
         result.errors.append(
             ErrorObject(
@@ -1923,14 +1915,39 @@ _IMPROVE_STOPWORDS = frozenset({
     "a",
     "an",
     "and",
+    "against",
     "at",
     "better",
     "for",
     "make",
     "of",
+    "this",
     "the",
     "to",
 })
+
+_IMPROVE_HANDLE_HINTS = (
+    (
+        frozenset({"validation", "blockers", "fix"}),
+        "he-fix-bugs",
+        "fallback HE validation-blocker intent hint",
+    ),
+    (
+        frozenset({"review", "implementation", "spec"}),
+        "he-code-review",
+        "fallback HE implementation-review intent hint",
+    ),
+    (
+        frozenset({"monitor", "long", "running", "phase"}),
+        "he-phase-heartbeat",
+        "fallback HE phase-monitoring intent hint",
+    ),
+    (
+        frozenset({"linear", "backed", "spec"}),
+        "he-spec",
+        "fallback HE spec intent hint",
+    ),
+)
 
 
 def _improve_tokens(text: str) -> set[str]:
@@ -1950,6 +1967,27 @@ def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str
         handles = handles_report(repo_root_path=repo_root, include_handles=True).get("handles", [])
     except (OSError, RuntimeError, ValueError, KeyError, TypeError):
         return None
+    handle_rows = {
+        str(row.get("handle") or "").strip().lower().lstrip("$"): row
+        for row in handles
+        if isinstance(row, dict) and row.get("handle")
+    }
+    for required_tokens, hinted_handle, rationale in _IMPROVE_HANDLE_HINTS:
+        normalized_hint = hinted_handle.strip().lower().lstrip("$")
+        row = handle_rows.get(normalized_hint)
+        if required_tokens.issubset(request_tokens) and row:
+            return {
+                "candidate_id": f"skill:{row.get('handle')}::{row.get('command_handle_path')}",
+                "candidate_type": row.get("kind", "skill"),
+                "name": row.get("handle"),
+                "path": row.get("command_handle_path"),
+                "confidence": 0.85,
+                "rationale": [
+                    rationale,
+                    "matched terms=" + ",".join(sorted(required_tokens)),
+                ],
+                "scope_rank": 2,
+            }
     scored: list[tuple[int, str, dict[str, Any], set[str]]] = []
     for row in handles:
         if not isinstance(row, dict):
@@ -1982,6 +2020,28 @@ def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str
     }
 
 
+def _improvement_route_state(route_decision_status: str | None, *, proof_failed: bool = False) -> tuple[str, str]:
+    """Return the stable agent-facing route state for a skills improvement result."""
+    if proof_failed:
+        return "blocked_reachability", "selected capability failed reachability proof"
+    if route_decision_status == "resolved":
+        return "resolved", "goal routing selected one reachable capability"
+    if route_decision_status == "unresolved_ambiguity":
+        return "blocked_ambiguity", "goal routing could not select one capability"
+    if route_decision_status in {"blocked_policy_drift", "blocked_catalog_parity", "degraded_no_candidates"}:
+        return "blocked_dependency", f"goal routing returned {route_decision_status}"
+    return "blocked_dependency", "goal routing did not produce a usable decision"
+
+
+def _proof_missing_workspace_command_handle(proof: dict[str, Any]) -> bool:
+    if not isinstance(proof, dict):
+        return False
+    gates = proof.get("gates")
+    if not isinstance(gates, dict):
+        return False
+    return gates.get("resolver") is False or gates.get("workspace_command_handle_exists") is False
+
+
 def improve_skills(
     repo_root: Path,
     goal_text: str,
@@ -2000,11 +2060,14 @@ def improve_skills(
     goal_decision = goal_result.data.get("goal_decision", {})
     route_decision_status = goal_result.data.get("route_decision_status")
     recommended = goal_decision.get("recommended_candidate")
+    initial_route_state, initial_route_state_reason = _improvement_route_state(route_decision_status)
 
     improvement: dict[str, Any] = {
         "schema_version": "skill-improvement-recommendation.v1",
         "goal": goal_text,
         "status": "resolved" if goal_result.status == "success" and recommended else "blocked",
+        "route_state": initial_route_state,
+        "route_state_reason": initial_route_state_reason,
         "agent_summary": "",
         "recommended_capability": None,
         "why": [],
@@ -2017,6 +2080,7 @@ def improve_skills(
         "proof": None,
         "alternatives": goal_decision.get("alternative_candidates", []),
         "next_command": None,
+        "goal_decision_status": goal_decision.get("decision_status"),
         "goal_decision": goal_decision,
     }
 
@@ -2072,7 +2136,8 @@ def improve_skills(
     improvement["why"] = rationale
     if fallback_used:
         improvement["status"] = "resolved_with_fallback"
-        improvement["goal_decision_status"] = goal_decision.get("decision_status")
+        improvement["route_state"] = "resolved_with_fallback"
+        improvement["route_state_reason"] = "fallback command-handle description match selected one reachable capability"
     improvement["reachability"] = {
         "status": "pass" if proof_result.status == "success" else "fail",
         "proof_status": proof.get("status") if isinstance(proof, dict) else "fail",
@@ -2092,7 +2157,70 @@ def improve_skills(
     if proof_result.status == "success":
         return result
 
-    improvement["status"] = "blocked_reachability"
+    fallback_after_unreachable_route = (
+        not fallback_used
+        and route_decision_status == "resolved"
+        and _proof_missing_workspace_command_handle(proof)
+    )
+    if fallback_after_unreachable_route:
+        fallback = _fallback_improvement_candidate(repo_root, goal_text)
+        fallback_handle = _candidate_handle(fallback or {})
+        if fallback and fallback_handle and fallback_handle != handle:
+            fallback_proof_result = skills_proof(repo_root, handle=fallback_handle)
+            fallback_proof = fallback_proof_result.data.get("proof", {})
+            if fallback_proof_result.status == "success":
+                fallback_gates = fallback_proof.get("gates", {}) if isinstance(fallback_proof, dict) else {}
+                fallback_required = (
+                    fallback_proof.get("gate_policy", {}).get("required", [])
+                    if isinstance(fallback_proof, dict)
+                    else []
+                )
+                fallback_required_gates_passed = all(bool(fallback_gates.get(gate)) for gate in fallback_required)
+                fallback_user_runtime_ready = bool(
+                    (
+                        fallback_gates.get("codex_user_link")
+                        and fallback_gates.get("codex_user_command_handle_exists")
+                    )
+                    or (
+                        fallback_gates.get("agents_user_link")
+                        and fallback_gates.get("agents_user_command_handle_exists")
+                    )
+                )
+                improvement["status"] = "resolved_with_fallback"
+                improvement["route_state"] = "resolved_with_fallback"
+                improvement["route_state_reason"] = (
+                    "fallback command-handle description match replaced an unreachable routed capability"
+                )
+                improvement["recommended_capability"] = {
+                    "handle": fallback_handle,
+                    "name": fallback.get("name"),
+                    "path": fallback.get("path"),
+                    "candidate_id": fallback.get("candidate_id"),
+                    "candidate_type": fallback.get("candidate_type"),
+                    "confidence": fallback.get("confidence"),
+                }
+                improvement["why"] = [
+                    *list(fallback.get("rationale") or []),
+                    f"initial routed capability unreachable={handle}",
+                ]
+                improvement["reachability"] = {
+                    "status": "pass",
+                    "proof_status": fallback_proof.get("status") if isinstance(fallback_proof, dict) else "pass",
+                    "required_gates_passed": fallback_required_gates_passed,
+                    "user_runtime_ready": fallback_user_runtime_ready,
+                }
+                improvement["proof"] = fallback_proof
+                improvement["agent_summary"] = (
+                    f"Recommended ${fallback_handle} after routed ${handle} failed reachability."
+                )
+                improvement["next_command"] = f"./bin/ask skills proof {shlex.quote(fallback_handle)} --json --robot"
+                return result
+
+    improvement["status"] = "blocked"
+    improvement["route_state"], improvement["route_state_reason"] = _improvement_route_state(
+        route_decision_status,
+        proof_failed=True,
+    )
     result.status = "error"
     result.errors.extend(proof_result.errors)
     if not result.errors:
@@ -2121,6 +2249,8 @@ def _create_symlink(source: Path, target: Path, dry_run: bool = False, *, replac
     Returns:
         action (str): Human-readable summary, e.g. "Created symlink: <target> -> <source>", "Updated symlink: <target> -> <source>", or "Skipped existing non-symlink path: <target>".
     """
+    if target.is_symlink() and target.readlink() == source:
+        return f"Symlink already current: {target} -> {source}"
     if target.exists() and not target.is_symlink() and not replace_existing:
         return f"Skipped existing non-symlink path: {target}"
     action = "Created" if not target.exists() else "Updated"
@@ -2346,183 +2476,6 @@ def _ensure_real_plugin_mirror_root(target: Path, canonical_plugins_dir: Path, d
     return f"Ensured plugin mirror directory: {target}"
 
 
-def _prune_command_handle_skill_entries(
-    repo_root: Path,
-    plugin_name: str,
-    plugin_root: Path,
-) -> tuple[list[str], list[str]]:
-    """Remove plugin skill entries that are already exposed by generated command handles."""
-    skills_root = plugin_root / "skills"
-    if not skills_root.is_dir():
-        return [], []
-    try:
-        report = handles_report(repo_root_path=repo_root, include_handles=True)
-    except Exception as exc:  # noqa: BLE001 - convert command-surface failures into sync errors.
-        raise PluginCacheRefreshError(
-            f"Failed to discover command handles for plugin cache pruning "
-            f"(plugin={plugin_name}, root={plugin_root}): {exc}"
-        ) from exc
-    handles = report.get("handles") if isinstance(report, dict) else []
-    if not isinstance(handles, list):
-        return [], []
-
-    logs: list[str] = []
-    deletes: list[str] = []
-    for row in handles:
-        if not isinstance(row, dict):
-            continue
-        if row.get("owner") != plugin_name:
-            continue
-        command_handle_path = str(row.get("command_handle_path") or "")
-        if not command_handle_path.startswith(".agents/skills/"):
-            continue
-        handle = str(row.get("handle") or "").strip()
-        if not handle or "/" in handle or ".." in handle:
-            continue
-        targets = [skills_root / handle]
-        targets.extend(
-            skill_md.parent
-            for skill_md in skills_root.rglob("SKILL.md")
-            if skill_md.parent.name == handle
-        )
-        for target in sorted(set(targets)):
-            if not (target.exists() or target.is_symlink()):
-                continue
-            if target.is_symlink() or target.is_file():
-                target.unlink()
-            else:
-                shutil.rmtree(target)
-            deletes.append(str(target))
-            logs.append(f"Removed command-handle duplicate plugin skill entry: {target}")
-    return logs, deletes
-
-
-def _plugin_version(source_dir: Path) -> str:
-    """Return the declared plugin version, falling back to the local-dev version."""
-    plugin_json = source_dir / ".codex-plugin" / "plugin.json"
-    try:
-        payload = json.loads(plugin_json.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return "0.1.0"
-    version = str(payload.get("version") or "0.1.0").strip()
-    if not version or "/" in version or ".." in version:
-        return "0.1.0"
-    return version
-
-
-def _replace_plugin_cache_copy(
-    repo_root: Path,
-    plugin_name: str,
-    source_dir: Path,
-    target_dir: Path,
-) -> PluginCacheRefreshReport:
-    """Replace one local plugin cache copy and prune command-handle duplicate entries."""
-    deletes: list[str] = []
-    if target_dir.is_symlink() or target_dir.is_file():
-        deletes.append(str(target_dir))
-        target_dir.unlink()
-    elif target_dir.exists():
-        deletes.append(str(target_dir))
-        shutil.rmtree(target_dir)
-    _copy_directory_contents(source_dir, target_dir)
-    _materialize_first_level_skill_aliases(target_dir)
-    logs, prune_deletes = _prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
-    deletes.extend(prune_deletes)
-    logs.append(f"Replaced local plugin cache: {target_dir} <- {source_dir}")
-    return PluginCacheRefreshReport(writes=[str(target_dir)], deletes=deletes, logs=logs)
-
-
-def _refresh_workspace_plugin_caches(
-    plan: dict,
-    logs: list[str],
-    repo_root: Path,
-    *,
-    dry_run: bool,
-) -> ErrorObject | None:
-    """Refresh repo-local plugin caches that Codex picker paths may scan."""
-    try:
-        marketplace_path, entries = _load_local_marketplace(repo_root)
-    except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
-        logs.append(f"Skipped workspace plugin cache refresh: {exc}")
-        return None
-
-    try:
-        marketplace_name = json.loads(marketplace_path.read_text(encoding="utf-8")).get("name") or "agent-skills-local"
-    except (OSError, json.JSONDecodeError):
-        marketplace_name = "agent-skills-local"
-    marketplace_name = str(marketplace_name).strip() or "agent-skills-local"
-    if "/" in marketplace_name or ".." in marketplace_name:
-        marketplace_name = "agent-skills-local"
-
-    runtime_cache_root = repo_root / ".agents" / "plugins-runtime" / "cache" / marketplace_name
-    versioned_cache_root = repo_root / "Plugins" / "cache" / marketplace_name
-    plan.setdefault("plugin_cache_writes", [])
-    plan.setdefault("writes", [])
-    plan.setdefault("deletes", [])
-
-    keep_plugin_names = {entry["name"] for entry in entries}
-    try:
-        for entry in entries:
-            plugin_name = entry["name"]
-            if "/" in plugin_name or ".." in plugin_name:
-                logs.append(f"Skipped unsafe plugin cache name: {plugin_name}")
-                continue
-            source_dir = repo_root / entry["path"].removeprefix("./")
-            if not source_dir.is_dir():
-                logs.append(f"Skipped missing plugin cache source: {source_dir}")
-                continue
-            version = _plugin_version(source_dir)
-            runtime_target = runtime_cache_root / plugin_name
-            versioned_target = versioned_cache_root / plugin_name / version
-            planned_writes = [str(runtime_target), str(versioned_target)]
-            plan["plugin_cache_writes"].extend(planned_writes)
-            plan["writes"].extend(planned_writes)
-            if dry_run:
-                logs.append(f"Would replace local plugin cache: {runtime_target} <- {source_dir}")
-                logs.append(f"Would replace local plugin cache: {versioned_target} <- {source_dir}")
-                for target in (runtime_target, versioned_target):
-                    if target.exists() or target.is_symlink():
-                        plan["deletes"].append(str(target))
-                plugin_version_root = versioned_cache_root / plugin_name
-                for child in sorted(plugin_version_root.iterdir()) if plugin_version_root.is_dir() else []:
-                    if child == versioned_target or not child.is_dir():
-                        continue
-                    plan["deletes"].append(str(child))
-                    logs.append(f"Would remove stale versioned local plugin cache variant: {child}")
-                continue
-            for target in (runtime_target, versioned_target):
-                report = _replace_plugin_cache_copy(repo_root, plugin_name, source_dir, target)
-                logs.extend(report.logs)
-                plan["deletes"].extend(report.deletes)
-            plugin_version_root = versioned_cache_root / plugin_name
-            for child in sorted(plugin_version_root.iterdir()) if plugin_version_root.is_dir() else []:
-                if child == versioned_target or not child.is_dir():
-                    continue
-                plan["deletes"].append(str(child))
-                shutil.rmtree(child)
-                logs.append(f"Removed stale versioned local plugin cache variant: {child}")
-
-        for cache_root in (runtime_cache_root, versioned_cache_root):
-            if not cache_root.is_dir():
-                continue
-            for child in sorted(cache_root.iterdir()):
-                if child.name in keep_plugin_names or not child.is_dir():
-                    continue
-                plan["deletes"].append(str(child))
-                if dry_run:
-                    logs.append(f"Would remove stale local plugin cache: {child}")
-                    continue
-                shutil.rmtree(child)
-                logs.append(f"Removed stale local plugin cache: {child}")
-    except (OSError, ValueError, PluginCacheRefreshError) as exc:
-        return ErrorObject(
-            code="ERR_RUNTIME",
-            message=f"Workspace plugin cache refresh failed: {exc}",
-            fix_suggestion="Check local plugin cache permissions and rerun `./bin/ask skills sync --scope workspace --robot --json`.",
-        )
-    return None
-
-
 def _finalize_skill_sync_result(
     result: CallResult,
     plan: dict,
@@ -2617,14 +2570,8 @@ def _refresh_home_plugin_mirrors(
             shutil.rmtree(target_dir)
         _copy_directory_contents(source_dir, target_dir)
         _materialize_first_level_skill_aliases(target_dir)
-        try:
-            prune_logs, _prune_deletes = _prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
-        except PluginCacheRefreshError as exc:
-            raise PluginCacheRefreshError(
-                f"Failed to prune home plugin mirror command-handle duplicates {target_dir}: {exc}"
-            ) from exc
-        else:
-            logs.extend(prune_logs)
+        # Home mirrors are source mirrors for local marketplace paths. Command-handle
+        # duplicate pruning belongs to runtime cache copies, not source mirrors.
         (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
         logs.append(f"Replaced home plugin mirror: {target_dir} <- {source_dir}")
 
@@ -2771,6 +2718,7 @@ def sync_skills(
     scope: str = "workspace",
     dry_run: bool = False,
     projection: Optional[str] = None,
+    plugin_cache_refresh: str = "auto",
 ) -> CallResult:
     """
     Synchronizes derived skill views for either the repository workspace or the user environment.
@@ -2783,6 +2731,10 @@ def sync_skills(
         dry_run (bool): If True, no filesystem mutations are performed; actions are reported only.
         projection (Optional[str]): Explicit runtime projection mode. When omitted,
             SYNC_SKILLS_PROJECTION_MODE is honored before the flat default.
+        plugin_cache_refresh (str): Plugin runtime cache refresh mode:
+            "auto" refreshes best-effort during workspace sync, "skip" runs
+            normal projection sync without cache mutation, and "only" refreshes
+            plugin runtime caches without changing skill projections.
     
     Returns:
         CallResult: Success result contains a `data` object with:
@@ -2813,6 +2765,15 @@ def sync_skills(
         result.data["requested_projection_mode"] = getattr(exc, "requested_mode", projection or "")
         return result
 
+    if plugin_cache_refresh not in {"auto", "skip", "only"}:
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Invalid plugin cache refresh mode: '{plugin_cache_refresh}'.",
+            fix_suggestion="Use --plugin-cache-refresh auto, skip, or only.",
+        ))
+        return result
+
     if scope not in {"workspace", "user"}:
         result.status = "error"
         result.errors.append(ErrorObject(
@@ -2838,10 +2799,47 @@ def sync_skills(
             "symlinks": 0,
         },
         "warnings": [],
+        "plugin_cache_refresh": plugin_cache_permission_declaration(repo_root, mode=plugin_cache_refresh),
     }
     logs = []
     skills_dir = repo_root / ".agents" / "skills"
     system_skills_dir = repo_root / "skills-system"
+
+    if plugin_cache_refresh == "only":
+        if scope != "workspace":
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_INVALID_SCOPE",
+                message="Plugin runtime cache refresh is workspace-scoped.",
+                fix_suggestion="Use `./bin/ask skills sync --scope workspace --plugin-cache-refresh only`.",
+            ))
+            return result
+        logs.append(
+            "Running plugin runtime cache refresh only; normal rooted projection sync skipped. "
+            f"If the cache path is blocked, {PLUGIN_CACHE_PERMISSION_RERUN}"
+        )
+        cache_error = refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        if cache_error:
+            result.errors.append(cache_error)
+            return _finalize_skill_sync_result(
+                result,
+                plan,
+                logs,
+                projection_decision,
+                scope=scope,
+                dry_run=dry_run,
+                status="error",
+            )
+        plan["validation_status"] = "pass"
+        return _finalize_skill_sync_result(
+            result,
+            plan,
+            logs,
+            projection_decision,
+            scope=scope,
+            dry_run=dry_run,
+            status="success",
+        )
 
     if system_skills_dir.is_dir():
         plan["preserved_system_lane_entries"] = sorted(
@@ -2925,7 +2923,15 @@ def sync_skills(
             return result
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
-        cache_error = _refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        cache_error = None
+        if plugin_cache_refresh == "skip":
+            plan["plugin_cache_refresh"]["status"] = "skipped"
+            logs.append(
+                "Skipped plugin runtime cache refresh (--plugin-cache-refresh skip); "
+                f"{PLUGIN_CACHE_PERMISSION_RERUN}"
+            )
+        else:
+            cache_error = refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
         if cache_error:
             result.errors.append(cache_error)
             return _finalize_skill_sync_result(
@@ -2975,7 +2981,15 @@ def sync_skills(
         projection_logs = _refresh_catalog_projections(repo_root, dry_run)
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)
-        cache_error = _refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
+        cache_error = None
+        if plugin_cache_refresh == "skip":
+            plan["plugin_cache_refresh"]["status"] = "skipped"
+            logs.append(
+                "Skipped plugin runtime cache refresh (--plugin-cache-refresh skip); "
+                f"{PLUGIN_CACHE_PERMISSION_RERUN}"
+            )
+        else:
+            cache_error = refresh_workspace_plugin_caches(plan, logs, repo_root, dry_run=dry_run)
         if cache_error:
             result.errors.append(cache_error)
             return _finalize_skill_sync_result(

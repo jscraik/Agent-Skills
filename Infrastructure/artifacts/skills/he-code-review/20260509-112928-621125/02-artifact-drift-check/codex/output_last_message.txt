@@ -1,0 +1,23 @@
+I could verify the canonical stage/routing contracts in the repo mirror, but I could not inspect your uncommitted local changes because the shell in this sandbox is refusing read-only commands.
+
+What I verified:
+- `/spec`, `/plan`, `/build`, `/test`, `/review`, and `/ship` are the intended lifecycle entry points in [`README.md`](/Users/jamiecraik/dev/agent-skills/README.md) and are mirrored by the command files in [`.claude/commands/`](/Users/jamiecraik/dev/agent-skills/.claude/commands/).
+- The routing map is explicitly defined in [`agents/README.md`](/Users/jamiecraik/dev/agent-skills/agents/README.md) and [`references/orchestration-patterns.md`](/Users/jamiecraik/dev/agent-skills/references/orchestration-patterns.md).
+- The repo’s endorsed routing model is:
+  - single persona for a single perspective
+  - parallel fan-out only for `/ship`
+  - sequential lifecycle is user-driven, not mediated by a router persona
+- The contract files agree on the core mapping:
+  - `/spec` → `spec-driven-development`
+  - `/plan` → `planning-and-task-breakdown`
+  - `/build` → `incremental-implementation` + `test-driven-development`
+  - `/review` → `code-review-and-quality`
+  - `/ship` → parallel `code-reviewer`, `security-auditor`, `test-engineer`
+
+So the published routing map itself is internally consistent. What I could not verify is whether your changed references/scripts still point at those canonical files, because I cannot read the local diff from this environment.
+
+If you want, send me either:
+1. the changed file paths, or
+2. the diff for the references/scripts,
+
+and I’ll check them against the stage contracts line by line.

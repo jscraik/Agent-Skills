@@ -1,0 +1,9 @@
+I can do that, but I’m missing the actual approved slice boundary.
+
+The workspace shell is currently refusing read-only access, so I can’t inspect the repo to discover the plan myself. If you send me one of these, I can continue immediately and stay within scope:
+
+1. The approved plan text or ticket link
+2. The exact files or feature slice to implement
+3. The output of the repo’s `./bin/ask ...` plan/closeout command, if you already have it
+
+Once I have that, I’ll implement only that slice and report the validation evidence alongside the change.

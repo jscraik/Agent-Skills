@@ -1,0 +1,8 @@
+Database outage prevented test execution for this slice.
+Write only the eval report template below (no extra prose):
+- Slice status: Blocked|Complete
+- Validation status: Not run|Passed|Failed
+- Reason: <one sentence>
+- Evidence: <explicitly list available evidence or "none">
+- Assessment: <closure rationale>
+- Closure call: Blocked|Ready

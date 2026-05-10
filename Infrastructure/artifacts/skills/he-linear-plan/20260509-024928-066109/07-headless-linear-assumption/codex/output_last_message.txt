@@ -1,0 +1,3 @@
+Yes. In autonomous mode, I’ll treat any Linear object creation as confirmation-required and I won’t create Linear issues, projects, or other objects unless you explicitly approve first.
+
+If you want, I can also help codify that as a written workflow guardrail in the repo.

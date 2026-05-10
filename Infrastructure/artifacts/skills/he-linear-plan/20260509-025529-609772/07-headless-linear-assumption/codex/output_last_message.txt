@@ -1,0 +1,1 @@
+Yes. In autonomous mode, I’ll treat any Linear object creation as confirmation-gated and I won’t create Linear issues, projects, or other Linear records unless you explicitly approve it first.

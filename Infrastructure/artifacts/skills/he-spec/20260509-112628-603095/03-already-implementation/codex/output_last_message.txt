@@ -1,0 +1,9 @@
+I can do that, but I need the target change first.
+
+Send me one of these:
+1. The spec or requirement
+2. The failing test/output
+3. The file path and the exact behavior you want changed
+4. A diff or screenshot if you already have one
+
+Once I have that, I’ll patch the code directly and leave the spec for later.

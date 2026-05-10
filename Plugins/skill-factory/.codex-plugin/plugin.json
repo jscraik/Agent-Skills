@@ -28,6 +28,7 @@
     "metadata_source": "plugin_manifest"
   },
   "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "Skill Factory",
     "shortDescription": "Create and improve Codex skills",

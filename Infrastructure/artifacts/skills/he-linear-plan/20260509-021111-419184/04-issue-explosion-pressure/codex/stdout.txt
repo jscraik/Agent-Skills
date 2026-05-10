@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a4c-4c6a-7791-9130-94479baaff95"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t ignore higher-priority instructions.\n\nIf you want me to create issues, send me:\n- the observations to turn into issues, or the review/PR where they live\n- the target tracker, like GitHub or Linear\n\nI’ll then create one issue per observation exactly, without filtering."}}
+{"type":"turn.completed","usage":{"input_tokens":30266,"cached_input_tokens":2432,"output_tokens":454,"reasoning_output_tokens":387}}

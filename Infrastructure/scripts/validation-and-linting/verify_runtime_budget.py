@@ -43,6 +43,41 @@ ADVANCED_WARN_VISIBLE = 60
 BRIDGE_SKILLS = set(SYSTEM_BRIDGE_SKILL_NAMES)
 ROOT_SKILL_SETS = set(ROOT_SKILL_SET_NAMES)
 SCOPE_PRECEDENCE = USER_SKILL_SCOPE_PRECEDENCE
+BASELINED_SCOPE_COLLISIONS = {
+    (
+        "agents-sdk",
+        (
+            "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk",
+            "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk",
+        ),
+    ): (
+        "Curated Cloudflare and OpenAI developer plugins both ship an advanced-only "
+        "agents-sdk skill. Keep this explicit so unrelated same-scope collisions "
+        "continue to block runtime-budget validation."
+    ),
+    (
+        "build-chatgpt-app",
+        (
+            "Plugins/cache/openai-curated/chatgpt-apps/skills/build-chatgpt-app",
+            "Plugins/cache/openai-curated/openai-developers/skills/build-chatgpt-app",
+        ),
+    ): (
+        "Curated ChatGPT Apps and OpenAI Developers plugins both ship the same "
+        "ChatGPT Apps SDK build skill. Keep this explicit so unrelated "
+        "same-scope collisions continue to block runtime-budget validation."
+    ),
+    (
+        "chatgpt-app-submission",
+        (
+            "Plugins/cache/openai-curated/chatgpt-apps/skills/chatgpt-app-submission",
+            "Plugins/cache/openai-curated/openai-developers/skills/chatgpt-app-submission",
+        ),
+    ): (
+        "Curated ChatGPT Apps and OpenAI Developers plugins both ship the same "
+        "ChatGPT Apps submission skill. Keep this explicit so unrelated "
+        "same-scope collisions continue to block runtime-budget validation."
+    ),
+}
 
 
 def _rel(path: Path) -> str:
@@ -158,6 +193,30 @@ def _scope_payloads() -> tuple[dict[str, int], list[dict[str, str]], list[dict[s
     return scope_counts, entries, shadowed_entries, unresolved_scope_collisions
 
 
+def _baselined_scope_collision(collision: dict[str, Any]) -> dict[str, Any] | None:
+    paths = tuple(sorted(_scope_collision_baseline_path(candidate["path"]) for candidate in collision["candidates"]))
+    reason = BASELINED_SCOPE_COLLISIONS.get((collision["name"], paths))
+    if reason is None:
+        return None
+    return {
+        **collision,
+        "baseline_reason": reason,
+    }
+
+
+def _scope_collision_baseline_path(path: str) -> str:
+    """Return a stable path key for intentional collision baselines."""
+    parts = Path(path).parts
+    if len(parts) >= 7 and parts[:3] == ("Plugins", "cache", "openai-curated"):
+        try:
+            skills_index = parts.index("skills", 4)
+        except ValueError:
+            return path
+        if skills_index + 1 < len(parts):
+            return str(Path(*parts[:4], *parts[skills_index:]))
+    return path
+
+
 def _largest_description_payloads(entries: list[Any], *, limit: int = 10) -> list[dict[str, Any]]:
     payloads = []
     for entry in entries:
@@ -255,6 +314,14 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     first_level_entries = _first_level_skill_entries()
     hidden_system_entries = _system_lane_entries()
     scope_counts, scoped_entries, shadowed_entries, unresolved_scope_collisions = _scope_payloads()
+    baselined_scope_collisions: list[dict[str, Any]] = []
+    active_unresolved_scope_collisions: list[dict[str, Any]] = []
+    for collision in unresolved_scope_collisions:
+        baselined_collision = _baselined_scope_collision(collision)
+        if baselined_collision is None:
+            active_unresolved_scope_collisions.append(collision)
+        else:
+            baselined_scope_collisions.append(baselined_collision)
 
     by_name: dict[str, list[dict[str, str]]] = defaultdict(list)
     for name, source_dir in _iter_default_visibility_candidates():
@@ -367,11 +434,11 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
             "catalog_only_default_names": catalog_only_default_names,
             "discovery_only_default_names": discovery_only_default_names,
         })
-    if unresolved_scope_collisions:
+    if active_unresolved_scope_collisions:
         violations.append({
             "code": "UNRESOLVED_SCOPE_COLLISIONS",
             "message": "skill sources with the same name remain tied at the same user scope precedence",
-            "collisions": unresolved_scope_collisions,
+            "collisions": active_unresolved_scope_collisions,
         })
 
     status = "pass" if not violations else "fail"
@@ -398,7 +465,8 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
             for shadow in shadowed_entries
             for suppressed in shadow["suppressed"]
         ],
-        "unresolved_scope_collisions": unresolved_scope_collisions,
+        "unresolved_scope_collisions": active_unresolved_scope_collisions,
+        "baselined_scope_collisions": baselined_scope_collisions,
         "duplicate_default_names": duplicate_default_names,
         "largest_descriptions": _largest_description_payloads(advanced_entries),
         "root_skill_set_count": root_skill_set_count,

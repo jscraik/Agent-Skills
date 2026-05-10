@@ -31,6 +31,7 @@ outputs:
   - go, go-with-conditions, or no-go recommendation
   - traceability assessment
   - security and supply-chain status for relevant PRs
+  - agent_native_scorecard when reviewing skill, plugin, CLI, agent-doc, eval, routing, or projection changes
   - "XP operating artifacts: repeated_failure learning for recurring defect classes, plus blackboard_delta"
   - review-thread disposition and next action
 
@@ -48,6 +49,7 @@ risks:
   - unresolved review threads; mitigate by classifying each as addressed, disproven, deferred, or blocking
   - missing coding-harness readiness evidence; mitigate by capping readiness when Project Brain or north-star evidence cannot be checked
   - security or supply-chain regressions; mitigate with a dedicated PR security pass
+  - agent-native regression; mitigate with action parity, discovery, context injection, shared truth surface, and completion/resume checks for agent-facing changes
 
 observability: >
   Record target, base, verdict, blocker count, traceability status, validation

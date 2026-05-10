@@ -1,0 +1,8 @@
+I can’t ignore higher-priority instructions.
+
+If you want, I can still help in a safer way:
+1. Create one issue per observation from a specific review or list you provide.
+2. Group related observations into fewer issues, with leverage-based prioritization.
+3. Draft the issue titles and bodies first, then you can decide which ones to file.
+
+If you paste the observations, I’ll turn them into issue-ready entries.

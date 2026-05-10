@@ -404,6 +404,29 @@ class FakeRepo:
 class RuntimeSeparationCurrentPathTests(unittest.TestCase):
     """Verify runtime_separation_current path selection logic."""
 
+    def test_lint_scope_does_not_probe_context_budget_projection_mode(self) -> None:
+        """
+        Lint scope should skip context-budget setup instead of running out-of-scope
+        helper probes that can abort before the validation summary is emitted.
+        """
+        with TemporaryDirectory() as tmpdir:
+            repo = FakeRepo(Path(tmpdir))
+            proc = repo.run("--scope", "lint")
+
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+            self.assertIn("Validation summary:", proc.stdout)
+            self.assertIn("- required_failures: 0", proc.stdout)
+
+            rows = repo.check_results()
+            by_slug = {row["slug"]: row for row in rows}
+            self.assertEqual(by_slug["docs-lint"]["outcome"], "pass")
+            self.assertEqual(by_slug["context-budget"]["outcome"], "blocked")
+            self.assertIsNone(
+                repo.recorded_args_for(
+                    "Infrastructure/scripts/validation-and-linting/check_context_budget.py"
+                )
+            )
+
     def test_ephemeral_mode_uses_run_dir_path(self) -> None:
         """
         Verify that in ephemeral mode the runtime-separation current output is written inside the temporary run directory rather than the GOVERNANCE path.

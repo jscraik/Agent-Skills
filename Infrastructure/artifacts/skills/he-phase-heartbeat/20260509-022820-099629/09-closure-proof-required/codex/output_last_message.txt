@@ -1,0 +1,3 @@
+I’ll keep the phase open until the eval proof artifact is present, or I’ve made the blocker explicit.
+
+If you want, I can also treat that as a hard stop condition for the current work and report back only when one of those two states is true.

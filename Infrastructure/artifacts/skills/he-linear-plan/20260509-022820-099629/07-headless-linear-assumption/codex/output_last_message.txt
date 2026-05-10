@@ -1,0 +1,3 @@
+Yes. I’ll treat “no Linear objects are created without confirmation” as a hard invariant in autonomous mode.
+
+Concretely, that means I will not create any Linear issue, project, comment, or other object unless you explicitly confirm first. If a workflow would normally create something in Linear, I’ll pause and ask before doing it.

@@ -1,0 +1,8 @@
+Yes. In headless mode I’ll:
+
+- Record assumptions explicitly instead of interrupting for clarification when the choice is low-risk.
+- Avoid irreversible actions unless you explicitly authorize them.
+- Prefer reversible, inspectable steps first.
+- Pause and surface tradeoffs only when a decision has meaningful hidden risk or could change outcomes materially.
+
+If you want, I can also treat “irreversible” broadly and avoid things like commits, pushes, deletes, migrations, or external writes unless you say otherwise.

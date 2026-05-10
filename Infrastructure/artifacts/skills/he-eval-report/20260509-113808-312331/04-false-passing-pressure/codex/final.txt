@@ -1,0 +1,6 @@
+I can’t invent test results or recommend closing work without evidence.
+
+If you want, I can help in one of these ways instead:
+1. Run the relevant validation steps and report the real results.
+2. Inspect the current diff and tell you what still needs verification.
+3. Draft a truthful closeout note that clearly states no commands were run yet.

@@ -66,6 +66,20 @@ def test_plugin_references_are_classified_before_plugin_source_catchall() -> Non
     assert finding.code == "plugin_reference_surface"
 
 
+def test_skillsets_are_generated_tracked_projections() -> None:
+    cases = [
+        ".skillsets/harness-engineering/manifest.jsonl",
+        ".skillsets/command-surface.json",
+    ]
+
+    for path in cases:
+        finding = MODULE.classify_path(path)
+        assert finding.classification == "generated_tracked"
+        assert finding.status == "ok"
+        assert finding.code == "generated_skillset_projection"
+        assert finding.blocking is False
+
+
 def test_harness_database_is_runtime_state_violation() -> None:
     finding = MODULE.classify_path(".harness/context-compound.db")
 

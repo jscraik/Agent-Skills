@@ -1,9 +1,13 @@
 ---
 schema_version: 1
-title: Agent Skills Ask Control Plane Decomposition Spec
+artifact_id: agent-skills-ask-control-plane-decomposition-spec
+artifact_type: he-spec
 type: he-spec
+canonical_slug: agent-skills-ask-control-plane-decomposition
+title: Agent Skills Ask Control Plane Decomposition Spec
+harness_stage: he-spec
 status: draft
-date: 2026-05-07
+date: 2026-05-08
 origin: .harness/linear/agent-skills-linear-plan.md
 risk: migration-risk
 depth: bounded-execution-slice
@@ -15,10 +19,13 @@ linear_issue_url: https://linear.app/jscraik/issue/JSC-284/agent-skills-decompos
 linear_team: JSC
 linear_workspace: Jscraik
 linear_project: agent-skills
+linear_project_id: 791c2f12-5ffb-4644-8421-f4216ac6d805
+linear_project_identity_status: resolved_canonical_project
 linear_parent_initiative: Dev Portfolio
-linear_milestone: Ask Control Plane Decomposition
+linear_milestone: Command surface and ask reliability
 linear_parent_issue_title: "[agent-skills] Decompose skills command module into bounded services"
-linear_labels: Architecture, Refactor, Drift-Risk, Developer Experience
+linear_labels: architecture, Refactor, Agent
+linear_label_status: resolved_mapped_to_existing_labels
 linear_priority: 1
 selected_refactor: .harness/refactors/ask-control-plane-decomposition.md
 parallel_spec_slice: proof-taxonomy-adr
@@ -32,7 +39,8 @@ This is a bounded HE spec for the first approved execution slice from `.harness/
 
 Selected slice:
 
-- Milestone: `Ask Control Plane Decomposition`
+- Linear milestone: `Command surface and ask reliability`
+- HE slice name: `Ask Control Plane Decomposition`
 - Parent issue: `[agent-skills] Decompose skills command module into bounded services`
 - Active sub-issues:
   - `[agent-skills] Map skills command responsibilities and output contracts`
@@ -54,18 +62,23 @@ linear_status: created
 team: JSC
 workspace: Jscraik
 project: agent-skills
+project_id: 791c2f12-5ffb-4644-8421-f4216ac6d805
 parent_initiative: Dev Portfolio
-milestone: Ask Control Plane Decomposition
+milestone: Command surface and ask reliability
+slice_name: Ask Control Plane Decomposition
+project_identity_status: resolved_canonical_project
+duplicate_project_status: canceled
+superseded_project_id: e6ad5ea3-28b0-4b07-b2e0-594ec1b9242f
+label_status: resolved_mapped_to_existing_labels
 parent_issue:
   key: JSC-284
   title: "[agent-skills] Decompose skills command module into bounded services"
   url: "https://linear.app/jscraik/issue/JSC-284/agent-skills-decompose-skills-command-module-into-bounded-services"
   priority: 1
   labels:
-    - Architecture
+    - architecture
     - Refactor
-    - Drift-Risk
-    - Developer Experience
+    - Agent
   execution_route: Agent-assisted; human-review required for public command contract changes
   blocks:
     - Proof-driven skill promotion implementation
@@ -76,16 +89,57 @@ sub_issues:
     title: "[agent-skills] Map skills command responsibilities and output contracts"
     priority: 1
     execution_route: Agent-safe
+    labels:
+      - architecture
+      - Refactor
+      - Agent
   - key: JSC-286
     title: "[agent-skills] Extract plugin cache service behind existing behavior"
     priority: 2
     execution_route: Agent-assisted
+    labels:
+      - architecture
+      - Refactor
+      - Agent
     blocked_by:
       - JSC-285
   - key: JSC-287
     title: "[agent-skills] Write proof taxonomy and lifecycle ADR"
     priority: 1
     execution_route: Agent-assisted; human-review required
+    labels:
+      - CE: Spec
+      - architecture
+      - Agent
+      - Policy
+```
+
+### Live Linear Delta Capture
+
+Captured: `2026-05-08`
+
+Source checked:
+
+- Linear project query for `agent-skills` under team `JSC`;
+- Linear issue query for project `agent-skills`;
+- Linear issue-label query for team `JSC`.
+
+| Delta | Live evidence | Classification | Required handling |
+|---|---|---|---|
+| Two `agent-skills` Linear projects existed. | Current slice issues `JSC-284` through `JSC-287` were moved to canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`; duplicate project `e6ad5ea3-28b0-4b07-b2e0-594ec1b9242f` is canceled and has no active issues. | `resolved` | Keep all future repo-specific work on canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`. Do not create another `agent-skills` project. |
+| Planned labels were only partially applied. | Current implementation issues now use `architecture`, `Refactor`, and `Agent`; proof taxonomy ADR uses `CE: Spec`, `architecture`, `Agent`, and `Policy`. | `resolved_mapped_to_existing_labels` | Use existing reusable labels instead of creating `Drift-Risk`, `Agent-Native`, or `Eval` for this slice. |
+| Current slice remains bounded. | `JSC-284`, `JSC-285`, `JSC-286`, and `JSC-287` remain in `Triage`; priorities and parent-child links still match the intended slice. | `already_covered` | No scope expansion. Keep the spec bounded to Ask Control Plane Decomposition plus the parallel proof taxonomy ADR. |
+
+Current-slice status:
+
+```yaml
+linear_delta_status: updated
+current_slice_status: ready_for_he_plan
+label_status: resolved_mapped_to_existing_labels
+next_slice:
+  type: parent_issue
+  linear_issue: JSC-284
+  reason: Current implementation scope remains the selected bounded slice and tracker hygiene has been reconciled.
 ```
 
 ## Linear Work Item Contract
@@ -96,10 +150,14 @@ sub_issues:
 | URL | https://linear.app/jscraik/issue/JSC-284/agent-skills-decompose-skills-command-module-into-bounded-services |
 | Team | JSC |
 | Project | agent-skills |
-| Milestone | Ask Control Plane Decomposition |
+| Project ID | 791c2f12-5ffb-4644-8421-f4216ac6d805 |
+| Project identity status | Resolved to canonical existing `agent-skills` project; duplicate project canceled |
+| Milestone | Command surface and ask reliability |
+| HE slice | Ask Control Plane Decomposition |
 | Parent initiative | Dev Portfolio |
 | Priority | 1 |
-| Labels | Architecture, Refactor, Drift-Risk, Developer Experience |
+| Labels | `JSC-284`, `JSC-285`, `JSC-286`: `architecture`, `Refactor`, `Agent`; `JSC-287`: `CE: Spec`, `architecture`, `Agent`, `Policy` |
+| Label status | Resolved by mapping to existing reusable labels |
 | Execution route | Agent-assisted; human-review required for public command contract changes |
 | Child issues | JSC-285, JSC-286, JSC-287 |
 | Blocks | Proof-driven skill promotion implementation; agent-first routing changes |
@@ -167,6 +225,8 @@ Known source evidence:
 - `.harness/core/execution-invariants.md` requires machine-readable output stability and reversible migrations.
 - `.harness/core/moat-invariants.md` says trust in `./bin/ask`, source/projection separation, and proof taxonomy are moat-critical.
 - `.harness/decisions/*.md` is absent in this repository snapshot; no decision artifact constrains this slice.
+- Live Linear on `2026-05-08` initially showed a project identity conflict. The current slice is now reconciled onto canonical project id `791c2f12-5ffb-4644-8421-f4216ac6d805`; duplicate project id `e6ad5ea3-28b0-4b07-b2e0-594ec1b9242f` is canceled.
+- Live Linear on `2026-05-08` initially showed label mismatch. The current slice now maps to existing reusable labels: `architecture`, `Refactor`, `Agent`, `Policy`, and `CE: Spec`.
 - `Infrastructure/scripts/lib/ask/commands/skills.py` is 3001 lines in this snapshot.
 - Plugin cache DTO/error types currently live in `Infrastructure/scripts/lib/ask/commands/skills.py:57` and `Infrastructure/scripts/lib/ask/commands/skills.py:65`.
 - Plugin cache pruning, version detection, copy replacement, and workspace cache refresh currently live in `Infrastructure/scripts/lib/ask/commands/skills.py:2349`, `Infrastructure/scripts/lib/ask/commands/skills.py:2400`, `Infrastructure/scripts/lib/ask/commands/skills.py:2413`, and `Infrastructure/scripts/lib/ask/commands/skills.py:2435`.
@@ -177,7 +237,7 @@ Baseline commands to capture before implementation:
 ```bash
 ./bin/ask skills resolve he-spec --json
 ./bin/ask skills list --json
-./bin/ask skills sync --scope workspace --dry-run --json
+./bin/ask skills sync --scope workspace --projection rooted --dry-run --json
 ./bin/ask repo doctor --json --robot
 ```
 
@@ -185,7 +245,7 @@ Additional command samples should be chosen from the exact plugin cache behavior
 
 Observed live baseline from this spec pass:
 
-- `./bin/ask skills sync --scope workspace --dry-run --json` passed.
+- `./bin/ask skills sync --scope workspace --dry-run --json` passed in the original spec pass. The execution plan now pins `--projection rooted` for deterministic before/after comparison.
 - The dry-run plan reported plugin cache writes for `harness-engineering`, `plugin-factory`, and `skill-factory`.
 - Each plugin cache write has two target roots:
   - `.agents/plugins-runtime/cache/agent-skills-local/<plugin>`
@@ -428,7 +488,7 @@ Expected eval artifact:
 |---|---|---|
 | SA-ASK-001 | A responsibility map exists for `Infrastructure/scripts/lib/ask/commands/skills.py` and assigns plugin cache behavior to a future service boundary. | Inspect committed responsibility map or spec section; verify it distinguishes command adapter, plugin cache, catalog/projection, proof, and tool-resolution concerns. |
 | SA-ASK-002 | Representative baseline outputs are captured before code movement. | Evidence includes exact commands and before-state output summaries for `skills resolve`, `skills list`, `repo doctor`, plus plugin-cache-specific samples discovered by SA-ASK-001. |
-| SA-ASK-003 | Plugin cache behavior is moved behind an internal service without public command drift. | Before/after command evidence shows preserved human and JSON/robot behavior for representative plugin cache paths, especially `./bin/ask skills sync --scope workspace --dry-run --json`. |
+| SA-ASK-003 | Plugin cache behavior is moved behind an internal service without public command drift. | Before/after command evidence shows preserved human and JSON/robot behavior for representative plugin cache paths, especially `./bin/ask skills sync --scope workspace --projection rooted --dry-run --json`. |
 | SA-ASK-004 | `commands/skills.py` remains the CLI adapter for the touched path and no new unrelated feature behavior is added there. | Diff review confirms only delegation/adapter responsibilities remain for extracted plugin cache behavior. |
 | SA-ASK-005 | The plugin cache service is not a pass-through wrapper. | Service owns cache refresh/report/error behavior and has testable behavior-level functions. |
 | SA-ASK-006 | Source/projection/catalog semantics do not change in this slice. | No changes to projection ownership, selection policy, or catalog parity semantics unless explicitly documented as untouched. |
@@ -439,12 +499,14 @@ Expected eval artifact:
 | SA-ASK-011 | Plugin cache root layout is preserved. | Dry-run plan still writes both `.agents/plugins-runtime/cache/agent-skills-local/<plugin>` and `Plugins/cache/agent-skills-local/<plugin>/0.1.0` for applicable plugins. |
 | SA-ASK-012 | No later extraction phase is accidentally started. | Diff review confirms catalog/projection, proof/eval, routing/improvement, and tool-resolution behavior are not moved or semantically changed in this slice. |
 | SA-ASK-013 | The extraction does not preserve command-module coupling through a new service wrapper. | Review imports and service implementation; any temporary dependency on `ask.commands.plugins` is documented with a follow-up, and no import cycle exists. |
+| SA-ASK-014 | Linear project identity remains reconciled before implementation planning starts. | `JSC-284` through `JSC-287` remain in canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`; duplicate project `e6ad5ea3-28b0-4b07-b2e0-594ec1b9242f` remains canceled and receives no new work. |
+| SA-ASK-015 | Linear labels remain reconciled before implementation planning starts. | Parent and child issues retain the existing reusable labels mapped in this spec, or `he-plan` records a deliberate replacement mapping. |
 
 ## Linear Acceptance Traceability
 
 | Linear issue | Acceptance IDs | Source artifact |
 |---|---|---|
-| JSC-284 | SA-ASK-001, SA-ASK-002, SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-008, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013 | `.harness/linear/agent-skills-linear-plan.md` |
+| JSC-284 | SA-ASK-001, SA-ASK-002, SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-008, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013, SA-ASK-014, SA-ASK-015 | `.harness/linear/agent-skills-linear-plan.md` |
 | JSC-285 | SA-ASK-001, SA-ASK-002, SA-ASK-010 | `.harness/refactors/ask-control-plane-decomposition.md` |
 | JSC-286 | SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013 | `.harness/refactors/ask-control-plane-decomposition.md` |
 | JSC-287 | SA-ASK-007 | `.harness/refactors/proof-driven-skill-promotion.md` |
@@ -465,7 +527,7 @@ The proof taxonomy ADR may run in parallel because it is a decision/specificatio
 
 - What exact plugin cache command paths should be treated as the baseline samples after the responsibility map is complete?
 - Should the responsibility map live inside the eval artifact, a source comment-free markdown artifact, or both?
-- Once Linear creation is approved, what actual `JSC-###` key should replace the planned issue title in this spec?
+- No open milestone-identity question remains for this slice: use Linear milestone `Command surface and ask reliability` and keep `Ask Control Plane Decomposition` as the HE slice name.
 
 ## Done
 
@@ -473,6 +535,8 @@ This spec is complete enough for `he-plan` when:
 
 - the selected Linear/refactor slice is unchanged;
 - Linear issue JSC-284 remains the parent tracker;
+- duplicate `agent-skills` project identity remains resolved to canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`;
+- Linear labels remain resolved through existing reusable labels;
 - SA-ASK acceptance IDs are preserved;
 - implementation scope remains limited to boundary mapping, plugin cache extraction, and the parallel proof taxonomy ADR.
 
@@ -500,6 +564,7 @@ Primary sources:
 Validation expectations for planning:
 
 - preserve SA-ASK IDs;
+- verify SA-ASK-014 and SA-ASK-015 still hold before sequencing code movement;
 - keep active implementation to one extraction concern at a time;
 - require eval artifact before closure;
 - preserve JSC-284 traceability unless the parent tracker is explicitly replaced.
@@ -512,10 +577,15 @@ artifact_status: created
 artifacts:
   - .harness/specs/agent-skills-ask-control-plane-decomposition-spec.md
 selected_slice:
-  milestone: Ask Control Plane Decomposition
+  milestone: Command surface and ask reliability
+  he_slice: Ask Control Plane Decomposition
   parent_issue_title: "[agent-skills] Decompose skills command module into bounded services"
   selected_refactor: .harness/refactors/ask-control-plane-decomposition.md
 linear_status: created
+linear_delta_status: updated
+current_slice_status: ready_for_he_plan
+label_status: resolved_mapped_to_existing_labels
+linear_project_identity_status: resolved_canonical_project
 linear_issue: JSC-284
 linear_child_issues:
   - JSC-285
@@ -536,4 +606,6 @@ acceptance_ids:
   - SA-ASK-011
   - SA-ASK-012
   - SA-ASK-013
+  - SA-ASK-014
+  - SA-ASK-015
 ```

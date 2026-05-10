@@ -9,8 +9,8 @@ the selected slice.
 ## Authority Order
 
 1. Current user request when it explicitly selects one bounded slice.
-2. `.harness/linear/<repo-name>-linear-plan.md` for the approved Linear destination, milestone, parent issue, dependencies, priority, labels, and agent/human execution route.
-3. `.harness/refactors/<selected-refactor>.md` when the selected route is a refactor or migration.
+2. The selected `.harness/linear/*.md` plan, preferably the dated Linear form, for the approved Linear destination, milestone, parent issue, dependencies, priority, labels, and agent/human execution route.
+3. The selected `.harness/refactors/*.md` program, preferably the dated Linear form, when the selected route is a refactor or migration.
 4. `.harness/decisions/*.md` for architectural decisions and tradeoffs the slice must not violate.
 5. `.harness/core/*.md` for invariants, routing rules, execution rules, moat constraints, and other non-negotiables.
 6. `.harness/brainstorm/*.md` for source context that explains intent without overriding the approved slice.
@@ -60,11 +60,11 @@ Secondary inputs must not create implementation requirements by themselves. If s
 Stop and return the smallest recovery step when:
 
 - no selected milestone, parent issue, refactor phase, or execution slice can be identified
-- tracked implementation lacks `.harness/linear/<repo-name>-linear-plan.md` or equivalent explicit Linear fields
+- tracked implementation lacks a selected `.harness/linear/*.md` plan or equivalent explicit Linear fields
 - live Linear deltas are present but unclassified
 - required Linear labels are missing, unapproved, or blocked from creation
 - more than one new Linear item is being promoted into the current HE spec, plan, or work slice
-- a refactor or migration route lacks the selected `.harness/refactors/<selected-refactor>.md`
+- a refactor or migration route lacks the selected `.harness/refactors/*.md` program
 - `.harness/decisions/*.md` or `.harness/core/*.md` conflict with the selected slice
 - secondary review, strategy, triage, or feature material attempts to drive implementation directly
 

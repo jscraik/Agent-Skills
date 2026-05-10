@@ -51,6 +51,17 @@ class RunRepoSkillQualityTests(unittest.TestCase):
             self.assertEqual(len(merged["runs"]), 2)
             self.assertTrue(out.exists())
 
+    def test_baseline_archive_stub_loads_from_projected_path(self) -> None:
+        baseline = (
+            REPO_ROOT
+            / "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/skill-quality-baseline.json"
+        )
+
+        allowed_failures = run_repo_skill_quality._load_allowed_structure_failures_from_baseline(baseline)
+
+        self.assertIn("Skills/agent-ops/bootstrap", allowed_failures)
+        self.assertGreater(len(allowed_failures), 50)
+
     def test_main_writes_repo_artifacts_and_threads_report_flags(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

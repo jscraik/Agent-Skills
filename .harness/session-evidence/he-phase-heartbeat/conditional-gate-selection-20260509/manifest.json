@@ -1,0 +1,23 @@
+{
+  "artifact_files": [
+    "aggregate.json",
+    "harness-engineering-evidence.json",
+    "index.json",
+    "insight-evidence-extension.json",
+    "redaction-report.json",
+    "skill-invocation-summary.json",
+    "skill-invocations.json",
+    "skill-proof-candidates.json",
+    "skill-refactor-evidence.json",
+    "skill-refactor-handoffs.json",
+    "skillify-candidates.json",
+    "solved-problems.json"
+  ],
+  "confidence": "medium",
+  "generated_at": "2026-05-09T09:58:04.647205Z",
+  "limitations": [
+    "Sensitive-looking paths or values were summarized.",
+    "Some sessions lacked enough evidence for outcome classification."
+  ],
+  "schema_version": 1
+}

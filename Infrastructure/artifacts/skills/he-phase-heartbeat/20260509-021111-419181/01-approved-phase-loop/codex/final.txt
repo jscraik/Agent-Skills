@@ -1,0 +1,27 @@
+I’ve confirmed the repo’s approved loop from the skill docs, and I can run it conceptually here, but I cannot execute local repo commands in this session because the shell is blocked by the environment.
+
+The loop I’d follow is:
+
+1. Discover the right skill for the task.
+2. Surface assumptions up front.
+3. Stop immediately on ambiguity or conflicting requirements.
+4. Work in thin slices.
+5. After each slice, pass the proof gates:
+   - tests
+   - build
+   - typecheck/lint when relevant
+   - runtime or manual verification when relevant
+6. Commit only after the slice is proven.
+7. Stop conditions are:
+   - unresolved ambiguity
+   - failed proof gate
+   - scope creep outside the request
+   - broken build or tests
+   - missing evidence
+
+Sources I used:
+- [using-agent-skills](https://github.com/addyosmani/agent-skills/blob/main/skills/using-agent-skills/SKILL.md)
+- [incremental-implementation](https://github.com/addyosmani/agent-skills/blob/main/skills/incremental-implementation/SKILL.md)
+- [test-driven-development](https://github.com/addyosmani/agent-skills/blob/main/skills/test-driven-development/SKILL.md)
+
+If you want me to actually apply the loop, send me the specific task or change target, and I’ll run it step by step with checkpoints and stop conditions.

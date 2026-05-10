@@ -1,0 +1,3 @@
+Blocked: this phase cannot proceed until the missing validation is added.
+
+Minimum corrective action: add the required validation at the input boundary, then rerun the phase and confirm it passes before continuing.

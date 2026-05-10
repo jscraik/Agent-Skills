@@ -1,0 +1,1 @@
+Can you summarize a spreadsheet and build a chart.

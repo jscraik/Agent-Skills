@@ -1,0 +1,231 @@
+---
+schema_version: 1
+artifact_id: <canonical-slug>-eval
+artifact_type: he-eval-report
+canonical_slug: <canonical-slug>
+title: <Title Matching First H1>
+harness_stage: he-eval-report
+status: draft
+date: YYYY-MM-DD
+traceability_required: true
+origin: <repo-relative plan or PR artifact>
+linear_issue: <issue key when tracked>
+linear_milestone: <milestone when tracked>
+---
+
+# <Title Matching Frontmatter>
+
+## Executive Eval Summary
+Status:
+Linear Completion Recommendation:
+Primary Blockers:
+Confidence:
+
+## Evaluated Slice
+Linear Project:
+Linear Milestone:
+Linear Parent Issue:
+Linear Sub-Issues:
+Refactor Program:
+Plugin Harness Engineering Spec:
+Affected Files/Modules:
+Affected Workflows:
+Related ADRs:
+Related Core Invariants:
+
+## Linear Definition of Done Status
+Artifact Path:
+Definition of Done Status:
+Closure Safety:
+
+## Linear Backlink Map
+Linear Project:
+Linear Milestone:
+Linear Parent Issue:
+Linear Sub-Issues:
+Linear Status Recommendation:
+Proof Artifact Links:
+Missing Identifiers:
+Traceability Repair:
+
+## Source Artifact Trace
+Linear Plan:
+Refactor Program:
+Plugin HE Spec:
+ADRs:
+Core Invariants:
+Other Source Artifacts:
+
+## Planned Proof Check
+Promised Proof From Source Artifacts:
+Proof Planned Before Implementation: yes | no | unknown
+Proof Produced:
+Proof Missing:
+Interpretation:
+Blocks Closure: yes | no
+
+## Functional Validation Results
+Command or Method:
+Result:
+Evidence:
+Confidence:
+Blocks Closure:
+
+## Eval Gate Matrix
+Gate:
+Expected:
+Actual:
+Status: pass | fail | partial | not-run
+Evidence:
+Confidence:
+Blocks Closure: yes | no
+Required Action:
+
+## Agentic Eval Validity
+Evaluated Capability / Task:
+Task Validity:
+Outcome Validity:
+Trajectory / Transcript Evidence:
+Grader Coverage:
+Trial Policy:
+Pass@k / Pass^k Reporting:
+Authorization Validator:
+Saturation / Maintenance Signal:
+Blocks Completion: yes | no
+Required Action:
+
+## Side-Effect Authorization
+Protected Action:
+User Authorization Evidence:
+Agent Justification:
+External Party Influence:
+Validator Decision: exempt
+Validator Confidence: high
+Suggested Next Step:
+Blocks Completion: no
+
+## Domain Model Integrity Check
+Domain Model Status:
+Bounded Context:
+Aggregate / Invariant Proof:
+Model-Code-Test Language Match:
+Translation Boundary:
+Closure Impact:
+Evidence:
+Blocks Completion:
+
+## Drift Validation
+Architecture Drift: Unknown
+Routing Drift: Unknown
+Context Drift: Unknown
+Governance Drift: Unknown
+Agent-Native Drift: Unknown
+Moat Drift: Unknown
+
+## Architecture Integrity Check
+Conclusion:
+Evidence:
+Affected Files/Modules:
+Confidence:
+Blocks Completion:
+
+## Domain Model Integrity Check
+Conclusion:
+Bounded Context:
+Canonical Terms:
+Aggregate Invariants:
+Lifecycle Ownership:
+Translation Evidence:
+Scenario or Test Evidence:
+Confidence:
+Blocks Completion:
+
+## Routing Determinism Check
+Conclusion:
+Evidence:
+Affected Files/Modules:
+Confidence:
+Blocks Completion:
+
+## Context Load Check
+Conclusion:
+Evidence:
+Affected Files/Modules:
+Confidence:
+Blocks Completion:
+
+## Agent-Native Check
+Conclusion:
+Evidence:
+Affected Files/Modules:
+Confidence:
+Blocks Completion:
+
+## Governance Simplicity Check
+Conclusion:
+Evidence:
+Affected Files/Modules:
+Confidence:
+Blocks Completion:
+
+## Moat Protection Check
+Conclusion:
+Evidence:
+Affected Files/Modules:
+Confidence:
+Blocks Completion:
+
+## Proof Artifacts
+Produced:
+Required:
+Missing:
+Planned Before Implementation:
+Blocks Completion:
+Attach or Link Back to Linear:
+
+## Failures / Regressions
+Failure or Regression:
+Evidence:
+Required Corrective Action:
+Follow-Up Justified:
+Blocks Closure:
+
+## Linear Completion Recommendation
+Classification: Blocked
+Recommended Linear Status:
+Required Linear Comment/Update:
+Issues to Close:
+Issues to Reopen:
+Issues to Leave Open:
+New Follow-Up Issues:
+Labels to Add/Remove:
+Milestone Completion:
+Project Status Change:
+Status Update Needed:
+Proof Artifacts to Attach or Link:
+
+## Follow-Up Work
+Classification: Do Not Create
+Target Linear Project:
+Parent Issue or Milestone:
+Reason:
+Priority:
+Labels:
+Agent-Safe or Human Review Required:
+
+## Core / ADR Update Recommendation
+Core Update:
+ADR Update:
+Reason:
+
+## Evidence & Traceability Matrix
+Conclusion:
+Fact:
+Interpretation:
+Assumption:
+Evidence:
+Affected Files/Modules:
+Command or Inspection Method:
+Confidence:
+Operational Impact:
+Blocks Completion:

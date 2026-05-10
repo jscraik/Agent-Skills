@@ -1,0 +1,6 @@
+I can handle that either way.
+
+1. `Interactive` - I pause and ask you the missing state before proceeding.
+2. `Headless` - I record a reasonable assumption and continue without waiting.
+
+If you want, reply with `interactive` or `headless`, and I’ll follow that mode.

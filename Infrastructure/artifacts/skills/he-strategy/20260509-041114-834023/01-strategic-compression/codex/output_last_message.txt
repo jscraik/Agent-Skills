@@ -1,0 +1,93 @@
+I couldn’t write the file in this session because the workspace is read-only, and the GitHub write path was also blocked.
+
+Here’s the durable strategic direction doc I’d add as `docs/strategic-direction.md`, synthesized from `README.md`, `AGENTS.md`, `docs/skill-anatomy.md`, `CONTRIBUTING.md`, `.claude/commands/spec.md`, and `.claude/commands/review.md`:
+
+```markdown
+# Strategic Direction
+
+This document compresses the durable intent behind the repo's intent, review, and triage artifacts into one stable source of truth.
+
+## North Star
+
+Agent Skills exists to make AI coding agents behave like disciplined senior engineers. The repo is not a loose collection of prompts. It is a control plane for repeatable workflows that are specific, verifiable, minimal, and battle-tested.
+
+## What We Optimize For
+
+- Clear triggers for when a skill applies
+- Step-by-step workflows instead of vague guidance
+- Evidence-backed verification instead of assumption
+- Progressive disclosure so the main artifact stays small and the supporting material stays load-bearing
+- Reuse of canonical sources instead of duplicated advice
+
+## Operating Model
+
+The lifecycle is intentionally simple:
+
+1. Define the work before writing code.
+2. Break the work into small, verifiable units.
+3. Build incrementally.
+4. Verify with evidence.
+5. Review every change before merge.
+6. Ship only when the system is ready to carry the change safely.
+
+This is the strategic throughline of the repo. The commands, personas, and skills exist to reinforce that flow, not to replace it.
+
+## Review Direction
+
+Review is a quality gate, not a style preference.
+
+Every meaningful change should be checked across five axes:
+
+- Correctness
+- Readability
+- Architecture
+- Security
+- Performance
+
+Findings should be specific, actionable, and tied to file and line evidence. Review output should help the next agent or human make the change safer, clearer, or easier to maintain.
+
+## Triage Direction
+
+Triage exists for unexpected behavior, failures, or ambiguous symptoms.
+
+The durable triage pattern is:
+
+1. Reproduce the problem.
+2. Localize the failure.
+3. Reduce the scope until the cause is obvious.
+4. Fix the smallest thing that restores correctness.
+5. Guard against recurrence with a check, test, or invariant.
+
+Triage should resolve uncertainty quickly and leave behind a better artifact than the one that was being diagnosed.
+
+## Decision Rules
+
+- Prefer canonical sources over repeated summaries.
+- Prefer behavior-shaping documentation over commentary.
+- Prefer one durable document over many overlapping notes.
+- Prefer precise language over broad abstractions.
+- Prefer the minimum process that still produces reliable outcomes.
+
+## What Should Not Change
+
+- Skills remain workflows, not essays.
+- Verification remains non-negotiable.
+- Review remains multi-axis and evidence-based.
+- Triage remains diagnostic and corrective, not speculative.
+- New documentation should strengthen the operating model instead of adding parallel interpretations.
+
+## Source Basis
+
+This document is synthesized from the repo's top-level guidance and entry points, especially:
+
+- `README.md`
+- `AGENTS.md`
+- `docs/skill-anatomy.md`
+- `CONTRIBUTING.md`
+- `.claude/commands/spec.md`
+- `.claude/commands/review.md`
+
+If the repo's operating model changes, update this document alongside the source artifacts so the direction stays aligned.
+```
+
+If you want, I can also tighten this into a shorter, more executive version or reshape it into an ADR-style note.

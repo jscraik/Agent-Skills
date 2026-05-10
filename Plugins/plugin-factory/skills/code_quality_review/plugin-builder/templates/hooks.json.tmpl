@@ -3,11 +3,11 @@
     "SessionStart": [
       {
         "matcher": "{{SESSION_START_MATCHER}}",
-        "handlers": [
+        "hooks": [
           {
             "type": "command",
             "command": "{{SESSION_START_COMMAND}}",
-            "timeout": {{SESSION_START_TIMEOUT_MS}},
+            "timeout": {{SESSION_START_TIMEOUT_SECONDS}},
             "statusMessage": "{{SESSION_START_STATUS_MESSAGE}}"
           }
         ]
@@ -16,11 +16,11 @@
     "Stop": [
       {
         "matcher": "{{STOP_MATCHER}}",
-        "handlers": [
+        "hooks": [
           {
             "type": "command",
             "command": "{{STOP_COMMAND}}",
-            "timeout": {{STOP_TIMEOUT_MS}},
+            "timeout": {{STOP_TIMEOUT_SECONDS}},
             "statusMessage": "{{STOP_STATUS_MESSAGE}}"
           }
         ]

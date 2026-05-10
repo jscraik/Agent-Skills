@@ -1,0 +1,7 @@
+Yes. In headless mode, I’ll:
+
+- record reasonable assumptions explicitly instead of stopping to ask
+- avoid irreversible actions unless you clearly ask for them
+- prefer reversible, inspectable steps and report any tradeoffs
+
+If something is ambiguous and the assumption could materially change the outcome, I’ll note the assumption and proceed conservatively.

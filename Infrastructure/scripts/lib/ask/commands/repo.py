@@ -11,6 +11,14 @@ from ask.commands.skills import skills_budget, skills_handles
 from ask.golden_path import build_golden_path_payload
 
 SCRIPT_TIMEOUT_SECONDS = 60
+DOCTOR_SIGNAL_PRIORITY = {
+    "repo_status": 10,
+    "projection_sync": 20,
+    "catalog_parity": 30,
+    "runtime_budget": 40,
+    "command_handles": 50,
+    "repo_surface": 60,
+}
 GENERATED_SURFACE_PREFIXES = (
     ".agents/skills/",
     ".skillsets/",
@@ -529,6 +537,7 @@ def repo_doctor(repo_root: Path) -> CallResult:
     payload = build_golden_path_payload(
         signals=signals,
         normal_next_command="./bin/ask repo status --json --robot",
+        signal_priorities=DOCTOR_SIGNAL_PRIORITY,
     )
     result.data["doctor"] = payload
     result.data.update(payload)
@@ -605,18 +614,24 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
         if _is_canonical_skill_path(path)
     ]
     commands = []
-    if canonical_skill_changed or generated_changed:
+    validation_commands = []
+    projection_update_present = bool(canonical_skill_changed and generated_changed)
+    if canonical_skill_changed and not projection_update_present:
         commands.extend(
             [
                 "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
                 "./bin/ask skills handles --check --json --robot",
             ]
         )
+    elif generated_changed:
+        validation_commands.append("./bin/ask skills handles --check --json --robot")
     return {
         "needed": bool(commands),
         "commands": commands,
+        "validation_commands": validation_commands,
         "generated_changed_files": generated_changed,
         "canonical_skill_changed_files": canonical_skill_changed,
+        "projection_update_present": projection_update_present,
     }
 
 
@@ -668,6 +683,14 @@ def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any
             "command": "./bin/ask repo doctor --json --robot",
         }
     ]
+    if any(path.startswith(GENERATED_SURFACE_PREFIXES) for path in changed_files):
+        commands.append(
+            {
+                "id": "skill_handles",
+                "reason": "Validate generated command handles for changed projection files.",
+                "command": "./bin/ask skills handles --check --json --robot",
+            }
+        )
     if changed_files:
         commands.append(
             {
@@ -734,6 +757,8 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
             or doctor_payload.get("next_command")
             or "./bin/ask repo doctor --json --robot"
         )
+    elif sync_report["validation_commands"]:
+        next_command = sync_report["validation_commands"][0]
     elif changed_files:
         next_command = _validation_command_for_changed_files(changed_files)
     else:

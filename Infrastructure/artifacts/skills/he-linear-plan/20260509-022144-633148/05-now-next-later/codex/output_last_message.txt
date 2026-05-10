@@ -1,0 +1,19 @@
+Yes. I can classify proposed work into those four buckets.
+
+A simple rubric:
+- `Now`: urgent, high-impact, small enough to do immediately, and clearly aligned with current goals.
+- `Next`: important, but depends on something else, needs more info, or is not the best use of time right this second.
+- `Later`: valuable eventually, but lower priority or not time-sensitive.
+- `Do Not Create`: out of scope, duplicates existing work, too speculative, or not worth turning into a tracked item.
+
+If you want, send me a list of proposed items and I’ll sort them into:
+1. `Now`
+2. `Next`
+3. `Later`
+4. `Do Not Create`
+
+If useful, I can also apply a stricter decision rule like:
+- `Now` = must do in this cycle
+- `Next` = candidate for the next cycle
+- `Later` = backlog
+- `Do Not Create` = reject entirely

@@ -10,6 +10,10 @@
 - `he-plan`
 - `he-work`
 - `he-code-review`
+- `he-eval-report`
+- `he-strategy`
+- `he-refactor`
+- `he-linear-plan`
 - `he-fix-bugs`
 - `he-improve`
 - `he-compound`
@@ -51,6 +55,38 @@ are source evidence and overlap/freshness inputs. When the repo uses Project
 Brain, solution capture also syncs or explicitly blocks the matching
 `.harness/knowledge/**` update.
 
+Post-implementation closure proof belongs to `he-eval-report` and writes
+`.harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-milestone>-eval.md`
+when Linear context is known, or the dated repo fallback when it is not.
+Do not recommend Linear parent issue, milestone, project, or execution-slice
+closure from implementation status alone; use the eval artifact to record
+validation evidence, drift posture, proof artifacts, and completion safety.
+
+Strategy, architectural review, triage, ADR compression, and core invariant
+compression belong to `he-strategy`. These artifacts are cognition context, not
+implementation authority, until admitted by a refactor, Linear, spec, or plan
+artifact. New lifecycle artifacts prefer dated Linear filenames such as
+`YYYY-MM-DD-JSC-###-<slug>-strategy.md`; stable names are reserved for living
+`.harness/core/**` files and numbered ADRs.
+
+Artifact classification uses
+`references/artifact-classification-and-traceability.md`: content shape beats
+path. Frontmatter, H1, required sections, source links, and Linear identifiers
+classify existing `.harness` files before directory names. Path/title/date
+mismatches are traceability defects, not silent routing assumptions.
+
+High-leverage architectural migration programs belong to `he-refactor` and
+write `.harness/refactors/YYYY-MM-DD-JSC-###-<refactor-slug>.md` when tracked.
+They define staged evolution, rollback, eval proof, and Linear mapping without
+editing implementation code or creating Linear objects.
+
+Linear execution mapping belongs to `he-linear-plan` and writes
+`.harness/linear/YYYY-MM-DD-JSC-###-<repo-name>-<slice-slug>-linear-plan.md`
+when tracked.
+It maps `.harness` cognition into small Now/Next/Later/Do Not Create execution
+sets, milestones, parent issues, dependencies, eval gates, and human/agent
+routing, but never mutates Linear without explicit confirmation.
+
 Dedicated UI plans are `he-plan` artifacts. New UI plans use
 `.harness/plan/**-ui-plan.md`; legacy `docs/ui-plan/**` and
 `docs/ui-plans/**` paths are compatibility source evidence unless the user asks
@@ -66,6 +102,23 @@ Compression is a blocking product gate: visible surfaces must be selected by the
 golden path, emitted in readiness/learning packets, hidden as plumbing, merged,
 deprecated, or explicitly justified. Metadata and classification alone do not
 count as compression.
+
+When HE work touches skills, plugins, CLIs, agent docs, evals, routing,
+projections, automation, or workflow surfaces, use
+`references/agent-native-audit-scorecard.md`. Agent-native readiness must prove
+action parity, capability discovery, context ownership, shared truth surfaces,
+entity completion, integration feedback, prompt-native composability, and
+deterministic completion.
+
+When HE consumes prior sessions or collector evidence, use
+`references/session-evidence-trace-context.md` to resolve repo, branch, PR,
+Linear, artifact chain, source bundle, and currentness before drawing scope or
+closure conclusions.
+
+When review feedback changes a spec, plan, strategy artifact, Linear plan,
+refactor program, or eval, use
+`references/document-review-finding-tiers.md` to separate `safe_auto`,
+`gated_auto`, `manual`, and `fyi` findings before editing or asking.
 
 ## Goal Continuity
 

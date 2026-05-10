@@ -1,0 +1,79 @@
+{
+  "status": "success",
+  "trace_id": "c0e96a8b-a448-40c5-9b63-e247cce7a4c0",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "repo surface --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "strict": false,
+    "repo_surface": {
+      "schema_version": 1,
+      "status": "warning",
+      "summary": {
+        "blocking_findings": 7461,
+        "counts_by_classification": {
+          "fixture": 894,
+          "generated_tracked": 11,
+          "historical_artifact": 7350,
+          "policy": 315,
+          "reference": 1175,
+          "source": 966,
+          "unknown": 122
+        },
+        "counts_by_code": {
+          "authored_source_surface": 81,
+          "duplicated_infrastructure_path": 6,
+          "fixture_or_template_surface": 15,
+          "generated_evidence_pattern": 11,
+          "generated_skillset_projection": 11,
+          "harness_reference_surface": 32,
+          "indexed_reference_surface": 1094,
+          "ownership_decision_required": 28,
+          "plugin_fixture_surface": 879,
+          "plugin_metadata_source": 3,
+          "plugin_reference_surface": 49,
+          "policy_surface": 315,
+          "source_path": 882,
+          "tracked_generated_work_area": 267,
+          "tracked_historical_artifact": 7072,
+          "unknown_surface": 88
+        },
+        "counts_by_status": {
+          "ok": 3361,
+          "unknown": 116,
+          "violation": 7345,
+          "warning": 11
+        },
+        "total_paths": 10833
+      },
+      "metadata": {
+        "inventory_scope": "tracked_files",
+        "next_steps": [
+          {
+            "command": "python3 Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py --json",
+            "rationale": "Inspect the full machine-readable inventory before changing tracked surfaces.",
+            "type": "review"
+          },
+          {
+            "command": "edit Docs/agents/15-repo-surface-ownership.md or Infrastructure/policy/repo_surface_allowlist.json",
+            "rationale": "Document intentional exceptions instead of hiding policy debt.",
+            "type": "policy"
+          },
+          {
+            "command": "rg -n '<candidate-path-or-skill-name>' Skills Plugins Infrastructure Docs .skillsets .agents",
+            "rationale": "Reference-scan candidates before any cleanup action.",
+            "type": "safety"
+          }
+        ],
+        "strict": false
+      }
+    }
+  },
+  "telemetry": {
+    "latency_ms": 213
+  },
+  "errors": []
+}

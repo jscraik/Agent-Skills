@@ -97,6 +97,31 @@ def _surface_result(warning_count: int = 0) -> CallResult:
     )
 
 
+def _closeout_doctor_payload(warning_count: int = 0, diagnostic_debt: list[dict] | None = None) -> dict:
+    return {
+        "blocking": False,
+        "diagnostic_debt": diagnostic_debt or [],
+        "signals": {
+            "runtime_budget": {
+                "details": {
+                    "status": "pass",
+                    "default_visible_count": 10,
+                    "estimated_description_tokens": 1000,
+                    "violation_count": 0,
+                }
+            },
+            "repo_surface": {
+                "details": {
+                    "status": "warning" if warning_count else "success",
+                    "blocking_findings": warning_count,
+                    "total_paths": 20,
+                    "counts_by_code": {"tracked_historical_artifact": warning_count},
+                }
+            },
+        },
+    }
+
+
 class TestAskRepoDoctor(unittest.TestCase):
     def test_all_pass_returns_existing_inspection_next_command(self) -> None:
         with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
@@ -113,6 +138,48 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertFalse(doctor["blocking"])
         self.assertEqual(doctor["blockers"], [])
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
+        self.assertEqual(doctor["next_command_kind"], "normal_inspection")
+        self.assertFalse(doctor["next_command_blocks_task"])
+        self.assertEqual(result.data["next_command_kind"], doctor["next_command_kind"])
+        self.assertEqual(result.metadata["next_steps"], [])
+
+    def test_repo_surface_warning_is_diagnostic_advisory_not_blocker(self) -> None:
+        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo.skills_handles",
+            return_value=_handles_result(),
+        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result(7)):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        self.assertEqual(result.status, "success")
+        self.assertFalse(doctor["blocking"])
+        self.assertEqual(doctor["blockers"], [])
+        self.assertEqual(doctor["diagnostic_debt"][0]["id"], "repo_surface")
+        self.assertEqual(doctor["next_command"], "./bin/ask repo surface --json --robot")
+        self.assertEqual(doctor["next_command_kind"], "diagnostic_advisory")
+        self.assertFalse(doctor["next_command_blocks_task"])
+        self.assertEqual(doctor["selected_next_command"]["id"], "repo_surface")
+        self.assertEqual(result.data["selected_next_command"], doctor["selected_next_command"])
+        self.assertEqual(result.metadata["next_steps"], [])
+
+    def test_repo_doctor_leaves_metadata_next_steps_empty_to_avoid_conflicts(self) -> None:
+        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo.doctor_catalog",
+            return_value=_catalog_result(drift=True),
+        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo.skills_handles",
+            return_value=_handles_result(),
+        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        self.assertEqual(
+            result.data["doctor"]["next_command"],
+            "./bin/ask repo doctor-catalog --json --robot",
+        )
+        self.assertEqual(result.metadata["next_steps"], [])
 
     def test_closeout_without_changes_reports_ready_existing_next_command(self) -> None:
         with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
@@ -176,6 +243,81 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(
             closeout["next_command"],
             "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        )
+
+    def test_closeout_changed_skill_source_with_projection_update_requires_handle_validation(self) -> None:
+        changed_files = [
+            ".skillsets/harness-engineering/manifest.jsonl",
+            "Plugins/harness-engineering/skills/he-router/SKILL.md",
+        ]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        self.assertTrue(closeout["commit_readiness"]["ready"])
+        self.assertFalse(closeout["sync"]["needed"])
+        self.assertTrue(closeout["sync"]["projection_update_present"])
+        self.assertEqual(closeout["sync"]["commands"], [])
+        self.assertEqual(
+            closeout["sync"]["validation_commands"],
+            ["./bin/ask skills handles --check --json --robot"],
+        )
+        self.assertEqual(
+            closeout["next_command"],
+            "./bin/ask skills handles --check --json --robot",
+        )
+
+    def test_closeout_generated_projection_only_requires_handle_validation(self) -> None:
+        changed_files = [".skillsets/command-surface.json"]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        self.assertTrue(closeout["commit_readiness"]["ready"])
+        self.assertFalse(closeout["sync"]["needed"])
+        self.assertEqual(closeout["sync"]["commands"], [])
+        self.assertEqual(
+            closeout["sync"]["validation_commands"],
+            ["./bin/ask skills handles --check --json --robot"],
+        )
+        self.assertEqual(
+            closeout["next_command"],
+            "./bin/ask skills handles --check --json --robot",
+        )
+        self.assertIn(
+            "./bin/ask skills handles --check --json --robot",
+            [command["command"] for command in closeout["focused_validation"]],
+        )
+
+    def test_closeout_generated_projection_with_other_changes_prioritizes_handles(self) -> None:
+        changed_files = [
+            ".skillsets/command-surface.json",
+            "Docs/agents/04-validation.md",
+        ]
+        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo.repo_doctor",
+            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+        ):
+            result = repo_closeout(REPO_ROOT, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        self.assertFalse(closeout["sync"]["needed"])
+        self.assertEqual(
+            closeout["next_command"],
+            "./bin/ask skills handles --check --json --robot",
+        )
+        self.assertEqual(
+            [command["id"] for command in closeout["focused_validation"]],
+            ["repo_doctor", "skill_handles", "changed_validation"],
         )
 
     def test_closeout_skips_changed_file_detection_without_changed_flag(self) -> None:
@@ -247,13 +389,26 @@ class TestAskRepoDoctor(unittest.TestCase):
         changed_files = ["Infrastructure/scripts/lib/ask/commands/repo.py"]
         with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
             "ask.commands.repo.repo_doctor",
-            return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+            return_value=_result(data={"doctor": _closeout_doctor_payload(warning_count=7)}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
 
         closeout = result.data["repo_closeout"]
         self.assertEqual(result.status, "success")
+        self.assertEqual(closeout["changed_files"], changed_files)
+        self.assertEqual(closeout["changed_file_count"], 1)
+        self.assertFalse(closeout["sync"]["needed"])
+        self.assertEqual(closeout["sync"]["commands"], [])
+        self.assertEqual(closeout["sync"]["validation_commands"], [])
+        self.assertEqual(
+            [command["id"] for command in closeout["focused_validation"]],
+            ["repo_doctor", "changed_validation"],
+        )
+        self.assertEqual(closeout["surface_policy"]["status"], "warning")
+        self.assertEqual(closeout["surface_policy"]["blocking_findings"], 7)
+        self.assertEqual(closeout["runtime_budget"]["status"], "pass")
         self.assertTrue(closeout["commit_readiness"]["ready"])
+        self.assertEqual(closeout["commit_readiness"]["blockers"], [])
         self.assertEqual(
             closeout["next_command"],
             "./bin/ask repo validate --changed-files "
@@ -316,8 +471,32 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(doctor["blocking"])
         self.assertEqual(doctor["blockers"][0]["id"], "catalog_parity")
         self.assertEqual(doctor["next_command"], "./bin/ask repo doctor-catalog --json --robot")
+        self.assertEqual(doctor["next_command_kind"], "blocking_repair")
+        self.assertTrue(doctor["next_command_blocks_task"])
+        self.assertEqual(result.data["next_command_kind"], doctor["next_command_kind"])
+        self.assertEqual(doctor["selected_next_command"]["id"], "catalog_parity")
         self.assertEqual(doctor["signals"]["repo_surface"]["state"], "warn")
         self.assertEqual(doctor["diagnostic_debt"][0]["id"], "repo_surface")
+
+    def test_runtime_budget_priority_beats_command_handle_blocker(self) -> None:
+        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result(violations=2)), patch(
+            "ask.commands.repo.skills_handles",
+            return_value=_handles_result(violations=3),
+        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(doctor["blockers"][0]["id"], "runtime_budget")
+        self.assertEqual(doctor["next_command"], "./bin/ask runtime budget --json --robot")
+        self.assertEqual(doctor["selected_next_command"]["id"], "runtime_budget")
+        self.assertEqual(
+            [item["id"] for item in doctor["secondary_next_commands"]],
+            ["command_handles"],
+        )
 
     def test_non_git_root_prioritizes_repo_status_before_projection_sync(self) -> None:
         with patch(
@@ -480,6 +659,8 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(doctor["blocking"])
         self.assertEqual(doctor["blockers"][0]["id"], "repo_status")
         self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
+        self.assertEqual(doctor["next_command_kind"], "blocking_repair")
+        self.assertTrue(doctor["next_command_blocks_task"])
         self.assertEqual(doctor["signals"]["projection_sync"]["state"], "skipped")
         self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
 

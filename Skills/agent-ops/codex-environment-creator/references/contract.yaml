@@ -1,0 +1,65 @@
+schema_version: "1.0"
+skill: "codex-environment-creator"
+type: runbook
+purpose: "Create, triage, and update repo-local Codex environment TOML files with canonical path, setup, action, and validation evidence."
+triggers:
+  - "Create or update .codex/environments/environment.toml"
+  - "Triage Codex environment setup failures"
+  - "Triage CODEX_HOME/environments.toml runtime provider selection"
+  - "Resolve environmental.toml or environmentals path drift"
+  - "Add repo-owned setup scripts or Codex actions"
+non_goals:
+  - "Cloud-only environment administration with no repo file"
+  - "Generic package installation unrelated to Codex environment setup"
+  - "Secret storage or destructive cache reset without explicit user approval"
+inputs:
+  - "target project path"
+  - "mode: create, triage, or update"
+  - "existing .codex environment files"
+  - "repo instructions and tooling files"
+  - "desired setup and actions"
+  - "current docs or live runtime evidence when schema behavior is uncertain"
+outputs:
+  - "canonical path decision"
+  - "environment file edit or triage report"
+  - "setup and action contract"
+  - "validation evidence"
+  - "cache and residual risk notes"
+runtime_contract:
+  canonical_path: ".codex/environments/environment.toml"
+  runtime_provider_path: "$CODEX_HOME/environments.toml"
+  drift_aliases:
+    - ".codex/environmental.toml"
+    - ".codex/environmentals/environmental.toml"
+    - ".codex/environmentals/enviromental.toml"
+  minimal_keys:
+    - "version"
+    - "name"
+    - "setup.script"
+    - "actions[].name"
+    - "actions[].icon"
+    - "actions[].command"
+  validation:
+    - "TOML parse"
+    - "repo-owned environment validator when present"
+    - "smallest relevant setup or preflight check"
+  runtime_provider_rules:
+    - "missing CODEX_HOME/environments.toml falls back to CODEX_EXEC_SERVER_URL"
+    - "default omitted selects local"
+    - "default none disables the default model-facing environment"
+    - "configured ids cannot be local or none"
+    - "each configured environment sets exactly one of url or program"
+    - "url transports require ws or wss"
+risks:
+  - "path drift"
+  - "schema drift"
+  - "unsafe setup action"
+  - "secret exposure"
+  - "cache invalidation"
+  - "repo wrapper drift"
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+observability: "Report exact commands, pass/fail/blocked outcomes, and residual risks."
+rollback_procedure: "Restore the prior TOML file or path migration, then rerun TOML parse and repo validator."

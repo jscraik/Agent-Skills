@@ -11,7 +11,9 @@ ROUTE_SCRIPT = str(
 SOURCE_PATHS = {
     "he-brainstorm": "Plugins/harness-engineering/skills/he-brainstorm/SKILL.md",
     "he-code-review": "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
+    "he-heartbeat": "Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
     "he-ideate": "Plugins/harness-engineering/skills/team_automation/he-ideate/SKILL.md",
+    "he-phase-heartbeat": "Plugins/harness-engineering/skills/he-phase-heartbeat/SKILL.md",
     "he-router": "Plugins/harness-engineering/skills/he-router/SKILL.md",
     "he-technical-review": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review/SKILL.md",
     "he-tdd": "Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md",
@@ -264,6 +266,21 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertEqual(payload["selected"]["id"], "he-router")
         self.assertIn("stage-correctness-question", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_phase_heartbeat_beats_direct_he_work(self) -> None:
+        payload = self._route(
+            "harness-engineering",
+            "create a heartbeat to monitor he-work phases and run simplify plus code review before each commit",
+            [
+                _row("he-heartbeat", "Automate HE wakeups and monitoring loops."),
+                _row("he-phase-heartbeat", "Run approved HE plans phase-by-phase under a heartbeat with review gates before commit."),
+                _row("he-router", "Route Harness Engineering stages."),
+                _row("he-work", "Build approved HE changes in verified slices."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "he-phase-heartbeat")
+        self.assertIn("phase-heartbeat-control-loop", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_malformed_routing_map_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory(prefix="route-skillset-") as tmp:

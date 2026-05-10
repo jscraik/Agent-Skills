@@ -1,0 +1,5 @@
+Which kind of harness request is this?
+
+1. Brainstorm
+2. Spec
+3. Plan

@@ -1,0 +1,3 @@
+I can do that with the CLI specialist skill, but I need the spec file or path first.
+
+If you point me to the spec, I’ll keep the review scoped to the command-line surface only and use the CLI-readiness lens for that area.

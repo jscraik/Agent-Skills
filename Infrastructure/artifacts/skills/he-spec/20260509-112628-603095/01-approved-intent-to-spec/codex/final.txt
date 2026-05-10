@@ -1,0 +1,13 @@
+I can do that, but I need the actual approved intent artifact first.
+
+Right now I can’t inspect the repo from this session because local shell access is blocked, so I don’t have the source intent to turn into a spec. If you point me to one of these, I can turn it into an evidence-backed implementation spec with acceptance criteria:
+
+1. The file path of the approved intent
+2. The intent text pasted here
+3. A link or identifier if it lives in a docs/issue system
+
+Once I have it, I’ll produce:
+- A concise implementation spec
+- Evidence references tied to the repo/docs
+- Clear acceptance criteria
+- Any assumptions or open questions called out explicitly

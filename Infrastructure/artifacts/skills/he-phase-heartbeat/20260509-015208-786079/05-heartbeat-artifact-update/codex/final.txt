@@ -1,0 +1,9 @@
+I can do that, but I need the exact artifact path or the phase-boundary file name first.
+
+I checked the repo layout I can reach and didn’t find an obvious dated harness artifact to update safely, and the local shell is blocked in this sandbox, so I don’t want to guess and touch the wrong canonical source.
+
+If you send me either:
+1. the file path for the dated artifact, or
+2. the phase boundary names and where they’re recorded,
+
+I’ll update it at each boundary and keep the evidence trail intact.

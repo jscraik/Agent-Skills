@@ -3,11 +3,11 @@
     "SessionStart": [
       {
         "matcher": ".*",
-        "handlers": [
+        "hooks": [
           {
             "type": "command",
-            "command": "./Infrastructure/scripts/hooks/session_start_check.sh",
-            "timeout": 30000,
+            "command": "${PLUGIN_ROOT}/Infrastructure/scripts/hooks/session_start_check.sh",
+            "timeout": 30,
             "statusMessage": "Validating session startup contract"
           }
         ]
@@ -16,11 +16,11 @@
     "Stop": [
       {
         "matcher": ".*",
-        "handlers": [
+        "hooks": [
           {
             "type": "command",
-            "command": "./Infrastructure/scripts/hooks/stop_guard.sh",
-            "timeout": 15000,
+            "command": "${PLUGIN_ROOT}/Infrastructure/scripts/hooks/stop_guard.sh",
+            "timeout": 15,
             "statusMessage": "Evaluating stop hook guardrails"
           }
         ]

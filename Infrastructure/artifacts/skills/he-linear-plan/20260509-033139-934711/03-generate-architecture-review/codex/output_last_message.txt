@@ -1,0 +1,18 @@
+Yes. Paste the Linear execution plan you have, and I’ll rewrite it into a full architecture review document instead.
+
+I’ll structure it as:
+- Problem statement
+- Current state
+- Proposed architecture
+- Key design decisions
+- Tradeoffs and risks
+- Failure modes
+- Security and reliability considerations
+- Migration or rollout strategy
+- Open questions
+- Recommendation
+
+If you want, I can also make it read like:
+1. a formal internal review,
+2. a decision memo, or
+3. a PR-ready architecture doc.

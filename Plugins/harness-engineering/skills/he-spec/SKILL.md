@@ -1,6 +1,6 @@
 ---
 name: he-spec
-description: "WHAT: Generate Linear-backed HE specs with acceptance IDs and validation. Use when requirements or traceability are needed before planning."
+description: "Create bounded, evidence-backed Harness Engineering specs from approved intent. Use when a selected issue, milestone, refactor phase, or execution slice needs acceptance criteria, traceability, risk gates, and validation boundaries before planning or implementation."
 metadata:
   skill-type: product_verification
 ---
@@ -8,17 +8,46 @@ metadata:
 ## Philosophy
 Make intent testable. A good HE spec preserves source truth, states boundaries, and gives planning enough acceptance detail without doing the plan's job.
 ## When to Use
-Use when requirements are needed before plan/work; Explore first and ask second.
+Use when requirements are needed before plan/work; explore first and ask second. Keep scope tight: start with the selected slice and only load 2-3 focused evidence surfaces unless a blocker proves more context is required.
 ## Inputs
 Problem, approved execution slice as one milestone, one parent issue, one refactor phase, or one execution slice, Linear issue, QA report, source evidence, current-vs-latest spec status.
 ## Outputs
 Return schema_version when structured. schema_version: 1, bounded implementation spec for one milestone, parent issue, refactor phase, or execution slice; complete replacement spec section or `.harness/specs/**.md` artifact; Linear Acceptance Traceability, acceptance IDs, validation plan, and blackboard_delta.
+
+Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. When asking a clarification question, include the literal marker `interactive_status: asked` before the question and summarize `selection_evidence`. When headless or autonomous mode would normally ask a question, set `interactive_status: autonomous_assumption`; when a real decision remains, ask once with `request_user_input` when available or return `interactive_status: blocked`.
+
+If the spec discovers missing live Linear tracking, bug tracking, or a required
+parent issue, make that gap explicit in the output as `linear_action_required`.
+Do not silently leave the work only in `.harness`: either route to
+`he-linear-plan`, ask for permission to create/update the live Linear object, or
+record the exact blocker preventing live issue creation.
 ## Procedure
-Inspect session-collector evidence and repo truth; for coding-harness-managed work load the execution slice contract before writing requirements; consume the approved `.harness/linear/<repo-name>-linear-plan.md`, selected `.harness/refactors/<selected-refactor>.md` when applicable, `.harness/decisions/*.md`, `.harness/core/*.md`, and `.harness/brainstorm/*.md` as primary inputs; use `.harness/strategy/*.md`, `.harness/triage/*.md`, `.harness/review/*.md`, and `.harness/features/*.md` only for evidence or context; stop if no selected milestone, parent issue, refactor phase, or execution slice is identified. Resolve/create the Linear tracker for non-trivial work; for existing tracked plans run the Linear Delta Capture Gate before consuming the approved slice, reconcile required labels, classify new or changed Linear issues, and promote at most one admitted item into the spec scope; require Linear project, milestone, parent issue, sub-issues when present, labels, priority, dependencies, and agent/human route for tracked specs; before writing durable docs choose `.harness/specs/**.md` from the artifact routing contract; define scope, assumptions, assets/icon-small.png if packaging matters, explicit In Scope and Out of Scope boundaries, and handoff to plan with coding-harness state when applicable. When feedback says a prior cockpit, golden-path, or agent-native plan was too additive, load the compression contract and make first-contact budget, standalone command admission, docs deletion budget, fresh-agent eval, ablation proof, and evidence-backed metric gates blocking acceptance criteria.
+1. Resolve the stage context contract first; stop if no milestone, parent issue, refactor phase, or execution slice is selected.
+2. Load primary source artifacts for the selected slice: Linear plan, selected refactor when applicable, decisions, core invariants, and brainstorm artifacts. Treat strategy, triage, review, and feature docs as evidence only unless the slice admits them.
+3. Apply document-review tiers, specialist skill steering, and interactive steering only when their trigger conditions are proven by source inspection.
+4. Resolve or block the Linear tracker; run the Linear Delta Capture Gate for existing tracked plans before admitting changed Linear work into scope. If the selected work has no live Linear parent/bug issue and execution will continue beyond the spec, surface `linear_action_required` with the target project, issue type (`bug`, `parent`, `sub-issue`, or `milestone`), proposed title, and required confirmation.
+5. Route durable output to `.harness/specs/**.md`, classify existing artifacts by content shape before path, and apply Artifact Identity frontmatter.
+6. When a slice could trigger broad domain, strategy, refactor, Linear,
+   security, specialist, or eval gates, apply the gate selection contract and
+   turn the selected risk class, required contracts, skipped contracts, and
+   minimum proof into acceptance criteria.
+7. Apply the first-principles contract before expanding scope: require the verified failure, challenged assumption, smallest effective mechanism, and proof needed for acceptance.
+8. Apply the plugin hook capability contract when the proposed feature includes bundled plugin hooks, runtime guardrails, or hook-enforced lifecycle behavior. Do not recommend hooks unless there is a repeated runtime failure and a fallback skill, validator, or eval path while `plugin_hooks` remains feature-gated.
+9. Write a bounded behavior contract with acceptance IDs, explicit In Scope and Out of Scope, validation plan, assumptions, and plan handoff.
+10. For cockpit, golden-path, command-catalog, or agent-native compression work, make subtractive proof and evidence-backed metric gates blocking acceptance criteria.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check traceability, tests, observability, rollback, and owner evidence.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
+If live Linear mutation was expected but not authorized, do not imply the issue
+exists; return the draft payload plus the exact confirmation needed to create
+or update the live Linear issue.
+## Execution Boundaries
+Non-mutating until the user authorizes artifact writes. Do not create, close, or mutate Linear objects unless the current task explicitly grants that authority.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
+## Gotchas
+- Stage context is required before writing specs; local docs do not replace Linear/source traceability.
+- Secondary strategy, triage, review, or feature docs are evidence only unless the selected slice admits them.
 ## Constraints
 Redact secrets; do not invent requirements. Do not remove important context for budget trimming; move deep context to references.
 ## Anti-Patterns
@@ -32,10 +61,23 @@ Redact secrets; do not invent requirements. Do not remove important context for 
 - For `JSC-246`, convert a QA report about the account settings flow into a complete replacement spec section with Linear Acceptance Traceability, acceptance IDs, assumptions, validation, and rollback notes.
 - When a current spec exists but the latest session evidence changes scope, compare current-vs-latest spec status before adding requirements.
 - Write new or replacement durable spec docs under `.harness/specs/**.md`; treat legacy `Specs/` paths as source evidence.
+- Run `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <spec-path>` for tracked spec artifacts before handoff.
 ## Assets
 Reference `assets/` only for skill packaging and browseability; spec source material belongs in references, not generated images.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
+- Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
+- Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- Domain context: `Plugins/harness-engineering/references/domain-context-contract.md`
+- Domain model routing: `Plugins/harness-engineering/references/domain-model-routing.md`
+- Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
+- Gate selection: `Plugins/harness-engineering/references/gate-selection-contract.md`
+- First principles: `Plugins/harness-engineering/references/first-principles-contract.md`
+- Plugin hook capability: `Plugins/harness-engineering/references/plugin-hook-capability-contract.md`
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
+- Document review tiers: `Plugins/harness-engineering/references/document-review-finding-tiers.md`
+- Session evidence trace: `Plugins/harness-engineering/references/session-evidence-trace-context.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Linear tracker gate: `Plugins/harness-engineering/references/linear-tracker-gate.md`
 - Linear delta capture gate: `Plugins/harness-engineering/references/linear-delta-capture-gate.md`
@@ -43,6 +85,7 @@ Reference `assets/` only for skill packaging and browseability; spec source mate
 - Execution slice contract: `Plugins/harness-engineering/references/execution-slice-contract.md`
 - Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`
 - Artifact routing: `Plugins/harness-engineering/references/artifact-routing-contract.md`
+- Artifact classification: `Plugins/harness-engineering/references/artifact-classification-and-traceability.md`
 - Doctrine: `Plugins/harness-engineering/references/he-spec-doctrine.md`
 - Artifact: `Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md`
 - Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`

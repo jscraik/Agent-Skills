@@ -140,7 +140,7 @@ while IFS= read -r file; do
       fi
     done <<< "$output"
   fi
-done < <(list_skill_files)
+done < <(list_skill_files || true)
 
 echo "Checked files: $checked"
 echo "Errors: $errors"

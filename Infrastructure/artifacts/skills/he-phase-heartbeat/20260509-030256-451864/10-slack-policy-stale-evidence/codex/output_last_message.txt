@@ -1,0 +1,3 @@
+`he-phase-heartbeat` runtime decision: `slack_policy=stop`.
+
+When cadence is running and evidence is stale, the decision is to stop rather than repeat the phase ritual. I did not edit any files.

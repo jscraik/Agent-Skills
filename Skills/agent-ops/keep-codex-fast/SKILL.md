@@ -61,7 +61,13 @@ When refusing or deferring unsafe cleanup, say `blocked`, name the blocker, and 
 python3 Skills/agent-ops/keep-codex-fast/scripts/keep_codex_fast.py report
 ```
 
-2. Summarize active sessions, archives, stale worktrees, logs, extended path candidates, and config prune candidates.
+For large Codex homes, prefer the bounded JSON form:
+
+```bash
+python3 Skills/agent-ops/keep-codex-fast/scripts/keep_codex_fast.py report --json --top-n 5 --max-seconds-per-target 2 --max-files-per-target 50000
+```
+
+2. Summarize active sessions, archives, stale worktrees, logs, extended path candidates, and config prune candidates. Check both legacy root SQLite files and the current `sqlite/` database directory; live Codex Desktop builds may use `~/.codex/sqlite/state_5.sqlite` and `~/.codex/sqlite/logs_2.sqlite*` while small legacy root files also exist.
 3. If old active chats may still matter, create repo-local handoff docs before archival. Use `references/handoff-template.md` when the user wants a template.
 4. For backup-only evidence, run:
 
@@ -88,7 +94,7 @@ python3 Skills/agent-ops/keep-codex-fast/scripts/keep_codex_fast.py apply --conf
 - Move old non-pinned session rollout files into `~/.codex/archived_sessions/...` and update `state_5.sqlite`.
 - Normalize Windows extended paths in local SQLite text fields.
 - Move stale worktrees into `~/.codex/archived_worktrees/...`.
-- Rotate `logs_2.sqlite*` into `~/.codex/archived_logs/...` when above threshold.
+- Rotate `logs_2.sqlite*` from both `~/.codex/` and `~/.codex/sqlite/` into `~/.codex/archived_logs/...` when above threshold.
 
 Config pruning is report-only by default. Run the dedicated config prune command only after reviewing the exact candidate list.
 

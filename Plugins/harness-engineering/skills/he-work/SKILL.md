@@ -1,6 +1,6 @@
 ---
 name: he-work
-description: "WHAT: Build approved HE changes in verified slices with traceability. Use when execution is approved or bounded delegation is needed."
+description: "Implement approved Harness Engineering plan slices with strict scope control. Use when code or artifact changes are authorized by a bounded plan, validation commands are known, and the work can preserve traceability, rollback, and handoff evidence."
 metadata:
   skill-type: team_automation
 ---
@@ -9,17 +9,32 @@ metadata:
 Ship the smallest honest slice. Work should leave clear proof of what changed, why it matched the plan, and which validation or blocked gate supports the handoff.
 ## When to Use
 Use when execution is approved or tiny and low risk.
+Treat tiny low-risk execution as no more than two files, no auth/security/permissions/data/CI/dependency/public-API/tool/skill/plugin changes, no external side effects, and a known validation command. Otherwise route to `he-spec`, `he-plan`, or the relevant risk stage first.
 ## Inputs
 Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees, optional active thread goal.
 ## Outputs
 Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff, slack_policy, and blackboard_delta.
+
+Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. When branch, goal, plan, Linear issue, selected slice, or multiple next stages conflict, ask once with `request_user_input` when available or return `interactive_status: blocked`; in unattended mode record `interactive_status: autonomous_assumption` only for non-mutating assumptions and keep mutation blocked without authority.
 ## Procedure
-Mark current active state; if `/goal` is active, confirm it matches the branch, issue, plan, or PR before editing and treat mismatches as blockers rather than overwriting project truth. Explore first, ask second; `update_plan` is live checklist only; for UI-plan work load the UI plan routing contract, preserve Project Brain status, and require visual/accessibility verification evidence; for coding-harness-managed work load the execution slice contract, run the Linear Delta Capture Gate for existing tracked plans, and verify the plan/todo maps to one selected milestone, parent issue, refactor phase, or execution slice before editing; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
+1. Mark live state before editing: branch, dirty worktree, active `/goal`, plan, Linear issue, PR, and selected slice.
+2. Resolve the stage context contract; stop on conflicts between branch, goal, plan, Linear issue, or selected slice.
+3. Load specialist, UI-plan, coding-harness, and Linear Delta references only when the approved slice proves the trigger.
+4. Keep `update_plan` as a live checklist; execute only the approved implementation unit.
+5. Before delegation or parallel work, run the work contract overlap check and use external delegation only for bounded non-overlapping slices or isolated worktrees.
+6. Run or explicitly block the smallest relevant validation gates, preserving exact command/path, actor, timestamp, recovery step, and rollback posture when blocked.
+7. Handoff to `he-code-review` mode `autofix` when review or validation evidence requires repair.
 For blocked coding-harness gates, preserve exact failing command/path, actor, timestamp, recovery step, and rollback posture in the handoff.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Run exact gates for changed paths and report outcomes.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
+## Execution Boundaries
+Mutate only files in the approved implementation slice. Do not stage, commit, push, resolve review threads, or close trackers unless separately authorized.
+For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
+## Gotchas
+- Dirty worktree ownership and active `/goal` conflicts are blockers, not context to overwrite.
+- Validation must run against the touched production path or be recorded as blocked with the smallest recovery step.
 ## Constraints
 Redact secrets; preserve user edits. Do not remove important context for budget trimming; move deep context to references.
 ## Anti-Patterns
@@ -36,6 +51,12 @@ Redact secrets; preserve user edits. Do not remove important context for budget 
 Reference `assets/` only for skill packaging and browseability; execution evidence belongs in validation output, PRs, and handoff notes.
 ## References
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
+- Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
+- Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
+- Specialist skill steering: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- Domain context: `Plugins/harness-engineering/references/domain-context-contract.md`
+- Domain model production: `Plugins/harness-engineering/references/domain-model-production-contract.md`
+- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
 - Goal continuity: `Plugins/harness-engineering/references/goal-continuity.md`
 - Execution slice contract: `Plugins/harness-engineering/references/execution-slice-contract.md`
