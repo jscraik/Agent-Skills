@@ -9,7 +9,7 @@ status: active
 date: 2026-05-09
 traceability_required: false
 origin: .harness/plan/2026-05-09-agent-skills-he-trust-defect-repair-plan.md
-linear_issue: not_created
+linear_issue: JSC-299
 risk: low
 ui: false
 ---
