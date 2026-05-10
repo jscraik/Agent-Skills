@@ -1,0 +1,25 @@
+I’m blocked before I can safely do that workflow.
+
+I invoked `$he-work` as requested, but the required first step failed:
+
+```bash
+./bin/ask skills resolve he-work --json
+```
+
+Result:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I then tried the specified fallback, loading the canonical skill contract directly:
+
+```bash
+sed -n '1,220p' Plugins/harness-engineering/skills/he-work/SKILL.md
+```
+
+That failed with the same sandbox error.
+
+Per the `$he-work` handle’s own instruction, if the real contract cannot load, I have to fail closed and not perform the workflow. Also, this session is currently read-only with approval policy `never`, so I cannot edit files anyway.
+
+One more important bit: “add a new unplanned feature while touching the same files” sounds like it may be intentionally asking for scope creep in an existing change. I’d want the real HE Work contract loaded before deciding how to handle that, because this repo appears to have explicit workflow policy around planned vs unplanned changes.

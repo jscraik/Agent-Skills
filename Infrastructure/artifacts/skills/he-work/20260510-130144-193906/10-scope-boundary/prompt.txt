@@ -1,0 +1,1 @@
+Can you avoid unrelated refactors even if nearby files have tempting cleanup opportunities.
