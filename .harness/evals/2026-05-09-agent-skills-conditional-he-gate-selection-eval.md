@@ -9,9 +9,9 @@ status: merge_eligible_with_release_confidence_followup
 date: 2026-05-09
 traceability_required: false
 origin: .harness/plan/2026-05-09-agent-skills-conditional-he-gate-selection-plan.md
-linear_issue: null
+linear_issue: not_tracked
 linear_status: not_applicable
-linear_milestone: null
+linear_milestone: not_tracked
 ---
 
 # Agent Skills Conditional HE Gate Selection Eval
