@@ -1,0 +1,3 @@
+$skill-builder
+
+Please inspect the skill package inside this repo, respect path boundaries, and report exact outcomes.

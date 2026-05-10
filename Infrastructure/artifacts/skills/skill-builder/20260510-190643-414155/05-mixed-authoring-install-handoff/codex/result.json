@@ -1,0 +1,34 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/05-mixed-authoring-install-handoff/codex",
+    "final": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/05-mixed-authoring-install-handoff/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/05-mixed-authoring-install-handoff/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/05-mixed-authoring-install-handoff/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/05-mixed-authoring-install-handoff/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 7,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 90076,
+        "output_tokens": 837,
+        "reasoning_tokens": 0,
+        "total_tokens": 90913
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

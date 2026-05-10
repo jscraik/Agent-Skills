@@ -1,0 +1,19 @@
+Yes. I can follow that rule.
+
+Current blocker before any edits: this session is in `read-only` filesystem sandbox mode, and command execution is failing before even read-only commands can run:
+
+```text
+./bin/ask skills resolve skill-builder --json
+sandbox-exec: sandbox_apply: Operation not permitted
+exit code: 71
+```
+
+I then tried the fallback path from the `skill-builder` handle:
+
+```text
+sed -n '1,240p' Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md
+sandbox-exec: sandbox_apply: Operation not permitted
+exit code: 71
+```
+
+So I cannot currently load the real skill-builder contract or make edits. I’ll preserve the validation evidence exactly like this going forward: commands run, exit codes, and key output. And before edits, I’ll call out blockers first, especially when `./bin/ask`, canonical skill loading, validation, or write access is unavailable.

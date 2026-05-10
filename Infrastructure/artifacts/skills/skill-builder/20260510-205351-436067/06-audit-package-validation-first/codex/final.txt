@@ -1,0 +1,13 @@
+I can’t complete the audit yet because the workspace shell is blocking every local read command in this session, so I’m unable to inspect the skill package or run validation against the live files.
+
+What I was able to confirm:
+- The handle resolves to the canonical source path you provided: `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`.
+- The repo’s handle stub at [`.agents/skills/skill-builder/SKILL.md`](/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-builder/SKILL.md) points there.
+
+What I could not do:
+- Read the canonical `SKILL.md`
+- Check the package layout
+- Run any validation or audit steps
+- Suggest edits safely without seeing the actual contents
+
+If you want, send me the canonical `SKILL.md` contents or re-run this in a session with local file reads enabled, and I’ll do the audit first, then validation, then propose edits only after that.

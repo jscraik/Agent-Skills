@@ -1,0 +1,37 @@
+I don’t have a `plugin-builder` skill or plugin available in this session. Closest available routes are `plugin-factory` for building/scaffolding plugins and `content-publishing` for launch/editorial copy. For a launch post, I’ll use the content-writing path and draft usable copy now.
+
+**Launch Post Draft**
+
+**Title:** Introducing Plugin Builder: a faster way to turn ideas into working Codex plugins
+
+Today we’re launching **Plugin Builder**, a new workflow for creating, shaping, and shipping Codex plugins with less setup friction and more confidence.
+
+Plugins are becoming the connective tissue between Codex and the tools, workflows, and knowledge that teams already rely on. But building one from scratch can still involve a lot of small decisions: directory structure, manifests, skills, MCP wiring, docs, examples, packaging, and validation. Plugin Builder is designed to make that path feel much more direct.
+
+With Plugin Builder, you can go from a rough idea to a structured plugin draft quickly. It helps scaffold the right files, organize capabilities into skills, produce clear metadata, and keep the plugin understandable for both humans and agents. The goal is simple: spend less time remembering the shape of a plugin and more time designing what it should actually do.
+
+It is especially useful when you want to:
+
+- Turn an internal workflow into a reusable Codex plugin
+- Package a set of skills, docs, scripts, or MCP tools together
+- Create a consistent starting point for plugin development
+- Improve plugin discoverability and maintainability
+- Move from prototype to reviewable implementation faster
+
+Plugin Builder is not just a file generator. It encourages a cleaner authoring loop: define the plugin’s purpose, scaffold the structure, refine the behavior, validate the package, and prepare it for use. That makes it easier for teams to create plugins that are narrow enough to be reliable, but rich enough to be genuinely useful.
+
+This launch is part of a larger push to make Codex extensibility feel more practical and less ceremonial. If skills are how Codex learns a specialized workflow, plugins are how those workflows become portable. Plugin Builder gives teams a better workbench for that process.
+
+We’re excited to see what people build with it.
+
+**Short Version**
+
+We’re launching **Plugin Builder**, a faster way to create Codex plugins from idea to structured draft. It helps scaffold plugin files, organize skills and metadata, and prepare a plugin for validation and review, so teams can focus on the workflow they want to encode instead of the boilerplate around it.
+
+**Social Post**
+
+Introducing **Plugin Builder**: a faster path from plugin idea to working Codex extension.
+
+It helps scaffold structure, organize skills, clarify metadata, and prepare plugins for review, so teams can package their workflows with less friction and more confidence.
+
+Codex gets more useful when your tools and practices are close at hand. Plugin Builder makes that easier.

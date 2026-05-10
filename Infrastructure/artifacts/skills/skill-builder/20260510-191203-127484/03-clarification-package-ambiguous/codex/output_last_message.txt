@@ -1,0 +1,5 @@
+Which part of `skill-builder` should I change?
+
+1. The handle shim at [`.agents/skills/skill-builder/SKILL.md`](/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-builder/SKILL.md)
+2. The canonical skill at [`Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md)
+3. Something else in the `skill-builder` workflow or contract

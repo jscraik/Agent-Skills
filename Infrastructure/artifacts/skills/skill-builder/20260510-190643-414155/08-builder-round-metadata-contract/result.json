@@ -1,0 +1,73 @@
+{
+  "id": "builder-round-metadata-contract",
+  "name": "builder round metadata contract",
+  "category": "edge",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": true,
+  "baseline_type": "neutral_repo_baseline",
+  "comparison_inputs": {
+    "prompt_set": "frozen-first-response-contract"
+  },
+  "iteration_round_state": "reviewed",
+  "metric_availability": "unavailable",
+  "readiness_state": "comparison_incomplete",
+  "comparison_review_artifact": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/08-builder-round-metadata-contract/comparison_review.md",
+  "neutral_baseline_approval": {
+    "id": "planner-approved-neutral-baseline-skill-builder",
+    "rationale": "archived fixture baseline for skill-builder comparison contracts",
+    "approved_by": "archive-fixture"
+  },
+  "timeout_profile": "default",
+  "timeout_sec": 600.0,
+  "dir": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/08-builder-round-metadata-contract",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": false,
+      "tier1_failures": [
+        "contains failed: '## Inputs'"
+      ],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/08-builder-round-metadata-contract/codex",
+        "final": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/08-builder-round-metadata-contract/codex/final.txt",
+        "stdout": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/08-builder-round-metadata-contract/codex/stdout.txt",
+        "stderr": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/08-builder-round-metadata-contract/codex/stderr.txt",
+        "jsonl": "Infrastructure/artifacts/skills/skill-builder/20260510-190643-414155/08-builder-round-metadata-contract/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 6,
+          "command_count": 0,
+          "unique_command_count": 0,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 0,
+          "turn_count": 1,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 136557,
+            "output_tokens": 1595,
+            "reasoning_tokens": 0,
+            "total_tokens": 138152
+          }
+        },
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] contains failed: '## Inputs'"
+  ],
+  "tier2_findings": [],
+  "warnings": []
+}
