@@ -726,6 +726,7 @@ Phase review gate:
 Command or Method: `bash .harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh`
 Result: pass; all 11 deterministic steps exited `0`.
 Evidence: Command snapshots are stored under `.harness/session-evidence/jsc-246-fresh-agent-golden-path/` with one stdout JSON, stderr text, and exit-code file per step.
+Captured At: 2026-05-10 from PR #153 head `13f6d4c0d` before the remote-update merge.
 Confidence: High for command-surface closure behavior because the runner starts with `./bin/ask repo doctor --json --robot` and then follows the golden path without opening docs.
 Blocks Closure: no.
 
