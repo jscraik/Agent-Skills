@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -53,6 +54,23 @@ def parse_result(stdout: str) -> dict[str, object]:
 def _append_repeatable_filter(cmd: list[str], flag: str, values: tuple[str, ...]) -> None:
     for value in values:
         cmd.extend([flag, value])
+
+
+def _skill_builder_runner_path(repo_root: Path) -> Path:
+    return (
+        repo_root
+        / "Plugins"
+        / "skill-factory"
+        / "skills"
+        / "code_quality_review"
+        / "skill-builder"
+        / "scripts"
+        / "run_skill_evals.py"
+    )
+
+
+def _skill_path(skill_name: str) -> Path:
+    return Path("Plugins") / "harness-engineering" / "skills" / skill_name
 
 
 def _classify_case_failures(parsed: dict[str, object]) -> dict[str, object]:
@@ -131,6 +149,48 @@ def _tool_preflight_errors(result: dict[str, object]) -> list[dict[str, object]]
     return errors
 
 
+def _merged_case_failure_classification(results: list[dict[str, object]]) -> dict[str, object]:
+    merged: dict[str, list[dict[str, object]]] = {
+        "timeout_cases": [],
+        "content_failure_cases": [],
+        "other_failure_cases": [],
+    }
+    for result in results:
+        classification = result.get("failure_classification")
+        if isinstance(classification, dict):
+            for key in merged:
+                values = classification.get(key)
+                if isinstance(values, list):
+                    merged[key].extend(value for value in values if isinstance(value, dict))
+            continue
+
+        if result.get("status") == "timeout" or result.get("returncode") == 124:
+            case_filters = result.get("case_filters")
+            case_id = case_filters[0] if isinstance(case_filters, list) and case_filters else None
+            merged["timeout_cases"].append(
+                {
+                    "id": case_id,
+                    "name": case_id,
+                    "category": None,
+                    "tier1_failures": [
+                        f"runner timed out after {result.get('timeout_seconds')} seconds"
+                    ],
+                }
+            )
+        elif result.get("returncode") != 0 or result.get("status") != "success":
+            case_filters = result.get("case_filters")
+            case_id = case_filters[0] if isinstance(case_filters, list) and case_filters else None
+            merged["other_failure_cases"].append(
+                {
+                    "id": case_id,
+                    "name": case_id,
+                    "category": None,
+                    "tier1_failures": result.get("tier1_failures") or result.get("errors") or [],
+                }
+            )
+    return merged
+
+
 def _result_failure_class(result: dict[str, object]) -> str | None:
     if result.get("returncode") == 0 and result.get("status") == "success":
         return None
@@ -160,40 +220,47 @@ def _failure_breakdown(results: list[dict[str, object]]) -> dict[str, object]:
     for result in results:
         skill = result.get("skill")
         failure_class = _result_failure_class(result)
-        if failure_class == "timeout":
+        classification = result.get("failure_classification")
+        timeout_cases = (
+            classification.get("timeout_cases", [])
+            if isinstance(classification, dict)
+            else []
+        )
+        content_cases = (
+            classification.get("content_failure_cases", [])
+            if isinstance(classification, dict)
+            else []
+        )
+        if failure_class == "timeout" or timeout_cases:
             breakdown["timeout_failures"].append(
                 {
                     "skill": skill,
                     "returncode": result.get("returncode"),
                     "timeout_seconds": result.get("timeout_seconds"),
                     "duration_seconds": result.get("duration_seconds"),
-                    "case_classification": (
-                        result.get("failure_classification", {}).get("timeout_cases", [])
-                        if isinstance(result.get("failure_classification"), dict)
-                        else []
-                    ),
+                    "case_classification": timeout_cases,
                 }
             )
-        elif failure_class == "content":
-            classification = result.get("failure_classification")
+        if failure_class == "content" or content_cases:
             breakdown["content_failures"].append(
                 {
                     "skill": skill,
-                    "cases": (
-                        classification.get("content_failure_cases", [])
-                        if isinstance(classification, dict)
-                        else []
-                    ),
+                    "cases": content_cases,
                 }
             )
-        elif failure_class == "tool_preflight":
+        if failure_class == "tool_preflight":
             breakdown["tool_preflight_failures"].append(
                 {
                     "skill": skill,
                     "errors": _tool_preflight_errors(result),
                 }
             )
-        elif failure_class == "other":
+        if (
+            failure_class == "other"
+            and not timeout_cases
+            and not content_cases
+            and not _tool_preflight_errors(result)
+        ):
             breakdown["other_failures"].append(
                 {
                     "skill": skill,
@@ -259,7 +326,7 @@ def _run_ask_eval(
     mode: str,
     per_skill_timeout_sec: int | None,
 ) -> dict[str, object]:
-    skill_path = Path("Plugins") / "harness-engineering" / "skills" / skill_name
+    skill_path = _skill_path(skill_name)
     cmd = [
         str(repo_root / "bin" / "ask"),
         "evals",
@@ -362,19 +429,10 @@ def _run_skill_builder_eval(
     model: str | None,
     timeout_profile: str | None,
 ) -> dict[str, object]:
-    skill_path = Path("Plugins") / "harness-engineering" / "skills" / skill_name
+    skill_path = _skill_path(skill_name)
     cmd = [
         sys.executable,
-        str(
-            repo_root
-            / "Plugins"
-            / "skill-factory"
-            / "skills"
-            / "code_quality_review"
-            / "skill-builder"
-            / "scripts"
-            / "run_skill_evals.py"
-        ),
+        str(_skill_builder_runner_path(repo_root)),
         str(skill_path),
         "--eval-mode",
         mode,
@@ -426,6 +484,8 @@ def _run_skill_builder_eval(
             "timeout_seconds": timeout,
             "status": "timeout",
             "decision": "timeout",
+            "case_filters": list(cases),
+            "category_filters": list(categories),
             "errors": [{"code": "ERR_TIMEOUT", "message": f"timed out after {timeout} seconds"}],
             "raw_output": error.stdout or "",
             "raw_error": error.stderr or "",
@@ -462,6 +522,187 @@ def _run_skill_builder_eval(
     }
 
 
+def _list_skill_builder_cases(
+    repo_root: Path,
+    skill_name: str,
+    mode: str,
+    cases: tuple[str, ...],
+    categories: tuple[str, ...],
+) -> tuple[list[str], dict[str, object] | None]:
+    skill_path = _skill_path(skill_name)
+    cmd = [
+        sys.executable,
+        str(_skill_builder_runner_path(repo_root)),
+        str(skill_path),
+        "--eval-mode",
+        mode,
+        "--runner",
+        "discovery-smoke",
+        "--list-cases",
+    ]
+    _append_repeatable_filter(cmd, "--case", cases)
+    _append_repeatable_filter(cmd, "--category", categories)
+    started_at = time.time()
+    try:
+        process = subprocess.run(
+            cmd,
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired as error:
+        return [], {
+            "skill": skill_name,
+            "mode": mode,
+            "runner": "codex",
+            "command": " ".join(cmd),
+            "returncode": 124,
+            "duration_seconds": round(time.time() - started_at, 3),
+            "timeout_seconds": 60,
+            "status": "timeout",
+            "errors": [
+                {
+                    "code": "ERR_CASE_DISCOVERY_TIMEOUT",
+                    "message": "Timed out while listing eval cases before split release execution.",
+                }
+            ],
+            "raw_output": error.stdout or "",
+            "raw_error": error.stderr or "",
+        }
+    if process.returncode != 0:
+        return [], {
+            "skill": skill_name,
+            "mode": mode,
+            "runner": "codex",
+            "command": " ".join(cmd),
+            "returncode": process.returncode,
+            "duration_seconds": round(time.time() - started_at, 3),
+            "status": "error",
+            "errors": [
+                {
+                    "code": "ERR_CASE_DISCOVERY",
+                    "message": "Could not list eval cases before split release execution.",
+                }
+            ],
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+        }
+
+    case_ids: list[str] = []
+    for line in process.stdout.splitlines():
+        match = re.match(r"^-\s+([^\s\[]+)\s+\[", line.strip())
+        if match:
+            case_ids.append(match.group(1))
+    if not case_ids:
+        return [], {
+            "skill": skill_name,
+            "mode": mode,
+            "runner": "codex",
+            "command": " ".join(cmd),
+            "returncode": 1,
+            "duration_seconds": round(time.time() - started_at, 3),
+            "status": "error",
+            "errors": [
+                {
+                    "code": "ERR_CASE_DISCOVERY_EMPTY",
+                    "message": "No eval case ids were discovered for split release execution.",
+                }
+            ],
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+        }
+    return case_ids, None
+
+
+def _run_skill_builder_eval_split_cases(
+    repo_root: Path,
+    skill_name: str,
+    mode: str,
+    runner: str,
+    cases: tuple[str, ...],
+    categories: tuple[str, ...],
+    per_skill_timeout_sec: int | None,
+    model: str | None,
+    timeout_profile: str | None,
+) -> dict[str, object]:
+    started_at = time.time()
+    case_ids, discovery_error = _list_skill_builder_cases(
+        repo_root,
+        skill_name,
+        mode,
+        cases,
+        categories,
+    )
+    if discovery_error is not None:
+        return discovery_error
+
+    case_results: list[dict[str, object]] = []
+    for case_id in case_ids:
+        case_results.append(
+            _run_skill_builder_eval(
+                repo_root,
+                skill_name,
+                mode,
+                runner,
+                (case_id,),
+                (),
+                per_skill_timeout_sec,
+                model,
+                timeout_profile,
+            )
+        )
+
+    failed = [
+        result
+        for result in case_results
+        if result.get("returncode") != 0 or result.get("status") != "success"
+    ]
+    timed_out = [
+        result
+        for result in case_results
+        if result.get("returncode") == 124 or result.get("status") == "timeout"
+    ]
+    return {
+        "skill": skill_name,
+        "mode": mode,
+        "runner": runner,
+        "command": (
+            f"split release cases via {_skill_builder_runner_path(repo_root)} "
+            f"cases={','.join(case_ids) or '<none>'}"
+        ),
+        "returncode": 0 if not failed else 2,
+        "duration_seconds": round(time.time() - started_at, 3),
+        "timeout_seconds": per_skill_timeout_sec,
+        "status": "success" if not failed else ("timeout" if len(timed_out) == len(failed) else "error"),
+        "decision": "pass" if not failed else "fail",
+        "split_cases": True,
+        "case_filters": list(cases),
+        "category_filters": list(categories),
+        "case_results": case_results,
+        "failure_classification": _merged_case_failure_classification(case_results),
+        "errors": [] if not failed else [{"code": "ERR_VALIDATION", "message": "One or more split eval cases failed."}],
+        "raw_output": json.dumps(
+            {
+                "split_cases": True,
+                "case_count": len(case_results),
+                "cases": [
+                    {
+                        "id": (result.get("case_filters") or [None])[0]
+                        if isinstance(result.get("case_filters"), list)
+                        else None,
+                        "status": result.get("status"),
+                        "returncode": result.get("returncode"),
+                        "duration_seconds": result.get("duration_seconds"),
+                    }
+                    for result in case_results
+                ],
+            }
+        ),
+        "raw_error": "",
+    }
+
+
 def run_skill(
     repo_root: Path,
     skill_name: str,
@@ -472,6 +713,7 @@ def run_skill(
     per_skill_timeout_sec: int | None,
     model: str | None,
     timeout_profile: str | None,
+    split_release_cases: bool,
 ) -> dict[str, object]:
     if eval_runner == "ask":
         if cases or categories or model or timeout_profile:
@@ -492,6 +734,18 @@ def run_skill(
                 "raw_error": "",
             }
         return _run_ask_eval(repo_root, skill_name, mode, per_skill_timeout_sec)
+    if split_release_cases and mode == "release":
+        return _run_skill_builder_eval_split_cases(
+            repo_root,
+            skill_name,
+            mode,
+            eval_runner,
+            cases,
+            categories,
+            per_skill_timeout_sec,
+            model,
+            timeout_profile,
+        )
     return _run_skill_builder_eval(
         repo_root,
         skill_name,
@@ -635,6 +889,22 @@ def main() -> int:
         action="store_true",
         help="Fail release confidence unless router sample execution passes.",
     )
+    parser.add_argument(
+        "--split-release-cases",
+        dest="split_release_cases",
+        action="store_true",
+        default=True,
+        help=(
+            "For --eval-runner codex release lanes, run each selected eval case separately "
+            "and aggregate results so timeouts do not hide content failures. Default: enabled."
+        ),
+    )
+    parser.add_argument(
+        "--no-split-release-cases",
+        dest="split_release_cases",
+        action="store_false",
+        help="Run release cases in one skill-level process for legacy debugging.",
+    )
     parser.add_argument("--json", action="store_true", help="Emit JSON only.")
     args = parser.parse_args()
 
@@ -658,6 +928,7 @@ def main() -> int:
             args.per_skill_timeout_sec,
             args.model,
             args.timeout_profile,
+            args.split_release_cases,
         )
         for skill in selected_skills
     ]
