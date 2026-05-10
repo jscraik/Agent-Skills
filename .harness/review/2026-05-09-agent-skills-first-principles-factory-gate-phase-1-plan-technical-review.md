@@ -27,11 +27,11 @@ Supporting evidence checked:
 - `.harness/review/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-technical-review.md`
 - `.harness/refactors/2026-05-09-agent-skills-first-principles-factory-gate.md`
 - `.harness/linear/2026-05-09-agent-skills-first-principles-factory-gate-linear-plan.md`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/src/schema.rs`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/src/engine/output_parser.rs`
-- `/Users/jamiecraik/dev/codex/codex-rs/core-plugins/src/loader.rs`
-- `/Users/jamiecraik/dev/codex/codex-rs/core-plugins/src/manifest.rs`
-- `/Users/jamiecraik/dev/codex/codex-rs/hooks/src/engine/mod_tests.rs`
+- `codex-rs/hooks/src/schema.rs`
+- `codex-rs/hooks/src/engine/output_parser.rs`
+- `codex-rs/core-plugins/src/loader.rs`
+- `codex-rs/core-plugins/src/manifest.rs`
+- `codex-rs/hooks/src/engine/mod_tests.rs`
 
 This review checks whether the deepened plan is technically executable as a
 Phase 1 implementation contract. It does not approve Phase 2 schema work,

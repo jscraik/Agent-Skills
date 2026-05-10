@@ -157,10 +157,10 @@ Local primary sources checked during the confidence loop:
 - Live relative-path calculation: verified every selected lane resolves
   `Infrastructure/references/first-principles-factory-gate.md` through
   `../../../../../Infrastructure/references/first-principles-factory-gate.md`.
-- Codex plugin-hook source in `/Users/jamiecraik/dev/codex`: verified
+- Codex plugin-hook source in `codex-rs`: verified
   `plugin_hooks` remains `UnderDevelopment` and default-off, plugin hook
   loading supports manifest/default hook sources, plugin hook metadata carries
-  plugin identity/source paths, and runtime tests cover plugin scoped
+  plugin identity/source paths, and runtime tests cover plugin-scoped
   `PLUGIN_ROOT` / `PLUGIN_DATA` expansion.
 
 ## Verdict

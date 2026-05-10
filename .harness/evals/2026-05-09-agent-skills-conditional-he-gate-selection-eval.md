@@ -9,9 +9,9 @@ status: blocked_release_confidence
 date: 2026-05-09
 traceability_required: true
 origin: .harness/plan/2026-05-09-agent-skills-conditional-he-gate-selection-plan.md
-linear_issue: null
-linear_status: not_applicable
-linear_milestone: null
+linear_issue: JSC-299
+linear_status: created
+linear_milestone: HE Authority And Proof Hardening
 ---
 
 # Agent Skills Conditional HE Gate Selection Eval
@@ -40,11 +40,11 @@ explicitly replaced by an approved equivalent proof lane.
 
 ## Evaluated Slice
 
-Linear Project: not linked.
+Linear Project: agent-skills.
 
-Linear Milestone: not linked.
+Linear Milestone: HE Authority And Proof Hardening.
 
-Linear Parent Issue: not linked.
+Linear Parent Issue: JSC-299.
 
 Linear Sub-Issues: none.
 
@@ -93,16 +93,16 @@ Safe closure classification:
 
 - Static wiring confidence: supported.
 - Release confidence: blocked.
-- Linear closure recommendation: not applicable because no Linear issue is
-  linked; if this represented a Linear parent issue, closure would be blocked.
+- Linear closure recommendation: blocked for plugin-wide release confidence
+  under `JSC-299` until lifecycle eval timeout proof is repaired.
 
 ## Linear Backlink Map
 
-Linear Project: missing.
+Linear Project: agent-skills.
 
-Linear Milestone: missing.
+Linear Milestone: HE Authority And Proof Hardening.
 
-Linear Parent Issue: missing.
+Linear Parent Issue: JSC-299.
 
 Linear Sub-Issues: none.
 
@@ -117,8 +117,8 @@ Proof Artifact Links:
 - `Infrastructure/artifacts/skills/he-router/20260509-115700-063915/scorecard.json`
 - `Infrastructure/artifacts/skills/he-eval-report/20260509-115709-391859/scorecard.json`
 
-Traceability gap: no Linear identifier is present. This does not block static
-plugin source validation, but it would block Linear closure.
+Traceability: linked to `JSC-299`. Static plugin source validation is supported,
+but Linear closure remains blocked by plugin-wide release-confidence proof.
 
 ## Source Artifact Trace
 

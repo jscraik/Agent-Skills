@@ -9,7 +9,7 @@ status: blocked
 date: 2026-05-10
 traceability_required: true
 origin: .harness/linear/agent-skills-linear-plan.md
-linear_issue: unknown
+linear_issue: JSC-299
 linear_milestone: HE Plugin Release Confidence
 ---
 
@@ -24,7 +24,7 @@ Confidence: high for timeout classification; medium for root cause because the r
 ## Evaluated Slice
 Linear Project: agent-skills
 Linear Milestone: HE Plugin Release Confidence
-Linear Parent Issue: unknown
+Linear Parent Issue: JSC-299
 Linear Sub-Issues: unknown
 Refactor Program: not_applicable
 Plugin Harness Engineering Spec: not_applicable
@@ -41,12 +41,12 @@ Closure Safety: unsafe to close plugin-wide release confidence until the release
 ## Linear Backlink Map
 Linear Project: agent-skills
 Linear Milestone: HE Plugin Release Confidence
-Linear Parent Issue: unknown
+Linear Parent Issue: JSC-299
 Linear Sub-Issues: unknown
 Linear Status Recommendation: keep open
 Proof Artifact Links: `.harness/evals/2026-05-10-agent-skills-he-fresh-release-lane-eval.md`; temporary clean worktree `/tmp/agent-skills-release-eval-2xsFKp`; smoke artifact `Infrastructure/artifacts/skills/he-router/20260510-152831-652625/summary.json` in the temporary worktree.
-Missing Identifiers: Linear parent issue key for this release-confidence slice.
-Traceability Repair: Link this eval to the next HE/Linear slice before moving release-confidence closure forward.
+Missing Identifiers: none for parent issue linkage.
+Traceability Repair: keep this eval linked to `JSC-299` before moving release-confidence closure forward.
 
 ## Source Artifact Trace
 Linear Plan: `.harness/linear/agent-skills-linear-plan.md`
@@ -164,7 +164,7 @@ Validator Confidence: high
 Suggested Next Step: Repair the release eval lane before rerunning plugin-wide confidence.
 Blocks Completion: no
 
-## Domain Model Integrity Check
+## Bounded Context And Translation Boundary Check
 Domain Model Status: not_applicable
 Bounded Context: Harness Engineering release-confidence evaluation.
 Aggregate / Invariant Proof: Release confidence remains blocked when lifecycle evals time out.
@@ -189,7 +189,7 @@ Affected Files/Modules: release eval runner and lifecycle skill eval case set.
 Confidence: medium
 Blocks Completion: yes
 
-## Domain Model Integrity Check
+## Canonical Model And Aggregate Invariants Check
 Conclusion: Domain model impact is not the primary concern for this slice.
 Bounded Context: Harness Engineering release confidence.
 Canonical Terms: timeout failure, content failure, tool/preflight failure, selection-signal warning, release lane.
@@ -279,6 +279,7 @@ ADR Update: not required yet
 Reason: This is an eval-runner operability finding, not yet a durable architecture decision.
 
 ## Evidence & Traceability Matrix
+
 | Conclusion | Evidence | Type | Confidence | Closure Impact |
 | --- | --- | --- | --- | --- |
 | Git pull completed before Slice 2 | `git pull --no-rebase --autostash` returned `Already up to date.` | fact | high | no block |

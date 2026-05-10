@@ -385,7 +385,7 @@ Phase 3 as closed.
 
 Blocks Completion: no
 
-## Domain Model Integrity Check
+## Factory-Gate Evidence Domain Model Integrity Check
 
 Domain Model Status: bounded to the first-principles gate evidence model.
 

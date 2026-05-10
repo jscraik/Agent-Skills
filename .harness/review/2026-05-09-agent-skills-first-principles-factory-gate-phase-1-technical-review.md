@@ -1,13 +1,11 @@
-# First-Principles Factory Gate Phase 1 Technical Review
-
+---
 schema_version: 1
+review_date: 2026-05-09
+review_target: ".harness/specs/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-spec.md"
+review_mode: technical spec review
+---
 
-Review date: 2026-05-09
-
-Review target:
-`.harness/specs/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-spec.md`
-
-Review mode: technical spec review
+# First-Principles Factory Gate Phase 1 Technical Review
 
 Source artifacts read:
 

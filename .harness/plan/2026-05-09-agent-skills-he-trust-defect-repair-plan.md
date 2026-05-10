@@ -5,7 +5,7 @@ artifact_type: he-plan
 canonical_slug: agent-skills-he-trust-defect-repair
 title: HE Trust Defect Repair Plan
 harness_stage: he-plan
-status: active
+status: validated
 date: 2026-05-09
 traceability_required: false
 origin: .harness/specs/2026-05-09-agent-skills-he-trust-defect-repair-spec.md

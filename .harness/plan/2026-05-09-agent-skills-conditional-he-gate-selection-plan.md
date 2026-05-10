@@ -7,10 +7,10 @@ title: Conditional HE Gate Selection Plan
 harness_stage: he-plan
 status: draft
 date: 2026-05-09
-traceability_required: false
+traceability_required: true
 origin: .harness/specs/2026-05-09-agent-skills-conditional-he-gate-selection-spec.md
-linear_issue: not_tracked
-linear_milestone: not_tracked
+linear_issue: JSC-299
+linear_milestone: HE Authority And Proof Hardening
 ---
 
 # Conditional HE Gate Selection Plan
@@ -20,14 +20,11 @@ linear_milestone: not_tracked
 This plan implements the first bounded slice from
 `.harness/specs/2026-05-09-agent-skills-conditional-he-gate-selection-spec.md`.
 
-No Linear destination has been provided. Treat this as an untracked
-plugin-hardening draft until a Linear project, milestone, or parent issue is
-assigned.
+This slice is tracked under Linear issue `JSC-299`; keep artifact metadata and
+closure evidence aligned to that issue.
 
-Implementation is blocked until the user confirms either:
-
-- proceed as an untracked plugin-hardening slice; or
-- attach the slice to a Linear project, milestone, or parent issue.
+Implementation remains bounded to the approved plugin-hardening slice and does
+not require additional Linear mutation before local validation.
 
 ## Execution Boundary
 
@@ -252,8 +249,6 @@ Rollback or stop if:
 
 ## Post-Plan Handoff
 
-Recommended next stage: blocked until authority is confirmed, then `he-work`.
+Recommended next stage: `he-work` for the tracked `JSC-299` slice.
 
-Before implementation, confirm whether this remains an untracked
-plugin-hardening slice or should be linked to a Linear project, milestone, or
-parent issue.
+Before external closure, confirm the `JSC-299` status update with human review.
