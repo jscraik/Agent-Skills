@@ -1,0 +1,19 @@
+I’m blocked before I can inspect or edit the files: every shell command is failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened even for read-only commands like `pwd`, `rg --files`, and `sed -n ...`, so I can’t currently read `UBIQUITOUS_LANGUAGE.md`, inspect `repo/payments-api/AGENTS.md`, verify `docs/workflow.md`, or prepare/apply a patch safely.
+
+Given the task, the intended change is clear:
+
+- Refactor `repo/payments-api/AGENTS.md` from the 900-line root instruction dump into a compact map.
+- Add a **Context Pointers** section that links to the deeper docs instead of repeating them.
+- Remove duplicated git/workflow rules already covered by `docs/workflow.md`.
+- Correct the stale test command from `npm test` to `pnpm test`, matching `package.json` and CI.
+- Preserve the **Project Brain** rules.
+- Preserve the **Local Memory** rules.
+- Keep any root-level rules that are genuinely unique and still govern the whole payments API repo.
+
+I can’t honestly claim the edit is done because I couldn’t access the tree. The environment needs to allow normal read/write filesystem access for `/Users/jamiecraik/dev/agent-skills`; once that’s fixed, I can make the refactor directly and run the repo closeout/validation commands.

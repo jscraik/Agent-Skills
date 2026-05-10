@@ -1,0 +1,34 @@
+Here’s the clean split I’d apply to `apps/web/AGENTS.md` under the `agents-md` workflow.
+
+**Keep in root**
+- Anything that is truly local to `apps/web` and needed before editing files in that app.
+- One short scope statement for the app, if it helps orient agents.
+- Any app-specific commands that are unique, actionable, and not already covered elsewhere.
+- Any hard rules that are specific to the app and can’t be inferred from shared docs.
+
+**Move to docs**
+- The long TypeScript style section copied from `docs/frontend.md`.
+- Any general “how to write frontend code” guidance that is shared across multiple web areas.
+- Any broad project description that explains what the app is, if it reads like documentation rather than an operating instruction.
+- Any repeated command examples that are better maintained centrally.
+
+**Route through Context Pointers**
+- A pointer for the TypeScript style guidance should route to `docs/frontend.md` rather than inlining the whole section.
+- A pointer for broader app documentation should route to the relevant app docs page, if one exists.
+- A pointer for shared lint or formatting policy should route to the canonical repo policy doc rather than repeating it in `apps/web/AGENTS.md`.
+- If `apps/web/AGENTS.md` needs to mention “see the frontend style guide,” make it a Context Pointer, not copied prose.
+
+**Delete**
+- Duplicate `pnpm lint` commands.
+- The vague “write good code” rule.
+- Any duplicated text that already exists in `docs/frontend.md`.
+- Any soft advice that does not change agent behavior.
+- Any phrasing that is generic enough to apply to every repo and every package.
+
+**Practical rule of thumb**
+- Root `AGENTS.md` should be for local execution and scope boundaries.
+- Docs should hold durable explanatory content and style guidance.
+- Context Pointers should connect the two without duplicating text.
+- Anything vague enough to mean “be competent” should usually be deleted unless you can turn it into a concrete, testable instruction.
+
+If you want, I can also turn this into a concrete rewrite plan for `apps/web/AGENTS.md` with proposed section names and exact pointer targets.

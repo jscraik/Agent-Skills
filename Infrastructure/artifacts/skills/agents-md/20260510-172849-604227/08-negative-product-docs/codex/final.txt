@@ -1,0 +1,9 @@
+I’m blocked by the current sandbox before I can read or edit the repo. Even read-only commands are failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I tried to inspect the README and git status from `/Users/jamiecraik/dev/agent-skills`, but the sandbox rejected both commands before they ran, and the approval policy is `never`, so I can’t request elevated filesystem access or apply a patch.
+
+What I need to finish this: a working filesystem sandbox for this workspace, or paste the current README product overview section here and I’ll rewrite it directly in chat. Once file access works, I’ll update the README in place and give you exact validation evidence.

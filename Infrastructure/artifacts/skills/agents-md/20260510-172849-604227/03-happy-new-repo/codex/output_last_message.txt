@@ -1,0 +1,70 @@
+Here’s a clean first-pass `AGENTS.md` for `/tmp/ledger-cli`:
+
+```markdown
+# ledger-cli Agent Guide
+
+ledger-cli is a small Python command-line application for working with ledger data. Keep changes focused, boring, and easy to verify from the CLI.
+
+## Root Essentials
+
+- This repo uses `uv` for Python environment and command execution.
+- Do not assume a package-manager install step beyond `uv`; prefer `uv run ...` commands from the repository root.
+- There is no Project Brain, memory surface, or repository-specific agent knowledge base yet. Use the live repository contents as the source of truth.
+- Before editing, inspect the relevant files and nearby tests so changes match the existing structure and style.
+- Preserve user work. Do not revert unrelated changes or clean up files outside the requested task.
+
+## Common Commands
+
+Run the main CLI test check with:
+
+```bash
+uv run pytest -q tests/cli
+```
+
+Useful supporting checks, when relevant:
+
+```bash
+uv run pytest -q
+uv run python -m ledger_cli --help
+```
+
+If the package or module name differs, confirm it from the repository before using module-level commands.
+
+## Development Guidance
+
+- Prefer small, direct Python changes over new abstractions.
+- Keep CLI behavior stable unless the task explicitly asks to change it.
+- When changing command output, options, exit codes, parsing, or error handling, add or update tests under `tests/cli`.
+- Treat tests in `tests/cli` as the primary behavioral contract for the command-line interface.
+- Use structured parsing and existing helpers where available instead of ad hoc string handling.
+- Keep error messages concise and useful for terminal users.
+- Avoid broad formatting churn unless the task is specifically about formatting.
+
+## Validation
+
+Before closeout, run the narrow required check whenever the task touches CLI behavior or shared Python code:
+
+```bash
+uv run pytest -q tests/cli
+```
+
+For broader changes, also consider:
+
+```bash
+uv run pytest -q
+```
+
+Report the exact commands run and whether they passed. If a check cannot be run, explain why and include the best available evidence instead.
+
+## Documentation
+
+- Update README or CLI help text when user-facing behavior changes.
+- Keep examples copy-pasteable with `uv run` where appropriate.
+- Do not invent undocumented workflows; verify commands against the repo before recommending them.
+
+## Git And Safety
+
+- Do not create commits, branches, or pull requests unless explicitly asked.
+- Do not rewrite history or run destructive git commands.
+- If the working tree already contains unrelated changes, leave them alone and continue around them.
+```

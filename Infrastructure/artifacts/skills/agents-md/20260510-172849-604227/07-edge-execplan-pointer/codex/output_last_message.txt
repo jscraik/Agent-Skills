@@ -1,0 +1,22 @@
+I couldn’t apply the change because this session is in a read-only sandbox and every shell command is failing at sandbox setup with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+The exact patch I would apply to root [AGENTS.md](/Users/jamiecraik/dev/agent-skills/AGENTS.md) is:
+
+```diff
+@@
+ - Before changing skills, sync policy, runtime projections, or agent-facing
+   docs, read [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md).
+ - Edit canonical sources, not runtime projections. See
+   [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
++- For long-running Harness Engineering refactors in `repo/harness`, use
++  `@harness-engineering` / `he-plan`; the detailed plan artifact must follow
++  the HE plan contract.
+
+ ## Common Commands
+```
+
+Validation status: not run, because the sandbox is blocking both reads and writes in this turn.

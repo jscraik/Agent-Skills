@@ -1,0 +1,14 @@
+I found three conflicting test-command policies:
+
+- `/Users/me/dev/shop/AGENTS.md` says `npm test`
+- `docs/tooling.md` says `pnpm test`
+- `.github/workflows/test.yml` runs `bun test`
+
+Before I refactor the docs, which command should be treated as the source of truth?
+
+1. `npm test` as the canonical policy
+2. `pnpm test` as the canonical policy
+3. `bun test` as the canonical policy
+4. Keep the runtime workflow as-is and make the docs explicitly describe the split
+
+Reply with the number, and I’ll update the docs to match.

@@ -1,0 +1,87 @@
+Here’s a solid first `AGENTS.md` draft for `/tmp/ledger-cli`:
+
+```markdown
+# ledger-cli Agent Guide
+
+This repository contains a small Python command-line application for working
+with ledger data. Keep changes focused, easy to review, and aligned with the
+existing CLI behavior.
+
+## Project Essentials
+
+- Use `uv` for Python commands and dependency-managed execution.
+- This repo does not currently have a Project Brain, memory surface, or durable
+  agent knowledge store. Rely on the live repository, tests, and local docs for
+  context.
+- Prefer small, direct changes over broad refactors.
+- Preserve existing command names, flags, output formats, and exit-code behavior
+  unless the task explicitly asks to change them.
+- Do not introduce new runtime dependencies unless they are clearly needed for
+  the requested change.
+
+## Common Commands
+
+Run the CLI test check with:
+
+```bash
+uv run pytest -q tests/cli
+```
+
+Use this as the primary validation command for CLI-facing changes.
+
+If broader Python validation exists in the repo, discover it from the live tree
+before running it. Do not assume a standard package layout or default pytest
+target.
+
+## Working Guidelines
+
+- Read the relevant CLI entrypoints, command handlers, and tests before editing.
+- Treat tests under `tests/cli` as the source of truth for expected user-facing
+  behavior.
+- When changing parsing, formatting, file I/O, or error handling, add or update
+  CLI tests that exercise the behavior from the user’s point of view.
+- Keep error messages clear and stable. Avoid churn in wording unless the change
+  is intentional.
+- Prefer standard-library Python where it is sufficient.
+- Keep helper functions close to the code that uses them until there is clear
+  reuse pressure.
+- Do not add broad abstractions for future ledger formats, storage backends, or
+  command frameworks unless the current task requires them.
+
+## Repo Hygiene
+
+- Before making changes, check the working tree and preserve user work.
+- Do not revert unrelated edits.
+- Edit source files and tests directly; avoid generated or cache directories.
+- Do not commit unless explicitly asked.
+- If asked to write a commit message, include this trailer exactly once at the
+  end:
+
+```text
+Co-authored-by: Codex <noreply@openai.com>
+```
+
+## Validation Expectations
+
+Before handing work back, run:
+
+```bash
+uv run pytest -q tests/cli
+```
+
+Report whether it passed or failed. If it cannot be run, explain the blocker and
+include the exact command attempted.
+
+For changes outside the CLI surface, inspect the repository for any nearby or
+documented checks and run the most relevant ones when practical.
+
+## Documentation
+
+- Update README or CLI usage docs when changing commands, flags, examples, or
+  user-visible behavior.
+- Keep documentation concise and command-oriented.
+- Since there is no Project Brain or memory surface yet, capture durable project
+  conventions in tracked docs when they become important enough to preserve.
+```
+
+I’d use this as a deliberately modest first guide: it gives agents the unusual test command, makes `uv` explicit, and avoids inventing process around a Project Brain that does not exist yet.

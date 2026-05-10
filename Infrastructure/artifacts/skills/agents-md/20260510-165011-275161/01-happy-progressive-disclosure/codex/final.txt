@@ -1,0 +1,13 @@
+I couldn’t make the refactor from this session because the shell is blocked by the current sandbox, so I couldn’t read or edit the `payments-api` files directly.
+
+What I would change in the root `AGENTS.md` there:
+
+- Shrink the 900-line file into a short index of `Context Pointers`
+- Replace duplicated git guidance with a pointer to `docs/workflow.md`
+- Update any `npm test` references to `pnpm test`
+- Preserve the `Project Brain` and `Local Memory` rules exactly, since you called those out as must-keep
+
+If you want, I can still help in one of two ways:
+
+1. You paste the current root `AGENTS.md`, and I’ll return a precise reduced rewrite.
+2. You switch me into a workspace where `/Users/me/dev/payments-api` is accessible, and I’ll do the edit directly.
