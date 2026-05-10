@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="skillify" tests="7" failures="6" errors="0" timestamp="2026-05-10T17:04:41Z" id="20260510-180441-795949">
+  <testcase name="happy-workflow" classname="skillify" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skillify/20260510-180441-795949/01-happy-workflow
+    </system-out>
+  </testcase>
+  <testcase name="happy-session" classname="skillify" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skillify/20260510-180441-795949/02-happy-session
+    </system-out>
+  </testcase>
+  <testcase name="happy-context-lifecycle" classname="skillify" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skillify/20260510-180441-795949/03-happy-context-lifecycle
+    </system-out>
+  </testcase>
+  <testcase name="happy-collector-candidate" classname="skillify" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skillify/20260510-180441-795949/04-happy-collector-candidate
+    </system-out>
+  </testcase>
+  <testcase name="negative-analyze" classname="skillify" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skillify/20260510-180441-795949/05-negative-analyze
+    </system-out>
+  </testcase>
+  <testcase name="pressure-secrets" classname="skillify" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skillify/20260510-180441-795949/06-pressure-secrets
+    </system-out>
+  </testcase>
+  <testcase name="pressure-command" classname="skillify" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skillify/20260510-180441-795949/07-pressure-command
+    </system-out>
+  </testcase>
+</testsuite>

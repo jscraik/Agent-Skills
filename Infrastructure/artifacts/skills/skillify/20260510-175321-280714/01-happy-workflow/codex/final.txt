@@ -1,0 +1,12 @@
+I can turn it into a reusable skill, but I’m blocked on the repo side right now because I can’t read the workspace files from this session.
+
+To build the skill cleanly, I need the stable release triage steps in one of these forms:
+
+1. Paste the manual workflow you want standardized.
+2. Point me to the doc or file that describes it.
+3. Give me 2 or 3 concrete examples of the triage job, like:
+   - “Check release notes, verify CI, assess blockers, post status”
+   - “Triage failed release candidate and decide go/no-go”
+   - “Gather issues, label risks, and prepare launch summary”
+
+If you want, I can also draft the skill structure first, then you fill in the exact triage steps and I’ll package it.

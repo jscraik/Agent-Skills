@@ -1,0 +1,39 @@
+Based on the session evidence I could access, the main failure pattern is not a single broken skill, but a repeated knowledge-management failure inside the session evidence pipeline.
+
+**What the evidence shows**
+- The memory bootstrap reports `10 pending questions`, all unresolved, with no resolved contradictions at all.
+- The pending items are all `contradiction` records from the same session family (`daemon-coding-harness`), which suggests contradictory memories are being created faster than they are being reconciled.
+- The contradictions cluster around a few recurring shapes:
+  - negation asymmetry, where one memory says something and another says the opposite by adding or removing a `not`-style qualifier
+  - polarity conflicts, like `"high"` vs `"low"`
+  - quantifier conflicts, like `"every"` vs `"no"`
+
+**Likely skill failures**
+1. **Contradiction resolution is not keeping up**
+   - The system is detecting conflicts, but not closing them.
+   - That means the skill output is leaving a trail of unresolved epistemic debt instead of converging on a stable learning.
+
+2. **The evidence normalization step is too brittle**
+   - The contradiction detector seems to be surfacing near-duplicate memories that differ only by small lexical flips.
+   - That usually means the underlying skill is over-asserting uncertain distinctions instead of collapsing them into one qualified memory.
+
+3. **Negation handling is a repeated weak spot**
+   - Several pending contradictions are explicitly described as `negation asymmetry`.
+   - That points to the skill often failing to preserve the scope of “not,” “no,” or equivalent qualifiers across related observations.
+
+4. **Opposing-value conflicts are not being canonicalized**
+   - The `high` vs `low` contradiction is a good example.
+   - The skill is likely storing mutually incompatible interpretations without a normalization rule for ordinal or intensity-based values.
+
+5. **Recent activity is accumulating faster than it is consolidated**
+   - The bootstrap shows `1174` new observations created in 24h and `0` updated in 24h.
+   - That suggests the session is highly write-heavy and almost entirely lacking cleanup or synthesis passes.
+
+**Bottom line**
+The strongest existing failure signal is a **consolidation failure**: the skill ecosystem is generating lots of evidence, detecting conflicts, but not resolving or compressing them into durable learnings. The secondary failure is **semantic drift in polarity/negation**, which is what makes the contradictions keep recurring.
+
+If you want, I can take the next step and turn this into a sharper failure taxonomy, for example:
+1. `evidence ingestion failures`
+2. `contradiction detection failures`
+3. `learning consolidation failures`
+4. `skill-specific behavioral regressions`

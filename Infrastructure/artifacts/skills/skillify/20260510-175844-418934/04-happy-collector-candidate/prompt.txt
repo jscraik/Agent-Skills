@@ -1,0 +1,1 @@
+The session-collector bundle has a skillify-candidates.json entry for a repeated validation workflow; help me build the skill package from the bounded evidence.
