@@ -1,0 +1,1108 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-10T15:31:06Z",
+  "skill": "he-router",
+  "skill_path": "Plugins/harness-engineering/skills/he-router",
+  "skill_release": {
+    "name": "he-router",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "d2236ef35749522184d34f103f8262cc0cd6923f",
+    "source_branch": "codex/goal-governor-independent-skill"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "smoke",
+  "tier2_mode": "warn",
+  "run_id": "20260510-163106-842051",
+  "case_filters": [],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "ambiguous-stage-route",
+      "name": "Ambiguous stage route",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/01-ambiguous-stage-route",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/01-ambiguous-stage-route/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/01-ambiguous-stage-route/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/01-ambiguous-stage-route/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/01-ambiguous-stage-route/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/01-ambiguous-stage-route/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "explicit-eval-route",
+      "name": "Explicit eval route",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/02-explicit-eval-route",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/02-explicit-eval-route/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/02-explicit-eval-route/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/02-explicit-eval-route/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/02-explicit-eval-route/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/02-explicit-eval-route/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "unrelated-image-request",
+      "name": "Unrelated image request",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/03-unrelated-image-request",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be not selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/03-unrelated-image-request/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/03-unrelated-image-request/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/03-unrelated-image-request/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/03-unrelated-image-request/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/03-unrelated-image-request/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "generated-handle-source-boundary",
+      "name": "Generated handle source boundary",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/04-generated-handle-source-boundary",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/04-generated-handle-source-boundary/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/04-generated-handle-source-boundary/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/04-generated-handle-source-boundary/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/04-generated-handle-source-boundary/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/04-generated-handle-source-boundary/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "external-write-approval-boundary",
+      "name": "External write approval boundary",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/05-external-write-approval-boundary",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/05-external-write-approval-boundary/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/05-external-write-approval-boundary/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/05-external-write-approval-boundary/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/05-external-write-approval-boundary/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/05-external-write-approval-boundary/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "routing-injection-pressure",
+      "name": "Routing injection pressure",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/06-routing-injection-pressure",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/06-routing-injection-pressure/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/06-routing-injection-pressure/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/06-routing-injection-pressure/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/06-routing-injection-pressure/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/06-routing-injection-pressure/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "available-specialist-route",
+      "name": "Available specialist route",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/07-available-specialist-route",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/07-available-specialist-route/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/07-available-specialist-route/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/07-available-specialist-route/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/07-available-specialist-route/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/07-available-specialist-route/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "production-domain-inferred-route",
+      "name": "Production domain inferred route",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/08-production-domain-inferred-route",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/08-production-domain-inferred-route/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/08-production-domain-inferred-route/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/08-production-domain-inferred-route/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/08-production-domain-inferred-route/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/08-production-domain-inferred-route/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "headless-router-assumption",
+      "name": "Headless router assumption",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/09-headless-router-assumption",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/09-headless-router-assumption/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/09-headless-router-assumption/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/09-headless-router-assumption/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/09-headless-router-assumption/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/09-headless-router-assumption/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "artifact-path-selection",
+      "name": "Artifact path selection",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/10-artifact-path-selection",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/10-artifact-path-selection/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/10-artifact-path-selection/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/10-artifact-path-selection/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/10-artifact-path-selection/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/10-artifact-path-selection/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "stage-sequence-check",
+      "name": "Stage sequence check",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/11-stage-sequence-check",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/11-stage-sequence-check/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/11-stage-sequence-check/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/11-stage-sequence-check/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/11-stage-sequence-check/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/11-stage-sequence-check/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "non-trigger-explanation",
+      "name": "Non trigger explanation",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/12-non-trigger-explanation",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be not selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/12-non-trigger-explanation/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/12-non-trigger-explanation/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/12-non-trigger-explanation/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/12-non-trigger-explanation/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/12-non-trigger-explanation/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "gate-selection-trivial-docs-negative",
+      "name": "Gate selection trivial docs negative",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/13-gate-selection-trivial-docs-negative",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/13-gate-selection-trivial-docs-negative/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/13-gate-selection-trivial-docs-negative/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/13-gate-selection-trivial-docs-negative/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/13-gate-selection-trivial-docs-negative/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/13-gate-selection-trivial-docs-negative/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    },
+    {
+      "id": "gate-selection-mixed-smallest-set",
+      "name": "Gate selection mixed smallest set",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/14-gate-selection-mixed-smallest-set",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/14-gate-selection-mixed-smallest-set/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/14-gate-selection-mixed-smallest-set/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/14-gate-selection-mixed-smallest-set/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/14-gate-selection-mixed-smallest-set/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/14-gate-selection-mixed-smallest-set/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 14,
+  "tier2_findings": 0,
+  "preflight_warnings": [],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 14
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 14
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "fail",
+  "exit_code": 2,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051",
+    "summary": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-router/20260510-163106-842051/junit.xml"
+  }
+}

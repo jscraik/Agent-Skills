@@ -1,0 +1,18 @@
+I can do that, but I need the spreadsheet file or its path first.
+
+I tried to inspect the workspace for `.xlsx`, `.xls`, `.csv`, and `.tsv` files, but the current execution sandbox is failing before the command runs:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Please send either:
+
+1. The full path to the spreadsheet you want summarized, for example:
+   ```text
+   /Users/jamiecraik/Downloads/report.xlsx
+   ```
+
+2. Or attach/upload the spreadsheet here.
+
+Once I can access it, I’ll summarize the key tables/columns and build a chart, ideally as an updated `.xlsx` with a new summary/chart sheet if the environment allows writing files.

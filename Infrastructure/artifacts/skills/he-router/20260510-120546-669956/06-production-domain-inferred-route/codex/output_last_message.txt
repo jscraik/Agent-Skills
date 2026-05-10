@@ -1,0 +1,163 @@
+I can route it, but I’m blocked from live repo inspection right now: even read-only shell commands are failing with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for:
+
+```bash
+pwd && rg --files ...
+sed -n '1,220p' .agents/skills/backend-platform/SKILL.md
+sed -n '1,220p' .agents/skills/product-strategy/SKILL.md
+```
+
+Given the request as stated, I’d route this as a **backend-platform-led production workflow design**, with **security-ops** and likely **product-strategy** as supporting lenses. If this is Stripe-specific, it should also pull in the Stripe best-practices workflow before implementation.
+
+**Primary Route**
+
+Use `backend-platform` as the owner because the core uncertainty is around account lifecycle, permissions, and persistence boundaries. This is not just a UI or billing-provider task; it is a domain-boundary and data-integrity problem.
+
+**Supporting Routes**
+
+Use `security-ops` for the permissions model, because billing permissions usually determine who can create subscriptions, update payment methods, see invoices, cancel plans, manage seats, or change account ownership. That is authorization-sensitive and production-risky.
+
+Use `product-strategy` only to clarify lifecycle states and business rules, especially if “account lifecycle” includes trials, grace periods, delinquency, suspension, cancellation, reactivation, team ownership transfer, or enterprise/manual billing.
+
+Use `build-web-apps:stripe-best-practices` if the provider is Stripe or likely Stripe. The billing workflow should not be designed in isolation from provider primitives like Checkout Sessions, Customer Portal, subscriptions, invoices, webhooks, entitlements, and idempotency behavior.
+
+**Boundary I’d Establish Before Code**
+
+The change needs a written contract before implementation. I’d split it into these ownership boundaries:
+
+1. **Account Lifecycle Boundary**
+
+   Canonical account states should be explicit and persisted in the app domain, not inferred from scattered Stripe fields or UI flags.
+
+   Likely states:
+
+   ```text
+   active
+   trialing
+   past_due
+   suspended
+   canceled
+   pending_deletion
+   archived
+   ```
+
+   The important design question is whether billing status *drives* account lifecycle or merely *informs* it. For production-grade behavior, I’d usually make account lifecycle an app-owned state machine, with billing events as inputs.
+
+2. **Billing Boundary**
+
+   Billing-provider objects should be treated as external facts, not the whole source of truth for app access.
+
+   Persist provider references such as:
+
+   ```text
+   billing_customer_id
+   subscription_id
+   price_id
+   current_period_end
+   billing_status
+   last_webhook_event_id
+   ```
+
+   But keep business authorization decisions in app-owned tables or projections.
+
+3. **Permissions Boundary**
+
+   Permissions should answer two separate questions:
+
+   ```text
+   Who can manage billing?
+   What is the account currently entitled to use?
+   ```
+
+   Those should not collapse into one role check.
+
+   Example distinction:
+
+   ```text
+   account_owner can change billing
+   billing_admin can update payment method
+   member can use product features
+   suspended account disables paid features regardless of member role
+   ```
+
+4. **Persistence Boundary**
+
+   I’d avoid writing billing-provider webhook handlers directly into many domain tables. Prefer a small ingestion path:
+
+   ```text
+   provider webhook
+   -> verified event log
+   -> idempotent billing sync
+   -> app billing/account projection
+   -> permission/entitlement evaluation
+   ```
+
+   This gives you replayability, auditability, and a place to handle out-of-order or duplicate events.
+
+5. **Operational Boundary**
+
+   A production-grade change needs explicit handling for:
+
+   ```text
+   duplicate webhooks
+   out-of-order events
+   failed payment recovery
+   customer portal changes
+   subscription cancellation at period end
+   immediate cancellation
+   plan downgrade timing
+   seat-count mismatch
+   account ownership transfer
+   manual admin override
+   audit trail
+   rollback / re-sync
+   ```
+
+**Implementation Shape I’d Recommend**
+
+I would not start by wiring provider events straight into account permissions. I’d implement in this order:
+
+1. Define the account lifecycle state machine and transitions.
+2. Define billing roles and entitlement checks separately.
+3. Add or verify persistent billing tables/projections.
+4. Implement webhook ingestion with idempotency and event logging.
+5. Implement a billing sync service that updates app-owned billing state.
+6. Implement account access evaluation from app-owned state.
+7. Add admin/debug commands for replaying or re-syncing billing state.
+8. Add tests around lifecycle transitions, permission checks, and webhook ordering.
+
+**Likely Validation Plan**
+
+Once filesystem commands work, I’d expect to run the repo-native checks from the AGENTS guidance:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask skills explain <relevant-handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+Before implementation, I’d also search for existing concepts:
+
+```bash
+rg -n "billing|subscription|stripe|invoice|entitlement|permission|role|account lifecycle|account_status|customer_id|webhook"
+rg --files | rg "(billing|subscription|account|permission|role|entitlement|stripe)"
+```
+
+**Routing Decision**
+
+Route this as:
+
+```text
+backend-platform: primary owner
+security-ops: authorization and production-risk review
+product-strategy: lifecycle/business-rule clarification
+stripe-best-practices: only if Stripe or Stripe-like provider is involved
+data-integrity review: before merge if migrations or billing persistence change
+```
+
+The key call: make **account lifecycle app-owned**, make **billing provider state an input**, and make **permissions/entitlements a separate evaluation layer**. That keeps the persistence boundary clean and gives you a fighting chance when billing events arrive late, twice, or in a deeply unhelpful order.

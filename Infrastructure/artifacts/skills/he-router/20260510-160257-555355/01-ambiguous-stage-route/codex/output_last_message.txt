@@ -1,0 +1,3 @@
+What shape do you want for the harness request: **plan**, **spec**, or **brainstorm**?
+
+My default would be **plan** if you want execution next, **spec** if the behavior still needs pinning down, and **brainstorm** if we’re exploring possibilities.

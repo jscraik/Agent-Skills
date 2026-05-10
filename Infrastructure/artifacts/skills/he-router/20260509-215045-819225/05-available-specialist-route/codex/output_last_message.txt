@@ -1,0 +1,29 @@
+Yes. For a harness plan that needs database expertise, the best routing is:
+
+1. **Primary skill: `harness-engineering`**
+   Use this as the top-level workflow skill because the work is framed as a Harness Engineering plan. It should own the lifecycle shape: goal, constraints, implementation slices, validation, review, and closeout evidence.
+
+2. **Database specialist overlay: `backend-platform`**
+   Use this when the plan involves backend/data/API/platform implementation decisions. It is the best broad routing skill for database architecture, schema boundaries, data access patterns, migrations, and persistence concerns.
+
+3. **Focused database expertise when applicable: `build-web-apps:supabase-postgres-best-practices`**
+   Use this if the plan touches Postgres query design, indexes, RLS, schema design, migrations, query performance, transaction boundaries, or Supabase/Postgres-specific behavior. Even if the project is not Supabase, the Postgres guidance is likely useful for SQL and relational design.
+
+4. **Reviewer agents for database risk, if implementation or review is involved**
+   Use these specialist reviewers when the plan becomes concrete enough to evaluate:
+   - `data-integrity-guardian` for schema constraints, transaction safety, persistent data correctness, privacy, and migration risk.
+   - `data-migrations-reviewer` if the plan includes migration files, backfills, enum changes, column renames, or data transforms.
+   - `performance-reviewer` if the plan includes query-heavy paths, indexing, caching, reporting, or high-volume reads/writes.
+   - `deployment-verification-agent` if production data changes need rollout, verification SQL, rollback steps, or monitoring.
+
+The practical route I’d use is:
+
+```text
+harness-engineering
+→ backend-platform
+→ build-web-apps:supabase-postgres-best-practices if Postgres/schema/query details matter
+→ data-integrity-guardian or data-migrations-reviewer for adversarial validation
+→ deployment-verification-agent if production rollout risk exists
+```
+
+I tried to read the local `SKILL.md` files directly, but the current sandbox is rejecting even read-only shell access with `sandbox_apply: Operation not permitted`, so this routing is based on the available skill descriptions rather than live file contents.

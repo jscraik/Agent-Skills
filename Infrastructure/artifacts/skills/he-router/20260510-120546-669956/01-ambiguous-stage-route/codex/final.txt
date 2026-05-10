@@ -1,0 +1,7 @@
+What shape is this Harness request?
+
+1. **Brainstorm**: the idea is still loose and you want options, tradeoffs, or framing.
+2. **Spec**: you want requirements, behavior, acceptance criteria, and edge cases captured.
+3. **Plan**: you want an implementation sequence with files, validation, and rollout steps.
+
+Send just `brainstorm`, `spec`, or `plan`, plus the request.

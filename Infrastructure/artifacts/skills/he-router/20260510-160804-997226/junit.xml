@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-router" tests="1" failures="1" errors="0" timestamp="2026-05-10T15:08:05Z" id="20260510-160804-997226">
+  <testcase name="artifact-path-selection" classname="he-router" time="300.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-router/20260510-160804-997226/01-artifact-path-selection
+    </system-out>
+  </testcase>
+</testsuite>

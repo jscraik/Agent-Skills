@@ -1,0 +1,29 @@
+Yes. For a harness plan that needs database expertise, I’d route it this way:
+
+1. **Primary skill: `harness-engineering`**
+
+   Use this as the top-level router because the object under review is a harness plan. It is the right skill for Harness Engineering lifecycle work: brainstorming, planning, implementation, review, fixes, prior-run improvements, and session-evidence workflows.
+
+2. **Specialist support: `backend-platform`**
+
+   Bring this in when the plan touches database architecture, API/data boundaries, migrations, data integrity, persistence behavior, or backend operational concerns. This is the best general database/platform specialist available from the local skills list.
+
+3. **Optional narrower specialist: `build-web-apps:supabase-postgres-best-practices`**
+
+   Use this only if the database layer is specifically Postgres, Supabase, SQL query performance, indexes, RLS, schema design, or migration safety. It is more focused than `backend-platform`, so it improves output when the harness plan includes concrete Postgres concerns.
+
+Given the wording “the harness plan needs database expertise,” the best route is:
+
+```text
+harness-engineering
+→ backend-platform
+→ build-web-apps:supabase-postgres-best-practices if Postgres/Supabase/query/schema details are present
+```
+
+I tried to inspect the local skill files and locate the harness plan, but the current sandbox is rejecting shell reads with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I can’t validate against the actual plan text from the workspace in this turn. If you paste the harness plan or point me to the relevant content in chat, I can review it through that routing lens and produce the database-aware version.

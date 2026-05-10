@@ -1,0 +1,8 @@
+Yes. I’ll operate in autonomous mode with those guardrails:
+
+- I’ll **record the chosen route assumption** before acting, so the path I’m taking is explicit and reviewable.
+- I’ll **avoid irreversible execution**: no destructive git commands, no publishing, no commits, no pushes, no deletion, no migrations, no external side effects unless you explicitly authorize them.
+- In this environment specifically, I’m also under a **read-only filesystem sandbox**, so I can inspect and reason from the repo, but I cannot edit files or run write operations here.
+- I’ll prefer repo-safe evidence gathering first: `./bin/ask ... --json --robot`, `rg`, file reads, and status/diagnostic commands.
+
+Chosen route assumption for this instruction: you want me to proceed independently where possible, but stay on the reversible side of the line and make assumptions visible before relying on them.

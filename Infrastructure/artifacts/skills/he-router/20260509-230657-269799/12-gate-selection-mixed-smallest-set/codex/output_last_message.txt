@@ -1,0 +1,53 @@
+I’m blocked by the execution environment before I can inspect or prove this in the repo.
+
+Both initial repo commands failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for:
+
+```bash
+pwd && rg --files -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/README.md' -g '*routing*' -g '*route*' -g 'AGENTS.md'
+git status --short
+```
+
+I also checked MCP resources as a fallback, and there are no repo resources exposed there.
+
+Given the current `read-only` sandbox plus `approval_policy=never`, I cannot read files, run `./bin/ask`, patch docs wording, or generate live proof from the tree in this turn.
+
+What I would do once command execution is available:
+
+1. Read the required policy context:
+
+```bash
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/README.md
+sed -n '1,220p' Docs/agents/14-path-ownership-boundaries.md
+sed -n '1,220p' Docs/agents/17-skill-management.md
+```
+
+2. Find the routing/trigger code and docs:
+
+```bash
+rg -n "domain|security|refactor|mixed|route|routing|approved slice|load everything|load all|skill" .
+```
+
+3. Run the request through the repo wrapper in robot mode, likely along these lines:
+
+```bash
+./bin/ask skills improve "route a request that mentions domain, security, and refactor words but only the approved slice changes docs wording; prove why mixed does not load everything" --json --robot
+```
+
+4. Prove the behavior with focused evidence:
+
+```bash
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+The intended proof I’d be looking for is: the mixed request is classified into a narrow approved docs slice, the routing output names only that slice or skill path, and no broad “domain”, “security”, and “refactor” skill families are all loaded just because those words appear in the request. Then I’d update only the canonical docs wording that explains that behavior, staying within path ownership boundaries, and report exact changed paths plus pass/fail validation.
+
+Right now, though, the honest status is: I can’t perform the live repo work until the sandbox command failure is fixed.

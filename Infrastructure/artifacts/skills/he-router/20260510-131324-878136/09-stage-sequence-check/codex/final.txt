@@ -1,0 +1,33 @@
+I can’t determine that from live repo evidence right now because every local read command is being rejected by the sandbox before it can inspect the tree:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for:
+
+```bash
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/README.md
+git status --short
+ls
+```
+
+Given the four choices, my provisional call is:
+
+**Next stage: strategy**
+
+Reason: choosing between `refactor`, `Linear plan`, and `eval` is itself a sequencing/product decision, and I don’t have enough verified repo state to justify jumping straight into implementation, ticket planning, or measurement. Strategy should be the short next stage that answers:
+
+1. What is the current target or unresolved problem?
+2. Is there already a changed surface area or failing validation?
+3. Are we trying to improve a skill’s behavior, restructure code/docs, create tracked execution work, or measure quality?
+
+Use this decision rule once repo access works:
+
+- **Eval** if there is an existing skill/plugin/workflow and the question is “how good is it?” or “what should we fix first?”
+- **Refactor** if evaluation or prior evidence already identified concrete structural changes and the target files are known.
+- **Linear plan** if the work is multi-step, cross-cutting, needs owner/status tracking, or should be decomposed before implementation.
+- **Strategy** if the goal, evidence, or order of operations is still ambiguous.
+
+So with current evidence: **strategy first**, then likely **eval** if this is about a skill/plugin quality question, or **Linear plan** if the strategy reveals a broader initiative.

@@ -1,0 +1,9 @@
+Yep, that is exactly the right kind of thing to clarify once.
+
+I asked for the lane with three choices:
+
+- `Plan`: execution sequence with validation and ownership details
+- `Spec`: requirements, scope, interfaces, acceptance criteria
+- `Brainstorm`: options and tradeoffs before committing
+
+I do not have a selected answer back yet, so I’ll hold off rather than guessing.

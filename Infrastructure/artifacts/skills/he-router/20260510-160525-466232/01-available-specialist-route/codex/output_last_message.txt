@@ -1,0 +1,59 @@
+Routed to the best available specialist: `data-integrity-guardian`, because this Harness Trace Ledger plan is really a persistence and state-integrity problem once it moves from strategy to spec.
+
+The verdict: **keep v1 as an active-run JSON ledger, not a database**, but only if the upcoming `he-spec` adds explicit database-grade integrity rules. The current strategy at [.harness/strategy/2026-05-10-agent-skills-harness-trace-ledger-strategy.md](/Users/jamiecraik/dev/agent-skills/.harness/strategy/2026-05-10-agent-skills-harness-trace-ledger-strategy.md:191) is directionally good: it scopes the ledger to one active heartbeat run and rejects global historical indexing. That is the right call for now.
+
+The database specialist’s high-priority findings were:
+
+1. **Add an atomic write contract before implementation.**
+   The strategy says the ledger should be deterministically generated/refreshed and later introduces `build_harness_trace_ledger.py`, but it does not define crash-safe writes. The spec should require `write temp file -> fsync -> atomic rename`, plus `revision`, `updated_at`, and `last_writer`. Otherwise a mid-write crash can leave truncated JSON and make heartbeat behavior nondeterministic.
+
+2. **Define concurrency semantics.**
+   Stage ownership currently allows `he-plan`, `he-work`, `he-phase-heartbeat`, and PR closeout to all interact with the ledger around lines 398-405. That creates a lost-update risk. The spec should define either “single writer only” or optimistic concurrency with `expected_revision`. If multiple stages can append, use immutable event IDs and reject stale writes.
+
+3. **Require idempotency keys for ledger deltas.**
+   Retried work can duplicate task, media, PR, or validation entries. The spec should require stable IDs such as `task_id`, `media_id`, `validation_id`, `pr_id`, and `event_id`, with clear upsert vs append rules per entity.
+
+4. **Track referenced artifact freshness.**
+   The strategy says the ledger should point to plans, media, session evidence, validation, and PR state rather than replace them. Good. But the spec needs integrity metadata for every file reference: `path`, `sha256`, `size_bytes`, `mtime`, `verified_at`, and mismatch handling. Otherwise the ledger can point at files that were edited or moved after the fact.
+
+5. **Make redaction enforceable, not aspirational.**
+   The strategy says the ledger should be free of raw transcript text and secrets, and allows deep links to be optional. The spec should add an allowlisted schema, forbidden fields/patterns, `redaction_status`, `redaction_applied_by`, and `redaction_policy_version`. This matters because session evidence, command output, PR links, and local paths can easily leak sensitive data.
+
+6. **Add retention fields.**
+   If the ledger stores long-lived references to local session evidence and PR/state context, add `retention_class`, `expires_at`, and lifecycle states like `active`, `archived`, `redacted`, `expired`.
+
+Recommended change before the next `he-spec`:
+
+```text
+Keep the active-run JSON ledger, but model it like a tiny durable store:
+- schema_version
+- ledger_id
+- run_id
+- revision
+- created_at / updated_at
+- last_writer
+- redaction_status
+- retention_class
+- snapshot: { current run state }
+- events: [ immutable append-only records with event_id and idempotency_key ]
+- referenced_artifacts: [ path, sha256, size_bytes, mtime, verified_at, status ]
+```
+
+Add validator fixtures for:
+
+```text
+- partial-write recovery
+- duplicate event replay
+- stale referenced artifact
+- concurrent update conflict
+- redaction violation
+- missing required artifact hash
+```
+
+My concrete routing recommendation for the harness plan is:
+
+```text
+he-strategy -> he-spec with data-integrity requirements -> he-plan
+```
+
+Do **not** jump straight to implementation. Also do **not** introduce SQLite or another database yet. The DB migration trigger should be explicit: cross-run querying, multiple concurrent writers, audit-grade historical event retention, or frequent conflict resolution. Until then, a run-scoped JSON ledger with atomic writes, revisions, idempotent events, and strict linting is the smallest strong mechanism.
