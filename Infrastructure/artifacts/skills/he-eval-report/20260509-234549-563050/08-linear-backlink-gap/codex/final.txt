@@ -1,0 +1,22 @@
+Yes. Based on the completion rule implied by “report has evidence but no Linear backlink,” the missing repair is the **Linear backlink**, not the evidence itself.
+
+What must be repaired before completion:
+
+1. The report must include a valid backlink to the relevant Linear issue, project, or work item.
+2. The backlink should be explicit enough to audit later, ideally one of:
+   - the Linear issue key, for example `ENG-123`
+   - the full Linear URL
+   - both, if the repo’s report format supports it
+3. The Linear item should also point back to the report or completion artifact if the workflow expects bidirectional traceability.
+4. The completion/closeout status should remain blocked until that traceability gap is fixed.
+5. Any final completion note should mention that evidence exists, but completion was withheld or repaired because the Linear backlink was missing.
+
+So the repair is: **add the missing Linear backlink to the report/completion artifact, and if required, add the reciprocal link from Linear back to the report.**
+
+I could not verify the exact file path live because the workspace shell is currently failing at the sandbox layer with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I can identify the required repair, but I could not inspect the report file itself or run `./bin/ask repo closeout --changed --json --robot` to confirm the final gate.

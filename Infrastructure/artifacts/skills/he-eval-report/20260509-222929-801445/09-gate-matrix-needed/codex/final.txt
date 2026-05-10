@@ -1,0 +1,39 @@
+I can build it, but I’m blocked from collecting the actual repo evidence right now.
+
+I tried to read the repository from `/Users/jamiecraik/dev/agent-skills` with `rg` and even a minimal `pwd`, but every shell call is failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because your ask is specifically “from actual evidence,” I don’t want to invent statuses. At the moment I have only the prompt-provided `AGENTS.md` instructions as evidence, not the repo’s validation outputs, eval logs, changed files, skill handles, or closeout reports.
+
+The matrix I would build once filesystem reads work is this shape:
+
+| Gate | Status | Evidence | Command / Source | Notes |
+|---|---:|---|---|---|
+| Repo health | not-run | Shell sandbox prevented execution | `./bin/ask repo doctor --json --robot` | Needs actual run output |
+| Changed-file ownership | not-run | Shell sandbox prevented execution | `./bin/ask repo closeout --changed --json --robot` plus path ownership docs | Needed to confirm canonical sources vs projections |
+| Skill explainability | not-run | Shell sandbox prevented execution | `./bin/ask skills explain <handle> --json --robot` | Need target handle(s) |
+| Skill proof / eval | not-run | Shell sandbox prevented execution | `./bin/ask skills prove <handle> --json --robot` | Primary eval gate evidence |
+| Policy / language compliance | partial | Prompt supplied AGENTS.md says to read `UBIQUITOUS_LANGUAGE.md` before changing skills/policy/docs | Provided AGENTS.md | Cannot verify actual file contents yet |
+| Validation evidence completeness | not-run | Shell sandbox prevented execution | `Docs/agents/04-validation.md`, closeout output, eval artifacts | Needs repo reads |
+| Runtime projection safety | partial | Prompt supplied AGENTS.md says edit canonical sources, not runtime projections | Provided AGENTS.md | Cannot inspect changed paths yet |
+
+Current honest status: **blocked, no repo-derived evidence collected**.
+
+The next required command, once the sandbox issue is cleared, is:
+
+```bash
+./bin/ask repo doctor --json --robot
+```
+
+Then I’d gather changed-file and eval evidence with:
+
+```bash
+./bin/ask repo closeout --changed --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask skills explain <handle> --json --robot
+```
+
+I can turn those outputs into a concrete pass/fail/partial/not-run matrix with exact evidence lines and paths as soon as command execution is available.

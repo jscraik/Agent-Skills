@@ -1,0 +1,34 @@
+I can classify it, but I could not inspect the repo files directly because every shell read failed with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Given the AGENTS.md guidance you provided, I’d classify this as a **planned-proof gap before closure**.
+
+**Classification:** closure-blocking process gap
+
+**Why:** the implementation is claiming proof after the fact, but the source plan did not make that proof a precondition of doing or closing the work. That means the evidence may still be real, but the plan failed to require it up front. In this repo’s terms, that is not primarily an implementation defect; it is a planning and validation-order defect.
+
+**Closure impact:** do not close as cleanly proven until one of these is recorded:
+
+1. The source plan is amended to include the required proof obligation.
+2. The proof is attached as after-the-fact evidence, explicitly marked as retrospective.
+3. The closure notes call out the planning miss as a gap, rather than letting the implementation proof imply the plan was adequate.
+
+Suggested wording:
+
+```text
+Classify as a planned-proof gap: implementation evidence was produced after the fact, but the source plan did not require that proof before work began. Closure may proceed only if the retrospective proof is attached and the missing upfront proof requirement is recorded as a planning/validation-order gap.
+```
+
+If this is going into a closeout record, I’d use:
+
+```text
+Gap: planned-proof missing before implementation
+Severity: closure-blocking until acknowledged
+Type: validation-order / planning-control gap
+Disposition: retrospective proof may satisfy implementation evidence, but does not erase the source-plan omission
+```
+
+So the clean answer is: **yes, classify it before closure as a closure-blocking planned-proof gap, with retrospective proof allowed only as evidence plus an explicit note that the plan failed to require it upfront.**

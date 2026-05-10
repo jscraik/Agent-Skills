@@ -1,0 +1,42 @@
+Yes. I’d recommend **do not close as clean/pass** when the eval report drops an upstream high-severity drift signal from the original prompt comparison.
+
+The right closure is something like:
+
+**Closure Recommendation: `blocked` / `needs-upstream-resolution`**
+
+Rationale:
+
+The original prompt comparison is the upstream source of truth for drift detection. If it produced a **high-severity drift signal**, and the generated eval report omits or downgrades that signal, the report itself is incomplete. Closing the run as successful would hide a material upstream discrepancy and create false confidence in the evaluation result.
+
+A good closure policy would be:
+
+```text
+Closure: Blocked
+
+Reason:
+The eval report omitted a high-severity upstream drift signal detected during the original prompt comparison. Because high-severity drift can indicate a behavioral, requirement, or intent mismatch, the report cannot be treated as complete until the signal is preserved, explicitly adjudicated, or intentionally waived with rationale.
+
+Required before closure:
+- Carry the upstream high-severity drift signal into the eval report, or
+- Mark it as reviewed and intentionally dismissed with evidence, or
+- Re-run/report after fixing the comparison-to-report propagation path.
+```
+
+I’d treat this as a **report integrity failure**, not merely a report wording issue. The important invariant is:
+
+```text
+High-severity upstream signals must either appear in closure evidence or be explicitly adjudicated.
+```
+
+So the closure recommendation should not be “pass with caveat.” It should be **blocked pending adjudication** unless there is already a deliberate suppression mechanism with a recorded rationale.
+
+If this is going into implementation, I’d encode it roughly as:
+
+```text
+If original_prompt_comparison contains any high-severity upstream drift signal
+and eval_report does not include, reference, waive, or resolve that signal,
+then closure_status = "blocked"
+and closure_reason = "high_severity_upstream_drift_signal_dropped"
+```
+
+The report can still close later, but only after the dropped signal is restored or explicitly resolved.
