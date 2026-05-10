@@ -25,6 +25,16 @@ DEFAULT_SKILLS = (
     "he-work",
 )
 
+SELECTION_SIGNAL_WARNING_MARKERS = (
+    "selection signal was unavailable",
+    "skill selection signal not found",
+)
+
+TOOL_PREFLIGHT_ERROR_CODES = {
+    "ERR_ASK_UNAVAILABLE",
+    "ERR_UNSUPPORTED_FILTER",
+}
+
 
 def repo_root_from_script() -> Path:
     return Path(__file__).resolve().parents[3]
@@ -76,6 +86,136 @@ def _classify_case_failures(parsed: dict[str, object]) -> dict[str, object]:
         "content_failure_cases": content_failure_cases,
         "other_failure_cases": other_failure_cases,
     }
+
+
+def _iter_case_warnings(parsed: dict[str, object]) -> list[dict[str, object]]:
+    warning_cases: list[dict[str, object]] = []
+    for case in parsed.get("cases", []):
+        if not isinstance(case, dict):
+            continue
+        warnings = [str(warning) for warning in (case.get("warnings") or [])]
+        if not warnings:
+            continue
+        warning_cases.append(
+            {
+                "id": case.get("id"),
+                "name": case.get("name"),
+                "category": case.get("category"),
+                "warnings": warnings,
+            }
+        )
+    return warning_cases
+
+
+def _selection_signal_warnings(parsed: dict[str, object]) -> list[dict[str, object]]:
+    selected: list[dict[str, object]] = []
+    for case in _iter_case_warnings(parsed):
+        warnings = [str(warning) for warning in (case.get("warnings") or [])]
+        if any(
+            marker in warning.lower()
+            for warning in warnings
+            for marker in SELECTION_SIGNAL_WARNING_MARKERS
+        ):
+            selected.append(case)
+    return selected
+
+
+def _tool_preflight_errors(result: dict[str, object]) -> list[dict[str, object]]:
+    errors: list[dict[str, object]] = []
+    for error in result.get("errors", []) or []:
+        if not isinstance(error, dict):
+            continue
+        code = str(error.get("code") or "")
+        if code in TOOL_PREFLIGHT_ERROR_CODES:
+            errors.append(error)
+    return errors
+
+
+def _result_failure_class(result: dict[str, object]) -> str | None:
+    if result.get("returncode") == 0 and result.get("status") == "success":
+        return None
+    if result.get("status") == "timeout" or result.get("returncode") == 124:
+        return "timeout"
+    if _tool_preflight_errors(result):
+        return "tool_preflight"
+
+    classification = result.get("failure_classification")
+    if isinstance(classification, dict):
+        if classification.get("content_failure_cases"):
+            return "content"
+        if classification.get("timeout_cases"):
+            return "timeout"
+    return "other"
+
+
+def _failure_breakdown(results: list[dict[str, object]]) -> dict[str, object]:
+    breakdown: dict[str, object] = {
+        "timeout_failures": [],
+        "content_failures": [],
+        "tool_preflight_failures": [],
+        "selection_signal_warnings": [],
+        "other_failures": [],
+    }
+
+    for result in results:
+        skill = result.get("skill")
+        failure_class = _result_failure_class(result)
+        if failure_class == "timeout":
+            breakdown["timeout_failures"].append(
+                {
+                    "skill": skill,
+                    "returncode": result.get("returncode"),
+                    "timeout_seconds": result.get("timeout_seconds"),
+                    "duration_seconds": result.get("duration_seconds"),
+                    "case_classification": (
+                        result.get("failure_classification", {}).get("timeout_cases", [])
+                        if isinstance(result.get("failure_classification"), dict)
+                        else []
+                    ),
+                }
+            )
+        elif failure_class == "content":
+            classification = result.get("failure_classification")
+            breakdown["content_failures"].append(
+                {
+                    "skill": skill,
+                    "cases": (
+                        classification.get("content_failure_cases", [])
+                        if isinstance(classification, dict)
+                        else []
+                    ),
+                }
+            )
+        elif failure_class == "tool_preflight":
+            breakdown["tool_preflight_failures"].append(
+                {
+                    "skill": skill,
+                    "errors": _tool_preflight_errors(result),
+                }
+            )
+        elif failure_class == "other":
+            breakdown["other_failures"].append(
+                {
+                    "skill": skill,
+                    "returncode": result.get("returncode"),
+                    "status": result.get("status"),
+                    "errors": result.get("errors", []),
+                }
+            )
+
+        raw_output = result.get("raw_output")
+        if isinstance(raw_output, str) and raw_output.strip():
+            parsed = parse_result(raw_output)
+            warnings = _selection_signal_warnings(parsed)
+            if warnings:
+                breakdown["selection_signal_warnings"].append(
+                    {
+                        "skill": skill,
+                        "cases": warnings,
+                    }
+                )
+
+    return breakdown
 
 
 def _ask_unavailable_reason(repo_root: Path) -> str | None:
@@ -431,6 +571,7 @@ def summarize(
         router_sample_gate.get("returncode") != 0 or router_sample_gate.get("status") != "pass"
     ):
         failing_gates.append("router_samples")
+    failure_breakdown = _failure_breakdown(results)
     return {
         "schema_version": 1,
         "gate": "harness-engineering-lifecycle-evals",
@@ -439,6 +580,7 @@ def summarize(
         "results": results,
         "failing_skills": [result["skill"] for result in failing],
         "failing_gates": failing_gates,
+        "failure_breakdown": failure_breakdown,
         "router_sample_gate": router_sample_gate,
     }
 
