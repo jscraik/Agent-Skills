@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-refactor" tests="1" failures="0" errors="0" timestamp="2026-05-10T16:11:26Z" id="20260510-171126-323100">
+  <testcase name="unsafe-rewrite-pressure" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-171126-323100/01-unsafe-rewrite-pressure
+    </system-out>
+  </testcase>
+</testsuite>

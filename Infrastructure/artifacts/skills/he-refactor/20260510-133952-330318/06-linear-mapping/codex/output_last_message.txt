@@ -1,0 +1,184 @@
+Here’s a small Linear mapping that keeps the refactor program bounded and ready to create later. I did **not** create any Linear objects.
+
+**Milestone**
+Title: `Instruction Surface Refactor: v1 Compression`
+
+Purpose: reduce overlapping agent-facing truth surfaces so the repo has clearer canonical ownership, less duplicated guidance, and safer runtime projections.
+
+Suggested timeframe: `1-2 weeks`
+
+Success criteria:
+- Root `AGENTS.md` becomes a concise routing document, not a repeated policy surface.
+- Canonical docs own the detailed rules: tooling, validation, workflow safety, path ownership, skill management, Linear workflow.
+- Skill/runtime projection boundaries are explicit and checked before edits.
+- Robot-readable commands remain the preferred validation surface.
+- Closeout produces clear evidence for changed files and remaining risks.
+
+**Parent Issue**
+Title: `Refactor agent-facing instruction surfaces into canonical owners`
+
+Type: `Parent / Initiative`
+
+Suggested description:
+
+```markdown
+## Goal
+
+Compress and clarify the repo’s agent-facing instruction surfaces so agents can find the right canonical source quickly, avoid duplicated policy, and make safer changes to skills, runtime projections, and workflow docs.
+
+This parent tracks the first small milestone of the broader refactor program: instruction surface compression and ownership cleanup.
+
+## Context
+
+The current repo has several overlapping truth surfaces, including root `AGENTS.md`, `Docs/agents/*`, runtime projections, skill docs, command contracts, and workflow summaries. The refactor should preserve behavior while moving detailed rules into canonical owners and turning higher-level surfaces into concise maps.
+
+Known canonical anchors:
+
+- `UBIQUITOUS_LANGUAGE.md`
+- `Docs/agents/README.md`
+- `Docs/agents/02-tooling-policy.md`
+- `Docs/agents/04-validation.md`
+- `Docs/agents/13-workflow-and-safety-guidance.md`
+- `Docs/agents/14-path-ownership-boundaries.md`
+- `Docs/agents/16-agent-operating-contract.md`
+- `Docs/agents/17-skill-management.md`
+- `Docs/agents/18-browser-and-local-preview.md`
+- `Docs/agents/05-contradictions-and-cleanup.md`
+
+## Scope
+
+- Compress duplicated repo guidance.
+- Preserve current command and validation behavior.
+- Clarify canonical ownership boundaries.
+- Make runtime projection guidance harder to violate.
+- Keep changes small enough to validate with repo wrappers.
+
+## Out of Scope
+
+- Redesigning the entire docs system.
+- Changing command semantics without a dedicated issue.
+- Moving runtime projection generation logic unless required by validation.
+- Creating new broad process surfaces.
+
+## Acceptance Criteria
+
+- Root `AGENTS.md` is short and points to canonical docs rather than restating them.
+- Duplicated guidance has either been removed or explicitly marked as canonical in one place.
+- Path ownership rules are clear before editing skills, projections, or agent-facing docs.
+- Validation evidence is captured with `./bin/ask repo closeout --changed --json --robot`.
+- No behavior-changing refactor lands without focused proof.
+
+## Validation
+
+Run, at minimum:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+```
+
+**Child Issues**
+
+1. `Compress root AGENTS.md into canonical map`
+
+   Goal: make root `AGENTS.md` a compact entrypoint that keeps only repo-wide non-negotiables and links to canonical docs for details.
+
+   Scope:
+   - Read `UBIQUITOUS_LANGUAGE.md` first.
+   - Compare `AGENTS.md` against `Docs/agents/02-tooling-policy.md`, `04-validation.md`, `13-workflow-and-safety-guidance.md`, `14-path-ownership-boundaries.md`, `16-agent-operating-contract.md`, and `17-skill-management.md`.
+   - Remove duplicated policy from `AGENTS.md` when canonical docs already own it.
+   - Keep essential startup and command guidance.
+
+   Acceptance:
+   - `AGENTS.md` is shorter.
+   - No canonical instruction is lost.
+   - Links point to the owning docs.
+
+2. `Audit instruction duplication across Docs/agents`
+
+   Goal: identify stale, contradictory, or duplicated guidance and produce a small cleanup list.
+
+   Scope:
+   - Use `Docs/agents/05-contradictions-and-cleanup.md` as the starting point.
+   - Check whether cleanup notes are still valid.
+   - Group findings by canonical owner.
+   - Avoid broad rewrites unless a contradiction is clear.
+
+   Acceptance:
+   - Each duplicate/contradiction has a recommended owner.
+   - Stale cleanup notes are removed or updated.
+   - Any remaining ambiguity is captured as follow-up work.
+
+3. `Clarify path ownership and runtime projection edit rules`
+
+   Goal: make it easy for agents to know whether a file is canonical source or generated/runtime projection before editing.
+
+   Scope:
+   - Review `Docs/agents/14-path-ownership-boundaries.md`.
+   - Ensure root guidance and skill-management docs point to it.
+   - Add missing examples only where they prevent likely mistakes.
+
+   Acceptance:
+   - Agents can determine the editable source for skills, projections, sync policy, and runtime docs.
+   - Runtime projection warnings are present in the right canonical surface.
+   - Validation command is documented.
+
+4. `Tighten validation evidence for instruction/doc refactors`
+
+   Goal: make closeout expectations crisp for docs and skill-policy changes.
+
+   Scope:
+   - Review `Docs/agents/04-validation.md` and `Docs/agents/16-agent-operating-contract.md`.
+   - Ensure `./bin/ask repo closeout --changed --json --robot` is the standard final evidence command.
+   - Clarify when `skills prove`, `skills explain`, or `repo doctor` should be added.
+
+   Acceptance:
+   - Validation order is clear.
+   - Evidence expectations are robot-readable.
+   - Doc-only and skill-affecting changes have distinct validation guidance.
+
+5. `Prove compressed instruction surface with one representative workflow`
+
+   Goal: verify the refactor by walking a realistic agent workflow end to end.
+
+   Scope:
+   - Pick one representative change path, preferably a small skill-doc or agent-doc edit.
+   - Confirm the agent can locate canonical guidance without relying on duplicated text.
+   - Run the expected repo wrapper validation.
+
+   Acceptance:
+   - Workflow succeeds using the compressed instruction map.
+   - Any missing link or unclear owner is fixed or filed.
+   - Closeout evidence is recorded.
+
+**Recommended Linear Shape**
+
+Milestone:
+`Instruction Surface Refactor: v1 Compression`
+
+Parent:
+`Refactor agent-facing instruction surfaces into canonical owners`
+
+Children:
+- `Compress root AGENTS.md into canonical map`
+- `Audit instruction duplication across Docs/agents`
+- `Clarify path ownership and runtime projection edit rules`
+- `Tighten validation evidence for instruction/doc refactors`
+- `Prove compressed instruction surface with one representative workflow`
+
+Labels:
+`refactor`, `agent-instructions`, `docs`, `skills`, `validation`
+
+Priority:
+Parent: `High`
+Children: `Medium`, with `Compress root AGENTS.md` as first/highest within the milestone.
+
+Suggested sequencing:
+1. `Audit instruction duplication across Docs/agents`
+2. `Clarify path ownership and runtime projection edit rules`
+3. `Compress root AGENTS.md into canonical map`
+4. `Tighten validation evidence for instruction/doc refactors`
+5. `Prove compressed instruction surface with one representative workflow`
+
+One caveat: I couldn’t read the live repo files because the current shell sandbox rejected even read-only commands, so this is grounded in the instructions you provided plus remembered repo context, not a fresh filesystem pass.

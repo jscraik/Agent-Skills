@@ -1,0 +1,33 @@
+I can do that, but I’m blocked from reading the repo right now. Every local command failed before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I can’t inspect the diff or produce a real code review from live evidence in this turn.
+
+For the review stance you asked for, I’d use this standard:
+
+- **Findings only when evidence is concrete**: point to exact files/lines and describe the observable risk or regression.
+- **Refactor suggestions only when they solve a demonstrated problem**: duplication causing inconsistent behavior, unclear ownership causing bugs, brittle branching, repeated test setup, or measurable complexity.
+- **Weak refactor evidence gets labeled as an assumption**: for example, “Assumption: this pattern appears repeated elsewhere, but I only see it in this diff.”
+- **No theater**: avoid broad “consider extracting,” “improve maintainability,” or “clean this up” comments unless there is a specific failure mode or maintenance cost in the current code.
+- **Prefer asking over posturing** when the concern depends on context outside the diff.
+
+A comment shape I’d use:
+
+```md
+Assumption: this code path is expected to stay limited to <specific scope>. If that’s true, I don’t think this needs a refactor yet.
+
+I’d only extract this if we already have another caller or if the branching grows around <specific condition>. In the current diff, the behavior is local and readable enough, so I’d avoid adding a new abstraction for now.
+```
+
+And for a stronger finding:
+
+```md
+[severity] <file>:<line>
+
+This looks like a behavioral issue because <specific input/state> now causes <specific outcome>. The evidence is <test/code path/existing contract>. A small local fix seems better than a broader refactor here unless there are other call sites I’m not seeing.
+```
+
+Once the sandbox issue is cleared, send me the diff/PR or rerun me in an environment where local reads work and I’ll do the actual review with that evidence bar.

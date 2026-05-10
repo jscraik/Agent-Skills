@@ -1,0 +1,25 @@
+I’m blocked before I can inspect or edit the repo: even read-only commands are failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I tried the minimal safe first steps from `/Users/jamiecraik/dev/agent-skills`:
+
+```bash
+pwd && rg --files -g 'AGENTS.md' -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/README.md'
+git status --short
+```
+
+Both failed with exit code `71` before running. Because the current policy says approval is `never` and filesystem sandboxing is read-only, I can’t request elevated permissions or make the refactor.
+
+What I would do once the sandbox is working:
+
+1. Run `./bin/ask repo doctor --json --robot`.
+2. Read `UBIQUITOUS_LANGUAGE.md` and the relevant `Docs/agents/*` guidance before touching skills/docs.
+3. Inspect changed files and nearby duplication or stale guidance.
+4. Choose exactly one highest-confidence refactor with low blast radius.
+5. Record skipped candidates and why they were skipped, likely in the closeout notes or the most appropriate repo-owned doc, depending on existing convention.
+6. Validate with `./bin/ask repo closeout --changed --json --robot`.
+
+No files were changed.

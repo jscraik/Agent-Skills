@@ -1,0 +1,24 @@
+I’m blocked from making the repo edit in this session because the sandbox is rejecting even read-only shell commands before they run:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for `rg`, `git status`, and `sed`, so I can’t safely find the target file, inspect surrounding context, or apply a patch without guessing.
+
+The smallest intended replacement should look like this wherever the broad rewrite plan currently appears:
+
+```md
+Instead of planning a broad rewrite, take the smallest reversible migration step first.
+
+- Smallest reversible migration step: Identify one narrow behavior, path, or projection boundary to move behind the new approach while leaving the old path intact and easy to restore.
+- Expected feedback: Capture whether the step reduces ambiguity, preserves current behavior, and exposes any hidden coupling or ownership confusion.
+- Stop or pivot condition: Stop expanding the migration if validation fails, user-facing behavior changes unexpectedly, ownership boundaries become less clear, or the feedback shows the rewrite premise is wrong.
+```
+
+If you can rerun me with filesystem access working, I’ll make the actual canonical-source edit and validate it with the repo’s wrapper commands, likely starting with:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
