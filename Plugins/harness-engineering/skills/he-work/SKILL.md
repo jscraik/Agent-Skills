@@ -1,6 +1,6 @@
 ---
 name: he-work
-description: "Build approved HE plan slices. Use when a bounded plan authorizes code changes and validation."
+description: "Implement approved Harness Engineering plan slices with strict scope control. Use when code or artifact changes are authorized by a bounded plan, validation commands are known, and the work can preserve traceability, rollback, and handoff evidence."
 metadata:
   skill-type: team_automation
 ---

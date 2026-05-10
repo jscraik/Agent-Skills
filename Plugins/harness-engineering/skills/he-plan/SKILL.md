@@ -1,6 +1,6 @@
 ---
 name: he-plan
-description: "Create traceable HE execution plans. Use when approved intent needs implementation units and validation gates."
+description: "Create bounded Harness Engineering execution plans from approved specs or issue slices. Use when work needs ordered implementation units, explicit scope boundaries, rollback posture, traceability, and validation gates before code changes."
 metadata:
   skill-type: team_automation
 ---
@@ -8,7 +8,7 @@ metadata:
 ## Philosophy
 Plans are execution contracts, not chat checklists. They should let another agent implement the work from source evidence while preserving Linear/spec/plan/PR traceability.
 ## When to Use
-Use when after approved spec/issue; do non-mutating inspection before planning.
+Use after an approved spec/issue; do non-mutating inspection before planning. Keep scope tight: start with the approved artifact plus the nearest repo evidence, and only load additional surfaces when they change sequencing, validation, or rollback.
 ## Inputs
 Spec, Linear issue, repo state, constraints, product blockers.
 ## Outputs

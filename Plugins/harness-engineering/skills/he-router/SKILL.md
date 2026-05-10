@@ -1,6 +1,6 @@
 ---
 name: he-router
-description: "Analyze and route HE lifecycle requests. Use when stage, artifact path, or specialist route is uncertain."
+description: "Determines the correct Harness Engineering skill for mixed or ambiguous user requests. Use when a request could mean brainstorm, spec, plan, work, review, eval, Linear planning, compound reconstruction, artifact lookup, or specialist steering."
 metadata:
   skill-type: team_automation
 ---

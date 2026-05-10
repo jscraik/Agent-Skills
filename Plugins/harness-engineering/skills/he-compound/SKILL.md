@@ -12,7 +12,7 @@ Use when work spans brainstorm/spec/plan/work/review or needs refresh/resume con
 ## Inputs
 Goal, Linear/project-brain state, specs, plans, PRs, session evidence, solved-problem evidence.
 ## Outputs
-Return schema_version when structured. Stage map, active owner, blockers, next action, blackboard_delta, retained references, `.harness/solutions/**` capture status, and Project Brain status.
+Return schema_version when structured. Stage map, active owner, blockers, next action, repeated_failure_state, blackboard_delta, retained references, `.harness/solutions/**` capture status, and Project Brain status.
 ## Procedure
 1. Reconstruct lifecycle state from live repo evidence, Linear, specs, plans, PRs, validation, session evidence, and Project Brain.
 2. Resolve the stage context contract enough to identify the earliest incomplete, stale, or conflicted stage.
@@ -25,6 +25,12 @@ Return schema_version when structured. Stage map, active owner, blockers, next a
 8. Use UI plan routing only when UI-plan artifacts are present, then hand off to `he-plan`, `he-work`, or `he-code-review`.
 9. Route product-compression blockers such as `active_stage: spec_refresh_required` to `he-spec` instead of approving another additive implementation pass.
 10. Apply the plugin hook capability contract when plugin hook state may affect startup context, guardrail behavior, or handoff evidence. Treat hook output as runtime evidence only; it can inform `.harness` artifacts but cannot replace missing specs, plans, evals, or traceability.
+11. When `he-code-review` reports `repeated_failure_route`,
+    `repeated_failure`, or repeated context-feedback candidates, reconstruct the
+    recurrence from review, validation, session, Linear, and `.harness`
+    evidence. Preserve the pattern in `repeated_failure_state`, decide whether
+    a `.harness/solutions/**` capture is warranted, and route executable repair
+    tracking back to `he-linear-plan` or the live Linear issue if missing.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Check routing, stage artifacts, and handoff evidence.
 ## Failure mode
@@ -44,6 +50,8 @@ Redact secrets; never collapse multi-stage work into one vague task. Do not remo
 - Treating `docs/ui-plan/**` or `docs/ui-plans/**` as new canonical output instead of legacy UI-plan source evidence.
 - Treating a chat summary as a replacement for Linear, spec, plan, PR, or validation links.
 - Advancing to work when prior acceptance proved implementation presence but not first-contact compression.
+- Treating repeated review failures as one-off findings when they need both
+  live Linear tracking and compound lifecycle memory.
 ## Examples
 - "Inspect and resume the coding-harness run for JSC-246; map Linear, spec, plan, PR, Project Brain, north-star evidence, and tell me the exact next HE stage."
 - "Inspect the HE compound state after PR 154 merged, update Project Brain if `.harness` changed, and capture any solved-problem doc that is now warranted."

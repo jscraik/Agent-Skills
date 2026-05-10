@@ -1,6 +1,6 @@
 ---
 name: he-phase-heartbeat
-description: "Plan approved HE phase heartbeats. Use when recurring phase execution needs gates and stop conditions."
+description: "Plan and run approved Harness Engineering phase heartbeats with evidence checkpoints, review gates, stop conditions, and safe continuation rules. Use when a bounded plan, issue, or PR needs recurring phase execution without autonomous closure."
 metadata:
   skill-type: team_automation
   triggers:

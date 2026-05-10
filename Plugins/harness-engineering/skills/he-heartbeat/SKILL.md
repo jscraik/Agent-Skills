@@ -1,6 +1,6 @@
 ---
 name: he-heartbeat
-description: "Create bounded HE follow-up checkpoints. Use when work must resume later with stop rules."
+description: "Create bounded Harness Engineering follow-up checkpoints, resume packets, stop conditions, and automation-safe handoff notes. Use when work must continue later without losing state or silently becoming autonomous execution."
 metadata:
   skill-type: team_automation
   triggers:

@@ -1,6 +1,6 @@
 schema_version: "2.0"
 skill_name: "he-linear-plan"
-last_updated: "2026-05-09"
+last_updated: "2026-05-10"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-linear-plan/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
@@ -70,8 +70,8 @@ cases:
     category: edge
     eval_modes: *modes
     should_trigger: true
-    prepend_skill: false
-    prompt: "Can you in autonomous mode, preserve the assumption that no Linear objects are created without confirmation."
+    prepend_skill: true
+    prompt: "Without inspecting files, handle this self-contained HE Linear headless case: in autonomous mode, preserve the assumption that no Linear objects are created without confirmation and include the literal interactive steering markers."
     deterministic_checks: *safe
     acceptance: *steer
   - id: eval-gate-map
@@ -83,6 +83,24 @@ cases:
     prompt: "Can you map each parent issue to relevant build, test, drift, routing, and rollback gates."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: live-linear-confirmation-required
+    name: "Live Linear confirmation required"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Can you create the missing live Linear bug issue for this approved HE defect, but the destination project and mutation approval are not explicit."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(linear_mutation_status|confirmation_required|live_linear_blocker|required_confirmation|issue_type:\\s*bug|destination|target project|ready-to-create|payload)"}]
+  - id: live-linear-approved-small-set
+    name: "Live Linear approved small set"
+    category: happy
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: true
+    prompt: "The user explicitly approved creating one live Linear parent issue in the known repo project from this selected slice; keep the active set small and report mutation status."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(linear_mutation_status|created|updated|confirmation|required|one live Linear parent|active set small|target project|issue|identifier|blocked)"}]
   - id: minimal-active-set
     name: "Minimal active set"
     category: happy

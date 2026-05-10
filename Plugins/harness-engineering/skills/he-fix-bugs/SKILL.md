@@ -1,6 +1,6 @@
 ---
 name: he-fix-bugs
-description: "Debug validated HE defects narrowly. Use when evidence proves a bug and scope must stay bounded."
+description: "Debug and repair validated Harness Engineering defects with bounded scope, reproduction evidence, root-cause notes, regression protection, and validation proof. Use when a bug is already evidenced and the fix should not expand into broad improvement work."
 metadata:
   skill-type: team_automation
 ---

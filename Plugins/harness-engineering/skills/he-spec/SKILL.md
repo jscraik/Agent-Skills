@@ -1,6 +1,6 @@
 ---
 name: he-spec
-description: "Create evidence-backed HE specs. Use when approved intent needs acceptance criteria before implementation."
+description: "Create bounded, evidence-backed Harness Engineering specs from approved intent. Use when a selected issue, milestone, refactor phase, or execution slice needs acceptance criteria, traceability, risk gates, and validation boundaries before planning or implementation."
 metadata:
   skill-type: product_verification
 ---
@@ -8,18 +8,24 @@ metadata:
 ## Philosophy
 Make intent testable. A good HE spec preserves source truth, states boundaries, and gives planning enough acceptance detail without doing the plan's job.
 ## When to Use
-Use when requirements are needed before plan/work; Explore first and ask second.
+Use when requirements are needed before plan/work; explore first and ask second. Keep scope tight: start with the selected slice and only load 2-3 focused evidence surfaces unless a blocker proves more context is required.
 ## Inputs
 Problem, approved execution slice as one milestone, one parent issue, one refactor phase, or one execution slice, Linear issue, QA report, source evidence, current-vs-latest spec status.
 ## Outputs
 Return schema_version when structured. schema_version: 1, bounded implementation spec for one milestone, parent issue, refactor phase, or execution slice; complete replacement spec section or `.harness/specs/**.md` artifact; Linear Acceptance Traceability, acceptance IDs, validation plan, and blackboard_delta.
 
 Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. When asking a clarification question, include the literal marker `interactive_status: asked` before the question and summarize `selection_evidence`. When headless or autonomous mode would normally ask a question, set `interactive_status: autonomous_assumption`; when a real decision remains, ask once with `request_user_input` when available or return `interactive_status: blocked`.
+
+If the spec discovers missing live Linear tracking, bug tracking, or a required
+parent issue, make that gap explicit in the output as `linear_action_required`.
+Do not silently leave the work only in `.harness`: either route to
+`he-linear-plan`, ask for permission to create/update the live Linear object, or
+record the exact blocker preventing live issue creation.
 ## Procedure
 1. Resolve the stage context contract first; stop if no milestone, parent issue, refactor phase, or execution slice is selected.
 2. Load primary source artifacts for the selected slice: Linear plan, selected refactor when applicable, decisions, core invariants, and brainstorm artifacts. Treat strategy, triage, review, and feature docs as evidence only unless the slice admits them.
 3. Apply document-review tiers, specialist skill steering, and interactive steering only when their trigger conditions are proven by source inspection.
-4. Resolve or block the Linear tracker; run the Linear Delta Capture Gate for existing tracked plans before admitting changed Linear work into scope.
+4. Resolve or block the Linear tracker; run the Linear Delta Capture Gate for existing tracked plans before admitting changed Linear work into scope. If the selected work has no live Linear parent/bug issue and execution will continue beyond the spec, surface `linear_action_required` with the target project, issue type (`bug`, `parent`, `sub-issue`, or `milestone`), proposed title, and required confirmation.
 5. Route durable output to `.harness/specs/**.md`, classify existing artifacts by content shape before path, and apply Artifact Identity frontmatter.
 6. When a slice could trigger broad domain, strategy, refactor, Linear,
    security, specialist, or eval gates, apply the gate selection contract and
@@ -33,6 +39,9 @@ Always make steering and proof searchable in the output: include `interactive_st
 Fail fast: stop at the first failed gate and do not proceed. Check traceability, tests, observability, rollback, and owner evidence.
 ## Failure mode
 If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
+If live Linear mutation was expected but not authorized, do not imply the issue
+exists; return the draft payload plus the exact confirmation needed to create
+or update the live Linear issue.
 ## Execution Boundaries
 Non-mutating until the user authorizes artifact writes. Do not create, close, or mutate Linear objects unless the current task explicitly grants that authority.
 For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.

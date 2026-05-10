@@ -176,3 +176,14 @@ cases:
     acceptance:
       - type: regex
         value: "(?is)(runtime evidence|plugin hook|\\.harness|not.*replacement|missing artifact|blocked|next route|stage context)"
+  - id: repeated-review-failure-state
+    name: "Repeated review failure state"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: true
+    prompt: "he-code-review reported a repeated_failure_route for the same validator bug across three PRs; reconstruct whether this needs live Linear tracking, compound lifecycle memory, or both."
+    deterministic_checks: *safe
+    acceptance:
+      - type: regex
+        value: "(?is)(repeated_failure_state|he-code-review|he-linear-plan|live Linear|compound|lifecycle memory|\\.harness/solutions|recurrence|both)"

@@ -1,6 +1,6 @@
 ---
 name: he-code-review
-description: "Review HE diffs for closure risk. Use when PR, commit, or readiness evidence is needed."
+description: "Review Harness Engineering diffs, PRs, commits, and readiness claims for introduced risk. Use when correctness, validation proof, security posture, traceability, closure safety, or review-thread resolution must be assessed before merge or handoff."
 metadata:
   skill-type: code_quality_review
 ---
@@ -8,13 +8,22 @@ metadata:
 ## Philosophy
 Find introduced risk before summaries. Code review should be precise enough for Codex inline findings and broad enough to catch traceability, validation, readiness gaps, and repeated context failures.
 ## When to Use
-Use when handling PRs, branches, diffs, commits, readiness, and disputed review feedback.
+Use when handling PRs, branches, diffs, commits, readiness, and disputed review feedback. Keep scope tight: inspect changed files, direct evidence, and at most the focused surfaces needed for the active review lane before widening.
 ## Inputs
 Diff, repo guidance, Linear issue, spec, plan, PR evidence, validation output.
 ## Outputs
-Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, reproduction_status, security_review, real_behavior_proof, work_candidate, repeated_failure, blackboard_delta, next handoff, repeated context-feedback candidates. If writing a durable review artifact, use `.harness/review/**.md` with Artifact Identity frontmatter.
+Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, reproduction_status, security_review, real_behavior_proof, work_candidate, repeated_failure, repeated_failure_route, blackboard_delta, next handoff, repeated context-feedback candidates. If writing a durable review artifact, use `.harness/review/**.md` with Artifact Identity frontmatter.
 
 Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. In headless review, record `interactive_status: autonomous_assumption` plus the evidence and confidence; when mutation or readiness mode is ambiguous, ask once with `request_user_input` when available or return `interactive_status: blocked`.
+
+When review finds a repeated failure, recurring bug pattern, or repeated context
+feedback candidate, do not leave it as prose. Classify it as:
+`linear_required` when executable repair work, bug tracking, owner assignment, or
+closure tracking is needed; `compound_required` when lifecycle memory, source
+prompt coverage, solved-problem capture, or cross-stage recurrence analysis is
+needed; or `both_required` when the failure needs live execution tracking and
+durable HE state reconstruction. Include the proposed Linear issue type and
+the `he-compound` handoff evidence when applicable.
 ## Procedure
 1. Select mode first: review-only, readiness, repair/autofix, commit review, or investigation. Review-only mode stays byte-clean.
 2. Resolve the stage context contract when the review will write artifacts, mutate files, update PR state, or hand off to another stage; ask before mutation when mode is ambiguous.
@@ -32,6 +41,10 @@ Always make steering and proof searchable in the output: include `interactive_st
 9. Do not approve readiness from green CI alone when real behavior proof, security review, live PR-thread state, or traceability evidence is missing.
 10. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, and keep the canonical slug aligned with the spec/plan/eval chain.
 11. End with approve, request changes, autofix candidate, or follow-up lane for repeated feedback.
+12. For repeated failures or bugs, set `repeated_failure_route` before closure:
+    route live repair work to `he-linear-plan` or live Linear issue creation
+    when tracking is missing, route lifecycle pattern analysis to `he-compound`,
+    and use both when execution and memory are both required.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Verify gates, references, subagent evidence, and command outcomes.
 ## Failure mode

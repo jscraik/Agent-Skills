@@ -1,6 +1,6 @@
 ---
 name: he-improve
-description: "Review and improve HE skills from evidence. Use when eval, review, or usage findings require changes."
+description: "Improve existing Harness Engineering skills, references, contracts, and evals from concrete evidence such as failed evals, repeated review findings, usage traces, or documented regressions. Use when a bounded hardening pass is required; do not use for speculative redesign."
 metadata:
   skill-type: team_automation
 ---

@@ -5,7 +5,7 @@ archive: "Infrastructure/references/harness-engineering/archived-skill-evals-202
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
 x_accept: &accept [{type: regex, value: "(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)"}]
-x_steer: &steer [{type: regex, value: "(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)"}]
+x_steer: &steer [{type: regex, value: "(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|INTERACTIVE_STEERING|HE_STEERING|HE_PLAN_STEER|HE_WORK_STEER|not start implementation|before I proceed|blocked)"}]
 x_block_unplanned: &block_unplanned [{type: regex, value: "(?is)(blocked|cannot|must not|out of scope|not approved|approved plan|approved slice|safe_to_continue:\\s*false)"}]
 x_nontrigger: &nontrigger [{type: not_regex, value: "(?is)(he-work|interactive_status|selection_evidence|schema_version|stage:|route:)"}]
 cases:
@@ -24,7 +24,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: true
-    prompt: "Can you the plan is complete but work and refactor are both valid next stages; ask before proceeding."
+    prompt: "Without inspecting files, handle this self-contained HE work steering case: the plan is complete but work and refactor are both valid next stages; ask before proceeding and include the literal interactive steering markers."
     deterministic_checks: *safe
     acceptance: *steer
   - id: unplanned-work

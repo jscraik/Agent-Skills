@@ -1,6 +1,6 @@
 ---
 name: he-brainstorm
-description: "Analyze HE options and choose survivor routes. Use when direction is unsettled before spec or plan work."
+description: "Explore Harness Engineering options, discard weak ideas, and select survivor routes before commitment. Use when intent, stage choice, tradeoffs, or possible solution shapes are still unsettled before spec, plan, Linear, or implementation work."
 metadata:
   skill-type: team_automation
 ---
