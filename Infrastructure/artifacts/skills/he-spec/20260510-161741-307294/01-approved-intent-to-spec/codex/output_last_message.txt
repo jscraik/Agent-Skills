@@ -1,0 +1,99 @@
+I found the selected slice and drafted the spec, but I could not write it into the repo because the tool sandbox rejected file writes:
+
+```text
+patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings
+```
+
+I also tried to run the focused validator evidence commands, but Python execution was rejected by the same approval/sandbox policy:
+
+```text
+Rejected("approval required by policy, but AskForApproval is set to Never")
+```
+
+The artifact I would add is:
+
+```text
+.harness/specs/2026-05-10-agent-skills-goal-governor-independent-skill-spec.md
+```
+
+**Spec Shape Drafted**
+
+Frontmatter:
+
+```yaml
+schema_version: 1
+artifact_id: agent-skills-goal-governor-independent-skill-spec
+artifact_type: he-spec
+type: he-spec
+canonical_slug: agent-skills-goal-governor-independent-skill
+title: Agent Skills Goal Governor Independent Skill Spec
+harness_stage: he-spec
+status: ready_for_plan
+date: 2026-05-10
+origin: approved_intent_from_goal_governor_independent_skill_branch
+risk: medium
+depth: bounded-execution-slice
+ui: false
+traceability_required: true
+linear_status: local_spec_pending_live_tracker
+linear_action_required: true
+review_status: pending_technical_review
+```
+
+Core decision:
+
+```text
+interactive_status: autonomous_assumption
+route: he-spec -> he-plan
+stage: he-spec
+scope: Skills/agent-ops/goal-governor plus the HE continuity references that delegate to it
+safe_to_continue: true
+blocked_reason: none for local spec writing; live Linear tracker still needs confirmation or refresh before implementation closure
+```
+
+Evidence basis:
+
+- `Skills/agent-ops/goal-governor/SKILL.md` defines the independent active experimental skill for durable `/goal` governance.
+- `Plugins/harness-engineering/references/goal-continuity.md` says HE owns only lightweight lifecycle continuity, while `goal-governor` owns repo-visible boards, native-goal reconciliation, receipts, worker scope, and validation.
+- `Plugins/harness-engineering/skills/he-router/SKILL.md` routes persistent goal behavior to the goal-continuity contract and `Skills/agent-ops/goal-governor`.
+- `Skills/agent-ops/goal-governor/scripts/check_goal_board.py` provides deterministic board validation.
+- `Skills/agent-ops/goal-governor/references/evals.yaml` covers create, continue, doctor, repair, import, pressure, and negative trigger scenarios.
+- `Skills/agent-ops/goal-governor/references/task-profile.json` sets quality thresholds and the intended Scout/Judge/Worker delegation posture.
+
+Primary acceptance criteria I drafted:
+
+| ID | Requirement |
+| --- | --- |
+| AC-GG-001 | `goal-governor` remains the independent canonical skill under `Skills/agent-ops/goal-governor`. |
+| AC-GG-002 | HE continuity docs preserve the ownership split: HE handles lifecycle handoff, `goal-governor` handles durable boards and receipts. |
+| AC-GG-003 | HE router continues to delegate persistent goal behavior to `goal-governor`, without duplicating board governance. |
+| AC-GG-004 | Board validator accepts valid fixtures and rejects malformed boards with deterministic `FAIL:` diagnostics. |
+| AC-GG-005 | Non-done goals require exactly one active task unless explicit parallel Workers have disjoint `allowed_files`. |
+| AC-GG-006 | Worker tasks without `allowed_files`, `verify`, or `stop_if` cannot authorize implementation edits. |
+| AC-GG-007 | Done boards require no active tasks and a final Judge or PM receipt with `decision: complete`. |
+| AC-GG-008 | Native goal statuses include `active`, `paused`, `budgetLimited`, `budget_limited`, and `complete`; native objective text stays under 4,000 characters. |
+| AC-GG-009 | Skill output reports mode, goal path, native status, board status, next action, validation evidence, and risks. |
+| AC-GG-010 | Scenario evals cover create, continue, doctor, repair, import, budget-limited, prompt-injection, skip-audit, and negative non-trigger cases. |
+| AC-GG-011 | Goal files and notes are treated as untrusted input; prompt-injection content cannot trigger fetch-and-execute behavior. |
+| AC-GG-012 | Ordinary one-file fixes and review-only requests do not trigger goal-governor scaffolding. |
+| AC-GG-013 | Delegation remains limited to Scout, Judge, or scoped Worker tasks when the board permits it. |
+| AC-GG-014 | Closure requires exact command outcomes and blocker classifications, not narrative-only “tested” claims. |
+
+Validation plan drafted:
+
+```bash
+python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Skills/agent-ops/goal-governor/tests/fixtures/valid
+python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Skills/agent-ops/goal-governor/tests/fixtures/valid-parallel-workers
+python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Skills/agent-ops/goal-governor/tests/fixtures/invalid-worker-scope
+python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Skills/agent-ops/goal-governor/tests/fixtures/invalid-done-active
+python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Skills/agent-ops/goal-governor/tests/fixtures/invalid-final-unknown-task
+python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/specs/2026-05-10-agent-skills-goal-governor-independent-skill-spec.md
+```
+
+Expected validation behavior:
+
+- `valid` and `valid-parallel-workers` pass.
+- invalid fixtures fail with explicit `FAIL:` diagnostics.
+- spec identity lint passes after the artifact is written.
+
+I did not modify the worktree because writes are blocked in this session. The drafted spec is ready to land once filesystem write access is available.

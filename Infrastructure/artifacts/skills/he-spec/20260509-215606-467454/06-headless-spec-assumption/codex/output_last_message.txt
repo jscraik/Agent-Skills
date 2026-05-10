@@ -1,0 +1,221 @@
+I’m blocked from writing into the repo in this environment: even read-only shell commands are failing immediately with `sandbox-exec: sandbox_apply: Operation not permitted`, and the current approval policy is `never`, so I can’t request expanded access or apply a patch. I can still give you the spec in ready-to-drop-in form.
+
+Given the repo guidance you provided, I’d place this as a canonical agent-facing doc, likely:
+
+`Docs/agents/19-autonomous-mode.md`
+
+If the numbering already has a newer slot, use the next available number and add it to `Docs/agents/README.md`.
+
+```markdown
+# Autonomous Mode
+
+Autonomous mode lets an agent continue execution when the next useful step is
+clear but a human clarification would normally be requested. The agent records
+its assumptions, chooses a conservative path, and keeps moving until it either
+finishes the requested outcome or reaches a real blocker.
+
+## Purpose
+
+Autonomous mode is for execution-first work where waiting for clarification would
+slow progress more than it would reduce risk. It should preserve user intent,
+protect user work, and produce enough evidence that the user can audit what was
+decided afterward.
+
+Autonomous mode does not remove the need for judgment. It changes the default
+from “pause for clarification” to “make a reversible, well-scoped assumption and
+record it.”
+
+## When To Use
+
+Use autonomous mode when the user explicitly asks for it, or when a repo workflow
+or operator instruction enables it for a bounded task.
+
+Autonomous mode is appropriate when:
+
+- The user’s goal is clear enough to make meaningful progress.
+- The remaining ambiguity has a low-risk conservative default.
+- The agent can record the assumption in the work product, closeout, commit
+  message, PR body, or another durable location.
+- The chosen path is easy to review, revise, or revert.
+- The task can be validated with repo-approved commands or explicit inspection.
+
+Do not use autonomous mode to bypass missing permission, policy, or safety
+requirements.
+
+## Non-Goals
+
+Autonomous mode is not a license to expand scope, make product decisions beyond
+the requested goal, ignore validation, or silently choose high-risk behavior.
+
+It must not be used to:
+
+- Modify unrelated files for cleanup or preference.
+- Revert user changes without explicit instruction.
+- Skip required policy, security, data, or release checks.
+- Invent external facts that should be verified.
+- Make irreversible production, credential, billing, publishing, or destructive
+  changes without explicit approval.
+- Hide uncertainty from the user.
+
+## Operating Rules
+
+When autonomous mode is active, the agent should follow this loop:
+
+1. Identify the user’s concrete goal.
+2. Find the smallest useful next step.
+3. If clarification would normally be asked, choose the safest reasonable
+   assumption.
+4. Record the assumption before or alongside the resulting work.
+5. Execute the step using repo-approved commands and canonical sources.
+6. Validate the result with the narrowest meaningful check.
+7. Continue until the goal is complete or a true blocker is reached.
+8. Close out with changed files, validation evidence, and unresolved assumptions.
+
+The agent should prefer assumptions that are:
+
+- Conservative.
+- Local to the current task.
+- Reversible.
+- Consistent with existing repo patterns.
+- Easy for a reviewer to spot.
+- Low blast radius if wrong.
+
+## Assumption Recording
+
+Every assumption that replaces a clarification question must be recorded in a
+durable place.
+
+Use the most relevant location:
+
+- In a spec: add an `Assumptions` section.
+- In code: prefer tests, names, or structure over comments; add comments only
+  when the assumption would otherwise be invisible.
+- In docs: record assumptions near the affected requirement or procedure.
+- In closeout: summarize assumptions that influenced implementation.
+- In PRs: include assumptions that reviewers must confirm.
+- In commits: include only assumptions needed to understand the change history.
+
+Each recorded assumption should include:
+
+- The ambiguous point.
+- The chosen interpretation.
+- Why that interpretation was selected.
+- What should change if the assumption is wrong.
+
+Recommended format:
+
+```markdown
+## Assumptions
+
+- Because `<ambiguity>`, this work assumes `<chosen interpretation>`.
+  This was chosen because `<reason>`. If incorrect, `<expected adjustment>`.
+```
+
+## Clarification Policy
+
+In autonomous mode, the agent should still ask for clarification when the
+ambiguity would materially change the outcome or risk profile.
+
+Ask before continuing when the decision involves:
+
+- Destructive filesystem or git operations.
+- Secrets, credentials, tokens, or private data exposure.
+- Billing, payments, subscriptions, or external purchases.
+- Publishing, releasing, deploying, or sending user-visible communications.
+- Data migrations, irreversible data changes, or production state.
+- Security-sensitive authorization or permission behavior.
+- Legal, compliance, medical, financial, or safety-sensitive judgment.
+- Large scope expansion beyond the user’s stated goal.
+- Multiple plausible interpretations with meaningfully different user value.
+
+If asking is required, keep the question short and include the recommended
+default where appropriate.
+
+## Scope Control
+
+Autonomous work must stay inside the requested outcome.
+
+The agent may make supporting changes when they are necessary to complete or
+validate the task, such as updating tests, docs, generated indexes, or references
+that are part of the repo’s normal workflow.
+
+The agent should not perform opportunistic refactors, style sweeps, dependency
+upgrades, or unrelated cleanup unless the user explicitly asked for that work or
+the repo workflow requires it.
+
+## Validation Expectations
+
+Autonomous mode requires explicit validation evidence.
+
+Before closeout, the agent should run the narrowest repo-approved checks that
+prove the work. If validation cannot run, the agent must say why and describe
+what inspection or partial validation was completed instead.
+
+Validation evidence should include:
+
+- Exact commands run.
+- Whether each command passed or failed.
+- Any relevant failure details.
+- Any skipped checks and the reason they were skipped.
+
+## Closeout Requirements
+
+Closeout for autonomous mode should include:
+
+- Files changed.
+- Summary of behavior or documentation changed.
+- Validation evidence.
+- Assumptions made.
+- Any remaining risks or follow-up needed.
+
+Keep the closeout concise, but do not omit assumptions that affected the result.
+
+## Examples
+
+### Low-Risk Documentation Ambiguity
+
+A user asks to document a workflow but does not specify the exact doc location.
+
+The agent may choose the existing agent-docs area, record that location
+assumption in the closeout, update the relevant index if present, and continue.
+
+### Low-Risk Implementation Ambiguity
+
+A user asks to add a filter but does not specify sort order.
+
+The agent may preserve the current sort order, add or update a test showing that
+behavior, and record the assumption in the closeout.
+
+### Clarification Required
+
+A user asks to “clean up old data” without defining which records are old.
+
+The agent must ask before making destructive data changes.
+
+## Assumptions For This Spec
+
+- Because the repository already has numbered agent guidance under
+  `Docs/agents/`, this spec assumes autonomous mode should live there as a new
+  agent-facing operating contract. If the repo has a different canonical spec
+  location, move this content there and update the relevant index.
+- Because the user asked for autonomous mode and assumption recording together,
+  this spec assumes the feature is primarily an agent workflow policy rather
+  than a product UI mode. If autonomous mode is also exposed in a CLI or API,
+  add command-level examples and machine-readable output requirements.
+- Because the provided AGENTS.md emphasizes canonical sources over runtime
+  projections, this spec assumes edits should be made to canonical docs only.
+  If runtime projections are generated from another source, update that source
+  instead.
+- Because no implementation surface was available for inspection, this spec
+  avoids naming specific commands beyond general repo-approved validation. If
+  `./bin/ask` has an autonomous-mode command or flag, add exact examples.
+```
+
+Suggested README entry:
+
+```markdown
+- Autonomous mode and assumption recording:
+  [Autonomous Mode](./19-autonomous-mode.md)
+```
+
+I couldn’t validate placement or update indexes because the workspace shell is currently blocked, but the spec is written to fit the AGENTS guidance you gave: canonical docs, explicit assumptions, conservative execution, and durable validation evidence.

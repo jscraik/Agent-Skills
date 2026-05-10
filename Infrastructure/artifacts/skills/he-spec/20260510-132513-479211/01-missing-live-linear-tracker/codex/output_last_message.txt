@@ -1,0 +1,29 @@
+I’m blocked from writing the spec in this session.
+
+What happened:
+
+- I invoked the named `$he-spec` handle as requested.
+- Per the handle instructions, I tried to resolve the real workflow with:
+
+```bash
+./bin/ask skills resolve he-spec --json
+```
+
+- I also tried to read the required repo guidance and canonical skill module:
+
+```bash
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,240p' Plugins/harness-engineering/skills/he-spec/SKILL.md
+```
+
+- All shell reads failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+- MCP resources are also empty, so there is no alternate workspace-readable source available from this session.
+
+Because the `$he-spec` handle explicitly says to fail closed if the contract cannot load, I did not fabricate the workflow or write a spec from guesswork.
+
+The important requested requirement is clear, though: when this is run in a writable/readable session, the spec should make the selected bug’s missing live Linear issue explicit in the spec itself, not only as hidden `.harness` metadata. Concretely, I would expect the spec to include a visible section such as `Live Linear Status` or `Tracking Gap` stating that no live Linear issue exists yet, with the selected bug’s local/harness identifier and the follow-up needed to create or link the Linear issue.

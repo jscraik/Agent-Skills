@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-spec" tests="1" failures="0" errors="0" timestamp="2026-05-10T16:12:40Z" id="20260510-171240-165122">
+  <testcase name="gate-selection-minimum-proof" classname="he-spec" time="300.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260510-171240-165122/01-gate-selection-minimum-proof
+    </system-out>
+  </testcase>
+</testsuite>

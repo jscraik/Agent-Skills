@@ -1,0 +1,25 @@
+I’m blocked before I can perform the `$he-spec` workflow.
+
+Per the `he-spec` handle, I first tried to resolve the canonical contract with:
+
+```bash
+./bin/ask skills resolve he-spec --json
+```
+
+I also tried simple read-only context commands like:
+
+```bash
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/README.md
+/bin/pwd
+```
+
+All of them fail immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also checked MCP resources as a fallback, but there are no repo resources exposed there.
+
+Because `$he-spec` explicitly says to fail closed if the contract cannot load, I can’t honestly verify whether the spec includes a command-line surface or invoke the best CLI specialist from repo evidence in this turn. The blocker is environmental: the read-only sandbox cannot launch even read-only shell commands.

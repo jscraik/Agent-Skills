@@ -1,0 +1,146 @@
+Yes. Before any implementation plan, I’ll define the “stop/go” frame first: what must pass, what failure looks like, and what we’ll roll back or abandon if reality disagrees with the plan.
+
+For this repo, I’d structure it like this.
+
+**Validation Gates**
+
+1. **Scope Gate**
+   Confirm the intended change touches the right canonical source paths, not runtime projections or generated outputs.
+
+   Evidence to collect:
+   - Relevant `AGENTS.md` instructions in scope
+   - [UBIQUITOUS_LANGUAGE.md](/Users/jamiecraik/dev/agent-skills/UBIQUITOUS_LANGUAGE.md) if the change affects skills, policy, runtime projections, or agent-facing docs
+   - Path ownership guidance from [Docs/agents/14-path-ownership-boundaries.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/14-path-ownership-boundaries.md)
+
+   Pass condition:
+   - We can name the canonical files to edit and explain why they are the right source of truth.
+
+   Fail condition:
+   - The only obvious target is generated/runtime output, or ownership is ambiguous.
+
+2. **Baseline Gate**
+   Establish current repo health before modifying anything.
+
+   Commands:
+   ```bash
+   ./bin/ask repo doctor --json --robot
+   git status --short
+   ```
+
+   Pass condition:
+   - Baseline health is known.
+   - Existing dirty files are identified so we do not confuse pre-existing user work with our changes.
+
+   Fail condition:
+   - Repo tooling cannot run, or baseline failures block meaningful validation.
+
+3. **Design/Contract Gate**
+   Before editing, define the behavioral contract the change must satisfy.
+
+   Evidence to collect:
+   - Existing docs or skill behavior being changed
+   - Current command output where applicable, for example:
+     ```bash
+     ./bin/ask skills explain <handle> --json --robot
+     ./bin/ask skills prove <handle> --json --robot
+     ```
+
+   Pass condition:
+   - We can state expected before/after behavior in concrete terms.
+   - Any affected skill, doc, sync policy, or workflow has a clear success condition.
+
+   Fail condition:
+   - The implementation goal is still vague enough that several incompatible solutions would all appear valid.
+
+4. **Implementation Gate**
+   Make only the minimal scoped edits needed to satisfy the contract.
+
+   Pass condition:
+   - Changes are limited to owned canonical paths.
+   - No unrelated cleanup, formatting churn, or projection edits are introduced.
+   - Any user-existing changes are preserved.
+
+   Fail condition:
+   - The implementation requires broad refactors not justified by the goal.
+   - The edit crosses ownership boundaries without evidence.
+
+5. **Focused Validation Gate**
+   Run the narrowest proof that directly validates the changed behavior.
+
+   Likely commands, depending on the change:
+   ```bash
+   ./bin/ask skills prove <handle> --json --robot
+   ./bin/ask skills explain <handle> --json --robot
+   ```
+
+   Pass condition:
+   - The specific changed behavior is proven by command output, tests, or documented checks.
+   - Output is machine-readable where repo tooling supports `--json --robot`.
+
+   Fail condition:
+   - The changed behavior cannot be demonstrated.
+   - Validation relies only on eyeballing text when a repo proof command exists.
+
+6. **Repo Closeout Gate**
+   Confirm final repo state and summarize changed files.
+
+   Commands:
+   ```bash
+   ./bin/ask repo closeout --changed --json --robot
+   git diff --stat
+   git diff --check
+   ```
+
+   Pass condition:
+   - Closeout succeeds or any failures are clearly explained as pre-existing or unrelated.
+   - Diff contains only expected files.
+   - No whitespace or patch hygiene issues.
+
+   Fail condition:
+   - Closeout reveals unexpected generated changes, ownership violations, or unrelated file churn.
+
+**Rollback Conditions**
+
+Rollback or stop immediately if any of these occur:
+
+1. **Wrong Source Edited**
+   If we discover we edited a runtime projection, generated artifact, vendored copy, or otherwise non-canonical path, revert only our change to that file and move the work to the canonical source.
+
+2. **Ownership Boundary Violation**
+   If the change crosses into a path with deeper or conflicting instructions that were not accounted for, stop and reassess before continuing.
+
+3. **Validation Regression**
+   If a repo validation command that passed at baseline fails after our change, and the failure is plausibly caused by our edit, roll back or fix before proceeding.
+
+4. **Unexplained Diff Expansion**
+   If the diff grows beyond the requested scope, especially broad formatting churn or unrelated docs/skills changes, revert our unrelated edits and keep only the necessary patch.
+
+5. **Ambiguous Semantics**
+   If the implementation goal depends on a product or policy decision that is not encoded in existing docs and cannot be inferred safely, stop and ask for clarification rather than inventing policy.
+
+6. **User Work Collision**
+   If existing uncommitted user changes overlap with the files we need and the correct merge is unclear, stop and ask how Jamie wants to handle the collision. Do not overwrite or revert their work.
+
+7. **Tooling Cannot Prove the Change**
+   If the repo’s own validation commands cannot run and there is no acceptable fallback proof, stop before claiming the work is complete. We can still prepare a patch, but it stays explicitly unverified.
+
+**Planning Rule**
+
+Only after those gates and rollback conditions are written down for the specific task would I produce the implementation plan. The plan should include:
+
+- files likely to change
+- commands to inspect current behavior
+- exact validation commands
+- expected pass/fail evidence
+- rollback trigger for each risky step
+
+So the order will be:
+
+```text
+1. Read governing instructions and ownership docs
+2. Define validation gates
+3. Define rollback conditions
+4. Then plan implementation
+5. Then edit
+6. Then validate and close out
+```
