@@ -449,25 +449,55 @@ class TestEnvironmentToml(unittest.TestCase):
     def setUp(self):
         self._content = ENVIRONMENT_TOML_PATH.read_text(encoding="utf-8")
 
-    def test_pylint_action_block_present(self):
-        self.assertIn("Pylint", self._content)
+    def test_pylint_action_block_removed(self):
+        """Pylint action must NOT be present after this PR removed it."""
+        self.assertNotIn(
+            'name = "Pylint"',
+            self._content,
+            "Pylint action was removed in this PR; 'name = \"Pylint\"' must not appear",
+        )
 
-    def test_pylint_command_check_present(self):
-        self.assertIn("pylint --version", self._content)
+    def test_pylint_version_command_removed(self):
+        """'pylint --version' must not appear in any action after Pylint removal."""
+        self.assertNotIn(
+            "pylint --version",
+            self._content,
+            "Pylint action was removed; 'pylint --version' must not appear",
+        )
 
-    def test_pylint_icon_is_debug(self):
-        # The action block uses icon = "debug"
-        # Check that the Pylint entry includes an icon attribute set to debug
-        pattern = r'(?s)Pylint.*?icon\s*=\s*["\']debug["\']'
-        match = re.search(pattern, self._content)
-        self.assertIsNotNone(match, "Pylint entry should have icon='debug'")
+    def test_pylint_existence_check_removed(self):
+        """'command -v pylint' must not appear after Pylint action removal."""
+        self.assertNotIn(
+            "command -v pylint",
+            self._content,
+            "Pylint action was removed; 'command -v pylint' must not appear",
+        )
 
-    def test_pylint_action_uses_strict_mode(self):
+    def test_strict_mode_present_in_remaining_actions(self):
+        """'set -euo pipefail' must still be present in at least one remaining action."""
         self.assertIn("set -euo pipefail", self._content)
 
-    def test_pylint_command_existence_check(self):
-        self.assertIn("command -v pylint", self._content)
+    def test_release_finalize_action_present(self):
+        """'Release Finalize' action must be present (added in this PR)."""
+        self.assertIn('name = "Release Finalize"', self._content)
+
+    def test_setup_uses_path_candidate_loop(self):
+        """setup script must use the new PATH candidate loop."""
+        self.assertIn("for candidate in", self._content)
+        self.assertIn('PATH="$candidate:$PATH"', self._content)
+
+    def test_mise_now_conditional_in_setup(self):
+        """mise execution must be conditional on 'command -v mise' in setup."""
+        self.assertIn("if command -v mise >/dev/null 2>&1;", self._content)
+
+    def test_mise_trust_allows_failure(self):
+        """'mise trust' must allow failure with '|| true' in setup/Tools actions."""
+        self.assertIn("mise trust --yes .mise.toml || true", self._content)
+
+    def test_prepare_worktree_conditional_present(self):
+        """setup must conditionally use scripts/prepare-worktree.sh if available."""
+        self.assertIn("if [[ -f scripts/prepare-worktree.sh ]]", self._content)
 
 
 if __name__ == "__main__":
-    unittest.main()
+
