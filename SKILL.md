@@ -33,7 +33,7 @@ Do not hand-edit runtime projections.
 - `codex-hooks-builder` — Use when creating, auditing, upgrading, or validating Codex hook packs, hooks.json files, hook scripts, or repo-local/user-level .codex hook installs.
 - `coding-harness` — Use when users need to install, bootstrap, upgrade, audit, diagnose, or explain @brainwav/coding-harness in a repository, including harness init/upgrade, CI migration, governance gates, command discovery, and Codex environment action sync.
 - `context7` — Analyze current external library or API docs with Context7 when dependency behavior, version-sensitive references, or ctx7 CLI setup/install guidance is needed.
-- `docs-expert` — Audit, rewrite, and validate repository documentation when README, runbook, code-doc, config-doc, or public trust-surface claims must match live repo evidence.
+- `docs-expert` — Use when README, runbook, code-doc, config-doc, or public trust-surface documentation must be audited, rewritten, or validated against live repository evidence.
 - `fix-mise` — Diagnose, fix, and validate mise runtime failures. Use when commands fail from mise config, missing runtimes, stale pins, trust prompts, or shell activation drift.
 - `improve-codebase-architecture` — Use when reviewing or improving codebase architecture needs deeper module boundaries, clearer context language, better interfaces, stronger testability, or Linear-backed decisions.
 - `keep-codex-fast` — Diagnose Codex Desktop or CLI local-state bloat and safe recovery options. Use when sessions, archived history, logs, worktrees, or stale Codex config may be making Codex feel slow.

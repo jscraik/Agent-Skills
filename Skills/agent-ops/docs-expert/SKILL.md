@@ -1,6 +1,6 @@
 ---
 name: docs-expert
-description: Audit, rewrite, and validate repository documentation when README, runbook, code-doc, config-doc, or public trust-surface claims must match live repo evidence.
+description: Use when README, runbook, code-doc, config-doc, or public trust-surface documentation must be audited, rewritten, or validated against live repository evidence.
 metadata:
   skill-type: code_quality_review
   lifecycle_state: active
@@ -48,6 +48,8 @@ metadata:
 - Start with 2-3 focused surfaces before expanding scope.
 - Identify doc type and reader job.
 - Inventory live scripts, package commands, workflows, tests, and governance docs.
+- Resolve generated docs, projections, or mirrored handles to their canonical
+  source before editing.
 - For Ruby gem README work that needs Ankane-style structure, route or recommend
   the `ankane-readme-writer` subagent after the live evidence inventory is
   known.
@@ -75,7 +77,10 @@ metadata:
 
 ## Validation
 - Run the smallest command or test that exercises the changed behavior.
-- Use strict skill audit and Plugin Eval when changing this skill.
+- For skill changes, prefer canonical gates: strict skill audit, skill gate,
+  OpenAI skill format, package boundary checks, and Plugin Eval.
+- For docs changes, run repo docs lint or prose tooling when available; do not
+  treat format lint as proof that spelling or prose checks passed.
 - Include exact commands, outcomes, and blockers.
 - Fail fast: stop at first failed gate; do not proceed until it is fixed and rerun.
 
@@ -102,9 +107,12 @@ metadata:
 - Loading archived context before the active workflow proves it is needed.
 
 ## Examples
-- Update the README so it matches the current CLI.
-- Audit this runbook against the scripts it references.
-- Add accurate JSDoc for the public config loader.
+- When the user asks to validate README setup commands, inspect the repo command
+  contract before rewriting `npm test`, `pnpm test`, or wrapper guidance.
+- When the user asks to audit a release runbook, compare every referenced
+  script path with the live tree and mark missing commands as `blocked`.
+- When the user asks for code docs, inspect exported types and observed failure
+  behavior before adding JSDoc for public APIs.
 
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
