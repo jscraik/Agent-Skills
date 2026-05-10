@@ -1,0 +1,7 @@
+I’m blocked by the current environment: shell commands are failing before they can read the workspace, so I can’t inspect or safely refactor the parser yet.
+
+If you want, send me either:
+1. The parser file path and its current contents, or
+2. A working filesystem/shell access path for this repo
+
+and I’ll make the allocation-focused refactor directly.

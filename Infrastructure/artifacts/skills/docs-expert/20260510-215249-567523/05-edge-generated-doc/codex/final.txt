@@ -1,0 +1,7 @@
+I couldn’t inspect the file contents or trace the projection locally because every shell command is currently blocked by the sandbox (`sandbox_apply: Operation not permitted`), so I’m not going to guess at the canonical source.
+
+What I can say safely:
+- The file you pointed at, `.agents/skills/docs-expert/SKILL.md`, is a generated projection by its path.
+- Per the repo guidance, the canonical source should live outside the generated `.agents/` projection, typically in the repo’s authored skill/docs source tree, with the projection regenerated from that source.
+
+If you want, I can continue as soon as I have a working read path to the workspace, and I’ll identify the exact canonical file before any edits.
