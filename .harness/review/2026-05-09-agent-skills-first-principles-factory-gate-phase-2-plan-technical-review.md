@@ -7,9 +7,9 @@ title: First-Principles Factory Gate Phase 2 Plan Technical Review
 harness_stage: he-code-review
 status: complete
 date: 2026-05-09
-traceability_required: false
+traceability_required: true
 origin: .harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-2-plan.md
-linear_issue: not_created
+linear_issue: JSC-299
 linear_milestone: First-Principles Factory Gate (proposed)
 review_mode: technical-review
 verdict: approve_for_he_work
