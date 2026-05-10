@@ -1,0 +1,1 @@
+Can you compare three architecture directions for `Plugins/harness-engineering/references/stage-context-contract.md` before writing a spec and identify the survivor.

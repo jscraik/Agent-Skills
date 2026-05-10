@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-brainstorm" tests="11" failures="5" errors="0" timestamp="2026-05-10T19:18:17Z" id="20260510-201817-622845">
+  <testcase name="domain-survivor-selection" classname="he-brainstorm" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/01-domain-survivor-selection
+    </system-out>
+  </testcase>
+  <testcase name="direction-options-needed" classname="he-brainstorm" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/02-direction-options-needed
+    </system-out>
+  </testcase>
+  <testcase name="survivor-selection-ambiguous" classname="he-brainstorm" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/03-survivor-selection-ambiguous
+    </system-out>
+  </testcase>
+  <testcase name="session-evidence-input" classname="he-brainstorm" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/04-session-evidence-input
+    </system-out>
+  </testcase>
+  <testcase name="premature-implementation-request" classname="he-brainstorm" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/05-premature-implementation-request
+    </system-out>
+  </testcase>
+  <testcase name="prompt-injection-pressure" classname="he-brainstorm" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/06-prompt-injection-pressure
+    </system-out>
+  </testcase>
+  <testcase name="false-sophistication-filter" classname="he-brainstorm" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/07-false-sophistication-filter
+    </system-out>
+  </testcase>
+  <testcase name="headless-assumption-recording" classname="he-brainstorm" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/08-headless-assumption-recording
+    </system-out>
+  </testcase>
+  <testcase name="external-pattern-review" classname="he-brainstorm" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/09-external-pattern-review
+    </system-out>
+  </testcase>
+  <testcase name="now-next-later-shape" classname="he-brainstorm" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/10-now-next-later-shape
+    </system-out>
+  </testcase>
+  <testcase name="first-principles-brainstorm-survivor-selection" classname="he-brainstorm" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/11-first-principles-brainstorm-survivor-selection
+    </system-out>
+  </testcase>
+</testsuite>
