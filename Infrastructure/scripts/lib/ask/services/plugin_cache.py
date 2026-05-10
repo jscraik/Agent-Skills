@@ -233,7 +233,11 @@ def refresh_workspace_plugin_caches(
             f"{exc}. Rooted skill projections and manifests may still be current; "
             f"{PLUGIN_CACHE_PERMISSION_RERUN}"
         )
-        return None
+        return ErrorObject(
+            code="ERR_RUNTIME",
+            message=f"Workspace plugin cache refresh blocked by permissions: {exc}",
+            fix_suggestion=PLUGIN_CACHE_PERMISSION_RERUN,
+        )
     except (OSError, ValueError, PluginCacheRefreshError) as exc:
         return ErrorObject(
             code="ERR_RUNTIME",
