@@ -110,6 +110,28 @@ Load references by trigger instead of by habit:
 - `skills/he-work/references/handoff-and-shipping.md`
 - `skills/he-work/references/execution-modes.md`
 
+`he-fix-bugs`:
+
+- `skills/he-fix-bugs/references/contract.yaml`
+- `references/session-evidence-contract.md`
+- Preserved compact context: description: "WHAT: Diagnose and fix HE test, QA, CI, incident, or regression failures. Use when reproduction and validation are required."
+description: "WHAT: Diagnose and fix HE test, QA, CI, incident, or regression failures. Use when reproduction and validation are required."
+- Preserved compact context: Reproduce first; inspect changed path; patch narrowly; validate exact failure path. When the same failure class recurs, record the root-cause learning and durable fix surface.
+Reproduce first; inspect changed path; patch narrowly; validate exact failure path. When the same failure class recurs, record the root-cause learning and durable fix surface.
+
+`he-heartbeat`:
+
+- `skills/he-heartbeat/references/heartbeat-policy-index.md`
+- `references/lifecycle-exit-contract.md`
+- Preserved compact context: description: "WHAT: Automate HE wakeups, monitoring, until-green checks, and follow-through. Use when later thread continuation or goal-aware scheduling is needed."
+description: "WHAT: Automate HE wakeups, monitoring, until-green checks, and follow-through. Use when later thread continuation or goal-aware scheduling is needed."
+- Preserved compact context: Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations. When `/goal` is active or requested, keep the goal as the persistent objective and the heartbeat as the scheduler with live checks and stop rules.
+Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations. When `/goal` is active or requested, keep the goal as the persistent objective and the heartbeat as the scheduler with live checks and stop rules.
+- Preserved compact context: For GitHub PR sweeps, keep the loop concrete: identify the PR set, re-check GitHub truth, inspect CircleCI/job logs for failing checks, inspect CodeRabbit/Codex review threads, and route each wake-up to the smallest safe `he-code-review` or `he-work` follow-up. Use `git-project-triage` as a helper role only when it is available in the Codex agent manifest; if the role is missing, continue inline and report that delegation gap.
+For GitHub PR sweeps, keep the loop concrete: identify the PR set, re-check GitHub truth, inspect CircleCI/job logs for failing checks, inspect CodeRabbit/Codex review threads, and route each wake-up to the smallest safe `he-code-review` or `he-work` follow-up. Use `git-project-triage` as a helper role only when it is available in the Codex agent manifest; if the role is missing, continue inline and report that delegation gap.
+- Preserved compact context: Redact secrets; do not create cron workarounds for short thread follow-up. Do not remove important context for budget trimming; move deep context to references.
+Redact secrets; do not create cron workarounds for short thread follow-up. Do not remove important context for budget trimming; move deep context to references.
+
 `he-code-review`:
 
 - `skills/he-code-review/references/review-policy-index.md`
@@ -143,6 +165,11 @@ Load references by trigger instead of by habit:
 - `skills/he-linear-plan/references/linear-plan-output-contract.md`
 - `skills/he-linear-plan/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
+
+`he-phase-heartbeat`:
+
+- `skills/he-phase-heartbeat/references/phase-gate-contract.md`
+- `skills/he-phase-heartbeat/references/contract.yaml`
 
 ## Historical Context Policy
 

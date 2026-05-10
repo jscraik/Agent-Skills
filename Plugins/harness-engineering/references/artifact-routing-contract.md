@@ -13,7 +13,7 @@ artifact_id: <canonical-slug>-<stage-suffix>
 artifact_type: <he-stage-or-index-type>
 canonical_slug: <repo-name>-<linear-parent-issue-or-milestone>
 title: <human title matching first H1>
-harness_stage: he-spec|he-plan|he-eval-report|he-brainstorm|he-compound|he-strategy|he-refactor|he-linear-plan
+harness_stage: he-spec|he-plan|he-eval-report|he-brainstorm|he-compound|he-strategy|he-refactor|he-linear-plan|he-phase-heartbeat
 status: draft|active|blocked|complete|superseded
 date: YYYY-MM-DD
 traceability_required: true|false
@@ -93,6 +93,7 @@ frontmatter conservative enough for simple parsers:
 | `he-strategy` core-compression mode | `.harness/core/**.md` |
 | `he-refactor` | `.harness/refactors/**.md` |
 | `he-linear-plan` | `.harness/linear/**.md` |
+| `he-phase-heartbeat` | automation/thread heartbeat plus phase status report |
 | `he-spec` | `.harness/specs/**.md` |
 | `he-plan` | `.harness/plan/**.md` |
 | `he-plan` dedicated UI plan | `.harness/plan/**-ui-plan.md` |
