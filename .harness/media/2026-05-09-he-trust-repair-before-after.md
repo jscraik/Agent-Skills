@@ -32,15 +32,10 @@ It supports:
 
 ## Source
 
-## Source
-
 Generated image cache source:
 
 `local generated_images cache (machine-local; omitted for privacy and portability)`
 
-Repository artifact path:
-
-`.harness/media/2026-05-09-he-trust-repair-before-after.png`
 Repository artifact path:
 
 `.harness/media/2026-05-09-he-trust-repair-before-after.png`
