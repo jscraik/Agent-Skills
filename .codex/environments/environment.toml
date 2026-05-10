@@ -118,10 +118,9 @@ if [ "$local_main_ahead_count" -ne 0 ]; then
   exit 2
 fi
 
-if git pull --ff-only origin main; then
-  :
-else
-  pull_status=$?
+git pull --ff-only origin main
+pull_status=$?
+if [ "$pull_status" -ne 0 ]; then
   local_main_ahead_count="$(git rev-list --count origin/main..HEAD 2>/dev/null || echo 0)"
   if [ "$local_main_ahead_count" -ne 0 ]; then
     echo "Local main is ahead of origin/main; aborting."
@@ -129,7 +128,6 @@ else
     exit 2
   fi
   exit "$pull_status"
-fi
 fi
 
 git merge --ff-only "origin/$release_branch"
