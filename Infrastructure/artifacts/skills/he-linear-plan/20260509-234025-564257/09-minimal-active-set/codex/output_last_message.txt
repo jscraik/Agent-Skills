@@ -1,0 +1,3 @@
+Absolutely. I’ll keep Linear creation deliberately selective: only high-signal, actionable findings that are worth tracking will become issues. Low-value, speculative, duplicate, or “nice to have someday” findings will stay out of Linear unless you explicitly ask me to capture them.
+
+When I do create or suggest Linear items, I’ll bias toward a small active set with clear owner/action/value, and I’ll summarize anything discarded rather than turning it into ticket clutter.

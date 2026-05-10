@@ -1,0 +1,229 @@
+I can route it, but the Linear context call was cancelled before I could identify the correct team/project, so I did **not** create or update Linear records.
+
+Here’s the Linear-ready plan I’d route from that gap review. I’d keep this as **one project with three tightly scoped remediation issues plus one closeout issue**, specifically to avoid recreating the “Linear issue explosion” failure mode.
+
+**Project**
+Title: `Gap Review Remediation: Authority, Issue Shape, Evidence Depth`
+
+Summary:
+Tighten planning and review workflows so gap reviews produce bounded execution plans, preserve product/strategy authority boundaries, and require evidence quality that cannot be satisfied by shallow citations or performative validation.
+
+Description:
+
+```markdown
+## Problem
+
+A recent gap review identified three recurring planning failures:
+
+1. Strategy over-authority
+   Planning artifacts drift from implementation guidance into product/strategic decision-making without clearly naming assumptions, decision owners, or reversible defaults.
+
+2. Linear issue explosion
+   Reviews produce too many fragmented Linear issues, making the plan harder to execute, sequence, or close out.
+
+3. Evidence-depth laundering
+   Evidence is cited or summarized in a way that makes the plan appear grounded, but the evidence does not actually support the claim, decision, or scope.
+
+## Goal
+
+Convert these findings into durable routing rules for future gap-review output:
+
+- Keep strategy claims bounded and explicitly owned.
+- Route Linear work into a small number of executable containers.
+- Require evidence to be deep enough to justify the claim it supports.
+- Preserve agent execution speed without weakening review quality.
+
+## Non-Goals
+
+- Rewriting all planning workflows.
+- Creating a broad governance framework.
+- Opening one issue per symptom, quote, or sub-observation.
+- Turning every gap review into a product strategy document.
+
+## Success Criteria
+
+- A gap review can produce a Linear plan with no more than 3-5 primary execution issues unless explicitly justified.
+- Every strategic claim names its authority level: observed, inferred, recommended, or decision-required.
+- Evidence references distinguish direct evidence, inferred evidence, and missing evidence.
+- Closeout includes a before/after example showing how the new routing avoids issue explosion.
+```
+
+**Issue 1**
+Title: `Define authority boundaries for gap-review recommendations`
+
+Labels: `planning`, `governance`, `gap-review`
+Priority: High
+Estimate: 2
+
+Description:
+
+```markdown
+## Problem
+
+Gap-review recommendations can overstep by presenting strategic judgments as if they are implementation facts. This creates strategy over-authority: the artifact appears to decide product direction, prioritization, or organizational intent without naming who owns that decision.
+
+## Scope
+
+Add or update guidance so gap-review output classifies recommendations by authority level:
+
+- Observed: directly supported by reviewed artifacts.
+- Inferred: reasonable conclusion from evidence, but not directly stated.
+- Recommended: agent proposal based on judgment.
+- Decision-required: requires Jamie or another owner to choose.
+
+## Acceptance Criteria
+
+- Gap-review plan guidance includes the four authority levels above.
+- Recommendations that affect roadmap, prioritization, policy, or team process must include an owner or decision-required marker.
+- The guidance includes one concrete example of rewriting an over-authoritative recommendation into a bounded recommendation.
+- Validation confirms the guidance lives in the canonical source, not only a runtime projection.
+
+## Evidence Required
+
+- Path to canonical guidance updated.
+- Before/after example.
+- Validation command output or explicit reason validation could not run.
+```
+
+**Issue 2**
+Title: `Add Linear routing rules to prevent issue explosion`
+
+Labels: `linear`, `planning`, `workflow`
+Priority: High
+Estimate: 3
+
+Description:
+
+```markdown
+## Problem
+
+Gap reviews can create too many Linear issues, splitting related remediation into fragments. This increases coordination cost and makes execution less likely.
+
+## Scope
+
+Define routing rules for converting gap-review findings into Linear plans.
+
+Default shape:
+
+- 1 project or parent issue for the review.
+- 1 issue per remediation theme.
+- 1 closeout issue only when verification spans multiple files, docs, or workflow behavior.
+- No issue per quote, symptom, document section, or minor subfinding unless it has an independent owner and completion path.
+
+## Acceptance Criteria
+
+- Guidance defines when to create a project vs parent issue.
+- Guidance caps default issue count at 3-5 primary execution issues.
+- Guidance requires grouping by remediation outcome, not by review observation.
+- Guidance includes escalation criteria for when more issues are justified.
+- A worked example maps the three findings from this gap review into the bounded plan.
+
+## Evidence Required
+
+- Canonical guidance path.
+- Example Linear plan with issue count.
+- Note explaining why each issue is independently executable.
+```
+
+**Issue 3**
+Title: `Require evidence-depth checks in gap-review closeout`
+
+Labels: `evidence`, `validation`, `gap-review`
+Priority: High
+Estimate: 3
+
+Description:
+
+```markdown
+## Problem
+
+Evidence-depth laundering happens when a plan cites evidence that sounds authoritative but does not actually prove the claim. This can hide weak grounding behind references, command names, or shallow summaries.
+
+## Scope
+
+Add an evidence-depth check for gap-review artifacts and Linear plans.
+
+Evidence categories:
+
+- Direct evidence: source explicitly supports the claim.
+- Corroborating evidence: source supports part of the claim.
+- Inferred evidence: source suggests the claim, but judgment is involved.
+- Missing evidence: claim still needs validation.
+
+## Acceptance Criteria
+
+- Gap-review guidance requires evidence category labels for material claims.
+- Claims that drive work scope cannot rely only on inferred evidence.
+- Closeout must include at least one explicit “missing or weak evidence” note when applicable.
+- Validation guidance distinguishes command execution evidence from source-content evidence.
+
+## Evidence Required
+
+- Canonical guidance path.
+- Example of a laundered evidence statement rewritten with the correct evidence category.
+- Validation or closeout command output.
+```
+
+**Issue 4**
+Title: `Close out gap-review routing remediation with a bounded example`
+
+Labels: `closeout`, `validation`, `gap-review`
+Priority: Normal
+Estimate: 1
+
+Description:
+
+```markdown
+## Purpose
+
+Verify the remediation guidance works as an execution path, not just as documentation.
+
+## Scope
+
+Create a closeout artifact or status update showing how this gap review is routed under the new rules.
+
+The closeout must include:
+
+- The three original findings.
+- The bounded Linear shape used.
+- Why no additional issues were created.
+- The authority level for each recommendation.
+- Evidence-depth classification for the claims that drove scope.
+
+## Acceptance Criteria
+
+- Closeout demonstrates the plan stays within the 3-5 issue default.
+- Closeout identifies any decision-required items.
+- Closeout includes validation evidence or a concrete blocker.
+- Closeout confirms no runtime projection was edited directly.
+
+## Evidence Required
+
+- Links to the project and issues.
+- Validation output.
+- Any unresolved decision points.
+```
+
+**Recommended Routing**
+
+I would create this as a Linear **project**, not a pile of standalone issues:
+
+Project: `Gap Review Remediation: Authority, Issue Shape, Evidence Depth`
+
+Issues under it:
+
+1. `Define authority boundaries for gap-review recommendations`
+2. `Add Linear routing rules to prevent issue explosion`
+3. `Require evidence-depth checks in gap-review closeout`
+4. `Close out gap-review routing remediation with a bounded example`
+
+That structure directly addresses the three findings while modeling the desired behavior: one container, three remediation themes, one verification path. No issue per symptom, no issue per doc section, no issue per phrase from the review.
+
+**Decision Needed**
+
+Before I create this in Linear, I need the destination because the Linear discovery call was cancelled:
+
+- Team/project to use, or
+- Permission to create it in the default relevant team if you want me to infer from Linear once tool access is allowed again.
+
+No Linear changes have been made yet.

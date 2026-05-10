@@ -1,0 +1,15 @@
+Yes. Send me the proposed work list and I’ll classify each item into:
+
+- `Now`: should be created or done immediately because it is high-value, unblocked, and aligned with the current goal.
+- `Next`: valuable and likely worth doing soon, but depends on current work landing, needs more context, or is slightly lower urgency.
+- `Later`: plausible future work, but not important enough for the current cycle.
+- `Do Not Create`: duplicate, stale, too vague, misaligned, already covered elsewhere, or likely to add process/code clutter.
+
+For each item, I can return a table like:
+
+| Proposed work | Classification | Reason | Suggested action |
+|---|---:|---|---|
+| Example item | Now | Directly supports the current goal and has a clear owner/scope. | Create the issue/task. |
+| Example item | Do Not Create | Duplicates existing guidance and would fragment the source of truth. | Fold into existing doc/task instead. |
+
+If you want, paste raw notes, bullets, Linear/GitHub issue titles, or a messy brainstorm. I’ll normalize them as I classify.

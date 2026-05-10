@@ -1,0 +1,3 @@
+$he-linear-plan
+
+The user explicitly approved creating one live Linear parent issue in the known repo project from this selected slice; keep the active set small and report mutation status.

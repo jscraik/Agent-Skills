@@ -1,0 +1,5 @@
+Yes. I’ll preserve that assumption for autonomous work:
+
+No Linear objects will be created without explicit confirmation from you first.
+
+That includes new issues, projects, comments, labels, links, or any other write action in Linear. I can still read/search Linear context if needed, summarize candidates, draft proposed objects, and ask for confirmation before creating or modifying anything.

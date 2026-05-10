@@ -1,0 +1,209 @@
+Yes. I’d route this as **one Linear project with three tightly scoped remediation issues**, plus one closeout issue. That avoids turning “Linear issue explosion” into a self-fulfilling prophecy.
+
+**Project**
+Title: `Close gap review findings: strategy authority, issue routing, evidence depth`
+
+Description:
+
+```markdown
+A gap review identified three operating-model risks:
+
+1. Strategy over-authority: planning artifacts can make broad strategic claims or impose direction beyond the validated mandate.
+2. Linear issue explosion: gap reviews can produce too many fragmented tickets, creating routing noise instead of focused execution.
+3. Evidence-depth laundering: shallow evidence can be presented as if it has deeper validation, especially when summaries compress uncertainty.
+
+Goal: tighten the review-to-execution path so findings are routed with bounded authority, minimal issue count, and explicit evidence standards.
+
+Non-goals:
+- Rewrite the whole planning/review system.
+- Create a large taxonomy of new Linear labels.
+- Convert every gap-review observation into its own issue.
+```
+
+Labels: `gap-review`, `agent-ops`, `process`, `evidence`
+
+Milestone or project state: `Planned`
+
+---
+
+**Issue 1**
+Title: `Bound strategic authority in gap review outputs`
+
+Priority: `High`
+
+Description:
+
+```markdown
+## Problem
+
+Gap review outputs can overreach by turning local findings into broad strategic direction. This creates “strategy over-authority”: the review sounds more definitive than the evidence or mandate supports.
+
+## Outcome
+
+Gap review outputs must clearly distinguish:
+- observed gaps
+- inferred risks
+- recommended next actions
+- strategic claims that require explicit owner approval
+
+## Scope
+
+Update the gap review routing guidance so strategy-level recommendations are framed as proposals unless there is an explicit source of authority.
+
+## Acceptance Criteria
+
+- Gap review guidance defines what counts as a strategy-level claim.
+- Outputs include language for “recommendation”, “requires owner decision”, and “validated direction”.
+- Review-to-Linear routing preserves uncertainty instead of flattening it into directives.
+- At least one example shows an over-authoritative finding rewritten into a bounded recommendation.
+
+## Validation
+
+Run the relevant repo closeout or docs validation command and attach the exact command/output summary to this issue.
+```
+
+Suggested owner: whoever owns planning/gap-review governance.
+
+---
+
+**Issue 2**
+Title: `Add issue-count controls for gap review Linear routing`
+
+Priority: `High`
+
+Description:
+
+```markdown
+## Problem
+
+Gap reviews can produce too many Linear issues. This creates routing overhead, duplicate ownership, and weak prioritization.
+
+## Outcome
+
+Gap review routing should default to a small number of bundled execution issues, with clear rules for when a finding deserves a separate ticket.
+
+## Scope
+
+Define routing rules for converting gap review findings into Linear work:
+- default to one project or parent issue
+- group related findings into workstreams
+- split only when ownership, sequencing, or validation differs materially
+- cap initial routed issues unless an owner explicitly approves expansion
+
+## Acceptance Criteria
+
+- Guidance includes a default maximum initial issue count.
+- Guidance defines split criteria.
+- Guidance includes examples of bundled vs split findings.
+- The three findings from this review route into no more than four issues total.
+- The routing guidance discourages ticket creation for observations without a concrete executable next step.
+
+## Validation
+
+Use a sample gap review and show the resulting Linear structure before and after the new routing rule.
+```
+
+Suggested owner: agent workflow / operations owner.
+
+---
+
+**Issue 3**
+Title: `Require evidence-depth labels in gap review findings`
+
+Priority: `High`
+
+Description:
+
+```markdown
+## Problem
+
+Gap review summaries can make shallow evidence look deeply validated. This is evidence-depth laundering: the final output appears more certain than the underlying review supports.
+
+## Outcome
+
+Every routed finding should carry an explicit evidence-depth signal so readers know how much confidence to place in it.
+
+## Scope
+
+Add an evidence-depth rubric to gap review outputs and Linear routing.
+
+Suggested levels:
+- Observation: seen in one artifact or instance
+- Pattern: repeated across multiple examples
+- Validated: confirmed against source material, owner input, tests, or operational evidence
+- Unverified inference: plausible but not yet proven
+
+## Acceptance Criteria
+
+- Gap review findings include an evidence-depth field.
+- Linear issue descriptions preserve that field.
+- Recommendations change wording based on evidence depth.
+- “Validated” cannot be used without naming the validation source.
+- Examples show shallow evidence being routed without overstated confidence.
+
+## Validation
+
+Review at least one existing or sample gap review and verify each routed issue includes evidence depth plus supporting source notes.
+```
+
+Suggested owner: evidence/validation owner, or same owner as Issue 1 if this is a small cleanup pass.
+
+---
+
+**Issue 4**
+Title: `Document the gap-review-to-Linear routing pattern`
+
+Priority: `Medium`
+
+Description:
+
+```markdown
+## Problem
+
+The fix should become reusable guidance, not one-off cleanup.
+
+## Outcome
+
+Document the final routing pattern for future gap reviews.
+
+## Scope
+
+Add or update agent-facing documentation with:
+- how to identify strategy over-authority
+- how to avoid Linear issue explosion
+- how to preserve evidence depth
+- how to route findings into a small Linear project structure
+
+## Acceptance Criteria
+
+- Documentation includes a reusable template.
+- Documentation names the default issue structure.
+- Documentation includes an example based on these three findings.
+- Related agent guidance links to the new or updated document.
+- Validation evidence is recorded in the issue before closeout.
+
+## Validation
+
+Run the repo’s relevant docs/check command and include the exact pass/fail result.
+```
+
+Suggested owner: docs/workflow owner.
+
+---
+
+**Dependency Order**
+1. `Bound strategic authority in gap review outputs`
+2. `Require evidence-depth labels in gap review findings`
+3. `Add issue-count controls for gap review Linear routing`
+4. `Document the gap-review-to-Linear routing pattern`
+
+The first two define what the findings mean. The third defines how many tickets they become. The fourth makes the pattern durable.
+
+**Routing Note**
+I would **not** create separate issues for every sub-symptom. The clean route is:
+
+- one Linear project
+- three remediation issues for the three named gaps
+- one documentation/closeout issue
+
+That directly addresses the review while avoiding issue explosion inside the fix itself.

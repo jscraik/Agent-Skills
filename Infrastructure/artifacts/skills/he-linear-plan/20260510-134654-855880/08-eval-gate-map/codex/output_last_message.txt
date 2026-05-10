@@ -1,0 +1,75 @@
+Here’s a practical gate map you can use to attach build, test, drift, routing, and rollback expectations to each parent issue. Since the sandbox rejected read-only file inspection, this is grounded in the AGENTS.md guidance you provided rather than a live read of the repo docs. I’d treat it as the working matrix, then verify exact handles with `./bin/ask skills explain <handle> --json --robot` once command execution is available.
+
+**Parent Issue Gate Matrix**
+
+| Parent issue area | Build gates | Test gates | Drift gates | Routing gates | Rollback gates |
+|---|---|---|---|---|---|
+| Skill authoring or improvement | Skill canonical source builds or renders through repo wrapper. Run `./bin/ask skills improve "<goal>" --json --robot` only from repo root. Avoid package-root commands unless the package root is verified. | `./bin/ask skills prove <handle> --json --robot`; focused tests for changed skill behavior; include scenario proof for any new workflow branch. | Confirm edited file is canonical source, not runtime projection. Check line-budget and skill-management rules from `Docs/agents/17-skill-management.md`. Verify no stale projected copy changed accidentally. | Route through skill ownership docs and `./bin/ask skills explain <handle> --json --robot`. If a skill belongs to a package/plugin area, validate package boundary before changing. | Revert by restoring the canonical skill source and regenerating/proving projections if applicable. Keep a minimal rollback note listing affected handles and generated artifacts. |
+| Runtime projections / synced agent-facing docs | Projection generation succeeds through the repo wrapper. Do not hand-edit generated/runtime projections. | Validate the projection consumer still sees expected content. Run closeout with changed files: `./bin/ask repo closeout --changed --json --robot`. | Primary gate. Confirm canonical source and projection are in sync. Check path ownership via `Docs/agents/14-path-ownership-boundaries.md`. Flag any projection-only edits as drift. | Route changes back to the owning canonical document or skill. Use `UBIQUITOUS_LANGUAGE.md` before changing policy, runtime projections, or agent-facing docs. | Roll back generated outputs by regenerating from the prior canonical source or reverting only the projection commit if it was generated incorrectly. |
+| Sync policy / instruction policy | Policy docs must be internally consistent and parseable as docs. Use root wrapper commands only. | Run repo doctor: `./bin/ask repo doctor --json --robot`; run closeout on changed files. Add focused doc/assertion tests if policy is executable. | Check for contradictions with `Docs/agents/05-contradictions-and-cleanup.md`. Confirm terminology matches `UBIQUITOUS_LANGUAGE.md`. | Route through the instruction map in `Docs/agents/README.md`; deeper AGENTS.md scopes override root guidance. Confirm affected scope before editing. | Rollback should restore the previous policy text and any generated projections. Include a note for any downstream docs that may need resync. |
+| Operator docs / workflow docs | Markdown/doc build or validation succeeds if repo has doc tooling. Always use `./bin/ask` wrappers from root. | `./bin/ask repo doctor --json --robot`; `./bin/ask repo closeout --changed --json --robot`; add examples or command transcript checks when changing operator commands. | Check docs for stale commands, duplicated guidance, and conflicts with cleanup notes. Verify wording does not drift from ubiquitous language. | Route by subject: command behavior to `Docs/agents/16-agent-operating-contract.md`, tooling to `02-tooling-policy.md`, validation to `04-validation.md`, workflow/safety to `13-workflow-and-safety-guidance.md`. | Roll back doc changes directly. If the doc change was paired with behavior changes, rollback must name both doc and code/config paths. |
+| Validation/check framework | Build any touched validator package from its verified package root, or use repo wrapper if available. | Run the specific validator tests plus `./bin/ask repo doctor --json --robot`. Confirm `--json --robot` output remains machine-readable. | Compare expected validation order against `Docs/agents/04-validation.md`. Ensure no check silently changes meaning or severity. | Route validation semantics through validation docs and operating contract. Any robot-output schema changes need contract review. | Roll back validator logic and expected outputs together. Preserve prior JSON shape unless an intentional migration exists. |
+| Repo command behavior / `./bin/ask` | `./bin/ask repo doctor --json --robot` must pass or produce known, explained failures. Any wrapper changes must preserve root entrypoint behavior. | Add or run tests for command dispatch, JSON mode, robot mode, exit codes, and error formatting. | Check command docs stay aligned with implementation. Watch for root/package command boundary drift. | Route through `Docs/agents/16-agent-operating-contract.md` and `Docs/agents/02-tooling-policy.md`. | Roll back command wrapper behavior first, then docs. Keep compatibility notes if users may have adopted new flags. |
+| Package-specific implementation | Build only from verified package root. No root package-manager install step. | Run package tests plus repo closeout. If shared behavior changed, broaden tests to downstream users. | Confirm package-local generated files, lockfiles, or runtime outputs are expected. Avoid unrelated metadata churn. | Route through path ownership boundaries and any deeper AGENTS.md in the package path. | Roll back package changes and any generated artifacts together. Note package root and exact commands needed to verify restored state. |
+| GitHub/CI workflow issue | Local build/config validation first where possible. For GitHub Actions or CircleCI, inspect actual failing check/log before editing. | Re-run affected local tests; verify CI config syntax; for CI fixes, confirm the previously failing job class is addressed. | Check CI config did not drift from documented command policy. Confirm cache/workspace changes do not hide stale outputs. | Route GitHub CI through GitHub workflow skill/docs if active; CircleCI through CircleCI-specific config/build guidance. | Roll back CI config and document the previous failing job. Avoid broad cache invalidation unless required. |
+| Release/deployment workflow | Release build/package command must pass in the owning package or repo wrapper. | Smoke test release artifact, schema, generated docs, and install path where applicable. | Check released artifacts match canonical sources. Verify runtime projections and marketplace/index metadata are current. | Route through release ownership docs and skill/plugin management docs. | Rollback includes previous artifact/version, metadata rollback, and any projection or marketplace entry restoration. |
+| Security/policy-sensitive change | Build impacted code normally, with no secret exposure. | Run targeted tests plus security checks relevant to the surface: auth, input handling, file access, shell execution, token handling. | Check policy docs and implementation are aligned. Look for stale exception text or broadened permissions. | Route through security guidance if present and path ownership docs. For high-risk changes, require explicit finding or threat-model link. | Rollback should be immediate and minimal: restore prior policy/guard, remove broadened access, and document any exposed window. |
+
+**Cross-Cutting Required Gates**
+
+| Gate type | Minimum required evidence |
+|---|---|
+| Build | Exact command, working directory, pass/fail result, and any known failure reason. Prefer root wrapper: `./bin/ask repo doctor --json --robot`. |
+| Test | Exact focused test/proof command. For skills, include `./bin/ask skills prove <handle> --json --robot`. For changed docs or policies, include closeout evidence. |
+| Drift | Explicit statement that canonical sources, runtime projections, generated outputs, and docs are aligned, or list the drift found. |
+| Routing | Exact owning doc, skill handle, package root, or path boundary used to decide where the change belongs. |
+| Rollback | Concrete rollback path: files/artifacts to restore, generation command if needed, and validation command proving rollback correctness. |
+
+**Suggested Parent-Issue Checklist Template**
+
+```md
+## Gates
+
+Build:
+- [ ] Command:
+- [ ] Result:
+- [ ] Evidence:
+
+Test:
+- [ ] Command:
+- [ ] Result:
+- [ ] Evidence:
+
+Drift:
+- [ ] Canonical source confirmed:
+- [ ] Runtime projection/generated output checked:
+- [ ] Docs/metadata aligned:
+
+Routing:
+- [ ] Owning path/doc/skill handle:
+- [ ] Relevant AGENTS.md scope:
+- [ ] Package root verified, if applicable:
+
+Rollback:
+- [ ] Files/artifacts to restore:
+- [ ] Regeneration command, if applicable:
+- [ ] Validation command after rollback:
+```
+
+**Recommended Defaults**
+
+Use these as the common gate bundle unless a parent issue has a stricter package-specific path:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+For skill changes, add:
+
+```bash
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+```
+
+For policy, runtime projection, or agent-facing docs, require a drift note that says whether `UBIQUITOUS_LANGUAGE.md` and path ownership boundaries were checked. That is the gate most likely to catch “looks fine locally, wrong source of truth” failures in this repo.
