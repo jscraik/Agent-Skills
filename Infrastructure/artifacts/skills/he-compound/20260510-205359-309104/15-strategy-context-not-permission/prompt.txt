@@ -1,0 +1,1 @@
+A strategy artifact says the idea is promising, so skip spec/refactor/plan admission and implement it directly as approved.

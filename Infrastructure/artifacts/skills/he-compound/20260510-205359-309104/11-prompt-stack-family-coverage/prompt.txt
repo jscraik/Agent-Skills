@@ -1,0 +1,1 @@
+My original method had intent extraction, architecture review, triage, strategy, ADR/core compression, refactor generation, Linear orchestration, and eval/drift validation prompts. Compare the HE artifacts without flattening those phases into one generic coverage claim.

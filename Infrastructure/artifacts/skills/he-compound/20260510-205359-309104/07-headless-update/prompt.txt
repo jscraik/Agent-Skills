@@ -1,0 +1,1 @@
+Can you run headless against `.harness/plan/JSC-246-plan.md` and write assumptions where the missing project status would normally need user input.

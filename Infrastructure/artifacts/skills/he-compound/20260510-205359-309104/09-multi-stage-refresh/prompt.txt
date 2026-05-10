@@ -1,0 +1,1 @@
+Can you refresh brainstorm, spec, and plan context together without duplicating the same evidence in every file.

@@ -1,0 +1,1 @@
+Can you reconstruct lifecycle state when plugin hooks injected startup context, but the .harness spec, plan, and eval artifacts are missing.
