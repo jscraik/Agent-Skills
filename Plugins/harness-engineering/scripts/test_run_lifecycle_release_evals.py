@@ -13,7 +13,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from run_lifecycle_release_evals import run_skill, summarize
+from run_lifecycle_release_evals import _classify_case_failures, run_skill, summarize
 
 
 class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
@@ -182,6 +182,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
                 None,
                 None,
                 True,
+                Path("/tmp/codex-home"),
             )
 
         self.assertTrue(result["split_cases"])
@@ -193,6 +194,8 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
             "case-b",
         )
         self.assertEqual(run_case.call_count, 2)
+        first_call = run_case.call_args_list[0].args
+        self.assertEqual(first_call[-1], Path("/tmp/codex-home"))
 
     def test_split_case_execution_preserves_case_timeout_classification(self) -> None:
         with (
@@ -224,6 +227,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
                 None,
                 None,
                 True,
+                Path("/tmp/codex-home"),
             )
 
         self.assertEqual(result["status"], "timeout")
@@ -231,6 +235,57 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
             result["failure_classification"]["timeout_cases"][0]["id"],
             "slow-case",
         )
+
+    def test_codex_auth_preflight_error_is_classified_as_tool_preflight(self) -> None:
+        summary = summarize(
+            [
+                {
+                    "skill": "he-spec",
+                    "returncode": 1,
+                    "status": "error",
+                    "raw_output": "",
+                    "raw_error": (
+                        "ERROR: Selected Codex home is missing authenticated Codex state "
+                        "for live Codex runs: /tmp/empty"
+                    ),
+                    "errors": [{"code": "ERR_VALIDATION", "message": "Evaluation run failed."}],
+                }
+            ]
+        )
+
+        breakdown = summary["failure_breakdown"]
+        self.assertEqual(
+            [item["skill"] for item in breakdown["tool_preflight_failures"]],
+            ["he-spec"],
+        )
+        self.assertEqual(breakdown["other_failures"], [])
+
+    def test_codex_no_final_output_case_is_tool_preflight_not_content(self) -> None:
+        classification = _classify_case_failures(
+            {
+                "cases": [
+                    {
+                        "id": "approved-intent-to-spec",
+                        "name": "Approved intent to spec",
+                        "category": "happy",
+                        "passed": False,
+                        "tier1_failed": True,
+                        "tier1_failures": ["[codex] codex returned non-zero exit code: 1"],
+                        "warnings": [
+                            "[codex] No events found in JSONL trace.",
+                            "[codex] skipped acceptance assertions because the runner exited "
+                            "non-zero and produced no final output",
+                        ],
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(
+            classification["tool_preflight_cases"][0]["id"],
+            "approved-intent-to-spec",
+        )
+        self.assertEqual(classification["content_failure_cases"], [])
 
 
 if __name__ == "__main__":

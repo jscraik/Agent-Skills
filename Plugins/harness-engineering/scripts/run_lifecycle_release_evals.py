@@ -33,8 +33,22 @@ SELECTION_SIGNAL_WARNING_MARKERS = (
 
 TOOL_PREFLIGHT_ERROR_CODES = {
     "ERR_ASK_UNAVAILABLE",
+    "ERR_CODEX_AUTH_UNAVAILABLE",
     "ERR_UNSUPPORTED_FILTER",
 }
+
+CODEX_AUTH_ERROR_MARKERS = (
+    "missing authenticated codex state",
+    "selected codex home is not logged in",
+    "codex login status reported",
+)
+
+CODEX_RUNNER_PREFLIGHT_MARKERS = (
+    "failed to initialize in-process app-server client",
+    "operation not permitted",
+    "no events found in jsonl trace",
+    "produced no final output",
+)
 
 
 def repo_root_from_script() -> Path:
@@ -76,6 +90,7 @@ def _skill_path(skill_name: str) -> Path:
 def _classify_case_failures(parsed: dict[str, object]) -> dict[str, object]:
     timeout_cases: list[dict[str, object]] = []
     content_failure_cases: list[dict[str, object]] = []
+    tool_preflight_cases: list[dict[str, object]] = []
     other_failure_cases: list[dict[str, object]] = []
 
     for case in parsed.get("cases", []):
@@ -94,6 +109,8 @@ def _classify_case_failures(parsed: dict[str, object]) -> dict[str, object]:
         }
         if any("exit code: 124" in failure or "returncode=124" in failure for failure in failure_strings):
             timeout_cases.append(case_summary)
+        elif _case_has_tool_preflight_signal(case, failure_strings):
+            tool_preflight_cases.append(case_summary)
         elif any("regex failed" in failure for failure in failure_strings):
             content_failure_cases.append(case_summary)
         else:
@@ -102,8 +119,39 @@ def _classify_case_failures(parsed: dict[str, object]) -> dict[str, object]:
     return {
         "timeout_cases": timeout_cases,
         "content_failure_cases": content_failure_cases,
+        "tool_preflight_cases": tool_preflight_cases,
         "other_failure_cases": other_failure_cases,
     }
+
+
+def _case_has_tool_preflight_signal(case: dict[str, object], failure_strings: list[str]) -> bool:
+    warning_strings = [str(warning) for warning in (case.get("warnings") or [])]
+    combined = "\n".join([*failure_strings, *warning_strings]).lower()
+    if (
+        "codex returned non-zero exit code" in combined
+        and any(marker in combined for marker in CODEX_RUNNER_PREFLIGHT_MARKERS)
+    ):
+        return True
+
+    runners = case.get("runners")
+    if not isinstance(runners, dict):
+        return False
+    for runner_result in runners.values():
+        if not isinstance(runner_result, dict):
+            continue
+        artifacts = runner_result.get("artifacts")
+        if not isinstance(artifacts, dict):
+            continue
+        stderr_path = artifacts.get("stderr")
+        if not isinstance(stderr_path, str):
+            continue
+        try:
+            stderr_text = Path(stderr_path).read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if any(marker in stderr_text.lower() for marker in CODEX_RUNNER_PREFLIGHT_MARKERS):
+            return True
+    return False
 
 
 def _iter_case_warnings(parsed: dict[str, object]) -> list[dict[str, object]]:
@@ -146,6 +194,14 @@ def _tool_preflight_errors(result: dict[str, object]) -> list[dict[str, object]]
         code = str(error.get("code") or "")
         if code in TOOL_PREFLIGHT_ERROR_CODES:
             errors.append(error)
+    raw_error = str(result.get("raw_error") or "")
+    if any(marker in raw_error.lower() for marker in CODEX_AUTH_ERROR_MARKERS):
+        errors.append(
+            {
+                "code": "ERR_CODEX_AUTH_UNAVAILABLE",
+                "message": "Codex live eval runner could not access authenticated Codex state.",
+            }
+        )
     return errors
 
 
@@ -153,6 +209,7 @@ def _merged_case_failure_classification(results: list[dict[str, object]]) -> dic
     merged: dict[str, list[dict[str, object]]] = {
         "timeout_cases": [],
         "content_failure_cases": [],
+        "tool_preflight_cases": [],
         "other_failure_cases": [],
     }
     for result in results:
@@ -175,6 +232,17 @@ def _merged_case_failure_classification(results: list[dict[str, object]]) -> dic
                     "tier1_failures": [
                         f"runner timed out after {result.get('timeout_seconds')} seconds"
                     ],
+                }
+            )
+        elif _tool_preflight_errors(result):
+            case_filters = result.get("case_filters")
+            case_id = case_filters[0] if isinstance(case_filters, list) and case_filters else None
+            merged["tool_preflight_cases"].append(
+                {
+                    "id": case_id,
+                    "name": case_id,
+                    "category": None,
+                    "tier1_failures": result.get("errors") or [],
                 }
             )
         elif result.get("returncode") != 0 or result.get("status") != "success":
@@ -203,6 +271,8 @@ def _result_failure_class(result: dict[str, object]) -> str | None:
     if isinstance(classification, dict):
         if classification.get("content_failure_cases"):
             return "content"
+        if classification.get("tool_preflight_cases"):
+            return "tool_preflight"
         if classification.get("timeout_cases"):
             return "timeout"
     return "other"
@@ -231,6 +301,11 @@ def _failure_breakdown(results: list[dict[str, object]]) -> dict[str, object]:
             if isinstance(classification, dict)
             else []
         )
+        tool_preflight_cases = (
+            classification.get("tool_preflight_cases", [])
+            if isinstance(classification, dict)
+            else []
+        )
         if failure_class == "timeout" or timeout_cases:
             breakdown["timeout_failures"].append(
                 {
@@ -248,17 +323,19 @@ def _failure_breakdown(results: list[dict[str, object]]) -> dict[str, object]:
                     "cases": content_cases,
                 }
             )
-        if failure_class == "tool_preflight":
+        if failure_class == "tool_preflight" or tool_preflight_cases:
             breakdown["tool_preflight_failures"].append(
                 {
                     "skill": skill,
                     "errors": _tool_preflight_errors(result),
+                    "case_classification": tool_preflight_cases,
                 }
             )
         if (
             failure_class == "other"
             and not timeout_cases
             and not content_cases
+            and not tool_preflight_cases
             and not _tool_preflight_errors(result)
         ):
             breakdown["other_failures"].append(
@@ -428,6 +505,7 @@ def _run_skill_builder_eval(
     per_skill_timeout_sec: int | None,
     model: str | None,
     timeout_profile: str | None,
+    codex_home: Path | None,
 ) -> dict[str, object]:
     skill_path = _skill_path(skill_name)
     cmd = [
@@ -449,6 +527,8 @@ def _run_skill_builder_eval(
         cmd.extend(["--model", model])
     if timeout_profile:
         cmd.extend(["--timeout-profile", timeout_profile])
+    if codex_home and runner == "codex":
+        cmd.extend(["--codex-home", str(codex_home)])
 
     started_at = time.time()
     print(
@@ -513,8 +593,8 @@ def _run_skill_builder_eval(
         "tier1_failures": parsed.get("tier1_failures"),
         "tier2_findings": parsed.get("tier2_findings"),
         "failure_classification": _classify_case_failures(parsed),
-        "case_filters": parsed.get("case_filters", []),
-        "category_filters": parsed.get("category_filters", []),
+        "case_filters": parsed.get("case_filters", list(cases)),
+        "category_filters": parsed.get("category_filters", list(categories)),
         "artifacts": parsed.get("artifacts", {}),
         "errors": [] if status == "success" else [{"code": "ERR_VALIDATION", "message": "Evaluation run failed."}],
         "raw_output": process.stdout,
@@ -625,6 +705,7 @@ def _run_skill_builder_eval_split_cases(
     per_skill_timeout_sec: int | None,
     model: str | None,
     timeout_profile: str | None,
+    codex_home: Path | None,
 ) -> dict[str, object]:
     started_at = time.time()
     case_ids, discovery_error = _list_skill_builder_cases(
@@ -650,6 +731,7 @@ def _run_skill_builder_eval_split_cases(
                 per_skill_timeout_sec,
                 model,
                 timeout_profile,
+                codex_home,
             )
         )
 
@@ -714,6 +796,7 @@ def run_skill(
     model: str | None,
     timeout_profile: str | None,
     split_release_cases: bool,
+    codex_home: Path | None,
 ) -> dict[str, object]:
     if eval_runner == "ask":
         if cases or categories or model or timeout_profile:
@@ -745,6 +828,7 @@ def run_skill(
             per_skill_timeout_sec,
             model,
             timeout_profile,
+            codex_home,
         )
     return _run_skill_builder_eval(
         repo_root,
@@ -756,6 +840,7 @@ def run_skill(
         per_skill_timeout_sec,
         model,
         timeout_profile,
+        codex_home,
     )
 
 
@@ -880,6 +965,14 @@ def main() -> int:
     )
     parser.add_argument("--model", help="Model override for direct Codex eval runner.")
     parser.add_argument(
+        "--codex-home",
+        help=(
+            "Codex home for direct Codex eval runner. Defaults to CODEX_HOME or ~/.codex "
+            "so split release lanes use authenticated state instead of unauthenticated "
+            "temporary homes."
+        ),
+    )
+    parser.add_argument(
         "--timeout-profile",
         choices=("default", "codex-heavy", "discovery-heavy"),
         help="Timeout profile for direct Codex eval runner.",
@@ -917,6 +1010,11 @@ def main() -> int:
         if item.strip()
     )
     categories = tuple(args.category or ())
+    codex_home = (
+        Path(args.codex_home).expanduser().resolve()
+        if args.codex_home
+        else Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex").expanduser().resolve()
+    )
     results = [
         run_skill(
             repo_root,
@@ -929,6 +1027,7 @@ def main() -> int:
             args.model,
             args.timeout_profile,
             args.split_release_cases,
+            codex_home if args.eval_runner == "codex" else None,
         )
         for skill in selected_skills
     ]
