@@ -1,0 +1,22 @@
+Using `$he-plan` from the handoff you provided. I’m honoring the “without inspecting files” constraint, so I’m treating this as a self-contained HE plan handoff and stopping before implementation.
+
+**Plan**
+
+1. Confirm the intended next stage from the handoff, because more than one valid path exists after planning.
+2. Once you choose the path, proceed with the selected workflow only.
+3. Preserve the handoff boundary: no implementation starts until you steer it.
+4. When implementation begins, validate with explicit pass/fail evidence and report changed paths and commands.
+
+**Valid Next Stages**
+
+- `Implement`: start making the planned changes.
+- `Review`: inspect the plan for risks, gaps, contradictions, or missing validation.
+- `Refine`: adjust scope, sequencing, acceptance criteria, or validation before coding.
+- `Split`: break the plan into smaller execution slices or worker tasks.
+- `Stop`: keep the plan as the artifact and do no further work.
+
+`<<<INTERACTIVE_STEERING_REQUIRED>>>`
+
+Which next stage should I take: `Implement`, `Review`, `Refine`, `Split`, or `Stop`?
+
+`<<<END_INTERACTIVE_STEERING>>>`

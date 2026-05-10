@@ -1,0 +1,205 @@
+Yes. For an irreversible HE routing change, I would handle it as a proof-gated design change, not a “tidy up the routing table” task.
+
+I can’t inspect the repo from this session because even read-only shell commands are being rejected by the sandbox, so this is a plan based on the AGENTS.md instructions you gave and the stated goal. The important posture shift is: first prove the current routing behavior and ownership boundaries, then define the irreversible migration, then implement only after the proof packet passes.
+
+**Plan**
+
+1. **Frame The Change As Irreversible**
+
+   Treat the HE routing change as irreversible if any of these are true:
+
+   - It changes which skill, workflow, or operator path handles existing user intent.
+   - It removes or deprecates an existing route.
+   - It changes canonical source ownership or runtime projection behavior.
+   - It changes handles, aliases, route precedence, fallback behavior, or discovery semantics.
+   - It affects generated/runtime files that agents consume.
+   - It would be hard to roll back without breaking learned agent behavior, docs, tests, or published workflows.
+
+   The working assumption should be: routing changes are product behavior changes for agents. They need proof, migration notes, and validation.
+
+2. **Read Required Policy Before Touching Files**
+
+   Before any implementation, read the repo-mandated sources:
+
+   - `UBIQUITOUS_LANGUAGE.md`
+   - `Docs/agents/README.md`
+   - `Docs/agents/14-path-ownership-boundaries.md`
+   - `Docs/agents/16-agent-operating-contract.md`
+   - `Docs/agents/04-validation.md`
+   - `Docs/agents/13-workflow-and-safety-guidance.md`
+   - `Docs/agents/17-skill-management.md`
+   - Any deeper `AGENTS.md` that governs the files involved
+
+   The goal is to identify the canonical source files for HE routing. No runtime projections should be edited directly.
+
+3. **Collect Proof Before Design**
+
+   Create a proof packet before proposing edits. It should include exact commands and outputs.
+
+   Required commands:
+
+   ```bash
+   ./bin/ask repo doctor --json --robot
+   ./bin/ask skills explain <affected-handle> --json --robot
+   ./bin/ask skills prove <affected-handle> --json --robot
+   ```
+
+   If the change affects multiple handles, run `explain` and `prove` for each one.
+
+   Also collect:
+
+   - The current route source path.
+   - The current runtime projection path, if one exists.
+   - The current route precedence behavior.
+   - Current fallback behavior.
+   - Current validation status.
+   - Current docs that describe the route.
+   - Any generated artifacts that would change after sync/projection.
+
+   This proof packet is the gate. If it is missing or ambiguous, implementation does not start.
+
+4. **Define The Routing Delta Explicitly**
+
+   Write the intended behavior as a before/after table:
+
+   | Case | Current Route | New Route | Why This Must Change | Compatibility Risk |
+   |---|---|---|---|---|
+   | User asks X | Existing HE route | New route | Reason | Low/Med/High |
+
+   Include at least:
+
+   - Trigger phrases.
+   - Skill handles or routing handles.
+   - Precedence changes.
+   - Deprecated route behavior.
+   - Whether old aliases still resolve.
+   - Whether old docs remain valid.
+   - Whether runtime projections need regeneration.
+   - Whether any agent workflows will see different behavior.
+
+5. **Classify The Irreversibility**
+
+   Give the change a migration classification:
+
+   - **Compatible:** old route still works, new route adds specificity.
+   - **Soft breaking:** old route still exists but behavior changes.
+   - **Hard breaking:** old route or handle no longer works.
+   - **Projection breaking:** canonical source changes require generated runtime updates.
+   - **Docs breaking:** agent-facing docs must change to remain truthful.
+
+   For irreversible HE routing, assume at least soft breaking unless proof shows otherwise.
+
+6. **Require Approval Criteria Before Implementation**
+
+   Implementation should only begin after the proof packet answers these questions:
+
+   - What exact route exists today?
+   - What exact behavior will change?
+   - Which canonical source owns the change?
+   - Which generated/runtime files must not be edited directly?
+   - What validation proves the existing behavior?
+   - What validation will prove the new behavior?
+   - What rollback or mitigation exists if the new route is wrong?
+   - What docs must change with the route?
+   - Are any handles, aliases, or workflows being removed?
+
+   If any answer is unknown, the next task is investigation, not editing.
+
+7. **Implementation Sequence After Proof Passes**
+
+   Once approved, make the smallest canonical edit set:
+
+   1. Update canonical HE routing source.
+   2. Update canonical docs that describe the route.
+   3. Regenerate/sync runtime projections using repo wrappers only.
+   4. Do not manually edit generated projections.
+   5. Add or update routing proof fixtures/tests.
+   6. Validate old and new route behavior where compatibility is expected.
+   7. Run closeout.
+
+   Expected command shape:
+
+   ```bash
+   ./bin/ask repo doctor --json --robot
+   ./bin/ask skills explain <affected-handle> --json --robot
+   ./bin/ask skills prove <affected-handle> --json --robot
+   ./bin/ask repo closeout --changed --json --robot
+   ```
+
+   If the repo has a specific HE validation or sync command, use that instead of inventing a package-level command.
+
+8. **Proof Required After Implementation**
+
+   The post-change proof packet should include:
+
+   - Before/after changed-file list.
+   - Evidence that only canonical sources were edited directly.
+   - Evidence that projections were regenerated by the repo tool, if applicable.
+   - `skills explain` output showing the new route.
+   - `skills prove` output showing the route is valid.
+   - `repo doctor` status.
+   - `repo closeout --changed` status.
+   - A compatibility note for every old route, alias, or behavior touched.
+
+9. **Stop Conditions**
+
+   Stop before implementation if:
+
+   - Path ownership is unclear.
+   - The affected handle cannot be proven before the change.
+   - Validation cannot distinguish old routing from new routing.
+   - The change would remove a route without an explicit migration path.
+   - Runtime projections appear to be the only known editable location.
+   - The route affects multiple skills or workflows and no precedence table exists.
+
+10. **Suggested Work Item Shape**
+
+   I’d phrase the implementation ticket like this:
+
+   ```markdown
+   ## Goal
+
+   Change HE routing for <specific intent/handle> from <current behavior> to <new behavior>.
+
+   ## Irreversibility
+
+   This is an irreversible routing change because <reason>. Treat as a proof-gated migration, not cleanup.
+
+   ## Pre-Implementation Proof Required
+
+   - [ ] Read `UBIQUITOUS_LANGUAGE.md`
+   - [ ] Read `Docs/agents/14-path-ownership-boundaries.md`
+   - [ ] Identify canonical routing source
+   - [ ] Identify runtime projections
+   - [ ] Run `./bin/ask repo doctor --json --robot`
+   - [ ] Run `./bin/ask skills explain <handle> --json --robot`
+   - [ ] Run `./bin/ask skills prove <handle> --json --robot`
+   - [ ] Document current route precedence and fallback behavior
+   - [ ] Document before/after routing table
+
+   ## Implementation Rules
+
+   - Edit canonical sources only.
+   - Do not manually edit runtime projections.
+   - Preserve compatibility unless explicitly approved.
+   - Update docs and proof fixtures with the route change.
+   - Require post-change proof before closeout.
+
+   ## Post-Implementation Proof Required
+
+   - [ ] `./bin/ask repo doctor --json --robot`
+   - [ ] `./bin/ask skills explain <handle> --json --robot`
+   - [ ] `./bin/ask skills prove <handle> --json --robot`
+   - [ ] `./bin/ask repo closeout --changed --json --robot`
+   - [ ] Changed files match planned ownership boundaries
+   - [ ] Compatibility/migration note written
+   ```
+
+**My recommendation**
+
+Do this in two separate PRs or commits if the repo process allows it:
+
+1. **Proof and design only:** adds the routing proof packet, before/after table, and migration decision.
+2. **Implementation:** changes the canonical routing source and regenerated projections.
+
+That makes the irreversible part visible before code moves, which is exactly the right instinct here.

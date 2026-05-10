@@ -1,0 +1,22 @@
+`HE_PLAN_HANDOFF_READY`
+
+I can handle this as a self-contained HE plan handoff without inspecting files.
+
+Because the handoff says multiple next stages are valid, I will **not start implementation yet**. Please choose the next stage:
+
+`HE_PLAN_STEER_IMPLEMENT`
+Proceed into implementation from the plan.
+
+`HE_PLAN_STEER_REVIEW`
+Review or critique the plan first.
+
+`HE_PLAN_STEER_REFINE`
+Refine the plan before implementation.
+
+`HE_PLAN_STEER_DECOMPOSE`
+Break the plan into smaller execution slices.
+
+`HE_PLAN_STEER_PAUSE`
+Stop here and wait.
+
+Which steering marker should I follow?

@@ -1,0 +1,42 @@
+Using `$he-plan` from the handoff you provided. I’m honoring your constraint: I did not inspect files or start implementation.
+
+**HE Plan**
+
+Goal: handle the handoff case where planning is complete enough to proceed, but the next stage is ambiguous because multiple valid paths exist.
+
+Current read:
+- The plan handoff is self-contained.
+- No repo inspection should happen yet.
+- Implementation must not begin automatically.
+- Because more than one next stage is valid, I should pause and ask Jamie to steer.
+- The response must include the literal interactive steering markers.
+
+Recommended next-stage options:
+
+1. **Implementation**
+   Start making the planned changes in the repo, using the plan as the source of truth.
+
+2. **Plan Refinement**
+   Tighten the plan first: clarify scope, acceptance criteria, risks, validation, or sequencing before any edits.
+
+3. **Review / Critique**
+   Treat the plan as a document to stress-test before implementation, surfacing ambiguity, missing validation, or likely failure modes.
+
+4. **Validation Design**
+   Define the exact checks, commands, fixtures, or evidence needed so implementation has a clean finish line.
+
+5. **Defer / Archive**
+   Do not proceed right now; preserve the handoff state and wait for a later explicit start.
+
+<<INTERACTIVE_STEERING_START>>
+Which next stage should I take?
+
+Reply with one of:
+- `implement`
+- `refine plan`
+- `review plan`
+- `design validation`
+- `defer`
+
+I will wait for your steering before starting implementation.
+<<INTERACTIVE_STEERING_END>>

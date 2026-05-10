@@ -1,0 +1,1 @@
+Can you plan a reversible local wording fix without forcing the full architecture review pipeline.
