@@ -1137,5 +1137,64 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Valid examples", message)
         self.assertIn("skills audit", message)
 
+    def test_skills_validate_openai_format_json_contract(self):
+        """Verify ask exposes OpenAI skill format as a first-class validation surface."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "validate-openai-format",
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        gate = output["data"]["openai_skill_format"]
+        self.assertEqual(gate["exit_code"], 0)
+        self.assertIn("lint_openai_skill_format.sh", " ".join(gate["command"]))
+
+    def test_skills_validate_skill_gate_json_contract(self):
+        """Verify ask exposes skill gate as a first-class validation surface."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "validate-skill-gate",
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        gate = output["data"]["skill_gate"]
+        self.assertEqual(gate["exit_code"], 0)
+        self.assertTrue(any("skill_gate.py" in part for part in gate["command"]))
+
+    def test_skills_validate_boundaries_json_contract(self):
+        """Verify ask exposes canonical-versus-projection ownership as a first-class check."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "validate-boundaries",
+            "he-heartbeat",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        boundary = output["data"]["boundary_check"]
+        self.assertEqual(boundary["status"], "pass")
+        self.assertEqual(boundary["handle"], "he-heartbeat")
+        self.assertIn(".agents/skills/", boundary["command_handle_path"])
+        self.assertTrue(boundary["canonical_skill_path"])
+
 if __name__ == "__main__":
     unittest.main()

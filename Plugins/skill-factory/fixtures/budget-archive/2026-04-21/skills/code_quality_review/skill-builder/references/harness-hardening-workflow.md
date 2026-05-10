@@ -21,6 +21,11 @@ If the input contains a placeholder such as `[PASTE SKILL CONTENT OR SKILL PACKA
 
 ## Validator Matrix
 
+Use the shared reporting policy at
+`Infrastructure/references/skill-validation-reporting-contract.md` before naming
+rows. Prefer wrapper labels over internal script names unless the standalone
+validator was independently run or directly evidenced.
+
 Use this vocabulary only: `pass`, `fail`, `blocked`, `not applicable`.
 
 | Validator | Available | Result | Evidence | Notes |
@@ -39,6 +44,17 @@ Use this vocabulary only: `pass`, `fail`, `blocked`, `not applicable`.
 | sync/projection checks | yes/no | pass/fail/blocked/not applicable | command or artifact | runtime visibility notes |
 
 Do not mark a validator `pass` unless it ran successfully or direct local evidence proves the exact result. Source existence does not prove runtime availability.
+
+Specific policy:
+
+- If `./bin/ask skills validate-openai-format` or
+  `lint_openai_skill_format.sh` ran, report `OpenAI skill format`; do not also
+  mark `openai_skill.py` as passed unless it was run separately.
+- Report `skill_gate.py` only when the direct script ran or a direct artifact
+  proves its result; otherwise prefer `./bin/ask skills validate-skill-gate`.
+- Format/progressive-disclosure lint do not prove `docs/prose/spelling`.
+- For package-boundary checks, keep the matrix result `pass` and put residual
+  canonical-versus-projection risk in `Notes`.
 
 ## Legacy Heading Compatibility
 

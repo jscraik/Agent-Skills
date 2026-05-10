@@ -75,6 +75,11 @@ Use repo wrappers from the repo root:
 
 Also run touched format, progressive-disclosure, OpenClaw, OpenAI-format, docs/prose, security, smoke, release, sync/projection, and package-boundary checks when relevant. Use only `pass`, `fail`, `blocked`, or `not applicable`; do not mark `pass` unless the validator ran or direct local evidence proves it. Fail fast, patch one failure class, and rerun the focused gate plus the smallest broader gate.
 
+Name gates using the repo's validator-reporting contract. Prefer canonical
+wrapper labels such as `OpenAI skill format` via `./bin/ask skills validate-openai-format`
+unless a standalone validator was independently run and evidenced. Do not claim
+a nested script passed when only a wrapper or broader audit ran.
+
 ## Safety Boundaries
 
 - Write inside approved repo scope unless user-scope install is approved.
@@ -125,6 +130,7 @@ Read when:
 - applying agent-native contracts: [agent-native skill contract](../../../../../Infrastructure/references/agent-native-skill-contract.md)
 - auditing trigger, side effects, context cost, or structured output: [OpenAI-style plugin design contract](../../../../../Infrastructure/references/openai-style-plugin-design-contract.md)
 - choosing improve/create/docs-only/handoff/stop: [First-principles factory gate](../../../../../Infrastructure/references/first-principles-factory-gate.md)
+- naming validator rows and wrapper-versus-standalone status correctly: [skill validation reporting contract](../../../../../Infrastructure/references/skill-validation-reporting-contract.md)
 - folding long review, validator, Codex-harness, or media workflows: [harness hardening workflow](./references/harness-hardening-workflow.md)
 - finding repository validators and helper scripts: `Infrastructure/scripts/`
 
