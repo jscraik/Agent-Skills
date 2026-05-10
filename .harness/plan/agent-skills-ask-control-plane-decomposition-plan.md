@@ -547,10 +547,10 @@ JSC-284 must not close until JSC-285, JSC-286, JSC-287, and PLAN-ASK-005 evidenc
 
 | Linear issue | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
 |---|---|---|---|---|
-| JSC-284 | SA-ASK-001 through SA-ASK-015 | PLAN-ASK-001, PLAN-ASK-005 | SA-ASK-001 through SA-ASK-015 | Pending he-work |
-| JSC-285 | SA-ASK-001, SA-ASK-002, SA-ASK-010 | PLAN-ASK-002 | SA-ASK-001, SA-ASK-002, SA-ASK-010 | Pending he-work |
-| JSC-286 | SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013 | PLAN-ASK-003 | SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013 | Pending he-work |
-| JSC-287 | SA-ASK-007 | PLAN-ASK-004 | SA-ASK-007 | Pending he-work |
+| JSC-284 | SA-ASK-001 through SA-ASK-015 | PLAN-ASK-001, PLAN-ASK-005 | SA-ASK-001 through SA-ASK-015 | Completed (see eval artifact) |
+| JSC-285 | SA-ASK-001, SA-ASK-002, SA-ASK-010 | PLAN-ASK-002 | SA-ASK-001, SA-ASK-002, SA-ASK-010 | Completed (see eval artifact) |
+| JSC-286 | SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013 | PLAN-ASK-003 | SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013 | Completed (see eval artifact) |
+| JSC-287 | SA-ASK-007 | PLAN-ASK-004 | SA-ASK-007 | Completed (ADR/eval evidence recorded) |
 
 ## Validation Strategy
 
