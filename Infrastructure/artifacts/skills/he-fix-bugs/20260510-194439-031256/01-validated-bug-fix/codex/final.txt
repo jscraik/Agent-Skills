@@ -1,0 +1,7 @@
+I can’t reproduce or fix this one from the current environment because every local shell command is being blocked by the sandbox before it can read the repo. I also don’t have any mounted repo resources to inspect, so I can’t see the routing validator code or the failing CI path.
+
+What I need to continue is one of these:
+1. A workspace mode that allows local read access to the repo, or
+2. The exact failing CI command/output for JSC-246, plus the file path for the HE routing validator.
+
+If you can share either, I’ll pick up from there and make the smallest possible fix.
