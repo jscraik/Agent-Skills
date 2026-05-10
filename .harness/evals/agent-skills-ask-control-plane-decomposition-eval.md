@@ -1,9 +1,7 @@
 ---
 schema_version: 1
 artifact_id: agent-skills-ask-control-plane-decomposition-eval
-artifact_id: agent-skills-ask-control-plane-decomposition-eval
 artifact_type: he-eval-report
-canonical_slug: agent-skills-ask-control-plane-decomposition
 canonical_slug: agent-skills-ask-control-plane-decomposition
 title: Agent Skills Ask Control Plane Decomposition Eval
 harness_stage: he-eval-report
