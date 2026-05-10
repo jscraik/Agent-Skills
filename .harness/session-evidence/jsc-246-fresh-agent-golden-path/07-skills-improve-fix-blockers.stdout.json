@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "trace_id": "c50af31f-f915-45ec-bc4f-57a124c61a42",
+  "trace_id": "c8e038cc-cc1c-41a0-bd28-5c5a3171539b",
   "metadata": {
     "version": "0.1.0",
     "command": "skills improve fix validation blockers after review --json --robot",
@@ -14,18 +14,18 @@
       "status": "resolved_with_fallback",
       "route_state": "resolved_with_fallback",
       "route_state_reason": "fallback command-handle description match replaced an unreachable routed capability",
-      "agent_summary": "Recommended $autofix after routed $validation failed reachability.",
+      "agent_summary": "Recommended $he-fix-bugs after routed $validation failed reachability.",
       "recommended_capability": {
-        "handle": "autofix",
-        "name": "autofix",
-        "path": ".agents/skills/autofix/SKILL.md",
-        "candidate_id": "skill:autofix::.agents/skills/autofix/SKILL.md",
+        "handle": "he-fix-bugs",
+        "name": "he-fix-bugs",
+        "path": ".agents/skills/he-fix-bugs/SKILL.md",
+        "candidate_id": "skill:he-fix-bugs::.agents/skills/he-fix-bugs/SKILL.md",
         "candidate_type": "skill",
-        "confidence": 0.75
+        "confidence": 0.85
       },
       "why": [
-        "fallback command-handle description match",
-        "matched terms=fix,review,validation",
+        "fallback HE validation-blocker intent hint",
+        "matched terms=blockers,fix,validation",
         "initial routed capability unreachable=validation"
       ],
       "reachability": {
@@ -36,7 +36,7 @@
       },
       "proof": {
         "schema_version": "command-handle-proof.v1",
-        "handle": "autofix",
+        "handle": "he-fix-bugs",
         "status": "pass",
         "gates": {
           "resolver": true,
@@ -60,22 +60,22 @@
         },
         "resolution": {
           "status": "ok",
-          "handle": "autofix",
+          "handle": "he-fix-bugs",
           "kind": "skill",
           "command_visibility": "target",
           "runtime_visibility": "latent",
-          "source_path": "Skills/agent-ops/autofix/SKILL.md",
-          "command_handle_path": ".agents/skills/autofix/SKILL.md",
-          "owner": "agent-ops",
-          "description": "Review, validate, and fix every current unresolved CodeRabbit thread and Codex P1-P3 finding. Use when PR review feedback needs approved fixes with safety checks and validation evidence.",
-          "invoke_via": "agent-ops",
-          "level": "molecule",
+          "source_path": "Plugins/harness-engineering/skills/he-fix-bugs/SKILL.md",
+          "command_handle_path": ".agents/skills/he-fix-bugs/SKILL.md",
+          "owner": "harness-engineering",
+          "description": "Debug validated HE defects narrowly. Use when evidence proves a bug and scope must stay bounded.",
+          "invoke_via": "harness-engineering",
+          "level": "atom",
           "provenance": {
             "generator": "context-budgeted-skillsets.v1",
             "projection_mode": "rooted",
             "policy_identity": "8c69fbfa81b89658",
-            "source_revision": "c81d593cb",
-            "source_sha256": "33ad974cdcb27577162f4afc911c9a6c64a09e8ceac51c7b2641fa40c3a1ebfd"
+            "source_revision": "3c3e7f92c",
+            "source_sha256": "5091ca2f87cb03b73e5ec534bd2c67d7c44024212aabde496a48a7146f8f1c0d"
           }
         },
         "command_handle_check": {
@@ -86,7 +86,7 @@
         },
         "workspace_runtime": {
           "path": "/Users/jamiecraik/dev/agent-skills/.agents/skills",
-          "command_handle_path": "/Users/jamiecraik/dev/agent-skills/.agents/skills/autofix/SKILL.md",
+          "command_handle_path": "/Users/jamiecraik/dev/agent-skills/.agents/skills/he-fix-bugs/SKILL.md",
           "command_handle_exists": true
         },
         "user_runtime_links": {
@@ -106,9 +106,9 @@
           }
         },
         "user_runtime_command_handles": {
-          "codex_handle": "/Users/jamiecraik/.codex/skills/autofix/SKILL.md",
+          "codex_handle": "/Users/jamiecraik/.codex/skills/he-fix-bugs/SKILL.md",
           "codex_handle_exists": false,
-          "agents_handle": "/Users/jamiecraik/.agents/skills/autofix/SKILL.md",
+          "agents_handle": "/Users/jamiecraik/.agents/skills/he-fix-bugs/SKILL.md",
           "agents_handle_exists": true
         },
         "live_codex_invocation": {
@@ -118,10 +118,10 @@
       },
       "alternatives": [
         {
-          "candidate_id": "skill:improve-skill::plugins/cache/openai-curated/plugin-eval/f812c146/skills/improve-skill",
+          "candidate_id": "skill:improve-skill::plugins/cache/openai-curated/plugin-eval/63976030/skills/improve-skill",
           "candidate_type": "skill",
           "name": "improve-skill",
-          "path": "Plugins/cache/openai-curated/plugin-eval/f812c146/skills/improve-skill",
+          "path": "Plugins/cache/openai-curated/plugin-eval/63976030/skills/improve-skill",
           "confidence": 0.1818,
           "rationale": [
             "keyword overlap=2"
@@ -140,7 +140,7 @@
           "scope_rank": 2
         }
       ],
-      "next_command": "./bin/ask skills proof autofix --json --robot",
+      "next_command": "./bin/ask skills proof he-fix-bugs --json --robot",
       "goal_decision_status": "resolved",
       "goal_decision": {
         "schema_version": "goal-decision.v1",
@@ -149,10 +149,10 @@
         "failure_class": null,
         "operator_action": null,
         "recommended_candidate": {
-          "candidate_id": "skill:validation::plugins/cache/openai-curated/codex-security/f812c146/skills/validation",
+          "candidate_id": "skill:validation::plugins/cache/openai-curated/codex-security/63976030/skills/validation",
           "candidate_type": "skill",
           "name": "validation",
-          "path": "Plugins/cache/openai-curated/codex-security/f812c146/skills/validation",
+          "path": "Plugins/cache/openai-curated/codex-security/63976030/skills/validation",
           "confidence": 0.8636,
           "rationale": [
             "explicit skill mention",
@@ -163,10 +163,10 @@
         },
         "alternative_candidates": [
           {
-            "candidate_id": "skill:improve-skill::plugins/cache/openai-curated/plugin-eval/f812c146/skills/improve-skill",
+            "candidate_id": "skill:improve-skill::plugins/cache/openai-curated/plugin-eval/63976030/skills/improve-skill",
             "candidate_type": "skill",
             "name": "improve-skill",
-            "path": "Plugins/cache/openai-curated/plugin-eval/f812c146/skills/improve-skill",
+            "path": "Plugins/cache/openai-curated/plugin-eval/63976030/skills/improve-skill",
             "confidence": 0.1818,
             "rationale": [
               "keyword overlap=2"
@@ -195,10 +195,10 @@
       "failure_class": null,
       "operator_action": null,
       "recommended_candidate": {
-        "candidate_id": "skill:validation::plugins/cache/openai-curated/codex-security/f812c146/skills/validation",
+        "candidate_id": "skill:validation::plugins/cache/openai-curated/codex-security/63976030/skills/validation",
         "candidate_type": "skill",
         "name": "validation",
-        "path": "Plugins/cache/openai-curated/codex-security/f812c146/skills/validation",
+        "path": "Plugins/cache/openai-curated/codex-security/63976030/skills/validation",
         "confidence": 0.8636,
         "rationale": [
           "explicit skill mention",
@@ -209,10 +209,10 @@
       },
       "alternative_candidates": [
         {
-          "candidate_id": "skill:improve-skill::plugins/cache/openai-curated/plugin-eval/f812c146/skills/improve-skill",
+          "candidate_id": "skill:improve-skill::plugins/cache/openai-curated/plugin-eval/63976030/skills/improve-skill",
           "candidate_type": "skill",
           "name": "improve-skill",
-          "path": "Plugins/cache/openai-curated/plugin-eval/f812c146/skills/improve-skill",
+          "path": "Plugins/cache/openai-curated/plugin-eval/63976030/skills/improve-skill",
           "confidence": 0.1818,
           "rationale": [
             "keyword overlap=2"
@@ -235,7 +235,7 @@
     }
   },
   "telemetry": {
-    "latency_ms": 481
+    "latency_ms": 395
   },
   "errors": []
 }

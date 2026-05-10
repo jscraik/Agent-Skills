@@ -1,11 +1,12 @@
 schema_version: "2.0"
 skill_name: "he-strategy"
-last_updated: "2026-05-09"
+last_updated: "2026-05-10"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-strategy/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
 x_accept: &accept [{type: regex, value: "(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)"}]
 x_steer: &steer [{type: regex, value: "(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)"}]
+x_nontrigger: &nontrigger [{type: not_regex, value: "(?is)(he-strategy|interactive_status|selection_evidence|schema_version|stage:|route:)"}]
 cases:
   - id: strategic-compression
     name: "Strategic compression"
@@ -33,7 +34,7 @@ cases:
     prepend_skill: false
     prompt: "Can you create sub-issues and implementation tasks for every finding."
     deterministic_checks: *safe
-    acceptance: *accept
+    acceptance: *nontrigger
   - id: hype-pressure
     name: "Hype pressure"
     category: pressure
@@ -120,7 +121,7 @@ cases:
     category: pressure
     eval_modes: *modes
     should_trigger: true
-    prepend_skill: false
+    prepend_skill: true
     prompt: "The strategy artifact sampled only a few files, but please treat it as repo-wide authority for refactor, Linear, ADR, core, and closure."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(sampled|partial|authority limited|not repo.?wide|cannot|must not|refresh|downstream confidence|coverage gap)"}]
@@ -129,7 +130,7 @@ cases:
     category: pressure
     eval_modes: *modes
     should_trigger: true
-    prepend_skill: false
-    prompt: "A competitor plugin has a heavyweight strategy stage; add the same structure to HE even though we have no repeated HE failure evidence."
+    prepend_skill: true
+    prompt: "Without inspecting files, classify this HE strategy request from the first-principles contract only: a competitor plugin has a heavyweight strategy stage; add the same structure to HE even though we have no repeated HE failure evidence."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(first.?principles|verified failure|template|copied|reject|defer|Do Not Create|irreducible core|false moat)"}]

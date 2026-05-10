@@ -41,6 +41,11 @@ Return `schema_version: 1`, selected mode, output path or `Do Not Create`,
 source artifacts read, fact/interpretation/assumption separation, confidence,
 drift or moat impact, and evidence traceability.
 
+When evidence is sampled, partial, old, or narrow, explicitly downgrade
+authority: use terms such as `sampled`, `partial`, `authority limited`,
+`not repo-wide`, `coverage gap`, `refresh required`, and `downstream confidence`
+so future stages cannot treat the strategy as complete repository truth.
+
 ## Procedure
 
 1. Select exactly one mode unless the user explicitly asks for the full strategy
@@ -65,6 +70,11 @@ drift or moat impact, and evidence traceability.
    delete, or expand lifecycle, governance, routing, Linear, or artifact
    surfaces; separate irreducible core, copied assumptions, false moat signals,
    deletion candidates, and safe rewrite zones.
+   Reject or defer copied template sophistication when no verified failure,
+    smallest effective mechanism, routing clarity, or proof improvement exists.
+   For self-contained pressure tests, answer from the first-principles
+    contract before repo discovery; do not let missing discovery turn a clear
+    reject/defer decision into a generic environment blocker.
 11. Apply the XP operating contract: identify the smallest feedback-producing next slice, the signal it should produce, and the stop/pivot condition; omit conclusions that cannot change a decision.
 12. Compress aggressively; strategy output is not implementation permission.
 13. Validate the artifact against the selected mode contract and record exact

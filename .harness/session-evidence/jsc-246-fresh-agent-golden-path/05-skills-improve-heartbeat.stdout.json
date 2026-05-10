@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "trace_id": "e4482cab-3755-4b96-adb8-fc2d142e55b9",
+  "trace_id": "ebe3f355-de31-4780-a4a4-e51232865dbd",
   "metadata": {
     "version": "0.1.0",
     "command": "skills improve monitor a long-running HE work phase --json --robot",
@@ -66,15 +66,15 @@
           "source_path": "Plugins/harness-engineering/skills/he-work/SKILL.md",
           "command_handle_path": ".agents/skills/he-work/SKILL.md",
           "owner": "harness-engineering",
-          "description": "WHAT: Build approved HE changes in verified slices with traceability. Use when execution is approved or bounded delegation is needed.",
+          "description": "Build approved HE plan slices. Use when a bounded plan authorizes code changes and validation.",
           "invoke_via": "harness-engineering",
-          "level": "atom",
+          "level": "molecule",
           "provenance": {
             "generator": "context-budgeted-skillsets.v1",
             "projection_mode": "rooted",
             "policy_identity": "8c69fbfa81b89658",
-            "source_revision": "c81d593cb",
-            "source_sha256": "31150419753eb8f4c99ac5fab25c0a7a87302693158023e8a9c0de9452304373"
+            "source_revision": "3c3e7f92c",
+            "source_sha256": "39d56d27b88af0d6a6ed6aea68cfb89fb7cd67bdeb91c25205cf9e7585e9154d"
           }
         },
         "command_handle_check": {
@@ -232,7 +232,7 @@
     }
   },
   "telemetry": {
-    "latency_ms": 275
+    "latency_ms": 244
   },
   "errors": []
 }

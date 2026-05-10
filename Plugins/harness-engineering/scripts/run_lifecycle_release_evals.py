@@ -45,6 +45,39 @@ def _append_repeatable_filter(cmd: list[str], flag: str, values: tuple[str, ...]
         cmd.extend([flag, value])
 
 
+def _classify_case_failures(parsed: dict[str, object]) -> dict[str, object]:
+    timeout_cases: list[dict[str, object]] = []
+    content_failure_cases: list[dict[str, object]] = []
+    other_failure_cases: list[dict[str, object]] = []
+
+    for case in parsed.get("cases", []):
+        if not isinstance(case, dict):
+            continue
+        if case.get("passed") is True and case.get("tier1_failed") is not True:
+            continue
+
+        failures = case.get("tier1_failures") or []
+        failure_strings = [str(failure) for failure in failures]
+        case_summary = {
+            "id": case.get("id"),
+            "name": case.get("name"),
+            "category": case.get("category"),
+            "tier1_failures": failures,
+        }
+        if any("exit code: 124" in failure or "returncode=124" in failure for failure in failure_strings):
+            timeout_cases.append(case_summary)
+        elif any("regex failed" in failure for failure in failure_strings):
+            content_failure_cases.append(case_summary)
+        else:
+            other_failure_cases.append(case_summary)
+
+    return {
+        "timeout_cases": timeout_cases,
+        "content_failure_cases": content_failure_cases,
+        "other_failure_cases": other_failure_cases,
+    }
+
+
 def _ask_unavailable_reason(repo_root: Path) -> str | None:
     ask_path = repo_root / "bin" / "ask"
     if not ask_path.exists():
@@ -279,6 +312,7 @@ def _run_skill_builder_eval(
         "decision": decision,
         "tier1_failures": parsed.get("tier1_failures"),
         "tier2_findings": parsed.get("tier2_findings"),
+        "failure_classification": _classify_case_failures(parsed),
         "case_filters": parsed.get("case_filters", []),
         "category_filters": parsed.get("category_filters", []),
         "artifacts": parsed.get("artifacts", {}),

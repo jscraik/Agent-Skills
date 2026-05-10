@@ -13,6 +13,8 @@ Use when requirements are needed before plan/work; Explore first and ask second.
 Problem, approved execution slice as one milestone, one parent issue, one refactor phase, or one execution slice, Linear issue, QA report, source evidence, current-vs-latest spec status.
 ## Outputs
 Return schema_version when structured. schema_version: 1, bounded implementation spec for one milestone, parent issue, refactor phase, or execution slice; complete replacement spec section or `.harness/specs/**.md` artifact; Linear Acceptance Traceability, acceptance IDs, validation plan, and blackboard_delta.
+
+Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. When asking a clarification question, include the literal marker `interactive_status: asked` before the question and summarize `selection_evidence`. When headless or autonomous mode would normally ask a question, set `interactive_status: autonomous_assumption`; when a real decision remains, ask once with `request_user_input` when available or return `interactive_status: blocked`.
 ## Procedure
 1. Resolve the stage context contract first; stop if no milestone, parent issue, refactor phase, or execution slice is selected.
 2. Load primary source artifacts for the selected slice: Linear plan, selected refactor when applicable, decisions, core invariants, and brainstorm artifacts. Treat strategy, triage, review, and feature docs as evidence only unless the slice admits them.

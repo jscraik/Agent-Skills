@@ -13,6 +13,8 @@ Use when after approved spec/issue; do non-mutating inspection before planning.
 Spec, Linear issue, repo state, constraints, product blockers.
 ## Outputs
 Return schema_version when structured. `.harness/plan/**.md` durable plan, complete replacement plan when revising, repo-relative file paths, risks, validation, Linear/spec/plan/PR traceability matrix, post_plan_handoff, slack_policy, and blackboard_delta.
+
+Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. For post-plan handoff, set `interactive_status: asked` when multiple valid next stages require a blocking choice, `interactive_status: autonomous_assumption` when headless mode records the conservative route, or `interactive_status: blocked` when execution would otherwise proceed without authority.
 ## Procedure
 1. Explore first and resolve the stage context contract; use `update_plan` only for live progress.
 2. Confirm the plan stays inside one selected milestone, parent issue, refactor phase, or execution slice; run the Linear Delta Capture Gate when consuming existing tracked plans.

@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "trace_id": "4dacb383-15c6-4b6c-8634-4cc309534856",
+  "trace_id": "1ee0b439-1ecc-494f-8ca5-32a80f21ae72",
   "metadata": {
     "version": "0.1.0",
     "command": "skills improve make agents better at fixing PR review comments --json --robot",
@@ -73,7 +73,7 @@
             "generator": "context-budgeted-skillsets.v1",
             "projection_mode": "rooted",
             "policy_identity": "8c69fbfa81b89658",
-            "source_revision": "c81d593cb",
+            "source_revision": "3c3e7f92c",
             "source_sha256": "33ad974cdcb27577162f4afc911c9a6c64a09e8ceac51c7b2641fa40c3a1ebfd"
           }
         },
@@ -204,7 +204,7 @@
     }
   },
   "telemetry": {
-    "latency_ms": 372
+    "latency_ms": 369
   },
   "errors": []
 }

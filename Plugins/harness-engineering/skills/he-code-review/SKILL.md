@@ -13,6 +13,8 @@ Use when handling PRs, branches, diffs, commits, readiness, and disputed review 
 Diff, repo guidance, Linear issue, spec, plan, PR evidence, validation output.
 ## Outputs
 Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, reproduction_status, security_review, real_behavior_proof, work_candidate, repeated_failure, blackboard_delta, next handoff, repeated context-feedback candidates. If writing a durable review artifact, use `.harness/review/**.md` with Artifact Identity frontmatter.
+
+Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. In headless review, record `interactive_status: autonomous_assumption` plus the evidence and confidence; when mutation or readiness mode is ambiguous, ask once with `request_user_input` when available or return `interactive_status: blocked`.
 ## Procedure
 1. Select mode first: review-only, readiness, repair/autofix, commit review, or investigation. Review-only mode stays byte-clean.
 2. Resolve the stage context contract when the review will write artifacts, mutate files, update PR state, or hand off to another stage; ask before mutation when mode is ambiguous.

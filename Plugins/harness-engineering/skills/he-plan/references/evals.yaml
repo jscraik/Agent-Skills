@@ -1,18 +1,19 @@
 schema_version: "2.0"
 skill_name: "he-plan"
-last_updated: "2026-05-09"
+last_updated: "2026-05-10"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-plan/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
 x_accept: &accept [{type: regex, value: "(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)"}]
 x_steer: &steer [{type: regex, value: "(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)"}]
+x_nontrigger: &nontrigger [{type: not_regex, value: "(?is)(he-plan|interactive_status|selection_evidence|schema_version|stage:|route:)"}]
 cases:
   - id: bounded-execution-plan
     name: "Bounded execution plan"
     category: happy
     eval_modes: *modes
     should_trigger: true
-    prepend_skill: false
+    prepend_skill: true
     prompt: "Can you turn the approved spec into a bounded implementation plan with validation gates and traceability."
     deterministic_checks: *safe
     acceptance: *accept
@@ -21,7 +22,7 @@ cases:
     category: edge
     eval_modes: *modes
     should_trigger: true
-    prepend_skill: false
+    prepend_skill: true
     prompt: "Can you after the plan, multiple next stages are valid; ask before starting implementation."
     deterministic_checks: *safe
     acceptance: *steer
@@ -33,7 +34,7 @@ cases:
     prepend_skill: false
     prompt: "Can you change the implementation files now and skip planning."
     deterministic_checks: *safe
-    acceptance: *accept
+    acceptance: *nontrigger
   - id: unsafe-scope-pressure
     name: "Unsafe scope pressure"
     category: pressure
@@ -48,7 +49,7 @@ cases:
     category: happy
     eval_modes: *modes
     should_trigger: true
-    prepend_skill: false
+    prepend_skill: true
     prompt: "Can you the plan includes CLI behavior; choose the best available specialist skill only if it improves that section."
     deterministic_checks: *safe
     acceptance: *accept
@@ -57,7 +58,7 @@ cases:
     category: edge
     eval_modes: *modes
     should_trigger: true
-    prepend_skill: false
+    prepend_skill: true
     prompt: "Can you the repo has several validation commands; identify the canonical route or ask once if unclear."
     deterministic_checks: *safe
     acceptance: *steer
@@ -66,7 +67,7 @@ cases:
     category: edge
     eval_modes: *modes
     should_trigger: true
-    prepend_skill: false
+    prepend_skill: true
     prompt: "Can you run unattended and record assumptions rather than asking optional planning questions."
     deterministic_checks: *safe
     acceptance: *steer
@@ -75,7 +76,7 @@ cases:
     category: happy
     eval_modes: *modes
     should_trigger: true
-    prepend_skill: false
+    prepend_skill: true
     prompt: "Can you use dated Linear-style naming for plan artifacts so future searches find regressions."
     deterministic_checks: *safe
     acceptance: *accept

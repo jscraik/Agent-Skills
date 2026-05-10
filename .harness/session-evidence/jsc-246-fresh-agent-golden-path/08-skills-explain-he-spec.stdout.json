@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "trace_id": "abbaf81b-6fb8-4a42-b6e5-bc4f38dc34e2",
+  "trace_id": "70d9191e-9e38-4bfa-bf39-bde6d8d57198",
   "metadata": {
     "version": "0.1.0",
     "command": "skills explain he-spec --json --robot",
@@ -32,8 +32,8 @@
       "schema_version": "skill-explanation.v1",
       "status": "resolved",
       "handle": "he-spec",
-      "agent_summary": "$he-spec is for WHAT: Generate Linear-backed HE specs with acceptance IDs and validation. Use when requirements or traceability are needed before planning.",
-      "what_it_is": "WHAT: Generate Linear-backed HE specs with acceptance IDs and validation. Use when requirements or traceability are needed before planning.",
+      "agent_summary": "$he-spec is for Create evidence-backed HE specs. Use when approved intent needs acceptance criteria before implementation.",
+      "what_it_is": "Create evidence-backed HE specs. Use when approved intent needs acceptance criteria before implementation.",
       "when_to_use": [
         "Use when requirements are needed before plan/work; Explore first and ask second."
       ],
@@ -74,22 +74,22 @@
         "source_path": "Plugins/harness-engineering/skills/he-spec/SKILL.md",
         "command_handle_path": ".agents/skills/he-spec/SKILL.md",
         "owner": "harness-engineering",
-        "description": "WHAT: Generate Linear-backed HE specs with acceptance IDs and validation. Use when requirements or traceability are needed before planning.",
+        "description": "Create evidence-backed HE specs. Use when approved intent needs acceptance criteria before implementation.",
         "invoke_via": "harness-engineering",
-        "level": "molecule",
+        "level": "atom",
         "provenance": {
           "generator": "context-budgeted-skillsets.v1",
           "projection_mode": "rooted",
           "policy_identity": "8c69fbfa81b89658",
-          "source_revision": "c81d593cb",
-          "source_sha256": "ff07c3e0e4bdb4f4f4c1748c0e1999551b3c863d21423897a91f51dccbe3f240"
+          "source_revision": "3c3e7f92c",
+          "source_sha256": "82837f2eac47eb560ed7d42fc130eae49f46027f831d5143ad8668b1d5d65802"
         }
       },
       "next_command": "./bin/ask skills proof he-spec --json --robot"
     }
   },
   "telemetry": {
-    "latency_ms": 211
+    "latency_ms": 156
   },
   "errors": []
 }

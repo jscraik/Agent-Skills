@@ -9,10 +9,13 @@ metadata:
 Ship the smallest honest slice. Work should leave clear proof of what changed, why it matched the plan, and which validation or blocked gate supports the handoff.
 ## When to Use
 Use when execution is approved or tiny and low risk.
+Treat tiny low-risk execution as no more than two files, no auth/security/permissions/data/CI/dependency/public-API/tool/skill/plugin changes, no external side effects, and a known validation command. Otherwise route to `he-spec`, `he-plan`, or the relevant risk stage first.
 ## Inputs
 Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees, optional active thread goal.
 ## Outputs
 Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff, slack_policy, and blackboard_delta.
+
+Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. When branch, goal, plan, Linear issue, selected slice, or multiple next stages conflict, ask once with `request_user_input` when available or return `interactive_status: blocked`; in unattended mode record `interactive_status: autonomous_assumption` only for non-mutating assumptions and keep mutation blocked without authority.
 ## Procedure
 1. Mark live state before editing: branch, dirty worktree, active `/goal`, plan, Linear issue, PR, and selected slice.
 2. Resolve the stage context contract; stop on conflicts between branch, goal, plan, Linear issue, or selected slice.

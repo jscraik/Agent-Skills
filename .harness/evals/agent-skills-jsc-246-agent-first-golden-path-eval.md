@@ -6,7 +6,7 @@ type: he-eval-report
 canonical_slug: agent-skills-jsc-246-agent-first-golden-path
 title: Agent Skills JSC-246 Agent First Golden Path Eval
 harness_stage: he-eval-report
-status: phase_006_refresh_complete
+status: phase_007_refresh_complete
 date: 2026-05-10
 traceability_required: true
 origin: .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md
@@ -18,10 +18,10 @@ linear_milestone: Command surface and ask reliability
 # Agent Skills JSC-246 Agent First Golden Path Eval
 
 ## Executive Eval Summary
-Status: `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, and `PLAN-JSC246-006` heartbeat evidence refreshed for the current dirty worktree; later historical phase evidence remains below but is not treated as fresh closeout proof.
-Linear Completion Recommendation: Do not mutate Linear from this heartbeat pass; continue the approved phase loop after human review of the refreshed baseline and doctor contract evidence.
-Primary Blockers: None for phase-001 through phase-006 evidence capture. Remaining repo-surface debt is advisory diagnostic debt, and the live dirty worktree is explicitly not a clean JSC-246 closeout fixture.
-Confidence: High for the refreshed phase-001 command evidence, phase-002 doctor next-action contract evidence, phase-003 skills-improve route-state evidence, phase-004 explain/prove taxonomy evidence, phase-005 closeout isolation fixture evidence, and phase-006 first-contact compression evidence; medium for parent closure until final phase evidence is rechecked against current worktree state.
+Status: `PLAN-JSC246-001` through `PLAN-JSC246-007` heartbeat evidence refreshed for the current dirty worktree.
+Linear Completion Recommendation: Do not mutate Linear from this heartbeat pass. Local JSC-246 proof is complete and ready for human Linear status/linkage review.
+Primary Blockers: None for local JSC-246 proof. Remaining repo-surface debt is advisory diagnostic debt, and the broad live dirty worktree is explicitly classified rather than absorbed as a clean parent-closure fixture.
+Confidence: High for refreshed phase-001 command evidence, phase-002 doctor next-action contract evidence, phase-003 skills-improve route-state evidence, phase-004 explain/prove taxonomy evidence, phase-005 closeout isolation fixture evidence, phase-006 first-contact compression evidence, and phase-007 fresh-agent command-runner proof.
 
 ## Evaluated Slice
 Linear Project: `agent-skills`
@@ -37,15 +37,15 @@ Related Core Invariants: Agent-first golden path, deterministic command output, 
 
 ## Linear Definition of Done Status
 Artifact Path: `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md`
-Definition of Done Status: Freshly satisfied for `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, and `PLAN-JSC246-006`; historical evidence for later phases remains below and must be rechecked before any renewed closure recommendation.
-Closure Safety: Do not close `JSC-246` from this heartbeat pass alone.
+Definition of Done Status: Freshly satisfied for `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006`, and `PLAN-JSC246-007`.
+Closure Safety: Local proof is complete. Do not close or mutate `JSC-246` from this heartbeat; link the artifact and command evidence through the normal human-reviewed Linear update path.
 
 ## Linear Backlink Map
 Linear Project: `agent-skills`
 Linear Milestone: `Command surface and ask reliability`
 Linear Parent Issue: `JSC-246`
 Linear Sub-Issues: None admitted for this phase.
-Linear Status Recommendation: Keep `JSC-246` open from this heartbeat pass; later historical evidence must be rechecked before any renewed closure recommendation. Do not infer completion for unrelated milestone work.
+Linear Status Recommendation: Ready for human Linear closure/linkage review for `JSC-246` only. Do not infer completion for unrelated milestone work.
 Proof Artifact Links: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`; `.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md`; focused pytest and ask validation outputs listed below.
 Missing Identifiers: None for the local phase artifact.
 Traceability Repair: No repair required for this phase; live Linear mutation was not attempted from this eval.
@@ -69,7 +69,7 @@ Traceability Repair: No repair required for this phase; live Linear mutation was
 | Linear issue | Acceptance IDs |
 | --- | --- |
 | `JSC-246` full approved plan | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006`, `PLAN-JSC246-007` |
-| Freshly revalidated in this heartbeat pass | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006` |
+| Freshly revalidated in this heartbeat pass | `PLAN-JSC246-001`, `PLAN-JSC246-002`, `PLAN-JSC246-003`, `PLAN-JSC246-004`, `PLAN-JSC246-005`, `PLAN-JSC246-006`, `PLAN-JSC246-007` |
 
 ## Source Artifact Trace
 Linear Plan: `.harness/linear/agent-skills-linear-plan.md` and `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`.
@@ -228,6 +228,52 @@ Dirty-Worktree Classification: The first-contact docs and command metadata surfa
 ### Phase 006 Decision
 
 `PLAN-JSC246-006` is complete for refreshed evidence. The current first-contact surfaces still point agents at the admitted executable route before broad catalogs, and deferred/non-admitted command names remain outside the default path. This phase does not add new command behavior or claim fresh-agent closure; parent closure still waits for `PLAN-JSC246-007`.
+
+## Heartbeat Phase 007 Refresh - 2026-05-10
+
+Status: `PLAN-JSC246-007` complete for current-run fresh-agent evidence and local closure gating.
+Heartbeat Route: `$he-phase-heartbeat`
+Plan Source: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`
+Fresh-Agent Runner: `.harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh`
+Dirty-Worktree Classification: The phase refreshed deterministic fresh-agent command snapshots under `.harness/session-evidence/jsc-246-fresh-agent-golden-path/` and this eval artifact. Existing plan/spec/review/script drift and unrelated generated artifacts were preserved and not absorbed into this phase.
+
+### Phase 007 Fresh-Agent Command Snapshot
+
+| Step | Command | Result | Key evidence |
+| --- | --- | --- | --- |
+| 01 | `./bin/ask repo doctor --json --robot` | pass | Trace `9c19d177-b8e3-4749-9efb-85b602318016`; `blocking: false`; `next_command: ./bin/ask repo surface --json --robot`; `next_command_kind: diagnostic_advisory`; `next_command_blocks_task: false`; advisory debt count 1 with repo-surface summary `Repo surface has 7461 diagnostic finding(s).` |
+| 02 | `./bin/ask repo surface --json --robot` | pass | Trace `c0e96a8b-a448-40c5-9b63-e247cce7a4c0`; diagnostic inventory was inspectable and did not block continuation into skills commands. |
+| 03 | `./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot` | pass | Trace `1ee0b439-1ecc-494f-8ca5-32a80f21ae72`; `status: resolved_with_fallback`; `route_state: resolved_with_fallback`; recommended handle `autofix`; proof and reachability passed. |
+| 04 | `./bin/ask skills improve "write a Linear-backed HE spec" --json --robot` | pass | Trace `96ee8c59-3c78-4af2-89b7-0d38d1451e96`; `status: resolved`; `route_state: resolved`; recommended handle `he-spec`; proof and reachability passed. |
+| 05 | `./bin/ask skills improve "monitor a long-running HE work phase" --json --robot` | pass | Trace `ebe3f355-de31-4780-a4a4-e51232865dbd`; `status: resolved`; `route_state: resolved`; recommended handle `he-work`; proof and reachability passed. |
+| 06 | `./bin/ask skills improve "review this implementation against the spec" --json --robot` | pass | Trace `21f0d475-7d53-4b1a-804a-ed945c7fe74b`; `status: resolved_with_fallback`; `route_state: resolved_with_fallback`; recommended handle `he-code-review`; proof and reachability passed. |
+| 07 | `./bin/ask skills improve "fix validation blockers after review" --json --robot` | pass | Trace `c8e038cc-cc1c-41a0-bd28-5c5a3171539b`; `status: resolved_with_fallback`; `route_state: resolved_with_fallback`; recommended handle `he-fix-bugs`; proof and reachability passed. |
+| 08 | `./bin/ask skills explain he-spec --json --robot` | pass | Trace `70d9191e-9e38-4bfa-bf39-bde6d8d57198`; explanation resolved `he-spec` and preserved the proof handoff path. |
+| 09 | `./bin/ask skills proof he-spec --json --robot` | pass | Trace `57e6c415-5906-4a43-9f78-31b170e85558`; command-handle proof status `pass`; resolver, generated handle, workspace handle, and `.agents` user runtime link gates passed. |
+| 10 | `./bin/ask skills prove he-spec --json --robot` | pass | Trace `abe53e6a-506c-48cd-add8-284f674e3249`; command-handle proof status `pass`; scorecard command completed successfully with the existing outcome-proof handoff semantics. |
+| 11 | `./bin/ask repo closeout --changed --json --robot` | pass | Trace `853e6bd0-dcfe-40d5-b759-7e416576ac75`; agent summary `Ready: no closeout blockers detected`; `commit_readiness.ready: true`; `sync_needed: false`; broad changed-file count `1974` classified as live dirty-tree context, not a clean closure fixture. |
+
+### Phase 007 Metrics
+
+| Metric | Required threshold | Observed value | Result |
+| --- | --- | --- | --- |
+| First command | `./bin/ask repo doctor --json --robot` | Step 01 is exactly `./bin/ask repo doctor --json --robot`. | pass |
+| Docs opened before first command | `0` | The deterministic runner invokes only `./bin/ask` commands and writes JSON/stderr/exit snapshots. | pass |
+| Docs opened for basic navigation | `0` | No docs, README, or broad catalog commands are invoked in the runner. | pass |
+| Blocking route ambiguity count | `0` | All representative `skills improve` outputs are `resolved` or `resolved_with_fallback`; none are `blocked_ambiguity`. | pass |
+| Command decisions after doctor before ready/validation-ready/blocked | `<= 5` for one admitted route | The runner records broader representative coverage, but the shortest admitted path after doctor is `repo surface`, one `skills improve`, `skills explain`, `skills prove`, and `repo closeout`: five decisions. | pass |
+| Diagnostic debt continuation | advisory debt must not block task continuation | Doctor emitted repo-surface diagnostic debt with `next_command_blocks_task: false`; runner followed `repo surface` and continued into skills and closeout commands. | pass |
+| `next_command` followed without manual repo browsing | required | Step 02 follows the doctor `next_command`; subsequent skill commands expose proof handoffs without manual browsing. | pass |
+
+### Phase 007 Validation Snapshot
+
+| Command | Result | Evidence |
+| --- | --- | --- |
+| `bash .harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh` | pass | Runner printed steps 01 through 11 with exit `0`; stdout JSON, stderr text, and exit files were refreshed under `.harness/session-evidence/jsc-246-fresh-agent-golden-path/`. |
+
+### Phase 007 Decision
+
+`PLAN-JSC246-007` is complete for refreshed local evidence. The fresh-agent path starts at `repo doctor`, treats repo-surface debt as an advisory diagnostic, continues into representative skill routing/proof commands, and reaches `repo closeout --changed` readiness without opening docs for basic navigation. Local JSC-246 proof is complete; Linear mutation was intentionally not attempted from this heartbeat.
 
 ## PLAN-JSC246-001 Baseline Snapshot Evidence
 
@@ -720,11 +766,11 @@ Operational Impact: Better operational reliability and cognition quality.
 Blocks Completion: no
 
 ## Proof Artifacts
-Produced: Focused pytest output, live ask doctor probe, repo surface probe, live skills improve route-state probes, live skills explain/proof/prove probes, live repo closeout changed-worktree probe, first-contact docs and command metadata review evidence, artifact identity lint, Linear traceability lint, diff check, scoped repo validation, plus the fresh phase-001 through phase-006 heartbeat evidence above.
-Required: Link this eval artifact and command evidence back to the Linear parent or milestone summary after the remaining phase evidence is refreshed.
-Missing: Fresh current-run proof for phase 007 in the dirty worktree context.
-Blocks Completion: yes for parent closure; no for phase-001 through phase-006 evidence capture.
-Attach or Link Back to Linear: Link this artifact as phase-001 through phase-006 heartbeat evidence, not as closure proof.
+Produced: Focused pytest output, live ask doctor probe, repo surface probe, live skills improve route-state probes, live skills explain/proof/prove probes, live repo closeout changed-worktree probe, first-contact docs and command metadata review evidence, artifact identity lint, Linear traceability lint, diff check, scoped repo validation, plus the fresh phase-001 through phase-007 heartbeat evidence above.
+Required: Link this eval artifact and command evidence back to the Linear parent or milestone summary through the normal human-reviewed Linear update path.
+Missing: None for local JSC-246 proof.
+Blocks Completion: no for local JSC-246 proof; Linear mutation was intentionally not attempted from this heartbeat.
+Attach or Link Back to Linear: Link this artifact and the fresh-agent runner evidence as closure proof for `JSC-246` only.
 
 ## Failures / Regressions
 Failure or Regression: Earlier parent closeout was blocked by projection drift and a generated-only `sync_required` loop.
@@ -740,24 +786,24 @@ Follow-Up Justified: Yes, but as separate HE skill lifecycle work rather than JS
 Blocks Closure: no for phase 006 after the local draft fix.
 
 ## Linear Completion Recommendation
-Classification: Phase-001 through phase-006 heartbeat refresh only
-Recommended Linear Status: Keep `JSC-246` open until phase 007 is refreshed or explicitly accepted as still-current by human review.
-Required Linear Comment/Update: If updating Linear now, note only that phases 001 through 006 were refreshed on 2026-05-09 and 2026-05-10 against a dirty worktree and that final closure evidence is historical pending refresh.
-Issues to Close: None from this heartbeat pass.
+Classification: Local JSC-246 proof complete; human Linear update still required.
+Recommended Linear Status: Ready for human-reviewed closure/linkage for `JSC-246` only.
+Required Linear Comment/Update: If updating Linear, link this eval artifact, the fresh-agent runner directory, and the validation/review gate summary. Note that Linear was not mutated by this heartbeat.
+Issues to Close: `JSC-246` after human review of linked proof.
 Issues to Reopen: None.
-Issues to Leave Open: `JSC-246` remains open from this heartbeat pass until phase 007 is refreshed or explicitly accepted as still-current by human review.
+Issues to Leave Open: Any non-JSC-246 milestone work remains outside this closure recommendation.
 New Follow-Up Issues: None; avoid issue explosion.
 Labels to Add/Remove: None.
-Milestone Completion: Not newly asserted by this heartbeat pass; do not infer completion for unrelated milestone work.
+Milestone Completion: Not asserted for unrelated milestone work.
 Project Status Change: No change.
 Status Update Needed: Yes when the phase proof is linked.
 Proof Artifacts to Attach or Link: This eval artifact and validation command summary.
 
 ## Follow-Up Work
-Classification: Continue phase refresh before JSC-246 closure
+Classification: Human Linear linkage/update only
 Target Linear Project: `agent-skills`
 Parent Issue or Milestone: `JSC-246` / `Command surface and ask reliability`
-Reason: Phases 001 through 006 are freshly rebaselined, while final phase evidence is historical relative to the current dirty worktree.
+Reason: Local proof is complete, but this heartbeat was instructed not to mutate Linear.
 Priority: Existing Linear priority `2`.
 Labels: Existing labels `Roadmap: Next`, `Agent`, `Infra`, `Improvement`.
 Agent-Safe or Human Review Required: Human review required before mutating Linear closure state.

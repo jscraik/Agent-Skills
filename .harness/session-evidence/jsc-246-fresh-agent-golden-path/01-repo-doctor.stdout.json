@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "trace_id": "83a94c53-7a23-495d-bd0a-625006fc5ec0",
+  "trace_id": "9c19d177-b8e3-4749-9efb-85b602318016",
   "metadata": {
     "version": "0.1.0",
     "command": "repo doctor --json --robot",
@@ -9,12 +9,19 @@
   },
   "data": {
     "doctor": {
-      "agent_summary": "Usable with diagnostic debt: Repo surface has 4586 diagnostic finding(s).",
+      "agent_summary": "Usable with diagnostic debt: Repo surface has 7461 diagnostic finding(s).",
       "blocking": false,
       "blockers": [],
       "next_command": "./bin/ask repo surface --json --robot",
       "next_command_kind": "diagnostic_advisory",
       "next_command_blocks_task": false,
+      "selected_next_command": {
+        "id": "repo_surface",
+        "kind": "diagnostic_advisory",
+        "command": "./bin/ask repo surface --json --robot",
+        "blocks_task": false
+      },
+      "secondary_next_commands": [],
       "signals": {
         "repo_status": {
           "state": "pass",
@@ -72,29 +79,30 @@
         "repo_surface": {
           "state": "warn",
           "severity": "warning",
-          "summary": "Repo surface has 4586 diagnostic finding(s).",
+          "summary": "Repo surface has 7461 diagnostic finding(s).",
           "source": "repo_surface",
           "next_command": "./bin/ask repo surface --json --robot",
           "details": {
             "status": "warning",
-            "total_paths": 7866,
-            "blocking_findings": 4586,
+            "total_paths": 10833,
+            "blocking_findings": 7461,
             "counts_by_code": {
-              "authored_source_surface": 68,
+              "authored_source_surface": 81,
               "duplicated_infrastructure_path": 6,
               "fixture_or_template_surface": 15,
               "generated_evidence_pattern": 11,
-              "harness_reference_surface": 13,
-              "indexed_reference_surface": 1076,
-              "ownership_decision_required": 39,
+              "generated_skillset_projection": 11,
+              "harness_reference_surface": 32,
+              "indexed_reference_surface": 1094,
+              "ownership_decision_required": 28,
               "plugin_fixture_surface": 879,
               "plugin_metadata_source": 3,
-              "plugin_reference_surface": 35,
-              "policy_surface": 308,
-              "source_path": 872,
+              "plugin_reference_surface": 49,
+              "policy_surface": 315,
+              "source_path": 882,
               "tracked_generated_work_area": 267,
-              "tracked_historical_artifact": 4257,
-              "unknown_surface": 17
+              "tracked_historical_artifact": 7072,
+              "unknown_surface": 88
             }
           }
         }
@@ -103,17 +111,24 @@
         {
           "id": "repo_surface",
           "severity": "warning",
-          "summary": "Repo surface has 4586 diagnostic finding(s).",
+          "summary": "Repo surface has 7461 diagnostic finding(s).",
           "next_command": "./bin/ask repo surface --json --robot"
         }
       ]
     },
-    "agent_summary": "Usable with diagnostic debt: Repo surface has 4586 diagnostic finding(s).",
+    "agent_summary": "Usable with diagnostic debt: Repo surface has 7461 diagnostic finding(s).",
     "blocking": false,
     "blockers": [],
     "next_command": "./bin/ask repo surface --json --robot",
     "next_command_kind": "diagnostic_advisory",
     "next_command_blocks_task": false,
+    "selected_next_command": {
+      "id": "repo_surface",
+      "kind": "diagnostic_advisory",
+      "command": "./bin/ask repo surface --json --robot",
+      "blocks_task": false
+    },
+    "secondary_next_commands": [],
     "signals": {
       "repo_status": {
         "state": "pass",
@@ -171,29 +186,30 @@
       "repo_surface": {
         "state": "warn",
         "severity": "warning",
-        "summary": "Repo surface has 4586 diagnostic finding(s).",
+        "summary": "Repo surface has 7461 diagnostic finding(s).",
         "source": "repo_surface",
         "next_command": "./bin/ask repo surface --json --robot",
         "details": {
           "status": "warning",
-          "total_paths": 7866,
-          "blocking_findings": 4586,
+          "total_paths": 10833,
+          "blocking_findings": 7461,
           "counts_by_code": {
-            "authored_source_surface": 68,
+            "authored_source_surface": 81,
             "duplicated_infrastructure_path": 6,
             "fixture_or_template_surface": 15,
             "generated_evidence_pattern": 11,
-            "harness_reference_surface": 13,
-            "indexed_reference_surface": 1076,
-            "ownership_decision_required": 39,
+            "generated_skillset_projection": 11,
+            "harness_reference_surface": 32,
+            "indexed_reference_surface": 1094,
+            "ownership_decision_required": 28,
             "plugin_fixture_surface": 879,
             "plugin_metadata_source": 3,
-            "plugin_reference_surface": 35,
-            "policy_surface": 308,
-            "source_path": 872,
+            "plugin_reference_surface": 49,
+            "policy_surface": 315,
+            "source_path": 882,
             "tracked_generated_work_area": 267,
-            "tracked_historical_artifact": 4257,
-            "unknown_surface": 17
+            "tracked_historical_artifact": 7072,
+            "unknown_surface": 88
           }
         }
       }
@@ -202,13 +218,13 @@
       {
         "id": "repo_surface",
         "severity": "warning",
-        "summary": "Repo surface has 4586 diagnostic finding(s).",
+        "summary": "Repo surface has 7461 diagnostic finding(s).",
         "next_command": "./bin/ask repo surface --json --robot"
       }
     ]
   },
   "telemetry": {
-    "latency_ms": 581
+    "latency_ms": 553
   },
   "errors": []
 }

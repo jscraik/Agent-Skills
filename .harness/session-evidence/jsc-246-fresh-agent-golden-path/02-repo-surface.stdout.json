@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "trace_id": "799309b7-5717-458c-90e0-58f13847f600",
+  "trace_id": "c0e96a8b-a448-40c5-9b63-e247cce7a4c0",
   "metadata": {
     "version": "0.1.0",
     "command": "repo surface --json --robot",
@@ -13,39 +13,41 @@
       "schema_version": 1,
       "status": "warning",
       "summary": {
-        "blocking_findings": 4586,
+        "blocking_findings": 7461,
         "counts_by_classification": {
           "fixture": 894,
-          "historical_artifact": 4535,
-          "policy": 308,
-          "reference": 1124,
-          "source": 943,
-          "unknown": 62
+          "generated_tracked": 11,
+          "historical_artifact": 7350,
+          "policy": 315,
+          "reference": 1175,
+          "source": 966,
+          "unknown": 122
         },
         "counts_by_code": {
-          "authored_source_surface": 68,
+          "authored_source_surface": 81,
           "duplicated_infrastructure_path": 6,
           "fixture_or_template_surface": 15,
           "generated_evidence_pattern": 11,
-          "harness_reference_surface": 13,
-          "indexed_reference_surface": 1076,
-          "ownership_decision_required": 39,
+          "generated_skillset_projection": 11,
+          "harness_reference_surface": 32,
+          "indexed_reference_surface": 1094,
+          "ownership_decision_required": 28,
           "plugin_fixture_surface": 879,
           "plugin_metadata_source": 3,
-          "plugin_reference_surface": 35,
-          "policy_surface": 308,
-          "source_path": 872,
+          "plugin_reference_surface": 49,
+          "policy_surface": 315,
+          "source_path": 882,
           "tracked_generated_work_area": 267,
-          "tracked_historical_artifact": 4257,
-          "unknown_surface": 17
+          "tracked_historical_artifact": 7072,
+          "unknown_surface": 88
         },
         "counts_by_status": {
-          "ok": 3269,
-          "unknown": 56,
-          "violation": 4530,
+          "ok": 3361,
+          "unknown": 116,
+          "violation": 7345,
           "warning": 11
         },
-        "total_paths": 7866
+        "total_paths": 10833
       },
       "metadata": {
         "inventory_scope": "tracked_files",
@@ -71,7 +73,7 @@
     }
   },
   "telemetry": {
-    "latency_ms": 196
+    "latency_ms": 213
   },
   "errors": []
 }

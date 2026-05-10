@@ -28,7 +28,7 @@ linear_label_status: resolved_with_existing_labels
 linear_priority: 2
 selected_refactor: .harness/refactors/agent-first-golden-path.md
 source_spec: Docs/specs/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-spec.md
-linear_delta_status: pass
+linear_delta_status: pass_live_refresh_2026_05_09
 live_baseline_status: runtime_budget_pass_with_unrelated_sync_required
 ---
 
@@ -54,6 +54,80 @@ loop dominant, compression-tested, and traceable enough for `he-plan`.
 
 `JSC-230`, `JSC-167`, and `JSC-169` remain outside this slice unless explicitly
 re-approved by a later Linear Delta Capture Gate.
+
+## HE Gate Profile
+
+```yaml
+gate_profile:
+  risk_class: architecture_sensitive
+  proven_risks:
+    - agent-facing command routing can become ambiguous if multiple entrypoints
+      compete with `repo doctor`.
+    - proof language can accidentally expand into neighboring proof-schema and
+      command-handle work.
+    - large non-blocking diagnostic debt can trap agents in diagnosis instead
+      of letting them continue the active task.
+    - docs-only compression can look complete while command behavior remains
+      unchanged.
+    - dirty worktree closeout evidence can be mistaken for a clean JSC-246
+      success fixture.
+  required_contracts:
+    - Plugins/harness-engineering/references/gate-selection-contract.md
+    - Plugins/harness-engineering/references/first-principles-contract.md
+    - Plugins/harness-engineering/references/agent-native-compression-contract.md
+    - Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md
+    - Plugins/harness-engineering/references/linear-delta-capture-gate.md
+  skipped_contracts:
+    - contract: Plugins/harness-engineering/references/plugin-hook-capability-contract.md
+      reason: JSC-246 does not propose bundled plugin hooks or hook-enforced lifecycle behavior.
+    - contract: Plugins/harness-engineering/references/domain-model-production-contract.md
+      reason: This slice changes command routing and proof semantics, not a product domain model.
+    - contract: codex-security security scan
+      reason: No permissions, auth, secret handling, sandbox policy, dependency trust, or external side effect is admitted by this spec.
+  minimum_proof_required:
+    continue_to_next_stage: Spec identity, Linear traceability, current command snapshots, bounded acceptance matrix, and technical review with no blocking findings.
+    safe_to_close: Eval artifact with fresh-agent transcript, closeout proof, route fixtures, diagnostic continuation proof, docs compression metric, and exact command outcomes.
+    block_next_stage: Any open finding that expands into JSC-230/JSC-167/JSC-169, introduces a new first-contact command without ablation proof, or treats current dirty closeout as clean success evidence.
+  evidence_basis: repo+linear+harness
+  downstream_route: he-plan
+```
+
+This gate profile is intentionally not `mixed`. The strongest live risk is
+architecture-sensitive command and lifecycle routing. Linear closure,
+security-sensitive behavior, plugin hook behavior, and domain-model production
+are explicitly not admitted by this spec.
+
+## First-Principles Check
+
+```yaml
+first_principles_check:
+  verified_failure: Future agents can see many useful `ask` surfaces but still
+    need repo archaeology to know the first safe command, the next command, and
+    whether closure is actually ready.
+  fundamental_constraint: Agent Skills Kit must make the safe control-plane
+    loop executable through live command output, not by requiring agents to
+    memorize scattered docs.
+  assumption_being_challenged: A broader command catalog, more docs, or a new
+    cockpit command would automatically improve agent operation.
+  smallest_effective_mechanism: Harden the existing five-command loop, prove
+    deterministic next-action routing, and compress first-contact docs around
+    generated command truth.
+  analogy_or_template_rejected: Do not copy dashboard/cockpit patterns from
+    adjacent systems unless ablation proves the existing `ask` loop cannot
+    carry the workflow.
+  proof_required: Targeted command fixtures, fresh-agent eval, docs-opened and
+    command-decision metrics, controlled closeout fixture, and final eval
+    artifact before Linear closure.
+  context_load_effect: reduced
+  routing_effect: clearer
+  decision_type: Type 1
+  outcome: proceed
+```
+
+Because this is a Type 1 architectural direction for the `ask` control plane,
+the plan must prefer reversible behavior tests and fixture characterization
+before changing public command names, adding aliases, or rewriting first-contact
+docs.
 
 ## Linear Work Item Contract
 
@@ -100,6 +174,111 @@ The previous approved slice is complete in Linear:
 | `JSC-285` | Done | Prior boundary-map child |
 | `JSC-286` | Done | Prior extraction child |
 | `JSC-287` | Done | Prior proof taxonomy ADR child |
+
+## Linear Delta Capture Refresh
+
+Refreshed on `2026-05-09` against live Linear state.
+
+```yaml
+linear_delta_status: pass_live_refresh_2026_05_09
+current_slice_status: continue
+label_status: resolved
+project:
+  name: agent-skills
+  id: 791c2f12-5ffb-4644-8421-f4216ac6d805
+milestone:
+  name: Command surface and ask reliability
+  id: 1c091ac7-b2ef-4321-ab05-7779841aaf2a
+  progress: 37.5
+selected_issue:
+  key: JSC-246
+  status: Todo
+  status_type: unstarted
+  priority: High
+  labels:
+    - Roadmap: Next
+    - Agent
+    - Infra
+    - Improvement
+required_label_state:
+  Roadmap: Next: existing
+  Agent: existing
+  Infra: existing
+  Improvement: existing
+not_mutated:
+  - No Linear issue, label, milestone, or project was created or updated during this spec refresh.
+```
+
+Live delta classification:
+
+| Issue | Live State | Priority | Classification | Handling |
+| --- | --- | --- | --- | --- |
+| `JSC-246` | Todo | High | `already_covered` / approved current slice | Continue as the only admitted spec slice. |
+| `JSC-284` | Done | Urgent | `already_covered` | Prior command-plane decomposition parent remains complete. |
+| `JSC-285` | Done | Urgent | `already_covered` | Prior responsibility-map child remains complete. |
+| `JSC-286` | Done | High | `already_covered` | Prior plugin-cache extraction child remains complete. |
+| `JSC-287` | Done | Urgent | `already_covered` | Prior proof-taxonomy ADR child remains complete. |
+| `JSC-230` | In Progress | High | `out_of_scope` for this spec | Commandable Skill Trees work remains a neighboring active lane; do not implement it through JSC-246. |
+| `JSC-231` | In Progress | High | `out_of_scope` for this spec | Command-surface projection work belongs to `JSC-230`, not this golden-path spec. |
+| `JSC-232` | In Progress | High | `out_of_scope` for this spec | Runtime stub generation belongs to `JSC-230`, not this golden-path spec. |
+| `JSC-233` | In Progress | High | `out_of_scope` for this spec | Public handle/reviewer resolver command work belongs to `JSC-230`, not this golden-path spec. |
+| `JSC-234` | Todo | High | `out_of_scope` for this spec | Handle proof commands and artifact schema would expand the proof surface beyond this slice. |
+| `JSC-235` | Todo | High | `out_of_scope` for this spec | Rooted command-handle regression tests belong to the commandable-skill-tree lane. |
+| `JSC-236` | In Progress | High | `out_of_scope` for this spec | Live Codex handle invocation proof belongs to `JSC-230`, not this golden-path spec. |
+| `JSC-167` | Backlog | High | `candidate_next_slice` / not admitted | Bootstrap and command discoverability may follow later; not required for this spec unless a later gate admits it. |
+| `JSC-169` | Backlog | High | `candidate_next_slice` / not admitted | Lazy-load command dependency work remains a separate reliability slice. |
+| `JSC-171` | Backlog | Medium | `candidate_next_slice` / not admitted | Executable docs contract tests may support later compression, but are not required before this spec can plan. |
+| `JSC-172` | Backlog | Medium | `candidate_next_slice` / not admitted | `ask doctor --fix` is intentionally excluded because this slice is proof and routing, not remediation automation. |
+| `JSC-173` | Backlog | Medium | `candidate_next_slice` / not admitted | Unified skill-surface doctor would add command surface and needs separate admission. |
+| `JSC-174` | Backlog | Medium | `candidate_next_slice` / not admitted | `ask start` overlaps first-contact UX but is blocked here unless ablation proves `repo doctor` cannot carry the path. |
+| `JSC-175` | Backlog | Low | `candidate_next_slice` / not admitted | Human/agent output profiles are adjacent and lower priority. |
+
+Delta decision:
+
+- No live Linear delta blocks this spec refresh.
+- No changed live issue is promoted into the current slice.
+- `JSC-174` is the most tempting loophole because it proposes a new
+  first-contact command. This spec explicitly rejects implementing it inside
+  JSC-246 unless `he-plan` produces ablation proof and a later Linear Delta
+  Capture Gate admits it.
+- The approved next action remains: plan and execute `JSC-246` as a bounded
+  agent-first golden path slice, with `repo doctor` as the first truth command.
+
+## Deepening Refresh: Live Evidence Drift
+
+Refreshed on `2026-05-09` after the live Linear delta capture.
+
+This pass does not change the selected slice. It tightens the proof contract
+around one observed fact: live command evidence changes as unrelated work lands
+in the shared worktree, so acceptance must distinguish stable behavior from
+incidental counts.
+
+Stable behavior from the latest command refresh:
+
+| Command | Latest Result | Spec Meaning |
+| --- | --- | --- |
+| `./bin/ask skills resolve he-spec --json --robot` | Pass; source revision `17b151a25`; source SHA unchanged at `82837f2eac47eb560ed7d42fc130eae49f46027f831d5143ad8668b1d5d65802`. | The HE Spec route is still reachable through the generated handle. |
+| `./bin/ask repo doctor --json --robot` | Pass; `blocking: false`; selected `./bin/ask repo surface --json --robot` as a `diagnostic_advisory`; repo surface reported `7448` findings across `10817` paths. | The first-truth command works and advisory surface debt remains non-blocking. Counts are evidence snapshots, not acceptance thresholds. |
+| `./bin/ask skills explain he-spec --json --robot` | Pass; reports canonical source, generated handle, rooted projection, latent runtime visibility, validation command, and current `skills proof` reachability next command. | `skills explain` has the correct agent-facing explanation shape and preserves the `skills proof` compatibility path. |
+| `./bin/ask skills prove he-spec --json --robot` | Pass; `proof_status: reachable_without_outcome_proof`; reachability and structural quality pass; outcome proof is available but not run. | `skills prove` must not imply trust, promotion, or outcome proof from reachability alone. |
+| `./bin/ask repo closeout --changed --json --robot` | Blocked with `sync_required`; next command remains `./bin/ask skills sync --scope workspace --projection rooted --json --robot`; output includes many unrelated HE/factory/session-evidence changes. | Closeout is correctly blocking the dirty shared worktree, but this is not clean JSC-246 success evidence. |
+
+Deepened acceptance rule:
+
+- Numeric repo-surface counts are diagnostic snapshots. The plan may assert the
+  presence of advisory diagnostic debt, selected next command, and
+  non-blocking behavior, but must not assert exact count values as stable pass
+  criteria.
+- `repo closeout --changed` live output may be used only as blocker evidence
+  while unrelated changes exist. Clean or validation-ready closeout must come
+  from a controlled fixture, scoped helper test, or isolated worktree state.
+- `skills explain` currently points at `skills proof` for reachability while
+  this spec names `skills prove` as the proof scorecard. The plan must either
+  preserve that compatibility boundary or migrate tests and consumers in one
+  reviewed change.
+- No acceptance criterion may depend on `JSC-174` / `ask start`, `JSC-230`
+  command handles, or proof-schema expansion unless a later Linear Delta
+  Capture Gate admits that scope.
 
 ## Problem Statement
 
@@ -182,11 +361,11 @@ loop makes task completion worse.
 
 | Evidence | Result | Why It Matters |
 | --- | --- | --- |
-| `./bin/ask skills resolve he-spec --json` | Resolved `he-spec` to `Plugins/harness-engineering/skills/he-spec/SKILL.md` with source revision `9105a11e1` and source SHA `aa2559ee6e392f0357285323b8ca1b5075dc9f5d1c0ef817389a792580e4461d`. | Confirms this spec used the canonical HE Spec workflow and records the live skill revision used for this refresh. |
+| `./bin/ask skills resolve he-spec --json --robot` | Resolved `he-spec` to `Plugins/harness-engineering/skills/he-spec/SKILL.md` with source revision `17b151a25` and source SHA `82837f2eac47eb560ed7d42fc130eae49f46027f831d5143ad8668b1d5d65802`. | Confirms this spec used the canonical HE Spec workflow and records the live skill revision used for this refresh. |
 | Live Linear issue `JSC-246` | Status `Todo`, priority `High`, labels `Roadmap: Next`, `Agent`, `Infra`, `Improvement`, project `agent-skills`. | Confirms the selected issue exists and is not already complete. |
 | `.harness/linear/agent-skills-linear-plan.md` | Approved current slice is `JSC-246` / Agent First Golden Path; delta gate status is `pass`. | Establishes this spec's allowed scope and confirms no new Linear work was admitted into this slice. |
 | `.harness/refactors/agent-first-golden-path.md` | Defines the product spine as `repo doctor`, `skills improve`, `skills explain`, `skills prove`, `repo closeout`. | Establishes the intended architecture and migration pressure. |
-| `./bin/ask repo doctor --json --robot` | Succeeded with non-blocking diagnostic debt; emitted next command `./bin/ask repo surface --json --robot`; runtime budget passed with `default_visible_count: 10`, `estimated_description_tokens: 3172`, and `violation_count: 0`; command handles passed with `handle_count: 98`; repo surface remained warning-only with `4620` diagnostic findings. | Shows `repo doctor` already behaves as the first truth and correctly distinguishes advisory diagnostic debt from blocking repair. |
+| `./bin/ask repo doctor --json --robot` | Succeeded with non-blocking diagnostic debt; emitted next command `./bin/ask repo surface --json --robot`; runtime budget passed with `default_visible_count: 10`, `estimated_description_tokens: 3172`, and `violation_count: 0`; command handles passed with `handle_count: 98`; repo surface remained warning-only with `7448` diagnostic findings. | Shows `repo doctor` already behaves as the first truth and correctly distinguishes advisory diagnostic debt from blocking repair. Exact diagnostic counts are snapshots, not acceptance thresholds. |
 | `./bin/ask repo status --json --robot` | Succeeded; repo root readable and `skills_synced: true`. | Confirms baseline repo state is readable through `ask`. |
 | `./bin/ask skills explain he-spec --json --robot` | Succeeded; reports canonical source, generated handle, runtime visibility, validation command, and reachability proof command. | Shows `skills explain` already has the right shape for the golden path. |
 | `Infrastructure/bin/ask` command registration | Registers `repo doctor`, `repo closeout`, `repo surface`, `skills improve`, `skills explain`, and `skills prove`; no `repo onboard` or `repo next` action was found. | Prevents the spec from hallucinating currently implemented commands. |
@@ -194,7 +373,7 @@ loop makes task completion worse.
 | `./bin/ask skills improve "make agents better at fixing PR review comments" --json --robot` | Succeeded with `status: resolved_with_fallback`, recommended `$autofix`, and also reported nested `goal_decision_status: intent_unresolved`. | Shows the command is useful but not yet cleanly deterministic enough to treat fallback routing as proof-quality routing. |
 | `./bin/ask skills prove he-spec --json --robot` | Succeeded with `proof_status: reachable_without_outcome_proof`, structural audit pass, outcome workout available but not run. | Confirms proof semantics are already honest and should be preserved, then strengthened with proof-level assertions. |
 | `./bin/ask runtime budget --json --robot` | Succeeded with no violations and no unresolved scope collisions; baselined same-scope collisions are `agents-sdk`, `build-chatgpt-app`, and `chatgpt-app-submission`; retained informational advisory `ADVANCED_SKILL_VISIBILITY_HIGH` for advanced-mode skill count. | Confirms the prior curated runtime-budget collision is resolved/baselined and must not remain an active JSC-246 blocker. |
-| `./bin/ask repo closeout --changed --json --robot` | Failed with `sync_required`; reported `changed_file_count: 14`, runtime budget pass, canonical skill changes outside this JSC-246 plan/spec slice, repo surface warning, and next command `./bin/ask skills sync --scope workspace --projection rooted --json --robot`. | Shows closeout catches current unrelated sync readiness while preserving runtime-budget and diagnostic-debt truth; eval fixtures must isolate JSC-246 changes from unrelated worktree churn. |
+| `./bin/ask repo closeout --changed --json --robot` | Failed with `sync_required`; reported a large dirty worktree with unrelated harness-engineering, factory, generated artifact, media, and session-evidence changes; runtime budget still passed; repo surface remained warning-only; next command was `./bin/ask skills sync --scope workspace --projection rooted --json --robot`. | Shows closeout catches current unrelated sync readiness while preserving runtime-budget and diagnostic-debt truth; eval fixtures must isolate JSC-246 changes from unrelated worktree churn. |
 
 ### Interpretation
 
@@ -226,7 +405,7 @@ JSC-246 fixture.
 command: ./bin/ask repo doctor --json --robot
 status: success
 blocking: false
-agent_summary: "Usable with diagnostic debt: Repo surface has 4620 diagnostic finding(s)."
+agent_summary: "Usable with diagnostic debt: Repo surface has 7448 diagnostic finding(s)."
 blockers: []
 next_command: ./bin/ask repo surface --json --robot
 next_command_kind: diagnostic_advisory
@@ -243,24 +422,25 @@ signals:
 Repo surface diagnostic debt from doctor:
 
 ```yaml
-total_paths: 7935
-blocking_findings: 4620
+total_paths: 10817
+blocking_findings: 7448
 counts_by_code:
-  authored_source_surface: 72
+  authored_source_surface: 81
   duplicated_infrastructure_path: 6
   fixture_or_template_surface: 15
   generated_evidence_pattern: 11
-  harness_reference_surface: 13
-  indexed_reference_surface: 1091
+  generated_skillset_projection: 11
+  harness_reference_surface: 30
+  indexed_reference_surface: 1094
   tracked_generated_work_area: 267
-  ownership_decision_required: 39
+  ownership_decision_required: 28
   plugin_fixture_surface: 879
   plugin_metadata_source: 3
-  plugin_reference_surface: 43
-  policy_surface: 310
-  source_path: 878
-  tracked_historical_artifact: 4257
-  unknown_surface: 51
+  plugin_reference_surface: 49
+  policy_surface: 315
+  source_path: 881
+  tracked_historical_artifact: 7063
+  unknown_surface: 84
 ```
 
 Runtime and handle baseline:
@@ -374,7 +554,7 @@ commit_readiness.ready: false
 commit_readiness.blockers:
   - sync_required
 next_command: ./bin/ask skills sync --scope workspace --projection rooted --json --robot
-changed_file_count: 14
+changed_file_count: large_dirty_worktree_snapshot
 sync.needed: true
 sync.commands:
   - ./bin/ask skills sync --scope workspace --projection rooted --json --robot
@@ -386,13 +566,12 @@ note: output included unrelated dirty harness-engineering skill, reference, scri
 
 Fresh confidence-loop note on `2026-05-09`: the current live closeout still
 blocks on `sync_required`, but the blocker is owned by unrelated dirty
-harness-engineering skill files (`he-eval-report`, `he-linear-plan`,
-`he-phase-heartbeat`, `he-refactor`, `he-strategy`) and related reference/script
-changes, not by the JSC-246 plan/spec artifacts alone. The implementation plan
-must not treat that blocker as JSC-246 implementation scope. It must prove
-closeout through controlled fixtures or an isolated changed-file scenario and
-record live closeout as blocked only when the command actually reports a
-blocker.
+harness-engineering, plugin-factory, and skill-factory source changes plus
+session-evidence artifacts, not by the JSC-246 spec artifact alone. The
+implementation plan must not treat that blocker as JSC-246 implementation
+scope. It must prove closeout through controlled fixtures or an isolated
+changed-file scenario and record live closeout as blocked only when the command
+actually reports a blocker.
 
 Closeout is already doing the right kind of pressure work. The next plan must
 avoid treating the current dirty worktree as a clean golden-path fixture. Use an
@@ -620,6 +799,53 @@ The next `he-plan` must sequence work in this order:
 Do not start by rewriting docs. Do not start by adding aliases. Do not start by
 cleaning artifacts. Those paths create apparent progress while avoiding the
 actual control-plane contract.
+
+## Negative Proof Requirements
+
+The implementation must prove the golden path by showing what it refuses or
+does not do, not only by showing successful command output.
+
+Required negative cases:
+
+| Case | Expected Result | Blocks Plan/Closure |
+| --- | --- | --- |
+| `repo doctor` sees both a blocking sync failure and repo-surface diagnostic debt. | Blocking sync failure wins; repo-surface debt is still reported as secondary/advisory evidence. | Yes |
+| `repo doctor` sees only non-blocking repo-surface diagnostic debt. | It may emit `repo surface` as diagnostic next action, but must not mark the repo unusable. | Yes |
+| `skills improve` cannot resolve a goal cleanly but has a fallback. | It must expose `resolved_with_fallback`, confidence, rationale, and next proof command. | Yes |
+| `skills improve` has multiple plausible routes and fallback would be unsafe. | It must return an explicit ambiguity/blocking state instead of picking silently. | Yes |
+| `skills explain` is given a missing handle. | It must return a structured not-found/error state and a recovery command, not an unhandled traceback. | Yes |
+| `skills prove` has only reachability/structural evidence. | It must not imply trust, default visibility, promotion, or outcome proof. | Yes |
+| `repo closeout --changed` runs with unrelated generated/projection churn. | It must report the blocker and next sync command without treating unrelated churn as JSC-246 success evidence. | Yes |
+| First-contact docs are edited without command behavior or eval proof. | Review must reject readiness as docs-only completion. | Yes |
+| A new public command or alias is proposed before ablation proof. | Plan/review must reject it or mark it out of scope. | Yes |
+
+The negative cases are part of the acceptance surface because the failure mode
+for this slice is false confidence: agents believe the command loop is safe
+because commands exist, while routing, proof, diagnostic continuation, or
+closeout semantics are still ambiguous.
+
+## Agentic Search And Artifact Naming
+
+This spec intentionally keeps the existing stable filename:
+
+```text
+.harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md
+```
+
+The stable chain key is:
+
+```yaml
+canonical_slug: agent-skills-jsc-246-agent-first-golden-path
+linear_issue: JSC-246
+date: 2026-05-09
+```
+
+Do not create a duplicate dated spec for the same active slice unless the Linear
+Delta Capture Gate admits a new execution slice or the artifact is intentionally
+superseded. Agentic search should key on `canonical_slug`, `linear_issue`,
+`artifact_type`, and dated frontmatter first, then path naming second. If a
+future pass renames this file to a dated Linear style, it must preserve the same
+`canonical_slug` and update every plan/review/eval backlink in the chain.
 
 ## System Boundary
 
@@ -1000,6 +1226,32 @@ editing command logic:
 - Should any first-contact README sections be generated from command metadata,
   or is validated prose sufficient for this slice?
 
+These are planning questions, not blockers for `he-plan`. The plan must resolve
+them by reading live command helpers and tests before implementation. If the
+answer requires a new command, public schema, or external Linear work, that
+answer must be recorded as out of scope for JSC-246 unless a later delta gate
+admits it.
+
+## Technical Review Readiness Checklist
+
+Before implementation begins, the technical review must verify:
+
+- The HE Gate Profile is specific and does not load `mixed` governance by
+  default.
+- The First-Principles Check names a real failure and rejects docs/catalog
+  expansion as a default solution.
+- Negative proof cases are represented in the plan as tests, fixtures, or
+  explicitly blocked fixture gaps.
+- No acceptance criterion requires new proof schema, promotion state, or
+  trusted/default-visible lifecycle state.
+- `repo surface` diagnostic debt is treated as advisory unless the relevant
+  command reports a true blocker.
+- `repo closeout --changed` proof uses controlled changed-file evidence or
+  helper-level fixtures.
+- Docs compression is paired with fresh-agent behavior metrics.
+- File naming and backlinks preserve the `canonical_slug` chain even if a later
+  dated rename is approved.
+
 ## Definition Of Done
 
 - Spec identity and Linear traceability lints pass.
@@ -1072,7 +1324,7 @@ finding:
     - id: repo_surface
       next_command: ./bin/ask repo surface --json --robot
       blocking: false
-      finding_count: 4620
+      finding_count: 7448
   golden_path:
     - ./bin/ask repo doctor --json --robot
     - ./bin/ask skills improve "<goal>" --json --robot

@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "trace_id": "6511562d-1274-4456-8a46-a8cc7bbcbe87",
+  "trace_id": "21f0d475-7d53-4b1a-804a-ed945c7fe74b",
   "metadata": {
     "version": "0.1.0",
     "command": "skills improve review this implementation against the spec --json --robot",
@@ -14,18 +14,18 @@
       "status": "resolved_with_fallback",
       "route_state": "resolved_with_fallback",
       "route_state_reason": "fallback command-handle description match selected one reachable capability",
-      "agent_summary": "Recommended $triage for this goal.",
+      "agent_summary": "Recommended $he-code-review for this goal.",
       "recommended_capability": {
-        "handle": "triage",
-        "name": "triage",
-        "path": ".agents/skills/triage/SKILL.md",
-        "candidate_id": "skill:triage::.agents/skills/triage/SKILL.md",
+        "handle": "he-code-review",
+        "name": "he-code-review",
+        "path": ".agents/skills/he-code-review/SKILL.md",
+        "candidate_id": "skill:he-code-review::.agents/skills/he-code-review/SKILL.md",
         "candidate_type": "skill",
-        "confidence": 0.65
+        "confidence": 0.85
       },
       "why": [
-        "fallback command-handle description match",
-        "matched terms=review,this"
+        "fallback HE implementation-review intent hint",
+        "matched terms=implementation,review,spec"
       ],
       "reachability": {
         "status": "pass",
@@ -35,7 +35,7 @@
       },
       "proof": {
         "schema_version": "command-handle-proof.v1",
-        "handle": "triage",
+        "handle": "he-code-review",
         "status": "pass",
         "gates": {
           "resolver": true,
@@ -59,22 +59,22 @@
         },
         "resolution": {
           "status": "ok",
-          "handle": "triage",
+          "handle": "he-code-review",
           "kind": "skill",
           "command_visibility": "target",
           "runtime_visibility": "latent",
-          "source_path": "Skills/agent-ops/triage/SKILL.md",
-          "command_handle_path": ".agents/skills/triage/SKILL.md",
-          "owner": "agent-ops",
-          "description": "Review file-based todo findings into ready, skipped, customized, or blocked states. Use this skill when pending todo files need approval.",
-          "invoke_via": "agent-ops",
+          "source_path": "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
+          "command_handle_path": ".agents/skills/he-code-review/SKILL.md",
+          "owner": "harness-engineering",
+          "description": "Review HE diffs for closure risk. Use when PR, commit, or readiness evidence is needed.",
+          "invoke_via": "harness-engineering",
           "level": "molecule",
           "provenance": {
             "generator": "context-budgeted-skillsets.v1",
             "projection_mode": "rooted",
             "policy_identity": "8c69fbfa81b89658",
-            "source_revision": "c81d593cb",
-            "source_sha256": "3e782c49a4c0507ea971ba32d7537d8a71d46a5466ccc101efb4167212a5097f"
+            "source_revision": "3c3e7f92c",
+            "source_sha256": "2f86305cb3f5fbc19e123044c9b47f3b087bec293ce94006d669736a99a689d5"
           }
         },
         "command_handle_check": {
@@ -85,7 +85,7 @@
         },
         "workspace_runtime": {
           "path": "/Users/jamiecraik/dev/agent-skills/.agents/skills",
-          "command_handle_path": "/Users/jamiecraik/dev/agent-skills/.agents/skills/triage/SKILL.md",
+          "command_handle_path": "/Users/jamiecraik/dev/agent-skills/.agents/skills/he-code-review/SKILL.md",
           "command_handle_exists": true
         },
         "user_runtime_links": {
@@ -105,9 +105,9 @@
           }
         },
         "user_runtime_command_handles": {
-          "codex_handle": "/Users/jamiecraik/.codex/skills/triage/SKILL.md",
+          "codex_handle": "/Users/jamiecraik/.codex/skills/he-code-review/SKILL.md",
           "codex_handle_exists": false,
-          "agents_handle": "/Users/jamiecraik/.agents/skills/triage/SKILL.md",
+          "agents_handle": "/Users/jamiecraik/.agents/skills/he-code-review/SKILL.md",
           "agents_handle_exists": true
         },
         "live_codex_invocation": {
@@ -135,7 +135,7 @@
           "scope_rank": 2
         }
       ],
-      "next_command": "./bin/ask skills proof triage --json --robot",
+      "next_command": "./bin/ask skills proof he-code-review --json --robot",
       "goal_decision_status": "intent_unresolved",
       "goal_decision": {
         "schema_version": "goal-decision.v1",
@@ -204,7 +204,7 @@
     }
   },
   "telemetry": {
-    "latency_ms": 328
+    "latency_ms": 293
   },
   "errors": []
 }
