@@ -2214,24 +2214,24 @@ materialize_plugin_cache_roots() {
         local tmp_copy_dir=""
         tmp_copy_dir="$(mktemp -d)"
         cleanup_paths+=("$tmp_copy_dir")
-        cp -a "$candidate_dir"/. "$tmp_copy_dir"/
+        cp -R "$candidate_dir"/. "$tmp_copy_dir"/
         while IFS= read -r child_dir; do
           [ -n "$child_dir" ] || continue
           rm -rf -- "$child_dir"
         done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -print)
-        cp -a "$tmp_copy_dir"/. "$plugin_dir"/
+        cp -R "$tmp_copy_dir"/. "$plugin_dir"/
       elif command -v rsync >/dev/null 2>&1; then
         rsync -a --delete --force "$candidate_dir/" "$plugin_dir/"
       else
         local tmp_copy_dir=""
         tmp_copy_dir="$(mktemp -d)"
         cleanup_paths+=("$tmp_copy_dir")
-        cp -a "$candidate_dir"/. "$tmp_copy_dir"/
+        cp -R "$candidate_dir"/. "$tmp_copy_dir"/
         while IFS= read -r child_dir; do
           [ -n "$child_dir" ] || continue
           rm -rf -- "$child_dir"
         done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -print)
-        cp -a "$tmp_copy_dir"/. "$plugin_dir"/
+        cp -R "$tmp_copy_dir"/. "$plugin_dir"/
       fi
 
       while IFS= read -r child_dir; do
