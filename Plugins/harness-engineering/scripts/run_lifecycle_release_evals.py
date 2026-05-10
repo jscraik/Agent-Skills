@@ -50,6 +50,8 @@ CODEX_RUNNER_PREFLIGHT_MARKERS = (
     "produced no final output",
 )
 
+SLOW_CASE_DIAGNOSTIC_THRESHOLD_SECONDS = 120
+
 
 def repo_root_from_script() -> Path:
     return Path(__file__).resolve().parents[3]
@@ -284,6 +286,7 @@ def _failure_breakdown(results: list[dict[str, object]]) -> dict[str, object]:
         "content_failures": [],
         "tool_preflight_failures": [],
         "selection_signal_warnings": [],
+        "slow_pass_cases": [],
         "other_failures": [],
     }
 
@@ -306,6 +309,18 @@ def _failure_breakdown(results: list[dict[str, object]]) -> dict[str, object]:
             if isinstance(classification, dict)
             else []
         )
+        slow_cases = result.get("slow_cases")
+        if isinstance(slow_cases, list) and slow_cases:
+            breakdown["slow_pass_cases"].append(
+                {
+                    "skill": skill,
+                    "threshold_seconds": result.get(
+                        "slow_case_threshold_seconds",
+                        SLOW_CASE_DIAGNOSTIC_THRESHOLD_SECONDS,
+                    ),
+                    "cases": slow_cases,
+                }
+            )
         if failure_class == "timeout" or timeout_cases:
             breakdown["timeout_failures"].append(
                 {
@@ -745,6 +760,19 @@ def _run_skill_builder_eval_split_cases(
         for result in case_results
         if result.get("returncode") == 124 or result.get("status") == "timeout"
     ]
+    slow_cases = [
+        {
+            "id": (result.get("case_filters") or [None])[0]
+            if isinstance(result.get("case_filters"), list)
+            else None,
+            "duration_seconds": result.get("duration_seconds"),
+        }
+        for result in case_results
+        if result.get("returncode") == 0
+        and result.get("status") == "success"
+        and isinstance(result.get("duration_seconds"), (int, float))
+        and result["duration_seconds"] >= SLOW_CASE_DIAGNOSTIC_THRESHOLD_SECONDS
+    ]
     return {
         "skill": skill_name,
         "mode": mode,
@@ -762,12 +790,16 @@ def _run_skill_builder_eval_split_cases(
         "case_filters": list(cases),
         "category_filters": list(categories),
         "case_results": case_results,
+        "slow_case_threshold_seconds": SLOW_CASE_DIAGNOSTIC_THRESHOLD_SECONDS,
+        "slow_cases": slow_cases,
         "failure_classification": _merged_case_failure_classification(case_results),
         "errors": [] if not failed else [{"code": "ERR_VALIDATION", "message": "One or more split eval cases failed."}],
         "raw_output": json.dumps(
             {
                 "split_cases": True,
                 "case_count": len(case_results),
+                "slow_case_threshold_seconds": SLOW_CASE_DIAGNOSTIC_THRESHOLD_SECONDS,
+                "slow_cases": slow_cases,
                 "cases": [
                     {
                         "id": (result.get("case_filters") or [None])[0]

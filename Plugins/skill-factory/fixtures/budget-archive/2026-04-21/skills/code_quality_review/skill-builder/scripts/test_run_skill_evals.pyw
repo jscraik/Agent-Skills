@@ -30,6 +30,12 @@ if existing_runner is not None:
     if existing_path.parent != SCRIPT_DIR:
         del sys.modules["run_skill_evals"]
 
+existing_trace_checks = sys.modules.get("deterministic_trace_checks")
+if existing_trace_checks is not None:
+    existing_path = Path(str(getattr(existing_trace_checks, "__file__", ""))).resolve()
+    if existing_path.parent != SCRIPT_DIR:
+        del sys.modules["deterministic_trace_checks"]
+
 from run_skill_evals import (
     EvalCase,
     _acceptance_skip_reason,
@@ -44,6 +50,7 @@ from run_skill_evals import (
     main,
     run_discovery_smoke,
 )
+from deterministic_trace_checks import evaluate_trace
 
 
 class RunSkillEvalsModeTests(unittest.TestCase):
@@ -83,6 +90,36 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         )
         self.assertIsNone(_acceptance_skip_reason(exit_code=1, output_text="partial response"))
         self.assertIsNone(_acceptance_skip_reason(exit_code=0, output_text=""))
+
+    def test_forbidden_short_command_matches_tokens_not_substrings(self) -> None:
+        events = [
+            {
+                "type": "item.completed",
+                "item": {
+                    "type": "command_execution",
+                    "command": "/bin/zsh -c 'cat references/first-principles.md'",
+                },
+            }
+        ]
+
+        result = evaluate_trace(events, deterministic_checks={"forbidden_commands": ["nc"]})
+
+        self.assertEqual(result.hard_failures, [])
+
+    def test_forbidden_short_command_matches_shell_c_payload(self) -> None:
+        events = [
+            {
+                "type": "item.completed",
+                "item": {
+                    "type": "command_execution",
+                    "command": "/bin/zsh -c 'nc example.com 80'",
+                },
+            }
+        ]
+
+        result = evaluate_trace(events, deterministic_checks={"forbidden_commands": ["nc"]})
+
+        self.assertEqual(result.hard_failures, ["forbidden command was executed: 'nc'"])
 
     def test_repo_evals_include_family_contract_cases(self) -> None:
         evals_path = SCRIPT_DIR.parent / "references" / "evals.yaml"

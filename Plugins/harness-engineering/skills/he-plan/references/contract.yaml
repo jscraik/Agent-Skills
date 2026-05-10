@@ -23,6 +23,7 @@ outputs:
   - mode and depth decision: fresh/resume/deepen plus lightweight/standard/deep
   - durable plan artifact with stable plan IDs and acceptance IDs
   - resolved or created Linear issue key/URL for tracked plans, or linear_blocked status with missing fields and ready-to-create payload
+  - explicit linear_action_required boolean and linear_mutation_status enum: not_applicable, already_linked, confirmation_required, approved_small_set_created, or blocked
   - Linear/spec/plan/PR traceability matrix for tracked work
   - post_plan_handoff state: handoff_executed, explicit_stop, blocked, or awaiting_user_choice
   - coding_harness lifecycle block including plan-gate status when the repo is coding-harness-managed
@@ -31,6 +32,7 @@ outputs:
   - exact first-contact budget decision for cockpit/compression plans, including default-help rails, agent-catalog rails, commands to demote or hide, and the advanced/all escape hatch
   - "XP operating artifacts: slack_policy for allowable uncertainty and blackboard_delta for durable plan-state updates"
   - explicit classification of assumptions, blockers, and deferred implementation unknowns
+  - evidence-backed confidence statement with verified facts, assumptions, blocked validations, and confidence ceilings
   - next-stage handoff to he-work, Linear workflow, document review, or folded he-deepen-plan
 
 observability: >
@@ -59,6 +61,7 @@ risks:
   - dropping source requirements; mitigate with source coverage validation
   - plan/state drift; mitigate with stable IDs and complete-replacement revisions
   - missing Linear traceability; mitigate by requiring active issue resolution or issue creation for tracked work
+  - local plan artifact mistaken for live tracker mutation; mitigate with required linear_action_required and linear_mutation_status output plus confirmation-gated Linear handoff
   - missing Harness gate evidence in coding-harness-managed repos; mitigate by running or explicitly blocking plan-gate and transition commands
   - plan-only drift after the user asked to continue; mitigate with the post-plan handoff contract and same-turn routing when authorized
   - weak tests; mitigate with behavior-focused scenarios and mock anti-pattern guidance

@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shlex
 import sys
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -285,7 +286,31 @@ def _contains_command(commands: List[str], needle: str) -> bool:
     needle_norm = needle.strip().lower()
     if not needle_norm:
         return False
+    if _is_simple_command_token(needle_norm):
+        return any(needle_norm in _command_tokens(c) for c in commands)
     return any(needle_norm in c.lower() for c in commands)
+
+
+def _is_simple_command_token(value: str) -> bool:
+    return bool(re.fullmatch(r"[a-z0-9_.+-]{1,32}", value))
+
+
+def _command_tokens(command: str) -> Set[str]:
+    tokens: Set[str] = set()
+    stack: List[str] = [command]
+    while stack:
+        current = stack.pop()
+        try:
+            parts = shlex.split(current)
+        except ValueError:
+            parts = current.split()
+        for idx, part in enumerate(parts):
+            normalized = Path(part).name.lower()
+            if normalized:
+                tokens.add(normalized)
+            if normalized in {"bash", "sh", "zsh"} and idx + 2 < len(parts) and parts[idx + 1] == "-c":
+                stack.append(parts[idx + 2])
+    return tokens
 
 
 def _check_command_order(commands: List[str], sequence: List[str]) -> bool:

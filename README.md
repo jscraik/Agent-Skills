@@ -2,6 +2,10 @@
 
 A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
 
+A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+
+A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+
 Agent Skills Kit is an **agent capability control plane** for Codex and AI
 coding agents.
 
@@ -32,6 +36,13 @@ Start with the executable agent path below. The product framing and proof
 contract live in [Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md).
 
 ## Quick start
+
+First make the repo-local command surface reachable from a fresh checkout:
+
+```bash
+bash scripts/bootstrap-ask.sh --json
+python3 bin/ask repo status --json
+```
 
 For AI coding agents, start with the product path:
 

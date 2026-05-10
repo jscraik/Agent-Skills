@@ -5,12 +5,12 @@ triggers:
   - Linear issue, milestone, or execution slice is about to close
   - drift validation or proof linkage is requested
 inputs:
-  - source slice, Linear identifiers, implementation diff, validation output, PR/commit evidence, ADR/core/refactor/spec links
+  - source slice, Linear IDs, diff, validation output, PR/commit evidence, ADR/core/refactor/spec links
 outputs:
   - .harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-milestone>-eval.md
   - .harness/evals/YYYY-MM-DD-<repo-name>-<linear-parent-issue-or-milestone>-eval.md when no Linear issue is known
   - closure recommendation: Complete, Complete with follow-up, Blocked, Needs rework, or Unsafe to close
-  - gate matrix, drift validation, proof artifacts, follow-up classification, and core/ADR update decision
+  - gate matrix, drift validation, proof artifacts, follow-up classification, core/ADR update decision
 required_validity_checks:
   - task_validity
   - outcome_validity
@@ -29,11 +29,17 @@ risks:
   - over-broad reports can evaluate adjacent work instead of the approved slice
   - protected side effects can be approved from agent claims or external-party requests
   - repeated review or CI remediation can be dismissed as noise instead of becoming eval seeds
-observability: "Track validator status, warning count, first blocking error, report-linked command outcomes, and side-effect authorization evidence fields."
-rollback_procedure: "Keep Linear open, classify the report as Blocked or Needs rework, patch or revert the failing implementation slice, and rerun the report validator plus the narrowest implementation validation before closeout."
+  - generated media can be mistaken for persisted proof when only a prompt or cache-only image exists
+observability: "Track validator status, warnings, first blocking error, command outcomes, and side-effect authorization fields."
+rollback_procedure: "Keep Linear open, mark Blocked or Needs rework, patch or revert the failing slice, and rerun report plus narrow implementation validation."
+media_artifact_policy:
+  repository_root: ".harness/media/"
+  required_when_media_is_proof:
+    - cache path when available
+    - repository PNG path
+    - prompt metadata path
+    - sidecar path
+    - existence verification
+  rule: "Prompt-only, visible-only, or cache-only media is incomplete proof for closure."
 non_goals:
-  - repeat the implementation spec
-  - create a second architecture review
-  - generate generic QA notes
-  - rubber-stamp implementation status
-  - create Linear issue noise
+  - repeat specs, duplicate architecture review, generic QA, rubber-stamp status, or create Linear noise

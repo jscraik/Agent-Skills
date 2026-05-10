@@ -144,6 +144,11 @@ Load references by trigger instead of by habit:
 - `skills/he-linear-plan/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
 
+`he-phase-heartbeat`:
+
+- `skills/he-phase-heartbeat/references/phase-gate-contract.md`
+- `skills/he-phase-heartbeat/references/contract.yaml`
+
 ## Historical Context Policy
 
 Historical compact-entrypoint lines from prior compression passes belong in:
@@ -207,4 +212,23 @@ description: "Create evidence-backed HE specs. Use when approved intent needs ac
 Use when requirements are needed before plan/work; Explore first and ask second.
 4. Resolve or block the Linear tracker; run the Linear Delta Capture Gate for existing tracked plans before admitting changed Linear work into scope.
 description: "Build approved HE plan slices. Use when a bounded plan authorizes code changes and validation."
+```
+
+The 2026-05-10 trust-repair hardening pass also retired long-form stage
+entrypoint doctrine into stage-local references while preserving these audit
+anchors for progressive-disclosure validation:
+
+```text
+description: "Explore Harness Engineering options, discard weak ideas, and select survivor routes before commitment. Use when intent, stage choice, tradeoffs, or possible solution shapes are still unsettled before spec, plan, Linear, or implementation work."
+Coordinate state, not ceremony. Compound should identify the earliest incomplete stage and preserve the evidence chain that lets the next agent act immediately.
+Implementation is not completion. Completion requires closure proof tied to the approved slice, the validation evidence, and the drift posture of the system after the change.
+Prove the failure before fixing it. The smallest reproduced cause gets the smallest safe patch.
+Improve with evidence, not vibes. Keep scope tight, preserve useful context in references, measure the delta, and make the stop rule explicit so future agents know whether to continue or ship.
+Linear is the execution tracker; `.harness` is the cognition and proof layer.
+# Harness Engineering Phase Heartbeat
+Plans are execution contracts, not chat checklists. They should let another agent implement the work from source evidence while preserving Linear/spec/plan/PR traceability.
+execution plans, Linear object design, or generic skill package refactoring.
+description: "Determines the correct Harness Engineering skill for mixed or ambiguous user requests. Use when a request could mean brainstorm, spec, plan, work, review, eval, Linear planning, compound reconstruction, artifact lookup, or specialist steering."
+Make intent testable. A good HE spec preserves source truth, states boundaries, and gives planning enough acceptance detail without doing the plan's job.
+Strategy artifacts are cognition compression, not ceremony. They should make a
 ```

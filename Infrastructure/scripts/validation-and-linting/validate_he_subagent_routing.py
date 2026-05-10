@@ -185,9 +185,12 @@ def validate_reference_docs() -> list[ValidationError]:
     return errors
 
 
-def validate_stage_entrypoints() -> list[ValidationError]:
+def validate_stage_entrypoints(changed_files: set[Path] | None = None) -> list[ValidationError]:
     errors: list[ValidationError] = []
     for skill_path in sorted(SKILLS_ROOT.glob("**/SKILL.md")):
+        relative_skill_path = skill_path.relative_to(ROOT)
+        if changed_files is not None and relative_skill_path not in changed_files:
+            continue
         text = skill_path.read_text(encoding="utf-8")
         if "subagent-call-contract.md" not in text:
             errors.append(
@@ -229,16 +232,27 @@ def main() -> int:
         default=ROUTING_MAP,
         help="Path to Harness Engineering routing map; defaults to plugin routing-map.json.",
     )
+    parser.add_argument(
+        "--changed-files",
+        nargs="*",
+        default=None,
+        help="Optional repo-relative file list used to scope stage entrypoint checks.",
+    )
     args = parser.parse_args()
 
     try:
+        changed_files = (
+            {Path(path.lstrip("./")) for path in args.changed_files}
+            if args.changed_files is not None
+            else None
+        )
         routing_map = load_json(args.routing_map)
         mapped_roles = mapped_stage_roles(routing_map)
         available_roles = manifest_roles(args.manifest.expanduser())
         errors = [
             *validate_roles(routing_map, mapped_roles, available_roles),
             *validate_reference_docs(),
-            *validate_stage_entrypoints(),
+            *validate_stage_entrypoints(changed_files),
             *validate_router_fragments(),
         ]
     except RuntimeError as exc:

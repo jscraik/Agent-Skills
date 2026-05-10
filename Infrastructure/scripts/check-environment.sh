@@ -4,6 +4,32 @@
 
 set -euo pipefail
 
+prepend_standard_tool_paths() {
+	local candidate
+	for candidate in \
+		"$HOME/.local/share/mise/shims" \
+		"$HOME/.local/bin" \
+		"/opt/homebrew/bin" \
+		"/opt/homebrew/sbin" \
+		"/usr/local/bin" \
+		"/usr/sbin" \
+		"/sbin"; do
+		if [[ -d "$candidate" && ":$PATH:" != *":$candidate:"* ]]; then
+			PATH="$candidate:$PATH"
+		fi
+	done
+	export PATH
+}
+
+prepend_standard_tool_paths
+
+if [[ "${BASH_VERSINFO[0]:-0}" -lt 4 && -z "${CHECK_ENVIRONMENT_REEXECED:-}" ]]; then
+	if [[ -x "/opt/homebrew/bin/bash" ]]; then
+		export CHECK_ENVIRONMENT_REEXECED=1
+		exec "/opt/homebrew/bin/bash" "$0" "$@"
+	fi
+fi
+
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then
 	:
@@ -19,7 +45,7 @@ CONTRACT_PATH="$REPO_ROOT/harness.contract.json"
 	PREK_CONFIG_PATH="$REPO_ROOT/prek.toml"
 	PACKAGE_JSON_PATH="$REPO_ROOT/package.json"
 	CODESTYLE_PATH="$REPO_ROOT/CODESTYLE.md"
-	TOOLING_DOC_PATH="${TOOLING_DOC_PATH:-$HOME/dev/config/codex/instructions/tooling.md}"
+	TOOLING_DOC_PATH="${TOOLING_DOC_PATH:-$HOME/dev/configs/codex/instructions/tooling.md}"
 
 if [[ ! -f "$CONTRACT_PATH" ]]; then
 	echo "Error: missing contract file at $CONTRACT_PATH"

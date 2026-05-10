@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "artifact": "he-refactor-codex-harness-infographic",
+  "skill": "he-refactor",
+  "created_for": "skill review and hardening",
+  "local_media_directory": ".harness/media/",
+  "prompt_file": ".harness/media/he-refactor-codex-harness-infographic.prompt.txt",
+  "direct_image_generation": "planned as final tool action",
+  "local_bitmap_storage": "unsupported by active imagegen tool schema",
+  "notes": [
+    "The active image generation tool does not expose an output path parameter.",
+    "Prompt and metadata are stored locally before final image invocation.",
+    "Do not store review-only generated media inside the skill package."
+  ]
+}

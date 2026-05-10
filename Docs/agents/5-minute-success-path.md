@@ -14,6 +14,13 @@ minutes.
 
 ## First Validated Outcome
 
+First prove the command wrapper can be reached from this checkout:
+
+```bash
+bash scripts/bootstrap-ask.sh --json
+python3 bin/ask repo status --json
+```
+
 Run the agent-first path from the repo root:
 
 ```bash

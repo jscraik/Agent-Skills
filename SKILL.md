@@ -12,23 +12,37 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
+- [.Agents — Skills](#.agents-skills)
 - [Skills — Agent Ops](#skills-agent-ops)
 
 ## Summary
-- `total_skills`: 21
+- `total_skills`: 31
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
 - `policy_identity`: 8c69fbfa81b89658
 
 ## Catalog
 
+## .Agents — Skills
+
+- `agent-ops` — Route agent operations, repo hygiene, validation, automation, and workflow support without loading individual operational skills by default.
+- `backend-platform` — Route backend, data, API, platform, and infrastructure implementation work without exposing every backend module up front.
+- `content-publishing` — Route writing, publishing, editorial, docs, and content operations work while keeping detailed content modules latent.
+- `frontend-ui` — Route frontend interface, design-system, browser, and user-experience work while keeping component-level skills latent until selected.
+- `harness-engineering` — Route Harness Engineering lifecycle and session-evidence requests when users need brainstorming, planning, implementation, review, fixes, heartbeats, or prior-run improvement.
+- `mobile-native` — Route mobile-native app, platform, device, and app-store work without loading unrelated implementation skills.
+- `plugin-factory` — Route plugin creation, plugin installation, scaffolding, packaging, and plugin lifecycle work through bounded modules.
+- `product-strategy` — Route product, planning, research synthesis, prioritization, and strategy work with latent specialist modules selected only as needed.
+- `security-ops` — Review, route, and audit security work. Use when tasks involve threat modeling, secrets, policy, or operational security risk.
+- `skill-factory` — Use when creating, auditing, installing, refactoring, or governing Codex skills while preserving local plugin browseability.
+
 ## Skills — Agent Ops
 
-- `agents-md` — Review or refactor AGENTS.md instruction surfaces with progressive disclosure. Use this skill when repo agent guidance needs routing, dedupe, or contradiction fixes.
+- `agents-md` — Use when reviewing, creating, shrinking, or refactoring AGENTS.md instruction surfaces that need scoped routing, dedupe, contradiction fixes, or progressive disclosure.
 - `autofix` — Review, validate, and fix every current unresolved CodeRabbit thread and Codex P1-P3 finding. Use when PR review feedback needs approved fixes with safety checks and validation evidence.
 - `autoresearch` — Analyze bounded autonomous experiment loops with baselines, hypothesis patches, noisy metric policy, fixed evaluation safety, protected regression guards, and keep/discard/block decisions. Use when $autoresearch is named or a repo/skill needs evidence-backed research iterations.
 - `bootstrap` — Create, diagnose, and validate a local dev bootstrap. Use when the user asks to clone a repo, install toolchains, install dependencies, and prove the project runs.
-- `codex-agent-creator` — Use when creating, installing, validating, folding, or troubleshooting Codex custom subagent role TOML and discoverability config.
+- `codex-agent-creator` — Use when asked to create, validate, install, fold, or troubleshoot Codex custom subagent role TOML and agent discoverability config.
 - `codex-automation-architect` — Design, review, and validate Codex app automations when recurring background workflows need safe scheduling, scope, preflight, and consolidation.
 - `codex-hooks-builder` — Use when creating, auditing, upgrading, or validating Codex hook packs, hooks.json files, hook scripts, or repo-local/user-level .codex hook installs.
 - `coding-harness` — Use when users need to install, bootstrap, upgrade, audit, diagnose, or explain @brainwav/coding-harness in a repository, including harness init/upgrade, CI migration, governance gates, command discovery, and Codex environment action sync.

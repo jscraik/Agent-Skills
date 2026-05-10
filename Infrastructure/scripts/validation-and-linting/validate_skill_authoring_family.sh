@@ -86,36 +86,38 @@ use_pyyaml_venv_python() {
   return 0
 }
 
+use_uv_python_launcher() {
+  command -v uv >/dev/null 2>&1 || return 1
+  uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
+  python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
+  return 0
+}
+
+use_mise_python_launcher() {
+  command -v mise >/dev/null 2>&1 || return 1
+  command -v uv >/dev/null 2>&1 || return 1
+  mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=(mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python)
+  python_cmd_display="mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python"
+  return 0
+}
+
 if [[ -n "${PYTHON_BIN:-}" ]]; then
   python_cmd=("$PYTHON_BIN")
   python_cmd_display="$PYTHON_BIN"
-elif command -v mise >/dev/null 2>&1 && command -v uv >/dev/null 2>&1; then
-  if mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1; then
-    python_cmd=(mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python)
-    python_cmd_display="mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python"
-  elif uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1; then
-    python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
-    python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
-    echo "[family-gate] WARN: Python launcher fallback engaged (mise probe failed); using uv directly"
-  elif use_pyyaml_venv_python; then
-    echo "[family-gate] WARN: Python launcher probes failed; using PyYAML venv fallback"
-  else
-    echo "[family-gate] WARN: Python launcher probes failed; using python3 fallback"
-  fi
-elif command -v uv >/dev/null 2>&1; then
-  if uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1; then
-    python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
-    python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
-  elif use_pyyaml_venv_python; then
-    echo "[family-gate] WARN: uv Python launcher probe failed; using PyYAML venv fallback"
-  else
-    echo "[family-gate] WARN: uv Python launcher probe failed; using python3 fallback"
-  fi
-elif use_pyyaml_venv_python; then
+elif [[ "${VALIDATE_ALL_ALLOW_MISE_PROBE:-0}" == "1" ]] && use_mise_python_launcher; then
   :
+elif use_uv_python_launcher; then
+  :
+elif use_pyyaml_venv_python; then
+  if command -v mise >/dev/null 2>&1; then
+    echo "[family-gate] WARN: Python launcher fallback engaged; using PyYAML venv without probing mise"
+  fi
 else
-  python_cmd=(python3)
-  python_cmd_display="python3"
+  if command -v mise >/dev/null 2>&1; then
+    echo "[family-gate] WARN: Python launcher probes failed; using python3 fallback without probing mise"
+  fi
 fi
 
 preserved_context_dir="Plugins/harness-engineering/fixtures/preserved-context"
@@ -144,8 +146,12 @@ echo "[family-gate] Harness Engineering preserved-context alias passed"
 
 echo "[family-gate] validating Harness Engineering subagent routing"
 he_subagent_manifest="Plugins/harness-engineering/fixtures/subagent-routing-manifest.fixture.json"
+he_subagent_args=(--manifest "$he_subagent_manifest")
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  he_subagent_args+=(--changed-files "${changed_files[@]}")
+fi
 "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_he_subagent_routing.py \
-  --manifest "$he_subagent_manifest"
+  "${he_subagent_args[@]}"
 echo "[family-gate] Harness Engineering subagent routing passed"
 
 skill_dirs=(
@@ -331,7 +337,11 @@ fi
 echo "[family-gate] he-work approval-flow linkage passed"
 
 echo "[family-gate] validating harness-engineering progressive-disclosure contract"
-bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh
+he_progressive_args=()
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  he_progressive_args=(--changed-files "${changed_files[@]}")
+fi
+bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh "${he_progressive_args[@]}"
 echo "[family-gate] harness-engineering progressive-disclosure contract passed"
 
 echo "[family-gate] validating authoring context-preservation contract"

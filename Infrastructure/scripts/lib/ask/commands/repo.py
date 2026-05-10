@@ -5,6 +5,7 @@ import shlex
 import sys
 from pathlib import Path
 from typing import Any, List
+from ask.bootstrap import run_bootstrap_checks
 from ask.envelope import CallResult, ErrorCode, ErrorObject
 from ask.catalog_parity import compute_catalog_parity
 from ask.commands.skills import skills_budget, skills_handles
@@ -13,6 +14,7 @@ from ask.golden_path import build_golden_path_payload
 SCRIPT_TIMEOUT_SECONDS = 60
 DOCTOR_SIGNAL_PRIORITY = {
     "repo_status": 10,
+    "ask_bootstrap": 15,
     "projection_sync": 20,
     "catalog_parity": 30,
     "runtime_budget": 40,
@@ -281,6 +283,60 @@ def _projection_sync_signal(status_result: CallResult) -> dict[str, Any]:
     }
 
 
+def _ask_bootstrap_signal(repo_root: Path) -> dict[str, Any]:
+    proof = run_bootstrap_checks(repo_root, repair=False)
+    entrypoint = proof["checks"]["entrypoint_executable"]
+    fallback = proof["checks"]["fallback_command"]
+    path_discovery = proof["checks"]["path_discovery"]
+    shim = proof["checks"]["shim_smoke"]
+    details = {
+        "status": proof["status"],
+        "entrypoint_status": entrypoint.get("status"),
+        "entrypoint_path_type": entrypoint.get("path_type"),
+        "safe_to_chmod": entrypoint.get("safe_to_chmod"),
+        "fallback_status": fallback.get("status"),
+        "fallback_defer_to": fallback.get("defer_to"),
+        "path_discovery_status": path_discovery.get("status"),
+        "resolved_path": path_discovery.get("resolved_path"),
+        "shim_status": shim.get("status"),
+        "shim_repo_identity_status": shim.get("repo_identity_status"),
+    }
+    if entrypoint.get("status") == "fail" or fallback.get("status") == "fail":
+        return {
+            "state": "block",
+            "severity": "blocker",
+            "summary": "Ask bootstrap entrypoint or fallback command is not ready.",
+            "source": "ask_bootstrap",
+            "next_command": "bash scripts/bootstrap-ask.sh --json",
+            "details": details,
+        }
+    if path_discovery.get("status") != "pass" and shim.get("status") == "skipped":
+        return {
+            "state": "warn",
+            "severity": "warning",
+            "summary": "Ask bootstrap fallback is ready; PATH shim is not configured.",
+            "source": "ask_bootstrap",
+            "next_command": "bash scripts/bootstrap-ask.sh --json",
+            "details": details,
+        }
+    if shim.get("status") != "pass":
+        return {
+            "state": "warn",
+            "severity": "warning",
+            "summary": "Ask bootstrap fallback works, but PATH discovery or shim identity is incomplete.",
+            "source": "ask_bootstrap",
+            "next_command": "bash scripts/bootstrap-ask.sh --json",
+            "details": details,
+        }
+    return {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Ask bootstrap entrypoint, fallback, and PATH shim are ready.",
+        "source": "ask_bootstrap",
+        "details": details,
+    }
+
+
 def _catalog_parity_signal(catalog_result: CallResult) -> dict[str, Any]:
     report = catalog_result.data.get("catalog_parity", {})
     if catalog_result.status == "success" and report.get("drift_detected") is False:
@@ -488,6 +544,10 @@ def repo_doctor(repo_root: Path) -> CallResult:
     except Exception as exc:
         signals = {
             "repo_status": _unknown_signal_error_signal(exc),
+            "ask_bootstrap": _skipped_signal(
+                "Ask bootstrap skipped because repository status failed.",
+                "repo_status",
+            ),
             "projection_sync": _skipped_signal(
                 "Projection sync skipped because repository status failed.",
                 "repo_status",
@@ -499,8 +559,10 @@ def repo_doctor(repo_root: Path) -> CallResult:
     else:
         repo_status_signal = _safe_signal(_repo_status_signal, status_result)
         projection_sync_signal = _safe_signal(_projection_sync_signal, status_result)
+        ask_bootstrap_signal = _safe_signal(_ask_bootstrap_signal, repo_root)
         signals = {
             "repo_status": repo_status_signal,
+            "ask_bootstrap": ask_bootstrap_signal,
             "projection_sync": projection_sync_signal,
         }
         if repo_status_signal.get("state") in {"block", "error"}:
@@ -957,7 +1019,7 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
     return result
 
 
-def check_hub_stability(repo_root: Path, changed_files: List[str] = None) -> CallResult:
+def check_hub_stability(repo_root: Path, changed_files: List[str] | None = None) -> CallResult:
     """
     Validate stability-related changes to SKILL.md files and enforce rules for skills marked `stability: stable`.
     

@@ -106,6 +106,14 @@ def test_harness_curated_context_paths_are_classified() -> None:
             "reference",
             "harness_reference_surface",
         ),
+        ".harness/media/2026-05-09-he-trust-repair-before-after.md": (
+            "reference",
+            "harness_reference_surface",
+        ),
+        ".harness/media/2026-05-09-he-trust-repair-before-after.png": (
+            "reference",
+            "harness_reference_surface",
+        ),
     }
 
     for path, (classification, code) in cases.items():

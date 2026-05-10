@@ -38,7 +38,11 @@ This file also preserves the compact entrypoint meaning that was expanded for
 folded ideation mode:
 
 ```text
-Explore first; separate evidence from guesses; before writing durable docs choose the routed `.harness` path from the artifact routing contract; for durable tracked work resolve/create the Linear issue before handoff; in coding-harness-managed repos load the command bridge and record the Harness transition.
+Explore first; separate evidence from guesses; before writing durable docs
+choose the routed `.harness` path from the artifact routing contract; for
+durable tracked work resolve/create the Linear issue before handoff; in
+coding-harness-managed repos load the command bridge and record the Harness
+transition.
 ```
 
 These patterns are not valid defaults for Harness Engineering:
