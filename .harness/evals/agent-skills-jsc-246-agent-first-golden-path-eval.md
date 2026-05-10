@@ -170,12 +170,6 @@ Dirty-Worktree Classification: Baseline evidence only. The phase refreshed route
 
 `PLAN-JSC246-003` is complete for refreshed evidence. The route-state contract is explicit in both focused tests and live command output while preserving existing `status` compatibility. Direct HE routes remain direct, fallback routes remain inspectable, and unreachable routed capabilities do not silently masquerade as successful recommendations. Do not treat this as parent closure proof because phases 005-007 remain historical relative to the current dirty worktree.
 
-Routing difference note: phase 007 has two evidence classes. The current-run
-refresh selected `he-code-review` for the implementation-review prompt under the
-route-state fallback contract. The older fresh-agent row selected `triage` from
-a different branch state and is retained as historical-only evidence, not as the
-authoritative route for this eval.
-
 ## Heartbeat Phase 004 Refresh - 2026-05-09
 
 Status: `PLAN-JSC246-004` complete for current-run explain/prove taxonomy evidence.
@@ -228,7 +222,7 @@ Dirty-Worktree Classification: The first-contact docs and command metadata surfa
 | --- | --- | --- | --- |
 | `git status --short -- README.md AGENTS.md Docs/agents/16-agent-operating-contract.md Docs/agents/5-minute-success-path.md Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md Infrastructure/scripts/lib/ask/command_metadata.py` | pass | scope cleanliness check | No output; the affected first-contact surfaces were clean before the eval refresh. |
 | `git diff --check -- README.md AGENTS.md Docs/agents/16-agent-operating-contract.md Docs/agents/5-minute-success-path.md Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md Infrastructure/scripts/lib/ask/command_metadata.py` | pass | required phase validation | No whitespace errors across the Phase 006 docs and command metadata surfaces. |
-| `rg -n "<golden-path command terms>" README.md AGENTS.md Docs/agents/16-agent-operating-contract.md Docs/agents/5-minute-success-path.md Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md Infrastructure/scripts/lib/ask/command_metadata.py` | pass | focused first-contact review | `AGENTS.md`, `README.md`, `Docs/agents/16-agent-operating-contract.md`, and `Docs/agents/5-minute-success-path.md` expose `repo doctor` before `skills improve`, `skills explain`, `skills prove`, and `repo closeout --changed`; `repo onboard` and `repo next` appear only as deferred candidates in the CLI contract; `repo surface` and `doctor-catalog` remain diagnostic follow-up rather than the default first-contact path. |
+| `rg -n "repo doctor\|skills improve\|skills explain\|skills prove\|repo closeout\|repo onboard\|repo next\|doctor-catalog\|repo surface\|he-heartbeat" README.md AGENTS.md Docs/agents/16-agent-operating-contract.md Docs/agents/5-minute-success-path.md Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md Infrastructure/scripts/lib/ask/command_metadata.py` | pass | focused first-contact review | `AGENTS.md`, `README.md`, `Docs/agents/16-agent-operating-contract.md`, and `Docs/agents/5-minute-success-path.md` expose `repo doctor` before `skills improve`, `skills explain`, `skills prove`, and `repo closeout --changed`; `repo onboard` and `repo next` appear only as deferred candidates in the CLI contract; `repo surface` and `doctor-catalog` remain diagnostic follow-up rather than the default first-contact path. |
 | `git show --numstat --oneline be32dc9e7 -- README.md AGENTS.md Docs/agents/16-agent-operating-contract.md Docs/agents/5-minute-success-path.md Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md Infrastructure/scripts/lib/ask/command_metadata.py` | pass | historical compression diff check | Commit `be32dc9e7 docs(ask): compress first-contact golden path` changed only the listed Phase 006 surfaces with line churn already recorded below: `AGENTS.md` 5/4, operating contract 11/5, five-minute path 19/15, CLI contract 14/11, command metadata 7/7, and README 4/4. |
 
 ### Phase 006 Decision
@@ -241,7 +235,6 @@ Status: `PLAN-JSC246-007` complete for current-run fresh-agent evidence and loca
 Heartbeat Route: `$he-phase-heartbeat`
 Plan Source: `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md`
 Fresh-Agent Runner: `.harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh`
-Evidence Revision: PR #153 head `25cb63f2a`; refreshed artifact section dated `2026-05-10`.
 Dirty-Worktree Classification: The phase refreshed deterministic fresh-agent command snapshots under `.harness/session-evidence/jsc-246-fresh-agent-golden-path/` and this eval artifact. Existing plan/spec/review/script drift and unrelated generated artifacts were preserved and not absorbed into this phase.
 
 ### Phase 007 Fresh-Agent Command Snapshot
@@ -726,7 +719,6 @@ Phase review gate:
 Command or Method: `bash .harness/session-evidence/jsc-246-fresh-agent-golden-path/run_fresh_agent_golden_path.sh`
 Result: pass; all 11 deterministic steps exited `0`.
 Evidence: Command snapshots are stored under `.harness/session-evidence/jsc-246-fresh-agent-golden-path/` with one stdout JSON, stderr text, and exit-code file per step.
-Captured At: 2026-05-10 from PR #153 head `13f6d4c0d` before the remote-update merge.
 Confidence: High for command-surface closure behavior because the runner starts with `./bin/ask repo doctor --json --robot` and then follows the golden path without opening docs.
 Blocks Closure: no.
 
@@ -822,7 +814,7 @@ ADR Update: Not required for this phase.
 Reason: The phase implements an approved additive contract; it does not introduce a new irreversible architectural decision.
 
 ## Evidence & Traceability Matrix
-Conclusion: Phases 001 through 006 are freshly complete. Historical phase 007 may still be useful evidence, but `JSC-246` is not ready for closure from this heartbeat pass alone.
+Conclusion: Phases 001 through 007 have fresh local proof evidence, but `JSC-246` is not ready for Linear closure from this heartbeat pass alone.
 Fact: Focused tests passed and live command output exposes advisory/non-blocking continuation metadata, deterministic skills-improve route states, explain/prove taxonomy fields, closeout changed-file readiness classification, compressed first-contact docs/metadata, and fresh-agent command evidence that starts with `repo doctor`.
 Interpretation: The implementation improves routing/proof/closeout determinism without breaking existing command fields or adding proof schema.
 Assumption: Human review or refreshed phase gates are required before mutating Linear issue state.

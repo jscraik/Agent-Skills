@@ -10,6 +10,7 @@ Covers:
 """
 import json
 import re
+import subprocess
 import unittest
 from pathlib import Path
 from typing import Any, ClassVar
@@ -50,9 +51,16 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
     return records
 
 
-# Git short-hash format used by the skillset generator (7-9 hex chars followed
-# by optional trailing chars). The PR changed "7b1cf7a49" to "0ae8c3e6d".
+# Git short-hash format used by the skillset generator.
 _REVISION_PATTERN = re.compile(r"^[0-9a-f]{7,}", re.IGNORECASE)
+
+
+def _current_source_revision() -> str:
+    return subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=REPO_ROOT,
+        text=True,
+    ).strip()
 
 
 # ---------------------------------------------------------------------------
@@ -142,17 +150,16 @@ class TestManifestJsonlStructure(unittest.TestCase):
 
 
 class TestManifestSourceRevisionUpdated(unittest.TestCase):
-    """All manifests in the PR should use the new source_revision 0ae8c3e6d."""
-
-    _NEW_REVISION = "0ae8c3e6d"
+    """All manifests in the PR should use the current generated source_revision."""
 
     def _assert_revision(self, path: Path):
+        expected_revision = _current_source_revision()
         records = _load_jsonl(path)
         for rec in records:
             rev = rec.get("provenance", {}).get("source_revision", "")
             self.assertEqual(
                 rev,
-                self._NEW_REVISION,
+                expected_revision,
                 f"Entry '{rec.get('id')}' in {path.name} still has old revision: {rev}",
             )
 
@@ -220,7 +227,7 @@ class TestCommandSurfaceJson(unittest.TestCase):
         self.assertEqual(self._data["schema_version"], "command-surface.v1")
 
     def test_all_source_revisions_use_new_hash(self):
-        new_revision = "0ae8c3e6d"
+        new_revision = _current_source_revision()
         old_revision = "7b1cf7a49"
         for entry in self._data.get("handles", []):
             prov = entry.get("provenance", {})
@@ -501,4 +508,4 @@ class TestEnvironmentToml(unittest.TestCase):
 
 
 if __name__ == "__main__":
-
+    unittest.main()

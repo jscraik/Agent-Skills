@@ -110,28 +110,6 @@ Load references by trigger instead of by habit:
 - `skills/he-work/references/handoff-and-shipping.md`
 - `skills/he-work/references/execution-modes.md`
 
-`he-fix-bugs`:
-
-- `skills/he-fix-bugs/references/contract.yaml`
-- `references/session-evidence-contract.md`
-- Preserved compact context: description: "WHAT: Diagnose and fix HE test, QA, CI, incident, or regression failures. Use when reproduction and validation are required."
-description: "WHAT: Diagnose and fix HE test, QA, CI, incident, or regression failures. Use when reproduction and validation are required."
-- Preserved compact context: Reproduce first; inspect changed path; patch narrowly; validate exact failure path. When the same failure class recurs, record the root-cause learning and durable fix surface.
-Reproduce first; inspect changed path; patch narrowly; validate exact failure path. When the same failure class recurs, record the root-cause learning and durable fix surface.
-
-`he-heartbeat`:
-
-- `skills/he-heartbeat/references/heartbeat-policy-index.md`
-- `references/lifecycle-exit-contract.md`
-- Preserved compact context: description: "WHAT: Automate HE wakeups, monitoring, until-green checks, and follow-through. Use when later thread continuation or goal-aware scheduling is needed."
-description: "WHAT: Automate HE wakeups, monitoring, until-green checks, and follow-through. Use when later thread continuation or goal-aware scheduling is needed."
-- Preserved compact context: Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations. When `/goal` is active or requested, keep the goal as the persistent objective and the heartbeat as the scheduler with live checks and stop rules.
-Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations. When `/goal` is active or requested, keep the goal as the persistent objective and the heartbeat as the scheduler with live checks and stop rules.
-- Preserved compact context: For GitHub PR sweeps, keep the loop concrete: identify the PR set, re-check GitHub truth, inspect CircleCI/job logs for failing checks, inspect CodeRabbit/Codex review threads, and route each wake-up to the smallest safe `he-code-review` or `he-work` follow-up. Use `git-project-triage` as a helper role only when it is available in the Codex agent manifest; if the role is missing, continue inline and report that delegation gap.
-For GitHub PR sweeps, keep the loop concrete: identify the PR set, re-check GitHub truth, inspect CircleCI/job logs for failing checks, inspect CodeRabbit/Codex review threads, and route each wake-up to the smallest safe `he-code-review` or `he-work` follow-up. Use `git-project-triage` as a helper role only when it is available in the Codex agent manifest; if the role is missing, continue inline and report that delegation gap.
-- Preserved compact context: Redact secrets; do not create cron workarounds for short thread follow-up. Do not remove important context for budget trimming; move deep context to references.
-Redact secrets; do not create cron workarounds for short thread follow-up. Do not remove important context for budget trimming; move deep context to references.
-
 `he-code-review`:
 
 - `skills/he-code-review/references/review-policy-index.md`
@@ -153,31 +131,18 @@ Redact secrets; do not create cron workarounds for short thread follow-up. Do no
 - `skills/he-strategy/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
 - `references/pragmatic-programmer-review-contract.md`
-- Preserved compact context: he-strategy synthesizes evidence into strategic direction but does not grant implementation permission; preserve assumptions, confidence limits, coverage gaps, and downstream admission gates.
-Strategy artifacts are cognition compression, not ceremony. They should make a
 
 `he-refactor`:
 
 - `skills/he-refactor/references/refactor-program-contract.md`
 - `skills/he-refactor/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
-- Preserved compact context: he-refactor turns validated strategy/spec findings into scoped refactor programs with source evidence, authority limits, validation gates, rollback points, and downstream traceability.
-new abstraction.
 
 `he-linear-plan`:
 
 - `skills/he-linear-plan/references/linear-plan-output-contract.md`
 - `skills/he-linear-plan/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
-- Preserved compact context: he-linear-plan converts selected HE work into a small Now/Next/Later/Do Not Create Linear execution plan with dependencies, eval gates, rollback gates, payload status, closure proof, and explicit mutation authority.
-2. If the user asks for architecture review, strategy, refactor program, spec,
-
-`he-phase-heartbeat`:
-
-- `skills/he-phase-heartbeat/references/phase-gate-contract.md`
-- `skills/he-phase-heartbeat/references/contract.yaml`
-- Preserved compact context: he-phase-heartbeat schedules approved phase continuation only after live state, collector evidence, scope, review gates, validation, stop rules, and commit authority are proven; cadence is not authority.
-# Harness Engineering Phase Heartbeat
 
 ## Historical Context Policy
 
@@ -242,4 +207,8 @@ description: "Create evidence-backed HE specs. Use when approved intent needs ac
 Use when requirements are needed before plan/work; Explore first and ask second.
 4. Resolve or block the Linear tracker; run the Linear Delta Capture Gate for existing tracked plans before admitting changed Linear work into scope.
 description: "Build approved HE plan slices. Use when a bounded plan authorizes code changes and validation."
+Also include selected stage `he-linear-plan`, `subagent_policy`, `roles_used`,
+# Skill: HE Phase Heartbeat
+new abstraction. Do not remove important context for budget trimming; move
+Strategy artifacts are cognition compression, not ceremony. Turn verified repo
 ```

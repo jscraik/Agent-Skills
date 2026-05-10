@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 OUT_DIR="${ROOT_DIR}/.harness/session-evidence/jsc-246-fresh-agent-golden-path"
@@ -18,7 +18,6 @@ run_step() {
   local exit_code=$?
   printf '%s\n' "${exit_code}" >"${exit_path}"
   printf '%s %s\n' "${name}" "${exit_code}"
-  return "${exit_code}"
 }
 
 run_step "01-repo-doctor" ./bin/ask repo doctor --json --robot

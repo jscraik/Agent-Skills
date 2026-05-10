@@ -7,8 +7,7 @@
     "he-eval-report": "Generate the eval report and drift validation before Linear completion.",
     "he-strategy": "Create a repository intent and architecture review with moat analysis.",
     "he-refactor": "Generate a high-leverage refactor program with rollback conditions.",
-    "he-linear-plan": "Create a Linear execution plan with Now / Next / Later and Portfolio Ops routing.",
-    "he-phase-heartbeat": "Run approved phase heartbeats with collector evidence, review gates, cadence, and stop rules."
+    "he-linear-plan": "Create a Linear execution plan with Now / Next / Later and Portfolio Ops routing."
   },
   "deterministic_decision_order": [
     {
@@ -76,20 +75,6 @@
         "wake this thread",
         "until green",
         "until merged"
-      ]
-    },
-    {
-      "priority": 19,
-      "rule": "approved-phase-loop",
-      "route": "he-phase-heartbeat",
-      "signals": [
-        "he-phase-heartbeat",
-        "phase heartbeat",
-        "approved phase loop",
-        "continue approved phases",
-        "phase gate before local commit",
-        "collector evidence becomes stale",
-        "keep he-work going until reviewed"
       ]
     },
     {
@@ -373,8 +358,7 @@
     "he-eval-report": "$harness-engineering:he-eval-report <completed-slice-or-pr>",
     "he-strategy": "$harness-engineering:he-strategy <strategy-or-review-request>",
     "he-refactor": "$harness-engineering:he-refactor <migration-candidate>",
-    "he-linear-plan": "$harness-engineering:he-linear-plan <harness-artifacts>",
-    "he-phase-heartbeat": "$harness-engineering:he-phase-heartbeat <approved-phase-plan-and-cadence>"
+    "he-linear-plan": "$harness-engineering:he-linear-plan <harness-artifacts>"
   },
   "routes": [
     {
@@ -448,17 +432,6 @@
         "known Linear identifiers when available"
       ],
       "output": "dated .harness/linear plan with Now/Next/Later/Do Not Create, eval gates, and human/agent routing"
-    },
-    {
-      "intent": "approved-phase-heartbeat",
-      "skill": "he-phase-heartbeat",
-      "required_inputs": [
-        "approved phase plan",
-        "active phase and stop condition",
-        "collector bundle or recovery step",
-        "cadence and review policy"
-      ],
-      "output": "phase heartbeat status with selected active phase, collector evidence state, review gates, validation, commit status, slack policy, blockers, and next wakeup"
     }
   ],
   "subagent_inventory_policy": {
@@ -475,19 +448,13 @@
       "swift-ios-reviewer"
     ],
     "global_non_he_roles": [
-      "adversarial-reviewer",
-      "ankane-readme-writer",
       "autoresearch-validator",
       "circleci",
       "coderabbit",
-      "data-migration-expert",
       "design-iterator",
-      "design-lens-reviewer",
       "git-project-triage",
       "guardian_subagent",
-      "issue-intelligence-analyst",
       "llm-wiki-validator",
-      "maintainability-reviewer",
       "monitor",
       "plugin-inspector",
       "pr-comment-resolver",
@@ -496,6 +463,7 @@
       "web-researcher"
     ],
     "retired_roles": [
+      "ankane-readme-writer",
       "arscontexta-knowledge-guide",
       "arscontexta-pipeline-worker",
       "diagram-cli",
@@ -719,21 +687,6 @@
         "product-lens-reviewer",
         "scope-guardian-reviewer",
         "project-standards-reviewer"
-      ]
-    },
-    "he-phase-heartbeat": {
-      "policy": "conditional",
-      "baseline_roles": [
-        "repo-research-analyst",
-        "learnings-researcher"
-      ],
-      "conditional_roles": [
-        "worker",
-        "testing-reviewer",
-        "correctness-reviewer",
-        "reliability-reviewer",
-        "project-standards-reviewer",
-        "deployment-verification-agent"
       ]
     }
   }

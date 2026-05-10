@@ -43,9 +43,6 @@ Now/Next/Later/Do Not Create classification, dependency map, eval gate map,
 human/agent route, payload status, closure proof requirements, and evidence
 traceability.
 
-Also include selected stage `he-linear-plan`, `subagent_policy`, `roles_used`,
-`roles_recommended`, and `roles_missing` from the shared subagent call policy.
-
 Always include `linear_mutation_status`: `not_requested`, `confirmation_required`,
 `blocked`, `created`, `updated`, or `not_applicable`. If live Linear creation or
 update is expected but not performed, include `live_linear_blocker`,
@@ -57,46 +54,42 @@ behavior, affected surface, severity, and validation evidence in the payload.
 
 1. Determine whether each finding is repo-specific, cross-repo, or portfolio
    level.
-2. Resolve the `he-linear-plan` subagent stage map from
-   `../../references/routing-map.json`, compare mapped roles with
-   `~/.codex/agents/manifest.json`, and follow the shared subagent call policy
-   before calling or recommending helper roles.
-3. If the user asks for architecture review, strategy, refactor program, spec,
+2. If the user asks for architecture review, strategy, refactor program, spec,
    plan, implementation, or eval closure instead of Linear execution routing,
    do not draft it here; route to the matching HE lifecycle skill and explain
    the handoff.
-4. Start with 2-3 focused evidence surfaces and widen only when routing,
+3. Start with 2-3 focused evidence surfaces and widen only when routing,
    dependency, or project-state evidence is missing.
-5. Classify source artifacts by content shape before path.
-6. Confirm Linear destination from user request, source artifacts, or connector
+4. Classify source artifacts by content shape before path.
+5. Confirm Linear destination from user request, source artifacts, or connector
    context; do not assume JSC for unrelated workspaces.
-7. Apply interactive steering when destination, active set, project, milestone,
+6. Apply interactive steering when destination, active set, project, milestone,
    issue type, or mutation authority cannot be proven.
-8. If the Linear plan consumes artifacts from an original prompt comparison or
+7. If the Linear plan consumes artifacts from an original prompt comparison or
    sampled upstream review, apply the shared source-prompt coverage contract;
    inherit evidence depth, coverage gaps, not-inspected surfaces, repo-specific
    drift signals, authority limits, and downstream confidence into the Linear
    plan before recommending active work.
-9. Keep the active set intentionally small.
-10. Apply the first-principles contract before drafting payloads: create Linear
+8. Keep the active set intentionally small.
+9. Apply the first-principles contract before drafting payloads: create Linear
    objects only when execution state must be tracked; keep cognition-only or
    copied-process observations in `.harness`, `Later`, or `Do Not Create`.
-11. Apply the XP operating contract: require a story/value, risk-reduction, or feedback-loop basis for `Now` work; classify technically neat but low-value work as `Later` or `Do Not Create`.
-12. Classify candidate work as `Now`, `Next`, `Later`, or `Do Not Create`.
-13. Under pressure to create every possible issue, preserve the filter: refuse
+10. Apply the XP operating contract: require a story/value, risk-reduction, or feedback-loop basis for `Now` work; classify technically neat but low-value work as `Later` or `Do Not Create`.
+11. Classify candidate work as `Now`, `Next`, `Later`, or `Do Not Create`.
+12. Under pressure to create every possible issue, preserve the filter: refuse
    one-issue-per-observation expansion and ask for the source observations plus
    a selected slice before producing payloads. If observations are provided,
    filter, collapse, and classify them first; never offer to turn each
    observation into a separate issue, even as an optional escape hatch.
-14. Convert selected refactor programs into milestone -> parent issue -> minimal
+13. Convert selected refactor programs into milestone -> parent issue -> minimal
    sub-issues, never one issue per observation.
-15. Define dependencies, eval gates, rollback gates, labels, and priority.
-16. Include ready-to-create payloads. If the user explicitly approved live
+14. Define dependencies, eval gates, rollback gates, labels, and priority.
+15. Include ready-to-create payloads. If the user explicitly approved live
    Linear mutation, create or update only the confirmed milestone/parent issue,
    bug issue, or minimal sub-issues and record the resulting identifiers. If
    approval is missing, return `linear_mutation_status: confirmation_required`
    rather than implying live tracking exists.
-17. Validate the generated plan and record exact pass, fail, or blocked
+16. Validate the generated plan and record exact pass, fail, or blocked
     outcomes.
 
 ## Constraints
@@ -198,4 +191,3 @@ at the first failed gate and do not proceed.
 - Pragmatic Programmer review: `../../references/pragmatic-programmer-review-contract.md`
 - XP operating contract: `../../references/xp-operating-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`
-- Subagent routing map: `../../references/subagent-routing.md`

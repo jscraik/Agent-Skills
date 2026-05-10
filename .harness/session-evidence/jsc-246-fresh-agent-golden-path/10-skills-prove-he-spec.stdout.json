@@ -92,30 +92,30 @@
         "checked_count": 196
       },
       "workspace_runtime": {
-        "path": "$WORKSPACE/.agents/skills",
-        "command_handle_path": "$WORKSPACE/.agents/skills/he-spec/SKILL.md",
+        "path": "/Users/jamiecraik/dev/agent-skills/.agents/skills",
+        "command_handle_path": "/Users/jamiecraik/dev/agent-skills/.agents/skills/he-spec/SKILL.md",
         "command_handle_exists": true
       },
       "user_runtime_links": {
         "codex_skills": {
-          "path": "$HOME/.codex/skills",
+          "path": "/Users/jamiecraik/.codex/skills",
           "exists": true,
           "is_symlink": true,
-          "target": "$HOME/dev/configs/.codex/skills",
+          "target": "/Users/jamiecraik/dev/configs/.codex/skills",
           "points_to_workspace_runtime": false
         },
         "agents_skills": {
-          "path": "$HOME/.agents/skills",
+          "path": "/Users/jamiecraik/.agents/skills",
           "exists": true,
           "is_symlink": true,
-          "target": "$WORKSPACE/.agents/skills",
+          "target": "/Users/jamiecraik/dev/agent-skills/.agents/skills",
           "points_to_workspace_runtime": true
         }
       },
       "user_runtime_command_handles": {
-        "codex_handle": "$HOME/.codex/skills/he-spec/SKILL.md",
+        "codex_handle": "/Users/jamiecraik/.codex/skills/he-spec/SKILL.md",
         "codex_handle_exists": false,
-        "agents_handle": "$HOME/.agents/skills/he-spec/SKILL.md",
+        "agents_handle": "/Users/jamiecraik/.agents/skills/he-spec/SKILL.md",
         "agents_handle_exists": true
       },
       "live_codex_invocation": {

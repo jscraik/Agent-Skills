@@ -9,7 +9,7 @@ status: active
 date: 2026-05-09
 traceability_required: false
 origin: .harness/plan/2026-05-09-agent-skills-he-trust-defect-repair-plan.md
-linear_issue: not_created
+linear_issue: JSC-299
 risk: low
 ui: false
 ---
@@ -34,7 +34,8 @@ It supports:
 
 Generated image cache source:
 
-`local generated_images cache (machine-local; omitted for privacy and portability)`
+Local generated image cache path omitted because it is environment-specific.
+Generation id: `019e04dd-86ac-7d23-b21c-e1a878f5b8dc`.
 
 Repository artifact path:
 

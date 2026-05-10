@@ -342,7 +342,7 @@ is copied to Linear or used for commit/PR messaging.
 
 Blocks Completion: no
 
-## Domain Model Integrity Check
+## Factory Authoring Domain Model Integrity Check
 
 Domain Model Status: partial and sufficient for Phase 2.
 
@@ -397,7 +397,7 @@ Confidence: high.
 
 Blocks Completion: no
 
-## Domain Model Translation Evidence
+## Domain Model Integrity Check
 
 Conclusion: sufficient for Phase 2.
 
