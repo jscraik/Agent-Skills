@@ -17,7 +17,7 @@ or phase heartbeats should be preserved here after generation.
 
 For future image generations like plan before/after infographics:
 
-- leave the original generated image in `/Users/jamiecraik/.codex/generated_images/`;
+- leave the original generated image in `$HOME/.codex/generated_images/` (or the active tool-reported cache path);
 - copy the selected PNG into `.harness/media/`;
 - use a dated, descriptive filename tied to the plan or slice;
 - add a sidecar Markdown artifact with purpose, source cache path, repository
