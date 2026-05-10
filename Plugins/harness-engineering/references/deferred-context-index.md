@@ -207,4 +207,8 @@ description: "Create evidence-backed HE specs. Use when approved intent needs ac
 Use when requirements are needed before plan/work; Explore first and ask second.
 4. Resolve or block the Linear tracker; run the Linear Delta Capture Gate for existing tracked plans before admitting changed Linear work into scope.
 description: "Build approved HE plan slices. Use when a bounded plan authorizes code changes and validation."
+Also include selected stage `he-linear-plan`, `subagent_policy`, `roles_used`,
+# Skill: HE Phase Heartbeat
+new abstraction. Do not remove important context for budget trimming; move
+Strategy artifacts are cognition compression, not ceremony. Turn verified repo
 ```

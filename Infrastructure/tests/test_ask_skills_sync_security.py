@@ -541,7 +541,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual((target / "README.md").read_text(encoding="utf-8"), "fresh\n")
         self.assertIn(str(target / "README.md"), report.deletes)
 
-    def test_plugin_cache_permission_failure_warns_without_failing_sync(self) -> None:
+    def test_plugin_cache_permission_failure_returns_error(self) -> None:
         marketplace = self.repo_root / "Plugins" / "marketplace.json"
         marketplace.parent.mkdir(parents=True)
         marketplace.write_text(
@@ -556,7 +556,9 @@ class TestAskSkillsSyncSecurity(TestCase):
         with mock.patch.object(plugin_cache, "copy_directory_contents", side_effect=PermissionError("blocked")):
             error = plugin_cache.refresh_workspace_plugin_caches(plan, logs, self.repo_root, dry_run=False)
 
-        self.assertIsNone(error)
+        self.assertIsNotNone(error)
+        self.assertEqual(error.code, "ERR_RUNTIME")
+        self.assertIn("blocked by permissions", error.message)
         self.assertIn("PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED", plan["warnings"])
         self.assertEqual(plan["plugin_cache_refresh"]["status"], "blocked")
         self.assertTrue(any("Skipped workspace plugin cache refresh after permission failure" in log for log in logs))

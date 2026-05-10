@@ -89,7 +89,10 @@ def materialize_first_level_skill_aliases(plugin_root: Path) -> None:
     for child in skills_root.iterdir():
         if child.name.startswith("_") or child.name in hidden_entries or not child.is_symlink():
             continue
-        resolved = child.resolve(strict=True)
+        try:
+            resolved = child.resolve(strict=True)
+        except FileNotFoundError:
+            continue
         if not resolved.is_dir():
             continue
         child.unlink()

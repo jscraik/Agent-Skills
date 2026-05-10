@@ -2,6 +2,7 @@
 schema_version: 1
 artifact_id: agent-skills-ask-control-plane-decomposition-eval
 artifact_type: he-eval-report
+type: he-eval-report
 canonical_slug: agent-skills-ask-control-plane-decomposition
 title: Agent Skills Ask Control Plane Decomposition Eval
 harness_stage: he-eval-report
@@ -124,12 +125,12 @@ Patch:
 | `python3 -m pytest Infrastructure/tests/test_ask_skills_sync_security.py -q` | pass | 25 passed in 3.77s after home mirror pruning fix. |
 | `python3 -m pytest Infrastructure/tests/test_local_plugin_picker_surface.py Infrastructure/tests/test_ask_skills_sync_security.py Infrastructure/tests/test_skill_scope_precedence.py -q` | pass | 41 passed in 3.78s after service extraction and review fixes. |
 | `PYTHONPATH=Infrastructure/scripts/lib python3 -c "import ask.services.plugin_cache; print('ok')"` | pass | Direct service import works without relying on `commands/skills.py` path side effects. |
-| `rg -n "ask\\.commands\\|from ask\\.commands\\|import .*commands" Infrastructure/scripts/lib/ask/services` | pass | No output; service layer does not import `ask.commands.*`. `rg` exits 1 when no matches are found. |
+| `rg -n "<ask command service import patterns>" Infrastructure/scripts/lib/ask/services` | pass | No output; service layer does not import `ask.commands.*`. `rg` exits 1 when no matches are found. |
 | `python3 -m py_compile Infrastructure/scripts/lib/ask/commands/skills.py Infrastructure/scripts/lib/ask/commands/plugins.py Infrastructure/scripts/lib/ask/services/plugin_cache.py Infrastructure/scripts/lib/ask/services/plugin_sources.py Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py` | pass | Python compile check passed for changed command/service modules and runtime-budget validator. |
 | `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json` | pass | Latest run after plan/eval updates: `scanned_files=177 errors=0 warnings=0`. |
 | `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/specs/agent-skills-ask-control-plane-decomposition-spec.md` | pass | Traceability lint passes for the spec artifact. |
 | `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/agent-skills-ask-control-plane-decomposition-plan.md` | pass | Traceability lint passes for the plan artifact. |
-| `rg -n "structural audit is not outcome proof\|selection policy changes\|default-visible promotion gates\|reachability\|structural\|quality\|outcome\|experimental\|latent\|structurally-valid\|reachable\|outcome-proven\|trusted\|default-visible\|deprecated" .harness/decisions/agent-skills-proof-taxonomy-and-lifecycle-adr.md` | pass | ADR contains required proof levels, lifecycle states, and non-enforcement language. |
+| `rg -n "structural audit is not outcome proof\\|selection policy changes\\|default-visible promotion gates\\|reachability\\|structural\\|quality\\|outcome\\|experimental\\|latent\\|structurally-valid\\|reachable\\|outcome-proven\\|trusted\\|default-visible\\|deprecated" .harness/decisions/agent-skills-proof-taxonomy-and-lifecycle-adr.md` | pass | ADR contains required proof levels, lifecycle states, and non-enforcement language. |
 | `./bin/ask repo doctor-catalog --json --robot` | pass | Catalog parity resolved; canonical count 21. |
 | `./bin/ask runtime budget --json --robot` | pass | Runtime budget within policy; curated `agents-sdk` collision explicitly baselined and no unresolved scope collisions remain. |
 | `./bin/ask repo doctor --json --robot` | pass | `blocking: false`; catalog parity, runtime budget, projection sync, and command handles pass. Latest closure trace `5954fd8e-642d-4fc6-8d9b-b723cff7269e`. Repo surface retains non-blocking diagnostic debt. |
@@ -159,7 +160,7 @@ Patch:
 | --- | --- | --- |
 | `simplify` | No actionable simplification finding. The ADR is short, uses one taxonomy table and one lifecycle table, and does not duplicate the global glossary. Subagent dispatch was attempted but returned only an instruction acknowledgment, so it is not counted as review evidence. | No patch required. |
 | `he-fix-bugs` | No blocker found. Required acceptance terms are present; the ADR does not mutate `UBIQUITOUS_LANGUAGE.md`, command behavior, selection policy, or promotion gates. Subagent dispatch was attempted but returned only an instruction acknowledgment, so it is not counted as review evidence. | No patch required. |
-| `he-code-review` | No readiness blocker found. Traceability is coherent: `JSC-287` -> `SA-ASK-007` -> `PLAN-ASK-004` -> ADR/eval evidence. Linear freshness remains explicitly blocked and no Linear mutation is claimed. | No patch required. |
+| `he-code-review` | No readiness blocker found. Traceability is coherent: `JSC-287` -> `SA-ASK-007` -> `PLAN-ASK-004` -> ADR/eval evidence. Linear freshness was resolved by the later live refresh and proof-posting step, so no blocked Linear freshness claim remains. | No patch required. |
 
 ## Resolved Blockers
 
@@ -212,7 +213,7 @@ Current baseline after service extraction:
 | Changed files list present | `Changed Files For This Slice` below records HE-slice files separately from broader dirty worktree surfaces. | complete |
 | Plugin cache field/log comparison present | `Decomposition Gate Decision` records preserved `plugin_cache_writes`, `logs`, `validation_status`, command handles, and mutation counts. | complete |
 | Repo doctor blocker classification present | Validation records `blocking: false` with repo-surface diagnostic debt classified as non-blocking. | complete |
-| Rollback conditions checked | No rollback condition hit for PLAN-ASK-003, PLAN-ASK-004, or PLAN-ASK-005. Linear mutation remains blocked rather than forced from stale tracker state. | complete |
+| Rollback conditions checked | No rollback condition hit for PLAN-ASK-003, PLAN-ASK-004, or PLAN-ASK-005. Linear tracker state was refreshed before closure evidence was recorded. | complete |
 | Linear traceability table present | `Linear Traceability` below maps `JSC-284` through `JSC-287` to plan units and evidence. | complete |
 | Later extraction phases not started | Catalog/projection extraction, proof enforcement, routing/improvement extraction, and tool-resolution extraction remain out of scope and were not started. | complete |
 

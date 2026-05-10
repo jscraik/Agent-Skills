@@ -1324,7 +1324,8 @@ sync_user_skills() {
     if ln -s "$source_dir" "$target_dir" 2>/dev/null; then
       echo "[OK] Created symlink: $target_dir -> $source_dir"
     else
-      echo "[WARN] Unable to create symlink $target_dir -> $source_dir (continuing)."
+      echo "[ERROR] Unable to create symlink $target_dir -> $source_dir."
+      return 1
     fi
   fi
 }
@@ -2038,6 +2039,7 @@ sync_versioned_local_marketplace_cache() {
 
   if ! can_mutate_sync_dir "$cache_root"; then
     skip_unwritable_sync_phase "versioned local marketplace cache sync" "$cache_root"
+    mark_runtime_cache_stale
     return 0
   fi
 
