@@ -439,3 +439,263 @@ status: complete
 
     assert not result.passed
     assert "frontmatter schema_version is required" in result.errors
+
+
+# ---------------------------------------------------------------------------
+# Tests for PR changes: null/unknown linear_issue values, new JSC-167 eval,
+# new linear plan, and extra type field in decomposition eval.
+# ---------------------------------------------------------------------------
+
+
+def test_jsc167_eval_identity_passes() -> None:
+    """The new JSC-167 eval file frontmatter passes identity lint.
+
+    Covers: 2026-05-10-JSC-167-agent-skills-jsc-167-ask-bootstrap-command-discoverability-eval.md
+    """
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-jsc-167-ask-bootstrap-command-discoverability-eval
+artifact_type: he-eval-report
+canonical_slug: agent-skills-jsc-167-ask-bootstrap-command-discoverability
+title: Agent Skills JSC-167 Ask Bootstrap Command Discoverability Eval
+harness_stage: he-eval-report
+status: blocked
+date: 2026-05-10
+traceability_required: true
+origin: .harness/plan/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-plan.md
+linear_issue: JSC-167
+linear_milestone: Command surface and ask reliability
+---
+
+# Agent Skills JSC-167 Ask Bootstrap Command Discoverability Eval
+"""
+
+    result = MODULE.lint_markdown(
+        Path(
+            ".harness/evals/"
+            "2026-05-10-JSC-167-agent-skills-jsc-167-ask-bootstrap-command-discoverability-eval.md"
+        ),
+        markdown,
+    )
+
+    assert result.passed, f"Unexpected errors: {result.errors}"
+
+
+def test_linear_issue_null_string_does_not_trigger_issue_key_check() -> None:
+    """linear_issue: null (YAML null serialised as the string 'null') must not
+    be treated as a valid issue key and must not trigger canonical_slug checks
+    for issue inclusion.
+
+    Covers: the conditional-he-gate-selection-eval.md frontmatter change where
+    JSC-299 was replaced with null.
+    """
+    markdown = """---
+schema_version: 1
+artifact_id: 2026-05-09-agent-skills-conditional-he-gate-selection-eval
+artifact_type: he-eval-report
+canonical_slug: agent-skills-conditional-he-gate-selection
+title: Agent Skills Conditional HE Gate Selection Eval
+harness_stage: he-eval-report
+status: blocked_release_confidence
+date: 2026-05-09
+traceability_required: true
+origin: .harness/plan/2026-05-09-agent-skills-conditional-he-gate-selection-plan.md
+linear_issue: null
+linear_status: not_applicable
+linear_milestone: null
+---
+
+# Agent Skills Conditional HE Gate Selection Eval
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/2026-05-09-agent-skills-conditional-he-gate-selection-eval.md"),
+        markdown,
+    )
+
+    # "null" is not a valid ISSUE_KEY_RE match so the slug-inclusion check
+    # must not fire.  The milestone value "null" (truthy string) satisfies the
+    # linear_milestone branch of the traceability check, so traceability errors
+    # must not appear either.
+    for error in result.errors:
+        assert "canonical_slug must include lower-case linear_issue" not in error
+
+
+def test_linear_issue_unknown_string_does_not_trigger_issue_key_check() -> None:
+    """linear_issue: unknown must not be treated as a valid issue key.
+
+    Covers: the he-fresh-release-lane-eval.md frontmatter change where
+    JSC-299 was replaced with 'unknown'.
+    """
+    markdown = """---
+schema_version: 1
+artifact_id: 2026-05-10-agent-skills-he-fresh-release-lane-eval
+artifact_type: he-eval-report
+canonical_slug: agent-skills-he-fresh-release-lane
+title: Agent Skills HE Fresh Release Lane Eval
+harness_stage: he-eval-report
+status: blocked
+date: 2026-05-10
+traceability_required: true
+origin: .harness/linear/agent-skills-linear-plan.md
+linear_issue: unknown
+linear_milestone: HE Plugin Release Confidence
+---
+
+# Agent Skills HE Fresh Release Lane Eval
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/2026-05-10-agent-skills-he-fresh-release-lane-eval.md"),
+        markdown,
+    )
+
+    for error in result.errors:
+        assert "canonical_slug must include lower-case linear_issue" not in error
+
+
+def test_linear_plan_with_empty_issue_and_no_traceability_passes() -> None:
+    """New linear plan with empty string linear_issue and traceability_required: false
+    must pass identity lint.
+
+    Covers: 2026-05-09-agent-skills-he-authority-proof-hardening-linear-plan.md
+    """
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-he-authority-proof-hardening-linear-plan
+artifact_type: he-linear-plan
+canonical_slug: agent-skills-he-authority-proof-hardening
+title: HE Authority And Proof Hardening Linear Plan
+harness_stage: he-linear-plan
+status: active
+date: 2026-05-09
+traceability_required: false
+origin: .harness/refactors/2026-05-09-agent-skills-he-authority-proof-hardening.md
+linear_issue: ""
+linear_milestone: "HE Authority And Proof Hardening"
+---
+
+# HE Authority And Proof Hardening Linear Plan
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/linear/2026-05-09-agent-skills-he-authority-proof-hardening-linear-plan.md"),
+        markdown,
+    )
+
+    assert result.passed, f"Unexpected errors: {result.errors}"
+
+
+def test_extra_type_field_alongside_artifact_type_does_not_break_identity_lint() -> None:
+    """Adding a duplicate 'type: he-eval-report' field alongside artifact_type
+    in the decomposition eval must not cause identity lint to fail.
+
+    Covers: agent-skills-ask-control-plane-decomposition-eval.md which gained
+    'type: he-eval-report' in this PR.
+    """
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-ask-control-plane-decomposition-eval
+artifact_type: he-eval-report
+type: he-eval-report
+canonical_slug: agent-skills-ask-control-plane-decomposition
+title: Agent Skills Ask Control Plane Decomposition Eval
+harness_stage: he-eval-report
+status: plan_ask_005_complete_linear_resolved
+date: 2026-05-08
+traceability_required: true
+origin: .harness/plan/agent-skills-ask-control-plane-decomposition-plan.md
+linear_issue: JSC-284
+---
+
+# Agent Skills Ask Control Plane Decomposition Eval
+"""
+
+    result = MODULE.lint_markdown(
+        Path(".harness/evals/agent-skills-ask-control-plane-decomposition-eval.md"),
+        markdown,
+    )
+
+    assert result.passed, f"Unexpected errors: {result.errors}"
+
+
+def test_date_prefixed_filename_with_uppercase_issue_key_validates_date() -> None:
+    """A date-prefixed filename that also contains an uppercase issue key
+    (e.g. 2026-05-10-JSC-167-...) should still extract and validate the date
+    portion correctly.
+
+    Covers: 2026-05-10-JSC-167-agent-skills-jsc-167-ask-bootstrap-command-discoverability-eval.md
+    """
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-jsc-167-ask-bootstrap-command-discoverability-eval
+artifact_type: he-eval-report
+canonical_slug: agent-skills-jsc-167-ask-bootstrap-command-discoverability
+title: Agent Skills JSC-167 Ask Bootstrap Command Discoverability Eval
+harness_stage: he-eval-report
+status: blocked
+date: 2026-05-10
+traceability_required: true
+origin: .harness/plan/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-plan.md
+linear_issue: JSC-167
+---
+
+# Agent Skills JSC-167 Ask Bootstrap Command Discoverability Eval
+"""
+
+    # Date in frontmatter matches the file date prefix -> no date mismatch error
+    result_match = MODULE.lint_markdown(
+        Path(
+            ".harness/evals/"
+            "2026-05-10-JSC-167-agent-skills-jsc-167-ask-bootstrap-command-discoverability-eval.md"
+        ),
+        markdown,
+    )
+    for error in result_match.errors:
+        assert "date-prefixed filenames must have matching frontmatter date" not in error
+
+    # Mismatched date must produce a date error
+    markdown_bad_date = markdown.replace("date: 2026-05-10", "date: 2026-05-09")
+    result_mismatch = MODULE.lint_markdown(
+        Path(
+            ".harness/evals/"
+            "2026-05-10-JSC-167-agent-skills-jsc-167-ask-bootstrap-command-discoverability-eval.md"
+        ),
+        markdown_bad_date,
+    )
+    assert not result_mismatch.passed
+    assert "date-prefixed filenames must have matching frontmatter date" in result_mismatch.errors
+
+
+def test_jsc167_canonical_slug_contains_issue_key() -> None:
+    """canonical_slug for JSC-167 eval must include 'jsc-167'.
+
+    If the slug omits the issue key, the linter must flag it.
+    """
+    markdown = """---
+schema_version: 1
+artifact_id: agent-skills-ask-bootstrap-command-discoverability-eval
+artifact_type: he-eval-report
+canonical_slug: agent-skills-ask-bootstrap-command-discoverability
+title: Agent Skills JSC-167 Ask Bootstrap Command Discoverability Eval
+harness_stage: he-eval-report
+status: blocked
+date: 2026-05-10
+traceability_required: true
+origin: .harness/plan/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-plan.md
+linear_issue: JSC-167
+---
+
+# Agent Skills JSC-167 Ask Bootstrap Command Discoverability Eval
+"""
+
+    result = MODULE.lint_markdown(
+        Path(
+            ".harness/evals/"
+            "2026-05-10-JSC-167-agent-skills-jsc-167-ask-bootstrap-command-discoverability-eval.md"
+        ),
+        markdown,
+    )
+
+    assert not result.passed
+    assert "frontmatter canonical_slug must include lower-case linear_issue" in result.errors
