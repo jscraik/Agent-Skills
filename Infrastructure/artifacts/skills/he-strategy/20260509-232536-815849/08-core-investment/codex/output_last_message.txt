@@ -1,0 +1,152 @@
+Yes. I’d concentrate on **five core investment areas** that reinforce each other instead of spreading effort across every possible agent improvement surface.
+
+**1. Evidence Kernel**
+
+Make every important agent action produce durable, queryable evidence.
+
+This is the foundation for cognition, determinism, and evals at once. If the system cannot reliably know what happened, why it happened, what files changed, what commands ran, what failed, and what was learned, then every higher-order improvement becomes vibes on sand.
+
+Investment shape:
+
+- Standardize evidence records for repo state, command runs, validation, skill activation, tool failures, user intent, and final outcomes.
+- Make evidence machine-readable first, human-readable second.
+- Ensure every workflow has a closeout artifact that says: inputs, actions, outputs, validations, unresolved risks.
+- Treat session evidence as the substrate for memory, evals, debugging, regression tests, and future planning.
+
+Why it compounds:
+
+- Cognition improves because agents can reason over prior work instead of rediscovering it.
+- Determinism improves because workflows become replayable and inspectable.
+- Eval quality improves because evals can grade against actual traces, not just final text.
+
+This is probably the highest-leverage area.
+
+**2. Deterministic Skill Runtime**
+
+Make skill selection, instruction loading, validation, and closeout behave like a predictable compiler pipeline.
+
+Right now, the big risk in skill-based agent systems is that the agent “sort of” follows instructions depending on context, phrasing, available memory, and luck. The investment should be in making skill execution crisp: trigger, load, constrain, act, validate, report.
+
+Investment shape:
+
+- Define a canonical lifecycle for skills: detect, load, plan, execute, validate, close.
+- Add explicit contracts for skill inputs, outputs, required evidence, and failure modes.
+- Make runtime projections auditable against canonical skill sources.
+- Prefer small, composable skill modules over sprawling instruction blobs.
+- Add deterministic routing tests for “given this request, these skills should activate.”
+
+Why it compounds:
+
+- Cognition improves because the agent has clearer local frames for work.
+- Determinism improves because the same request activates the same operational path.
+- Eval quality improves because skills can be tested as units with expected activation, behavior, and artifacts.
+
+This turns skills from “helpful prompt files” into operational machinery.
+
+**3. Eval Harness And Scenario Bank**
+
+Build a serious eval layer around realistic tasks, not just static lint checks or output rubrics.
+
+The core bet: evals should measure whether agents can complete real work under repo constraints. That means scenario-based evals with fixture repos, dirty worktrees, conflicting instructions, broken tests, stale docs, misleading user prompts, and partial tool failures.
+
+Investment shape:
+
+- Create a scenario bank organized by capability: skill routing, repo hygiene, validation, docs editing, code changes, GitHub workflows, security review, plugin evaluation.
+- For each scenario, capture expected evidence, allowed actions, forbidden actions, validation commands, and grading criteria.
+- Measure both outcome quality and process quality.
+- Add regression scenarios from real failures.
+- Include negative evals: cases where the right behavior is to refuse, ask, stop, or avoid editing generated projections.
+
+Why it compounds:
+
+- Cognition improves because eval failures become structured learning material.
+- Determinism improves because expected behavior becomes executable.
+- Eval quality improves because the tests resemble the actual work agents do.
+
+This is where the system starts becoming self-improving in a disciplined way.
+
+**4. Knowledge And Memory Governance**
+
+Invest in turning prior work into reusable cognition without letting memory become noisy, stale, or overconfident.
+
+Memory only compounds if it is curated. Otherwise it becomes a liability: outdated decisions, duplicated patterns, and confident recall of context that no longer applies. The important area is not just “store more memory,” but govern promotion from observation to learning to durable pattern.
+
+Investment shape:
+
+- Define what qualifies as an observation, learning, pattern, or schema.
+- Link memories to evidence artifacts and validation results.
+- Add decay, invalidation, and supersession paths.
+- Make contradictions first-class objects rather than hidden confusion.
+- Feed high-quality learnings back into skills, docs, evals, and workflow guidance.
+- Build “before acting, retrieve relevant prior failures” into risky workflows.
+
+Why it compounds:
+
+- Cognition improves because the agent can reuse verified lessons.
+- Determinism improves because guidance is versioned, scoped, and source-backed.
+- Eval quality improves because eval failures can become new test cases or updated rubrics.
+
+The key is to make memory accountable to evidence, not just convenient recall.
+
+**5. Validation And Closeout Discipline**
+
+Make “done” mean something objective.
+
+This should be a repo-wide investment in validation contracts: what commands prove a change, what evidence is required, what closeout format is expected, and how agents should behave when validation is partial or blocked.
+
+Investment shape:
+
+- Normalize closeout into a small set of required fields: changed files, commands run, pass/fail, skipped checks, risks, follow-ups.
+- Make validation order explicit per workflow type.
+- Prefer repo wrappers like `./bin/ask repo doctor --json --robot` and `./bin/ask repo closeout --changed --json --robot`.
+- Require machine-readable validation output where possible.
+- Track validation debt separately from implementation debt.
+- Add checks that catch missing validation, wrong package-root commands, edits to runtime projections, and ungrounded final claims.
+
+Why it compounds:
+
+- Cognition improves because every completed task leaves behind a useful summary.
+- Determinism improves because completion criteria are explicit.
+- Eval quality improves because graders can compare claims against validation evidence.
+
+This is the investment that prevents “looks done” from masquerading as done.
+
+**The Core Stack**
+
+If I had to name the few areas as a compact investment portfolio, I’d choose:
+
+1. **Evidence Kernel**
+2. **Deterministic Skill Runtime**
+3. **Scenario-Based Eval Harness**
+4. **Governed Memory**
+5. **Validation And Closeout Contracts**
+
+The ordering matters. Evidence comes first because it powers everything else. Deterministic runtime comes second because it makes agent behavior shapeable. Evals come third because they give you the scoreboard. Memory comes fourth because it lets improvements persist. Validation comes fifth because it keeps the whole system honest at the point of delivery.
+
+**What I Would Avoid Over-Investing In**
+
+I would avoid making the first wave about broad agent personality tuning, giant prompt rewrites, generic benchmark chasing, or adding many new skills. Those may help locally, but they do not compound as strongly unless the evidence, runtime, eval, memory, and validation layers are already solid.
+
+I’d also be careful with “more autonomy” as an investment area. Autonomy only compounds after determinism and evidence are strong. Before that, it mostly increases blast radius.
+
+**My Recommended Near-Term Bets**
+
+For the next focused cycle, I’d pick three concrete bets:
+
+1. **Trace Everything Important**
+
+   Every meaningful repo operation should emit structured evidence: command, cwd, inputs, outputs, result, files touched, validation status.
+
+2. **Make Skill Execution Testable**
+
+   Add scenario tests that assert which skills activate, which docs are read, which files are allowed to change, and what closeout evidence is required.
+
+3. **Turn Real Failures Into Evals**
+
+   Whenever an agent makes a bad call, misses validation, edits the wrong source, ignores path ownership, or gives an ungrounded final answer, capture it as a regression scenario.
+
+That trio gives you the first compounding loop:
+
+`work -> evidence -> eval failure/success -> memory/skill update -> better future work`
+
+That is the cognition flywheel worth building around.

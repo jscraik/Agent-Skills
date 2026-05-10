@@ -1,0 +1,11 @@
+Yes. The direct callout I’d use is:
+
+> The artifacts claim a “simple governance” model, but the actual workflow reads as heavy process: multiple required documents, policy sync steps, ownership-boundary checks, validation gates, closeout commands, and agent-facing operating contracts. That is a real contradiction, not just a wording issue. If the intent is lightweight governance, the process should be reduced to match that claim. If the process is intentionally rigorous, the artifacts should stop describing it as simple and instead name the governance model honestly.
+
+A sharper version:
+
+> There is a mismatch between the stated governance philosophy and the implemented operating model. The language says “simple governance,” but the artifacts encode a layered, procedural system with several mandatory reads, command wrappers, validation paths, ownership rules, and closeout expectations. That makes “simple” misleading. Either simplify the artifact requirements, or reframe the claim as “structured governance,” “explicit governance,” or “lightweight where possible, strict at boundaries.”
+
+And the most direct review comment:
+
+> **Contradiction:** These artifacts describe the governance approach as simple, but the instructions themselves establish a heavy process. The repo requires agents to navigate multiple policy documents, canonical/runtime ownership boundaries, prescribed command wrappers, validation ordering, sync behavior, and closeout evidence. That is not simple governance in practice. The docs should either reduce the process burden or change the framing so the stated model matches the operational reality.

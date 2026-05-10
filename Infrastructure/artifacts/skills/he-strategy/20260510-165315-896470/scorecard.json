@@ -1,0 +1,135 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-10T15:53:15Z",
+  "skill": "he-strategy",
+  "skill_path": "Plugins/harness-engineering/skills/he-strategy",
+  "skill_release": {
+    "name": "he-strategy",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "dd577275ad3b6331c413851d2e0f5e79f5fe4be4",
+    "source_branch": "codex/goal-governor-independent-skill"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "release",
+  "tier2_mode": "warn",
+  "run_id": "20260510-165315-896470",
+  "case_filters": [
+    "domain-vision-core"
+  ],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "domain-vision-core",
+      "name": "Domain vision core",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470/01-domain-vision-core",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 1,
+          "passed": false,
+          "tier1_failures": [
+            "codex returned non-zero exit code: 1"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "No events found in JSONL trace.",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+            "skipped acceptance assertions because the runner exited non-zero and produced no final output"
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470/01-domain-vision-core/codex",
+            "final": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470/01-domain-vision-core/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470/01-domain-vision-core/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470/01-domain-vision-core/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470/01-domain-vision-core/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 0,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 0,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "total_tokens": 0
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] codex returned non-zero exit code: 1"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] No events found in JSONL trace.",
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.",
+        "[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output"
+      ]
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 1,
+  "tier2_findings": 0,
+  "preflight_warnings": [],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 1
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 1
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "fail",
+  "exit_code": 2,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470",
+    "summary": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-strategy/20260510-165315-896470/junit.xml"
+  }
+}

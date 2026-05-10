@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-strategy" tests="1" failures="1" errors="0" timestamp="2026-05-10T15:53:13Z" id="20260510-165313-873439">
+  <testcase name="contradiction-detection" classname="he-strategy" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260510-165313-873439/01-contradiction-detection
+    </system-out>
+  </testcase>
+</testsuite>

@@ -1,0 +1,198 @@
+Yes. From the guide you pasted, the biggest deletion opportunities are likely places where the repo has **duplicated agent guidance, runtime projections, stale transitional docs, or overlapping command surfaces**. Those create cognitive drag because every extra instruction surface has to be reconciled by agents and humans, but only a few are canonical.
+
+I couldn’t run local inspection because the sandbox failed before commands reached the repo:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So this is a repo-guidance-based deletion map, not a verified file-by-file audit. The strongest candidates are still pretty clear.
+
+**Highest-Leverage Deletion Candidates**
+
+1. **Stale cleanup/contradiction docs once their advice has been folded**
+
+   Candidate:
+
+   [Docs/agents/05-contradictions-and-cleanup.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/05-contradictions-and-cleanup.md)
+
+   Why it creates drag:
+
+   A document whose purpose is “cleanup notes and stale guidance to remove” is useful as a temporary work queue, but harmful as permanent guidance. It forces agents to carry both the current policy and the memory of old contradictions. Once each item is either resolved, converted into an issue, or folded into canonical docs, the file should be deleted or reduced to a tiny historical note.
+
+   Deletion test:
+
+   If this file mostly says “remove X”, “contradiction Y”, “old behavior Z”, or “cleanup pending”, delete it after folding any still-valid decisions into canonical docs.
+
+2. **Runtime projections or generated copies of skills/docs**
+
+   Candidate areas:
+
+   Any generated/runtime copies described by:
+
+   [Docs/agents/14-path-ownership-boundaries.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/14-path-ownership-boundaries.md)
+
+   Why it creates drag:
+
+   Your root guide explicitly says: “Edit canonical sources, not runtime projections.” That means runtime projections are operational artifacts, not authoring surfaces. If they are committed or visible enough that agents read/edit them, they create a second source of truth.
+
+   Deletion test:
+
+   Delete committed runtime projections if they can be regenerated and are not required as fixtures. If they must exist, move them under an obviously generated path, add a generated-file marker, and exclude them from normal skill/doc discovery.
+
+3. **Duplicate AGENTS.md files that restate root policy without local overrides**
+
+   Candidate:
+
+   Any nested `AGENTS.md` beneath `/Users/jamiecraik/dev/agent-skills` that mostly repeats the root instructions.
+
+   Why it creates drag:
+
+   Nested `AGENTS.md` files are powerful when they narrow behavior for a subtree. They are costly when they restate generic repo policy, because every agent has to merge them into its working instructions and decide whether differences are intentional.
+
+   Deletion test:
+
+   For each nested `AGENTS.md`, ask: “Does this contain a local rule that only applies to this subtree?” If no, delete it. If yes, shrink it to only the local deltas.
+
+4. **Docs that duplicate `Docs/agents/README.md` instruction-map content**
+
+   Candidate:
+
+   Any “start here”, “agent guide”, “operating overview”, or “how to work in this repo” document that overlaps heavily with:
+
+   [Docs/agents/README.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/README.md)
+
+   Why it creates drag:
+
+   The root guide already says to start at `Docs/agents/README.md` for the full instruction map. Multiple maps are expensive because they drift. A map should point; it should not become another policy layer.
+
+   Deletion test:
+
+   If a doc is mostly navigation, and its links are already represented in `Docs/agents/README.md`, delete it or fold the missing links into the README.
+
+5. **Old command documentation that competes with `./bin/ask`**
+
+   Candidate areas:
+
+   Docs or scripts that tell agents to run package-manager commands from the repo root, invoke lower-level `Infrastructure/bin/ask` directly, or use older wrappers instead of:
+
+   ```bash
+   ./bin/ask repo doctor --json --robot
+   ./bin/ask skills improve "<goal>" --json --robot
+   ./bin/ask skills explain <handle> --json --robot
+   ./bin/ask skills prove <handle> --json --robot
+   ./bin/ask repo closeout --changed --json --robot
+   ```
+
+   Why it creates drag:
+
+   Your root guide is trying to make `./bin/ask` the repo control plane. Any old command surface teaches agents a second workflow and increases the odds of invalid validation evidence.
+
+   Deletion test:
+
+   If a doc exists only to describe a pre-`./bin/ask` workflow, delete it after any still-current command behavior is represented in:
+
+   [Docs/agents/16-agent-operating-contract.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/16-agent-operating-contract.md)
+   [Docs/agents/02-tooling-policy.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/02-tooling-policy.md)
+   [Docs/agents/04-validation.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/04-validation.md)
+
+6. **Transitional sync-policy docs after policy becomes canonical**
+
+   Candidate areas:
+
+   Anything describing how policy used to sync, temporary migration stages, or projection compatibility behavior.
+
+   Why it creates drag:
+
+   Sync policy is agent-facing and high-impact. Keeping migration scaffolding around after the migration makes every future change feel riskier than it is.
+
+   Deletion test:
+
+   Keep only the current rule and the current command. Delete historical rationale unless it explains a still-active constraint.
+
+7. **Skill-management docs that repeat line-budget or audit rules in multiple places**
+
+   Candidate:
+
+   Overlap around:
+
+   [Docs/agents/17-skill-management.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/17-skill-management.md)
+
+   Why it creates drag:
+
+   Skill authoring needs one crisp source of truth. Repeating audit/fold/line-budget rules across skill templates, guides, and operator docs makes agents over-read and under-act.
+
+   Deletion test:
+
+   If a rule is normative, keep it in `17-skill-management.md` or the canonical skill authoring source. If it is copied elsewhere as advice, delete the copy and link back.
+
+8. **Browser/local-preview fallback docs outside the canonical browser guidance**
+
+   Candidate:
+
+   Any frontend/browser preview instructions outside:
+
+   [Docs/agents/18-browser-and-local-preview.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/18-browser-and-local-preview.md)
+
+   Why it creates drag:
+
+   Browser fallback rules tend to become stale quickly because tooling changes. Keeping them in several places makes agents choose between old browser assumptions and current fallback policy.
+
+   Deletion test:
+
+   Delete any secondary browser-preview instructions unless they document a package-specific exception.
+
+9. **Verbose operator docs that encode behavior already enforced by `--robot` JSON**
+
+   Candidate areas:
+
+   Long-form docs explaining output interpretation, command sequencing, or validation evidence that the `./bin/ask ... --json --robot` interface already encodes.
+
+   Why it creates drag:
+
+   If machine-readable command output is canonical, prose that mirrors it becomes stale validation theater. Agents should rely on the command contract, not re-derive behavior from prose.
+
+   Deletion test:
+
+   Keep prose that explains intent or recovery. Delete prose that merely restates fields, statuses, or command ordering already enforced by `repo doctor`, `skills prove`, or `repo closeout`.
+
+10. **Examples that are not tested or tied to a proving command**
+
+   Candidate areas:
+
+   Unvalidated sample skills, old workflow snippets, abandoned fixtures, demo docs, or examples outside a test/prove path.
+
+   Why it creates drag:
+
+   Examples are magnets for imitation. If they are stale, agents copy bad patterns with confidence. Untested examples are worse than no examples in a repo that manages agent behavior.
+
+   Deletion test:
+
+   Delete examples that do not either serve as fixtures or have a clear validation path through `./bin/ask skills prove <handle> --json --robot`.
+
+**What I Would Delete First**
+
+If you want the highest signal cleanup pass, I’d start in this order:
+
+1. Resolve and delete [Docs/agents/05-contradictions-and-cleanup.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/05-contradictions-and-cleanup.md), or turn remaining items into tracked issues.
+2. Remove nested `AGENTS.md` files that do not contain subtree-specific deltas.
+3. Delete committed runtime projections that are regenerable and not fixtures.
+4. Collapse duplicate command guidance into `Docs/agents/16-agent-operating-contract.md`, `02-tooling-policy.md`, and `04-validation.md`.
+5. Remove stale examples that are not covered by `skills prove`.
+
+**Useful Rule**
+
+Delete anything that is one of these:
+
+```text
+A second map
+A second command path
+A second source of truth
+A migration note after the migration
+A generated artifact pretending to be editable
+An example nobody proves
+A local AGENTS.md with no local rule
+A cleanup TODO that has become permanent documentation
+```
+
+The sharper version: keep docs that **change agent behavior today**. Delete docs that only explain why the current behavior used to be confusing.

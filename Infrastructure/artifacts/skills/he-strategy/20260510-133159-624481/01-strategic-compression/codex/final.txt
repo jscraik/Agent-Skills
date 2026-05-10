@@ -1,0 +1,36 @@
+I can do that, but I’m blocked from reading or writing the workspace in this session.
+
+I tried to inspect `/Users/jamiecraik/dev/agent-skills` with read-only commands:
+
+```bash
+pwd && rg --files -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/README.md' -g 'AGENTS.md'
+rg --files | rg '(intent|review|triage|strategy|direction|artifact|artifacts)'
+ls
+```
+
+Each failed before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because the approval policy is `never`, I can’t request the filesystem access needed to read the intent/review/triage artifacts or write the durable direction document.
+
+The fastest way forward is for you to either paste the relevant artifacts here or provide their contents in the prompt. If you paste them, I’ll compress them into a strategic direction document with a durable structure like:
+
+```markdown
+# Strategic Direction
+
+## Executive Direction
+## Context And Source Signals
+## What We Are Optimizing For
+## Strategic Bets
+## Operating Principles
+## Near-Term Priorities
+## Explicit Non-Goals
+## Risks And Open Questions
+## Decision Log
+## Review Cadence
+```
+
+If you want it to land directly in the repo once filesystem access is available, I’d likely place it under something like `Docs/strategy/strategic-direction.md` or the nearest existing strategy/docs convention after inspecting the tree.

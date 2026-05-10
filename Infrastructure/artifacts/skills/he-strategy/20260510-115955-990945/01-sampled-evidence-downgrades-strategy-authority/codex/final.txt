@@ -1,0 +1,21 @@
+Blocked: I tried the required `$he-strategy` resolution path first:
+
+```bash
+./bin/ask skills resolve he-strategy --json
+```
+
+It failed before the repo wrapper could run:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I then followed the handle fallback and attempted to read the canonical module directly:
+
+```bash
+sed -n '1,220p' Plugins/harness-engineering/skills/he-strategy/SKILL.md
+```
+
+That failed with the same sandbox error.
+
+Per the `$he-strategy` handle contract, if the contract cannot load I have to fail closed and not perform the workflow. So I’m stopped here until the sandbox allows basic repo reads or you paste the canonical `Plugins/harness-engineering/skills/he-strategy/SKILL.md` contents into the thread.

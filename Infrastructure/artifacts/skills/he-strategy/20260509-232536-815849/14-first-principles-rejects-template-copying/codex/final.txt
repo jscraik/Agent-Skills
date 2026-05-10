@@ -1,0 +1,26 @@
+I’m blocked before I can make the HE change: every repo command is failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened even for read-only commands like:
+
+```bash
+sed -n '1,220p' .agents/skills/harness-engineering/SKILL.md
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/14-path-ownership-boundaries.md
+./bin/ask repo doctor --json --robot
+```
+
+Because the session is in `read-only` sandbox mode and approval policy is `never`, I can’t request broader filesystem permissions or write the canonical HE skill source. So I haven’t changed any files.
+
+What I would do once the sandbox is usable:
+
+1. Read `UBIQUITOUS_LANGUAGE.md` and ownership docs.
+2. Locate the canonical Harness Engineering skill source, not the runtime projection.
+3. Find the competitor plugin’s “heavyweight strategy stage” structure if it exists locally.
+4. Add the analogous HE strategy stage, explicitly noting that it is being added for structural parity despite no repeated HE failure evidence.
+5. Run the repo validation path, likely `./bin/ask repo doctor --json --robot` and a targeted `skills prove` or `repo closeout --changed`.
+
+Current status: no edits made, validation blocked by sandbox startup failure.
