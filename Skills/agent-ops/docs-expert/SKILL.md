@@ -48,6 +48,9 @@ metadata:
 - Start with 2-3 focused surfaces before expanding scope.
 - Identify doc type and reader job.
 - Inventory live scripts, package commands, workflows, tests, and governance docs.
+- For Ruby gem README work that needs Ankane-style structure, route or recommend
+  the `ankane-readme-writer` subagent after the live evidence inventory is
+  known.
 - Rewrite one primary reader path at a time.
 - Validate operational claims against files or commands.
 - Report changed docs, evidence, validation, and manual checks.
@@ -60,11 +63,37 @@ metadata:
 - Redact secrets and sensitive data by default.
 - Avoid destructive commands unless explicitly requested and rollback is clear.
 
+## Execution Boundaries
+- Edit documentation, examples, doc comments, and docs-adjacent configuration only
+  when the requested reader path requires it.
+- Do not change runtime behavior, package dependencies, CI policy, release state,
+  or external trackers from this skill unless a separate routed skill authorizes
+  that work.
+- Treat `ankane-readme-writer` as a specialist helper for Ruby gem README shape;
+  docs-expert remains responsible for live evidence, claim validation, and final
+  docs quality.
+
 ## Validation
 - Run the smallest command or test that exercises the changed behavior.
 - Use strict skill audit and Plugin Eval when changing this skill.
 - Include exact commands, outcomes, and blockers.
 - Fail fast: stop at first failed gate; do not proceed until it is fixed and rerun.
+
+## Failure Mode
+- If live evidence conflicts with the requested wording, report the conflict and
+  keep the docs aligned to verified repo truth.
+- If required commands, files, or connectors are unavailable, mark the affected
+  claim `blocked` and preserve the nearest safe wording.
+- If the request would require non-doc behavior changes, stop and route to the
+  appropriate implementation or workflow skill.
+
+## Gotchas
+- README polish can hide false operational claims; verify commands before making
+  them sound confident.
+- Generated or projected docs may have a canonical source elsewhere; find that
+  source before editing.
+- Ankane-style brevity is a format constraint, not permission to drop required
+  setup, safety, or compatibility details.
 
 ## Anti-Patterns
 - Expanding scope because adjacent work is interesting.
