@@ -357,10 +357,10 @@ Evidence: source `.harness/linear/**` plan and this eval.
 
 Confidence: high.
 
-Blocks Closure: yes.
+Blocks Closure: no.
 
-Required Action: create or confirm Linear issue only if external tracking is
-desired.
+Required Action: create or confirm a Linear issue only if external tracking is
+desired; if one is created later, link this accepted eval before closure.
 
 ## Agentic Eval Validity
 
