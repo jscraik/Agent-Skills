@@ -18,6 +18,6 @@ Style: professional engineering poster, dark ink and warm off-white technical-pa
 
 Linked context:
 
-- Reviewed skill projection: `/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-factory/SKILL.md`
-- Canonical generator/template edits: `/Users/jamiecraik/dev/agent-skills/Infrastructure/templates/root-skill-set/SKILL.md.j2`, `/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/generate_root_skill_sets.py`
+- Reviewed skill projection: `.agents/skills/skill-factory/SKILL.md`
+- Canonical generator/template edits: `Infrastructure/templates/root-skill-set/SKILL.md.j2`, `Infrastructure/scripts/lifecycle-and-sync/generate_root_skill_sets.py`
 - Validation focus: strict audit, OpenClaw, OpenAI skill format lint, progressive disclosure lint, smoke evals, release evals, path ownership.
