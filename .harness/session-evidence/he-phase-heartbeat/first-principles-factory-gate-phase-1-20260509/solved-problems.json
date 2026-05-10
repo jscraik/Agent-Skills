@@ -1,0 +1,833 @@
+[
+  {
+    "evidence_labels": [
+      "session-023"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "approval_required, network, missing_file, permission, lint_failure, test_failure, git_state, timeout",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "permission",
+      "lint_failure",
+      "test_failure",
+      "git_state",
+      "timeout"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-031"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "approval_required, lint_failure, missing_file, network, permission, timeout, git_state",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "approval_required",
+      "lint_failure",
+      "missing_file",
+      "network",
+      "permission",
+      "timeout",
+      "git_state"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-034"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "timeout, lint_failure, missing_file, network, approval_required, permission",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "timeout",
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required",
+      "permission"
+    ],
+    "validation": "65 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-038"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "approval_required, lint_failure, missing_file, network, permission, git_state",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "approval_required",
+      "lint_failure",
+      "missing_file",
+      "network",
+      "permission",
+      "git_state"
+    ],
+    "validation": "1 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-044"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-045"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-047"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-048"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "1 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-050"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "lint_failure, missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "4 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-052"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-053"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "network, missing_file, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "validation": "2 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-055"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "2 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-056"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-058"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "lint_failure, missing_file, approval_required, network",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "lint_failure",
+      "missing_file",
+      "approval_required",
+      "network"
+    ],
+    "validation": "1 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-059"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "2 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-060"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "2 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-063"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "network, missing_file, approval_required, timeout, lint_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "network",
+      "missing_file",
+      "approval_required",
+      "timeout",
+      "lint_failure"
+    ],
+    "validation": "1 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-065"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required, lint_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "validation": "5 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-066"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "lint_failure, missing_file, approval_required, network, timeout, permission, git_state",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "lint_failure",
+      "missing_file",
+      "approval_required",
+      "network",
+      "timeout",
+      "permission",
+      "git_state"
+    ],
+    "validation": "69 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-068"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, timeout, lint_failure, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "timeout",
+      "lint_failure",
+      "approval_required"
+    ],
+    "validation": "2 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-071"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "lint_failure, missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-075"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "timeout, missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "timeout",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "4 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-076"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required, timeout",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout"
+    ],
+    "validation": "2 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-077"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "1 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-091"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "approval_required, missing_file, network, lint_failure, permission, test_failure, git_state",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "lint_failure",
+      "permission",
+      "test_failure",
+      "git_state"
+    ],
+    "validation": "1 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-103"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, timeout, approval_required, lint_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "timeout",
+      "approval_required",
+      "lint_failure"
+    ],
+    "validation": "2 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-109"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, approval_required, network, lint_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "approval_required",
+      "network",
+      "lint_failure"
+    ],
+    "validation": "1 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-116"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, approval_required, network",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "approval_required",
+      "network"
+    ],
+    "validation": "5 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-117"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "lint_failure, missing_file, approval_required, network, test_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "lint_failure",
+      "missing_file",
+      "approval_required",
+      "network",
+      "test_failure"
+    ],
+    "validation": "2 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-121"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-123"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, approval_required, network",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "approval_required",
+      "network"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-127"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "approval_required, lint_failure, missing_file, network, timeout, git_state, permission",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "approval_required",
+      "lint_failure",
+      "missing_file",
+      "network",
+      "timeout",
+      "git_state",
+      "permission"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-132"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "network, missing_file, approval_required, permission",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "network",
+      "missing_file",
+      "approval_required",
+      "permission"
+    ],
+    "validation": "5 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-133"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, network, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "validation": "3 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-134"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "network, missing_file, approval_required",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "validation": "1 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-137"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "lint_failure, missing_file, network, approval_required, timeout, git_state, permission, test_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout",
+      "git_state",
+      "permission",
+      "test_failure"
+    ],
+    "validation": "489 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-138"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "lint_failure, missing_file, approval_required, network, permission, timeout, git_state, test_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "lint_failure",
+      "missing_file",
+      "approval_required",
+      "network",
+      "permission",
+      "timeout",
+      "git_state",
+      "test_failure"
+    ],
+    "validation": "304 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-139"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, lint_failure, network, approval_required, timeout, permission, git_state, test_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "lint_failure",
+      "network",
+      "approval_required",
+      "timeout",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "validation": "551 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-140"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "network, approval_required, missing_file, permission, git_state, lint_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "network",
+      "approval_required",
+      "missing_file",
+      "permission",
+      "git_state",
+      "lint_failure"
+    ],
+    "validation": "4 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-141"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "lint_failure, approval_required, missing_file, network, timeout, permission, git_state, test_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "lint_failure",
+      "approval_required",
+      "missing_file",
+      "network",
+      "timeout",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "validation": "596 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-142"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "missing_file, approval_required, lint_failure, network, permission, timeout, test_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "missing_file",
+      "approval_required",
+      "lint_failure",
+      "network",
+      "permission",
+      "timeout",
+      "test_failure"
+    ],
+    "validation": "56 validation gate(s)"
+  },
+  {
+    "evidence_labels": [
+      "session-143"
+    ],
+    "fix_pattern": "see command fingerprints and validation gates",
+    "problem": "lint_failure, missing_file, approval_required, network, timeout, git_state, permission, test_failure",
+    "reuse_targets": [
+      "harness-engineering",
+      "skillify",
+      "skill-refactor"
+    ],
+    "symptoms": [
+      "lint_failure",
+      "missing_file",
+      "approval_required",
+      "network",
+      "timeout",
+      "git_state",
+      "permission",
+      "test_failure"
+    ],
+    "validation": "425 validation gate(s)"
+  }
+]
