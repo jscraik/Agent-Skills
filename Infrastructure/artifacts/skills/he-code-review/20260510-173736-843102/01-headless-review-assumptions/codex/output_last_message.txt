@@ -1,0 +1,32 @@
+I routed `$he-code-review` correctly and found the canonical source at [Plugins/harness-engineering/skills/he-code-review/SKILL.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-code-review/SKILL.md). The change you want belongs there, not in the generated runtime handle under `.agents/skills`.
+
+I attempted the edit, but the current tool sandbox rejected the write before modifying the file:
+
+```text
+patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings
+```
+
+So no files were changed, and I could not run post-edit validation. The smallest intended patch is this:
+
+```diff
+diff --git a/Plugins/harness-engineering/skills/he-code-review/SKILL.md b/Plugins/harness-engineering/skills/he-code-review/SKILL.md
+--- a/Plugins/harness-engineering/skills/he-code-review/SKILL.md
++++ b/Plugins/harness-engineering/skills/he-code-review/SKILL.md
+@@
+-Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. In headless review, record `interactive_status: autonomous_assumption` plus the evidence and confidence; when mutation or readiness mode is ambiguous, ask once with `request_user_input` when available or return `interactive_status: blocked`.
++Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. In headless, unattended, autonomous, or eval review, do not ask non-blocking questions; record `interactive_status: autonomous_assumption` plus the assumption, evidence, confidence, risk, and downstream checkpoint. Ask once with `request_user_input` when available only when a blocking choice would authorize mutation, readiness approval, external state changes, broad scope expansion, or closure; otherwise return `interactive_status: blocked`.
+@@
+-2. Resolve the stage context contract when the review will write artifacts, mutate files, update PR state, or hand off to another stage; ask before mutation when mode is ambiguous.
++2. Resolve the stage context contract when the review will write artifacts, mutate files, update PR state, or hand off to another stage. In unattended review, convert non-blocking ambiguity into recorded assumptions with confidence; block instead of mutating when mode ambiguity would authorize side effects.
+```
+
+Why this is the right shape: the existing interactive steering contract already says headless/autonomous mode must not block on user questions and should record assumption, evidence, risk, and downstream checkpoint. This patch makes `he-code-review` obey that more explicitly for unattended reviews, while still blocking when the ambiguity would authorize real side effects like mutation, readiness approval, external state changes, broad scope, or closure.
+
+Validation I would run after the patch:
+
+```bash
+./bin/ask skills audit Plugins/harness-engineering/skills/he-code-review --level strict --json --robot
+git diff --check -- Plugins/harness-engineering/skills/he-code-review/SKILL.md
+```
+
+Current blocker: write access is unavailable in this run, so I could only produce the exact canonical patch and evidence path, not apply it.

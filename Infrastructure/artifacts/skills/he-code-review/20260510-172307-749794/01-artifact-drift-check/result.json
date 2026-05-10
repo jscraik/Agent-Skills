@@ -1,0 +1,63 @@
+{
+  "id": "artifact-drift-check",
+  "name": "Artifact drift check",
+  "category": "happy",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": false,
+  "baseline_type": null,
+  "comparison_inputs": null,
+  "iteration_round_state": null,
+  "metric_availability": null,
+  "readiness_state": null,
+  "comparison_review_artifact": null,
+  "neutral_baseline_approval": null,
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 300.0,
+  "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": true,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check/codex",
+        "final": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check/codex/final.txt",
+        "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check/codex/stdout.txt",
+        "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check/codex/stderr.txt",
+        "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 62,
+          "command_count": 26,
+          "unique_command_count": 26,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 1,
+          "turn_count": 1,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 1918243,
+            "output_tokens": 5634,
+            "reasoning_tokens": 0,
+            "total_tokens": 1923877
+          }
+        },
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": true,
+  "tier1_failed": false,
+  "tier2_failed": false,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": []
+}

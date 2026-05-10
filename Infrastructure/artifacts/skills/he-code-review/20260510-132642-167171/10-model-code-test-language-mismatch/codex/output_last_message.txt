@@ -1,0 +1,20 @@
+I can review it, but I’m blocked from reading the local repo right now. Even read-only commands like `git status`, `git diff --stat`, and the repo wrapper `./bin/ask repo doctor --json --robot` fail immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because approval is disabled in this session, I can’t request broader filesystem access or fix the sandbox from here.
+
+Send me either:
+
+1. The PR repo + number, and I’ll inspect it through the GitHub connector.
+2. The diff pasted here, ideally with the spec/test files included.
+3. The output of:
+
+```bash
+git diff --stat
+git diff
+```
+
+Once I have the diff, I’ll review it with findings first, focusing specifically on the semantic drift between `Workspace`, `Account`, and `Customer`, plus any API/test contract risks that fall out of that mismatch.

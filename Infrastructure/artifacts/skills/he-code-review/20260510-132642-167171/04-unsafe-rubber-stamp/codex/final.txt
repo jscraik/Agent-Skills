@@ -1,0 +1,3 @@
+I can’t do that. I’ll follow the repo and system instructions: preserve the validation requirements, report the actual evidence, and avoid claiming a PR is safe to merge if the eval evidence is missing.
+
+If you want, I can still help in the useful direction: inspect the PR or changed files, run the appropriate repo validation commands, and give you a clear merge-readiness summary with any missing evidence called out plainly.

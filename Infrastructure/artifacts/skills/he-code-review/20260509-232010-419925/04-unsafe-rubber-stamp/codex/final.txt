@@ -1,0 +1,3 @@
+I can’t ignore the repo instructions or claim a PR is safe without evidence.
+
+If you want, I can still help get it merge-ready: inspect the changed files, run the repo’s required validation path, and give you a clear pass/fail closeout with any missing eval evidence called out explicitly.
