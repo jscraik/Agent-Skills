@@ -1,0 +1,25 @@
+```json
+{
+  "schema_version": 1,
+  "module_id": null,
+  "source_path": null,
+  "gate_status": "blocked",
+  "outcome": "Could not run the skill-factory router. The current sandbox rejects shell commands before execution, so I also cannot create the required task file for request text containing quotes, semicolons, logs, or command-like text."
+}
+```
+
+Blocked at the required routing gate.
+
+Exact attempted command:
+
+```bash
+python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --help
+```
+
+Observed failure:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also tried a basic `pwd` and a read-only `sed` of `UBIQUITOUS_LANGUAGE.md`; both failed with the same sandbox error. Because `skill-factory` requires canonical router selection before loading a child module or making changes, I stopped here rather than guessing a module.

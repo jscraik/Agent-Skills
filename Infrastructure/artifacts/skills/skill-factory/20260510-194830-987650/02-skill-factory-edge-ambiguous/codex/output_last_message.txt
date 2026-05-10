@@ -1,0 +1,14 @@
+`skill-factory` routing is **blocked**.
+
+`schema_version`: unavailable
+`module id`: unavailable
+`source_path`: unavailable
+`gate status`: `blocked`
+`command`: `python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "skill-factory" --task "Help me decide which module should handle this without loading extra skills." --json`
+`blocker`: the current environment is `read-only` with approval policy `never`, and the command failed before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Per the `skill-factory` contract, I should stop here: routing did not produce a canonical `source_path`, so I won’t infer or load a child module.

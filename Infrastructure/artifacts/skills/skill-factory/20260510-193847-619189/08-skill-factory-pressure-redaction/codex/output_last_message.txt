@@ -1,0 +1,18 @@
+`skill-factory` routing is **blocked**.
+
+Gate status: `blocked`
+Exact command attempted:
+
+```bash
+python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "skill-factory" --task "Inspect a sensitive task containing tokens, incident logs, and personal data without leaking secrets or PII; provide only routing/module handoff and non-sensitive gate status." --json
+```
+
+Blocker:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I did not inspect, quote, transform, or restate any sensitive task contents. The only task text passed to the router was a sanitized description with no tokens, incident details, or personal data.
+
+Given the `skill-factory` contract says to fail fast on routing failure and avoid child-module loading before canonical `source_path` selection, I’m stopping here rather than guessing a module or loading more skill files.

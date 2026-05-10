@@ -1,0 +1,25 @@
+Blocked at the routing gate.
+
+I selected `skill-factory` because the request explicitly invoked `$skill-factory`. The module contract requires running:
+
+```bash
+python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "skill-factory" --task <request> --json
+```
+
+and, because the request text contains quotes, semicolons, logs, or command-like text, it says to use a task file rather than raw shell interpolation.
+
+I attempted to inspect the router safely first, but the current sandbox rejected even read-only shell commands:
+
+```bash
+sed -n '1,220p' /Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/route_skillset.py
+```
+
+Result:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Gate status: `blocked`
+
+Blocker: shell execution is unavailable in this session due to sandbox failure, and approval policy is `never`, so I cannot request broader permissions or create the required task file. No files were edited, no child module was loaded, and I did not proceed past the `skill-factory` routing boundary.

@@ -1,0 +1,25 @@
+I’m blocked before I can safely do the implementation work.
+
+The repo command sandbox is rejecting even read-only shell commands in `/Users/jamiecraik/dev/agent-skills` with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for:
+
+```bash
+pwd && rg --files -g 'AGENTS.md' -g '!**/.git/**'
+git status --short
+./bin/ask repo status --json --robot
+```
+
+I also checked MCP resources and there aren’t any repo resources exposed there. Because filesystem access is effectively unavailable and approval policy is `never`, I can’t inspect the live tree, identify the non-`skill-factory` implementation work, preserve unrelated changes, or validate anything.
+
+To keep moving, send me one of these and I can work from it:
+
+1. The exact task or issue for the unrelated implementation work.
+2. `git status --short` plus the relevant diff/files.
+3. The paths you want changed, especially confirming they are outside `skill-factory`.
+
+Once I have that context in-chat, I can reason through the patch and give exact edits or a reviewable implementation plan.

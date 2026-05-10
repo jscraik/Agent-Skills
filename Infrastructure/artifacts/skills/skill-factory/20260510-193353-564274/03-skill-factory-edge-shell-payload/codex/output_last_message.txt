@@ -1,0 +1,19 @@
+Blocked by the current execution environment before I could route the request.
+
+I attempted to follow `skill-factory` exactly, including avoiding raw shell interpolation for the request text, but every repo read/command failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Failed commands:
+
+```bash
+pwd && python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set skill-factory --help
+sed -n '1,180p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,160p' Docs/agents/14-path-ownership-boundaries.md
+```
+
+Gate status: `blocked`
+
+Blocker: the read-only sandbox wrapper itself is failing with `sandbox_apply: Operation not permitted`, so I cannot read the required repo guidance or run the canonical router. Per the `skill-factory` contract, I stopped rather than guessing a child module or proceeding without canonical `source_path` selection.
