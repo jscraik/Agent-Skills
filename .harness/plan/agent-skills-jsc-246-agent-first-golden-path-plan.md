@@ -6,7 +6,7 @@ type: he-plan
 canonical_slug: agent-skills-jsc-246-agent-first-golden-path
 title: Agent Skills JSC-246 Agent First Golden Path Plan
 harness_stage: he-plan
-status: active
+status: local_proof_complete_pending_linear_review
 date: 2026-05-09
 origin: .harness/specs/agent-skills-jsc-246-agent-first-golden-path-spec.md
 risk: medium-high
@@ -1540,6 +1540,25 @@ Do not commit or close Linear before:
 | `JSC-246` | SA12, SA13, SA14, SA17 | PLAN-JSC246-006 | SA12, SA13, SA14, SA17 | Docs compression diff; ablation notes; command metadata review. |
 | `JSC-246` | SA6, SA13, SA15, SA18, SA20 | PLAN-JSC246-007 | SA6, SA13, SA15, SA18, SA20 | `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md`; fresh-agent transcript or deterministic script; final technical review gate evidence. |
 
+## Compound Closeout State
+
+`he-eval-report` now classifies the local `JSC-246` proof as complete for
+`PLAN-JSC246-001` through `PLAN-JSC246-007`.
+
+`he-compound` routing should no longer resume this plan at `he-work`. The
+earliest remaining lifecycle step is human Linear closure/linkage review for
+`JSC-246` only. Do not infer completion for unrelated command-surface milestone
+work, `JSC-230` through `JSC-236`, `JSC-174`, or broad dirty-worktree cleanup.
+
+Closure status:
+
+- Local HE proof: complete.
+- Linear mutation: not attempted from the heartbeat/eval pass.
+- Next route: human Linear status/linkage review, using the eval artifact and
+  pushed commit evidence.
+- Residual risk: unrelated dirty worktree entries may still exist and must stay
+  outside `JSC-246` closure claims.
+
 ## Blackboard Delta
 
 ```yaml
@@ -1547,13 +1566,12 @@ schema_version: he-blackboard-delta/v1
 topic: agent-first-golden-path
 linear_issue: JSC-246
 selected_slice: Agent First Golden Path
-plan_status: ready_for_he_work_after_validation_rerun
+plan_status: local_proof_complete_pending_linear_review
 live_blockers:
-  - id: sync_required
-    command: ./bin/ask repo closeout --changed --json --robot
-    status: blocked
-    sync_needed: true
-    owner: unrelated_dirty_harness_engineering_plugin_factory_skill_factory_and_session_evidence_changes
+  - id: unrelated_dirty_worktree
+    command: git status --short --branch
+    status: present
+    owner: unrelated_dirty_harness_engineering_plugin_factory_skill_factory_session_evidence_and_generated_artifacts
     jsc246_scope_blocker: false
 validation_follow_up:
   - id: post_deepening_lints
@@ -1601,27 +1619,22 @@ non_negotiables:
   - docs_compression_after_behavior_stabilization
   - eval_artifact_required_before_linear_closure
 post_plan_handoff:
-  state: awaiting_user_choice
-  selected_next_stage: he-work
+  state: local_proof_complete_pending_linear_review
+  selected_next_stage: human_linear_closure_linkage_review
   evidence: .harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md
-  next_action: ask before mutating code; if approved, start PLAN-JSC246-001 baseline snapshots and fixture map
+  eval_artifact: .harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md
+  next_action: link the eval and pushed commit evidence to JSC-246 through the normal human-reviewed Linear update path; do not resume he-work for PLAN-JSC246-001 through PLAN-JSC246-007
 ```
 
-## Handoff To he-work
+## Handoff To Linear Closure Review
 
-Start with `PLAN-JSC246-001` only after the user authorizes implementation. Do
-not edit docs, add aliases, or change proof schema before baseline snapshots and
-fixture coverage are recorded.
+Do not restart `PLAN-JSC246-001`. The eval artifact records fresh completion
+evidence for all seven plan units.
 
-Recommended first command:
+Recommended closure evidence:
 
-```bash
-./bin/ask repo doctor --json --robot
-```
-
-Then run the handle-resolution and command snapshot commands from
-PLAN-JSC246-001 and record results in:
-
-```text
-.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md
-```
+- `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md`
+- pushed commit evidence for the JSC-246 implementation/proof refresh
+- focused validation evidence recorded in the eval artifact
+- explicit note that Linear mutation was intentionally not attempted during the
+  heartbeat/eval pass
