@@ -1,0 +1,16 @@
+I can do the ranking, but I can’t read those two JSON files from this sandboxed workspace right now.
+
+If you paste:
+- `skill-refactor-evidence.json`
+- `skill-refactor-handoffs.json`
+
+I’ll return:
+- a ranked list of the repeatedly failing or misrouted skills
+- the evidence for each rank
+- a short summary of the main failure modes, including weak validation patterns
+
+If it helps, you can paste just the sections that mention:
+- skill names
+- failure counts or repeated reroutes
+- validation/test evidence
+- handoff notes or “blocked / sent back / retried” entries

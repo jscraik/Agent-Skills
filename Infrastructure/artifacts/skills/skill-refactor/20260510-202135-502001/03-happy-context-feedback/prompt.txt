@@ -1,0 +1,3 @@
+$skill-refactor
+
+CodeRabbit and Codex keep leaving the same GitHub review feedback on this skill; inspect whether the context package needs to adapt, and report context feedback evidence plus the smallest lifecycle adaptation candidate.

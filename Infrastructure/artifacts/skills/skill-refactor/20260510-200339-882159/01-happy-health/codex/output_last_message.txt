@@ -1,0 +1,13 @@
+I can do the ranking, but I can’t read those local JSON files from this sandbox right now because the workspace shell is blocked by the environment.
+
+If you paste the contents of:
+
+- `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/skill-refactor-evidence.json`
+- `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/skill-refactor-handoffs.json`
+
+I’ll turn that into a ranked list of:
+- repeatedly failed skills
+- incorrectly routed skills
+- skills with weak validation evidence
+
+If you prefer, I can also work from a smaller excerpt, like just the sections that mention failures, handoffs, or validation notes.

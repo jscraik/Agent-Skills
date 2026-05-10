@@ -1,0 +1,19 @@
+The smallest repair is to restore the evidence-preservation contract, not to broaden the skill.
+
+From the session evidence, the regression pattern is that outputs can look complete while only carrying sampled evidence. That points to a loss of source grounding, specifically:
+
+- preserve the original prompt text as source evidence
+- require `evidence_depth`
+- require `coverage_scope`
+- require `coverage_gaps`
+- require `original_prompt_coverage`
+
+So my recommendation is:
+
+1. Re-add the missing instruction or output-field requirement that preserves the original prompt / source evidence.
+2. Do not expand the workflow or add new stages yet.
+3. Re-run the eval on the same case to see whether the grade returns on evidence completeness alone.
+
+Why this is the smallest fix: the evidence suggests the skill still produces a plausible result, but the evaluator is penalizing thin provenance. That is a narrower failure than orchestration, logic, or formatting.
+
+If you want, I can next turn this into a one-line patch suggestion for the exact `SKILL.md` wording.

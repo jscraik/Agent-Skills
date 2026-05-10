@@ -1,0 +1,24 @@
+I’m blocked from inspecting the repo locally right now.
+
+The shell is failing before any read-only command starts with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also tried switching to the GitHub connector for read-only repo evidence, but that MCP call was cancelled before it returned anything.
+
+To inspect this properly, I need one of these:
+
+1. A working local read path for `/Users/jamiecraik/dev/agent-skills`, so I can run commands like:
+   ```bash
+   rg -n "CodeRabbit|Codex|context package|review feedback" .
+   git status --short
+   ./bin/ask repo doctor --json --robot
+   ```
+
+2. The GitHub PR/review link or repo access through the GitHub connector.
+
+3. The repeated CodeRabbit/Codex review comment pasted here.
+
+Once I have that, I’ll trace the feedback to the canonical skill source, check whether the context package is stale or missing guidance, and report whether it needs an adaptation versus whether the reviewers are repeating a false positive.

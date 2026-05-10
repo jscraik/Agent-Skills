@@ -1,0 +1,6 @@
+I couldn’t complete the ranking from the two JSON files because the workspace shell is currently blocked by the sandbox layer, so I can’t read:
+
+- `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/skill-refactor-evidence.json`
+- `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/skill-refactor-handoffs.json`
+
+If you paste the contents of those files, or make them available through a readable path, I can turn that into a clean ranked list quickly. If you want, I can also give you a tiny `jq` command set to extract the repeated-failure, misrouting, and weak-evidence signals locally, then I’ll rank them from the output.

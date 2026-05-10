@@ -1,0 +1,28 @@
+I tried to validate the live repo state from `/Users/jamiecraik/dev/agent-skills`, but the execution environment is currently blocked before any command can read the filesystem.
+
+Commands attempted:
+
+```bash
+sed -n '1,220p' /Users/jamiecraik/dev/agent-skills/.agents/skills/harness-engineering/SKILL.md
+./bin/ask repo status --json --robot
+rg --files -g 'AGENTS.md' -g 'session*' -g '*evidence*' -g '*.json' .harness Docs Skills Infrastructure | head -200
+```
+
+All three failed with the same sandbox error:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So the blocker is not “missing session evidence” yet. The blocker is that the shell sandbox cannot apply its policy at all, which prevents validating whether session evidence files, `.harness` state, repo status, or the relevant skill instructions are actually available.
+
+Current validated state:
+
+- CWD from context: `/Users/jamiecraik/dev/agent-skills`
+- Filesystem sandbox mode: `read-only`
+- Approval policy: `never`
+- Actual command execution: blocked by `sandbox-exec: sandbox_apply: Operation not permitted`
+- No repo evidence could be read
+- No session evidence availability could be confirmed
+
+I can’t honestly claim anything about the contents or absence of session evidence until command execution can read the workspace.

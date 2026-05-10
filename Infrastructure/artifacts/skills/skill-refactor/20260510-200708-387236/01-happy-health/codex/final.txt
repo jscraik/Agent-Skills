@@ -1,0 +1,31 @@
+I’m blocked from inspecting the evidence files: the shell sandbox is rejecting even read-only commands in `/Users/jamiecraik/dev/agent-skills` with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for both:
+
+```bash
+sed -n '1,220p' /Users/jamiecraik/dev/agent-skills/.agents/skills/harness-engineering/SKILL.md
+ls -l .harness/session-evidence/he-phase-heartbeat/jsc-246-20260509
+pwd
+```
+
+I also checked MCP resources, and there are no file resources exposed for this workspace.
+
+So I can’t honestly rank the skills yet without the contents of:
+
+```text
+.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/skill-refactor-evidence.json
+.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/skill-refactor-handoffs.json
+```
+
+Once file access is working, I’d rank them by a combined score across:
+
+1. Repeated hard failures: failed runs, explicit blocked/error statuses, repeated fallback paths.
+2. Misrouting: handoffs where the selected skill did not match the task domain, unnecessary skill chaining, or downstream correction by another skill.
+3. Weak validation evidence: missing commands, non-reproducible claims, no pass/fail evidence, “reviewed” without concrete artifacts, or validation that does not touch the changed surface.
+4. Recurrence: same skill appearing in multiple weak handoffs or evidence records, weighted above one-off misses.
+
+If you paste those two JSON files here, I can do the ranking directly in the next message.

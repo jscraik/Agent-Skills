@@ -1,0 +1,21 @@
+The smallest repair is to restore the skill’s evidence-capture contract so it preserves the original prompt and records evidence coverage metadata before producing its evaluation output.
+
+Why this is the smallest fix:
+- The strongest session anchor says the skill outputs can look complete while only carrying sampled evidence, and explicitly recommends preserving the original prompt text plus `evidence_depth`, `coverage_scope`, `coverage_gaps`, and `original_prompt_coverage`. See [memory `3573c08c-8da8-4ba3-af4f-f49117fd2dd4`](memory://3573c08c-8da8-4ba3-af4f-f49117fd2dd4), created `2026-05-10T14:08:11Z`.
+- A second anchor says to treat basename-only command evidence as incomplete and rerun with full logging, which reinforces the same failure mode: evidence is too thin to support a high score. See [memory `3d3783e6-5cd0-446e-abbd-e2747a37eabe`](memory://3d3783e6-5cd0-446e-abbd-e2747a37eabe), created `2026-05-10T14:08:11Z`.
+- The session bootstrap confirms this run was in autonomous, non-destructive inspection mode, so the right repair is a reversible instrumentation fix rather than a workflow rewrite. See [memory `15c36f39-9c1e-4097-ba76-56488a95f5e8`](memory://15c36f39-9c1e-4097-ba76-56488a95f5e8), created `2026-05-10T13:42:27Z`.
+
+Recommendation:
+- Add or restore a thin evidence-preservation layer in `skill-refactor` that:
+  - stores the original prompt verbatim,
+  - records `evidence_depth`,
+  - records `coverage_scope`,
+  - records `coverage_gaps`,
+  - records `original_prompt_coverage`,
+  - and refuses to claim a fully grounded result when evidence is sampled rather than complete.
+
+Confidence:
+- `0.72` that this is the direct cause of the A-to-C drop.
+- `0.90` that this is the smallest safe repair, even if it is not the only missing piece.
+
+If you want, I can next turn this into a one-paragraph fix brief with an exact acceptance check list.

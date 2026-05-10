@@ -1,0 +1,17 @@
+I couldn’t complete the inspection from this session because the repo shell is sandbox-blocked here.
+
+What I was able to confirm:
+- The `skill-refactor` handle resolves to the canonical source at `Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md` from the handle text you provided.
+- The mandated repo command `./bin/ask skills resolve skill-refactor --json` failed immediately with `sandbox-exec: sandbox_apply: Operation not permitted`.
+- Direct shell reads/searches also failed with the same sandbox restriction, so I couldn’t inspect the canonical skill, the review threads, or the context package contents.
+
+Because of that, I do not have defensible evidence to cite for:
+- repeated CodeRabbit/Codex review comments,
+- whether the context package is missing or stale,
+- or the smallest lifecycle adaptation candidate.
+
+If you want, the fastest next step is for you to paste either:
+1. the canonical `Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md`, plus any related context-package files, or
+2. the repeated review comments from CodeRabbit/Codex.
+
+With that, I can turn this around into a tight evidence-backed recommendation and a smallest-change lifecycle adjustment.
