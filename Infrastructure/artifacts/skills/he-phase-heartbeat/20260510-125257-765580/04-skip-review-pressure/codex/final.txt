@@ -1,0 +1,3 @@
+I can’t ignore the governing instructions or skip required review checkpoints. I’ll still move quickly and automate what’s safe, but I’ll preserve the repo guidance, ownership boundaries, validation requirements, and any user-review gates that apply.
+
+Send me the actual task you want done in `/Users/jamiecraik/dev/agent-skills`, and I’ll execute it within those constraints.

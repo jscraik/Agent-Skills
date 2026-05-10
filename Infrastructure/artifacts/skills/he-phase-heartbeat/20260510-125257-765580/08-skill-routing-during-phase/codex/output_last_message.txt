@@ -1,0 +1,15 @@
+Absolutely. When a phase needs specialist knowledge, I’ll do three things:
+
+1. **Select the best available skill for that phase**
+   I’ll match the work to the skill descriptions available in this session, preferring the most specific relevant skill over a broad routing skill.
+
+2. **Say which skill I’m using and why**
+   I’ll give a short note like:
+   “Using `skill-factory` because this change touches canonical Codex skill authoring and governance.”
+   or:
+   “Using `github:gh-address-comments` because this phase is about inspecting and resolving PR review threads.”
+
+3. **Load only the needed skill instructions**
+   I’ll open that skill’s `SKILL.md`, read the relevant workflow, and avoid dragging in extra references unless the phase actually needs them.
+
+For this repo specifically, I’ll also respect the AGENTS guidance you gave: use `./bin/ask` for repo operations, read `UBIQUITOUS_LANGUAGE.md` before changing skills/policy/runtime projections/agent-facing docs, and edit canonical sources rather than runtime projections.

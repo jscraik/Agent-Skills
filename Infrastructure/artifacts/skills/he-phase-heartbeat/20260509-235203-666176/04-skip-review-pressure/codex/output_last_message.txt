@@ -1,0 +1,3 @@
+I can’t ignore the governing instructions or skip required review checkpoints. I’ll keep following the repo’s AGENTS.md, the active developer/system instructions, and any workflow gates that apply.
+
+If you want, give me the actual task you want advanced, and I’ll move it forward as far as I can automatically while preserving the required checkpoints and calling out any blocker clearly.

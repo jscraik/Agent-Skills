@@ -1,0 +1,25 @@
+Yes. I’m treating that as an operating rule:
+
+When a phase is blocked by missing validation, I will stop, identify the missing validation explicitly, and record the minimum corrective action needed before continuing.
+
+I tried to inspect the repo validation with:
+
+```bash
+./bin/ask repo doctor --json --robot
+```
+
+It could not run in this session because the environment blocked the command before the repo tooling started:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So the current phase is blocked by **unavailable validation execution**, not by a repo-reported failure.
+
+Minimum corrective action:
+
+```text
+Run ./bin/ask repo doctor --json --robot in an environment where sandbox-exec is permitted, then continue from the reported validation result.
+```
+
+Because the workspace is read-only here, I can’t write that record into the repo, but that is the smallest actionable note to carry forward.
