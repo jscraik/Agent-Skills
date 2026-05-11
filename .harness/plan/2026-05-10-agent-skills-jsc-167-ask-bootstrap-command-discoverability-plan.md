@@ -202,10 +202,10 @@ In scope:
   shared logic.
 - Make bootstrap output machine-readable with fields for executable status,
   fallback smoke, PATH discovery, shim smoke, repo identity, and remediation.
-- Add repo-doctor reporting for ask entrypoint executable status and command
+- Introduce repo-doctor reporting for ask entrypoint executable status and command
   discoverability.
-- Add focused tests and shell fixtures that cover CF1-CF12 where applicable.
-- Add deterministic docs contract validation for the bootstrap and fallback
+- Include focused tests and shell fixtures that cover CF1-CF12 where applicable.
+- Enable deterministic docs contract validation for the bootstrap and fallback
   commands.
 - Update only normative first-contact command docs where they describe first-run
   command paths: `README.md`, `AGENTS.md`,
@@ -446,7 +446,7 @@ Implementation:
 - Emit the "Bootstrap Proof Contract" fields above.
 - Preserve raw command failure data when fallback smoke fails.
 - Use bounded output excerpts for subprocess failures.
-- Keep the script free of shell-profile sourcing and global installer behavior.
+- Keep the script free of shell-profile sourcing and global-installer behavior.
 - Ensure `bash scripts/bootstrap-ask.sh --json` is runnable before any required
   `./bin/ask ...` validation command in the first-contact sequence.
 
