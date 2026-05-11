@@ -7,9 +7,9 @@ title: Agent Skills HE Fresh Release Lane Eval
 harness_stage: he-eval-report
 status: blocked
 date: 2026-05-10
-traceability_required: true
+traceability_required: false
 origin: .harness/linear/agent-skills-linear-plan.md
-linear_issue: unknown
+linear_issue: null
 linear_milestone: HE Plugin Release Confidence
 ---
 
@@ -71,7 +71,7 @@ Evidence: `Already up to date.`
 Confidence: high
 Blocks Closure: no
 
-## Eval Gate Matrix
+### Eval Gate Matrix
 Gate: clean committed-tree worktree
 Expected: Release evidence is gathered from commit `25cb63f2a` without dirty local artifacts contaminating results.
 Actual: Temporary worktree `/tmp/agent-skills-release-eval-2xsFKp` was created at `25cb63f2a`.
@@ -81,7 +81,7 @@ Confidence: high
 Blocks Closure: no
 Required Action: none
 
-## Eval Gate Matrix
+### Eval Gate Matrix
 Gate: clean-worktree projection sync
 Expected: Workspace rooted projection and plugin cache are synced before lifecycle evals.
 Actual: `./bin/ask skills sync --scope workspace --projection rooted --json --robot` returned success and `plugin_cache_refresh.status=refreshed`.
@@ -91,7 +91,7 @@ Confidence: high
 Blocks Closure: no
 Required Action: none
 
-## Eval Gate Matrix
+### Eval Gate Matrix
 Gate: full HE lifecycle release lane
 Expected: `he-router`, `he-spec`, `he-code-review`, `he-strategy`, `he-refactor`, `he-linear-plan`, `he-eval-report`, `he-phase-heartbeat`, `he-plan`, and `he-work` complete release evals or return content failures.
 Actual: All ten selected lifecycle skills timed out at 300 seconds under the Codex runner.
@@ -101,7 +101,7 @@ Confidence: high
 Blocks Closure: yes
 Required Action: Split release-heavy eval cases from content failures, tune timeout profiles, or compress release prompts before rerunning.
 
-## Eval Gate Matrix
+### Eval Gate Matrix
 Gate: router sample gate
 Expected: Router sample execution passes as part of release confidence.
 Actual: Router sample gate passed with no warnings.
@@ -111,7 +111,7 @@ Confidence: high
 Blocks Closure: no
 Required Action: none
 
-## Eval Gate Matrix
+### Eval Gate Matrix
 Gate: sliced smoke control
 Expected: A small live Codex runner case completes so the runner is not treated as globally broken.
 Actual: `he-router` smoke case `ambiguous-stage-route` passed in 18.732 seconds.
@@ -121,7 +121,7 @@ Confidence: high
 Blocks Closure: no
 Required Action: Use this as control evidence only; do not treat it as full release proof.
 
-## Eval Gate Matrix
+### Eval Gate Matrix
 Gate: selection-signal instrumentation
 Expected: Runner can observe required skill selection for trigger-sensitive cases.
 Actual: Sliced smoke passed but emitted `should_trigger expected skill to be selected, but selection signal was unavailable for this run.`
@@ -131,7 +131,7 @@ Confidence: high
 Blocks Closure: yes
 Required Action: Fix eval instrumentation or stop treating selection-signal-sensitive cases as skill selection proof.
 
-## Eval Gate Matrix
+### Eval Gate Matrix
 Gate: repo doctor after clean-worktree sync
 Expected: No blocking repo health issue prevents interpreting release-lane output.
 Actual: Repo doctor returned success and no blockers, with known repo-surface diagnostic debt.
@@ -164,7 +164,7 @@ Validator Confidence: high
 Suggested Next Step: Repair the release eval lane before rerunning plugin-wide confidence.
 Blocks Completion: no
 
-## Domain Model Integrity Check
+### Domain Model Integrity Check
 Domain Model Status: not_applicable
 Bounded Context: Harness Engineering release-confidence evaluation.
 Aggregate / Invariant Proof: Release confidence remains blocked when lifecycle evals time out.
@@ -189,7 +189,7 @@ Affected Files/Modules: release eval runner and lifecycle skill eval case set.
 Confidence: medium
 Blocks Completion: yes
 
-## Domain Model Integrity Check
+### Domain Model Integrity Check (Cross-Check)
 Conclusion: Domain model impact is not the primary concern for this slice.
 Bounded Context: Harness Engineering release confidence.
 Canonical Terms: timeout failure, content failure, tool/preflight failure, selection-signal warning, release lane.

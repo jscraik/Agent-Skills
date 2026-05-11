@@ -18,6 +18,7 @@ Style: professional engineering poster, dark ink and warm off-white technical-pa
 
 Linked context:
 
-- Reviewed skill projection: `.agents/skills/skill-factory/SKILL.md`
+- Reviewed runtime projection: `.agents/skills/skill-factory/SKILL.md`
+- Canonical skill source: `Plugins/skill-factory/SKILL.md`
 - Canonical generator/template edits: `Infrastructure/templates/root-skill-set/SKILL.md.j2`, `Infrastructure/scripts/lifecycle-and-sync/generate_root_skill_sets.py`
 - Validation focus: strict audit, OpenClaw, OpenAI skill format lint, progressive disclosure lint, smoke evals, release evals, path ownership.

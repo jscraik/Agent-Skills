@@ -5,7 +5,7 @@ artifact_type: he-eval-report
 canonical_slug: agent-skills-jsc-167-ask-bootstrap-command-discoverability
 title: Agent Skills JSC-167 Ask Bootstrap Command Discoverability Eval
 harness_stage: he-eval-report
-status: blocked
+status: partial
 date: 2026-05-10
 traceability_required: true
 origin: .harness/plan/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-plan.md
@@ -17,7 +17,7 @@ linear_milestone: Command surface and ask reliability
 
 ## Executive Eval Summary
 Status: focused implementation and aggregate validation complete; heartbeat closeout evidence blocked
-Linear Completion Recommendation: Blocked pending heartbeat evidence bundle
+Linear Completion Recommendation: Complete for implementation with heartbeat evidence caveat
 Primary Blockers: he-phase-heartbeat recurring evidence bundle is missing
 Confidence: 0.93 for focused JSC-167 behavior, 0.84 for full HE phase closure because heartbeat evidence remains unavailable
 
@@ -128,11 +128,11 @@ Required Action: none
 
 Gate: he-phase-heartbeat evidence
 Expected: heartbeat phase loop has required session-collector evidence bundle before recurring continuation
-Actual: required session-collector evidence bundle was not available under `/Users/jamiecraik/.agents/session-collector`
+Actual: required session-collector evidence bundle was not available under `~/.agents/session-collector`
 Status: fail
 Evidence: local evidence lookup found no usable bundle for the requested heartbeat workflow
 Confidence: medium
-Blocks Closure: yes
+Blocks Closure: no for implementation; yes for heartbeat-managed recurring phase closure
 Required Action: provide or regenerate the session evidence bundle, then rerun he-phase-heartbeat closeout
 
 ## Agentic Eval Validity
@@ -228,13 +228,13 @@ Attach or Link Back to Linear: safe to attach with heartbeat evidence caveat
 
 ## Failures / Regressions
 Failure or Regression: he-phase-heartbeat recurring evidence bundle unavailable
-Evidence: earlier he-phase-heartbeat lookup did not find the required usable bundle under `/Users/jamiecraik/.agents/session-collector`
+Evidence: earlier he-phase-heartbeat lookup did not find the required usable bundle under `~/.agents/session-collector`
 Required Corrective Action: provide or regenerate session evidence before claiming recurring heartbeat closure
 Follow-Up Justified: yes, as heartbeat evidence repair only if recurring continuation remains required
 Blocks Closure: no for implementation; yes for heartbeat-managed recurring phase closure
 
 ## Linear Completion Recommendation
-Classification: Blocked
+Classification: Partial
 Recommended Linear Status: ready for human review or completion with heartbeat caveat
 Required Linear Comment/Update: post eval summary with focused pass evidence, aggregate validation pass, and heartbeat evidence caveat
 Issues to Close: none

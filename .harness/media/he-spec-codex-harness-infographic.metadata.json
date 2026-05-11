@@ -9,7 +9,9 @@
   "validation_context": {
     "strict_audit": "pass",
     "plugin_eval": "pass_with_budget_warnings",
-    "smoke_eval_case": "missing-live-linear-tracker",
-    "release_eval_case": "missing-live-linear-tracker"
+    "smoke_eval_case": "blocked",
+    "smoke_eval_blocker_reason": "missing-live-linear-tracker",
+    "release_eval_case": "blocked",
+    "release_eval_blocker_reason": "missing-live-linear-tracker"
   }
 }
