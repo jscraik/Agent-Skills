@@ -99,7 +99,7 @@ def test_eval_yaml_parse_gate_does_not_contain_hardcoded_user_path() -> None:
     """No evidence line in the eval should reference a hardcoded user-specific
     virtualenv path (e.g. /Users/<username>/.venvs/...).
 
-    The PR replaced '/Users/jamiecraik/.venvs/pyyaml/bin/python' with
+    The PR replaced '/Users/<username>/.venvs/pyyaml/bin/python' with
     'python3', making the evidence portable.
     """
     text = EVAL_FILE.read_text(encoding="utf-8")
@@ -113,7 +113,7 @@ def test_eval_yaml_parse_gate_does_not_contain_hardcoded_user_path() -> None:
 def test_eval_yaml_parse_gate_does_not_contain_venv_path() -> None:
     """The evidence command must not reference a .venvs virtualenv path.
 
-    Regression guard: ensures the old '/Users/jamiecraik/.venvs/pyyaml/bin/python'
+    Regression guard: ensures the old '/Users/<username>/.venvs/pyyaml/bin/python'
     form (or any .venvs variant) cannot creep back into the evidence section.
     """
     text = EVAL_FILE.read_text(encoding="utf-8")
@@ -215,7 +215,7 @@ def test_frontmatter_with_hardcoded_user_path_is_detectable() -> None:
     the content-level assertion would catch it.
     """
     old_evidence = (
-        "`/Users/jamiecraik/.venvs/pyyaml/bin/python "
+        "`/Users/<username>/.venvs/pyyaml/bin/python "
         "-c \"import pathlib,yaml; print('ok')\"` -> pass."
     )
     new_evidence = (
