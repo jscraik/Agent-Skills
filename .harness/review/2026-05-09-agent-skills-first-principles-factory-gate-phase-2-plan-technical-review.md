@@ -175,13 +175,13 @@ or Phase 4 behavior proof in the same pass.
 ## Validation Evidence
 
 - Command:
-  `python3 - <<'PY' ... compare Phase 2 spec minimum schema keys against the Phase 2 plan and check deprecated exploratory schema keys are absent ... PY`
+  `python3 -c "<inline script: compare Phase 2 spec minimum schema keys against the Phase 2 plan and check deprecated exploratory schema keys are absent>"`
   -> pass.
 - Command:
-  `python3 - <<'PY' ... calculate relative paths from all seven selected lane files to Infrastructure/references/first-principles-factory-gate.md ... PY`
+  `python3 -c "<inline script: calculate relative paths from all seven selected lane files to Infrastructure/references/first-principles-factory-gate.md>"`
   -> pass.
 - Command:
-  `python3 - <<'PY' ... verify ../codex source contains plugin_hooks default-off feature gate, default hooks/hooks.json discovery, PluginHookSource metadata, and PLUGIN_ROOT/PLUGIN_DATA test coverage ... PY`
+  `python3 -c "<inline script: verify ../codex source contains plugin_hooks default-off feature gate, default hooks/hooks.json discovery, PluginHookSource metadata, and PLUGIN_ROOT/PLUGIN_DATA test coverage>"`
   -> pass.
 - Command:
   `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-2-plan.md .harness/review/2026-05-09-agent-skills-first-principles-factory-gate-phase-2-plan-technical-review.md`

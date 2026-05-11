@@ -76,7 +76,7 @@ Gate: bootstrap JSON contract
 Expected: stable ask-bootstrap.v1 output with bounded checks and fallback proof
 Actual: `bash scripts/bootstrap-ask.sh --json` returned ask-bootstrap.v1 with status warning, fallback pass, path warn, and shim skipped
 Status: pass
-Evidence: command output summary recorded in chat; full output available by rerunning the command
+Evidence: .harness/evidence/JSC-167-ask-bootstrap-command-discoverability/bootstrap-json-output.txt
 Confidence: high
 Blocks Closure: no
 Required Action: none for implementation; configure PATH shim only if desired as follow-up
@@ -94,7 +94,7 @@ Gate: static and type validation
 Expected: changed Python files pass lint, compile, and type checks
 Actual: `ruff check ...` passed; `pyright ...` passed with 0 errors; `python3 -m py_compile ...` passed
 Status: pass
-Evidence: command outputs recorded during implementation
+Evidence: .harness/evidence/JSC-167-ask-bootstrap-command-discoverability/static-validation-output.txt
 Confidence: high
 Blocks Closure: no
 Required Action: none
@@ -130,7 +130,7 @@ Gate: he-phase-heartbeat evidence
 Expected: heartbeat phase loop has required session-collector evidence bundle before recurring continuation
 Actual: required session-collector evidence bundle was not available under `~/.agents/session-collector`
 Status: fail
-Evidence: local evidence lookup found no usable bundle for the requested heartbeat workflow
+Evidence: .harness/evidence/JSC-167-ask-bootstrap-command-discoverability/heartbeat-evidence-lookup.txt
 Confidence: medium
 Blocks Closure: no for implementation; yes for heartbeat-managed recurring phase closure
 Required Action: provide or regenerate the session evidence bundle, then rerun he-phase-heartbeat closeout
