@@ -186,6 +186,12 @@ def validate_written_manifest_provenance(
                 continue
             source_parts = Path(source_path).parts
             plugin_skills_index = source_parts.index("skills") if "skills" in source_parts else -1
+            is_system_bridge_source = (
+                row.get("scope") == "system"
+                and len(source_parts) >= 3
+                and ".." not in source_parts
+                and source_parts[0] == "skills-system"
+            )
             is_canonical_source = (
                 len(source_parts) >= 3
                 and ".." not in source_parts
@@ -195,7 +201,7 @@ def validate_written_manifest_provenance(
                 and ".." not in source_parts
                 and source_parts[0] == "Plugins"
                 and plugin_skills_index >= 2
-            )
+            ) or is_system_bridge_source
             if not is_canonical_source:
                 violations.append({
                     "code": "SKILLSET_SOURCE_PATH_NOT_CANONICAL",

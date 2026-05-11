@@ -17,6 +17,8 @@ from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity
 from skill_discovery import (
     REPO_ROOT,
     classify_skill_scope,
+    SYSTEM_BRIDGE_SKILL_NAMES,
+    iter_system_lane_skill_dirs,
     iter_plugin_skill_dirs,
     iter_repo_skill_dirs,
     normalize_skill_description,
@@ -188,6 +190,9 @@ def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str 
         except ValueError:
             return None, "untagged"
     lowered = tuple(part.lower() for part in parts)
+    scope = classify_skill_scope(source_dir)
+    if scope == "system" and source_dir.name in SYSTEM_BRIDGE_SKILL_NAMES:
+        return "agent-ops", "system-bridge"
     if len(lowered) >= 2 and lowered[0] == "skills":
         if lowered[1] == "project":
             return None, "untagged"
@@ -199,6 +204,8 @@ def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str 
             plugin_name = lowered[skills_index - 1]
             if plugin_name in ROOT_SKILL_SETS:
                 return plugin_name, "inferred"
+    if lowered and lowered[0] == "skills-system" and source_dir.name in SYSTEM_BRIDGE_SKILL_NAMES:
+        return "agent-ops", "system-bridge"
     return None, "untagged"
 
 
@@ -257,12 +264,15 @@ def runtime_visibility_for(frontmatter: dict[str, str]) -> str:
 def iter_candidate_skill_dirs() -> list[Path]:
     seen: set[tuple[int, int] | str] = set()
     dirs: list[Path] = []
-    for skill_dir in [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs()]:
+    for skill_dir in [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs(), *iter_system_lane_skill_dirs()]:
         skill_md = skill_dir / "SKILL.md"
         if not skill_md.exists():
             continue
         scope = classify_skill_scope(skill_dir)
-        if scope in {"system", "primary-runtime", "external", "unknown"}:
+        if scope == "system":
+            if skill_dir.name not in SYSTEM_BRIDGE_SKILL_NAMES:
+                continue
+        elif scope in {"primary-runtime", "external", "unknown"}:
             continue
         try:
             stat = skill_dir.stat()
@@ -274,6 +284,23 @@ def iter_candidate_skill_dirs() -> list[Path]:
         seen.add(key)
         dirs.append(skill_dir)
     return sorted(dirs, key=rel)
+
+def canonical_source_path_for_row(source_dir: Path, scope: str, skill_set: str | None) -> str:
+    """
+    Return a repo-relative canonical source path for manifest provenance.
+
+    System bridge skills are maintained outside the Skills/** and Plugins/**
+    canonical trees, but runtime needs a stable canonical-path form for manifest
+    validation and handle resolution.
+    """
+    if (
+        scope == "system"
+        and skill_set == "agent-ops"
+        and source_dir.name in SYSTEM_BRIDGE_SKILL_NAMES
+        and source_dir.parent.name == ".system"
+    ):
+        return f"skills-system/{source_dir.name}/SKILL.md"
+    return rel(source_dir / "SKILL.md")
 
 
 def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
@@ -292,13 +319,19 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
             unmapped.append({"id": source_dir.name, "source_path": rel(skill_md), "reason": skill_set_status})
             continue
         level, _level_status = infer_level(source_dir.name, frontmatter, description)
+        scope = classify_skill_scope(source_dir)
+        source_path = canonical_source_path_for_row(
+            source_dir=source_dir,
+            scope=scope,
+            skill_set=skill_set,
+        )
         metadata_status = "frontmatter" if frontmatter else "inferred"
         modules.append(
             SkillModule(
                 id=source_dir.name,
                 skill_set=skill_set,
                 level=level,
-                source_path=rel(skill_md),
+                source_path=source_path,
                 triggers=triggers_for(source_dir.name, frontmatter, description),
                 exclusions=exclusions_for(frontmatter),
                 risk=risk_for(frontmatter),
