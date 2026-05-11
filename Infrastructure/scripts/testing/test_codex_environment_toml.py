@@ -56,6 +56,17 @@ _EXPECTED_CANDIDATES = [
     "/sbin",
 ]
 
+# Prepend loop order must be reverse-priority so final PATH keeps expected priority.
+_PREPEND_LOOP_CANDIDATES = [
+    "/sbin",
+    "/usr/sbin",
+    "/usr/local/bin",
+    "/opt/homebrew/sbin",
+    "/opt/homebrew/bin",
+    "$HOME/.local/bin",
+    "$HOME/.local/share/mise/shims",
+]
+
 
 class TestEnvironmentTomlContract(unittest.TestCase):
     def test_environment_toml_parses(self) -> None:
@@ -98,6 +109,26 @@ class TestEnvironmentTomlContract(unittest.TestCase):
         for candidate in _EXPECTED_CANDIDATES:
             with self.subTest(candidate=candidate):
                 self.assertIn(candidate, tools_command)
+
+    def test_setup_path_loop_uses_reverse_order_for_prepend(self) -> None:
+        """setup loop must iterate in reverse-priority order when prepending PATH candidates."""
+        env = _load_environment()
+        setup_command = env["setup"]["script"]
+        indices = [setup_command.find(candidate) for candidate in _PREPEND_LOOP_CANDIDATES]
+        for candidate, idx in zip(_PREPEND_LOOP_CANDIDATES, indices):
+            with self.subTest(candidate=candidate):
+                self.assertGreater(idx, -1, f"Missing candidate {candidate} in setup loop")
+        self.assertEqual(indices, sorted(indices), "setup loop candidates must appear in reverse-priority order")
+
+    def test_tools_path_loop_uses_reverse_order_for_prepend(self) -> None:
+        """Tools loop must iterate in reverse-priority order when prepending PATH candidates."""
+        env = _load_environment()
+        tools_command = _action_command(env, "Tools")
+        indices = [tools_command.find(candidate) for candidate in _PREPEND_LOOP_CANDIDATES]
+        for candidate, idx in zip(_PREPEND_LOOP_CANDIDATES, indices):
+            with self.subTest(candidate=candidate):
+                self.assertGreater(idx, -1, f"Missing candidate {candidate} in Tools loop")
+        self.assertEqual(indices, sorted(indices), "Tools loop candidates must appear in reverse-priority order")
 
     def test_setup_path_loop_skips_already_present_candidates(self) -> None:
         """The PATH loop must guard against adding duplicates with ':$PATH:' pattern."""

@@ -6,7 +6,7 @@ name = "harness local environment"
 script = '''
 set -euo pipefail
 
-for candidate in "$HOME/.local/share/mise/shims" "$HOME/.local/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "/usr/local/bin" "/usr/sbin" "/sbin"; do
+for candidate in "/sbin" "/usr/sbin" "/usr/local/bin" "/opt/homebrew/sbin" "/opt/homebrew/bin" "$HOME/.local/bin" "$HOME/.local/share/mise/shims"; do
   if [[ -d "$candidate" && ":$PATH:" != *":$candidate:"* ]]; then
     PATH="$candidate:$PATH"
   fi
@@ -31,7 +31,7 @@ icon = "tool"
 command = '''
 set -euo pipefail
 
-for candidate in "$HOME/.local/share/mise/shims" "$HOME/.local/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "/usr/local/bin" "/usr/sbin" "/sbin"; do
+for candidate in "/sbin" "/usr/sbin" "/usr/local/bin" "/opt/homebrew/sbin" "/opt/homebrew/bin" "$HOME/.local/bin" "$HOME/.local/share/mise/shims"; do
   if [[ -d "$candidate" && ":$PATH:" != *":$candidate:"* ]]; then
     PATH="$candidate:$PATH"
   fi
