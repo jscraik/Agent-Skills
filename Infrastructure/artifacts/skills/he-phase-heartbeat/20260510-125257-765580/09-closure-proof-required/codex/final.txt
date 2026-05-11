@@ -1,0 +1,6 @@
+Understood. I’ll treat the phase as still open until one of these is true:
+
+1. The eval proof artifact exists and I’ve verified its path.
+2. There is an explicit blocker, with the exact failing command, error/output, and why I can’t proceed further in this environment.
+
+I won’t mark closeout or completion based on intent, partial validation, or “should be fine” evidence.

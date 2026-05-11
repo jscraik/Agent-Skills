@@ -1,0 +1,27 @@
+Use this path shape:
+
+```text
+.harness/linear/plans/2026-05-10-<LINEAR-KEY>-<short-plan-slug>.md
+```
+
+For example, if the Linear issue is `JSC-289` and the update is about smoke eval tightening:
+
+```text
+.harness/linear/plans/2026-05-10-JSC-289-smoke-eval-tightening.md
+```
+
+Why that one:
+
+- It keeps the artifact in `.harness`, which matches this repo’s durable harness/Project Brain surface.
+- `linear/plans/` makes the live Linear linkage explicit instead of burying it in generic docs.
+- The date prefix gives chronological ordering.
+- The Linear key in the filename makes the artifact discoverable from both repo search and issue-driven workflows.
+- The slug should describe the plan update, not the whole project.
+
+I could not verify the live tree because the shell runner is currently failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So this is the path I’d choose from the instructions and repo conventions visible in the prompt, not from a fresh `rg` pass over `.harness`.

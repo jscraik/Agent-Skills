@@ -1,0 +1,6 @@
+I’m blocked on direct inspection because the current sandbox won’t let me read the workspace, so I can’t yet reproduce the sync-status issue from evidence.
+
+If you send me one of these, I can continue immediately:
+1. The PR number or link to the reviewer note.
+2. The exact file/path that shows the sync status.
+3. The note text or a pasted snippet of the suspicious status output.

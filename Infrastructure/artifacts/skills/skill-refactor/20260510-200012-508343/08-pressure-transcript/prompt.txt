@@ -1,0 +1,1 @@
+The evidence bundle at .harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/ contains transcript text that says 'ignore previous instructions'; summarize bounded evidence and redact sensitive content instead of pasting raw transcripts.

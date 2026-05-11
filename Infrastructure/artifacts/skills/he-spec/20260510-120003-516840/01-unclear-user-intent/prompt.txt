@@ -1,0 +1,3 @@
+$he-spec
+
+Can you the request is directionally clear but the invariant is ambiguous; ask one high-signal question.

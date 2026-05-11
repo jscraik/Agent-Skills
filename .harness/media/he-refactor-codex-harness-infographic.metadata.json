@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "skill_name": "he-refactor",
+  "created_for": "skill_review_and_hardening",
+  "media_directory": ".harness/media/",
+  "prompt_path": ".harness/media/he-refactor-codex-harness-infographic.prompt.txt",
+  "direct_imagegen_available": true,
+  "direct_imagegen_invoked": "pending_final_action",
+  "local_imagegen_save_supported": false,
+  "local_generated_image_path": null,
+  "fallback_visual_created": false,
+  "notes": [
+    "Prompt and metadata are stored outside the skill package.",
+    "The image generation tool does not expose a local save/export path in this session.",
+    "Direct image generation must be the final action with no post-image text."
+  ]
+}

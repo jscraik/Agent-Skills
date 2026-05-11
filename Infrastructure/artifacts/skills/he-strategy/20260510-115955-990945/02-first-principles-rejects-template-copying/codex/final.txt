@@ -1,0 +1,19 @@
+I’m blocked by the current sandbox before I can even read the repo files or resolve `$he-strategy`.
+
+Every attempted repo command failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Commands attempted from `/Users/jamiecraik/dev/agent-skills`:
+
+```bash
+./bin/ask skills resolve he-strategy --json
+git status --short
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+```
+
+Because the active environment is `read-only` with approval policy `never`, I can’t request broader permissions or make edits. I also can’t safely infer the HE strategy change without reading the canonical skill contract and ownership docs, especially since your repo instructions explicitly require reading `UBIQUITOUS_LANGUAGE.md` before changing skills or agent-facing docs.
+
+So: I did not modify anything. To continue, I’d need a session where repo reads and writes are allowed, or at minimum a working filesystem sandbox for this repo.

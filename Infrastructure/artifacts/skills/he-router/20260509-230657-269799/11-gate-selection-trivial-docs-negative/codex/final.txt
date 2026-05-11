@@ -1,0 +1,21 @@
+I can route it that way, but I’m blocked from doing the live repo work in this session: even read-only shell commands like `pwd`, `sed`, and `rg` fail immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I can’t inspect the Harness skill/router text, identify the exact wording reference, or make a verified cleanup from the live tree.
+
+The intended route is:
+
+1. Use only the `harness-engineering` routing skill.
+2. Avoid loading domain, strategy, refactor, Linear, security, and eval gates.
+3. Treat it as a trivial wording-only cleanup.
+4. Read `UBIQUITOUS_LANGUAGE.md` first if the edit touches skills, policy, runtime projections, or agent-facing docs, per the repo AGENTS.md.
+5. Edit the canonical source only, not a runtime projection.
+6. Validate with the repo wrapper, likely:
+   ```bash
+   ./bin/ask repo closeout --changed --json --robot
+   ```
+
+I wasn’t able to run those checks or edit files because the sandbox is rejecting all shell access before the command executes.

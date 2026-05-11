@@ -1,0 +1,36 @@
+I’m blocked by the session sandbox before I can read or edit the repo.
+
+What happened:
+- Current cwd: `/Users/jamiecraik/dev/agent-skills`
+- The environment says filesystem sandboxing is `read-only`, but every attempted read command failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Commands that failed included:
+```bash
+pwd && rg -n "closure proof|closure-proof|release confidence|scope confidence|lifecycle release|release eval|static checks|static check" -S .
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/README.md
+```
+
+Because approval policy is `never`, I can’t request broader filesystem permissions, and I also can’t safely make or validate the change without reading the canonical repo guidance first.
+
+The intended change, based on your request, is clear though: wherever closure proof generation currently refuses or withholds proof when lifecycle release evals time out, it should still emit closure proof if static checks pass, but the confidence language must be scoped to the checked surface. In other words, it should say something like “static/scope confidence” or “confidence in the validated scope” and explicitly note that release confidence is unavailable because lifecycle release evals timed out. It should not claim “release confidence” in that timeout path.
+
+A good validation target once filesystem access works would be:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+And likely a focused test around the closeout/closure-proof path for:
+- static checks pass
+- lifecycle release evals timeout
+- closure proof is produced
+- wording says scoped confidence, not release confidence
+- timeout is included as residual risk/evidence limitation
+
+I can carry this through once the session has a working read/write filesystem sandbox.

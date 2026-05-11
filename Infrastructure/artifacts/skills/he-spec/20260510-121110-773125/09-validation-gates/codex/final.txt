@@ -1,0 +1,105 @@
+Yes. Before planning implementation, I’d define the validation gates and rollback conditions as the first control layer, so the implementation plan is constrained by what “safe to proceed” and “safe to undo” mean.
+
+A good shape for this repo would be:
+
+**Validation Gates**
+
+1. **Scope Gate**
+   - Confirm the exact canonical source files that should change.
+   - Confirm no runtime projection files are being edited directly.
+   - Confirm relevant `AGENTS.md` and `UBIQUITOUS_LANGUAGE.md` guidance has been read before touching skills, sync policy, runtime projections, or agent-facing docs.
+
+2. **Repo Health Gate**
+   - Run:
+
+   ```bash
+   ./bin/ask repo doctor --json --robot
+   ```
+
+   Pass condition:
+   - Command exits successfully.
+   - No blocking repo health issues are reported.
+   - Any warnings are either unrelated or explicitly accepted before implementation continues.
+
+3. **Skill/Artifact Explanation Gate**
+   - For any skill or agent-facing artifact being changed, run the appropriate explanation command, for example:
+
+   ```bash
+   ./bin/ask skills explain <handle> --json --robot
+   ```
+
+   Pass condition:
+   - The target resolves to the expected canonical source.
+   - Ownership boundaries are clear.
+   - The intended change belongs in that source, not in a generated/runtime projection.
+
+4. **Focused Validation Gate**
+   - After edits, run the narrowest proof/check command relevant to the changed artifact, usually:
+
+   ```bash
+   ./bin/ask skills prove <handle> --json --robot
+   ```
+
+   Pass condition:
+   - The changed skill or artifact validates successfully.
+   - No regressions appear in required schema, line-budget, projection, or discoverability checks.
+
+5. **Repo Closeout Gate**
+   - Run:
+
+   ```bash
+   ./bin/ask repo closeout --changed --json --robot
+   ```
+
+   Pass condition:
+   - Changed files are expected.
+   - No ownership violations.
+   - No stale generated files or unsynced projections.
+   - No unrelated changes introduced by the implementation.
+
+6. **Diff Review Gate**
+   - Review the final diff manually.
+
+   Pass condition:
+   - The diff is limited to the requested scope.
+   - It preserves existing conventions and terminology.
+   - It does not remove user work or unrelated content.
+   - Any generated changes are intentional and traceable to the canonical source.
+
+**Rollback Conditions**
+
+Rollback or stop-and-reassess if any of these occur:
+
+1. **Ownership Boundary Violation**
+   - A planned edit targets a runtime projection or generated file when a canonical source should be edited instead.
+   - Action: discard only my attempted change to that file and move the edit to the correct source.
+
+2. **Repo Doctor Fails Before Work**
+   - `./bin/ask repo doctor --json --robot` reports a blocking issue before implementation begins.
+   - Action: stop implementation planning and report the pre-existing blocker, unless the requested task is specifically to fix that blocker.
+
+3. **Unexpected Dirty Worktree Conflict**
+   - Existing user changes overlap with the intended edit in a way that makes intent ambiguous.
+   - Action: pause and ask before modifying those files. Do not revert user changes.
+
+4. **Validation Regression**
+   - `skills prove`, repo validation, or closeout fails because of the implementation.
+   - Action: first attempt a focused fix. If the fix expands scope materially, rollback my changes for that implementation slice and report the blocker.
+
+5. **Projection/Sync Drift**
+   - Canonical edits produce unexpected runtime projection changes, missing sync output, or stale generated artifacts.
+   - Action: run the documented sync/prove path if available. If drift remains unexplained, stop and report exact files and command output.
+
+6. **Scope Creep Detected**
+   - The implementation requires changing unrelated skills, policy, broad docs, or infrastructure beyond the agreed goal.
+   - Action: stop, summarize the discovered dependency, and ask whether to expand scope.
+
+7. **Semantic Contract Break**
+   - The change alters skill behavior, command behavior, schema shape, handles, or discoverability in a way not explicitly intended.
+   - Action: rollback that part of the change or split it into a separately reviewed decision.
+
+8. **Closeout Shows Unexpected Files**
+   - `repo closeout --changed` reports files that were not part of the implementation plan.
+   - Action: inspect each file. Keep only intentional changes I made; leave unrelated user changes untouched.
+
+In practice, I’d write these into the implementation plan as a first section before the task breakdown, with each gate tied to an exact command and pass/fail condition. That gives us a clean “no guessing” path: scope first, implement second, prove third, close out last.

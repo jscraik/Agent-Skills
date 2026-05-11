@@ -9,6 +9,9 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
 
 ## Root Essentials
 
+- On a fresh checkout, run `bash scripts/bootstrap-ask.sh --json` before
+  requiring `./bin/ask`; if the wrapper is unavailable, verify the fallback with
+  `python3 bin/ask repo status --json`.
 - Use `./bin/ask` for repo operations; it forwards to
   `Infrastructure/bin/ask`.
 - The repository root has no package manager install step. Use repo wrappers at

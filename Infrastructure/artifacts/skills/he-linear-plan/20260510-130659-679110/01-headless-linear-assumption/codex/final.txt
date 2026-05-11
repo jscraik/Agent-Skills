@@ -1,0 +1,17 @@
+Handled headlessly from the self-contained prompt only. I did not inspect files and did not create, mutate, or prepare to create any Linear objects.
+
+`<<<INTERACTIVE_STEERING_START>>>`
+
+Autonomous-mode assumption preserved: no Linear issues, projects, cycles, comments, labels, relations, or other Linear objects are created without explicit confirmation.
+
+For this case, the correct plan is confirmation-gated:
+
+1. Treat the requested Linear work as planning-only.
+2. Produce the proposed Linear object shape or action plan in text.
+3. Stop before any Linear write action.
+4. Ask for explicit confirmation before creating or updating anything in Linear.
+5. If confirmation is absent, continue only with non-mutating analysis or drafting.
+
+`<<<INTERACTIVE_STEERING_END>>>`
+
+Result: no Linear-side effects occurred, and the interactive steering markers are included literally.

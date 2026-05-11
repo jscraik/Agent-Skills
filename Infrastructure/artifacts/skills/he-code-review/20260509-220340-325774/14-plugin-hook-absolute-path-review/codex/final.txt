@@ -1,0 +1,71 @@
+**Findings**
+
+**High: `hooks/hooks.json` hard-codes Jamie’s local checkout path, so installed plugin hooks will fail outside that machine**
+Affected path: `hooks/hooks.json` entry calling:
+
+```text
+/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/scripts/guard.py
+```
+
+Because `guard.py` ships with the plugin, the hook should resolve it from the installed plugin package, not from this repository checkout. As written, the hook only works when all of these are true:
+
+```text
+user = jamiecraik
+repo path = /Users/jamiecraik/dev/agent-skills
+plugin source checkout exists locally
+plugin runtime uses that checkout instead of the packaged plugin copy
+```
+
+That defeats the plugin boundary. A user who installs or syncs the plugin into another `CODEX_HOME`, another machine, CI, a temp eval home, or a projected runtime cache will have `hooks/hooks.json` pointing at a nonexistent path. The symptom will likely be hook execution failure before `guard.py` can run.
+
+The fix should make the hook command plugin-relative or runtime-relative, depending on the hook system’s supported schema. In spirit, the hook should reference the packaged script under the plugin itself, for example something equivalent to:
+
+```json
+{
+  "command": "python3",
+  "args": ["${PLUGIN_DIR}/scripts/guard.py"]
+}
+```
+
+or, if this hook format supports direct relative paths from the hook file/plugin root:
+
+```json
+{
+  "command": "scripts/guard.py"
+}
+```
+
+The exact syntax should follow the local hook contract, but the important bit is: no absolute `/Users/.../agent-skills/Plugins/...` path in a shipped plugin manifest.
+
+**Medium: the diff risks coupling canonical repo layout to runtime projections**
+The repo instructions say to edit canonical sources, not runtime projections, and path ownership matters here. If `hooks/hooks.json` is a runtime projection or installed artifact, the durable fix belongs in the canonical plugin source that generates or owns that hook file. Otherwise the next sync/projection step may either overwrite the fix or continue emitting the absolute path.
+
+I’d check the ownership docs before patching:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+and specifically confirm whether `hooks/hooks.json` is canonical or generated. If generated, fix the source template/config that produces the hook entry.
+
+**Open Questions**
+
+I couldn’t inspect the live diff because this session’s shell sandbox rejected even read-only commands with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So this review is based on the behavior you described rather than line-by-line repo evidence. The core finding is still solid: a shipped plugin hook must not call a script through Jamie’s absolute local checkout path when the script is part of the plugin package.
+
+**Recommended Fix Shape**
+
+Use the plugin’s own packaged location as the source of truth. The best final form depends on the hook runner’s variable support, but the hierarchy I’d prefer is:
+
+1. Use a documented plugin-root variable if available, such as `${PLUGIN_DIR}`, `${HOOK_DIR}`, or equivalent.
+2. If hooks execute relative to the plugin root, use `scripts/guard.py`.
+3. If hooks execute relative to `hooks/hooks.json`, use `../scripts/guard.py` or the documented relative path.
+4. Avoid resolving through `/Users/jamiecraik/dev/agent-skills/...` entirely.
+
+After the change, validation should include a negative check from outside Jamie’s checkout, ideally by installing or projecting the plugin into a temp/runtime home and verifying the hook command resolves the packaged `guard.py` there.

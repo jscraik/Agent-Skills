@@ -1,0 +1,41 @@
+Classification: **Planned-proof gap before closure**
+
+The implementation’s closure evidence is retrospective: it claims proof after the work was done, but the source plan did not make that proof a required precondition for doing or closing the work. That is a real planning gap because the proof standard was introduced after the fact instead of being part of the planned acceptance criteria.
+
+I would classify it as:
+
+```text
+gap_type: planned-proof gap
+phase: before closure
+severity: closure-blocking unless explicitly waived
+status: unresolved until the plan is amended or closure evidence is re-scoped
+```
+
+The important distinction is:
+
+```text
+Implementation proof exists or is claimed after the fact
+```
+
+does not satisfy:
+
+```text
+The source plan required this proof before implementation or closure
+```
+
+So before closure, the record should say something like:
+
+```markdown
+## Planned-Proof Gap
+
+The implementation claims proof after the fact, but the source plan did not require that proof as an acceptance condition before work began or before closure. This creates a planned-proof gap: closure depends on evidence that was not specified by the plan.
+
+Classification: planned-proof gap before closure.
+
+Required resolution before closure:
+- Amend the source plan to include the proof requirement and explain why it is being added late, or
+- Mark the gap as explicitly waived with rationale, owner, and residual risk, or
+- Re-open/re-scope the work so the proof requirement is planned and validated before final closure.
+```
+
+I tried to inspect the local repo guidance first, but the read-only sandbox rejected shell access with `sandbox_apply: Operation not permitted`, so this classification is based on the AGENTS.md instructions you provided and the wording of the request.

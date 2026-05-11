@@ -144,7 +144,24 @@ Load references by trigger instead of by habit:
 - `skills/he-linear-plan/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
 
+`he-phase-heartbeat`:
+
+- `skills/he-phase-heartbeat/references/phase-gate-contract.md`
+- `skills/he-phase-heartbeat/references/contract.yaml`
+
 ## Historical Context Policy
+
+## Preserved Entry Point Lines
+
+Preserved entrypoint lines from earlier compression rounds are intentionally
+stored in archival fixtures and stage-specific preservation references, not in
+this active router index.
+
+Authoritative preservation locations:
+
+- `fixtures/budget-archive/**`
+- `fixtures/preserved-context/**`
+- stage `references/source-prompt-preservation.md` files
 
 Historical compact-entrypoint lines from prior compression passes belong in:
 
@@ -172,43 +189,3 @@ entrypoint paragraphs. Their audit value is preserved by active stage diffs,
 the relevant `skills/**/references/source-prompt-preservation.md` files, and
 fixtures. Keep this index as a router only; do not paste retired procedure text
 back into this file.
-
-The 2026-05-10 Linear and recurrence routing pass tightened several stage
-frontmatter descriptions and moved mutation/recurrence details into the active
-stage bodies plus eval fixtures. The following retired trigger and boundary
-lines are preserved only as audit context for progressive-disclosure validation:
-
-```text
-description: "Analyze HE options and choose survivor routes. Use when direction is unsettled before spec or plan work."
-description: "Review HE diffs for closure risk. Use when PR, commit, or readiness evidence is needed."
-Use when handling PRs, branches, diffs, commits, readiness, and disputed review feedback.
-Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, reproduction_status, security_review, real_behavior_proof, work_candidate, repeated_failure, blackboard_delta, next handoff, repeated context-feedback candidates. If writing a durable review artifact, use `.harness/review/**.md` with Artifact Identity frontmatter.
-Return schema_version when structured. Stage map, active owner, blockers, next action, blackboard_delta, retained references, `.harness/solutions/**` capture status, and Project Brain status.
-description: "Debug validated HE defects narrowly. Use when evidence proves a bug and scope must stay bounded."
-description: "Create bounded HE follow-up checkpoints. Use when work must resume later with stop rules."
-description: "Review and improve HE skills from evidence. Use when eval, review, or usage findings require changes."
-description: "Convert approved HE cognition into a small Linear execution plan. Use when strategy, refactor, plan, or source-prompt evidence needs scoped tracking."
-backlog noise or accidental Linear mutation.
-Do not use to create Linear objects immediately, generate strategy, write
-refactor programs, produce specs/plans, implement work, or validate closure.
-   or mutation authority cannot be proven.
-15. Include ready-to-create payloads without mutating Linear.
-mutate Linear, create projects, create labels, or expand the active issue set
-from this skill. Do not remove important context for budget trimming; move deep
-context to references.
-Generate ready-to-create Linear plans only. Do not create initiatives, projects,
-milestones, issues, dependencies, labels, or status updates without explicit
-post-plan approval.
-description: "Plan approved HE phase heartbeats. Use when recurring phase execution needs gates and stop conditions."
-description: "Create traceable HE execution plans. Use when approved intent needs implementation units and validation gates."
-Use when after approved spec/issue; do non-mutating inspection before planning.
-description: "Analyze and route HE lifecycle requests. Use when stage, artifact path, or specialist route is uncertain."
-description: "Create evidence-backed HE specs. Use when approved intent needs acceptance criteria before implementation."
-Use when requirements are needed before plan/work; Explore first and ask second.
-4. Resolve or block the Linear tracker; run the Linear Delta Capture Gate for existing tracked plans before admitting changed Linear work into scope.
-description: "Build approved HE plan slices. Use when a bounded plan authorizes code changes and validation."
-Also include selected stage `he-linear-plan`, `subagent_policy`, `roles_used`,
-# Skill: HE Phase Heartbeat
-new abstraction. Do not remove important context for budget trimming; move
-Strategy artifacts are cognition compression, not ceremony. Turn verified repo
-```

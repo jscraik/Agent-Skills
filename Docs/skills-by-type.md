@@ -13,14 +13,14 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `library_api_reference`: 2
 - `product_verification`: 4
 - `data_fetch_analysis`: 3
-- `team_automation`: 30
+- `team_automation`: 34
 - `scaffolding_templates`: 17
-- `code_quality_review`: 21
+- `code_quality_review`: 22
 - `ci_cd_deployment`: 0
-- `runbook`: 12
+- `runbook`: 13
 - `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 93
+- `total_tagged`: 99
 
 ## Semantic Types
 
@@ -58,8 +58,12 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `he-fix-bugs` — `Plugins/harness-engineering/skills`
 - `he-heartbeat` — `Plugins/harness-engineering/skills`
 - `he-improve` — `Plugins/harness-engineering/skills`
+- `he-linear-plan` — `Plugins/harness-engineering/skills`
+- `he-phase-heartbeat` — `Plugins/harness-engineering/skills`
 - `he-plan` — `Plugins/harness-engineering/skills`
+- `he-refactor` — `Plugins/harness-engineering/skills`
 - `he-router` — `Plugins/harness-engineering/skills`
+- `he-strategy` — `Plugins/harness-engineering/skills`
 - `he-work` — `Plugins/harness-engineering/skills`
 - `interview-me` — `Skills/product-strategy`
 - `plugin-factory-router` — `Plugins/plugin-factory/skills`
@@ -108,6 +112,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `fixing-metadata` — `Skills/frontend-ui`
 - `go` — `Skills/agent-ops`
 - `he-code-review` — `Plugins/harness-engineering/skills`
+- `he-eval-report` — `Plugins/harness-engineering/skills`
 - `improve-codebase-architecture` — `Skills/agent-ops`
 - `javascript-pro` — `Skills/agent-ops`
 - `plugin-builder` — `Plugins/plugin-factory/skills/code_quality_review`
@@ -127,6 +132,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 
 - `bash-hygiene` — `Skills/agent-ops`
 - `biome-linting` — `Skills/agent-ops`
+- `codex-environment-creator` — `Skills/agent-ops`
 - `diagram-cli` — `Skills/agent-ops`
 - `keep-codex-fast` — `Skills/agent-ops`
 - `npm-release` — `Skills/agent-ops`

@@ -1,0 +1,3 @@
+I couldn’t safely read the workspace files because the shell is blocked by the sandbox, and the GitHub mirror lookup for this repo didn’t resolve. To update the README accurately, I need the current `README.md` and `package.json` contents, or at least the sections that list commands and scripts.
+
+If you paste those here, I’ll align every command example to the current scripts and return the exact doc patch.

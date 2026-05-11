@@ -1,0 +1,30 @@
+Yes. I’d recommend closure as **“Do not close as resolved; close as upstream prompt-comparison drift requiring source correction or explicit acceptance.”**
+
+Suggested closure language:
+
+```text
+Closure recommendation: keep open / upstream action required.
+
+The eval report dropped a high-severity drift signal that originated in the original prompt comparison. Because the signal was present upstream and then disappeared from the downstream eval report, this should not be treated as a clean pass or local remediation. Close only after one of the following is true:
+
+1. The original prompt comparison is corrected and the high-severity drift no longer reproduces.
+2. The eval report is updated to preserve and surface upstream high-severity drift signals.
+3. The drift is explicitly accepted as intentional, with rationale captured in the report.
+
+Until then, closure should be classified as unresolved upstream drift, not fixed, waived by omission, or non-reproducible.
+```
+
+If this is going into a report, I’d make the status sharper:
+
+```text
+Status: Blocked from closure
+
+Reason: A high-severity drift finding from the original prompt comparison was omitted by the eval report. Dropping the signal changes the apparent risk posture without evidence that the underlying drift was resolved.
+
+Required evidence for closure:
+- Re-run or artifact showing the original prompt comparison no longer emits the high-severity drift signal, or
+- Report-generation change showing upstream high-severity drift is propagated into the eval report, or
+- Explicit documented waiver accepting the drift with owner, rationale, and date.
+```
+
+The key distinction is that this is **not evidence of remediation**. It is evidence of **reporting drift or lossy propagation**. For closure, I’d require either repaired upstream comparison, repaired report propagation, or an explicit waiver.

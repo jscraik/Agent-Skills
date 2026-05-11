@@ -1,0 +1,43 @@
+I tried to invoke `$he-plan` exactly as its handle requires:
+
+```bash
+./bin/ask skills resolve he-plan --json
+```
+
+That failed before the repo tool could run:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+exit code 71
+```
+
+I then attempted the documented fallback, reading the canonical source directly at:
+
+```text
+Plugins/harness-engineering/skills/he-plan/SKILL.md
+```
+
+but the same sandbox startup failure blocked even read-only shell commands. Per the `$he-plan` handle contract, that means I have to fail closed rather than pretend I loaded the workflow.
+
+From the AGENTS.md instructions you provided, the best repo-grounded answer I can give is:
+
+The canonical validation/closeout route appears to be:
+
+```bash
+./bin/ask repo closeout --changed --json --robot
+```
+
+Use that after making changes, because AGENTS.md names it under common commands and points validation evidence to the repo wrapper. For health/orientation before work, the canonical starting check is:
+
+```bash
+./bin/ask repo doctor --json --robot
+```
+
+So my read is:
+
+```text
+preflight/orientation: ./bin/ask repo doctor --json --robot
+final validation evidence: ./bin/ask repo closeout --changed --json --robot
+```
+
+I could not verify this against `Docs/agents/04-validation.md` or the real `he-plan` workflow because all local shell reads are currently blocked by the sandbox failure above.

@@ -1,0 +1,23 @@
+I’m blocked before I can inspect or change the repo: every read command is failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened even for read-only commands like `pwd`, `rg`, and `sed`, so I can’t currently locate the first-principles observation flow, read the relevant skill instructions, or patch the canonical source.
+
+Given the request, the likely intended change is to update the logic that converts first-principles observations into Linear issues so it creates **one Linear issue per observation unconditionally**, including observations that are cognition-only and do not represent execution state. The acceptance shape I’d implement once the sandbox is usable:
+
+- Find the canonical source for first-principles observation processing, not runtime projections.
+- Remove or relax any filter like “execution state only”, “actionable only”, “requires implementation”, or “non-cognition-only”.
+- Ensure batching preserves one issue per observation rather than grouping cognition-only observations into a summary.
+- Add or update tests/fixtures covering mixed observations:
+  - execution-state observation creates an issue
+  - cognition-only observation creates an issue
+  - multiple observations create multiple separate Linear issues
+- Run the repo wrapper validation, likely:
+  - `./bin/ask repo doctor --json --robot`
+  - targeted skill/projection tests if the changed area exposes them
+  - `./bin/ask repo closeout --changed --json --robot`
+
+I haven’t made any file changes.

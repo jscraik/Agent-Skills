@@ -1,0 +1,48 @@
+I can compare them, but I’m blocked on the evidence right now: the shell sandbox is rejecting every local read command with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That includes simple read-only commands like `ls`, `rg`, and `sed`, so I can’t inspect the HE strategy artifact or your original long-form prompt method from the repo. I also checked local memory as a fallback, and it only surfaced adjacent Harness Engineering context, not the two source texts needed for an equivalence judgment.
+
+So the honest answer is: **I can’t yet say whether they are equivalent**, because that needs a side-by-side read of both artifacts.
+
+What I’d compare once I can see them:
+
+1. **Objective parity**
+   Whether the HE strategy artifact preserves the same end goal as the original long-form prompt, rather than merely summarizing its topic.
+
+2. **Operating model parity**
+   Whether it keeps the same method of work: investigation depth, sequencing, evidence expectations, stop conditions, review loops, validation, and closeout behavior.
+
+3. **Decision criteria parity**
+   Whether the same judgments are encoded: what counts as good, risky, incomplete, blocked, overbuilt, or ready.
+
+4. **Behavioral force**
+   Whether the artifact still makes an agent behave the same way in practice. This is usually where compressed strategy docs lose equivalence: they retain vocabulary but drop the pressure that caused the original prompt to steer behavior.
+
+5. **Failure-mode coverage**
+   Whether the original prompt’s warnings, anti-patterns, edge cases, and “don’t accidentally do this” instructions survived the transformation.
+
+6. **Actionability**
+   Whether the HE strategy artifact is executable by an agent without Jamie-context in its head. A good equivalent artifact should produce the same next actions from a cold start.
+
+My default suspicion, without the files, is that a “strategy artifact” is often **directionally equivalent but not operationally equivalent** to a long-form prompt. It may preserve the intent and concepts while losing some of the procedural weight, examples, sequencing, and guardrails that made the original method reliable. But that’s a hypothesis, not a finding.
+
+To make the actual call, I need either:
+
+```bash
+# paths to both files
+<path-to-HE-strategy-artifact>
+<path-to-original-long-form-prompt>
+```
+
+or the text of both pasted here. Once I have that, I can give you a crisp verdict like:
+
+- **Equivalent**
+- **Mostly equivalent, with specific losses**
+- **Not equivalent**
+- **Equivalent as strategy, not equivalent as an execution prompt**
+
+and I’ll ground it in exact sections from both texts.

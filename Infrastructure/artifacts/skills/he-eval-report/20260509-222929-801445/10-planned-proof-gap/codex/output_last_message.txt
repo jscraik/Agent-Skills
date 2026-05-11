@@ -1,0 +1,34 @@
+Classification: **planned-proof gap before closure**.
+
+The gap is that the implementation claims proof **after the fact**, but the source plan did not make that proof a required pre-work or pre-closure condition. That means the closure evidence is retrospective rather than plan-driven.
+
+I’d classify it as:
+
+```text
+Type: Closure / validation contract gap
+Severity: Material process gap
+Status: Must classify before closure
+```
+
+Why: if proof is only asserted after implementation, the plan did not give the agent or reviewer a clear obligation to produce that evidence before declaring the work complete. The issue is not necessarily that the implementation is wrong; it is that the plan failed to require the proof at the right checkpoint.
+
+Suggested closure note:
+
+```text
+Planned-proof gap: The implementation now claims proof, but the source plan did not require proof as a pre-work or pre-closure condition. Classify this as a validation contract gap before closure. Closure should either amend the plan to include the proof requirement and attach evidence, or explicitly record that the proof was added post hoc and was not part of the original acceptance criteria.
+```
+
+Recommended disposition:
+
+```text
+Do not close as cleanly planned.
+Close only with a recorded gap classification, or revise the plan/acceptance criteria first and then attach the proof evidence.
+```
+
+I tried to inspect the repo directly from `/Users/jamiecraik/dev/agent-skills`, but the command runner is currently failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So this classification is based on the AGENTS instructions and the scenario you described, rather than live file evidence.

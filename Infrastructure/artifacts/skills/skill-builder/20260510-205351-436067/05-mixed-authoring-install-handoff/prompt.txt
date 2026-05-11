@@ -1,0 +1,3 @@
+$skill-builder
+
+Separate skill authoring from install work and hand off the install step.

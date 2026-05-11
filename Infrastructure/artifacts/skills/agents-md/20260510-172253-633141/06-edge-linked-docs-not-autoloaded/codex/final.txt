@@ -1,0 +1,39 @@
+Short answer: **no, Codex will not reliably load `docs/release.md` automatically before release work if the root `AGENTS.md` bullet was deleted.**
+
+Based on the `AGENTS.md` instructions you provided, Codex automatically receives and follows:
+
+- The root `AGENTS.md` itself.
+- Any deeper `AGENTS.md` files that govern files being edited.
+- Direct system/developer/user instructions.
+- Documents explicitly referenced by applicable instructions when the task requires them.
+
+But a standalone file like `docs/release.md` is **not automatically loaded just because it exists**. Codex would only read it if something points to it or the task naturally causes Codex to discover it during repo exploration.
+
+The current root guidance you pasted references several required docs for specific kinds of work, for example:
+
+- `UBIQUITOUS_LANGUAGE.md` before changing skills, sync policy, runtime projections, or agent-facing docs.
+- `Docs/agents/14-path-ownership-boundaries.md`
+- `Docs/agents/16-agent-operating-contract.md`
+- `Docs/agents/02-tooling-policy.md`
+- `Docs/agents/04-validation.md`
+- `Docs/agents/13-workflow-and-safety-guidance.md`
+- `Docs/agents/17-skill-management.md`
+- `Docs/agents/18-browser-and-local-preview.md`
+- `Docs/agents/05-contradictions-and-cleanup.md`
+- `Docs/agents/README.md` when the full instruction map is needed.
+
+There is **no remaining automatic hook** in the supplied `AGENTS.md` that says release work must read `docs/release.md`. So moving required release rules there and deleting the root bullet likely made those rules discoverable only by chance, search, or human prompting.
+
+I wasn’t able to verify the live tree with shell commands because the execution sandbox is currently rejecting even read-only commands with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+But from the instruction-loading model and the `AGENTS.md` content in your message, the conclusion is clear enough: **the release rule should be restored in an applicable `AGENTS.md`**, ideally as a concise required-read bullet such as:
+
+```md
+- Before release work, read [Release Process](./docs/release.md).
+```
+
+If release work may happen from nested package paths, keep that instruction in the highest `AGENTS.md` whose scope covers those paths, or add scoped `AGENTS.md` files near the release-owned areas.

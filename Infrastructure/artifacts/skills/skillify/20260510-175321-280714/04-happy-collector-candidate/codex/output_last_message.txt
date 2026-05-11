@@ -1,0 +1,14 @@
+I’m blocked by the sandbox here: repo commands are failing before they can read the tree, so I can’t inspect the `session-collector` bundle directly.
+
+If you paste these three things, I can build the skill package from the bounded evidence in one pass:
+
+1. The `skillify-candidates.json` entry for the repeated validation workflow
+2. The relevant evidence snippets from the session-collector bundle
+3. Any existing nearby skill folder or naming convention you want this to follow
+
+Once I have that, I can produce:
+- the skill’s `SKILL.md`
+- any supporting files the bundle implies
+- a concise rationale for the bounded evidence and scope
+
+If you want, paste just the candidate entry first and I’ll start structuring the skill from that.

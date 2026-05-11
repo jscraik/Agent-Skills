@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-spec" tests="1" failures="1" errors="0" timestamp="2026-05-10T12:06:58Z" id="20260510-130658-712347">
+  <testcase name="unclear-user-intent" classname="he-spec" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/
+    </failure>
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260510-130658-712347/01-unclear-user-intent
+    </system-out>
+  </testcase>
+</testsuite>

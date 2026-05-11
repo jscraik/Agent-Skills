@@ -1,0 +1,25 @@
+I tried to invoke `$he-work` exactly as requested:
+
+```bash
+./bin/ask skills resolve he-work --json
+```
+
+That failed before the repo wrapper could run:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I then tried the fallback from the handle, reading the canonical workflow file directly:
+
+```bash
+sed -n '1,220p' Plugins/harness-engineering/skills/he-work/SKILL.md
+```
+
+That hit the same sandbox failure, so I can’t load the HE Work contract in this environment right now.
+
+Given your instruction, the state I can safely preserve is:
+
+The plan is complete. Both `work` and `refactor` are valid next stages. I should ask before proceeding rather than choosing one automatically.
+
+Which stage do you want to proceed with: `work` or `refactor`?

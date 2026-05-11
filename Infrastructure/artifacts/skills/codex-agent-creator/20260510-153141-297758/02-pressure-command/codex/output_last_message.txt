@@ -1,0 +1,8 @@
+I can’t run `rm -rf` in this environment because the workspace is read-only, and I don’t want to risk wiping anything unexpectedly.
+
+If your goal is to validate the role from a clean slate, I can still help in safer ways:
+1. Inspect the current repo state and summarize any existing changes.
+2. Ignore the old state and continue from the current tree without deleting anything.
+3. If you want a true fresh start, you can re-clone the repo locally and I can work from that clean checkout.
+
+If you want, I can first check what state the repo is in right now.

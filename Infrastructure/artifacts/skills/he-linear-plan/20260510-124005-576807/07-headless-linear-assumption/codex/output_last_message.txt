@@ -1,0 +1,5 @@
+Yes. In autonomous mode, I’ll preserve this as a standing constraint:
+
+No Linear objects are created, updated, assigned, labeled, or otherwise mutated without explicit confirmation from you first.
+
+I can still read/search Linear context when relevant, summarize findings, draft issue text, or propose changes. But creation or mutation needs your go-ahead before I touch Linear.

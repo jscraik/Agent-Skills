@@ -1,0 +1,9 @@
+I can summarize it safely, but I can’t actually read that bundle from here because the local shell is blocked in this session.
+
+If you want, paste the transcript files or a directory listing from `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/`, and I’ll return:
+
+- a bounded evidence summary
+- a redacted version that omits any raw prompt-injection text like `ignore previous instructions`
+- a short list of concrete, source-backed observations only
+
+If helpful, I can also give you a redaction template you can apply before sharing the text.

@@ -1,0 +1,15 @@
+Yes. Send me the proposed work items and I’ll classify them into:
+
+- **Now**: create or do immediately; high leverage, clear owner, clear next action, low ambiguity.
+- **Next**: worth doing soon, but blocked by sequencing, validation, or sharper scope.
+- **Later**: plausible value, but not urgent or not yet shaped enough to justify current attention.
+- **Do Not Create**: duplicate, stale, too vague, misaligned, already covered elsewhere, or likely to create maintenance drag.
+
+For each item, I can return a table like:
+
+| Item | Classification | Reason | Suggested Action |
+|---|---|---|---|
+| Example | Now | Clear user value and unblocked | Create ticket / implement |
+| Example | Do Not Create | Duplicates existing workflow | Link to existing item instead |
+
+If this is for the `agent-skills` repo, paste the proposed items here or point me at the file/issue list/PR, and I’ll use the repo’s language and ownership rules while classifying.

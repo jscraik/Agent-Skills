@@ -1,0 +1,18 @@
+I’m blocked on two fronts right now:
+
+1. Linear lookup was cancelled by the client before it returned anything: `user cancelled MCP tool call`.
+2. Local repo shell commands are failing before execution with: `sandbox-exec: sandbox_apply: Operation not permitted`.
+
+To produce real closeout proof, I need one Linear anchor from you: the **project name/slug** and **milestone name**, or even just a related issue key like `JSC-123`.
+
+Once you give me that, I’ll assemble a closeout proof pack with:
+
+- milestone identity: project, milestone, target date/status
+- all linked milestone issues and their current states
+- unresolved blockers or dependency issues, if any
+- recent project/status updates that confirm completion
+- validation evidence from the repo where available
+- explicit verdict: `SAFE TO CLOSE` or `DO NOT CLOSE YET`
+- exact remaining gaps if anything is unverified
+
+Right now I cannot honestly say it is safe to close without that Linear evidence.

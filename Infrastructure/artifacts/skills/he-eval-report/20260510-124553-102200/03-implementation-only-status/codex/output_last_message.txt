@@ -1,0 +1,14 @@
+I can mark it complete, but I’m blocked on two things in this session:
+
+1. I don’t have a callable Linear tool exposed, even though the Linear skill is listed.
+2. Shell access is currently failing under the read-only sandbox with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I also couldn’t infer the Linear issue from the branch name.
+
+I did not run validation, per your instruction.
+
+Send me the Linear issue ID or link and enable a Linear-capable tool/session, and I’ll mark it complete directly without running any validation.

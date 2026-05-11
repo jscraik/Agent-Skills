@@ -1,0 +1,140 @@
+Yes. I’d separate the work into three buckets, with a hard rule: **only Bucket 1 is allowed to shape the current implementation plan**.
+
+**Must Implement Now**
+
+This is work that is required for the current change to be correct, usable, and verifiable.
+
+Put something here only if it meets one of these tests:
+
+1. **Correctness blocker**
+   Without it, the feature or fix does not actually work.
+
+2. **Contract blocker**
+   Without it, an existing command, API, skill handle, runtime projection, or documented workflow breaks.
+
+3. **Validation blocker**
+   Without it, we cannot honestly prove the change with the repo’s expected checks.
+
+4. **Safety blocker**
+   Without it, the change risks corrupting canonical sources, editing generated projections, violating path ownership, or confusing agents.
+
+5. **User-facing coherence blocker**
+   Without it, users or agents will see contradictory instructions, broken examples, or unusable output.
+
+Examples:
+
+- Update the canonical skill source being changed.
+- Adjust tests or fixtures directly affected by the behavior.
+- Update docs that would otherwise become false because of the change.
+- Preserve path ownership boundaries.
+- Run the relevant validation commands and capture pass/fail evidence.
+- Remove or correct stale guidance that directly conflicts with the new behavior.
+
+A good “now” item usually sounds like:
+
+> Required because the current change is incomplete or misleading without it.
+
+**Follow-Up Work**
+
+This is valid work, but it should not be allowed to expand the current change unless Jamie explicitly chooses to pull it in.
+
+Put something here when it is useful but not required for correctness now.
+
+Examples:
+
+- Broader cleanup of nearby docs.
+- Renaming concepts for consistency across unrelated areas.
+- Improving examples that are still technically correct.
+- Refactoring helpers that are adjacent but not necessary.
+- Adding richer diagnostics beyond what this change needs.
+- Consolidating duplicate guidance that does not currently conflict.
+- Improving UX or command ergonomics after the core flow works.
+- Migrating more skills after proving the pattern on one.
+
+A good follow-up item usually sounds like:
+
+> Valuable, but the current change remains correct without it.
+
+**Explicitly Not In Scope**
+
+This is the anti-noise bucket. It protects the current task from becoming a magnet for every nearby improvement.
+
+Put something here when it is tempting, related, or visible, but would change the shape of the task.
+
+Examples:
+
+- Reworking the whole skill architecture.
+- Changing runtime projection strategy.
+- Editing generated files instead of canonical sources.
+- Normalizing every doc while touching one doc.
+- Replacing command surfaces unrelated to the current goal.
+- Fixing historical inconsistencies that do not affect this change.
+- Introducing new abstractions before the current need proves them.
+
+A good out-of-scope item usually sounds like:
+
+> Do not do this as part of the current change, even if noticed.
+
+**Practical Template**
+
+I’d use this in plans, issues, PR descriptions, or implementation notes:
+
+```md
+## Must Implement Now
+
+- [ ] <Required implementation change>
+  Reason: <What breaks or remains false without it>
+  Validation: <Exact command or evidence>
+
+- [ ] <Required doc/test/update>
+  Reason: <Why this is part of the current contract>
+  Validation: <Exact command or review point>
+
+## Follow-Up Work
+
+- <Useful later improvement>
+  Why later: <Current change is correct without it>
+
+- <Adjacent cleanup>
+  Why later: <Would broaden scope without changing correctness>
+
+## Not In Scope
+
+- <Tempting expansion>
+  Boundary: <Why it should not be included now>
+
+- <Unrelated cleanup>
+  Boundary: <Which future task or owner should handle it>
+```
+
+**Decision Rule**
+
+When deciding where something goes, ask:
+
+> “If we ship without this, is the current change wrong, broken, unsafe, or unprovable?”
+
+If yes, it is **Must Implement Now**.
+
+If no, ask:
+
+> “Would doing this now make the diff larger, touch more ownership areas, or require separate validation?”
+
+If yes, it is **Follow-Up Work** or **Not In Scope**.
+
+**Repo-Specific Framing**
+
+For this repo, I’d make the distinction especially strict around:
+
+- **Canonical sources vs runtime projections**
+  Anything required in canonical source is potentially “now.” Runtime projection edits are usually out of scope unless the repo’s workflow explicitly says otherwise.
+
+- **Agent-facing docs**
+  If agents would be misled by stale or contradictory instructions after the change, that doc fix is “now.” General prose cleanup is follow-up.
+
+- **Validation evidence**
+  The current change should end with exact pass/fail evidence from the relevant `./bin/ask ... --json --robot` commands. Extra validation breadth can be follow-up unless risk demands it.
+
+- **Skill changes**
+  If touching skills, the “now” scope should include only the skill behavior, docs, proof, and projections required by the intended goal. Broader skill garden maintenance should stay follow-up.
+
+I tried to inspect the repo live, but the current sandbox rejected even read-only shell commands with `sandbox_apply: Operation not permitted`, so I’m giving you the separation framework rather than pretending I verified specific files.

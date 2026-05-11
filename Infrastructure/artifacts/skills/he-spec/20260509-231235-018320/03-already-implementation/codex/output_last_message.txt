@@ -1,0 +1,9 @@
+I’m blocked before I can touch the repo: every shell command is failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That includes simple read-only commands like `pwd`, so I can’t inspect the worktree, verify existing changes, or apply a patch safely. The current session also has `sandbox_mode=read-only` and approval policy `never`, so I can’t request write access or escalate.
+
+I’m ready to apply the code patch directly once the environment allows file access. I’ll also need either the patch text itself or the target change you want implemented, since no actual patch was included in this turn.

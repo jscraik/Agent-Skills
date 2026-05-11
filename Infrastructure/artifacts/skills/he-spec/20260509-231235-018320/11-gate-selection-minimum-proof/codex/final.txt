@@ -1,0 +1,50 @@
+Absolutely. Here’s a drop-in acceptance criteria set for **gate selection** that focuses on standard work recording minimum proof and explicitly recording skipped heavy gates.
+
+**Acceptance Criteria**
+
+- Standard work runs produce a gate-selection record for each changed skill, doc, policy, projection, or workflow artifact under review.
+
+- The gate-selection record includes the minimum proof required to justify the selected validation path, including:
+  - changed paths or handles under consideration
+  - detected artifact type or ownership area
+  - selected gate tier or validation scope
+  - commands, checks, or proofs that were run
+  - pass, fail, skipped, or not-applicable status for each selected gate
+  - concise rationale for why the selected gates are sufficient
+
+- Standard work distinguishes between required baseline proof and optional heavy gates.
+
+- Heavy gates are skipped only when the gate-selection logic determines they are not required for the change scope.
+
+- Every skipped heavy gate is recorded explicitly with:
+  - gate name
+  - skip reason
+  - the condition or evidence that made the gate unnecessary
+  - any lighter proof that covers the relevant risk
+
+- Gate-selection output is machine-readable in `--json --robot` mode and suitable for closeout evidence.
+
+- Human-readable summaries preserve the same gate-selection facts without requiring the user to infer skipped gates from absence.
+
+- If a changed artifact falls into an ambiguous ownership area, standard work escalates to the safer applicable gate set or records the ambiguity and selected fallback.
+
+- If minimum proof cannot be collected, the gate-selection record marks the result as incomplete or failed rather than passing silently.
+
+- `repo closeout --changed --json --robot` includes or references the gate-selection evidence for the current changed set.
+
+- Existing validation behavior is preserved for changes that already require heavy gates.
+
+- Tests or fixtures cover at least:
+  - a standard low-risk change where minimum proof is recorded
+  - a change where a heavy gate is skipped with an explicit reason
+  - a change where a heavy gate is required and therefore not skipped
+  - an ambiguous change where fallback/escalation behavior is recorded
+  - robot-mode output shape for selected, skipped, passed, and failed gates
+
+- Documentation explains the difference between minimum proof, selected gates, and skipped heavy gates using repo terminology from `UBIQUITOUS_LANGUAGE.md`.
+
+- Acceptance evidence for this work includes the exact command output from the relevant repo wrapper, preferably:
+  - `./bin/ask repo doctor --json --robot`
+  - `./bin/ask repo closeout --changed --json --robot`
+
+I couldn’t patch this directly because the current shell sandbox is blocking even read-only repo commands with `sandbox_apply: Operation not permitted`, but the criteria above should be ready to paste into the relevant issue/spec or implementation plan.

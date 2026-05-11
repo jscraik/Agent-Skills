@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-code-review" tests="1" failures="0" errors="0" timestamp="2026-05-10T12:39:55Z" id="20260510-133955-154089">
+  <testcase name="repeated-failure-routes-linear-and-compound" classname="he-code-review" time="600.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260510-133955-154089/01-repeated-failure-routes-linear-and-compound
+    </system-out>
+  </testcase>
+</testsuite>

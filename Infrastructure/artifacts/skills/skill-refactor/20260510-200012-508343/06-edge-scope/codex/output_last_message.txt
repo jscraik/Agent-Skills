@@ -1,0 +1,26 @@
+I can do that, with one caveat: the local shell is currently blocked even for read-only inspection commands (`sandbox_apply: Operation not permitted`), so this is a **context-level inspection** using the skill inventory and paths provided in-session, not a live file-content audit.
+
+I’ll keep the category to **GitHub workflow skills**:
+
+| Rank | Skill | Confidence | Why |
+|---:|---|---:|---|
+| 1 | `github:github` | **High** | Clear broad routing skill for repo, PR, and issue orientation. The description is well-scoped as the general entry point before narrower workflows. |
+| 2 | `github:gh-address-comments` | **High** | Strongly bounded: inspect unresolved review threads/requested changes/inline comments, then implement selected fixes. It names GitHub app usage plus GraphQL via `gh` when needed, which is precise. |
+| 3 | `github:gh-fix-ci` | **High** | Clear trigger and workflow: debug or fix failing GitHub Actions checks, inspect PR metadata and logs before implementing fixes. Narrow enough to avoid accidental broad CI work. |
+| 4 | `github:yeet` | **Medium-High** | Useful and specific for publishing local changes: confirm scope, commit, push branch, open draft PR. Slightly lower confidence because publish workflows usually depend on repo state, auth, branch rules, and exact commit discipline. |
+| 5 | `coderabbit:code-review` | **Medium** | Adjacent to GitHub PR work, but broader and less specific from the inventory alone. It says it reviews code changes using CodeRabbit AI, which is actionable, but I’d want to inspect the skill body before ranking it above the GitHub-native workflows. |
+
+**Category Confidence: High**
+
+The GitHub category looks coherent: there is a sensible progression from general triage (`github:github`) to specialized workflows (`gh-address-comments`, `gh-fix-ci`, `yeet`). The scopes are mostly distinct, which reduces routing ambiguity.
+
+**Tight Findings**
+
+- `github:github` should be the default entry point for unclear GitHub requests.
+- `gh-address-comments` and `gh-fix-ci` are the strongest specialized skills because their triggers are concrete and operational.
+- `yeet` is powerful but higher-risk because it crosses into commit/push/PR creation, so it should require explicit user intent.
+- `coderabbit:code-review` belongs near this category operationally, but I’d keep it separate unless the user explicitly asks for CodeRabbit, PR review feedback, or AI review.
+
+**What I could not validate**
+
+I could not read the actual `SKILL.md` files or run repo commands due the sandbox failure, so I did not verify internal instructions, examples, scripts, or contradictions against `AGENTS.md`/`UBIQUITOUS_LANGUAGE.md`.

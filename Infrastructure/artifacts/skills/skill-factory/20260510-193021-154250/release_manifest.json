@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-10T18:30:21Z",
+  "skill": {
+    "name": "skill-factory",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "5ca96659da7127046af58f426ff705cf2b72867a",
+    "source_branch": "codex/jsc-299-he-trust-defect-repair"
+  },
+  "run": {
+    "run_id": "20260510-193021-154250",
+    "eval_mode": "smoke",
+    "runner_mode": "codex",
+    "tier2_mode": "warn",
+    "capture_jsonl": true,
+    "readiness_summary": {
+      "comparison_blocked": 0,
+      "comparison_incomplete": 0,
+      "downstream_ready": 0,
+      "starter_valid": 0,
+      "unknown": 4
+    },
+    "round_state_summary": {
+      "blocked": 0,
+      "decision_recorded": 0,
+      "evidence_captured": 0,
+      "prepared": 0,
+      "reviewed": 0,
+      "running": 0,
+      "unknown": 4
+    },
+    "neutral_baseline_approvals_used": [],
+    "reports_base": "Infrastructure/artifacts/skills/skill-factory/20260510-193021-154250"
+  },
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/skill-factory/20260510-193021-154250",
+    "summary": "Infrastructure/artifacts/skills/skill-factory/20260510-193021-154250/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/skill-factory/20260510-193021-154250/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/skill-factory/20260510-193021-154250/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/skill-factory/20260510-193021-154250/junit.xml"
+  }
+}

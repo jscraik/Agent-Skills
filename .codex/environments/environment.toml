@@ -6,9 +6,13 @@ name = "harness local environment"
 script = '''
 set -euo pipefail
 
-for candidate in "$HOME/.local/share/mise/shims" "$HOME/.local/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "/usr/local/bin" "/usr/sbin" "/sbin"; do
-  if [[ -d "$candidate" && ":$PATH:" != *":$candidate:"* ]]; then
-    PATH="$PATH:$candidate"
+for candidate in "/sbin" "/usr/sbin" "/usr/local/bin" "/opt/homebrew/sbin" "/opt/homebrew/bin" "$HOME/.local/bin" "$HOME/.local/share/mise/shims"; do
+  if [[ -d "$candidate" ]]; then
+    PATH=":${PATH:-}:"
+    PATH="${PATH//:$candidate:/:}"
+    PATH="${PATH#:}"
+    PATH="${PATH%:}"
+    PATH="$candidate${PATH:+:$PATH}"
   fi
 done
 export PATH
@@ -31,9 +35,13 @@ icon = "tool"
 command = '''
 set -euo pipefail
 
-for candidate in "$HOME/.local/share/mise/shims" "$HOME/.local/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "/usr/local/bin" "/usr/sbin" "/sbin"; do
-  if [[ -d "$candidate" && ":$PATH:" != *":$candidate:"* ]]; then
-    PATH="$candidate:$PATH"
+for candidate in "/sbin" "/usr/sbin" "/usr/local/bin" "/opt/homebrew/sbin" "/opt/homebrew/bin" "$HOME/.local/bin" "$HOME/.local/share/mise/shims"; do
+  if [[ -d "$candidate" ]]; then
+    PATH=":${PATH:-}:"
+    PATH="${PATH//:$candidate:/:}"
+    PATH="${PATH#:}"
+    PATH="${PATH%:}"
+    PATH="$candidate${PATH:+:$PATH}"
   fi
 done
 export PATH
@@ -160,6 +168,16 @@ set -euo pipefail
 
 command -v ralph >/dev/null 2>&1
 ralph --help
+'''
+
+[[actions]]
+name = "Pylint"
+icon = "debug"
+command = '''
+set -euo pipefail
+
+command -v pylint >/dev/null 2>&1
+pylint --version
 '''
 
 [[actions]]

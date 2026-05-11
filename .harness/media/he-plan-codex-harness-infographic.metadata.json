@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "created_for": "he-plan skill hardening review",
+  "created_at": "2026-05-10",
+  "skill_package": "Plugins/harness-engineering/skills/he-plan",
+  "prompt_file": ".harness/media/he-plan-codex-harness-infographic.prompt.txt",
+  "local_bitmap_persistence": "unsupported_by_active_imagegen_tool",
+  "notes": [
+    "Review-only media metadata is stored outside the skill package.",
+    "The active image-generation tool does not expose an output path parameter.",
+    "Do not claim a generated bitmap was saved under .harness/media unless a later tool copies or exports one there."
+  ]
+}

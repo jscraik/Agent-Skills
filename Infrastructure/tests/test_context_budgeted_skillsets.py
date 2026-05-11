@@ -53,6 +53,30 @@ class TestRootSkillsetProjection(ContextBudgetTempDirTestCase):
             all(root["body_words"] <= RUNTIME_BUDGET["max_root_body_words_each"] for root in report["roots"])
         )
 
+    def test_root_skill_generation_preserves_security_contract_sections(self) -> None:
+        report = generate_root_skill_sets.build_roots(self.temp_dir / "skills")
+
+        for root in report["roots"]:
+            with self.subTest(root=root["name"]):
+                content = root["content"]
+                self.assertIn("## Philosophy", content)
+                self.assertIn("## Validation", content)
+                self.assertIn("## Execution Boundaries", content)
+                self.assertIn("## Failure Mode", content)
+                self.assertIn("## Gotchas", content)
+
+    def test_root_skill_evals_use_typed_acceptance_checks(self) -> None:
+        report = generate_root_skill_sets.build_roots(self.temp_dir / "skills")
+
+        for root in report["roots"]:
+            evals = json.loads(root["evals"])
+            for case in evals["cases"]:
+                with self.subTest(root=root["name"], case=case["id"]):
+                    self.assertTrue(case["acceptance"])
+                    self.assertTrue(all(isinstance(check, dict) for check in case["acceptance"]))
+                    self.assertTrue(all(check.get("type") for check in case["acceptance"]))
+                    self.assertTrue(all(check.get("value") for check in case["acceptance"]))
+
     def test_manifest_generation_writes_provenance_rich_rows(self) -> None:
         report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
         writes = generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")

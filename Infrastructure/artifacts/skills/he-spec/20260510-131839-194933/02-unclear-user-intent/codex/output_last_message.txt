@@ -1,0 +1,7 @@
+<<INTERACTIVE_STEERING_REQUIRED>>
+
+One invariant question before I write the HE spec:
+
+Should the invariant be **“preserve the existing user-visible behavior exactly”** or **“preserve only the underlying contract while allowing UX/workflow changes”**?
+
+<<WAITING_FOR_STEERING>>

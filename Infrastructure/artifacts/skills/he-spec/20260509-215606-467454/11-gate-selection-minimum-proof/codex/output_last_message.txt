@@ -1,0 +1,125 @@
+I can draft the acceptance criteria, but I’m blocked from applying them directly in the repo right now: every local shell read is failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Given the current `read-only` sandbox plus `approval_policy=never`, I can’t inspect the canonical docs or edit files safely. Here’s a repo-ready acceptance criteria section you can drop into the relevant gate-selection/spec doc.
+
+**Acceptance Criteria: Gate Selection For Standard Work**
+
+For standard work, the gate-selection workflow must record minimum proof and explicitly document skipped heavy gates.
+
+1. Standard work classifies the gate path before execution begins.
+
+   Acceptance:
+   - Given a work item that does not touch high-risk areas, broad architecture, production data, security boundaries, external APIs, migrations, or release-critical behavior, the agent selects the standard gate path.
+   - Given a work item that does touch one or more heavy-gate triggers, the agent either selects the applicable heavy gate or records why the trigger does not apply.
+   - The selected gate path is visible in the work record before closeout.
+
+2. Standard work records minimum proof.
+
+   Acceptance:
+   - Every standard work record includes a `minimum_proof` entry or equivalent structured field.
+   - Minimum proof includes the exact commands, checks, inspections, or reasoning used to validate the change.
+   - Each proof item records a pass, fail, skipped, or not-run status.
+   - If no executable validation is available, the record states what was inspected instead and why that is sufficient for standard work.
+   - A standard work record cannot be closed with an empty proof section.
+
+3. Standard work records skipped heavy gates.
+
+   Acceptance:
+   - Every standard work record includes a `skipped_heavy_gates` entry or equivalent structured field.
+   - The record lists each heavy gate considered and skipped.
+   - Each skipped heavy gate includes a concise reason tied to scope, risk, ownership, or unchanged behavior.
+   - The record distinguishes between “not applicable” and “applicable but intentionally skipped.”
+   - Heavy gates are not silently omitted when the work type would normally prompt consideration.
+
+4. Heavy-gate triggers are explicit and reviewable.
+
+   Acceptance:
+   - The gate-selection criteria name the conditions that require heavy-gate consideration.
+   - At minimum, heavy-gate consideration is triggered by changes involving security, auth/authz, production data, migrations, payments, external API contracts, CI/release automation, runtime policy, agent-facing instructions, broad refactors, or cross-package behavior.
+   - The standard work record shows whether any trigger was present.
+   - If a trigger is present and the heavy gate is skipped, the reason must be specific enough for a reviewer to challenge.
+
+5. Closeout enforces gate-selection evidence.
+
+   Acceptance:
+   - Closeout fails, warns, or produces a non-green status when standard work lacks minimum proof.
+   - Closeout fails, warns, or produces a non-green status when skipped heavy gates are missing for standard work.
+   - Closeout output includes the selected gate path, minimum proof summary, and skipped heavy-gate summary.
+   - The closeout output is machine-readable in `--json --robot` mode.
+
+6. Standard work remains lightweight.
+
+   Acceptance:
+   - Standard work does not require running heavy gates when no heavy-gate trigger applies.
+   - The minimum proof requirement can be satisfied by focused validation proportional to the change.
+   - Documentation-only, wording-only, or narrowly scoped non-runtime changes can close with inspection-based proof when executable tests are not meaningful.
+   - The workflow avoids requiring broad test suites, security scans, migration checks, or architectural reviews unless triggered by the work scope.
+
+7. Gate-selection decisions are auditable after the fact.
+
+   Acceptance:
+   - A reviewer can reconstruct why the standard path was selected from the work record alone.
+   - A reviewer can see what validation was performed without reading the full transcript.
+   - A reviewer can see which heavy gates were considered and why they were skipped.
+   - The record uses stable vocabulary for gate names, statuses, and proof outcomes.
+
+8. Missing evidence produces actionable feedback.
+
+   Acceptance:
+   - When minimum proof is missing, the system tells the agent exactly what field or evidence is required.
+   - When skipped heavy gates are missing, the system tells the agent to either list skipped gates or select the applicable heavy gate.
+   - When a heavy-gate trigger is detected without a gate decision, the system names the trigger that needs resolution.
+   - Error or warning messages are suitable for agent consumption in robot mode.
+
+9. Existing workflows keep working.
+
+   Acceptance:
+   - Existing standard work records without the new fields either migrate cleanly or receive a clear compatibility warning.
+   - Existing heavy-gate workflows are not weakened by the standard work path.
+   - Existing closeout commands continue to run with `--json --robot`.
+   - The change does not require a package-manager install step at the repository root.
+
+A compact example shape, if the project wants structured output:
+
+```json
+{
+  "gate_selection": {
+    "path": "standard",
+    "triggers_considered": [
+      {
+        "gate": "security",
+        "status": "not_applicable",
+        "reason": "No auth, input handling, secret, permission, or boundary changes."
+      },
+      {
+        "gate": "migration",
+        "status": "not_applicable",
+        "reason": "No schema, data, or persistence changes."
+      },
+      {
+        "gate": "architecture",
+        "status": "skipped",
+        "reason": "Change is limited to acceptance criteria text and does not introduce new abstractions."
+      }
+    ],
+    "minimum_proof": [
+      {
+        "type": "inspection",
+        "status": "passed",
+        "evidence": "Confirmed criteria require selected path, proof, skipped heavy gates, and closeout visibility."
+      }
+    ],
+    "skipped_heavy_gates": [
+      "security",
+      "migration",
+      "architecture"
+    ]
+  }
+}
+```
+
+I’d place this near the gate-selection or closeout requirements rather than burying it in general workflow guidance, because the key behavior is enforceable evidence: standard work should be lightweight, but never invisible.

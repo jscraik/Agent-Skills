@@ -1,0 +1,23 @@
+Blocked before mutation.
+
+I attempted to run the required handle resolution from the repo root:
+
+```bash
+./bin/ask skills resolve he-linear-plan --json
+```
+
+It failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I then tried the fallback required by the handle, reading the canonical workflow at:
+
+```text
+Plugins/harness-engineering/skills/he-linear-plan/SKILL.md
+```
+
+That was also blocked by the same sandbox error, even for a plain read.
+
+Mutation status: **no Linear issue was created**. I also do not currently have a callable Linear MCP/tool namespace in this session, so I can’t safely create the approved live Linear parent issue through the connector from here. The active set is still empty: zero Linear mutations made.

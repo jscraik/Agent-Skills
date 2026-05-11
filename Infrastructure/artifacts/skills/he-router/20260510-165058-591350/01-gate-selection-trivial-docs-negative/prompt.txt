@@ -1,0 +1,1 @@
+Can you route a trivial Harness reference wording cleanup without loading domain, strategy, refactor, Linear, security, or eval gates.

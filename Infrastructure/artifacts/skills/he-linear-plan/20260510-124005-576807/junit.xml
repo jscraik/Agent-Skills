@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-linear-plan" tests="12" failures="2" errors="0" timestamp="2026-05-10T11:40:05Z" id="20260510-124005-576807">
+  <testcase name="linear-routing-plan" classname="he-linear-plan" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/01-linear-routing-plan
+    </system-out>
+  </testcase>
+  <testcase name="destination-ambiguous" classname="he-linear-plan" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/02-destination-ambiguous
+    </system-out>
+  </testcase>
+  <testcase name="generate-architecture-review" classname="he-linear-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 124
+    </failure>
+    <system-out>
+warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/03-generate-architecture-review/codex/codex_events.jsonl
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/03-generate-architecture-review
+    </system-out>
+  </testcase>
+  <testcase name="issue-explosion-pressure" classname="he-linear-plan" time="60.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/04-issue-explosion-pressure
+    </system-out>
+  </testcase>
+  <testcase name="now-next-later" classname="he-linear-plan" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/05-now-next-later
+    </system-out>
+  </testcase>
+  <testcase name="missing-project-state" classname="he-linear-plan" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/06-missing-project-state
+    </system-out>
+  </testcase>
+  <testcase name="headless-linear-assumption" classname="he-linear-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(ask once|ask you|route this work|file this work|treat this work|one choice|interactive.*headless|which destination|before proceeding|before I assume|record a headless assumption|confirmation-gated|confirmation-required|explicitly confirm|explicitly approve|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked|without confirmation|Repo project|Portfolio Ops|reply with)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/07-headless-linear-assumption
+    </system-out>
+  </testcase>
+  <testcase name="eval-gate-map" classname="he-linear-plan" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/08-eval-gate-map
+    </system-out>
+  </testcase>
+  <testcase name="minimal-active-set" classname="he-linear-plan" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/09-minimal-active-set
+    </system-out>
+  </testcase>
+  <testcase name="partial-source-coverage-keeps-linear-local" classname="he-linear-plan" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/10-partial-source-coverage-keeps-linear-local
+    </system-out>
+  </testcase>
+  <testcase name="linear-plan-inherits-drift-signals" classname="he-linear-plan" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/11-linear-plan-inherits-drift-signals
+    </system-out>
+  </testcase>
+  <testcase name="first-principles-compresses-linear-noise" classname="he-linear-plan" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-124005-576807/12-first-principles-compresses-linear-noise
+    </system-out>
+  </testcase>
+</testsuite>

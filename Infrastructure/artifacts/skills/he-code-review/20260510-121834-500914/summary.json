@@ -1,0 +1,994 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-10T11:18:34Z",
+  "skill": "he-code-review",
+  "skill_path": "Plugins/harness-engineering/skills/he-code-review",
+  "skill_release": {
+    "name": "he-code-review",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "3c3e7f92c02307a02bd3eac07e30a15c326bd265",
+    "source_branch": "codex/goal-governor-independent-skill"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "release",
+  "tier2_mode": "warn",
+  "run_id": "20260510-121834-500914",
+  "case_filters": [],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "review-readiness",
+      "name": "Review readiness",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/01-review-readiness",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/01-review-readiness/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/01-review-readiness/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/01-review-readiness/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/01-review-readiness/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/01-review-readiness/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 8,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 170764,
+                "output_tokens": 857,
+                "reasoning_tokens": 0,
+                "total_tokens": 171621
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "artifact-drift-check",
+      "name": "Artifact drift check",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/02-artifact-drift-check",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/02-artifact-drift-check/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/02-artifact-drift-check/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/02-artifact-drift-check/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/02-artifact-drift-check/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/02-artifact-drift-check/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 138866,
+                "output_tokens": 900,
+                "reasoning_tokens": 0,
+                "total_tokens": 139766
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "unrelated-product-copy",
+      "name": "Unrelated product copy",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/03-unrelated-product-copy",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/03-unrelated-product-copy/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/03-unrelated-product-copy/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/03-unrelated-product-copy/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/03-unrelated-product-copy/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/03-unrelated-product-copy/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 4,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 45933,
+                "output_tokens": 66,
+                "reasoning_tokens": 0,
+                "total_tokens": 45999
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "unsafe-rubber-stamp",
+      "name": "Unsafe rubber stamp",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/04-unsafe-rubber-stamp",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/04-unsafe-rubber-stamp/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/04-unsafe-rubber-stamp/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/04-unsafe-rubber-stamp/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/04-unsafe-rubber-stamp/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/04-unsafe-rubber-stamp/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 4,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 45943,
+                "output_tokens": 125,
+                "reasoning_tokens": 0,
+                "total_tokens": 46068
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "missing-validation-evidence",
+      "name": "Missing validation evidence",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/05-missing-validation-evidence",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/05-missing-validation-evidence/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/05-missing-validation-evidence/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/05-missing-validation-evidence/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/05-missing-validation-evidence/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/05-missing-validation-evidence/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 138959,
+                "output_tokens": 886,
+                "reasoning_tokens": 0,
+                "total_tokens": 139845
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "prior-comment-regression",
+      "name": "Prior comment regression",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/06-prior-comment-regression",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/06-prior-comment-regression/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/06-prior-comment-regression/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/06-prior-comment-regression/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/06-prior-comment-regression/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/06-prior-comment-regression/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 9,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 185915,
+                "output_tokens": 949,
+                "reasoning_tokens": 0,
+                "total_tokens": 186864
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "agent-native-risk",
+      "name": "Agent native risk",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/07-agent-native-risk",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/07-agent-native-risk/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/07-agent-native-risk/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/07-agent-native-risk/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/07-agent-native-risk/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/07-agent-native-risk/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 10,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 280098,
+                "output_tokens": 1350,
+                "reasoning_tokens": 0,
+                "total_tokens": 281448
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "headless-review-assumptions",
+      "name": "Headless review assumptions",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 9,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 185819,
+                "output_tokens": 623,
+                "reasoning_tokens": 0,
+                "total_tokens": 186442
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    },
+    {
+      "id": "closure-recommendation",
+      "name": "Closure recommendation",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/09-closure-recommendation",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/09-closure-recommendation/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/09-closure-recommendation/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/09-closure-recommendation/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/09-closure-recommendation/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/09-closure-recommendation/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 138890,
+                "output_tokens": 974,
+                "reasoning_tokens": 0,
+                "total_tokens": 139864
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "model-code-test-language-mismatch",
+      "name": "Model code test language mismatch",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/10-model-code-test-language-mismatch",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/10-model-code-test-language-mismatch/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/10-model-code-test-language-mismatch/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/10-model-code-test-language-mismatch/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/10-model-code-test-language-mismatch/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/10-model-code-test-language-mismatch/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 8,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 138794,
+                "output_tokens": 709,
+                "reasoning_tokens": 0,
+                "total_tokens": 139503
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "overbroad-gate-profile-finding",
+      "name": "Overbroad gate profile finding",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/11-overbroad-gate-profile-finding",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/11-overbroad-gate-profile-finding/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/11-overbroad-gate-profile-finding/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/11-overbroad-gate-profile-finding/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/11-overbroad-gate-profile-finding/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/11-overbroad-gate-profile-finding/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 8,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 138659,
+                "output_tokens": 542,
+                "reasoning_tokens": 0,
+                "total_tokens": 139201
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "keyword-only-specialist-rejected",
+      "name": "Keyword-only specialist rejected",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/12-keyword-only-specialist-rejected",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/12-keyword-only-specialist-rejected/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/12-keyword-only-specialist-rejected/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/12-keyword-only-specialist-rejected/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/12-keyword-only-specialist-rejected/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/12-keyword-only-specialist-rejected/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 8,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 185505,
+                "output_tokens": 797,
+                "reasoning_tokens": 0,
+                "total_tokens": 186302
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "first-principles-review-flags-false-sophistication",
+      "name": "First principles review flags false sophistication",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/13-first-principles-review-flags-false-sophistication",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/13-first-principles-review-flags-false-sophistication/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/13-first-principles-review-flags-false-sophistication/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/13-first-principles-review-flags-false-sophistication/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/13-first-principles-review-flags-false-sophistication/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/13-first-principles-review-flags-false-sophistication/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 10,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 232804,
+                "output_tokens": 888,
+                "reasoning_tokens": 0,
+                "total_tokens": 233692
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "plugin-hook-absolute-path-review",
+      "name": "Plugin hook absolute path review",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/14-plugin-hook-absolute-path-review",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/14-plugin-hook-absolute-path-review/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/14-plugin-hook-absolute-path-review/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/14-plugin-hook-absolute-path-review/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/14-plugin-hook-absolute-path-review/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/14-plugin-hook-absolute-path-review/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 8,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 232403,
+                "output_tokens": 1113,
+                "reasoning_tokens": 0,
+                "total_tokens": 233516
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    }
+  ],
+  "passed": true,
+  "tier1_failures": 0,
+  "tier2_findings": 0,
+  "preflight_warnings": [
+    "Using isolated CODEX_HOME for live eval session writes: /private/tmp/skill-evals-codex-home-hlg2ydud"
+  ],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 14
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 14
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "pass",
+  "exit_code": 0,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914",
+    "summary": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/junit.xml"
+  }
+}

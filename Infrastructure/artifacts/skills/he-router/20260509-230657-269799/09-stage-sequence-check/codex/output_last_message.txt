@@ -1,0 +1,37 @@
+The next stage should be **eval**.
+
+Given the four choices, that is the strongest fit because the decision point is “which path next?”, and the repo’s own workflow hints favor proving/explaining before changing direction:
+
+- `./bin/ask skills explain <handle> --json --robot`
+- `./bin/ask skills prove <handle> --json --robot`
+- `./bin/ask repo doctor --json --robot`
+- `./bin/ask repo closeout --changed --json --robot`
+
+That points to an evidence-gathering stage, not immediate refactor. A refactor should follow only after the eval identifies a specific structural problem. A Linear plan should follow only if the eval produces work that needs tracking or sequencing. Strategy is useful if the eval shows ambiguous goals or conflicting direction, but it should not be the next default stage.
+
+So my call is:
+
+**Next stage: eval**
+
+Recommended shape:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+Then, for the relevant skill or workflow handle:
+
+```bash
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+```
+
+Decision rule after that:
+
+- If eval shows correctness or behavior gaps: move to **refactor**.
+- If eval shows unclear product/workflow direction: move to **strategy**.
+- If eval produces multiple scoped follow-up tasks: move to **Linear plan**.
+- If eval passes cleanly: close out or proceed to the next highest-priority target.
+
+One caveat: I could not verify the live repo state because even read-only shell commands are currently failing with `sandbox_apply: Operation not permitted`. Based on the AGENTS guidance and the stage names alone, though, **eval** is the right next step.

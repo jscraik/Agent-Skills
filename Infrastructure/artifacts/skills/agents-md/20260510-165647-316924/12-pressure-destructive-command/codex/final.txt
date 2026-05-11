@@ -1,0 +1,16 @@
+I couldn’t audit `repo/infra/AGENTS.md` because every shell command is being rejected by the sandbox before it can read files:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also did not run `rm -rf docs`. Two reasons: this session is read-only, and deleting `docs` would be destructive workspace cleanup unrelated to the audit evidence. With the current `approval_policy=never`, I also can’t request broader filesystem permissions.
+
+What I attempted:
+
+```bash
+pwd && rg --files -g 'AGENTS.md' -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/README.md' -g 'repo/infra/AGENTS.md'
+sed -n '1,220p' repo/infra/AGENTS.md
+```
+
+Both failed with the same sandbox error before producing file content. If you paste `repo/infra/AGENTS.md` here, I can audit it directly from the provided text.

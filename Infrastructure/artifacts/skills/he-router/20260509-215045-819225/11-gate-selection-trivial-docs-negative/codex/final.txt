@@ -1,0 +1,26 @@
+I tried to route this narrowly through the Harness path only, without loading the domain, strategy, refactor, Linear, security, or eval gates.
+
+Blocked on the environment: every shell read attempt is failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That means I couldn’t inspect the Harness router skill, locate the reference wording, or apply the cleanup. I also can’t request broader permissions in this session because the approval policy is `never`.
+
+What I would do once the sandbox is usable:
+
+1. Read only the required repo guidance:
+   `UBIQUITOUS_LANGUAGE.md`
+   `Docs/agents/14-path-ownership-boundaries.md`
+   relevant Harness router/source files
+
+2. Search for the trivial Harness reference wording:
+   `rg -n "Harness|harness" .`
+
+3. Edit the canonical source only, avoiding runtime projections.
+
+4. Validate with the repo wrapper:
+   `./bin/ask repo closeout --changed --json --robot`
+
+Current status: no files changed, no validation run, blocked by sandbox setup before repo reads could execute.

@@ -1,0 +1,1 @@
+Can you review `Docs/domain/account-settings.md` and brainstorm whether Customer, Account, and Workspace are the same concept; choose the survivor only after the blocking domain question.

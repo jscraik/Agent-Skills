@@ -1,0 +1,307 @@
+I can turn it into a skill, but I couldn’t write it into the repo from this session because the workspace commands are currently blocked by the sandbox. What I can give you right now is a ready-to-drop skill design that includes the workflow plus the four lifecycle pieces you asked for: testing, distribution, observation, and adaptation.
+
+**Proposed skill**
+Use this as the canonical `SKILL.md` for a PR feedback resolver skill.
+
+```md
+---
+name: pr-feedback-loop
+description: Resolve repeatable PR feedback loops by triaging review comments, fixing code, validating changes, resolving review threads, and deciding when to re-request review. Use when a user asks to address PR review feedback, review comments, CI failures tied to a PR, or repeated back-and-forth on a pull request.
+---
+
+# PR Feedback Loop Skill
+
+## Purpose
+
+This skill turns a repeatable PR feedback cycle into a disciplined workflow:
+
+1. Ingest PR feedback from review comments, review threads, and CI status.
+2. Triage feedback into actionable groups.
+3. Implement fixes with the smallest safe change set.
+4. Validate changes before asking for another review.
+5. Resolve threads and re-request review only when the branch is ready.
+6. Learn from outcomes so the workflow improves over time.
+
+## When to Use
+
+Use this skill when the task involves:
+
+- Addressing PR review comments
+- Resolving repeated review feedback
+- Fixing CI failures on a pull request
+- Replying to reviewers after code changes
+- Preparing a PR for another review cycle
+- Reducing churn from recurring review patterns
+
+Do not use this skill for:
+
+- Creating a new PR from scratch
+- General feature implementation with no PR feedback
+- Broad codebase refactors without an active review loop
+- One-off questions about GitHub PRs
+
+## Workflow
+
+### 1. Gather Current PR State
+
+Collect the current state of the PR:
+
+- Review comments and threads
+- Review status and unresolved conversations
+- Latest commit history
+- CI/check status
+- Any linked issue or reviewer notes
+- Any prior fixes already applied in the branch
+
+If the PR context is incomplete, stop and ask for the missing identifier or link.
+
+### 2. Triage Feedback
+
+Classify each item into one of these buckets:
+
+- `must_fix`: correctness, security, build, failing tests, broken behavior
+- `should_fix`: clear reviewer request, maintainability, UX, or design issue
+- `consider`: optional improvement or preference-based feedback
+- `won't_fix`: out of scope, outdated, or invalid for this PR
+
+For each comment, record:
+
+- Thread or comment identifier
+- File and line if available
+- Short summary
+- Category
+- Recommended action
+- Whether it blocks re-review
+
+### 3. Plan the Fix Set
+
+Build the smallest safe fix set that:
+
+- Addresses all `must_fix` items
+- Addresses `should_fix` items when practical and low-risk
+- Avoids unrelated cleanup
+- Preserves existing intent and public behavior unless a change is explicitly requested
+
+If two comments conflict, prefer the one that is:
+
+- More recent and still relevant
+- More specific to the current code
+- More strongly supported by tests, logs, or repo conventions
+
+### 4. Apply Changes
+
+Make the code changes with minimal scope.
+
+Rules:
+
+- Prefer targeted edits over broad refactors
+- Keep changes grouped by feedback thread where possible
+- Add or update tests near the changed behavior
+- Preserve formatting and local conventions
+- If a comment is resolved by explanation rather than code, capture that explicitly
+
+### 5. Validate
+
+Before marking anything complete, run the most relevant checks:
+
+- Unit tests for affected code
+- Integration tests if behavior crosses boundaries
+- Lint/typecheck if the change touches style or contracts
+- Any repo-specific validation required by local instructions
+
+Validation output must be summarized with:
+
+- Commands run
+- Result of each command
+- Any failures and why they do or do not block merge
+
+### 6. Resolve Threads
+
+Only resolve a review thread when:
+
+- The underlying issue is fixed, or
+- The comment is proven outdated, or
+- The thread is no longer applicable
+
+If thread resolution permissions are unavailable, say so explicitly and leave a precise note for the user.
+
+### 7. Re-request Review
+
+Re-request review only after:
+
+- All blocking feedback is addressed
+- Validation passes
+- Any reply comments explain how the feedback was handled
+- No known unresolved blockers remain
+
+### 8. Close the Loop
+
+Finish by reporting:
+
+- What changed
+- Which review items were addressed
+- Which items were intentionally not addressed, with reasons
+- What was validated
+- Whether review was re-requested
+- Any remaining risk
+
+## Testing Strategy
+
+This skill must be tested at three levels.
+
+### A. Workflow Tests
+
+Simulate the end-to-end review loop on a representative PR:
+
+- PR with only comments
+- PR with comments plus CI failure
+- PR with a mix of valid, outdated, and subjective feedback
+- PR where a fix requires test updates
+- PR where thread resolution permission is missing
+
+Success criteria:
+
+- Correct triage
+- Minimal fix scope
+- Validation before re-review
+- Accurate final status report
+
+### B. Behavior Tests
+
+Test decision quality on edge cases:
+
+- Conflicting review comments
+- A comment about code that has already changed upstream
+- A suggestion that would widen scope unnecessarily
+- A false-positive CI failure
+- A request that cannot be satisfied without a larger redesign
+
+Success criteria:
+
+- The skill explains tradeoffs clearly
+- It does not over-fix
+- It does not claim completion when blockers remain
+
+### C. Regression Tests
+
+Add or maintain fixtures for:
+
+- Review thread parsing
+- Comment categorization
+- Validation summary formatting
+- Resolved vs unresolved thread handling
+- Re-review gating
+
+Success criteria:
+
+- Known feedback loops do not regress
+- Classification remains stable across repo changes
+- Output remains machine-readable enough for downstream automation
+
+## Distribution
+
+This skill should be distributed in the following ways:
+
+- As a repo-local canonical skill under the skills directory
+- As a reusable packaged skill artifact for other repos
+- As a short alias entry in skill discovery metadata
+- As a documented workflow in the repo’s agent guide if it is a common pattern
+
+Distribution rules:
+
+- Keep the canonical source in one place
+- Avoid duplicating workflow logic across docs and projections
+- Publish only stable, well-tested versions
+- Include a changelog note when workflow behavior changes
+
+## Observability
+
+This skill should be observable through structured logs and outcomes.
+
+Track:
+
+- Number of review threads processed
+- Number of comments classified into each bucket
+- Number of fix cycles per PR
+- Validation pass/fail rates
+- Time from first review comment to re-review
+- Thread resolution success rate
+- Count of unresolved blockers left at handoff
+
+Emit a short structured record for each run:
+
+```json
+{
+  "skill": "pr-feedback-loop",
+  "pr": "<id>",
+  "threads_total": 0,
+  "threads_fixed": 0,
+  "must_fix": 0,
+  "should_fix": 0,
+  "consider": 0,
+  "validation_passed": true,
+  "re_review_requested": true,
+  "unresolved_blockers": 0
+}
+```
+
+Observability rules:
+
+- Do not log secrets or private review content verbatim unless explicitly required
+- Prefer identifiers and summaries over full comment bodies
+- Record the reason when a thread is left unresolved
+- Record when validation is skipped and why
+
+## Adaptation
+
+This skill should improve from real use.
+
+Adaptation loop:
+
+1. Collect run outcomes and reviewer reactions.
+2. Identify recurring failure modes.
+3. Update triage rules, validation steps, or reply templates.
+4. Re-test against prior fixtures.
+5. Publish a new skill revision.
+
+Trigger adaptation when:
+
+- The same type of review comment appears repeatedly
+- Validation frequently catches issues after review
+- Reviewers reopen threads that were marked resolved
+- The workflow becomes too slow or too broad
+- A repo-specific convention repeatedly changes the ideal response
+
+Guardrails for adaptation:
+
+- Preserve stable core behavior unless there is evidence to change it
+- Prefer narrow updates over rewriting the whole workflow
+- Keep backward compatibility for common review cases
+- Record the rationale for every workflow change
+
+## Output Contract
+
+When this skill runs, the final response should include:
+
+- PR summary
+- Feedback items handled
+- Fixes applied
+- Validation performed
+- Threads resolved or left open
+- Whether another review was requested
+- Residual risks
+```
+
+**How I’d package it**
+- Place the skill under the repo’s canonical skills directory.
+- Add any required metadata file if this repo’s skill format expects one.
+- If this repo has a skill index or discovery manifest, register the new skill there.
+- Keep the workflow logic in the skill, and keep repository-specific examples in a separate doc if needed.
+
+**What the lifecycle pieces mean in practice**
+- **Tested:** run fixtures that simulate PR comments, unresolved threads, CI failures, and permission-limited resolution.
+- **Distributed:** publish the skill in the repo’s skill catalog so it can be discovered by name and reused across repos.
+- **Observed:** log counts, outcomes, validation results, and unresolved blockers without dumping private review text.
+- **Adapted:** update the triage and validation rules when real review loops show a recurring pattern.
+
+If you want, I can next turn this into the exact file layout your repo uses, including any companion README, registry entry, and test fixtures.

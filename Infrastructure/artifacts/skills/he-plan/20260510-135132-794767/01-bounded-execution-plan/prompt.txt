@@ -1,0 +1,3 @@
+$he-plan
+
+Can you turn the approved spec into a bounded implementation plan with validation gates and traceability.

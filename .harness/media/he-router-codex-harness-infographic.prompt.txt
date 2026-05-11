@@ -1,0 +1,43 @@
+Create a production-grade technical infographic background titled conceptually
+"From Prompt Skill -> Codex Harness Skill," but do not render final overlay text
+in the image. Design a dark, professional systems-engineering visual with clean
+OpenAI-style geometry, strong negative space, and clear zones where
+deterministic overlay text can be added later.
+
+Composition: left side shows a fragile prompt-only skill: loose unconnected
+cards, vague arrows, unchecked assumptions, bloated text blocks, and subtle
+warning outlines. Right side shows a governed Codex harness skill package:
+compact SKILL.md entrypoint, routed references, scripts, assets, evals,
+contract files, validation gates, evidence artifacts, and rollback paths
+connected into a composable system. Center shows a transformation corridor from
+assumptions to evidence, with structured lines passing through deterministic
+gates.
+
+Include visual metaphors for: AGENTS.md as a top governance layer, rules and
+command boundaries as guarded rails, hooks/validation gates as checkpoint
+nodes, Skill Factory strict audit as a formal inspection gate, skill_gate.py as
+a required-section contract checker, OpenClaw guard as security/readiness
+scanning, OpenAI skill-format lint as frontmatter/schema validation, Plugin Eval
+as score and invoke-cost budget, progressive disclosure as compact entrypoint
+branching to references, smoke eval and release eval as staged test pulses,
+human approval gates as deliberate stop markers, evidence artifacts as signed
+trace cards, rollback paths as reversible arrows, deterministic checks as
+precise tick marks, and composable skills as modular blocks snapping into a
+larger harness.
+
+Also include package-level surfaces as abstract components: references, scripts,
+assets, examples, fixtures, templates, contract.yaml, evals.yaml, schemas, and
+validator configs. Show stale/orphaned supporting files being filtered out or
+quarantined. Show AI-generated slop being reduced through markdown lint,
+spelling/prose lint, link checks, and anti-slop review.
+
+Style requirements: dark harness-proof engineering aesthetic, matte black and
+charcoal base with restrained teal, white, and amber accents; no fake
+dashboards, no fake logos, no invented metrics, no sci-fi nonsense, no
+decorative orbs, no clutter. Use crisp vector-like shapes, subtle depth, clean
+typography zones left blank for later overlay, high contrast, 16:9 layout
+suitable for X/Twitter technical content. The image should communicate movement
+from vague prompting to governed execution, hidden behaviour to observable
+systems, fragile workflows to validated orchestration, bloated prompt blob to
+compact progressive-disclosure skill, and isolated skill file to complete
+validated Codex skill package.

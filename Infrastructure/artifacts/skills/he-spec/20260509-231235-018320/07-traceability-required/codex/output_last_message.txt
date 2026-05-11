@@ -1,0 +1,34 @@
+I can do it, but I’m blocked by the current sandbox before I can inspect or edit the repo.
+
+I tried to read the repo state and required guidance from `/Users/jamiecraik/dev/agent-skills`, but every shell command is failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+The failed commands were:
+
+```bash
+pwd && git status --short
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/README.md
+```
+
+Because the session is in read-only sandbox mode with approval policy `never`, I can’t request broader filesystem permissions or write changes. So I can’t safely locate “each requirement,” map them to source artifacts, Linear identifiers, or assumptions, or patch the relevant files from here.
+
+What I would do once the sandbox is usable:
+
+1. Inspect the current changed files with `git status --short`.
+2. Read the relevant AGENTS/docs guidance, especially `UBIQUITOUS_LANGUAGE.md` and path ownership docs.
+3. Locate the requirement list or spec section.
+4. For every requirement, add one of:
+   - `Source artifact:` with exact repo path and section/file reference.
+   - `Linear:` with issue identifier.
+   - `Assumption:` explicit, testable assumption text.
+5. Run the repo validation wrapper, likely:
+
+```bash
+./bin/ask repo closeout --changed --json --robot
+```
+
+Right now the only honest state is: ready to attach the traceability, but the tool environment cannot read or edit the workspace yet.

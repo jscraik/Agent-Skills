@@ -1,0 +1,111 @@
+Yes. I’d decide it by asking whether the proposed domain model changes the **shared operating vocabulary and control plane concepts** of Agent Skills Kit, or whether it only makes one area’s wording cleaner.
+
+Given the repo guidance you pasted, the default bar should be:
+
+**Put it in core strategy when the model becomes part of the system’s shared language.**
+
+Treat it as **core strategy** if most of these are true:
+
+1. It names concepts that multiple repo areas must agree on: skills, operator docs, runtime projections, syncing, validation, discovery, policy, workflows, or agent-facing docs.
+2. It changes how contributors should think about ownership boundaries, canonical sources, generated/runtime projections, or lifecycle flow.
+3. It affects command behavior, especially things surfaced through `./bin/ask`, `--json --robot`, validation, proving, improving, syncing, or closeout.
+4. It introduces durable nouns or relationships that other docs, tools, tests, or CLIs should eventually adopt.
+5. It resolves ambiguity in `UBIQUITOUS_LANGUAGE.md` or belongs there because people will otherwise invent competing names.
+6. It needs to be stable across packages, skills, docs, and agent workflows.
+7. It would be confusing if only one local folder knew about it.
+8. Future changes should be judged against it.
+
+Examples that sound like **core strategy**:
+
+- Defining what a “canonical source” is versus a “runtime projection.”
+- Clarifying the lifecycle of a skill from authoring to validation to runtime availability.
+- Introducing a shared distinction between “skill handle,” “runtime projection,” “operator doc,” and “workflow.”
+- Modeling “policy sync” as a repo-level control-plane concern.
+- Renaming a cross-cutting concept used by commands, docs, and validation output.
+
+**Keep it local when the model only improves wording inside one bounded area.**
+
+Treat it as **local terminology cleanup** if most of these are true:
+
+1. It only affects one skill, one doc cluster, one package, or one implementation detail.
+2. It does not change repo-wide behavior, validation semantics, or ownership boundaries.
+3. It makes prose clearer but does not introduce a concept other contributors need to reuse.
+4. The terms are aliases, labels, or local implementation names rather than domain-level nouns.
+5. The change can be understood entirely from the local file without updating `UBIQUITOUS_LANGUAGE.md`.
+6. It would be overkill to require future contributors in unrelated areas to learn it.
+7. It does not need CLI, schema, test, or generated-doc alignment.
+8. It is mostly about reducing confusion in a narrow context.
+
+Examples that sound like **local cleanup**:
+
+- Renaming a section heading inside one skill’s instructions.
+- Standardizing “proof step” vs “prove step” inside one validation doc, if the command/API language stays unchanged.
+- Cleaning up local wording in a package README.
+- Replacing inconsistent helper names in one script where no public/domain term is involved.
+- Clarifying one workflow’s internal labels without changing the repo’s shared concepts.
+
+**My Decision Rule**
+
+Use this short test:
+
+> If adopting the model would require updating `UBIQUITOUS_LANGUAGE.md`, path ownership guidance, repo command docs, validation docs, or more than one bounded area, it belongs in core strategy.
+> If adopting it only improves local readability and can stay invisible outside its immediate folder, it is local terminology cleanup.
+
+**Practical Classification Matrix**
+
+| Question | Core Strategy | Local Cleanup |
+|---|---:|---:|
+| Does it affect more than one subsystem? | Yes | No |
+| Does it define a durable noun in the repo’s language? | Yes | Usually no |
+| Would `./bin/ask` behavior, docs, or output need to align? | Yes | No |
+| Would contributors need to know it before editing related areas? | Yes | No |
+| Does it change ownership boundaries or canonical/runtime distinctions? | Yes | No |
+| Can it be safely explained only in the touched file? | No | Yes |
+| Would competing terms cause future design drift? | Yes | Maybe, but locally |
+| Is it mostly wording consistency? | Maybe | Yes |
+
+**Recommended Process**
+
+For a proposed model, I’d make the call in this order:
+
+1. **Identify the nouns.**
+   List the new/changed terms. If they describe repo-wide things like skill, projection, policy, sync, validation, proof, operator doc, workflow, control plane, or canonical source, assume core until proven otherwise.
+
+2. **Trace the blast radius.**
+   Search where the current terms appear. If the terms cross `Docs/agents`, skill docs, CLI help/output, schemas, tests, or runtime projections, the model is strategic.
+
+3. **Check ownership.**
+   If the change tells agents where to edit, what is canonical, or what should be generated, it is core strategy because it affects behavior.
+
+4. **Check command contract impact.**
+   If `./bin/ask ... --json --robot` output, explanations, proofs, closeout, or validation evidence would use the model, it belongs in core strategy.
+
+5. **Decide persistence.**
+   If this is a term future agents should preserve and reuse, put it in core strategy. If it is just a local cleanup to make a page read better, keep it local.
+
+**What I’d Need To Decide A Specific Proposal**
+
+Send me the proposed domain model and, ideally, the files or concepts it touches. I’d classify it like this:
+
+```text
+Decision: Core strategy | Local terminology cleanup
+
+Why:
+- Cross-boundary impact:
+- Shared vocabulary impact:
+- Command/runtime impact:
+- Ownership/canonical-source impact:
+- Validation/proof impact:
+
+Required doc placement:
+- UBIQUITOUS_LANGUAGE.md: yes/no
+- Docs/agents/*: yes/no
+- Local file only: yes/no
+
+Implementation scope:
+- Terms to adopt:
+- Terms to retire:
+- Files likely affected:
+```
+
+One important nuance: a terminology cleanup can become core strategy if it removes ambiguity around a concept agents must act on. In this repo, anything that affects **where to edit**, **what is canonical**, **what is generated**, **how validation is proven**, or **how skills are discovered/synced** should be treated as strategic, even if the initial change looks like “just naming.”

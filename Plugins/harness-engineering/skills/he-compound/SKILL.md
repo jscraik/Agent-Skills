@@ -5,70 +5,150 @@ metadata:
   skill-type: team_automation
 ---
 # Harness Engineering Compound
+
 ## Philosophy
-Coordinate state, not ceremony. Compound should identify the earliest incomplete stage and preserve the evidence chain that lets the next agent act immediately.
+
+Coordinate state, not ceremony. Compound identifies the earliest incomplete HE
+stage and preserves the evidence chain that lets the next agent act immediately.
+Local `AGENTS.md`, rules, hooks, command boundaries, and approval gates outrank
+this skill.
+
 ## When to Use
-Use when work spans brainstorm/spec/plan/work/review or needs refresh/resume control.
+
+Use when work spans brainstorm, spec, plan, work, review, Linear, PRs, Project
+Brain, or `.harness` memory and needs refresh, resume control, source-prompt
+coverage, repeated-failure reconstruction, or solved-problem capture.
+
+## When Not to Use
+
+Do not use for a single selected implementation slice, plain code fix, isolated
+docs edit, or unverified learning capture. Route direct execution to the active
+stage skill or implementation workflow.
+
 ## Inputs
-Goal, Linear/project-brain state, specs, plans, PRs, session evidence, solved-problem evidence.
+
+Goal, repo path, Linear/Project Brain state, specs, plans, PRs, validation,
+session evidence, source-prompt baseline, repeated-failure evidence, or
+solved-problem proof.
+
 ## Outputs
-Return schema_version when structured. Stage map, active owner, blockers, next action, repeated_failure_state, blackboard_delta, retained references, `.harness/solutions/**` capture status, and Project Brain status.
+
+Return mode, stage map, earliest stage, owner, blockers, next action,
+references, source-prompt coverage, repeated-failure state, blackboard delta,
+solution-capture status, Project Brain status, validation, and handoff.
+
+## Preconditions
+
+Resolve the canonical repo and cited evidence before treating it as fact.
+Classify side effects before acting: read-only, `.harness` artifact write,
+repo-write, user-config-write, external-write, or destructive. Learning capture
+requires solved and verified evidence.
+
 ## Procedure
-1. Reconstruct lifecycle state from live repo evidence, Linear, specs, plans, PRs, validation, session evidence, and Project Brain.
-2. Resolve the stage context contract enough to identify the earliest incomplete, stale, or conflicted stage.
-3. When an original prompt, external workflow, old manual method, or plugin comparison is the baseline, apply source-prompt coverage before routing downstream; preserve source prompt status, evidence depth, coverage gaps, not-inspected evidence classes, repo-specific drift signals, original prompt coverage, downstream confidence, and next route.
+
+1. Reconstruct lifecycle state from live repo evidence, Linear, specs, plans,
+   PRs, validation, session evidence, and Project Brain.
+2. Resolve only enough stage context to identify the earliest incomplete, stale,
+   or conflicted stage.
+3. If an original prompt, external workflow, manual method, or plugin comparison
+   is the baseline, apply source-prompt coverage before routing. Preserve source
+   status, evidence depth, gaps, not-inspected evidence classes, repo drift
+   signals, confidence, route.
 4. Keep scope tight: start with 2-3 focused surfaces that prove lifecycle state
    before loading broader repo or session evidence.
-5. Ask before choosing when earliest incomplete stage, resume target, refresh route, or source-prompt coverage conflicts across evidence.
-6. Preserve Harness lifecycle state in coding-harness-managed repos and refresh or explicitly block Project Brain only when repository context changed.
-7. Use solution capture only for solved-problem evidence; write new captures under `.harness/solutions/**`, not legacy `docs/solutions/**`.
-8. Use UI plan routing only when UI-plan artifacts are present, then hand off to `he-plan`, `he-work`, or `he-code-review`.
-9. Route product-compression blockers such as `active_stage: spec_refresh_required` to `he-spec` instead of approving another additive implementation pass.
-10. Apply the plugin hook capability contract when plugin hook state may affect startup context, guardrail behavior, or handoff evidence. Treat hook output as runtime evidence only; it can inform `.harness` artifacts but cannot replace missing specs, plans, evals, or traceability.
+5. Ask before choosing when earliest stage, resume target, refresh route, or
+   source-prompt coverage conflicts. In headless mode, record assumptions and
+   block irreversible routing.
+6. Preserve HE lifecycle state in coding-harness-managed repos and refresh or
+   explicitly block Project Brain only when repository context changed.
+7. Use solution capture only for solved-problem evidence; write new captures
+   under `.harness/solutions/**`, not legacy `docs/solutions/**`.
+8. Use UI plan routing only when UI-plan artifacts are present, then hand off to
+   `he-plan`, `he-work`, or `he-code-review`.
+9. Route product-compression blockers such as
+   `active_stage: spec_refresh_required` to `he-spec` instead of approving
+   another additive implementation pass.
+10. Treat plugin-hook output as runtime evidence only. It can inform `.harness`
+    artifacts but cannot replace missing specs, plans, evals, or traceability.
 11. When `he-code-review` reports `repeated_failure_route`,
-    `repeated_failure`, or repeated context-feedback candidates, reconstruct the
-    recurrence from review, validation, session, Linear, and `.harness`
-    evidence. Preserve the pattern in `repeated_failure_state`, decide whether
-    a `.harness/solutions/**` capture is warranted, and route executable repair
-    tracking back to `he-linear-plan` or the live Linear issue if missing.
+    `repeated_failure`, or context-feedback recurrence, reconstruct the pattern
+    from review, validation, session, Linear, and `.harness` evidence. Preserve
+    it in `repeated_failure_state`, decide whether `.harness/solutions/**`
+    capture is warranted, and route repair tracking to `he-linear-plan` or live
+    Linear when missing.
+
 ## Validation
-Fail fast: stop at the first failed gate and do not proceed. Check routing, stage artifacts, and handoff evidence.
-## Failure mode
-If required evidence, Linear linkage, or next-stage routing is missing, stop and return the blocker with the smallest recovery step.
-## Execution Boundaries
-Compound reconstructs lifecycle state and routes the next stage. Do not collapse multi-stage work into execution or refresh Project Brain unless source evidence proves a context change.
-For direct-handle use, apply the OpenAI-style design contract: classify the strongest side effect and separate read-only analysis, artifact writes, repo edits, external updates, destructive actions, and completion-gating recommendations before proceeding.
+
+Fail fast. Check routing, stage artifacts, source-prompt coverage, Linear/PR
+links, Project Brain status, solution-capture eligibility, validation evidence,
+and handoff authority. Report each gate as `pass`, `fail`, or `blocked`.
+
+## Safety Boundaries
+
+Compound reconstructs lifecycle state and routes the next stage. Do not collapse
+multi-stage work into execution, refresh Project Brain without source evidence,
+write user/global config, update external systems, or perform destructive
+actions without explicit authority. Redact secrets and private transcripts.
+
+## Failure Handling
+
+If required evidence, Linear linkage, source-prompt baseline, route, destination,
+or authority is missing, stop with `blocked_reason` and the smallest recovery
+step. Chat summaries cannot replace source, tracker, artifact, PR, validation,
+or trace evidence.
+
+## Handoff Rules
+
+Route brainstorm gaps to `he-brainstorm`, acceptance/behavior gaps to `he-spec`,
+execution strategy gaps to `he-plan`, implementation to `he-work`, review to
+`he-code-review`, repeated repair tracking to `he-linear-plan` or live Linear,
+and completed solved-problem capture to `.harness/solutions/**`.
+
+## Output Format
+
+Structured output: `schema_version`, `mode`, `stage_map`,
+`earliest_incomplete_stage`, `active_owner`, `blockers`, `next_action`,
+`source_prompt_coverage`, `repeated_failure_state`, `blackboard_delta`,
+`retained_references`, `solution_capture_status`, `project_brain_status`,
+`validation`, `handoff`, and `blocked_reason`.
+
+## Confidence Reporting
+
+Tie confidence to source freshness, artifact traceability, tracker/PR validity,
+validation evidence, source-prompt coverage depth, and unresolved assumptions.
+Do not claim runtime availability, Project Brain freshness, Linear state,
+solution capture, or release readiness without direct evidence.
+
 ## Gotchas
-- Compound owns state reconstruction, not implementation.
-- Legacy docs may be source evidence, but new solved-problem captures belong under `.harness/solutions/**`.
-## Constraints
-Redact secrets; never collapse multi-stage work into one vague task. Do not remove important context for budget trimming; move deep context to references.
-## Anti-Patterns
-- Turning a multi-stage workflow into one vague implementation task.
-- Refreshing Project Brain without checking whether repo context changed.
-- Writing new HE solution captures to legacy `docs/solutions/**` instead of `.harness/solutions/**`.
-- Treating `docs/ui-plan/**` or `docs/ui-plans/**` as new canonical output instead of legacy UI-plan source evidence.
-- Treating a chat summary as a replacement for Linear, spec, plan, PR, or validation links.
-- Advancing to work when prior acceptance proved implementation presence but not first-contact compression.
-- Treating repeated review failures as one-off findings when they need both
-  live Linear tracking and compound lifecycle memory.
+
+- State reconstruction and routing only; not implementation.
+- New captures go under `.harness/solutions/**`; legacy docs are evidence.
+- Repeated failures may need both Linear tracking and lifecycle memory.
+- Do not remove important context for budget trimming; move deep context to
+  references with a clear route.
+
 ## Examples
-- "Inspect and resume the coding-harness run for JSC-246; map Linear, spec, plan, PR, Project Brain, north-star evidence, and tell me the exact next HE stage."
-- "Inspect the HE compound state after PR 154 merged, update Project Brain if `.harness` changed, and capture any solved-problem doc that is now warranted."
+
+- "Inspect and resume the coding-harness run for JSC-246; map Linear, spec,
+  plan, PR, Project Brain, north-star evidence, and tell me the exact next HE
+  stage."
+- "Inspect the HE compound state after PR 154 merged, update Project Brain if
+  `.harness` changed, and capture any solved-problem doc now warranted."
+
 ## Assets
-Reference `assets/` only for skill packaging and browseability; lifecycle state belongs in structured handoff evidence.
+
+Reference `assets/` only for skill packaging and browseability; lifecycle state
+belongs in structured handoff evidence.
+
 ## References
-- Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`
-- Stage context: `Plugins/harness-engineering/references/stage-context-contract.md`
-- Interactive steering: `Plugins/harness-engineering/references/interactive-steering-contract.md`
-- OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
-- Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
-- Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
-- Solution capture: `Plugins/harness-engineering/references/solution-capture-contract.md`
-- Source prompt coverage: `Plugins/harness-engineering/references/source-prompt-coverage-contract.md`
-- Plugin hook capability: `Plugins/harness-engineering/references/plugin-hook-capability-contract.md`
-- UI plan routing: `Plugins/harness-engineering/references/ui-plan-routing-contract.md`
-- Artifact routing: `Plugins/harness-engineering/references/artifact-routing-contract.md`
-- Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`
-- Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
-- XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`
+
+Read `references/contract.yaml` for the full mode contract, `references/evals.yaml`
+for validation scenarios, and `assets/resolution-template.md` only when writing
+solution captures. Use shared HE references only when active: stage context,
+coding-harness bridge, solution capture, source-prompt coverage, plugin-hook
+capability, UI plan routing, artifact routing, agent-native compression,
+pragmatic invariants, and XP operating contract.
+Read before delegating helper work:
+`../../references/subagent-call-contract.md`.
+
+Deferred context index: `../../references/deferred-context-index.md`.

@@ -1,0 +1,9 @@
+The `skill-builder` handle points to the canonical module at `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`, but I couldn’t load it here because the repo wrapper and direct file read both hit a sandbox restriction (`sandbox_apply: Operation not permitted`).
+
+So the correct handoff is:
+
+- Resolve `skill-builder` through `./bin/ask skills resolve skill-builder --json`
+- If that path is unavailable, load `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md` directly
+- If neither can be loaded, fail closed and stop, which is what happened in this environment
+
+If you want, I can still help by translating the request into the next best plugin-only authoring handoff once you provide the resolved card or the module contents.

@@ -1,0 +1,304 @@
+Yes. I can route it as a small Linear project with three containment tracks, plus one coordinating issue that keeps the work from turning into another issue explosion.
+
+I don’t have a callable Linear connector exposed in this session, and the local sandbox blocked even read-only shell access, so I can’t create the issues directly from here. But here is the plan in Linear-ready form.
+
+**Project**
+Title: Gap Review Remediation: Authority, Scope, Evidence
+
+Goal: Convert the gap review findings into bounded fixes that reduce agent overreach, prevent unbounded Linear planning, and make evidence quality explicit in agent-facing workflows.
+
+Suggested labels: `agent-skills`, `gap-review`, `governance`, `linear`, `evidence`, `planning`
+
+Suggested state flow: `Triage` -> `Ready` -> `In Progress` -> `Review` -> `Done`
+
+Suggested lead: one owner for coordination, with each track assigned separately.
+
+**Coordinator Issue**
+Title: Route gap-review remediation for strategy over-authority, Linear issue explosion, and evidence-depth laundering
+
+Description:
+
+```md
+## Context
+
+A gap review identified three related failure modes in agent-facing workflow guidance:
+
+1. Strategy over-authority: agents can turn weak or ambiguous review findings into strong strategic direction without enough grounding.
+2. Linear issue explosion: gap reviews can produce too many Linear issues, creating planning sprawl instead of executable remediation.
+3. Evidence-depth laundering: shallow evidence can be presented with the confidence or ceremony of deep validation.
+
+## Objective
+
+Create bounded remediation across canonical agent guidance so future gap reviews produce scoped, evidence-calibrated, executable work.
+
+## Tracks
+
+- Strategy authority boundaries
+- Linear issue-routing limits
+- Evidence-depth labeling and validation
+
+## Acceptance Criteria
+
+- Each gap category has exactly one owner issue.
+- The plan limits initial issue count to one coordinator plus three remediation issues.
+- Follow-up issues are only created after explicit triage criteria are met.
+- Evidence expectations distinguish observation, corroborated finding, validated finding, and decision-grade evidence.
+- Updated guidance points agents toward bounded plans instead of broad strategy claims.
+```
+
+**Issue 1**
+Title: Bound strategic authority in gap-review outputs
+
+Problem:
+
+Gap reviews can accidentally promote local observations into strategic directives. This creates “strategy over-authority”: the agent sounds like it is setting direction rather than identifying risks, options, or recommended next steps.
+
+Suggested owner: agent workflow/docs owner
+
+Labels: `governance`, `planning`, `agent-guidance`
+
+Description:
+
+```md
+## Problem
+
+Gap-review outputs need clearer authority boundaries. Current behavior can allow agents to overstate strategy from limited evidence, especially when findings involve product direction, operating model, process governance, or team workflow.
+
+## Desired Behavior
+
+Agents should separate:
+
+- observed gap
+- inferred risk
+- recommended next action
+- strategic implication
+- decision requiring human authority
+
+## Proposed Remediation
+
+Update canonical agent guidance so gap reviews use calibrated language:
+
+- “This suggests…” for inference
+- “Recommend triaging…” for next action
+- “Do not decide…” for strategy ownership
+- “Needs owner confirmation…” for roadmap, policy, or process changes
+
+Add a small decision boundary rubric for when a finding is advisory versus strategy-setting.
+
+## Acceptance Criteria
+
+- Guidance explicitly prevents agents from converting limited review evidence into strategic mandates.
+- Gap-review templates include a section for “Authority Boundary” or equivalent.
+- Recommendations distinguish between agent-executable fixes and human-owned decisions.
+- Examples include at least one unacceptable over-authority phrasing and a corrected version.
+```
+
+Suggested initial subtasks:
+
+```md
+- Identify the canonical doc or skill section that governs gap-review output.
+- Add authority-boundary language.
+- Add one before/after example.
+- Validate with repo closeout or the repo’s standard documentation check.
+```
+
+**Issue 2**
+Title: Prevent Linear issue explosion from gap reviews
+
+Problem:
+
+Gap reviews can generate too many Linear issues. This shifts work from remediation to management overhead and obscures priority.
+
+Suggested owner: Linear/workflow owner
+
+Labels: `linear`, `workflow`, `scope-control`
+
+Description:
+
+```md
+## Problem
+
+Gap reviews need a routing rule that prevents issue explosion. A single review should not automatically produce a large backlog. The default output should be a small number of owner-level issues with explicit split criteria.
+
+## Desired Behavior
+
+For a gap review, agents should create or propose:
+
+- one coordinator issue when multiple themes exist
+- one issue per major failure mode
+- no implementation subtasks unless they are immediately actionable and owned
+- follow-up issues only after triage confirms scope, owner, and acceptance criteria
+
+## Proposed Remediation
+
+Add Linear routing guidance that limits initial issue creation and requires split criteria.
+
+Suggested default cap:
+
+- 1 coordinator issue
+- up to 3 theme issues
+- no more than 5 total issues without explicit user approval
+
+Split criteria:
+
+- different owner
+- different validation path
+- different code/doc surface
+- different release or rollout risk
+- too large for one review cycle
+
+## Acceptance Criteria
+
+- Gap-review Linear routing has an explicit issue-count cap.
+- The cap includes an escalation rule for asking before creating more.
+- Guidance prefers grouped theme issues over scattered micro-issues.
+- Every created issue must have owner, acceptance criteria, and validation evidence.
+```
+
+Suggested initial subtasks:
+
+```md
+- Add issue-count cap to Linear planning guidance.
+- Add split criteria.
+- Add example: 3 gap themes routed as 1 coordinator + 3 owner issues.
+- Add anti-example: turning every observation into a separate ticket.
+```
+
+**Issue 3**
+Title: Add evidence-depth labels to prevent evidence-depth laundering
+
+Problem:
+
+Gap reviews may present shallow observations as if they were deeply validated findings. This can mislead downstream planning, prioritization, and PR review.
+
+Suggested owner: validation/docs owner
+
+Labels: `evidence`, `validation`, `quality-bar`
+
+Description:
+
+```md
+## Problem
+
+Evidence-depth laundering happens when weak evidence receives strong framing. For example, one anecdote, one file read, or one review comment can be written as if it were a validated systemic pattern.
+
+## Desired Behavior
+
+Gap-review outputs should label evidence depth and confidence directly.
+
+Suggested evidence levels:
+
+- Observation: seen once, limited context
+- Corroborated: supported by multiple examples or sources
+- Validated: tested, reproduced, or confirmed against canonical guidance
+- Decision-grade: validated and sufficient for policy, roadmap, or process change
+
+## Proposed Remediation
+
+Add evidence-depth labels to gap-review and Linear-routing guidance. Require findings to include source type and confidence.
+
+Findings should avoid strong language unless they meet the matching evidence level.
+
+## Acceptance Criteria
+
+- Evidence-depth levels are defined in canonical guidance.
+- Gap-review output templates include evidence level and confidence.
+- Linear issues created from gap reviews include the evidence level in the description.
+- Guidance prevents “validated” language unless validation was actually performed.
+```
+
+Suggested initial subtasks:
+
+```md
+- Define evidence-depth levels.
+- Add language calibration rules.
+- Update the gap-review issue template.
+- Add examples of shallow, corroborated, and validated findings.
+```
+
+**Routing Rules**
+Use this as the operating rule for turning the review into Linear work:
+
+```md
+## Routing Policy
+
+Initial route from this gap review:
+
+- Create 1 coordinator issue.
+- Create 3 remediation issues, one per confirmed failure mode.
+- Do not create child issues until each owner issue is triaged.
+- Any additional issue requires a clear split reason and owner.
+
+## Split Reasons
+
+A new issue may be created only when at least one applies:
+
+- separate owner
+- separate canonical source file or skill
+- separate validation method
+- separate release risk
+- blocked by a different dependency
+- too large to complete in one review cycle
+
+## Evidence Requirements
+
+Every issue must state:
+
+- evidence level
+- source of evidence
+- confidence
+- validation required for Done
+```
+
+**Recommended Priority**
+I’d route them in this order:
+
+1. Evidence-depth laundering
+   This is the foundation. If evidence is mislabeled, the other two problems become harder to detect.
+
+2. Strategy over-authority
+   Once evidence labels exist, authority boundaries become easier to enforce because claims have visible confidence.
+
+3. Linear issue explosion
+   This one should be fixed alongside the others, but the routing rule can be added quickly after the first two clarify how findings should be framed.
+
+**Linear Issue Template**
+Use this template for all three remediation issues:
+
+```md
+## Gap
+
+What failure mode was identified?
+
+## Evidence Level
+
+Observation | Corroborated | Validated | Decision-grade
+
+## Evidence Source
+
+Where did this come from?
+
+## Risk
+
+What goes wrong if this remains unchanged?
+
+## Scope
+
+What canonical source, workflow, skill, or doc should change?
+
+## Out of Scope
+
+What should not be changed in this issue?
+
+## Acceptance Criteria
+
+- [ ]
+- [ ]
+- [ ]
+
+## Validation
+
+What command, review, or evidence proves this is fixed?
+```
+
+My recommendation: create exactly four Linear issues from this review: the coordinator plus the three owner issues above. That keeps the plan tight, gives each failure mode a clear home, and avoids recreating the very planning sprawl the review found.

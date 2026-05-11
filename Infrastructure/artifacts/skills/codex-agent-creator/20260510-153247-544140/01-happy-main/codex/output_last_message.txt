@@ -1,0 +1,39 @@
+To validate a Codex custom subagent TOML, I need these exact inputs from you:
+
+- The target TOML file path, or the content pasted inline if you want me to review before touching the file
+- The owning context: standalone role file, `.codex/agents/*.toml`, or `[agents.<name>]` config in a `config.toml`
+- The intended role name and scope
+- The exact key paths you expect the file to contain
+- The expected value types for those keys
+- Any compatibility constraints, especially whether this must work as a standalone discovered agent or only through a declaring config
+- The validation command or parser that is supposed to consume the file
+- If discoverability is involved, the declaring config path and whether install scope is global, project, or validation-only
+- If you want a real validation pass, the evidence source too: existing agents, local schema, validator output, or official docs
+
+For Codex custom subagent TOML specifically, the repo guidance says the minimum validation-relevant contract is usually:
+
+- `name`
+- `description`
+- `developer_instructions`
+- `model`
+- `model_reasoning_effort`
+
+And for standalone discovered files, the guide says `name`, `description`, and `developer_instructions` are required at minimum, while `[agents.<name>].config_file`-based roles may inherit the role name from the declaring table. The guide also calls out common runtime fields to verify when relevant:
+
+- `model_reasoning_summary`
+- `model_verbosity`
+- `sandbox_mode`
+- `approval_policy`
+- `approvals_reviewer`
+- `allow_login_shell`
+
+If you want, send me either:
+1. the TOML file contents, or
+2. the file path plus the intended role schema,
+
+and I can validate it without editing anything yet.
+
+References:
+- [Codex Agent Role Creation Guide](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/references/role-creation-guide.md)
+- [Codex Agent Creator skill](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md)
+- [TOML skill](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/toml/SKILL.md)

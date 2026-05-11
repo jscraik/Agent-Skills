@@ -1,28 +1,37 @@
 schema_version: 1
 skill: docs-expert
-purpose: "Make repo docs accurate, reader-first, and evidence-backed."
+purpose: "Make repository documentation accurate, reader-first, and evidence-backed against live repo truth."
 triggers:
-  - "Use when the user request matches the skill scope."
+  - "Use when README, runbook, code-doc, config-doc, template, or public trust-surface documentation needs audit, rewrite, or validation."
+  - "Use when documentation claims must be checked against scripts, package commands, workflows, repository structure, or governance docs."
 non_goals:
-  - "Route unrelated work away from this skill."
+  - "Do not change runtime behavior, dependencies, CI policy, release state, or external trackers from this skill alone."
+  - "Route unrelated implementation, release, security, or workflow changes to the appropriate skill."
 inputs:
   - user_request
   - target_context
   - evidence
 outputs:
-  - result
-  - evidence_summary
+  - doc_audit_findings
+  - rewritten_docs
+  - evidence_map
   - validation_status
+  - unresolved_unknowns
 risks:
   - over_triggering
   - untrusted_input
   - validation_drift
+  - generated_projection_edits
+  - unsupported_operational_claims
 safety:
   untrusted_inputs: true
   redact_secrets: true
   destructive_commands: false
 validation:
+  - skill_gate
+  - openai_skill_format
   - plugin_eval_grade_a
   - strict_skill_audit
+  - package_boundary_checks
 observability: "Report validation commands and outcomes."
-rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."
+rollback_procedure: "Restore the canonical documentation source, regenerate projections only through the repo contract, then rerun strict audit, skill gate, OpenAI skill format, package boundary checks, and Plugin Eval where relevant."

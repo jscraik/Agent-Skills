@@ -295,7 +295,7 @@ Actual: parse passed with the PyYAML virtualenv.
 Status: pass.
 
 Evidence:
-`python3 -c "...yaml.safe_load..."` using an environment with PyYAML installed.
+`python -c "...yaml.safe_load..."`.
 
 Confidence: high.
 
@@ -357,11 +357,10 @@ Evidence: source `.harness/linear/**` plan and this eval.
 
 Confidence: high.
 
-Blocks Closure: no for local slice closure; external Linear closure still
-requires an explicit issue if selected.
+Blocks Closure: no.
 
-Required Action: create or confirm Linear issue only if external tracking is
-desired.
+Required Action: create or confirm a Linear issue only if external tracking is
+desired; if one is created later, link this accepted eval before closure.
 
 ## Agentic Eval Validity
 

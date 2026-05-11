@@ -1,0 +1,21 @@
+For a Linear-linked plan update created today, use the dated canonical harness artifact path pattern:
+
+```text
+Docs/harness/artifacts/2026-05-09-linear-<LINEAR_KEY>-plan-update.md
+```
+
+Replace `<LINEAR_KEY>` with the actual Linear issue key, for example:
+
+```text
+Docs/harness/artifacts/2026-05-09-linear-ASK-123-plan-update.md
+```
+
+I’d use **May 9, 2026** because your environment date is `2026-05-09` in `Europe/London`.
+
+One caveat: I tried to verify the exact repo convention from the live tree, but the current read-only sandbox is rejecting even read commands with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So this is the best path choice from the naming intent and current date, rather than a confirmed match from existing files.

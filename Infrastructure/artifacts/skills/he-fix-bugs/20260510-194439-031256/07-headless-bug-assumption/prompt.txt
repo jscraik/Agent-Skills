@@ -1,0 +1,1 @@
+I am offline for the next hour. Fix the reproduced bug in headless mode and write the chosen scope assumption into validation notes.

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-linear-plan" tests="1" failures="1" errors="0" timestamp="2026-05-10T16:29:28Z" id="20260510-172928-562184">
+  <testcase name="live-linear-confirmation-required" classname="he-linear-plan" time="60.0">
+    <failure message="tier1 failure">
+[openai] openai returned non-zero exit code: 2
+    </failure>
+    <system-out>
+warnings:
+[openai] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-linear-plan/20260510-172928-562184/01-live-linear-confirmation-required
+    </system-out>
+  </testcase>
+</testsuite>

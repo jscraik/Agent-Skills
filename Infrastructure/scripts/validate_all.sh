@@ -112,29 +112,48 @@ scope_reason=""
 
 python_cmd=(python3)
 python_cmd_display="python3"
+
+use_uv_python_launcher() {
+  command -v uv >/dev/null 2>&1 || return 1
+  uv run --python 3.12 python -c "import sys, yaml" >/dev/null 2>&1 || return 1
+  python_cmd=(uv run --python 3.12 python)
+  python_cmd_display="uv run --python 3.12 python"
+  return 0
+}
+
+use_mise_python_launcher() {
+  command -v mise >/dev/null 2>&1 || return 1
+  command -v uv >/dev/null 2>&1 || return 1
+  mise exec -- uv run --python 3.12 python -c "import sys, yaml" >/dev/null 2>&1 || return 1
+  python_cmd=(mise exec -- uv run --python 3.12 python)
+  python_cmd_display="mise exec -- uv run --python 3.12 python"
+  return 0
+}
+
+use_system_python_launcher() {
+  python3 -c "import sys, yaml" >/dev/null 2>&1 || return 1
+  python_cmd=(python3)
+  python_cmd_display="python3"
+  return 0
+}
+
 if [[ -n "${PYTHON_BIN:-}" ]]; then
   python_cmd=("$PYTHON_BIN")
   python_cmd_display="$PYTHON_BIN"
-elif command -v mise >/dev/null 2>&1 && command -v uv >/dev/null 2>&1; then
-  if mise exec -- uv run --python 3.12 python -c "import sys, yaml" >/dev/null 2>&1; then
-    python_cmd=(mise exec -- uv run --python 3.12 python)
-    python_cmd_display="mise exec -- uv run --python 3.12 python"
-  elif uv run --python 3.12 python -c "import sys, yaml" >/dev/null 2>&1; then
-    python_cmd=(uv run --python 3.12 python)
-    python_cmd_display="uv run --python 3.12 python"
-    echo "⚠️  Python launcher fallback: mise probe failed, using uv directly"
-  elif python3 -c "import sys, yaml" >/dev/null 2>&1; then
-    python_cmd=(python3)
-    python_cmd_display="python3"
+elif [[ "$output_mode" == "ephemeral" ]]; then
+  if use_uv_python_launcher; then
+    :
+  elif use_system_python_launcher; then
     echo "⚠️  Python launcher fallback: uv runtime missing yaml, using python3"
+  elif [[ "${VALIDATE_ALL_ALLOW_MISE_PROBE:-0}" == "1" ]] && use_mise_python_launcher; then
+    echo "⚠️  Python launcher fallback: uv/python3 probes failed, using mise because VALIDATE_ALL_ALLOW_MISE_PROBE=1"
   fi
-elif command -v uv >/dev/null 2>&1; then
-  if uv run --python 3.12 python -c "import sys, yaml" >/dev/null 2>&1; then
-    python_cmd=(uv run --python 3.12 python)
-    python_cmd_display="uv run --python 3.12 python"
-  elif python3 -c "import sys, yaml" >/dev/null 2>&1; then
-    python_cmd=(python3)
-    python_cmd_display="python3"
+else
+  if use_mise_python_launcher; then
+    :
+  elif use_uv_python_launcher; then
+    echo "⚠️  Python launcher fallback: mise probe failed, using uv directly"
+  elif use_system_python_launcher; then
     echo "⚠️  Python launcher fallback: uv runtime missing yaml, using python3"
   fi
 fi
@@ -213,7 +232,7 @@ check_matches_validation_scope() {
       ;;
     lint)
       case "$slug" in
-        docs-lint|skill-types|openai-format|progressive-disclosure)
+        docs-lint|ask-bootstrap-docs|skill-types|openai-format|progressive-disclosure)
           return 0
           ;;
       esac
@@ -275,17 +294,23 @@ should_run_check() {
     recursive-artifacts)
       [[ "$scope_has_skill_graph" -eq 1 || "$scope_has_authoring_family" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
-    docs-lint)
+    docs-lint|ask-bootstrap-docs)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
+      ;;
+    verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|provider-policy|selection-contract|router-schema|ask-cli-modularity|selection-gate-severity)
+      [[ "$scope_has_validation_core" -eq 1 ]]
+      ;;
+    skill-lifecycle-tests|skill-catalog|plugin-shadowing|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|skill-types|openai-format|progressive-disclosure|skill-graph-profiles|gotcha-store)
+      [[ "$scope_has_skill_graph" -eq 1 ]]
       ;;
     skill-authoring-family)
       [[ "$scope_has_authoring_family" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
     runtime-separation-*)
-      [[ "$scope_has_runtime_separation" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
+      [[ "$scope_has_runtime_separation" -eq 1 ]]
       ;;
     *)
-      return 0
+      return 1
       ;;
   esac
 }
@@ -445,6 +470,7 @@ scope_has_skill_graph=0
 scope_has_authoring_family=0
 scope_has_runtime_separation=0
 scope_has_validation_core=0
+scope_forced_validation_fallback=0
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   for changed_file in "${changed_files[@]}"; do
     case "$changed_file" in
@@ -489,6 +515,12 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
         ;;
     esac
   done
+
+  if [[ "$scope_has_docs" -eq 0 && "$scope_has_skill_graph" -eq 0 && "$scope_has_authoring_family" -eq 0 && "$scope_has_runtime_separation" -eq 0 && "$scope_has_validation_core" -eq 0 ]]; then
+    echo "🧭 Changed-files scope classification missed all known buckets; falling back to baseline required validation"
+    scope_has_validation_core=1
+    scope_forced_validation_fallback=1
+  fi
 fi
 
 projection_manifest="$run_dir/projection-integrity.json"
@@ -504,6 +536,7 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
 fi
 
 schedule_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json
+schedule_check required ask-bootstrap-docs "🧭 Verifying ask bootstrap docs..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_ask_bootstrap_docs.py
 schedule_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/verify_verify_work_scope_flags.py
 schedule_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/verify_question_lifecycle_contract.py
 schedule_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" Infrastructure/scripts/test_skill_lifecycle_validation.py

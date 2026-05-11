@@ -1,0 +1,5 @@
+One high-signal question:
+
+What must remain invariant across the change: the user-visible behavior, the underlying data/contract shape, or the operational workflow that produces it?
+
+I tried to load `$he-spec` through `./bin/ask skills resolve he-spec --json` as instructed, then directly from `Plugins/harness-engineering/skills/he-spec/SKILL.md`, but both read attempts were blocked by the current sandbox with `sandbox_apply: Operation not permitted`.

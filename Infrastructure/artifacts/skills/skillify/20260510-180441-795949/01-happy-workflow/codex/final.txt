@@ -1,0 +1,12 @@
+I couldn’t complete the package in this session because the workspace is mounted read-only, so file writes are blocked.
+
+I did get far enough to draft the skill shape in my head: a reusable `release-triage` skill with a stable workflow for:
+- identifying the release target
+- collecting release evidence
+- classifying status as `green`, `yellow`, or `red`
+- isolating blockers vs. risks
+- producing a short handoff summary
+
+If you want, I can still help in one of two ways next:
+1. I can give you the exact `SKILL.md` contents to paste into the repo.
+2. If you can reopen the session with write access, I’ll add the package directly and wire it into the repo layout.

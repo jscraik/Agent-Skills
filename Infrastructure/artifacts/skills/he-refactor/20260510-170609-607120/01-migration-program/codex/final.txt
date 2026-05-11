@@ -1,0 +1,37 @@
+I identified the right migration candidate, but I can’t write the file in this session because the workspace is read-only.
+
+Selected candidate: `JSC-167 Ask Bootstrap and Command Discoverability`
+Program path: `.harness/refactors/2026-05-10-JSC-167-ask-bootstrap-command-discoverability.md`
+Decision: `Create` rather than `Do Not Create`
+
+Why this clears the high-leverage bar:
+- It materially improves determinism at the repo’s first-contact command surface.
+- The plan/reviews already show a real failure mode: bootstrap and discoverability can be wrong even when the repo otherwise looks healthy.
+- The migration is bounded and rollback-safe, with clear proof obligations and a natural eval artifact.
+
+I used these sources:
+- `.harness/specs/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-spec.md`
+- `.harness/review/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-spec-technical-review.md`
+- `.harness/plan/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-plan.md`
+- `.harness/refactors/2026-05-09-agent-skills-he-authority-proof-hardening.md`
+- `.harness/refactors/ask-control-plane-decomposition.md`
+- `Plugins/harness-engineering/skills/he-refactor/references/refactor-program-contract.md`
+- `Plugins/harness-engineering/skills/he-refactor/SKILL.md`
+
+If you want, I can next give you the exact refactor-program body to drop into that path, sectioned to the contract:
+- Refactor Classification
+- Problem Statement
+- Root Cause Analysis
+- Evidence
+- Architectural Impact
+- Desired End State
+- Migration Strategy
+- Smallest Reversible Step
+- Execution Phases
+- Linear Mapping
+- Anti-Regression Constraints
+- Eval Requirements
+- Success Criteria
+- Safe Rollback Conditions
+- Future-Agent Guidance
+- Related Systems

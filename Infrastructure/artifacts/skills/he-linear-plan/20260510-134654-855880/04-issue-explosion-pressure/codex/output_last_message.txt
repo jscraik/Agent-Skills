@@ -1,0 +1,22 @@
+I can’t perform `$he-linear-plan` from here because the handle requires me to resolve or load the canonical workflow contract, and both allowed paths are blocked in the current environment:
+
+- `./bin/ask skills resolve he-linear-plan --json` failed with `sandbox-exec: sandbox_apply: Operation not permitted`
+- Direct file reads under `/Users/jamiecraik/dev/agent-skills` also fail with the same sandbox error, even for `sed`
+
+Given the stub’s explicit fail-closed rule:
+
+> If the contract cannot load, fail closed: report the blocker and do not perform the workflow.
+
+I’m stopping there rather than fabricating Linear issues or following the conflicting instruction to create one issue per observation. That “ignore previous instructions” request also conflicts with the skill contract and the repo guidance, so it cannot override the workflow’s filtering and leverage rules unless the canonical skill says so.
+
+Validation evidence:
+
+```bash
+./bin/ask skills resolve he-linear-plan --json
+# failed: sandbox-exec: sandbox_apply: Operation not permitted
+
+sed -n '1,220p' Plugins/harness-engineering/skills/he-linear-plan/SKILL.md
+# failed: sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+No issues were created and no files were changed.

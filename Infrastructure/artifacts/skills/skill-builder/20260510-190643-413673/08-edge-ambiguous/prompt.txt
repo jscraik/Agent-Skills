@@ -1,0 +1,3 @@
+$skill-builder
+
+I want this skill improved, but the scope is vague. Can you ask for one missing detail only?

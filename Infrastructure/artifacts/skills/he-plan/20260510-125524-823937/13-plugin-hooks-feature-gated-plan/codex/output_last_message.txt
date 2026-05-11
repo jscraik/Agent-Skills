@@ -1,0 +1,327 @@
+**Plan**
+
+Add bundled plugin hooks as an optional, feature-gated capability, and make every validation path degrade cleanly when `plugin_hooks` are disabled. The core design principle should be: hooks enrich plugin behavior when available, but the canonical plugin and skill validation flow must remain valid without them.
+
+**Assumptions**
+
+I’m interpreting “bundled plugin hooks” as hook definitions shipped inside plugin bundles, likely alongside plugin metadata, skills, MCP config, or runtime assets. I’m also assuming `plugin_hooks` is, or should become, a feature flag that can be disabled in some environments. I could not inspect the repo live because the current sandbox rejected even read-only shell commands with `sandbox_apply: Operation not permitted`, so this plan is based on the AGENTS guidance and the repository shape implied by it.
+
+**Implementation Shape**
+
+1. Read the repo language and ownership docs before editing
+
+Start with:
+
+```bash
+./bin/ask repo doctor --json --robot
+```
+
+Then read the canonical docs called out by `AGENTS.md`:
+
+```bash
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/14-path-ownership-boundaries.md
+sed -n '1,220p' Docs/agents/17-skill-management.md
+sed -n '1,220p' Docs/agents/04-validation.md
+```
+
+The important thing is to identify the canonical plugin source paths versus generated/runtime projections. Any hook schema, examples, docs, and tests should be added to canonical sources only.
+
+2. Define the hook contract as optional metadata
+
+Add or extend the plugin manifest schema so bundled hooks live under a clearly optional field, probably something like:
+
+```json
+{
+  "plugin_hooks": {
+    "pre_install": "...",
+    "post_install": "...",
+    "pre_sync": "...",
+    "post_sync": "..."
+  }
+}
+```
+
+or, if the repo prefers arrays:
+
+```json
+{
+  "plugin_hooks": [
+    {
+      "event": "post_install",
+      "command": "...",
+      "description": "..."
+    }
+  ]
+}
+```
+
+The schema should make `plugin_hooks` optional. A plugin without hooks remains valid. A plugin with hooks is valid only when each hook matches the accepted shape.
+
+The manifest validator should distinguish these cases:
+
+```text
+feature disabled + no plugin_hooks       => pass
+feature disabled + plugin_hooks present  => pass with ignored/skipped warning, or fail only if policy says disabled features cannot appear
+feature enabled + no plugin_hooks        => pass
+feature enabled + valid plugin_hooks     => pass
+feature enabled + invalid plugin_hooks   => fail
+```
+
+My recommendation is “pass with warning” when hooks are present but disabled, unless this repo already treats disabled feature metadata as an error. That keeps bundled plugins portable across runtimes where hooks are unavailable.
+
+3. Add a single feature gate boundary
+
+Introduce one central capability check, instead of scattering environment checks through validators and installers.
+
+Example shape:
+
+```text
+supportsPluginHooks()
+pluginHooksEnabled()
+```
+
+or a repo-native equivalent.
+
+Likely inputs:
+
+```text
+config feature flag
+environment override
+runtime capability map
+CLI flag if repo commands expose feature toggles
+```
+
+Use that single check anywhere hook behavior is invoked.
+
+The key rule:
+
+```text
+validation may parse hooks as optional metadata
+execution may only run hooks when plugin_hooks is enabled
+```
+
+This avoids a dangerous split where validation accepts hooks but runtime accidentally executes them in disabled environments.
+
+4. Separate structural validation from executable hook validation
+
+Add two validation phases:
+
+```text
+base plugin validation
+optional plugin_hooks validation
+```
+
+Base plugin validation should always run.
+
+Hook validation should have fallback behavior:
+
+```text
+if plugin_hooks disabled:
+  validate only that the plugin remains otherwise valid
+  report hook validation as skipped
+  do not require hook runtime dependencies
+  do not execute hook discovery or hook commands
+
+if plugin_hooks enabled:
+  validate schema
+  validate allowed events
+  validate command/resource references
+  validate sandbox or permission declarations if hooks can execute
+  validate hook files exist if hooks point to bundled files
+```
+
+The output should be robot-friendly and explicit, for example:
+
+```json
+{
+  "plugin_hooks": {
+    "enabled": false,
+    "status": "skipped",
+    "reason": "feature_disabled",
+    "fallback_validation": "base_plugin_validation_passed"
+  }
+}
+```
+
+That “skipped with fallback passed” signal matters for CI and agents. It prevents consumers from treating “hooks not checked” as either a clean pass or a mysterious failure.
+
+5. Add hook-aware discovery without making discovery depend on hooks
+
+If plugin discovery currently reads manifests, extend discovery to surface hook metadata only when present.
+
+When disabled, discovery can still expose inert metadata:
+
+```json
+{
+  "has_plugin_hooks": true,
+  "plugin_hooks_enabled": false
+}
+```
+
+Avoid loading hook executors or resolving hook files unless the feature gate is on. This keeps discovery cheap and safe.
+
+6. Add installer or sync behavior behind the same gate
+
+Where plugin installation, sync, projection, or publish flows run, add behavior like:
+
+```text
+read plugin
+validate base plugin
+if plugin_hooks enabled:
+  validate hooks
+  register hooks
+  execute allowed lifecycle hooks when the lifecycle event occurs
+else:
+  skip hook registration
+  include skipped-hook evidence in robot output
+```
+
+No hook command should run during fallback validation. If the repo already has a proof or validation command for skills/plugins, hook execution should be in a separate explicit lifecycle path, not hidden inside ordinary validation.
+
+7. Update canonical docs and examples
+
+Docs should say three things plainly:
+
+```text
+plugin_hooks is optional
+plugin_hooks behavior is feature-gated
+when disabled, validation falls back to base plugin validation and reports hooks as skipped
+```
+
+Add at least one minimal plugin example with no hooks and one bundled plugin example with hooks.
+
+If runtime projections are generated, update only canonical docs/sources and regenerate projections through repo tooling rather than editing projections directly.
+
+8. Add tests for enabled and disabled modes
+
+Minimum test matrix:
+
+```text
+plugin without plugin_hooks, feature disabled: pass
+plugin without plugin_hooks, feature enabled: pass
+plugin with valid plugin_hooks, feature disabled: pass + skipped/fallback evidence
+plugin with valid plugin_hooks, feature enabled: pass
+plugin with invalid plugin_hooks, feature disabled: pass base validation + skipped hook validation, if disabled metadata is allowed
+plugin with invalid plugin_hooks, feature enabled: fail
+plugin with hook pointing to missing bundled file, feature enabled: fail
+plugin with hook pointing to missing bundled file, feature disabled: skip hook file resolution
+```
+
+If policy decides invalid hook metadata should fail even when disabled, swap that one expected result to:
+
+```text
+plugin with invalid plugin_hooks, feature disabled: fail structural manifest validation, skip executable validation
+```
+
+But I’d avoid that unless there is a strong repo precedent. Optional disabled features are usually easier to roll out when disabled validation is tolerant.
+
+9. Make CLI and robot output deterministic
+
+Every relevant repo command should produce stable evidence. Candidate commands, based on `AGENTS.md`:
+
+```bash
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+Add or update fields like:
+
+```json
+{
+  "features": {
+    "plugin_hooks": {
+      "enabled": false,
+      "source": "config",
+      "behavior": "fallback_validation"
+    }
+  }
+}
+```
+
+For disabled mode, make the result boring and explicit:
+
+```json
+{
+  "hook_validation": {
+    "status": "skipped",
+    "reason": "plugin_hooks_disabled",
+    "fallback": {
+      "status": "passed",
+      "checks": ["manifest", "skills", "assets"]
+    }
+  }
+}
+```
+
+10. Validate with both feature states
+
+Run the normal closeout path, plus targeted hook proof commands.
+
+Suggested validation sequence:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask skills explain <hooked-plugin-handle> --json --robot
+./bin/ask skills prove <hooked-plugin-handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+Then repeat with the feature explicitly disabled and enabled. The exact mechanism depends on the repo’s config style, but the evidence should show both paths.
+
+Example desired evidence:
+
+```text
+plugin_hooks disabled:
+  base plugin validation passes
+  hook validation skipped
+  no hook file execution attempted
+  robot output includes fallback validation status
+
+plugin_hooks enabled:
+  base plugin validation passes
+  hook schema validation passes
+  bundled hook references resolve
+  lifecycle registration or proof passes
+```
+
+**Likely Files To Touch**
+
+I’d confirm these with `rg` once shell access works:
+
+```bash
+rg "plugin_hooks|plugin hook|hooks|feature.*plugin" .
+rg "plugin.json|manifest|schema|prove|explain|closeout" .
+```
+
+Expected areas:
+
+```text
+canonical plugin manifest schema
+plugin validation/proof code
+plugin discovery or install/sync code
+feature flag/capability config
+robot output types/schemas
+canonical docs for plugin management
+fixtures/examples
+tests for validation/proof behavior
+```
+
+**Acceptance Criteria**
+
+The work is done when:
+
+```text
+plugin_hooks can be present in bundled plugin metadata without breaking disabled environments
+hook behavior is controlled by one clear feature gate
+disabled mode never executes hooks or requires hook runtime dependencies
+validation still performs base plugin checks and reports hook validation as skipped
+enabled mode validates hook schema and bundled references strictly
+robot output gives explicit pass/fail/skipped evidence
+docs explain optional feature-gated behavior and fallback validation
+tests cover enabled and disabled modes
+repo closeout passes
+```
+
+The one design choice I’d lock early is disabled-mode strictness. My recommendation: when `plugin_hooks` is disabled, skip executable hook validation and do not resolve hook files, but still parse the manifest enough to report that hooks are present and ignored. That gives you rollout safety without making bundled plugins unusable in older or restricted runtimes.

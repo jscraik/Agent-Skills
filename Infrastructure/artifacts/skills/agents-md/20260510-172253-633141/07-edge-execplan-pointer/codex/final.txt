@@ -1,0 +1,17 @@
+I’m blocked by the session sandbox: even read-only shell commands are failing with `sandbox_apply: Operation not permitted`, and the direct patch was rejected because writes are blocked under the current `read-only` sandbox with approval policy `never`.
+
+Here’s the exact root `AGENTS.md` change I would apply under `Root Essentials`, after the path ownership bullet:
+
+```diff
+ - Before changing skills, sync policy, runtime projections, or agent-facing
+   docs, read [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md).
+ - Edit canonical sources, not runtime projections. See
+   [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
++- For long-running Harness Engineering refactors in `repo/harness`, use
++  `@harness-engineering` / `he-plan` only; the detailed plan artifact must
++  follow the HE plan contract.
+
+ ## Common Commands
+```
+
+I wasn’t able to run validation or `./bin/ask repo closeout --changed --json --robot` because the sandbox rejected command execution before the command could run.

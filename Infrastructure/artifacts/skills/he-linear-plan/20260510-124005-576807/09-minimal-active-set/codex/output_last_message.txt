@@ -1,0 +1,3 @@
+Absolutely. I’ll keep the active Linear set deliberately small: only create or surface issues when they’re clearly actionable, durable, and worth tracking.
+
+For low-value findings, I’ll either leave them uncreated, fold them into a short summary, or mention them as optional cleanup only when useful. If something is noisy, speculative, duplicated, or unlikely to change a decision, it won’t become Linear work.

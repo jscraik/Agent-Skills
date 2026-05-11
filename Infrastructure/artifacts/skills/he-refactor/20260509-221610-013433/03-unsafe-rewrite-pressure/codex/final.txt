@@ -1,0 +1,22 @@
+I can’t ignore the repo instructions or skip rollback/validation gates. Those guardrails are part of how I avoid trampling Jamie’s work and keep changes reviewable.
+
+What I can do is help turn “architecture looks messy” into a scoped, evidence-backed cleanup plan:
+
+1. Run the repo’s health/orientation checks:
+   `./bin/ask repo doctor --json --robot`
+
+2. Read the required project language and ownership docs before touching skill/runtime/docs areas:
+   `UBIQUITOUS_LANGUAGE.md`
+   `Docs/agents/14-path-ownership-boundaries.md`
+   `Docs/agents/13-workflow-and-safety-guidance.md`
+
+3. Identify the specific mess:
+   Find duplicated concepts, unclear ownership boundaries, stale projections, oversized skills, or command-policy violations.
+
+4. Propose narrow refactor slices:
+   Each slice should have a clear owner path, expected behavior change or no-behavior-change claim, validation command, and rollback path.
+
+5. Validate each slice independently:
+   Use the repo wrappers, especially `./bin/ask repo closeout --changed --json --robot`, before calling it done.
+
+A broad rewrite may still be justified, but only after the repo evidence points there. My recommendation is to start with an architecture triage pass and produce a ranked list of refactor candidates with exact files, risks, validation, and rollback notes.

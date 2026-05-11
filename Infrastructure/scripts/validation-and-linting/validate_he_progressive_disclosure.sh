@@ -9,6 +9,40 @@ INDEX_PATH='Plugins/harness-engineering/references/deferred-context-index.md'
 INVARIANT_MARKER='Do not remove important context for budget trimming'
 LINK_MARKER='deferred-context-index.md'
 
+changed_files=()
+changed_files_mode=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --changed-files)
+      changed_files_mode=1
+      shift
+      while [[ $# -gt 0 ]]; do
+        if [[ "$1" == --* ]]; then
+          break
+        fi
+        changed_files+=("${1#./}")
+        shift
+      done
+      continue
+      ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh [--changed-files <file>...]
+
+  --changed-files
+      Optional repo-relative file list used to scope the changed HE skill set.
+EOF
+      exit 0
+      ;;
+    *)
+      echo "[he-progressive] ERROR: unknown argument: $1" >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
+
 python3 Infrastructure/scripts/validation-and-linting/check_he_active_archive_links.py
 
 resolve_base_ref() {
@@ -40,6 +74,12 @@ collect_changed_he_skills() {
   local base_ref="$1"
   local -a all_changed=()
   local path
+
+  if [[ "$changed_files_mode" -eq 1 ]]; then
+    printf '%s\n' "${changed_files[@]}" \
+      | awk '/^Plugins\/harness-engineering\/(skills\/.+\/SKILL\.md|fixtures\/.+\/skills\/.+\/SKILL(\.full)?\.md)$/'
+    return 0
+  fi
 
   if [[ -n "$base_ref" ]]; then
     while IFS= read -r path; do
@@ -253,6 +293,9 @@ has_context_move_evidence() {
 }
 
 base_ref="$(resolve_base_ref)"
+if [[ "$changed_files_mode" -eq 1 ]]; then
+  base_ref=""
+fi
 changed_skills=()
 while IFS= read -r skill_path; do
   [[ -n "$skill_path" ]] && changed_skills+=("$skill_path")

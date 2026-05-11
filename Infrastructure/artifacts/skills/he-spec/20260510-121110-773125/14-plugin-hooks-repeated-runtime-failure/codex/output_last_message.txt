@@ -1,0 +1,194 @@
+Yes. I can spec it, with the recommendation deliberately gated so the hook is only adopted after evidence shows a repeated runtime failure and cheaper mechanisms are insufficient.
+
+I wasn’t able to read the repo files in this turn because the shell sandbox is failing before file reads with `sandbox_apply: Operation not permitted`, so this is a repo-aligned proposal based on the AGENTS.md guidance you supplied rather than a patch against live files.
+
+**Spec: Bundled Plugin Hook For HE**
+
+**Problem**
+Harness Engineering sometimes needs runtime enforcement or repair behavior that cannot be reliably expressed through static skill instructions, docs, or operator habit. A bundled plugin hook may be appropriate, but only when there is clear evidence that the same runtime failure repeats and the hook is the smallest safe intervention.
+
+The goal is to avoid adding ambient automation just because it is possible. The hook should be justified by observed failure, bounded to the failing behavior, and removable if the underlying runtime improves.
+
+**Recommendation Gate**
+Do not recommend or implement a bundled plugin hook unless all of these are true:
+
+1. **Repeated Failure**
+   The same runtime failure has occurred at least twice in materially similar circumstances.
+
+2. **Runtime-Specific**
+   The failure happens during agent/runtime execution, not merely during authoring, validation, review, or documentation.
+
+3. **Instruction Insufficient**
+   Existing guidance, skill wording, `AGENTS.md`, validation docs, or closeout checks are unlikely to prevent recurrence on their own.
+
+4. **Smaller Mechanisms Exhausted**
+   The team has considered lower-cost mechanisms first:
+   `SKILL.md` clarification, canonical docs update, validation rule, CLI warning, repo doctor check, test fixture, closeout evidence requirement, or improved error message.
+
+5. **Hook Is Smallest Safe Mechanism**
+   The hook can be scoped to a narrow detection or guard action without becoming a broad policy engine.
+
+6. **Observable And Auditable**
+   The hook emits evidence that can be inspected through normal HE workflows.
+
+If any of these are false, the recommendation should be: **do not add a bundled plugin hook yet**.
+
+**Non-Goals**
+The hook should not become a general-purpose runtime supervisor.
+
+It should not encode broad HE policy that belongs in canonical docs, skills, validators, or `./bin/ask`.
+
+It should not silently mutate user work, rewrite agent output, resolve ambiguous intent, or hide a failure from the operator.
+
+It should not bypass repo validation, skill proof commands, closeout evidence, or path ownership boundaries.
+
+**Candidate Hook Shape**
+A bundled plugin hook should be modeled as a narrow runtime guard:
+
+```text
+runtime event -> detect known repeated failure -> emit structured evidence -> optionally block or advise
+```
+
+Preferred behavior order:
+
+1. **Observe**
+   Detect the failure condition and record structured evidence.
+
+2. **Warn**
+   Surface a precise warning with the minimal corrective action.
+
+3. **Block**
+   Only block execution if continuing would produce misleading evidence, corrupt state, violate ownership boundaries, or create unsafe automation.
+
+4. **Repair**
+   Only repair automatically when the transformation is deterministic, reversible, and already accepted as safe policy elsewhere.
+
+**Hook Interface**
+Suggested conceptual contract:
+
+```json
+{
+  "hook_id": "he.runtime.<failure-name>",
+  "scope": "harness-engineering",
+  "trigger": {
+    "event": "runtime.before_action | runtime.after_action | validation.before_closeout | skill.before_projection",
+    "conditions": []
+  },
+  "evidence": {
+    "failure_signature": "stable identifier for the repeated failure",
+    "observed_count": 2,
+    "examples": [],
+    "source": "session evidence | validation logs | closeout output"
+  },
+  "action": {
+    "mode": "observe | warn | block | repair",
+    "message": "operator-facing explanation",
+    "next_step": "smallest corrective action"
+  },
+  "safety": {
+    "mutates_files": false,
+    "requires_confirmation": false,
+    "rollback": "not applicable | deterministic reversal",
+    "ownership_boundaries_checked": true
+  }
+}
+```
+
+**Decision Record Template**
+Every recommended hook should have a short decision record before implementation:
+
+```markdown
+# HE Bundled Plugin Hook Decision: <hook name>
+
+## Failure
+
+Describe the runtime failure in one sentence.
+
+## Evidence
+
+- Occurrence 1: <session/log/check reference>
+- Occurrence 2: <session/log/check reference>
+
+## Why Existing Mechanisms Are Insufficient
+
+Explain why docs, skill wording, validation, or closeout checks do not catch this early enough.
+
+## Smallest Safe Mechanism
+
+Explain why a hook is narrower and safer than alternatives.
+
+## Hook Scope
+
+- Trigger:
+- Detection:
+- Action:
+- Files or state mutated:
+- Evidence emitted:
+
+## Safety Boundaries
+
+- No silent broad mutation:
+- No ownership-boundary bypass:
+- No masking validation failures:
+- Removal condition:
+
+## Recommendation
+
+Recommend / do not recommend.
+```
+
+**Recommendation Logic**
+The recommendation should be intentionally conservative:
+
+```text
+IF repeated runtime failure is proven
+AND failure is materially similar across occurrences
+AND lower-cost mechanisms are insufficient
+AND hook can be scoped to detection/warn/block/repair without broad policy capture
+THEN recommend a bundled plugin hook
+ELSE do not recommend a hook
+```
+
+**Implementation Guidance**
+If the gate passes, implement the hook as close as possible to the runtime event where the failure becomes observable.
+
+Prefer stable failure signatures over fuzzy matching.
+
+Prefer structured JSON evidence over prose-only logs.
+
+Prefer warning mode first unless the failure creates invalid state, misleading validation, or unsafe mutation.
+
+Keep the hook owned by the bundled plugin layer only if the behavior genuinely belongs with the plugin at runtime. If it is repo policy, put it in canonical docs or `./bin/ask` validation instead.
+
+**Validation Requirements**
+A proposed hook should not be accepted without proof of:
+
+1. Detection of the known repeated failure.
+2. No trigger on a near-miss or valid workflow.
+3. Evidence output in `--json --robot` compatible form if surfaced through repo commands.
+4. No mutation unless explicitly designed and tested.
+5. Closeout evidence showing the hook did not replace ordinary validation.
+
+Suggested validation commands, adjusted to the actual package/root once live repo access works:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+**Default Recommendation**
+Based on the constraint in your prompt, the default stance should be:
+
+> Do not recommend a bundled plugin hook yet. Recommend one only after two or more materially similar runtime failures are documented and the decision record shows that a hook is the smallest safe mechanism compared with docs, validation, skill wording, or CLI checks.
+
+**Acceptance Criteria**
+This spec is satisfied when:
+
+1. HE has a written hook decision gate.
+2. Hook recommendations require repeated runtime evidence.
+3. The spec explicitly prefers smaller non-hook mechanisms first.
+4. Any approved hook has a narrow trigger, structured evidence, defined action mode, and removal condition.
+5. The hook cannot be used as a broad substitute for canonical docs, validation, or closeout checks.
+
+So the short version: yes, spec it as a guarded escape hatch. The recommendation should remain “no hook” until recurrence plus evidence proves the hook is the smallest safe tool for the job.

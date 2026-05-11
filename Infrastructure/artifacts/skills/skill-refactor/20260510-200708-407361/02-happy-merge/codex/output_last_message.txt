@@ -1,0 +1,53 @@
+I couldn’t read the raw `.json` file directly in this sandbox, so I compared the recent review notes against the indexed evidence that surfaced in local memory. The overlap is still clear enough to make a solid lane recommendation.
+
+**Recommendation**
+
+- **Keep**
+  - **Instruction-surface compression**
+    - The review notes strongly support keeping the lane that compresses duplicated agent instructions, especially around `AGENTS.md` and cross-links to owned docs.
+    - Evidence: `coding-harness-compression-after-recent-docs-commits-2026-04-13` points to `AGENTS.md` as the highest-yield dedupe target.
+  - **Lifecycle contract / workflow ownership**
+    - Keep the lane that treats Linear flow, setup payloads, and execution summaries as separately owned surfaces.
+    - Evidence: `coding-harness-lifecycle-contract-linear-issue-flow-2026-04-13` draws a sharp line between contract-critical behavior and shorter execution docs.
+
+- **Improve**
+  - **Cross-surface consistency / control-plane drift**
+    - This lane is important, but it needs sharper guardrails and fewer “maybe overlapping” sublanes.
+    - Evidence: `coding-harness-bootstraped-architecture-review-repo-worktree-2026-04-20` and `coding-harness-project-assessment-graded-aligned-vision-2026-04-26` both flag control-plane drift and too many overlapping truth surfaces.
+    - Improvement direction: define explicit source-of-truth ownership, then make every other lane link out instead of restating policy.
+  - **CI truth-surface unification**
+    - Keep the intent, but narrow it so it only covers required-check alignment and parity tests, not general docs cleanup.
+    - Evidence: `coding-harness-ac3-implementation-completed-key-deliverables-2026-04-27` shows real progress here, but it should stay focused on branch-protection and required-check parity.
+
+- **Merge**
+  - **Instruction-surface compression + cross-surface consistency**
+    - These are currently adjacent enough that they should probably be one lane with two subcategories.
+    - Why: both are about reducing duplicated authority and making one canonical surface actually canonical.
+    - Practical merge label: **“Surface ownership and compression”**.
+  - **Lifecycle contract + setup payload ownership**
+    - The `13/16/19` split in the review notes suggests these are not separate strategic lanes so much as one workflow family with different artifact responsibilities.
+    - Practical merge label: **“Workflow contract and artifacts”**.
+  - **CI truth-surface unification + parity test maintenance**
+    - These should be one lane if they share the same check matrix and same failure modes.
+    - Practical merge label: **“Parity and required-check alignment”**.
+
+- **Retire**
+  - **Generic “docs cleanup” lane**
+    - Too broad and too weak to justify its own lane if the real work is already being handled by instruction-surface compression.
+  - **Any lane that only restates the same overlap from a different surface**
+    - If a lane exists mainly to say “this doc overlaps with that doc,” it should be collapsed into the canonical ownership lane above.
+  - **Loose “architecture review” as a standalone lane**
+    - Keep the activity, but not as an independent lane if it only rephrases control-plane drift, truth-surface overlap, or contract ownership.
+
+**Bottom line**
+
+The review notes point to a smaller set of stronger lanes than the evidence file likely implies:
+
+1. **Surface ownership and compression**
+2. **Workflow contract and artifacts**
+3. **Parity and required-check alignment**
+4. **Control-plane drift / cross-surface consistency** as the top-level guardrail
+
+Everything else looks like either a sublane of one of those or a candidate for retirement.
+
+If you want, I can turn this into a tighter table with `lane -> evidence -> action -> rationale` next.

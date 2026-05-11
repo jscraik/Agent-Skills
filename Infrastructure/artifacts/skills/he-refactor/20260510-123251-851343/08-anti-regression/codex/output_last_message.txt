@@ -1,0 +1,111 @@
+Yes. I’d define it as a short, explicit “do not recreate these old shapes” contract for post-migration agents. The key is to make it behavioral, not just historical, so future agents know what patterns are forbidden even if filenames change.
+
+Here’s a canonical version you can drop into the migration closeout docs, likely near `Docs/agents/05-contradictions-and-cleanup.md`, `Docs/agents/17-skill-management.md`, or a migration-specific section linked from `Docs/agents/README.md`.
+
+```markdown
+## Post-Migration Non-Reintroduction Contract
+
+After the migration, future agents must preserve the canonical source/runtime
+projection boundary and must not reintroduce pre-migration structures, aliases,
+or workflows that the migration removed.
+
+Future agents must not reintroduce:
+
+- Runtime projection edits as source edits.
+  Runtime-projected files are generated outputs. Agents must update the canonical
+  source that owns the content, then regenerate or sync projections through the
+  repo tooling.
+
+- Duplicate skill definitions.
+  A skill must have one canonical source of truth. Agents must not recreate
+  parallel copies of the same skill body, README, metadata, or runtime-facing
+  instructions in another tree to “make discovery work.”
+
+- Legacy path aliases that bypass ownership boundaries.
+  Agents must not restore old paths, symlinks, compatibility shims, or copied
+  folders that make deprecated locations appear authoritative again.
+
+- Stale agent instructions.
+  Agents must not bring back obsolete AGENTS.md guidance, command lists,
+  validation steps, package-manager instructions, or wording that contradicts
+  the current Agent Operating Contract, Tooling Policy, Validation docs, or Path
+  Ownership Boundaries.
+
+- Root-level package-manager workflows.
+  The repository root has no package-manager install step. Agents must not add
+  or document root-level `npm install`, `pnpm install`, `yarn install`,
+  `bundle install`, `pip install`, or equivalent package workflows unless the
+  repository policy is intentionally changed in the canonical docs.
+
+- Direct package commands from the repository root.
+  Agents must use `./bin/ask` for repo operations from the root and run package
+  commands only inside verified package roots.
+
+- Hand-maintained discovery indexes.
+  Agents must not manually recreate generated registries, marketplaces,
+  manifests, runtime projections, or discovery files when a canonical source and
+  sync/projection command owns them.
+
+- Pre-migration terminology.
+  Agents must not reintroduce names, concepts, or category labels that were
+  replaced by `UBIQUITOUS_LANGUAGE.md`. New docs and skill changes must use the
+  current ubiquitous language.
+
+- Validation shortcuts that bypass repo evidence.
+  Agents must not replace `./bin/ask repo doctor --json --robot`,
+  `./bin/ask skills prove <handle> --json --robot`, or
+  `./bin/ask repo closeout --changed --json --robot` with ad hoc local checks
+  unless the relevant canonical validation doc explicitly allows it.
+
+- “Helpful” compatibility copies.
+  Agents must not copy canonical docs, skills, or operator guidance into runtime,
+  plugin, cache, generated, or convenience locations to help another tool find
+  them. Improve the canonical discovery/sync path instead.
+
+- Conflicting AGENTS.md scopes.
+  Agents must not add deeper AGENTS.md files that override root policy unless
+  the override is deliberate, narrowly scoped, and consistent with the canonical
+  docs.
+
+- Hidden migration exceptions.
+  Agents must not preserve undocumented special cases, temporary bridges,
+  migration-only flags, or local conventions after the migration is complete.
+  Any remaining exception must be named in canonical documentation with an owner,
+  reason, and removal condition.
+```
+
+I’d also add a tighter enforcement note:
+
+```markdown
+## Agent Enforcement Rule
+
+When an agent finds a removed pre-migration pattern, it must treat the pattern as
+stale even if it appears useful. The agent should delete or replace the stale
+pattern only when the requested change already touches that area; otherwise it
+should report the stale pattern in closeout notes and leave unrelated files
+unchanged.
+
+If the agent believes a removed pattern is still required, it must update the
+canonical ownership, language, and validation docs first. It must not silently
+restore the old pattern.
+```
+
+And a concise checklist version for future PRs:
+
+```markdown
+## Post-Migration Review Checklist
+
+Before closing out migration-adjacent work, confirm that the change does not:
+
+- Edit runtime projections instead of canonical sources.
+- Add duplicate skill or doc copies.
+- Restore deprecated paths, aliases, symlinks, or compatibility shims.
+- Reintroduce stale AGENTS.md instructions.
+- Document root-level package-manager installs.
+- Replace `./bin/ask` repo workflows with ad hoc commands.
+- Manually maintain generated discovery or runtime files.
+- Use terminology superseded by `UBIQUITOUS_LANGUAGE.md`.
+- Add undocumented migration exceptions.
+```
+
+I wasn’t able to inspect the live tree because the current sandbox blocks even read-only shell commands with `sandbox_apply: Operation not permitted`, so I’m basing this on the AGENTS.md guidance you supplied. The shape is still the one I’d want in the repo: explicit, testable, and hard for a future agent to “helpfully” wander around.

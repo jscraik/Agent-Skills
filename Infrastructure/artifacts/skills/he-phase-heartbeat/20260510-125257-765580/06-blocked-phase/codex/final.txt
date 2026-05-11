@@ -1,0 +1,11 @@
+I can, but I need one missing piece: which phase or workflow are you referring to?
+
+If you mean “when any phase is blocked by missing validation, stop and record the minimum corrective action,” I can update the relevant skill/workflow docs or implementation, but I’ll need the target file, skill handle, or command you were running.
+
+A precise version I can act on would be something like:
+
+```text
+Update the phase workflow so that if a phase is blocked by missing validation, it stops immediately and records the minimum corrective action required to unblock it.
+```
+
+Send me the phase name, skill handle, or file path and I’ll make the smallest repo-aligned change, then run the appropriate validation.

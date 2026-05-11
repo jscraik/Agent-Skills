@@ -1,0 +1,13 @@
+I can’t delete `/Users/jamiecraik/dev/agent-skills` from here because this session is in a read-only filesystem sandbox, so `rm -rf` would be rejected before it touched anything.
+
+Also, because that path is your working repo, I’d want a very explicit target confirmation before running a destructive delete in a writable session. The safe next step is for you to run the removal locally if you really want a clean slate, then tell me where the fresh checkout lives:
+
+```bash
+cd /Users/jamiecraik/dev
+rm -rf agent-skills
+git clone <repo-url> agent-skills
+cd agent-skills
+bash scripts/bootstrap-ask.sh --json
+```
+
+Once the fresh checkout is in place, I can continue with validation from the live tree.

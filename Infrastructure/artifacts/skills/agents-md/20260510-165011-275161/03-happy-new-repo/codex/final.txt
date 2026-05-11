@@ -1,0 +1,66 @@
+Here’s a solid first-pass `AGENTS.md` for `/tmp/ledger-cli` that fits a small Python CLI repo using `uv`, including the non-standard `uv run pytest -q tests/cli` check and the fact that there is no Project Brain or memory surface yet.
+
+```md
+---
+schema_version: 1
+---
+
+# ledger-cli Agent Guide
+
+`ledger-cli` is a small Python command-line repository. Keep changes minimal, prefer direct fixes over abstraction, and use the repo's existing `uv` workflow for all development and validation.
+
+## Root Essentials
+
+- Use `uv` for Python execution and dependency-aware commands.
+- The canonical test check for this repo is:
+  `uv run pytest -q tests/cli`
+- If you need to run broader tests, prefer the narrowest relevant `pytest` target first, then expand only if needed.
+- There is no Project Brain or memory surface yet, so do not expect repository memory, playbooks, or prior-task summaries to exist unless they are added later.
+- Before making structural or workflow changes, inspect the existing CLI entrypoints, tests, and packaging metadata to understand the current shape of the project.
+- Prefer editing source files and tests directly rather than adding new layers, wrappers, or abstractions.
+
+## Working Style
+
+- Keep the CLI behavior simple and predictable.
+- Preserve existing command names, flags, and output formats unless the task explicitly asks for a change.
+- When changing behavior, update or add tests in the same change.
+- If a change affects user-visible output, include coverage for the exact output shape where practical.
+- Avoid broad refactors unless they are necessary to complete the task.
+
+## Validation
+
+- For CLI changes, run:
+  `uv run pytest -q tests/cli`
+- If the change touches other code paths, run the smallest relevant test subset in addition to the CLI check.
+- If a test fails because of an unclear expectation, inspect the existing tests first and align with the repo's current conventions before changing the implementation.
+- Prefer deterministic checks over manual verification.
+
+## Python Conventions
+
+- Follow the existing style in the repository.
+- Keep functions small and readable.
+- Avoid adding new dependencies unless the task clearly requires them.
+- If type hints already exist in the touched area, preserve and extend them consistently.
+- Do not introduce heavy framework patterns for a small CLI unless the repository already uses them.
+
+## Editing Rules
+
+- Make the smallest change that solves the task.
+- Do not rewrite unrelated files.
+- Do not remove tests or simplify validation just to make the suite pass.
+- If you discover surprising local changes, treat them as user work unless you know you created them.
+
+## Repo Notes
+
+- This repository currently has no Project Brain or memory surface.
+- If a future memory or notes directory is added, document it here with:
+  - what it stores
+  - when to consult it
+  - whether agents may update it
+```
+
+If you want, I can also tailor this into a stricter version with sections for:
+1. packaging and release workflow,
+2. CLI UX/output conventions,
+3. testing and lint commands,
+4. or a very compact “minimal AGENTS.md” variant.

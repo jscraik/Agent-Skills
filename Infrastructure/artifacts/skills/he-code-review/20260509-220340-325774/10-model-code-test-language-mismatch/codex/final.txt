@@ -1,0 +1,30 @@
+I can review it, but I’m blocked from seeing the live diff in this session right now.
+
+Every read-only command I tried from `/Users/jamiecraik/dev/agent-skills` failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Commands attempted:
+
+```bash
+pwd && rg --files -g 'AGENTS.md' -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/README.md'
+git status --short && git diff --stat
+git status --short
+```
+
+Because this is a review request, I don’t want to invent findings without line-level evidence. Please paste the diff, or run this locally and paste the output:
+
+```bash
+git diff --stat
+git diff --find-renames
+```
+
+If the diff is large, the highest-signal version would be:
+
+```bash
+git diff --find-renames -- path/to/spec path/to/implementation path/to/tests
+```
+
+Once I have it, I’ll review it as a consistency/behavior regression pass with findings first, ordered by severity. The specific smell you named, “spec says Workspace, code says Account, tests assert Customer behavior,” is exactly the kind of mismatch I’ll trace across the contract, implementation naming, persistence/API behavior, and test assertions.

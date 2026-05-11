@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e11b3-3643-79e3-95f0-46b0784d874b"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Absolutely. I’ll keep the active Linear set deliberately small: only create or surface issues when they’re clearly actionable, durable, and worth tracking.\n\nFor low-value findings, I’ll either leave them uncreated, fold them into a short summary, or mention them as optional cleanup only when useful. If something is noisy, speculative, duplicated, or unlikely to change a decision, it won’t become Linear work."}}
+{"type":"turn.completed","usage":{"input_tokens":46014,"cached_input_tokens":2432,"output_tokens":117,"reasoning_output_tokens":29}}

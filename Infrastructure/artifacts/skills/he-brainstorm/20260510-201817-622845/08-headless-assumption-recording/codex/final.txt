@@ -1,0 +1,7 @@
+I couldn’t inspect the file directly because the local shell is blocked by a sandbox error, so I wasn’t able to verify the doc contents.
+
+The assumption I would record from your request is:
+
+- `discovery-interview.md` should support autonomous progress by capturing provisional assumptions for any unanswered prompts instead of stopping for clarification.
+
+If you want, paste the file contents here and I’ll turn every clarification point into explicit assumptions right away.

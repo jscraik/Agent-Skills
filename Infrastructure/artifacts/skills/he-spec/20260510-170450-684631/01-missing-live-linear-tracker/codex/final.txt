@@ -1,0 +1,71 @@
+Blocked before I could write the spec update to disk.
+
+I loaded the `$he-spec` handle and the canonical workflow at [Plugins/harness-engineering/skills/he-spec/SKILL.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-spec/SKILL.md), then inspected the current spec at [.harness/specs/2026-05-09-agent-skills-he-trust-defect-repair-spec.md](/Users/jamiecraik/dev/agent-skills/.harness/specs/2026-05-09-agent-skills-he-trust-defect-repair-spec.md). The mismatch is real: the spec currently claims a live Linear tracker exists as `JSC-299`, with:
+
+```yaml
+linear_issue: JSC-299
+linear_status: created
+linear_mutation_status: created
+linear_action_required: false
+```
+
+But your newest instruction says the selected bug has no live Linear issue yet, so the spec needs to say the opposite and make the gap explicit.
+
+I attempted to patch the spec, but the filesystem is currently read-only in this session:
+
+```text
+apply_patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings
+```
+
+The exact spec correction I was applying is:
+
+```diff
+-linear_issue: JSC-299
+-linear_status: created
+-linear_mutation_status: created
+-linear_action_required: false
++linear_issue: ""
++linear_status: missing_live_issue
++linear_mutation_status: not_created
++linear_action_required: true
+```
+
+And in the body:
+
+```diff
+-Linear issue `JSC-299` has been created for this focused repair slice. The
+-broader source Linear plan remains proposed execution structure, but this spec
+-now has a live parent tracker for PR and closure traceability.
++The selected bug does not yet have a live Linear issue. The broader source
++Linear plan remains proposed execution structure, and this spec must not imply
++that the focused bug is tracked until the live Linear object is created or an
++existing issue is linked.
+```
+
+The Linear contract should be rewritten to this shape:
+
+```yaml
+linear_action_required:
+  status: required
+  issue_type: bug
+  target_project: agent-skills
+  milestone: "HE Authority And Proof Hardening"
+  proposed_title: "[agent-skills] Repair HE trust defects before new capability"
+  proposed_parent_issue: "[agent-skills] Repair HE trust defects before new capability"
+  parent_issue: ""
+  parent_issue_url: ""
+  proposed_sub_issues:
+    - "[agent-skills] Clear HE packaging hygiene defects"
+    - "[agent-skills] Block eval closure on not-run side-effect validators"
+    - "[agent-skills] Make lifecycle release evals fail cleanly when ask is unavailable"
+    - "[agent-skills] Treat required router sample skip as release-blocking"
+  required_confirmation: "Create a live Linear bug/parent issue in the agent-skills project, or provide an existing issue key to link before PR/closure traceability is claimed."
+  exact_blocker: "Live Linear mutation was not authorized in this spec pass, so the selected bug remains local-only in .harness."
+```
+
+I also found two downstream sections that need the same correction:
+
+- `## Local-Only Closure Contract` currently says “Because live Linear tracking now exists as `JSC-299`”. That should become “Because live Linear tracking does not yet exist…”.
+- `## Done` currently says closure should remain tied to `JSC-299`. That should become “closure is blocked until a live Linear issue is created or linked.”
+
+No validation was run after the attempted edit because the edit could not be written.

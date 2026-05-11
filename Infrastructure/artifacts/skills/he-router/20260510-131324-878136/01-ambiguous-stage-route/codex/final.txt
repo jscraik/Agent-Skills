@@ -1,0 +1,3 @@
+Which shape should I use for the Harness request: **brainstorm**, **spec**, or **plan**?
+
+My default recommendation is **plan** if you already know the outcome you want and need execution steps. Use **brainstorm** if the idea is still fuzzy, or **spec** if you want crisp requirements before anyone implements.

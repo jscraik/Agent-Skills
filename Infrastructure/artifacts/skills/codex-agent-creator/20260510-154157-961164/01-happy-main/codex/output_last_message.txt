@@ -1,0 +1,28 @@
+To validate a Codex custom subagent TOML, I need these exact inputs:
+
+- The TOML file content, or the absolute path to the file you want checked.
+- The intended shape of the role:
+  - standalone `agents/<name>.toml`
+  - or a role referenced by `[agents.<name>].config_file`
+- The agent name you expect Codex to register.
+- The agent description.
+- The `developer_instructions` body.
+- The model value.
+- The `model_reasoning_effort` value.
+- The intended scope:
+  - `global`
+  - `project`
+- Any runtime limits you expect to be present, if applicable:
+  - `agents.max_threads`
+  - `agents.max_depth`
+  - `agents.job_max_runtime_seconds`
+- Any execution posture overrides you expect to be encoded:
+  - approval policy
+  - sandbox mode
+  - network setting
+- If you want discoverability validated too, the exact `config.toml` or declaring config path that should point to the agent.
+- If you want me to check for compatibility with the current repo contract, I also need the target context:
+  - whether this is for the repo-owned control plane or a user-wide config
+  - whether there is an existing agent this should replace or fold into
+
+If you want, send me just the TOML file and I can validate the structure from there, then tell you exactly what is missing or inconsistent before any edits.

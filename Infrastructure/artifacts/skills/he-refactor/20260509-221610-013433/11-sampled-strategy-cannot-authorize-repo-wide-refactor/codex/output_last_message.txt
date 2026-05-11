@@ -1,0 +1,17 @@
+I’m blocked by the execution environment before I can inspect or edit the repo.
+
+Both a basic read command and the repo wrapper fail immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Commands attempted from `/Users/jamiecraik/dev/agent-skills`:
+
+```bash
+pwd && rg --files -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/README.md' -g '*refactor*' -g '*strategy*' -g 'AGENTS.md'
+git status --short
+./bin/ask repo doctor --json --robot
+```
+
+Because the sandbox is failing before command execution, I can’t safely read `UBIQUITOUS_LANGUAGE.md`, determine the canonical source path, inspect existing strategy/refactor artifacts, or create the repo-wide refactor program without guessing. The next step is to rerun this with a working filesystem sandbox for `/Users/jamiecraik/dev/agent-skills`; once that’s available, I’ll use the repo wrappers and create the highest-priority refactor program in the canonical location with validation evidence.

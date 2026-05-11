@@ -1,0 +1,17 @@
+I’m blocked by the current sandbox before I can even read files. Every read command failed with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Commands attempted from `/Users/jamiecraik/dev/agent-skills`:
+
+```bash
+sed -n '1,220p' README.md
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+find .. -name AGENTS.md -print
+```
+
+Because the environment is read-only and approval is disabled, I can’t inspect `README.md`, read the required `UBIQUITOUS_LANGUAGE.md`, or apply the README edit safely in this turn.
+
+The fastest way forward is to paste the current README product overview section here, or loosen the sandbox so reads and writes work. Once I can see the text, I’ll rewrite it into a more customer-facing, punchier overview and keep the edit scoped to `README.md`.

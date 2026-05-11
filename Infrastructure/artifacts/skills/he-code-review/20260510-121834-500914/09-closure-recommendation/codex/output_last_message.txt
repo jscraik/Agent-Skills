@@ -1,0 +1,43 @@
+**Completion Recommendation**
+
+**Pass**
+- Instruction context is clear enough to define the expected closeout standard.
+- Evidence: the provided `AGENTS.md` for `/Users/jamiecraik/dev/agent-skills` says repo work should use root wrappers such as `./bin/ask`, especially:
+  - `./bin/ask repo doctor --json --robot`
+  - `./bin/ask repo closeout --changed --json --robot`
+- Evidence: the same instructions require reading `UBIQUITOUS_LANGUAGE.md` before changing skills, sync policy, runtime projections, or agent-facing docs, and editing canonical sources rather than runtime projections.
+
+**Blocked**
+- I cannot produce a reliable completion recommendation for the actual working tree because the command sandbox is failing before any shell command runs.
+- Evidence: attempted repo inspection commands all failed with the same sandbox error:
+  - `pwd && rg --files -g 'AGENTS.md' -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/README.md'`
+  - `git status --short`
+  - `git diff --stat`
+  - `pwd`
+- Failure output for each attempt:
+  ```text
+  sandbox-exec: sandbox_apply: Operation not permitted
+  ```
+- Because of that, I could not inspect:
+  - changed files
+  - diff scope
+  - validation output
+  - whether canonical sources or runtime projections were touched
+  - whether repo-specific checks pass
+  - whether there are unrelated user changes to preserve
+
+**Needs Rework**
+- No code or document changes can be marked as “needs rework” from live evidence yet, because I could not read the tree or diff.
+- The completion process itself needs rework before approval: it needs successful local evidence from the repo wrapper commands.
+- Required evidence before calling this complete:
+  ```bash
+  ./bin/ask repo doctor --json --robot
+  ./bin/ask repo closeout --changed --json --robot
+  git status --short
+  git diff --stat
+  ```
+- If skills, sync policy, runtime projections, or agent-facing docs were changed, completion also needs evidence that `UBIQUITOUS_LANGUAGE.md` and the relevant ownership guidance were read and followed.
+
+**Recommendation**
+- **Blocked, not complete.**
+- Reason: the live repo state and validation evidence could not be inspected due to sandbox failure. The instructions are sufficient to know what evidence is required, but the required evidence is unavailable in this session.

@@ -1,0 +1,34 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-175009-059815/01-first-principles-review-flags-false-sophistication/codex",
+    "final": "Infrastructure/artifacts/skills/he-code-review/20260510-175009-059815/01-first-principles-review-flags-false-sophistication/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-175009-059815/01-first-principles-review-flags-false-sophistication/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-175009-059815/01-first-principles-review-flags-false-sophistication/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-175009-059815/01-first-principles-review-flags-false-sophistication/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 50,
+      "command_count": 21,
+      "unique_command_count": 21,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 1,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 855825,
+        "output_tokens": 4825,
+        "reasoning_tokens": 0,
+        "total_tokens": 860650
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

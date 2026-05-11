@@ -1,0 +1,1 @@
+Compare the current he-strategy/refactor/linear artifacts with my original long-form prompt workflow and tell me whether they are equivalent before routing downstream.

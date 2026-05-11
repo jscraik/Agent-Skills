@@ -1,0 +1,283 @@
+Yes. I can turn it into a skill design that bakes in the full lifecycle: how to run it, how to test it, how to distribute it, how to observe it in practice, and how to adapt it safely over time.
+
+I wasn’t able to write into the local repo from this session because the shell path is blocked, so I’m giving you the skill content directly in a form you can drop into a new skill. If you want, I can next turn this into a repo-ready `SKILL.md` plus supporting files once file access is available.
+
+**Skill Draft: `gh-pr-feedback-workflow`**
+
+```md
+---
+name: gh-pr-feedback-workflow
+description: Resolve repeatable pull request review feedback by classifying comments, implementing the smallest safe fix, validating the change, and reporting what changed. Use when a user wants to address PR review comments, requested changes, or repeated reviewer feedback in a disciplined loop.
+---
+
+# PR Feedback Workflow
+
+## Purpose
+
+This skill helps Codex handle repeatable pull request feedback consistently across repositories and review cycles.
+
+It is designed for:
+- inline PR comments
+- requested changes
+- recurring review themes
+- review-thread cleanup
+- follow-up fixes after a previous implementation pass
+
+It is not designed for:
+- open-ended product planning
+- unrelated refactors
+- bulk “fix everything” sweeps without review context
+- code review generation without implementation
+
+## Operating Principles
+
+- Prefer the smallest safe change that addresses the reviewer’s concern.
+- Preserve the author’s intent unless the feedback reveals a real bug, contract break, or maintainability hazard.
+- Treat review comments as evidence, not instructions to overfit.
+- Distinguish between:
+  - valid bug
+  - style preference
+  - missing test coverage
+  - misunderstanding
+  - outdated comment
+- If a comment is ambiguous, resolve it conservatively and explain the tradeoff.
+- If multiple comments share one root cause, fix the root cause once rather than patching each symptom.
+
+## Workflow
+
+### 1. Intake
+
+Capture:
+- PR or branch identifier
+- the feedback threads or summary
+- the relevant files
+- the expected behavior
+- any constraints from the repository’s local guidance
+
+If the feedback is broad, first cluster comments by theme:
+- correctness
+- safety
+- API contract
+- tests
+- performance
+- naming / readability
+- documentation
+
+### 2. Triage
+
+For each comment, classify it as one of:
+- `must-fix`
+- `should-fix`
+- `nice-to-have`
+- `outdated`
+- `needs-clarification`
+
+Decision rules:
+- `must-fix` if it affects correctness, security, data integrity, contract compatibility, or test reliability.
+- `should-fix` if it materially improves clarity, maintainability, or prevents future errors.
+- `nice-to-have` if it is a taste preference with low risk.
+- `outdated` if the code has already changed or the concern no longer applies.
+- `needs-clarification` if the reviewer’s intent is unclear.
+
+### 3. Implement
+
+For each accepted item:
+- make the smallest correct change
+- keep diffs localized
+- add or update tests where behavior changes
+- avoid opportunistic cleanup unless it reduces risk or complexity
+- preserve backward compatibility unless the feedback explicitly requires a breaking change
+
+If a fix requires broader change than expected:
+- stop and explain the scope increase
+- propose the minimal safe alternative
+- proceed only after choosing the safer route
+
+### 4. Validate
+
+Validation should match the change:
+- unit tests for logic and edge cases
+- integration tests for API or workflow behavior
+- snapshot or UI tests for visible output
+- lint or typecheck if the change affects syntax or contracts
+
+Validation hierarchy:
+1. targeted tests first
+2. broader suite if needed
+3. manual inspection only if automated checks cannot cover the change
+
+### 5. Report Back
+
+Report:
+- what feedback was addressed
+- what changed in the code
+- what was intentionally not changed and why
+- what tests were run
+- any residual risk or follow-up needed
+
+If a comment was not applied, say why:
+- outdated
+- incorrect
+- out of scope
+- already covered
+- requires product decision
+
+## Testing
+
+This skill must be tested at three levels.
+
+### A. Scenario Tests
+
+Create a small set of canonical review scenarios:
+- one correctness bug
+- one unclear reviewer comment
+- one style-only comment
+- one outdated comment
+- one multi-comment root-cause case
+
+For each scenario, verify the skill:
+- classifies comments appropriately
+- makes the minimal correct change
+- adds the right test coverage
+- reports the result clearly
+
+### B. Regression Tests
+
+Maintain a fixture set of prior PR feedback examples and expected outcomes.
+
+Each fixture should record:
+- comment text
+- classification
+- expected action
+- expected validation
+- expected response summary
+
+Regression tests should catch:
+- over-fixing
+- under-fixing
+- ignoring test impact
+- applying changes to outdated feedback
+- failing to explain non-applied comments
+
+### C. Acceptance Tests
+
+The skill is successful if it can consistently:
+- turn a review thread into a small, reviewable patch
+- explain the reasoning behind each decision
+- validate the fix with appropriate tests
+- avoid unnecessary churn
+
+Recommended acceptance signal:
+- reviewers confirm the follow-up patch addresses their concern with minimal extra change
+- repeated review themes decline over time
+
+## Distribution
+
+This skill should be distributed as part of the repository’s skill catalog.
+
+Distribution requirements:
+- include the `SKILL.md` source in the canonical skill location
+- keep any example scenarios or fixtures nearby in a dedicated subfolder
+- version the skill with the repo
+- document the intended trigger phrases in the skill description
+
+Recommended distribution channels:
+- local skill registry in the repo
+- team docs listing when to use the skill
+- example PR feedback scenarios for onboarding
+- optional bundle export for reuse across repos
+
+Distribution rule:
+- always distribute the canonical source, not generated runtime projections
+
+## Observation
+
+The skill should emit lightweight operational signals so its usage can be observed.
+
+Track:
+- number of review comments processed
+- number classified as `must-fix`, `should-fix`, `nice-to-have`, `outdated`, `needs-clarification`
+- number of comments resolved by one shared root-cause fix
+- validation method used
+- number of follow-up review rounds required
+- cases where the skill declined to apply a comment
+
+Observability sources:
+- skill execution logs
+- PR review metadata
+- test outcomes
+- follow-up reviewer responses
+
+Metrics to watch:
+- resolution rate per cycle
+- average iterations to close feedback
+- percentage of comments needing clarification
+- percentage of fixes that required rework
+- number of regressions after “addressed” status
+
+Observation rule:
+- prefer structured summaries over free-form notes
+- capture enough context to understand why a decision was made
+
+## Adaptation
+
+This skill should adapt based on repeated patterns in feedback and outcomes.
+
+Adaptation triggers:
+- the same comment appears across multiple PRs
+- reviewers repeatedly request the same correction
+- a test gap keeps reappearing
+- a style preference turns out to be a team convention
+- a “minor” issue repeatedly becomes a bug in production or review churn
+
+Adaptation process:
+1. identify the recurring pattern
+2. decide whether it is a rule, a convention, or a one-off
+3. update the skill guidance or examples
+4. add or adjust fixture coverage
+5. verify that the new guidance reduces repeat review cycles
+
+Adaptation guardrails:
+- do not absorb every reviewer preference into the skill
+- do not turn one-off feedback into global policy
+- do not let the skill drift into overfitting one codebase
+- preserve the minimal-fix default
+
+## Output Format
+
+When used, the skill should produce:
+- a short classification summary
+- a list of accepted fixes
+- a list of deferred or rejected comments with reasons
+- validation evidence
+- a concise final reply suitable for the PR thread
+
+## Example Trigger Phrases
+
+- “address these PR comments”
+- “resolve this review feedback”
+- “apply the reviewer changes”
+- “fix the requested changes”
+- “handle the follow-up review”
+```
+
+**Recommended supporting files**
+
+- `scenarios/README.md`
+- `scenarios/correctness.md`
+- `scenarios/clarification.md`
+- `scenarios/style_only.md`
+- `scenarios/outdated.md`
+- `fixtures/*.json`
+- `tests/skill_tests.md` or repo-native validation docs
+
+**What I built into it**
+- `testing`: scenario, regression, and acceptance coverage
+- `distribution`: canonical source, versioning, catalog placement
+- `observation`: comment counts, resolution rate, validation method, rework rate
+- `adaptation`: explicit triggers, process, and guardrails
+
+If you want, I can next convert this into:
+1. a repo-specific skill folder layout,
+2. a tighter `SKILL.md` tailored to your existing conventions, or
+3. a full implementation plan with test fixtures and distribution metadata.

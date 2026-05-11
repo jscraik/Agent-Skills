@@ -1,0 +1,46 @@
+For validating a Codex custom subagent TOML, the repo’s guidance points to this exact input set:
+
+Required:
+1. The TOML file itself, or the absolute path to it.
+2. The intended scope:
+   - `validation-only`
+   - `global`
+   - `project`
+   - `repo-owned`
+3. The canonical source path, if the TOML is not the source of truth.
+4. An evidence source:
+   - local schema evidence
+   - official docs
+   - existing validator output
+   - runtime/config-load evidence
+
+Strongly recommended for a clean validation:
+1. The target agent name exactly as it should be loaded.
+2. The validation goal:
+   - `syntax only`
+   - `schema / field contract`
+   - `discoverability`
+   - `runtime posture`
+   - `full role validation`
+3. The declaring config path, if the role is wired through `[agents.<name>]` or another config layer.
+4. Any config-layer context that affects discovery:
+   - `config.toml`
+   - `.codex/agents/*.toml`
+   - project or repo-owned discoverability wiring
+
+Helpful if you want me to check correctness beyond the file:
+1. Nearby existing agent roles to compare for overlap, reuse, folding, or rename decisions.
+2. Any privacy or safety constraints on the role text, especially if instructions were generated or copied from session transcripts.
+3. The current Codex contract source you want treated as authoritative if there is any schema drift risk.
+
+Shortest handoff you can give me:
+- TOML path
+- scope
+- declaring config path if any
+- validation goal
+
+Relevant repo refs:
+- [Skills/agent-ops/codex-agent-creator/SKILL.md](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md)
+- [Skills/agent-ops/codex-agent-creator/references/role-creation-guide.md](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/references/role-creation-guide.md)
+
+If you want, I can turn that into a one-line fill-in template for you next.

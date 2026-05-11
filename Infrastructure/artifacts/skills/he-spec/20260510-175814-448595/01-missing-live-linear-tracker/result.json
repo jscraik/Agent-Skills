@@ -1,0 +1,63 @@
+{
+  "id": "missing-live-linear-tracker",
+  "name": "Missing live Linear tracker",
+  "category": "edge",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": true,
+  "baseline_type": null,
+  "comparison_inputs": null,
+  "iteration_round_state": null,
+  "metric_availability": null,
+  "readiness_state": null,
+  "comparison_review_artifact": null,
+  "neutral_baseline_approval": null,
+  "timeout_profile": "default",
+  "timeout_sec": 90.0,
+  "dir": "Infrastructure/artifacts/skills/he-spec/20260510-175814-448595/01-missing-live-linear-tracker",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": true,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "Infrastructure/artifacts/skills/he-spec/20260510-175814-448595/01-missing-live-linear-tracker/codex",
+        "final": "Infrastructure/artifacts/skills/he-spec/20260510-175814-448595/01-missing-live-linear-tracker/codex/final.txt",
+        "stdout": "Infrastructure/artifacts/skills/he-spec/20260510-175814-448595/01-missing-live-linear-tracker/codex/stdout.txt",
+        "stderr": "Infrastructure/artifacts/skills/he-spec/20260510-175814-448595/01-missing-live-linear-tracker/codex/stderr.txt",
+        "jsonl": "Infrastructure/artifacts/skills/he-spec/20260510-175814-448595/01-missing-live-linear-tracker/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 6,
+          "command_count": 0,
+          "unique_command_count": 0,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 0,
+          "turn_count": 1,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 85330,
+            "output_tokens": 756,
+            "reasoning_tokens": 0,
+            "total_tokens": 86086
+          }
+        },
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": true,
+  "tier1_failed": false,
+  "tier2_failed": false,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": []
+}

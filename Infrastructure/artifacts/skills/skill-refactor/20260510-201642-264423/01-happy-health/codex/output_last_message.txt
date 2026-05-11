@@ -1,0 +1,20 @@
+I’m blocked from reading the evidence files in this session: every local shell command, including read-only commands like `pwd`, `sed`, `ls`, and `python3 bin/ask repo status --json`, is failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also checked MCP resources, but there are no exposed local resources for these files.
+
+Because the request depends on the actual contents of:
+
+- `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/skill-refactor-evidence.json`
+- `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/skill-refactor-handoffs.json`
+
+I can’t honestly rank the skills without seeing that evidence. Paste the two JSON files, or rerun me in a session where read-only filesystem commands work, and I’ll produce a ranked list with:
+
+1. Skills that repeatedly failed.
+2. Skills that routed incorrectly.
+3. Skills that produced weak or missing validation evidence.
+4. Evidence snippets from the JSON backing each ranking.
+5. A short recommended action per skill.

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-spec" tests="1" failures="0" errors="0" timestamp="2026-05-10T16:06:51Z" id="20260510-170651-852786">
+  <testcase name="out-of-scope-control" classname="he-spec" time="300.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260510-170651-852786/01-out-of-scope-control
+    </system-out>
+  </testcase>
+</testsuite>

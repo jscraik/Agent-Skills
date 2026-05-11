@@ -25,12 +25,12 @@ linear_parent_initiative: Dev Portfolio
 linear_milestone: Command surface and ask reliability
 he_slice: Ask Control Plane Decomposition
 linear_parent_issue_title: "[agent-skills] Decompose skills command module into bounded services"
-linear_child_issues: "JSC-285, JSC-286, JSC-287"
-linear_labels: "architecture, Refactor, Agent"
+linear_child_issues: JSC-285, JSC-286, JSC-287
+linear_labels: architecture, Refactor, Agent
 linear_label_status: resolved_mapped_to_existing_labels
 selected_refactor: .harness/refactors/ask-control-plane-decomposition.md
 parallel_refactor: .harness/refactors/proof-driven-skill-promotion.md
-eval_artifact: .harness/evals/agent-skills-jsc-284-eval.md
+eval_artifact: .harness/evals/agent-skills-ask-control-plane-decomposition-eval.md
 ---
 
 # Agent Skills Ask Control Plane Decomposition Plan
@@ -157,7 +157,7 @@ In scope:
 - Extract plugin cache refresh/report/error behavior into `Infrastructure/scripts/lib/ask/services/plugin_cache.py` or an equivalent internal service path that matches repo conventions.
 - Preserve public `./bin/ask skills ...` command behavior.
 - Preserve observed plugin cache dry-run fields and log strings.
-- Record implementation evidence in `.harness/evals/agent-skills-jsc-284-eval.md`.
+- Record implementation evidence in `.harness/evals/agent-skills-ask-control-plane-decomposition-eval.md`.
 - Write the proof taxonomy ADR in parallel as a decision-only artifact.
 - Preserve the resolved validation gate before starting and closing `PLAN-ASK-003`.
 
@@ -227,7 +227,7 @@ Steps:
 1. Verify `JSC-284` through `JSC-287` remain on canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`.
 2. Verify duplicate project `e6ad5ea3-28b0-4b07-b2e0-594ec1b9242f` remains canceled and has no active issues.
 3. Verify implementation issues keep `architecture`, `Agent`, `Refactor`; proof ADR keeps `CE: Spec`, `architecture`, `Agent`, `Policy`.
-4. Run baseline command samples and record exact outcomes in `.harness/evals/agent-skills-jsc-284-eval.md`.
+4. Run baseline command samples and record exact outcomes in `.harness/evals/agent-skills-ask-control-plane-decomposition-eval.md`.
 
 Baseline commands:
 
@@ -281,7 +281,7 @@ Steps:
    - proof/eval
    - tool resolution
    - routing/improvement
-3. Record the responsibility map in `.harness/evals/agent-skills-jsc-284-eval.md`.
+3. Record the responsibility map in `.harness/evals/agent-skills-ask-control-plane-decomposition-eval.md`.
 4. Select plugin-cache-specific baseline assertions from the current `skills sync --scope workspace --projection rooted --dry-run --json` output.
 5. Record the current `repo doctor` failure class separately from migration risk.
 
@@ -486,7 +486,7 @@ Objective:
 Required eval artifact:
 
 ```text
-.harness/evals/agent-skills-jsc-284-eval.md
+.harness/evals/agent-skills-ask-control-plane-decomposition-eval.md
 ```
 
 Eval artifact must include:
@@ -547,10 +547,10 @@ JSC-284 must not close until JSC-285, JSC-286, JSC-287, and PLAN-ASK-005 evidenc
 
 | Linear issue | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
 |---|---|---|---|---|
-| JSC-284 | SA-ASK-001 through SA-ASK-015 | PLAN-ASK-001, PLAN-ASK-005 | SA-ASK-001 through SA-ASK-015 | Closed with child proof posted |
-| JSC-285 | SA-ASK-001, SA-ASK-002, SA-ASK-010 | PLAN-ASK-002 | SA-ASK-001, SA-ASK-002, SA-ASK-010 | Closed with proof posted |
-| JSC-286 | SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013 | PLAN-ASK-003 | SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013 | Closed with proof posted |
-| JSC-287 | SA-ASK-007 | PLAN-ASK-004 | SA-ASK-007 | Closed with proof posted |
+| JSC-284 | SA-ASK-001 through SA-ASK-015 | PLAN-ASK-001, PLAN-ASK-005 | SA-ASK-001 through SA-ASK-015 | Completed (see eval artifact) |
+| JSC-285 | SA-ASK-001, SA-ASK-002, SA-ASK-010 | PLAN-ASK-002 | SA-ASK-001, SA-ASK-002, SA-ASK-010 | Completed (see eval artifact) |
+| JSC-286 | SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013 | PLAN-ASK-003 | SA-ASK-003, SA-ASK-004, SA-ASK-005, SA-ASK-006, SA-ASK-009, SA-ASK-010, SA-ASK-011, SA-ASK-012, SA-ASK-013 | Completed (see eval artifact) |
+| JSC-287 | SA-ASK-007 | PLAN-ASK-004 | SA-ASK-007 | Completed (ADR/eval evidence recorded) |
 
 ## Validation Strategy
 
@@ -614,7 +614,7 @@ Do not rollback the Linear hygiene correction: canonical project identity remain
 - Do not add unrelated feature behavior to `commands/skills.py`.
 - Do not leave new service modules importing from `ask.commands.*`.
 - Do not create new Linear projects, milestones, labels, or issues for this slice.
-- Do not close `JSC-284` without `.harness/evals/agent-skills-jsc-284-eval.md`.
+- Do not close `JSC-284` without `.harness/evals/agent-skills-ask-control-plane-decomposition-eval.md`.
 
 ## Open Execution Unknowns
 
@@ -633,7 +633,7 @@ The plan is complete when:
 - `JSC-285` has responsibility-map and baseline evidence.
 - `JSC-286` has plugin-cache service extraction evidence with preserved command behavior.
 - `JSC-287` has an ADR or ready draft that defines proof taxonomy without enforcement.
-- `.harness/evals/agent-skills-jsc-284-eval.md` exists and links evidence to SA-ASK IDs.
+- `.harness/evals/agent-skills-ask-control-plane-decomposition-eval.md` exists and links evidence to SA-ASK IDs.
 - No later refactor phase started accidentally.
 - Linear tracker identity remains canonical.
 

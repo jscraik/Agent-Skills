@@ -1,0 +1,21 @@
+`blocked`
+
+The routed-result validation could not run because every shell command is failing at the sandbox layer before the repo command starts:
+
+```bash
+python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "skill-factory" --task 'Can you validate the routed result and call out any blocker before continuing?' --json
+```
+
+Result:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also tried to read the repo-required `UBIQUITOUS_LANGUAGE.md` before going further, and that failed with the same sandbox error:
+
+```bash
+test -f UBIQUITOUS_LANGUAGE.md && sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+```
+
+So the blocker is environmental, not a skill routing failure I can inspect yet: the current read-only sandbox cannot apply, and approval policy is `never`, so I cannot request broader permissions or safely continue to child-module loading.

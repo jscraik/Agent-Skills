@@ -1,0 +1,46 @@
+I’m blocked from doing the repo-evidence evaluation right now because every shell read is failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I tried read-only commands from `/Users/jamiecraik/dev/agent-skills`, including `pwd`, `rg --files`, and `sed` against `AGENTS.md` / `Docs/agents/README.md`; all failed with the same sandbox setup error. Since the current policy says approval is `never`, I can’t request broader filesystem permissions or run outside the sandbox.
+
+Based on the slice description alone, my closure evaluation is:
+
+**Closure verdict: Fail / Not Closeable**
+
+A domain-sensitive slice cannot be considered closed when both of these are missing:
+
+1. **Bounded context proof**
+   There is no evidence that the slice’s language, ownership boundary, source-of-truth paths, or runtime projections have been mapped to the correct domain boundary. For this repo, that matters because AGENTS.md explicitly calls out canonical source ownership and path ownership boundaries. Without proof, we cannot tell whether the slice edits the intended bounded context or leaks changes across adjacent contexts.
+
+2. **Aggregate invariant proof**
+   There is no demonstrated invariant check showing that the aggregate remains valid after the slice. For a domain-sensitive change, closure needs evidence that the aggregate’s consistency rules still hold across creation, update, projection, validation, and sync paths. Missing this proof means the slice may pass local checks while still violating the domain model.
+
+Minimum evidence I’d expect before marking it closeable:
+
+```text
+Bounded context evidence:
+- Identified bounded context name and domain language.
+- Canonical source paths touched.
+- Runtime projection/generated paths intentionally untouched or regenerated.
+- Neighboring contexts checked for accidental coupling.
+- Relevant ownership boundary doc cited.
+
+Aggregate invariant evidence:
+- Aggregate root or equivalent consistency boundary identified.
+- Invariants listed in domain language.
+- Code paths that can mutate the aggregate enumerated.
+- Tests/proofs showing invalid states are rejected.
+- Validation command output showing pass/fail status.
+
+Repo closeout evidence:
+- ./bin/ask repo doctor --json --robot
+- ./bin/ask repo closeout --changed --json --robot
+- Any skill-specific prove/explain command if this slice touches skills.
+```
+
+So the clean evaluation is: **do not close this slice yet**. It needs a follow-up proof pass focused specifically on bounded-context ownership and aggregate invariants before ordinary validation evidence is meaningful.
+
+I can do the full file-backed evaluation once the workspace shell sandbox can read files again, or if you paste the changed paths / closeout output / relevant slice notes here.

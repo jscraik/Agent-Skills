@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-phase-heartbeat" tests="1" failures="0" errors="0" timestamp="2026-05-10T12:10:28Z" id="20260510-131028-236089">
+  <testcase name="phase-choice-ambiguous" classname="he-phase-heartbeat" time="600.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260510-131028-236089/01-phase-choice-ambiguous
+    </system-out>
+  </testcase>
+</testsuite>

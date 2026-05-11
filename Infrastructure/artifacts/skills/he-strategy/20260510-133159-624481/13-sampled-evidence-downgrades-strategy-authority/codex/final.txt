@@ -1,0 +1,19 @@
+I tried to invoke `$he-strategy` exactly as its handle requires:
+
+```bash
+./bin/ask skills resolve he-strategy --json
+```
+
+That failed before the repo wrapper could run:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I then tried the documented fallback, reading the canonical contract directly at:
+
+[Plugins/harness-engineering/skills/he-strategy/SKILL.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-strategy/SKILL.md)
+
+That hit the same sandbox failure. I also checked MCP resources and there are no exposed repo resources to read from.
+
+So the workflow is currently blocked at the skill-loading step, and the `$he-strategy` instructions say to fail closed if the contract cannot load. I have not performed any repo-wide refactor, Linear, ADR, core, or closure work from partial memory. The key blocker is environmental: every shell read is being rejected with `sandbox_apply: Operation not permitted` under the current read-only sandbox.

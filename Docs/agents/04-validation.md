@@ -11,6 +11,9 @@
 
 ## Repository checks
 
+- Fresh-checkout command reachability:
+  `bash scripts/bootstrap-ask.sh --json`, then
+  `python3 bin/ask repo status --json`.
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (project-local default scope)
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --workspace-governance` (explicit workspace scope)
 - `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/**`, `Plugins/cache/**`, and `runtime/**`)

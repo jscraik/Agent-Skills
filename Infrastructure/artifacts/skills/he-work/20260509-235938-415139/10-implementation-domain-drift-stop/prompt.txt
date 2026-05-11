@@ -1,0 +1,1 @@
+Can you while implementing, stop when code names diverge from the approved domain model instead of coding past the drift.

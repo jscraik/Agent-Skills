@@ -44,27 +44,27 @@ tool call error: tool call failed for `github/get_file_contents`
 
 Caused by:
     Mcp error: -32603: Not Found: Resource not found: Not Found
-web search: 
+web search:
 web search: site:github.com agent-skills report skill SKILL.md
-web search: 
+web search:
 web search: site:github.com/addyosmani/agent-skills report skill
-web search: 
+web search:
 web search: site:github.com/addyosmani/agent-skills "report" "skills/"
-web search: 
+web search:
 web search: https://github.com/openclaw/openclaw/blob/main/skills/skill-creator/SKILL.md
-web search: 
+web search:
 web search: site:github.com "report" "skills/" "improvement loop" agent skill
-web search: 
+web search:
 web search: site:github.com "bundle-local-report" skill
-web search: 
+web search:
 2026-05-03T15:11:07.988465Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(Io, Os { code: 54, kind: ConnectionReset, message: \\\"Connection reset by peer\\\" })) }\")" Failed during the export process
 web search: https://gist.github.com/Trecek/4d4ed91677ddad29e19d9481f03df2a9
-web search: 
+web search:
 web search: 'output_mode' in https://gist.github.com/Trecek/4d4ed91677ddad29e19d9481f03df2a9
-web search: 
+web search:
 2026-05-03T15:11:33.007884Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(Io, Os { code: 54, kind: ConnectionReset, message: \\\"Connection reset by peer\\\" })) }\")" Failed during the export process
 web search: site:github.com "bundle-local-report" "report.html" "report.md"
-web search: 
+web search:
 web search: site:github.com/addyosmani/agent-skills "improvement" "skill" "review" "round"
 **Reviewing report skill improvements**
 

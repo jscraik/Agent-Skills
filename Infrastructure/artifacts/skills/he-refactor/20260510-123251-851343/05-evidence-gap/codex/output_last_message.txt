@@ -1,0 +1,9 @@
+Yes. I’ll treat this as a review constraint:
+
+- If I suggest a refactor, I’ll separate **observed evidence** from **assumptions**.
+- I won’t frame weak signals as defects.
+- I’ll avoid performative “architecture theater” and only recommend refactors when there’s a concrete maintenance, correctness, readability, or risk reason.
+- If the evidence is thin, I’ll say so plainly and mark it as optional or speculative.
+- Findings will stay focused on behavior, risk, and validation rather than taste.
+
+Send me the PR, diff, branch, or files you want reviewed and I’ll apply that bar.

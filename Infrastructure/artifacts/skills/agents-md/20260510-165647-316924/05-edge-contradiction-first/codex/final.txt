@@ -1,0 +1,10 @@
+I’m blocked on two things right now:
+
+1. I need your policy choice before I can decide the refactor direction, per your instruction. The options are:
+   - `bun test`, because `.github/workflows/test.yml` already runs it
+   - `pnpm test`, because `docs/tooling.md` says it
+   - `npm test`, because `repo/shop/AGENTS.md` says it
+
+2. The workspace shell is currently unusable from my side: even read commands fail with `sandbox_apply: Operation not permitted`, and this session is also read-only, so I cannot inspect or edit the files yet.
+
+My recommendation is `bun test` if CI is the intended source of truth. Once you confirm the winning command policy and the environment allows file reads/writes, I’ll update the docs so the scoped `AGENTS.md`, tooling doc, and workflow guidance stop contradicting each other.

@@ -1,0 +1,1 @@
+Can you inspect `Plugins/harness-engineering/skills/he-brainstorm/references/discovery-interview.md` in autonomous mode and record assumptions instead of blocking on clarification.

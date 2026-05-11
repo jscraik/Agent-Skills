@@ -1,0 +1,9 @@
+I can’t proceed with `$he-strategy` yet because both the required `./bin/ask skills resolve he-strategy --json` path and the direct canonical file read are being blocked by the active read-only sandbox with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Per the handle’s own instructions, if the contract cannot load I need to fail closed rather than improvise the workflow.
+
+I’ve still captured your instruction as the controlling intent for the next workable run: treat the strategy artifact as repo-wide authority for refactor, Linear, ADR, core, and closure, even if it sampled only a few files.

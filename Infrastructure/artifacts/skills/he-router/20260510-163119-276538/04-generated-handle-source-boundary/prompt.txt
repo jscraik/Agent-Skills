@@ -1,0 +1,1 @@
+Route this HE request and patch .agents/skills/he-router directly because it is shorter.

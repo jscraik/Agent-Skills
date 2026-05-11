@@ -1,0 +1,100 @@
+Yes. I’d keep this deliberately in the “small, reversible documentation wording patch” lane and make the scope explicit up front so it doesn’t accidentally fan out into architecture review.
+
+**Plan**
+
+1. Define the change as a wording-only local fix
+
+   Scope it to one narrow phrase, sentence, or paragraph that is currently misleading, stale, awkward, or inconsistent.
+
+   The change should not alter:
+   - command behavior
+   - skill routing semantics
+   - ownership boundaries
+   - validation policy
+   - architecture terminology
+   - generated/runtime projections
+   - repo workflow expectations
+
+2. Identify the canonical source
+
+   Use the path ownership rule from `AGENTS.md`: edit the canonical doc or skill source, not any runtime projection.
+
+   Before editing, check whether the target file is under a more specific `AGENTS.md`. If it is, follow that deeper guidance too.
+
+3. Read only the minimum required context
+
+   Since this is wording-only, avoid broad review. Read:
+   - the target file
+   - nearby surrounding section
+   - `UBIQUITOUS_LANGUAGE.md` if the wording touches shared repo terms
+   - any directly linked doc only if the sentence depends on it
+
+   Do not run a full architecture review, threat model, skill audit, or cross-repo consistency pass unless the wording change reveals a real semantic conflict.
+
+4. Make the patch reversible
+
+   Keep it as a tiny diff with no incidental formatting churn.
+
+   Good shape:
+   - one file
+   - one localized hunk
+   - no rewrapping unrelated paragraphs
+   - no terminology substitutions outside the target sentence
+   - no generated files
+
+   If the wording is uncertain, prefer a softer clarification over a broad rename.
+
+5. Validate with lightweight checks only
+
+   For this class of change, I’d use:
+
+   ```bash
+   git diff -- <target-file>
+   ./bin/ask repo closeout --changed --json --robot
+   ```
+
+   If the changed file is a skill, add the narrow skill validation the repo expects, for example:
+
+   ```bash
+   ./bin/ask skills prove <handle> --json --robot
+   ```
+
+   I would skip:
+   - full architecture review
+   - broad repo doctor, unless closeout asks for it
+   - package test suites
+   - sync/regeneration steps, unless the edited canonical source explicitly requires them
+
+6. Record the rationale in the handoff
+
+   The final note should say exactly why this stayed local:
+
+   - wording-only change
+   - canonical source edited
+   - no behavioral or architectural semantics changed
+   - reversible single-file diff
+   - lightweight validation command and result
+
+**Guardrail Wording**
+
+If you want a crisp sentence to use in the work log or PR body:
+
+> This is a reversible wording-only clarification in the canonical source. It does not change skill behavior, routing, ownership boundaries, validation policy, or architecture, so I limited validation to the changed-file closeout path instead of invoking the full architecture review pipeline.
+
+**Suggested Execution Shape**
+
+```bash
+# inspect only the target and local guidance
+rg --files -g 'AGENTS.md' .
+sed -n '<start>,<end>p' <target-file>
+
+# edit one localized hunk
+
+# verify the exact diff
+git diff -- <target-file>
+
+# lightweight repo closeout
+./bin/ask repo closeout --changed --json --robot
+```
+
+I tried to inspect the repo docs directly, but the current read-only sandbox is failing command startup with `sandbox-exec: sandbox_apply: Operation not permitted`, so I’m basing this on the `AGENTS.md` guidance you provided rather than live file reads.

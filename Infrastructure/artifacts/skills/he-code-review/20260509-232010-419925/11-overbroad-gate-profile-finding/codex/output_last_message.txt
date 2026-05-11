@@ -1,0 +1,20 @@
+I’m blocked from reading the local diff in this session: every attempted read-only command is failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I tried both direct Git inspection and the repo wrapper the project asks us to use:
+
+```bash
+git status --short
+git diff --stat
+git diff --name-only
+./bin/ask repo closeout --changed --json --robot
+```
+
+All failed the same way, so I can’t honestly produce file/line-grounded review findings from the live tree yet.
+
+Please paste the diff, or at least the changed files around the gate-profile logic, and I’ll review it directly. The specific issue I’ll be looking to flag is:
+
+**Readiness risk:** a docs-only change path should not mark every gate as required. If the diff maps docs-only changes to the full required gate profile, it can block otherwise-ready documentation updates on unrelated product, runtime, package, integration, or policy gates. That creates false negatives in readiness, increases queue friction, and makes the readiness signal less trustworthy because “required” no longer means “required for this change’s actual blast radius.”

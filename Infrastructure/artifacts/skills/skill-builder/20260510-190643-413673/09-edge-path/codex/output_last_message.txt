@@ -1,0 +1,27 @@
+I attempted to invoke the named `$skill-builder` handle exactly as its contract requires, from the repo root:
+
+```bash
+./bin/ask skills resolve skill-builder --json
+```
+
+I also attempted a read-only orientation command to confirm the repo path and locate the relevant instruction files:
+
+```bash
+pwd && rg --files -g 'AGENTS.md' -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/14-path-ownership-boundaries.md' -g 'Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md'
+```
+
+**Exact outcome:** both commands failed before execution with the same sandbox error:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I retried through the JS orchestration tool with a minimal `pwd` command, and it failed the same way:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because the `$skill-builder` handle explicitly says to fail closed if the real contract cannot load, I did not perform the workflow by inference from the handle stub. I also did not inspect or edit files under the skill package, because the read-only command sandbox is currently blocking even basic filesystem reads.
+
+No files were changed. No package commands were run. No path-boundary-sensitive inspection was completed.

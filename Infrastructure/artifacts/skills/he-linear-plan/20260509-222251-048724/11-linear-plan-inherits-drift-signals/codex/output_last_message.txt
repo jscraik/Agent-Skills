@@ -1,0 +1,123 @@
+I started routing this through the Linear connector, but the Linear lookup was cancelled before I could read the workspace structure or create anything. So I did not create or update any Linear project/issues.
+
+Here’s the Linear-ready plan I would route, kept intentionally small to avoid reproducing the “issue explosion” problem.
+
+**Proposed Project**
+Title: `Gap Review Remediation: Authority, Issue Scope, Evidence Depth`
+
+Summary:
+Tighten the planning and review workflow so strategy recommendations stay within authority, Linear output stays bounded, and evidence claims preserve source depth instead of flattening or laundering weak support into strong conclusions.
+
+Health: `atRisk` initially, because the gaps affect planning quality and downstream execution trust.
+
+Priority: High
+
+**Milestone 1: Define The Control Surface**
+Goal: make the review’s authority boundaries explicit before changing workflows.
+
+Issue 1: `Define authority boundaries for strategy recommendations`
+
+Description:
+The gap review identified “strategy over-authority”: plans or reviews are making strategic calls without enough source authority, explicit owner approval, or decision context.
+
+Acceptance criteria:
+- Document what the agent/review workflow may recommend, what it may only flag, and what requires human/product owner decision.
+- Add clear language distinguishing `recommendation`, `risk`, `option`, and `decision`.
+- Include examples of over-authority phrasing and corrected phrasing.
+- Link to the relevant canonical agent guidance once verified in repo.
+
+Suggested labels: `gap-review`, `planning`, `governance`
+
+Issue 2: `Add authority checks to planning output rubric`
+
+Description:
+Planning output should include a lightweight self-check that prevents unsupported strategic direction from being framed as a settled decision.
+
+Acceptance criteria:
+- Add or update checklist/rubric language for strategy authority.
+- Require source/owner evidence for any “should” that changes product, roadmap, policy, or operating model.
+- Require lower-authority wording where evidence is incomplete.
+- Include one before/after sample.
+
+Suggested labels: `gap-review`, `planning`, `quality`
+
+**Milestone 2: Bound Linear Routing**
+Goal: stop gap reviews from turning into too many issues without prioritization or ownership clarity.
+
+Issue 3: `Create Linear routing rules for gap reviews`
+
+Description:
+The gap review identified “Linear issue explosion”: findings are being decomposed into too many Linear issues, likely creating more coordination cost than remediation value.
+
+Acceptance criteria:
+- Define when a finding becomes a project, parent issue, child issue, comment, or no Linear artifact.
+- Set a default cap for issue creation from one review, unless explicitly approved.
+- Require each created issue to have a single remediation outcome and acceptance criteria.
+- Include examples for 1 finding, 3 related findings, and many low-confidence findings.
+
+Suggested labels: `gap-review`, `linear`, `workflow`
+
+Issue 4: `Consolidate related review findings into one parent remediation plan`
+
+Description:
+For this gap review, route the three findings as one coherent remediation plan rather than separate sprawling workstreams.
+
+Acceptance criteria:
+- One parent project or parent issue tracks the whole remediation.
+- The three gaps are represented as bounded child issues or milestones.
+- No additional follow-up issues are created unless they satisfy the routing rules.
+- The plan names the owner/team and expected validation evidence.
+
+Suggested labels: `gap-review`, `linear`, `planning`
+
+**Milestone 3: Preserve Evidence Depth**
+Goal: prevent shallow evidence from being presented as deeply validated.
+
+Issue 5: `Define evidence-depth levels for review claims`
+
+Description:
+The gap review identified “evidence-depth laundering”: outputs may compress weak, indirect, stale, or single-source evidence into confident claims.
+
+Acceptance criteria:
+- Define evidence levels such as `observed in code`, `observed in docs`, `inferred`, `reported`, `unverified`, and `needs validation`.
+- Require claims to carry their evidence level when used to justify roadmap, risk, or workflow changes.
+- Include guidance for when to quote exact file paths, command output, Linear links, or reviewer notes.
+- Include examples of laundered claims and corrected claims.
+
+Suggested labels: `gap-review`, `evidence`, `quality`
+
+Issue 6: `Add evidence-depth validation to closeout`
+
+Description:
+Closeout should verify that evidence claims in remediation plans have the depth they imply.
+
+Acceptance criteria:
+- Add closeout checks for unsupported confidence.
+- Require exact evidence references for completed remediation work.
+- Require explicit “not validated” notes where validation could not be run.
+- Ensure final summaries do not upgrade inference into fact.
+
+Suggested labels: `gap-review`, `validation`, `workflow`
+
+**Suggested Status Update**
+```markdown
+## Gap Review Remediation Plan
+
+A gap review identified three connected planning-quality failures:
+
+- Strategy over-authority: outputs can imply decision authority beyond their evidence or role.
+- Linear issue explosion: review findings can be over-decomposed into too many tickets.
+- Evidence-depth laundering: weak or indirect evidence can be summarized as stronger than it is.
+
+The remediation should stay intentionally bounded. The recommended shape is one project or parent issue with three milestones: authority boundaries, Linear routing rules, and evidence-depth validation.
+
+Initial status is at risk because these gaps affect trust in planning artifacts and can multiply downstream coordination work if handled as many independent tickets.
+```
+
+**What I still need to actually route it**
+To create this in Linear, I need either:
+
+1. The Linear team/project name you want it filed under, or
+2. Permission to retry the Linear workspace lookup after the cancelled connector call.
+
+Once that’s available, I’d create one project or parent issue, then at most the six scoped issues above.

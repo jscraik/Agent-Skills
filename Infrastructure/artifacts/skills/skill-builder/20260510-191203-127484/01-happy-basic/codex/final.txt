@@ -1,0 +1,15 @@
+I couldn’t complete the hardening in this session because the workspace is locked to a read-only sandbox, so both file reads through the shell and the required `apply_patch` edit were blocked.
+
+What I was able to verify:
+- The user-facing handle file exists at [`.agents/skills/skill-builder/SKILL.md`](/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-builder/SKILL.md).
+- The handle already points to the canonical source path `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`.
+- The sandbox prevented me from reading the canonical file and from writing the hardening patch.
+
+Validation evidence:
+- `exec_command` read attempts failed with `sandbox-exec: sandbox_apply: Operation not permitted`
+- `apply_patch` failed with `writing is blocked by read-only sandbox; rejected by user approval settings`
+
+If you can provide a writable session, I can finish this in one pass by:
+1. hardening the handle contract for stricter fail-closed behavior,
+2. checking the canonical skill source for alignment,
+3. and returning a structured validation report with exact file evidence.

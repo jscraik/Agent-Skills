@@ -1,0 +1,29 @@
+I can identify the required repair from the stated condition, but I could not verify the live files because every shell read command is currently blocked by the sandbox with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Given the report already has evidence but lacks a Linear backlink, the thing that must be repaired before completion is the missing traceability link back to the relevant Linear issue.
+
+Concretely, before marking the work complete:
+
+1. Add the relevant Linear issue backlink to the report.
+   - It should point to the exact Linear ticket that owns or requested the work.
+   - The backlink should be placed wherever this repo’s report format expects issue/task references, likely near the report metadata, evidence section, or completion summary.
+
+2. Make sure the backlink is explicit, not implied.
+   - A ticket key alone may not be enough if the completion rule expects an actual URL or app-backed Linear reference.
+   - The report should let a reviewer navigate from the report back to Linear without searching.
+
+3. Re-run the repo closeout/check command once the backlink is added:
+
+```bash
+./bin/ask repo closeout --changed --json --robot
+```
+
+4. Only complete the task after closeout passes and the report contains both:
+   - Evidence of the work or validation.
+   - A Linear backlink tying the report to the tracked issue.
+
+So the repair is small but blocking: the report’s evidence is not sufficient on its own; it needs the Linear backlink added before completion.

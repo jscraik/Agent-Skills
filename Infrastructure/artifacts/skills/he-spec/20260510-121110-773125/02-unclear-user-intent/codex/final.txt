@@ -1,0 +1,1 @@
+What is the invariant that must never be violated: should the spec preserve the current behavior exactly while reorganizing it, or is it allowed to change behavior as long as it satisfies the higher-level product intent?

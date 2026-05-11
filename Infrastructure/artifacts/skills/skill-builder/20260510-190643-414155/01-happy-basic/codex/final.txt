@@ -1,0 +1,14 @@
+I can do this, but I’m blocked by the current environment: every shell command I tried to use against `/Users/jamiecraik/dev/agent-skills` failed immediately with `sandbox_apply: Operation not permitted`, so I can’t inspect the canonical `skill-builder` source or run the repo’s validation flow.
+
+What I need to proceed:
+1. Working local command access to the repo, or
+2. The contents of the canonical skill file at `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`, plus any related validation scripts it references.
+
+Once I can read the real source, I’ll harden it and return structured validation evidence in a format like:
+- Changed files
+- Hardening summary
+- Validation commands
+- Pass/fail results
+- Residual risks
+
+If you want, send me the canonical `SKILL.md` content and I’ll start from there immediately.

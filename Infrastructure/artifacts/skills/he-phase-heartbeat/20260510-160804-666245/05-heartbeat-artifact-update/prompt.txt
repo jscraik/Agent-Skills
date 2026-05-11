@@ -1,0 +1,1 @@
+Please update the dated harness artifact at each phase boundary, preserve collector evidence, and stop before committing if review gates are missing.

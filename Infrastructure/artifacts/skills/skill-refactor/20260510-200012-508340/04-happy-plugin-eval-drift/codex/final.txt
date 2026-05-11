@@ -1,0 +1,21 @@
+I compared the evaluation trail in memory with the recent session evidence, and the drop looks like a **compression regression**, not a capability regression.
+
+What lines up:
+- `00335be6-316b-44f8-ae42-9f78556fd7d3` says the highest-yield next dedupe target was `AGENTS.md`.
+- `fa58cde5-4c5d-4e24-810e-45455d8ad9ab` shows the repo was still considered strong when the instruction surface was intact.
+- `3573c08c-8da8-4ba3-af4f-f49117fd2dd4` warns that newer HE-style replacements can look complete while only partially preserving the older, load-bearing prompt behavior.
+- `15c36f39-9c1e-4097-ba76-56488a95f5e8` shows the run was explicitly about preserving a chosen route and irreversible assumptions, which is the kind of context that gets lost when instructions are over-compressed.
+
+My read is that the **smallest repair** is to **restore one thin, explicit “load-bearing essentials” block in `AGENTS.md`**, rather than broadening the whole doc again.
+
+Recommended minimal fix:
+- Put back the root essentials as a short, visible section.
+- Keep the explicit command-policy lines that tell agents to use `./bin/ask`, bootstrap first on fresh checkout, and read `UBIQUITOUS_LANGUAGE.md` before touching skill/runtime docs.
+- Avoid re-expanding the entire doc tree. The score likely fell because the instructions became too terse to preserve operational behavior, not because the underlying guidance is wrong.
+
+Why this is the smallest effective repair:
+- It addresses the likely failure mode directly: lost instruction fidelity.
+- It changes only one canonical file.
+- It restores the parts most likely to be used by Plugin Eval as evidence of agent readiness.
+
+If you want, I can next turn this into a precise patch plan for `AGENTS.md` with the exact lines to reintroduce and the minimum text to keep.

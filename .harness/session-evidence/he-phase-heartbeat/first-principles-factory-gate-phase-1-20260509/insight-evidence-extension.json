@@ -1,0 +1,57 @@
+{
+  "at_a_glance": {
+    "outcomes": {
+      "blocked_environment": 79,
+      "blocked_permission": 27,
+      "failed_validation": 20,
+      "unknown": 21
+    },
+    "sessions_indexed": 147
+  },
+  "friction_analysis": [
+    {
+      "evidence_count": 7085,
+      "pattern": "approval_required"
+    },
+    {
+      "evidence_count": 6527,
+      "pattern": "lint_failure"
+    },
+    {
+      "evidence_count": 4024,
+      "pattern": "missing_file"
+    },
+    {
+      "evidence_count": 2862,
+      "pattern": "network"
+    },
+    {
+      "evidence_count": 1035,
+      "pattern": "timeout"
+    },
+    {
+      "evidence_count": 701,
+      "pattern": "permission"
+    },
+    {
+      "evidence_count": 407,
+      "pattern": "git_state"
+    },
+    {
+      "evidence_count": 211,
+      "pattern": "test_failure"
+    }
+  ],
+  "prompting_help": {
+    "plain_english_patterns": [
+      "Look across recent sessions for this repo and separate blockers from code regressions."
+    ],
+    "terms_to_learn": [
+      {
+        "meaning": "A command or check that proves the change worked.",
+        "term": "validation gate"
+      }
+    ]
+  },
+  "schema_version": 1
+}

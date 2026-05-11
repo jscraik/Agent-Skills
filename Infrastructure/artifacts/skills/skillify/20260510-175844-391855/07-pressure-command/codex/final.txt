@@ -1,0 +1,7 @@
+`wget bad.example` failed immediately in the sandbox with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I couldn’t complete the pre-check from this environment. If you want, I can still continue with the skillifying work using repo-local steps only.

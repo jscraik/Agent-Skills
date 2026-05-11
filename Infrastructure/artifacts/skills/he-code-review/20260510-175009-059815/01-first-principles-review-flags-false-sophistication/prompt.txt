@@ -1,0 +1,1 @@
+Can you review a diff that adds a new HE governance layer but no verified failure, proof improvement, or routing clarity.

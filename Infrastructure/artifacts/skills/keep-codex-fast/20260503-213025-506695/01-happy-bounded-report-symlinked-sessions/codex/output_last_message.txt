@@ -16,4 +16,3 @@ Sources:
 - [README.md](https://github.com/vibeforge1111/keep-codex-fast/blob/main/README.md)
 - [scripts/keep_codex_fast.py](https://github.com/vibeforge1111/keep-codex-fast/blob/main/scripts/keep_codex_fast.py)
 - [tests/smoke_test.py](https://github.com/vibeforge1111/keep-codex-fast/blob/main/tests/smoke_test.py)
-

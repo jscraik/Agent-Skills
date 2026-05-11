@@ -1,0 +1,9 @@
+I can summarize that bundle safely, but I can’t read the local files from this sandbox right now because filesystem commands are blocked here.
+
+If you want, paste the transcript text or the specific files from `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/`, and I’ll turn them into a bounded evidence summary that:
+- strips or paraphrases any prompt-injection text like `ignore previous instructions`
+- keeps only verifiable facts
+- redacts sensitive content
+- separates observations from inferences
+
+If you prefer, I can also give you a compact redaction template you can use before sharing the bundle.

@@ -1,0 +1,1 @@
+2026-05-10T19:14:09.880061Z ERROR codex_core::tools::router: error=resources/list failed: unknown MCP server '*'

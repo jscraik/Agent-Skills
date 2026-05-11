@@ -18,10 +18,11 @@ Use this policy when `he-router` must choose one Harness Engineering stage. Appl
 12. Repo intent, architecture review, structural triage, strategic direction, ADR compression, or core invariant compression routes to `he-strategy`.
 13. High-leverage architectural migration/refactor program generation routes to `he-refactor`.
 14. Linear execution orchestration, milestone/parent issue mapping, Now/Next/Later/Do Not Create classification, or Portfolio Ops routing routes to `he-linear-plan`.
-15. Harden/deepen an existing spec or plan routes through folded deepen modes.
-16. New lifecycle work flows `he-brainstorm` -> `he-strategy` or `he-refactor` when cognition/migration is needed -> `he-linear-plan` when tracker routing is needed -> `he-spec` -> `he-plan` -> `he-work`.
-17. QA intake routes by expected-behavior clarity: clear bugs to `he-fix-bugs`, unclear behavior to `he-brainstorm`/`he-spec`, sequencing to `he-plan`.
-18. If still ambiguous, apply `interactive-steering-contract.md` and ask once
+15. Approved phase-loop continuation, phase gates before local commit, collector stale-evidence stop rules, or keeping `he-work` moving until review routes to `he-phase-heartbeat`.
+16. Harden/deepen an existing spec or plan routes through folded deepen modes.
+17. New lifecycle work flows `he-brainstorm` -> `he-strategy` or `he-refactor` when cognition/migration is needed -> `he-linear-plan` when tracker routing is needed -> `he-spec` -> `he-plan` -> `he-work`; approved recurring execution continues through `he-phase-heartbeat`.
+18. QA intake routes by expected-behavior clarity: clear bugs to `he-fix-bugs`, unclear behavior to `he-brainstorm`/`he-spec`, sequencing to `he-plan`.
+19. If still ambiguous, apply `interactive-steering-contract.md` and ask once
     for the missing source artifact or lifecycle state.
 
 ## Compatibility Modes
@@ -48,3 +49,4 @@ Folded names remain router aliases and modes, not first-class packaged skills:
 - "Write the repo intent, architecture review, and triage artifacts" -> `he-strategy`.
 - "Create a staged migration program for the routing cleanup" -> `he-refactor`.
 - "Map the refactor programs into a small Linear execution plan" -> `he-linear-plan`.
+- "Keep the approved phase moving, but stop if collector evidence goes stale" -> `he-phase-heartbeat`.

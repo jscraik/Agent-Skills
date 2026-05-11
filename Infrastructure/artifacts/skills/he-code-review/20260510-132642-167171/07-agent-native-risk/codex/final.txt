@@ -1,0 +1,48 @@
+I can do that review, but I’m blocked from inspecting the repo in this session.
+
+I tried to read the live tree from `/Users/jamiecraik/dev/agent-skills`, starting with:
+
+```bash
+git status --short
+rg --files -g 'AGENTS.md' -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/**' -g '*.md' | rg '(skill|routing|agent|README|UBIQUITOUS)'
+pwd
+```
+
+Each shell command failed before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because this is a review request, I don’t want to invent findings without seeing the actual changed files. The right review needs live evidence from the diff and the routing docs, especially likely files under `Docs/agents/`, skill registry/projection code, and any changed `SKILL.md` or routing metadata.
+
+What I would check once the shell is usable:
+
+1. **Discoverability**
+   - New routing entry points are visible from `Docs/agents/README.md` or the canonical instruction map.
+   - Skill handles, domains, and ownership boundaries are named consistently with `UBIQUITOUS_LANGUAGE.md`.
+   - Future agents can find the right route using obvious terms from the user’s request, not only internal names.
+   - Runtime projections are clearly marked as projections if touched, with canonical sources still discoverable.
+
+2. **Determinism**
+   - Routing rules have explicit precedence when multiple skills match.
+   - Tie-breakers are documented for overlapping domains.
+   - The same user request should select the same skill path regardless of which doc an agent reads first.
+   - “Route-only” skills do not silently delegate to different modules based on vague wording.
+   - Examples cover ambiguous cases, especially adjacent domains like `frontend-ui` vs `build-web-apps`, `skill-factory` vs `plugin-factory`, and `security-ops` vs `codex-security`.
+
+3. **Agent Execution Safety**
+   - Instructions say when to stop at explanation versus when to implement.
+   - Validation commands are exact and robot-friendly.
+   - Any generated/runtime skill projections point back to canonical sources.
+   - No new routing doc creates a conflict with `Docs/agents/14-path-ownership-boundaries.md`, `16-agent-operating-contract.md`, or `17-skill-management.md`.
+
+4. **Review Red Flags**
+   - New skills introduced only in one file but missing from the index.
+   - Overlapping trigger phrases without precedence.
+   - “Use when…” blocks that depend on subjective judgment without examples.
+   - Hidden coupling between skill names and filesystem paths.
+   - Docs that mention “canonical” without identifying the canonical file.
+   - Runtime docs edited directly instead of source docs.
+
+I’m ready to run the actual review once repo reads are available.

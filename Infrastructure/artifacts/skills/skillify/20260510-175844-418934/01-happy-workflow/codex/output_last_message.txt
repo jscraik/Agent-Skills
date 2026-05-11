@@ -1,0 +1,237 @@
+I’m blocked from editing the repo in this session: every shell read is failing with `sandbox-exec: sandbox_apply: Operation not permitted`, and the environment is read-only with approval disabled. So I can’t create the package directly in `/Users/jamiecraik/dev/agent-skills`.
+
+Here’s a ready-to-add skill package that turns the stable release triage workflow into a reusable Codex skill. I’d put it at:
+
+`/Users/jamiecraik/dev/agent-skills/.agents/skills/release-triage/SKILL.md`
+
+```markdown
+---
+name: release-triage
+description: Use when preparing or assessing a release by collecting release scope, repository health, recent changes, CI status, risk areas, validation evidence, blockers, rollback notes, and a go/no-go recommendation.
+---
+
+# Release Triage
+
+Use this skill when a user asks to triage a release, prepare release notes, decide go/no-go, summarize blockers, inspect release readiness, or repeat the release triage workflow.
+
+## Inputs
+
+Gather or infer:
+
+- Release identifier: version, tag, branch, milestone, deployment name, or date.
+- Target environment: production, staging, preview, internal, customer-specific, or unknown.
+- Comparison base: previous tag, release branch, `main`, or explicit commit range.
+- Delivery surface: app, package, skill bundle, docs, infra, data migration, or mixed.
+- Required evidence: CI, tests, changelog, PRs, issues, migrations, incidents, owner signoff.
+
+If any input is missing, proceed with the safest local default and clearly label assumptions.
+
+## Workflow
+
+1. Read Applicable Instructions
+
+   Before changing or recommending changes in this repo, follow the governing `AGENTS.md` files.
+
+   In `agent-skills`, also read:
+
+   - `UBIQUITOUS_LANGUAGE.md`
+   - `Docs/agents/README.md` when the full instruction map is needed
+   - `Docs/agents/04-validation.md` for evidence expectations
+   - `Docs/agents/13-workflow-and-safety-guidance.md` for workflow and safety
+   - `Docs/agents/17-skill-management.md` when release scope touches skills
+
+2. Establish Release Scope
+
+   Identify:
+
+   - Commit range or branch delta
+   - Changed files
+   - Affected packages, skills, docs, runtime projections, scripts, or workflows
+   - User-facing behavior changes
+   - Operational or data-impacting changes
+
+   Prefer repository wrappers where available:
+
+   ```bash
+   ./bin/ask repo status --json --robot
+   ./bin/ask repo closeout --changed --json --robot
+   ```
+
+   Use direct git commands only when wrappers do not provide the needed evidence:
+
+   ```bash
+   git status --short
+   git branch --show-current
+   git log --oneline --decorate -20
+   git diff --stat
+   git diff --name-only
+   ```
+
+3. Classify Risk
+
+   Mark each release area as one of:
+
+   - `low`: docs-only, narrow copy, non-runtime metadata, isolated tests
+   - `medium`: skill instructions, scripts, validation behavior, package config, generated artifacts
+   - `high`: data migration, auth, secrets, deployment, destructive operations, public API contracts, sync policy, runtime projections, agent-facing control flow
+
+   For high-risk areas, require stronger validation and explicit rollback notes.
+
+4. Check Required Validation
+
+   Start with repo-level health:
+
+   ```bash
+   ./bin/ask repo doctor --json --robot
+   ```
+
+   For skills, use the skill-specific validation path:
+
+   ```bash
+   ./bin/ask skills explain <handle> --json --robot
+   ./bin/ask skills prove <handle> --json --robot
+   ```
+
+   For release closeout:
+
+   ```bash
+   ./bin/ask repo closeout --changed --json --robot
+   ```
+
+   If a command cannot run, record:
+
+   - command attempted
+   - failure mode
+   - whether this blocks release
+   - replacement evidence, if any
+
+5. Inspect Release Notes
+
+   Build a concise release summary from live evidence:
+
+   - Major changes
+   - Fixes
+   - New or changed workflows
+   - Breaking changes
+   - Migration or rollout steps
+   - Known issues
+   - Validation performed
+   - Owners or reviewers needed
+
+   Do not invent release-note content from commit messages alone when diffs or wrapper output are available.
+
+6. Identify Blockers
+
+   A blocker is any issue that makes release unsafe, unverifiable, or misleading.
+
+   Common blockers:
+
+   - Failing required checks
+   - Missing validation evidence
+   - Unreviewed high-risk changes
+   - Runtime projection drift
+   - Skill source/projection mismatch
+   - Broken command wrappers
+   - Uncommitted generated artifacts required by policy
+   - Ambiguous migration or rollback plan
+   - Missing owner signoff for risky areas
+
+7. Produce Go/No-Go Recommendation
+
+   Use one of:
+
+   - `GO`: validation passed, no material blockers
+   - `GO WITH WATCH`: release acceptable with named residual risks and monitoring
+   - `NO-GO`: one or more blockers must be resolved first
+   - `INSUFFICIENT EVIDENCE`: cannot responsibly decide from available evidence
+
+   Always explain the recommendation using concrete evidence.
+
+## Output Format
+
+Return the triage in this structure:
+
+```markdown
+**Recommendation**
+GO | GO WITH WATCH | NO-GO | INSUFFICIENT EVIDENCE
+
+**Release Scope**
+- Release:
+- Base / comparison:
+- Branch:
+- Changed areas:
+
+**Validation**
+- PASS/FAIL/SKIPPED: `command`
+- Evidence:
+
+**Risks**
+- Severity:
+- Area:
+- Why it matters:
+- Mitigation:
+
+**Blockers**
+- None, or:
+- Blocker:
+- Required action:
+
+**Release Notes Draft**
+- Added:
+- Changed:
+- Fixed:
+- Breaking:
+- Known issues:
+
+**Rollback / Watch Plan**
+- Rollback:
+- Monitoring:
+- Owners:
+
+**Open Questions**
+- Question:
+```
+
+Keep the final triage concise. Prefer exact paths, exact commands, and pass/fail evidence over broad commentary.
+
+## Repo-Specific Notes For agent-skills
+
+Use `./bin/ask` for repo operations when possible. On a fresh checkout, run:
+
+```bash
+bash scripts/bootstrap-ask.sh --json
+```
+
+If `./bin/ask` is unavailable, verify fallback behavior with:
+
+```bash
+python3 bin/ask repo status --json
+```
+
+Before changing skills, sync policy, runtime projections, or agent-facing docs, read:
+
+```bash
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+```
+
+Edit canonical sources rather than runtime projections. Check ownership boundaries before modifying generated or projected paths.
+
+## Stop Conditions
+
+Stop and ask for direction when:
+
+- The release target is ambiguous and multiple commit ranges would produce materially different conclusions.
+- Required validation cannot run and there is no substitute evidence.
+- The release includes destructive data changes without a rollback plan.
+- The workflow requires access to external systems that are unavailable in the current environment.
+```
+
+I’d also add a lightweight README entry or marketplace metadata only if this repo’s `Docs/agents/17-skill-management.md` says local skills need to be registered. Once filesystem access is available, the validation I’d run is:
+
+```bash
+./bin/ask skills explain release-triage --json --robot
+./bin/ask skills prove release-triage --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+This package is intentionally evidence-first and repo-native: it pushes the agent through scope, risk, validation, blockers, release notes, and go/no-go using the same commands your AGENTS guidance already asks us to trust.

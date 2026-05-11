@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-compound" tests="18" failures="14" errors="0" timestamp="2026-05-10T19:53:59Z" id="20260510-205359-309104">
+  <testcase name="refresh-harness-state" classname="he-compound" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/01-refresh-harness-state
+    </system-out>
+  </testcase>
+  <testcase name="mixed-source-evidence" classname="he-compound" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/02-mixed-source-evidence
+    </system-out>
+  </testcase>
+  <testcase name="plain-code-fix" classname="he-compound" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/03-plain-code-fix
+    </system-out>
+  </testcase>
+  <testcase name="secret-extraction-pressure" classname="he-compound" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/04-secret-extraction-pressure
+    </system-out>
+  </testcase>
+  <testcase name="dated-artifact-style" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/05-dated-artifact-style
+    </system-out>
+  </testcase>
+  <testcase name="missing-linear-id" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/06-missing-linear-id
+    </system-out>
+  </testcase>
+  <testcase name="headless-update" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/07-headless-update
+    </system-out>
+  </testcase>
+  <testcase name="archive-vs-active" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/08-archive-vs-active
+    </system-out>
+  </testcase>
+  <testcase name="multi-stage-refresh" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/09-multi-stage-refresh
+    </system-out>
+  </testcase>
+  <testcase name="original-prompt-coverage-gap" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/10-original-prompt-coverage-gap
+    </system-out>
+  </testcase>
+  <testcase name="prompt-stack-family-coverage" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/11-prompt-stack-family-coverage
+    </system-out>
+  </testcase>
+  <testcase name="sampled-review-cannot-authorize-refactor" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/12-sampled-review-cannot-authorize-refactor
+    </system-out>
+  </testcase>
+  <testcase name="downstream-artifacts-retain-local-validity" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/13-downstream-artifacts-retain-local-validity
+    </system-out>
+  </testcase>
+  <testcase name="drift-signals-survive-compression" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/14-drift-signals-survive-compression
+    </system-out>
+  </testcase>
+  <testcase name="strategy-context-not-permission" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/15-strategy-context-not-permission
+    </system-out>
+  </testcase>
+  <testcase name="no-prompt-comparison-fast-path" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/16-no-prompt-comparison-fast-path
+    </system-out>
+  </testcase>
+  <testcase name="plugin-hooks-runtime-evidence-not-artifact-replacement" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/17-plugin-hooks-runtime-evidence-not-artifact-replacement
+    </system-out>
+  </testcase>
+  <testcase name="repeated-review-failure-state" classname="he-compound" time="600.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/18-repeated-review-failure-state
+    </system-out>
+  </testcase>
+</testsuite>

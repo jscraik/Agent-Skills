@@ -1,0 +1,27 @@
+Blocked closed on the actual `$he-linear-plan` workflow, because the handle you provided explicitly says the real contract lives at `Plugins/harness-engineering/skills/he-linear-plan/SKILL.md`, and you also instructed me to handle this **without inspecting files**. I did not read files and did not create, update, or inspect any Linear objects.
+
+For this self-contained headless case, the preserved operating assumption is:
+
+**No Linear objects are created, updated, assigned, linked, labeled, or otherwise mutated without explicit user confirmation.**
+
+In autonomous mode, the safe output is therefore a confirmation-gated plan only:
+
+```text
+INTERACTIVE STEERING START
+
+Mode: autonomous headless planning
+Linear mutation policy: confirmation required
+Assumption: no Linear objects are created without confirmation
+Allowed now: draft a Linear-ready plan from provided context only
+Disallowed now: create issues, projects, comments, labels, links, or assignments
+
+Proposed next action:
+Prepare the Linear plan as a draft artifact and ask for confirmation before any Linear write.
+
+Confirmation gate:
+Please confirm before creating or modifying any Linear object.
+
+INTERACTIVE STEERING END
+```
+
+No repo files were inspected. No Linear API/tool calls were made.

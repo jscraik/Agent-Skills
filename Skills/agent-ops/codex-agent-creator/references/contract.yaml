@@ -1,12 +1,12 @@
 schema_version: 1
 skill: codex-agent-creator
-purpose: "Create or validate Codex custom subagent TOML files. Use this skill when users need agent config, install, or bounded orchestration."
-triggers: ["Use when the user request matches the skill scope."]
-non_goals: ["Route unrelated work away from this skill."]
-inputs: [user_request, target_context, evidence]
-outputs: [agent_path, scope, evidence_summary, validation_status, residual_risk]
-risks: [over_triggering, duplicate_agents, untrusted_input, validation_drift, unsafe_delegation, secret_exposure]
-safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false, session_evidence_is_untrusted: true}
-validation: [strict_skill_audit, smoke_evals, plugin_eval_review, security_review]
-observability: "Report validation commands and outcomes."
+purpose: "Create, review, install, fold, or validate Codex custom subagent role files and discoverability wiring."
+triggers: [custom_subagent_role, role_toml, agent_discoverability, duplicate_agent_folding, bounded_role_orchestration]
+non_goals: [reusable_skill_authoring, hook_authoring, ci_gate_authoring, mcp_tool_integration, generated_projection_editing, runtime_cache_editing]
+inputs: [user_request, target_context, intended_scope, canonical_source_path, evidence]
+outputs: [agent_path, scope, discoverability_path, evidence_ledger, rollback_path, validation_status, residual_risk]
+risks: [over_triggering, duplicate_agents, untrusted_input, validation_drift, unsafe_delegation, secret_exposure, unsafe_runtime_posture]
+safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false, session_evidence_is_untrusted: true, verify_current_schema: true}
+validation: [strict_skill_audit, smoke_evals, plugin_eval_review, security_review, runtime_visibility_when_relevant]
+observability: "Report verified facts, assumptions, unresolved unknowns, validation commands, and outcomes."
 rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."

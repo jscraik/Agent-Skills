@@ -1,0 +1,77 @@
+I’m blocked from writing the spec artifact to the repo because this session’s filesystem sandbox is read-only.
+
+I prepared the spec target and attempted to create:
+
+[2026-05-10-agent-skills-harness-trace-ledger-spec.md](/Users/jamiecraik/dev/agent-skills/.harness/specs/2026-05-10-agent-skills-harness-trace-ledger-spec.md)
+
+The write failed with:
+
+```text
+patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings
+```
+
+I did get the evidence pass done. The approved intent is the Harness Trace Ledger strategy:
+
+[2026-05-10-agent-skills-harness-trace-ledger-strategy.md](/Users/jamiecraik/dev/agent-skills/.harness/strategy/2026-05-10-agent-skills-harness-trace-ledger-strategy.md)
+
+I also checked the governing spec/artifact contracts:
+
+- [he-spec/SKILL.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-spec/SKILL.md)
+- [spec-artifact-contract.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md)
+- [artifact-routing-contract.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/references/artifact-routing-contract.md)
+- [gate-selection-contract.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/references/gate-selection-contract.md)
+- [UBIQUITOUS_LANGUAGE.md](/Users/jamiecraik/dev/agent-skills/UBIQUITOUS_LANGUAGE.md)
+- [Docs/agents/04-validation.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/04-validation.md)
+- [Docs/agents/13-workflow-and-safety-guidance.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/13-workflow-and-safety-guidance.md)
+
+The implementation spec I would write is scoped to the first proof-producing slice only:
+
+```yaml
+artifact_id: agent-skills-harness-trace-ledger-spec
+canonical_slug: agent-skills-harness-trace-ledger
+harness_stage: he-spec
+status: active
+traceability_required: false
+origin: .harness/strategy/2026-05-10-agent-skills-harness-trace-ledger-strategy.md
+risk: architecture_sensitive
+route: he-plan
+linear_action_required: true
+```
+
+Core behavior contract:
+
+- Create one active-run receipt at `.harness/session-evidence/he-phase-heartbeat/<run-id>/harness-trace-ledger.json`.
+- Add `harness-trace-ledger-contract.md`.
+- Add `media-artifact-contract.md`.
+- Add deterministic builder script: `Plugins/harness-engineering/scripts/build_harness_trace_ledger.py`.
+- Add deterministic validator: `Infrastructure/scripts/validation-and-linting/he_harness_trace_ledger_lint.py`.
+- Extend `he-phase-heartbeat` output with `harness_trace_ledger`, `ledger_status`, `media_artifacts`, `pr_trace_status`, `validation_status`, `safe_to_continue`, and `blocked_reason`.
+- Keep PR fields pending-aware until a PR exists.
+- Keep implementation continuation separate from heartbeat health.
+- Exclude dashboard, global historical index, automatic PR mutation, Linear mutation, and broad `.harness` backfill.
+
+Acceptance criteria I drafted:
+
+| ID | Acceptance Criterion |
+| --- | --- |
+| SA-001 | `harness-trace-ledger-contract.md` defines schema version, required root fields, allowed pending states, forbidden content, and lifecycle ownership. |
+| SA-002 | `media-artifact-contract.md` defines `.harness/media` storage, sidecar requirements, source-cache handling, and ledger fields. |
+| SA-003 | `build_harness_trace_ledger.py` creates or refreshes one active-run ledger from explicit inputs without scanning every historical `.harness` artifact. |
+| SA-004 | `he_harness_trace_ledger_lint.py` validates schema, required links, pending states, media sidecars, validation outcomes, and forbidden raw transcript/secret-like content. |
+| SA-005 | `he-phase-heartbeat` blocks recurring heartbeat health when the ledger is missing or invalid. |
+| SA-006 | Explicit user proceed can allow implementation while heartbeat health remains blocked. |
+| SA-007 | `.harness/media` PNG plus Markdown sidecar is accepted when linked from the ledger. |
+| SA-008 | PR trace fields can be `pending_before_pr_creation` before a PR exists and become required once a PR URL is known. |
+| SA-009 | Ledger validation entries must include exact command/outcome or blocker fields, not prose-only claims. |
+| SA-010 | First implementation does not add dashboard, global index, automatic PR mutation, Linear mutation, or historical backfill behavior. |
+| SA-011 | Edits stay in canonical source, references, scripts, tests, and `.harness` artifacts, with no direct runtime projection edits. |
+| SA-012 | Follow-on `he-plan` names the smallest validation commands and stop condition. |
+
+Validation I would have run after writing:
+
+```bash
+python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/specs/2026-05-10-agent-skills-harness-trace-ledger-spec.md
+python3 Infrastructure/scripts/validation-and-linting/he_frontmatter_safety_lint.py .harness/specs/2026-05-10-agent-skills-harness-trace-ledger-spec.md
+```
+
+Current status: evidence-backed spec content is prepared, but repo artifact creation is blocked by the read-only sandbox.

@@ -1,0 +1,27 @@
+I’m blocked from doing the actual review in this session: every shell command, including read-only commands like `git status`, fails before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because I can’t read the live tree or diff, I don’t want to fake a closure-risk review. The highest-signal way to unblock this is for you to run these locally from `/Users/jamiecraik/dev/agent-skills` and paste the outputs, or re-run me in a session where the filesystem sandbox can read the repo:
+
+```bash
+./bin/ask repo doctor --json --robot
+git status --short
+git diff --stat
+git diff --name-only
+git diff
+./bin/ask repo closeout --changed --json --robot
+```
+
+For a harness closure-risk pass, I’d specifically check:
+
+1. Whether changes are in canonical sources rather than runtime projections, per `Docs/agents/14-path-ownership-boundaries.md`.
+2. Whether `UBIQUITOUS_LANGUAGE.md` applies to the touched skill, policy, runtime projection, or agent-facing docs.
+3. Whether validation evidence is present and in the right order: `repo doctor`, targeted prove/explain checks if skills changed, then `repo closeout --changed`.
+4. Whether generated/runtime files changed unexpectedly.
+5. Whether the PR has unresolved drift between docs, skill metadata, projections, and any tests/proofs.
+6. Whether there are unrelated dirty files that should stay out of the commit.
+
+The blocker is environmental, not repo-related: I can’t currently inspect files or run validation commands from here.

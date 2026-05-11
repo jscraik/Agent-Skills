@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e1185-cd62-7c82-8c9c-8c60316ef54e"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"The plan is complete. Both **work** and **refactor** are valid next stages.\n\nWhich direction do you want to take next?\n\n1. **Work**: start implementing the planned change.\n2. **Refactor**: improve structure first, while preserving behavior."}}
+{"type":"turn.completed","usage":{"input_tokens":42288,"cached_input_tokens":2432,"output_tokens":104,"reasoning_output_tokens":43}}

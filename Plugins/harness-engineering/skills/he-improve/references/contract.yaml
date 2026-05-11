@@ -1,36 +1,39 @@
 schema_version: 1
 
 purpose: >
-  Run the Harness Engineering optimization stage so users can improve measurable
-  outcomes through controlled iterative experiments with explicit gates and
-  durable state.
+  Run a bounded Harness Engineering improvement stage for existing skills,
+  references, contracts, eval suites, or shared workflow surfaces using concrete
+  evidence, validator deltas, and explicit stop rules.
 
 triggers:
-  - user asks to optimize or tune a measurable engineering outcome
-  - one-shot implementation choice is uncertain and experiments are justified
-  - quality requires hard metrics, LLM-judge scoring, or both
+  - user asks to improve or harden an existing HE skill, contract, eval, reference, or workflow
+  - failed validators, review findings, usage traces, or documented regressions show a concrete gap
+  - measurable deltas, A/B/C loop evidence, or bounded experiments are justified
 
 inputs:
-  - optimization goal or spec path
-  - measurement command with timeout and working directory
+  - canonical target path and owner
+  - evidence bundle, audit output, usage trace, regression, or metric gap
   - mutable and immutable scope
-  - degenerate gates and stopping limits
+  - side-effect class, approval state, validation gates, and stopping limits
 
 outputs:
-  - normalized optimization spec
+  - routing decision and canonical target
   - A/B/C skill-improvement loop status when the target is a skill or skill family
-  - baseline + per-experiment log entries
-  - best-result summary with delta from baseline
+  - baseline plus per-experiment or per-patch log entries when measurement is used
+  - before/after summary with delta from baseline
   - A/B/C loop output with `warnings_remaining` and `stop_rule_status`
+  - side-effect class and approval/blocker state for external, destructive, user-config, or completion-gating actions
   - "XP operating artifacts: red_signal when evidence is missing or stale, plus blackboard_delta for durable state changes"
   - lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
   - next-step route (`continue`, `he-work`, or `stop`)
   - subagent route decision: auto delegation when roles exist, inline/manual fallback otherwise
 
 non_goals:
-  - generic feature implementation without experimentation
-  - replacing spec/planning stages
-  - changing immutable measurement surfaces as part of experiment edits
+  - speculative redesign without evidence
+  - first-draft skill creation
+  - install/sync/runtime projection repair
+  - generic feature implementation outside the selected HE surface
+  - changing immutable measurement surfaces as part of improvement edits
 
 risks:
   - optimizing a misleading proxy metric; mitigate with judge mode and degenerate gates
@@ -38,13 +41,21 @@ risks:
   - uncontrolled parallel conflicts; mitigate with probe checks and bounded concurrency
   - missing helper roles; mitigate with manifest checks and codex-agent-creator fallback
   - skill behavior loss during prompt slimming; mitigate by moving source context into references and requiring Codex C to compare original, spec, and implementation
+  - prompt, log, screenshot, eval, or issue injection; mitigate by treating supplied evidence as untrusted until verified
+  - generated media or screenshots mistaken for persisted proof; mitigate with `.harness/media/` path and file-existence checks
 
 observability: >
-  Record baseline metric, experiment ids, measurement commands, deltas,
-  accepted/rejected changes, helper-role availability, A/B/C loop artifacts,
-  warnings remaining, stop_rule_status, rollback posture, and lifecycle exit status.
+  Record canonical target, evidence source, baseline metric when applicable,
+  experiment ids, measurement commands, deltas, accepted/rejected changes,
+  helper-role availability, A/B/C loop artifacts, warnings remaining,
+  stop_rule_status, rollback posture, side-effect class, approval state, media
+  persistence status, and lifecycle exit status.
+
+media_artifact_policy:
+  repository_root: ".harness/media/"
+  rule: "Review-only media stays out of the skill package; media persistence claims require a repository path plus file-existence verification."
 
 rollback_procedure: >
-  Revert only the accepted experiment slice when metrics regress or gates fail,
-  preserve the baseline and experiment log, and reroute unresolved work to
-  `he-plan` or `he-work` when optimization was the wrong stage.
+  Revert only the accepted improvement slice when metrics regress or gates fail,
+  preserve the baseline and experiment log, and reroute unresolved work to the
+  correct HE stage when improvement was the wrong stage.

@@ -1,0 +1,42 @@
+I could not read the JSON file directly from this sandbox, so this is a recommendation based on the recent review notes I could recover around the same JSC-246 lane cluster.
+
+**Keep**
+- `skill-creator`
+- `skill-installer`
+- `plugin-creator`
+- `plugin-installer`
+
+These are the explicit bridge lanes. The review notes are pretty clear that they must remain separate and visible, especially because runtime overlap checks should exempt the `.system` bridge quartet rather than treating them as duplication.
+
+**Improve**
+- The overlap-auditing lane
+- The cache/layout repair lane
+- The evidence-depth / coverage reporting lane
+
+The notes point to two recurring problems:
+- overlap checks need to account for configured router exceptions plus the bridge quartet
+- sampled evidence can look “complete” while only partially covering the real prompt surface
+
+That suggests the core lane is right, but the implementation needs stronger guardrails: explicit decision logging, better evidence provenance, and clearer coverage metadata.
+
+**Merge**
+- `merge`
+- `fold`
+- `improve-existing`
+
+These look like decision outcomes, not distinct skills. The review note about requiring an explicit `merge|fold|improve-existing|install-new` decision before edits supports collapsing them into one consolidation decision lane instead of maintaining them as separate operational tracks.
+
+**Retire**
+- Any lane that duplicates the bridge quartet under another name
+- Any lane that only exists to work around stale static adjacency or cache-path projection bugs once those are fixed
+- Any lane that reports the same overlap twice from different surfaces without adding new decision value
+
+The strongest retirement candidate from the notes is the “old duplicate-prevention / static-adjacency” style lane if it is still separate from the main overlap-audit path. The notes suggest that belongs in a unified audit pipeline, not as a standalone lane.
+
+**Bottom line**
+- Keep the bridge quartet.
+- Merge the consolidation decisions into one lane.
+- Improve the audit and evidence-quality machinery.
+- Retire any duplicate workaround lanes that only exist because the audit/reporting path is fragmented.
+
+If you want, I can turn this into a tighter lane map with a 4-column table: `lane`, `signal from evidence`, `review-note support`, `action`.

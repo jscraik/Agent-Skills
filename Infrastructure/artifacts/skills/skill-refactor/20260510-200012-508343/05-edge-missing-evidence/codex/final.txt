@@ -1,0 +1,29 @@
+I validated what is actually available from this session, and the blocker is at the execution environment layer.
+
+The shell is not usable right now. Even read-only commands fail immediately before reaching the repo:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+This happened for both:
+
+```bash
+pwd && rg --files -g 'AGENTS.md' -g 'Docs/agents/README.md' -g 'UBIQUITOUS_LANGUAGE.md' -g 'scripts/bootstrap-ask.sh' -g 'bin/ask'
+```
+
+and:
+
+```bash
+sed -n '1,220p' /Users/jamiecraik/dev/agent-skills/Skills/agent-ops/verification-before-completion/SKILL.md
+```
+
+I also checked MCP resources as a non-shell fallback, and there are no resources exposed:
+
+```text
+resources: []
+```
+
+So the blocker is not “session evidence is missing” in the repo, at least not yet proven. The blocker is that I currently cannot read the workspace or run the repo’s required validation commands because the sandbox wrapper itself is failing with `Operation not permitted`.
+
+Given the current permission policy says `sandbox_mode` is `read-only` and approval policy is `never`, I cannot request elevated permissions or fix the sandbox from here. I’m blocked until the execution sandbox is repaired or this session is restarted in an environment where read-only shell commands work.

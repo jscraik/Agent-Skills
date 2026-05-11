@@ -1,0 +1,1 @@
+The bug evidence includes a generated screenshot from Codex Desktop. Record whether it is persisted under .harness/media before claiming proof.

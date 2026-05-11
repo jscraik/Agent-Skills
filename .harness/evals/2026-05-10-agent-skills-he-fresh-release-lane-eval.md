@@ -9,7 +9,7 @@ status: blocked
 date: 2026-05-10
 traceability_required: true
 origin: .harness/linear/agent-skills-linear-plan.md
-linear_issue: JSC-299
+linear_issue: unknown
 linear_milestone: HE Plugin Release Confidence
 ---
 
@@ -24,7 +24,7 @@ Confidence: high for timeout classification; medium for root cause because the r
 ## Evaluated Slice
 Linear Project: agent-skills
 Linear Milestone: HE Plugin Release Confidence
-Linear Parent Issue: JSC-299
+Linear Parent Issue: unknown
 Linear Sub-Issues: unknown
 Refactor Program: not_applicable
 Plugin Harness Engineering Spec: not_applicable
@@ -41,12 +41,12 @@ Closure Safety: unsafe to close plugin-wide release confidence until the release
 ## Linear Backlink Map
 Linear Project: agent-skills
 Linear Milestone: HE Plugin Release Confidence
-Linear Parent Issue: JSC-299
+Linear Parent Issue: unknown
 Linear Sub-Issues: unknown
 Linear Status Recommendation: keep open
 Proof Artifact Links: `.harness/evals/2026-05-10-agent-skills-he-fresh-release-lane-eval.md`; temporary clean worktree `/tmp/agent-skills-release-eval-2xsFKp`; smoke artifact `Infrastructure/artifacts/skills/he-router/20260510-152831-652625/summary.json` in the temporary worktree.
-Missing Identifiers: none for parent issue linkage.
-Traceability Repair: keep this eval linked to `JSC-299` before moving release-confidence closure forward.
+Missing Identifiers: Linear parent issue key for this release-confidence slice.
+Traceability Repair: Link this eval to the next HE/Linear slice before moving release-confidence closure forward.
 
 ## Source Artifact Trace
 Linear Plan: `.harness/linear/agent-skills-linear-plan.md`
@@ -72,9 +72,7 @@ Confidence: high
 Blocks Closure: no
 
 ## Eval Gate Matrix
-
-### Gate: Clean Committed-Tree Worktree
-
+Gate: clean committed-tree worktree
 Expected: Release evidence is gathered from commit `25cb63f2a` without dirty local artifacts contaminating results.
 Actual: Temporary worktree `/tmp/agent-skills-release-eval-2xsFKp` was created at `25cb63f2a`.
 Status: pass
@@ -83,8 +81,8 @@ Confidence: high
 Blocks Closure: no
 Required Action: none
 
-### Gate: Clean-Worktree Projection Sync
-
+## Eval Gate Matrix
+Gate: clean-worktree projection sync
 Expected: Workspace rooted projection and plugin cache are synced before lifecycle evals.
 Actual: `./bin/ask skills sync --scope workspace --projection rooted --json --robot` returned success and `plugin_cache_refresh.status=refreshed`.
 Status: pass
@@ -93,8 +91,8 @@ Confidence: high
 Blocks Closure: no
 Required Action: none
 
-### Gate: Full HE Lifecycle Release Lane
-
+## Eval Gate Matrix
+Gate: full HE lifecycle release lane
 Expected: `he-router`, `he-spec`, `he-code-review`, `he-strategy`, `he-refactor`, `he-linear-plan`, `he-eval-report`, `he-phase-heartbeat`, `he-plan`, and `he-work` complete release evals or return content failures.
 Actual: All ten selected lifecycle skills timed out at 300 seconds under the Codex runner.
 Status: fail
@@ -103,8 +101,8 @@ Confidence: high
 Blocks Closure: yes
 Required Action: Split release-heavy eval cases from content failures, tune timeout profiles, or compress release prompts before rerunning.
 
-### Gate: Router Sample Gate
-
+## Eval Gate Matrix
+Gate: router sample gate
 Expected: Router sample execution passes as part of release confidence.
 Actual: Router sample gate passed with no warnings.
 Status: pass
@@ -113,8 +111,8 @@ Confidence: high
 Blocks Closure: no
 Required Action: none
 
-### Gate: Sliced Smoke Control
-
+## Eval Gate Matrix
+Gate: sliced smoke control
 Expected: A small live Codex runner case completes so the runner is not treated as globally broken.
 Actual: `he-router` smoke case `ambiguous-stage-route` passed in 18.732 seconds.
 Status: pass
@@ -123,8 +121,8 @@ Confidence: high
 Blocks Closure: no
 Required Action: Use this as control evidence only; do not treat it as full release proof.
 
-### Gate: Selection-Signal Instrumentation
-
+## Eval Gate Matrix
+Gate: selection-signal instrumentation
 Expected: Runner can observe required skill selection for trigger-sensitive cases.
 Actual: Sliced smoke passed but emitted `should_trigger expected skill to be selected, but selection signal was unavailable for this run.`
 Status: partial
@@ -133,8 +131,8 @@ Confidence: high
 Blocks Closure: yes
 Required Action: Fix eval instrumentation or stop treating selection-signal-sensitive cases as skill selection proof.
 
-### Gate: Repo Doctor After Clean-Worktree Sync
-
+## Eval Gate Matrix
+Gate: repo doctor after clean-worktree sync
 Expected: No blocking repo health issue prevents interpreting release-lane output.
 Actual: Repo doctor returned success and no blockers, with known repo-surface diagnostic debt.
 Status: partial
@@ -166,7 +164,7 @@ Validator Confidence: high
 Suggested Next Step: Repair the release eval lane before rerunning plugin-wide confidence.
 Blocks Completion: no
 
-## Bounded Context And Translation Boundary Check
+## Domain Model Integrity Check
 Domain Model Status: not_applicable
 Bounded Context: Harness Engineering release-confidence evaluation.
 Aggregate / Invariant Proof: Release confidence remains blocked when lifecycle evals time out.
@@ -191,7 +189,7 @@ Affected Files/Modules: release eval runner and lifecycle skill eval case set.
 Confidence: medium
 Blocks Completion: yes
 
-## Canonical Model And Aggregate Invariants Check
+## Domain Model Integrity Check
 Conclusion: Domain model impact is not the primary concern for this slice.
 Bounded Context: Harness Engineering release confidence.
 Canonical Terms: timeout failure, content failure, tool/preflight failure, selection-signal warning, release lane.
@@ -281,7 +279,6 @@ ADR Update: not required yet
 Reason: This is an eval-runner operability finding, not yet a durable architecture decision.
 
 ## Evidence & Traceability Matrix
-
 | Conclusion | Evidence | Type | Confidence | Closure Impact |
 | --- | --- | --- | --- | --- |
 | Git pull completed before Slice 2 | `git pull --no-rebase --autostash` returned `Already up to date.` | fact | high | no block |

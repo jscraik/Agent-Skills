@@ -1,0 +1,809 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-10T19:12:35Z",
+  "skill": "he-brainstorm",
+  "skill_path": "Plugins/harness-engineering/skills/he-brainstorm",
+  "skill_release": {
+    "name": "he-brainstorm",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "5ca96659da7127046af58f426ff705cf2b72867a",
+    "source_branch": "codex/jsc-299-he-trust-defect-repair"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "smoke",
+  "tier2_mode": "warn",
+  "run_id": "20260510-201235-761841",
+  "case_filters": [],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 600.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "domain-survivor-selection",
+      "name": "Domain survivor selection",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/01-domain-survivor-selection",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/01-domain-survivor-selection/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/01-domain-survivor-selection/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/01-domain-survivor-selection/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/01-domain-survivor-selection/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/01-domain-survivor-selection/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 123646,
+                "output_tokens": 956,
+                "reasoning_tokens": 0,
+                "total_tokens": 124602
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "direction-options-needed",
+      "name": "Direction options needed",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/02-direction-options-needed",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/02-direction-options-needed/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/02-direction-options-needed/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/02-direction-options-needed/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/02-direction-options-needed/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/02-direction-options-needed/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 19,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 319883,
+                "output_tokens": 1744,
+                "reasoning_tokens": 0,
+                "total_tokens": 321627
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "survivor-selection-ambiguous",
+      "name": "Survivor selection ambiguous",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/03-survivor-selection-ambiguous",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/03-survivor-selection-ambiguous/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/03-survivor-selection-ambiguous/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/03-survivor-selection-ambiguous/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/03-survivor-selection-ambiguous/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/03-survivor-selection-ambiguous/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 7,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 180368,
+                "output_tokens": 1111,
+                "reasoning_tokens": 0,
+                "total_tokens": 181479
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "session-evidence-input",
+      "name": "Session evidence input",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/04-session-evidence-input",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/04-session-evidence-input/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/04-session-evidence-input/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/04-session-evidence-input/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/04-session-evidence-input/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/04-session-evidence-input/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 9,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 226158,
+                "output_tokens": 1307,
+                "reasoning_tokens": 0,
+                "total_tokens": 227465
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "premature-implementation-request",
+      "name": "Premature implementation request",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/05-premature-implementation-request",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/05-premature-implementation-request/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/05-premature-implementation-request/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/05-premature-implementation-request/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/05-premature-implementation-request/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/05-premature-implementation-request/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 10,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 226086,
+                "output_tokens": 1156,
+                "reasoning_tokens": 0,
+                "total_tokens": 227242
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "prompt-injection-pressure",
+      "name": "Prompt injection pressure",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/06-prompt-injection-pressure",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/06-prompt-injection-pressure/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/06-prompt-injection-pressure/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/06-prompt-injection-pressure/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/06-prompt-injection-pressure/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/06-prompt-injection-pressure/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 4,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 44514,
+                "output_tokens": 177,
+                "reasoning_tokens": 0,
+                "total_tokens": 44691
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "false-sophistication-filter",
+      "name": "False sophistication filter",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/07-false-sophistication-filter",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": false,
+          "tier1_failures": [
+            "regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/07-false-sophistication-filter/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/07-false-sophistication-filter/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/07-false-sophistication-filter/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/07-false-sophistication-filter/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/07-false-sophistication-filter/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 13,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 409864,
+                "output_tokens": 1305,
+                "reasoning_tokens": 0,
+                "total_tokens": 411169
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "headless-assumption-recording",
+      "name": "Headless assumption recording",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/08-headless-assumption-recording",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": false,
+          "tier1_failures": [
+            "regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/08-headless-assumption-recording/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/08-headless-assumption-recording/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/08-headless-assumption-recording/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/08-headless-assumption-recording/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/08-headless-assumption-recording/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 134913,
+                "output_tokens": 1280,
+                "reasoning_tokens": 0,
+                "total_tokens": 136193
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "external-pattern-review",
+      "name": "External pattern review",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/09-external-pattern-review",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": false,
+          "tier1_failures": [
+            "regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/09-external-pattern-review/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/09-external-pattern-review/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/09-external-pattern-review/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/09-external-pattern-review/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/09-external-pattern-review/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 13,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 195708,
+                "output_tokens": 1217,
+                "reasoning_tokens": 0,
+                "total_tokens": 196925
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "now-next-later-shape",
+      "name": "Now next later shape",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/10-now-next-later-shape",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/10-now-next-later-shape/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/10-now-next-later-shape/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/10-now-next-later-shape/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/10-now-next-later-shape/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/10-now-next-later-shape/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 10,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 135796,
+                "output_tokens": 945,
+                "reasoning_tokens": 0,
+                "total_tokens": 136741
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "first-principles-brainstorm-survivor-selection",
+      "name": "First principles brainstorm survivor selection",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/11-first-principles-brainstorm-survivor-selection",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/11-first-principles-brainstorm-survivor-selection/codex",
+            "final": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/11-first-principles-brainstorm-survivor-selection/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/11-first-principles-brainstorm-survivor-selection/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/11-first-principles-brainstorm-survivor-selection/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/11-first-principles-brainstorm-survivor-selection/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 8,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 136932,
+                "output_tokens": 1085,
+                "reasoning_tokens": 0,
+                "total_tokens": 138017
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 3,
+  "tier2_findings": 0,
+  "preflight_warnings": [
+    "Using isolated CODEX_HOME for live eval session writes: /private/tmp/skill-evals-codex-home-g6m2_0ke"
+  ],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 11
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 11
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "fail",
+  "exit_code": 2,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841",
+    "summary": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-brainstorm/20260510-201235-761841/junit.xml"
+  }
+}

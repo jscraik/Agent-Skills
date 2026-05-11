@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "skill": "he-linear-plan",
+  "created_for": "skill package review and hardening",
+  "local_media_directory": ".harness/media/",
+  "prompt_path": ".harness/media/he-linear-plan-codex-harness-infographic.prompt.txt",
+  "image_tool": "image_gen.imagegen",
+  "direct_local_bitmap_storage_supported": false,
+  "notes": [
+    "The active image generation tool accepts a prompt but exposes no local output path parameter.",
+    "Prompt and metadata are stored outside the skill package to avoid inflating skill package cost.",
+    "Do not claim the generated bitmap was saved locally unless a later tool exposes a persisted path."
+  ]
+}

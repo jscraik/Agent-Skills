@@ -1,0 +1,28 @@
+Create a production-grade technical infographic background titled conceptually
+"From Prompt Skill -> Codex Harness Skill," but do not render final overlay text
+in the image. Design a dark, professional systems-engineering visual with clean
+OpenAI-style geometry, strong negative space, and clear zones where
+deterministic overlay text can be added later.
+
+Composition: left side shows a fragile prompt-only skill with loose cards,
+unchecked assumptions, bloated text blocks, raw prompt-injection pressure, and
+unbounded refactor requests. Right side shows a governed Codex harness skill
+package for he-refactor: compact SKILL.md entrypoint, routed references,
+contract.yaml, evals.yaml, task-profile metadata, validation gates, evidence
+artifacts, rollback paths, and .harness/refactors outputs connected into a
+composable system. Center shows a transformation corridor from assumptions to
+evidence, with structured lines passing through deterministic gates.
+
+Include abstract visual metaphors for AGENTS.md governance, rules and command
+boundaries, hooks and validation gates, Skill Factory strict audit, OpenClaw,
+openai_skill.py or OpenAI skill-format lint, Plugin Eval, smoke evals, release
+evals, MCP/tool boundaries, evidence artifacts, traces, rollback paths,
+confidence scoring, execution boundaries, human approval gates, .harness/media,
+context budget/invoke cost, and compatibility aliases for legacy headings.
+
+Style requirements: dark harness-proof engineering aesthetic, matte black and
+charcoal base with restrained teal, white, and amber accents; no fake
+dashboards, no fake logos, no invented metrics, no sci-fi nonsense, no
+decorative orbs, no clutter. Use crisp vector-like shapes, subtle depth, clean
+blank typography zones for later overlay, high contrast, 16:9 layout suitable
+for X/Twitter technical content.

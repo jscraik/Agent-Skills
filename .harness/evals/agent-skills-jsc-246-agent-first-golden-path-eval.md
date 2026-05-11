@@ -814,7 +814,7 @@ ADR Update: Not required for this phase.
 Reason: The phase implements an approved additive contract; it does not introduce a new irreversible architectural decision.
 
 ## Evidence & Traceability Matrix
-Conclusion: Phases 001 through 007 have fresh local proof evidence, but `JSC-246` is not ready for Linear closure from this heartbeat pass alone.
+Conclusion: Phases 001 through 007 are complete in the captured evidence set, including the current-run phase-007 pass; however, `JSC-246` remains not ready for closure from this heartbeat pass alone until required non-local closure gates are satisfied.
 Fact: Focused tests passed and live command output exposes advisory/non-blocking continuation metadata, deterministic skills-improve route states, explain/prove taxonomy fields, closeout changed-file readiness classification, compressed first-contact docs/metadata, and fresh-agent command evidence that starts with `repo doctor`.
 Interpretation: The implementation improves routing/proof/closeout determinism without breaking existing command fields or adding proof schema.
 Assumption: Human review or refreshed phase gates are required before mutating Linear issue state.

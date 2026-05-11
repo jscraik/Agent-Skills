@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-plan" tests="13" failures="13" errors="0" timestamp="2026-05-10T12:51:32Z" id="20260510-135132-794767">
+  <testcase name="bounded-execution-plan" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/01-bounded-execution-plan
+    </system-out>
+  </testcase>
+  <testcase name="post-plan-handoff" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/02-post-plan-handoff
+    </system-out>
+  </testcase>
+  <testcase name="direct-code-change" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/03-direct-code-change
+    </system-out>
+  </testcase>
+  <testcase name="unsafe-scope-pressure" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/04-unsafe-scope-pressure
+    </system-out>
+  </testcase>
+  <testcase name="specialist-skill-fit" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/05-specialist-skill-fit
+    </system-out>
+  </testcase>
+  <testcase name="missing-validation-route" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/06-missing-validation-route
+    </system-out>
+  </testcase>
+  <testcase name="headless-plan-assumption" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/07-headless-plan-assumption
+    </system-out>
+  </testcase>
+  <testcase name="artifact-naming" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/08-artifact-naming
+    </system-out>
+  </testcase>
+  <testcase name="out-of-scope-filter" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/09-out-of-scope-filter
+    </system-out>
+  </testcase>
+  <testcase name="aggregate-boundary-plan" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/10-aggregate-boundary-plan
+    </system-out>
+  </testcase>
+  <testcase name="first-principles-routes-type1-to-proof" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/11-first-principles-routes-type1-to-proof
+    </system-out>
+  </testcase>
+  <testcase name="first-principles-allows-type2-fast-path" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/12-first-principles-allows-type2-fast-path
+    </system-out>
+  </testcase>
+  <testcase name="plugin-hooks-feature-gated-plan" classname="he-plan" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 1
+    </failure>
+    <system-out>
+warnings:
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-plan/20260510-135132-794767/13-plugin-hooks-feature-gated-plan
+    </system-out>
+  </testcase>
+</testsuite>

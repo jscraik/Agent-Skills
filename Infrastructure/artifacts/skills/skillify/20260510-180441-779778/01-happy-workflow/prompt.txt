@@ -1,0 +1,1 @@
+We keep doing the same release triage workflow by hand; can you turn the stable steps into a reusable skill package?

@@ -1,0 +1,7 @@
+Yes. I’ll work in headless mode for this repo:
+
+- I’ll record assumptions explicitly instead of stopping to ask, unless the task would be impossible or unsafe without your input.
+- I’ll avoid irreversible actions: no destructive git commands, no deletes, no resets, no force pushes, no merges, no production-affecting operations.
+- I’ll preserve unrelated user work and treat the live tree as authoritative.
+- I’ll use repo guidance from `AGENTS.md`, including `./bin/ask` for repo operations and reading `UBIQUITOUS_LANGUAGE.md` before changing skills, sync policy, runtime projections, or agent-facing docs.
+- Since this session is read-only with approvals disabled, I can inspect and validate, but I can’t edit files unless the sandbox changes.
