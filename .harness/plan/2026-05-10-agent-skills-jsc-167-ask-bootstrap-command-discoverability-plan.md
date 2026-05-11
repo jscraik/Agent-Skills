@@ -498,8 +498,8 @@ Implementation:
 - Assert wrong-shim cases warn or fail even when exit code is zero.
 - Assert repo identity requires both resolved-path provenance and parsed
   `repo_root_resolved` evidence.
-- Assert the public symlink path and canonical infrastructure path refer to the
-  same script, rather than testing a duplicate script.
+- Assert the public repo-root command path `scripts/bootstrap-ask.sh` is the
+  canonical entrypoint, rather than testing a duplicate script path.
 
 Validation:
 
