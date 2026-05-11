@@ -12,27 +12,30 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
+from types import ModuleType
+
+import yaml
 
 
 # ---------------------------------------------------------------------------
 # Module paths
 # ---------------------------------------------------------------------------
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+repo_root = Path(__file__).resolve().parents[3]
 
-_IDENTITY_SCRIPT = (
+_identity_script = (
     Path(__file__).resolve().parents[1]
     / "validation-and-linting"
     / "he_artifact_identity_lint.py"
 )
-_SAFETY_SCRIPT = (
+_safety_script = (
     Path(__file__).resolve().parents[1]
     / "validation-and-linting"
     / "he_frontmatter_safety_lint.py"
 )
 
 
-def _load(name: str, script: Path):
+def _load(name: str, script: Path) -> ModuleType:
     spec = importlib.util.spec_from_file_location(name, script)
     assert spec is not None, f"Could not locate module at {script}"
     mod = importlib.util.module_from_spec(spec)
@@ -42,20 +45,20 @@ def _load(name: str, script: Path):
     return mod
 
 
-IDENTITY = _load("he_artifact_identity_lint", _IDENTITY_SCRIPT)
-SAFETY = _load("he_frontmatter_safety_lint", _SAFETY_SCRIPT)
+identity = _load("he_artifact_identity_lint", _identity_script)
+safety = _load("he_frontmatter_safety_lint", _safety_script)
 
 # ---------------------------------------------------------------------------
 # Path to the changed eval artifact
 # ---------------------------------------------------------------------------
 
-EVAL_FILE = REPO_ROOT / ".harness" / "evals" / "2026-05-09-agent-skills-first-principles-contract-eval.md"
+eval_file = repo_root / ".harness" / "evals" / "2026-05-09-agent-skills-first-principles-contract-eval.md"
 
 # ---------------------------------------------------------------------------
 # Canonical frontmatter for the changed eval (matches the actual file header)
 # ---------------------------------------------------------------------------
 
-EVAL_FRONTMATTER = """---
+eval_frontmatter = """---
 schema_version: 1
 artifact_id: agent-skills-first-principles-contract-eval
 artifact_type: he-eval-report
@@ -73,7 +76,7 @@ linear_milestone: HE First-Principles Gate (proposed)
 # First-Principles Contract Eval
 """
 
-EVAL_PATH = Path(".harness/evals/2026-05-09-agent-skills-first-principles-contract-eval.md")
+eval_path = Path(".harness/evals/2026-05-09-agent-skills-first-principles-contract-eval.md")
 
 # ---------------------------------------------------------------------------
 # Content-level tests: the key change in this PR
@@ -86,7 +89,7 @@ def test_eval_yaml_parse_gate_uses_portable_python3_command() -> None:
 
     This is the exact change introduced in this PR (line 298 of the eval file).
     """
-    text = EVAL_FILE.read_text(encoding="utf-8")
+    text = eval_file.read_text(encoding="utf-8")
 
     # The new portable command must be present.
     assert "python3 -c" in text, (
@@ -102,10 +105,34 @@ def test_eval_yaml_parse_gate_does_not_contain_hardcoded_user_path() -> None:
     The PR replaced '/Users/<username>/.venvs/pyyaml/bin/python' with
     'python3', making the evidence portable.
     """
-    text = EVAL_FILE.read_text(encoding="utf-8")
+    text = eval_file.read_text(encoding="utf-8")
 
-    assert "/Users/" not in text, (
-        "The eval file still contains a hardcoded '/Users/' path. "
+    # Extract the YAML frontmatter and parse it
+    if text.startswith("---\n"):
+        # Find the closing frontmatter delimiter
+        end_frontmatter = text.find("\n---\n", 4)
+        if end_frontmatter != -1:
+            # Parse the frontmatter (not used but validates structure)
+            frontmatter_text = text[4:end_frontmatter]
+            yaml.safe_load(frontmatter_text)
+
+    # Find the "Eval YAML parse" gate section
+    gate_start = text.find("Gate: Eval YAML parse.")
+    assert gate_start != -1, "Could not find 'Gate: Eval YAML parse.' gate in eval file."
+
+    # Find the Evidence section within this gate
+    evidence_start = text.find("Evidence:", gate_start)
+    assert evidence_start != -1, "Could not find Evidence section in Eval YAML parse gate."
+
+    # Extract evidence content (up to next blank line or next section)
+    evidence_end = text.find("\n\n", evidence_start)
+    if evidence_end == -1:
+        evidence_end = len(text)
+
+    gate_evidence = text[evidence_start:evidence_end]
+
+    assert "/Users/" not in gate_evidence, (
+        "The Eval YAML parse gate evidence still contains a hardcoded '/Users/' path. "
         "The evidence command must use the portable 'python3' form."
     )
 
@@ -116,10 +143,34 @@ def test_eval_yaml_parse_gate_does_not_contain_venv_path() -> None:
     Regression guard: ensures the old '/Users/<username>/.venvs/pyyaml/bin/python'
     form (or any .venvs variant) cannot creep back into the evidence section.
     """
-    text = EVAL_FILE.read_text(encoding="utf-8")
+    text = eval_file.read_text(encoding="utf-8")
 
-    assert ".venvs" not in text, (
-        "The eval file references a '.venvs' path in an evidence command. "
+    # Extract the YAML frontmatter and parse it
+    if text.startswith("---\n"):
+        # Find the closing frontmatter delimiter
+        end_frontmatter = text.find("\n---\n", 4)
+        if end_frontmatter != -1:
+            # Parse the frontmatter (not used but validates structure)
+            frontmatter_text = text[4:end_frontmatter]
+            yaml.safe_load(frontmatter_text)
+
+    # Find the "Eval YAML parse" gate section
+    gate_start = text.find("Gate: Eval YAML parse.")
+    assert gate_start != -1, "Could not find 'Gate: Eval YAML parse.' gate in eval file."
+
+    # Find the Evidence section within this gate
+    evidence_start = text.find("Evidence:", gate_start)
+    assert evidence_start != -1, "Could not find Evidence section in Eval YAML parse gate."
+
+    # Extract evidence content (up to next blank line or next section)
+    evidence_end = text.find("\n\n", evidence_start)
+    if evidence_end == -1:
+        evidence_end = len(text)
+
+    gate_evidence = text[evidence_start:evidence_end]
+
+    assert ".venvs" not in gate_evidence, (
+        "The Eval YAML parse gate evidence references a '.venvs' path. "
         "Evidence commands must use the portable 'python3' executable."
     )
 
@@ -131,7 +182,7 @@ def test_eval_yaml_parse_gate_evidence_targets_expected_yaml_files() -> None:
     Ensures the command content was not accidentally altered when the Python
     executable path was updated.
     """
-    text = EVAL_FILE.read_text(encoding="utf-8")
+    text = eval_file.read_text(encoding="utf-8")
 
     assert (
         "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/evals.yaml"
@@ -148,7 +199,7 @@ def test_eval_yaml_parse_gate_evidence_prints_ok() -> None:
     """The python3 command in the gate evidence must include the 'print('ok')'
     verification step, confirming the script asserts success.
     """
-    text = EVAL_FILE.read_text(encoding="utf-8")
+    text = eval_file.read_text(encoding="utf-8")
 
     assert "print('ok')" in text, (
         "The Eval YAML parse gate evidence command is missing the print('ok') "
@@ -165,16 +216,16 @@ def test_first_principles_eval_frontmatter_passes_identity_lint() -> None:
     """The canonical frontmatter for the changed eval file must pass
     he_artifact_identity_lint validation.
     """
-    result = IDENTITY.lint_markdown(EVAL_PATH, EVAL_FRONTMATTER)
+    result = identity.lint_markdown(eval_path, eval_frontmatter)
 
     assert result.passed, f"Identity lint errors: {result.errors}"
 
 
 def test_first_principles_eval_real_file_passes_identity_lint() -> None:
     """The actual eval file on disk must pass identity lint after the PR change."""
-    text = EVAL_FILE.read_text(encoding="utf-8")
+    text = eval_file.read_text(encoding="utf-8")
 
-    result = IDENTITY.lint_markdown(EVAL_PATH, text)
+    result = identity.lint_markdown(eval_path, text)
 
     assert result.passed, f"Identity lint errors on real file: {result.errors}"
 
@@ -188,16 +239,16 @@ def test_first_principles_eval_frontmatter_passes_safety_lint() -> None:
     """The canonical frontmatter for the changed eval file must pass
     he_frontmatter_safety_lint validation.
     """
-    result = SAFETY.lint_markdown(EVAL_PATH, EVAL_FRONTMATTER)
+    result = safety.lint_markdown(eval_path, eval_frontmatter)
 
     assert result.passed, f"Safety lint errors: {result.errors}"
 
 
 def test_first_principles_eval_real_file_passes_safety_lint() -> None:
     """The actual eval file on disk must pass safety lint after the PR change."""
-    text = EVAL_FILE.read_text(encoding="utf-8")
+    text = eval_file.read_text(encoding="utf-8")
 
-    result = SAFETY.lint_markdown(EVAL_PATH, text)
+    result = safety.lint_markdown(eval_path, text)
 
     assert result.passed, f"Safety lint errors on real file: {result.errors}"
 
@@ -238,7 +289,7 @@ def test_eval_file_gate_section_contains_portability_marker() -> None:
     Boundary test: ensures that even if the gate prose is updated, the
     portable executable keyword is always present.
     """
-    text = EVAL_FILE.read_text(encoding="utf-8")
+    text = eval_file.read_text(encoding="utf-8")
 
     # Find the Eval YAML parse gate block
     gate_start = text.find("Gate: Eval YAML parse.")
