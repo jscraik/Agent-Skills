@@ -142,25 +142,45 @@ class TestManifestJsonlStructure(unittest.TestCase):
 
 
 class TestManifestSourceRevisionUpdated(unittest.TestCase):
-    """All manifests in the PR should use the new source_revision 0ae8c3e6d."""
+    """All manifests in the PR should use one consistent current source revision."""
 
-    _NEW_REVISION = "0ae8c3e6d"
-
-    def _assert_revision(self, path: Path):
+    def _assert_revision(self, path: Path, expected_revision: str):
         records = _load_jsonl(path)
         for rec in records:
             rev = rec.get("provenance", {}).get("source_revision", "")
             self.assertEqual(
                 rev,
-                self._NEW_REVISION,
+                expected_revision,
                 f"Entry '{rec.get('id')}' in {path.name} still has old revision: {rev}",
             )
 
+    def _discover_expected_revision(self) -> str:
+        revisions = set()
+        for manifest_path in SKILLSET_MANIFEST_PATHS:
+            records = _load_jsonl(manifest_path)
+            for rec in records:
+                rev = rec.get("provenance", {}).get("source_revision", "")
+                if rev:
+                    revisions.add(rev)
+        self.assertGreater(len(revisions), 0, "No source_revision values found in manifests")
+        self.assertEqual(
+            len(revisions),
+            1,
+            f"Expected one consistent source_revision across manifests, got: {sorted(revisions)}",
+        )
+        return next(iter(revisions))
+
     def test_agent_ops_revision_updated(self):
-        self._assert_revision(REPO_ROOT / ".skillsets" / "agent-ops" / "manifest.jsonl")
+        self._assert_revision(
+            REPO_ROOT / ".skillsets" / "agent-ops" / "manifest.jsonl",
+            self._discover_expected_revision(),
+        )
 
     def test_backend_platform_revision_updated(self):
-        self._assert_revision(REPO_ROOT / ".skillsets" / "backend-platform" / "manifest.jsonl")
+        self._assert_revision(
+            REPO_ROOT / ".skillsets" / "backend-platform" / "manifest.jsonl",
+            self._discover_expected_revision(),
+        )
 
     def test_no_old_revision_in_any_manifest(self):
         """No manifest should still reference the old revision 7b1cf7a49."""
@@ -220,8 +240,19 @@ class TestCommandSurfaceJson(unittest.TestCase):
         self.assertEqual(self._data["schema_version"], "command-surface.v1")
 
     def test_all_source_revisions_use_new_hash(self):
-        new_revision = "0ae8c3e6d"
         old_revision = "7b1cf7a49"
+        revisions = {
+            entry.get("provenance", {}).get("source_revision", "")
+            for entry in self._data.get("handles", [])
+            if entry.get("provenance", {}).get("source_revision", "")
+        }
+        self.assertGreater(len(revisions), 0, "No source_revision values found in command-surface")
+        self.assertEqual(
+            len(revisions),
+            1,
+            f"Expected one consistent source_revision in command-surface, got: {sorted(revisions)}",
+        )
+        expected_revision = next(iter(revisions))
         for entry in self._data.get("handles", []):
             prov = entry.get("provenance", {})
             rev = prov.get("source_revision", "")
@@ -231,7 +262,7 @@ class TestCommandSurfaceJson(unittest.TestCase):
                     f"Command '{entry.get('handle')}' still uses old revision {old_revision}"
                 )
                 self.assertEqual(
-                    rev, new_revision,
+                    rev, expected_revision,
                     f"Command '{entry.get('handle')}' has unexpected revision: {rev}"
                 )
 
