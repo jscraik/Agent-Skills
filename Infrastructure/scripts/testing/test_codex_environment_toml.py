@@ -85,7 +85,7 @@ class TestEnvironmentTomlContract(unittest.TestCase):
         env = _load_environment()
         setup_command = env["setup"]["script"]
         self.assertIn("for candidate in", setup_command)
-        self.assertIn('PATH="$candidate:$PATH"', setup_command)
+        self.assertIn('PATH="$candidate${PATH:+:$PATH}"', setup_command)
         self.assertIn("export PATH", setup_command)
 
     def test_tools_uses_path_candidate_loop(self) -> None:
@@ -93,7 +93,7 @@ class TestEnvironmentTomlContract(unittest.TestCase):
         env = _load_environment()
         tools_command = _action_command(env, "Tools")
         self.assertIn("for candidate in", tools_command)
-        self.assertIn('PATH="$candidate:$PATH"', tools_command)
+        self.assertIn('PATH="$candidate${PATH:+:$PATH}"', tools_command)
         self.assertIn("export PATH", tools_command)
 
     def test_setup_path_loop_includes_mise_shims_candidate(self) -> None:
@@ -131,10 +131,11 @@ class TestEnvironmentTomlContract(unittest.TestCase):
         self.assertEqual(indices, sorted(indices), "Tools loop candidates must appear in reverse-priority order")
 
     def test_setup_path_loop_skips_already_present_candidates(self) -> None:
-        """The PATH loop must guard against adding duplicates with ':$PATH:' pattern."""
+        """The PATH loop must remove existing candidate entries before prepend."""
         env = _load_environment()
         setup_command = env["setup"]["script"]
-        self.assertIn('":$PATH:" != *":$candidate:"*', setup_command)
+        self.assertIn('PATH="${PATH//:$candidate:/:}"', setup_command)
+        self.assertIn('PATH="$candidate${PATH:+:$PATH}"', setup_command)
 
     def test_setup_path_loop_checks_directory_exists(self) -> None:
         """The PATH loop must check -d before prepending candidate directories."""

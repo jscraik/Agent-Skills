@@ -7,8 +7,12 @@ script = '''
 set -euo pipefail
 
 for candidate in "/sbin" "/usr/sbin" "/usr/local/bin" "/opt/homebrew/sbin" "/opt/homebrew/bin" "$HOME/.local/bin" "$HOME/.local/share/mise/shims"; do
-  if [[ -d "$candidate" && ":$PATH:" != *":$candidate:"* ]]; then
-    PATH="$candidate:$PATH"
+  if [[ -d "$candidate" ]]; then
+    PATH=":${PATH:-}:"
+    PATH="${PATH//:$candidate:/:}"
+    PATH="${PATH#:}"
+    PATH="${PATH%:}"
+    PATH="$candidate${PATH:+:$PATH}"
   fi
 done
 export PATH
@@ -32,8 +36,12 @@ command = '''
 set -euo pipefail
 
 for candidate in "/sbin" "/usr/sbin" "/usr/local/bin" "/opt/homebrew/sbin" "/opt/homebrew/bin" "$HOME/.local/bin" "$HOME/.local/share/mise/shims"; do
-  if [[ -d "$candidate" && ":$PATH:" != *":$candidate:"* ]]; then
-    PATH="$candidate:$PATH"
+  if [[ -d "$candidate" ]]; then
+    PATH=":${PATH:-}:"
+    PATH="${PATH//:$candidate:/:}"
+    PATH="${PATH#:}"
+    PATH="${PATH%:}"
+    PATH="$candidate${PATH:+:$PATH}"
   fi
 done
 export PATH
