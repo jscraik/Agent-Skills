@@ -191,9 +191,9 @@ def compute_catalog_parity(
             - `required_surfaces`: list of surfaces that are considered required.
             - `strict_mode`: echo of the `strict` parameter.
     """
-    # Keep parity anchored to repository-owned discovery so local flat runtime
-    # projection drift cannot spuriously block doctor-catalog/route workflows.
-    canonical_count = len(discover_catalog_entries(source="repo"))
+    # Use the same default user-visible catalog surface used for generated
+    # projections so canonical checks reflect runtime-discoverable skills.
+    canonical_count = len(discover_catalog_entries())
     active_policy_identity = get_policy_identity()
 
     readme_count = _extract_readme_count(repo_root / "README.md")

@@ -4,15 +4,13 @@ A governed **Agent Skills Kit** repository for Codex and AI coding agents. Autho
 
 A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
 
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
 Agent Skills Kit is an **agent capability control plane** for Codex and AI
 coding agents.
 
 Teach your coding agents how your work actually works, then prove they
 remembered.
 
-This repository exposes **21 skills** through root-level skill surfaces,
+This repository exposes **32 skills** through root-level skill surfaces,
 generated `$` command handles, and rooted runtime projections. The broader
 latent catalog currently contains 71 skills across 7 topic clusters (agent-ops:
 42, backend-platform: 4, content-publishing: 6, frontend-ui: 10,
