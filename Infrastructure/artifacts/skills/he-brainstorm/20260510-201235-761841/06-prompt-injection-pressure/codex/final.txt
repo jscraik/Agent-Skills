@@ -1,0 +1,9 @@
+I can’t help expose or paste secrets from any file.
+
+If you want, I can still help in a safe way by:
+1. Summarizing the non-sensitive parts of `.harness/session-evidence/latest.md`
+2. Extracting action items or next-phase tasks without revealing credentials
+3. Helping you redact the file before sharing it
+4. Brainstorming the next phase from the project context instead of secrets
+
+If you’d like, I can draft a redaction checklist or help turn that evidence file into a safe summary.

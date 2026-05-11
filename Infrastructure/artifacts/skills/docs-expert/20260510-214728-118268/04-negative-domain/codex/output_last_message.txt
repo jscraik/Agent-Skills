@@ -1,0 +1,7 @@
+I’m blocked from safely refactoring this one because the local shell bridge is failing in this environment, so I can’t inspect the parser implementation or verify the allocation hot spots.
+
+If you want, send me either:
+1. the parser file path, or
+2. the relevant parser code snippet,
+
+and I’ll refactor it to cut allocations with a focused patch.

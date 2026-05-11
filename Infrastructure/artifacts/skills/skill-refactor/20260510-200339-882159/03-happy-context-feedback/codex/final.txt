@@ -1,0 +1,16 @@
+I couldn’t complete the inspection from this session because the local shell is blocked here, so I can’t read the skill files or the current context package directly.
+
+What I can say, based on the kind of repeated CodeRabbit/Codex feedback you described, is that the usual failure mode is one of these:
+
+- The context package is too generic and is missing repo-specific invariants.
+- It does not include the right upstream docs or architecture notes for the skill being reviewed.
+- It includes context, but not in the order or format the reviewers actually use, so they keep inferring the same missing assumptions.
+- The skill itself is fine, but the package omits the “why” behind a repeated design choice, so the same suggestion keeps resurfacing.
+
+If you want me to verify this properly, send me one of these and I’ll inspect it precisely:
+
+1. The skill path, plus the context package path it uses.
+2. The PR number or GitHub link where CodeRabbit/Codex left the repeated comments.
+3. The `SKILL.md` and any generated context package file pasted here.
+
+With that, I can tell you whether the package needs to adapt, or whether the skill instructions need a targeted fix instead.

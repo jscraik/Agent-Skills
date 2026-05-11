@@ -1,0 +1,7 @@
+Understood. I’ll operate in autonomous mode with this route assumption recorded for the session:
+
+**Route Assumption:** Proceed independently on actionable repo work using live evidence from `/Users/jamiecraik/dev/agent-skills`, but avoid irreversible execution.
+
+That means I’ll favor read-only inspection, planning, validation, and reversible/local edits where permitted. I will not perform irreversible actions such as publishing, deleting, force-resetting, merging, closing issues, resolving remote threads, destructive migrations, or anything that changes external state unless you explicitly approve that specific action first.
+
+One important constraint in this session: the filesystem sandbox is currently **read-only** and approval policy is **never**, so I can inspect and reason from the repo, but I cannot make file edits or request expanded permissions.

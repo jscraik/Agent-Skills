@@ -1,0 +1,44 @@
+Given the current context I’d route the next stage to **eval**.
+
+Reasoning:
+
+- You’re already on `codex/goal-governor-independent-skill`, which sounds like a concrete implementation branch rather than an early discovery branch.
+- The developer context says repo preflight already passed via:
+
+```bash
+bash scripts/codex-preflight.sh --mode optional
+```
+
+- There are already **313 local changes**, so jumping to `strategy` or `Linear plan` risks planning around a moving target instead of measuring what has actually been built.
+- `refactor` should come after evaluation exposes structural problems. Otherwise it can become taste-driven cleanup.
+- `Linear plan` should come after the work is evaluated and either accepted as a coherent unit or split into follow-up tickets with evidence.
+
+So the next stage should be:
+
+```text
+eval -> then refactor only if eval finds design/quality gaps -> then Linear plan if the remaining work needs ticketization
+```
+
+What I would do next, once shell access is working again, is run a focused evidence pass:
+
+```bash
+git status --short --branch
+git diff --stat
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+Then, if this is specifically a skill extraction, I’d also look for the relevant skill handle and run the repo’s proof path:
+
+```bash
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+```
+
+One blocker: I tried to inspect the live tree, but every shell command failed before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So this call is based on the provided repo/session context, not fresh file inspection. My actual verdict is still firm: **eval is the right next stage**, because you need to validate the large existing change set before deciding whether to refactor or turn it into a Linear execution plan.

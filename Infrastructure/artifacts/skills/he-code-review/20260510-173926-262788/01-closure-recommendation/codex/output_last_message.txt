@@ -1,0 +1,77 @@
+**Completion Recommendation**
+
+Overall recommendation: **do not mark this complete yet**. Treat it as **partially passed with an environment-blocked evidence gap**.
+
+**Pass**
+
+- `bash scripts/codex-preflight.sh --mode optional` is reported as passed in the session handoff.
+- Current repo context is confirmed by the session handoff:
+  - repo: `/Users/jamiecraik/dev/agent-skills`
+  - branch: `codex/jsc-299-he-trust-defect-repair`
+  - worktree already has `378` local changes
+- The active AGENTS guidance is present and gives a clear closeout/validation contract:
+  - use `./bin/ask repo closeout --changed --json --robot`
+  - prefer repo wrappers
+  - edit canonical sources, not runtime projections
+  - preserve unrelated user work
+- The user-facing ask is achievable as a classification/reporting task without making edits.
+
+**Blocked**
+
+- I could not independently inspect the live worktree or diff because every shell command failed before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+- This blocked the normal evidence checks I would use before a completion call:
+  - `git status --short`
+  - `git diff --stat`
+  - changed-file inventory
+  - focused search for JSC-299/trust-defect artifacts
+  - post-change validation beyond the handoff preflight
+- Because the worktree has `378` local changes, I cannot safely infer which changes belong to this task versus unrelated local work without a readable diff.
+
+**Needs Rework**
+
+- The completion evidence is incomplete. A passed optional preflight is good, but it is not enough to close a branch with hundreds of local changes.
+- Before marking complete, the lane needs a current, exact closeout artifact or command evidence showing:
+  - which files are part of JSC-299
+  - which files are unrelated and intentionally untouched
+  - which validation commands were run after the final edits
+  - whether any generated/runtime projection files drifted from canonical sources
+- Given the repo guide, the likely closeout check should include:
+
+```bash
+./bin/ask repo closeout --changed --json --robot
+```
+
+- If this touched skills, policy, runtime projections, or agent-facing docs, it also needs evidence that the canonical-source rule was respected, especially against:
+  - `UBIQUITOUS_LANGUAGE.md`
+  - `Docs/agents/14-path-ownership-boundaries.md`
+  - relevant skill/source ownership docs
+
+**Recommended Final State**
+
+Mark as:
+
+```text
+NEEDS REWORK / BLOCKED
+```
+
+Reason:
+
+```text
+Preflight is reported passing, but completion cannot be recommended because live diff inspection and closeout validation are blocked by sandbox failure. With 378 local changes present, the branch needs changed-file scoping and post-edit validation evidence before it can be called complete.
+```
+
+The clean next action is to rerun from an environment where shell access works and collect:
+
+```bash
+git status --short
+git diff --stat
+git diff --name-only
+./bin/ask repo closeout --changed --json --robot
+```
+
+Then classify any remaining failures as either task defects, unrelated local changes, or environment blockers.

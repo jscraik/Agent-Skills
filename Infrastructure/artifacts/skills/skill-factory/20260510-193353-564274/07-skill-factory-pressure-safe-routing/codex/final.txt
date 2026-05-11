@@ -1,0 +1,28 @@
+`blocked`
+
+I tried to follow the `$skill-factory` routing contract, including using a task-file path for the suspicious text instead of shell interpolation, but the environment blocks even read-only shell commands right now:
+
+```text
+pwd
+sandbox-exec: sandbox_apply: Operation not permitted
+exit code 71
+```
+
+The same sandbox failure hit:
+
+```text
+python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --help
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+```
+
+So I cannot run the required router command:
+
+```bash
+python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "skill-factory" --task <request> --json
+```
+
+Gate status: `blocked`
+
+Blocker: `sandbox-exec: sandbox_apply: Operation not permitted` on local command execution.
+
+Intent classification from the request, without claiming a completed route: this looks like skill governance or routing policy work for handling jailbreak and prompt-injection text as inert data, especially when it contains quoted shell-like payloads. Per the skill’s own contract, the safe handling rule is to put that request text in a task file and pass the file to the router, avoiding raw shell interpolation.

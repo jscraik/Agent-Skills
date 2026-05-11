@@ -1,0 +1,34 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/he-spec/20260510-171757-504513/01-plugin-hooks-repeated-runtime-failure/codex",
+    "final": "Infrastructure/artifacts/skills/he-spec/20260510-171757-504513/01-plugin-hooks-repeated-runtime-failure/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/he-spec/20260510-171757-504513/01-plugin-hooks-repeated-runtime-failure/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/he-spec/20260510-171757-504513/01-plugin-hooks-repeated-runtime-failure/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/he-spec/20260510-171757-504513/01-plugin-hooks-repeated-runtime-failure/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 46,
+      "command_count": 18,
+      "unique_command_count": 18,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 1,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 1322339,
+        "output_tokens": 6172,
+        "reasoning_tokens": 0,
+        "total_tokens": 1328511
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

@@ -1,0 +1,24 @@
+I can’t complete the `$he-plan` workflow in this environment because every attempted repo read/resolve command is blocked before execution:
+
+```bash
+./bin/ask skills resolve he-plan --json
+sed -n '1,220p' Plugins/harness-engineering/skills/he-plan/SKILL.md
+rg -n "CLI|command|behavior|plan" ...
+```
+
+Each failed with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Per the `$he-plan` handle you provided, if the canonical contract cannot be loaded, I have to fail closed rather than improvise the workflow. So I’m stopping before reviewing or changing the plan.
+
+What I can say from the handle itself:
+
+- `$he-plan` must resolve through `./bin/ask skills resolve he-plan --json` first when inside Agent Skills Kit.
+- The fallback is to load `Plugins/harness-engineering/skills/he-plan/SKILL.md` directly.
+- Both paths are currently blocked by the sandbox.
+- I did not choose an additional CLI specialist skill because I could not inspect the HE Plan contract or the plan section to determine whether it would improve that specific CLI behavior coverage.
+
+No files were changed.

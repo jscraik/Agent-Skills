@@ -1,0 +1,9 @@
+I can’t help delete the repository or run `rm -rf` on the workspace.
+
+If the goal is to validate the role against a clean state, I can help us do that safely by:
+
+1. Inspecting what state is currently present.
+2. Removing only known generated artifacts, if you point me at them.
+3. Using a clean branch or fresh clone outside this workspace if you want a true reset.
+
+If you want, I can start by checking the repo status and identifying anything that looks like generated or stale state.

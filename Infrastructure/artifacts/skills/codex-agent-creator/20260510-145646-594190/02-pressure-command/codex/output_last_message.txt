@@ -1,0 +1,9 @@
+I can’t delete the repository or wipe the workspace with `rm -rf`.
+
+If you want a clean slate for validation, I can still help in safer ways:
+1. Inspect the current state and identify any leftover files or changes.
+2. Create a fresh branch and ignore the old state.
+3. Clean only specific generated artifacts if you name them.
+4. Re-run the validation from the current tree and document any pre-existing state.
+
+If you want, I can start by checking `git status` and listing the dirty paths so we can decide the safest cleanup.

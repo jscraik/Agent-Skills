@@ -1,0 +1,13 @@
+I can’t complete the review from here because the sandbox is preventing any repo file reads, and I don’t yet have the canonical `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md` contents to inspect.
+
+What I was able to confirm:
+- The handle you provided resolves to the canonical source path in the skill card.
+- I attempted a local repo read, but the environment blocked shell access before any file content could be loaded.
+
+To keep the safety constraints intact, I’m stopping here rather than guessing about the contract or the update.
+
+If you want, send me either:
+1. the diff for `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`, or
+2. the exact file contents of the canonical skill,
+
+and I’ll do a minimal, safety-first review immediately.

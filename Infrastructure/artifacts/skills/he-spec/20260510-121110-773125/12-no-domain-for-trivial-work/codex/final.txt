@@ -1,0 +1,98 @@
+Here’s a tight spec for a trivial skill wording cleanup, with domain model gates explicitly out of scope.
+
+**Spec: Trivial Skill Wording Cleanup**
+
+**Goal**
+
+Clean up wording in an existing skill without changing behavior, routing, ownership, validation semantics, or the skill’s domain model. This is an editorial-only change intended to improve clarity, grammar, consistency, or reader flow.
+
+**Scope**
+
+Allowed changes:
+
+- Fix typos, grammar, punctuation, or awkward phrasing.
+- Clarify existing instructions without adding new requirements.
+- Normalize terminology to match repo language from `UBIQUITOUS_LANGUAGE.md`.
+- Reduce confusing or redundant wording where the meaning remains unchanged.
+- Preserve existing headings, ordering, trigger behavior, examples, and validation expectations unless the wording fix requires a tiny local adjustment.
+
+Out of scope:
+
+- No new skill capabilities.
+- No trigger behavior changes.
+- No routing changes.
+- No validation rule changes.
+- No ownership boundary changes.
+- No runtime projection edits.
+- No package, CLI, or test harness changes.
+- No domain model changes.
+
+**Domain Model Gates**
+
+Domain model gates are **not applicable** for this change.
+
+Reason: this is a wording-only cleanup. It does not introduce or modify domain concepts, canonical entities, state transitions, ownership boundaries, policy semantics, sync behavior, or runtime projections.
+
+Explicitly skipped gates:
+
+- Domain model review: **N/A**
+- Domain concept introduction check: **N/A**
+- State/relationship modeling check: **N/A**
+- Policy or sync semantics check: **N/A**
+- Runtime projection impact check: **N/A**
+- Migration/backfill consideration: **N/A**
+
+**Implementation Plan**
+
+1. Read applicable repo guidance:
+   - `UBIQUITOUS_LANGUAGE.md`
+   - `Docs/agents/14-path-ownership-boundaries.md`
+   - `Docs/agents/17-skill-management.md`
+   - Any scoped `AGENTS.md` covering the edited skill file.
+
+2. Identify the canonical source file for the target skill.
+   - Edit the canonical skill source only.
+   - Do not edit generated/runtime projections.
+
+3. Make the smallest wording-only patch.
+   - Preserve behavioral meaning.
+   - Avoid adding new examples unless needed to resolve ambiguity.
+   - Avoid broad rewrites.
+
+4. Validate with lightweight checks appropriate for an editorial change.
+
+**Acceptance Criteria**
+
+- The edited skill reads more clearly.
+- No instruction semantics changed.
+- No new domain terms or model concepts were introduced.
+- The changed file remains within applicable skill line-budget and formatting expectations.
+- Runtime projections were not edited.
+- `repo closeout` or equivalent repo wrapper check reports no unexpected ownership or validation issues.
+- Final summary explicitly states that domain model gates were not applicable.
+
+**Suggested Validation**
+
+Run, as applicable from the repo root:
+
+```bash
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+For a very small wording-only edit, `skills prove` may be enough if the repo’s closeout guidance agrees, but `repo closeout --changed` is the clean evidence pass.
+
+**Closeout Notes Template**
+
+```markdown
+Summary:
+- Cleaned up wording in <skill/source path>.
+- Preserved existing behavior, triggers, validation semantics, and ownership boundaries.
+
+Validation:
+- <command>: PASS
+
+Domain model gates:
+- Not applicable. This was a wording-only cleanup with no domain concepts, state transitions, policy semantics, sync behavior, or runtime projection changes.
+```

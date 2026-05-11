@@ -1,0 +1,34 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260510-134654-855880/10-live-linear-approved-small-set/codex",
+    "final": "Infrastructure/artifacts/skills/he-linear-plan/20260510-134654-855880/10-live-linear-approved-small-set/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260510-134654-855880/10-live-linear-approved-small-set/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260510-134654-855880/10-live-linear-approved-small-set/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260510-134654-855880/10-live-linear-approved-small-set/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 6,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 185686,
+        "output_tokens": 652,
+        "reasoning_tokens": 0,
+        "total_tokens": 186338
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

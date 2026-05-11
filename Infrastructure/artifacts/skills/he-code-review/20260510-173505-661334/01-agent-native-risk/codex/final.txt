@@ -1,0 +1,38 @@
+**Findings**
+
+1. **Medium: phase-heartbeat routing is not deterministic because the generic heartbeat rule wins first.**
+   [Plugins/harness-engineering/references/routing-map.json](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/references/routing-map.json:68) routes generic `"heartbeat"` signals to `he-heartbeat` at priority `18`, while the new phase-specific rule is later at priority `19` on [routing-map.json](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/references/routing-map.json:81). Because `he-router` says to apply the routing map before keyword matching in [he-router/SKILL.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-router/SKILL.md:60), a request like “run the phase heartbeat” or “continue the approved phase heartbeat” can match the generic `"heartbeat"` rule first and route to `he-heartbeat`, even though `he-phase-heartbeat` explicitly owns stale phase-loop evidence and approved phase continuation in [he-phase-heartbeat/SKILL.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-heartbeat/SKILL.md:23). The separate prose decision order repeats the same problem: generic heartbeat is item 3, while approved phase-loop routing is item 15 in [deterministic-stage-routing.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/references/deterministic-stage-routing.md:9).
+   **Fix:** move `approved-phase-loop` above `recurring-control-loop`, or narrow the generic heartbeat signals so phase-loop phrases are excluded before matching. Add an eval that proves “phase heartbeat”, “collector evidence becomes stale”, and “keep he-work going until reviewed” resolve to `he-phase-heartbeat`.
+
+**What Looks Good**
+
+The new skill is discoverable in the generated harness-engineering manifest: [manifest.jsonl](/Users/jamiecraik/dev/agent-skills/.skillsets/harness-engineering/manifest.jsonl:9) has `id: "he-phase-heartbeat"`, the canonical `source_path`, and several useful triggers. It is also present in the source skill frontmatter triggers at [he-phase-heartbeat/SKILL.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-heartbeat/SKILL.md:6), and the router points agents to the routing map and deterministic routing docs at [he-router/SKILL.md](/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-router/SKILL.md:128). So the main discoverability pieces are there; the determinism issue is the ordering conflict, not missing registration.
+
+The progressive disclosure scanner change is covered by a focused unit test: [test_skill_scan_progressive_disclosure.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/testing/test_skill_scan_progressive_disclosure.py:189) verifies the newer harness-style headers are accepted, and [skill_scan.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/lifecycle-and-sync/skill_scan.py:35) now recognizes those aliases. That supports future agents loading smaller, predictable context.
+
+**Validation**
+
+I could inspect the diffs and generated surfaces, but runtime validation commands were blocked by the current shell sandbox wrapper:
+
+```text
+./bin/ask skills prove he-router --json --robot
+./bin/ask skills prove he-phase-heartbeat --json --robot
+bash scripts/bootstrap-ask.sh --json
+```
+
+All three failed before running with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+The focused unittest command was also rejected by policy before execution:
+
+```text
+python3 -m unittest Infrastructure.scripts.testing.test_skill_scan_progressive_disclosure.SkillScanProgressiveDisclosureTests.test_strict_mode_accepts_harness_style_header_aliases
+Rejected("approval required by policy, but AskForApproval is set to Never")
+```
+
+**Verdict**
+
+Not quite green for deterministic future-agent routing yet. Discoverability looks mostly intact, but the new `he-phase-heartbeat` route can be shadowed by the older generic heartbeat rule. Fix the rule ordering or exclusions, then rerun the two `skills prove` checks plus the progressive-disclosure unittest.

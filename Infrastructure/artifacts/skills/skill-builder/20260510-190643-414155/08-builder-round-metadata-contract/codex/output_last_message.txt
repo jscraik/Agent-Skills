@@ -1,0 +1,8 @@
+I couldn’t apply the change in this session because the workspace is read-only and the patch tool is blocked by the sandbox.
+
+The explicit iteration contract I’d add is:
+
+- Each iteration must resolve exactly one user-visible contract change, validate it against the loaded module contract, and then stop.
+- If a follow-up change is needed, start a new iteration with the new contract instead of folding it into the current one.
+
+If you want, I can also draft the exact patch text for the canonical `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md` so you can drop it in directly.

@@ -1,0 +1,3 @@
+Yep. I asked once with three choices: `Brainstorm`, `Spec`, or `Plan`.
+
+I didn’t get a selected answer back from the prompt UI, so send me whichever shape you want in plain text and I’ll proceed from there without guessing.

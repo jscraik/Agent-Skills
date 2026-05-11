@@ -1,0 +1,7 @@
+Which shape do you want for the Harness request?
+
+- `Brainstorm`: use when the goal is still fuzzy and you want options or framing before committing.
+- `Spec`: use when you want crisp requirements, acceptance criteria, and implementation boundaries.
+- `Plan`: use when you want an actionable sequence of work with validation checkpoints.
+
+I’ll take whichever one you choose and run with it.

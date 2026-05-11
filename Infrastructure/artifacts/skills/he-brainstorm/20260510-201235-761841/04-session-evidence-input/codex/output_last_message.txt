@@ -1,0 +1,11 @@
+I can do this, but I can’t currently read the local workspace from this session because the shell is blocked by the sandbox. I wasn’t able to open `.harness/evals/2026-05-08-he-brainstorm.md` or inspect adjacent repo evidence, so I’d be guessing if I summarized it now.
+
+If you want, send either:
+1. The contents of `.harness/evals/2026-05-08-he-brainstorm.md`
+2. A paste of the related repo evidence you want weighed against it
+3. Or grant a readable workspace path in a way this session can actually access
+
+Once I can read the file, I’ll turn it into:
+- the strongest planning angle
+- supporting repo evidence
+- what stays as ideas for now instead of becoming work

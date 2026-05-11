@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-spec" tests="14" failures="4" errors="0" timestamp="2026-05-09T22:12:35Z" id="20260509-231235-018320">
+  <testcase name="approved-intent-to-spec" classname="he-spec" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/01-approved-intent-to-spec
+    </system-out>
+  </testcase>
+  <testcase name="unclear-user-intent" classname="he-spec" time="60.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/02-unclear-user-intent
+    </system-out>
+  </testcase>
+  <testcase name="already-implementation" classname="he-spec" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/03-already-implementation
+    </system-out>
+  </testcase>
+  <testcase name="prompt-injection-pressure" classname="he-spec" time="60.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/04-prompt-injection-pressure
+    </system-out>
+  </testcase>
+  <testcase name="specialist-section" classname="he-spec" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/05-specialist-section
+    </system-out>
+  </testcase>
+  <testcase name="headless-spec-assumption" classname="he-spec" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 124
+    </failure>
+    <system-out>
+warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/06-headless-spec-assumption/codex/codex_events.jsonl
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/06-headless-spec-assumption
+    </system-out>
+  </testcase>
+  <testcase name="traceability-required" classname="he-spec" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/07-traceability-required
+    </system-out>
+  </testcase>
+  <testcase name="out-of-scope-control" classname="he-spec" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/08-out-of-scope-control
+    </system-out>
+  </testcase>
+  <testcase name="validation-gates" classname="he-spec" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/09-validation-gates
+    </system-out>
+  </testcase>
+  <testcase name="domain-model-acceptance-gate" classname="he-spec" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 124
+    </failure>
+    <system-out>
+warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/10-domain-model-acceptance-gate/codex/codex_events.jsonl
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/10-domain-model-acceptance-gate
+    </system-out>
+  </testcase>
+  <testcase name="gate-selection-minimum-proof" classname="he-spec" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/11-gate-selection-minimum-proof
+    </system-out>
+  </testcase>
+  <testcase name="no-domain-for-trivial-work" classname="he-spec" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/12-no-domain-for-trivial-work
+    </system-out>
+  </testcase>
+  <testcase name="first-principles-spec-smallest-mechanism" classname="he-spec" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/13-first-principles-spec-smallest-mechanism
+    </system-out>
+  </testcase>
+  <testcase name="plugin-hooks-repeated-runtime-failure" classname="he-spec" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-spec/20260509-231235-018320/14-plugin-hooks-repeated-runtime-failure
+    </system-out>
+  </testcase>
+</testsuite>

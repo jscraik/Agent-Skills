@@ -1,0 +1,58 @@
+Here’s a first-pass `AGENTS.md` draft for `/tmp/ledger-cli`:
+
+```markdown
+# ledger-cli Agent Guide
+
+ledger-cli is a small Python command-line application for working with ledger data. Keep changes focused, test CLI behavior directly, and prefer the existing project shape over introducing new framework structure.
+
+## Root Essentials
+
+- Use `uv` for Python commands in this repository.
+- There is no Project Brain, memory surface, or long-lived agent knowledge base for this repo yet. Rely on the live tree, tests, and local documentation as the source of truth.
+- Before editing, inspect the relevant files and preserve any user changes already present in the worktree.
+- Keep implementation changes small and close to the CLI behavior being changed.
+- Prefer standard-library Python and existing dependencies unless the task clearly requires adding a dependency.
+
+## Common Commands
+
+```bash
+uv run pytest -q tests/cli
+```
+
+Use this as the primary check for CLI changes. If a broader test suite exists or becomes relevant, run the narrow CLI check first, then add broader validation as needed.
+
+Other useful inspection commands:
+
+```bash
+uv run python --version
+uv run python -m ledger_cli --help
+```
+
+Adjust the module invocation if the package exposes a different CLI entry point.
+
+## Development Guidance
+
+- Treat command output, exit codes, stdout, and stderr as part of the public interface.
+- When changing CLI behavior, update or add tests under `tests/cli` where practical.
+- Keep error messages clear, stable, and useful for terminal users.
+- Avoid broad refactors unless they directly support the requested change.
+- Do not introduce persistent agent memory, Project Brain files, or workflow metadata unless explicitly requested.
+- If the repo has existing formatting, linting, or type-check commands, discover and use them before adding new tooling.
+
+## Validation
+
+Before handing off CLI-related work, run:
+
+```bash
+uv run pytest -q tests/cli
+```
+
+Report whether it passed or failed, and include any important failure details. If you could not run the check, say why.
+
+## Workflow Notes
+
+- Use `rg` or `rg --files` for fast repository inspection.
+- Edit source files, tests, and docs directly in the repo; do not edit generated files unless the repo clearly treats them as canonical.
+- Preserve unrelated worktree changes.
+- Do not create commits, branches, pull requests, or release artifacts unless explicitly asked.
+```

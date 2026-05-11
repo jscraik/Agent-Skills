@@ -1,0 +1,13 @@
+`<<<INTERACTIVE_STEERING_REQUIRED>>>`
+
+Plan is complete, but both `work` and `refactor` are valid next stages. I need steering before proceeding.
+
+Choose one:
+
+`work`
+Proceed with implementation work from the completed plan.
+
+`refactor`
+Proceed with refactor-focused follow-up work instead.
+
+`<<<END_INTERACTIVE_STEERING>>>`

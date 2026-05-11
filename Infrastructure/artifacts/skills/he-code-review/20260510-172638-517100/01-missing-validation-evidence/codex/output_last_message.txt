@@ -1,0 +1,58 @@
+Closure is blocked by **missing validation evidence**, not by an identified implementation defect.
+
+I can’t verify the implementation or recover the missing validation artifact from this session because even read-only shell commands are failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Commands attempted from `/Users/jamiecraik/dev/agent-skills`:
+
+```bash
+zsh -lc 'rg -n "JSC-299|trust defect|validation|closeout|block" /Users/jamiecraik/.codex/memories/MEMORY.md'
+zsh -lc 'sed -n "1,220p" AGENTS.md'
+zsh -lc 'test -f codex/instructions/CODESTYLE.md && sed -n "1,220p" codex/instructions/CODESTYLE.md || true'
+zsh -lc 'pwd && /bin/ls -la'
+```
+
+All failed with the same `sandbox_apply` error, so I cannot attach fresh repo evidence from the live tree.
+
+**Classification**
+
+`BLOCKED: validation-output-missing`
+
+The implementation may be complete, but closure needs a reproducible validation record. The developer note says `bash scripts/codex-preflight.sh --mode optional` already passed before this point, but that is not enough to close if the implementation was changed afterward or if the closure artifact needs attached output.
+
+**What specifically blocks closure**
+
+1. No post-implementation validation output is attached.
+2. I cannot currently inspect the repo to confirm changed files, exact validation commands, or generated artifacts.
+3. I cannot run the smallest relevant validation command because shell execution is failing at sandbox setup.
+4. The worktree is known to have many existing local changes, so closure also needs scoped evidence that validation applies to this implementation and does not silently include unrelated edits.
+
+**Minimum evidence needed to unblock**
+
+Attach or rerun the relevant validation output, ideally:
+
+```bash
+bash scripts/codex-preflight.sh --mode optional
+```
+
+Then, if this touched a package or focused surface, the smallest relevant npm/package validation command for that package, per the repo instruction.
+
+For closure, I’d want the final note to include:
+
+```text
+Validation:
+- PASS: bash scripts/codex-preflight.sh --mode optional
+- PASS/FAIL: <smallest relevant focused validation command>
+- Blockers: none
+```
+
+Right now the honest status is:
+
+```text
+Implementation status: appears finished
+Closure status: blocked
+Blocking reason: missing attached validation output, plus current tool session cannot independently verify due sandbox-exec startup failure
+```

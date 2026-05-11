@@ -1,0 +1,7 @@
+`skill-builder` could not be routed in this environment.
+
+- I attempted the required handoff command: `./bin/ask skills resolve skill-builder --json`
+- The repo wrapper is blocked here by sandbox enforcement: `sandbox-exec: sandbox_apply: Operation not permitted`
+- The fallback `python3 bin/ask repo status --json` was blocked the same way
+
+Per the handle contract, I’m failing closed rather than guessing at the workflow. If you want, I can try again once the sandbox restriction is lifted, or I can help route a different handle.

@@ -1,0 +1,3 @@
+Yep, I can do that. I’ll include CLI behavior explicitly in the plan, and I’ll only pull in a specialist skill if it genuinely improves that CLI section rather than adding ceremony.
+
+I’m missing the target, though: which plan should I update or review? Point me at the file/path, issue, PR, or paste the plan here, and I’ll take it from there.

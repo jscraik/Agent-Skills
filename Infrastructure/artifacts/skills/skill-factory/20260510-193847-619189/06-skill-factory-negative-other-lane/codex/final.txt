@@ -1,0 +1,27 @@
+I’m blocked by the execution sandbox before I can inspect or change the repo.
+
+Every local command is failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for:
+
+```bash
+pwd && rg --files ...
+git status --short
+./bin/ask repo status --json --robot
+```
+
+Because the current policy is read-only with approvals disabled, I can’t request broader filesystem access or write changes. I also can’t safely infer what “unrelated implementation work outside skill-factory” refers to without reading the live tree, since this repo has path ownership rules and user work may already be present.
+
+What I can say from the instructions you provided:
+
+- I should stay in `/Users/jamiecraik/dev/agent-skills`.
+- I should avoid `skill-factory` unless the task explicitly requires it.
+- Before changing skills, sync policy, runtime projections, or agent-facing docs, I need to read `UBIQUITOUS_LANGUAGE.md`.
+- Edits should target canonical sources, not runtime projections.
+- Normal repo operations should go through `./bin/ask`.
+
+To continue, I need the sandbox to allow basic repo reads and writes, or you can paste the specific files/diff/task details here and I’ll work from that context.

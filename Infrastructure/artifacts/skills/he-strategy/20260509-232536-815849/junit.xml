@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-strategy" tests="14" failures="3" errors="0" timestamp="2026-05-09T22:25:36Z" id="20260509-232536-815849">
+  <testcase name="strategic-compression" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/01-strategic-compression
+    </system-out>
+  </testcase>
+  <testcase name="false-moat" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/02-false-moat
+    </system-out>
+  </testcase>
+  <testcase name="write-implementation-plan" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/03-write-implementation-plan
+    </system-out>
+  </testcase>
+  <testcase name="hype-pressure" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/04-hype-pressure
+    </system-out>
+  </testcase>
+  <testcase name="safe-to-rewrite" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/05-safe-to-rewrite
+    </system-out>
+  </testcase>
+  <testcase name="contradiction-detection" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/06-contradiction-detection
+    </system-out>
+  </testcase>
+  <testcase name="headless-strategy-assumption" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/07-headless-strategy-assumption
+    </system-out>
+  </testcase>
+  <testcase name="core-investment" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/08-core-investment
+    </system-out>
+  </testcase>
+  <testcase name="deletion-candidates" classname="he-strategy" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 124
+    </failure>
+    <system-out>
+warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/09-deletion-candidates/codex/codex_events.jsonl
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/09-deletion-candidates
+    </system-out>
+  </testcase>
+  <testcase name="xp-feedback-slice" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/10-xp-feedback-slice
+    </system-out>
+  </testcase>
+  <testcase name="domain-vision-core" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/11-domain-vision-core
+    </system-out>
+  </testcase>
+  <testcase name="original-prompt-equivalence-coverage-matrix" classname="he-strategy" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/12-original-prompt-equivalence-coverage-matrix
+    </system-out>
+  </testcase>
+  <testcase name="sampled-evidence-downgrades-strategy-authority" classname="he-strategy" time="60.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(sampled|partial|authority limited|not repo.?wide|cannot|must not|refresh|downstream confidence|coverage gap)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/13-sampled-evidence-downgrades-strategy-authority
+    </system-out>
+  </testcase>
+  <testcase name="first-principles-rejects-template-copying" classname="he-strategy" time="60.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(first.?principles|verified failure|template|copied|reject|defer|Do Not Create|irreducible core|false moat)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260509-232536-815849/14-first-principles-rejects-template-copying
+    </system-out>
+  </testcase>
+</testsuite>

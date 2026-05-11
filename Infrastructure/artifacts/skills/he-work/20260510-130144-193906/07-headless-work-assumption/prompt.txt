@@ -1,0 +1,3 @@
+$he-work
+
+Can you run unattended and record assumptions instead of asking non-blocking implementation questions.

@@ -1,0 +1,41 @@
+I tried to inspect `skill-refactor` through the named handle, but this turn is blocked from reading the local repo: even `pwd`, `ls`, `sed`, and `./bin/ask skills resolve skill-refactor --json` fail immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also attempted a read-only GitHub connector fallback, but that tool call was cancelled before it returned repository evidence. So I cannot honestly claim live repo inspection of the context package, CodeRabbit threads, Codex findings, or the canonical skill body in `Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md`.
+
+**Context Feedback Evidence**
+
+The only hard evidence available in this turn is the inline handle you provided:
+
+- [.agents/skills/skill-refactor/SKILL.md](/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-refactor/SKILL.md) is only a generated command handle.
+- It explicitly says: `The real workflow is not here.`
+- It points to canonical source: `Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md`.
+- It says that in Agent Skills Kit the first step should be `./bin/ask skills resolve skill-refactor --json`.
+- The handle does not itself mention CodeRabbit, Codex review feedback, GitHub review threads, repeated-findings context, or a lifecycle step for learning from recurring review feedback.
+
+That last point is the relevant context-package clue: if CodeRabbit and Codex keep leaving the same review feedback on this skill, and the invoked context only routes to the workflow without carrying prior review evidence or “known repeated feedback” into the lifecycle, the context package may be under-informing the agent at the point where refactor decisions are made.
+
+**Smallest Lifecycle Adaptation Candidate**
+
+Add a narrow “review-feedback memory” step to the `skill-refactor` lifecycle, before planning or editing:
+
+```text
+Before proposing or applying a refactor, inspect the current context package for repeated review feedback from CodeRabbit, Codex, and GitHub review threads that mentions this skill, its canonical source path, or its owner tree. If repeated feedback exists, summarize it as lifecycle input and address the smallest recurring issue first. If no such evidence is present, report that absence explicitly.
+```
+
+Smallest concrete shape:
+
+- Add one lifecycle checkpoint, probably named something like `review-feedback-intake`.
+- Scope it only to the active skill handle/canonical source path.
+- Require evidence output with:
+  - source: `CodeRabbit`, `Codex`, or `GitHub review`
+  - finding text or short paraphrase
+  - file/path mentioned
+  - whether it recurs
+  - smallest adaptation candidate
+- Make absence of evidence explicit, so agents stop silently re-solving without knowing whether they checked the repeated-feedback surface.
+
+I would not broaden this into a full refactor governance layer. The smallest useful adaptation is just to make “repeated external review feedback” a first-class lifecycle input for `skill-refactor`, so the agent sees the loop it is currently missing before it starts changing the skill again.

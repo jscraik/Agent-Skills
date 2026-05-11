@@ -13,7 +13,9 @@ linear_issue: <issue key when tracked>
 linear_milestone: <milestone when tracked>
 ---
 
-# <Title Matching Frontmatter>
+<!-- markdownlint-disable MD025 -->
+
+# Title Matching Frontmatter
 
 ## Executive Eval Summary
 Status:
@@ -105,13 +107,12 @@ Suggested Next Step:
 Blocks Completion: no
 
 ## Domain Model Integrity Check
-Domain Model Status:
+Conclusion:
 Bounded Context:
-Aggregate / Invariant Proof:
-Model-Code-Test Language Match:
-Translation Boundary:
-Closure Impact:
-Evidence:
+Aggregate Invariants:
+Translation Evidence:
+Scenario or Test Evidence:
+Confidence:
 Blocks Completion:
 
 ## Drift Validation
@@ -125,54 +126,31 @@ Moat Drift: Unknown
 ## Architecture Integrity Check
 Conclusion:
 Evidence:
-Affected Files/Modules:
-Confidence:
-Blocks Completion:
-
-## Domain Model Integrity Check
-Conclusion:
-Bounded Context:
-Canonical Terms:
-Aggregate Invariants:
-Lifecycle Ownership:
-Translation Evidence:
-Scenario or Test Evidence:
-Confidence:
 Blocks Completion:
 
 ## Routing Determinism Check
 Conclusion:
 Evidence:
-Affected Files/Modules:
-Confidence:
 Blocks Completion:
 
 ## Context Load Check
 Conclusion:
 Evidence:
-Affected Files/Modules:
-Confidence:
 Blocks Completion:
 
 ## Agent-Native Check
 Conclusion:
 Evidence:
-Affected Files/Modules:
-Confidence:
 Blocks Completion:
 
 ## Governance Simplicity Check
 Conclusion:
 Evidence:
-Affected Files/Modules:
-Confidence:
 Blocks Completion:
 
 ## Moat Protection Check
 Conclusion:
 Evidence:
-Affected Files/Modules:
-Confidence:
 Blocks Completion:
 
 ## Proof Artifacts
@@ -180,6 +158,11 @@ Produced:
 Required:
 Missing:
 Planned Before Implementation:
+Generated Media Cache Source:
+Repository Media Path:
+Prompt Metadata Path:
+Media Sidecar Path:
+Repository Media Exists:
 Blocks Completion:
 Attach or Link Back to Linear:
 
@@ -209,8 +192,6 @@ Classification: Do Not Create
 Target Linear Project:
 Parent Issue or Milestone:
 Reason:
-Priority:
-Labels:
 Agent-Safe or Human Review Required:
 
 ## Core / ADR Update Recommendation

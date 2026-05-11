@@ -1,0 +1,3 @@
+Got it. I’ll treat the strategy artifact as repo-wide authority for refactor, Linear, ADR, core, and closure work, even if its sampling was narrow.
+
+For any changes in `/Users/jamiecraik/dev/agent-skills`, I’ll also follow the AGENTS.md hierarchy you provided, including using `./bin/ask` for repo operations, reading `UBIQUITOUS_LANGUAGE.md` before skill/policy/runtime/agent-doc changes, and editing canonical sources rather than runtime projections.

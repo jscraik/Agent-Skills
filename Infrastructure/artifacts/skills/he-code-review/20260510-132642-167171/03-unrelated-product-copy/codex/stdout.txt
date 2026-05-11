@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e11db-8d89-7651-b5dd-21f79af9c659"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Sure. Send me the current headline and, if you have it, the product/site context. I’ll give you a few more playful options with different intensity levels: subtle, cheeky, and bold."}}
+{"type":"turn.completed","usage":{"input_tokens":46009,"cached_input_tokens":39296,"output_tokens":65,"reasoning_output_tokens":18}}

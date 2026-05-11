@@ -1,0 +1,30 @@
+I’m blocked by the execution environment before I can inspect or edit the repo.
+
+Every attempted command in `/Users/jamiecraik/dev/agent-skills`, including simple read-only commands like `pwd` and `git status --short`, fails immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because the session is in `read-only` sandbox mode and approval policy is `never`, I can’t request broader filesystem permissions or apply patches safely. So I could not do the required repo evidence pass, choose a high-confidence refactor from the live tree, or record skipped alternatives in a file.
+
+What I would do once the sandbox is usable:
+
+1. Run the repo-required context checks:
+   ```bash
+   ./bin/ask repo doctor --json --robot
+   ```
+   plus targeted reads of `UBIQUITOUS_LANGUAGE.md`, path ownership docs, and changed files.
+
+2. Identify only mechanical, low-risk refactor candidates, such as duplicated wording, dead helper code with no references, or a local naming cleanup contained to one canonical source.
+
+3. Implement exactly one highest-confidence refactor.
+
+4. Record skipped refactors in the appropriate canonical doc or closeout note with reasons like “too broad,” “runtime projection,” “behavioral uncertainty,” or “insufficient validation surface.”
+
+5. Validate with:
+   ```bash
+   ./bin/ask repo closeout --changed --json --robot
+   ```
+
+Current status: no files changed, no validation run, blocked by sandbox startup failure.

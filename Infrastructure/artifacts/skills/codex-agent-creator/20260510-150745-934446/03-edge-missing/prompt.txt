@@ -1,0 +1,1 @@
+Please install this agent locally, but do not touch project config unless that is the only way to make Codex discover it.

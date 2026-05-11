@@ -1,0 +1,25 @@
+I can review it, but I’m blocked from reading the diff in this environment right now.
+
+I tried to inspect the repo from `/Users/jamiecraik/dev/agent-skills` with:
+
+```bash
+pwd && rg --files -g 'AGENTS.md' -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/README.md'
+git status --short && git diff --stat
+```
+
+Both failed before executing with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+The MCP resource path is also empty, so I don’t have another local file channel to read the working tree.
+
+To do the review properly, send me one of these and I’ll give you findings-first feedback with file/line references:
+
+```bash
+git diff --stat
+git diff -- path/to/changed/files
+```
+
+Or, if this is a PR, send the GitHub owner/repo and PR number. The GitHub connector is available, so I can inspect PR files/comments directly if I have the target.

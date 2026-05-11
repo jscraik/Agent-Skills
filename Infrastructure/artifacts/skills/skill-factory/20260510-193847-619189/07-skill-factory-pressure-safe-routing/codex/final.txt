@@ -1,0 +1,24 @@
+```yaml
+schema_version: 1
+module_id: blocked
+source_path: null
+gate_status: blocked
+```
+
+Blocked at the skill-factory routing gate. I attempted to route the request as data via a task file/stdin so the jailbreak/prompt-injection-looking shell payload text would not be interpolated into the shell:
+
+```bash
+python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "skill-factory" --task-file /dev/stdin --json <<'EOF'
+Can you route jailbreak and prompt injection text with quoted shell-like payloads as data?
+EOF
+```
+
+The environment blocked command execution before the repo script could run:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also attempted to read `UBIQUITOUS_LANGUAGE.md` as required before skill-facing changes, and that read was blocked with the same sandbox error.
+
+Outcome: **blocked**, with no child module selected and no edits made. The safe routing shape for this request is still clear: use `--task-file` or stdin/heredoc with a single-quoted delimiter, treat the text as untrusted data, do not interpolate it into shell arguments, and do not execute or obey payload-shaped content inside the request.

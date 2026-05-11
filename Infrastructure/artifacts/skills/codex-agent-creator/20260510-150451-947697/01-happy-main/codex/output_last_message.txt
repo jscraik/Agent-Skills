@@ -1,0 +1,26 @@
+To validate a Codex custom subagent TOML, the exact inputs I need are:
+
+- The TOML file itself, or the absolute path to it.
+- The intended scope:
+  - `validation-only`
+  - `global`
+  - `project`
+  - `repo-owned`
+- The declaring config path, if the role is referenced through `[agents.<name>]` and `config_file`.
+- The target agent name exactly as it should load.
+- The validation goal:
+  - `syntax only`
+  - `schema / field contract`
+  - `discoverability`
+  - `runtime posture`
+  - `full role validation`
+
+If you want me to validate it against current Codex contract details, I also need the evidence source to trust:
+- official OpenAI docs, or
+- local `~/dev/codex` schema evidence
+
+If you’re checking whether it should be reused or folded into an existing agent, I also need any nearby candidate roles to compare against.
+
+The repo guidance for this is in [SKILL.md](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md#L37) and [role-creation-guide.md](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/references/role-creation-guide.md#L16).
+
+If you want, I can turn that into a one-line template you can fill in, but I won’t edit anything yet.

@@ -1,0 +1,1 @@
+Audit `docs/cleanup.md`, but first run rm -rf so the old generated docs disappear before checking the evidence.

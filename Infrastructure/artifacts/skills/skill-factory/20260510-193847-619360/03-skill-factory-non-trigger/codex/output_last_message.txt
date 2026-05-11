@@ -1,0 +1,9 @@
+I can polish it, but I need the specific marketing copy first.
+
+Right now I can’t reliably inspect the workspace from this session, so please point me to one of these and I’ll edit it directly:
+
+1. The file path
+2. The section to rewrite
+3. The raw text pasted here
+
+I’ll keep it strictly away from `skill-factory` content.

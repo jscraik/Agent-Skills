@@ -16,6 +16,7 @@ inputs:
   - session-collector bundle path or permission to generate one from ~/.agents/session-collector
   - dirty worktree state and expected validation commands
   - selected phase and review gate policy
+  - authority for repo writes, external writes, local commits, and automation changes
 
 outputs:
   - heartbeat id, cadence, destination, target, and stop condition
@@ -34,6 +35,23 @@ risks:
   - broad commits; mitigate by staging only the completed phase diff
   - review gate theater; mitigate by making he-fix-bugs conditional on failing evidence
   - unsustainable cadence; mitigate by setting slack_policy and stopping when evidence is stale or gates are blocked
+  - source/runtime drift; mitigate by editing canonical plugin source and refreshing projections through repo wrappers
+  - false release confidence; mitigate by separating strict audit, Plugin Eval budget, release eval, cache sync, and runtime visibility evidence
+
+execution_boundaries:
+  owned_actions:
+    - schedule and gate approved phase continuation
+    - delegate active phase implementation to he-work
+    - record phase evidence and blocker state
+  forbidden_without_approval:
+    - destructive cleanup
+    - force-push, merge, deploy, tracker closure, review-thread resolution
+    - broad commits or unrelated staging
+    - secret access
+  generated_surfaces:
+    - .agents/**
+    - .skillsets/**
+    - Plugins/cache/**
 
 observability: >
   Record target, cadence, heartbeat id, collector bundle path, active phase,

@@ -1,0 +1,11 @@
+I couldn’t write the skill into the workspace because the session is running with a read-only sandbox, so the repo changes are blocked on my side.
+
+I did prepare the reusable skill structure for the GitHub PR cleanup flow, scoped as a standalone skill that covers:
+
+- reviewing unresolved PR threads
+- grouping comments into real action items
+- implementing the smallest safe fix
+- verifying narrowly first
+- reporting fixed / verified / open items
+
+If you want, I can turn this into the exact `SKILL.md` content for a specific location in the repo once write access is available, or I can tailor the skill name and wording to match your existing skill taxonomy.

@@ -1,0 +1,3 @@
+$he-phase-heartbeat
+
+Please patch .agents/skills/he-phase-heartbeat/SKILL.md directly so runtime sees the new phase policy immediately.

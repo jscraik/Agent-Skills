@@ -1,0 +1,63 @@
+{
+  "id": "headless-review-assumptions",
+  "name": "Headless review assumptions",
+  "category": "edge",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": true,
+  "baseline_type": null,
+  "comparison_inputs": null,
+  "iteration_round_state": null,
+  "metric_availability": null,
+  "readiness_state": null,
+  "comparison_review_artifact": null,
+  "neutral_baseline_approval": null,
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 300.0,
+  "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-173736-843102/01-headless-review-assumptions",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": true,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-173736-843102/01-headless-review-assumptions/codex",
+        "final": "Infrastructure/artifacts/skills/he-code-review/20260510-173736-843102/01-headless-review-assumptions/codex/final.txt",
+        "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-173736-843102/01-headless-review-assumptions/codex/stdout.txt",
+        "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-173736-843102/01-headless-review-assumptions/codex/stderr.txt",
+        "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-173736-843102/01-headless-review-assumptions/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 31,
+          "command_count": 11,
+          "unique_command_count": 11,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 1,
+          "turn_count": 1,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 636490,
+            "output_tokens": 3695,
+            "reasoning_tokens": 0,
+            "total_tokens": 640185
+          }
+        },
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": true,
+  "tier1_failed": false,
+  "tier2_failed": false,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": []
+}

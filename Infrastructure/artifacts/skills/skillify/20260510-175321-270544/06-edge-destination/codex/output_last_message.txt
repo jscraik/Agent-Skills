@@ -1,0 +1,71 @@
+I’m stopping before creating anything because the category is unclear, and I also can’t validate the destination from the live repo right now.
+
+What I could determine from your source: this reads like a skill for **AGENTS.md instruction discovery and precedence**, especially around:
+
+- finding every relevant `AGENTS.md`
+- applying directory-scoped instructions
+- handling conflicts by deeper-path precedence
+- respecting system/developer/user instructions above repo guidance
+- validating scope before editing files
+
+The likely skill category might be one of these, but I should not choose without confirmation:
+
+1. `agent-ops` / workflow governance
+   Best fit if this is meant to guide agents during repo work.
+
+2. `harness-engineering` / agent runtime behavior
+   Best fit if this is about how Codex-style agents should interpret instructions across containers.
+
+3. `skill-factory` / skill authoring guidance
+   Best fit if this is mainly a reusable skill for creating or validating other skills.
+
+4. A new standalone skill category, perhaps `agent-instructions` or `repo-guidance`
+   Best fit if you want this as a broadly reusable cross-repo skill rather than folded into an existing routing area.
+
+I attempted to inspect the repo and the skill-creator instructions, but every shell read failed with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because the session is read-only and approval is disabled, I can’t validate the canonical destination or write the skill file in this turn.
+
+My recommended category is **agent-ops**, because the content is operational guidance for agents working inside arbitrary repositories and containers. If you confirm that category, the next step would be to create a focused skill along these lines:
+
+```markdown
+---
+name: agends-instruction-scope
+description: Use when working in a repository or container that may contain AGENTS.md files, especially before editing files, validating instruction precedence, or determining which human guidance applies to a path.
+---
+
+# AGENTS.md Instruction Scope
+
+Use this skill when you need to determine which `AGENTS.md` instructions apply before reading, editing, validating, or reporting on files in a workspace.
+
+## Workflow
+
+1. Locate applicable `AGENTS.md` files.
+   - Check the filesystem path from the workspace root to the target file or directory.
+   - Remember that `AGENTS.md` files can appear anywhere, including `/`, the home directory, repository roots, and nested subdirectories.
+   - Do not assume they only appear in version-controlled directories.
+
+2. Determine scope.
+   - Each `AGENTS.md` governs the directory containing it and every child path beneath that directory.
+   - For each file you plan to change, apply every `AGENTS.md` whose scope includes that file.
+
+3. Resolve precedence.
+   - System, developer, and direct user instructions outrank `AGENTS.md`.
+   - When multiple `AGENTS.md` files apply, the deeper file overrides conflicting guidance from higher-level files.
+   - Non-conflicting guidance from higher-level files still applies.
+
+4. Validate before editing.
+   - Before changing a file, identify the exact applicable instruction stack for that path.
+   - If the applicable category, ownership boundary, or destination is unclear, stop and ask for clarification.
+   - Do not infer a destination when the instructions require validation.
+
+5. Report evidence.
+   - When useful, cite the relevant `AGENTS.md` paths and the target file path.
+   - For blocked work, state which category or destination could not be validated.
+```
+
+I’d wait for your category choice before proceeding.

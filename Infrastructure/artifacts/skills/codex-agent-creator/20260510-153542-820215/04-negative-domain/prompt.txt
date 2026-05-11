@@ -1,0 +1,1 @@
+I want a new skill that teaches Codex how to run our release checklist, not a custom subagent role.

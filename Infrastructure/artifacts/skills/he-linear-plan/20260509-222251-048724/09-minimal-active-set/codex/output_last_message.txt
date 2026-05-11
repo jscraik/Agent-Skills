@@ -1,0 +1,3 @@
+Yes. I’ll keep the active Linear set intentionally small: only create or keep issues for findings that are actionable, high-signal, and worth someone’s attention.
+
+For anything low-value, speculative, duplicate, cosmetic, or better handled opportunistically while touching nearby code, I’ll leave it uncreated and mention it only in the working notes or final summary if useful.

@@ -1,0 +1,9 @@
+I can review it, but I’m blocked from seeing the diff right now. The local sandbox is rejecting even read-only commands like `git diff --stat` and `./bin/ask repo doctor --json --robot` with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+There are also no MCP resources exposed for this workspace, so I don’t have another local path to inspect the files.
+
+Please paste the diff, or send the GitHub PR/branch reference. Once I can see it, I’ll review in the requested stance and specifically flag the over-broad “every gate required for docs-only changes” profile as a readiness risk if the diff does that.

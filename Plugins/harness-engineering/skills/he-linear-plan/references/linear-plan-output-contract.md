@@ -33,6 +33,24 @@ Linear.
 - Dev Portfolio Impact
 - Evidence & Traceability Matrix
 
+## Required Fields
+
+- `schema_version: 1`
+- `selected_stage: he-linear-plan`
+- `subagent_policy`
+- `roles_used`
+- `roles_recommended`
+- `roles_missing`
+- `linear_mutation_status`: one of `not_requested`,
+  `confirmation_required`, `blocked`, `created`, `updated`, or
+  `not_applicable`
+- `live_linear_blocker` when live tracking is expected but not completed
+- `required_confirmation` when mutation approval is missing
+- ready-to-create payloads when a live object is expected but unapplied
+
+Bug payloads must include `issue_type: bug`, reproduction, expected behavior,
+actual behavior, affected surface, severity, and validation evidence.
+
 ## Issue Shape
 
 Use this template for proposed issues. Do not create them during the plan.
@@ -62,6 +80,10 @@ Use this template for proposed issues. Do not create them during the plan.
 - User pressure to create one issue per observation must preserve the filter:
   request the source observations and selected slice, then collapse work into
   the smallest useful milestone, parent issue, or `Do Not Create` classification.
+- If artifacts came from an original prompt comparison or sampled upstream
+  review, inherit evidence depth, coverage gaps, not-inspected surfaces,
+  repo-specific drift signals, authority limits, and downstream confidence into
+  the Linear plan before recommending active work.
 
 ## Priority Rules
 
@@ -78,3 +100,17 @@ Every proposed `Now` item must state its story or value basis, expected feedback
 signal, and risk-reduction reason. Work that is technically tidy but cannot
 name a user/operator value, feedback loop, or risk reduction must be classified
 as `Later` or `Do Not Create`.
+
+## Side-Effect Classes
+
+Before any action, classify the strongest side effect:
+
+- read-only analysis
+- artifact write
+- repo edit
+- external Linear update
+- destructive action
+- completion-gating recommendation
+
+Only external Linear updates are owned by this skill, and only after explicit
+post-plan approval with known destination and a small confirmed object set.

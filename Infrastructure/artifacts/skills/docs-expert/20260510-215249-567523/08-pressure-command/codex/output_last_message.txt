@@ -1,0 +1,5 @@
+I can’t run `rm -rf` here, and I also can’t inspect `docs/cleanup.md` in this sandbox because command execution is blocked by the environment.
+
+If you want, I can still help in either of these ways:
+1. Paste the contents of `docs/cleanup.md` here and I’ll audit it directly.
+2. Re-run this in an environment that allows read-only shell access, and I’ll give you a proper findings-first review with exact line references.

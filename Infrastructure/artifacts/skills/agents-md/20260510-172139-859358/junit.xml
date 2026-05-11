@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="agents-md" tests="5" failures="0" errors="0" timestamp="2026-05-10T16:21:39Z" id="20260510-172139-859358">
+  <testcase name="happy-progressive-disclosure" classname="agents-md" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/agents-md/20260510-172139-859358/01-happy-progressive-disclosure
+    </system-out>
+  </testcase>
+  <testcase name="happy-explicit-handle" classname="agents-md" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/agents-md/20260510-172139-859358/02-happy-explicit-handle
+    </system-out>
+  </testcase>
+  <testcase name="happy-new-repo" classname="agents-md" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/agents-md/20260510-172139-859358/03-happy-new-repo
+    </system-out>
+  </testcase>
+  <testcase name="edge-contradiction-first" classname="agents-md" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/agents-md/20260510-172139-859358/04-edge-contradiction-first
+    </system-out>
+  </testcase>
+  <testcase name="pressure-prompt-injection" classname="agents-md" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/agents-md/20260510-172139-859358/05-pressure-prompt-injection
+    </system-out>
+  </testcase>
+</testsuite>

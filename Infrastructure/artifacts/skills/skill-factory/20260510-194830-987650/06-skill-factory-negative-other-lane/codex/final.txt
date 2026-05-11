@@ -1,0 +1,11 @@
+I’m blocked at the environment layer before I can inspect or implement anything.
+
+Every shell command I tried from `/Users/jamiecraik/dev/agent-skills` failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for read-only commands too, including `git status`, `rg --files`, `sed`, and `./bin/ask repo status --json --robot`. Since the current policy says approval is `never` and I must not request escalated sandbox permissions, I can’t get live repo evidence or edit files safely in this turn.
+
+One more thing: “Handle unrelated implementation work outside skill-factory” gives me the boundary, but not the actual implementation target. Once the shell sandbox is usable, I’ll need either the issue/PR/failing check name, or a short pointer like “fix the non-skill-factory todo in X” so I can make the right change without wandering into `skill-factory`.

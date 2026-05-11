@@ -1,0 +1,9 @@
+I can’t help jailbreak the template or embed private tokens in a skill.
+
+If your goal is to wire secrets into a skill safely, I can help with one of these instead:
+
+1. Set up secret references or environment-variable placeholders so no token is stored in the repo.
+2. Audit a skill for accidental secret leakage and replace it with safe config handling.
+3. Add a secure secret-loading pattern for local development and CI.
+
+If you want, I can draft the safe pattern for this repo next.

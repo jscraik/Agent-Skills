@@ -13,6 +13,7 @@ sys.path.append(str(REPO_ROOT / "scripts"))
 
 from ask.commands import plugins as plugins_commands  # noqa: E402
 from ask.commands import skills as skills_commands  # noqa: E402
+from ask.envelope import ErrorObject  # noqa: E402
 from ask.services import plugin_cache  # noqa: E402
 
 sys.path.append(str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
@@ -607,6 +608,31 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(plan["plugin_cache_refresh"]["mode"], "only")
         self.assertEqual(plan["plugin_cache_refresh"]["status"], "refreshed")
         self.assertIn("cache only refresh", result.data["logs"])
+
+    def test_sync_skills_plugin_cache_refresh_only_fails_on_permission_denial(self) -> None:
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", side_effect=AssertionError("should not sync skills")),
+            mock.patch.object(skills_commands, "refresh_workspace_plugin_caches") as refresh_mock,
+        ):
+            refresh_mock.return_value = ErrorObject(
+                code="ERR_RUNTIME",
+                message="Workspace plugin cache refresh blocked by permissions: blocked",
+                fix_suggestion="rerun with write access",
+            )
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                plugin_cache_refresh="only",
+            )
+
+        self.assertEqual(result.status, "error")
+        refresh_mock.assert_called_once()
+        self.assertEqual(len(result.errors), 1)
+        self.assertEqual(result.errors[0].code, "ERR_RUNTIME")
+        plan = result.data["plan"]
+        self.assertEqual(plan["plugin_cache_refresh"]["mode"], "only")
+        self.assertEqual(plan["validation_status"], "not_run")
 
     def test_sync_skills_rejects_invalid_plugin_cache_refresh_mode(self) -> None:
         result = skills_commands.sync_skills(

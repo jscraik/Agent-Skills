@@ -175,6 +175,94 @@ def _summarize_family_benchmark_failure(stdout: str, stderr: str, limit: int = 3
     return None
 
 
+def _validate_repo_relative_skill_path(repo_root: Path, skill_path: str) -> tuple[Optional[Path], Optional[CallResult]]:
+    """Resolve *skill_path* and block path traversal outside the repository root."""
+    result = CallResult()
+    try:
+        resolved_path = (repo_root / skill_path).resolve()
+        resolved_root = repo_root.resolve()
+        try:
+            if not resolved_path.is_relative_to(resolved_root):
+                result.status = "error"
+                result.errors.append(
+                    ErrorObject(
+                        code="ERR_PATH_TRAVERSAL",
+                        message=f"Path traversal detected: '{skill_path}' resolves outside repository root.",
+                        fix_suggestion="Use a relative path within the repository.",
+                    )
+                )
+                return None, result
+        except AttributeError:
+            try:
+                resolved_path.relative_to(resolved_root)
+            except ValueError:
+                result.status = "error"
+                result.errors.append(
+                    ErrorObject(
+                        code="ERR_PATH_TRAVERSAL",
+                        message=f"Path traversal detected: '{skill_path}' resolves outside repository root.",
+                        fix_suggestion="Use a relative path within the repository.",
+                    )
+                )
+                return None, result
+    except Exception as exc:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Invalid path: {exc}",
+                fix_suggestion="Check the path format and try again.",
+            )
+        )
+        return None, result
+    return resolved_path, None
+
+
+def _normalize_skill_target_path(skill_path: str) -> tuple[Path, str]:
+    """Return the directory target and normalized repo-relative path for a skill input."""
+    audit_target = Path(skill_path)
+    if audit_target.name == "SKILL.md":
+        audit_target = audit_target.parent
+    return audit_target, audit_target.as_posix()
+
+
+def _run_validation_command(
+    repo_root: Path,
+    command: list[str],
+    data_key: str,
+    failure_message: str,
+    fix_suggestion: Optional[str] = None,
+) -> CallResult:
+    """Run a validation subprocess and return a CallResult with captured output."""
+    result = CallResult()
+    proc = subprocess.run(
+        command,
+        cwd=str(repo_root),
+        capture_output=True,
+        text=True,
+        env=_subprocess_env_with_uv_cache(),
+    )
+    result.data[data_key] = {
+        "command": command,
+        "exit_code": proc.returncode,
+        "stdout": proc.stdout,
+        "stderr": proc.stderr,
+    }
+    if proc.returncode == 0:
+        result.status = "success"
+        return result
+
+    result.status = "error"
+    result.errors.append(
+        ErrorObject(
+            code="ERR_VALIDATION",
+            message=failure_message,
+            fix_suggestion=fix_suggestion,
+        )
+    )
+    return result
+
+
 @dataclass(frozen=True)
 class _RouterSkill:
     name: str
@@ -1285,45 +1373,11 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     """
     result = CallResult()
 
-    # Path traversal protection: resolve and verify path is within repo
-    try:
-        resolved_path = (repo_root / skill_path).resolve()
-        resolved_root = repo_root.resolve()
-        # Use is_relative_to for proper boundary check (not just string prefix)
-        try:
-            if not resolved_path.is_relative_to(resolved_root):
-                result.status = "error"
-                result.errors.append(ErrorObject(
-                    code="ERR_PATH_TRAVERSAL",
-                    message=f"Path traversal detected: '{skill_path}' resolves outside repository root.",
-                    fix_suggestion="Use a relative path within the repository."
-                ))
-                return result
-        except AttributeError:
-            # Python <3.9 fallback: check path components
-            try:
-                resolved_path.relative_to(resolved_root)
-            except ValueError:
-                result.status = "error"
-                result.errors.append(ErrorObject(
-                    code="ERR_PATH_TRAVERSAL",
-                    message=f"Path traversal detected: '{skill_path}' resolves outside repository root.",
-                    fix_suggestion="Use a relative path within the repository."
-                ))
-                return result
-    except Exception as e:
-        result.status = "error"
-        result.errors.append(ErrorObject(
-            code="ERR_VALIDATION",
-            message=f"Invalid path: {e}",
-            fix_suggestion="Check the path format and try again."
-        ))
-        return result
+    _, path_error = _validate_repo_relative_skill_path(repo_root, skill_path)
+    if path_error:
+        return path_error
 
-    audit_target = Path(skill_path)
-    if audit_target.name == "SKILL.md":
-        audit_target = audit_target.parent
-    audit_target_path = audit_target.as_posix()
+    audit_target, audit_target_path = _normalize_skill_target_path(skill_path)
 
     python = _get_python_command(["pyyaml", "jsonschema"])
 
@@ -1386,6 +1440,96 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             fix_suggestion=f"Ensure '{skill_path}' exists and contains a SKILL.md file."
         ))
         
+    return result
+
+
+def validate_skill_gate(repo_root: Path, skill_path: str) -> CallResult:
+    """Run the canonical skill gate as a first-class validation command."""
+    _, path_error = _validate_repo_relative_skill_path(repo_root, skill_path)
+    if path_error:
+        return path_error
+
+    audit_target, audit_target_path = _normalize_skill_target_path(skill_path)
+    python = _get_python_command(["pyyaml", "jsonschema"])
+    gate_script = _resolve_skill_builder_script(repo_root, "skill_gate")
+    gate_cmd = python + [
+        gate_script,
+        audit_target_path,
+        "--require-security-evals",
+        "--pi-high-fail",
+        "--require-fail-fast",
+    ]
+    return _run_validation_command(
+        repo_root,
+        gate_cmd,
+        "skill_gate",
+        "Skill gate validation failed.",
+        fix_suggestion=(
+            "Inspect data.skill_gate for full output, or rerun the command shown there "
+            f"against {shlex.quote(audit_target_path)}."
+        ),
+    )
+
+
+def validate_openai_skill_format(repo_root: Path, skill_path: str, mode: str = "strict") -> CallResult:
+    """Run the canonical OpenAI skill format wrapper as a first-class validation command."""
+    _, path_error = _validate_repo_relative_skill_path(repo_root, skill_path)
+    if path_error:
+        return path_error
+
+    _, audit_target_path = _normalize_skill_target_path(skill_path)
+    command = [
+        "bash",
+        "Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh",
+        "--mode",
+        mode,
+        audit_target_path,
+    ]
+    return _run_validation_command(
+        repo_root,
+        command,
+        "openai_skill_format",
+        "OpenAI skill format validation failed.",
+        fix_suggestion=(
+            "Inspect data.openai_skill_format for full output, or rerun the command shown there "
+            f"against {shlex.quote(audit_target_path)}."
+        ),
+    )
+
+
+def validate_skill_boundaries(repo_root: Path, handle: str) -> CallResult:
+    """Resolve a handle and expose canonical-versus-projection ownership boundaries."""
+    resolved = skills_explain_boundary(repo_root, handle)
+    if resolved.status != "success":
+        return resolved
+    return resolved
+
+
+def skills_explain_boundary(repo_root: Path, handle: str) -> CallResult:
+    """Return a compact command-surface ownership report for one skill handle."""
+    result = skills_resolve(repo_root, handle=handle)
+    if result.status != "success":
+        return result
+
+    resolution = result.data.get("resolution", {})
+    canonical_path = resolution.get("canonical_skill_path") or resolution.get("source_path")
+    command_handle_path = resolution.get("command_handle_path")
+    projection_risks: list[str] = []
+    if command_handle_path:
+        projection_risks.append("Do not hand-edit generated command handles under .agents/skills/**.")
+    if canonical_path and command_handle_path and canonical_path != command_handle_path:
+        projection_risks.append("Edit the canonical source path and regenerate or verify projections after changes.")
+
+    boundary = {
+        "handle": resolution.get("handle", handle.lstrip("$")),
+        "status": "pass",
+        "canonical_skill_path": canonical_path,
+        "command_handle_path": command_handle_path,
+        "invoke_via": resolution.get("invoke_via"),
+        "command_visibility": resolution.get("command_visibility"),
+        "notes": projection_risks,
+    }
+    result.data = {"boundary_check": boundary}
     return result
 
 def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, str]:

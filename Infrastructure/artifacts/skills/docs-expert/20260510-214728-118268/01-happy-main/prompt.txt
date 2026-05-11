@@ -1,0 +1,1 @@
+Update the README so every command matches the current package scripts.

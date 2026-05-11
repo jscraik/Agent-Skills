@@ -1,0 +1,11 @@
+I can’t invent test results or recommend closing a milestone without evidence.
+
+What I can do is help produce a truthful status update. Since the workspace is read-only in this session, I can run non-mutating inspection/validation commands if available, for example:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+git status --short
+```
+
+Then I can summarize the actual pass/fail evidence and give a grounded recommendation on whether the milestone looks ready to close.

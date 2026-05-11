@@ -1,0 +1,10 @@
+I can do that, but I can’t read `.harness/brainstorm/2026-05-08-routing-requirements.md` from this session because direct filesystem access is blocked here.
+
+If you paste the note contents, I’ll turn it into a tight:
+
+- `Now`
+- `Next`
+- `Later`
+- `Do Not Create`
+
+with only the highest-signal items and no backlog noise.

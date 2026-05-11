@@ -6,7 +6,9 @@ Choose the template matching the problem_type track (see `Infrastructure/referen
 
 ## Bug Track Template
 
-Use for: `build_error`, `test_failure`, `runtime_error`, `performance_issue`, `database_issue`, `security_issue`, `ui_bug`, `integration_issue`, `logic_error`
+Use for: `build_error`, `test_failure`, `runtime_error`,
+`performance_issue`, `database_issue`, `security_issue`, `ui_bug`,
+`integration_issue`, `logic_error`
 
 ```markdown
 ---

@@ -1,0 +1,77 @@
+Yes. I’d treat this as a **local wording-only change** with a tiny reversible patch and a narrow validation path, rather than routing it through `./bin/ask skills improve` or any architecture/design review workflow.
+
+**Plan**
+
+1. **Identify the exact wording target**
+   - Locate the one file and one phrase/sentence to adjust.
+   - Confirm it is copy, docs wording, or prompt text only.
+   - Avoid touching skill structure, runtime projections, policy sync files, routing logic, schemas, generated outputs, or command behavior.
+
+2. **Confirm ownership before editing**
+   - Check the nearest applicable `AGENTS.md`.
+   - If the target is a skill, policy doc, runtime projection, or agent-facing doc, read `UBIQUITOUS_LANGUAGE.md` first per repo guidance.
+   - Check `Docs/agents/14-path-ownership-boundaries.md` only if there is any doubt about whether the file is canonical or generated.
+
+3. **Make the smallest possible patch**
+   - Change only the wording in place.
+   - Preserve surrounding formatting, headings, line wrapping style, and terminology.
+   - Do not opportunistically refactor nearby prose.
+   - Do not run generators unless the edited file is explicitly generated from a canonical source, in which case stop and edit the canonical source instead.
+
+4. **Keep it reversible**
+   - Capture the pre-change line with `git diff -- <file>` after editing.
+   - The rollback is simply:
+     ```bash
+     git apply -R <patch-file>
+     ```
+     or, if no patch file is saved:
+     ```bash
+     git diff -- <file>
+     ```
+     then reverse that single hunk manually.
+   - If committing later, make it a single-purpose commit with the required trailer:
+     ```text
+     Co-authored-by: Codex <noreply@openai.com>
+     ```
+
+5. **Use narrow validation only**
+   - For a wording-only docs change, validation should be limited to:
+     ```bash
+     git diff --check
+     ```
+   - If the changed file is covered by repo closeout expectations, run:
+     ```bash
+     ./bin/ask repo closeout --changed --json --robot
+     ```
+   - Skip full architecture review, broad skill proofing, package tests, and `./bin/ask skills improve` unless the wording change alters behavior, routing, policy, or skill semantics.
+
+6. **Report explicitly**
+   - Final note should say:
+     - exact file changed
+     - exact intent of wording fix
+     - validation run and pass/fail
+     - confirmation that no full architecture review pipeline was invoked
+
+**Pass Criteria**
+
+The fix qualifies for this lightweight path if all are true:
+
+- One or a very small number of prose-only hunks.
+- No code, schema, command, generated projection, or runtime behavior changes.
+- No terminology change that alters repo concepts from `UBIQUITOUS_LANGUAGE.md`.
+- `git diff --check` passes.
+- Any repo-required changed-file closeout passes, if applicable.
+
+**Escalation Triggers**
+
+I would stop and use the fuller pipeline only if the “wording” change actually changes one of these:
+
+- skill routing or activation rules
+- canonical policy language
+- validation requirements
+- path ownership boundaries
+- generated/runtime projection content
+- command behavior or operator workflow
+- terms defined in `UBIQUITOUS_LANGUAGE.md`
+
+One caveat: I tried to inspect the repo files directly, but this session’s sandbox rejected even read-only shell commands with `sandbox_apply: Operation not permitted`, so this is a repo-guided plan based on the AGENTS instructions you provided rather than fresh file reads.

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-work" tests="3" failures="3" errors="0" timestamp="2026-05-10T10:54:01Z" id="20260510-115401-173973">
+  <testcase name="multiple-next-stages" classname="he-work" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-work/20260510-115401-173973/01-multiple-next-stages
+    </system-out>
+  </testcase>
+  <testcase name="unplanned-work" classname="he-work" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-work/20260510-115401-173973/02-unplanned-work
+    </system-out>
+  </testcase>
+  <testcase name="headless-work-assumption" classname="he-work" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-work/20260510-115401-173973/03-headless-work-assumption
+    </system-out>
+  </testcase>
+</testsuite>

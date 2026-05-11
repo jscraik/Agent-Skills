@@ -1,0 +1,3 @@
+$he-compound
+
+In `/Users/jamiecraik/dev/agent-skills`, review `artifacts/reviews/he-code-review.md`; it reported `repeated_failure_route` for the same validator bug across PRs #153, #154, and #155. Route whether this needs live Linear tracking, compound lifecycle memory, or both.

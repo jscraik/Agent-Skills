@@ -1,0 +1,242 @@
+I can write it, but the local shell is currently blocked by the sandbox before even read-only commands run:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because this session is also in `read-only` mode with approval policy `never`, I can’t create or patch the file directly in the repo from here. I’ll still do the autonomous-mode version: below is the spec I would place in the repo, with assumptions recorded where I would normally ask clarifying questions.
+
+Proposed path: `/Users/jamiecraik/dev/agent-skills/Docs/specs/autonomous-mode-assumptions.md`
+
+```markdown
+# Autonomous Mode Assumption Recording Spec
+
+## Status
+
+Draft
+
+## Summary
+
+Add an autonomous execution mode for agent workflows where the agent proceeds without clarification when the next step is reasonably inferable, while explicitly recording assumptions that would normally have been asked as clarification questions.
+
+The goal is to preserve execution momentum for Jamie-style builder workflows without losing the epistemic trail that makes later review, correction, or rollback possible.
+
+## Problem
+
+Agent workflows often pause to ask clarifying questions when requirements are incomplete. That is useful for ambiguous or high-risk work, but it can slow down execution when the missing information is low-risk, locally inferable, or already implied by repository conventions.
+
+Today, when an agent decides to proceed anyway, assumptions are often implicit in the implementation or final summary. That makes it harder to audit why a path was chosen, distinguish deliberate inference from accidental omission, and correct a mistaken assumption later.
+
+## Goals
+
+- Allow agents to continue execution without blocking on non-critical clarification.
+- Require explicit recording of assumptions made during autonomous execution.
+- Make assumptions visible in specs, plans, closeout notes, or machine-readable output.
+- Preserve safety boundaries for destructive, security-sensitive, externally visible, or irreversible actions.
+- Keep the mode compatible with existing `--json --robot` command flows.
+- Encourage concrete evidence from repo files, commands, tests, and validation output.
+
+## Non-Goals
+
+- Do not remove the ability to ask clarifying questions.
+- Do not permit agents to bypass approval requirements or sandbox restrictions.
+- Do not authorize destructive git operations, secret access, production changes, or external publication without an explicit user request.
+- Do not require every tiny implementation choice to be logged as an assumption.
+- Do not introduce a separate package manager, install step, or runtime projection editing path.
+
+## Assumptions
+
+- The canonical source for this behavior should live under `Docs/` rather than a runtime projection.
+- The feature is intended for agent-facing workflows in this repository, especially skill improvement, repo maintenance, docs, and spec-writing flows.
+- `./bin/ask` remains the preferred command surface for repo operations.
+- Existing `--json --robot` behavior should be preserved and extended rather than replaced.
+- Assumption recording should be lightweight enough that agents actually use it.
+- The user prefers progress over repeated clarification when risk is low.
+- A later human or agent reviewer should be able to inspect assumptions and decide whether any require correction.
+
+## Definitions
+
+### Autonomous Mode
+
+A workflow mode where the agent proceeds with an inferred implementation path instead of pausing for clarification, provided the action is low-risk and reversible or reviewable.
+
+### Assumption
+
+A concrete statement about missing, ambiguous, or inferred information that affects the chosen plan, implementation, validation, or output.
+
+### Clarification Candidate
+
+A question the agent would normally ask before proceeding, but chooses to convert into an assumption under autonomous mode.
+
+### Blocking Clarification
+
+A question that must still be asked because proceeding would be unsafe, destructive, externally visible, legally sensitive, security-sensitive, or likely to waste significant work.
+
+## User Experience
+
+When autonomous mode is requested, the agent should:
+
+1. Identify missing information that would normally trigger clarification.
+2. Decide whether each clarification candidate is blocking or assumable.
+3. Proceed on assumable items.
+4. Record assumptions close to the work product.
+5. Validate the result using repository-standard commands where possible.
+6. Summarize assumptions and validation evidence in closeout.
+
+Example user prompt:
+
+```text
+Write the spec in autonomous mode and record assumptions where clarification would normally be asked.
+```
+
+Expected agent behavior:
+
+- Do not stop to ask what format should be used if the repo has a spec convention.
+- Do not stop to ask where to put the file if canonical docs paths are discoverable.
+- Do record assumptions such as target audience, scope boundaries, command surface, and validation expectations.
+- Do stop if the requested spec depends on unavailable confidential context or requires changing protected systems.
+
+## Assumption Record Format
+
+Assumptions should be written as short, reviewable bullets.
+
+Recommended markdown format:
+
+```markdown
+## Assumptions
+
+- Assumed `<decision>` because `<evidence or rationale>`.
+- Assumed `<scope boundary>` to avoid expanding beyond `<stated goal>`.
+- Assumed `<default behavior>` follows `<repo convention or command output>`.
+```
+
+Recommended JSON shape for robot output:
+
+```json
+{
+  "assumptions": [
+    {
+      "statement": "Assumed docs/specs is the canonical home for new specs.",
+      "rationale": "Repository docs are organized under Docs/ and AGENTS.md points agents to Docs/agents/README.md for instruction maps.",
+      "risk": "low",
+      "would_have_asked": "Where should this spec live?"
+    }
+  ]
+}
+```
+
+## Risk Classification
+
+Each assumption may optionally include a risk level.
+
+### Low Risk
+
+Use when the assumption is easy to change, local to docs or tests, and unlikely to affect users.
+
+Examples:
+
+- File naming convention.
+- Section ordering in a draft spec.
+- Whether to include examples.
+
+### Medium Risk
+
+Use when the assumption shapes implementation behavior or public documentation but remains reviewable before release.
+
+Examples:
+
+- Default command flags.
+- Output schema fields.
+- Workflow sequencing.
+
+### High Risk
+
+Do not silently assume. Ask for clarification or require explicit approval.
+
+Examples:
+
+- Publishing externally.
+- Modifying production data.
+- Deleting files.
+- Rotating credentials.
+- Changing authentication or authorization behavior.
+- Changing canonical policy in a way that conflicts with existing docs.
+
+## Behavioral Rules
+
+- Autonomous mode applies only after the user explicitly requests it or a workflow explicitly enables it.
+- The agent should prefer repository evidence over generic conventions.
+- The agent should use existing command wrappers, especially `./bin/ask`, for repo operations.
+- The agent should edit canonical sources rather than runtime projections.
+- The agent should preserve unrelated user work.
+- The agent should report blockers precisely when sandboxing, missing tools, or permissions prevent completion.
+- The agent should not treat autonomous mode as permission to invent requirements beyond the user’s request.
+
+## Blocking Conditions
+
+The agent must pause or report a blocker when:
+
+- Required files cannot be read.
+- Required files cannot be written.
+- The requested change would be destructive or irreversible.
+- The action requires network access that is unavailable.
+- The action requires credentials, secrets, or production access.
+- The change affects security, payments, legal compliance, or user data in a way that cannot be safely inferred.
+- Existing repo instructions conflict and no deeper scoped instruction resolves the conflict.
+
+## Workflow
+
+1. Read applicable `AGENTS.md` files.
+2. Read required project language or policy docs before changing governed areas.
+3. Discover canonical target paths and local examples.
+4. Draft assumptions before implementation.
+5. Implement the spec or change.
+6. Run the narrowest meaningful validation.
+7. Run repo closeout when applicable.
+8. Report changed files, assumptions, validation results, and unresolved risks.
+
+## Validation
+
+For this repository, expected validation should normally include:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+When changing a specific skill, also run:
+
+```bash
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+```
+
+Validation may be skipped only when blocked by sandboxing, missing dependencies, or unavailable permissions. The final report must state the exact blocker.
+
+## Acceptance Criteria
+
+- A user can request autonomous mode in plain language.
+- The agent proceeds without clarification for low-risk inferred details.
+- The resulting spec, plan, or closeout includes an `Assumptions` section.
+- Each assumption is concrete enough to be reviewed or corrected.
+- High-risk ambiguity still causes a pause or blocker report.
+- Robot output can include assumptions in a structured field.
+- Validation evidence is included when commands can be run.
+- The workflow complies with repository path ownership and tooling policy.
+
+## Open Questions
+
+- Should autonomous mode be a persistent workflow flag, a per-command flag, or only a prompt-level instruction?
+- Should `./bin/ask` expose a first-class `--autonomous` flag?
+- Should assumption recording be required in all robot outputs or only workflows that mutate files?
+- Should assumptions be stored in generated artifacts, closeout output, or both?
+- Should medium-risk assumptions require special labeling or confirmation before merge?
+
+## Initial Recommendation
+
+Start with prompt-level autonomous mode plus a documented assumption format. Avoid adding a new command flag until at least two workflows need machine-enforced behavior.
+
+This keeps the behavior immediately useful while preserving a clean path toward future `./bin/ask --autonomous` support.
+```
+
+I wasn’t able to write the file or run repo validation because every shell command is failing at the sandbox layer before execution. The spec above is ready to drop into the proposed path once filesystem writes are available.

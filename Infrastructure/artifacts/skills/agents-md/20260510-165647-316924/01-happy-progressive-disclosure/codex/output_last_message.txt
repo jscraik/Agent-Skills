@@ -1,0 +1,30 @@
+I’m blocked by the execution environment before I can read or edit the repo. Even a minimal `pwd` from `/Users/jamiecraik/dev/agent-skills` fails with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because the session is also in `read-only` mode with approval policy `never`, I can’t request write access or bypass the sandbox. No files were changed.
+
+What I would do once the sandbox is fixed:
+
+1. Read the required repo guidance:
+   - `UBIQUITOUS_LANGUAGE.md`
+   - `repo/payments-api/AGENTS.md`
+   - `repo/payments-api/docs/workflow.md`
+   - `repo/payments-api/package.json`
+   - CI config under `repo/payments-api/.github/` or equivalent
+
+2. Refactor `repo/payments-api/AGENTS.md` into a short root map with:
+   - A brief “Start Here” section
+   - “Context Pointers” linking to detailed docs such as `docs/workflow.md`
+   - Correct command references using `pnpm test`, matching `package.json` and CI
+   - Preserved “Project Brain” rules
+   - Preserved “Local Memory” rules
+   - Removed duplicated git rules that already live in `docs/workflow.md`
+
+3. Validate with something like:
+   - `./bin/ask repo closeout --changed --json --robot`
+   - plus any repo-specific docs or lint checks if the payments API defines them
+
+Once command execution is available, I can make the actual edit directly.

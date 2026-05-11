@@ -1,0 +1,32 @@
+I’m blocked by the execution environment before I can inspect or edit the repo.
+
+Every attempted read command fails immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I tried:
+
+```bash
+pwd
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' /Users/jamiecraik/dev/agent-skills/.agents/skills/content-publishing/SKILL.md
+find repo/payments-api -name AGENTS.md -print
+```
+
+All failed the same way, before the command itself ran. The session is also configured as `read-only` with approval policy `never`, so I can’t request expanded filesystem access or safely patch files.
+
+What I would do once the sandbox is usable:
+
+1. Read `UBIQUITOUS_LANGUAGE.md`, per the root AGENTS instruction.
+2. Read `repo/payments-api/AGENTS.md`, `repo/payments-api/docs/workflow.md`, `repo/payments-api/package.json`, and CI config.
+3. Replace the 900-line root AGENTS file with a compact map centered on:
+   - project-specific rules that truly belong at root
+   - `Context Pointers` to deeper docs like `docs/workflow.md`
+   - corrected test command: `pnpm test`
+   - preserved `Project Brain` rules
+   - preserved `Local Memory` rules
+4. Validate with a readback and likely `./bin/ask repo closeout --changed --json --robot` if the wrapper is available.
+
+I can pick this back up as soon as command execution or write access is available.

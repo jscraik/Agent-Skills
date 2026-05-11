@@ -30,7 +30,8 @@ outputs:
   - a written spec artifact with stable SA or VAC identifiers
   - Linear Work Item Contract and Linear Acceptance Traceability for tracked specs
   - Linear Delta Capture status with label reconciliation for existing tracked plans
-  - linear_blocked status with missing fields and ready-to-create payload when the tracker gate cannot complete
+  - linear_mutation_status as not_needed, confirmation_required, blocked, created, updated, or deferred_to_he-linear-plan
+  - linear_action_required with target project, issue type, proposed title, ready-to-create/update payload, required confirmation, and blocker when live tracking is missing
   - coding_harness lifecycle block with Harness command gate status, `project_brain_status`, and companion `project_brain_evidence_state` when the target repo is coding-harness-managed
   - source-parity notes covering current active source, superseded/latest-only artifacts, and session evidence used
   - compression recovery gates when cockpit, command catalog, README front door, default help, golden-path command, or other first-contact UX is in scope
@@ -55,6 +56,7 @@ non_goals:
   - letting secondary review, strategy, triage, or feature material drive implementation directly
   - inventing contract-level behavior that is not grounded in source artifacts or research
   - skipping or weakening the Linear tracker gate for non-trivial tracked work
+  - presenting local `.harness` state as proof that a live Linear object exists
   - skipping the companion UI-spec need when the work clearly requires it
   - treating additive metadata, classification, docs routing, or command existence as product compression
 
@@ -62,7 +64,7 @@ risks:
   - weak source grounding; mitigate with authoritative-source resolution and one focused blocker question
   - contract ambiguity; mitigate with explicit section requirements and stable acceptance IDs
   - UI ambiguity causing planning churn; mitigate with ui_required detection and dedicated UI-spec mode
-  - missing Linear traceability; mitigate by resolving or creating the Linear issue before writing tracked specs
+  - missing Linear traceability; mitigate by resolving the issue, creating it only when approved, or returning a confirmation-gated ready payload
   - missing or one-off labels; mitigate by reusing existing labels, creating only approved reusable labels, or blocking with a ready-to-create payload
   - coding-harness Project Brain drift; mitigate by recording whether Project Brain is updated, blocked, or not applicable
   - stale or generic external guidance; mitigate with bounded primary-source research and dated citations

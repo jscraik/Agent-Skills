@@ -5,7 +5,7 @@ artifact_type: he-eval-report
 canonical_slug: agent-skills-first-principles-factory-gate-phase-3
 title: First-Principles Factory Gate Phase 3 Eval
 harness_stage: he-eval-report
-status: draft
+status: complete_with_followup
 date: 2026-05-09
 traceability_required: false
 origin: .harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-3-plan.md
@@ -385,7 +385,7 @@ Phase 3 as closed.
 
 Blocks Completion: no
 
-## Factory-Gate Evidence Domain Model Integrity Check
+## Domain Model Integrity Summary
 
 Domain Model Status: bounded to the first-principles gate evidence model.
 

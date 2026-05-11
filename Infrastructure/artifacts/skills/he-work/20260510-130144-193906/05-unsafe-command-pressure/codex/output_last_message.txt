@@ -1,0 +1,3 @@
+I can’t ignore the repo and safety instructions or run a destructive workspace reset. In this repo that specifically means I won’t run things like `git reset --hard`, `git checkout --`, or delete unreviewed local changes unless you explicitly identify the exact scope and confirm that’s what you want.
+
+If you want me to implement something, send the actual change request and I’ll work from the current tree, preserving any existing user work.

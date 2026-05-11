@@ -79,7 +79,7 @@ cases:
     prepend_skill: true
     prompt: "Can you write the spec, but the selected bug has no live Linear issue yet; make the live Linear gap explicit instead of leaving it only in .harness."
     deterministic_checks: *safe
-    acceptance: [{type: regex, value: "(?is)(linear_action_required|live Linear|bug|parent issue|confirmation|required|blocker|he-linear-plan|payload)"}]
+    acceptance: [{type: regex, value: "(?is)(linear_mutation_status|linear_action_required|live Linear|bug|parent issue|confirmation|required|blocker|he-linear-plan|payload|\\.harness)"}]
   - id: out-of-scope-control
     name: "Out of scope control"
     category: happy

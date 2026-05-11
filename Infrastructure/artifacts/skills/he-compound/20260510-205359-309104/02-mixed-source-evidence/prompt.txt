@@ -1,0 +1,1 @@
+Can you compare `.harness/session-evidence/latest.md`, `Plugins/harness-engineering/references/stage-context-contract.md`, and Linear JSC-246 context; identify the traceability gap before updating artifacts.

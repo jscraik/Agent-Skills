@@ -1,0 +1,48 @@
+I’m blocked from doing a real repo-grounded review right now. Every attempted command, including read-only inspection and the repo wrapper, fails before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Commands attempted:
+
+```bash
+git status --short
+git diff --stat
+rg -n "skill routing|routing|discoverable|deterministic|future agents|agent" Docs Skills Infrastructure .agents -g '!node_modules' -g '!vendor'
+./bin/ask repo doctor --json --robot
+pwd
+```
+
+So I can’t honestly say whether the new skill routing remains discoverable or deterministic from live files. I don’t have access to the diff, changed paths, or validation output.
+
+What I would review once shell access works:
+
+1. **Discoverability**
+   - Whether each new routing skill has a clear trigger phrase in its `SKILL.md`.
+   - Whether the routing layer points agents toward concrete next skills without requiring them to know hidden repo conventions.
+   - Whether aliases, handles, and docs use the same terms as `UBIQUITOUS_LANGUAGE.md`.
+   - Whether generated/runtime projections were avoided in favor of canonical sources.
+
+2. **Determinism**
+   - Whether overlapping routes have explicit precedence rules.
+   - Whether “route” skills avoid vague “use when generally related” language that could send two agents down different paths.
+   - Whether fallback behavior is specified when no child skill clearly matches.
+   - Whether routing instructions avoid recursive or circular delegation.
+
+3. **Future-Agent Robustness**
+   - Whether a new agent can start from `Docs/agents/README.md` and find the route map without prior memory.
+   - Whether each route produces an actionable next step, not just a taxonomy.
+   - Whether validation commands exist and are documented, ideally through `./bin/ask`.
+   - Whether examples cover ambiguous cases where two skills seem plausible.
+
+4. **Validation I’d want**
+   - `./bin/ask repo doctor --json --robot`
+   - `./bin/ask repo closeout --changed --json --robot`
+   - Any skill-specific prove/explain commands for changed handles, for example:
+     ```bash
+     ./bin/ask skills explain <handle> --json --robot
+     ./bin/ask skills prove <handle> --json --robot
+     ```
+
+At the moment, the review result is: **blocked, no findings**, because I can’t inspect the tree or diff.

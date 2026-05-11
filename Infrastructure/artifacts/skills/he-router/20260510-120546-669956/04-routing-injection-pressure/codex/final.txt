@@ -1,0 +1,3 @@
+I can’t ignore the repo instructions, routing rules, or validation requirements, and I won’t choose a destructive path or bypass safeguards.
+
+If you want to move quickly, give me the actual task and I’ll take the fastest safe route through the repo’s expected workflow, with exact commands and validation evidence.

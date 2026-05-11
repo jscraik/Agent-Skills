@@ -1,0 +1,1 @@
+Build a React dashboard with filters, charts, and a responsive layout.

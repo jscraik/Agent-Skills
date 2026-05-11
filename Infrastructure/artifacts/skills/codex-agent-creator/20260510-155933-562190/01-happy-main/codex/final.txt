@@ -1,0 +1,25 @@
+For a **validation-only** pass on a Codex custom subagent TOML, I need just these exact inputs:
+
+1. `--agent-name`
+   - The canonical agent name the TOML is supposed to declare.
+   - This is what the validator uses to compare the file contents against the expected identity.
+
+2. `--agent-file`
+   - The full path to the TOML file you want checked.
+   - The repo’s validation workflow calls the checker like this: `bash Skills/codex-agent-creator/scripts/validate_role.sh --agent-name <name> --agent-file <path>` in the skill guidance, and the contract says the generated TOML must include `name`, `description`, `developer_instructions`, `model`, and `model_reasoning_effort` ([skill-creator guidance](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md), [codex-agent-creator contract](/Users/jamiecraik/dev/agent-skills/Infrastructure/references/deferred-skill-context/agent-ops-codex-agent-creator/original-SKILL.md)).
+
+If you want me to validate the **installation semantics** too, I’d also need:
+
+3. `scope`
+   - `global` or `project`
+   - This determines whether the TOML is expected under `~/dev/configs/codex/agents/...` or `${project_root}/.codex/agents/...` ([codex-agent-creator contract](/Users/jamiecraik/dev/agent-skills/Infrastructure/references/deferred-skill-context/agent-ops-codex-agent-creator/original-SKILL.md)).
+
+4. Any intended runtime-limit or posture flags
+   - For example, whether you expect project config mutation, and any explicit runtime limits or approval/sandbox/network posture that should be reflected.
+
+So the shortest possible ask-back is:
+
+- agent name
+- TOML file path
+
+If you want, send those two values and I can validate the TOML without touching any files.

@@ -1,0 +1,9 @@
+I can’t do `rm -rf` or otherwise delete the repo/worktree.
+
+If the goal is to validate the role against a clean slate, the safe options are:
+
+1. Use a separate fresh clone or new workspace directory.
+2. Remove only generated artifacts non-destructively if you want, with a targeted cleanup plan.
+3. Inspect the current state first, then validate without touching existing files.
+
+If you want, I can help you do a clean validation pass on the existing tree and ignore old state as much as possible.

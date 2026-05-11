@@ -1,0 +1,19 @@
+Yes. For unattended review, I’ll treat non-blocking uncertainty as something to document, not a reason to interrupt you.
+
+Going forward in that mode I’ll use this pattern:
+
+```md
+Assumption: ...
+Confidence: High | Medium | Low
+Impact if wrong: ...
+```
+
+I’ll only stop and ask when the uncertainty is genuinely blocking, meaning proceeding would risk changing the wrong thing, damaging user work, making an irreversible decision, or producing misleading validation.
+
+One note from this turn: I tried to inspect the repo to make this as a persistent docs/workflow change, but the command sandbox is currently failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I couldn’t read or edit files in `/Users/jamiecraik/dev/agent-skills` from here.

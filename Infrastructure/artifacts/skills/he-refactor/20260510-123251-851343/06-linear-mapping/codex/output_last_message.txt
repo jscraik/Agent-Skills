@@ -1,0 +1,202 @@
+No Linear objects created.
+
+Given the repo guidance and the “refactor program” framing, I’d map this as one small milestone with a single parent issue that contains the operating structure, then 5 focused child issues. This keeps it small enough to execute without turning Linear into a second planning system.
+
+**Milestone**
+
+**Name:** Refactor Program: Canonical Sources First
+
+**Goal:** Reduce drift between canonical skill/operator sources, runtime projections, and agent-facing docs while preserving existing repo command contracts.
+
+**Success Criteria:**
+
+- Canonical ownership boundaries are clear for every touched refactor area.
+- Runtime projection changes are generated or synced from source, not hand-edited.
+- Validation evidence is captured with repo wrappers.
+- Refactor work is split into reviewable, low-risk slices.
+- Any stale or contradictory guidance found during the work is either removed or explicitly tracked.
+
+**Suggested Timeline:** 1 week / one short Linear cycle
+
+**Scope Guardrail:** This milestone should improve structure and consistency, not redesign the whole skills system.
+
+**Parent Issue**
+
+**Title:** Refactor skills control plane around canonical ownership and validation
+
+**Type:** Parent issue / initiative issue
+
+**Description:**
+
+Refactor the agent-skills control plane so skill sources, operator docs, sync policy, and runtime projections follow the repository’s canonical ownership model.
+
+This work should follow the repo operating contract:
+
+- Use `./bin/ask` for repo operations.
+- Read `UBIQUITOUS_LANGUAGE.md` before changing skills, sync policy, runtime projections, or agent-facing docs.
+- Edit canonical sources rather than runtime projections.
+- Validate through repo wrappers and capture robot-mode evidence.
+- Keep slices small and avoid unrelated cleanup.
+
+**Outcome:**
+
+By the end of this parent issue, the refactor program should leave the repo easier for agents to navigate, safer to modify, and less likely to accumulate stale duplicated instructions.
+
+**Acceptance Criteria:**
+
+- Refactor scope is decomposed into child issues with explicit touched areas.
+- Each child issue names the canonical source paths it expects to modify.
+- Each child issue includes validation commands.
+- No child issue requires editing runtime projections directly unless the issue explicitly proves that path is canonical.
+- Closeout evidence can be produced with `./bin/ask repo closeout --changed --json --robot`.
+
+**Child Issues**
+
+**1. Audit canonical ownership boundaries for refactor targets**
+
+**Purpose:** Establish what can be edited safely before touching behavior.
+
+**Likely References:**
+
+- `UBIQUITOUS_LANGUAGE.md`
+- `Docs/agents/14-path-ownership-boundaries.md`
+- `Docs/agents/README.md`
+
+**Acceptance Criteria:**
+
+- Refactor target areas are listed with canonical source paths.
+- Runtime projection paths are identified and excluded from direct edits.
+- Any unclear ownership is captured as a follow-up note rather than guessed.
+
+**Validation:**
+
+```bash
+./bin/ask repo doctor --json --robot
+```
+
+**2. Normalize stale or contradictory agent guidance**
+
+**Purpose:** Remove or reconcile guidance that conflicts with the current operating contract.
+
+**Likely References:**
+
+- `Docs/agents/05-contradictions-and-cleanup.md`
+- `Docs/agents/13-workflow-and-safety-guidance.md`
+- `Docs/agents/16-agent-operating-contract.md`
+
+**Acceptance Criteria:**
+
+- Contradictory instructions are resolved in canonical docs.
+- Wording aligns with the ubiquitous language.
+- No generated/runtime projection is hand-edited as the source of truth.
+
+**Validation:**
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+**3. Tighten skill management rules around install, audit, fold, and line budgets**
+
+**Purpose:** Make skill lifecycle rules clearer and easier for agents to follow.
+
+**Likely References:**
+
+- `Docs/agents/17-skill-management.md`
+- Relevant canonical skill sources, if the refactor touches actual skills
+
+**Acceptance Criteria:**
+
+- Skill management guidance clearly distinguishes authoring, auditing, folding, installing, and syncing.
+- Line-budget or size guidance is stated in actionable terms.
+- Any examples use current repo command conventions.
+
+**Validation:**
+
+```bash
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+```
+
+Use the actual affected skill handle for `<handle>`.
+
+**4. Align validation guidance with robot-mode evidence requirements**
+
+**Purpose:** Make closeout and validation expectations consistent across docs and workflows.
+
+**Likely References:**
+
+- `Docs/agents/04-validation.md`
+- `Docs/agents/16-agent-operating-contract.md`
+- `Docs/agents/13-workflow-and-safety-guidance.md`
+
+**Acceptance Criteria:**
+
+- Validation order is explicit.
+- Required evidence is machine-readable where possible.
+- Commands prefer `./bin/ask ... --json --robot`.
+- Closeout expectations are clear for changed files.
+
+**Validation:**
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+**5. Prove one representative refactor slice end to end**
+
+**Purpose:** Demonstrate the refactor workflow on a small, real slice before expanding it.
+
+**Suggested Slice:** One bounded agent-facing doc or one narrowly scoped skill-management clarification.
+
+**Acceptance Criteria:**
+
+- Starts from canonical ownership check.
+- Makes a minimal canonical-source edit.
+- Runs relevant repo validation.
+- Captures pass/fail evidence.
+- Notes any follow-up issue separately instead of broadening scope.
+
+**Validation:**
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+**Linear Shape**
+
+I’d structure it like this:
+
+```text
+Milestone: Refactor Program: Canonical Sources First
+
+Parent:
+  Refactor skills control plane around canonical ownership and validation
+
+Children:
+  1. Audit canonical ownership boundaries for refactor targets
+  2. Normalize stale or contradictory agent guidance
+  3. Tighten skill management rules around install, audit, fold, and line budgets
+  4. Align validation guidance with robot-mode evidence requirements
+  5. Prove one representative refactor slice end to end
+```
+
+**Suggested Labels**
+
+- `refactor`
+- `agent-skills`
+- `docs`
+- `validation`
+- `canonical-sources`
+
+**Suggested Priority**
+
+- Parent: Medium
+- Child 1: High, because it gates safe edits
+- Child 2-4: Medium
+- Child 5: High, because it proves the workflow before the program grows
+
+One note: I couldn’t inspect the live tree because the current shell sandbox rejected even read-only commands with `sandbox_apply: Operation not permitted`, so this map is based on the AGENTS instructions you provided and the visible repo contract. No Linear API or creation action was used.

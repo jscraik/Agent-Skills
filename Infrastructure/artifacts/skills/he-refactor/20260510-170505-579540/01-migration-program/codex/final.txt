@@ -1,0 +1,7 @@
+The refactor program is already present at [`.harness/refactors/2026-05-09-agent-skills-he-authority-proof-hardening.md`](/Users/jamiecraik/dev/agent-skills/.harness/refactors/2026-05-09-agent-skills-he-authority-proof-hardening.md), and it already has the core deterministic shape the review and strategy call for: phased migration bands, rollback rules, eval proof, and a small Linear mapping.
+
+I tried to tighten it further by pinning the live issue and adding explicit deterministic stop/go controls, but I couldn’t write the change because this session is running with a read-only sandbox and the patch tool is blocked.
+
+If you want, I can still do one of these next:
+1. Draft the exact patch text for the deterministic controls section so you can apply it locally.
+2. Produce a cleaner JSC-299-named refactor program version as a full replacement, ready to paste into a writable run.

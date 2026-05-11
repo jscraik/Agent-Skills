@@ -236,6 +236,57 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
             "slow-case",
         )
 
+    def test_split_case_execution_reports_slow_pass_cases_without_failing(self) -> None:
+        with (
+            mock.patch(
+                "run_lifecycle_release_evals._list_skill_builder_cases",
+                return_value=(["slow-pass"], None),
+            ),
+            mock.patch("run_lifecycle_release_evals._run_skill_builder_eval") as run_case,
+        ):
+            run_case.return_value = {
+                "skill": "he-spec",
+                "returncode": 0,
+                "status": "success",
+                "decision": "pass",
+                "case_filters": ["slow-pass"],
+                "duration_seconds": 121.5,
+                "failure_classification": {
+                    "timeout_cases": [],
+                    "content_failure_cases": [],
+                    "other_failure_cases": [],
+                    "tool_preflight_cases": [],
+                },
+                "raw_output": "",
+                "errors": [],
+            }
+
+            result = run_skill(
+                Path("/tmp/repo"),
+                "he-spec",
+                "release",
+                "codex",
+                (),
+                (),
+                300,
+                None,
+                None,
+                True,
+                Path("/tmp/codex-home"),
+            )
+
+        summary = summarize([result])
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["returncode"], 0)
+        self.assertEqual(result["slow_cases"][0]["id"], "slow-pass")
+        self.assertEqual(summary["status"], "pass")
+        self.assertEqual(
+            summary["failure_breakdown"]["slow_pass_cases"][0]["cases"][0]["id"],
+            "slow-pass",
+        )
+        self.assertEqual(summary["failure_breakdown"]["timeout_failures"], [])
+        self.assertEqual(summary["failure_breakdown"]["content_failures"], [])
+
     def test_codex_auth_preflight_error_is_classified_as_tool_preflight(self) -> None:
         summary = summarize(
             [

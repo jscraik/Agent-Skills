@@ -1,0 +1,17 @@
+I can, but I’m blocked from reading the local diff in this session right now.
+
+I tried to inspect the repo from `/Users/jamiecraik/dev/agent-skills` with `git diff --stat`, `git diff --name-only`, and even a plain `pwd`, but every shell command is failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I don’t have access to the actual changed files or line numbers yet.
+
+Please paste the diff, or at least the changed-file list plus the relevant hunks, and I’ll review it in the normal code-review format: findings first, ordered by severity, with exact file/line references. Given your description, I’ll specifically look for contract drift across the three concepts:
+
+- **Spec says `Workspace`**: public API, docs, user-facing behavior, acceptance criteria.
+- **Code says `Account`**: model names, service boundaries, permission checks, persistence, migrations.
+- **Tests assert `Customer` behavior**: fixtures, factories, expectations, authorization and lifecycle semantics.
+
+The highest-risk thing I’ll be checking is whether this is just naming inconsistency or an actual semantic mismatch: `Workspace`, `Account`, and `Customer` usually imply different ownership, billing, membership, and authorization boundaries.

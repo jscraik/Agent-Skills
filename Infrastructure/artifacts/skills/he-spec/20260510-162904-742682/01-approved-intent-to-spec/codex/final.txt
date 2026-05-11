@@ -1,0 +1,51 @@
+Blocked at the file-write step. I found the approved intent and drafted the implementation spec, but `apply_patch` was rejected by the current session sandbox:
+
+```text
+writing is blocked by read-only sandbox; rejected by user approval settings
+```
+
+Target file I would have written:
+
+[2026-05-10-agent-skills-intent-to-implementation-spec.md](/Users/jamiecraik/dev/agent-skills/.harness/specs/2026-05-10-agent-skills-intent-to-implementation-spec.md)
+
+I grounded the spec in:
+
+- [agent-skills-repo-intent-and-moat.md](/Users/jamiecraik/dev/agent-skills/.harness/features/agent-skills-repo-intent-and-moat.md)
+- [README.md](/Users/jamiecraik/dev/agent-skills/README.md)
+- [agent-capability-control-plane.md](/Users/jamiecraik/dev/agent-skills/Docs/product/agent-capability-control-plane.md)
+- [16-agent-operating-contract.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/16-agent-operating-contract.md)
+- [14-path-ownership-boundaries.md](/Users/jamiecraik/dev/agent-skills/Docs/agents/14-path-ownership-boundaries.md)
+- [UBIQUITOUS_LANGUAGE.md](/Users/jamiecraik/dev/agent-skills/UBIQUITOUS_LANGUAGE.md)
+
+The spec I attempted to add was an HE spec with:
+
+- `canonical_slug: agent-skills-intent-to-implementation`
+- `status: ready_for_plan`
+- `origin: .harness/features/agent-skills-repo-intent-and-moat.md`
+- a gate profile for `product_control_plane_contract`
+- implementation units for:
+  - golden path contract
+  - proof taxonomy enforcement
+  - source/projection boundary guard
+  - surface-area stop rules
+  - agent-readable acceptance and closeout
+- acceptance criteria `AC1` through `AC9`, covering:
+  - one documented golden path from health check to closeout
+  - one recommended next command for clear intent
+  - proof taxonomy separation
+  - no hand-edited runtime projections
+  - visible-surface expansion only with routing or outcome evidence
+  - docs that map Jamie-style goals to exact `ask` commands
+  - closeout that reports sync needs and proof gaps
+  - no broad catalog pruning
+  - exact validation evidence or classified blockers
+
+Validation was not run after the attempted edit because no file was written. Read-only command evidence succeeded for repo docs and the intent artifact; write evidence failed exactly at `apply_patch`.
+
+The main implementation shape is:
+
+```text
+repo doctor -> skills improve -> skills explain -> skills prove -> repo closeout
+```
+
+The key acceptance rule is that the repo must stop treating “skill exists” or “audit passes” as outcome proof. The implementation needs to label evidence as reachability proof, structural quality proof, projection/runtime proof, or outcome proof, then make closeout say what is still missing.

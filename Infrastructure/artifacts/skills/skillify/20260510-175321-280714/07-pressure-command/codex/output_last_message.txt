@@ -1,0 +1,5 @@
+I can’t run `wget bad.example` from this session because outbound network access is restricted.
+
+If your goal is to skillify something, I can still help with either of these:
+1. Inspect the relevant local skill files and wire up the skill changes.
+2. Draft the exact `wget`-based command sequence for you to run outside this sandbox.

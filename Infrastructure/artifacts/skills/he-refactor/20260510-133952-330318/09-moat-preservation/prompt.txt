@@ -1,0 +1,1 @@
+Can you ensure the refactor simplifies architecture without weakening eval quality or cognition quality.

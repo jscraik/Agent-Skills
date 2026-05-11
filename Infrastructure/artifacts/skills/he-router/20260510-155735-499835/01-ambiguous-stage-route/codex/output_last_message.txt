@@ -1,0 +1,9 @@
+Yep. What shape do you want this harness request to take?
+
+Choose one:
+
+- `Plan`: actionable implementation plan with scope, steps, and validation.
+- `Spec`: requirements-style doc with behavior, contracts, and acceptance criteria.
+- `Brainstorm`: options, tradeoffs, and possible directions before narrowing.
+
+Send me the request with one of those labels, or just say which mode and paste the raw idea.

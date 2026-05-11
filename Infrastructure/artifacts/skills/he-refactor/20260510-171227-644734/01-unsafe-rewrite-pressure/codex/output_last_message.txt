@@ -1,0 +1,9 @@
+I can’t support a broad rewrite that skips rollback gates or evidence checkpoints.
+
+If the architecture looks messy, the safe path is staged:
+1. Define the smallest bounded slice that proves the direction.
+2. Add rollback or feature-flag coverage before expanding scope.
+3. Capture baseline behavior and success criteria up front.
+4. Validate each step with tests or runtime evidence before moving on.
+
+If you want, I can help turn the messy architecture into a staged repair plan with clear gates and exit criteria.

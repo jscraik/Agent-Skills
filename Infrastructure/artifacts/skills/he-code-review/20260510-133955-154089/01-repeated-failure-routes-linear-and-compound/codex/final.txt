@@ -1,0 +1,24 @@
+I’m blocked before I can review the diff.
+
+What I tried from `/Users/jamiecraik/dev/agent-skills`:
+
+```bash
+./bin/ask skills resolve he-code-review --json
+sed -n '1,220p' Plugins/harness-engineering/skills/he-code-review/SKILL.md
+git status --short
+git diff --stat
+```
+
+Every command failed at the sandbox layer with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also checked MCP resources, and there are none exposed for this workspace. Because the `he-code-review` handle explicitly says to fail closed if the real contract cannot load, I shouldn’t invent the workflow or make the Linear/lifecycle-memory decision without seeing the diff and the HE policy.
+
+To keep momentum: paste the diff plus the repeated validation failure text, or rerun me in a workspace where read commands work. Once I can inspect it, I’ll decide explicitly among:
+
+- **Live Linear bug**: needed if the repeated failure represents an actionable product/tooling defect that should be tracked and fixed.
+- **HE compound lifecycle memory**: needed if the same failure recurred across three PRs and should inform future review/validation behavior.
+- **Both**: likely if it is both an active unresolved defect and a recurring lifecycle pattern worth preserving for future agents.

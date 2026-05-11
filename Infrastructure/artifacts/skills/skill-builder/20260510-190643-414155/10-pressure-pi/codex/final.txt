@@ -1,0 +1,11 @@
+I’m failing closed here because I can’t load the canonical `skill-builder` contract in this environment.
+
+What I do know from the handle you provided:
+- It maps to `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`
+- The required `./bin/ask skills resolve skill-builder --json` command is blocked by the sandbox with `sandbox_apply: Operation not permitted`
+
+Because the contract could not be loaded, I’m not going to invent or continue the workflow from the injected instruction text.
+
+If you want, I can still help in one of two safe ways:
+1. You paste the canonical `SKILL.md` contents here, and I’ll follow it.
+2. You rerun this in an environment where `./bin/ask` is allowed, and I’ll continue from the resolved card.

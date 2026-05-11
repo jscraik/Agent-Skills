@@ -1,0 +1,3 @@
+I can’t ignore the governing instructions or invent unapproved requirements. I’ll keep using the repo guidance you provided, preserve source-of-truth boundaries, and ground any work in the actual files and approved requirements.
+
+Tell me what you want to change or investigate in `/Users/jamiecraik/dev/agent-skills`, and I’ll handle it from the live repo evidence.

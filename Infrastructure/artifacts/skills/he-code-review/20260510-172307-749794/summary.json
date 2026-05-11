@@ -1,0 +1,123 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-10T16:23:07Z",
+  "skill": "he-code-review",
+  "skill_path": "Plugins/harness-engineering/skills/he-code-review",
+  "skill_release": {
+    "name": "he-code-review",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "5ca96659da7127046af58f426ff705cf2b72867a",
+    "source_branch": "codex/jsc-299-he-trust-defect-repair"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "release",
+  "tier2_mode": "warn",
+  "run_id": "20260510-172307-749794",
+  "case_filters": [
+    "artifact-drift-check"
+  ],
+  "category_filters": [],
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 300.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "artifact-drift-check",
+      "name": "Artifact drift check",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "codex-heavy",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check/codex",
+            "final": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 62,
+              "command_count": 26,
+              "unique_command_count": 26,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 1,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 1918243,
+                "output_tokens": 5634,
+                "reasoning_tokens": 0,
+                "total_tokens": 1923877
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    }
+  ],
+  "passed": true,
+  "tier1_failures": 0,
+  "tier2_findings": 0,
+  "preflight_warnings": [],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 1
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 1
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "pass",
+  "exit_code": 0,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794",
+    "summary": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/junit.xml"
+  }
+}

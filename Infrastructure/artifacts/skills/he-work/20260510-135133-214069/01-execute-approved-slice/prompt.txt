@@ -1,0 +1,1 @@
+Can you implement only the approved plan slice and collect validation evidence.

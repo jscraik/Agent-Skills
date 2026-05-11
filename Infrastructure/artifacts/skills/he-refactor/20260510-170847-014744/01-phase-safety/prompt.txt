@@ -1,0 +1,1 @@
+Can you break the migration into phases with rollback conditions and eval proof requirements.

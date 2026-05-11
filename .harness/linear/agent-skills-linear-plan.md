@@ -19,7 +19,7 @@ Recommended active set:
 | Window | Linear objects |
 |---|---|
 | Now | 1 repo milestone, 1 parent issue, 2 sub-issues, plus 1 parallel proof taxonomy ADR issue. |
-| Next | Proof-driven skill promotion and agent-first golden path—post-refresh/admitted (JSC-246). |
+| Next | Harden ask bootstrap and command discoverability—provisional next spec target after local JSC-246 proof completion (JSC-167). |
 | Later | Repository cognition burn-down and governance compression after the command plane is less fragile. |
 | Do Not Create | Any issue that merely repeats a review finding without execution proof, owner, or validation gate. |
 
@@ -510,12 +510,12 @@ Do not create one-off labels such as `Moat-Critical`, `Context`, or `Routing` un
 | `Portfolio Ops` | Do not reactivate solely for this repo plan | 0-1 coordination issue only if needed | Cross-repo work is not needed to start repo execution. |
 | `Dev Portfolio` | Use as parent initiative only | No new initiative | Existing initiative represents the repo execution surface. |
 
-Recommended current active objects after Linear delta refresh:
+Recommended current active objects after the 2026-05-09 Linear delta refresh:
 
 | Object | Activate now? | Reason |
 |---|---|---|
-| Milestone: Command surface and ask reliability / slice: Agent First Golden Path—post-refresh/admitted (JSC-246) | Yes | This is the next unresolved command-surface slice after `JSC-284` closed. |
-| Parent: `JSC-246` `[agent-skills] Build repo surface contract and agent capability control-plane golden paths` | Yes | Single admitted parent issue for the next `$he-spec` handoff. |
+| Milestone: Command surface and ask reliability / slice: Agent First Golden Path—post-refresh/admitted (JSC-246) | Historical yes; locally complete pending Linear review | This was the admitted command-surface slice after `JSC-284` closed; current repo-local proof now treats it as covered pending human Linear closure/linkage. |
+| Parent: `JSC-246` `[agent-skills] Build repo surface contract and agent capability control-plane golden paths` | Historical yes; do not re-admit | This was the single admitted parent issue for the JSC-246 `$he-spec` handoff; do not use it as the next spec target again without a fresh Linear review. |
 | Prior parent: `JSC-284` `[agent-skills] Decompose skills command module into bounded services` | No; keep closed | Completed with children `JSC-285`, `JSC-286`, and `JSC-287`; do not reopen for new work. |
 | Existing in-progress track: `JSC-230` Commandable Skill Trees | Do not fold into this slice | Already has its own active parent/child topology; folding it into `JSC-246` would blur ownership. |
 
@@ -557,7 +557,7 @@ Do not create the Portfolio Ops issue unless another repo needs the same reactiv
 
 Initial plan state: no Linear objects were created by the plan alone.
 
-Current tracker state: Linear objects were later created during the `$he-spec` tracker gate, then reconciled onto the canonical existing `agent-skills` project. Live delta refresh now shows `JSC-284`, `JSC-285`, `JSC-286`, and `JSC-287` are complete; the next admitted issue is `JSC-246`.
+Current tracker state: Linear objects were later created during the `$he-spec` tracker gate, then reconciled onto the canonical existing `agent-skills` project. The 2026-05-09 live delta refresh showed `JSC-284`, `JSC-285`, `JSC-286`, and `JSC-287` complete and admitted `JSC-246`; the 2026-05-10 repo-local proof artifacts classify local `JSC-246` proof as complete pending human Linear closure/linkage review. A later 2026-05-10 live Linear retry succeeded after the plugin namespace became callable and confirmed `JSC-167` as the next unblocked `$he-spec` target.
 
 Review confirmation received for this plan:
 
@@ -579,7 +579,7 @@ Final workflow decision (after the subsequent `$he-spec` flow):
 
 ## Approved Current Slice
 
-The only slice admitted for the current HE Spec lane is:
+The most recent admitted HE Spec lane was:
 
 | Field | Value |
 |---|---|
@@ -593,15 +593,19 @@ The only slice admitted for the current HE Spec lane is:
 | Selected refactor | `.harness/refactors/agent-first-golden-path.md` |
 | Parallel decision slice | None admitted for this handoff. |
 | Execution route | Agent-assisted; human-review required for public command contract and agent-facing workflow changes. |
-| Planning blocker | None from Linear tracker hygiene; `$he-spec` should start from `JSC-246` and avoid folding in `JSC-230`, `JSC-167`, or `JSC-169` unless explicitly re-approved. |
+| Planning blocker | Local proof is complete and awaiting human Linear closure/linkage review; do not resume `JSC-246` implementation or fold in `JSC-230`, `JSC-167`, or `JSC-169` through the completed JSC-246 plan. |
 
 No other review, strategy, triage, or Linear issue is admitted into this slice.
 
 ## Linear Delta Capture
 
-Last synced: `2026-05-09 21:31 BST` after live Linear refresh.
+Last synced: `2026-05-10 22:17 BST` after live Linear refresh.
 
-Source: Live Linear project query for canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`, project milestone lookup by ID, issue-level milestone `Command surface and ask reliability`, completed parent `JSC-284`, completed child issues `JSC-285`, `JSC-286`, and `JSC-287`, unresolved command-surface candidates in the same project, team label lookup, and targeted search/fetch for first-principles issues returned by Linear full-text search.
+Current gate update: `2026-05-10 22:17 BST` live Linear delta refresh succeeded through the Linear MCP tool surface. Treat the selected next slice below as live-verified against the canonical Linear project, milestone, and issue graph.
+
+Source: Live Linear project query for canonical project `791c2f12-5ffb-4644-8421-f4216ac6d805`, project milestone lookup by ID, project status updates, and project issue listing for the canonical `agent-skills` project. Milestone lookup by canonical project ID returned only `Command surface and ask reliability` (`1c091ac7-b2ef-4321-ab05-7779841aaf2a`, progress `37.5%`). Project issue listing returned the completed `JSC-284` child topology, the active `JSC-230` child topology, and command-surface backlog candidates including `JSC-167`, `JSC-168`, `JSC-169`, `JSC-170`, `JSC-171`, `JSC-172`, `JSC-173`, `JSC-174`, `JSC-175`, and `JSC-176`.
+
+Delta result: no new milestone supersedes `Command surface and ask reliability`; no newly discovered parent issue displaces the approved next spec target; `JSC-246` remains Linear-open but is still classified as prior/local-proof-complete tracker drift rather than next-slice scope.
 
 Tracker hygiene note: milestone lookup by canonical project ID now resolves the active milestone as `Command surface and ask reliability` (`1c091ac7-b2ef-4321-ab05-7779841aaf2a`, progress `37.5%`). If a name-only Linear lookup surfaces the canceled duplicate project's `Ask Control Plane Decomposition` milestone, treat that as stale duplicate-project noise and continue using the canonical project ID.
 
@@ -615,9 +619,9 @@ Label status: `resolved_with_existing_labels`; no Linear label mutation is requi
 | JSC-285 | `[agent-skills] Map skills command responsibilities and output contracts` | Done | 1 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |
 | JSC-286 | `[agent-skills] Extract plugin cache service behind existing behavior` | Done | 2 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |
 | JSC-287 | `[agent-skills] Write proof taxonomy and lifecycle ADR` | Done | 1 | already_covered | Completed child of `JSC-284`; remove from next-slice queue. |
-| JSC-246 | `Build repo surface contract and agent capability control-plane golden paths` | Todo | 2 | candidate_next_slice | Best next `$he-spec` target: unresolved, in the canonical project, in the active command-surface milestone, and directly maps to the planned Agent First Golden Path slice. |
-| JSC-167 | `Harden ask bootstrap and command discoverability` | Backlog | 2 | candidate_next_slice | Valid later command-surface work, but narrower than `JSC-246` and not admitted while only one slice may advance. |
-| JSC-169 | `Refactor ask to lazy-load command dependencies by topic` | Backlog | 2 | candidate_next_slice | Valid later architecture work, but should follow or be explicitly scoped by the `JSC-246` spec rather than bypass it. |
+| JSC-246 | `Build repo surface contract and agent capability control-plane golden paths` | Live: Todo; local proof complete pending Linear review | 2 | already_covered | Linear still shows this issue open, but `.harness/evals/agent-skills-jsc-246-agent-first-golden-path-eval.md` and `.harness/plan/agent-skills-jsc-246-agent-first-golden-path-plan.md` classify local proof complete and ready for human Linear closure/linkage review; do not admit as the next spec target again. |
+| JSC-167 | `Harden ask bootstrap and command discoverability` | Backlog | 2 | candidate_next_slice | Live Linear confirms this issue is in canonical project `agent-skills`, milestone `Command surface and ask reliability`, priority High, labels `Roadmap: Now`, `Infra`, and `Improvement`, with no blockers. Admit as the next `$he-spec` target. |
+| JSC-169 | `Refactor ask to lazy-load command dependencies by topic` | Backlog | 2 | candidate_later_slice | Live Linear confirms this is valid later command-loading architecture work, but it is blocked by `JSC-168`; keep behind `JSC-167` unless a later gate explicitly re-approves it. |
 | JSC-230 | `Implement Commandable Skill Trees for rooted skill handles` | In Progress | 2 | already_covered | Separate active parent with its own child topology; do not merge into this handoff. |
 | JSC-231 | `Generate command-surface projection from rooted manifests` | In Progress | 2 | already_covered | Child of `JSC-230`; already owned by the commandable-skill-tree track. |
 | JSC-232 | `Generate thin runtime stubs for command-visible skill handles` | In Progress | 2 | already_covered | Child of `JSC-230`; already owned by the commandable-skill-tree track. |
@@ -625,7 +629,7 @@ Label status: `resolved_with_existing_labels`; no Linear label mutation is requi
 | JSC-234 | `Add handle proof commands and artifact schema` | Todo | 2 | already_covered | Child of `JSC-230`; keep in that parent rather than duplicating into `JSC-246`. |
 | JSC-235 | `Add rooted command-handle regression tests` | Todo | 2 | already_covered | Child of `JSC-230`; keep in that parent rather than duplicating into `JSC-246`. |
 | JSC-236 | `Prove workspace/user sync and live Codex handle invocation` | In Progress | 2 | already_covered | Child of `JSC-230`; already owned by the commandable-skill-tree track. |
-| JSC-168 | `Add reproducible Python environment contract for ask CLI` | Backlog | 2 | needs_human_triage | May support command reliability, but it is environment-contract work and should not enter the golden-path spec without explicit approval. |
+| JSC-168 | `Add reproducible Python environment contract for ask CLI` | Backlog | 2 | supporting_candidate | May support command reliability and unblock later lazy-load work, but it has no active milestone assignment in the live project listing; do not merge into `JSC-167` unless the spec proves bootstrap cannot be made reliable without environment-contract scope. |
 | JSC-170 | `Fix Robot mode alias behavior to match documented examples` | Backlog | 2 | needs_human_triage | Potentially related to agent UX, but narrower than the admitted golden-path slice. |
 | JSC-174 | `Add ask start fast lane for first-contact agent workflows` | Backlog | 3 | needs_human_triage | May become a child of the golden-path program after spec review; do not admit before boundary definition. |
 | JSC-175 | `Split ask output profiles for humans vs agents` | Backlog | 4 | out_of_scope | Useful output polish, but not the next structural slice. |
@@ -638,4 +642,6 @@ Label status: `resolved_with_existing_labels`; no Linear label mutation is requi
 
 | Order | Slice | Linear Issue | Route | Depends On | Notes |
 |---:|---|---|---|---|---|
-| 1 | Agent First Golden Path spec | JSC-246 | Agent-assisted; human-review required for public command contract changes | `JSC-284` closure evidence; live Linear delta refresh complete; canonical project milestone verified by ID | This is the single admitted next slice for `$he-spec`. Scope it to repo surface contract and golden-path control-plane behavior, not all pending command-surface tickets. |
+| 1 | Ask bootstrap and command discoverability hardening spec | JSC-167 | Agent-assisted; human-review required for public command/discoverability contract changes | Local `JSC-246` proof complete; live Linear refresh confirms `JSC-167` is unblocked and in the active command-surface milestone | Approved next `$he-spec` target. Scope it to bootstrap and command discoverability hardening, not lazy-load architecture, `ask start`, commandable skill trees, or broad command-surface cleanup. |
+| 2 | Reproducible ask CLI environment contract triage | JSC-168 | Agent-assisted; human-review required if dependency installation or contributor setup contract changes | `JSC-167` spec/decision, or proof that bootstrap reliability cannot close without environment-contract scope | Keep as a supporting candidate, not the next spec target, unless the `JSC-167` spec finds it is a prerequisite. |
+| 3 | Lazy-load ask command dependencies by topic spec | JSC-169 | Agent-assisted; human-review required for command loading architecture changes | `JSC-167` spec/decision and `JSC-168` blocker resolution, or explicit re-approval | Keep as the next architecture candidate after discoverability hardening. Do not combine with `JSC-167` unless a later gate proves the boundary is artificial. |

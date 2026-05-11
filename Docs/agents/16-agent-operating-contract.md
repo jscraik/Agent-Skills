@@ -7,6 +7,13 @@ contract agents need for everyday work.
 
 ## `ask` CLI
 
+Fresh checkouts should prove the wrapper before depending on `./bin/ask`:
+
+```bash
+bash scripts/bootstrap-ask.sh --json
+python3 bin/ask repo status --json
+```
+
 All agents should use `./bin/ask` for repo operations.
 
 | Task            | Command                                            |

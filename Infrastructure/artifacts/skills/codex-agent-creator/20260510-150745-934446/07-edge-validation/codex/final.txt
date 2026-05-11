@@ -1,0 +1,45 @@
+Stopped at the first failing gate.
+
+Passed validation command:
+
+```bash
+./bin/ask repo doctor --json --robot
+```
+
+Result: exit code `0`, status `success`.
+
+Important details from the passing gate:
+
+```text
+agent_summary: Usable with diagnostic debt: Ask bootstrap fallback is ready; PATH shim is not configured.
+blocking: false
+blockers: []
+projection_sync: pass
+catalog_parity: pass
+runtime_budget: pass
+command_handles: pass
+```
+
+Failing gate:
+
+```bash
+./bin/ask repo closeout --changed --json --robot
+```
+
+Result: exit code `2`, status `error`.
+
+Blocker:
+
+```text
+Blocked: closeout has 1 blocker(s).
+commit_readiness.ready: false
+commit_readiness.blockers: ["sync_required"]
+```
+
+The tool’s suggested next command is:
+
+```bash
+./bin/ask skills sync --scope workspace --projection rooted --json --robot
+```
+
+I did not continue past that failing gate.

@@ -9,9 +9,9 @@ status: blocked_release_confidence
 date: 2026-05-09
 traceability_required: true
 origin: .harness/plan/2026-05-09-agent-skills-conditional-he-gate-selection-plan.md
-linear_issue: JSC-299
-linear_status: created
-linear_milestone: HE Authority And Proof Hardening
+linear_issue: null
+linear_status: not_applicable
+linear_milestone: null
 ---
 
 # Agent Skills Conditional HE Gate Selection Eval
@@ -40,11 +40,11 @@ explicitly replaced by an approved equivalent proof lane.
 
 ## Evaluated Slice
 
-Linear Project: agent-skills.
+Linear Project: not linked.
 
-Linear Milestone: HE Authority And Proof Hardening.
+Linear Milestone: not linked.
 
-Linear Parent Issue: JSC-299.
+Linear Parent Issue: not linked.
 
 Linear Sub-Issues: none.
 
@@ -93,16 +93,16 @@ Safe closure classification:
 
 - Static wiring confidence: supported.
 - Release confidence: blocked.
-- Linear closure recommendation: blocked for plugin-wide release confidence
-  under `JSC-299` until lifecycle eval timeout proof is repaired.
+- Linear closure recommendation: not applicable because no Linear issue is
+  linked; if this represented a Linear parent issue, closure would be blocked.
 
 ## Linear Backlink Map
 
-Linear Project: agent-skills.
+Linear Project: missing.
 
-Linear Milestone: HE Authority And Proof Hardening.
+Linear Milestone: missing.
 
-Linear Parent Issue: JSC-299.
+Linear Parent Issue: missing.
 
 Linear Sub-Issues: none.
 
@@ -117,8 +117,8 @@ Proof Artifact Links:
 - `Infrastructure/artifacts/skills/he-router/20260509-115700-063915/scorecard.json`
 - `Infrastructure/artifacts/skills/he-eval-report/20260509-115709-391859/scorecard.json`
 
-Traceability: linked to `JSC-299`. Static plugin source validation is supported,
-but Linear closure remains blocked by plugin-wide release-confidence proof.
+Traceability gap: no Linear identifier is present. This does not block static
+plugin source validation, but it would block Linear closure.
 
 ## Source Artifact Trace
 
@@ -428,7 +428,7 @@ Missing or blocked:
 
 - Passing full lifecycle smoke output for the changed lifecycle skills.
 - Fully refreshed plugin picker cache copy.
-- Passing Linear closure state after plugin-wide release proof.
+- Linear backlink.
 
 ## Failures / Regressions
 
@@ -517,4 +517,4 @@ this validation-hardening phase.
 | Sliced changed-surface smoke passes | runtime eval | `run_lifecycle_release_evals.py --mode smoke --eval-runner codex ... --case ambiguous-stage-route --case implementation-only-status` | high | supports narrow repair confidence |
 | Plugin-wide release confidence is blocked | runtime eval | legacy full `run_lifecycle_release_evals.py --mode smoke ...` | high | blocks closure |
 | Plugin picker cache proof is incomplete | sync output | `PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED` | high | blocks cache freshness claim |
-| Linear traceability is linked but closure remains blocked | artifact inspection | `JSC-299` is present in frontmatter and the Linear backlink map | high | blocks closure until release-confidence proof passes |
+| Linear traceability is missing | artifact inspection | no Linear issue in source spec/plan | high | blocks Linear closure |

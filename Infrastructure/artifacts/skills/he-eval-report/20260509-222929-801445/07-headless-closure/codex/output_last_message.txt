@@ -1,0 +1,22 @@
+I’m blocked at the environment layer before I can inspect or edit the repo.
+
+Every shell command, including a plain `ls` in `/Users/jamiecraik/dev/agent-skills`, is failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because approval policy is `never`, I can’t request broader filesystem permissions or retry outside the sandbox. I also can’t safely patch the autonomous-mode closure behavior without reading the relevant source first, especially in this repo where the AGENTS guidance says to edit canonical sources and follow the local command wrappers.
+
+What I was going to do once file access works:
+
+1. Read `UBIQUITOUS_LANGUAGE.md` as required before changing agent-facing workflow behavior.
+2. Locate the autonomous-mode closure path, likely around text such as `status choice`, `closure`, `autonomous`, or user-choice prompting.
+3. Replace the user status-choice prompt with recorded closure assumptions in autonomous mode.
+4. Run the repo wrapper validation, likely:
+   ```bash
+   ./bin/ask repo doctor --json --robot
+   ./bin/ask repo closeout --changed --json --robot
+   ```
+
+So the request is clear and actionable, but this turn cannot make progress until the sandbox can read the workspace.

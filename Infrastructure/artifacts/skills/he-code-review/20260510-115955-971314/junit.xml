@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-code-review" tests="2" failures="0" errors="0" timestamp="2026-05-10T10:59:55Z" id="20260510-115955-971314">
+  <testcase name="unrelated-product-copy" classname="he-code-review" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260510-115955-971314/01-unrelated-product-copy
+    </system-out>
+  </testcase>
+  <testcase name="headless-review-assumptions" classname="he-code-review" time="600.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260510-115955-971314/02-headless-review-assumptions
+    </system-out>
+  </testcase>
+</testsuite>

@@ -1,0 +1,1 @@
+Absolutely. I’ll keep changes tightly scoped to whatever you ask for, preserve nearby code as-is, and leave tempting cleanup alone unless it is directly required for the task or you explicitly ask for it.

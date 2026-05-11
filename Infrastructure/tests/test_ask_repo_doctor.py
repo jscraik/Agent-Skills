@@ -3,13 +3,14 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+# pyright: reportMissingImports=false
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
-from ask.commands.repo import repo_closeout, repo_doctor  # noqa: E402
+from ask.commands.repo import _ask_bootstrap_signal, repo_closeout, repo_doctor  # noqa: E402
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
 
 
@@ -97,6 +98,36 @@ def _surface_result(warning_count: int = 0) -> CallResult:
     )
 
 
+def _bootstrap_proof(
+    *,
+    status: str = "success",
+    path_status: str = "pass",
+    shim_status: str = "pass",
+) -> dict:
+    return {
+        "status": status,
+        "checks": {
+            "entrypoint_executable": {
+                "status": "pass",
+                "path_type": "regular_file",
+                "safe_to_chmod": True,
+            },
+            "fallback_command": {
+                "status": "pass",
+                "defer_to": None,
+            },
+            "path_discovery": {
+                "status": path_status,
+                "resolved_path": "/tmp/repo/bin/ask" if path_status == "pass" else None,
+            },
+            "shim_smoke": {
+                "status": shim_status,
+                "repo_identity_status": "pass" if shim_status == "pass" else "skipped",
+            },
+        },
+    }
+
+
 def _closeout_doctor_payload(warning_count: int = 0, diagnostic_debt: list[dict] | None = None) -> dict:
     return {
         "blocking": False,
@@ -123,6 +154,11 @@ def _closeout_doctor_payload(warning_count: int = 0, diagnostic_debt: list[dict]
 
 
 class TestAskRepoDoctor(unittest.TestCase):
+    def setUp(self) -> None:
+        self.bootstrap_patch = patch("ask.commands.repo.run_bootstrap_checks", return_value=_bootstrap_proof())
+        self.bootstrap_patch.start()
+        self.addCleanup(self.bootstrap_patch.stop)
+
     def test_all_pass_returns_existing_inspection_next_command(self) -> None:
         with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
             "ask.commands.repo.doctor_catalog",
@@ -142,6 +178,17 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertFalse(doctor["next_command_blocks_task"])
         self.assertEqual(result.data["next_command_kind"], doctor["next_command_kind"])
         self.assertEqual(result.metadata["next_steps"], [])
+
+    def test_missing_path_shim_is_warning_not_false_pass(self) -> None:
+        with patch(
+            "ask.commands.repo.run_bootstrap_checks",
+            return_value=_bootstrap_proof(status="warning", path_status="warn", shim_status="skipped"),
+        ):
+            signal = _ask_bootstrap_signal(REPO_ROOT)
+
+        self.assertEqual(signal["state"], "warn")
+        self.assertEqual(signal["severity"], "warning")
+        self.assertEqual(signal["next_command"], "bash scripts/bootstrap-ask.sh --json")
 
     def test_repo_surface_warning_is_diagnostic_advisory_not_blocker(self) -> None:
         with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(

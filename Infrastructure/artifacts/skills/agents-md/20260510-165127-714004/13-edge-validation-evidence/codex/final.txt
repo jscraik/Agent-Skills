@@ -1,0 +1,11 @@
+I’m blocked before I can refactor or validate anything: the environment is in `read-only` sandbox mode, approval policy is `never`, and even read-only shell commands are failing at sandbox startup with `sandbox_apply: Operation not permitted`.
+
+Exact commands I ran:
+
+| Command | Result |
+|---|---|
+| `git status --short` | Blocked: `sandbox-exec: sandbox_apply: Operation not permitted` |
+| `sed -n '1,220p' repo/api/AGENTS.md` | Blocked: `sandbox-exec: sandbox_apply: Operation not permitted` |
+| `sed -n '1,220p' UBIQUITOUS_LANGUAGE.md` | Blocked: `sandbox-exec: sandbox_apply: Operation not permitted` |
+
+Because those were blocked, I could not inspect `repo/api/AGENTS.md`, read the required `UBIQUITOUS_LANGUAGE.md`, make the refactor, or run validation.

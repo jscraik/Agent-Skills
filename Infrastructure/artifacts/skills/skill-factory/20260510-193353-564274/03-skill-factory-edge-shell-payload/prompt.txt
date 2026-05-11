@@ -1,0 +1,3 @@
+$skill-factory
+
+Please handle request text with quotes, semicolons, logs, and command-like text.

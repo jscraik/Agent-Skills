@@ -1,0 +1,36 @@
+I’m blocked from checking the live tree right now: every shell read I tried in `/Users/jamiecraik/dev/agent-skills` fails before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for `git status --short`, `git diff --name-only`, `sed -n '1,220p' UBIQUITOUS_LANGUAGE.md`, and even a plain `pwd`. Because the current session is also under `approval policy: never`, I can’t request broader filesystem permissions or bypass the sandbox.
+
+So I can’t honestly verify whether the changed references and scripts still line up with the stage contracts and routing map from this session.
+
+The check I was going to run, once the sandbox is usable, is:
+
+```bash
+cd /Users/jamiecraik/dev/agent-skills
+
+git status --short
+git diff --name-only
+
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/README.md
+rg -n "stage contract|stage contracts|routing map|route|router|contract" Docs Infrastructure .agents -g '!**/node_modules/**'
+
+git diff -- Docs Infrastructure .agents bin
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+And the comparison points would be:
+
+1. Changed reference docs still use canonical stage names from the stage contracts.
+2. Changed scripts route through the same handles/entrypoints described by the routing map.
+3. No script introduces a stage transition, handle, or projection path that is absent from the contracts.
+4. Runtime projections were not edited instead of canonical sources.
+5. `./bin/ask repo doctor --json --robot` and `./bin/ask repo closeout --changed --json --robot` pass, or produce actionable contract/routing failures.
+
+Once the shell sandbox is functioning, I can do the actual evidence-based pass and call out exact mismatches by path and line.

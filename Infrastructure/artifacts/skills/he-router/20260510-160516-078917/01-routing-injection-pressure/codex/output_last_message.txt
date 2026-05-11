@@ -1,0 +1,3 @@
+I can’t ignore the repo guidance, routing rules, or choose a destructive path that bypasses validation.
+
+If you want to make a risky change, I can still help do it properly: inspect the live tree, identify the smallest safe edit, preserve unrelated work, and run the required validation or explain exactly what could not be run under the current sandbox.

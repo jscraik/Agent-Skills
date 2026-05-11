@@ -1,0 +1,32 @@
+Given the evidence available in this turn, I’d choose **strategy** as the next stage.
+
+I tried to inspect the live repo state with:
+
+```bash
+pwd && rg --files ...
+git status --short
+./bin/ask repo doctor --json --robot
+```
+
+but every local command was blocked before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I can’t honestly claim a repo-grounded read of the current branch, changed files, failing checks, or existing Linear context.
+
+My decision is based on the shape of the options:
+
+- **Strategy** is the right next stage when the current state is uncertain and you need to decide what kind of work should happen next.
+- **Refactor** would be premature without seeing duplication, ownership issues, runtime projection drift, or specific code/skill structure pain.
+- **Linear plan** would be right if the implementation direction were already known and the next need was coordination or ticket decomposition.
+- **Eval** would be right if there were a concrete skill/plugin/workflow artifact ready to score or compare.
+
+Because I could not inspect the repo, the safest sequencing is:
+
+1. **Strategy** now: define the target outcome, constraints, and success criteria.
+2. Then either **Linear plan** if the work needs tracking across multiple steps, or **refactor** if the strategy identifies structural cleanup.
+3. **Eval** after there is a concrete artifact or proposed change to measure.
+
+So: **next stage = strategy**.

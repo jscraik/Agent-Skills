@@ -1,0 +1,185 @@
+I could not read `apps/web/AGENTS.md` directly because every local command is being blocked by the current read-only sandbox with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So this is based on the contents you described, applying the `$agents-md` workflow intent: keep AGENTS.md small, operational, scoped, and route longer teaching/reference material through Context Pointers.
+
+**What Stays In Root**
+
+Keep only the agent-operational guidance that must be seen before editing anything under `apps/web/`.
+
+Recommended root `apps/web/AGENTS.md` shape:
+
+```md
+# Web App Agent Guide
+
+This directory contains the web frontend application.
+
+## Before Editing
+
+- Follow the frontend project conventions in [docs/frontend.md](../../docs/frontend.md).
+- Use the repo wrappers from the repository root unless a command below explicitly requires the app package root.
+- Run validation from `apps/web` when changing web app code.
+
+## Common Commands
+
+```bash
+pnpm lint
+pnpm test
+pnpm typecheck
+```
+
+## Context Pointers
+
+- TypeScript, React, and frontend style: [docs/frontend.md](../../docs/frontend.md)
+- App architecture and routing: [docs/web-architecture.md](../../docs/web-architecture.md)
+- UI/component conventions: [docs/ui-components.md](../../docs/ui-components.md)
+- Testing expectations: [docs/frontend-testing.md](../../docs/frontend-testing.md)
+```
+
+The exact docs filenames should match what exists in the repo. If only `docs/frontend.md` exists today, point there for the TypeScript section and avoid inventing extra docs until there is enough material to justify them.
+
+**What Moves To Docs**
+
+Move the long TypeScript style section copied from `docs/frontend.md` out of `apps/web/AGENTS.md`.
+
+That material already belongs in `docs/frontend.md`, because it is reference guidance rather than local routing instruction. The AGENTS file should point to it, not duplicate it. Duplicating style guidance creates drift: one copy gets updated, the other fossilizes, and agents start following whichever one they read first.
+
+Move the project description out of `apps/web/AGENTS.md` if it is broad product/background prose. Put it in a project or architecture doc, depending on its content:
+
+- High-level product purpose: `docs/web.md`, `docs/product.md`, or the repo’s existing product/context doc.
+- Frontend architecture: `docs/frontend.md` or a dedicated `docs/web-architecture.md`.
+- App package layout: a concise section in `docs/frontend.md`, unless it is crucial before every edit.
+
+Keep only a one-line local description in AGENTS.md, for example:
+
+```md
+This directory contains the web frontend application.
+```
+
+**Context Pointers**
+
+Use Context Pointers in `apps/web/AGENTS.md` to route agents to the deeper docs instead of embedding the docs inline.
+
+Recommended pointers:
+
+```md
+## Context Pointers
+
+- Frontend conventions, TypeScript style, React patterns, and formatting:
+  [docs/frontend.md](../../docs/frontend.md)
+- Testing and validation expectations for frontend changes:
+  [docs/frontend.md](../../docs/frontend.md#testing)
+- Package scripts and local app workflow:
+  [package.json](./package.json)
+```
+
+If the current `docs/frontend.md` has stable headings, point directly to them. For example:
+
+```md
+- TypeScript style: [docs/frontend.md](../../docs/frontend.md#typescript)
+- React conventions: [docs/frontend.md](../../docs/frontend.md#react)
+- Validation: [docs/frontend.md](../../docs/frontend.md#validation)
+```
+
+If headings are unstable or missing, use file-level pointers rather than fragile anchors.
+
+**What Should Be Deleted**
+
+Delete the duplicated `pnpm lint` commands. Keep exactly one command entry.
+
+Bad pattern:
+
+```md
+pnpm lint
+pnpm lint
+pnpm lint --fix
+```
+
+Better pattern:
+
+```md
+pnpm lint
+```
+
+Only keep `pnpm lint --fix` if agents are actually expected to run autofix as part of normal workflow, and label it clearly:
+
+```md
+pnpm lint
+pnpm lint --fix
+```
+
+Delete the vague “write good code” rule. It is not actionable and does not change agent behavior in a useful way.
+
+Replace it only if there is a concrete repo-specific rule. For example:
+
+```md
+- Prefer existing shared components from `apps/web/src/components` before creating new primitives.
+- Keep route-level data loading in the existing route/module pattern.
+- Add or update focused tests when changing user-visible behavior.
+```
+
+If the rule is just moral encouragement, delete it outright.
+
+Delete the copied TypeScript style section from `apps/web/AGENTS.md` once the Context Pointer to `docs/frontend.md` exists.
+
+Delete any broad project description that does not affect immediate agent behavior in this directory. A root AGENTS file is a routing and safety surface, not a README replacement.
+
+**Recommended Final Split**
+
+`apps/web/AGENTS.md` should keep:
+
+- One-sentence app/package description.
+- Local setup or validation commands specific to `apps/web`.
+- Any web-app-only safety constraints that must be followed before editing.
+- Context Pointers to canonical docs.
+- Maybe one or two truly local conventions, only if they are not already covered in docs.
+
+`docs/frontend.md` should keep:
+
+- TypeScript style.
+- React/component conventions.
+- Frontend testing expectations.
+- Formatting and lint guidance.
+- Examples and rationale.
+
+A project or architecture doc should keep:
+
+- Longer project description.
+- Application structure.
+- Route/data-flow overview.
+- Domain-specific frontend concepts.
+
+Delete:
+
+- Duplicated `pnpm lint`.
+- The vague “write good code” rule.
+- Copied TypeScript style prose from AGENTS.md.
+- Any duplicated material already canonical in `docs/frontend.md`.
+
+**Net Recommendation**
+
+Make `apps/web/AGENTS.md` a thin router:
+
+```md
+# Web App Agent Guide
+
+This directory contains the web frontend application.
+
+## Commands
+
+```bash
+pnpm lint
+pnpm test
+pnpm typecheck
+```
+
+## Context Pointers
+
+- Frontend and TypeScript conventions: [docs/frontend.md](../../docs/frontend.md)
+- Package scripts: [package.json](./package.json)
+```
+
+Then let `docs/frontend.md` carry the long-lived style guidance. That gives agents the right local entrypoint without turning AGENTS.md into a stale second copy of the frontend handbook.

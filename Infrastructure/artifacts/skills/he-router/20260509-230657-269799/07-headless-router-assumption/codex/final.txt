@@ -1,0 +1,7 @@
+Acknowledged. I’ll operate under this route assumption:
+
+`Autonomous mode is limited to reversible/read-only planning, inspection, and recommendation steps. I will avoid irreversible execution, including commits, pushes, merges, deletes, publishing, migrations, destructive shell commands, or external side effects, unless you explicitly authorize that specific action.`
+
+I attempted to record it in local memory twice, but the memory database returned a temporary operation failure both times. So it is recorded in this thread context, but not durably persisted through the memory tool.
+
+Also noted: the current environment is read-only with approval policy `never`, so I cannot mutate the repo anyway.

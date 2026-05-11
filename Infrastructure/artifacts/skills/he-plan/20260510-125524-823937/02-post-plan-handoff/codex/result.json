@@ -1,0 +1,36 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff/codex",
+    "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 6,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 139166,
+        "output_tokens": 488,
+        "reasoning_tokens": 0,
+        "total_tokens": 139654
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

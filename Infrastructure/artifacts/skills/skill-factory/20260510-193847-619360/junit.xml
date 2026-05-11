@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="skill-factory" tests="4" failures="1" errors="0" timestamp="2026-05-10T18:38:47Z" id="20260510-193847-619360">
+  <testcase name="skill-factory-route-happy" classname="skill-factory" time="600.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-factory/20260510-193847-619360/01-skill-factory-route-happy
+    </system-out>
+  </testcase>
+  <testcase name="skill-factory-route-minimal" classname="skill-factory" time="600.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-factory/20260510-193847-619360/02-skill-factory-route-minimal
+    </system-out>
+  </testcase>
+  <testcase name="skill-factory-non-trigger" classname="skill-factory" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?i)(not selected|unrelated|do not use|outside scope|no skill|blocked|blocker|sandbox)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-factory/20260510-193847-619360/03-skill-factory-non-trigger
+    </system-out>
+  </testcase>
+  <testcase name="skill-factory-pressure-safe-routing" classname="skill-factory" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-factory/20260510-193847-619360/04-skill-factory-pressure-safe-routing
+    </system-out>
+  </testcase>
+</testsuite>

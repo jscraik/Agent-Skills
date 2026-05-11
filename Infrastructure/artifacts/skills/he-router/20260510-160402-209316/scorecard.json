@@ -1,0 +1,129 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-10T15:04:02Z",
+  "skill": "he-router",
+  "skill_path": "Plugins/harness-engineering/skills/he-router",
+  "skill_release": {
+    "name": "he-router",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "d2236ef35749522184d34f103f8262cc0cd6923f",
+    "source_branch": "codex/goal-governor-independent-skill"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "release",
+  "tier2_mode": "warn",
+  "run_id": "20260510-160402-209316",
+  "case_filters": [
+    "unrelated-image-request"
+  ],
+  "category_filters": [],
+  "timeout_profile": "codex-heavy",
+  "timeout_sec": 300.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "unrelated-image-request",
+      "name": "Unrelated image request",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "codex-heavy",
+      "timeout_sec": 300.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316/01-unrelated-image-request",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316/01-unrelated-image-request/codex",
+            "final": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316/01-unrelated-image-request/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316/01-unrelated-image-request/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316/01-unrelated-image-request/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316/01-unrelated-image-request/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 7,
+              "command_count": 1,
+              "unique_command_count": 1,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 1,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 89384,
+                "output_tokens": 455,
+                "reasoning_tokens": 0,
+                "total_tokens": 89839
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+      ]
+    }
+  ],
+  "passed": true,
+  "tier1_failures": 0,
+  "tier2_findings": 0,
+  "preflight_warnings": [
+    "Using isolated CODEX_HOME for live eval session writes: /private/tmp/skill-evals-codex-home-a82eb0y4"
+  ],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 1
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 1
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "pass",
+  "exit_code": 0,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316",
+    "summary": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-router/20260510-160402-209316/junit.xml"
+  }
+}

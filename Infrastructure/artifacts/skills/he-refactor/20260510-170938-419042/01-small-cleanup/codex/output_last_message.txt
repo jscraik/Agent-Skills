@@ -1,0 +1,8 @@
+I can’t make that a refactor program in this repo.
+
+The refactor-program index explicitly excludes “cosmetic cleanup, routine maintenance, small tactical fixes” in [`.harness/refactors/README.md`](/Users/jamiecraik/dev/agent-skills/.harness/refactors/README.md#L7), and the existing program shape is for staged service extraction, not one-line formatting work in [`.harness/refactors/ask-control-plane-decomposition.md`](/Users/jamiecraik/dev/agent-skills/.harness/refactors/ask-control-plane-decomposition.md#L25).
+
+Best fit options:
+1. I can make the one-line formatting change directly.
+2. I can create a tiny task note in the appropriate `.harness/triage` or `.harness/plan` surface.
+3. If the formatting cleanup is actually part of a larger structural migration, I can fold it into a real refactor program.

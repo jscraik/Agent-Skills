@@ -1,0 +1,7 @@
+Route this to the canonical skill workflow:
+
+- Target: `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`
+- Handoff mode: pass the resolved card to the active orchestrator and wait for orchestration
+- Fallback if the canonical file cannot load: fail closed and stop, rather than improvising the workflow
+
+I also attempted the repo’s recommended resolver (`./bin/ask skills resolve skill-builder --json`), but this environment blocked shell execution with `sandbox_apply: Operation not permitted`, so I could not complete the resolution step from here.

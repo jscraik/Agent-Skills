@@ -1,0 +1,21 @@
+I’m blocked from reviewing the change in this environment right now: even read-only shell commands like `ls`, `git status`, and `rg` fail before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because I can’t inspect the live tree or diff, I can’t give you a grounded code review with file and line references yet.
+
+What I would check once the sandbox is usable or you paste the diff:
+
+1. Whether specialist selection scans comments/docstrings instead of executable logic, config, skill metadata, or user-visible routing requirements.
+2. Whether the match is an overly broad substring check like `text.includes("security")`.
+3. Whether tests cover false positives such as:
+   ```text
+   // This is not a security issue
+   // Do not use the security reviewer here
+   ```
+4. Whether the intended trigger should be based on structured metadata, changed file paths, labels, reviewer role declarations, or actual code semantics rather than incidental prose.
+5. Whether the routing behavior causes unnecessary security-review escalation, extra token cost, noisy reviews, or wrong specialist selection that masks the correct reviewer.
+
+If you paste the relevant diff, I can review it directly. My likely review stance from the description alone: selecting a security specialist solely because the word `security` appears in a comment is probably a bug unless comments are explicitly part of the product’s routing contract.

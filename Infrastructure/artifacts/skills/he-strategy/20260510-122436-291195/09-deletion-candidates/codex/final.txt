@@ -1,0 +1,223 @@
+Yes. Based on the repo guidance you pasted, the highest-leverage deletion targets are likely the things that blur the control plane: duplicated agent instructions, stale runtime projections, obsolete skill surfaces, and docs that describe workflows no one should use anymore.
+
+Because the shell sandbox is blocking even read-only commands right now with `sandbox_apply: Operation not permitted`, I can’t verify exact files in the live tree. So treat this as a deletion map: what to look for, why it creates drag, and how I’d rank it once we can inspect the repo.
+
+**Best Deletion Candidates**
+
+1. Duplicate or competing agent guidance outside the canonical docs map
+
+Delete or fold any guidance that repeats material now owned by:
+
+- `Docs/agents/README.md`
+- `Docs/agents/16-agent-operating-contract.md`
+- `Docs/agents/02-tooling-policy.md`
+- `Docs/agents/04-validation.md`
+- `Docs/agents/13-workflow-and-safety-guidance.md`
+- `Docs/agents/17-skill-management.md`
+- `Docs/agents/14-path-ownership-boundaries.md`
+- `UBIQUITOUS_LANGUAGE.md`
+
+Drag signal: agents must reconcile multiple explanations of the same behavior.
+
+Low leverage signal: the file only restates commands, validation order, path ownership, or workflow rules without adding a new decision boundary.
+
+Delete/fold shape: keep one canonical rule, replace local restatements with links.
+
+2. Stale cleanup notes that have become permanent architecture
+
+`Docs/agents/05-contradictions-and-cleanup.md` sounds explicitly like a temporary debt ledger. Anything inside it that has already been resolved should be deleted, not allowed to live as ambient warning text.
+
+Drag signal: “cleanup notes” become a second source of truth.
+
+Low leverage signal: entries describe removed behavior, old contradictions, or “watch out for X” after X no longer exists.
+
+Delete/fold shape: resolve the item, remove it from the cleanup doc, and keep only active contradictions.
+
+3. Runtime projections that are being edited or treated as source
+
+Your AGENTS file says: “Edit canonical sources, not runtime projections.”
+
+That implies generated/projected runtime files are a major drag source if they are checked, documented, reviewed, or manually patched as if they were canonical.
+
+Delete candidates:
+
+- committed generated projections that can be rebuilt
+- duplicated runtime copies of skills
+- derived agent-facing docs that mirror canonical docs
+- generated indexes or manifests that are no longer needed for bootstrap/discovery
+
+Drag signal: a change requires touching both canonical source and projection.
+
+Low leverage signal: the file can be regenerated deterministically and is not needed as an authored artifact.
+
+Delete/fold shape: remove from source control if safe, or mark generated and exclude from human editing. If it must stay, shrink it to a machine artifact with no policy prose.
+
+4. Old command entry points that bypass `./bin/ask`
+
+The root guidance says repo operations should go through `./bin/ask`, which forwards to `Infrastructure/bin/ask`.
+
+Likely deletion targets:
+
+- legacy scripts that do repo validation directly
+- old wrappers that duplicate `ask` subcommands
+- docs that tell agents to use package-manager commands from repo root
+- Makefile targets or shell scripts that overlap with `./bin/ask repo doctor`, `skills prove`, `repo closeout`, etc.
+
+Drag signal: agents have to choose between multiple commands for the same operation.
+
+Low leverage signal: the script exists mostly for historical convenience and does not encode a unique invariant.
+
+Delete/fold shape: delete wrappers, migrate any unique behavior into `Infrastructure/bin/ask`, update docs to point at `./bin/ask`.
+
+5. Skill docs that exceed their routing value
+
+This repo appears to care about skill browseability, line budgets, and canonical skill management. That usually means some skills become drag because they are too long, too general, or too duplicated with operator docs.
+
+Delete candidates:
+
+- skill sections that explain generic agent behavior
+- skill instructions duplicated from AGENTS or `Docs/agents`
+- examples that are not executable or not representative
+- “background” prose that does not change agent behavior
+- obsolete variants of skill workflows kept for comparison
+
+Drag signal: reading the skill costs more than the workflow saves.
+
+Low leverage signal: the content is motivational, historical, or explanatory rather than operational.
+
+Delete/fold shape: keep trigger, decision rules, required commands, validation, and sharp caveats. Move rare background to docs, or delete it outright.
+
+6. Parallel docs for “how skills work”
+
+There may be multiple places explaining skill lifecycle: install, audit, fold, prove, sync, runtime projection, path ownership, marketplace, etc.
+
+Canonical candidate appears to be:
+
+- `Docs/agents/17-skill-management.md`
+
+Deletion target is everything else that explains the same lifecycle less authoritatively.
+
+Drag signal: small terminology drift, especially around “canonical source”, “runtime projection”, “sync”, “prove”, “fold”, “handle”, and “skill”.
+
+Low leverage signal: doc only helps someone who has not read the canonical skill-management doc.
+
+Delete/fold shape: collapse into `17-skill-management.md` or replace with a one-line pointer.
+
+7. Historical design notes that no longer drive decisions
+
+Repos like this often accumulate planning docs that were useful during design but now compete with current policy.
+
+Delete candidates:
+
+- old RFCs superseded by `UBIQUITOUS_LANGUAGE.md`
+- implementation notes for tooling that has been replaced by `ask`
+- migration plans after migration completed
+- scratch audits with no open action
+- “v1/v2” comparison docs after one path won
+
+Drag signal: a reader cannot tell if the doc is current or archival.
+
+Low leverage signal: no command, no invariant, no owner, no current decision.
+
+Delete/fold shape: either delete, or archive only if the repo has an explicit archival convention. Do not leave it beside active docs.
+
+8. Package-level instructions that restate root policy
+
+Nested `AGENTS.md` files are useful only when they add local constraints.
+
+Delete or shrink nested `AGENTS.md` files if they merely repeat:
+
+- use `./bin/ask`
+- don’t edit projections
+- validation order
+- repo closeout
+- package manager policy
+- general workflow safety
+
+Drag signal: same instruction appears in root and child scopes.
+
+Low leverage signal: no local package-specific command, ownership boundary, or style rule.
+
+Delete/fold shape: keep only the local delta. If there is no delta, delete the nested `AGENTS.md`.
+
+9. Generated manifests that duplicate discoverable state
+
+The AGENTS guide mentions skill discovery, syncing, and runtime projections. There may be marketplace/index files, generated skill catalogs, or copied metadata.
+
+Delete candidates if generated and reproducible:
+
+- skill indexes
+- discovery manifests
+- marketplace projections
+- runtime skill registries
+- copied summaries of `SKILL.md` files
+
+Drag signal: every skill change requires updating indexes manually.
+
+Low leverage signal: the source files already contain the data and tooling can regenerate the index.
+
+Delete/fold shape: keep source metadata close to the skill, generate indexes as build artifacts, or keep only the minimum checked-in manifest required by consumers.
+
+10. Validation docs that list commands without decision criteria
+
+Command lists are useful, but duplicated command lists are not. The root AGENTS already lists common commands.
+
+Delete candidates:
+
+- docs that only list `repo doctor`, `skills prove`, `repo closeout`
+- stale validation recipes without pass/fail interpretation
+- package-specific test instructions copied from root without package-specific nuance
+
+Drag signal: validation becomes checklist theater.
+
+Low leverage signal: the doc does not explain when to run which command or what failure means.
+
+Delete/fold shape: centralize commands in `Docs/agents/04-validation.md`; keep local docs only for local evidence rules.
+
+**My Ranking**
+
+If I had to start deleting for maximum drag reduction, I’d do it in this order:
+
+1. Resolved entries in `Docs/agents/05-contradictions-and-cleanup.md`
+2. Nested `AGENTS.md` files with no local delta
+3. Docs that duplicate `Docs/agents/17-skill-management.md`
+4. Old command wrappers bypassing `./bin/ask`
+5. Checked-in runtime projections that can be regenerated
+6. Historical migration/design notes with no active decision
+7. Generated manifests that duplicate skill metadata
+8. Long skill prose that restates global agent policy
+9. Duplicate validation command lists
+10. Any “temporary” audit/report files still living beside canonical docs
+
+**Deletion Test**
+
+For each candidate, ask:
+
+- Does this file define a current source of truth?
+- Does an agent make a better decision because this exists?
+- Is this information already available from a deeper or more canonical file?
+- Can it be regenerated?
+- Does it encode an invariant, or just narrate history?
+- Would deleting it reduce the number of places a future change must touch?
+
+If the answers are “no, no, yes, yes, history, yes,” delete it or fold the one surviving useful line into the canonical owner.
+
+**What I’d Run Once The Sandbox Allows Reads**
+
+```bash
+./bin/ask repo doctor --json --robot
+rg --files -g 'AGENTS.md'
+rg -n "projection|generated|do not edit|canonical|deprecated|obsolete|cleanup|contradiction|TODO|FIXME|legacy|runtime" .
+rg -n "./bin/ask|repo doctor|skills prove|repo closeout|npm install|pnpm install|yarn install" Docs .agents Infrastructure
+find . -iname '*old*' -o -iname '*deprecated*' -o -iname '*legacy*' -o -iname '*archive*'
+```
+
+Then I’d produce a concrete deletion table with:
+
+- exact path
+- delete vs fold vs keep
+- owner/canonical replacement
+- confidence
+- validation command after removal
+
+Right now, the strongest repo-specific answer is: delete anything that competes with canonical source ownership, especially stale cleanup notes, duplicated skill-management docs, nested instruction files without local deltas, generated/runtime projections treated as authored files, and legacy command surfaces that bypass `./bin/ask`.

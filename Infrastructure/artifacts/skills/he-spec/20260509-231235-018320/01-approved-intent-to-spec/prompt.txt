@@ -1,0 +1,1 @@
+Can you turn the approved intent into an evidence-backed implementation spec with acceptance criteria.

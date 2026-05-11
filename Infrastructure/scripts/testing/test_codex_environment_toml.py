@@ -56,6 +56,17 @@ _EXPECTED_CANDIDATES = [
     "/sbin",
 ]
 
+# Prepend loop order must be reverse-priority so final PATH keeps expected priority.
+_PREPEND_LOOP_CANDIDATES = [
+    "/sbin",
+    "/usr/sbin",
+    "/usr/local/bin",
+    "/opt/homebrew/sbin",
+    "/opt/homebrew/bin",
+    "$HOME/.local/bin",
+    "$HOME/.local/share/mise/shims",
+]
+
 
 class TestEnvironmentTomlContract(unittest.TestCase):
     def test_environment_toml_parses(self) -> None:
@@ -74,7 +85,7 @@ class TestEnvironmentTomlContract(unittest.TestCase):
         env = _load_environment()
         setup_command = env["setup"]["script"]
         self.assertIn("for candidate in", setup_command)
-        self.assertIn('PATH="$candidate:$PATH"', setup_command)
+        self.assertIn('PATH="$candidate${PATH:+:$PATH}"', setup_command)
         self.assertIn("export PATH", setup_command)
 
     def test_tools_uses_path_candidate_loop(self) -> None:
@@ -82,7 +93,7 @@ class TestEnvironmentTomlContract(unittest.TestCase):
         env = _load_environment()
         tools_command = _action_command(env, "Tools")
         self.assertIn("for candidate in", tools_command)
-        self.assertIn('PATH="$candidate:$PATH"', tools_command)
+        self.assertIn('PATH="$candidate${PATH:+:$PATH}"', tools_command)
         self.assertIn("export PATH", tools_command)
 
     def test_setup_path_loop_includes_mise_shims_candidate(self) -> None:
@@ -99,11 +110,32 @@ class TestEnvironmentTomlContract(unittest.TestCase):
             with self.subTest(candidate=candidate):
                 self.assertIn(candidate, tools_command)
 
-    def test_setup_path_loop_skips_already_present_candidates(self) -> None:
-        """The PATH loop must guard against adding duplicates with ':$PATH:' pattern."""
+    def test_setup_path_loop_uses_reverse_order_for_prepend(self) -> None:
+        """setup loop must iterate in reverse-priority order when prepending PATH candidates."""
         env = _load_environment()
         setup_command = env["setup"]["script"]
-        self.assertIn('":$PATH:" != *":$candidate:"*', setup_command)
+        indices = [setup_command.find(candidate) for candidate in _PREPEND_LOOP_CANDIDATES]
+        for candidate, idx in zip(_PREPEND_LOOP_CANDIDATES, indices):
+            with self.subTest(candidate=candidate):
+                self.assertGreater(idx, -1, f"Missing candidate {candidate} in setup loop")
+        self.assertEqual(indices, sorted(indices), "setup loop candidates must appear in reverse-priority order")
+
+    def test_tools_path_loop_uses_reverse_order_for_prepend(self) -> None:
+        """Tools loop must iterate in reverse-priority order when prepending PATH candidates."""
+        env = _load_environment()
+        tools_command = _action_command(env, "Tools")
+        indices = [tools_command.find(candidate) for candidate in _PREPEND_LOOP_CANDIDATES]
+        for candidate, idx in zip(_PREPEND_LOOP_CANDIDATES, indices):
+            with self.subTest(candidate=candidate):
+                self.assertGreater(idx, -1, f"Missing candidate {candidate} in Tools loop")
+        self.assertEqual(indices, sorted(indices), "Tools loop candidates must appear in reverse-priority order")
+
+    def test_setup_path_loop_skips_already_present_candidates(self) -> None:
+        """The PATH loop must remove existing candidate entries before prepend."""
+        env = _load_environment()
+        setup_command = env["setup"]["script"]
+        self.assertIn('PATH="${PATH//:$candidate:/:}"', setup_command)
+        self.assertIn('PATH="$candidate${PATH:+:$PATH}"', setup_command)
 
     def test_setup_path_loop_checks_directory_exists(self) -> None:
         """The PATH loop must check -d before prepending candidate directories."""
@@ -218,35 +250,34 @@ class TestEnvironmentTomlContract(unittest.TestCase):
         self.assertLess(trust_idx, install_idx, "Expected 'mise trust' before 'mise install' in Tools")
 
     # ------------------------------------------------------------------
-    # Conditional npm install / prepare-worktree.sh
+    # Conditional prepare-worktree.sh contract (no root npm fallback)
     # ------------------------------------------------------------------
 
-    def test_setup_uses_conditional_prepare_worktree_or_npm(self) -> None:
-        """setup must use prepare-worktree.sh if available, else npm install."""
+    def test_setup_uses_conditional_prepare_worktree_or_error(self) -> None:
+        """setup must use prepare-worktree.sh and fail closed when missing."""
         env = _load_environment()
         setup_command = env["setup"]["script"]
         self.assertIn("if [[ -f scripts/prepare-worktree.sh ]]", setup_command)
         self.assertIn("bash scripts/prepare-worktree.sh", setup_command)
-        self.assertIn("npm install", setup_command)
+        self.assertNotIn("npm install", setup_command)
+        self.assertIn("root package-manager install is intentionally unsupported", setup_command)
+        self.assertIn("exit 1", setup_command)
 
-    def test_tools_uses_conditional_prepare_worktree_or_npm(self) -> None:
-        """Tools action must use prepare-worktree.sh if available, else npm install."""
+    def test_tools_uses_conditional_prepare_worktree_or_error(self) -> None:
+        """Tools action must use prepare-worktree.sh and fail closed when missing."""
         env = _load_environment()
         tools_command = _action_command(env, "Tools")
         self.assertIn("if [[ -f scripts/prepare-worktree.sh ]]", tools_command)
         self.assertIn("bash scripts/prepare-worktree.sh", tools_command)
-        self.assertIn("npm install", tools_command)
+        self.assertNotIn("npm install", tools_command)
+        self.assertIn("root package-manager install is intentionally unsupported", tools_command)
+        self.assertIn("exit 1", tools_command)
 
-    def test_setup_does_not_unconditionally_run_npm_install(self) -> None:
-        """setup must not call npm install unconditionally."""
+    def test_setup_does_not_reference_npm_install(self) -> None:
+        """setup must not reference root npm install."""
         env = _load_environment()
         setup_command = env["setup"]["script"]
-        # npm install must only appear in the else branch, i.e. after 'else' and before 'fi'
-        # A simple heuristic: npm install must be guarded by the prepare-worktree.sh check
-        prepare_idx = setup_command.find("scripts/prepare-worktree.sh")
-        npm_idx = setup_command.find("npm install")
-        # npm install must appear AFTER the prepare-worktree.sh conditional
-        self.assertLess(prepare_idx, npm_idx, "npm install must appear after prepare-worktree.sh check")
+        self.assertNotIn("npm install", setup_command)
 
     # ------------------------------------------------------------------
     # Release Finalize action
@@ -461,24 +492,23 @@ esac
         self.assertIn("git pull --ff-only origin main", command)
 
     # ------------------------------------------------------------------
-    # Pylint action must NOT be present (removed in this PR)
+    # Pylint action contract
     # ------------------------------------------------------------------
 
-    def test_pylint_action_is_absent(self) -> None:
-        """Pylint action must have been removed from environment.toml."""
+    def test_pylint_action_exists(self) -> None:
+        """Pylint action must be present in environment.toml."""
         env = _load_environment()
-        self.assertFalse(
+        self.assertTrue(
             _action_exists(env, "Pylint"),
-            "Pylint action should not exist in environment.toml (it was removed in this PR)",
+            "Pylint action should exist in environment.toml",
         )
 
-    def test_pylint_version_command_is_absent(self) -> None:
-        """'pylint --version' must not appear in any action (Pylint action was removed)."""
+    def test_pylint_action_runs_version(self) -> None:
+        """Pylint action must validate pylint availability and print version."""
         env = _load_environment()
-        for action in env.get("actions", []):
-            command = action.get("command", "")
-            with self.subTest(action=action.get("name")):
-                self.assertNotIn("pylint --version", command)
+        command = _action_command(env, "Pylint")
+        self.assertIn("command -v pylint >/dev/null 2>&1", command)
+        self.assertIn("pylint --version", command)
 
     # ------------------------------------------------------------------
     # Behavioral shell tests: PATH candidate loop

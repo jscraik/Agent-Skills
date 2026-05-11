@@ -1,0 +1,30 @@
+I’m blocked before I can write the `$he-spec` spec.
+
+I tried to follow the handle contract from `/Users/jamiecraik/dev/agent-skills/.agents/skills/he-spec/SKILL.md` by running:
+
+```bash
+./bin/ask skills resolve he-spec --json
+git status --short
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+```
+
+Every command failed before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+A second minimal probe via the JS tool wrapper using just `pwd` failed the same way, so this is not a repo command problem. It’s the current execution sandbox failing to apply.
+
+I did not modify any files.
+
+Once the sandbox is usable, the next steps are:
+
+1. Resolve `he-spec` with `./bin/ask skills resolve he-spec --json`.
+2. Read the canonical `Plugins/harness-engineering/skills/he-spec/SKILL.md`.
+3. Read `UBIQUITOUS_LANGUAGE.md` before changing harness-engineering/spec material, per repo instructions.
+4. Find the selected bug context in `.harness`.
+5. Write the spec so the missing live Linear issue is explicitly called out in the spec itself, rather than only existing as hidden `.harness` context.
+6. Run the repo’s closeout or relevant validation command, likely `./bin/ask repo closeout --changed --json --robot`.
+
+The blocker is environmental, not conceptual: I need shell/file access to the workspace to proceed.

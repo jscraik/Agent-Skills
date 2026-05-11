@@ -1,0 +1,25 @@
+I’m blocked before I can make the edit: every local command is failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for:
+
+```bash
+./bin/ask skills resolve skill-builder --json
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md
+```
+
+Because this session is also under `approval_policy=never` and the filesystem sandbox is read-only, I can’t request the extra permission needed to read or patch the canonical file. Per the `skill-builder` handle’s own fail-closed rule, I should stop here rather than guessing at the workflow contract or editing the wrong source.
+
+The intended next edit target, once the sandbox is usable, is:
+
+[Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md)
+
+Validation command I would run after the edit:
+
+```bash
+./bin/ask skills prove skill-builder --json --robot
+```

@@ -1,0 +1,39 @@
+I can’t complete the routing proof from the live repo in this session because every shell read is being rejected before execution:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened even for simple read-only commands like:
+
+```bash
+pwd && rg -n "domain|security|refactor|mixed|approved slice|load everything|route" -S .
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/README.md
+ls
+```
+
+I also tried the MCP resource path, but there are no local MCP resources exposed for this workspace:
+
+```text
+resources: []
+```
+
+And when I tried using the GitHub connector as a fallback read path, the tool call was cancelled before it returned repository data.
+
+So the honest status is: I cannot prove “mixed does not load everything” from repo evidence yet, and I cannot make the docs wording change because this session is read-only and the read sandbox itself is failing.
+
+What I would do once shell access works:
+
+1. Read `UBIQUITOUS_LANGUAGE.md`, per the repo’s `AGENTS.md`.
+2. Find the routing implementation and tests with `rg` for `domain`, `security`, `refactor`, `mixed`, and route/load language.
+3. Locate the approved-slice docs wording source, making sure it is canonical and not a runtime projection.
+4. Add or update the smallest doc wording that demonstrates the request is routed to only the approved slice.
+5. Run the repo wrapper validations, likely:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+The blocker is environmental, not conceptual: I need the shell sandbox to allow read operations before I can give Jamie-grade proof with exact paths, line references, and pass/fail validation.

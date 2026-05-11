@@ -1,0 +1,63 @@
+{
+  "id": "specialist-skill-fit",
+  "name": "Specialist skill fit",
+  "category": "happy",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": true,
+  "prepend_skill": true,
+  "baseline_type": null,
+  "comparison_inputs": null,
+  "iteration_round_state": null,
+  "metric_availability": null,
+  "readiness_state": null,
+  "comparison_review_artifact": null,
+  "neutral_baseline_approval": null,
+  "timeout_profile": "default",
+  "timeout_sec": 600.0,
+  "dir": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/02-specialist-skill-fit",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": true,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/02-specialist-skill-fit/codex",
+        "final": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/02-specialist-skill-fit/codex/final.txt",
+        "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/02-specialist-skill-fit/codex/stdout.txt",
+        "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/02-specialist-skill-fit/codex/stderr.txt",
+        "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/02-specialist-skill-fit/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 9,
+          "command_count": 0,
+          "unique_command_count": 0,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 0,
+          "turn_count": 1,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 186454,
+            "output_tokens": 788,
+            "reasoning_tokens": 0,
+            "total_tokens": 187242
+          }
+        },
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": true,
+  "tier1_failed": false,
+  "tier2_failed": false,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": []
+}

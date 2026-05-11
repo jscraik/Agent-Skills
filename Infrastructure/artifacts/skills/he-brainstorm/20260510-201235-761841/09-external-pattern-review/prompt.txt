@@ -1,0 +1,1 @@
+Can you compare this lifecycle idea against `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md` and keep only improvements that strengthen harness engineering.

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-strategy" tests="1" failures="0" errors="0" timestamp="2026-05-10T11:02:59Z" id="20260510-120259-906249">
+  <testcase name="first-principles-rejects-template-copying" classname="he-strategy" time="600.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260510-120259-906249/01-first-principles-rejects-template-copying
+    </system-out>
+  </testcase>
+</testsuite>

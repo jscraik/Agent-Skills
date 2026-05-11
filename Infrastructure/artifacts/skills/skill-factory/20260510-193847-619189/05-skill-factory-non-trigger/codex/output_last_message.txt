@@ -1,0 +1,11 @@
+I’m blocked by the execution sandbox before I can inspect or edit the repo.
+
+Every shell command, including simple read-only commands like `pwd`, `git status --short`, `rg`, and `sed`, fails immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also checked MCP resources and there are no repo resources exposed there. Because the current approval policy is `never`, I can’t request broader filesystem permissions or rerun outside the sandbox.
+
+So I haven’t touched any files. The next useful step is to rerun this with a working filesystem sandbox or give me the specific file/path containing the marketing copy, and I can polish it directly once reads/writes are available.

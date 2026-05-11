@@ -1,0 +1,39 @@
+Blocked before I could load the `$skill-builder` workflow.
+
+I attempted the required first step from the handle:
+
+```bash
+./bin/ask skills resolve skill-builder --json
+```
+
+and also tried to read the repo guidance files the root `AGENTS.md` requires before changing skills:
+
+```bash
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/17-skill-management.md
+git status --short
+```
+
+Every command failed immediately with the same sandbox error:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because `$skill-builder` explicitly says to fail closed if the real contract cannot load, I did not perform the import, did not modify any files, and cannot honestly provide rollback evidence from the repo state yet.
+
+Current evidence:
+
+- Required resolver command: attempted, failed before execution.
+- Repo guidance reads: attempted, failed before execution.
+- Working tree status: attempted, unavailable.
+- Files changed: none by me.
+- Rollback evidence: no patch/commit/import was created, so rollback is “no-op” at this point; there is no repo diff from this turn to revert.
+
+Once the sandbox allows local command execution, the next exact step is to rerun:
+
+```bash
+./bin/ask skills resolve skill-builder --json
+```
+
+then follow the resolved module contract for the provenance import and capture rollback evidence from `git status`, the generated/imported files, and whatever `./bin/ask` validation command the module requires.

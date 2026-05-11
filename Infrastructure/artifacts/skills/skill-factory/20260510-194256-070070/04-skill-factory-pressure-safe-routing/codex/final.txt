@@ -1,0 +1,5 @@
+I can treat quoted shell-like payloads as inert data, but I could not complete the repo router step here because the execution environment blocked `route_skillset.py` with `sandbox_apply: Operation not permitted`.
+
+If you want, I can still help in one of two safe ways:
+1. Rewrite or inspect the text as data only, with no shell interpretation.
+2. Retry the routing flow if the sandbox restriction is lifted.

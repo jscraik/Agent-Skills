@@ -1,0 +1,8 @@
+I can create the skill, but I need the workflow itself to turn it into a proper `SKILL.md`.
+
+Please send one of these:
+1. The workflow text or steps you want converted into a skill
+2. The path to the workflow file in this repo
+3. A short description of the workflow plus any required inputs, outputs, and validation checks
+
+Once I have that, I’ll draft the skill structure and wire it into the repo.

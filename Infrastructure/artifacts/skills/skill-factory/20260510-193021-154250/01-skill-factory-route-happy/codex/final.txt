@@ -1,0 +1,5 @@
+Specialist: `skill-factory`
+
+Source path: `/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-factory/SKILL.md`
+
+I couldn’t run the local routing script here because the sandbox blocked shell execution, so I’m using the canonical source path you provided.

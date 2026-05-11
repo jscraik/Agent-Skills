@@ -1268,7 +1268,7 @@ sync_user_skills() {
   local force="${3:-0}"
   local mode="${4:-symlink}"
 
-  # sync_dir_copy copies the contents of source_dir into target_dir, preserving file metadata and mirroring the source (removing extraneous files); it prefers `rsync -a --delete --force` when available and falls back to removing first-level entries and using `cp -a` otherwise.
+  # sync_dir_copy copies the contents of source_dir into target_dir, preserving file metadata and mirroring the source (removing extraneous files); it prefers `rsync -a --delete --force` when available and falls back to removing first-level entries and using portable `cp -R` otherwise.
   sync_dir_copy() {
     local source_dir="$1"
     local target_dir="$2"
@@ -1282,7 +1282,7 @@ sync_user_skills() {
 
     # Fallback for environments without rsync.
     find "$target_dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-    cp -a "$source_dir/." "$target_dir/"
+    cp -R "$source_dir/." "$target_dir/"
   }
 
   if [ "$mode" = "copy" ]; then
@@ -1486,7 +1486,7 @@ normalize_plugin_copy() {
           ;;
       esac
       rm -f -- "$skill_entry"
-      cp -a "$resolved" "$skill_entry"
+      cp -R "$resolved" "$skill_entry"
       echo "[OK] Materialized ${label} skill alias: $skill_entry"
 
       # Recursively materialize any nested symlinks (both files and directories) within the copied tree
@@ -1514,7 +1514,7 @@ normalize_plugin_copy() {
             # Directory symlink - copy recursively then remove link
             local tmp_dir
             tmp_dir="$(mktemp -d)"
-            if cp -a "$nested_link/." "$tmp_dir/"; then
+            if cp -R "$nested_link/." "$tmp_dir/"; then
               rm -f -- "$nested_link"
               mv "$tmp_dir" "$nested_link"
               echo "[OK] Materialized ${label} nested directory symlink: $nested_link"
@@ -1606,7 +1606,7 @@ normalize_plugin_copy() {
       if [ -d "$nested_resolved" ]; then
         local tmp_dir
         tmp_dir="$(mktemp -d)"
-        if cp -a "$nested_resolved/." "$tmp_dir/"; then
+        if cp -R "$nested_resolved/." "$tmp_dir/"; then
           rm -f -- "$nested_link"
           mv "$tmp_dir" "$nested_link"
           echo "[OK] Materialized ${label} directory symlink before fixture pruning: $nested_link"
@@ -1967,7 +1967,7 @@ sync_local_marketplace_cache() {
     else
       rm -rf -- "$target_plugin_dir"
       mkdir -p "$target_plugin_dir"
-      cp -a "$source_dir"/. "$target_plugin_dir"/
+      cp -R "$source_dir"/. "$target_plugin_dir"/
       rm -rf -- "$target_plugin_dir/.git" "$target_plugin_dir/node_modules" "$target_plugin_dir/__pycache__"
       find "$target_plugin_dir" -name '.DS_Store' -type f -delete
     fi
@@ -2117,7 +2117,7 @@ sync_versioned_local_marketplace_cache() {
     else
       rm -rf -- "$target_dir"
       mkdir -p "$target_dir"
-      cp -a "$source_dir"/. "$target_dir"/
+      cp -R "$source_dir"/. "$target_dir"/
       rm -rf -- "$target_dir/.git" "$target_dir/node_modules" "$target_dir/__pycache__"
       find "$target_dir" -name '.DS_Store' -type f -delete
     fi
@@ -2165,7 +2165,7 @@ sync_repo_cache_snapshots_to_runtime_cache() {
   else
     rm -rf -- "$target_cache_root"
     mkdir -p "$target_cache_root"
-    cp -a "$source_cache_root"/. "$target_cache_root"/
+    cp -R "$source_cache_root"/. "$target_cache_root"/
   fi
 }
 
@@ -2216,24 +2216,24 @@ materialize_plugin_cache_roots() {
         local tmp_copy_dir=""
         tmp_copy_dir="$(mktemp -d)"
         cleanup_paths+=("$tmp_copy_dir")
-        cp -a "$candidate_dir"/. "$tmp_copy_dir"/
+        cp -R "$candidate_dir"/. "$tmp_copy_dir"/
         while IFS= read -r child_dir; do
           [ -n "$child_dir" ] || continue
           rm -rf -- "$child_dir"
         done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -print)
-        cp -a "$tmp_copy_dir"/. "$plugin_dir"/
+        cp -R "$tmp_copy_dir"/. "$plugin_dir"/
       elif command -v rsync >/dev/null 2>&1; then
         rsync -a --delete --force "$candidate_dir/" "$plugin_dir/"
       else
         local tmp_copy_dir=""
         tmp_copy_dir="$(mktemp -d)"
         cleanup_paths+=("$tmp_copy_dir")
-        cp -a "$candidate_dir"/. "$tmp_copy_dir"/
+        cp -R "$candidate_dir"/. "$tmp_copy_dir"/
         while IFS= read -r child_dir; do
           [ -n "$child_dir" ] || continue
           rm -rf -- "$child_dir"
         done < <(find "$plugin_dir" -mindepth 1 -maxdepth 1 -print)
-        cp -a "$tmp_copy_dir"/. "$plugin_dir"/
+        cp -R "$tmp_copy_dir"/. "$plugin_dir"/
       fi
 
       while IFS= read -r child_dir; do

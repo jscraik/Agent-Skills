@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-strategy" tests="2" failures="2" errors="0" timestamp="2026-05-10T10:54:00Z" id="20260510-115400-635658">
+  <testcase name="sampled-evidence-downgrades-strategy-authority" classname="he-strategy" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(sampled|partial|authority limited|not repo.?wide|cannot|must not|refresh|downstream confidence|coverage gap)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260510-115400-635658/01-sampled-evidence-downgrades-strategy-authority
+    </system-out>
+  </testcase>
+  <testcase name="first-principles-rejects-template-copying" classname="he-strategy" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(first.?principles|verified failure|template|copied|reject|defer|Do Not Create|irreducible core|false moat)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-strategy/20260510-115400-635658/02-first-principles-rejects-template-copying
+    </system-out>
+  </testcase>
+</testsuite>

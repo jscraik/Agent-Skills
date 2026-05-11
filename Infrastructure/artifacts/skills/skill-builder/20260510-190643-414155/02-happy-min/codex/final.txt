@@ -1,0 +1,11 @@
+No actionable safety issues in the handle text itself.
+
+What looks good:
+- It resolves to the canonical source rather than duplicating workflow logic.
+- It explicitly says to fail closed if the contract cannot load.
+- It limits fallback search to the owner skill tree, which keeps the scope tight.
+- It avoids broad discovery or speculative behavior.
+
+Residual risk:
+- I couldn’t verify the on-disk canonical file or surrounding docs from the workspace because shell access was blocked in this session, so this is a content-only review of the snippet you provided.
+- If you want, I can do a deeper pass on the canonical `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md` contract once the repo is readable, and check for any hidden routing or safety drift.

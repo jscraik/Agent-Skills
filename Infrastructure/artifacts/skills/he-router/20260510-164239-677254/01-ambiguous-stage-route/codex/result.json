@@ -1,0 +1,36 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [
+    "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+  ],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/he-router/20260510-164239-677254/01-ambiguous-stage-route/codex",
+    "final": "Infrastructure/artifacts/skills/he-router/20260510-164239-677254/01-ambiguous-stage-route/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/he-router/20260510-164239-677254/01-ambiguous-stage-route/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/he-router/20260510-164239-677254/01-ambiguous-stage-route/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/he-router/20260510-164239-677254/01-ambiguous-stage-route/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 7,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 249330,
+        "output_tokens": 1366,
+        "reasoning_tokens": 0,
+        "total_tokens": 250696
+      }
+    },
+    "selected_skill": null
+  },
+  "used_schema": false
+}

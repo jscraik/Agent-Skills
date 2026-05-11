@@ -1,0 +1,36 @@
+I’m blocked by the current sandbox before I can inspect or edit anything.
+
+I tried to read the repo from `/Users/jamiecraik/dev/agent-skills` with:
+
+```bash
+pwd && rg -n "broad rewrite|rewrite plan|smallest reversible|stop or pivot|pivot condition|expected feedback" .
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/README.md
+```
+
+All three failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because the session is in read-only sandbox mode and approval policy is `never`, I can’t request broader permissions or make edits from here.
+
+The intended replacement shape I would apply once filesystem access works is something like:
+
+```markdown
+Replace the broad rewrite plan with one smallest reversible migration step.
+
+State:
+- the smallest change that can be shipped independently
+- the feedback expected from that change
+- the condition that means stop, revert, or pivot before continuing
+```
+
+Or, if this is meant to be a concrete instruction line:
+
+```markdown
+Prefer the smallest reversible migration step over a broad rewrite plan. For each step, name the expected feedback signal and the stop or pivot condition before expanding scope.
+```
+
+That keeps the idea sharp: one reversible move, one feedback loop, one explicit brake.

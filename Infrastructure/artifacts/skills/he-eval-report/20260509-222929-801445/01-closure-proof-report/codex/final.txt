@@ -1,0 +1,18 @@
+I’m blocked on two things before I can generate a real eval + drift proof:
+
+1. I don’t have the Linear slice identifier in the prompt, and my attempt to look it up in Linear was cancelled.
+2. Local repo commands are currently failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That means I can’t run the repo-required evidence commands like:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+Send me the Linear issue ID or slice handle, plus either a working command sandbox or the raw outputs from the relevant `./bin/ask` commands, and I can turn it into a closure-ready eval/drift proof with a clear recommend / do-not-recommend call.

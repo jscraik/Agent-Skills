@@ -1,0 +1,20 @@
+I can’t complete the import workflow in this sandbox because every attempt to read the repo or run `./bin/ask` is failing with:
+
+- `sandbox-exec: sandbox_apply: Operation not permitted`
+
+What I can confirm from the handle you provided:
+
+- `skill-builder` is only a command handle.
+- Its canonical source is `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`.
+- The handle itself instructs us to resolve through `./bin/ask skills resolve skill-builder --json`, and if that cannot load, to fail closed.
+
+Rollback evidence, in this case, is the negative evidence from the resolution path:
+
+- The required resolver command could not execute.
+- The canonical skill contract could not be loaded.
+- Per the handle’s own contract, that means the workflow must not proceed.
+
+If you want, I can still help in one of two ways:
+
+1. You paste the canonical `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`, and I’ll import it with provenance and summarize rollback evidence from the text.
+2. You let me work from the repo in a shell that can actually read files, and I’ll resolve the handle end to end.

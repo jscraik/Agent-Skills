@@ -1,0 +1,1 @@
+Got it. After I produce a plan, if there are multiple valid next stages, I’ll pause and ask which direction you want before starting implementation.
