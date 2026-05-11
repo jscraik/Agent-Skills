@@ -1,6 +1,6 @@
 # Solution Capture Contract
 
-Use this when `he-compound` captures a verified solved problem or refreshes a
+Use this when `he-reinforce` captures a verified solved problem or refreshes a
 high-overlap existing solution.
 
 ## Canonical Root

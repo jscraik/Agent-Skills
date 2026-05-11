@@ -23,7 +23,7 @@ closure tracking is needed; `compound_required` when lifecycle memory, source
 prompt coverage, solved-problem capture, or cross-stage recurrence analysis is
 needed; or `both_required` when the failure needs live execution tracking and
 durable HE state reconstruction. Include the proposed Linear issue type and
-the `he-compound` handoff evidence when applicable.
+the `he-reconcile` or `he-reinforce` handoff evidence when applicable.
 ## Procedure
 1. Select mode first: review-only, readiness, repair/autofix, commit review, or investigation. Review-only mode stays byte-clean.
 2. Resolve the stage context contract when the review will write artifacts, mutate files, update PR state, or hand off to another stage; ask before mutation when mode is ambiguous.
@@ -43,7 +43,7 @@ the `he-compound` handoff evidence when applicable.
 11. End with approve, request changes, autofix candidate, or follow-up lane for repeated feedback.
 12. For repeated failures or bugs, set `repeated_failure_route` before closure:
     route live repair work to `he-linear-plan` or live Linear issue creation
-    when tracking is missing, route lifecycle pattern analysis to `he-compound`,
+    when tracking is missing, route lifecycle pattern analysis to `he-reconcile`,
     and use both when execution and memory are both required.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Verify gates, references, subagent evidence, and command outcomes.

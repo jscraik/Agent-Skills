@@ -16,7 +16,8 @@
 - `he-linear-plan`
 - `he-fix-bugs`
 - `he-improve`
-- `he-compound`
+- `he-reconcile`
+- `he-reinforce`
 - `he-heartbeat`
 
 ## Routing
@@ -29,7 +30,8 @@ Start with `he-router` when the stage is unclear. Direct stage calls are fine wh
 - `he-tdd` -> `he-work`
 - `he-technical-review` / `he-reliability-review` -> `he-code-review`
 - `he-refine` -> `he-improve`
-- `he-compound-refresh` -> `he-compound`
+- `he-compound` lifecycle state refresh -> `he-reconcile`
+- `he-compound` / `he-compound-refresh` solved-problem or learning refresh -> `he-reinforce`
 - `he-prune-branches` -> `he-router` branch-hygiene handoff
 
 Source of truth:
@@ -48,7 +50,11 @@ before `he-spec`, `he-plan`, or `he-work` consumes
 captured into the plan as classified deltas first, then at most one admitted
 item becomes the current or next execution slice.
 
-Solved-problem capture belongs to `he-compound` and writes new HE solution
+Lifecycle state reconciliation belongs to `he-reconcile`: use it when HE work
+needs earliest-stage recovery, source-prompt coverage, tracker/artifact conflict
+resolution, or session-evidence resume routing.
+
+Solved-problem capture and stale learning refresh belong to `he-reinforce` and write new HE solution
 artifacts under `.harness/solutions/**` using
 `references/solution-capture-contract.md`. Legacy `docs/solutions/**` entries
 are source evidence and overlap/freshness inputs. When the repo uses Project
@@ -86,6 +92,10 @@ when tracked.
 It maps `.harness` cognition into small Now/Next/Later/Do Not Create execution
 sets, milestones, parent issues, dependencies, eval gates, and human/agent
 routing, but never mutates Linear without explicit confirmation.
+Repo identity is carried by labels, preferably `Repo › ...`, while projects are
+reserved for bounded deliverables with a clear completion state. Use labels and
+views for repo queues, maintenance, triage, and backlog organization; use cycles
+only for active execution commitment.
 
 Dedicated UI plans are `he-plan` artifacts. New UI plans use
 `.harness/plan/**-ui-plan.md`; legacy `docs/ui-plan/**` and

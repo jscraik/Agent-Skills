@@ -22,12 +22,11 @@ Keep these older router rules out of the entrypoint while preserving audit value
   `Plugins/harness-engineering/references/session-evidence-contract.md`.
 - Route coverage-gap and skillify-candidate evidence to `he-improve` before
   any new skill package is proposed.
-- Structured output includes `schema_version`, `selected_stage`,
-  `matched_rule`, `confidence`, `rationale`, `recommended_next_step`, and
-  `missing_input` when blocked.
-- Select exactly one primary stage.
-- Do not implement product code.
-- Do not select `he-work` for review, PR, go/no-go, failing test, root-cause,
+- Structured output includes `schema_version`, `selected_stage` or `blocker`,
+  `matched_rule`, `confidence`, `recommended_next_step`, and `missing_input`
+  when blocked.
+- Select exactly one primary stage and do not implement product code.
+- Never select `he-work` for review, PR, go/no-go, failing-test, root-cause,
   TDD, browser-polish, optimization, or stale-branch cleanup requests.
 - Redact secrets and sensitive data.
 - Move budget-trimmed context to references and index it in
@@ -43,10 +42,10 @@ Keep these older router rules out of the entrypoint while preserving audit value
   artifact evidence is missing, or lifecycle cues conflict; stop at the first
   failed gate and report the blocker.
 - If required evidence is missing, return `confidence: blocked` with exactly
-  one `missing_input`; do not guess a stage.
-- `review`, `PR`, `go/no-go`, and `failing test` requests are not
-  implementation requests.
-- Linear issue references are routing evidence, not a substitute for artifact checks.
+  one `missing_input`; do not guess.
+- `review`, `PR`, `go/no-go`, and `failing test` are not implementation
+  requests.
+- Linear references are routing evidence, not substitutes for artifact checks.
 - Session evidence requests need prior-session or repeated-failure context
   before choosing a stage.
 - Collector `he-*` path fragments and bundle names are evidence labels, not

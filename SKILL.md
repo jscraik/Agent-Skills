@@ -13,12 +13,13 @@ Do not hand-edit runtime projections.
 - [Summary](#summary)
 - [Catalog](#catalog)
 - [Skills — Agent Ops](#skills-agent-ops)
+- [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 21
+- `total_skills`: 22
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: 8c69fbfa81b89658
+- `policy_identity`: 9d326c1400d42d1b
 
 ## Catalog
 
@@ -45,4 +46,8 @@ Do not hand-edit runtime projections.
 - `triage` — Review file-based todo findings into ready, skipped, customized, or blocked states. Use this skill when pending todo files need approval.
 - `ubiquitous-language` — Build shared project vocabulary, glossary terms, aliases, prompt translations, and agent instruction links when wording is fuzzy or overloaded.
 - `verification-before-completion` — Review and validate completion claims. Use when you are about to say work is complete, fixed, passing, pushed, or ready for review.
+
+## Skills System
+
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
 

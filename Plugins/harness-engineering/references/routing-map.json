@@ -8,7 +8,7 @@
     "he-strategy": "Create a repository intent and architecture review with moat analysis.",
     "he-refactor": "Generate a high-leverage refactor program with rollback conditions.",
     "he-linear-plan": "Create a Linear execution plan with Now / Next / Later and Portfolio Ops routing.",
-    "he-phase-heartbeat": "Run approved phase heartbeats with collector evidence, review gates, cadence, and stop rules."
+    "he-phase-heartbeat": "Use he-phase-heartbeat for an approved phase loop with collector evidence, review gates, cadence, and stop rules."
   },
   "deterministic_decision_order": [
     {
@@ -339,12 +339,27 @@
     },
     {
       "priority": 85,
-      "rule": "compound-refresh",
-      "route": "he-compound",
+      "rule": "learning-reinforcement",
+      "route": "he-reinforce",
       "folded_from": "he-compound-refresh",
       "signals": [
         "he-compound-refresh",
-        "refresh compound state",
+        "compound solved problem",
+        "capture solved problem",
+        "refresh learning",
+        "sync Project Brain learning",
+        "remember this fix"
+      ]
+    },
+    {
+      "priority": 86,
+      "rule": "lifecycle-reconcile",
+      "route": "he-reconcile",
+      "folded_from": "he-compound",
+      "signals": [
+        "he-compound",
+        "refresh harness state",
+        "reconcile lifecycle state",
         "resume compound run",
         "re-check blockers"
       ]
@@ -369,7 +384,9 @@
     "he-improve": "$harness-engineering:he-improve <measurement-goal>",
     "he-code-review": "$harness-engineering:he-code-review <review-target>",
     "he-heartbeat": "$harness-engineering:he-heartbeat <target-and-cadence>",
-    "he-compound": "$harness-engineering:he-compound <request>",
+    "he-reconcile": "$harness-engineering:he-reconcile <state-or-resume-request>",
+    "he-reinforce": "$harness-engineering:he-reinforce <solved-problem-or-learning-refresh>",
+    "he-compound": "$harness-engineering:he-compound <deprecated-compatibility-request>",
     "he-eval-report": "$harness-engineering:he-eval-report <completed-slice-or-pr>",
     "he-strategy": "$harness-engineering:he-strategy <strategy-or-review-request>",
     "he-refactor": "$harness-engineering:he-refactor <migration-candidate>",
@@ -463,6 +480,7 @@
   ],
   "subagent_inventory_policy": {
     "he_relevant_roles": [
+      "planning-specialist-agent",
       "adversarial-document-reviewer",
       "data-migrations-reviewer",
       "bug-reproduction-validator",
@@ -518,7 +536,7 @@
         "learnings-researcher"
       ]
     },
-    "he-compound": {
+    "he-reconcile": {
       "policy": "conditional",
       "baseline_roles": [
         "repo-research-analyst",
@@ -529,6 +547,23 @@
         "spec-flow-analyzer",
         "worker"
       ]
+    },
+    "he-reinforce": {
+      "policy": "conditional",
+      "baseline_roles": [
+        "repo-research-analyst",
+        "learnings-researcher"
+      ],
+      "conditional_roles": [
+        "session-historian",
+        "git-history-analyzer",
+        "project-standards-reviewer"
+      ]
+    },
+    "he-compound": {
+      "policy": "manual-only",
+      "baseline_roles": [],
+      "conditional_roles": []
     },
     "he-brainstorm": {
       "policy": "conditional",
@@ -556,6 +591,7 @@
     "he-plan": {
       "policy": "conditional",
       "baseline_roles": [
+        "planning-specialist-agent",
         "repo-research-analyst",
         "learnings-researcher"
       ],

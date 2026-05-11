@@ -58,12 +58,26 @@ cases:
     expected_artifact_root: automation
     proof: "heartbeat prompt, cadence, stop rule, residual risk"
 
-  - id: tracer-compound
-    stage: he-compound
+  - id: tracer-reconcile
+    stage: he-reconcile
     prompt: "Inspect live state and pick the next HE stage from Linear, spec, plan, PR, and validation evidence."
-    expected_route: he-compound
+    expected_route: he-reconcile
     expected_artifact_root: stage-map
     proof: "stage map, active owner, blockers, next action"
+
+  - id: tracer-reinforce
+    stage: he-reinforce
+    prompt: "Capture the verified solved validator problem into durable HE learning with overlap, redaction, and Project Brain checks."
+    expected_route: he-reinforce
+    expected_artifact_root: .harness/solutions
+    proof: "solved evidence, validation, overlap status, Project Brain status, discoverability"
+
+  - id: tracer-compound-compatibility
+    stage: he-compound
+    prompt: "An old he-compound request should route to he-reconcile for state recovery or he-reinforce for learning capture."
+    expected_route: he-compound
+    expected_artifact_root: compatibility-route
+    proof: "selected replacement, authority limit, recommended next step"
 
   - id: tracer-eval-report
     stage: he-eval-report

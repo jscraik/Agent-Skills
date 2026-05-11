@@ -34,6 +34,7 @@ SELECTION_SIGNAL_WARNING_MARKERS = (
 TOOL_PREFLIGHT_ERROR_CODES = {
     "ERR_ASK_UNAVAILABLE",
     "ERR_CODEX_AUTH_UNAVAILABLE",
+    "ERR_CODEX_RUNNER_PREFLIGHT",
     "ERR_UNSUPPORTED_FILTER",
 }
 
@@ -154,6 +155,57 @@ def _case_has_tool_preflight_signal(case: dict[str, object], failure_strings: li
         if any(marker in stderr_text.lower() for marker in CODEX_RUNNER_PREFLIGHT_MARKERS):
             return True
     return False
+
+
+def _stderr_has_codex_runner_preflight_signal(stderr_path: object) -> bool:
+    if not isinstance(stderr_path, str):
+        return False
+    try:
+        stderr_text = Path(stderr_path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+    return any(marker in stderr_text.lower() for marker in CODEX_RUNNER_PREFLIGHT_MARKERS)
+
+
+def _artifact_tool_preflight_case(parsed: dict[str, object]) -> dict[str, object] | None:
+    artifacts = parsed.get("artifacts")
+    if not isinstance(artifacts, dict):
+        return None
+    if not _stderr_has_codex_runner_preflight_signal(artifacts.get("stderr")):
+        return None
+
+    case_filters = parsed.get("case_filters")
+    case_id = case_filters[0] if isinstance(case_filters, list) and case_filters else None
+    return {
+        "id": case_id,
+        "name": case_id,
+        "category": None,
+        "tier1_failures": parsed.get("tier1_failures") or [
+            "[codex] Codex runner preflight failed before producing final output."
+        ],
+    }
+
+
+def _classify_eval_failures(parsed: dict[str, object]) -> dict[str, object]:
+    classification = _classify_case_failures(parsed)
+    artifact_case = _artifact_tool_preflight_case(parsed)
+    if artifact_case is None:
+        return classification
+
+    classification.setdefault("tool_preflight_cases", [])
+    tool_cases = classification.get("tool_preflight_cases")
+    if isinstance(tool_cases, list):
+        tool_cases.append(artifact_case)
+
+    other_cases = classification.get("other_failure_cases")
+    if isinstance(other_cases, list):
+        artifact_id = artifact_case.get("id")
+        classification["other_failure_cases"] = [
+            case
+            for case in other_cases
+            if not isinstance(case, dict) or case.get("id") != artifact_id
+        ]
+    return classification
 
 
 def _iter_case_warnings(parsed: dict[str, object]) -> list[dict[str, object]]:
@@ -607,7 +659,7 @@ def _run_skill_builder_eval(
         "decision": decision,
         "tier1_failures": parsed.get("tier1_failures"),
         "tier2_findings": parsed.get("tier2_findings"),
-        "failure_classification": _classify_case_failures(parsed),
+        "failure_classification": _classify_eval_failures(parsed),
         "case_filters": parsed.get("case_filters", list(cases)),
         "category_filters": parsed.get("category_filters", list(categories)),
         "artifacts": parsed.get("artifacts", {}),
@@ -760,6 +812,19 @@ def _run_skill_builder_eval_split_cases(
         for result in case_results
         if result.get("returncode") == 124 or result.get("status") == "timeout"
     ]
+    failure_classification = _merged_case_failure_classification(case_results)
+    tool_preflight_cases = failure_classification.get("tool_preflight_cases")
+    non_tool_preflight_failures = (
+        failure_classification.get("content_failure_cases")
+        or failure_classification.get("timeout_cases")
+        or failure_classification.get("other_failure_cases")
+    )
+    all_failures_are_tool_preflight = (
+        bool(failed)
+        and isinstance(tool_preflight_cases, list)
+        and len(tool_preflight_cases) == len(failed)
+        and not non_tool_preflight_failures
+    )
     slow_cases = [
         {
             "id": (result.get("case_filters") or [None])[0]
@@ -792,8 +857,19 @@ def _run_skill_builder_eval_split_cases(
         "case_results": case_results,
         "slow_case_threshold_seconds": SLOW_CASE_DIAGNOSTIC_THRESHOLD_SECONDS,
         "slow_cases": slow_cases,
-        "failure_classification": _merged_case_failure_classification(case_results),
-        "errors": [] if not failed else [{"code": "ERR_VALIDATION", "message": "One or more split eval cases failed."}],
+        "failure_classification": failure_classification,
+        "errors": []
+        if not failed
+        else [
+            {
+                "code": "ERR_CODEX_RUNNER_PREFLIGHT"
+                if all_failures_are_tool_preflight
+                else "ERR_VALIDATION",
+                "message": "Codex live eval runner failed before producing final output."
+                if all_failures_are_tool_preflight
+                else "One or more split eval cases failed.",
+            }
+        ],
         "raw_output": json.dumps(
             {
                 "split_cases": True,

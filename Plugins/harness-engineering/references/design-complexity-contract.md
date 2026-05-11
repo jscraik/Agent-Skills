@@ -35,7 +35,7 @@ When a stage returns structured output or hands off to another HE stage, include
 
 ```yaml
 schema_version: 1
-he_stage: "<he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat>"
+he_stage: "<he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat>"
 status: pass|blocked|needs_route|needs_user
 owned_artifact: "<path or not_applicable>"
 evidence_freshness: fresh|stale|blocked|not_applicable
@@ -53,7 +53,7 @@ context_map:
   conflict_status: none|blocked|resolved|not_applicable
   conflict_rule: stop|refresh|prefer_source|record_blocker|not_applicable
 blocker: "<smallest recovery step or null>"
-next_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat|done
+next_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat|done
 validation:
   status: pass|fail|blocked|not_run_with_reason|not_applicable
   commands: []

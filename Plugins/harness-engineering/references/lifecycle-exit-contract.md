@@ -6,7 +6,7 @@ Use this at the end of every active HE stage so downstream agents know status, p
 
 `he-router -> he-brainstorm -> he-spec -> he-plan -> he-work -> he-code-review -> he-fix-bugs -> he-work|done`
 
-Use `he-improve` for measured improvement, `he-compound` for cross-stage orchestration or solved-problem capture, and `he-heartbeat` for wake/re-check loops.
+Use `he-improve` for measured improvement, `he-reconcile` for cross-stage state reconciliation, `he-reinforce` for solved-problem capture or learning refresh, and `he-heartbeat` for wake/re-check loops.
 
 Folded stages are modes, not the default route:
 
@@ -16,7 +16,8 @@ Folded stages are modes, not the default route:
 - `he-tdd` -> `he-work`
 - `he-refine` -> `he-improve`
 - `he-technical-review`, `he-reliability-review` -> `he-code-review`
-- `he-compound-refresh` -> `he-compound`
+- `he-compound` state refresh -> `he-reconcile`
+- `he-compound-refresh` or solved-problem compound -> `he-reinforce`
 
 ## Durable Artifact Routing
 
@@ -39,7 +40,7 @@ When structured output is requested, or when handing off to another HE stage, em
 
 ```yaml
 schema_version: 1
-he_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat
+he_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat
 mode: "<stage mode or folded mode>"
 tracker_status: resolved|created|blocked|not_applicable|user_opted_out
 artifact_status: none|drafted|updated|validated|not_applicable
@@ -72,7 +73,7 @@ domain_model:
   core_domain_relevance: core|supporting|generic|unknown|not_applicable
   closure_impact: blocks_spec|blocks_plan|blocks_work|blocks_review|blocks_eval|none
 exit_status: ready_for_next_stage|blocked|done
-next_stage: he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat|done
+next_stage: he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat|done
 missing_inputs: []
 evidence:
   linear: "<issue key/url or blocker>"
@@ -116,7 +117,8 @@ For short chat responses, summarize the same fields without losing blocker, trac
 - `he-code-review`: findings, readiness verdict, evidence ladder, next action.
 - `he-fix-bugs`: reproduction, root cause, fix/verification status, regression test recommendation.
 - `he-improve`: baseline, measured delta, accepted/rejected experiment, rollback posture.
-- `he-compound`: mode, earliest incomplete stage, stage exit evidence, next exact stage.
+- `he-reconcile`: mode, earliest incomplete stage, stage exit evidence, next exact stage.
+- `he-reinforce`: solved status, selected learning artifact, Project Brain status, discoverability, and validation evidence.
 - `he-heartbeat`: live checks, cadence, stop conditions, next stage when the heartbeat wakes.
 
 ## Coding Harness Managed Repos

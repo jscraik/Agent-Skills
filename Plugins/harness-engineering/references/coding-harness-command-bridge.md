@@ -36,7 +36,8 @@ In managed repos, `project_brain_status: not_applicable` is valid only when `.ha
 | `he-plan` | Plan only the selected milestone, parent issue, refactor phase, or execution slice; write plans under `.harness/plan/**.md`; run or block `harness plan-gate --require-plan-id --require-traceability --json`; preserve acceptance IDs, plan IDs, Linear keys, and future PR evidence. |
 | `he-work` | Inspect branch, dirty state, and Harness artifacts; verify work maps to the selected execution slice; run/block `blast-radius`, `policy-gate`, `preflight-gate`, and `validation-plan`. |
 | `he-code-review` | Review `Linear -> spec/source IDs -> plan -> PR -> validation`; run/block docs, review, CodeRabbit, learnings, context, and north-star gates. |
-| `he-compound` | Map earliest incomplete HE stage plus Harness lifecycle state; refresh Project Brain when `.harness/knowledge/**`, `.harness/decisions/**`, or `.harness/review-log.md` changed. |
+| `he-reconcile` | Map earliest incomplete HE stage plus Harness lifecycle state; report Project Brain freshness when `.harness/knowledge/**`, `.harness/decisions/**`, or `.harness/review-log.md` changed. |
+| `he-reinforce` | Capture verified solved problems and refresh/sync Project Brain learning when `.harness/solutions/**`, `.harness/knowledge/**`, `.harness/decisions/**`, or `.harness/review-log.md` changed. |
 
 Record exact pass/fail/blocked outcomes. If north-star evidence is unavailable, cap readiness. Never collapse Linear, Project Brain, spec, plan, PR, and validation into one chat summary.
 

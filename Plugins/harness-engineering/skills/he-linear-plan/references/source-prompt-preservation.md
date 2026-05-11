@@ -26,10 +26,17 @@ turning partial cognition into broad execution authority.
 - mark `needs_human_triage` instead of assuming JSC values when the Linear
   workspace, team, initiative, project, or repo route cannot be proven
 - do not create new initiatives or projects by default
-- route repo-specific work to the matching repo project
-- route cross-repo work to `Portfolio Ops`
+- carry repo-specific identity with a repo/location label, preferably
+  `Repo › ...`; legacy plain repo labels remain valid until migrated
+- use projects only for bounded deliverables with clear completion states
+- leave project empty for speculative, exploratory, maintenance, operational
+  debt, or ungrouped repo-owned work
+- route cross-repo bounded deliverables to an appropriate project only when
+  coordination, delivery tracking, or execution spanning multiple work items
+  requires it
 - keep active sets intentionally small
 - use milestones for bounded execution slices
+- use cycles only for current execution commitment
 - classify work as `Now`, `Next`, `Later`, or `Do Not Create`
 - convert refactor programs into minimal parent/sub-issue structures
 - include validation gates, rollback conditions, dependency maps, labels,

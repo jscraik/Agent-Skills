@@ -11,7 +11,8 @@ Keep HE routing compact without losing folded stage context. Folded names are co
 | `he-deepen-spec` | `he-spec` | deepen spec | `fixtures/preserved-context/skills/team_automation/he-deepen-spec/` |
 | `he-deepen-plan` | `he-plan` | deepen plan | `fixtures/preserved-context/skills/team_automation/he-deepen-plan/` |
 | `he-refine` | `he-improve` | refinement | `fixtures/preserved-context/skills/team_automation/he-refine/` |
-| `he-compound-refresh` | `he-compound` | refresh state | `fixtures/preserved-context/skills/team_automation/he-compound-refresh/` |
+| `he-compound` | `he-reconcile` | reconcile lifecycle state | `fixtures/preserved-context/skills/team_automation/he-compound/` |
+| `he-compound-refresh` | `he-reinforce` | refresh durable learning | `fixtures/preserved-context/skills/team_automation/he-compound-refresh/` |
 | `he-prune-branches` | `he-router` | `agent-ops` branch hygiene | `fixtures/preserved-context/skills/team_automation/he-prune-branches/` |
 | `he-tdd` | `he-work` | test-first | `fixtures/preserved-context/skills/team_automation/he-tdd/` |
 | `he-technical-review` | `he-code-review` | technical critique | `fixtures/preserved-context/skills/code_quality_review/he-technical-review/` |
@@ -37,7 +38,8 @@ Keep HE routing compact without losing folded stage context. Folded names are co
 - `he-work`: load `he-tdd` context when the user asks for RED/GREEN, failing-test-first, regression-first, or test-first execution.
 - `he-improve`: load `he-refine` context for browser-first or iterative artifact refinement.
 - `he-code-review`: load `he-technical-review` or `he-reliability-review` context for deeper-than-readiness review.
-- `he-compound`: load `he-compound-refresh` context when resuming stale lifecycle state or refreshing solution docs.
+- `he-reconcile`: load preserved `he-compound` context when resuming stale lifecycle state.
+- `he-reinforce`: load `he-compound-refresh` context when refreshing solution docs or Project Brain learning.
 
 ## Preserved Compact Entry Point Lines
 
@@ -62,7 +64,7 @@ prove the context was moved rather than dropped.
 Ensure `docs/brainstorms/` exists before writing. Use frontmatter with `title`, `date`, `status`, `spec_required`, `risk_level`, and `complexity`.
 If the user references an existing brainstorm topic or document, or there is an obvious recent matching `*-requirements.md` file in `docs/brainstorms/`:
   - one or more existing artifact paths under `docs/brainstorms/`, `Docs/specs/`, `Docs/plans/`, `docs/ui-plans/`, or `docs/solutions/`
-- User says: "Run `he-compound` from `docs/brainstorms/2026-04-06-queue-retry-requirements.md` and tell me the first incomplete Harness Engineering stage."
+- User says: "Run `he-reconcile` from `docs/brainstorms/2026-04-06-queue-retry-requirements.md` and tell me the first incomplete Harness Engineering stage."
 - do not recommend deleting or gitignoring Harness Engineering pipeline artifacts in `docs/brainstorms/`, `Docs/plans/`, or `docs/solutions/`
 - User says: "Please deepen `Docs/plans/2026-04-07-checkout-retry-rollout-plan.md`; rollout, rollback, and verification still feel weak."
 - Which plan should I deepen? You can give me the path directly from `Docs/plans/`.

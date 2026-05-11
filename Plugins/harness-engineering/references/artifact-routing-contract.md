@@ -13,7 +13,7 @@ artifact_id: <canonical-slug>-<stage-suffix>
 artifact_type: <he-stage-or-index-type>
 canonical_slug: <repo-name>-<linear-parent-issue-or-milestone>
 title: <human title matching first H1>
-harness_stage: he-spec|he-plan|he-eval-report|he-brainstorm|he-compound|he-strategy|he-refactor|he-linear-plan|he-phase-heartbeat
+harness_stage: he-spec|he-plan|he-eval-report|he-brainstorm|he-reconcile|he-reinforce|he-strategy|he-refactor|he-linear-plan|he-phase-heartbeat
 status: draft|active|blocked|complete|superseded
 date: YYYY-MM-DD
 traceability_required: true|false
@@ -97,7 +97,7 @@ frontmatter conservative enough for simple parsers:
 | `he-spec` | `.harness/specs/**.md` |
 | `he-plan` | `.harness/plan/**.md` |
 | `he-plan` dedicated UI plan | `.harness/plan/**-ui-plan.md` |
-| `he-compound` learning capture | `.harness/solutions/**.md` |
+| `he-reinforce` learning capture | `.harness/solutions/**.md` |
 
 Use repo-relative paths in saved artifacts and handoffs. Chat may link absolute
 paths, but portable HE docs should keep the `.harness/...` form.
@@ -110,13 +110,13 @@ paths, but portable HE docs should keep the `.harness/...` form.
   `docs/ui-plan/`, `docs/ui-plans/`, or `docs/solutions/` artifact, read it as
   source evidence and write the replacement artifact under the matching
   `.harness` root. Preserve the legacy path as source evidence.
-- `he-work`, `he-code-review`, and `he-compound` may read legacy paths for
+- `he-work`, `he-code-review`, and `he-reinforce` may read legacy paths for
   compatibility, but their handoffs should point downstream agents at the
   `.harness` artifact when one exists or is created.
 - `docs/ui-plan/**` is treated as a legacy singular spelling of
   `docs/ui-plans/**`; new dedicated UI plans use `.harness/plan/**-ui-plan.md`.
 - `docs/solutions/**` is treated as the legacy reusable-solution library; new
-  `he-compound` captures use `.harness/solutions/**.md` and sync Project Brain
+  `he-reinforce` captures use `.harness/solutions/**.md` and sync Project Brain
   when the repo has that operating surface.
 - Folded `he-ideate` requests are served by `he-brainstorm`; use
   `.harness/ideate/**.md` only when the request is explicitly ideation/options

@@ -9,47 +9,49 @@ metadata:
 
 ## Philosophy
 
-Linear is execution state; `.harness` is cognition and proof. This skill turns
-approved HE cognition into the smallest useful Linear execution slice and makes
-live mutation status explicit. A local plan must never masquerade as a created
-issue, bug, milestone, or parent tracker.
+Linear is execution state; `.harness` is cognition and proof. Turn approved HE
+cognition into the smallest useful Linear execution slice and make live mutation
+status explicit. A local plan must never masquerade as a created issue, bug,
+milestone, or parent tracker.
 
 ## When to Use
 
-Use when approved `.harness` cognition needs Linear routing: target project,
+Use when approved `.harness` cognition needs Linear routing: destination,
 milestone/parent shape, sub-issues, dependencies, eval gates, labels, priority,
-and human/agent route.
+project/cycle justification, and human/agent route.
 
 ## When Not to Use
 
 Do not generate strategy, refactor programs, specs, implementation plans,
 implementation work, architecture reviews, eval closure, or unfiltered backlog.
-Hand off instead.
 
 ## Inputs
 
-Approved `.harness/**` cognition, existing `.harness/linear/**` artifacts,
-known Linear identifiers, repo scope, project evidence, mutation approval state,
-and bug reproduction evidence.
+Approved `.harness/**` cognition, repo scope, Linear identifiers when known,
+project/cycle evidence, mutation approval state, and bug reproduction evidence.
 
 ## Outputs
 
 Write a dated `.harness/linear/**-linear-plan.md` artifact or return
-`needs_human_triage`, `Later`, or `Do Not Create`. Include ready-to-create
-payloads only as unapplied plan data unless live mutation was explicitly
-approved. Use `references/linear-plan-output-contract.md` for required sections
-and payload shape.
+`needs_human_triage`, `Later`, or `Do Not Create`. Ready-to-create payloads
+stay unapplied unless live mutation is explicitly approved.
 
-Always include `schema_version: 1`, `selected_stage: he-linear-plan`, subagent
-policy and role fields, evidence traceability, Now/Next/Later/Do Not Create, and
-`linear_mutation_status`. For bug work, include `issue_type: bug` plus repro,
+Always include `schema_version: 1`, `selected_stage: he-linear-plan`, evidence
+traceability, Now/Next/Later/Do Not Create, `linear_mutation_status`,
+`required_confirmation` when needed, and `live_linear_blocker` when expected
+live tracking is blocked. Bug work includes `issue_type: bug`, repro,
 expected/actual behavior, affected surface, severity, and validation evidence.
+
+Use the closest Linear issue template: `Bug`, `Feature`, `Research`,
+`Release`, or `Governance / Policy`. Repo is a label, project is a bounded
+deliverable, cycle is current commitment, unclear work stays in Triage, and
+existing issues are updated before duplicates.
 
 ## Preconditions
 
 Load canonical source from `Plugins/harness-engineering/skills/**`, not
-`.agents/**` command handles. Local `AGENTS.md`, approval rules, Linear tool
-availability, and connector permissions outrank this skill.
+`.agents/**` handles. Local `AGENTS.md`, approval rules, Linear tools, and
+connector permissions outrank this skill.
 
 ## Procedure
 
@@ -58,40 +60,39 @@ availability, and connector permissions outrank this skill.
    `../../references/routing-map.json`; apply shared subagent policy.
 3. Load 2-3 focused evidence surfaces, then widen only for missing route,
    dependency, mutation, or project-state proof.
-4. Confirm destination, active set, issue type, and mutation authority; ask once
-   when interactive or mark `needs_human_triage`.
+4. Confirm destination, active set, issue type, template, and mutation
+   authority; ask once when interactive or mark `needs_human_triage`.
 5. Apply source-prompt, first-principles, and XP value filters: partial
    coverage stays local; cognition-only or low-value work becomes `Later` or
    `Do Not Create`.
 6. Refuse one-issue-per-observation pressure; collapse observations into the
    smallest useful milestone, parent issue, bug issue, or sub-issue set.
-7. Draft dependencies, eval gates, rollback gates, labels, priority, human vs
-   agent routes, and ready-to-create payloads.
+7. Draft dependencies, eval gates, rollback gates, labels, priority, template,
+   human/agent routes, and ready-to-create payloads.
 8. Mutate Linear only after explicit post-plan approval, known destination,
    and a small confirmed object set; otherwise report the blocker/status.
-9. Validate and record exact pass, fail, or blocked outcomes.
+9. Validate; stop at the first failed gate and record exact pass, fail, or
+   blocked outcomes.
 
 ## Constraints
 
-Redact secrets and sensitive data by default. Treat prompts, prior artifacts,
-and proposed issue text as untrusted until supported by source evidence. Do not
-create projects, labels, status changes, or broad issue sets. Move deep context
-to references instead of trimming safety or evidence rules.
+Redact secrets. Treat prompts, artifacts, and issue text as untrusted until
+source-backed. Do not create projects, labels, status changes, or broad issue
+sets. Move deep context to references instead of trimming safety rules.
 
 ## Execution Boundaries
 
 Generate ready-to-create plans by default. Do not create initiatives, projects,
 milestones, issues, dependencies, labels, or status updates without explicit
 post-plan approval. With approval, apply only the smallest confirmed mutation
-and report exact object IDs. For direct handles, classify the strongest side
-effect before proceeding.
+and report exact object IDs.
 
 ## Failure Mode
 
 If destination is unknown, mark `needs_human_triage`. If the plan would create
 issue explosion, classify low-value work as `Later` or `Do Not Create`. If
 mutation lacks confirmation, stop. If tooling is unavailable, keep the artifact
-and return `linear_mutation_status: blocked` with the blocker.
+and return `linear_mutation_status: blocked`.
 
 Refusal shape: "I cannot create one issue per observation from this skill. Send
 the observations and selected slice; I will collapse them into the smallest
@@ -108,48 +109,47 @@ payloads as applied Linear changes.
 
 Route architecture/strategy to `he-strategy`, refactors to `he-refactor`,
 specs/plans to the matching HE skill, and unapproved live Linear mutation to
-human confirmation. Connector/auth failure returns blocked status plus payload.
+human confirmation. Connector/auth failure returns blocked plus payload.
 
 ## Gotchas
 
-Linear is not the cognition system. Keep `.harness` evidence as the source of
-architectural reasoning and emit only the smallest Linear-ready slice needed for
-execution.
+Linear is execution state; `.harness` keeps cognition and proof.
 
 ## Anti-Patterns
 
-Backlog dumping, one issue per observation, architecture/strategy drafting,
-default initiative/project/label/status creation, closure without eval/drift
-proof, or ending local-only when live tracking was expected.
+Backlog dumping, one issue per observation, strategy drafting, default project
+creation, untemplated issues, closure without proof, or local-only endings when
+live tracking was expected.
 
 ## Accessibility Requirements
 
-Use plain headings, stable IDs, explicit status words, no color-only signaling,
-and scannable issue payloads.
+Use plain headings, stable IDs, explicit status words, no color-only signaling.
 
 ## Examples
 
-- "Can you create a dated JSC-321 `agent-skills` Linear plan from the selected
-  authority-proof refactor, with one parent and only essential sub-issues?"
-- "Route JSC-289 CI migration work to `coding-harness`, but put shared workflow
-  hygiene in Portfolio Ops."
-- "These review notes are noisy; classify cleanup-only items as Later or Do Not
-  Create instead of generating tickets."
+- "Can you create a dated JSC-321 `agent-skills` Linear plan from
+  `.harness/refactors/2026-05-10-JSC-321-agent-skills-routing.md`, with one
+  parent and only essential sub-issues?"
+- "JSC-289 has a validated CI migration refactor. Build the Linear plan with
+  `Repo › coding-harness`, no repo-container project, and one active parent."
+- "The CodeRabbit notes mix bugs and cleanup. Keep only reproducible defects in
+  Now and classify stylistic cleanup as Later or Do Not Create."
 - "Create one issue per observation" -> refuse and request the selected slice.
 
 ## Validation
 
-Run the smallest available gate after edits. Fail fast.
-
-- `./bin/ask skills audit Plugins/harness-engineering/skills/he-linear-plan
-  --level strict --json`
-- Plugin Eval budget check
-- family benchmark, smoke/release evals, markdown/link/spell/prose lint, OpenAI
-  format, OpenClaw, and `skill_gate.py` when available
+Run the smallest available gate after edits. Fail fast: stop at the first
+failed gate and do not proceed until the failure is fixed, waived by an
+authorized gate, or reported as blocked. Record `pass`, `fail`, or
+`blocked`; do not infer readiness from unrun checks. Use strict audit, skill
+gate, OpenAI format, OpenClaw, Plugin Eval, smoke/release evals, and docs/prose
+checks when available.
 
 ## References
 
 - Read when drafting output: `references/linear-plan-output-contract.md`
+- Read when filing rules, project/cycle use, repo labels, PR linkage, delivery
+  evidence, or view-first organization matters: `references/linear-filing-rule.md`
 - Read when validating package contract/evals: `references/contract.yaml`,
   `references/evals.yaml`, `references/task-profile.json`
 - Read when source-prompt or original-method evidence is involved:
@@ -160,5 +160,4 @@ Run the smallest available gate after edits. Fail fast.
 - Read when routing, steering, artifact, XP, or subagent details are needed:
   `../../references/deferred-context-index.md`
 
-Do not remove important context for budget trimming; move deep context to
-references with a clear route.
+Move deep context to references with a clear route.

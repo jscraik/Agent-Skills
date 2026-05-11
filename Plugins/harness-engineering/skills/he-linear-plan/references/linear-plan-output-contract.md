@@ -27,10 +27,14 @@ Linear.
 - Human vs Agent Execution Map
 - Story / Value Basis
 - Recommended Labels
+- Repo / Location Label
 - Priority Mapping
+- Project / Cycle Justification
 - Project Reactivation Recommendation
 - Portfolio Ops Items
 - Dev Portfolio Impact
+- GitHub PR Tracking
+- Delivery Evidence
 - Evidence & Traceability Matrix
 
 ## Required Fields
@@ -46,10 +50,72 @@ Linear.
   `not_applicable`
 - `live_linear_blocker` when live tracking is expected but not completed
 - `required_confirmation` when mutation approval is missing
+- `repo_location_label` for every issue payload, preferably `Repo › ...`
+- `project_assignment_reason`: bounded deliverable reason or `empty`
+- `cycle_assignment_reason`: current execution commitment reason or `empty`
+- `github_tracking_rule`
+- `delivery_evidence_rule`
 - ready-to-create payloads when a live object is expected but unapplied
+- `template` for each proposed issue payload, selected from `Bug`, `Feature`,
+  `Research`, `Release`, or `Governance / Policy`; ask before creating when no
+  template fits
 
 Bug payloads must include `issue_type: bug`, reproduction, expected behavior,
 actual behavior, affected surface, severity, and validation evidence.
+
+## Template Rules
+
+Always use a Linear issue template when creating an issue. Use the closest
+matching template:
+
+- `Bug`: defects or regressions.
+- `Feature`: net-new capability.
+- `Research`: investigation or discovery.
+- `Release`: release planning, validation, or cut work.
+- `Governance / Policy`: policy, control, or process-rule changes.
+
+If no template fits, ask before creating the issue. Do not silently create an
+untemplated issue.
+
+## Label Policy
+
+For every non-triage issue, apply the following exact mapping while keeping one
+Type label and one Roadmap label:
+
+- Bug -> Type > Bug
+- Feature -> Type > Feature + Roadmap > Roadmap: Next
+- Research -> Type > Research + Roadmap > Roadmap: Next
+- Release -> Release + Reliability + Type > Docs + Roadmap > Roadmap: Now
+- Governance / Policy -> Policy + Governance + Type > Docs + Roadmap > Roadmap: Next
+
+If classification is unclear, keep the issue in Triage and ask. Prefer updating an
+existing issue over creating a duplicate.
+
+## Filing Model
+
+Repo identity belongs in labels, not projects. Every issue payload must include
+a repo/location label, preferably `Repo › ...`; legacy plain repo labels remain
+valid only until migrated.
+
+Projects are bounded deliverables, not permanent repo containers. Leave
+`project` empty for speculative ideas, isolated backlog items, maintenance,
+exploratory tasks, operational debt, and repo-owned work that is not part of an
+active deliverable. Use `cycle` only for current execution commitment.
+
+Prefer labels and views for repo slices, triage, maintenance queues, backlog
+review, roadmap lanes, missing-project review, and active work by repo. Escalate
+to projects only when coordination, delivery tracking, or bounded execution
+requires it.
+
+Delegate to Codex only when the issue has clear scope, a repo/location label,
+acceptance criteria, validation command or proof expectation, enough structure
+to execute safely, and active-execution intent.
+
+Implementation PRs should be traceable to one primary Linear issue where
+possible. Include the Linear issue identifier in branch, commit, or PR context.
+Do not treat a merged PR as shipped evidence; use Linear Releases when
+available, otherwise tags, deployments, changelog entries, package versions, or
+manual release notes.
 
 ## Issue Shape
 
@@ -69,10 +135,15 @@ Use this template for proposed issues. Do not create them during the plan.
 
 ## Routing Rules
 
-- Repo-specific work routes to the matching repo project.
+- Repo-specific identity routes through a repo/location label, preferably
+  `Repo › ...`; legacy plain repo labels remain valid until migrated.
+- Repo-specific work must not create or assume a matching repo-container
+  project.
 - Cross-repo workflow, reporting, shared governance, labels, or portfolio
-  hygiene routes to `Portfolio Ops`.
-- Portfolio-level operating model work may attach to `Dev Portfolio`.
+  hygiene remains label/view organized unless it belongs to a bounded
+  deliverable requiring project-level coordination.
+- Portfolio-level operating model work may attach to `Dev Portfolio` only when
+  the initiative improves review, prioritization, or sequencing.
 - Do not create new initiatives, projects, labels, issues, comments, or status
   changes without explicit user confirmation after plan review.
 - If destination cannot be proven, mark `needs_human_triage` and ask once when

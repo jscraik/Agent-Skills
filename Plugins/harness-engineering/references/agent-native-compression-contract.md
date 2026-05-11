@@ -59,7 +59,7 @@ compression by themselves.
   metadata, docs, or policy surfaces.
 - `he-code-review`: block readiness when implementation proves presence but not
   compression, fresh-agent usability, or ablation.
-- `he-compound`: when a lifecycle diagnosis says `spec_refresh_required` for
+- `he-reconcile`: when a lifecycle diagnosis says `spec_refresh_required` for
   product compression, route back to `he-spec` instead of approving more
   implementation.
 - `he-improve`: prefer tightening an existing shared contract, eval, or high

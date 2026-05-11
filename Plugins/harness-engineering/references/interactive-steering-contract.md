@@ -37,7 +37,7 @@ the choice in a long report.
   ambiguous and a mutation could occur.
 - `he-eval-report`: closure could be Complete or Complete with follow-up; ask
   accept, challenge, or rework before recommending Linear completion.
-- `he-compound`: earliest incomplete lifecycle stage, resume target, or refresh
+- `he-reconcile`: earliest incomplete lifecycle stage, resume target, or refresh
   route conflicts across Linear, spec, plan, PR, or Project Brain evidence.
 
 ## Do Not Ask When

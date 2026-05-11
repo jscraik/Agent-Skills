@@ -4,12 +4,12 @@ purpose: "Map approved Harness Engineering cognition into a small, traceable Lin
 triggers:
   - Linear execution orchestration
   - mapping .harness refactors into milestones and parent issues
-  - repo-specific versus Portfolio Ops routing
+  - repo/location label and bounded deliverable routing
   - Now / Next / Later / Do Not Create classification
   - dependency and eval gate planning
   - human versus agent execution routing
   - label and priority recommendations
-  - project reactivation recommendations
+  - project or cycle justification when bounded delivery or active execution is proven
 
 inputs:
   - .harness/features/*.md
@@ -44,9 +44,15 @@ non_goals:
   - implement code
   - edit generated command handles or runtime projections as canonical source
 
+conditional_capabilities:
+  - "With explicit post-plan approval, known destination, and a small confirmed object set, the skill may perform the approved Linear mutation and must report exact object IDs."
+  - "Without explicit approval, ready-to-create payloads remain unapplied plan data."
+
 risks:
   - Linear issue explosion
   - creating new initiatives or projects unnecessarily
+  - recreating repo-container projects instead of carrying repo identity in labels
+  - assigning cycles to important-but-not-current work
   - treating every finding as work
   - hiding cross-repo work in a repo-specific project
   - closure without eval proof
@@ -54,7 +60,7 @@ risks:
   - technically neat work being promoted to Now without story value or a feedback signal
   - local artifacts hiding missing live Linear mutation, confirmation, or connector blockers
 
-observability: "Record source artifacts read, target Linear destination, existing project match or needs_human_triage reason, Now / Next / Later / Do Not Create classification, story/value basis for Now items, dependency map, eval gate map, human versus agent execution route, evidence and traceability matrix, dated output path or Do Not Create classification, no Linear mutations performed, and validation outcomes recorded as pass, fail, or blocked."
+observability: "Record source artifacts read, target Linear destination, repo/location label, project assignment reason or empty, cycle assignment reason or empty, existing project match or needs_human_triage reason, Now / Next / Later / Do Not Create classification, story/value basis for Now items, dependency map, eval gate map, human versus agent execution route, GitHub PR tracking rule, delivery evidence rule, evidence and traceability matrix, dated output path or Do Not Create classification, Linear mutation status, and validation outcomes recorded as pass, fail, or blocked."
 
 rollback_procedure: "If the destination is wrong, mark needs_human_triage and do not create objects; if the plan creates backlog noise, collapse to fewer parent issues or classify as Do Not Create; if a Linear object was accidentally created, stop and ask the user before modifying or deleting it; do not recommend closure unless eval and drift proof are present."
 
@@ -63,8 +69,11 @@ linear_operating_model:
   workspace_team: Jscraik
   team_key: JSC
   top_level_initiative: Dev Portfolio
-  cross_repo_project: Portfolio Ops
-  repo_specific_project: "<repo-name>"
+  repo_location_label_preferred_format: "Repo › <repo-name>"
+  repo_location_label_legacy_allowed: true
+  project_policy: "projects are bounded deliverables, not repo containers"
+  cycle_policy: "cycles are current execution commitments only"
+  cross_repo_project_policy: "use a bounded project only when coordination, delivery tracking, or multi-issue execution requires it"
   default_new_initiative_policy: "do not create unless existing structure cannot represent the work cleanly"
   active_set_rule: "keep active sets intentionally small"
   confirmation_required_when_unverified: true

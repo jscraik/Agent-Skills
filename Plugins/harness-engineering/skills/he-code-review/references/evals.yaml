@@ -63,14 +63,14 @@ cases:
     deterministic_checks: *safe
     acceptance: *accept
   - id: repeated-failure-routes-linear-and-compound
-    name: "Repeated failure routes Linear and Compound"
+    name: "Repeated failure routes Linear and Reinforce"
     category: edge
     eval_modes: *modes
     should_trigger: true
     prepend_skill: true
-    prompt: "Can you review a diff where the same validation failure has appeared in three PRs; decide whether it needs a live Linear bug, he-compound lifecycle memory, or both."
+    prompt: "Can you review a diff where the same validation failure has appeared in three PRs; decide whether it needs a live Linear bug, he-reconcile lifecycle state, he-reinforce durable learning, or both."
     deterministic_checks: *safe
-    acceptance: [{type: regex, value: "(?is)(repeated_failure_route|linear_required|compound_required|both_required|he-linear-plan|he-compound|live Linear|bug|recurrence|pattern)"}]
+    acceptance: [{type: regex, value: "(?is)(repeated_failure_route|linear_required|reinforce_required|both_required|he-linear-plan|he-reconcile|he-reinforce|live Linear|bug|recurrence|pattern)"}]
   - id: agent-native-risk
     name: "Agent native risk"
     category: happy

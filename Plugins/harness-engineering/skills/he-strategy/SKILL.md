@@ -153,6 +153,8 @@ impact, future-agent guidance, validation outcomes, and evidence traceability.
 - Read when applying first principles or XP ->
   `../../references/first-principles-contract.md`,
   `../../references/xp-operating-contract.md`
+- Read when strategy is produced from a review or critique ->
+  `../../references/pragmatic-programmer-review-contract.md`
 
 Do not remove important context for budget trimming; move deep context to
 references with a clear route.
