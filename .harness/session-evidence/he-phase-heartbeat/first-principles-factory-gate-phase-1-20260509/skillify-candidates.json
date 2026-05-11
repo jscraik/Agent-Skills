@@ -897,12 +897,12 @@
       "git_state"
     ],
     "procedure": [
-      "git status",
-      "python <redacted> <redacted>",
-      "cat <redacted>",
-      "pnpm run docs:lint",
-      "git diff",
-      "rg <redacted> <redacted>"
+      "./bin/ask git status --short --branch",
+      "./bin/ask python <redacted> <redacted>",
+      "./bin/ask cat <redacted>",
+      "./bin/ask pnpm run docs:lint",
+      "./bin/ask git diff --name-only",
+      "./bin/ask rg <redacted> <redacted>"
     ],
     "redactions": [
       "absolute paths and sensitive-looking values are summarized"
@@ -916,12 +916,12 @@
     "source": "session-evidence",
     "trigger_phrases": [],
     "validation": [
-      "git commit",
-      "pnpm run test:skill",
-      "python <redacted> <redacted>",
-      "pnpm vitest run <path>",
-      "test <redacted>",
-      "test <redacted> && test"
+      "./bin/ask git commit --dry-run",
+      "./bin/ask pnpm run test:skill",
+      "./bin/ask python <redacted> <redacted>",
+      "./bin/ask pnpm vitest run <path>",
+      "./bin/ask bash -lc 'test <redacted>'",
+      "./bin/ask bash -lc 'test <redacted> && test <redacted>'"
     ],
     "workflow_name": "X-writer workflow"
   },
@@ -2037,12 +2037,12 @@
       "test_failure"
     ],
     "procedure": [
-      "zsh <redacted>",
-      "sed 1,220p <redacted>",
-      "git status",
-      "nl <redacted> | sed",
-      "nl <path> | sed",
-      "zsh <path>"
+      "./bin/ask zsh -lc '<redacted full command>'",
+      "./bin/ask sed -n '1,220p' <redacted>",
+      "./bin/ask git status --short --branch",
+      "./bin/ask bash -lc 'nl -ba <redacted> | sed -n \"1,220p\"'",
+      "./bin/ask bash -lc 'nl -ba <path> | sed -n \"1,220p\"'",
+      "./bin/ask zsh -lc '<path>'"
     ],
     "redactions": [
       "absolute paths and sensitive-looking values are summarized"
@@ -2056,12 +2056,12 @@
     "source": "session-evidence",
     "trigger_phrases": [],
     "validation": [
-      "zsh <redacted>",
-      "zsh pnpm test",
-      "zsh <path>",
-      "git commit",
-      "git diff validate-codex-config.py",
-      "rg validate_goal_feature|\\[feature\\]|goals|goal validate-codex-config.py test_validate_codex_config.py"
+      "./bin/ask zsh -lc '<redacted full command>'",
+      "./bin/ask zsh -lc 'pnpm test'",
+      "./bin/ask zsh -lc '<path>'",
+      "./bin/ask git commit --dry-run",
+      "./bin/ask git diff -- validate-codex-config.py",
+      "./bin/ask rg -n 'validate_goal_feature|\\[feature\\]|goals|goal' validate-codex-config.py test_validate_codex_config.py"
     ],
     "workflow_name": "codex workflow"
   },

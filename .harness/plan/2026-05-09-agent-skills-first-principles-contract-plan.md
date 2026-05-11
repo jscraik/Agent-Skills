@@ -576,7 +576,7 @@ Rollback:
 | Skill edits begin without reading repo vocabulary guidance. | Read `UBIQUITOUS_LANGUAGE.md` before implementation. | Implementation closeout records the read as source evidence. |
 | New eval cases parse but only prove keyword presence. | Require behavioral acceptances such as reject, defer, ask, record assumption, or `Do Not Create`. | Manual review plus future eval report. |
 | New first-principles hook weakens prior domain, XP, or gate-selection contracts. | Run existing gate, domain, and XP wiring validators after implementation. | All three validators pass or block completion. |
-| `skills audit` assumptions drift. | Use verified command shape from `ask skills audit --help`; fallback to `skills explain` only if audit is unsupported in the implementation context. | Validation log records exact command outcomes. |
+| `skills audit` assumptions drift. | Use verified command shape from `./bin/ask skills audit --help`; fallback to `./bin/ask skills explain` only if audit is unsupported in the implementation context. | Validation log records exact command outcomes. |
 | Projection output includes unrelated dirty state. | Sync only after canonical edits and inspect generated `.skillsets/**` diff against the touched HE source files. | Eval report classifies unrelated projection churn as blocked or excluded. |
 
 ## Readiness Checklist Before Implementation

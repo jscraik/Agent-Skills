@@ -157,7 +157,7 @@ Local primary sources checked during the confidence loop:
 - Live relative-path calculation: verified every selected lane resolves
   `Infrastructure/references/first-principles-factory-gate.md` through
   `../../../../../Infrastructure/references/first-principles-factory-gate.md`.
-- Codex plugin-hook source in `/Users/jamiecraik/dev/codex`: verified
+- Codex plugin-hook source (`../codex` repository checkout): verified
   `plugin_hooks` remains `UnderDevelopment` and default-off, plugin hook
   loading supports manifest/default hook sources, plugin hook metadata carries
   plugin identity/source paths, and runtime tests cover plugin scoped
@@ -181,7 +181,7 @@ or Phase 4 behavior proof in the same pass.
   `python3 - <<'PY' ... calculate relative paths from all seven selected lane files to Infrastructure/references/first-principles-factory-gate.md ... PY`
   -> pass.
 - Command:
-  `python3 - <<'PY' ... verify Codex source contains plugin_hooks default-off feature gate, default hooks/hooks.json discovery, PluginHookSource metadata, and PLUGIN_ROOT/PLUGIN_DATA test coverage ... PY`
+  `python3 - <<'PY' ... verify ../codex source contains plugin_hooks default-off feature gate, default hooks/hooks.json discovery, PluginHookSource metadata, and PLUGIN_ROOT/PLUGIN_DATA test coverage ... PY`
   -> pass.
 - Command:
   `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-2-plan.md .harness/review/2026-05-09-agent-skills-first-principles-factory-gate-phase-2-plan-technical-review.md`

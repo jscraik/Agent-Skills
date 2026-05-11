@@ -23,9 +23,10 @@ generation was not invoked.
 ## Linked Context
 
 - Canonical skill: `Plugins/harness-engineering/skills/he-fix-bugs/SKILL.md`
-- Runtime handle, not edited: `.agents/skills/he-fix-bugs/SKILL.md`
+- Runtime handle, not edited: `~/.codex/skills/he-fix-bugs/SKILL.md` (user-runtime projection path)
 - Review focus: Skill Factory hardening, validator compatibility, progressive
-  disclosure, evidence capture, media persistence truthfulness.
+  disclosure, evidence capture, and establishing media-persistence truthfulness
+  requirements for a future unblocked render pass.
 
 ## Persistence Notes
 
@@ -35,4 +36,3 @@ schema, while its contract forbids narrative text after generation. The user
 requires post-generation cache discovery, repository copy into `.harness/media/`,
 sidecar creation, file-existence verification, and final persistence evidence.
 Invoking the tool would make those requirements unverifiable from this run.
-

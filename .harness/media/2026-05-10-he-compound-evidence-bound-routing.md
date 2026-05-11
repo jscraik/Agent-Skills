@@ -31,9 +31,9 @@ Review media sidecar for the `he-compound` skill hardening pass. The image is a 
 
 ## Prompt Summary
 
-See `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-he-compound-evidence-bound-routing-prompt.md`.
+See `.harness/media/2026-05-10-he-compound-evidence-bound-routing-prompt.md`.
 
 ## Linked Context
 
-- Skill: `/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-compound/SKILL.md`
-- Smoke eval artifact: `/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/scorecard.json`
+- Skill: `Plugins/harness-engineering/skills/he-compound/SKILL.md`
+- Smoke eval artifact: `Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/scorecard.json`

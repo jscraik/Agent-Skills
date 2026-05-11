@@ -7,7 +7,7 @@ title: Agent Skills Conditional HE Gate Selection Eval
 harness_stage: he-eval-report
 status: blocked_release_confidence
 date: 2026-05-09
-traceability_required: true
+traceability_required: false
 origin: .harness/plan/2026-05-09-agent-skills-conditional-he-gate-selection-plan.md
 linear_issue: null
 linear_status: not_applicable

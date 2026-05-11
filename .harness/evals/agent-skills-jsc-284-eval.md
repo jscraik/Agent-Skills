@@ -523,7 +523,7 @@ Target Linear Project: `agent-skills`
 
 Parent Issue or Milestone: `JSC-284`
 
-Reason: live Linear refresh is required before closure/status mutation.
+Reason: live Linear refresh requirement is already satisfied for this slice; only selected-file commit staging review remains.
 
 Priority: High for closure; not a code blocker.
 

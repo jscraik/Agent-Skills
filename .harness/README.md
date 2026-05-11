@@ -25,6 +25,7 @@ execution, and review documents; keep local runtime output out of git.
 | `.harness/memory/LEARNINGS.md` | reference | Repo-local learned fixes and recurring operational knowledge. |
 | `.harness/quality/**` | policy | Quality criteria and scorecards. |
 | `.harness/evals/**.md` | intentional_archive | Harness engineering eval reports and execution evidence. |
+| `.harness/media/**.md` | intentional_archive | Prompt metadata and sidecar evidence artifacts (including blocked media attempts such as `2026-05-10-he-fix-bugs-codex-harness-skill.md`) kept for auditability. |
 | `.harness/session-evidence/**` | intentional_archive | Deterministic command snapshots and session evidence bundles for harness engineering closure proof. |
 | `.harness/*-contract.json` | policy | Contract JSON consumed by repo validators or Harness setup flows. |
 | `.harness/*-generated.json` | generated_tracked | Generated contract JSON tracked for downstream consumers. |

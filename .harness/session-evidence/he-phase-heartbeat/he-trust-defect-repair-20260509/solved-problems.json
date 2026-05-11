@@ -15,7 +15,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -33,7 +37,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "4 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 4,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -52,7 +60,11 @@
       "approval_required",
       "timeout"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -70,7 +82,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "2 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 2,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -89,7 +105,11 @@
       "missing_file",
       "approval_required"
     ],
-    "validation": "4 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 4,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -112,7 +132,11 @@
       "test_failure",
       "git_state"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -134,7 +158,11 @@
       "timeout",
       "git_state"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -155,7 +183,11 @@
       "approval_required",
       "permission"
     ],
-    "validation": "109 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 109,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -176,7 +208,11 @@
       "permission",
       "git_state"
     ],
-    "validation": "1 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 1,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -194,7 +230,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -212,7 +252,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -230,7 +274,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -248,7 +296,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "1 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 1,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -267,7 +319,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "4 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 4,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -285,7 +341,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -303,7 +363,11 @@
       "missing_file",
       "approval_required"
     ],
-    "validation": "2 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 2,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -321,7 +385,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "2 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 2,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -339,7 +407,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -358,7 +430,11 @@
       "approval_required",
       "network"
     ],
-    "validation": "1 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 1,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -376,7 +452,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "2 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 2,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -394,7 +474,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "2 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 2,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -414,7 +498,11 @@
       "timeout",
       "lint_failure"
     ],
-    "validation": "1 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 1,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -433,7 +521,11 @@
       "approval_required",
       "lint_failure"
     ],
-    "validation": "5 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 5,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -455,7 +547,11 @@
       "permission",
       "git_state"
     ],
-    "validation": "77 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 77,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -475,7 +571,11 @@
       "lint_failure",
       "approval_required"
     ],
-    "validation": "2 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 2,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -494,7 +594,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -513,7 +617,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "4 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 4,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -532,7 +640,11 @@
       "approval_required",
       "timeout"
     ],
-    "validation": "2 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 2,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -550,7 +662,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "1 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 1,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -572,7 +688,11 @@
       "test_failure",
       "git_state"
     ],
-    "validation": "1 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 1,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -592,7 +712,11 @@
       "approval_required",
       "lint_failure"
     ],
-    "validation": "2 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 2,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -611,7 +735,11 @@
       "network",
       "lint_failure"
     ],
-    "validation": "1 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 1,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -629,7 +757,11 @@
       "approval_required",
       "network"
     ],
-    "validation": "5 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 5,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -649,7 +781,11 @@
       "network",
       "test_failure"
     ],
-    "validation": "2 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 2,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -667,7 +803,11 @@
       "network",
       "approval_required"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -685,7 +825,11 @@
       "approval_required",
       "network"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -707,7 +851,11 @@
       "git_state",
       "permission"
     ],
-    "validation": "3 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 3,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -730,7 +878,11 @@
       "git_state",
       "test_failure"
     ],
-    "validation": "560 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 560,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -753,7 +905,11 @@
       "git_state",
       "test_failure"
     ],
-    "validation": "617 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 617,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -776,7 +932,11 @@
       "permission",
       "test_failure"
     ],
-    "validation": "519 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 519,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -799,7 +959,11 @@
       "git_state",
       "test_failure"
     ],
-    "validation": "343 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 343,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -820,7 +984,11 @@
       "git_state",
       "lint_failure"
     ],
-    "validation": "4 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 4,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -842,7 +1010,11 @@
       "timeout",
       "test_failure"
     ],
-    "validation": "56 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 56,
+      "blocker_reason": null
+    }
   },
   {
     "evidence_labels": [
@@ -865,6 +1037,10 @@
       "permission",
       "test_failure"
     ],
-    "validation": "425 validation gate(s)"
+    "validation": {
+      "outcome": "pass",
+      "gate_count": 425,
+      "blocker_reason": null
+    }
   }
 ]
