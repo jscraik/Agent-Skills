@@ -71,7 +71,7 @@ eval_file = repo_root / ".harness" / "evals" / "2026-05-09-agent-skills-first-pr
 # Canonical frontmatter for the changed eval (matches the actual file header)
 # ---------------------------------------------------------------------------
 
-eval_frontmatter = """---
+EVAL_FRONTMATTER = """---
 schema_version: 1
 artifact_id: agent-skills-first-principles-contract-eval
 artifact_type: he-eval-report
@@ -99,13 +99,28 @@ eval_path = Path(".harness/evals/2026-05-09-agent-skills-first-principles-contra
 def test_eval_yaml_parse_gate_uses_portable_python3_command() -> None:
     """
     Assert the Eval YAML parse gate evidence uses a portable python3 command.
-    
+
     Checks that the target eval markdown contains the substring "python3 -c", ensuring the evidence uses a portable command rather than a user-specific virtualenv path.
     """
     text = eval_file.read_text(encoding="utf-8")
 
+    # Find the "Eval YAML parse" gate section
+    gate_start = text.find("Gate: Eval YAML parse.")
+    assert gate_start != -1, "Could not find 'Gate: Eval YAML parse.' gate in eval file."
+
+    # Find the Evidence section within this gate
+    evidence_start = text.find("Evidence:", gate_start)
+    assert evidence_start != -1, "Could not find Evidence section in Eval YAML parse gate."
+
+    # Extract evidence content (up to next blank line or next section)
+    evidence_end = text.find("\n\n", evidence_start)
+    if evidence_end == -1:
+        evidence_end = len(text)
+
+    gate_evidence = text[evidence_start:evidence_end]
+
     # The new portable command must be present.
-    assert "python3 -c" in text, (
+    assert "python3 -c" in gate_evidence, (
         "Expected 'python3 -c' in the Eval YAML parse gate evidence section, "
         "but it was not found."
     )
@@ -197,14 +212,29 @@ def test_eval_yaml_parse_gate_evidence_targets_expected_yaml_files() -> None:
     """
     text = eval_file.read_text(encoding="utf-8")
 
+    # Find the "Eval YAML parse" gate section
+    gate_start = text.find("Gate: Eval YAML parse.")
+    assert gate_start != -1, "Could not find 'Gate: Eval YAML parse.' gate in eval file."
+
+    # Find the Evidence section within this gate
+    evidence_start = text.find("Evidence:", gate_start)
+    assert evidence_start != -1, "Could not find Evidence section in Eval YAML parse gate."
+
+    # Extract evidence content (up to next blank line or next section)
+    evidence_end = text.find("\n\n", evidence_start)
+    if evidence_end == -1:
+        evidence_end = len(text)
+
+    gate_evidence = text[evidence_start:evidence_end]
+
     assert (
         "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/evals.yaml"
-        in text
+        in gate_evidence
     ), "skill-factory evals.yaml path is missing from the Eval YAML parse gate evidence."
 
     assert (
         "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/references/evals.yaml"
-        in text
+        in gate_evidence
     ), "plugin-factory evals.yaml path is missing from the Eval YAML parse gate evidence."
 
 
@@ -214,7 +244,22 @@ def test_eval_yaml_parse_gate_evidence_prints_ok() -> None:
     """
     text = eval_file.read_text(encoding="utf-8")
 
-    assert "print('ok')" in text, (
+    # Find the "Eval YAML parse" gate section
+    gate_start = text.find("Gate: Eval YAML parse.")
+    assert gate_start != -1, "Could not find 'Gate: Eval YAML parse.' gate in eval file."
+
+    # Find the Evidence section within this gate
+    evidence_start = text.find("Evidence:", gate_start)
+    assert evidence_start != -1, "Could not find Evidence section in Eval YAML parse gate."
+
+    # Extract evidence content (up to next blank line or next section)
+    evidence_end = text.find("\n\n", evidence_start)
+    if evidence_end == -1:
+        evidence_end = len(text)
+
+    gate_evidence = text[evidence_start:evidence_end]
+
+    assert "print('ok')" in gate_evidence, (
         "The Eval YAML parse gate evidence command is missing the print('ok') "
         "verification step."
     )
@@ -225,11 +270,11 @@ def test_eval_yaml_parse_gate_evidence_prints_ok() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_first_principles_eval_frontmatter_passes_identity_lint() -> None:
+def test_first_principles_EVAL_FRONTMATTER_passes_identity_lint() -> None:
     """The canonical frontmatter for the changed eval file must pass
     he_artifact_identity_lint validation.
     """
-    result = identity.lint_markdown(eval_path, eval_frontmatter)
+    result = identity.lint_markdown(eval_path, EVAL_FRONTMATTER)
 
     assert result.passed, f"Identity lint errors: {result.errors}"
 
@@ -248,11 +293,11 @@ def test_first_principles_eval_real_file_passes_identity_lint() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_first_principles_eval_frontmatter_passes_safety_lint() -> None:
+def test_first_principles_EVAL_FRONTMATTER_passes_safety_lint() -> None:
     """
     Verify that the canonical frontmatter for the eval file passes the safety frontmatter lint.
     """
-    result = safety.lint_markdown(eval_path, eval_frontmatter)
+    result = safety.lint_markdown(eval_path, EVAL_FRONTMATTER)
 
     assert result.passed, f"Safety lint errors: {result.errors}"
 
