@@ -295,7 +295,7 @@ Actual: parse passed with the PyYAML virtualenv.
 Status: pass.
 
 Evidence:
-`python3 -c "import pathlib,yaml; [yaml.safe_load(pathlib.Path(p).read_text()) for p in ['Plugins/skill-factory/skills/code_quality_review/skill-builder/references/evals.yaml','Plugins/plugin-factory/skills/code_quality_review/plugin-builder/references/evals.yaml']]; print('ok')"` -> pass.
+`/Users/jamiecraik/.venvs/pyyaml/bin/python -c "import pathlib,yaml; [yaml.safe_load(pathlib.Path(p).read_text()) for p in ['Plugins/skill-factory/skills/code_quality_review/skill-builder/references/evals.yaml','Plugins/plugin-factory/skills/code_quality_review/plugin-builder/references/evals.yaml']]; print('ok')"` -> pass.
 
 Confidence: high.
 
