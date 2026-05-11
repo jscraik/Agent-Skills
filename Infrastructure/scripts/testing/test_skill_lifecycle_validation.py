@@ -1030,7 +1030,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("normalize_plugin_copy()", content)
         self.assertIn('find "$skills_dir" -mindepth 1 -maxdepth 1 -type l -print', content)
-        self.assertIn('cp -a "$resolved" "$skill_entry"', content)
+        self.assertIn('cp -R "$resolved" "$skill_entry"', content)
         self.assertIn('normalize_plugin_copy "$1" "runtime"', content)
         self.assertIn('normalize_plugin_copy "$1" "cached"', content)
         self.assertIn("whole_plugin_dir_symlinks_materialized=1", content)
