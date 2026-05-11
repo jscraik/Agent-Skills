@@ -172,5 +172,6 @@ Read `references/contract.yaml` for the full reinforcement contract and
 `references/evals.yaml` for validation scenarios. Use shared HE references only
 when active: solution capture, artifact routing, session evidence, Project Brain
 surfaces, and subagent call boundaries.
+Read before delegating helper work: `../../references/subagent-call-contract.md`.
 
 Deferred context index: `../../references/deferred-context-index.md`.
