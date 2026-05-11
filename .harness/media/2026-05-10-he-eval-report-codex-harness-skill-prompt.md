@@ -1,8 +1,8 @@
 # From Prompt Skill -> Codex Harness Skill Prompt Metadata
 
-Status: prompt metadata only. Direct image generation was not invoked because the active image-generation tool contract forbids user-facing text after generation, while this review requires post-generation persistence evidence in the final response.
+Status: prompt metadata recorded before generation. Generation state and persistence evidence are tracked in the paired sidecar artifact.
 
-Target skill: `/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-eval-report/SKILL.md`
+Target skill: `Plugins/harness-engineering/skills/he-eval-report/SKILL.md`
 
 Intended repository PNG path: `.harness/media/2026-05-10-he-eval-report-codex-harness-skill.png`
 

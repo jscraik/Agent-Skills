@@ -7,10 +7,10 @@ Review media artifact for the skill-builder hardening patch that folded a large 
 ## Image Generation & Persistence Evidence
 
 - `$imagegen` invoked: yes
-- generated-image cache source path: `/Users/jamiecraik/.codex/generated_images/019e1292-3f9d-7db2-99d6-2d16ecee653a/ig_0f920b1b6326cbef016a00e3e1f0248191a2b8a1d34ce49ed4.png`
-- repository `.harness/media/` PNG path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-skill-builder-manual-drafting-to-validated-hardening-workflow.png`
-- prompt metadata path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-skill-builder-manual-drafting-to-validated-hardening-workflow-prompt.md`
-- sidecar path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-skill-builder-manual-drafting-to-validated-hardening-workflow.md`
+- generated-image cache source path: `~/.codex/generated_images/019e1292-3f9d-7db2-99d6-2d16ecee653a/ig_0f920b1b6326cbef016a00e3e1f0248191a2b8a1d34ce49ed4.png`
+- repository `.harness/media/` PNG path: `.harness/media/2026-05-10-skill-builder-manual-drafting-to-validated-hardening-workflow.png`
+- prompt metadata path: `.harness/media/2026-05-10-skill-builder-manual-drafting-to-validated-hardening-workflow-prompt.md`
+- sidecar path: `.harness/media/2026-05-10-skill-builder-manual-drafting-to-validated-hardening-workflow.md`
 - repository PNG existence verification: pass
 - persistence method: cache-copy
 - final user-facing text after imagegen permitted: no, active image tool contract forbids narrative text after generation
@@ -33,4 +33,4 @@ See prompt metadata for the full image prompt.
 
 ## Linked Context
 
-Skill under review: `/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`
+Skill under review: `Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md`

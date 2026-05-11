@@ -13,13 +13,14 @@ brainstorm boundaries into evidence-gated ambiguity routing.
   a discoverable cache path or native output path in its callable schema
 - repository `.harness/media/` PNG path: blocked; no PNG was written
 - prompt metadata path:
-  `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-he-brainstorm-evidence-gated-routing-prompt.md`
+  `.harness/media/2026-05-10-he-brainstorm-evidence-gated-routing-prompt.md`
 - sidecar path:
-  `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-he-brainstorm-evidence-gated-routing.md`
+  `.harness/media/2026-05-10-he-brainstorm-evidence-gated-routing.md`
 - repository PNG existence verification: blocked
 - persistence method: blocked
-- final user-facing text after imagegen permitted: no, per active image tool
-  contract forbidding post-generation text
+- final user-facing text after imagegen permitted: no for narrative follow-up;
+  deterministic overlay text inside the image is allowed when the prompt
+  explicitly requests it.
 - residual risk: direct generation was not invoked because the requested
   persistence proof cannot be completed with the active tool contract.
 
@@ -44,11 +45,11 @@ brainstorm boundaries into evidence-gated ambiguity routing.
 ## Prompt Summary
 
 See prompt metadata:
-`/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-he-brainstorm-evidence-gated-routing-prompt.md`.
+`.harness/media/2026-05-10-he-brainstorm-evidence-gated-routing-prompt.md`.
 
 ## Linked Context
 
 - Skill package:
-  `/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-brainstorm`
+  `Plugins/harness-engineering/skills/he-brainstorm`
 - Runtime handle:
-  `/Users/jamiecraik/dev/agent-skills/.agents/skills/he-brainstorm/SKILL.md`
+  `.agents/skills/he-brainstorm/SKILL.md`

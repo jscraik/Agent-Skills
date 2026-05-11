@@ -184,7 +184,7 @@ not create, close, or update Linear objects.
 | CLI behavior tests | `Infrastructure/tests/test_ask_cli.py`, `Infrastructure/tests/test_ask_helpers.py` | Existing process-level and helper-level examples for JSON envelope and command parsing tests. |
 | Onboarding docs | `README.md`, `AGENTS.md`, `Docs/agents/5-minute-success-path.md` | First-run command surfaces that must agree on bootstrap and fallback. |
 | Validation wrapper | `Infrastructure/scripts/validation-and-linting/verify-work.sh` | Canonical closeout validation wrapper for implementation. |
-| Script path reality | `scripts` is a symlink to `Infrastructure/scripts` | Adding `scripts/bootstrap-ask.sh` writes the canonical file at `Infrastructure/scripts/bootstrap-ask.sh`; the plan must not create a second divergent script tree. |
+| Script path reality | `scripts/` is a stable repo-root entrypoint directory | Add the public bootstrap command at `scripts/bootstrap-ask.sh`; keep reusable helper logic under `Infrastructure/scripts/lib/ask/`. |
 | Python subprocess docs | https://docs.python.org/3/library/subprocess.html | Confirms `subprocess.run` supports argument arrays, `cwd`, `capture_output`, `text`, and `timeout`; bootstrap process calls must use these bounded controls. |
 | Python pathlib docs | https://docs.python.org/3/library/pathlib.html | Confirms `Path.chmod`, `Path.stat`, and `Path.is_symlink`; chmod repair must first prove `bin/ask` is a regular repo-local file, not a symlink or non-file. |
 | Python shutil docs | https://docs.python.org/3/library/shutil.html#shutil.which | Confirms `shutil.which` can resolve executables from a supplied `PATH`; PATH discovery must record the exact resolved path. |
@@ -290,12 +290,13 @@ contract check, preferably a small Python validator under
 `Infrastructure/scripts/validation-and-linting/verify_ask_bootstrap_docs.py`
 with focused tests under `Infrastructure/scripts/testing/`.
 
-### Decision 6: Treat `scripts/` As The Public Symlink Surface
+### Decision 6: Treat `scripts/` As The Public Repo-Root Entrypoint
 
-The public command is `bash scripts/bootstrap-ask.sh`, but `scripts` is a
-repository symlink to `Infrastructure/scripts`. Implementation must add the file
-through the canonical infrastructure tree and verify that the public symlink path
-works. Do not create a physical replacement `scripts/` directory.
+The public command is `bash scripts/bootstrap-ask.sh`, and `scripts/` is a
+stable repo-root entrypoint directory. Add the bootstrap command at the
+repo-root path, keep shared helper logic under
+`Infrastructure/scripts/lib/ask/`, and do not create a second divergent script
+tree.
 
 ### Decision 7: Keep Bootstrap Logic Importable For Tests
 
@@ -422,8 +423,7 @@ Linear mapping:
 
 Files:
 
-- Add `Infrastructure/scripts/bootstrap-ask.sh`, reached publicly as
-  `scripts/bootstrap-ask.sh` through the existing symlink.
+- Add `scripts/bootstrap-ask.sh` as the canonical public bootstrap entrypoint.
 - Add `Infrastructure/scripts/lib/ask/bootstrap.py` for importable check logic
   and JSON result assembly.
 - Add `Infrastructure/scripts/testing/test_ask_bootstrap.py`.

@@ -9,7 +9,7 @@ Generate a technical infographic for the `skill-refactor` review showing the tra
 - `$imagegen` invoked: pending
 - generated-image cache source path: unavailable before generation
 - repository `.harness/media/` PNG path: blocked; active image-generation tool does not expose a local output path parameter in this session
-- prompt metadata path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-skill-refactor-codex-harness-skill-prompt.md`
+- prompt metadata path: `.harness/media/2026-05-10-skill-refactor-codex-harness-skill-prompt.md`
 - sidecar path: blocked until a generated bitmap path is discoverable
 - repository PNG existence verification: blocked
 - persistence method: blocked
@@ -93,6 +93,6 @@ Style:
 
 ## Linked Context
 
-- Reviewed skill: `/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md`
-- Runtime handle not edited: `/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-refactor/SKILL.md`
+- Reviewed skill: `Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md`
+- Runtime handle not edited: `.agents/skills/skill-refactor/SKILL.md`
 - Local prompt metadata only; no generated PNG is claimed before a file exists.

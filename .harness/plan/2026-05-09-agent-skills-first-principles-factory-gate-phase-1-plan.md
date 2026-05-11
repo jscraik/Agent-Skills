@@ -42,9 +42,9 @@ runtime projections.
 | `Plugins/skill-factory/hooks/session_start_routing.py` | Current hook context carries skill lane routing. | Target for `PU-003`; preserve existing context. |
 | `Plugins/plugin-factory/hooks/session_start_contract.py` | Current hook context carries bundled hook contract. | Target for `PU-004`; preserve existing context. |
 | `Infrastructure/tests/test_plugin_bundled_hooks_contract.py` | Existing tests execute scripts directly and assert hook context fragments. | Target for `PU-005`. |
-| `/Users/jamiecraik/dev/codex/codex-rs/hooks/src/schema.rs` | `SessionStartHookSpecificOutputWire` requires `hookEventName` and accepts optional `additionalContext`. | Hook script output must include `hookEventName: "SessionStart"` inside `hookSpecificOutput`. |
-| `/Users/jamiecraik/dev/codex/codex-rs/hooks/src/engine/output_parser.rs` | Runtime parser extracts `additionalContext` only after parsing the `SessionStart` command output wire schema. | Focused tests must prove schema-shaped output, not only generic JSON. |
-| `/Users/jamiecraik/dev/codex/codex-rs/core-plugins/src/loader.rs` | Plugin hooks load only when `plugin_hooks_enabled` is true and otherwise no plugin hook sources are loaded. | Preserve advisory/fallback wording; do not assume hooks are live. |
+| `../codex/codex-rs/hooks/src/schema.rs` | `SessionStartHookSpecificOutputWire` requires `hookEventName` and accepts optional `additionalContext`. | Hook script output must include `hookEventName: "SessionStart"` inside `hookSpecificOutput`. |
+| `../codex/codex-rs/hooks/src/engine/output_parser.rs` | Runtime parser extracts `additionalContext` only after parsing the `SessionStart` command output wire schema. | Focused tests must prove schema-shaped output, not only generic JSON. |
+| `../codex/codex-rs/core-plugins/src/loader.rs` | Plugin hooks load only when `plugin_hooks_enabled` is true and otherwise no plugin hook sources are loaded. | Preserve advisory/fallback wording; do not assume hooks are live. |
 
 ## Synthesis Checkpoint
 
