@@ -17,7 +17,7 @@ linear_milestone: Command surface and ask reliability
 
 ## Executive Eval Summary
 Status: focused implementation and aggregate validation complete; heartbeat closeout evidence blocked
-Linear Completion Recommendation: Complete with follow-up
+Linear Completion Recommendation: Blocked pending heartbeat evidence bundle
 Primary Blockers: he-phase-heartbeat recurring evidence bundle is missing
 Confidence: 0.93 for focused JSC-167 behavior, 0.84 for full HE phase closure because heartbeat evidence remains unavailable
 
@@ -43,7 +43,7 @@ Linear Project: agent-skills
 Linear Milestone: Command surface and ask reliability
 Linear Parent Issue: JSC-167
 Linear Sub-Issues: none in this slice
-Linear Status Recommendation: complete with follow-up evidence note
+Linear Status Recommendation: blocked pending heartbeat evidence attachment
 Proof Artifact Links: .harness/specs/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-spec.md; .harness/plan/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-plan.md; .harness/review/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-plan-technical-review.md; .harness/media/2026-05-10-jsc-167-ask-bootstrap-before-after.png
 Missing Identifiers: no additional Linear identifier needed for this eval; live Linear mutation was not performed
 Traceability Repair: attach or reference this eval with the aggregate validation pass and the heartbeat evidence caveat
@@ -234,12 +234,12 @@ Follow-Up Justified: yes, as heartbeat evidence repair only if recurring continu
 Blocks Closure: no for implementation; yes for heartbeat-managed recurring phase closure
 
 ## Linear Completion Recommendation
-Classification: Complete with follow-up
+Classification: Blocked
 Recommended Linear Status: ready for human review or completion with heartbeat caveat
 Required Linear Comment/Update: post eval summary with focused pass evidence, aggregate validation pass, and heartbeat evidence caveat
 Issues to Close: none
 Issues to Reopen: none
-Issues to Leave Open: none required by implementation evidence
+Issues to Leave Open: JSC-167 until the required he-phase-heartbeat evidence bundle is attached or explicitly waived
 New Follow-Up Issues: do not create unless heartbeat evidence repair becomes recurring operational work
 Labels to Add/Remove: none
 Milestone Completion: do not advance milestone completion from this eval
