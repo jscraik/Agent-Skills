@@ -34,7 +34,7 @@ It supports:
 
 Generated image cache source:
 
-`/Users/jamiecraik/.codex/generated_images/019e04dd-86ac-7d23-b21c-e1a878f5b8dc/ig_00a18cf34defe2690169ff92c305a081919be58e55d2cd05fb.png`
+`~/.codex/generated_images/019e04dd-86ac-7d23-b21c-e1a878f5b8dc/ig_00a18cf34defe2690169ff92c305a081919be58e55d2cd05fb.png`
 
 Repository artifact path:
 

@@ -10,9 +10,9 @@ Review media sidecar for the `he-compound` skill hardening pass. The image is a 
 
 - `$imagegen` invoked: planned as final action after this sidecar because the active image tool forbids user-facing text after generation
 - generated-image cache source path: blocked until the active image tool returns or exposes a cache path
-- repository `.harness/media/` PNG path: blocked; `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-he-compound-evidence-bound-routing.png` not claimed
-- prompt metadata path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-he-compound-evidence-bound-routing-prompt.md`
-- sidecar path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-he-compound-evidence-bound-routing.md`
+- repository `.harness/media/` PNG path: blocked; `.harness/media/2026-05-10-he-compound-evidence-bound-routing.png` not claimed
+- prompt metadata path: `.harness/media/2026-05-10-he-compound-evidence-bound-routing-prompt.md`
+- sidecar path: `.harness/media/2026-05-10-he-compound-evidence-bound-routing.md`
 - repository PNG existence verification: blocked
 - persistence method: blocked
 - final user-facing text after imagegen permitted: no

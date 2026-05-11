@@ -10,8 +10,8 @@ Sidecar artifact for the `he-improve` skill hardening review media request.
 - generated-image cache source path: blocked because direct image generation was
   not invoked
 - repository `.harness/media/` PNG path: blocked; no repository PNG was created
-- prompt metadata path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-he-improve-codex-harness-skill-prompt.md`
-- sidecar path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-10-he-improve-codex-harness-skill.md`
+- prompt metadata path: `.harness/media/2026-05-10-he-improve-codex-harness-skill-prompt.md`
+- sidecar path: `.harness/media/2026-05-10-he-improve-codex-harness-skill.md`
 - repository PNG existence verification: fail, expected because generation was
   blocked
 - persistence method: blocked

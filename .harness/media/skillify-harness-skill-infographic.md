@@ -1,7 +1,7 @@
 # Skillify Harness Skill Infographic Metadata
 
 Date: 2026-05-10
-Target skill: `/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/scaffolding_templates/skillify`
+Target skill: `Plugins/skill-factory/skills/scaffolding_templates/skillify`
 Purpose: Review-only media prompt metadata for the requested "From Prompt Skill -> Codex Harness Skill" infographic.
 Storage note: The active image-generation tool does not expose a local output-path parameter, so this file stores prompt metadata only. Do not treat it as proof that a generated bitmap was saved under `.harness/media/`.
 
