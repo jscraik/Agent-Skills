@@ -198,7 +198,13 @@ def run_status_command(
 
 
 def resolve_ask_on_path(env: dict[str, str] | None = None) -> dict[str, Any]:
-    path_value = (env if env is not None else os.environ).get("PATH")
+    if env is None:
+        path_value = os.environ.get("PATH")
+    elif "PATH" in env:
+        path_value = env.get("PATH")
+    else:
+        # Honor isolated call-sites that intentionally omit PATH.
+        path_value = ""
     resolved = shutil.which("ask", path=path_value)
     return {
         "status": "pass" if resolved else "warn",

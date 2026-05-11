@@ -307,7 +307,7 @@ should_run_check() {
       [[ "$scope_has_authoring_family" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
     runtime-separation-*)
-      [[ "$scope_has_runtime_separation" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
+      [[ "$scope_has_runtime_separation" -eq 1 ]]
       ;;
     *)
       return 1
@@ -470,6 +470,7 @@ scope_has_skill_graph=0
 scope_has_authoring_family=0
 scope_has_runtime_separation=0
 scope_has_validation_core=0
+scope_forced_validation_fallback=0
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   for changed_file in "${changed_files[@]}"; do
     case "$changed_file" in
@@ -514,6 +515,12 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
         ;;
     esac
   done
+
+  if [[ "$scope_has_docs" -eq 0 && "$scope_has_skill_graph" -eq 0 && "$scope_has_authoring_family" -eq 0 && "$scope_has_runtime_separation" -eq 0 && "$scope_has_validation_core" -eq 0 ]]; then
+    echo "🧭 Changed-files scope classification missed all known buckets; falling back to baseline required validation"
+    scope_has_validation_core=1
+    scope_forced_validation_fallback=1
+  fi
 fi
 
 projection_manifest="$run_dir/projection-integrity.json"
