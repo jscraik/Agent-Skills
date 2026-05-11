@@ -173,14 +173,9 @@ def listish(value: str | None) -> list[str]:
 
 def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str | None, str]:
     """
-    Determine the root skill-set for a skill directory using frontmatter declarations and repository path heuristics.
+    Infer the root skill-set for a skill directory using frontmatter declarations and repository path heuristics.
     
-    Checks frontmatter for declared skill-set keys (accepting multiple spellings); if present, returns the normalized value when it matches a known root skill-set, otherwise `None`, with status "declared". When not declared, infers the skill-set from the directory path relative to the repository using these rules:
-    - skills/<root_skill_set>/... → returns that root skill set ("inferred")
-    - skills/project/... → treated as untagged ("untagged")
-    - plugins/<plugin>/skills/... → returns the plugin name when it matches a root skill set ("inferred")
-    - skills-system/<name> or a directory with scope "system" whose name is in SYSTEM_BRIDGE_SKILL_NAMES → mapped to "agent-ops" with status "system-bridge"
-    If the path cannot be relativized to the repository or no rule matches, returns `None` with status "untagged".
+    Checks frontmatter for declared skill-set keys (multiple spellings accepted) and returns the normalized value when it matches a known root skill-set. When no declaration is present, infers the skill-set from the repository-relative path using canonical patterns (e.g., skills/<root_skill_set>/..., plugins/<plugin>/skills/..., skills-system/<name>) and special handling for system-bridge skills. If the path cannot be relativized to the repository or no rule matches, the result is treated as untagged.
     
     Parameters:
         source_dir (Path): Directory containing the skill (expected to contain SKILL.md).
@@ -188,8 +183,8 @@ def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str 
     
     Returns:
         tuple[str | None, str]: (skill_set, status)
-            - `skill_set`: a root skill-set name when determined, otherwise `None`.
-            - `status`: one of "declared", "inferred", "system-bridge", or "untagged" indicating how the value was obtained.
+            - skill_set: a root skill-set name when determined, otherwise `None`.
+            - status: one of "declared", "inferred", "system-bridge", or "untagged" indicating how the value was obtained.
     """
     declared = (
         frontmatter.get("metadata.skill-set")
@@ -282,12 +277,12 @@ def runtime_visibility_for(frontmatter: dict[str, str]) -> str:
 
 def iter_candidate_skill_dirs() -> list[Path]:
     """
-    Collect candidate skill directories to include in projections.
+    Collect candidate skill directories for projection.
     
-    Scans repository, plugin, and system-lane skill locations, filters to directories that contain a SKILL.md, excludes directories whose classified scope is "primary-runtime", "external", or "unknown", and for scope "system" only includes names listed in SYSTEM_BRIDGE_SKILL_NAMES. Deduplicates candidates using filesystem identity (st_dev, st_ino) when available, falling back to the resolved absolute path string, and returns the resulting list sorted by the repository-relative path produced by rel().
+    Scans repository, plugin, and system-lane skill locations and selects directories that contain a SKILL.md. Excludes directories whose classified scope is "primary-runtime", "external", or "unknown". For scope "system" only includes directories whose name appears in SYSTEM_BRIDGE_SKILL_NAMES. Results are deduplicated and returned sorted by the repository-relative path produced by rel().
     
     Returns:
-        list[Path]: Sorted list of unique candidate skill directory paths.
+        list[Path]: Unique candidate skill directory paths sorted by repository-relative path.
     """
     seen: set[tuple[int, int] | str] = set()
     dirs: list[Path] = []

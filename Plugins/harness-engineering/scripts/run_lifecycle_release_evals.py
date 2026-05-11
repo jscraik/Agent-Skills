@@ -129,19 +129,18 @@ def _classify_case_failures(parsed: dict[str, object]) -> dict[str, object]:
 
 def _case_has_tool_preflight_signal(case: dict[str, object], failure_strings: list[str]) -> bool:
     """
-    Detects whether a case exhibits signs of a Codex runner "preflight" (tool-preflight) failure.
+    Detects whether a case exhibits signs of a Codex runner "preflight" failure.
     
-    Checks the provided `failure_strings` together with any `case["warnings"]` for known Codex preflight markers and the specific phrase "codex returned non-zero exit code". If not found there, inspects each runner result in `case["runners"]` for an `artifacts["stderr"]` file path and scans that file's contents (UTF-8 with replacement) for the same markers. Treats missing/invalid runner/artifact entries or unreadable stderr files as absent signals.
+    Checks the provided failure_strings combined with any case["warnings"] for the phrase "codex returned non-zero exit code" together with any Codex runner preflight markers; if that combination is not found, inspects runner artifact stderr files (when present and readable) for those markers.
     
     Parameters:
-        case (dict): A case dictionary that may contain:
+        case (dict): Case dictionary that may include:
             - "warnings": iterable of warning entries (will be stringified)
-            - "runners": mapping of runner names to runner-result dicts, where a runner-result may include
-              an "artifacts" dict with an "stderr" file path string.
-        failure_strings (list[str]): List of failure strings (e.g., tier1 failure messages) to search.
+            - "runners": mapping of runner names to result dicts, each may contain an "artifacts" dict with an "stderr" file path string.
+        failure_strings (list[str]): List of failure messages (e.g., tier1 failures) to search.
     
     Returns:
-        `true` if any combined failure/warning text or any readable runner stderr contains a Codex runner preflight marker and the phrase indicating a non-zero Codex exit; `false` otherwise.
+        `true` if the combined failure/warning text contains both the non-zero Codex exit phrase and a preflight marker, or if any readable runner stderr contains a preflight marker; `false` otherwise.
     """
     warning_strings = [str(warning) for warning in (case.get("warnings") or [])]
     combined = "\n".join([*failure_strings, *warning_strings]).lower()

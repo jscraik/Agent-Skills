@@ -169,7 +169,7 @@ def compute_catalog_parity(
     route_considered_total: int | None = None,
 ) -> dict[str, Any]:
     """
-    Build a diagnostic report comparing the canonical skill count and active policy identity against observed counts and metadata across repository and runtime surfaces.
+    Produce a diagnostic report comparing the canonical catalog and active policy identity against observed counts and metadata across repository and runtime surfaces.
     
     Parameters:
         repo_root (Path): Repository root used to read README.md, SKILL.md, and history artifacts.
@@ -178,11 +178,11 @@ def compute_catalog_parity(
         route_considered_total (int | None): Optional override for the observed "route considered metadata" total; when None the canonical count is used.
     
     Returns:
-        report (dict[str, Any]): Diagnostic report containing:
+        report (dict[str, Any]): Diagnostic report with the following keys:
             - `schema_version`: report schema identifier.
             - `policy_identity`: active policy identity used for comparisons.
             - `canonical_count`: canonical skill count discovered from the catalog.
-            - `surfaces`: list of per-surface dictionaries with keys `surface_name`, `observed_count`, `canonical_count`, `parity_ok`, `policy_identity`, and `policy_identity_required`.
+            - `surfaces`: list of per-surface dictionaries containing `surface_name`, `observed_count`, `canonical_count`, `parity_ok`, `policy_identity`, and `policy_identity_required`.
             - `drift_detected`: `True` if any gating condition failed, `False` otherwise.
             - `drift_class`: classification of the detected drift or `None`.
             - `blocking_reason`: short code describing why strict validation is blocked, or `None`.
