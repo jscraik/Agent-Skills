@@ -21,6 +21,8 @@ outputs:
   - "XP operating artifacts: slack_policy for scoped uncertainty and blackboard_delta for durable implementation-state updates"
   - handoff with Linear, PR, completed IDs, risks, rollback, and monitoring notes
   - UI evidence when user-visible surfaces changed
+  - visual references or screenshot proof when user-visible behavior, rollback,
+    validation, or before/after state cannot be reviewed clearly from text alone
 non_goals:
   - first-pass specs or plans
   - silent product scope expansion
@@ -36,7 +38,8 @@ risks:
   - overlapping delegated edits; mitigate by file/module overlap checks, worktree isolation, or serial execution
 observability: >
   Record validation commands/outcomes, Linear result or blocker, monitoring or
-  no-impact note, and screenshot evidence for user-visible changes.
+  no-impact note, visual reference status, and screenshot evidence for
+  user-visible changes.
 rollback_procedure: >
   Keep logical commits scoped to verified slices, document rollback triggers
   and smallest revert path, and do not hand off tracked work until validation

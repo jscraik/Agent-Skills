@@ -11,3 +11,6 @@ Use visuals only when they improve comprehension:
 
 Skip visuals that restate prose or drift into implementation architecture,
 schemas, or code structure for `he-plan`. Prose governs if a visual disagrees.
+
+Apply the shared generated-media and proof rules from
+`Plugins/harness-engineering/references/visual-reference-contract.md`.

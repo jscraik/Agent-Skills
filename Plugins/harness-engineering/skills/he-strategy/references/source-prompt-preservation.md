@@ -8,11 +8,14 @@ strategy prompts without loading the full prompt text into `SKILL.md`.
 - Repository Intent Extraction + Strategic Review
 - Multi-Disciplinary Architecture & Skill Review
 - Structural Triage & Execution Prioritization
+- Full Repository Cognition Pipeline: intent + architecture review + triage
 - Strategic Compression & Direction
 - Architectural Decision Compression
 - Core Knowledge Compression & Architectural Invariants
 
-These are modes inside `he-strategy`, not separate top-level skills.
+These are modes inside `he-strategy`, not separate top-level skills. When the
+user asks for intent, architecture review, and triage together, use
+`repo-cognition-pipeline` and load `repo-cognition-pipeline.md`.
 
 When the user asks whether HE output is equivalent to one of these original
 prompt workflows, load the shared source-prompt coverage contract at

@@ -25,6 +25,7 @@ outputs:
   - side-effect class and approval/blocker state for external, destructive, user-config, or completion-gating actions
   - "XP operating artifacts: red_signal when evidence is missing or stale, plus blackboard_delta for durable state changes"
   - lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
+  - visual references when improvement evidence, media proof, routing changes, or before/after behavior are clearer as a diagram, table, or persisted image reference
   - next-step route (`continue`, `he-work`, or `stop`)
   - subagent route decision: auto delegation when roles exist, inline/manual fallback otherwise
 
@@ -48,12 +49,12 @@ observability: >
   Record canonical target, evidence source, baseline metric when applicable,
   experiment ids, measurement commands, deltas, accepted/rejected changes,
   helper-role availability, A/B/C loop artifacts, warnings remaining,
-  stop_rule_status, rollback posture, side-effect class, approval state, media
-  persistence status, and lifecycle exit status.
+  stop_rule_status, rollback posture, side-effect class, approval state, visual
+  reference status, media persistence status, and lifecycle exit status.
 
 media_artifact_policy:
   repository_root: ".harness/media/"
-  rule: "Review-only media stays out of the skill package; media persistence claims require a repository path plus file-existence verification."
+  rule: "Review-only media stays out of the skill package; media persistence claims require a repository path plus file-existence verification. Use the shared visual reference contract for generated media proof, before/after visuals, routing diagrams, and visual-not-needed decisions."
 
 rollback_procedure: >
   Revert only the accepted improvement slice when metrics regress or gates fail,

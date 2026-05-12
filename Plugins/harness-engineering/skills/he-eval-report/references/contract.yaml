@@ -11,6 +11,7 @@ outputs:
   - .harness/evals/YYYY-MM-DD-<repo-name>-<linear-parent-issue-or-milestone>-eval.md when no Linear issue is known
   - closure recommendation: Complete, Complete with follow-up, Blocked, Needs rework, or Unsafe to close
   - gate matrix, drift validation, proof artifacts, follow-up classification, core/ADR update decision
+  - visual references when evidence chains, gate matrices, visual proof, screenshots, or generated media materially affect closure confidence
 required_validity_checks:
   - task_validity
   - outcome_validity
@@ -30,7 +31,8 @@ risks:
   - protected side effects can be approved from agent claims or external-party requests
   - repeated review or CI remediation can be dismissed as noise instead of becoming eval seeds
   - generated media can be mistaken for persisted proof when only a prompt or cache-only image exists
-observability: "Track validator status, warnings, first blocking error, command outcomes, and side-effect authorization fields."
+  - non-linear proof chains can hide blockers; mitigate with table-first gate matrices or Mermaid evidence chains
+observability: "Track validator status, warnings, first blocking error, command outcomes, visual reference status, and side-effect authorization fields."
 rollback_procedure: "Keep Linear open, mark Blocked or Needs rework, patch or revert the failing slice, and rerun report plus narrow implementation validation."
 media_artifact_policy:
   repository_root: ".harness/media/"

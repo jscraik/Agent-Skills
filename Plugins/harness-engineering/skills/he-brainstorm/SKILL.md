@@ -163,7 +163,8 @@ Read when folded `he-ideate` mode is active: `references/ideation-mode.md`.
 Read before writing durable requirements: `references/requirements-artifact-guide.md`.
 Read before interactive questioning: `references/discovery-interview.md`.
 Read before final handoff review: `references/document-review-pass.md`.
-Read when visual output may help: `references/visual-communication.md`.
+Read when visual output may help: `references/visual-communication.md`,
+`../../references/visual-reference-contract.md`.
 Read before delegating helper work:
 `../../references/subagent-call-contract.md`.
 Read when reviewability/No-Fog structure matters:

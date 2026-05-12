@@ -5,6 +5,7 @@ triggers:
   - repo intent extraction
   - architecture review
   - structural triage
+  - repo cognition pipeline
   - strategic compression
   - ADR compression
   - core invariant compression
@@ -39,6 +40,10 @@ outputs:
     mode: triage
     pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-triage.md"
     pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slug>-triage.md"
+  - root: ".harness/features + .harness/review + .harness/triage"
+    mode: repo-cognition-pipeline
+    pattern_without_linear: "YYYY-MM-DD-<repo-name>-intent.md, YYYY-MM-DD-<repo-name>-architecture-review.md, YYYY-MM-DD-<repo-name>-triage.md"
+    note: "Use only when the user explicitly asks for intent, architecture review, and triage as one pipeline. Intent and review must feed triage; triage must compress rather than repeat."
   - root: .harness/strategy
     mode: strategic-compression
     pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-strategy.md"
@@ -51,6 +56,7 @@ outputs:
     mode: core-compression
     pattern: "<invariant-domain>.md"
     note: "Core invariant files are living policy and keep stable canonical names."
+  - visual_references: "Required when strategy, architecture, triage, intent, ADR, or core relationships are easier to review as a strategy map, boundary diagram, drift map, route map, or matrix."
 
 non_goals:
   - authorize implementation
@@ -59,6 +65,7 @@ non_goals:
   - write migration programs
   - create generic product strategy
   - produce architecture theater or review repetition
+  - turn every finding into work
 
 risks:
   - hallucinated repository intent
@@ -67,8 +74,10 @@ risks:
   - prompt growth replacing proof
   - uncited current-standards claims
   - leaking private or sensitive repository data
+  - strategy relationships hidden in prose instead of a map or matrix when visual structure would reduce review effort
+  - full-pipeline requests collapsing into a single generic strategy document
 
-observability: "Record source artifacts read, inspection method or command, affected systems or modules, confidence level, operational impact, drift or moat impact when relevant, fact/interpretation/assumption separation, dated output path or Do Not Create classification, evidence and traceability matrix, and validation outcomes recorded as pass, fail, or blocked."
+observability: "Record source artifacts read, inspection method or command, affected systems or modules, confidence level, operational impact, drift or moat impact when relevant, fact/interpretation/assumption separation, visual reference status, dated output path or Do Not Create classification, source prompt family coverage when applicable, evidence and traceability matrix, and validation outcomes recorded as pass, fail, or blocked."
 
 rollback_procedure: "If an artifact is wrong, identify unsupported conclusions, move them to Unknown or remove them, replace low-value governance with Do Not Create, and never delete existing .harness artifacts without explicit user approval."
 

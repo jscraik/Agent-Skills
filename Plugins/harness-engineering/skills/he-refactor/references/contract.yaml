@@ -33,6 +33,7 @@ outputs:
     pattern_without_linear: "YYYY-MM-DD-<repo-name>-<refactor-slug>.md"
     legacy_supported_pattern: "<refactor-slug>.md"
     note: "Dated Linear identifiers are preferred for new programs."
+  - visual_references: "Required when the program spans multiple modules, phases, boundaries, coexistence states, rollback paths, or eval gates; prefer Mermaid before/after diagrams and migration maps."
 
 non_goals:
   - cosmetic cleanup
@@ -53,8 +54,9 @@ risks:
   - rollback-free architecture changes
   - eval-free closure
   - creating new abstraction before deleting old abstraction
+  - migration coupling hidden in prose instead of a before/after boundary or phase diagram
 
-observability: "Record source artifacts read, affected systems and blast radius, fact/interpretation/assumption separation, migration phases, validation requirements, rollback conditions, Linear mapping without mutation, expected eval artifact pattern .harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<slug>-eval.md, dated output path or Do Not Create classification, required sections present, and validation outcomes recorded as pass, fail, or blocked."
+observability: "Record source artifacts read, affected systems and blast radius, fact/interpretation/assumption separation, migration phases, validation requirements, rollback conditions, visual reference status, Linear mapping without mutation, expected eval artifact pattern .harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<slug>-eval.md, dated output path or Do Not Create classification, required sections present, and validation outcomes recorded as pass, fail, or blocked."
 
 rollback_procedure: "If evidence is weak, do not create the refactor program; if migration cannot be staged safely, mark the program Blocked; if a phase regresses routing, context load, eval quality, or rollback safety, stop the migration and keep legacy behavior active; do not delete legacy paths until eval and drift proof pass."
 

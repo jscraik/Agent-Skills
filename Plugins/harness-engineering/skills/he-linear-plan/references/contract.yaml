@@ -32,6 +32,7 @@ outputs:
   - story_value_basis: "Required for each Now item; include user/operator value, expected feedback signal, and risk-reduction reason."
   - linear_mutation_status: "Required on every output; use not_requested, confirmation_required, blocked, created, updated, or not_applicable."
   - bug_payload: "When issue_type is bug, preserve reproduction, expected behavior, actual behavior, affected surface, severity, and validation evidence."
+  - visual_references: "Required when issue trees, dependencies, eval gates, Now/Next/Later classifications, or human/agent route splits benefit from Mermaid or table-first review."
 
 non_goals:
   - create Linear labels
@@ -59,8 +60,9 @@ risks:
   - ready-to-create payloads being mistaken for applied changes
   - technically neat work being promoted to Now without story value or a feedback signal
   - local artifacts hiding missing live Linear mutation, confirmation, or connector blockers
+  - multi-issue plans hiding dependency or route complexity that should be visible as an issue tree, dependency map, or eval-gate table
 
-observability: "Record source artifacts read, target Linear destination, repo/location label, project assignment reason or empty, cycle assignment reason or empty, existing project match or needs_human_triage reason, Now / Next / Later / Do Not Create classification, story/value basis for Now items, dependency map, eval gate map, human versus agent execution route, GitHub PR tracking rule, delivery evidence rule, evidence and traceability matrix, dated output path or Do Not Create classification, Linear mutation status, and validation outcomes recorded as pass, fail, or blocked."
+observability: "Record source artifacts read, target Linear destination, repo/location label, project assignment reason or empty, cycle assignment reason or empty, existing project match or needs_human_triage reason, Now / Next / Later / Do Not Create classification, story/value basis for Now items, dependency map, eval gate map, human versus agent execution route, visual reference status, GitHub PR tracking rule, delivery evidence rule, evidence and traceability matrix, dated output path or Do Not Create classification, Linear mutation status, and validation outcomes recorded as pass, fail, or blocked."
 
 rollback_procedure: "If the destination is wrong, mark needs_human_triage and do not create objects; if the plan creates backlog noise, collapse to fewer parent issues or classify as Do Not Create; if a Linear object was accidentally created, stop and ask the user before modifying or deleting it; do not recommend closure unless eval and drift proof are present."
 

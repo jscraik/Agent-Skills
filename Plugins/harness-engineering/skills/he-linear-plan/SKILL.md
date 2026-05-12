@@ -72,9 +72,13 @@ connector permissions outrank this skill.
 8. Apply the BLUF review contract to non-trivial generated Linear plan artifacts
    so the creation decision, active set, mutation blocker, and next action are
    visible before payload detail.
-9. Mutate Linear only after explicit post-plan approval, known destination,
+9. Apply the visual reference contract when the Linear plan has three or more
+   objects, dependencies, eval gates, human/agent route splits, or Now/Next/Later
+   decisions that are easier to review as a Mermaid issue tree, dependency map,
+   or table.
+10. Mutate Linear only after explicit post-plan approval, known destination,
    and a small confirmed object set; otherwise report the blocker/status.
-10. Validate; stop at the first failed gate and record exact pass, fail, or
+11. Validate; stop at the first failed gate and record exact pass, fail, or
    blocked outcomes.
 
 ## Constraints
@@ -165,6 +169,9 @@ For non-trivial generated Linear plans, run or block
   `../../references/subagent-call-contract.md`
 - Read when reviewability/No-Fog structure matters:
   `../../references/bluf-review-contract.md`
+- Read when issue trees, dependencies, eval gates, route splits, or generated
+  media need visual proof rules:
+  `../../references/visual-reference-contract.md`
 - Read when routing, steering, artifact, XP, or subagent details are needed:
   `../../references/deferred-context-index.md`
 

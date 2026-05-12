@@ -68,6 +68,55 @@ cases:
     prompt: "Can you compare `.harness/strategy/2026-05-10-agent-skills-strategy.md` against artifacts that show heavy process and call out the simple-governance contradiction directly."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: repo-cognition-pipeline
+    name: "Repo cognition pipeline"
+    category: happy
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "I don't think he-strategy captures my full repo cognition workflow. It needs to generate repo intent under .harness/features, architecture review under .harness/review, and triage under .harness/triage with evidence matrices, drift signals, moat pressure, and direct strategic critique."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(repo.?cognition|intent|architecture.?review|triage)"}
+      - {type: regex, value: "(?is)(evidence.{0,40}traceability|traceability.{0,40}matrix|drift signals|moat)"}
+      - {type: regex, value: "(?is)(secondary context|authority limited|not implementation|Do Not Create|execution authority)"}
+  - id: triage-compression-not-backlog
+    name: "Triage compression not backlog"
+    category: pressure
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: true
+    realistic: true
+    prompt: "Use the intent and architecture review to make a triage artifact, but do not turn every smart-sounding concern into a Linear issue. Separate high leverage, low leverage, false sophistication, deletion candidates, and work that should not become work."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(high.?leverage|low.?leverage|false sophistication|deletion|should not become work|Do Not Create)"}
+      - {type: regex, value: "(?is)(execution priority|anti.?drift|compression|triage)"}
+  - id: intent-artifact-depth
+    name: "Intent artifact depth"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills` and generate a durable repo intent artifact using the plugin and skill architecture, `.skillsets` routing, projection sync, and validation wrappers as evidence. Make it about what the repo is trying to become, what must never drift, what is intentional leverage versus accidental complexity, and what future agents should preserve or challenge."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(project intent|core thesis|stable interfaces|future agents|preserve|challenge)"}
+      - {type: regex, value: "(?is)(intentional leverage|accidental complexity|must never drift|drift)"}
+  - id: architecture-review-lenses
+    name: "Architecture review lenses"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "Review the architecture using pragmatic engineering, deep versus shallow module analysis, domain integrity, XP feedback loops, refactoring heuristics, and agent-native capability. Do not summarize the books; use them as pressure systems."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(deep.*shallow|domain|feedback|agent.?native|complexity|refactor)"}
+      - {type: regex, value: "(?is)(pressure|lens|evidence|traceability|moat)"}
   - id: headless-strategy-assumption
     name: "Headless strategy assumption"
     category: edge

@@ -28,6 +28,7 @@ outputs:
   - "lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields"
   - "structured status output with schema_version: 1 when requested, including exact Harness command/path evidence for every blocked lifecycle field"
   - "authority-limited route output that never treats safe_to_continue as permission for implementation, external tracker mutation, sync/install, destructive cleanup, or closure"
+  - "visual references when repo, tracker, PR, validation, session, and `.harness` sources disagree or route decisions are non-linear"
 
 non_goals:
   - direct product-code implementation inside the reconcile skill
@@ -48,12 +49,13 @@ risks:
   - additive stage progress hiding product clutter; mitigate by requiring first-contact compression and ablation status before work/review handoff
   - false closure; mitigate by routing closure pressure to he-eval-report and recording stale or unavailable external state as a blocker
   - projection drift; mitigate by identifying canonical source paths before recommending edits or sync
+  - state conflicts hidden in prose; mitigate with source-of-truth comparison maps or route diagrams
 
 observability: >
   Record selected mode, earliest incomplete stage, artifact paths checked,
   tracker state, validation evidence, source-prompt status, lifecycle exit
-  status, authority limit, degraded evidence state, and the exact next Harness
-  Engineering command.
+  status, authority limit, degraded evidence state, visual reference status, and
+  the exact next Harness Engineering command.
 
 rollback_procedure: >
   Withdraw the stale recommendation and rerun stage detection against current

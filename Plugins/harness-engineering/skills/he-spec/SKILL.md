@@ -149,6 +149,8 @@ Read when: prior Codex/session evidence matters ->
 Read before delegating helper work -> `../../references/subagent-call-contract.md`.
 Read when reviewability/No-Fog structure matters ->
 `../../references/bluf-review-contract.md`.
+Read when visual aids, generated media, or proof visuals matter ->
+`../../references/visual-reference-contract.md`.
 Read when retained doctrine is needed ->
 `Plugins/harness-engineering/references/he-spec-doctrine.md`.
 Deferred context index -> `../../references/deferred-context-index.md`.

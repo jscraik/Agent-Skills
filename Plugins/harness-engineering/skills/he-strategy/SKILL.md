@@ -16,9 +16,9 @@ boundaries, approval rules, and validation hooks take precedence.
 
 ## When to Use
 
-Use for one selected mode: repo intent, architecture review, triage, strategy
-compression, ADR/core compression, moat/drift analysis, source-prompt
-equivalence, or future-agent guidance.
+Use for one selected mode: repo intent, architecture review, triage, full repo
+cognition pipeline, strategy compression, ADR/core compression, moat/drift
+analysis, source-prompt equivalence, or future-agent guidance.
 
 ## When Not to Use
 
@@ -35,23 +35,28 @@ lifecycle artifacts; reserve stable ADR/core names for living policy.
 ## Inputs
 
 Selected mode, repo evidence, relevant `.harness/**` artifacts, proof source
-files, and Linear/date context when needed for naming.
+files, source prompt family when applicable, and Linear/date context when
+needed for naming.
 
 ## Outputs
 
 Write only the selected cognition artifact under `.harness/features/`,
 `.harness/review/`, `.harness/triage/`, `.harness/strategy/`,
-`.harness/decisions/`, or `.harness/core/`, or return `Do Not Create`. Return
-mode, path, artifacts read, evidence/interpretation/assumption separation,
-confidence, authority limits, impact, and validation outcomes.
+`.harness/decisions/`, or `.harness/core/`, or return `Do Not Create`. For an
+explicit full repo cognition pipeline, write the bounded sequence of intent,
+architecture review, and triage artifacts only after selecting output paths and
+authority limits. Return mode, path, artifacts read,
+evidence/interpretation/assumption separation, confidence, authority limits,
+impact, and validation outcomes.
 
 Also include `he-strategy`, `subagent_policy`, `roles_used`,
 `roles_recommended`, and `roles_missing`.
 
 ## Procedure
 
-1. Select exactly one mode unless the user explicitly asks for the full strategy
-   pipeline; ask once only when ambiguity materially changes the artifact.
+1. Select exactly one mode unless the user explicitly asks for the full repo
+   cognition pipeline; ask once only when ambiguity materially changes the
+   artifact sequence or authority.
 2. Resolve `he-strategy` in `../../references/routing-map.json`, compare roles
    with `~/.codex/agents/manifest.json`, and follow shared subagent policy.
 3. Choose the output path or `Do Not Create` before writing; do not overwrite
@@ -67,9 +72,16 @@ Also include `he-strategy`, `subagent_policy`, `roles_used`,
 8. Apply the BLUF review contract to non-trivial generated strategy artifacts so
    the strategic decision, authority limit, risk consequence, and next route are
    visible before supporting evidence.
-9. Compress conclusions to decisions that change routing, deletion, investment,
+9. Apply the visual reference contract when strategy output explains direction,
+   architecture boundaries, drift, priority, moat, or route relationships better
+   as a map, matrix, or Mermaid diagram.
+10. For full repo cognition pipeline requests, load
+   `references/repo-cognition-pipeline.md`; produce intent, architecture review,
+   and triage as separate artifacts, and keep triage as compression rather than
+   a repeat of the review.
+11. Compress conclusions to decisions that change routing, deletion, investment,
    anti-drift behavior, or the smallest feedback-producing next slice.
-10. Validate the artifact against the selected mode contract and record each
+12. Validate the artifact against the selected mode contract and record each
    gate as `pass`, `fail`, or `blocked`.
 
 ## Validation
@@ -149,12 +161,18 @@ impact, future-agent guidance, validation outcomes, and evidence traceability.
 ## References
 
 - Read when selecting mode output -> `references/strategy-output-contract.md`
+- Read when the user requests repo intent + architecture review + triage, or a
+  deeper replacement for the long prompt workflow ->
+  `references/repo-cognition-pipeline.md`
 - Read when comparing old prompt workflows -> `references/source-prompt-preservation.md`
 - Read when validating contract or eval coverage -> `references/contract.yaml`,
   `references/evals.yaml`
 - Read when routing shared HE contracts -> `../../references/deferred-context-index.md`
 - Read when reviewability/No-Fog structure matters ->
   `../../references/bluf-review-contract.md`
+- Read when strategy maps, architecture boundaries, drift maps, or generated
+  media need visual proof rules ->
+  `../../references/visual-reference-contract.md`
 - Read when resolving helper roles -> `../../references/subagent-call-contract.md`,
   `../../references/subagent-routing.md`
 - Read when applying first principles or XP ->

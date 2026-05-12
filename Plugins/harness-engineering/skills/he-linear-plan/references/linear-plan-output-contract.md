@@ -36,6 +36,7 @@ Linear.
 - GitHub PR Tracking
 - Delivery Evidence
 - Evidence & Traceability Matrix
+- Visual References / Diagrams
 
 ## Required Fields
 
@@ -185,3 +186,29 @@ Before any action, classify the strongest side effect:
 
 Only external Linear updates are owned by this skill, and only after explicit
 post-plan approval with known destination and a small confirmed object set.
+
+## Visual References / Diagrams
+
+Include this section for non-trivial Linear plans. Use it to make the active
+set, dependency chain, eval gates, and human/agent route visible before payload
+detail.
+
+Required when any of these are true:
+
+- three or more proposed Linear objects
+- parent plus sub-issue structure
+- dependency or blocker relationships
+- Now / Next / Later / Do Not Create classification across multiple items
+- human-versus-agent execution split
+- eval gates or delivery evidence differ by issue
+
+Preferred formats:
+
+- Mermaid issue tree for milestone, parent, and sub-issue shape
+- Mermaid dependency map for blockers and execution order
+- markdown table for Now / Next / Later / Do Not Create
+- markdown table for eval gates and delivery evidence
+
+If no visual adds value, write `Not needed` and say why. Apply the shared
+generated-media and proof rules from
+`Plugins/harness-engineering/references/visual-reference-contract.md`.

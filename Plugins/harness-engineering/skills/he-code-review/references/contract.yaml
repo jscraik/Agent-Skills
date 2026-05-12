@@ -37,6 +37,7 @@ outputs:
   - agent_native_scorecard when reviewing skill, plugin, CLI, agent-doc, eval, routing, or projection changes
   - "XP operating artifacts: repeated_failure learning for recurring defect classes, plus blackboard_delta"
   - review-thread disposition and next action
+  - visual references for risk surfaces, attack paths, causality chains, permission boundaries, or review-thread state when a normal findings list would hide the failure path
 
 non_goals:
   - implementing fixes unless explicitly in repair/autofix mode
@@ -55,11 +56,12 @@ risks:
   - unsafe reviewer text or generated prompts being treated as instructions; mitigate with untrusted-evidence handling and explicit refusal/blocker statuses
   - non-mutating closure or merge recommendations being accidentally executed; mitigate with selected mode and side-effect class before action output
   - agent-native regression; mitigate with action parity, discovery, context injection, shared truth surface, and completion/resume checks for agent-facing changes
+  - hidden cross-file or security causality; mitigate with Mermaid or table-first review visuals only when they clarify a real failure path
 
 observability: >
   Record target, base, verdict, blocker count, traceability status, validation
   commands, security routing, follow-up owner, confidence score, confidence caps,
-  and the exact PR, Linear, spec, plan, CI, review-thread, and artifact
+  visual reference status, and the exact PR, Linear, spec, plan, CI, review-thread, and artifact
   references used to justify the verdict.
 
 rollback_procedure: >

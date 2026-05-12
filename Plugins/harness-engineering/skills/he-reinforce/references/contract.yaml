@@ -30,6 +30,7 @@ outputs:
   - "discoverability_status proving the learning surface is visible from active instructions or explicitly blocked"
   - "overlap_status across .harness/solutions/** and legacy docs/solutions/** when relevant"
   - "redaction_status and validation_status"
+  - "visual_references when a repeated causal chain, source-of-truth drift, rollback path, or prevention loop is clearer as a small diagram or comparison table"
 
 non_goals:
   - lifecycle state routing or resume decisions
@@ -51,8 +52,8 @@ risks:
 observability: >
   Record mode, evidence checked, selected artifact, overlap candidates,
   validation status, redaction status, Project Brain status, discoverability
-  status, continuity status, structure status, size budget status, writes, and
-  blocked reason.
+  status, continuity status, structure status, size budget status, visual
+  reference status, writes, and blocked reason.
 
 continuity_memory_contract:
   source_pattern: >

@@ -69,6 +69,9 @@ user-config-write, external-write, destructive, or completion-gating. Start with
 8. Apply the BLUF review contract to non-trivial durable improvement reports or
    loop artifacts so the target, gap, patch decision, validation blocker, and
    stop rule are visible before detail.
+9. Apply the visual reference contract when an improvement report, media proof,
+   skill routing change, or before/after behavior comparison would otherwise be
+   hidden in prose.
 
 ## Validation
 
@@ -141,6 +144,7 @@ loop artifacts, and review media belong in references, repo artifacts, or
 - Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`.
 - Shared subagent call policy: `../../references/subagent-call-contract.md`.
 - BLUF review contract: `../../references/bluf-review-contract.md`.
+- Visual reference contract: `../../references/visual-reference-contract.md`.
 - Deferred context index: `../../references/deferred-context-index.md`.
 
 Do not remove important context for budget trimming; move deep context to

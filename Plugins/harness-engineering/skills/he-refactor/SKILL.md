@@ -72,9 +72,12 @@ shared subagent policy fields for `he-refactor`.
 8. Apply the BLUF review contract to non-trivial generated refactor programs so
    the migration decision, risk consequence, smallest reversible step, and
    stop/pivot condition are visible before phase detail.
-9. Define closure proof using dated `.harness/evals/**` artifacts and preserve
+9. Apply the visual reference contract when the migration spans multiple
+   modules, phases, boundaries, coexistence states, rollback paths, or eval gates;
+   prefer before/after Mermaid boundary diagrams and phase maps.
+10. Define closure proof using dated `.harness/evals/**` artifacts and preserve
    future-agent anti-regression constraints.
-10. Validate the generated program and record exact `pass`, `fail`, or
+11. Validate the generated program and record exact `pass`, `fail`, or
     `blocked` outcomes.
 
 ## Constraints
@@ -161,6 +164,7 @@ supporting references are unverified.
 - Original prompt behavior: `references/source-prompt-preservation.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`
 - BLUF review contract: `../../references/bluf-review-contract.md`
+- Visual reference contract: `../../references/visual-reference-contract.md`
 - Shared contracts: source-prompt coverage, execution slice, artifact routing,
   classification, Linear tracker, interactive steering, OpenAI-style design,
   agent-native compression, Pragmatic Programmer, XP, and subagent routing under

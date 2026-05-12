@@ -23,7 +23,10 @@ Always make steering and proof searchable in the output: include `interactive_st
 4. Keep `update_plan` as a live checklist; execute only the approved implementation unit.
 5. Before delegation or parallel work, run the work contract overlap check and use external delegation only for bounded non-overlapping slices or isolated worktrees.
 6. Run or explicitly block the smallest relevant validation gates, preserving exact command/path, actor, timestamp, recovery step, and rollback posture when blocked.
-7. Handoff to `he-code-review` mode `autofix` when review or validation evidence requires repair.
+7. Apply the visual reference contract when user-visible behavior, screenshot
+   evidence, rollback state, validation evidence, or before/after state cannot
+   be reviewed clearly from text alone.
+8. Handoff to `he-code-review` mode `autofix` when review or validation evidence requires repair.
 For blocked coding-harness gates, preserve exact failing command/path, actor, timestamp, recovery step, and rollback posture in the handoff.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Run exact gates for changed paths and report outcomes.
@@ -66,5 +69,6 @@ Reference `assets/` only for skill packaging and browseability; execution eviden
 - Work contract: `Plugins/harness-engineering/skills/he-work/references/work-execution-contract.md`
 - Modes: `Plugins/harness-engineering/skills/he-work/references/execution-modes.md`
 - UI plan routing: `Plugins/harness-engineering/references/ui-plan-routing-contract.md`
+- Visual reference contract: `Plugins/harness-engineering/references/visual-reference-contract.md`
 - Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
 - XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

@@ -75,7 +75,10 @@ detail.
 7. Apply the BLUF review contract to non-trivial eval reports so the closure
    recommendation, proof blocker, follow-up decision, and next action are
    scannable before detailed evidence.
-8. Generate and validate the report, then ask accept/challenge/rework before
+8. Apply the visual reference contract when proof spans multiple gates,
+   artifacts, media files, validation outputs, or non-linear drift decisions;
+   prefer gate matrices and evidence-chain diagrams.
+9. Generate and validate the report, then ask accept/challenge/rework before
    using `Complete` or `Complete with follow-up` as a Linear closure
    recommendation.
 
@@ -160,6 +163,9 @@ or media persistence is failed or blocked.
   `references/evals.yaml`.
 - Read when report scanability/No-Fog structure matters:
   `../../references/bluf-review-contract.md`.
+- Read when evidence chains, gate matrices, visual proof, screenshots, or
+  generated media need persistence rules:
+  `../../references/visual-reference-contract.md`.
 - Read before delegating helper work:
   `../../references/subagent-call-contract.md`.
 - Read shared HE contracts only when the selected slice needs them:

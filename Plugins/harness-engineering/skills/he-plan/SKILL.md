@@ -196,7 +196,8 @@ Read when: depth/mode changes -> `references/planning-depth.md`,
 `references/codex-plan-mode.md`, `references/deepening-review.md`,
 `references/professional-confidence-review.md`.
 Read when: verification strategy matters -> `references/test-strategy.md`.
-Read when: visual structure helps -> `references/visual-communication.md`.
+Read when: visual structure helps -> `references/visual-communication.md`,
+`../../references/visual-reference-contract.md`.
 Read before delegation -> `../../references/subagent-call-contract.md`.
 Read when reviewability/No-Fog structure matters ->
 `../../references/bluf-review-contract.md`.

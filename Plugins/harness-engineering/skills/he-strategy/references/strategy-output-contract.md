@@ -13,6 +13,11 @@ compact; this file carries the mode-specific output contract.
   no-Linear equivalent.
 - `triage`: write `.harness/triage/YYYY-MM-DD-JSC-###-<slug>-triage.md` or the
   no-Linear equivalent.
+- `repo-cognition-pipeline`: write the explicit sequence
+  `.harness/features/YYYY-MM-DD-<repo-name>-intent.md`,
+  `.harness/review/YYYY-MM-DD-<repo-name>-architecture-review.md`, and
+  `.harness/triage/YYYY-MM-DD-<repo-name>-triage.md` when the user asks for the
+  full intent + architecture review + triage workflow.
 - `strategic-compression`: write
   `.harness/strategy/YYYY-MM-DD-JSC-###-<slug>-strategy.md` or the no-Linear
   equivalent.
@@ -35,6 +40,8 @@ Every output must include:
 - drift or moat impact where relevant
 - future-agent guidance
 - evidence and traceability matrix
+- visual references or diagrams when strategy, architecture, triage, or intent
+  relationships are easier to review as a map, matrix, or Mermaid diagram
 
 ## Mode Guardrails
 
@@ -64,6 +71,26 @@ Triage artifacts should compress findings into strategic, architectural,
 operational, governance, agent-native, technical debt, false sophistication,
 deletion, refactor, anti-drift, Linear, ADR, and future-agent risks.
 
+Full repo cognition pipeline artifacts should follow
+`repo-cognition-pipeline.md`. The intent artifact establishes durable thesis and
+drift signals, the architecture review pressure-tests coherence and moat, and
+the triage artifact decides what should become execution, ADRs, refactor
+programs, eval programs, governance changes, or `Do Not Create`.
+
 Strategic compression artifacts should define core thesis, actual moat, false
 moat signals, contradictions, deletion candidates, non-negotiables, safe rewrite
 zones, risks, direction, priorities, future-agent guidance, and evidence matrix.
+
+## Visual References / Diagrams
+
+Use visuals only when they sharpen the strategy decision:
+
+- intent artifacts: project thesis map, stable-interface map, drift-risk map
+- architecture reviews: boundary diagram, risk surface, or module interaction map
+- triage artifacts: issue cluster map, priority ladder, or deletion/refactor map
+- strategic compression: thesis-risk matrix, moat/drift map, or route map
+- ADR/core compression: decision consequence map only when dependencies matter
+
+Prefer Mermaid and markdown tables. If no visual adds value, write `Not needed`
+and say why. Apply the shared generated-media and proof rules from
+`Plugins/harness-engineering/references/visual-reference-contract.md`.

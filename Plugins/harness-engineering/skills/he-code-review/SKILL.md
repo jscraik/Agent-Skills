@@ -27,7 +27,10 @@ For repeated failures, classify the follow-up as `linear_required`, `compound_re
 7. Do not approve readiness from green CI alone when behavior proof, security review, live PR-thread state, or traceability evidence is missing.
 8. For closure/execute/autonomous/merge/low-signal lanes, load `review-mode-contract.md` and emit one auditable non-mutating action per target.
 9. When writing `.harness/review/**`, apply artifact routing plus BLUF review contracts without hiding severity-ranked findings.
-10. End with approve, request changes, autofix candidate, non-mutating action plan, or follow-up lane.
+10. Apply the visual reference contract only when a risk surface, attack path,
+    causality chain, permission boundary, or review-thread state would be hidden
+    by a normal findings list.
+11. End with approve, request changes, autofix candidate, non-mutating action plan, or follow-up lane.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Verify gates, references, subagent evidence, and command outcomes.
 ## Failure mode
@@ -65,5 +68,5 @@ Read when:
 - review depth, confidence caps, repeated feedback, or output shape is needed: `Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md`
 - disputed behavior or proof-loop guidance is needed: `Plugins/harness-engineering/skills/he-code-review/references/review-loop-patterns.md`
 - broader HE contracts are triggered: `Plugins/harness-engineering/references/deferred-context-index.md`
-- artifact identity or BLUF output is required: `Plugins/harness-engineering/references/artifact-routing-contract.md`, `Plugins/harness-engineering/references/bluf-review-contract.md`
+- artifact identity, BLUF output, or review visuals are required: `Plugins/harness-engineering/references/artifact-routing-contract.md`, `Plugins/harness-engineering/references/bluf-review-contract.md`, `Plugins/harness-engineering/references/visual-reference-contract.md`
 - detailed doctrine is necessary: `Infrastructure/references/harness-engineering/he-code-review-doctrine.md`

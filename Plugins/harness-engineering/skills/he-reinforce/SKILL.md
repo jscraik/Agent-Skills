@@ -92,6 +92,9 @@ secrets, credentials, or unredacted sensitive data into learning artifacts.
 12. Apply the BLUF review contract to non-trivial learning, decision,
     continuity, or stale-note artifacts so the learning value, proof status,
     refresh decision, and next action are visible before detail.
+13. Apply the visual reference contract only when a durable learning artifact
+    explains a repeated causal chain, source-of-truth drift, rollback path, or
+    prevention loop more clearly as a small diagram or comparison table.
 
 ## Validation
 
@@ -181,6 +184,8 @@ when active: solution capture, artifact routing, session evidence, Project Brain
 surfaces, and subagent call boundaries.
 Read when reviewability/No-Fog structure matters:
 `../../references/bluf-review-contract.md`.
+Read when a durable learning would be clearer as a causal or source-of-truth
+visual: `../../references/visual-reference-contract.md`.
 Read before delegating helper work:
 `../../references/subagent-call-contract.md`.
 

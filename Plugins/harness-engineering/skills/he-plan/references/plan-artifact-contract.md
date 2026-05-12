@@ -104,6 +104,9 @@ Visual reference requirements:
 - Do not add decorative images or generic infographics to satisfy the visual
   rule; every visual must clarify execution order, dependencies, boundaries,
   risk, validation, or rollback.
+- Apply the shared visual contract for generated media persistence, proof
+  rules, and compact not-needed reasons:
+  `Plugins/harness-engineering/references/visual-reference-contract.md`.
 
 ## BLUF Review Surface
 

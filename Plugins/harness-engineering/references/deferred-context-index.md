@@ -37,6 +37,7 @@ the reference below, and let validators catch stale duplicated procedure text.
   - `references/session-evidence-trace-context.md`
 - Review, ideation, and agent-native lenses:
   - `references/bluf-review-contract.md`
+  - `references/visual-reference-contract.md`
   - `references/agent-native-audit-scorecard.md`
   - `references/brainstorm-topic-coverage-contract.md`
   - `references/document-review-finding-tiers.md`
@@ -60,6 +61,7 @@ Load references by trigger instead of by habit:
 | --- | --- | --- |
 | Any stage writes durable docs, mutates files, or hands off | `references/stage-context-contract.md`, `references/lifecycle-exit-contract.md` | compact stage context plus exit status |
 | Non-trivial durable HE artifact is operator-facing | `references/bluf-review-contract.md` | Command Summary with one opening BLUF paragraph, No-Fog Gate, or compact not-applicable reason |
+| Non-trivial artifact has flow, dependency, boundary, state, validation, rollback, UI, media, or source-of-truth complexity | `references/visual-reference-contract.md` | Mermaid/table/image reference, or compact not-needed reason |
 | Stage choice is ambiguous | `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/interactive-steering-contract.md` | selected stage or one blocking question |
 | `.harness` artifacts determine scope | `references/artifact-classification-and-traceability.md`, `references/artifact-routing-contract.md` | content-shape classification and Artifact Identity status |
 | Non-trivial tracked work | `references/linear-tracker-gate.md` | resolved, created, blocked, or user-opted-out tracker status |

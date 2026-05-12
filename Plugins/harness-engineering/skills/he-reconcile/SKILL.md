@@ -70,6 +70,9 @@ hand off to `he-reinforce`.
 11. Apply the BLUF review contract to non-trivial durable reconcile artifacts so
     the earliest incomplete stage, blocker, next action, and confidence impact
     are visible before evidence detail.
+12. Apply the visual reference contract when repo, tracker, PR, validation,
+    session, and `.harness` sources disagree; prefer source-of-truth comparison
+    maps and route diagrams.
 
 ## Validation
 
@@ -149,5 +152,7 @@ compression, pragmatic invariants, and XP operating contract. Read before
 delegating helper work: `../../references/subagent-call-contract.md`.
 Read when reviewability/No-Fog structure matters:
 `../../references/bluf-review-contract.md`.
+Read when source-of-truth conflicts or route decisions need diagrams:
+`../../references/visual-reference-contract.md`.
 
 Deferred context index: `../../references/deferred-context-index.md`.

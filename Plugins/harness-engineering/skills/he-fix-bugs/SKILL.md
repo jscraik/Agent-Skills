@@ -62,6 +62,9 @@ reproduction or ownership requires it.
    review-only media in the skill package.
 7. For recurring failures, record the root-cause learning and durable fix
    surface.
+8. Apply the visual reference contract when screenshot evidence, a failure
+   causal chain, before/after UI behavior, or regression route is clearer as a
+   persisted image reference, table, or Mermaid diagram.
 
 ## Validation
 
@@ -126,6 +129,7 @@ belongs in logs, tests, traces, `.harness/media/`, and handoff notes.
 - Contract and eval routing: `references/contract.yaml`, `references/evals.yaml`.
 - Shared HE context: `Plugins/harness-engineering/references/deferred-context-index.md`.
 - Shared subagent call policy: `../../references/subagent-call-contract.md`.
+- Visual reference contract: `../../references/visual-reference-contract.md`.
 
 Do not remove important context for budget trimming; move deep context to
 references with a clear route.
