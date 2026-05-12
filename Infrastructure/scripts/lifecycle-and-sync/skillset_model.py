@@ -172,6 +172,20 @@ def listish(value: str | None) -> list[str]:
 
 
 def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str | None, str]:
+    """
+    Infer the root skill-set for a skill directory using frontmatter declarations and repository path heuristics.
+    
+    Checks frontmatter for declared skill-set keys (multiple spellings accepted) and returns the normalized value when it matches a known root skill-set. When no declaration is present, infers the skill-set from the repository-relative path using canonical patterns (e.g., skills/<root_skill_set>/..., plugins/<plugin>/skills/..., skills-system/<name>) and special handling for system-bridge skills. If the path cannot be relativized to the repository or no rule matches, the result is treated as untagged.
+    
+    Parameters:
+        source_dir (Path): Directory containing the skill (expected to contain SKILL.md).
+        frontmatter (dict[str, str]): Parsed SKILL.md frontmatter keys and values.
+    
+    Returns:
+        tuple[str | None, str]: (skill_set, status)
+            - skill_set: a root skill-set name when determined, otherwise `None`.
+            - status: one of "declared", "inferred", "system-bridge", or "untagged" indicating how the value was obtained.
+    """
     declared = (
         frontmatter.get("metadata.skill-set")
         or frontmatter.get("metadata.skill_set")
@@ -262,6 +276,14 @@ def runtime_visibility_for(frontmatter: dict[str, str]) -> str:
 
 
 def iter_candidate_skill_dirs() -> list[Path]:
+    """
+    Collect candidate skill directories for projection.
+    
+    Scans repository, plugin, and system-lane skill locations and selects directories that contain a SKILL.md. Excludes directories whose classified scope is "primary-runtime", "external", or "unknown". For scope "system" only includes directories whose name appears in SYSTEM_BRIDGE_SKILL_NAMES. Results are deduplicated and returned sorted by the repository-relative path produced by rel().
+    
+    Returns:
+        list[Path]: Unique candidate skill directory paths sorted by repository-relative path.
+    """
     seen: set[tuple[int, int] | str] = set()
     dirs: list[Path] = []
     for skill_dir in [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs(), *iter_system_lane_skill_dirs()]:
@@ -287,11 +309,20 @@ def iter_candidate_skill_dirs() -> list[Path]:
 
 def canonical_source_path_for_row(source_dir: Path, scope: str, skill_set: str | None) -> str:
     """
-    Return a repo-relative canonical source path for manifest provenance.
-
-    System bridge skills are maintained outside the Skills/** and Plugins/**
-    canonical trees, but runtime needs a stable canonical-path form for manifest
-    validation and handle resolution.
+    Produce a repo-relative canonical path to the SKILL.md used for manifest provenance.
+    
+    When the skill is a system-scoped bridge entry (scope == "system", skill_set == "agent-ops",
+    the directory name is in SYSTEM_BRIDGE_SKILL_NAMES, and its parent directory is ".system"),
+    returns "skills-system/{skill_name}/SKILL.md". Otherwise returns the repo-relative path to
+    source_dir / "SKILL.md".
+    
+    Parameters:
+        source_dir (Path): Directory containing the skill's SKILL.md.
+        scope (str): Classified scope of the skill (e.g., "system").
+        skill_set (str | None): Inferred or declared root skill set name.
+    
+    Returns:
+        str: Repo-relative posix path to the canonical SKILL.md location.
     """
     if (
         scope == "system"
@@ -304,6 +335,20 @@ def canonical_source_path_for_row(source_dir: Path, scope: str, skill_set: str |
 
 
 def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
+    """
+    Builds SkillModule records for all discovered candidate skill directories and collects any unmapped candidates.
+    
+    Each discovered skill directory with a SKILL.md is parsed and normalized into a SkillModule (including inferred or declared skill_set, level, scope, triggers, exclusions, risk, runtime_visibility, description, metadata status, canonical source_path, and provenance). The returned modules are sorted by (skill_set, id, source_path).
+    
+    Returns:
+        tuple[
+            list[SkillModule],             # List of built SkillModule objects, sorted by (skill_set, id, source_path).
+            list[dict[str, str]]           # List of unmapped candidate records; each dict contains:
+                                           #   - "id": directory name,
+                                           #   - "source_path": repository-relative path to SKILL.md,
+                                           #   - "reason": short status explaining why it could not be assigned.
+        ]
+    """
     modules: list[SkillModule] = []
     unmapped: list[dict[str, str]] = []
     revision = source_revision()

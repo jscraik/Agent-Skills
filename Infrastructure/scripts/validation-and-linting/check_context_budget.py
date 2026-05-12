@@ -99,7 +99,16 @@ def validate_written_manifest_provenance(
     skillsets_dir: Optional[Path] = None,
     repo_root_path: Path = REPO_ROOT,
 ) -> list[dict[str, Any]]:
-    """Validate generated `.skillsets/**` files are owned, current, and provenance-rich."""
+    """
+    Validate generated files under the `.skillsets` directory for ownership, canonical provenance, source integrity, and required provenance fields.
+    
+    Parameters:
+        skillsets_dir (Optional[Path]): Directory containing generated skillset artifacts. Defaults to `<repo_root>/.skillsets`.
+        repo_root_path (Path): Repository root used to resolve and validate source paths. Defaults to the module's REPO_ROOT.
+    
+    Returns:
+        list[dict[str, Any]]: A list of violation records. Each record is a mapping with at least a `code` describing the violation and contextual keys such as `path`, `line`, `source_path`, `expected`, `actual`, or `message` depending on the error.
+    """
     skillsets_dir = skillsets_dir or repo_root_path / ".skillsets"
     if not skillsets_dir.exists():
         return []

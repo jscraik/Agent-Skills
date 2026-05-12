@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-cat <<'USAGE'
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  cat <<'USAGE'
 Usage: verify-work [options]
   --project-governance
     Select project-local scope (default).
@@ -12,6 +13,8 @@ Usage: verify-work [options]
 Validation artifacts are ephemeral.
 Validation artifacts are persistent.
 USAGE
+  exit 0
+fi
 
 set -euo pipefail
 

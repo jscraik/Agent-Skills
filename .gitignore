@@ -69,8 +69,12 @@ sync-symlink/
 **/.codex-repo-plugin-source
 
 # Runtime-generated command implementation artifacts from runtime split tooling
-Infrastructure/**/*_impl.*
+# (limit to generated/runtime artifact surfaces only)
+Infrastructure/artifacts/**/*_impl.*
+Infrastructure/reports/**/*_impl.*
 
+# Keep source implementation scripts trackable
+!Infrastructure/scripts/*_impl.sh
 # Generated artifacts
 .diagram/*
 !.diagram/context/
