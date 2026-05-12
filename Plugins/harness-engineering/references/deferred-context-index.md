@@ -116,6 +116,7 @@ Load references by trigger instead of by habit:
 
 - `skills/he-code-review/references/review-policy-index.md`
 - `skills/he-code-review/references/review-loop-patterns.md`
+- `skills/he-code-review/references/review-mode-contract.md`
 - `references/pragmatic-programmer-review-contract.md`
 
 `he-eval-report`:
