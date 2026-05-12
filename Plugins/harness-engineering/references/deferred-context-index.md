@@ -59,7 +59,7 @@ Load references by trigger instead of by habit:
 | Stage or condition | Load | Expected proof |
 | --- | --- | --- |
 | Any stage writes durable docs, mutates files, or hands off | `references/stage-context-contract.md`, `references/lifecycle-exit-contract.md` | compact stage context plus exit status |
-| Non-trivial durable HE artifact is operator-facing | `references/bluf-review-contract.md` | Command Summary, BLUF-Only Summary, section BLUFs, No-Fog Gate, or compact not-applicable reason |
+| Non-trivial durable HE artifact is operator-facing | `references/bluf-review-contract.md` | Command Summary with one opening BLUF paragraph, No-Fog Gate, or compact not-applicable reason |
 | Stage choice is ambiguous | `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/interactive-steering-contract.md` | selected stage or one blocking question |
 | `.harness` artifacts determine scope | `references/artifact-classification-and-traceability.md`, `references/artifact-routing-contract.md` | content-shape classification and Artifact Identity status |
 | Non-trivial tracked work | `references/linear-tracker-gate.md` | resolved, created, blocked, or user-opted-out tracker status |
@@ -197,8 +197,10 @@ back into this file.
 
 The BLUF productization pass compressed several stage entrypoints while keeping
 their behavior in stage references, artifact contracts, and the BLUF review
-contract. These exact retired lines are preserved so progressive-disclosure
-validation can prove the context was moved rather than silently dropped.
+contract. BLUF now means one opening Bottom Line Up Front paragraph, not a
+section-by-section template. These exact retired lines are preserved so
+progressive-disclosure validation can prove the context was moved rather than
+silently dropped.
 
 ```text
 5. Route durable brainstorm artifacts to `.harness/brainstorm/**.md`; route

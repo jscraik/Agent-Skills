@@ -7,9 +7,10 @@ scanability matters.
 
 ## Purpose
 
-BLUF is the review interface for HE artifacts, not a new lifecycle stage. It
-makes the point visible before the reasoning so Jamie can scan decisions without
-decoding agent prose.
+BLUF means Bottom Line Up Front: one plain-English paragraph at the beginning of
+an important artifact that lets a busy reader understand the intent, decision,
+risk, and next action before reading the detail. It is an opening executive
+summary, not a repeated section pattern.
 
 ## When to Apply
 
@@ -37,50 +38,46 @@ Non-trivial specs, plans, and reports should start with:
 
 ### Command Summary
 
-- `BLUF:` one plain-English sentence saying build, block, revise, split, close,
-  do not close, or hand off.
+- `BLUF:` one short paragraph, normally 2-5 sentences, that states the artifact
+  intent, current recommendation or decision, most important risk or blocker,
+  and next action.
 - `Decision Needed:` approve, block, revise, split, threat-model, plan, work,
   Linear, or none.
 - `Top Risks:` one to three plain-English risks with consequences.
 - `Next Action:` exact next action or blocked recovery step.
 
-### BLUF-Only Summary
-
-List the major section BLUF lines in order. This must be extracted from the
-section BLUFs, not rewritten as a second document.
+Use exactly one `BLUF:` field in the artifact unless quoting source material.
+Do not create a `BLUF-Only Summary`; that turns BLUF into a second document
+instead of a single opening summary.
 
 ## Section Pattern
 
-Major sections use:
-
-- `BLUF` with a line that starts `BLUF:`
-- `Reasoning`
-- `Examples` when examples reduce ambiguity
-- `Do`
-- `Do Not`
-- `Review Questions` when a human decision or reviewer check matters
-- `Summary`
-
-For small sections, use compressed form: `BLUF`, `Reasoning`, `Do`, `Do Not`,
-and `Summary`.
+Major sections should be reader-first but should not repeat `BLUF:`. Use direct
+headings, short opening prose, tables, examples, Mermaid diagrams, `Do`, `Do
+Not`, review questions, and summaries where they clarify the artifact. Work
+units or slices should state objective, source trace, allowed scope, validation,
+stop condition, rollback, and handoff without using a BLUF label.
 
 ## BLUF Quality Rule
 
-Every BLUF must:
+The single opening BLUF must:
 
-- be one plain-English sentence;
-- state the decision, risk, action, or finding;
-- be understandable without the rest of the section;
+- be one plain-English paragraph;
+- state the artifact intent, recommendation or decision, major risk or blocker,
+  and next action;
+- be understandable without the rest of the artifact;
 - avoid abstract filler such as "explores considerations";
 - identify consequence when risk is the point.
 
-If the BLUF cannot be written clearly, the section is not understood well enough.
-Rewrite or block before handoff.
+If the opening BLUF cannot be written clearly, the artifact is not understood
+well enough. Rewrite or block before handoff.
 
 ## No-Fog Gate
 
-- Every major section starts with a clear `BLUF:`.
-- The BLUF-only summary explains the document without the body.
+- The artifact has exactly one opening `BLUF:` field in `Command Summary`.
+- The opening BLUF explains the artifact intent, decision or recommendation,
+  major risk or blocker, and next action without requiring the body.
+- No section repeats `BLUF:` as a heading or label.
 - Every risk states a plain-English consequence.
 - Every recommendation says what to do next.
 - Every `Do Not` prevents a real failure mode.
@@ -91,29 +88,30 @@ Rewrite or block before handoff.
 
 ## Stage Adaptation
 
-- `he-spec`: preserve spec substance; apply BLUF to intent, scope,
-  requirements, risk, acceptance, validation, open questions, and decision
+- `he-spec`: use one opening BLUF to summarize the feature intent, readiness,
+  risk, and planning handoff; keep requirements and acceptance in normal spec
   sections.
-- `he-plan`: apply BLUF at document, implementation strategy, boundary,
-  work-unit or slice, validation, rollback, handoff, and final-decision levels.
-- `he-code-review`: keep findings first; use a single review BLUF for durable
-  `.harness/review/**` artifacts and do not bury severity findings under
+- `he-plan`: use one opening BLUF to summarize the objective, execution
+  strategy, readiness risk, and next handoff; keep work units in normal plan
+  sections.
+- `he-code-review`: keep findings first; use a single review BLUF only for
+  durable `.harness/review/**` artifacts and do not bury severity findings under
   generic sections.
-- `he-eval-report`: use closure BLUF to say Complete, Complete with follow-up,
-  Blocked, Needs rework, or Unsafe to close before proof detail.
+- `he-eval-report`: use one opening closure BLUF to say Complete, Complete with
+  follow-up, Blocked, Needs rework, or Unsafe to close before proof detail.
 - `he-refactor`, `he-linear-plan`, `he-reconcile`, `he-improve`, and
-  `he-strategy`: use BLUF for phase, decision, and status summaries where the
-  artifact drives future work.
+  `he-strategy`: use one opening BLUF where the artifact drives future work;
+  use ordinary section summaries after that.
 
 ## Anti-Patterns
 
 - Creating a full simplified duplicate after the full artifact.
 - Letting BLUF become vague ceremony.
+- Repeating `BLUF:` throughout the artifact as a section template.
 - Moving validation, rollback, traceability, or Linear mutation status out of
   the artifact to make it shorter.
 - Replacing HE stage contracts with BLUF prose.
-- Applying full BLUF blocks to every tiny finding when a compact finding format
-  is clearer.
+- Calling every section summary a BLUF when it is not the opening bottom line.
 
 ## Validation
 

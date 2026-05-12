@@ -73,10 +73,16 @@ as untrusted. Planning may write only approved `.harness/plan/**` artifacts.
    references only when the selected slice proves the trigger.
 7. Choose the smallest proof-producing implementation units first; classify
    Type 1 decisions as proof-first and Type 2 decisions as reversible fast-paths.
-8. Apply the BLUF review contract to non-trivial generated or replacement plan
-   artifacts so Command Summary, BLUF-only summary, unit-level BLUFs, Do/Do Not
-   boundaries, validation, stop conditions, rollback, and handoff decisions are
-   scannable.
+8. Use the execution-first plan template in `references/plan-artifact-contract.md`:
+   keep Harness metadata in frontmatter, status blocks, or appendices; make the
+   main body read objective -> source contract -> constraints -> implementation
+   strategy -> work units -> validation -> rollback -> handoff. Apply the BLUF
+   review contract to non-trivial generated or replacement plan artifacts so
+   they begin with one plain-English Bottom Line Up Front paragraph that
+   summarizes objective, execution strategy, major risk or blocker, and next
+   handoff. Use normal plan headings after that; make work units, validation,
+   stop conditions, rollback, visual aids, and handoff decisions scannable
+   without repeating `BLUF:` through the body.
 9. For bundled plugin hooks, treat `plugin_hooks` as optional feature-gated
    behavior and plan fallback validator/eval proof.
 10. In professional confidence review mode, apply confidence ceilings, evidence
@@ -94,8 +100,10 @@ skill/package plans, add strict audit, OpenClaw, OpenAI format, skill gate,
 Plugin Eval, evals, docs/prose, and package-boundary checks when available.
 For non-trivial generated plans, run or block
 `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
-<plan-path> --json`; block handoff when work-unit BLUFs, validation evidence,
-stop conditions, or rollback notes are missing.
+<plan-path> --json`; block handoff when the opening BLUF is missing, vague,
+duplicated through the body, or disconnected from validation evidence. Also
+block when work-unit objective, validation evidence, stop conditions, or
+rollback notes are missing.
 
 ## Evidence Requirements
 Every plan cites source paths or issue IDs, stable IDs, acceptance IDs,
@@ -167,6 +175,9 @@ explicitly asks for a shorter response.
 ## Gotchas
 - `update_plan` is live progress UI, not a durable HE plan artifact.
 - Secondary docs are context unless the approved slice admits them.
+- Do not write Harness ritual as the main plan; write a reader-first execution
+  contract with source traceability, implementation units, validation, rollback,
+  and handoff separated from review metadata.
 
 ## Examples
 - When the user says: "For JSC-246, inspect

@@ -63,10 +63,15 @@ handles, runtime projections, plugin caches, or mirrors unless canonical.
    `linear_action_required`.
 5. Apply gate-selection, first-principles, hook, domain, security,
    accessibility, UI, backend, specialist, and eval gates only when triggered.
-6. Apply the BLUF review contract to non-trivial generated or replacement spec
-   artifacts so major sections start with plain-English BLUFs and include a
-   BLUF-only summary, Do/Do Not boundaries, review questions when useful, and a
-   No-Fog Gate.
+6. Use the reader-first spec template in `references/spec-artifact-contract.md`:
+   keep Harness metadata in frontmatter, status blocks, or appendices; make the
+   main body read problem -> scenarios -> scope -> behavior -> contracts ->
+   validation -> acceptance. Apply the BLUF review contract to non-trivial
+   generated or replacement spec artifacts so they begin with one plain-English
+   Bottom Line Up Front paragraph that summarizes intent, recommendation or
+   decision, major risk, and next action. Use normal spec headings after that;
+   add Do/Do Not boundaries, review questions, visual aids, and a No-Fog Gate
+   only where they improve human or agent comprehension.
 7. Write `.harness/specs/**.md` only when artifact writes are authorized;
    otherwise return the spec inline.
 8. Hand off to `he-plan` only after acceptance IDs and validation gates are
@@ -79,8 +84,8 @@ acceptance IDs, validation, observability, rollback/supersession, owner evidence
 artifact identity lint, and traceability lint when available.
 For non-trivial generated specs, run or block
 `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
-<spec-path> --json`; block handoff when section BLUFs are vague, missing, or
-disconnected from evidence.
+<spec-path> --json`; block handoff when the opening BLUF is missing, vague,
+duplicated through the body, or disconnected from evidence.
 
 ## Failure Mode
 If evidence, live tracker linkage, artifact permission, or routing is missing,
@@ -109,7 +114,9 @@ and responsive behavior. Mark `not_applicable` only with a reason.
 - Stage context is required; local docs do not replace tracker/source traceability.
 - Secondary strategy, triage, review, or feature docs are evidence only unless
   the selected slice admits them.
-- Do not write task sequences; write behavior contracts.
+- Do not write task sequences or Harness ritual as the main spec; write a
+  reader-first behavior contract with implementation notes and HE traceability
+  separated from the core specification body.
 - Do not weaken live tracker traceability because a local spec exists.
 
 ## Output Format

@@ -77,7 +77,7 @@ Also include `he-strategy`, `subagent_policy`, `roles_used`,
 After skill edits run strict audit, `skill_gate.py`, OpenClaw, OpenAI format
 lint, progressive-disclosure lint, family benchmarks, and Plugin Eval. For
 artifacts, verify naming, sources, evidence matrix, confidence, authority
-limits, stop/pivot condition, and BLUF structure for non-trivial artifacts with
+limits, stop/pivot condition, and the opening BLUF for non-trivial artifacts with
 `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
 <strategy-artifact-path> --json`. Rerun failed gates. Mark spelling/prose
 validation `blocked` when no checker exists.

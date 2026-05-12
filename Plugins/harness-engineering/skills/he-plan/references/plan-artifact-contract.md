@@ -21,6 +21,90 @@ jsc-283-packaged-skill-behavior-assurance`, not the date.
 - For tracked work, include a Linear/spec/plan/PR matrix with PR evidence left pending until delivery.
 - For tracked work, run `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <plan-path>` and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <plan-path>`.
 
+## Execution-First Plan Template
+
+The main body must be an execution contract, not a visible transcript of the
+Harness planning process. Keep mode decisions, blackboard deltas, confidence
+review detail, and mutation payloads in frontmatter, compact status blocks, or
+appendices unless they directly change the execution plan.
+
+Use this default section order for standard durable plans:
+
+1. `Command Summary`
+2. `Objective`
+3. `Source Contract`
+4. `Scope and Boundaries`
+5. `Current State / Evidence`
+6. `Implementation Strategy`
+7. `Work Units`
+8. `Dependencies and Sequencing`
+9. `Validation Gates`
+10. `Review Plan`
+11. `Rollback Plan`
+12. `Risk Register`
+13. `Observability and Evidence`
+14. `Visual References / Diagrams`
+15. `Accessibility and Operator Ergonomics`
+16. `Open Questions`
+17. `Final Decision`
+18. `Appendix A. Harness Metadata / Traceability`
+19. `Appendix B. Linear / Tracker Handoff`
+20. `Appendix C. Review Outcomes`
+
+For lightweight plans, keep the same reader path but collapse adjacent sections
+when that does not hide scope, validation, rollback, or handoff. For deep plans,
+expand `Work Units`, `Validation Gates`, `Rollback Plan`, and `Risk Register`
+so every high-risk slice has its own stop condition and proof requirement.
+
+Plan unit contract:
+
+- Use stable `PU-*` IDs for implementation units.
+- Map every `PU-*` to source `FR-*`, `NFR-*`, `SA-*`, `VAC-*`, issue, or
+  decision IDs when they exist.
+- Each `PU-*` must include: objective, source trace, allowed paths or areas,
+  forbidden paths or areas, steps, validation command/evidence, stop condition,
+  rollback note, and handoff state.
+- Do not turn source requirements into vague task titles; preserve the
+  requirement language and state what implementation evidence will satisfy it.
+- Do not include implementation discoveries as settled facts until source
+  inspection proves them. Mark them as `implementation-time unknown` or
+  `[NEEDS CLARIFICATION: ...]`.
+
+Validation and proof requirements:
+
+- Prefer deterministic commands and repo wrappers over agent narrative.
+- Record each planned gate as `required`, `conditional`, or `not_applicable`
+  with the reason.
+- Separate validation that can run before implementation from validation that
+  can only run after a `PU-*` is complete.
+- Include smoke, release, docs/prose, security, accessibility, package-boundary,
+  and runtime checks only when the source contract or touched surface requires
+  them; do not paste a generic checklist.
+- A plan is not ready for `he-work` when validation commands, rollback,
+  ownership, or source traceability are missing.
+
+Visual reference requirements:
+
+- Include at least one visual aid when the plan has multiple work streams,
+  dependencies, rollout phases, review lanes, service boundaries, state
+  transitions, or cross-surface sequencing that is easier to understand
+  visually than through prose.
+- Prefer Mermaid diagrams, dependency graphs, sequence diagrams, flowcharts,
+  and markdown tables because humans can scan them and agents can parse them.
+- Keep visuals at execution-structure level: show units, dependencies,
+  boundaries, validation flow, or rollback flow. Do not encode fragile method
+  names, SQL, API fields, or speculative architecture unless source evidence
+  requires those details.
+- Use generated bitmap images only when a human visual reference materially
+  improves review or when a media artifact is explicitly requested. Store
+  review-only generated media under `.harness/media/` with prompt/sidecar
+  evidence when generated media is created.
+- Prose and validation gates remain authoritative when a visual and text
+  disagree.
+- Do not add decorative images or generic infographics to satisfy the visual
+  rule; every visual must clarify execution order, dependencies, boundaries,
+  risk, validation, or rollback.
+
 ## BLUF Review Surface
 
 For non-trivial durable plans, apply
@@ -28,15 +112,18 @@ For non-trivial durable plans, apply
 
 Keep the existing plan substance. Add:
 
-- Command Summary with `BLUF`, decision needed, top risks, and next action.
-- BLUF-Only Summary extracted from plan and unit BLUFs.
-- BLUFs for implementation strategy, change boundaries, work units, validation
-  gates, review/handoff, rollback, and final decision.
+- Command Summary with exactly one `BLUF` paragraph, decision needed, top risks,
+  and next action.
+- No `BLUF-Only Summary`.
+- No section-level or unit-level `BLUF:` labels. Major plan sections and
+  `PU-*` units should open with clear objective or summary prose, but only the
+  document opening is BLUF.
 - Unit-level Do/Do Not, validation evidence, stop conditions, rollback notes,
   and summary.
 - No-Fog Gate before handoff.
 
-Do not turn the plan into duplicate simple/full documents. The BLUF layer is an
-index into the existing detail.
+Do not turn the plan into duplicate simple/full documents. The BLUF paragraph is
+the opening bottom line; the rest of the plan is the evidence and execution
+contract.
 
 Full retained notes: `Plugins/harness-engineering/references/he-plan-doctrine.md`.

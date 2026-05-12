@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate BLUF-first review structure in durable HE Markdown artifacts."""
+"""Validate opening BLUF structure in durable HE Markdown artifacts."""
 
 from __future__ import annotations
 
@@ -11,16 +11,8 @@ from pathlib import Path
 
 
 FIELD_RE = re.compile(r"(?m)^(BLUF|Decision Needed|Top Risks|Next Action):\s*\S")
-HEADING_RE = re.compile(r"(?m)^(#{2,4})\s+(.+?)\s*$")
 BLUF_RE = re.compile(r"(?m)^BLUF:\s*(\S.+)$")
-
-EXEMPT_HEADINGS = {
-    "Command Summary",
-    "BLUF-Only Summary",
-    "No-Fog Gate",
-    "References",
-    "Validation",
-}
+BLUF_ONLY_SUMMARY_RE = re.compile(r"(?m)^##\s+BLUF-Only Summary\s*$")
 
 
 def strip_frontmatter(text: str) -> str:
@@ -31,14 +23,8 @@ def strip_frontmatter(text: str) -> str:
     return text
 
 
-def section_body(text: str, start: int, level: int) -> str:
-    pattern = re.compile(rf"(?m)^#{{1,{level}}}\s+")
-    match = pattern.search(text, start)
-    end = match.start() if match else len(text)
-    return text[start:end]
-
-
 def validate(path: Path, *, compact: bool) -> list[str]:
+    _ = compact
     text = strip_frontmatter(path.read_text(encoding="utf-8"))
     errors: list[str] = []
 
@@ -51,26 +37,22 @@ def validate(path: Path, *, compact: bool) -> list[str]:
             if field not in found_fields:
                 errors.append(f"Command Summary missing non-empty {field}:")
 
-    if not compact and "## BLUF-Only Summary" not in text:
-        errors.append("missing ## BLUF-Only Summary")
+    if BLUF_ONLY_SUMMARY_RE.search(text):
+        errors.append("BLUF-Only Summary is no longer allowed; use one opening BLUF paragraph")
 
     blufs = [match.group(1).strip() for match in BLUF_RE.finditer(text)]
     if not blufs:
-        errors.append("no non-empty BLUF lines found")
+        errors.append("missing non-empty opening BLUF line")
+    if len(blufs) > 1:
+        errors.append(f"expected exactly one BLUF line, found {len(blufs)}")
     for index, bluf in enumerate(blufs, start=1):
-        if len(bluf.split()) > 35:
-            errors.append(f"BLUF {index} is too long ({len(bluf.split())} words)")
+        word_count = len(bluf.split())
+        if word_count < 12:
+            errors.append(f"BLUF {index} is too short ({word_count} words)")
+        if word_count > 120:
+            errors.append(f"BLUF {index} is too long ({word_count} words)")
         if bluf.endswith(":"):
             errors.append(f"BLUF {index} ends like a label instead of a sentence")
-
-    for heading in HEADING_RE.finditer(text):
-        level = len(heading.group(1))
-        title = heading.group(2).strip()
-        if title in EXEMPT_HEADINGS or (title.startswith("<") and title.endswith(">")):
-            continue
-        body = section_body(text, heading.end(), level)
-        if not BLUF_RE.search(body):
-            errors.append(f"section lacks BLUF: {title}")
 
     return errors
 
@@ -78,7 +60,11 @@ def validate(path: Path, *, compact: bool) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="+", type=Path)
-    parser.add_argument("--compact", action="store_true", help="Allow small artifacts without BLUF-Only Summary")
+    parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="Accepted for compatibility; BLUF-Only Summary is not required",
+    )
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 

@@ -18,25 +18,20 @@ linear_milestone: <milestone when tracked>
 # Title Matching Frontmatter
 
 ## Command Summary
-BLUF: <closure recommendation and reason>
+BLUF: <one short paragraph with closure recommendation, proof state, major blocker or risk, and next action>
 Decision Needed: <accept | challenge | rework | none>
 Top Risks: <one to three risks with consequences>
 Next Action: <exact next action>
 
-## BLUF-Only Summary
-1. <Executive Eval Summary BLUF>
-2. <Functional Validation Results BLUF>
-3. <Linear Completion Recommendation BLUF>
-
 ## Executive Eval Summary
-BLUF: <overall closure state in one sentence>
+Summary: <overall closure state in one sentence>
 Status:
 Linear Completion Recommendation:
 Primary Blockers:
 Confidence:
 
 ## Evaluated Slice
-BLUF: <the exact slice being evaluated>
+Summary: <the exact slice being evaluated>
 Linear Project:
 Linear Milestone:
 Linear Parent Issue:
@@ -49,13 +44,13 @@ Related ADRs:
 Related Core Invariants:
 
 ## Linear Definition of Done Status
-BLUF: <whether the Linear definition of done is satisfied>
+Summary: <whether the Linear definition of done is satisfied>
 Artifact Path:
 Definition of Done Status:
 Closure Safety:
 
 ## Linear Backlink Map
-BLUF: <whether Linear traceability is complete>
+Summary: <whether Linear traceability is complete>
 Linear Project:
 Linear Milestone:
 Linear Parent Issue:
@@ -66,7 +61,7 @@ Missing Identifiers:
 Traceability Repair:
 
 ## Source Artifact Trace
-BLUF: <whether source artifacts support the closure claim>
+Summary: <whether source artifacts support the closure claim>
 Linear Plan:
 Refactor Program:
 Plugin HE Spec:
@@ -75,7 +70,7 @@ Core Invariants:
 Other Source Artifacts:
 
 ## Planned Proof Check
-BLUF: <whether promised proof was produced>
+Summary: <whether promised proof was produced>
 Promised Proof From Source Artifacts:
 Proof Planned Before Implementation: yes | no | unknown
 Proof Produced:
@@ -84,7 +79,7 @@ Interpretation:
 Blocks Closure: yes | no
 
 ## Functional Validation Results
-BLUF: <whether functional validation supports closure>
+Summary: <whether functional validation supports closure>
 Command or Method:
 Result:
 Evidence:
@@ -92,7 +87,7 @@ Confidence:
 Blocks Closure:
 
 ## Eval Gate Matrix
-BLUF: <whether eval gates block completion>
+Summary: <whether eval gates block completion>
 Gate:
 Expected:
 Actual:
@@ -103,7 +98,7 @@ Blocks Closure: yes | no
 Required Action:
 
 ## Agentic Eval Validity
-BLUF: <whether the agentic eval proves the intended capability>
+Summary: <whether the agentic eval proves the intended capability>
 Evaluated Capability / Task:
 Task Validity:
 Outcome Validity:
@@ -117,7 +112,7 @@ Blocks Completion: yes | no
 Required Action:
 
 ## Side-Effect Authorization
-BLUF: <whether protected actions were authorized>
+Summary: <whether protected actions were authorized>
 Protected Action:
 User Authorization Evidence:
 Agent Justification:
@@ -128,7 +123,7 @@ Suggested Next Step:
 Blocks Completion: no
 
 ## Domain Model Integrity Check
-BLUF: <whether domain invariants remain intact>
+Summary: <whether domain invariants remain intact>
 Conclusion:
 Bounded Context:
 Aggregate Invariants:
@@ -138,7 +133,7 @@ Confidence:
 Blocks Completion:
 
 ## Drift Validation
-BLUF: <whether drift blocks closure>
+Summary: <whether drift blocks closure>
 Architecture Drift: Unknown
 Routing Drift: Unknown
 Context Drift: Unknown
@@ -147,43 +142,43 @@ Agent-Native Drift: Unknown
 Moat Drift: Unknown
 
 ## Architecture Integrity Check
-BLUF: <whether architecture integrity is acceptable>
+Summary: <whether architecture integrity is acceptable>
 Conclusion:
 Evidence:
 Blocks Completion:
 
 ## Routing Determinism Check
-BLUF: <whether routing remains deterministic>
+Summary: <whether routing remains deterministic>
 Conclusion:
 Evidence:
 Blocks Completion:
 
 ## Context Load Check
-BLUF: <whether context loading remains bounded>
+Summary: <whether context loading remains bounded>
 Conclusion:
 Evidence:
 Blocks Completion:
 
 ## Agent-Native Check
-BLUF: <whether agents can operate the workflow safely>
+Summary: <whether agents can operate the workflow safely>
 Conclusion:
 Evidence:
 Blocks Completion:
 
 ## Governance Simplicity Check
-BLUF: <whether governance stayed simple enough>
+Summary: <whether governance stayed simple enough>
 Conclusion:
 Evidence:
 Blocks Completion:
 
 ## Moat Protection Check
-BLUF: <whether the work preserves the HE moat>
+Summary: <whether the work preserves the HE moat>
 Conclusion:
 Evidence:
 Blocks Completion:
 
 ## Proof Artifacts
-BLUF: <whether required proof artifacts exist>
+Summary: <whether required proof artifacts exist>
 Produced:
 Required:
 Missing:
@@ -197,7 +192,7 @@ Blocks Completion:
 Attach or Link Back to Linear:
 
 ## Failures / Regressions
-BLUF: <whether failures or regressions block closure>
+Summary: <whether failures or regressions block closure>
 Failure or Regression:
 Evidence:
 Required Corrective Action:
@@ -205,7 +200,7 @@ Follow-Up Justified:
 Blocks Closure:
 
 ## Linear Completion Recommendation
-BLUF: <the Linear closure recommendation>
+Summary: <the Linear closure recommendation>
 Classification: Blocked
 Recommended Linear Status:
 Required Linear Comment/Update:
@@ -220,7 +215,7 @@ Status Update Needed:
 Proof Artifacts to Attach or Link:
 
 ## Follow-Up Work
-BLUF: <whether follow-up work is required>
+Summary: <whether follow-up work is required>
 Classification: Do Not Create
 Target Linear Project:
 Parent Issue or Milestone:
@@ -228,13 +223,13 @@ Reason:
 Agent-Safe or Human Review Required:
 
 ## Core / ADR Update Recommendation
-BLUF: <whether core or ADR updates are required>
+Summary: <whether core or ADR updates are required>
 Core Update:
 ADR Update:
 Reason:
 
 ## Evidence & Traceability Matrix
-BLUF: <whether evidence supports each material claim>
+Summary: <whether evidence supports each material claim>
 Conclusion:
 Fact:
 Interpretation:

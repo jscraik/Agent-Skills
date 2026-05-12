@@ -27,7 +27,9 @@ outputs:
   - concrete current-state resolution for `current` plan/spec requests, or blocked unclear_source_of_truth status
   - professional_confidence_review output when triggered, including initial/final confidence, evidence classifications, adversarial findings, fixes, revised plan, associated spec update status, iterative re-review summary, and confidence plateau
   - claim-level evidence pack or evidence debt for non-trivial professional reviews, including source path, freshness, blocker, and confidence impact
-  - durable plan artifact with stable plan IDs and acceptance IDs
+  - execution-first durable plan artifact with objective, source contract, scope, implementation strategy, work units, validation, rollback, review, and handoff
+  - stable PU plan-unit identifiers mapped to source FR, NFR, SA, VAC, issue, or decision IDs when available
+  - visual references or diagrams when dependencies, rollout phases, review lanes, state transitions, service boundaries, or cross-surface sequencing benefits from visual explanation
   - resolved or created Linear issue key/URL for tracked plans, or linear_blocked status with missing fields and ready-to-create payload
   - explicit linear_action_required boolean and linear_mutation_status enum: not_applicable, already_linked, confirmation_required, approved_small_set_created, or blocked
   - Linear/spec/plan/PR traceability matrix for tracked work
@@ -39,7 +41,7 @@ outputs:
   - "XP operating artifacts: slack_policy for allowable uncertainty and blackboard_delta for durable plan-state updates"
   - explicit classification of assumptions, blockers, and deferred implementation unknowns
   - evidence-backed confidence statement with verified facts, assumptions, blocked validations, and confidence ceilings
-  - "reviewability surface for non-trivial plans: Command Summary, BLUF-Only Summary, unit-level BLUFs, Do/Do Not boundaries, stop conditions, rollback notes, and No-Fog Gate"
+  - "reviewability surface for non-trivial plans: Command Summary with exactly one opening BLUF paragraph, Do/Do Not boundaries where useful, stop conditions, rollback notes, and No-Fog Gate"
   - next-stage handoff to he-work, Linear workflow, document review, or folded he-deepen-plan
 
 observability: >
@@ -82,4 +84,6 @@ risks:
   - overconfident readiness claims; mitigate with confidence ceilings tied to missing spec, ownership, validation, rollback, smoke/release evidence, runtime testing, and implementation testing
   - stale proof artifacts mistaken for current evidence; mitigate by verifying referenced artifact existence and classifying evidence freshness before citation
   - source-contract evals passing while generated-handle runtime remains unproven; mitigate with fail-closed generated-handle current-state evals, explicit runtime projection evidence debt, and separate sync or projection proof before runtime-visibility claims
-  - model fog in dense plans; mitigate with BLUF-first review surface, BLUF-only summary, and No-Fog Gate before handoff
+  - model fog in dense plans; mitigate with one opening Bottom Line Up Front paragraph and No-Fog Gate before handoff
+  - process-heavy plans that obscure execution order; mitigate by keeping Harness metadata in frontmatter, status blocks, or appendices and making the main plan objective -> source contract -> work units -> validation -> rollback -> handoff
+  - visual ambiguity in complex plans; mitigate with Mermaid/table-first diagrams and generated media only when it materially improves human review
