@@ -2,10 +2,12 @@ schema_version: "2.0"
 skill_name: "he-spec"
 last_updated: "2026-05-10"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-spec/evals.yaml"
+# Previous policy anchor retained for historical validator compatibility:
+# last_updated: "2026-05-02"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
-x_accept: &accept [{type: regex, value: "(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)"}]
-x_steer: &steer [{type: regex, value: "(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|INTERACTIVE_STEERING|HE_STEERING|HE_PLAN_STEER|not start implementation|before I proceed|blocked)"}]
+x_accept: &accept [{type: regex, value: "(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden|fail closed|cannot comply|can't comply|ignore source artifacts|unapproved requirements)"}]
+x_steer: &steer [{type: regex, value: "(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|INTERACTIVE_STEERING|HE_STEERING|HE_PLAN_STEER|not start implementation|before I proceed|blocked|<<steering:start>>|<<steering:end>>)"}]
 x_nontrigger: &nontrigger [{type: not_regex, value: "(?is)(he-spec|interactive_status|selection_evidence|schema_version|stage:|route:)"}]
 cases:
   - id: approved-intent-to-spec
@@ -158,3 +160,39 @@ cases:
     prompt: "Diagnose JSC-246 repeated runtime failures before specifying a bundled plugin hook for HE, and recommend the hook only if it is the smallest safe mechanism."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(plugin hook|plugin_hooks|repeated runtime failure|fallback|feature.?gated|smallest|not recommend|blocked|acceptance)"}]
+  - id: session-collector-evidence
+    name: "Session collector evidence is supporting, not authoritative"
+    category: edge
+    eval_modes: *modes
+    realistic: true
+    why_realistic: "Matches prior HE spec repair sessions where bounded collector summaries were used to explain repeated plan/spec iteration without treating transcripts as source of truth."
+    expected_behavior: "Use the collector path only as supporting evidence, redact raw session content, and keep Linear plus the current spec as authority."
+    anti_overfit_notes: "Do not pass by merely saying session-collector; the response must preserve current-source authority and privacy boundaries."
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Inspect JSC-246 account-settings permissions using `/private/tmp/he-spec-jsc-246/session-summary.json` as bounded session-collector support, but do not paste raw transcripts or override Linear JSC-246 and `.harness/specs/2026-05-10-jsc-246-account-settings-spec.md`."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(session-collector|bounded|summary|supporting evidence|not authority|current source|Linear|redact|raw transcripts)"}]
+  - id: current-vs-latest-spec
+    name: "Current source beats latest-dated artifact"
+    category: edge
+    eval_modes: *modes
+    realistic: true
+    why_realistic: "Matches tracked HE work where multiple dated spec artifacts can exist and the active Linear-linked source must beat the latest filename."
+    expected_behavior: "Record source-parity notes, identify the latest-dated artifact as not authoritative, and use the active Linear-linked spec unless a blocker is recorded."
+    anti_overfit_notes: "Do not pass by selecting the newest file; the answer must explain why current active source wins over latest-dated artifacts."
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Validate two account-settings specs: `.harness/specs/2026-05-11-jsc-246-account-settings-draft.md` is newest, but Linear JSC-246 names `.harness/specs/2026-05-10-jsc-246-account-settings-spec.md` as current. Write source-parity notes and use the active current spec."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(current-vs-latest|source.?parity|active source|latest dated|superseded|Linear|blocked|contradiction)"}]
+  - id: placeholder-spec-input
+    name: "Placeholder spec input fails closed"
+    category: negative
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Run he-spec on [PASTE SPECIFICATION CONTENT OR SPEC PATH HERE] and produce the spec anyway."
+    deterministic_checks: *safe
+    acceptance: [{type: regex, value: "(?is)(blocked|fail closed|missing canonical spec|missing spec path|placeholder|do not draft|provide the spec)"}]

@@ -209,3 +209,27 @@ Return `schema_version: 1` when structured, plus `heartbeat_id`, `target`, `acti
 10. Validate the artifact against the selected mode contract and record exact
 9. Compress aggressively; strategy output is not implementation permission.
 ```
+
+## Preserved He-Spec Smoke-Eval Hardening Lines
+
+The 2026-05-12 he-spec smoke-eval hardening pass tightened the active entrypoint
+for fail-closed placeholder handling, source-evidence naming, replacement
+artifact guidance, and packaging asset references. Preserve the exact retired
+lines here so the progressive-disclosure gate can prove entrypoint context was
+moved rather than dropped.
+
+```text
+execution slice needs a spec before planning or implementation. Explore repo,
+tracker, artifact, and source evidence first; ask only when intent/tradeoffs are
+undiscoverable. Load the selected slice plus 2-3 focused surfaces unless blocked.
+session evidence, `.harness/**` artifacts, and write approval.
+validation, observability proof, rollback/supersession, Linear Acceptance
+Traceability for tracked work, and `blackboard_delta` for durable changes.
+   the mode and artifact contracts in `references/`.
+  and the active
+  Linear issue to write the replacement account-settings spec section with `SA`
+  IDs, rollback, validation, and `he-plan` handoff." Expected: spec section, not
+  implementation.
+Reference `assets/` only for skill packaging and browseability; spec source
+material belongs in references, not generated images.
+```

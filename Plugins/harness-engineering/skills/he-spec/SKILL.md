@@ -14,20 +14,24 @@ priority instructions and approval boundaries remain authoritative.
 
 ## When to Use
 Use when an approved milestone, parent issue, bug, refactor phase, UI source, or
-execution slice needs a spec before planning or implementation. Explore repo,
-tracker, artifact, and source evidence first; ask only when intent/tradeoffs are
-undiscoverable. Load the selected slice plus 2-3 focused surfaces unless blocked.
+execution slice needs a spec before planning or implementation. Explore first and ask second:
+inspect repo, tracker, artifact, and source evidence before asking, then ask only
+when intent/tradeoffs are undiscoverable. Load the selected slice plus 2-3
+focused surfaces unless blocked.
 
 ## When Not to Use
 Do not use for implementation, review-only feedback, task planning, runtime
 install/sync, broad strategy, or unselected ideas. Stop when no selected slice
 exists or when external writes, destructive changes, secret access, production
 deployment, or broad repo edits lack approval.
+If the supplied spec prompt still contains placeholders such as
+`[PASTE SPECIFICATION CONTENT OR SPEC PATH HERE]`, fail closed and request the
+missing canonical spec path or content instead of drafting against a template.
 
 ## Inputs
 Required: problem statement, selected slice, and primary source evidence.
 Optional: tracker metadata, QA report, current-vs-latest spec status, UI source,
-session evidence, `.harness/**` artifacts, and write approval.
+session-collector evidence, `.harness/**` artifacts, and write approval.
 
 ## Outputs
 Return `schema_version: 1`, `interactive_status`, `selection_evidence`, `route`,
@@ -36,8 +40,8 @@ Return `schema_version: 1`, `interactive_status`, `selection_evidence`, `route`,
 `spec_path`, `acceptance_ids`, `handoff`, and evidence-tied `confidence`.
 
 Specs include stable `SA` or `VAC` IDs, source traceability, In/Out of Scope,
-validation, observability proof, rollback/supersession, Linear Acceptance
-Traceability for tracked work, and `blackboard_delta` for durable changes.
+validation, observability proof, rollback/supersession, Linear Acceptance Traceability
+for tracked work, and `blackboard_delta` for durable changes.
 
 ## Preconditions
 Identify canonical source, repo instructions, permissions, and tracker/artifact
@@ -51,7 +55,9 @@ handles, runtime projections, plugin caches, or mirrors unless canonical.
    invariants, brainstorm/QA/UI artifacts, and current spec. Treat strategy,
    triage, review, and feature docs as secondary unless admitted by the slice.
 3. Choose `standard-spec`, `dedicated-ui-spec`, revision, or deepen mode using
-   the mode and artifact contracts in `references/`.
+   the mode and artifact contracts in `references/`. For revisions, return a
+   complete replacement spec section or complete replacement artifact rather
+   than interpretation-heavy deltas.
 4. Resolve or block live tracking. If missing and execution continues, set
    `linear_mutation_status: confirmation_required` or `blocked` and include
    `linear_action_required`.
@@ -115,18 +121,18 @@ unless deterministic or directly proven.
 
 ## Examples
 - When the user says: "For JSC-246, validate `.harness/qa/account-settings.md`
-  and the active
-  Linear issue to write the replacement account-settings spec section with `SA`
-  IDs, rollback, validation, and `he-plan` handoff." Expected: spec section, not
-  implementation.
+  and the active Linear issue to write the replacement account settings flow
+  spec section with `SA` IDs, In Scope, Out of Scope, rollback, validation, and
+  `he-plan` handoff." Expected: spec section, not implementation.
 - When the user says: "For JSC-299, inspect the defect that exists only in
   `.harness/linear/coding-harness-linear-plan.md`; draft the spec and return the
   confirmation-gated Linear payload instead of pretending the live issue exists."
   Expected: local spec plus tracker blocker or confirmation payload.
 
 ## Assets
-Reference `assets/` only for skill packaging and browseability; spec source
-material belongs in references, not generated images.
+Reference `assets/icon-small.png`, `assets/icon-large.png`, and `assets/` only
+for skill packaging and browseability; spec source material belongs in
+references, not generated images.
 
 ## References
 Read when: mode/artifact shape -> `references/spec-mode-rules.md`,
@@ -136,6 +142,8 @@ Read when: prior Codex/session evidence matters ->
 Read before delegating helper work -> `../../references/subagent-call-contract.md`.
 Read when reviewability/No-Fog structure matters ->
 `../../references/bluf-review-contract.md`.
+Read when retained doctrine is needed ->
+`Plugins/harness-engineering/references/he-spec-doctrine.md`.
 Deferred context index -> `../../references/deferred-context-index.md`.
 Do not remove important context for budget trimming; move deep context to
 references and index it in `../../references/deferred-context-index.md`.

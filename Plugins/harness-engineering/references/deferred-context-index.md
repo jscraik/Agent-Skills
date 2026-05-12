@@ -89,11 +89,11 @@ Load references by trigger instead of by habit:
 
 `he-spec`:
 
-- `references/he-spec-doctrine.md`
-- `skills/he-spec/references/autoresearch-2026-05-02.md`
-- `skills/he-spec/references/codex-and-session-evidence.md`
-- `skills/he-spec/references/spec-artifact-contract.md`
-- `skills/he-spec/references/spec-mode-rules.md`
+- `Plugins/harness-engineering/references/he-spec-doctrine.md`
+- `Plugins/harness-engineering/skills/he-spec/references/autoresearch-2026-05-02.md`
+- `Plugins/harness-engineering/skills/he-spec/references/codex-and-session-evidence.md`
+- `Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md`
+- `Plugins/harness-engineering/skills/he-spec/references/spec-mode-rules.md`
 
 `he-plan`:
 
