@@ -57,9 +57,13 @@ handles, runtime projections, plugin caches, or mirrors unless canonical.
    `linear_action_required`.
 5. Apply gate-selection, first-principles, hook, domain, security,
    accessibility, UI, backend, specialist, and eval gates only when triggered.
-6. Write `.harness/specs/**.md` only when artifact writes are authorized;
+6. Apply the BLUF review contract to non-trivial generated or replacement spec
+   artifacts so major sections start with plain-English BLUFs and include a
+   BLUF-only summary, Do/Do Not boundaries, review questions when useful, and a
+   No-Fog Gate.
+7. Write `.harness/specs/**.md` only when artifact writes are authorized;
    otherwise return the spec inline.
-7. Hand off to `he-plan` only after acceptance IDs and validation gates are
+8. Hand off to `he-plan` only after acceptance IDs and validation gates are
    stable.
 
 ## Validation
@@ -67,6 +71,10 @@ Fail fast: record each gate as `pass`, `fail`, or `blocked`; never claim
 readiness from unrun checks. Durable specs require traceability, stable
 acceptance IDs, validation, observability, rollback/supersession, owner evidence,
 artifact identity lint, and traceability lint when available.
+For non-trivial generated specs, run or block
+`python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
+<spec-path> --json`; block handoff when section BLUFs are vague, missing, or
+disconnected from evidence.
 
 ## Failure Mode
 If evidence, live tracker linkage, artifact permission, or routing is missing,
@@ -126,7 +134,11 @@ Read when: mode/artifact shape -> `references/spec-mode-rules.md`,
 Read when: prior Codex/session evidence matters ->
 `references/codex-and-session-evidence.md`.
 Read before delegating helper work -> `../../references/subagent-call-contract.md`.
+Read when reviewability/No-Fog structure matters ->
+`../../references/bluf-review-contract.md`.
 Deferred context index -> `../../references/deferred-context-index.md`.
+Do not remove important context for budget trimming; move deep context to
+references and index it in `../../references/deferred-context-index.md`.
 Read when risk expands: tracker/delta gates, gate selection, first principles,
 plugin hook capability, domain/model, agent-native compression, HE doctrine,
 pragmatic invariants, XP operating contracts, and security/accessibility modules.

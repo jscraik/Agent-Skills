@@ -36,6 +36,7 @@ the reference below, and let validators catch stale duplicated procedure text.
   - `references/session-evidence-skillify-triage.md`
   - `references/session-evidence-trace-context.md`
 - Review, ideation, and agent-native lenses:
+  - `references/bluf-review-contract.md`
   - `references/agent-native-audit-scorecard.md`
   - `references/brainstorm-topic-coverage-contract.md`
   - `references/document-review-finding-tiers.md`
@@ -58,6 +59,7 @@ Load references by trigger instead of by habit:
 | Stage or condition | Load | Expected proof |
 | --- | --- | --- |
 | Any stage writes durable docs, mutates files, or hands off | `references/stage-context-contract.md`, `references/lifecycle-exit-contract.md` | compact stage context plus exit status |
+| Non-trivial durable HE artifact is operator-facing | `references/bluf-review-contract.md` | Command Summary, BLUF-Only Summary, section BLUFs, No-Fog Gate, or compact not-applicable reason |
 | Stage choice is ambiguous | `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/interactive-steering-contract.md` | selected stage or one blocking question |
 | `.harness` artifacts determine scope | `references/artifact-classification-and-traceability.md`, `references/artifact-routing-contract.md` | content-shape classification and Artifact Identity status |
 | Non-trivial tracked work | `references/linear-tracker-gate.md` | resolved, created, blocked, or user-opted-out tracker status |
@@ -189,3 +191,22 @@ entrypoint paragraphs. Their audit value is preserved by active stage diffs,
 the relevant `skills/**/references/source-prompt-preservation.md` files, and
 fixtures. Keep this index as a router only; do not paste retired procedure text
 back into this file.
+
+## 2026-05-12 BLUF Productization Preservation Notes
+
+The BLUF productization pass compressed several stage entrypoints while keeping
+their behavior in stage references, artifact contracts, and the BLUF review
+contract. These exact retired lines are preserved so progressive-disclosure
+validation can prove the context was moved rather than silently dropped.
+
+```text
+5. Route durable brainstorm artifacts to `.harness/brainstorm/**.md`; route
+10. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, and keep the canonical slug aligned with the spec/plan/eval chain.
+7. Generate and validate the report, then ask accept/challenge/rework before
+8. Mutate Linear only after explicit post-plan approval, known destination,
+3. For tracked work, resolve or block Linear linkage and run the Linear Delta
+8. Define closure proof using dated `.harness/evals/**` artifacts and preserve
+- User asks: "The Linear template bug in `he-linear-plan` is fixed and the
+6. Write `.harness/specs/**.md` only when artifact writes are authorized;
+8. Compress conclusions to decisions that change routing, deletion, investment,
+```

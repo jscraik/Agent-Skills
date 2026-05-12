@@ -12,8 +12,11 @@ CONTEXT = """Skill Factory routing context:
 - Route installation, listing, and browseability checks to skill-installer.
 - Route evidence folding, dedupe, pruning, and retirement work to skill-refactor.
 - Route reusable workflow capture to skillify.
-- Run the first-principles factory gate before create, harden, refactor, or skillify work: identify the user outcome, copied assumption, smallest effective mechanism, artifact decision, and proof needed.
-- Prefer IMPROVE_EXISTING, DOCS_ONLY, or DO_NOT_BUILD when a new skill would only copy a template or increase context load.
+- Run the first-principles factory gate before create, harden, refactor, or skillify work.
+- Identify the user outcome, copied assumption, smallest effective mechanism,
+  artifact decision, and proof needed.
+- Prefer IMPROVE_EXISTING, DOCS_ONLY, or DO_NOT_BUILD when a new skill would
+  only copy a template or increase context load.
 - Use route_skillset.py with --skill-set skill-factory when validating routed skill behavior."""
 
 

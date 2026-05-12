@@ -37,6 +37,7 @@ outputs:
   - compression recovery gates when cockpit, command catalog, README front door, default help, golden-path command, or other first-contact UX is in scope
   - "XP operating artifact: blackboard_delta for new or changed durable requirements"
   - exact parallel research support via repo-research-analyst, learnings-researcher, and conditional external-research roles when needed
+  - "reviewability surface for non-trivial specs: Command Summary, BLUF-Only Summary, section BLUFs, Do/Do Not boundaries, and No-Fog Gate"
   - explicit validation and next-stage handoff guidance
 
 observability: >
@@ -71,3 +72,4 @@ risks:
   - prior-session drift; mitigate by treating session-collector output as supporting evidence, not tracker authority
   - advisory compression language; mitigate by making first-contact budget, standalone command admission, docs deletion budget, fresh-agent eval, ablation proof, and evidence-backed metrics blocking acceptance gates
   - review-stack sprawl; mitigate by requiring one selected execution slice and treating secondary Harness roots as context unless admitted by the Linear/refactor slice
+  - model fog in dense specs; mitigate with BLUF-first review surface and No-Fog Gate for non-trivial artifacts

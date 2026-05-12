@@ -69,9 +69,12 @@ connector permissions outrank this skill.
    smallest useful milestone, parent issue, bug issue, or sub-issue set.
 7. Draft dependencies, eval gates, rollback gates, labels, priority, template,
    human/agent routes, and ready-to-create payloads.
-8. Mutate Linear only after explicit post-plan approval, known destination,
+8. Apply the BLUF review contract to non-trivial generated Linear plan artifacts
+   so the creation decision, active set, mutation blocker, and next action are
+   visible before payload detail.
+9. Mutate Linear only after explicit post-plan approval, known destination,
    and a small confirmed object set; otherwise report the blocker/status.
-9. Validate; stop at the first failed gate and record exact pass, fail, or
+10. Validate; stop at the first failed gate and record exact pass, fail, or
    blocked outcomes.
 
 ## Constraints
@@ -144,6 +147,9 @@ authorized gate, or reported as blocked. Record `pass`, `fail`, or
 `blocked`; do not infer readiness from unrun checks. Use strict audit, skill
 gate, OpenAI format, OpenClaw, Plugin Eval, smoke/release evals, and docs/prose
 checks when available.
+For non-trivial generated Linear plans, run or block
+`python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
+<linear-plan-path> --json`.
 
 ## References
 
@@ -157,7 +163,10 @@ checks when available.
   `../../references/source-prompt-coverage-contract.md`
 - Read before delegating helper work:
   `../../references/subagent-call-contract.md`
+- Read when reviewability/No-Fog structure matters:
+  `../../references/bluf-review-contract.md`
 - Read when routing, steering, artifact, XP, or subagent details are needed:
   `../../references/deferred-context-index.md`
 
-Move deep context to references with a clear route.
+Do not remove important context for budget trimming; move deep context to
+references and index it in `../../references/deferred-context-index.md`.

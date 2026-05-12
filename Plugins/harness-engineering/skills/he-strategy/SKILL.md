@@ -64,9 +64,12 @@ Also include `he-strategy`, `subagent_policy`, `roles_used`,
    other shared HE contracts only when their triggers apply.
 7. If evidence is sampled, stale, or narrow, label authority limited and record
    downstream confidence plus refresh work.
-8. Compress conclusions to decisions that change routing, deletion, investment,
+8. Apply the BLUF review contract to non-trivial generated strategy artifacts so
+   the strategic decision, authority limit, risk consequence, and next route are
+   visible before supporting evidence.
+9. Compress conclusions to decisions that change routing, deletion, investment,
    anti-drift behavior, or the smallest feedback-producing next slice.
-9. Validate the artifact against the selected mode contract and record each
+10. Validate the artifact against the selected mode contract and record each
    gate as `pass`, `fail`, or `blocked`.
 
 ## Validation
@@ -74,7 +77,9 @@ Also include `he-strategy`, `subagent_policy`, `roles_used`,
 After skill edits run strict audit, `skill_gate.py`, OpenClaw, OpenAI format
 lint, progressive-disclosure lint, family benchmarks, and Plugin Eval. For
 artifacts, verify naming, sources, evidence matrix, confidence, authority
-limits, and stop/pivot condition. Rerun failed gates. Mark spelling/prose
+limits, stop/pivot condition, and BLUF structure for non-trivial artifacts with
+`python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
+<strategy-artifact-path> --json`. Rerun failed gates. Mark spelling/prose
 validation `blocked` when no checker exists.
 
 ## Constraints
@@ -148,6 +153,8 @@ impact, future-agent guidance, validation outcomes, and evidence traceability.
 - Read when validating contract or eval coverage -> `references/contract.yaml`,
   `references/evals.yaml`
 - Read when routing shared HE contracts -> `../../references/deferred-context-index.md`
+- Read when reviewability/No-Fog structure matters ->
+  `../../references/bluf-review-contract.md`
 - Read when resolving helper roles -> `../../references/subagent-call-contract.md`,
   `../../references/subagent-routing.md`
 - Read when applying first principles or XP ->

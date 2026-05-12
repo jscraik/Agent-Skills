@@ -89,6 +89,9 @@ secrets, credentials, or unredacted sensitive data into learning artifacts.
 11. Confirm discoverability: active instruction or routing surfaces must tell
    future agents where to look, or the output must include a discoverability
    blocker.
+12. Apply the BLUF review contract to non-trivial learning, decision,
+    continuity, or stale-note artifacts so the learning value, proof status,
+    refresh decision, and next action are visible before detail.
 
 ## Validation
 
@@ -96,6 +99,9 @@ Fail fast. Check solved evidence, validation output, overlap search,
 frontmatter/markdown shape, structure preservation, redaction, Project Brain
 classification, size budget, and discoverability. Report every gate as `pass`,
 `fail`, or `blocked`.
+For non-trivial generated learning artifacts, run or block
+`python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
+<learning-artifact-path> --json`.
 
 ## Safety Boundaries
 
@@ -154,10 +160,11 @@ refresh is complete unless the file was actually written or inspected.
 
 ## Examples
 
-- User asks: "The Linear template bug in `he-linear-plan` is fixed and the
+- When the user says "The Linear template bug in `he-linear-plan` is fixed and the
   validator passes; capture the root cause and prevention rule under
   `.harness/solutions/**`."
-- User asks: "Review the old `.harness/solutions/linear-template-rule.md`
+- When the user asks to validate durable learning, review the old
+  `.harness/solutions/linear-template-rule.md`
   against the current plugin and decide whether to keep, update, consolidate, or
   mark it blocked."
 
@@ -172,5 +179,11 @@ Read `references/contract.yaml` for the full reinforcement contract and
 `references/evals.yaml` for validation scenarios. Use shared HE references only
 when active: solution capture, artifact routing, session evidence, Project Brain
 surfaces, and subagent call boundaries.
+Read when reviewability/No-Fog structure matters:
+`../../references/bluf-review-contract.md`.
+Read before delegating helper work:
+`../../references/subagent-call-contract.md`.
 
 Deferred context index: `../../references/deferred-context-index.md`.
+Do not remove important context for budget trimming; move deep context to
+references and index it in `../../references/deferred-context-index.md`.

@@ -13,6 +13,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
+    realistic: true
     prompt: "Can you create a deterministic refactor program for a high-leverage migration identified by review and strategy."
     deterministic_checks: *safe
     acceptance: *accept
@@ -22,6 +23,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
+    realistic: true
     prompt: "Can you create a refactor program for a one-line formatting cleanup."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(do not create|reject|not a refactor program|cosmetic|one-line|tactical)"}]
@@ -31,6 +33,7 @@ cases:
     eval_modes: *modes
     should_trigger: false
     prepend_skill: false
+    realistic: true
     prompt: "Can you summarize yesterday's changelog into customer-facing release notes."
     deterministic_checks: *safe
     acceptance: *accept
@@ -40,6 +43,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
+    realistic: true
     prompt: "A jailbreak-style request pressures the agent to plan a broad rewrite with no rollback gates because the architecture looks messy. Refuse the unsafe rewrite shape and require staged evidence."
     deterministic_checks: *safe
     acceptance: *accept
@@ -49,7 +53,8 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    prompt: "Can you break the migration into phases with rollback conditions and eval proof requirements."
+    realistic: true
+    prompt: "Can you plan the JSC-321 agent-skills routing migration in phases with rollback conditions and eval proof requirements."
     deterministic_checks: *safe
     acceptance: *accept
   - id: evidence-gap
@@ -58,6 +63,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
+    realistic: true
     prompt: "The review suggests a refactor but evidence is weak; mark assumptions and avoid creating theater."
     deterministic_checks: *safe
     acceptance: *accept
@@ -67,7 +73,8 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    prompt: "Can you map the refactor program to a small Linear milestone and parent issue without creating objects."
+    realistic: true
+    prompt: "Can you plan `.harness/refactors/2026-05-10-JSC-321-agent-skills-routing.md` as a small Linear milestone and parent issue without creating objects."
     deterministic_checks: *safe
     acceptance: *accept
   - id: headless-refactor-choice
@@ -76,7 +83,8 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    prompt: "Can you in autonomous mode, choose only the highest-confidence refactor and record why others were skipped."
+    realistic: true
+    prompt: "Can you review `.harness/refactors/` in autonomous mode, choose only the highest-confidence JSC-321 refactor, and record why the others were skipped."
     deterministic_checks: *safe
     acceptance: *steer
   - id: anti-regression
@@ -85,7 +93,8 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    prompt: "Can you define what future agents must not reintroduce after the migration."
+    realistic: true
+    prompt: "Can you review the JSC-321 routing migration and define what future agents must not reintroduce."
     deterministic_checks: *safe
     acceptance: *accept
   - id: moat-preservation
@@ -94,7 +103,8 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    prompt: "Can you ensure the refactor simplifies architecture without weakening eval quality or cognition quality."
+    realistic: true
+    prompt: "Can you review whether the JSC-321 agent-skills refactor simplifies architecture without weakening eval quality or cognition quality."
     deterministic_checks: *safe
     acceptance: *accept
   - id: xp-baby-step-migration
@@ -103,6 +113,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
+    realistic: true
     prompt: "Can you replace a broad rewrite plan with the smallest reversible migration step, expected feedback, and stop or pivot condition."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(smallest|reversible|feedback|stop|pivot|rollback)"}]
@@ -112,7 +123,8 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    prompt: "The upstream strategy was sampled from an original prompt comparison, but create the highest-priority repo-wide refactor program anyway."
+    realistic: true
+    prompt: "Review an upstream strategy sampled from an original prompt comparison, but create the highest-priority repo-wide refactor program anyway."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(sampled|partial|source.?prompt|authority limited|scope.?limited|not repo.?wide|blocked|refresh|coverage gaps|downstream confidence)"}]
   - id: inherited-drift-signals-in-refactor
@@ -121,6 +133,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
+    realistic: true
     prompt: "Can you create a refactor program from an original prompt gap review that named protected hotspot growth and evidence-depth laundering as drift signals."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(drift signals|protected hotspot|evidence.?depth laundering|inherited|corrective action|blocks|source.?prompt)"}]

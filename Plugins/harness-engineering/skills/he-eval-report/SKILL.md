@@ -42,6 +42,9 @@ otherwise. Include Artifact Identity frontmatter from
 `schema_version`, evaluated slice, validation results, drift validation, proof
 artifacts, closure recommendation, follow-up work, blockers, next handoff, and
 confidence.
+Non-trivial reports also include the BLUF review surface so the closure
+recommendation, blocker consequence, and next action are visible before proof
+detail.
 
 ## Preconditions
 - Resolve exactly one evaluated slice; classify source artifacts by content
@@ -69,7 +72,10 @@ confidence.
    sidecar path, and file-existence verification. A prompt alone is not proof.
 6. Run or explicitly block relevant validation gates; never invent passing
    results.
-7. Generate and validate the report, then ask accept/challenge/rework before
+7. Apply the BLUF review contract to non-trivial eval reports so the closure
+   recommendation, proof blocker, follow-up decision, and next action are
+   scannable before detailed evidence.
+8. Generate and validate the report, then ask accept/challenge/rework before
    using `Complete` or `Complete with follow-up` as a Linear closure
    recommendation.
 
@@ -121,9 +127,10 @@ without surrounding prose, image-only proof, or conclusions that require reading
 unlinked logs.
 
 ## Output Format
-Use the template in `references/eval-report-template.md`. Closure recommendation
-must be one of `Complete`, `Complete with follow-up`, `Blocked`, `Needs rework`,
-or `Unsafe to close`; do not use completion recommendations until steering is
+Use the template in `references/eval-report-template.md` plus the BLUF review
+surface for non-trivial reports. Closure recommendation must be one of
+`Complete`, `Complete with follow-up`, `Blocked`, `Needs rework`, or
+`Unsafe to close`; do not use completion recommendations until steering is
 complete.
 
 ## Confidence Reporting
@@ -151,6 +158,8 @@ or media persistence is failed or blocked.
   `references/linear-completion-policy.md`.
 - Read when validating local contract/evals: `references/contract.yaml`,
   `references/evals.yaml`.
+- Read when report scanability/No-Fog structure matters:
+  `../../references/bluf-review-contract.md`.
 - Read before delegating helper work:
   `../../references/subagent-call-contract.md`.
 - Read shared HE contracts only when the selected slice needs them:

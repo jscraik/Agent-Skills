@@ -67,6 +67,9 @@ hand off to `he-reinforce`.
 10. For repeated review/validation failures, reconstruct the pattern in
     `repeated_failure_state` and route repair tracking to `he-linear-plan`,
     live Linear, or `he-reinforce`.
+11. Apply the BLUF review contract to non-trivial durable reconcile artifacts so
+    the earliest incomplete stage, blocker, next action, and confidence impact
+    are visible before evidence detail.
 
 ## Validation
 
@@ -74,6 +77,9 @@ Fail fast. Check routing, stage artifacts, source-prompt coverage, tracker/PR
 links, Project Brain freshness, validation evidence, and handoff authority.
 Report gates as `pass`, `fail`, or `blocked`. Treat stale tracker, validation,
 PR, or artifact evidence as degraded, not closure proof.
+For non-trivial generated reconcile artifacts, run or block
+`python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
+<reconcile-artifact-path> --json`.
 
 ## Safety Boundaries
 
@@ -141,5 +147,7 @@ when active: stage context, coding-harness bridge, source-prompt coverage,
 plugin-hook capability, UI plan routing, artifact routing, agent-native
 compression, pragmatic invariants, and XP operating contract. Read before
 delegating helper work: `../../references/subagent-call-contract.md`.
+Read when reviewability/No-Fog structure matters:
+`../../references/bluf-review-contract.md`.
 
 Deferred context index: `../../references/deferred-context-index.md`.

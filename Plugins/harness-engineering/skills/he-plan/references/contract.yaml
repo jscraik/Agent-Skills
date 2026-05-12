@@ -10,6 +10,9 @@ triggers:
   - sequencing related Linear issues or blockers before he-work
   - creating validation, rollout, rollback, or test strategy for planned delivery
   - revising a plan while preserving stable IDs and traceability
+  - deepening a plan or running technical review before he-work
+  - reviewing a plan with professional engineering confidence standards
+  - prompts that frame Codex as a senior software engineering reviewer, systems architect, implementation-risk analyst, specification maintainer, Codex harness engineer, Skill Factory validation partner, media artifact operator, or adversarial validation partner
 
 inputs:
   - approved execution slice: one milestone, one parent issue, one refactor phase, or one execution slice
@@ -21,6 +24,9 @@ inputs:
 outputs:
   - selected execution slice type, source path, and explicit planning boundary
   - mode and depth decision: fresh/resume/deepen plus lightweight/standard/deep
+  - concrete current-state resolution for `current` plan/spec requests, or blocked unclear_source_of_truth status
+  - professional_confidence_review output when triggered, including initial/final confidence, evidence classifications, adversarial findings, fixes, revised plan, associated spec update status, iterative re-review summary, and confidence plateau
+  - claim-level evidence pack or evidence debt for non-trivial professional reviews, including source path, freshness, blocker, and confidence impact
   - durable plan artifact with stable plan IDs and acceptance IDs
   - resolved or created Linear issue key/URL for tracked plans, or linear_blocked status with missing fields and ready-to-create payload
   - explicit linear_action_required boolean and linear_mutation_status enum: not_applicable, already_linked, confirmation_required, approved_small_set_created, or blocked
@@ -33,6 +39,7 @@ outputs:
   - "XP operating artifacts: slack_policy for allowable uncertainty and blackboard_delta for durable plan-state updates"
   - explicit classification of assumptions, blockers, and deferred implementation unknowns
   - evidence-backed confidence statement with verified facts, assumptions, blocked validations, and confidence ceilings
+  - "reviewability surface for non-trivial plans: Command Summary, BLUF-Only Summary, unit-level BLUFs, Do/Do Not boundaries, stop conditions, rollback notes, and No-Fog Gate"
   - next-stage handoff to he-work, Linear workflow, document review, or folded he-deepen-plan
 
 observability: >
@@ -69,3 +76,10 @@ risks:
   - additive compatibility dominating subtractive clarity; mitigate by sequencing default-help budget, agent-catalog budget, docs front-door collapse, standalone-command admission tests, fresh-agent eval, and ablation proof as blocking units
   - compression plans remaining too subjective to implement; mitigate by requiring exact public command names, hidden command names, future command admission criteria, and generated snapshot commands in the plan artifact
   - execution-slice drift; mitigate by loading `references/execution-slice-contract.md` and blocking any plan unit that is not admitted by the selected Linear/refactor slice
+  - first-pass plan reviews remaining too shallow; mitigate by routing deepen/technical-review/professional-confidence prompts to `references/professional-confidence-review.md`
+  - current shorthand producing invented plan/spec context; mitigate by requiring concrete source resolution or blocked unclear_source_of_truth status
+  - plan/spec drift after material plan revision; mitigate by requiring associated spec update, proposed patch, or blocked status
+  - overconfident readiness claims; mitigate with confidence ceilings tied to missing spec, ownership, validation, rollback, smoke/release evidence, runtime testing, and implementation testing
+  - stale proof artifacts mistaken for current evidence; mitigate by verifying referenced artifact existence and classifying evidence freshness before citation
+  - source-contract evals passing while generated-handle runtime remains unproven; mitigate with fail-closed generated-handle current-state evals, explicit runtime projection evidence debt, and separate sync or projection proof before runtime-visibility claims
+  - model fog in dense plans; mitigate with BLUF-first review surface, BLUF-only summary, and No-Fog Gate before handoff

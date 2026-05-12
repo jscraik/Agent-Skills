@@ -39,7 +39,7 @@ the `he-reconcile` or `he-reinforce` handoff evidence when applicable.
    change lacks verified-failure evidence or proof impact.
 8. Apply the plugin hook capability contract when reviewing plugin manifests, `hooks/hooks.json`, hook commands, or hook-enforced lifecycle claims. Flag hardcoded absolute paths when `${PLUGIN_ROOT}` or `${PLUGIN_DATA}` would preserve plugin portability, and verify fallback behavior while `plugin_hooks` may be disabled.
 9. Do not approve readiness from green CI alone when real behavior proof, security review, live PR-thread state, or traceability evidence is missing.
-10. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, and keep the canonical slug aligned with the spec/plan/eval chain.
+10. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, keep the canonical slug aligned with the spec/plan/eval chain, and apply the BLUF review contract without hiding severity-ranked findings.
 11. End with approve, request changes, autofix candidate, or follow-up lane for repeated feedback.
 12. For repeated failures or bugs, set `repeated_failure_route` before closure:
     route live repair work to `he-linear-plan` or live Linear issue creation
@@ -85,6 +85,7 @@ Reference `assets/` only for skill packaging and browseability; review evidence 
 - Plugin hook capability: `Plugins/harness-engineering/references/plugin-hook-capability-contract.md`
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Deferred context index: `Plugins/harness-engineering/references/deferred-context-index.md`
+- BLUF review contract: `Plugins/harness-engineering/references/bluf-review-contract.md`
 - Coding Harness bridge: `Plugins/harness-engineering/references/coding-harness-command-bridge.md`
 - Review policy index: `Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md`
 - Review loop patterns: `Plugins/harness-engineering/skills/he-code-review/references/review-loop-patterns.md`

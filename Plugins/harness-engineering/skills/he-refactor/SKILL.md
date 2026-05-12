@@ -69,9 +69,12 @@ shared subagent policy fields for `he-refactor`.
 7. Define desired end state, smallest reversible XP step, feedback expected,
    stop/pivot condition, phases, rollback, coexistence rules, and Linear mapping
    without creating Linear objects.
-8. Define closure proof using dated `.harness/evals/**` artifacts and preserve
+8. Apply the BLUF review contract to non-trivial generated refactor programs so
+   the migration decision, risk consequence, smallest reversible step, and
+   stop/pivot condition are visible before phase detail.
+9. Define closure proof using dated `.harness/evals/**` artifacts and preserve
    future-agent anti-regression constraints.
-9. Validate the generated program and record exact `pass`, `fail`, or
+10. Validate the generated program and record exact `pass`, `fail`, or
     `blocked` outcomes.
 
 ## Constraints
@@ -128,9 +131,11 @@ readers and tired operators.
 
 ## Examples
 
-- "Create a dated JSC-321 refactor program for collapsing duplicate routing
-  paths, including rollback gates and eval proof."
-- "Reject this one-line formatting cleanup as `Do Not Create`."
+- When the user says "migrate duplicate HE routing paths," plan
+  `.harness/refactors/2026-05-10-JSC-321-agent-routing.md` with rollback gates
+  and eval proof.
+- When the user asks to review a one-line whitespace cleanup, reject it as
+  `Do Not Create` because it is tactical, not architectural.
 
 ## Validation
 
@@ -139,6 +144,8 @@ at the first failed gate and do not proceed.
 
 - inspect required sections, dated Linear naming, rollback gates, and eval proof
 - verify low-value candidates were rejected and source/runtime ownership is clear
+- `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
+  <refactor-program-path> --json` for non-trivial generated programs
 - `./bin/ask skills audit Plugins/harness-engineering/skills/he-refactor
   --level strict --json`
 - eval/plugin-eval gates when available
@@ -153,6 +160,7 @@ supporting references are unverified.
 - Local contract and evals: `references/contract.yaml`, `references/evals.yaml`
 - Original prompt behavior: `references/source-prompt-preservation.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`
+- BLUF review contract: `../../references/bluf-review-contract.md`
 - Shared contracts: source-prompt coverage, execution slice, artifact routing,
   classification, Linear tracker, interactive steering, OpenAI-style design,
   agent-native compression, Pragmatic Programmer, XP, and subagent routing under

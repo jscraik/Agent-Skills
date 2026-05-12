@@ -1,10 +1,23 @@
 # Harness Hardening Workflow
 
-Read when a user gives a long skill-review, validator-alignment, Codex-harness, or generated-media workflow and asks `skill-builder` to fold it into an existing skill package.
+Read when a user gives a long skill-review, validator-alignment, Codex-harness,
+adversarial skill-hardening, repeated-iteration, or generated-media workflow and
+asks `skill-builder` to fold it into an existing skill package.
+
+This reference is mandatory, not optional, when the request combines reviewer,
+harness engineer, systems architect, Skill Factory validation, adversarial
+hardening, validator-alignment, or media artifact operator language for an
+existing skill. Apply the relevant checklist items as gates before claiming the
+skill is acceptable.
 
 ## Purpose
 
 Convert a large review prompt into durable skill behavior without turning `SKILL.md` into a prompt blob. Keep the entrypoint compact, move detailed contracts here, and validate the package that actually ships.
+
+The expected outcome for hardening language is a canonical-source patch or a
+precise blocked status. A report, rewrite prompt, or recommendation list is not
+sufficient when the user asked to update, harden, fix, tighten, improve, or make
+a skill acceptable.
 
 ## Routing Preamble
 
@@ -16,8 +29,274 @@ Before edits, state:
 - Request type: create, improve, audit, install/sync, validator repair, lifecycle hardening, or visual/media generation.
 - Side effects: read-only, repo-write, user-config-write, external-write, media-write, or destructive.
 - Required approval and validation gates.
+- Execution mode: read-only review, auto-tighten-until-pass-or-blocked,
+  session-evidence analysis, artifact generation, or handoff-only.
+- Optional `next_handoff` when the primary lane must pass structured output to a
+  second lane; do not report multiple primary lanes.
 
 If the input contains a placeholder such as `[PASTE SKILL CONTENT OR SKILL PACKAGE PATH HERE]`, do not pretend content was supplied. Use a concrete path only when the user provided one elsewhere in the same request or current workspace evidence proves it.
+
+## Auto-Tighten Loop
+
+For repair-mode hardening:
+
+1. Resolve canonical source and path ownership.
+2. Create or update an evidence ledger.
+3. Identify the smallest evidence-backed failure class.
+4. Patch that failure class in canonical source only.
+5. Trace every edit to a finding and evidence id.
+6. Run the focused gate only when validation is requested and allowed.
+7. Repeat until the focused gate passes, a broader gate is required, or a
+   concrete blocker prevents progress.
+
+Stop conditions must name the blocker precisely: missing canonical source,
+conflicting instructions, approval boundary, unavailable validator, failed
+environment, media persistence conflict, or unresolved validator drift.
+
+Do not report success from tone, apparent quality, or Plugin Eval alone.
+If validation is not requested, not allowed, unavailable, or blocked, report
+readiness as `blocked` or `unverified`; do not claim acceptable or release-ready
+status.
+
+## Evidence Model
+
+Every non-trivial Skill Factory run should maintain an `evidence_ledger`.
+Classify each item so claims can be checked without rereading the entire
+session:
+
+- `observed_local`: session collector, logs, local traces, prior runs
+- `repo_canonical`: source files, contracts, validators, AGENTS guidance
+- `runtime_projection`: generated handles, runtime mirrors, installed views
+- `generated_artifact`: eval outputs, reports, media, manifests
+- `validation_output`: strict audit, Plugin Eval, smoke/release evals, wrappers
+- `external_primary`: official docs, specs, API docs
+- `external_secondary`: community examples, blog posts, non-authoritative docs
+- `human_supplied`: pasted prompts, user corrections, screenshots, direct claims
+- `memory`: durable memory summaries or rollout summaries
+
+Preferred precedence: runtime/validator evidence beats agent judgment; repo
+canonical source beats runtime projection; fresh session evidence beats stale
+memory; official docs beat secondary sources; user correction beats generic
+style preference; generated eval output must be validated before it is trusted.
+
+Evidence source routing:
+
+- Use repo contracts and canonical source first for path ownership, local
+  workflow behavior, and validator contracts.
+- Use session collector for repeated failures, prior-run behavior, and "why does
+  this keep happening" investigations.
+- Use memory for durable prior decisions and recurring patterns, but refresh
+  drift-prone facts when they affect current edits.
+- Use `openai-docs` for official OpenAI, Codex, Responses API, Agents SDK,
+  model, hosted-tool, plugin, or skill behavior.
+- Use `context7` for current non-OpenAI library, framework, CLI, or external API
+  documentation.
+- Use validators, evals, and generated artifacts to prove readiness, not to
+  invent requirements.
+
+Do not treat `openai-docs` or `context7` as permanent Skill Factory context.
+Invoke them only after a research decision says the skill depends on current
+external behavior or official documentation. Store the returned source as an
+evidence ledger item with the claim it supports.
+
+Minimum ledger item:
+
+- `id`
+- `class`
+- `source`
+- `timestamp` or `generated_at` when available
+- `freshness`: fresh, partial, stale, blocked, or not_applicable
+- `claim_supported`
+- `confidence`: low, medium, or high
+
+## Evidence Freshness And Strength
+
+For repeated-iteration, prior-run, or "why does this keep happening" hardening,
+record:
+
+- `session_evidence_summary.status`: used, blocked, stale, partial, or not_applicable
+- `generated_at`
+- `window_start`
+- `window_end`
+- `session_count`
+- `matching_sessions`
+- `source`
+- `root_causes`
+- `blocked_by`
+
+If a collector bundle predates the reported failure window or lacks matching
+sessions, report `stale` or `partial`, not `used`.
+
+Classify evidence strength before changing canonical behavior:
+
+- `weak`: one anecdote, one unverified user claim, or one low-confidence finding
+- `moderate`: one user correction plus matching repo evidence, or one collector
+  handoff plus plausible source evidence
+- `strong`: multiple sessions, validator output, or fresh collector evidence
+  plus repo source confirmation
+
+Recurring failure claims require at least one of:
+
+- two or more evidence anchors showing the same root cause
+- one high-confidence collector handoff plus validator output
+- one user-corrected failure plus matching validation, memory, or repo evidence
+
+Do not make broad routing, validation, or lifecycle changes from weak evidence.
+Report weak evidence as a candidate and gather more proof.
+
+## Source Of Truth Resolver
+
+Before creation or hardening, record:
+
+- canonical skill source
+- runtime projection or generated handle, if any
+- plugin mirror or cache path, if any
+- governing repo contracts
+- target side-effect class
+
+Edit canonical source only unless an explicit repo contract says otherwise.
+
+## Research Decision Gate
+
+Decide whether external research is needed before using it:
+
+- `needed`: yes, no, or blocked
+- `reason`
+- `route`: openai-docs, context7, web, local_only, or blocked
+- `allowed_sources`
+- `forbidden_sources`
+- `evidence_class_expected`
+
+Use external primary research when current behavior depends on a changing API,
+tool, model, plugin contract, or official docs. Prefer local repo contracts and
+session evidence when the question is about prior local behavior, canonical path
+ownership, or user-specific workflow history.
+
+Route selection:
+
+- `openai-docs`: OpenAI/Codex/API/model/Agents SDK/hosted-tool claims.
+- `context7`: current non-OpenAI dependency, library, framework, CLI, or API
+  claims.
+- `web`: only when no routed docs skill or MCP source can answer and the
+  workflow allows external browsing.
+- `local_only`: repo, session collector, memory, or validator evidence is
+  authoritative enough.
+
+If the route is `openai-docs` or `context7` and retrieval is blocked, mark the
+research decision `blocked`; do not silently substitute generic knowledge.
+
+## Minimum Viable Skill Gate
+
+Before creating a new skill or expanding an existing one, decide:
+
+- repeated need: yes/no
+- clear trigger: yes/no
+- stable workflow: yes/no
+- reusable artifact: yes/no
+- cheaper than docs or script: yes/no
+- decision: create, improve_existing, docs_only, script, or do_not_build
+
+Prefer improving an existing skill or adding a script/reference when a new skill
+would increase always-loaded context without a distinct reusable workflow.
+
+## Patch Trace
+
+Every edit in auto-tighten mode should map to evidence:
+
+- `finding_id`
+- `evidence_ids`
+- `root_cause`
+- `files_changed`
+- `intended_behavior_change`
+- `validation_gate`
+
+Do not make untraced opportunistic edits. Record cleanup ideas as next steps or
+evidence debt instead.
+
+## Generated Content Provenance
+
+For generated or rewritten skill content, record:
+
+- `section`
+- `derived_from`
+- `invented`: true/false
+- `needs_human_review`: true/false
+
+Generated instructions that cannot be traced to evidence, repo contract, or
+explicit user requirement must be marked for review rather than treated as
+authority.
+
+## Eval Origin Map
+
+Generate evals from evidence, not imagination. Prefer real failed prompts, user
+corrections, session collector examples, validator failures, repo workflows, and
+official docs constraints.
+
+Each eval should record:
+
+- `origin.type`: session, validator, docs, user_correction, repo_contract, or
+  manual
+- `origin.source`
+- `evidence_ids`
+- `realistic`: true/false
+- `why_realistic`
+- `anti_overfit_notes`
+
+Add negative evals for known factory failure modes: read-only review must not
+edit; fix requests must not stop at reports; artifact requests must not return
+prompt-only output; runtime projections must not be edited; Plugin Eval success
+must not override strict audit failures; missing repeated-iteration evidence
+must block repeated-failure claims.
+
+## Readiness Decision
+
+Calculate readiness deterministically:
+
+- `pass`: every required gate is `pass` or `not applicable` with a reason
+- `fail`: any required gate is `fail`
+- `blocked`: any required gate is `blocked`
+- `unverified`: a required gate was not run or lacks evidence
+
+Record:
+
+- `status`
+- `controlling_gate`
+- `reason`
+- `required_gates`
+- `unverified_gates`
+
+Do not narratively upgrade a blocked, failed, or unverified readiness decision.
+
+## Evidence Pack
+
+For non-trivial creation or hardening, prefer writing or reporting a compact
+evidence pack:
+
+- `evidence-ledger.json`
+- `patch-trace.json`
+- `readiness-decision.json`
+- `eval-origin-map.json`
+- `artifact-status.json`
+
+Use `.harness/skill-evidence/<skill-name>/` when the repository and user allow
+artifact writes. If evidence-pack writes are not allowed, return the same shape
+in the final handoff.
+
+## Skill Factory Feedback
+
+When a Skill Factory run is blocked or requires user correction, emit feedback
+that future session collectors can consume:
+
+- `target`
+- `requested_mode`
+- `completed_mode`
+- `blocked_by`
+- `user_correction_required`
+- `correction_type`
+
+Track missing evidence surfaces as `evidence_debt`, for example missing
+docs/prose wrappers, missing eval-realism validators, missing media persistence
+checks, or missing collector freshness metadata.
 
 ## Validator Matrix
 
@@ -41,6 +320,9 @@ Use this vocabulary only: `pass`, `fail`, `blocked`, `not applicable`.
 | smoke evals | yes/no | pass/fail/blocked/not applicable | command or artifact | failing case ids |
 | release evals | yes/no | pass/fail/blocked/not applicable | command or artifact | failing case ids |
 | docs/prose/spelling | yes/no | pass/fail/blocked/not applicable | command or artifact | exact blocker if absent |
+| eval realism | yes/no | pass/fail/blocked/not applicable | schema or audit evidence | synthetic or overfit cases |
+| media artifact persistence | yes/no | pass/fail/blocked/not applicable | file path or sidecar | required only for media asks |
+| package boundary checks | yes/no | pass/fail/blocked/not applicable | command or artifact | canonical/projection notes |
 | sync/projection checks | yes/no | pass/fail/blocked/not applicable | command or artifact | runtime visibility notes |
 
 Do not mark a validator `pass` unless it ran successfully or direct local evidence proves the exact result. Source existence does not prove runtime availability.
@@ -55,6 +337,11 @@ Specific policy:
 - Format/progressive-disclosure lint do not prove `docs/prose/spelling`.
 - For package-boundary checks, keep the matrix result `pass` and put residual
   canonical-versus-projection risk in `Notes`.
+- Plugin Eval success does not override strict audit, eval realism,
+  docs/prose/spelling, media persistence, package-boundary, or runtime
+  visibility failures.
+- Eval realism should use explicit schema fields when present, especially
+  `realistic: true|false`. Natural-language markers are fallback evidence only.
 
 ## Legacy Heading Compatibility
 
@@ -88,6 +375,23 @@ Keep always-loaded `SKILL.md` focused on trigger, inputs, procedure, safety, out
 
 ## Evidence And Confidence
 
+## Session Evidence Intake
+
+Prefer bounded session-collector outputs before raw transcripts. Useful inputs
+include `skill_refactor_handoffs`, `skill_refactor_evidence`,
+`skillify_candidates`, `skill_invocations`, validation logs, and concise memory
+summaries.
+
+For repeated-iteration, prior-run, session-evidence, or "why does this keep
+happening" hardening, bounded session evidence is required. If it cannot be
+loaded, record `session_evidence_summary.status: blocked` with the missing
+bundle, command, or permission boundary.
+
+Group repeated failures as coverage gap, instruction drift, routing mismatch,
+quality regression, context-package conflict, missing observation path, missing
+validation, or environment blocker. Feed concrete repair items into
+`skill-builder`; do not leave recurring failures as an advisory-only report.
+
 Initial and final confidence must cite evidence, determinism, validator outcomes, runtime visibility, context cost, and residual risk. Use the lowest applicable ceiling:
 
 | Condition | Maximum confidence |
@@ -103,6 +407,9 @@ Initial and final confidence must cite evidence, determinism, validator outcomes
 | validators disagree and no compatibility decision is made | 87% |
 
 Never claim 100% unless behavior is deterministic, formally proven, or repeatably verified.
+
+If Plugin Eval and strict audit disagree, cap confidence at the stricter
+failure condition and explain which gate controls release readiness.
 
 ## Safety And Approval Gates
 
@@ -163,6 +470,27 @@ Required sidecar fields:
 - linked context
 
 If the active image-generation contract forbids post-generation text or post-generation tool use, state the conflict before generation and do not claim both direct generation and repository-local persistence unless both are actually completed.
+
+If image generation is available and the user requested an artifact, prompt text
+alone is a failed media outcome. If generation or persistence cannot run, mark
+the artifact status `blocked` with the exact unavailable tool, output path,
+approval, or policy limitation.
+
+For artifact requests, record media generation availability as `yes`, `no`,
+`blocked`, or `unknown` with evidence. If availability is `unknown`, media
+artifact persistence is `blocked`, not `pass`.
+
+General artifact status:
+
+- `requested`: true/false
+- `artifact_type`: image, video, slide, doc, eval, contract, reference, script,
+  report, manifest, or other
+- `generation_surface`: imagegen, filesystem, script, plugin, manual_patch, or
+  blocked
+- `path`
+- `sidecar`
+- `existence`: pass, fail, or blocked
+- `verification`: pass, fail, blocked, or not_applicable
 
 ## Bespoke Infographic Prompt Contract
 

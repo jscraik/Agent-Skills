@@ -21,4 +21,22 @@ jsc-283-packaged-skill-behavior-assurance`, not the date.
 - For tracked work, include a Linear/spec/plan/PR matrix with PR evidence left pending until delivery.
 - For tracked work, run `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <plan-path>` and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <plan-path>`.
 
+## BLUF Review Surface
+
+For non-trivial durable plans, apply
+`Plugins/harness-engineering/references/bluf-review-contract.md`.
+
+Keep the existing plan substance. Add:
+
+- Command Summary with `BLUF`, decision needed, top risks, and next action.
+- BLUF-Only Summary extracted from plan and unit BLUFs.
+- BLUFs for implementation strategy, change boundaries, work units, validation
+  gates, review/handoff, rollback, and final decision.
+- Unit-level Do/Do Not, validation evidence, stop conditions, rollback notes,
+  and summary.
+- No-Fog Gate before handoff.
+
+Do not turn the plan into duplicate simple/full documents. The BLUF layer is an
+index into the existing detail.
+
 Full retained notes: `Plugins/harness-engineering/references/he-plan-doctrine.md`.

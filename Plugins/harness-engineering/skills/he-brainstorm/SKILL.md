@@ -58,16 +58,21 @@ repo write, or destructive.
 3. Resolve only the stage context fields needed for tracker, artifact route,
    evidence freshness, and coding-harness handoff.
 4. Separate stated facts, interpretations, guesses, and out-of-scope work.
-5. Route durable brainstorm artifacts to `.harness/brainstorm/**.md`; route
+5. Keep scope tight: start with 2-3 focused surfaces and widen only when the
+   ambiguity cannot be resolved from the initial evidence.
+6. Route durable brainstorm artifacts to `.harness/brainstorm/**.md`; route
    explicit folded `he-ideate` artifacts to `.harness/ideate/**.md`.
-6. Resolve or block the Linear tracker before durable handoff for tracked work.
-7. In folded `he-ideate` mode, use `references/ideation-mode.md` for candidate
+7. Resolve or block the Linear tracker before durable handoff for tracked work.
+8. In folded `he-ideate` mode, use `references/ideation-mode.md` for candidate
    generation, critique, coverage recovery, survivor selection, web research,
    and specialist-skill steering.
-8. Apply the first-principles contract before survivor selection: prefer ideas
+9. Apply the first-principles contract before survivor selection: prefer ideas
    that prevent verified HE failures or reduce ambiguity; defer copied patterns
    that lack HE-specific failure evidence.
-9. Ask before survivor selection when the chosen survivor would shape downstream
+10. Apply the BLUF review contract to non-trivial durable brainstorm or ideation
+   artifacts so the selected survivor, uncertainty, risk consequence, and next
+   HE stage are visible before option detail.
+11. Ask before survivor selection when the chosen survivor would shape downstream
    spec, plan, Linear work, or implementation scope.
 
 ## Validation
@@ -75,6 +80,9 @@ repo write, or destructive.
 Fail fast. Check scope, traceability, evidence labels, Linear/tracker gate,
 artifact route, handoff clarity, and whether command, web, repo, or Linear
 claims were actually verified. Report `pass`, `fail`, or `blocked`.
+For non-trivial generated artifacts, run or block
+`python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
+<brainstorm-or-ideation-path> --json`.
 
 ## Safety Boundaries
 
@@ -158,6 +166,8 @@ Read before final handoff review: `references/document-review-pass.md`.
 Read when visual output may help: `references/visual-communication.md`.
 Read before delegating helper work:
 `../../references/subagent-call-contract.md`.
+Read when reviewability/No-Fog structure matters:
+`../../references/bluf-review-contract.md`.
 Use shared HE references only when their topic is active: subagent policy, stage
 context, interactive steering, specialist steering, domain context/model,
 OpenAI-style design, topic coverage, first principles, deferred context, Linear

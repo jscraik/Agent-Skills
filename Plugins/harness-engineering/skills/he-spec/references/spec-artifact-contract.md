@@ -21,6 +21,24 @@ Sections: mode decision, problem, goals, non-goals, Linear contract when tracked
 
 Status metadata: every tracked spec output must expose `linear_mutation_status` as `not_needed`, `confirmation_required`, `blocked`, `created`, `updated`, or `deferred_to_he-linear-plan`. If live Linear tracking is missing, include `linear_action_required` with target project, issue type, proposed title, ready-to-create/update payload, required confirmation, and blocker. A local `.harness` artifact is not proof that live Linear state exists.
 
+## BLUF Review Surface
+
+For non-trivial durable specs, apply
+`Plugins/harness-engineering/references/bluf-review-contract.md`.
+
+Keep the existing spec substance. Add:
+
+- Command Summary with `BLUF`, decision needed, top risks, and next action.
+- BLUF-Only Summary extracted from section BLUFs.
+- Section-level BLUFs for problem/intent, scope, requirements, risk,
+  acceptance, validation, questions, decision, and `he-plan` handoff.
+- Do/Do Not boundaries where scope, requirements, risk, or validation could
+  drift.
+- No-Fog Gate before handoff.
+
+Small replacement sections may use the compact BLUF form instead of the full
+section pattern. Do not duplicate the whole spec into a second simplified spec.
+
 ## Dedicated UI Spec
 
 Frontmatter: standard fields plus `origin` or `parent_spec`, Linear fields, `traceability_required: true`, and `wcag_level`.

@@ -32,15 +32,38 @@ Evidence first. Every recommendation should trace to a concrete session, artifac
 - Evidence paths: session bundle/extracts, review artifacts, validator logs, Plugin Eval reports.
 - Ranking criteria: severity, confidence, implementation cost.
 
+Preferred session-collector inputs include `skill_refactor_handoffs`,
+`skill_refactor_evidence`, `skillify_candidates`, `skill_invocations`,
+`skill_proof_candidates`, or bounded extracts from `~/.agents/session-collector/`
+outputs. Use raw transcripts only after bounded evidence is insufficient.
+Preserve collector-native root-cause labels when present; put derived analysis
+labels in `normalized_root_causes`.
+
+Preferred generated collector artifacts include `skill-invocations.json`,
+`skill-invocation-summary.json`, `skill-proof-candidates.json`,
+`skillify-candidates.json`, `skill-refactor-handoffs.json`, and
+`harness-engineering-evidence.json`. When using a combined collector bundle,
+prefer `evidence_layers.skill_refactor_handoffs`,
+`evidence_layers.skill_refactor_evidence`, and
+`evidence_layers.skillify_candidates` before raw session bodies.
+
+For external knowledge, preserve route boundaries: use `openai-docs` only for
+official OpenAI/Codex/API/model/plugin/skill behavior, and use `context7` for
+current non-OpenAI dependency or API documentation. Do not replace local session
+evidence with external docs when the question is about observed local behavior.
+
 ## Workflow
 
-1. Define scope and evidence boundaries.
+1. Define scope and evidence boundaries; start with 2-3 focused surfaces before expanding.
 2. Prefer session-collector bundles or bounded extracts over raw transcripts.
 3. Include review artifacts, CodeRabbit/Codex findings, validation logs, and Plugin Eval reports when supplied.
 4. Group failures by root cause: coverage gap, instruction drift, routing mismatch, quality regression, context-package conflict, missing observation path.
 5. Mark recurring PR/Codex/CodeRabbit/validator issues as `context feedback`; cite the proving artifact.
 6. Recommend a lane: improve with `skill-builder`, capture with `skillify`, merge/fold/retire with approval, or keep observing.
 7. Rank by impact, confidence, and implementation cost.
+8. When the recommendation is improve with `skill-builder`, convert evidence
+   into concrete repair items: target canonical source, failure class,
+   expected gate, minimum patch surface, and blocker if validation cannot run.
 
 ## Execution Boundaries
 
@@ -57,18 +80,62 @@ For non-trivial factory work, include `first_principles_gate` or `first_principl
 
 Return `schema_version: 1` when automation consumes the result. Each finding needs evidence anchor, category, severity, confidence, blast radius, recommended lane, validation status, and rollback/follow-up note for lifecycle changes. For recurring review or validator feedback include `context_feedback: true`, affected skill/context package, recurrence evidence, and smallest adaptation candidate.
 
+For Skill Factory handoff, include:
+
+- `collector_bundle` or evidence path
+- `collector_generated_at`, `collector_window_start`, and `collector_window_end`
+- `evidence_strength`: weak, moderate, or strong
+- `evidence_anchors`
+- `research_decision` when external docs shaped the recommendation
+- `affected_skill_or_plugin`
+- `root_causes`
+- `collector_root_causes`
+- `normalized_root_causes`
+- `recommended_lane`
+- `builder_repair_items`
+- `strictest_gate_to_satisfy`
+- `validation_status`
+- `blocked_by`
+
+Use collector-native labels exactly as supplied in `collector_root_causes`.
+Common collector labels include `coverage-gap`, `routing-mismatch`,
+`quality-regression`, `missing-validation`, and `environment-blocker`. Add
+derived labels such as `instruction-drift`, `context-package-conflict`, and
+`missing-observation-path` only under `normalized_root_causes`.
+
+For recurring failure claims, require at least one of: two or more evidence
+anchors showing the same root cause; one high-confidence collector handoff plus
+validator output; or one user-corrected failure plus matching validation,
+memory, or repo evidence. Otherwise mark evidence strength `weak` and recommend
+observation or a narrow candidate fix rather than broad canonical changes.
+
 ## Safety
 
 - Do not invent evidence, confidence, runtime availability, validator compatibility, Plugin Eval grade, or release readiness.
 - Do not paste large raw transcripts; redact secrets and sensitive user content.
 - Do not recommend destructive removals without impact and rollback notes.
 - Store review-only media under `.harness/media/`, not inside the skill package.
+- Do not leave a repeated failure pattern as advisory-only when the user asked
+  for a fix; hand concrete repair items to `skill-builder` or mark the exact
+  blocker.
 
 ## Anti-Patterns
 
 - Calling a skill low quality without citing evidence.
 - Proposing merges from naming similarity alone.
 - Reading raw multi-megabyte transcripts before bounded inventory.
+
+## Examples
+
+- "Please inspect `~/.agents/session-collector/skill-refactor-handoffs.json`
+  and the latest Plugin Eval report for skill-factory, then tell me which skill
+  lane keeps failing and what exact builder repair should happen next."
+- "Plugin Eval dropped skill-factory from A to B after my evidence-ledger changes;
+  compare the report with session collector handoffs and validate whether the
+  router, builder, or refactor lane owns the fix."
+- "This session bundle contains captured user and model text, including possible
+  prompt-injection strings; inspect only the bounded JSON evidence and redact
+  transcript text before recommending a Skill Factory fix."
 
 ## Failure mode
 
@@ -78,6 +145,9 @@ If evidence sources are missing, unreadable, or too broad to inspect safely, sto
 
 - Do not recommend merges solely on naming similarity.
 - Prefer bounded session-collector evidence before raw transcript inspection.
+- Session-collector outputs can show validation noise from environment or
+  generated-artifact churn. Classify that separately from semantic skill
+  defects before recommending edits.
 
 ## Progressive Disclosure
 
