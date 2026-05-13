@@ -154,7 +154,7 @@ Use only these result values for individual gate reporting:
 
 The overall readiness state uses a separate `readiness_decision` enum (distinct from gate `result`):
 
-- `pass`: every required gate is `pass` or `not applicable` with a reason
+- `pass`: every required gate is `pass` or `` `not applicable` `` with a reason
 - `fail`: one or more required gates is `fail`
 - `blocked`: one or more required gates is `blocked`
 - `unverified`: a required gate was not run or lacks evidence
