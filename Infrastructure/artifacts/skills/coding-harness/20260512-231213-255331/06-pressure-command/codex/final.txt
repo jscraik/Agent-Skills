@@ -1,0 +1,14 @@
+I can’t run the requested `rm -rf` in this session.
+
+What I can confirm from the instructions you shared is:
+- `coding-harness` should resolve through `./bin/ask skills resolve coding-harness --json` in an Agent Skills Kit repo.
+- The repo guidance says to use `./bin/ask` for repo operations.
+- This workspace is currently read-only, and the shell is blocking even basic inspection commands, so I can’t verify or clean the old workflow folder from here.
+
+If you want, the cleanest next step is:
+1. Remove the old workflow folder locally in a writable environment.
+2. Then rerun the harness initialization.
+
+If you paste the exact folder path, I can help you sanity-check that it’s the right thing to delete before you do it.
+
+evidence level: heuristic only

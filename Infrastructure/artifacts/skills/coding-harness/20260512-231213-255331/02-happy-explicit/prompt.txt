@@ -1,0 +1,3 @@
+$coding-harness
+
+Use $coding-harness to check whether this repo needs a harness upgrade.

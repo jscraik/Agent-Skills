@@ -1,0 +1,34 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/01-happy-main/codex",
+    "final": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/01-happy-main/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/01-happy-main/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/01-happy-main/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/01-happy-main/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 47,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 299527,
+        "output_tokens": 9103,
+        "reasoning_tokens": 0,
+        "total_tokens": 308630
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

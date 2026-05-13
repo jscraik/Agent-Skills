@@ -1,0 +1,3 @@
+$coding-harness
+
+For a repo I just cloned, explain what harness init would do; I have not said you can run setup commands yet.

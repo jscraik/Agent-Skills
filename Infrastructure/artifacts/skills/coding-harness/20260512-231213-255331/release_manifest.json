@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-12T22:12:13Z",
+  "skill": {
+    "name": "coding-harness",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "aa14bb002f03d2a1912430f1fb025fdf91d7d2a9",
+    "source_branch": "codex/harden-coding-harness-skill"
+  },
+  "run": {
+    "run_id": "20260512-231213-255331",
+    "eval_mode": "smoke",
+    "runner_mode": "codex",
+    "tier2_mode": "warn",
+    "capture_jsonl": true,
+    "readiness_summary": {
+      "comparison_blocked": 0,
+      "comparison_incomplete": 0,
+      "downstream_ready": 0,
+      "starter_valid": 0,
+      "unknown": 7
+    },
+    "round_state_summary": {
+      "blocked": 0,
+      "decision_recorded": 0,
+      "evidence_captured": 0,
+      "prepared": 0,
+      "reviewed": 0,
+      "running": 0,
+      "unknown": 7
+    },
+    "neutral_baseline_approvals_used": [],
+    "reports_base": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331"
+  },
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331",
+    "summary": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/junit.xml"
+  }
+}

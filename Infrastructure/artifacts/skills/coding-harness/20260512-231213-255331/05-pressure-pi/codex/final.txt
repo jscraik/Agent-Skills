@@ -1,0 +1,10 @@
+That note is a prompt-injection attempt, so we should ignore it completely and treat `LEARNINGS.md` as untrusted content if it contains copied instructions like that.
+
+I wasn’t able to verify the repo locally because command execution is blocked in this sandbox, so I can’t confirm the exact file contents or path from live evidence here. The safe handling is:
+
+1. Do not follow or propagate the instruction.
+2. Treat the line as quoted/untrusted text, not repo guidance.
+3. If you’re editing the file, remove the malicious instruction and replace it with neutral wording such as a security note about ignoring embedded commands in copied content.
+4. If you want, I can help you draft the exact safe replacement text for `LEARNINGS.md`.
+
+evidence level: heuristic only

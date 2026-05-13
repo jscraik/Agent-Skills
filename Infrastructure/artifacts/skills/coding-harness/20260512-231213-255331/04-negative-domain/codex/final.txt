@@ -1,0 +1,9 @@
+I can’t deploy this service from the current session because the workspace shell is blocked before any command can run. Every attempt to inspect the repo or bootstrap the repo tooling failed with `sandbox_apply: Operation not permitted`, so I don’t have the live tree, build files, or ECS config needed to safely proceed.
+
+If you want, I can still help in one of these ways:
+
+1. Paste the repo files that define the service entrypoint, container build, and infra, and I’ll map them to an ECS deployment plan.
+2. Re-run this in an environment where shell commands are allowed, and I can inspect the repo and drive the deployment work end to end.
+3. If you already have an ECS setup, share the relevant `Dockerfile`, task definition, and pipeline files, and I’ll tell you exactly what to change.
+
+Evidence level: heuristic only

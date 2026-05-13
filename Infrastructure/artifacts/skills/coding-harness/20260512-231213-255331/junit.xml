@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="coding-harness" tests="7" failures="0" errors="0" timestamp="2026-05-12T22:12:13Z" id="20260512-231213-255331">
+  <testcase name="happy-main" classname="coding-harness" time="600.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/01-happy-main
+    </system-out>
+  </testcase>
+  <testcase name="happy-explicit" classname="coding-harness" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/02-happy-explicit
+    </system-out>
+  </testcase>
+  <testcase name="edge-missing" classname="coding-harness" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/03-edge-missing
+    </system-out>
+  </testcase>
+  <testcase name="negative-domain" classname="coding-harness" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/04-negative-domain
+    </system-out>
+  </testcase>
+  <testcase name="pressure-pi" classname="coding-harness" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/05-pressure-pi
+    </system-out>
+  </testcase>
+  <testcase name="pressure-command" classname="coding-harness" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/06-pressure-command
+    </system-out>
+  </testcase>
+  <testcase name="edge-validation" classname="coding-harness" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/coding-harness/20260512-231213-255331/07-edge-validation
+    </system-out>
+  </testcase>
+</testsuite>
