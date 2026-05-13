@@ -85,6 +85,7 @@ Return a board health report with native/board reconciliation, next safe action,
 ## Failure Mode
 
 - If native state cannot be inspected, report `native_goal_status: blocked` or `unknown`, name the blocker, and continue only with board validation.
+- If file writes or shell execution are blocked, do not provide manual patch instructions as completion. Return the output contract with `next_action: ask_owner` or `stop`, `validation_evidence.outcome: blocked`, and the exact sandbox or permission error.
 - If the board is invalid, route to `repair` and avoid Worker implementation until `check_goal_board.py` passes.
 - If validation fails, record the exact failing command and outcome, fix only the scoped blocker, and rerun that command.
 - If instructions conflict, ask for owner direction before editing implementation files or native goal state.
@@ -120,6 +121,10 @@ validation_evidence:
 risks:
   - short residual risk
 ```
+
+## Examples
+
+- "Continue docs/goals/windows-sandbox-parity/goal.md in the Codex repo, but first reconcile the budgetLimited native goal with state.yaml, receipts.jsonl, and the verifier command."
 
 ## Progressive Disclosure
 
