@@ -18,7 +18,7 @@ Operate `@brainwav/coding-harness` with command-accurate, preview-first validati
 ## Philosophy
 - Start from live command/source evidence and local repository patterns.
 - Keep setup and repair reversible: dry-run before mutation, then validate.
-- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
+- Do not remove important context for budget trimming; route details through references.
 - Separate local scaffold truth from auth-bound remote checks.
 
 ## When To Use
@@ -94,7 +94,7 @@ Operate `@brainwav/coding-harness` with command-accurate, preview-first validati
 
 ## Failure Mode
 - Fail closed when command truth, repo root, package manager, or canonical harness state cannot be established.
-- Stop at the first failed or blocked validation gate, report the exact command output, and rerun that same gate after a fix.
+- Stop at the first failed or blocked validation gate, report the sanitized command output (with secrets and sensitive data redacted per the Redact secrets policy), and rerun that same gate after a fix.
 - Mark auth-bound, network-bound, or destructive checks as blocked rather than inferred from local source.
 - If the requested task is not harness setup, governance, CI ownership, command discovery, or action sync, hand off instead of expanding scope.
 

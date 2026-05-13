@@ -6,14 +6,11 @@ canonical_slug: agent-skills-first-principles-factory-gate-phase-1
 harness_stage: he-code-review
 status: complete
 date: 2026-05-09
+target: .harness/specs/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-spec.md
+review_mode: technical spec review
 ---
 
 # First-Principles Factory Gate Phase 1 Technical Review
-
-Review target:
-`.harness/specs/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-spec.md`
-
-Review mode: technical spec review
 
 Source artifacts read:
 

@@ -95,6 +95,8 @@ Infrastructure/artifacts/skill-graphs/drills/
 Infrastructure/artifacts/skills/**/structure-gate.json
 Infrastructure/artifacts/skills/**/structure-gate.sarif
 Infrastructure/artifacts/skills/autoresearch/
+# Ignore timestamped eval run artifacts (e.g., coding-harness/YYYYMMDD-HHMMSS-*/...)
+Infrastructure/artifacts/skills/*/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]-*/
 Infrastructure/reports/20*.md
 Infrastructure/reports/data/pattern-registry.json
 Infrastructure/reports/data/candidates.json

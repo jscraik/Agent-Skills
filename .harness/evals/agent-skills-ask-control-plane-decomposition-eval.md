@@ -160,7 +160,7 @@ Patch:
 | --- | --- | --- |
 | `simplify` | No actionable simplification finding. The ADR is short, uses one taxonomy table and one lifecycle table, and does not duplicate the global glossary. Subagent dispatch was attempted but returned only an instruction acknowledgment, so it is not counted as review evidence. | No patch required. |
 | `he-fix-bugs` | No blocker found. Required acceptance terms are present; the ADR does not mutate `UBIQUITOUS_LANGUAGE.md`, command behavior, selection policy, or promotion gates. Subagent dispatch was attempted but returned only an instruction acknowledgment, so it is not counted as review evidence. | No patch required. |
-| `he-code-review` | No readiness blocker found. Traceability is coherent: `JSC-287` -> `SA-ASK-007` -> `PLAN-ASK-004` -> ADR/eval evidence. Linear freshness remains explicitly blocked and no Linear mutation is claimed. | No patch required. |
+| `he-code-review` | No readiness blocker found. Traceability is coherent: `JSC-287` -> `SA-ASK-007` -> `PLAN-ASK-004` -> ADR/eval evidence. Linear closure completed (see Lines 52–61: live fetch and closure mutation completed). | No patch required. |
 
 ## Resolved Blockers
 
@@ -213,7 +213,7 @@ Current baseline after service extraction:
 | Changed files list present | `Changed Files For This Slice` below records HE-slice files separately from broader dirty worktree surfaces. | complete |
 | Plugin cache field/log comparison present | `Decomposition Gate Decision` records preserved `plugin_cache_writes`, `logs`, `validation_status`, command handles, and mutation counts. | complete |
 | Repo doctor blocker classification present | Validation records `blocking: false` with repo-surface diagnostic debt classified as non-blocking. | complete |
-| Rollback conditions checked | No rollback condition hit for PLAN-ASK-003, PLAN-ASK-004, or PLAN-ASK-005. Linear mutation remains blocked rather than forced from stale tracker state. | complete |
+| Rollback conditions checked | No rollback condition hit for PLAN-ASK-003, PLAN-ASK-004, or PLAN-ASK-005. Linear closure completed (see Lines 52–61: live fetch and closure mutation completed). | complete |
 | Linear traceability table present | `Linear Traceability` below maps `JSC-284` through `JSC-287` to plan units and evidence. | complete |
 | Later extraction phases not started | Catalog/projection extraction, proof enforcement, routing/improvement extraction, and tool-resolution extraction remain out of scope and were not started. | complete |
 

@@ -4,13 +4,13 @@ Purpose: keep execution routing deterministic, explainable, and low-context.
 
 ## Proven Invariants
 
-- Agents should start from `repo doctor`, not repo archaeology.
-- The golden path is the strategic product spine:
-  - `repo doctor`
-  - `skills improve`
-  - `skills explain`
-  - `skills prove`
-  - `repo closeout`
+- Agents should start from `./bin/ask repo doctor`, not repo archaeology.
+- The golden path is the strategic product spine (each shorthand maps to `./bin/ask <command>`):
+  - `repo doctor` → `./bin/ask repo doctor`
+  - `skills improve` → `./bin/ask skills improve`
+  - `skills explain` → `./bin/ask skills explain`
+  - `skills prove` → `./bin/ask skills prove`
+  - `repo closeout` → `./bin/ask repo closeout`
 - Skill routing must preserve canonical source pointers.
 - Routing must distinguish experimental breadth from trusted core.
 - Default-visible promotion requires proof status.
@@ -24,9 +24,9 @@ Purpose: keep execution routing deterministic, explainable, and low-context.
 ## Operating Principles
 
 - Every blocker should expose one exact next command or file.
-- `skills improve` should return one primary recommendation when possible.
-- `skills explain` should show canonical source, visibility, limits, and smallest validation.
-- `skills prove` should label proof level.
+- `./bin/ask skills improve` should return one primary recommendation when possible.
+- `./bin/ask skills explain` should show canonical source, visibility, limits, and smallest validation.
+- `./bin/ask skills prove` should label proof level.
 - Generated handles must route, not teach.
 
 ## Forbidden Regressions
