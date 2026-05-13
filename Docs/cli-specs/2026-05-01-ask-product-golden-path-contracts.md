@@ -34,14 +34,18 @@ next` are deferred candidates.
 Captured on 2026-05-01 against branch
 `codex/he-code-review-openclaw-flow`.
 
+Refreshed on 2026-05-13 against branch `codex/he-productization-pr`. The
+contracts below remain product contracts, while several routes are now
+implemented in the live `ask` surface.
+
 | Command                                                                                                                    | Observed Output                                                                                                              | Friction                                                                                                                                                     |
 | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `./bin/ask repo status --json --robot`                                                                                     | Reports `is_git` and `skills_synced` only.                                                                                   | It proves basic repo health but does not include runtime budget, handle health, surface policy status, blockers, or next command guidance.                   |
-| `./bin/ask runtime budget --json --robot`                                                                                  | Reports `advanced_visible_count: 162`, advisory threshold `60`, `first_level_default_count: 109`, and `budget_status: pass`. | Runtime surface health is available, but agents must know to call it separately and then interpret large JSON.                                               |
-| `./bin/ask repo surface --json`                                                                                            | Reports `status: warning`, `blocking_findings: 4003`, and tracked-surface classifications.                                   | Surface ownership evidence exists, but it is low-level inventory output and not yet combined with repo health or closeout readiness.                         |
-| `./bin/ask repo --help`                                                                                                    | Exposes `status`, `validate`, `check-stability`, `doctor-catalog`, `provider-audit`, and `surface`.                          | There is no namespace-first health command that composes repo, runtime, handle, and surface signals.                                                         |
-| `./bin/ask skills --help`                                                                                                  | Exposes `goal`, `route`, `prove`, `handles`, and related primitives.                                                         | Goal and skill explanation primitives exist, but product contracts do not yet define how they map to improve, explain, prove, or closeout workflows.         |
-| `./bin/ask repo doctor-catalog --json --robot`                                                                             | Returns `decision_status: resolved` after `README.md` exposes canonical count `20`.                                          | Catalog parity is separately diagnosable, but product health still needs to surface this blocker when goal routing or closeout depends on it.                |
+| `./bin/ask runtime budget --json --robot`                                                                                  | Reports `advanced_visible_count: 173`, advisory threshold `60`, `first_level_default_count: 118`, and `budget_status: pass`. | Runtime surface health is available, but agents must know to call it separately and then interpret large JSON.                                               |
+| `./bin/ask repo surface --json --robot`                                                                                    | Reports tracked-surface classifications and diagnostic debt without deleting files.                                           | Surface ownership evidence exists, but it is low-level inventory output and must be summarized by doctor or closeout flows.                                  |
+| `./bin/ask repo --help`                                                                                                    | Exposes `status`, `validate`, `check-stability`, `doctor`, `closeout`, `doctor-catalog`, `provider-audit`, and `surface`.    | Repo health and closeout now have namespace-first routes; deeper surface policy still needs detailed follow-up output.                                      |
+| `./bin/ask skills --help`                                                                                                  | Exposes `goal`, `route`, `improve`, `explain`, `prove`, `handles`, and related primitives.                                   | The product path is now executable, but outcome proof still requires real workout/eval/transcript evidence.                                                  |
+| `./bin/ask repo doctor-catalog --json --robot`                                                                             | Returns `decision_status: resolved` after README, `SKILL.md`, `ask skills list`, and route metadata expose canonical count `32`. | Catalog parity is separately diagnosable, and doctor/closeout should continue surfacing this blocker when routing or delivery depends on it.                 |
 | `./bin/ask skills goal "continue implementing the Agent Skills Kit repo surface control-plane plan" --json --robot`        | Returns `intent_unresolved` with `route_decision_status: unresolved_ambiguity`.                                              | Broad goals can remain too ambiguous even after catalog parity is healthy; product flows need sharper repair prompts and next-command guidance.              |
 | `./bin/ask skills goal "use he-work to implement P4 namespace-first product command contracts for JSC-246" --json --robot` | Resolves `he-work` with confidence `0.938`.                                                                                  | Goal routing works when the user names the workflow and phase, which supports a future `skills improve` contract that asks for narrower context when needed. |
 
@@ -72,7 +76,7 @@ All commands in this document must use the standard `ask` JSON envelope:
       },
       "runtime_budget": {
         "status": "pass",
-        "advanced_visible_count": 162,
+        "advanced_visible_count": 173,
         "advisories": []
       },
       "blockers": [],
@@ -119,9 +123,9 @@ Required data fields:
     },
     "runtime_budget": {
       "status": "pass",
-      "advanced_visible_count": 162,
+      "advanced_visible_count": 173,
       "advanced_visible_warn": 60,
-      "first_level_default_count": 109,
+      "first_level_default_count": 118,
       "advisories": []
     },
     "handles": {
@@ -131,7 +135,7 @@ Required data fields:
     },
     "surface_policy": {
       "status": "warning",
-      "blocking_findings": 4003,
+      "blocking_findings": 16750,
       "unknown_count": 39,
       "historical_artifact_count": 3959
     },
@@ -365,12 +369,12 @@ Required data fields:
     },
     "runtime_budget": {
       "status": "pass",
-      "advanced_visible_count": 162,
+      "advanced_visible_count": 173,
       "advisories": []
     },
     "surface_policy": {
       "status": "warning",
-      "blocking_findings": 4003
+      "blocking_findings": 16750
     },
     "focused_validation": [],
     "commit_readiness": {

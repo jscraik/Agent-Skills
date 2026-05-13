@@ -28,6 +28,30 @@ schema_version: 1
 
 # ask (Agent Skills Kit) CLI Specification
 
+## 2026-05-13 Refresh
+
+This document remains the implementation-grade baseline for the original
+`ask` envelope, error, telemetry, and lifecycle contracts. The live command
+surface has since expanded beyond the 2026-04-06 tree. Validate the current
+surface with `./bin/ask --help`; as of the 2026-05-13 documentation refresh it
+exposes these top-level topics:
+
+- `repo`: `status`, `validate`, `check-stability`, `doctor`,
+  `closeout`, `doctor-catalog`, `provider-audit`, `surface`
+- `skills`: `list`, `budget`, `handles`, `resolve`, `parse`,
+  `proof`, `prove`, `explain`, `route`, `goal`, `improve`,
+  `starter`, `sync`, `audit`, validation helpers, `install`, `fold`,
+  `init`
+- `runtime`: `surface`, `budget`
+- `reviewers`: `resolve`
+- `workouts`: `list`, `run`, `score`, `promote`
+- `plugins`, `evals`, `graph`, `mcp`, and `wiki`
+
+The product golden path is now documented separately in
+[ask Product Golden Path Command Contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md):
+`repo doctor` -> `skills improve` -> `skills explain` -> `skills prove`
+-> `repo closeout --changed`.
+
 ## Enhancement Summary
 This specification has been deepened to include:
 - **Full Signature Set:** All commands now have explicit type-safe parameter definitions.
@@ -47,12 +71,28 @@ This specification has been deepened to include:
 graph TD
     ask[ask] --> skills[skills]
     ask --> repo[repo]
+    ask --> reviewers[reviewers]
+    ask --> runtime[runtime]
     ask --> plugins[plugins]
     ask --> evals[evals]
+    ask --> workouts[workouts]
     ask --> graph[graph]
+    ask --> mcp[mcp]
+    ask --> wiki[wiki]
 
     skills --> sync[sync]
     skills --> list[list]
+    skills --> budget[budget]
+    skills --> handles[handles]
+    skills --> resolve[resolve]
+    skills --> parse[parse]
+    skills --> proof[proof]
+    skills --> prove[prove]
+    skills --> explain[explain]
+    skills --> route[route]
+    skills --> goal[goal]
+    skills --> improve[improve]
+    skills --> starter[starter]
     skills --> audit[audit]
     skills --> install[install]
     skills --> fold[fold]
@@ -60,6 +100,22 @@ graph TD
 
     repo --> validate[validate]
     repo --> status[status]
+    repo --> check_stability[check-stability]
+    repo --> doctor[doctor]
+    repo --> closeout[closeout]
+    repo --> doctor_catalog[doctor-catalog]
+    repo --> provider_audit[provider-audit]
+    repo --> surface[surface]
+
+    runtime --> runtime_surface[surface]
+    runtime --> runtime_budget[budget]
+
+    reviewers --> reviewers_resolve[resolve]
+
+    workouts --> workouts_list[list]
+    workouts --> workouts_run[run]
+    workouts --> workouts_score[score]
+    workouts --> workouts_promote[promote]
 
     plugins --> plugins_init[init]
 

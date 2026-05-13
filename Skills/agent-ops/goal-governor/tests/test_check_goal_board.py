@@ -102,3 +102,39 @@ def test_native_goal_runtime_fields_accept_raw_budget_limited_status() -> None:
 
     assert errors == []
     assert goal_status == "active"
+
+
+def test_native_goal_runtime_fields_accept_identity_and_timestamps() -> None:
+    state = {
+        "goal": {
+            "status": "active",
+            "native_objective": "/goal Follow docs/goals/current/goal.md",
+            "native_status": "active",
+            "native_goal_id": "goal_abc-123",
+            "native_created_at": "2026-05-13T10:00:00Z",
+            "native_updated_at": "2026-05-13T10:05:00Z",
+            "token_budget": 1000,
+            "tokens_used": 10,
+            "time_used_seconds": 60,
+        }
+    }
+
+    errors, goal_status = check_goal_board.validate_goal_section(state)
+
+    assert errors == []
+    assert goal_status == "active"
+
+
+def test_native_goal_id_must_be_opaque_identifier_when_present() -> None:
+    state = {
+        "goal": {
+            "status": "active",
+            "native_objective": "/goal Follow docs/goals/current/goal.md",
+            "native_status": "active",
+            "native_goal_id": "not an id",
+        }
+    }
+
+    errors, _ = check_goal_board.validate_goal_section(state)
+
+    assert "goal.native_goal_id must be a non-empty opaque id when present" in errors

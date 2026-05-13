@@ -11,11 +11,15 @@ Workout source lives under `.workouts/**`. Runtime evidence lives under
 ## CLI
 
 ```bash
-python3 bin/ask workouts list --json
-python3 bin/ask workouts run agent-ops/verification-before-completion --attempts 5 --json
-python3 bin/ask workouts score agent-ops/verification-before-completion --json
-python3 bin/ask workouts promote agent-ops/verification-before-completion --if-better --dry-run --json
+./bin/ask workouts list --json --robot
+./bin/ask workouts run agent-ops/verification-before-completion --attempts 5 --json --robot
+./bin/ask workouts score agent-ops/verification-before-completion --json --robot
+./bin/ask workouts promote agent-ops/verification-before-completion --if-better --dry-run --json --robot
 ```
+
+As of the 2026-05-13 refresh, `./bin/ask workouts list --json --robot` reports
+three ready workouts: `agent-ops/verification-before-completion`,
+`harness-engineering/he-spec`, and `skill-factory/skill-refactor`.
 
 ## Contract
 

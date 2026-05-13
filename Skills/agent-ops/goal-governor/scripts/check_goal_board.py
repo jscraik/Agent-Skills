@@ -22,6 +22,7 @@ STATUSES = {"queued", "active", "blocked", "done"}
 NATIVE_STATUSES = {"active", "paused", "budgetLimited", "budget_limited", "complete", None}
 MAX_NATIVE_OBJECTIVE_CHARS = 4_000
 TASK_ID = re.compile(r"^T\d{3}$")
+NATIVE_GOAL_ID = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
 def fail(message: str) -> int:
@@ -232,6 +233,11 @@ def validate_goal_section(state: dict[str, Any]) -> tuple[list[str], str | None]
     if native_status not in NATIVE_STATUSES:
         errors.append("goal.native_status must be active, paused, budgetLimited, budget_limited, or complete")
 
+    native_goal_id = goal.get("native_goal_id")
+    if native_goal_id is not None:
+        if not isinstance(native_goal_id, str) or not NATIVE_GOAL_ID.match(native_goal_id):
+            errors.append("goal.native_goal_id must be a non-empty opaque id when present")
+
     for field in ("tokens_used", "time_used_seconds"):
         value = goal.get(field)
         if value is not None and (not isinstance(value, int) or value < 0):
@@ -240,6 +246,11 @@ def validate_goal_section(state: dict[str, Any]) -> tuple[list[str], str | None]
     token_budget = goal.get("token_budget")
     if token_budget is not None and (not isinstance(token_budget, int) or token_budget <= 0):
         errors.append("goal.token_budget must be a positive integer when present")
+
+    for field in ("native_created_at", "native_updated_at"):
+        value = goal.get(field)
+        if value is not None and (not isinstance(value, str) or not value.strip()):
+            errors.append(f"goal.{field} must be a non-empty string when present")
 
     return errors, str(goal_status) if isinstance(goal_status, str) else None
 

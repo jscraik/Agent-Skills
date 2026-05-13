@@ -1297,6 +1297,12 @@ sync_user_skills() {
 
   mkdir -p "$(dirname "$target_dir")"
   if [ -L "$target_dir" ]; then
+    local current_target
+    current_target="$(readlink "$target_dir" 2>/dev/null || true)"
+    if [ "$current_target" = "$source_dir" ]; then
+      echo "[OK] Symlink already current: $target_dir -> $source_dir"
+      return 0
+    fi
     # Update existing symlink
     if ln -sfn "$source_dir" "$target_dir" 2>/dev/null; then
       echo "[OK] Updated symlink: $target_dir -> $source_dir"
