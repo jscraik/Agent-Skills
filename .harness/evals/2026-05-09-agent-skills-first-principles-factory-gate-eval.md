@@ -6,7 +6,7 @@ canonical_slug: agent-skills-first-principles-factory-gate
 title: First-Principles Factory Gate Eval
 harness_stage: he-eval-report
 status: complete_with_followup
-date: 2026-05-13
+date: 2026-05-09
 traceability_required: false
 origin: .harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-plan.md
 linear_issue: not_created
