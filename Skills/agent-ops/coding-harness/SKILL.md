@@ -94,7 +94,7 @@ Operate `@brainwav/coding-harness` with command-accurate, preview-first validati
 
 ## Failure Mode
 - Fail closed when command truth, repo root, package manager, or canonical harness state cannot be established.
-- Stop at the first failed or blocked validation gate, report the exact command output, and rerun that same gate after a fix.
+- Stop at the first failed or blocked validation gate, report the sanitized command output (with secrets and sensitive data redacted per the Redact secrets policy), and rerun that same gate after a fix.
 - Mark auth-bound, network-bound, or destructive checks as blocked rather than inferred from local source.
 - If the requested task is not harness setup, governance, CI ownership, command discovery, or action sync, hand off instead of expanding scope.
 
