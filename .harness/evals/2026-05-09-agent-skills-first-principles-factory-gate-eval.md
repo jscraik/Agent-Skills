@@ -5,8 +5,8 @@ artifact_type: he-eval-report
 canonical_slug: agent-skills-first-principles-factory-gate
 title: First-Principles Factory Gate Eval
 harness_stage: he-eval-report
-status: draft
-date: 2026-05-09
+status: complete_with_followup
+date: 2026-05-13
 traceability_required: false
 origin: .harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-plan.md
 linear_issue: not_created
@@ -17,21 +17,21 @@ linear_milestone: First-Principles Factory Gate (proposed)
 
 ## Executive Eval Summary
 
-Status: Complete with follow-up for Phase 1 only.
+Status: Complete with follow-up for the four-phase first-principles factory
+gate program.
 
 Linear Completion Recommendation: no Linear mutation is required because no
-Linear issue exists. If the proposed Phase 1 Linear sub-issue is created later,
-this slice can be marked `Complete with follow-up` after user acceptance of
-this eval.
+Linear issue exists. If the proposed parent or phase sub-issues are created
+later, mark the completed slices Complete with follow-up after user acceptance
+of this aggregate eval.
 
-Primary Blockers: full first-principles factory-gate readiness remains blocked
-until later phases add reference schema/procedure wiring, validator enforcement,
-and behavior-changing eval proof. Phase 1 itself has no blocking validation
-failure.
+Primary Blockers: no phase-owned validation blocker remains. The only follow-up
+is optional live model eval or smoke benchmarking if Jamie wants trajectory
+proof beyond static eval fixtures and deterministic validation.
 
-Confidence: high for Phase 1 router/hook/test implementation; medium for the
-overall factory-gate program because no Phase 2 through Phase 4 proof has been
-implemented.
+Confidence: high for router/hook context, reference schema/procedure wiring,
+warning-first validator coverage, and static behavior-proof eval fixtures;
+medium for live runtime behavior until optional model eval smoke proof is run.
 
 ## Evaluated Slice
 
@@ -73,11 +73,12 @@ before enforcement, no generated projection edits, and proof-before-closure.
 Artifact Path:
 `.harness/evals/2026-05-09-agent-skills-first-principles-factory-gate-eval.md`.
 
-Definition of Done Status: satisfied for Phase 1 implementation only; not
-satisfied for the full first-principles factory-gate program.
+Definition of Done Status: satisfied with follow-up for the four-phase
+first-principles factory-gate program.
 
-Closure Safety: safe to review Phase 1. Unsafe to close the broader
-factory-gate initiative as complete.
+Closure Safety: safe to close the local four-phase implementation as complete
+with follow-up. Unsafe to claim universal factory correctness without live
+trajectory evidence.
 
 ## Linear Backlink Map
 
@@ -90,8 +91,8 @@ Linear Parent Issue: not created.
 Linear Sub-Issues: not created.
 
 Linear Status Recommendation: leave uncreated unless the user wants external
-tracking; if created for Phase 1, recommend `Complete with follow-up` after
-acceptance because later phases remain open.
+tracking; if created, recommend Complete with follow-up for the completed local
+implementation and keep optional live trajectory proof as follow-up.
 
 Proof Artifact Links:
 
@@ -100,6 +101,10 @@ Proof Artifact Links:
 - `.harness/specs/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-spec.md`
 - `.harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-plan.md`
 - `.harness/review/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-plan-technical-review.md`
+- `.harness/evals/2026-05-09-agent-skills-first-principles-factory-gate-phase-2-eval.md`
+- `.harness/evals/2026-05-09-agent-skills-first-principles-factory-gate-phase-3-eval.md`
+- `.harness/evals/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-eval.md`
+- `.harness/review/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-technical-review.md`
 - this eval artifact
 
 Missing Identifiers: Linear parent issue ID and Linear sub-issue ID were not
@@ -121,14 +126,23 @@ Plugin HE Spec:
 
 ADRs: none.
 
-Core Invariants: Phase 1 encodes the decision boundary in routers and
-advisory hook context without changing package generation or enforcement.
+Core Invariants: Phase 1 encodes the decision boundary in routers and advisory
+hook context; Phase 2 moves full schema and examples into references and lane
+procedures; Phase 3 adds warning-first validator coverage; Phase 4 adds static
+behavior-proof eval fixtures. No phase changed generated projections, runtime
+mirrors, plugin caches, MCP servers, apps, or Linear state.
 
 Other Source Artifacts:
 
 - `.harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-plan.md`
 - `.harness/review/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-plan-technical-review.md`
 - live Codex hook schema evidence recorded in the plan
+- `.harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-2-plan.md`
+- `.harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-3-plan.md`
+- `.harness/plan/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-plan.md`
+- `.harness/evals/2026-05-09-agent-skills-first-principles-factory-gate-phase-2-eval.md`
+- `.harness/evals/2026-05-09-agent-skills-first-principles-factory-gate-phase-3-eval.md`
+- `.harness/evals/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-eval.md`
 
 ## Planned Proof Check
 
@@ -143,13 +157,18 @@ pytest passed, `git diff --check` passed, authoring-family changed-file
 validation passed after preserving unrelated HE plan context, and plan artifact
 lints passed after implementation evidence was recorded.
 
-Proof Missing: no behavior-changing eval fixture proves the gate changes a
-factory decision yet. That is Phase 4 work, not Phase 1.
+Proof Missing: live model trajectory, pass@k reporting, and saturation
+measurement remain optional follow-up. Phase 4 added static eval fixtures that
+require artifact-selection decisions, but those fixtures were not run as live
+model trials.
 
-Interpretation: Phase 1 met its planned proof but should not be used to claim
-full factory readiness.
+Interpretation: the four-phase program met its planned local proof for
+factory-gate availability, procedure wiring, warning-first validation, and
+static behavior-proof eval coverage. It should not be used to claim universal
+factory correctness.
 
-Blocks Closure: no for Phase 1; yes for full program closure.
+Blocks Closure: no for local four-phase closure; yes for stronger live-runtime
+readiness claims.
 
 ## Functional Validation Results
 
@@ -241,7 +260,8 @@ Confidence: high.
 
 Blocks Closure: no
 
-Required Action: keep Phase 2 through Phase 4 out of this closeout.
+Required Action: none; later phases are now covered by their own proof
+artifacts.
 
 Gate: Hook runtime output shape
 
@@ -282,20 +302,23 @@ Required Action: implement enforcement only under a later approved phase.
 
 Gate: Behavior-changing eval proof
 
-Expected: full program readiness requires a later eval proving the gate changes
-at least one build/do-not-build decision.
+Expected: full program readiness requires eval coverage proving the gate can
+change at least one build, improve-existing, hook, or do-not-build decision.
 
-Actual: no behavior-changing factory eval fixture exists yet.
+Actual: Phase 4 added four static behavior-proof fixtures across skillify,
+skill-refactor, and plugin-factory-router.
 
-Status: not-run
+Status: pass with follow-up
 
-Evidence: Phase 1 plan deliberately excludes eval fixture changes.
+Evidence: .harness/evals/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-eval.md and .harness/review/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-technical-review.md.
 
-Confidence: high.
+Confidence: high for static fixture coverage; medium for live runtime behavior.
 
-Blocks Closure: no for Phase 1; yes for full program readiness.
+Blocks Closure: no for local four-phase closure; yes for universal runtime
+readiness claims.
 
-Required Action: keep Phase 4 open until behavior-changing eval proof exists.
+Required Action: optional live model eval smoke proof if Jamie wants trajectory
+evidence.
 
 ## Agentic Eval Validity
 
@@ -308,8 +331,8 @@ hook, and focused-test updates only.
 Outcome Validity: high for Phase 1 because the expected fragments and runtime
 hook event field are asserted by tests.
 
-Trajectory / Transcript Evidence: implementation followed the Phase 1 plan,
-stopped short of Phase 2 through Phase 4, and recorded validation in the plan.
+Trajectory / Transcript Evidence: phases 1 through 4 are recorded in local
+plan/eval/review artifacts. Live model trajectories were not collected.
 
 Grader Coverage: deterministic tests cover hook JSON output and context
 fragments; router text was checked by diff inspection rather than model-graded
@@ -324,12 +347,12 @@ run.
 Authorization Validator: user explicitly invoked `$he-work` for implementation
 and `$he-eval-report` for proof artifact creation.
 
-Saturation / Maintenance Signal: not saturated; later phases are required for
-schema, validator, and behavior eval proof.
+Saturation / Maintenance Signal: partially saturated for static coverage; live
+model saturation remains optional follow-up.
 
 Blocks Completion: no
 
-Required Action: run later behavior eval before claiming full factory-gate
+Required Action: run live behavior eval before claiming universal factory-gate
 readiness.
 
 ## Side-Effect Authorization
@@ -356,7 +379,7 @@ Blocks Completion: no
 
 ## Domain Model Integrity Check
 
-Domain Model Status: partial and sufficient for Phase 1.
+Domain Model Status: complete with follow-up for the four-phase local program.
 
 Bounded Context: `skill-factory` and `plugin-factory` authoring boundaries.
 
@@ -367,10 +390,11 @@ Model-Code-Test Language Match: router/hook/test text consistently uses
 `first-principles factory gate`, `artifact decision`, `smallest effective
 mechanism`, `IMPROVE_EXISTING`, and `DO_NOT_BUILD`.
 
-Translation Boundary: full gate schema and behavior enforcement remain outside
-Phase 1.
+Translation Boundary: live trajectory proof and strict validator enforcement
+remain outside this local closure.
 
-Closure Impact: no Phase 1 closure block; broader readiness remains blocked.
+Closure Impact: no local four-phase closure block; broader runtime readiness
+requires optional live eval evidence.
 
 Evidence: source diffs and focused hook tests.
 
@@ -392,8 +416,9 @@ Moat Drift: Improved
 
 ## Architecture Integrity Check
 
-Conclusion: improved for Phase 1 because the gate is placed at factory
-decision boundaries without changing package generation internals.
+Conclusion: improved because the gate is placed at factory decision boundaries,
+wired into factory procedures, covered by warning-first validation, and backed
+by static behavior-proof eval fixtures.
 
 Evidence: router additions and hook context additions only.
 
@@ -406,7 +431,8 @@ Blocks Completion: no.
 ## Routing Determinism Check
 
 Conclusion: improved because routers now name the artifact decision before
-handoff while preserving one-lane routing.
+handoff while preserving one-lane routing, and Phase 4 route checks verified
+the new eval prompts select the intended factory surfaces.
 
 Evidence: both router diffs keep read-only boundaries and add one compact gate
 section.
@@ -470,10 +496,10 @@ smallest effective mechanism, artifact decision, and proof before build work.
 
 Affected Files/Modules: factory routers and hook context.
 
-Confidence: high for Phase 1; medium for full moat impact until behavior evals
-exist.
+Confidence: high for static factory behavior coverage; medium for full moat
+impact until live behavior evals exist.
 
-Blocks Completion: no for Phase 1.
+Blocks Completion: no for local four-phase closure.
 
 ## Proof Artifacts
 
@@ -481,20 +507,26 @@ Produced:
 
 - `.harness/plan/2026-05-09-agent-skills-first-principles-factory-gate-phase-1-plan.md`
 - `.harness/evals/2026-05-09-agent-skills-first-principles-factory-gate-eval.md`
+- `.harness/evals/2026-05-09-agent-skills-first-principles-factory-gate-phase-2-eval.md`
+- `.harness/evals/2026-05-09-agent-skills-first-principles-factory-gate-phase-3-eval.md`
+- `.harness/evals/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-eval.md`
+- `.harness/review/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-technical-review.md`
 - focused hook contract test results
 - authoring-family changed-file validation result
 
 Required:
 
-- user review or accept/challenge/rework decision for this eval;
-- later Phase 4 behavior-changing eval proof before full factory-gate closure.
+- user review or accept/challenge/rework decision for this aggregate eval;
+- optional live model eval smoke proof before stronger runtime-readiness claims.
 
-Missing: behavior-changing eval fixtures and full factory-gate closure proof.
+Missing: live model trajectory proof, pass@k reporting, and saturation
+measurement.
 
-Planned Before Implementation: yes for Phase 1 proof; yes, deferred, for Phase
-4 behavior proof.
+Planned Before Implementation: yes for phase-local proof; Phase 4 explicitly
+made live model trajectory proof optional follow-up.
 
-Blocks Completion: no for Phase 1; yes for full program readiness.
+Blocks Completion: no for local four-phase closure; yes for universal runtime
+readiness claims.
 
 Attach or Link Back to Linear: not applicable until Linear objects are created.
 
