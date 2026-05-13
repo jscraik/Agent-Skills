@@ -899,6 +899,36 @@ def extract_rubric_metrics(parsed_json: Any) -> Optional[Dict[str, Any]]:
     return metrics or None
 
 
+def _parse_agent_self_assessment(output_text: str) -> Optional[bool]:
+    """
+    Parse agent's explicit self-assessment from output text.
+
+    Looks for patterns like:
+    - "Pass/fail: - Fail"
+    - "Pass/fail: Pass"
+    - "Result: Fail"
+    etc.
+
+    Returns:
+        True if agent reports pass, False if agent reports fail, None if no clear signal.
+    """
+    # Look for common self-assessment patterns
+    patterns = [
+        (r"(?i)pass\s*/\s*fail\s*:?\s*-?\s*fail", False),
+        (r"(?i)pass\s*/\s*fail\s*:?\s*-?\s*pass", True),
+        (r"(?i)result\s*:?\s*-?\s*fail", False),
+        (r"(?i)result\s*:?\s*-?\s*pass", True),
+        (r"(?i)status\s*:?\s*-?\s*fail", False),
+        (r"(?i)status\s*:?\s*-?\s*pass", True),
+    ]
+
+    for pattern, result in patterns:
+        if re.search(pattern, output_text):
+            return result
+
+    return None
+
+
 def _acceptance_skip_reason(*, exit_code: int, output_text: str) -> Optional[str]:
     """
     Return a skip reason when acceptance assertions should be skipped because the runner failed and produced no final output.
@@ -2466,9 +2496,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 )
             if c.should_trigger is not None and selected_skill is None:
                 expected = "selected" if c.should_trigger else "not selected"
-                runner_warnings.append(
-                    f"should_trigger expected skill to be {expected}, but selection signal was unavailable for this run."
-                )
+                # When prepend_skill is true, selection signals may not be emitted (skill is pre-loaded).
+                # This is expected and non-blocking. Otherwise, missing signal is a hard failure.
+                if c.prepend_skill:
+                    runner_warnings.append(
+                        f"should_trigger expected skill to be {expected}, but selection signal was unavailable for this run. "
+                        f"NOTE: This is expected and non-blocking when prepend_skill=true (skill is pre-loaded, not dynamically selected)."
+                    )
+                else:
+                    runner_tier1_failures.append(
+                        f"should_trigger={c.should_trigger} but selection signal unavailable (selected_skill is None). "
+                        f"Cannot verify selection expectation without signal evidence."
+                    )
 
             # Assertions + rubric parsing
             parsed_json: Optional[Any] = None
@@ -2518,6 +2557,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             selected_skill=selected_skill,
                         )
                     )
+
+            # Check agent self-assessment: if agent explicitly reports "Fail", treat as hard failure
+            agent_self_assessment = _parse_agent_self_assessment(output_text)
+            if agent_self_assessment is False:
+                runner_tier1_failures.append(
+                    "Agent self-assessment reports explicit failure (e.g., 'Pass/fail: Fail'). "
+                    "Treating this as a hard failure regardless of exit_code."
+                )
 
             rubric = extract_rubric_metrics(parsed_json) if parsed_json is not None else None
             if rubric:
