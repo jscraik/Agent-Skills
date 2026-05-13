@@ -6,16 +6,8 @@ name = "harness local environment"
 script = '''
 set -euo pipefail
 
-for candidate in "/sbin" "/usr/sbin" "/usr/local/bin" "/opt/homebrew/sbin" "/opt/homebrew/bin" "$HOME/.local/bin" "$HOME/.local/share/mise/shims"; do
-  if [[ -d "$candidate" ]]; then
-    PATH=":${PATH:-}:"
-    PATH="${PATH//:$candidate:/:}"
-    PATH="${PATH#:}"
-    PATH="${PATH%:}"
-    PATH="$candidate${PATH:+:$PATH}"
-  fi
-done
-export PATH
+source "$(git rev-parse --show-toplevel)/.codex/scripts/normalize-path.sh"
+normalize_path_candidates
 
 if command -v mise >/dev/null 2>&1; then
   mise trust --yes .mise.toml || true
@@ -35,16 +27,8 @@ icon = "tool"
 command = '''
 set -euo pipefail
 
-for candidate in "/sbin" "/usr/sbin" "/usr/local/bin" "/opt/homebrew/sbin" "/opt/homebrew/bin" "$HOME/.local/bin" "$HOME/.local/share/mise/shims"; do
-  if [[ -d "$candidate" ]]; then
-    PATH=":${PATH:-}:"
-    PATH="${PATH//:$candidate:/:}"
-    PATH="${PATH#:}"
-    PATH="${PATH%:}"
-    PATH="$candidate${PATH:+:$PATH}"
-  fi
-done
-export PATH
+source "$(git rev-parse --show-toplevel)/.codex/scripts/normalize-path.sh"
+normalize_path_candidates
 
 if command -v mise >/dev/null 2>&1; then
   mise trust --yes .mise.toml || true

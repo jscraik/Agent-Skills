@@ -5,12 +5,14 @@ artifact_type: he-eval-report
 canonical_slug: agent-skills-jsc-167-ask-bootstrap-command-discoverability
 title: Agent Skills JSC-167 Ask Bootstrap Command Discoverability Eval
 harness_stage: he-eval-report
-status: partial
+status: implementation_complete
 date: 2026-05-10
 traceability_required: true
 origin: .harness/plan/2026-05-10-agent-skills-jsc-167-ask-bootstrap-command-discoverability-plan.md
 linear_issue: JSC-167
 linear_milestone: Command surface and ask reliability
+linear_closure_status: pending_review
+heartbeat_closure_status: blocked_on_evidence
 ---
 
 # Agent Skills JSC-167 Ask Bootstrap Command Discoverability Eval
