@@ -305,7 +305,7 @@ SA-010: No generated projections, plugin caches, runtime mirrors, Linear objects
 
 ## Visual References / Diagrams
 
-```mermaid
+~~~mermaid
 flowchart LR
     P1[Phase 1: visible gate] --> P2[Phase 2: shared procedure]
     P2 --> P3[Phase 3: warning-first validator]
@@ -313,7 +313,7 @@ flowchart LR
     P4 --> C{Closure claim?}
     C -->|Build and non-build decisions proven| Done[Complete with bounded confidence]
     C -->|Only words or YAML proven| Follow[Complete with follow-up or blocked]
-```
+~~~
 
 The diagram is normative only for phase order and closure decision. The
 requirements and acceptance criteria are authoritative when text and diagram
