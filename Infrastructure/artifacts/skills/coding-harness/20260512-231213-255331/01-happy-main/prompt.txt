@@ -1,1 +1,0 @@
-In /Users/jamiecraik/dev/configs, install coding-harness and verify the scaffold without guessing whether setup passed.

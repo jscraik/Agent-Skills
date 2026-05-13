@@ -1,1 +1,0 @@
-After updating the generated Codex environment actions, finish the harness closeout and report exactly which checks passed or were blocked.

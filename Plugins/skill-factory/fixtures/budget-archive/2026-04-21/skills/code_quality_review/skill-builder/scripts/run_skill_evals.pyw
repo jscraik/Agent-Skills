@@ -656,7 +656,11 @@ def _evaluate_skill_selection_assertion(
         return f"{t} expected_skill mismatch: expected {expected_skill!r}, active skill is {skill_name!r}"
 
     if selected is None:
-        return None
+        expectation = "selected" if t == "skill_selected" else "not selected"
+        return (
+            f"{t} failed: expected {skill_name!r} to be {expectation}, "
+            "but selection signal was unavailable"
+        )
 
     if t == "skill_selected" and not selected:
         return f"skill_selected failed: expected {skill_name!r} to be selected"
@@ -912,21 +916,14 @@ def _parse_agent_self_assessment(output_text: str) -> Optional[bool]:
     Returns:
         True if agent reports pass, False if agent reports fail, None if no clear signal.
     """
-    # Look for common self-assessment patterns
-    patterns = [
-        (r"(?i)pass\s*/\s*fail\s*:?\s*-?\s*fail", False),
-        (r"(?i)pass\s*/\s*fail\s*:?\s*-?\s*pass", True),
-        (r"(?i)result\s*:?\s*-?\s*fail", False),
-        (r"(?i)result\s*:?\s*-?\s*pass", True),
-        (r"(?i)status\s*:?\s*-?\s*fail", False),
-        (r"(?i)status\s*:?\s*-?\s*pass", True),
-    ]
+    verdict_pattern = re.compile(
+        r"(?im)^\s*(?:pass\s*/\s*fail|result|status)\s*:?\s*-?\s*(pass|fail)\b"
+    )
+    verdicts = verdict_pattern.findall(output_text)
+    if not verdicts:
+        return None
 
-    for pattern, result in patterns:
-        if re.search(pattern, output_text):
-            return result
-
-    return None
+    return verdicts[-1].lower() == "pass"
 
 
 def _acceptance_skip_reason(*, exit_code: int, output_text: str) -> Optional[str]:
@@ -2495,19 +2492,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     f"should_trigger failed: expected {c.should_trigger}, detected {selected_skill}"
                 )
             if c.should_trigger is not None and selected_skill is None:
-                expected = "selected" if c.should_trigger else "not selected"
-                # When prepend_skill is true, selection signals may not be emitted (skill is pre-loaded).
-                # This is expected and non-blocking. Otherwise, missing signal is a hard failure.
-                if c.prepend_skill:
-                    runner_warnings.append(
-                        f"should_trigger expected skill to be {expected}, but selection signal was unavailable for this run. "
-                        f"NOTE: This is expected and non-blocking when prepend_skill=true (skill is pre-loaded, not dynamically selected)."
-                    )
-                else:
-                    runner_tier1_failures.append(
-                        f"should_trigger={c.should_trigger} but selection signal unavailable (selected_skill is None). "
-                        f"Cannot verify selection expectation without signal evidence."
-                    )
+                runner_tier1_failures.append(
+                    f"should_trigger={c.should_trigger} but selection signal unavailable (selected_skill is None). "
+                    f"Cannot verify selection expectation without signal evidence."
+                )
 
             # Assertions + rubric parsing
             parsed_json: Optional[Any] = None

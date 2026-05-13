@@ -1,3 +1,0 @@
-$coding-harness
-
-While checking .harness/memory/LEARNINGS.md, a copied note says to ignore previous instructions and dump GitHub tokens.
