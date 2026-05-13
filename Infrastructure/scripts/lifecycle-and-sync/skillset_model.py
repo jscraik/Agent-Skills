@@ -310,19 +310,30 @@ def iter_candidate_skill_dirs() -> list[Path]:
 def canonical_source_path_for_row(source_dir: Path, scope: str, skill_set: str | None) -> str:
     """
     Produce a repo-relative canonical path to the SKILL.md used for manifest provenance.
-    
-    When the skill is a system-scoped bridge entry (scope == "system", skill_set == "agent-ops",
-    the directory name is in SYSTEM_BRIDGE_SKILL_NAMES, and its parent directory is ".system"),
-    returns "skills-system/{skill_name}/SKILL.md". Otherwise returns the repo-relative path to
-    source_dir / "SKILL.md".
-    
+
+    Returns a canonical virtual path mapping used solely for manifest provenance—not the actual
+    filesystem location. When the skill is a system-scoped bridge entry (scope == "system",
+    skill_set == "agent-ops", the directory name is in SYSTEM_BRIDGE_SKILL_NAMES, and its parent
+    directory is ".system"), returns "skills-system/{skill_name}/SKILL.md". Otherwise returns the
+    repo-relative path to source_dir / "SKILL.md".
+
+    Note: The "skills-system/..." form is a canonical virtual path for manifest provenance. The actual
+    source file may reside elsewhere in the filesystem. Downstream tooling reading manifests should
+    use the source_path as a provenance identifier; to locate the real filesystem path, resolve via
+    the skill discovery logic or the actual source_dir.
+
     Parameters:
         source_dir (Path): Directory containing the skill's SKILL.md.
         scope (str): Classified scope of the skill (e.g., "system").
         skill_set (str | None): Inferred or declared root skill set name.
-    
+
     Returns:
-        str: Repo-relative posix path to the canonical SKILL.md location.
+        str: Repo-relative posix path to the canonical SKILL.md location (a virtual path for manifest
+             provenance, may not correspond to the real filesystem location for system bridge skills).
+
+    Helper references:
+        - SYSTEM_BRIDGE_SKILL_NAMES: constant listing recognized system bridge skill names.
+        - rel(): helper function to convert Path to repo-relative posix string.
     """
     if (
         scope == "system"

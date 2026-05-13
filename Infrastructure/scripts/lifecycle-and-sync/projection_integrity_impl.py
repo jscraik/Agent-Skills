@@ -167,7 +167,7 @@ def default_repo_root(script_path: Path) -> Path:
 
     Prefers the nearest ancestor containing `.git` (works for normal repos and
     worktrees). Falls back to an ancestor that contains both `Infrastructure/`
-    and `scripts/`, then to the historical depth-based default.
+    and `scripts/`, then to the top-level ancestor.
     """
     resolved = script_path.resolve()
     for candidate in resolved.parents:
@@ -176,7 +176,8 @@ def default_repo_root(script_path: Path) -> Path:
     for candidate in resolved.parents:
         if (candidate / "Infrastructure").is_dir() and (candidate / "scripts").is_dir():
             return candidate
-    return resolved.parents[2]
+    # Return the top-level ancestor (repository root)
+    return resolved.parents[3] if len(resolved.parents) > 3 else resolved.parents[-1]
 
 
 def normalize_excluded_dir_names(excluded_dir_names: Iterable[str]) -> tuple[str, ...]:
@@ -904,13 +905,18 @@ def _sync_mirror_python(
             continue
         normalized_source = _normalize_stamped_text(source_bytes, source_file)
         if projection_file.exists() and projection_file.is_file() and not projection_file.is_symlink():
-            projection_bytes = projection_file.read_bytes()
-            if normalized_source is not None:
-                normalized_projection = _normalize_stamped_text(projection_bytes, projection_file)
-                if normalized_projection is not None and normalized_projection == normalized_source:
+            try:
+                projection_bytes = projection_file.read_bytes()
+            except OSError:
+                # Unreadable projection file: will be recreated below
+                pass
+            else:
+                if normalized_source is not None:
+                    normalized_projection = _normalize_stamped_text(projection_bytes, projection_file)
+                    if normalized_projection is not None and normalized_projection == normalized_source:
+                        continue
+                elif projection_bytes == source_bytes:
                     continue
-            elif projection_bytes == source_bytes:
-                continue
         if projection_file.exists() or projection_file.is_symlink():
             if projection_file.is_symlink():
                 projection_file.unlink()
@@ -1092,8 +1098,30 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
                 )
             continue
 
-        source_bytes = source_file.read_bytes()
-        projection_bytes = projection_file.read_bytes()
+        try:
+            source_bytes = source_file.read_bytes()
+        except OSError:
+            mismatched_files.append(
+                {
+                    "path": rel_key,
+                    "reason": "unreadable_file",
+                    "source_sha256": "unreadable_source",
+                    "projection_sha256": hash_bytes(projection_file.read_bytes()) if projection_file.exists() else "missing",
+                }
+            )
+            continue
+        try:
+            projection_bytes = projection_file.read_bytes()
+        except OSError:
+            mismatched_files.append(
+                {
+                    "path": rel_key,
+                    "reason": "unreadable_file",
+                    "source_sha256": hash_bytes(source_bytes),
+                    "projection_sha256": "unreadable_projection",
+                }
+            )
+            continue
 
         if rel.suffix in STAMPABLE_SUFFIXES:
             try:

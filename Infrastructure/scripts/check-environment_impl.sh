@@ -137,11 +137,22 @@ fi
 	for action in "${required_codex_actions[@]}"; do
 		name="${action%%|*}"
 		icon="${action##*|}"
-		if ! awk -v name="$name" -v icon="$icon" '
-			prev == "name = \"" name "\"" && $0 == "icon = \"" icon "\"" { found = 1 }
-			{ prev = $0 }
-			END { exit found ? 0 : 1 }
-		' "$CODEX_ENVIRONMENT_PATH"; then
+		if ! python3 - "$CODEX_ENVIRONMENT_PATH" "$name" "$icon" <<'PY'
+import sys
+import tomllib
+from pathlib import Path
+
+env_path = Path(sys.argv[1])
+required_name = sys.argv[2]
+required_icon = sys.argv[3]
+
+data = tomllib.loads(env_path.read_text(encoding="utf-8"))
+for env in data.get("environments", []):
+    if env.get("name") == required_name and env.get("icon") == required_icon:
+        sys.exit(0)
+sys.exit(1)
+PY
+		then
 			echo "Error: Codex environment action '$name' is missing or mapped to the wrong icon in $CODEX_ENVIRONMENT_PATH"
 			exit 1
 		fi
@@ -219,11 +230,6 @@ PY
 		}
 
 		repo_capabilities=()
-		explicit_capabilities=()
-		for capability in "${explicit_capabilities[@]}"; do
-			[[ -n "$capability" ]] || continue
-			repo_capabilities+=("$capability")
-		done
 		ui_markers=("react" "react-dom" "next" "vite" "tailwindcss" "@storybook/react" "@storybook/react-vite" "@radix-ui/react-slot")
 		for marker in "${ui_markers[@]}"; do
 			if has_package_marker "$marker"; then

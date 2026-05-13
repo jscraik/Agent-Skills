@@ -48,10 +48,13 @@ run_case() {
   set -e
 
   local run_dir
-  run_dir="$(printf '%s\n' "$output" | rg -o "\\[recursive-loop\\] out_dir=.*" | tail -n1 | sed 's/.*out_dir=//')"
+  run_dir="$(printf '%s\n' "$output" | rg -o "\\[recursive-loop\\] out_dir=.*" | tail -n1 | sed 's/.*out_dir=//' || true)"
+  if [[ -z "$run_dir" ]]; then
+    run_dir=""
+  fi
   local run_json blocker_json blocker_code terminal_status stop_reason
-  run_json="${run_dir}/run.json"
-  blocker_json="${run_dir}/run_blocker.json"
+  run_json="${run_dir:+${run_dir}/run.json}"
+  blocker_json="${run_dir:+${run_dir}/run_blocker.json}"
   blocker_code="none"
   terminal_status="unknown"
   stop_reason="unknown"
@@ -154,6 +157,28 @@ lines.append("- `kill_switch` -> `kill_switch_activated`")
 lines.append("- `rollback_required` -> `run_rollback_required`")
 lines.append("- `rollout_off` -> `run_rollforward_blocked`")
 Path(sys.argv[2]).write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+# Validate observed blockers against expectations
+expected_blockers = set()
+observed_blockers = set()
+for row in report.get("cases", []):
+    case = row["case_id"]
+    blocker = row["blocker_code"]
+    if blocker != "none":
+        observed_blockers.add((case, blocker))
+    # Build expected set based on control inputs
+    if row.get("kill_switch"):
+        expected_blockers.add((case, "kill_switch_activated"))
+    elif row.get("rollback_required"):
+        expected_blockers.add((case, "run_rollback_required"))
+    elif row.get("rollout_mode") == "off":
+        expected_blockers.add((case, "run_rollforward_blocked"))
+
+if observed_blockers != expected_blockers:
+    print("Blocker mismatch detected:", file=sys.stderr)
+    print(f"  Expected: {expected_blockers}", file=sys.stderr)
+    print(f"  Observed: {observed_blockers}", file=sys.stderr)
+    sys.exit(1)
 PY
 
 echo "[rollback-drill] report_json=$report_json"

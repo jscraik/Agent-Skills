@@ -14,7 +14,7 @@ def _load_impl() -> ModuleType:
         from . import projection_integrity_impl as _impl
 
         return _impl
-    except Exception:  # pragma: no cover - fallback when run as a file
+    except (ImportError, ModuleNotFoundError):  # pragma: no cover - fallback when run as a file
         module_name = "projection_integrity_impl_runtime"
         spec = importlib.util.spec_from_file_location(
             module_name, Path(__file__).with_name("projection_integrity_impl.py")

@@ -21,7 +21,7 @@ is_script_sourced() {
 
 SCRIPT_PATH="$(resolve_script_path)"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${SCRIPT_PATH}")" && pwd -P)"
-WORKSPACE_ROOT_FALLBACK="$(cd -- "${SCRIPT_DIR}/.." && pwd -P)"
+WORKSPACE_ROOT_FALLBACK="$(cd -- "${SCRIPT_DIR}/../.." && pwd -P)"
 if WORKSPACE_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel 2>/dev/null)"; then
 	:
 else

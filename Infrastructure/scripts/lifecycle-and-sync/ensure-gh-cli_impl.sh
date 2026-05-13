@@ -2,7 +2,6 @@
 set -euo pipefail
 
 DRY_RUN=0
-FORCE=1
 
 usage() {
   cat <<'USAGE'
@@ -139,16 +138,11 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
   exit 1
 fi
 
-if [[ "$FORCE" -eq 1 ]]; then
-  if install_gh "$OS"; then
-    if verify_gh; then
-      exit 0
-    fi
+if install_gh "$OS"; then
+  if verify_gh; then
+    exit 0
   fi
-
-  manual_install_hint "$OS"
-  exit 1
 fi
 
-echo "[ERROR] Unexpected install state"
+manual_install_hint "$OS"
 exit 1

@@ -98,6 +98,7 @@ def repo_validate(
         cmd.append("--changed-files")
         cmd.extend(changed_files)
         
+    VALIDATE_TIMEOUT = 300  # 5 minutes
     stdout_chunks: List[str] = []
     with subprocess.Popen(
         cmd,
@@ -113,7 +114,18 @@ def repo_validate(
             # Preserve machine-readable stdout for the final envelope while still
             # showing long-running validation progress to operators in real time.
             print(line, end="", file=sys.stderr)
-        process.wait()
+        try:
+            process.wait(timeout=VALIDATE_TIMEOUT)
+        except subprocess.TimeoutExpired:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+            timeout_msg = f"Validation timed out after {VALIDATE_TIMEOUT} seconds."
+            stdout_chunks.append(timeout_msg + "\n")
+            print(timeout_msg, file=sys.stderr)
     
     # Parse output for summary
     stdout = "".join(stdout_chunks)
@@ -121,8 +133,8 @@ def repo_validate(
     warn_only_issues = 0
 
     # Handle early exit case where validation script fails before producing summary
-    if "- required_failures:" not in stdout and "- warn_only_issues:" not in stdout:
-        result.data["required_failures"] = 1  # Assume failure if no summary lines
+    if "- required_failures:" not in stdout or "- warn_only_issues:" not in stdout:
+        result.data["required_failures"] = 1  # Assume failure if any summary field is missing
         result.data["warn_only_issues"] = 0
         result.data["raw_output"] = stdout
         result.status = "error"
@@ -1056,7 +1068,11 @@ def check_hub_stability(repo_root: Path, changed_files: List[str] | None = None)
             if fm and STABLE_RE.search(fm.group(1)):
                 skill = md.parts[-2]
                 stable_skills.append(skill)
-        except Exception:
+        except (OSError, UnicodeDecodeError) as exc:
+            print(f"Warning: Failed to read or parse {md}: {exc}", file=sys.stderr)
+            continue
+        except re.error as exc:
+            print(f"Warning: Regex error processing {md}: {exc}", file=sys.stderr)
             continue
 
     # If checking specific changed files
@@ -1098,7 +1114,11 @@ def check_hub_stability(repo_root: Path, changed_files: List[str] | None = None)
                     errors.append(f"STABLE SKILL MISSING 'name': {skill}")
                 if not re.search(r"^description\s*:", fm.group(1), re.MULTILINE):
                     errors.append(f"STABLE SKILL MISSING 'description': {skill}")
-            except Exception:
+            except (OSError, UnicodeDecodeError) as exc:
+                print(f"Warning: Failed to read or parse {p}: {exc}", file=sys.stderr)
+                continue
+            except re.error as exc:
+                print(f"Warning: Regex error processing {p}: {exc}", file=sys.stderr)
                 continue
 
     result.data["stable_skills"] = sorted(stable_skills)

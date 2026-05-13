@@ -48,7 +48,7 @@ If only a wrapper ran, report the wrapper label instead of the internal file nam
 | `release evals` | `./bin/ask evals run <path> --mode release --json --robot` or owned equivalent | first-class gate |
 | `package boundary checks` | `./bin/ask skills validate-boundaries <handle-or-path> --json --robot` or owned equivalent | first-class evidence check |
 | `sync/projection checks` | `./bin/ask skills prove <handle-or-path> --json --robot` or owned sync proof | first-class evidence check |
-| `docs/prose/spelling` | `vale <paths>` when installed, or another documented repo docs-quality wrapper | first-class only when a canonical docs-quality command actually ran |
+| `docs/prose/spelling` | `vale <paths>` execution is the only accepted evidence; repo docs-quality wrappers may orchestrate but do not replace the Vale output requirement | first-class only when Vale (or equivalent canonical docs-quality command) has run and produced output |
 | `eval realism` | explicit eval schema fields such as `realistic: true\|false`, strict audit findings, or owned eval-realism validator output | first-class when schema or validator evidence exists |
 | `media artifact persistence` | generated artifact path, prompt metadata path, sidecar, and existence check under `.harness/media/` or owned artifact location | first-class only for media/artifact asks |
 
@@ -139,12 +139,27 @@ Evidence must not over-claim:
 ## Readiness Decision
 
 Report an overall readiness decision whenever claiming a skill is acceptable,
-release-ready, or fully hardened:
+release-ready, or fully hardened.
+
+### Gate Result Values
+
+Use only these result values for individual gate reporting:
+
+- `pass`
+- `fail`
+- `blocked`
+- `not applicable`
+
+### Readiness Decision Enum
+
+The overall readiness state uses a separate `readiness_decision` enum (distinct from gate `result`):
 
 - `pass`: every required gate is `pass` or `not applicable` with a reason
 - `fail`: one or more required gates is `fail`
 - `blocked`: one or more required gates is `blocked`
 - `unverified`: a required gate was not run or lacks evidence
+
+Note: Parsers and contract validators should treat `readiness_decision` (not gate `result`) as the source of overall readiness states. The value `unverified` is not allowed as a gate `result`.
 
 Include the controlling gate and reason. Do not narratively override the
 decision with a higher-confidence summary.

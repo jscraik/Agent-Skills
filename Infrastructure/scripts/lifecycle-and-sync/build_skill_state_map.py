@@ -28,7 +28,9 @@ def _load_impl() -> ModuleType:
 
 
 _impl = _load_impl()
-globals().update({name: value for name, value in vars(_impl).items() if not name.startswith("_")})
+__all__ = [name for name in vars(_impl) if not name.startswith("_")]
+for name in __all__:
+    globals()[name] = getattr(_impl, name)
 
 
 def main() -> int:

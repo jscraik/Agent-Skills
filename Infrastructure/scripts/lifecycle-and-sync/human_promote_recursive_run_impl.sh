@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+repo_root="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$repo_root"
 
 run_id=""
@@ -114,6 +114,13 @@ while (($# > 0)); do
     --decision)
       require_option_value "$1" "${2:-}"
       decision="$2"
+      case "$decision" in
+        approved|rejected|candidate) ;;
+        *)
+          echo "Invalid --decision value: $decision (must be approved, rejected, or candidate)" >&2
+          exit 2
+          ;;
+      esac
       shift 2
       ;;
     --note)
@@ -658,8 +665,10 @@ trap - EXIT
 
 if [[ "$decision" == "approved" ]]; then
   python3 - "$run_json_path" "$run_dir/events.jsonl" "$reviewers" "$lesson_id" <<'PY'
+import fcntl
 import hashlib
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path

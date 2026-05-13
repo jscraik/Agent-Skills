@@ -17,7 +17,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Iterable, Optional, Sequence
 
 
 CANONICAL_DAILY_HEALTH = "Docs/skill-graphs/telemetry/daily-skill-health.md"
@@ -49,8 +49,8 @@ def read_json(path: Path, default: Any) -> Any:
         return default
 
 
-def read_jsonl(path: Path) -> List[Dict[str, Any]]:
-    rows: List[Dict[str, Any]] = []
+def read_jsonl(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     if not path.exists():
         return rows
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -94,7 +94,7 @@ def esc(value: Any) -> str:
     )
 
 
-def parse_daily_health(daily_health_path: Path) -> Dict[str, Any]:
+def parse_daily_health(daily_health_path: Path) -> dict[str, Any]:
     text = daily_health_path.read_text(encoding="utf-8")
     metrics = {
         "generated_at": "unknown",
@@ -127,8 +127,8 @@ class SkillNode:
     inventory_slice: str = "operational"
     display_slice: str = "extended"
     profile_status: str = "valid"
-    thresholds: Dict[str, Any] = field(default_factory=dict)
-    criteria_ids: List[str] = field(default_factory=list)
+    thresholds: dict[str, Any] = field(default_factory=dict)
+    criteria_ids: list[str] = field(default_factory=list)
     recent_status: str = "no_recent_run_data"
     recent_stop_reason: str = "n/a"
     recent_run: str = "n/a"
@@ -191,7 +191,7 @@ def enforce_daily_health_contract(repo_root: Path, daily_health_path: Path) -> N
             )
 
 
-def load_inventory_policy(repo_root: Path, path: Path, override_mode: Optional[str]) -> Dict[str, Any]:
+def load_inventory_policy(repo_root: Path, path: Path, override_mode: Optional[str]) -> dict[str, Any]:
     payload = read_json(path, {})
     if not isinstance(payload, dict):
         raise RuntimeError(f"Invalid inventory policy JSON: {path}")
@@ -213,11 +213,11 @@ def load_inventory_policy(repo_root: Path, path: Path, override_mode: Optional[s
     return payload
 
 
-def iter_system_skills(repo_root: Path, policy: Dict[str, Any]) -> List[str]:
+def iter_system_skills(repo_root: Path, policy: dict[str, Any]) -> list[str]:
     if policy.get("system_slice_mode") != "separate":
         return []
     system_prefixes: Sequence[str] = policy.get("system_prefixes", [])
-    out: List[str] = []
+    out: list[str] = []
     for skill_md in sorted(repo_root.rglob("SKILL.md")):
         rel = skill_md.relative_to(repo_root).as_posix()
         rel_dir = skill_md.parent.relative_to(repo_root).as_posix()
@@ -228,22 +228,22 @@ def iter_system_skills(repo_root: Path, policy: Dict[str, Any]) -> List[str]:
 
 def discover_nodes(
     repo_root: Path,
-    profile_index: Dict[str, Any],
-    wave_readiness: Dict[str, Any],
-    inventory_policy: Dict[str, Any],
-) -> List[SkillNode]:
+    profile_index: dict[str, Any],
+    wave_readiness: dict[str, Any],
+    inventory_policy: dict[str, Any],
+) -> list[SkillNode]:
     rows = profile_index.get("skills") if isinstance(profile_index, dict) else []
     if not isinstance(rows, list) or not rows:
         raise RuntimeError("profile-index.json is missing a non-empty skills[] inventory.")
 
-    wave_ready: Dict[str, bool] = {}
+    wave_ready: dict[str, bool] = {}
     waves = wave_readiness.get("waves") if isinstance(wave_readiness, dict) else {}
     if isinstance(waves, dict):
         for wave, payload in waves.items():
             if isinstance(payload, dict):
                 wave_ready[wave] = bool(payload.get("ready"))
 
-    nodes: List[SkillNode] = []
+    nodes: list[SkillNode] = []
     for row in rows:
         if not isinstance(row, dict):
             continue
@@ -303,10 +303,10 @@ def discover_nodes(
     return sorted(nodes, key=lambda item: (item.inventory_slice, item.scope_profile, item.scope_skill))
 
 
-def build_node_alias_index(nodes: Sequence[SkillNode]) -> Dict[str, SkillNode]:
+def build_node_alias_index(nodes: Sequence[SkillNode]) -> dict[str, SkillNode]:
     """Build a strict alias map for run/profile joins while rejecting ambiguous aliases."""
-    collisions: Dict[str, int] = {}
-    alias_map: Dict[str, SkillNode] = {}
+    collisions: dict[str, int] = {}
+    alias_map: dict[str, SkillNode] = {}
 
     def add(alias: str, node: SkillNode) -> None:
         key = str(alias or "").strip().lower()
@@ -340,15 +340,15 @@ def build_node_alias_index(nodes: Sequence[SkillNode]) -> Dict[str, SkillNode]:
 
 
 def apply_shadow_runs(
-    nodes: List[SkillNode],
-    shadow_dashboard: Dict[str, Any],
-    parity_manifest: Dict[str, Any],
+    nodes: list[SkillNode],
+    shadow_dashboard: dict[str, Any],
+    parity_manifest: dict[str, Any],
     runs_root: Path,
-    queue_reason_by_run_id: Dict[str, str],
-) -> List[Dict[str, Any]]:
+    queue_reason_by_run_id: dict[str, str],
+) -> list[dict[str, Any]]:
     alias_map = build_node_alias_index(nodes)
-    run_rows: List[Dict[str, Any]] = []
-    row_by_run_id: Dict[str, Dict[str, Any]] = {}
+    run_rows: list[dict[str, Any]] = []
+    row_by_run_id: dict[str, dict[str, Any]] = {}
     shadow_run_ids: set[str] = set()
 
     def resolve_node(profile_id: str, scope_skill: str) -> Optional[SkillNode]:
@@ -358,14 +358,14 @@ def apply_shadow_runs(
                 return alias_map[key]
         return None
 
-    def ensure_row(run_id: str) -> Dict[str, Any]:
+    def ensure_row(run_id: str) -> dict[str, Any]:
         row = row_by_run_id.get(run_id)
         if row is None:
             row = {"run_id": run_id}
             row_by_run_id[run_id] = row
         return row
 
-    def apply_values(target: Dict[str, Any], source: Dict[str, Any], *, overwrite: bool) -> None:
+    def apply_values(target: dict[str, Any], source: dict[str, Any], *, overwrite: bool) -> None:
         for key, value in source.items():
             if key == "run_id" or value is None:
                 continue
@@ -376,8 +376,8 @@ def apply_shadow_runs(
                 target[key] = text
 
     parity_runs = parity_manifest.get("runs") if isinstance(parity_manifest, dict) else []
-    parity_by_run_id: Dict[str, str] = {}
-    promotion_by_run_id: Dict[str, str] = {}
+    parity_by_run_id: dict[str, str] = {}
+    promotion_by_run_id: dict[str, str] = {}
     if isinstance(parity_runs, list):
         for item in parity_runs:
             if not isinstance(item, dict):
@@ -505,7 +505,7 @@ def apply_shadow_runs(
     return sorted(run_rows, key=lambda item: str(item.get("finished_at", "")), reverse=True)
 
 
-def apply_promotion_badges(nodes: List[SkillNode], promotion_validation: Dict[str, Any], run_rows: List[Dict[str, Any]]) -> None:
+def apply_promotion_badges(nodes: list[SkillNode], promotion_validation: dict[str, Any], run_rows: list[dict[str, Any]]) -> None:
     alias_map = build_node_alias_index(nodes)
     run_by_id = {str(row.get("run_id", "")).strip(): row for row in run_rows if str(row.get("run_id", "")).strip()}
     results = promotion_validation.get("results") if isinstance(promotion_validation, dict) else []
@@ -545,7 +545,7 @@ def apply_promotion_badges(nodes: List[SkillNode], promotion_validation: Dict[st
             node.promotion = promotion_state
 
 
-def apply_candidates(nodes: List[SkillNode], candidates_rows: Iterable[Dict[str, Any]]) -> None:
+def apply_candidates(nodes: list[SkillNode], candidates_rows: Iterable[dict[str, Any]]) -> None:
     by_skill = {node.scope_skill: node for node in nodes}
     by_profile = {node.profile_id: node for node in nodes}
     for row in candidates_rows:
@@ -560,15 +560,19 @@ def apply_candidates(nodes: List[SkillNode], candidates_rows: Iterable[Dict[str,
         score = row.get("composite_score")
         try:
             node.candidate_pressure = max(node.candidate_pressure, float(score))
-        except Exception:  # noqa: BLE001 — score may be None or non-numeric
-            pass
+        except (ValueError, TypeError) as exc:
+            import logging
+            logging.debug(
+                f"Invalid composite_score for node {getattr(node, 'id', getattr(node, 'name', 'unknown'))}: "
+                f"score={score!r}, error={exc}"
+            )
 
 
-def parse_queue_reasons(path: Path) -> Tuple[Dict[str, int], Dict[str, str]]:
+def parse_queue_reasons(path: Path) -> tuple[dict[str, int], dict[str, str]]:
     if not path.exists():
         return {}, {}
-    counts: Dict[str, int] = {}
-    by_run: Dict[str, str] = {}
+    counts: dict[str, int] = {}
+    by_run: dict[str, str] = {}
     reason_re = re.compile(r"reason `([^`]+)`")
     run_re = re.compile(r"^- `(run_[^`]+)`")
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -585,7 +589,7 @@ def parse_queue_reasons(path: Path) -> Tuple[Dict[str, int], Dict[str, str]]:
     return counts, by_run
 
 
-def summarize_promotion_counts(promotion_validation: Dict[str, Any], run_rows: List[Dict[str, Any]]) -> Dict[str, int]:
+def summarize_promotion_counts(promotion_validation: dict[str, Any], run_rows: list[dict[str, Any]]) -> dict[str, int]:
     if not isinstance(promotion_validation, dict):
         promotion_validation = {}
     decision_counts = promotion_validation.get("decision_counts")
@@ -617,21 +621,21 @@ def summarize_promotion_counts(promotion_validation: Dict[str, Any], run_rows: L
 def render_html(
     *,
     generated_at: str,
-    controls: Dict[str, Any],
-    readiness_summary: Dict[str, Any],
-    wave_status: Dict[str, Any],
-    shadow_dashboard: Dict[str, Any],
-    daily_health: Dict[str, Any],
-    promotion_validation: Dict[str, Any],
-    nodes: List[SkillNode],
-    run_rows: List[Dict[str, Any]],
-    queue_reason_counts: Dict[str, int],
-    candidates_rows: List[Dict[str, Any]],
-    artifact_rows: List[Tuple[str, str, str, str]],
+    controls: dict[str, Any],
+    readiness_summary: dict[str, Any],
+    wave_status: dict[str, Any],
+    shadow_dashboard: dict[str, Any],
+    daily_health: dict[str, Any],
+    promotion_validation: dict[str, Any],
+    nodes: list[SkillNode],
+    run_rows: list[dict[str, Any]],
+    queue_reason_counts: dict[str, int],
+    candidates_rows: list[dict[str, Any]],
+    artifact_rows: list[tuple[str, str, str, str]],
 ) -> str:
-    cluster_cards: Dict[str, List[str]] = {}
-    cluster_slice: Dict[str, str] = {}
-    cluster_counts: Dict[str, int] = {}
+    cluster_cards: dict[str, list[str]] = {}
+    cluster_slice: dict[str, str] = {}
+    cluster_counts: dict[str, int] = {}
     for node in nodes:
         mode_cls = normalize_class_token(f"mode-{node.delegation_mode}")
         halo_cls = normalize_class_token(f"halo-{node.recent_status}")
@@ -659,7 +663,7 @@ def render_html(
 </article>
 """
         )
-    cluster_sections: List[str] = []
+    cluster_sections: list[str] = []
     for cluster in sorted(cluster_cards):
         section_slice_cls = normalize_class_token(f"slice-{cluster_slice.get(cluster, 'extended')}")
         cluster_sections.append(
@@ -672,7 +676,7 @@ def render_html(
 """
         )
 
-    run_rows_html: List[str] = []
+    run_rows_html: list[str] = []
     for row in run_rows:
         run_rows_html.append(
             "<tr>"
@@ -696,7 +700,7 @@ def render_html(
     if not run_rows_html:
         run_rows_html.append("<tr><td colspan='15' class='muted'>No run rows found.</td></tr>")
 
-    cand_rows_html: List[str] = []
+    cand_rows_html: list[str] = []
     for row in candidates_rows[:40]:
         cand_rows_html.append(
             "<tr>"
@@ -926,14 +930,14 @@ def maybe_write_graph_adapter(
     *,
     repo_root: Path,
     graph_adapter_dir: Path,
-    nodes: List[SkillNode],
-    run_rows: List[Dict[str, Any]],
-    candidates_rows: List[Dict[str, Any]],
-) -> Tuple[int, int]:
+    nodes: list[SkillNode],
+    run_rows: list[dict[str, Any]],
+    candidates_rows: list[dict[str, Any]],
+) -> tuple[int, int]:
     safe_dir = graph_adapter_guarded_dir(repo_root, graph_adapter_dir)
     notes_dir = safe_dir / "notes"
     clear_graph_adapter_notes(notes_dir)
-    edges: List[Dict[str, str]] = []
+    edges: list[dict[str, str]] = []
     count = 0
 
     for node in nodes:
