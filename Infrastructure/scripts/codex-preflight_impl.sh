@@ -483,22 +483,27 @@ main() {
 	while (( $# > 0 )); do
 		case "$1" in
 			--stack)
+				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; exit 2; }
 				stack="${2:-}"
 				shift 2
 				;;
 			--mode)
+				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; exit 2; }
 				local_memory_mode="${2:-}"
 				shift 2
 				;;
 			--repo-fragment)
+				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; exit 2; }
 				expected_repo="${2:-}"
 				shift 2
 				;;
 			--bins)
+				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; exit 2; }
 				bins_csv="${2:-}"
 				shift 2
 				;;
 			--paths)
+				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; exit 2; }
 				paths_csv="${2:-}"
 				shift 2
 				;;
