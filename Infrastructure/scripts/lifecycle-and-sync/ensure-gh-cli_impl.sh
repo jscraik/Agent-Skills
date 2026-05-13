@@ -79,8 +79,7 @@ install_gh() {
     Darwin)
       if have_cmd brew; then
         echo "[INFO] Installing via Homebrew..."
-        brew install gh
-        return 0
+        brew install gh && return 0
       fi
       ;;
     Linux)
@@ -112,18 +111,15 @@ install_gh() {
     *)
       if have_cmd winget; then
         echo "[INFO] Installing via winget..."
-        winget install --id GitHub.cli --exact --silent --accept-source-agreements --accept-package-agreements
-        return 0
+        winget install --id GitHub.cli --exact --silent --accept-source-agreements --accept-package-agreements && return 0
       fi
       if have_cmd scoop; then
         echo "[INFO] Installing via scoop..."
-        scoop install gh
-        return 0
+        scoop install gh && return 0
       fi
       if have_cmd choco; then
         echo "[INFO] Installing via chocolatey..."
-        choco install gh -y
-        return 0
+        choco install gh -y && return 0
       fi
       ;;
   esac

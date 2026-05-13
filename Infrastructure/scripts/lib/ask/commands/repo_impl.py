@@ -99,36 +99,40 @@ def repo_validate(
         cmd.extend(changed_files)
         
     VALIDATE_TIMEOUT = 300  # 5 minutes
-    stdout_chunks: List[str] = []
-    with subprocess.Popen(
-        cmd,
-        cwd=str(repo_root),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,
-    ) as process:
-        assert process.stdout is not None
-        for line in process.stdout:
-            stdout_chunks.append(line)
-            # Preserve machine-readable stdout for the final envelope while still
-            # showing long-running validation progress to operators in real time.
-            print(line, end="", file=sys.stderr)
-        try:
-            process.wait(timeout=VALIDATE_TIMEOUT)
-        except subprocess.TimeoutExpired:
-            process.terminate()
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-            timeout_msg = f"Validation timed out after {VALIDATE_TIMEOUT} seconds."
-            stdout_chunks.append(timeout_msg + "\n")
-            print(timeout_msg, file=sys.stderr)
-    
+    try:
+        completed = subprocess.run(
+            cmd,
+            cwd=str(repo_root),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
+            timeout=VALIDATE_TIMEOUT,
+        )
+        stdout = completed.stdout or ""
+        if stdout:
+            print(stdout, end="", file=sys.stderr)
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout or ""
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode(errors="replace")
+        timeout_msg = f"Validation timed out after {VALIDATE_TIMEOUT} seconds."
+        stdout += timeout_msg + "\n"
+        print(stdout, end="", file=sys.stderr)
+        completed = subprocess.CompletedProcess(cmd, returncode=124, stdout=stdout)
+    except OSError as exc:
+        result.status = "error"
+        result.data["required_failures"] = 1
+        result.data["warn_only_issues"] = 0
+        result.data["raw_output"] = str(exc)
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Unable to start validation command: {exc}",
+            fix_suggestion="Verify bash and Infrastructure/scripts/validate_all.sh are available."
+        ))
+        return result
+
     # Parse output for summary
-    stdout = "".join(stdout_chunks)
     required_failures = 0
     warn_only_issues = 0
 
@@ -159,7 +163,7 @@ def repo_validate(
     result.data["scope"] = scope
     result.data["changed_files"] = changed_files or []
     
-    if process.returncode == 0:
+    if completed.returncode == 0:
         result.status = "success"
     else:
         result.status = "error"
@@ -1132,6 +1136,7 @@ def check_hub_stability(repo_root: Path, changed_files: List[str] | None = None)
                                 capture_output=True,
                                 text=True,
                                 check=False,
+                                timeout=SCRIPT_TIMEOUT_SECONDS,
                             )
                             if previous.returncode == 0 and re.search(r"^## Deprecation\b", previous.stdout, re.MULTILINE):
                                 continue

@@ -275,7 +275,7 @@ if [[ -n "$lesson_file" && ! -f "$lesson_file" ]]; then
   exit 2
 fi
 
-run_dir="$(cd "$run_dir" 2>/dev/null && pwd || true)"
+run_dir="$(cd "$run_dir" 2>/dev/null && pwd -P || true)"
 if [[ -z "$run_dir" ]]; then
   echo "Run directory not found" >&2
   exit 2

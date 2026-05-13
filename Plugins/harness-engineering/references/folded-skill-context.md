@@ -140,6 +140,43 @@ references and index it in `../../references/deferred-context-index.md`.
 Redact secrets; do not create cron workarounds for short thread follow-up. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text. Keep scope tight: start with 2-3 focused surfaces and expand only when the next heartbeat needs more context.
 references with a clear route.
 
+## Preserved He-Code-Review Productization Context
+
+The 2026-05-13 productization pass compacted
+`Plugins/harness-engineering/skills/he-code-review/SKILL.md` while keeping its
+review policy in stage references. The active entrypoint now routes to the
+policy index and shared HE contracts; the preserved line below anchors the
+removed context for the progressive-disclosure relocation gate.
+
+Diff, repo guidance, Linear issue, spec, plan, PR evidence, validation output.
+
+Disposition:
+- moved-to-reference: mode selection, artifact identity, repeated-failure
+  routing, evidence ladder, plugin-hook review checks, gate selection, and
+  first-principles review policy.
+- superseded: repeated output-schema field lists now covered by active stage
+  output contracts.
+- intentionally-discarded: duplicate reference lists and stale budget-trimming
+  language that no longer adds unique review behavior.
+
+## Preserved He-Compound Productization Context
+
+The 2026-05-13 productization pass folded
+`Plugins/harness-engineering/skills/he-compound/SKILL.md` into the active
+state-reconstruction and routing contracts. The preserved line below anchors
+the removed entrypoint context for the progressive-disclosure relocation gate.
+
+description: "Analyze session, repo, Linear, and harness evidence to refresh HE lifecycle state. Use when multi-stage HE work needs source-prompt coverage, resume routing, or earliest-stage recovery."
+
+Disposition:
+- moved-to-reference: lifecycle state reconstruction, source-prompt coverage,
+  repeated-failure capture, Project Brain freshness, solution-capture
+  eligibility, and earliest-stage routing.
+- superseded: old compound stage naming now routes through the current
+  reconcile/reinforce lifecycle surfaces.
+- intentionally-discarded: duplicate gotcha lists and repeated reference
+  inventories that are represented in the active contracts.
+
 ## Preserved He-Spec Smoke-Eval Hardening Lines
 
 The 2026-05-12 he-spec smoke-eval hardening pass tightened the active entrypoint

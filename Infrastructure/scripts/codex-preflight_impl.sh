@@ -236,11 +236,15 @@ check_paths() {
 
 		local -a matches=()
 		local match
+		local had_nullglob=0
+		shopt -q nullglob && had_nullglob=1
 		shopt -s nullglob
 		for match in ${p}; do
 			matches+=("${match}")
 		done
-		shopt -u nullglob
+		if (( had_nullglob == 0 )); then
+			shopt -u nullglob
+		fi
 
 		if (( ${#matches[@]} == 0 )); then
 			matches+=("${p}")
@@ -286,10 +290,16 @@ run_local_memory_preflight_with_runner() {
 		command+=(--config "${config_path}")
 	fi
 
+	local had_errexit=0
+	[[ $- == *e* ]] && had_errexit=1
 	set +e
 	output="$("${command[@]}" 2>&1)"
 	status=$?
-	set -e
+	if (( had_errexit == 1 )); then
+		set -e
+	else
+		set +e
+	fi
 	if [[ "${status}" -eq 0 ]]; then
 		if [[ -n "${output}" ]]; then
 			printf '%s\n' "${output}"
@@ -474,7 +484,7 @@ main() {
 		if (( $# > 3 )); then
 			log_err "legacy positional mode accepts at most 3 arguments"
 			usage >&2
-			exit 2
+			return 2
 		fi
 		expected_repo="${1:-}"
 		bins_csv="${2:-}"
@@ -486,45 +496,45 @@ main() {
 	while (( $# > 0 )); do
 		case "$1" in
 			--stack)
-				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; exit 2; }
+				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; return 2; }
 				stack="${2:-}"
 				shift 2
 				;;
 			--mode)
-				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; exit 2; }
+				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; return 2; }
 				local_memory_mode="${2:-}"
 				shift 2
 				;;
 			--repo-fragment)
-				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; exit 2; }
+				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; return 2; }
 				expected_repo="${2:-}"
 				shift 2
 				;;
 			--bins)
-				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; exit 2; }
+				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; return 2; }
 				bins_csv="${2:-}"
 				shift 2
 				;;
 			--paths)
-				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; exit 2; }
+				(( $# >= 2 )) || { log_err "missing value for $1"; usage >&2; return 2; }
 				paths_csv="${2:-}"
 				shift 2
 				;;
 			-h|--help)
 				usage
-				exit 0
+				return 0
 				;;
 			*)
 				log_err "unknown argument: $1"
 				usage >&2
-				exit 2
+				return 2
 				;;
 		esac
 	done
 
 	case "${local_memory_mode}" in
 		off|optional|required) ;;
-		*) log_err "invalid --mode: ${local_memory_mode}"; exit 2 ;;
+		*) log_err "invalid --mode: ${local_memory_mode}"; return 2 ;;
 	esac
 
 	log_section 'Codex Preflight'
@@ -532,17 +542,17 @@ main() {
 
 	if ! command -v git >/dev/null 2>&1; then
 		log_err 'missing binary: git'
-		exit 2
+		return 2
 	fi
 
 	local git_root
 	if ! git_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
 		log_err 'not inside a git repo (git rev-parse failed)'
-		exit 2
+		return 2
 	fi
 	if [[ -z "${git_root}" ]]; then
 		log_err 'git rev-parse returned empty root'
-		exit 2
+		return 2
 	fi
 	git_root="$(cd -- "${git_root}" && pwd -P)"
 	echo "git root: ${git_root}"
@@ -550,11 +560,11 @@ main() {
 
 	if [[ "${WORKSPACE_ROOT}" != "${git_root}" && "${WORKSPACE_ROOT}" != "${git_root}"/* ]]; then
 		log_err "script workspace mismatch: ${WORKSPACE_ROOT} is not inside git root ${git_root}"
-		exit 2
+		return 2
 	fi
 	if [[ -n "${expected_repo}" && "${WORKSPACE_ROOT}" != *"${expected_repo}"* ]]; then
 		log_err "repo mismatch: expected fragment '${expected_repo}' in '${WORKSPACE_ROOT}'"
-		exit 2
+		return 2
 	fi
 
 	cd "${WORKSPACE_ROOT}"
@@ -562,6 +572,13 @@ main() {
 	if [[ "${stack}" == 'auto' ]]; then
 		stack="$(detect_stack)"
 	fi
+	case "${stack}" in
+		auto|repo|js|py|rust) ;;
+		*)
+			log_err "invalid --stack value: ${stack}"
+			return 2
+			;;
+	esac
 	echo "stack: ${stack}"
 
 	if [[ -z "${bins_csv}" ]]; then
@@ -586,7 +603,7 @@ main() {
 		if ! preflight_local_memory_gold; then
 			if [[ "${local_memory_mode}" == 'required' ]]; then
 				log_err 'local-memory preflight failed (required mode)'
-				exit 2
+				return 2
 			fi
 			log_warn 'local-memory preflight failed (optional mode)'
 		fi

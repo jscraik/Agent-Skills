@@ -38,16 +38,16 @@ Refreshed on 2026-05-13 against branch `codex/he-productization-pr`. The
 contracts below remain product contracts, while several routes are now
 implemented in the live `ask` surface.
 
-| Command                                                                                                                    | Observed Output                                                                                                              | Friction                                                                                                                                                     |
-| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `./bin/ask repo status --json --robot`                                                                                     | Reports `is_git` and `skills_synced` only.                                                                                   | It proves basic repo health but does not include runtime budget, handle health, surface policy status, blockers, or next command guidance.                   |
-| `./bin/ask runtime budget --json --robot`                                                                                  | Reports `advanced_visible_count: 173`, advisory threshold `60`, `first_level_default_count: 118`, and `budget_status: pass`. | Runtime surface health is available, but agents must know to call it separately and then interpret large JSON.                                               |
-| `./bin/ask repo surface --json --robot`                                                                                    | Reports tracked-surface classifications and diagnostic debt without deleting files.                                           | Surface ownership evidence exists, but it is low-level inventory output and must be summarized by doctor or closeout flows.                                  |
-| `./bin/ask repo --help`                                                                                                    | Exposes `status`, `validate`, `check-stability`, `doctor`, `closeout`, `doctor-catalog`, `provider-audit`, and `surface`.    | Repo health and closeout now have namespace-first routes; deeper surface policy still needs detailed follow-up output.                                      |
-| `./bin/ask skills --help`                                                                                                  | Exposes `goal`, `route`, `improve`, `explain`, `prove`, `handles`, and related primitives.                                   | The product path is now executable, but outcome proof still requires real workout/eval/transcript evidence.                                                  |
+| Command                                                                                                                    | Observed Output                                                                                                                  | Friction                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `./bin/ask repo status --json --robot`                                                                                     | Reports `is_git` and `skills_synced` only.                                                                                       | It proves basic repo health but does not include runtime budget, handle health, surface policy status, blockers, or next command guidance.                   |
+| `./bin/ask runtime budget --json --robot`                                                                                  | Reports `advanced_visible_count: 173`, advisory threshold `60`, `default_visible_count: 10`, and `budget_status: pass`.          | Runtime surface health is available, but agents must know to call it separately and then interpret large JSON.                                               |
+| `./bin/ask repo surface --json --robot`                                                                                    | Reports tracked-surface classifications and diagnostic debt without deleting files.                                              | Surface ownership evidence exists, but it is low-level inventory output and must be summarized by doctor or closeout flows.                                  |
+| `./bin/ask repo --help`                                                                                                    | Exposes `status`, `validate`, `check-stability`, `doctor`, `closeout`, `doctor-catalog`, `provider-audit`, and `surface`.        | Repo health and closeout now have namespace-first routes; deeper surface policy still needs detailed follow-up output.                                       |
+| `./bin/ask skills --help`                                                                                                  | Exposes `goal`, `route`, `improve`, `explain`, `prove`, `handles`, and related primitives.                                       | The product path is now executable, but outcome proof still requires real workout/eval/transcript evidence.                                                  |
 | `./bin/ask repo doctor-catalog --json --robot`                                                                             | Returns `decision_status: resolved` after README, `SKILL.md`, `ask skills list`, and route metadata expose canonical count `32`. | Catalog parity is separately diagnosable, and doctor/closeout should continue surfacing this blocker when routing or delivery depends on it.                 |
-| `./bin/ask skills goal "continue implementing the Agent Skills Kit repo surface control-plane plan" --json --robot`        | Returns `intent_unresolved` with `route_decision_status: unresolved_ambiguity`.                                              | Broad goals can remain too ambiguous even after catalog parity is healthy; product flows need sharper repair prompts and next-command guidance.              |
-| `./bin/ask skills goal "use he-work to implement P4 namespace-first product command contracts for JSC-246" --json --robot` | Resolves `he-work` with confidence `0.938`.                                                                                  | Goal routing works when the user names the workflow and phase, which supports a future `skills improve` contract that asks for narrower context when needed. |
+| `./bin/ask skills goal "continue implementing the Agent Skills Kit repo surface control-plane plan" --json --robot`        | Returns `intent_unresolved` with `route_decision_status: unresolved_ambiguity`.                                                  | Broad goals can remain too ambiguous even after catalog parity is healthy; product flows need sharper repair prompts and next-command guidance.              |
+| `./bin/ask skills goal "use he-work to implement P4 namespace-first product command contracts for JSC-246" --json --robot` | Resolves `he-work` with confidence `0.938`.                                                                                      | Goal routing works when the user names the workflow and phase, which supports a future `skills improve` contract that asks for narrower context when needed. |
 
 P4 therefore started as contracts only. The first admitted executable route is
 `ask repo doctor`, followed by the capability and closeout commands above.
@@ -63,7 +63,10 @@ All commands in this document must use the standard `ask` JSON envelope:
   "metadata": {
     "version": "1.0.0",
     "command": "ask repo doctor --json --robot",
-    "next_steps": ["Review runtime budget advisories", "Run ask repo surface --json for detailed findings"],
+    "next_steps": [
+      "Review runtime budget advisories",
+      "Run ask repo surface --json for detailed findings"
+    ],
     "correction_note": null
   },
   "data": {
@@ -122,11 +125,14 @@ Required data fields:
       "skills_synced": true
     },
     "runtime_budget": {
-      "status": "pass",
-      "advanced_visible_count": 173,
-      "advanced_visible_warn": 60,
-      "first_level_default_count": 118,
-      "advisories": []
+      "state": "pass",
+      "severity": "info",
+      "details": {
+        "status": "pass",
+        "default_visible_count": 10,
+        "estimated_description_tokens": 3234,
+        "violation_count": 0
+      }
     },
     "handles": {
       "status": "pass",
@@ -368,9 +374,14 @@ Required data fields:
       "commands": []
     },
     "runtime_budget": {
-      "status": "pass",
-      "advanced_visible_count": 173,
-      "advisories": []
+      "state": "pass",
+      "severity": "info",
+      "details": {
+        "status": "pass",
+        "default_visible_count": 10,
+        "estimated_description_tokens": 3234,
+        "violation_count": 0
+      }
     },
     "surface_policy": {
       "status": "warning",

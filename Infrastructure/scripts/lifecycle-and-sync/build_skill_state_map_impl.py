@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -575,9 +576,8 @@ def apply_candidates(nodes: list[SkillNode], candidates_rows: Iterable[dict[str,
         try:
             node.candidate_pressure = max(node.candidate_pressure, float(score))
         except (ValueError, TypeError) as exc:
-            import logging
             logging.debug(
-                f"Invalid composite_score for node {getattr(node, 'id', getattr(node, 'name', 'unknown'))}: "
+                f"Invalid composite_score for node {node.scope_skill or node.profile_id or 'unknown'}: "
                 f"score={score!r}, error={exc}"
             )
 
