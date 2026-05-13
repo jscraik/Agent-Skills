@@ -1358,7 +1358,10 @@ def _isolated_codex_home_for_eval() -> Tuple[Path, List[str]]:
     """
     warnings: List[str] = []
     source_home = _effective_codex_home(None)
-    temp_home_ctx = tempfile.TemporaryDirectory(prefix="skill-evals-codex-home-")
+    temp_home_ctx = tempfile.TemporaryDirectory(
+        prefix="skill-evals-codex-home-",
+        ignore_cleanup_errors=True,
+    )
     atexit.register(temp_home_ctx.cleanup)
     target_home = Path(temp_home_ctx.name).resolve()
 
