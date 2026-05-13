@@ -227,7 +227,7 @@ Compatibility:
 
 - Existing first_principles_gate schema remains authoritative for factory outputs.
 - Phase 4 proof metadata may appear only in .harness eval/plan artifacts if adding it to eval YAML would create unsupported fields.
-- Any closure artifact MUST map Phase 4 proof cases back to FR-* and SA-* IDs.
+- Any closure artifact MUST map Phase 4 proof cases back to `FR-*` and `SA-*` IDs.
 
 ## Security, Privacy, and Safety
 
