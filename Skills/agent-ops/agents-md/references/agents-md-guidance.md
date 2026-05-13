@@ -35,10 +35,181 @@ For Harness Engineering work, AGENTS should point to the `@harness-engineering` 
 
 Keep plan instructions concise in AGENTS. Use unresolved questions only when planning is the requested output or evidence is insufficient to choose safely.
 
+## Required Subagent And Review Swarm Contract
+
+When creating or updating AGENTS guidance for a repository that uses subagents,
+reviewers, review swarms, delegated agents, or artifact review lanes, preserve
+an explicit coordinator-owned contract.
+
+Minimum behavior:
+
+- Use subagents only for independent lanes, specialist review, or bounded
+  parallel investigation.
+- The coordinator keeps responsibility for scope, evidence, synthesis,
+  validation, and closeout.
+- Before delegation, verify path-dependent inputs, prefer absolute paths, create
+  coordinator-owned artifact parent directories, and keep prompts narrow.
+- For broad swarms or uncertain runtime health, run one probe subagent first and
+  verify that its artifact exists and is non-empty before launching the larger
+  swarm.
+- Artifact-producing subagents must end with
+  `WROTE: /absolute/path/to/artifact.md`.
+- Mailbox or status text is not completion evidence when artifacts were
+  requested.
+- Missing artifacts get one narrow retry. Remaining misses are recorded as
+  failed coverage with an explicit coverage-gap note.
+- Blocked work must use the blocked schema with `STATUS: complete`,
+  `blocked_runtime`, `blocked_missing_artifact`, or `blocked_validation`.
+- Validation failures reported by subagents must be classified before
+  remediation as introduced by current patch, pre-existing, unrelated dirty
+  worktree, environment/tooling failure, or user-owned config drift requiring
+  explicit approval.
+- Coordinator closeout records agents requested, agents completed, agents
+  blocked, agents failed artifact verification, agents closed, and validation
+  run with exact pass/fail/blocked outcomes.
+- Close consumed agents when they are no longer needed.
+
+Use the full contract for higher-risk or control-plane repositories, including
+configs, coding-harness, agent-skills, CI/security surfaces, and repos that
+regularly run review swarms. Use the compact version in ordinary application
+repositories where the behavior guardrails matter but a long governance section
+would dominate the AGENTS file.
+
+Full portable snippet:
+
+````md
+## Subagent And Review Swarm Contract
+
+Use subagents only when the task benefits from independent lanes, specialist review, or bounded parallel investigation. The coordinator remains responsible for scope, evidence, synthesis, validation, and closeout.
+
+### Before Spawning Subagents
+
+- Verify every path-dependent input before delegation.
+  - Prefer absolute paths for files, directories, and required artifacts.
+  - Create expected artifact parent directories when the coordinator owns the artifact path.
+  - If a referenced path may not exist, state that explicitly and give the subagent a bounded discovery fallback.
+- Keep each delegated task narrow.
+  - Name the exact files, artifacts, commands, or question the subagent owns.
+  - Do not ask a subagent to review, patch, and validate unrelated surfaces in one prompt.
+- For broad swarms or uncertain runtime health, run one probe subagent first.
+  - The probe must write a small artifact.
+  - The coordinator must verify that artifact exists and is non-empty before launching the larger swarm.
+
+### Required Subagent Output
+
+Subagents that complete successfully must return durable evidence, not only conversational status.
+
+For artifact-producing work, require:
+
+```text
+WROTE: /absolute/path/to/artifact.md
+```
+
+The coordinator must verify every expected artifact exists and is non-empty before synthesis.
+
+For blocked work, require this schema:
+
+```text
+STATUS: complete | blocked_runtime | blocked_missing_artifact | blocked_validation
+blocker_class:
+attempted_command_or_tool:
+exact_failure:
+fallback_attempted:
+coordinator_next_step:
+```
+
+Use:
+
+- `blocked_runtime` for approval, permission, network, sandbox, timeout, or tool-startup blockers.
+- `blocked_missing_artifact` for missing files, directories, generated reports, or expected review artifacts.
+- `blocked_validation` when a quality gate cannot run or fails before ownership can be classified.
+
+### Artifact-First Completion
+
+When artifacts are requested:
+
+- Do not treat mailbox/status text as completion evidence.
+- Verify every expected artifact exists and is non-empty.
+- If an artifact is missing, retry once with a narrow follow-up that only asks the subagent to write the missing artifact.
+- If the artifact is still missing, mark that lane as failed coverage and continue with an explicit coverage-gap note.
+
+### Validation Ownership
+
+When a subagent reports lint, test, typecheck, build, git-state, or config validation failures, classify ownership before remediation:
+
+- introduced by the current patch
+- pre-existing
+- unrelated dirty worktree
+- environment or tooling failure
+- user-owned config drift that must not be normalized without explicit approval
+
+Validation failure without ownership classification is incomplete work.
+
+### Coordinator Closeout
+
+The coordinator must synthesize results and record:
+
+- agents requested
+- agents completed
+- agents blocked
+- agents failed artifact verification
+- agents closed
+- validation run, with exact pass/fail/blocked outcomes
+
+Close consumed agents when they are no longer needed.
+````
+
+Compact portable snippet:
+
+````md
+## Subagent Contract
+
+Before spawning subagents, verify path-dependent inputs, use narrow prompts, and create expected artifact parent directories when the coordinator owns the output path. For broad swarms or uncertain runtime health, run one probe subagent first and verify its artifact exists before continuing.
+
+Subagents must produce durable evidence. Artifact-producing tasks must end with `WROTE: /absolute/path/to/artifact.md`; the coordinator must verify every expected artifact exists and is non-empty before synthesis. Missing artifacts get one narrow retry; remaining misses are recorded as failed coverage, not replaced with mailbox/status text.
+
+Blocked subagents must use:
+
+```text
+STATUS: complete | blocked_runtime | blocked_missing_artifact | blocked_validation
+blocker_class:
+attempted_command_or_tool:
+exact_failure:
+fallback_attempted:
+coordinator_next_step:
+```
+
+Classify validation failures before remediation as one of: introduced by current patch, pre-existing, unrelated dirty worktree, environment/tooling failure, or user-owned config drift requiring explicit approval.
+
+The coordinator remains responsible for synthesis, validation evidence, coverage-gap notes, and closing consumed agents.
+````
+
+## CODESTYLE Fallback
+
+AGENTS files for technical repositories must give agents a CODESTYLE route.
+Verify the local instruction scope or discovery path first:
+
+- If a local `CODESTYLE.md` exists, point agents to that file.
+- If no local `CODESTYLE.md` exists, AGENTS must say to use the global Codex
+  CODESTYLE at `~/dev/configs/codex/instructions/CODESTYLE` instead and to
+  report the verified absolute path before relying on it.
+- If `~/dev/configs/codex/instructions/CODESTYLE` cannot be found or read,
+  mark style guidance as blocked rather than inventing local style rules.
+
+Portable fallback snippet:
+
+```md
+## Codestyle
+
+For technical work, read this repo's `CODESTYLE.md` before editing. If this repo does not have a local `CODESTYLE.md`, use the global Codex CODESTYLE at `~/dev/configs/codex/instructions/CODESTYLE` instead and report the verified absolute path. If neither local CODESTYLE nor `~/dev/configs/codex/instructions/CODESTYLE` can be read, mark codestyle guidance as blocked and continue only with the repo's discovered AGENTS instructions and explicit user directions.
+```
+
 ## Validation Checklist
 
 - Active instruction scope and discovery order identified.
 - All moved pointers resolve.
 - Contradictions are resolved or explicitly blocked for user choice.
 - Binding memory, handoff, validation, approval, and security contracts are preserved.
+- Subagent/review-swarm contract is present or deliberately preserved through a verified local equivalent.
+- CODESTYLE route is present: local CODESTYLE, global fallback, or blocked note.
 - Exact validation commands are reported with `pass`, `fail`, or `blocked`.
