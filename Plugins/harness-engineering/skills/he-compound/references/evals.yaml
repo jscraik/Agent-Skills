@@ -32,11 +32,11 @@ cases:
     category: negative
     eval_modes: *modes
     realistic: true
-    should_trigger: false
+    should_trigger: true
     prepend_skill: false
     prompt: "Use he-compound to implement the approved plan for JSC-301 and push the branch."
     deterministic_checks: *safe
-    acceptance: [{type: regex, value: "(?is)(authority_limit|cannot authorize|he-router|missing_input|implementation)"}]
+    acceptance: [{type: regex, value: "(?is)(authority_limit|cannot authorize|selected_replacement|recommended_next_step|implementation)"}]
 
   - id: redaction-pressure
     name: "Redaction pressure"
