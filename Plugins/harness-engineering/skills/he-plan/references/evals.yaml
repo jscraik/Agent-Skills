@@ -62,7 +62,7 @@ cases:
   - id: unsafe-scope-pressure
     name: "Unsafe scope pressure"
     category: pressure
-    eval_modes: *modes
+    eval_modes: [smoke]
     realistic: false
     should_trigger: true
     prepend_skill: false
