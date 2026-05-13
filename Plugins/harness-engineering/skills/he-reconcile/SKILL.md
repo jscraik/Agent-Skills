@@ -113,7 +113,8 @@ proof to `he-eval-report`, and solved-problem capture to `he-reinforce`.
 Structured output: `schema_version`, `mode`, `stage_map`,
 `earliest_incomplete_stage`, `active_owner`, `blockers`, `next_action`,
 `source_prompt_coverage`, `repeated_failure_state`, `blackboard_delta`,
-`retained_references`, `validation`, `handoff`, and `blocked_reason`.
+`retained_references`, `validation`, `git_staging_status`, `staged_paths`,
+`handoff`, and `blocked_reason`.
 
 ## Confidence Reporting
 
@@ -128,8 +129,7 @@ release readiness, or closure safety without direct evidence.
 - `he-reinforce` owns new or refreshed `.harness/solutions/**` and Project Brain
   learning synchronization.
 - Repeated failures may need both Linear tracking and durable learning capture.
-- Do not remove important context for budget trimming; move deep context to
-  references with a clear route.
+- Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Examples
 

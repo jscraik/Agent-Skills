@@ -38,6 +38,8 @@ outputs:
   - decision_artifact_status: "Required when architecture-shaping, governance-defining, moat-critical, routing, or expensive-to-reverse decisions influence execution; use present, missing, blocked, not_applicable, or upstream_required."
   - existing_project_match: "Required when repo-specific work is routed; identify the matched repo project, the evidence source, duplicate/canceled alternatives, and whether mutation is safe."
   - linear_mutation_status: "Required on every output; use not_requested, confirmation_required, blocked, created, updated, or not_applicable."
+  - git_staging_status: "Required when a local Linear plan artifact is written or updated; stage only current-turn files."
+  - staged_paths: "Repo-relative paths staged for handoff, or empty when staging is blocked/not_applicable."
   - bug_payload: "When issue_type is bug, preserve reproduction, expected behavior, actual behavior, affected surface, severity, and validation evidence."
   - visual_references: "Required when issue trees, dependencies, eval gates, Now/Next/Later classifications, or human/agent route splits benefit from Mermaid or table-first review."
 

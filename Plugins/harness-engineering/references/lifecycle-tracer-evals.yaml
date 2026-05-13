@@ -142,10 +142,10 @@ cases:
     expected_artifact_root: .harness/evals
     proof: "XP lens applied: quality gates preserved, planned proof verified, missing proof blocks or needs rework"
 
-  - id: tracer-xp-phase-heartbeat-slack
-    stage: he-phase-heartbeat
+  - id: tracer-xp-phase-work-slack
+    stage: he-phase-work
     prompt: "Schedule phase continuation with sustainable cadence and stop if collector evidence or gates become stale."
-    expected_route: he-phase-heartbeat
+    expected_route: he-phase-work
     expected_artifact_root: automation
     proof: "XP lens applied: slack_policy, cadence, stale-evidence stop rule, and gated continuation"
 

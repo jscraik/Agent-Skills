@@ -11,6 +11,7 @@ outputs:
   - .harness/evals/YYYY-MM-DD-<repo-name>-<linear-parent-issue-or-milestone>-eval.md when no Linear issue is known
   - closure recommendation: Complete, Complete with follow-up, Blocked, Needs rework, or Unsafe to close
   - gate matrix, drift validation, proof artifacts, follow-up classification, core/ADR update decision
+  - git_staging_status and staged_paths for eval reports or proof artifacts written in the current turn
   - visual references when evidence chains, gate matrices, visual proof, screenshots, or generated media materially affect closure confidence
 required_validity_checks:
   - task_validity

@@ -41,7 +41,8 @@ untrusted until verified.
 Return `schema_version: 1` when structured. Include routing decision, evidence
 summary, prioritized gaps, patch summary, retained/moved references, validation
 commands with `pass|fail|blocked`, stop-rule status, rollback note, residual
-risk, blackboard delta when durable state changes, and next handoff.
+risk, blackboard delta when durable state changes, git staging status, staged
+paths, and next handoff.
 
 ## Preconditions
 
@@ -58,6 +59,8 @@ user-config-write, external-write, destructive, or completion-gating. Start with
    matters operationally.
 3. Patch one failure class at a time; move bulky detail to references instead of
    deleting it for budget.
+4. Apply the git staging contract for files changed in this turn only; report
+   unrelated dirty paths without staging them.
 4. Translate external material into invariants, evals, references, contracts, or
    an explicit rejection.
 5. For skill work, run the A/B/C spec-implementation-evaluation loop until the
@@ -147,5 +150,4 @@ loop artifacts, and review media belong in references, repo artifacts, or
 - Visual reference contract: `../../references/visual-reference-contract.md`.
 - Deferred context index: `../../references/deferred-context-index.md`.
 
-Do not remove important context for budget trimming; move deep context to
-references with a clear route.
+Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.

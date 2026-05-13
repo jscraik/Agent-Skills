@@ -1,0 +1,3 @@
+interface:
+  display_name: "Harness Engineering Phase Work"
+  short_description: "Use when approved HE plan phases need 10 minute wakeups, collector evidence, review gates, Linear updates, and scoped git staging."

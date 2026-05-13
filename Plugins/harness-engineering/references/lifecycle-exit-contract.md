@@ -46,6 +46,9 @@ tracker_status: resolved|created|blocked|not_applicable|user_opted_out
 artifact_status: none|drafted|updated|validated|not_applicable
 traceability_status: pass|blocked|not_applicable
 validation_status: pass|fail|blocked|not_run_with_reason|not_applicable
+git_staging_status: staged|blocked|not_applicable
+staged_paths: []
+unstaged_unrelated_paths: []
 gate_profile:
   risk_class: trivial|standard|domain_sensitive|architecture_sensitive|closure_sensitive|security_sensitive|mixed|not_applicable
   proven_risks: []
@@ -92,7 +95,7 @@ coding_harness:
   harness_commands_blocked: []
 ```
 
-For short chat responses, summarize the same fields without losing blocker, tracker, artifact, validation, or next-stage state.
+For short chat responses, summarize the same fields without losing blocker, tracker, artifact, validation, git staging, or next-stage state.
 
 ## Exit Rules
 
@@ -100,6 +103,7 @@ For short chat responses, summarize the same fields without losing blocker, trac
 - Do not route to `he-plan` while behavior, acceptance criteria, or product scope is unresolved.
 - Do not route to `he-work` while plan/source traceability, validation strategy, or scope boundary is missing.
 - Do not claim `done` without validation evidence or a concrete reason validation is not applicable.
+- Do not finish after writing artifacts without applying `git-staging-contract.md` or reporting why staging is blocked or not applicable.
 - Do not let a PR, branch, local plan, or session summary replace Linear as tracker of record.
 - Do not let external review, CI, session, or user wording change HE domain meaning without translation through `domain-context-contract.md`.
 - When `domain_model.status` is ambiguous or conflicted, do not harden the next lifecycle stage until the owning artifact records the bounded context and closure_impact.

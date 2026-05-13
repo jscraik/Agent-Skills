@@ -28,6 +28,7 @@ outputs:
   - harness_readiness verdict, traceability states, validation state, review-thread state, and next action
   - coding_harness lifecycle block with review-gate, docs-gate, CodeRabbit, learnings, Project Brain, and north-star evidence status when applicable; `not_applicable` is valid only with an explicit repo-local absence indicator for the command bridge surface
   - lifecycle_exit with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields
+  - git_staging_status and staged_paths when durable review artifacts or autofix files are written in the current turn
   - severity-ranked readiness findings
   - go, go-with-conditions, or no-go recommendation
   - traceability assessment

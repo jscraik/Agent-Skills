@@ -40,8 +40,8 @@ when Linear context is known, or `.harness/evals/YYYY-MM-DD-<repo>-<issue-or-mil
 otherwise. Include Artifact Identity frontmatter from
 `Plugins/harness-engineering/references/artifact-routing-contract.md` and return
 `schema_version`, evaluated slice, validation results, drift validation, proof
-artifacts, closure recommendation, follow-up work, blockers, next handoff, and
-confidence.
+artifacts, closure recommendation, follow-up work, blockers, git staging
+status, staged paths, next handoff, and confidence.
 Non-trivial reports also include the BLUF review surface so the closure
 recommendation, blocker consequence, and next action are visible before proof
 detail.
@@ -78,7 +78,8 @@ detail.
 8. Apply the visual reference contract when proof spans multiple gates,
    artifacts, media files, validation outputs, or non-linear drift decisions;
    prefer gate matrices and evidence-chain diagrams.
-9. Generate and validate the report, then ask accept/challenge/rework before
+9. Generate and validate the report, apply the git staging contract for the
+   report and any current-turn proof artifacts, then ask accept/challenge/rework before
    using `Complete` or `Complete with follow-up` as a Linear closure
    recommendation.
 
@@ -171,5 +172,4 @@ or media persistence is failed or blocked.
 - Read shared HE contracts only when the selected slice needs them:
   `Plugins/harness-engineering/references/deferred-context-index.md`.
 
-Do not remove important context for budget trimming; move deep context to
-references with a clear route.
+Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.

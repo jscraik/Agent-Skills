@@ -47,7 +47,8 @@ session-collector evidence, `.harness/**` artifacts, and write approval.
 Return `schema_version: 1`, `interactive_status`, `selection_evidence`, `route`,
 `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`,
 `blocked_reason`, `linear_mutation_status`, `linear_action_required`,
-`spec_path`, `acceptance_ids`, `handoff`, and evidence-tied `confidence`.
+`spec_path`, `acceptance_ids`, `git_staging_status`, `staged_paths`,
+`handoff`, and evidence-tied `confidence`.
 
 Specs include stable `SA` or `VAC` IDs, source traceability, In/Out of Scope,
 validation, observability proof, rollback/supersession, Linear Acceptance Traceability
@@ -170,8 +171,7 @@ Read when visual aids, generated media, or proof visuals matter ->
 Read when retained doctrine is needed ->
 `Plugins/harness-engineering/references/he-spec-doctrine.md`.
 Deferred context index -> `../../references/deferred-context-index.md`.
-Do not remove important context for budget trimming; move deep context to
-references and index it in `../../references/deferred-context-index.md`.
+Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.
 Read when risk expands: tracker/delta gates, gate selection, first principles,
 plugin hook capability, domain/model, agent-native compression, HE doctrine,
 pragmatic invariants, XP operating contracts, and security/accessibility modules.

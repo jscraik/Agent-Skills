@@ -125,8 +125,9 @@ Use plain Markdown, short sections, descriptive links, and non-color-only tables
 
 Use the selected mode contract. Include `schema_version: 1`, source artifacts,
 facts, interpretations, assumptions, confidence, authority limits, impact,
-future-agent guidance, validation outcomes, evidence traceability, and direct
-strategic critique when required by the mode.
+future-agent guidance, validation outcomes, evidence traceability,
+`git_staging_status`, `staged_paths`, and direct strategic critique when
+required by the mode.
 
 ## References
 
@@ -139,6 +140,5 @@ strategic critique when required by the mode.
 - Shared HE routing and BLUF/visual/subagent/first-principles/XP contracts ->
   `../../references/deferred-context-index.md`
 
-Do not remove important context for budget trimming; move deep context to
-references. Do not remove safety or evidence boundaries for budget trimming;
+Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text. Do not remove safety or evidence boundaries for budget trimming;
 move deep context behind a clear reference route.

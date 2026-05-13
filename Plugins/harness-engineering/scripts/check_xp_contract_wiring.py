@@ -13,7 +13,7 @@ XP_REFERENCE = "xp-operating-contract.md"
 XP_REQUIRED_SKILLS = {
     "he-eval-report",
     "he-linear-plan",
-    "he-phase-heartbeat",
+    "he-phase-work",
     "he-plan",
     "he-refactor",
     "he-strategy",
@@ -50,10 +50,10 @@ XP_REQUIRED_SURFACES = {
         "story_value_basis",
         "story/value basis",
     ),
-    "skills/he-phase-heartbeat/references/contract.yaml": (
+    "skills/he-phase-work/references/contract.yaml": (
         "slack_policy",
     ),
-    "skills/he-phase-heartbeat/references/phase-gate-contract.md": (
+    "skills/he-phase-work/references/phase-gate-contract.md": (
         "slack_policy",
         "stale",
     ),
@@ -110,7 +110,7 @@ def validate(root: Path) -> list[str]:
         "tracer-xp-strategy-feedback-slice",
         "tracer-xp-linear-value-filter",
         "tracer-xp-eval-planned-proof",
-        "tracer-xp-phase-heartbeat-slack",
+        "tracer-xp-phase-work-slack",
     ):
         if expected not in tracer_text:
             errors.append(f"missing XP lifecycle tracer eval: {expected}")

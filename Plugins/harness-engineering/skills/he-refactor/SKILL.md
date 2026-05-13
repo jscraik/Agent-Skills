@@ -53,8 +53,9 @@ low-value, tactical, or process-theater findings.
 
 Return: `schema_version: 1`, selected candidate, output path or rejection
 reason, source artifacts, fact/interpretation/assumption split, blast radius,
-phases, rollback, Linear mapping, eval proof, future-agent guardrails, and
-shared subagent policy fields for `he-refactor`.
+phases, rollback, Linear mapping, eval proof, future-agent guardrails,
+`git_staging_status`, `staged_paths`, and shared subagent policy fields for
+`he-refactor`.
 
 ## Procedure
 
@@ -190,5 +191,4 @@ supporting references are unverified.
   `../../references/**`.
 - Deferred context index: `../../references/deferred-context-index.md`
 
-Do not remove important context for budget trimming; move deep context to
-references with a clear route.
+Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.

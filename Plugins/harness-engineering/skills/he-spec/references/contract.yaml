@@ -42,6 +42,7 @@ outputs:
   - exact parallel research support via repo-research-analyst, learnings-researcher, and conditional external-research roles when needed
   - "reviewability surface for non-trivial specs: Command Summary with exactly one opening BLUF paragraph, Do/Do Not boundaries where useful, and No-Fog Gate"
   - deterministic generated-artifact shape validation for non-trivial specs, including reader-first section order, stable IDs, conformance rules, and visual-reference decision
+  - git_staging_status and staged_paths for any spec artifacts written or updated in the current turn
   - explicit validation and next-stage handoff guidance
 
 observability: >

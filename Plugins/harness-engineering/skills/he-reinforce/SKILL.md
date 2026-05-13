@@ -140,7 +140,8 @@ Structured output: `schema_version`, `mode`, `selected_artifact`,
 `evidence_checked`, `solved_status`, `validation_status`, `overlap_status`,
 `refresh_decisions`, `project_brain_status`, `continuity_status`,
 `structure_status`, `size_budget_status`, `discoverability_status`,
-`redaction_status`, `writes`, `blocked_reason`, and `handoff`.
+`redaction_status`, `writes`, `git_staging_status`, `staged_paths`,
+`blocked_reason`, and `handoff`.
 
 ## Confidence Reporting
 
@@ -190,5 +191,4 @@ Read before delegating helper work:
 `../../references/subagent-call-contract.md`.
 
 Deferred context index: `../../references/deferred-context-index.md`.
-Do not remove important context for budget trimming; move deep context to
-references and index it in `../../references/deferred-context-index.md`.
+Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.

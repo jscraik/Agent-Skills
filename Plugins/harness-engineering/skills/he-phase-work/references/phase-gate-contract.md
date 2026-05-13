@@ -1,12 +1,10 @@
 # Phase Gate Contract
 
-Read when: collector commands, required artifacts, phase-exit sequence, stop rules, report fields, or the detail relocated out of `SKILL.md` is needed during phase work.
+Read when: collector commands, required artifacts, phase-exit sequence, stop rules, report fields, or the detail relocated out of `SKILL.md` is needed during a phase work.
 
-Use this contract when `he-phase-work` is keeping `he-work` alive across approved plan phases.
+Use this contract when a 10 minute Harness Engineering heartbeat is keeping `he-work` alive across plan phases.
 Do not substitute `he-heartbeat` for stale evidence inside an approved phase
-loop; stale phase evidence is a stop condition for `he-phase-heartbeat`.
-Use `he-heartbeat` only as the approved 10-minute wake-up mechanism for the
-phase-work loop.
+loop; stale phase evidence is a stop condition for `he-phase-work`.
 
 ## Evidence Intake
 
@@ -45,9 +43,7 @@ For direct-handle use, classify the strongest side effect before proceeding:
 - `external_write`: create or update heartbeat automations, issue comments, PR bodies, or trackers.
 - `destructive`: delete, force-push, merge, deploy, close trackers, resolve review threads, or remove evidence.
 
-Ask for explicit approval or block before `external_write`, `destructive`, or
-phase-boundary `git add` actions unless the user already granted that authority
-for the exact target.
+Ask for explicit approval or block before `external_write` or `destructive` actions unless the user already granted that authority for the exact target.
 
 ## Phase Exit Gate
 
@@ -56,25 +52,19 @@ For each phase:
 1. Confirm the phase is approved, incomplete, reopened, or evidence-missing.
 2. Confirm the changed diff belongs to that phase.
 3. Run `simplify` over the phase diff.
-4. Run the phase's required tests or validation command.
-5. Run `he-fix-bugs` only when failing evidence exists.
+4. Run the phase's smallest relevant tests or validation command and record exact outcomes.
+5. Run `he-fix-bugs` only when failing evidence exists, then rerun the relevant failing gate.
 6. Run `he-code-review` for readiness and traceability.
-7. Record exact validation command outcomes.
-8. Stage only completed-phase files with `git add` when local staging authority is explicit; otherwise report `git_staging_status: blocked` with the ready paths.
-9. Update Linear or the tracker only when external-write authority is explicit; otherwise report `linear_update_status: blocked` with the prepared update text.
-10. Set `slack_policy` to `none`, `bounded`, or `blocked`.
-11. Commit only the completed phase diff, or report the blocker.
-
-After the final phase, run `he-eval-report`, then `he-reinforce`, then
-`he-reconcile`, and apply the same validation and staging boundaries to their
-artifacts.
+7. Stage only completed-phase files with scoped `git add`, or report `git_staging_status: blocked`.
+8. Update Linear or the tracker with phase evidence, or report `linear_update_status: blocked` with ready-to-post text.
+9. Set `slack_policy` to `none`, `bounded`, or `blocked`.
 
 ## Stop Rules
 
 Stop the heartbeat when:
 
 - all phases are complete with evidence,
-- the final phase gate passes and commit status is known,
+- the final phase gate passes, final eval/reinforce/reconcile closeout has run, and staging status is known,
 - the plan path disappears or becomes ambiguous,
 - the same deterministic blocker repeats twice,
 - validation evidence is stale and the next wake-up would only repeat the same
@@ -93,8 +83,7 @@ Each wake-up should report:
 - validation status,
 - review gate status,
 - git staging status,
-- Linear or tracker update status,
-- commit status,
+- Linear update status,
 - blocker and smallest recovery step,
 - slack policy,
 - next expected wake-up or stop reason.
@@ -112,7 +101,8 @@ For coding-harness work, prefer source-truth command probes from the target repo
 These details were moved out of the always-loaded `SKILL.md` body to preserve context while reducing invoke cost:
 
 - Start with two or three focused surfaces and expand only when phase evidence proves broader context is required.
-- Search for an existing matching heartbeat before creating another one; use a 10-minute cadence unless the user gave a different explicit cadence, and include live checks, stop rules, reporting policy, and forbidden unattended actions.
+- Search for an existing matching heartbeat before creating another one, and include cadence, live checks, stop rules, reporting policy, and forbidden unattended actions.
+- Use a 10 minute heartbeat for phase work; do not stretch phase work into an arbitrary monitor cadence.
 - Keep the XP operating contract explicit by setting `slack_policy` to `none`, `bounded`, or `blocked`.
 - For plugin-level confidence claims, run or require the HE lifecycle release eval lane across changed lifecycle skills plus adjacent route/work skills.
 - Treat static Plugin Eval budget failures as blocking, excluded from the runtime claim, or assigned follow-up; do not hide them under strict audit success.

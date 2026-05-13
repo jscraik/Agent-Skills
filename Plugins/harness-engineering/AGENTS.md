@@ -50,6 +50,9 @@ skill logic:
   long controller prompts.
 - Keep always-loaded `SKILL.md` files trigger-focused and move bulky examples,
   matrices, rubrics, and extended rationale into references.
+- Do not preserve stale, duplicated, unsafe, inappropriate, or superseded text
+  merely because a `SKILL.md` became shorter. Removed context should be
+  classified as moved, superseded, intentionally discarded, or not-context.
 - Preserve validator-required headings and compatibility aliases when local
   validators still require them.
 - Split independent decisions into sequential questions. Do not ask one broad

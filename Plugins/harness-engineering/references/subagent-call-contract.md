@@ -22,3 +22,4 @@ Each stage closeout should include these fields or equivalent prose:
 - `roles_used`
 - `roles_recommended`
 - `roles_missing`
+- `git_staging_status` when the stage wrote artifacts

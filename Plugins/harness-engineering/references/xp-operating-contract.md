@@ -49,7 +49,7 @@ from replacing working software.
   record integration status.
 - `he-eval-report`: verify the promised proof exists; do not invent late proof
   or mark missing evidence as success.
-- `he-phase-heartbeat`: preserve sustainable cadence with bounded slack and
+- `he-phase-work`: preserve sustainable cadence with bounded slack and
   stop rather than ritualize wakeups when evidence is stale.
 
 ## Red Signals

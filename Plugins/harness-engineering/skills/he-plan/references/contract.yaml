@@ -43,6 +43,7 @@ outputs:
   - evidence-backed confidence statement with verified facts, assumptions, blocked validations, and confidence ceilings
   - "reviewability surface for non-trivial plans: Command Summary with exactly one opening BLUF paragraph, Do/Do Not boundaries where useful, stop conditions, rollback notes, and No-Fog Gate"
   - deterministic generated-artifact shape validation for non-trivial plans, including execution-first section order, stable PU IDs, source ID mapping, rollback, handoff, and visual-reference decision
+  - git_staging_status and staged_paths for any plan artifacts written or updated in the current turn
   - next-stage handoff to he-work, Linear workflow, document review, or folded he-deepen-plan
 
 observability: >

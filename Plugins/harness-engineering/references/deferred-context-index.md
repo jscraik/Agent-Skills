@@ -23,6 +23,7 @@ the reference below, and let validators catch stale duplicated procedure text.
 - Lifecycle, artifact, slice, and tracker gates:
   - `references/stage-context-contract.md`
   - `references/lifecycle-exit-contract.md`
+  - `references/git-staging-contract.md`
   - `references/artifact-routing-contract.md`
   - `references/artifact-classification-and-traceability.md`
   - `references/execution-slice-contract.md`
@@ -59,7 +60,7 @@ Load references by trigger instead of by habit:
 
 | Stage or condition | Load | Expected proof |
 | --- | --- | --- |
-| Any stage writes durable docs, mutates files, or hands off | `references/stage-context-contract.md`, `references/lifecycle-exit-contract.md` | compact stage context plus exit status |
+| Any stage writes durable docs, mutates files, or hands off | `references/stage-context-contract.md`, `references/lifecycle-exit-contract.md`, `references/git-staging-contract.md` | compact stage context plus exit status plus git staging status for current-turn files |
 | Non-trivial durable HE artifact is operator-facing | `references/bluf-review-contract.md` | Command Summary with one opening BLUF paragraph, No-Fog Gate, or compact not-applicable reason |
 | Non-trivial artifact has flow, dependency, boundary, state, validation, rollback, UI, media, or source-of-truth complexity | `references/visual-reference-contract.md` | Mermaid/table/image reference, or compact not-needed reason |
 | Stage choice is ambiguous | `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/interactive-steering-contract.md` | selected stage or one blocking question |
@@ -149,12 +150,32 @@ Load references by trigger instead of by habit:
 - `skills/he-linear-plan/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
 
-`he-phase-heartbeat`:
+`he-phase-work`:
 
-- `skills/he-phase-heartbeat/references/phase-gate-contract.md`
-- `skills/he-phase-heartbeat/references/contract.yaml`
+- `skills/he-phase-work/references/phase-gate-contract.md`
+- `skills/he-phase-work/references/contract.yaml`
 
 ## Historical Context Policy
+
+Deferred context exists to keep meaningful, still-valid HE knowledge reachable
+without loading it by default. It is not a landfill for every line removed from
+`SKILL.md`.
+
+When compacting a stage entrypoint, classify removed material:
+
+- `moved-to-reference`: valid reusable behavior preserved in a stage reference,
+  shared contract, or fixture.
+- `superseded`: replaced by a newer compressed rule, route, contract, or
+  validator.
+- `intentionally-discarded`: stale, duplicated, unsafe, inappropriate,
+  contradicted by current HE guidance, or no longer part of the shipped
+  contract.
+- `not-context`: formatting, navigation, repeated prose, examples with no
+  durable value, or low-signal explanation.
+
+Only the `moved-to-reference` disposition belongs in this index. The other
+dispositions may be mentioned in review notes or change summaries when useful,
+but they should not be pasted into deferred context.
 
 ## Preserved Entry Point Lines
 
@@ -195,23 +216,21 @@ the relevant `skills/**/references/source-prompt-preservation.md` files, and
 fixtures. Keep this index as a router only; do not paste retired procedure text
 back into this file.
 
-## 2026-05-12 BLUF Productization Preservation Notes
+## 2026-05-12 BLUF Productization Disposition Notes
 
-The BLUF productization pass compressed several stage entrypoints while keeping
-their behavior in stage references, artifact contracts, and the BLUF review
+The BLUF productization pass compressed several stage entrypoints. Meaningful
+behavior was moved to stage references, artifact contracts, and the BLUF review
 contract. BLUF now means one opening Bottom Line Up Front paragraph, not a
-section-by-section template. These exact retired lines are preserved so
-progressive-disclosure validation can prove the context was moved rather than
-silently dropped.
+section-by-section template.
 
-```text
-5. Route durable brainstorm artifacts to `.harness/brainstorm/**.md`; route
-10. When writing `.harness/review/**`, classify by content shape before path, preserve dated Linear prefixes where the repo uses them, and keep the canonical slug aligned with the spec/plan/eval chain.
-7. Generate and validate the report, then ask accept/challenge/rework before
-8. Mutate Linear only after explicit post-plan approval, known destination,
-3. For tracked work, resolve or block Linear linkage and run the Linear Delta
-8. Define closure proof using dated `.harness/evals/**` artifacts and preserve
-- User asks: "The Linear template bug in `he-linear-plan` is fixed and the
-6. Write `.harness/specs/**.md` only when artifact writes are authorized;
-8. Compress conclusions to decisions that change routing, deletion, investment,
-```
+Disposition:
+
+- `moved-to-reference`: durable artifact routing, Linear mutation gates,
+  closure proof, review shape, and strategy/refactor/Linear output rules are
+  preserved in the Stage Reference Map above and the linked stage references.
+- `superseded`: exact numbered procedure fragments were replaced by compact
+  stage procedures plus shared BLUF, visual-reference, source-prompt, Linear,
+  and lifecycle contracts.
+- `intentionally-discarded`: incomplete line fragments and prompt snippets that
+  no longer form valid operational guidance are not preserved here.
+- `not-context`: numbering artifacts and partial copied lines are omitted.

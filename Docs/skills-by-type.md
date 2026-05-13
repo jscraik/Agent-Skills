@@ -4,6 +4,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 Entries are grouped by declared semantic type; each path names the owning skill package root, including plugin-owned surfaces.
 
 ## Table of Contents
+
 - [Summary](#summary)
 - [Semantic Types](#semantic-types)
 - [Validation Notes](#validation-notes)
@@ -59,7 +60,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `he-heartbeat` — `Plugins/harness-engineering/skills`
 - `he-improve` — `Plugins/harness-engineering/skills`
 - `he-linear-plan` — `Plugins/harness-engineering/skills`
-- `he-phase-heartbeat` — `Plugins/harness-engineering/skills`
+- `he-phase-work` — `Plugins/harness-engineering/skills`
 - `he-plan` — `Plugins/harness-engineering/skills`
 - `he-reconcile` — `Plugins/harness-engineering/skills`
 - `he-refactor` — `Plugins/harness-engineering/skills`
@@ -156,4 +157,3 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 ## Validation Notes
 
 - No invalid semantic type tags detected.
-

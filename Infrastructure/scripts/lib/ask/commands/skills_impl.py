@@ -2083,7 +2083,7 @@ _IMPROVE_HANDLE_HINTS = (
     ),
     (
         frozenset({"monitor", "long", "running", "phase"}),
-        "he-phase-heartbeat",
+        "he-phase-work",
         "fallback HE phase-monitoring intent hint",
     ),
     (

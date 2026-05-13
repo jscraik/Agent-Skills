@@ -142,6 +142,8 @@ _CONTEXT_POLICY_PATTERNS = (
     re.compile(r"never drop required context", re.IGNORECASE),
     re.compile(r"required operational context is never removed", re.IGNORECASE),
     re.compile(r"preserve .*context.*relocat", re.IGNORECASE),
+    re.compile(r"important, still-valid context", re.IGNORECASE),
+    re.compile(r"removed context.*disposition", re.IGNORECASE),
 )
 
 _HARNESS_CACHE_SCOPE_PATTERN = re.compile(
@@ -730,8 +732,10 @@ def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: 
                 "FAIL",
                 "CONTEXT_RELOCATION_POLICY_MISSING",
                 skill_rel,
-                "missing explicit context-preservation policy in SKILL.md; "
-                "required context must be relocated to references, not trimmed",
+                "missing explicit context-disposition policy in SKILL.md; "
+                "important still-valid context must be relocated to references, "
+                "while stale, duplicated, unsafe, inappropriate, superseded, or "
+                "low-signal text may be intentionally discarded",
             )
         )
 

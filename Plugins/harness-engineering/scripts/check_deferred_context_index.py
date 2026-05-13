@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Detect stale active-procedure snapshots in the HE deferred context index."""
+"""Detect stale active-procedure snapshots in the HE deferred context index.
+
+The index should route meaningful moved context, not preserve every line removed
+from compacted SKILL.md files. Stale, duplicated, unsafe, inappropriate,
+superseded, or low-signal text should be dispositioned outside this index rather
+than pasted here.
+"""
 
 from __future__ import annotations
 
@@ -23,7 +29,17 @@ def validate(path: Path) -> list[str]:
     text = path.read_text(encoding="utf-8")
     errors: list[str] = []
     if "```" in text:
-        errors.append("deferred context index must not contain copied code fences")
+        errors.append(
+            "deferred context index must not contain copied code fences; route "
+            "meaningful moved context to references and discard stale or "
+            "inappropriate fragments instead of preserving them here"
+        )
+    if re.search(r"(?i)exact retired lines are preserved", text):
+        errors.append(
+            "deferred context index must not preserve exact retired lines; use "
+            "moved-to-reference, superseded, intentionally-discarded, or "
+            "not-context disposition notes"
+        )
     for pattern in PROCEDURE_PATTERNS:
         if pattern.search(text):
             errors.append(f"deferred context index contains active procedure text: {pattern.pattern}")

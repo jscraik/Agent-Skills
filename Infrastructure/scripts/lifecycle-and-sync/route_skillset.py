@@ -66,6 +66,7 @@ HE_FOLDED_STAGE_ALIASES = {
     "he-deepen-plan": "he-plan",
     "he-deepen-spec": "he-spec",
     "he-ideate": "he-brainstorm",
+    "he-phase-heartbeat": "he-phase-work",
     "he-prune-branches": "he-router",
     "he-refine": "he-improve",
     "he-reliability-review": "he-code-review",
@@ -291,12 +292,12 @@ def harness_engineering_override(
             "confidence": 0.9,
             "reason": "matched multi-stage HE rule 'stage-correctness-question'",
         }
-    phase_heartbeat_row = row_by_id(rows, "he-phase-heartbeat")
-    if phase_heartbeat_row and is_he_phase_heartbeat_request(task_text, task_tokens):
+    phase_work_row = row_by_id(rows, "he-phase-work")
+    if phase_work_row and is_he_phase_heartbeat_request(task_text, task_tokens):
         return {
-            "row": phase_heartbeat_row,
+            "row": phase_work_row,
             "confidence": 0.97,
-            "reason": "matched deterministic HE rule 'phase-heartbeat-control-loop'",
+            "reason": "matched deterministic HE rule 'phase-work-control-loop'",
         }
     if distinct_mentioned_stages:
         stage_id = distinct_mentioned_stages[0]

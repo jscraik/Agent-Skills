@@ -55,7 +55,8 @@ Return `schema_version: 1` when structured plus `interactive_status`,
 `selection_evidence`, `route`, `stage`, `scope`, `source`, `plan_path`,
 `traceability`, `validation`, `safe_to_continue`, `blocked_reason`,
 `linear_action_required`, `linear_mutation_status`, `post_plan_handoff`,
-`blackboard_delta`, and evidence-tied `confidence`.
+`blackboard_delta`, `git_staging_status`, `staged_paths`, and evidence-tied
+`confidence`.
 
 Durable plans live under `.harness/plan/**.md` and include stable plan IDs,
 acceptance IDs, ordered units, dependencies, tests, rollback, risks,
@@ -215,8 +216,7 @@ Read before delegation -> `../../references/subagent-call-contract.md`.
 Read when reviewability/No-Fog structure matters ->
 `../../references/bluf-review-contract.md`.
 Deferred context index -> `../../references/deferred-context-index.md`.
-Do not remove important context for budget trimming; move deep context to
-references and index it in `../../references/deferred-context-index.md`.
+Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.
 Read triggered shared HE contracts only as needed: stage context, interactive
 steering, Linear tracker/delta gates, execution slice, artifact routing, first
 principles, plugin hooks, coding-harness bridge, and domain routing.

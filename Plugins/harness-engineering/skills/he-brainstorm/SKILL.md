@@ -114,8 +114,8 @@ ambiguous.
 
 Structured output: `schema_version`, `mode`, `scope_tier`, `stated`, `inferred`,
 `guesses`, `out_of_scope`, `options_or_survivors`, `warrants`, `risks`,
-`validation`, `blackboard_delta`, `artifact_path`, `next_stage`,
-`blocked_reason`.
+`validation`, `blackboard_delta`, `artifact_path`, `git_staging_status`,
+`staged_paths`, `next_stage`, `blocked_reason`.
 
 ## Confidence Reporting
 
@@ -176,5 +176,4 @@ tracker gate, coding-harness bridge, artifact routing/classification, pragmatic
 invariants, and XP operating contract.
 
 Deferred context index: `../../references/deferred-context-index.md`.
-Do not remove important context for budget trimming; move deep context to
-references with a clear route.
+Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.

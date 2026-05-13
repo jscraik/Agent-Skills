@@ -52,7 +52,9 @@ Always include `schema_version: 1`, `selected_stage: he-linear-plan`, evidence
 traceability, Target Linear Destination, Existing Project Match,
 Now/Next/Later/Do Not Create, `decision_artifact_status`,
 `linear_mutation_status`, `required_confirmation` when needed, and
-`live_linear_blocker` when expected live tracking is blocked. Bug work includes
+`live_linear_blocker` when expected live tracking is blocked. Include
+`git_staging_status` and `staged_paths` when writing local Linear artifacts.
+Bug work includes
 `issue_type: bug`, repro, expected/actual behavior, affected surface, severity,
 and validation evidence.
 
@@ -210,5 +212,4 @@ For non-trivial generated Linear plans, run or block
 - Read when routing, steering, artifact, XP, or subagent details are needed:
   `../../references/deferred-context-index.md`
 
-Do not remove important context for budget trimming; move deep context to
-references and index it in `../../references/deferred-context-index.md`.
+Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.

@@ -21,7 +21,7 @@ DEFAULT_SKILLS = (
     "he-refactor",
     "he-linear-plan",
     "he-eval-report",
-    "he-phase-heartbeat",
+    "he-phase-work",
     "he-plan",
     "he-work",
 )
