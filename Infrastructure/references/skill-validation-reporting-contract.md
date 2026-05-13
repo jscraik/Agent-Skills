@@ -82,7 +82,7 @@ If only a wrapper ran, report the wrapper label instead of the internal file nam
 
 ### `eval realism`
 
-- Prefer explicit schema-backed evidence such as `realistic: true|false`,
+- Prefer explicit schema-backed evidence such as `realistic` (with values `true` or `false`),
   `why_realistic`, `expected_behavior`, and `anti_overfit_notes`.
 - Natural-language markers are fallback evidence only.
 - Synthetic examples, trigger-word-only prompts, internal test-case phrasing, or
