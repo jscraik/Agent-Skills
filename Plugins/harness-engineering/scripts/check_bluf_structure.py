@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 FIELD_RE = re.compile(r"(?m)^(BLUF|Decision Needed|Top Risks|Next Action):\s*\S")
-BLUF_RE = re.compile(r"(?m)^BLUF:\s*(\S.+)$")
+BLUF_RE = re.compile(r"(?m)^BLUF:\s*(.*(?:\n(?![A-Z][A-Za-z ]{2,40}:|\s*##\s).+)*)")
 BLUF_ONLY_SUMMARY_RE = re.compile(r"(?m)^##\s+BLUF-Only Summary\s*$")
 BLUF_HEADING_RE = re.compile(r"(?m)^#{2,6}\s+BLUF\b")
 VAGUE_BLUF_RE = re.compile(
@@ -26,6 +26,21 @@ RISK_RE = re.compile(
     r"\b(risk|blocked|blocker|unsafe|unclear|missing|fails?|failure|drift|consequence|because|until)\b",
     re.IGNORECASE,
 )
+AUDIENCE_RE = re.compile(
+    r"\b(user|operator|reader|Jamie|developer|reviewer|agent|team|customer|stakeholder)\b",
+    re.IGNORECASE,
+)
+DOCUMENT_JOB_RE = re.compile(
+    r"\b(this (spec|plan|report|artifact|document)|defines?|explains?|sets?|proves?|decides?|recommends?|covers?)\b",
+    re.IGNORECASE,
+)
+WHY_RE = re.compile(r"\b(because|so that|so |to (help|make|allow|prevent|avoid|ensure|turn)|why)\b", re.IGNORECASE)
+
+
+def normalize_bluf(raw: str) -> str:
+    lines = [line.strip() for line in raw.splitlines()]
+    lines = [line for line in lines if line]
+    return " ".join(lines)
 
 
 def strip_frontmatter(text: str) -> str:
@@ -36,9 +51,13 @@ def strip_frontmatter(text: str) -> str:
     return text
 
 
+def strip_fenced_code(text: str) -> str:
+    return re.sub(r"(?ms)^```.*?^```", "", text)
+
+
 def validate(path: Path, *, compact: bool) -> list[str]:
     _ = compact
-    text = strip_frontmatter(path.read_text(encoding="utf-8"))
+    text = strip_fenced_code(strip_frontmatter(path.read_text(encoding="utf-8")))
     errors: list[str] = []
 
     if "## Command Summary" not in text:
@@ -56,7 +75,7 @@ def validate(path: Path, *, compact: bool) -> list[str]:
         errors.append("BLUF must be a single opening field, not a repeated heading")
 
     bluf_matches = list(BLUF_RE.finditer(text))
-    blufs = [match.group(1).strip() for match in bluf_matches]
+    blufs = [normalize_bluf(match.group(1)) for match in bluf_matches]
     if not blufs:
         errors.append("missing non-empty opening BLUF line")
     if len(blufs) > 1:
@@ -67,14 +86,23 @@ def validate(path: Path, *, compact: bool) -> list[str]:
             errors.append("BLUF must appear inside the opening Command Summary")
     for index, bluf in enumerate(blufs, start=1):
         word_count = len(bluf.split())
-        if word_count < 12:
+        sentence_count = len(re.findall(r"[.!?](?:\s|$)", bluf))
+        if word_count < 45:
             errors.append(f"BLUF {index} is too short ({word_count} words)")
-        if word_count > 120:
+        if word_count > 180:
             errors.append(f"BLUF {index} is too long ({word_count} words)")
+        if sentence_count < 3:
+            errors.append(f"BLUF {index} needs at least 3 sentences of orientation")
         if bluf.endswith(":"):
             errors.append(f"BLUF {index} ends like a label instead of a sentence")
         if VAGUE_BLUF_RE.search(bluf):
             errors.append(f"BLUF {index} uses vague review prose instead of a bottom line")
+        if not DOCUMENT_JOB_RE.search(bluf):
+            errors.append(f"BLUF {index} does not explain the document's job")
+        if not AUDIENCE_RE.search(bluf):
+            errors.append(f"BLUF {index} does not name the reader, user, operator, developer, agent, or stakeholder")
+        if not WHY_RE.search(bluf):
+            errors.append(f"BLUF {index} does not explain why the artifact matters")
         if not ACTION_RE.search(bluf):
             errors.append(f"BLUF {index} does not state a decision, action, or next step")
         if not RISK_RE.search(bluf):

@@ -42,8 +42,8 @@ Apply the OpenAI-style plugin design contract during scaffold shape decisions: k
 
 Use the detailed scaffold procedure in `references/workflow.md`.
 
-Required operational context is never removed; detailed guidance is relocated to references, not trimmed.
-Do not remove important context for budget trimming; move it to `references/` and add explicit `Read when` signposts in `SKILL.md`.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 Classify reusable, delivery-oriented, visible-family, or `coding-harness` plugins with [references/factory-governance-spine.md](./references/factory-governance-spine.md). Keep one-skill plugins minimal.
 
 Read when:

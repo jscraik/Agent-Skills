@@ -16,7 +16,7 @@ metadata:
 ## Philosophy
 - Find architecture moves that reduce cognitive load and improve leverage before broad refactors.
 - Start from live evidence and local patterns.
-- Do not remove important context for budget trimming; use progressive disclosure.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 - Treat architecture as daily design work: choose the smallest reversible move that improves the code currently under pressure.
 
 ## When To Use

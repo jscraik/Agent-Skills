@@ -41,7 +41,7 @@ Plugin Installer owns provenance checks, quarantine validation, install evidence
 
 Use the staged install protocol in `references/workflow.md`.
 
-Required operational context is never removed; detailed guidance is relocated to references, not trimmed.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 Read when:
 - You need full install, provenance, and rollback flow details: [references/workflow.md](./references/workflow.md).

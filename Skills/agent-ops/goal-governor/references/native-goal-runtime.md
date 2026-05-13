@@ -59,5 +59,5 @@ Keep these root-instruction details discoverable after root compression:
 - If verification is missing, red, stale, blocked, or from a different dirty fingerprint, recover verification before feature work.
 - After each task, append a machine-checkable receipt and select the next safe task.
 - Mark a goal complete only after a final Judge or PM audit receipt with `decision: complete`; then update the native goal status.
-- Do not remove important context for budget trimming; move deep context to references and keep it discoverable through the deferred context index.
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 - Previous examples included creating a board for Codex config cleanup, continuing `docs/goals/codex-goal-governance/goal.md` after a branch switch, and doctoring goal enablement, worker scope, and Scout/Judge/Worker runtime health before harness execution.

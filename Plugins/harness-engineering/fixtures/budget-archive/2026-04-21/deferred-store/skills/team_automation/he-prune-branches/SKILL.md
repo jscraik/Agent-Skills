@@ -75,7 +75,7 @@ Use references only when additional edge handling is needed.
 - Redact secrets and sensitive filesystem details in shared output.
 - Never delete branches without explicit user confirmation.
 - Continue inline when helper-role delegation is unavailable; emit manual role guidance instead of blocking.
-- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Anti-Patterns
 

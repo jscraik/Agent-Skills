@@ -116,8 +116,10 @@ For non-trivial durable plans, apply
 
 Keep the existing plan substance. Add:
 
-- Command Summary with exactly one `BLUF` paragraph, decision needed, top risks,
-  and next action.
+- Command Summary with exactly one substantive `BLUF` paragraph, decision
+  needed, top risks, and next action. The BLUF must explain the document's job,
+  affected system, reader/user value, execution decision, major risk or
+  blocker, and next action in one paragraph.
 - No `BLUF-Only Summary`.
 - No section-level or unit-level `BLUF:` labels. Major plan sections and
   `PU-*` units should open with clear objective or summary prose, but only the

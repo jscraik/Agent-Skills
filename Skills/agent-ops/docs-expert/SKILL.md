@@ -16,7 +16,7 @@ metadata:
 ## Philosophy
 - Make repo docs accurate, reader-first, and evidence-backed.
 - Start from live evidence and local patterns.
-- Do not remove important context for budget trimming; use progressive disclosure.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## When To Use
 - README, docs, runbooks, code docs, templates, or config docs need work.

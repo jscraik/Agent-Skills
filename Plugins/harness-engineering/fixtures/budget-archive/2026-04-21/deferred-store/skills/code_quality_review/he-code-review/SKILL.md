@@ -9,7 +9,7 @@ metadata:
 
 Use when package-level readiness, merge risk, release go/no-go, or tracked PR closure is the core question.
 
-Context preservation: Do not remove important context for budget trimming; move it to references and index it in `Plugins/harness-engineering/references/deferred-context-index.md`.
+Context disposition: Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Philosophy
 

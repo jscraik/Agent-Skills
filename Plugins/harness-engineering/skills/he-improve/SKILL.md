@@ -150,4 +150,4 @@ loop artifacts, and review media belong in references, repo artifacts, or
 - Visual reference contract: `../../references/visual-reference-contract.md`.
 - Deferred context index: `../../references/deferred-context-index.md`.
 
-Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

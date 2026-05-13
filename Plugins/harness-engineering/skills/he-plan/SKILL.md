@@ -88,9 +88,11 @@ as untrusted. Planning may write only approved `.harness/plan/**` artifacts.
    main body read objective -> source contract -> constraints -> implementation
    strategy -> work units -> validation -> rollback -> handoff. Apply the BLUF
    review contract to non-trivial generated or replacement plan artifacts so
-   they begin with one plain-English Bottom Line Up Front paragraph that
-   summarizes objective, execution strategy, major risk or blocker, and next
-   handoff. Use normal plan headings after that; make work units, validation,
+   they begin with one substantive plain-English Bottom Line Up Front paragraph.
+   The paragraph must explain the document's job to a non-technical reader and
+   to a developer new to the project: what the plan will change, why that work
+   matters, how execution is bounded, what risk could stop it, and what handoff
+   follows. Use normal plan headings after that; make work units, validation,
    stop conditions, rollback, visual aids, and handoff decisions scannable
    without repeating `BLUF:` through the body.
 9. For bundled plugin hooks, treat `plugin_hooks` as optional feature-gated
@@ -216,7 +218,7 @@ Read before delegation -> `../../references/subagent-call-contract.md`.
 Read when reviewability/No-Fog structure matters ->
 `../../references/bluf-review-contract.md`.
 Deferred context index -> `../../references/deferred-context-index.md`.
-Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 Read triggered shared HE contracts only as needed: stage context, interactive
 steering, Linear tracker/delta gates, execution slice, artifact routing, first
 principles, plugin hooks, coding-harness bridge, and domain routing.

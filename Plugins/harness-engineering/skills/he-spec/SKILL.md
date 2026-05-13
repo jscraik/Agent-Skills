@@ -78,11 +78,13 @@ handles, runtime projections, plugin caches, or mirrors unless canonical.
    keep Harness metadata in frontmatter, status blocks, or appendices; make the
    main body read problem -> scenarios -> scope -> behavior -> contracts ->
    validation -> acceptance. Apply the BLUF review contract to non-trivial
-   generated or replacement spec artifacts so they begin with one plain-English
-   Bottom Line Up Front paragraph that summarizes intent, recommendation or
-   decision, major risk, and next action. Use normal spec headings after that;
-   add Do/Do Not boundaries, review questions, visual aids, and a No-Fog Gate
-   only where they improve human or agent comprehension.
+   generated or replacement spec artifacts so they begin with one substantive
+   plain-English Bottom Line Up Front paragraph. The paragraph must explain the
+   document's job to a non-technical reader and to a developer new to the
+   project: what the spec covers, why it matters, what decision it makes, what
+   risk constrains it, and what happens next. Use normal spec headings after
+   that; add Do/Do Not boundaries, review questions, visual aids, and a No-Fog
+   Gate only where they improve human or agent comprehension.
 7. Write `.harness/specs/**.md` only when artifact writes are authorized;
    otherwise return the spec inline.
 8. Hand off to `he-plan` only after acceptance IDs and validation gates are
@@ -171,7 +173,7 @@ Read when visual aids, generated media, or proof visuals matter ->
 Read when retained doctrine is needed ->
 `Plugins/harness-engineering/references/he-spec-doctrine.md`.
 Deferred context index -> `../../references/deferred-context-index.md`.
-Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 Read when risk expands: tracker/delta gates, gate selection, first principles,
 plugin hook capability, domain/model, agent-native compression, HE doctrine,
 pragmatic invariants, XP operating contracts, and security/accessibility modules.

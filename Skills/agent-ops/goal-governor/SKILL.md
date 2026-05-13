@@ -97,7 +97,7 @@ docs/goals/<slug>/
 - Do not treat generated templates as proof that agents are installed; verify runtime config and role availability.
 - Do not install or mutate `~/.codex` directly unless the user asks for a direct runtime install. Prefer canonical repo projection paths.
 - If native goal state and board state conflict, stop implementation and classify the mismatch.
-- Do not remove important context for budget trimming; move deep context to references instead of deleting it.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Anti-Patterns
 

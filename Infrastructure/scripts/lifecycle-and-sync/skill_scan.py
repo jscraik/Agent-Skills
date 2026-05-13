@@ -152,6 +152,9 @@ CONTEXT_POLICY_PATTERNS = (
     re.compile(r"never drop required context", re.IGNORECASE),
     re.compile(r"required operational context is never removed", re.IGNORECASE),
     re.compile(r"preserve .*context.*relocat", re.IGNORECASE),
+    re.compile(r"apply the context-disposition policy", re.IGNORECASE),
+    re.compile(r"important,? still-valid context", re.IGNORECASE),
+    re.compile(r"stale, duplicated, unsafe, superseded, or low-signal", re.IGNORECASE),
 )
 READ_WHEN_PATTERN = re.compile(r"read when\s*:", re.IGNORECASE)
 REFERENCE_LINK_PATTERN = re.compile(r"\]\([^)]*references/[^)]*\)", re.IGNORECASE)
@@ -286,7 +289,7 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
     - Presence of an Infrastructure/scripts/ directory when many code fences are present.
     - Presence of recommended level-2 headings from REQUIRED_HEADINGS (missing headings are errors in "strict" mode, warnings otherwise).
     - Presence of the agent-native execution contract across all skills: execution boundaries, expected artifacts, repair/failure behavior, and validation or acceptance criteria (missing contract dimensions are errors in "strict" mode, warnings otherwise).
-    - For relocation-guard skills (a predefined set of relative paths), additional checks for context-preservation policy language, a `Read when:` progressive-disclosure signpost, a markdown link into `references/`, and at least one relocation target document in the `references/` directory (severity follows mode).
+    - For relocation-guard skills (a predefined set of relative paths), additional checks for context-disposition policy language, a `Read when:` progressive-disclosure signpost, a markdown link into `references/`, and at least one relocation target document in the `references/` directory (severity follows mode).
     
     The function prints per-file error/warning messages and a final summary to stdout.
     
@@ -351,7 +354,7 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
                 emit(
                     severity,
                     skill.relative_path,
-                    "missing context-preservation policy; required context must be relocated to references, not trimmed",
+                    "missing context-disposition policy; important still-valid context must be relocated to references while stale, duplicated, unsafe, superseded, or low-signal text may be intentionally discarded",
                 )
             if READ_WHEN_PATTERN.search(body) is None:
                 emit(severity, skill.relative_path, "missing `Read when:` progressive-disclosure signpost")

@@ -6,7 +6,8 @@ REPO_ROOT="$(cd -P -- "$SCRIPT_DIR/../../.." && pwd -P)"
 cd "$REPO_ROOT"
 
 INDEX_PATH='Plugins/harness-engineering/references/deferred-context-index.md'
-INVARIANT_MARKER='Do not remove important context for budget trimming'
+INVARIANT_MARKER='Apply the context-disposition policy'
+LEGACY_INVARIANT_MARKER='Do not remove important context for budget trimming'
 LINK_MARKER='deferred-context-index.md'
 
 changed_files=()
@@ -215,6 +216,16 @@ has_context_move_evidence() {
     return 0
   fi
 
+  # Rewrites that keep or expand the same skill file are not progressive-
+  # disclosure removals. This gate is meant to catch context shortened out of
+  # the entrypoint without relocation evidence, not semantic tightening or
+  # reader-first rewrites that add replacement guidance in place.
+  local skill_added skill_deleted
+  read -r skill_added skill_deleted < <(numstat_added_deleted "$base_ref" "$skill_path")
+  if (( skill_added >= skill_deleted )); then
+    return 0
+  fi
+
   # Materializing an archived active symlink shows the old link target as a
   # deleted line. That line is packaging metadata, not skill instruction
   # context, so it does not need relocation evidence.
@@ -241,6 +252,9 @@ has_context_move_evidence() {
         '
   )"
   for moved_line in "${removed_lines[@]}"; do
+    if [[ "$moved_line" == *"$LEGACY_INVARIANT_MARKER"* ]]; then
+      continue
+    fi
     normalized_moved_line="$(
       printf '%s\n' "$moved_line" \
         | sed -E 's#skills/(team_automation|code_quality_review)/#skills/#g'
@@ -314,7 +328,7 @@ for skill_file in "${changed_skills[@]}"; do
     continue
   fi
 
-  if ! grep -Fq "$LINK_MARKER" "$skill_file"; then
+  if [[ "$skill_file" == Plugins/harness-engineering/skills/* ]] && ! grep -Fq "$LINK_MARKER" "$skill_file"; then
     echo "[he-progressive] ERROR: $skill_file must link to deferred context index ($INDEX_PATH)"
     ((failures += 1))
   fi

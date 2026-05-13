@@ -232,7 +232,7 @@ Keep examples in evals or references unless the user asks for a concrete trigger
 - Plugin-level success can hide a weak lane; evaluate the lane before release claims.
 - Mirrors can be stale after source edits; validate freshness when runtime visibility matters.
 - Description text is routing surface; keep it trigger-first.
-- Do not remove important context for budget trimming; move deep context to
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
   references with a clear route.
 
 ## Anti-patterns

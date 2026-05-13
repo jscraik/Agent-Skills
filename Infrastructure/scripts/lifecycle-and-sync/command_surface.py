@@ -625,7 +625,8 @@ def parse_command_handles(text: str, *, repo_root_path: Path | None = None) -> d
 
 def handles_report(*, repo_root_path: Path | None = None, include_handles: bool = True) -> dict[str, Any]:
     handles = build_skill_handles(repo_root_path=repo_root_path)
-    violations = validate_skill_handles(handles, repo_root_path=repo_root_path)
+    surfaced_handles = _with_folded_alias_handles(handles)
+    violations = validate_skill_handles(surfaced_handles, repo_root_path=repo_root_path)
     command_handle_rows = _command_handle_write_rows(handles)
     command_handle_violations = [
         violation
@@ -642,10 +643,10 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
         "policy_identity": policy_identity(),
         "generated_from": "rooted_manifests",
         "projection_path": COMMAND_SURFACE_PATH.as_posix(),
-        "handle_count": len(handles),
+        "handle_count": len(surfaced_handles),
         "generated_command_handle_count": command_handle_count,
         "violations": violations,
-        "handles": [handle.to_dict() for handle in handles] if include_handles else [],
+        "handles": [handle.to_dict() for handle in surfaced_handles] if include_handles else [],
         "notes": [
             "Skill handles are resolved from rooted manifest metadata.",
             "The command-surface manifest is a generated projection, not a source of truth.",

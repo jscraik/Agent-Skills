@@ -154,9 +154,9 @@ The PR 136 main-sync refresh preserved these lines removed from compact runtime 
 - `- Assets: [./assets](./assets)`
 - `- Assets: `./assets``
 - `- Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)`
-- `- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).`
-- `- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.`
-- `- Do not remove important context for budget trimming; move it to references and index it in `../../references/deferred-context-index.md`.`
+- `Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.`
+- `Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.`
+- `Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.`
 - `- Domain model routing: `../../../references/domain-model-routing.md``
 - `- Ensure exactly one selected stage, one next invocation, request evidence, and blocked output when required inputs are missing.`
 - `- Ensure new caller-facing interfaces and domain terms are specified before implementation tasks.`
@@ -233,7 +233,7 @@ Read `Infrastructure/references/automation-prompt-contract.md` when writing a
 new heartbeat prompt, reviewing a heartbeat prompt, or repairing a drifted loop.
 ```
 
-Exact moved-line preservation for the progressive-disclosure gate:
+Moved-context disposition for the progressive-disclosure gate:
 
 ```text
 ## Philosophy
@@ -244,9 +244,9 @@ Exact moved-line preservation for the progressive-disclosure gate:
 - Assets: [./assets](./assets)
 - Assets: `./assets`
 - Canonical stage map: [../../../references/subagent-routing.md](../../../references/subagent-routing.md)
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
-- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
-- Do not remove important context for budget trimming; move it to references and index it in `../../references/deferred-context-index.md`.
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 - Domain model routing: `../../../references/domain-model-routing.md`
 - Ensure exactly one selected stage, one next invocation, request evidence, and blocked output when required inputs are missing.
 - Ensure new caller-facing interfaces and domain terms are specified before implementation tasks.

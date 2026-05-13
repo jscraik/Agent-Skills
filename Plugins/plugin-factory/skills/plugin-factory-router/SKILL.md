@@ -74,7 +74,7 @@ and plugin design contract needed to choose the lane.
 
 Use [references/workflow.md](./references/workflow.md) for route map and handoff behavior.
 
-Required operational context is never removed; detailed guidance is relocated to references, not trimmed.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 Apply `Infrastructure/references/openai-style-plugin-design-contract.md` at the
 plugin boundary before handing off to plugin creation, builder, installer, or

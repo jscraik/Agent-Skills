@@ -18,7 +18,7 @@ Operate `@brainwav/coding-harness` with command-accurate, preview-first validati
 ## Philosophy
 - Start from live command/source evidence and local repository patterns.
 - Keep setup and repair reversible: dry-run before mutation, then validate.
-- Do not remove important context for budget trimming; route details through references.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 - Separate local scaffold truth from auth-bound remote checks.
 
 ## When To Use

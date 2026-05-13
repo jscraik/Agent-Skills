@@ -131,7 +131,7 @@ _RUBRIC_VERSION_DIVERGENCE_DAYS = 90
 # Optional contract fields expected at gold standard; absence produces WARN (not FAIL).
 _RECOMMENDED_CONTRACT_KEYS = {"rollback_procedure", "observability"}
 
-# Family members that must preserve context via progressive disclosure.
+# Family members that must apply context disposition via progressive disclosure.
 _RELOCATION_GUARD_SKILLS = {
     "plugins/skill-factory/skills/code_quality_review/skill-builder",
     "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
@@ -142,7 +142,8 @@ _CONTEXT_POLICY_PATTERNS = (
     re.compile(r"never drop required context", re.IGNORECASE),
     re.compile(r"required operational context is never removed", re.IGNORECASE),
     re.compile(r"preserve .*context.*relocat", re.IGNORECASE),
-    re.compile(r"important, still-valid context", re.IGNORECASE),
+    re.compile(r"important,? still-valid context", re.IGNORECASE),
+    re.compile(r"stale, duplicated, unsafe, inappropriate, superseded, or low-signal", re.IGNORECASE),
     re.compile(r"removed context.*disposition", re.IGNORECASE),
 )
 
@@ -704,9 +705,9 @@ def _validate_reference_pi(skill_rel: str, skill_dir: Path) -> List[Finding]:
 
 def _validate_context_relocation(skill_rel: str, canonical_rel: str, skill_dir: Path) -> List[Finding]:
     """
-    Validate that a skill enforces progressive-disclosure context relocation and return findings for any missing signals.
+    Validate that a skill enforces progressive-disclosure context disposition and return findings for any missing signals.
 
-    This check applies only to skills listed in the relocation-guard set; for other skills it returns an empty list. When applicable, it inspects SKILL.md and the references/ directory and emits FAIL findings for each missing requirement: an explicit context-preservation policy, a "Read when:" signpost, a Markdown link into references/, and at least one document-like file in references/.
+    This check applies only to skills listed in the relocation-guard set; for other skills it returns an empty list. When applicable, it inspects SKILL.md and the references/ directory and emits FAIL findings for each missing requirement: an explicit context-disposition policy, a "Read when:" signpost, a Markdown link into references/, and at least one document-like file in references/.
 
     Parameters:
         skill_rel (str): Repository-relative skill path used as the `skill` field on findings.

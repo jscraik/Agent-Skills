@@ -111,8 +111,10 @@ For non-trivial durable specs, apply
 
 Keep the existing spec substance. Add:
 
-- Command Summary with exactly one `BLUF` paragraph, decision needed, top risks,
-  and next action.
+- Command Summary with exactly one substantive `BLUF` paragraph, decision
+  needed, top risks, and next action. The BLUF must explain the document's job,
+  affected system, reader/user value, decision or recommendation, major risk or
+  blocker, and next action in one paragraph.
 - No `BLUF-Only Summary`.
 - No section-level `BLUF:` labels. Major spec sections should open with clear
   prose, tables, examples, or diagrams, but only the document opening is BLUF.

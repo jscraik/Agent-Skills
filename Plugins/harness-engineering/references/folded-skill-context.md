@@ -135,9 +135,9 @@ phases, rollback, Linear mapping, eval proof, future-agent guardrails, and
 `spec_path`, `acceptance_ids`, `handoff`, and evidence-tied `confidence`.
 future-agent guidance, validation outcomes, evidence traceability, and direct
 Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff, slack_policy, and blackboard_delta.
-Do not remove important context for budget trimming; move deep context to
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 references and index it in `../../references/deferred-context-index.md`.
-Redact secrets; do not create cron workarounds for short thread follow-up. Do not remove important context for budget trimming; move deep context to references. Keep scope tight: start with 2-3 focused surfaces and expand only when the next heartbeat needs more context.
+Redact secrets; do not create cron workarounds for short thread follow-up. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text. Keep scope tight: start with 2-3 focused surfaces and expand only when the next heartbeat needs more context.
 references with a clear route.
 
 ## Preserved He-Spec Smoke-Eval Hardening Lines

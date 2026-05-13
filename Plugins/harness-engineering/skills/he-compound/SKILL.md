@@ -76,7 +76,7 @@ Redact secrets, credentials, private transcript text, tokens, PII, and sensitive
 business data by default before summarizing or handing off. This handle has
 routing authority only. It cannot authorize implementation, artifact writes,
 external mutation, deletion, closure proof, or learning capture.
-Do not remove important context for budget trimming; move deep context to
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 references and index it in `../../references/deferred-context-index.md`.
 Apply the context-disposition policy by moving important still-valid context to
 references and intentionally discarding stale, duplicated, unsafe, superseded,

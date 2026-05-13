@@ -74,7 +74,7 @@ metadata:
 - Keep writes inside the target repo unless the user explicitly approves another path.
 - Do not run destructive commands, cache resets, package publishes, or secret changes without explicit confirmation.
 - Do not hand-edit generated runtime projections when a canonical environment source owns the behavior.
-- Do not remove important context for budget trimming; move detail to references and signpost it.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Validation
 - Run the narrowest parser or validator that proves the edited environment file is valid.

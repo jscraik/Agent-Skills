@@ -140,5 +140,5 @@ required by the mode.
 - Shared HE routing and BLUF/visual/subagent/first-principles/XP contracts ->
   `../../references/deferred-context-index.md`
 
-Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text. Do not remove safety or evidence boundaries for budget trimming;
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 move deep context behind a clear reference route.

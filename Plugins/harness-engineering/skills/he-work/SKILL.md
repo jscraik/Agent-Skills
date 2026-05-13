@@ -40,7 +40,7 @@ For direct-handle use, apply the OpenAI-style design contract: classify the stro
 - Dirty worktree ownership and active `/goal` conflicts are blockers, not context to overwrite.
 - Validation must run against the touched production path or be recorded as blocked with the smallest recovery step.
 ## Constraints
-Redact secrets; preserve user edits. Do not remove important context for budget trimming; apply the context-disposition policy by moving important still-valid context to references and intentionally discarding stale, duplicated, unsafe, superseded, or low-signal text.
+Redact secrets; preserve user edits. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 ## Anti-Patterns
 - Editing before checking the active branch, dirty state, and source artifact.
 - Editing when an active thread goal conflicts with the branch, issue, plan, or PR.

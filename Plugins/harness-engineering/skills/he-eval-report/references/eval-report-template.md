@@ -18,7 +18,7 @@ linear_milestone: <milestone when tracked>
 # Title Matching Frontmatter
 
 ## Command Summary
-BLUF: <one short paragraph with closure recommendation, proof state, major blocker or risk, and next action>
+BLUF: <one substantive paragraph explaining this report's job, the evaluated work, why closure matters, the closure recommendation, proof state, major blocker or risk, and exact next action>
 Decision Needed: <accept | challenge | rework | none>
 Top Risks: <one to three risks with consequences>
 Next Action: <exact next action>
