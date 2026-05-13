@@ -656,6 +656,8 @@ def _evaluate_skill_selection_assertion(
         return f"{t} expected_skill mismatch: expected {expected_skill!r}, active skill is {skill_name!r}"
 
     if selected is None:
+        if t == "skill_not_selected":
+            return None
         expectation = "selected" if t == "skill_selected" else "not selected"
         return (
             f"{t} failed: expected {skill_name!r} to be {expectation}, "
