@@ -1101,12 +1101,18 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         try:
             source_bytes = source_file.read_bytes()
         except OSError:
+            projection_sha = "missing"
+            if projection_file.exists():
+                try:
+                    projection_sha = hash_bytes(projection_file.read_bytes())
+                except OSError:
+                    projection_sha = "unreadable_projection"
             mismatched_files.append(
                 {
                     "path": rel_key,
                     "reason": "unreadable_file",
                     "source_sha256": "unreadable_source",
-                    "projection_sha256": hash_bytes(projection_file.read_bytes()) if projection_file.exists() else "missing",
+                    "projection_sha256": projection_sha,
                 }
             )
             continue

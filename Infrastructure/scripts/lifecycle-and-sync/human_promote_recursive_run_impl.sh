@@ -172,14 +172,6 @@ write_blocker_and_exit() {
   local blocker_path="$run_dir/run_blocker.json"
   local events_path="$run_dir/events.jsonl"
 
-  # M-03: run_blocker.json is write-once per run — the first blocking event is the
-  # forensic truth. If one already exists, log the conflict and exit without overwriting.
-  if [[ -f "$blocker_path" ]]; then
-    echo "[promotion-gate] run_blocker.json already exists (write-once protection); new code='${code}' message='${message}'" >&2
-    echo "[promotion-gate] existing blocker preserved at: $blocker_path" >&2
-    exit 3
-  fi
-
   python3 - "$run_json_path" "$blocker_path" "$events_path" "$code" "$message" "$reviewers" "$now" <<'PY'
 import fcntl
 import hashlib
@@ -205,7 +197,24 @@ blocker = {
     "remediation_owner": actor,
     "created_at": ts,
 }
-blocker_path.write_text(json.dumps(blocker, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+blocker_path.parent.mkdir(parents=True, exist_ok=True)
+try:
+    with blocker_path.open("x", encoding="utf-8") as f:
+        f.write(json.dumps(blocker, indent=2, sort_keys=True) + "\n")
+        f.flush()
+        try:
+            import os
+            os.fsync(f.fileno())
+        except Exception:
+            pass
+except FileExistsError:
+    print(
+        f"[promotion-gate] run_blocker.json already exists (write-once protection); "
+        f"new code='{code}' message='{message}'",
+        file=sys.stderr,
+    )
+    print(f"[promotion-gate] existing blocker preserved at: {blocker_path}", file=sys.stderr)
+    raise SystemExit(3)
 events_path.parent.mkdir(parents=True, exist_ok=True)
 seed = f"{run.get('run_id')}::{code}::{ts}".encode("utf-8")
 event = {
@@ -442,16 +451,17 @@ promotion_key="${PROMOTION_SIGNING_KEY:-}"
 sig_required="${PROMOTION_SIG_REQUIRED:-0}"
 
 if [[ -n "$promotion_key" ]]; then
-  python3 - "$decision_tmp" "$decision_sig_file" "$promotion_key" <<'PY'
+  python3 - "$decision_tmp" "$decision_sig_file" <<'PY'
 import hmac
 import json
+import os
 import sys
 from hashlib import sha256
 from pathlib import Path
 
 decision_path = Path(sys.argv[1])
 sig_path = Path(sys.argv[2])
-key = sys.argv[3].encode("utf-8")
+key = os.environ["PROMOTION_SIGNING_KEY"].encode("utf-8")
 
 # Canonical form: sorted keys, no trailing whitespace variation
 obj = json.loads(decision_path.read_text(encoding="utf-8"))

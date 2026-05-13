@@ -196,7 +196,7 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-05-10 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:4203147734)
 
-**2026-05-11 [Codex]:** Bash command 'cat' failed with exit code 1 (argv=cat <path>, cwd=<unspecified>, target=<file that does not exist or is inaccessible>) -> File read failed; verify the target path exists and is readable, check permissions, confirm the working directory is correct, then use an alternative read method (e.g., Read tool) or correct the path before retrying. Evidence: captured in .harness/memory/command-failure-3040072751.log (repeat-learning marker: this is a duplicate of prior cat exit-code-1 entries; see artifact pointer for full command details). Recommended diagnostic: run 'ls -la <directory>' to confirm file presence and permissions. (auto-key:3040072751)
+**2026-05-11 [Codex]:** Bash command 'cat' failed with exit code 1 while reading an unavailable local path -> File read failed; verify the target path exists and is readable, check permissions, confirm the working directory is correct, then use an alternative read method or correct the path before retrying. Repeat-learning marker: this is a duplicate of prior cat exit-code-1 entries. Recommended diagnostic: run 'ls -la' on the target parent directory to confirm file presence and permissions. (auto-key:3040072751)
 
 **2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2293629618)
 

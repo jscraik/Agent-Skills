@@ -28,7 +28,7 @@ else
 	WORKSPACE_ROOT="${WORKSPACE_ROOT_FALLBACK}"
 fi
 PREFLIGHT_OVERRIDES_FILE="${WORKSPACE_ROOT}/.harness/memory/codex-preflight-overrides.env"
-LOCAL_MEMORY_FALLBACK_SCRIPT="${SCRIPT_DIR}/codex-preflight-local-memory-legacy.sh"
+LOCAL_MEMORY_FALLBACK_SCRIPT="${SCRIPT_DIR}/codex-preflight-local-memory-legacy_impl.sh"
 
 # usage prints the CLI usage text, available options, examples, and the legacy positional-interface note for the codex preflight script.
 usage() {
@@ -286,14 +286,17 @@ run_local_memory_preflight_with_runner() {
 		command+=(--config "${config_path}")
 	fi
 
-	if output="$("${command[@]}" 2>&1)"; then
+	set +e
+	output="$("${command[@]}" 2>&1)"
+	status=$?
+	set -e
+	if [[ "${status}" -eq 0 ]]; then
 		if [[ -n "${output}" ]]; then
 			printf '%s\n' "${output}"
 		fi
 		return 0
 	fi
 
-	status=$?
 	if [[ -n "${output}" ]]; then
 		printf '%s\n' "${output}" >&2
 	fi

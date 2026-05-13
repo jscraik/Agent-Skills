@@ -112,7 +112,7 @@ for tool in "${required_mise_tools[@]}"; do
 done
 
 if [[ -f "$TOOLING_DOC_PATH" ]]; then
-	required_tooling_doc_terms=("node" "pnpm" "python" "uv" "make" "rg" "fd" "jq" "prek" "diagram" "mise" "vale" "argos" "cosign" "cloudflared" "vitest" "ruff" "pylint" "eslint" "agent-browser" "agentation" "mermaid-cli" "markdownlint-cli2" "wrangler" "beautiful-mermaid" "semgrep" "semver" "trivy" "rsearch" "wsearch")
+	required_tooling_doc_terms=("node" "pnpm" "python" "uv" "make" "rg" "fd" "jq" "prek" "diagram" "mise" "vale" "argos" "cosign" "cloudflared" "vitest" "ruff" "pylint" "eslint" "agent-browser" "agentation-mcp" "mermaid-cli" "markdownlint-cli2" "wrangler" "beautiful-mermaid" "semgrep" "semver" "trivy" "rsearch" "wsearch")
 	for term in "${required_tooling_doc_terms[@]}"; do
 		if ! rg -qi "(^|[^A-Za-z0-9_-])${term}([^A-Za-z0-9_-]|$)" "$TOOLING_DOC_PATH"; then
 			echo "Error: tooling doc missing expected term '$term': $TOOLING_DOC_PATH"
@@ -125,7 +125,7 @@ else
 	echo "Warning: tooling doc not found at $TOOLING_DOC_PATH; skipping doc sync check."
 fi
 
-	required_bins=("pnpm" "node" "jq" "make" "rg" "fd" "prek" "diagram" "mise" "vale" "argos" "cosign" "cloudflared" "vitest" "ruff" "pylint" "eslint" "agent-browser" "agentation-mcp" "mmdc" "markdownlint-cli2" "wrangler" "beautiful-mermaid" "semgrep" "semver" "trivy" "rsearch" "wsearch")
+	required_bins=("pnpm" "node" "jq" "make" "rg" "fd" "python3" "prek" "diagram" "mise" "vale" "argos" "cosign" "cloudflared" "vitest" "ruff" "pylint" "eslint" "agent-browser" "agentation-mcp" "mmdc" "markdownlint-cli2" "wrangler" "beautiful-mermaid" "semgrep" "semver" "trivy" "rsearch" "wsearch")
 	for bin in "${required_bins[@]}"; do
 		if ! command -v "$bin" >/dev/null 2>&1; then
 			echo "Error: required binary '$bin' is not installed or not on PATH"
@@ -329,10 +329,29 @@ run_check_environment_with_runner() {
 	fi
 
 	if [[ ! -f "$ATTESTATION_PATH" ]]; then
-		local json_line
-		json_line="$(printf '%s\n' "$output" | awk '/^\{/{line=$0} END{if(line!="") print line}')"
-		if [[ -n "$json_line" ]]; then
-			printf '%s\n' "$json_line" > "$ATTESTATION_PATH"
+		if CHECK_ENVIRONMENT_RUNNER_OUTPUT="$output" python3 - "$ATTESTATION_PATH" <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+text = os.environ.get("CHECK_ENVIRONMENT_RUNNER_OUTPUT", "")
+decoder = json.JSONDecoder()
+for index, char in enumerate(text):
+    if char != "{":
+        continue
+	    try:
+	        obj, end = decoder.raw_decode(text[index:])
+	    except json.JSONDecodeError:
+	        continue
+	    if not isinstance(obj, dict):
+	        continue
+	    Path(sys.argv[1]).write_text(json.dumps(obj, sort_keys=True) + "\n", encoding="utf-8")
+	    raise SystemExit(0)
+raise SystemExit(1)
+PY
+		then
+			:
 		fi
 	fi
 
@@ -344,22 +363,23 @@ run_check_environment_with_runner() {
 	return 0
 }
 
-if [[ -f "$REPO_ROOT/src/cli.ts" ]] && command -v pnpm >/dev/null 2>&1; then
-	if ! run_check_environment_with_runner "repo source CLI (pnpm exec tsx src/cli.ts)" pnpm exec tsx "$REPO_ROOT/src/cli.ts"; then
-		echo "Error: repo source CLI failed to run check-environment successfully."
-		exit 1
+if [[ -f "$REPO_ROOT/src/cli.ts" ]] && command -v pnpm >/dev/null 2>&1 && pnpm --dir "$REPO_ROOT" exec tsx --version >/dev/null 2>&1; then
+	if ! run_check_environment_with_runner "repo source CLI (pnpm --dir <repo> exec tsx src/cli.ts)" pnpm --dir "$REPO_ROOT" exec tsx "$REPO_ROOT/src/cli.ts"; then
+		echo "Warning: repo source CLI failed; trying the next available runner."
 	fi
-elif [[ -f "$REPO_ROOT/dist/cli.js" ]] && command -v node >/dev/null 2>&1; then
+fi
+
+if [[ ! -f "$ATTESTATION_PATH" && -f "$REPO_ROOT/dist/cli.js" ]] && command -v node >/dev/null 2>&1; then
 	if ! run_check_environment_with_runner "repo dist CLI (node dist/cli.js)" node "$REPO_ROOT/dist/cli.js"; then
 		echo "Error: repo dist CLI failed to run check-environment successfully."
 		exit 1
 	fi
-elif [[ -x "$REPO_ROOT/scripts/harness-cli.sh" ]]; then
+elif [[ ! -f "$ATTESTATION_PATH" && -x "$REPO_ROOT/scripts/harness-cli.sh" ]]; then
 	if ! run_check_environment_with_runner "repo wrapper (bash scripts/harness-cli.sh)" bash "$REPO_ROOT/scripts/harness-cli.sh"; then
 		echo "Error: repo wrapper failed to run check-environment successfully."
 		exit 1
 	fi
-else
+elif [[ ! -f "$ATTESTATION_PATH" ]]; then
 	if ! command -v npm >/dev/null 2>&1; then
 		echo "Error: npm is required to validate the global harness fallback."
 		exit 1

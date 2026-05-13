@@ -1,10 +1,10 @@
 ---
 schema_version: 1
 artifact_id: agent-skills-he-eval-artifact-date-identity-solution
-artifact_type: he-compound-solution
+artifact_type: he-reinforce-solution
 canonical_slug: agent-skills-he-eval-artifact-date-identity
 title: HE Eval Artifact Date Identity Solution
-harness_stage: he-compound
+harness_stage: he-reinforce
 status: complete
 date: 2026-05-13
 traceability_required: true

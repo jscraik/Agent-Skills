@@ -114,6 +114,7 @@ for item in data:
                 resolved = repo_relative
         if not resolved.is_file():
             raise SystemExit(f"profile file does not exist: {profile_file}")
+        profile_file = str(resolved)
         if not profile_id:
             profile_obj = json.loads(resolved.read_text(encoding="utf-8"))
             profile_id = str(profile_obj.get("profile_id") or "").strip()
@@ -164,15 +165,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
-for profile in "${profiles[@]}"; do
-  idx=0
-  for existing in "${profiles[@]}"; do
-    if [[ "$existing" == "$profile" ]]; then
-      break
-    fi
-    idx=$((idx + 1))
-  done
-
+for idx in "${!profiles[@]}"; do
+  profile="${profiles[$idx]}"
   source_profile_file="${profile_files[$idx]}"
   profile_objective="${profile_objectives[$idx]}"
 

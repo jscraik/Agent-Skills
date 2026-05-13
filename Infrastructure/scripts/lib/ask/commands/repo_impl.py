@@ -907,6 +907,21 @@ def provider_audit(repo_root: Path) -> CallResult:
             )
         )
         return result
+    except OSError as exc:
+        result.data["provider_policy"] = {
+            "status": "fail",
+            "raw_stdout": "",
+            "raw_stderr": str(exc),
+        }
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="OpenAI provider policy audit could not start.",
+                fix_suggestion="Verify the Python interpreter and provider policy script path, then retry.",
+            )
+        )
+        return result
     try:
         report = json.loads(process.stdout)
     except json.JSONDecodeError:
@@ -985,6 +1000,26 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
                     "Run the underlying inventory script directly to identify "
                     "the slow path, then retry repo surface."
                 ),
+            )
+        )
+        return result
+    except OSError as exc:
+        result.status = "error"
+        result.data["repo_surface"] = {
+            "status": "error",
+            "raw_stdout": "",
+            "raw_stderr": str(exc),
+            "summary": {
+                "total_paths": 0,
+                "blocking_findings": 1,
+            },
+        }
+        result.data["strict"] = strict
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Repo surface inventory could not start.",
+                fix_suggestion="Verify the Python interpreter and inventory script path, then retry repo surface.",
             )
         )
         return result
@@ -1091,12 +1126,21 @@ def check_hub_stability(repo_root: Path, changed_files: List[str] | None = None)
                         data = json.loads(edges_file.read_text())
                         stable_ids = {n["id"] for n in data.get("nodes", []) if n.get("stability") == "stable"}
                         if skill in stable_ids:
+                            previous = subprocess.run(
+                                ["git", "show", f"HEAD:{f}"],
+                                cwd=str(repo_root),
+                                capture_output=True,
+                                text=True,
+                                check=False,
+                            )
+                            if previous.returncode == 0 and re.search(r"^## Deprecation\b", previous.stdout, re.MULTILINE):
+                                continue
                             errors.append(
                                 f"STABLE SKILL DELETED: '{skill}' is marked stable and was deleted "
                                 f"without a deprecation notice. Add a ## Deprecation section to the "
                                 f"last committed version before removal."
                             )
-                    except Exception as e:
+                    except (OSError, json.JSONDecodeError, KeyError, TypeError, subprocess.SubprocessError) as e:
                         errors.append(
                             f"Unable to validate stable skill deletion for '{skill}' due to error reading "
                             f"or parsing skill-edges.json: {e}"

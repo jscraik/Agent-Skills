@@ -37,6 +37,16 @@ have_cmd() {
   command -v "$1" >/dev/null 2>&1
 }
 
+run_privileged() {
+  if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+    "$@"
+  elif have_cmd sudo; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
+
 verify_gh() {
   if have_cmd gh; then
     echo "[OK] GitHub CLI found: $(command -v gh)"
@@ -74,38 +84,30 @@ install_gh() {
       fi
       ;;
     Linux)
-      if have_cmd apt-get; then
-        echo "[INFO] Installing via apt-get..."
-        sudo apt-get update
-        sudo apt-get install -y gh
-        return 0
-      fi
-      if have_cmd apt; then
-        echo "[INFO] Installing via apt..."
-        sudo apt update
-        sudo apt install -y gh
-        return 0
-      fi
-      if have_cmd dnf; then
-        echo "[INFO] Installing via dnf..."
-        sudo dnf install -y gh
-        return 0
-      fi
-      if have_cmd yum; then
-        echo "[INFO] Installing via yum..."
-        sudo yum install -y gh
-        return 0
-      fi
-      if have_cmd pacman; then
-        echo "[INFO] Installing via pacman..."
-        sudo pacman -S --noconfirm github-cli
-        return 0
-      fi
-      if have_cmd zypper; then
-        echo "[INFO] Installing via zypper..."
-        sudo zypper --non-interactive install -y gh
-        return 0
-      fi
+	  if have_cmd apt-get; then
+	    echo "[INFO] Installing via apt-get..."
+	    run_privileged apt-get update && run_privileged apt-get install -y gh && return 0
+	  fi
+	  if have_cmd apt; then
+	    echo "[INFO] Installing via apt..."
+	    run_privileged apt update && run_privileged apt install -y gh && return 0
+	  fi
+	  if have_cmd dnf; then
+	    echo "[INFO] Installing via dnf..."
+	    run_privileged dnf install -y gh && return 0
+	  fi
+	  if have_cmd yum; then
+	    echo "[INFO] Installing via yum..."
+	    run_privileged yum install -y gh && return 0
+	  fi
+	  if have_cmd pacman; then
+	    echo "[INFO] Installing via pacman..."
+	    run_privileged pacman -S --noconfirm github-cli && return 0
+	  fi
+	  if have_cmd zypper; then
+	    echo "[INFO] Installing via zypper..."
+	    run_privileged zypper --non-interactive install -y gh && return 0
+	  fi
       ;;
     *)
       if have_cmd winget; then

@@ -45,22 +45,26 @@ def read_json(path: Path, default: Any) -> Any:
         return default
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return default
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Failed to read JSON artifact {path}: {exc}") from exc
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     if not path.exists():
         return rows
-    for line in path.read_text(encoding="utf-8").splitlines():
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        raise RuntimeError(f"Failed to read JSONL artifact {path}: {exc}") from exc
+    for line_number, line in enumerate(lines, start=1):
         line = line.strip()
         if not line:
             continue
         try:
             obj = json.loads(line)
-        except Exception:
-            continue
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(f"Malformed JSONL artifact {path}:{line_number}: {exc}") from exc
         if isinstance(obj, dict):
             rows.append(obj)
     return rows
@@ -244,11 +248,19 @@ def discover_nodes(
                 wave_ready[wave] = bool(payload.get("ready"))
 
     nodes: list[SkillNode] = []
+    allowlist = set(inventory_policy.get("allowlist_scope_skills", []))
+    system_prefixes: Sequence[str] = inventory_policy.get("system_prefixes", [])
+    system_slice_mode = str(inventory_policy.get("system_slice_mode", "exclude"))
     for row in rows:
         if not isinstance(row, dict):
             continue
         scope_skill = str(row.get("scope_skill", "")).strip()
         if not scope_skill:
+            continue
+        if allowlist and scope_skill not in allowlist:
+            continue
+        is_system_skill = any(f"{scope_skill}/".startswith(prefix) for prefix in system_prefixes)
+        if is_system_skill and system_slice_mode == "exclude":
             continue
         profile_path_rel = str(row.get("profile_path", "")).strip()
         if not profile_path_rel:
@@ -264,7 +276,8 @@ def discover_nodes(
         delegation = profile_obj.get("delegation") if isinstance(profile_obj.get("delegation"), dict) else {}
         criteria = profile_obj.get("criteria") if isinstance(profile_obj.get("criteria"), list) else []
         scope_profile = str(row.get("scope_skill", "")).split("/", 1)[0]
-        display_slice = "core" if scope_profile in CORE_PROFILES else "extended"
+        inventory_slice = "system" if is_system_skill else "operational"
+        display_slice = "system" if is_system_skill else ("core" if scope_profile in CORE_PROFILES else "extended")
         nodes.append(
             SkillNode(
                 scope_skill=scope_skill,
@@ -273,6 +286,7 @@ def discover_nodes(
                 delegation_mode=str(delegation.get("mode", row.get("delegation_mode", "co-pilot"))).strip() or "co-pilot",
                 wave=str(row.get("wave", "wave-2-co-pilot")).strip() or "wave-2-co-pilot",
                 wave_ready=wave_ready.get(str(row.get("wave", "")), False),
+                inventory_slice=inventory_slice,
                 display_slice=display_slice,
                 profile_status=str(
                     row.get("task_profile_status", row.get("status", "unknown"))
@@ -733,6 +747,8 @@ def render_html(
     approved = promotion_counts.get("approved", 0)
     draft = promotion_counts.get("draft", 0)
     failed = promotion_counts.get("failed", 0)
+    core_count = sum(1 for node in nodes if node.display_slice == "core")
+    full_count = len(nodes)
 
     return f"""<!doctype html>
 <html lang="en">
@@ -848,8 +864,8 @@ def render_html(
     <section class="panel">
       <h2>2) Skill state map</h2>
       <div class="toolbar">
-        <button id="view-core" class="toggle-btn active" type="button">Core View (70)</button>
-        <button id="view-full" class="toggle-btn" type="button">Full View (114)</button>
+        <button id="view-core" class="toggle-btn active" type="button">Core View ({core_count})</button>
+        <button id="view-full" class="toggle-btn" type="button">Full View ({full_count})</button>
       </div>
       <div id="skill-clusters" class="clusters mode-core">
         {''.join(cluster_sections)}
