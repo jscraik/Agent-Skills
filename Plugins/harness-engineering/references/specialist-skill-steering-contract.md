@@ -102,7 +102,7 @@ Pick the candidate that best satisfies all of:
 - has a narrow enough scope to avoid context bloat;
 - can add concrete acceptance, validation, sequencing, or risk evidence;
 - does not override the selected HE lifecycle stage;
-- does not expand the approved Linear/refactor/slice scope.
+- does not expand the approved Linear/reframe/slice scope.
 
 If two candidates remain equally valid and the choice changes artifact quality,
 scope, or validation gates, apply `interactive-steering-contract.md` and ask

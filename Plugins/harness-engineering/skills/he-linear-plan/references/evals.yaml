@@ -14,7 +14,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    prompt: "Convert `.harness/refactors/2026-05-10-JSC-321-agent-skills-routing.md` into a small Linear execution plan with one parent, repo/location label, dependencies, and validation gates."
+    prompt: "Convert `.harness/reframes/2026-05-10-JSC-321-agent-skills-routing.md` into a small Linear execution plan with one parent, repo/location label, dependencies, and validation gates."
     deterministic_checks: *safe
     acceptance: *accept
   - id: destination-ambiguous
@@ -24,7 +24,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    prompt: "Route JSC-289 from .harness/refactors/2026-05-10-JSC-289-ci-required-checks.md: /Users/jamiecraik/dev/coding-harness required-check names drifted from shared CircleCI policy; ask once before deciding whether the Linear destination is a Repo › coding-harness issue or a bounded Portfolio Ops deliverable."
+    prompt: "Route JSC-289 from .harness/reframes/2026-05-10-JSC-289-ci-required-checks.md: /Users/jamiecraik/dev/coding-harness required-check names drifted from shared CircleCI policy; ask once before deciding whether the Linear destination is a Repo › coding-harness issue or a bounded Portfolio Ops deliverable."
     deterministic_checks: *safe
     acceptance: *steer
   - id: generate-architecture-review
@@ -58,7 +58,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    prompt: "Plan JSC-321 in Repo › agent-skills by classifying skill-router cleanup from .harness/refactors/2026-05-10-JSC-321-agent-skills-routing.md, docs wording polish from .harness/reviews/2026-05-10-doc-nits.md, stale eval fixture repair, and an unverified marketplace idea into Now, Next, Later, and Do Not Create."
+    prompt: "Plan JSC-321 in Repo › agent-skills by classifying skill-router cleanup from .harness/reframes/2026-05-10-JSC-321-agent-skills-routing.md, docs wording polish from .harness/reviews/2026-05-10-doc-nits.md, stale eval fixture repair, and an unverified marketplace idea into Now, Next, Later, and Do Not Create."
     deterministic_checks: *safe
     acceptance: *accept
   - id: missing-project-state
@@ -173,7 +173,7 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: true
-    prompt: "Use my JSC Dev Portfolio Linear setup to plan an agent-skills execution slice from .harness/refactors and avoid creating any new project, initiative, or labels unless the existing Dev Portfolio, Portfolio Ops, and agent-skills project structure cannot represent the work."
+    prompt: "Use my JSC Dev Portfolio Linear setup to plan an agent-skills execution slice from .harness/reframes and avoid creating any new project, initiative, or labels unless the existing Dev Portfolio, Portfolio Ops, and agent-skills project structure cannot represent the work."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(Dev Portfolio|Portfolio Ops|agent-skills|existing project match|repo control project|no new initiative|no new project|labels.*exist|confirmation|required|linear_mutation_status)"}

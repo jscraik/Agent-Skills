@@ -20,7 +20,7 @@ guidance remain binding.
   whether completion is blocked, needs rework, or safe with follow-up.
 
 ## When Not to Use
-- Do not use for implementation planning, code review, strategy, or refactor
+- Do not use for implementation planning, code review, strategy, or reframe
   design; hand off to the matching HE skill.
 - Do not use to close Linear, post external comments, publish, delete, approve,
   or update trackers. This skill may recommend after proof, not mutate external
@@ -29,7 +29,7 @@ guidance remain binding.
   source existence, or generated media prompts without persisted artifacts.
 
 ## Inputs
-Selected slice, source `.harness/{linear,refactors,decisions,core,strategy,triage,brainstorm,spec,plan,solutions}/`
+Selected slice, source `.harness/{linear,reframes,decisions,core,strategy,triage,brainstorm,spec,plan,solutions}/`
 artifacts, implementation diff, validation output, branch/PR evidence, Linear
 identifiers, proof artifacts, generated-media cache paths or repository media
 paths when media proof is part of the slice.
@@ -58,7 +58,7 @@ detail.
 1. If asked to close work from implementation status alone, stop and classify
    closure as blocked until report, validation, drift proof, and
    accept/challenge/rework steering are complete.
-2. Compare implementation against the approved Linear plan, refactor program,
+2. Compare implementation against the approved Linear plan, reframe program,
    plugin HE spec, ADRs, core invariants, source-prompt coverage limits, and
    proof artifacts.
 3. Prove agentic eval validity: task, outcome, trajectory/process evidence,
@@ -119,7 +119,7 @@ classify closure safety as `Blocked`, `Needs rework`, or `Unsafe to close`, and
 state the smallest repair before completion.
 
 ## Handoff Rules
-- Planning/design/code-review/refactor work: hand off to the matching HE skill.
+- Planning/design/code-review/reframe work: hand off to the matching HE skill.
 - Live Linear mutation: hand off to Linear tooling or `he-linear-plan` after
   explicit approval.
 - User/global config writes, external writes, or destructive changes: hand off

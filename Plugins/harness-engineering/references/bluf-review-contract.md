@@ -1,6 +1,6 @@
 # BLUF Review Contract
 
-Read when: writing, reviewing, or validating durable HE specs, plans, refactor
+Read when: writing, reviewing, or validating durable HE specs, plans, reframe
 programs, Linear plans, eval reports, review artifacts, strategy artifacts,
 reconcile reports, or other operator-facing `.harness/**` artifacts where
 scanability matters.
@@ -24,7 +24,7 @@ Apply the full contract to non-trivial durable artifacts, especially:
 - `.harness/plan/**`
 - `.harness/evals/**`
 - `.harness/review/**`
-- `.harness/refactors/**`
+- `.harness/reframes/**`
 - `.harness/linear/**`
 - `.harness/strategy/**`, `.harness/decisions/**`, and `.harness/core/**` when
   they drive later work
@@ -147,7 +147,7 @@ well enough. Rewrite or block before handoff.
   generic sections.
 - `he-eval-report`: use one opening closure BLUF to say Complete, Complete with
   follow-up, Blocked, Needs rework, or Unsafe to close before proof detail.
-- `he-refactor`, `he-linear-plan`, `he-reconcile`, `he-improve`, and
+- `he-reframe`, `he-linear-plan`, `he-reconcile`, `he-improve`, and
   `he-strategy`: use one opening BLUF where the artifact drives future work;
   use ordinary section summaries after that.
 

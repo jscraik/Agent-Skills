@@ -15,7 +15,7 @@ XP_REQUIRED_SKILLS = {
     "he-linear-plan",
     "he-phase-work",
     "he-plan",
-    "he-refactor",
+    "he-reframe",
     "he-strategy",
     "he-work",
 }
@@ -57,7 +57,7 @@ XP_REQUIRED_SURFACES = {
         "slack_policy",
         "stale",
     ),
-    "skills/he-refactor/references/refactor-program-contract.md": (
+    "skills/he-reframe/references/reframe-program-contract.md": (
         "xp migration constraint",
         "smallest reversible step",
     ),

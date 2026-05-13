@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "profile_id": "Plugins-harness-engineering-skills-he-refactor",
-  "scope_skill": "Plugins/harness-engineering/skills/he-refactor",
+  "profile_id": "Plugins-harness-engineering-skills-he-reframe",
+  "scope_skill": "Plugins/harness-engineering/skills/he-reframe",
   "scope_profile": "Plugins",
   "rubric_version": "2026-05-01",
   "evaluator_version": "v1",
@@ -13,8 +13,8 @@
   },
   "criteria": {
     "clarity": "Refactor program boundaries, phases, and authority are explicit.",
-    "specificity": "Programs map to concrete .harness/refactors files and dated Linear naming.",
-    "safety": "The skill blocks refactor theater and requires rollback and eval proof."
+    "specificity": "Programs map to concrete .harness/reframes files and dated Linear naming.",
+    "safety": "The skill blocks reframe theater and requires rollback and eval proof."
   },
   "delegation": {
     "preferred": "co-pilot",

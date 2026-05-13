@@ -13,7 +13,7 @@ artifact_id: <canonical-slug>-<stage-suffix>
 artifact_type: <he-stage-or-index-type>
 canonical_slug: <repo-name>-<linear-parent-issue-or-milestone>
 title: <human title matching first H1>
-harness_stage: he-spec|he-plan|he-eval-report|he-brainstorm|he-reconcile|he-reinforce|he-strategy|he-refactor|he-linear-plan|he-phase-work
+harness_stage: he-spec|he-plan|he-eval-report|he-brainstorm|he-reconcile|he-reinforce|he-strategy|he-reframe|he-linear-plan|he-phase-work
 status: draft|active|blocked|complete|superseded
 date: YYYY-MM-DD
 traceability_required: true|false
@@ -24,7 +24,7 @@ linear_milestone: <milestone when tracked>
 
 Use `canonical_slug` as the chain key across `.harness/features`,
 `.harness/review`, `.harness/triage`, `.harness/strategy`,
-`.harness/refactors`, `.harness/decisions`, `.harness/core`,
+`.harness/reframes`, `.harness/decisions`, `.harness/core`,
 `.harness/linear`, `.harness/specs`, `.harness/plan`, `.harness/solutions`,
 `.harness/evals`, and related proof artifacts. Stage-specific titles may differ
 only by suffix, such as `Intent`, `Strategy`, `Refactor`, `Spec`, `Plan`,
@@ -45,7 +45,7 @@ New tracked issue artifacts should prefer dated Linear filenames:
 .harness/review/YYYY-MM-DD-JSC-###-<canonical-slug>-architecture-review.md
 .harness/triage/YYYY-MM-DD-JSC-###-<canonical-slug>-triage.md
 .harness/strategy/YYYY-MM-DD-JSC-###-<canonical-slug>-strategy.md
-.harness/refactors/YYYY-MM-DD-JSC-###-<refactor-slug>.md
+.harness/reframes/YYYY-MM-DD-JSC-###-<reframe-slug>.md
 .harness/linear/YYYY-MM-DD-JSC-###-<repo-name>-<slice-slug>-linear-plan.md
 .harness/specs/YYYY-MM-DD-JSC-###-<canonical-slug>-spec.md
 .harness/plan/YYYY-MM-DD-JSC-###-<canonical-slug>-plan.md
@@ -91,7 +91,7 @@ frontmatter conservative enough for simple parsers:
 | `he-strategy` strategic-compression mode | `.harness/strategy/**.md` |
 | `he-strategy` decision-compression mode | `.harness/decisions/**.md` |
 | `he-strategy` core-compression mode | `.harness/core/**.md` |
-| `he-refactor` | `.harness/refactors/**.md` |
+| `he-reframe` | `.harness/reframes/**.md` |
 | `he-linear-plan` | `.harness/linear/**.md` |
 | `he-phase-work` | automation/thread heartbeat plus phase status report |
 | `he-spec` | `.harness/specs/**.md` |

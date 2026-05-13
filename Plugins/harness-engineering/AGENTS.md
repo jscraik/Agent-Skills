@@ -118,7 +118,7 @@ converting them into skill failures.
 ## Handoff Rules
 
 - Use `he-router` for stage selection and authority limits.
-- Use `he-refactor` for staged migration programs.
+- Use `he-reframe` for staged migration programs.
 - Use `he-linear-plan` for Linear-ready tracking plans and mutation status.
 - Use `he-eval-report` for closure proof.
 - Use Skill Factory or Plugin Factory when the work is about generic skill or

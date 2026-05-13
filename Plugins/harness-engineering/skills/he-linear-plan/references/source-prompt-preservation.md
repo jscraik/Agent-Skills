@@ -13,7 +13,7 @@ turning partial cognition into broad execution authority.
 
 - read `.harness/features`, `.harness/review`, `.harness/triage`,
   `.harness/strategy`, `.harness/core`, `.harness/decisions`, and
-  `.harness/refactors`
+  `.harness/reframes`
 - treat `.harness/decisions` as compressed architecture memory, not backlog
   input; if high-value ADRs are missing, mark decision readiness blocked or
   route to the upstream decision-compression step
@@ -46,7 +46,7 @@ turning partial cognition into broad execution authority.
 - use milestones for bounded execution slices
 - use cycles only for current execution commitment
 - classify work as `Now`, `Next`, `Later`, or `Do Not Create`
-- convert refactor programs into minimal parent/sub-issue structures
+- convert reframe programs into minimal parent/sub-issue structures
 - include validation gates, rollback conditions, dependency maps, labels,
   priority, and human/agent execution routing
 - do not mutate Linear without explicit confirmation

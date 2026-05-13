@@ -1,6 +1,6 @@
 ---
 name: he-linear-plan
-description: "Convert approved HE cognition into small live-ready Linear execution tracking. Use when strategy, refactor, plan, bug, or source-prompt evidence needs scoped issue, milestone, or project routing with explicit confirmation before any live mutation."
+description: "Convert approved HE cognition into small live-ready Linear execution tracking. Use when strategy, reframe, plan, bug, or source-prompt evidence needs scoped issue, milestone, or project routing with explicit confirmation before any live mutation."
 metadata:
   skill-type: team_automation
 ---
@@ -25,12 +25,12 @@ volume.
 Use when approved `.harness` cognition needs Linear routing: destination,
 existing project match, milestone/parent shape, sub-issues, dependencies, eval
 gates, labels, priority, project/cycle justification, and human/agent route.
-Also use when an HE prompt asks to convert ADRs, refactor programs, strategy, or
+Also use when an HE prompt asks to convert ADRs, reframe programs, strategy, or
 core invariants into a small Linear execution plan.
 
 ## When Not to Use
 
-Do not generate strategy, refactor programs, specs, implementation plans,
+Do not generate strategy, reframe programs, specs, implementation plans,
 implementation work, architecture reviews, eval closure, unfiltered backlog, or
 ADR spam. If required decision evidence is absent, route to the appropriate
 upstream cognition step or mark the Linear plan blocked instead of inventing
@@ -144,7 +144,7 @@ payloads as applied Linear changes.
 
 ## Handoff Rules
 
-Route architecture/strategy to `he-strategy`, refactors to `he-refactor`,
+Route architecture/strategy to `he-strategy`, reframes to `he-reframe`,
 ADRs or missing decision compression to the upstream ADR-producing HE step,
 specs/plans to the matching HE skill, and unapproved live Linear mutation to
 human confirmation. Connector/auth failure returns blocked plus payload.
@@ -166,7 +166,7 @@ Use plain headings, stable IDs, explicit status words, no color-only signaling.
 ## Examples
 
 - "Create `.harness/linear/2026-05-13-JSC-321-agent-skills-routing-linear-plan.md`
-  from `.harness/refactors/2026-05-10-JSC-321-agent-skills-routing.md`: use the
+  from `.harness/reframes/2026-05-10-JSC-321-agent-skills-routing.md`: use the
   existing `agent-skills` repo project, one milestone, one parent, and only
   independently verifiable sub-issues."
 - "Use my JSC Dev Portfolio setup for `agent-skills`: confirm `Dev Portfolio`,

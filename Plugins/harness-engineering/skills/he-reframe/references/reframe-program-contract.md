@@ -1,20 +1,20 @@
-# Refactor Program Contract
+# Reframe Program Contract
 
-Use this reference after `he-refactor` accepts a high-leverage migration
-candidate. A refactor program is a deterministic migration safety rail, not an
+Use this reference after `he-reframe` accepts a high-leverage migration
+candidate. A reframe program is a deterministic migration safety rail, not an
 implementation spec or backlog dump.
 
 ## Naming
 
 - With Linear context:
-  `.harness/refactors/YYYY-MM-DD-JSC-###-<refactor-slug>.md`
+  `.harness/reframes/YYYY-MM-DD-JSC-###-<reframe-slug>.md`
 - Without Linear context:
-  `.harness/refactors/YYYY-MM-DD-<repo-name>-<refactor-slug>.md`
+  `.harness/reframes/YYYY-MM-DD-<repo-name>-<reframe-slug>.md`
 - Legacy stable names remain readable but are not preferred for new programs.
 
 ## Required Program Sections
 
-- Refactor Classification
+- Reframe Classification
 - Problem Statement
 - Root Cause Analysis
 - Evidence

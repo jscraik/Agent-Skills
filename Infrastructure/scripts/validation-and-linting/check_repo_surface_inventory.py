@@ -446,6 +446,7 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         or _starts_with(normalized, ".harness/core")
         or _starts_with(normalized, ".harness/decisions")
         or _starts_with(normalized, ".harness/linear")
+        or _starts_with(normalized, ".harness/reframes")
         or _starts_with(normalized, ".harness/refactors")
         or _starts_with(normalized, ".harness/quality")
         or _starts_with(normalized, ".harness/solutions")

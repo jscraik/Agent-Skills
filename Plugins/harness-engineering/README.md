@@ -12,7 +12,7 @@
 - `he-code-review`
 - `he-eval-report`
 - `he-strategy`
-- `he-refactor`
+- `he-reframe`
 - `he-linear-plan`
 - `he-fix-bugs`
 - `he-improve`
@@ -70,7 +70,7 @@ validation evidence, drift posture, proof artifacts, and completion safety.
 
 Strategy, architectural review, triage, ADR compression, and core invariant
 compression belong to `he-strategy`. These artifacts are cognition context, not
-implementation authority, until admitted by a refactor, Linear, spec, or plan
+implementation authority, until admitted by a reframe, Linear, spec, or plan
 artifact. New lifecycle artifacts prefer dated Linear filenames such as
 `YYYY-MM-DD-JSC-###-<slug>-strategy.md`; stable names are reserved for living
 `.harness/core/**` files and numbered ADRs.
@@ -81,8 +81,8 @@ path. Frontmatter, H1, required sections, source links, and Linear identifiers
 classify existing `.harness` files before directory names. Path/title/date
 mismatches are traceability defects, not silent routing assumptions.
 
-High-leverage architectural migration programs belong to `he-refactor` and
-write `.harness/refactors/YYYY-MM-DD-JSC-###-<refactor-slug>.md` when tracked.
+High-leverage architectural migration programs belong to `he-reframe` and
+write `.harness/reframes/YYYY-MM-DD-JSC-###-<reframe-slug>.md` when tracked.
 They define staged evolution, rollback, eval proof, and Linear mapping without
 editing implementation code or creating Linear objects.
 
@@ -126,7 +126,7 @@ Linear, artifact chain, source bundle, and currentness before drawing scope or
 closure conclusions.
 
 When review feedback changes a spec, plan, strategy artifact, Linear plan,
-refactor program, or eval, use
+reframe program, or eval, use
 `references/document-review-finding-tiers.md` to separate `safe_auto`,
 `gated_auto`, `manual`, and `fyi` findings before editing or asking.
 

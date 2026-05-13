@@ -1,5 +1,5 @@
 schema_version: "2.0"
-skill_name: "he-refactor"
+skill_name: "he-reframe"
 last_updated: "2026-05-09"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-refactor/evals.yaml"
 x_modes: &modes [smoke, release]
@@ -14,7 +14,7 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Can you create a deterministic refactor program for a high-leverage migration identified by review and strategy."
+    prompt: "Can you create a deterministic reframe program for a high-leverage migration identified by review and strategy."
     deterministic_checks: *safe
     acceptance: *accept
   - id: evolution-lane-routing
@@ -24,12 +24,12 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "In /Users/jamiecraik/dev/agent-skills, use he-refactor after `.harness/features/agent-skills-intent.md`, `.harness/review/agent-skills-architecture-review.md`, and `.harness/triage/agent-skills-triage.md` mention strategic compression, refactor programs, ADR compression, and core invariant compression. Route each lane and only create he-refactor-owned outputs when justified."
+    prompt: "In /Users/jamiecraik/dev/agent-skills, use he-reframe after `.harness/features/agent-skills-intent.md`, `.harness/review/agent-skills-architecture-review.md`, and `.harness/triage/agent-skills-triage.md` mention strategic compression, reframe programs, ADR compression, and core invariant compression. Route each lane and only create he-reframe-owned outputs when justified."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(selected_lane|request lane|lane routing)"}
       - {type: regex, value: "(?is)(he-strategy|next_handoff|strategy missing)"}
-      - {type: regex, value: "(?is)(\\.harness/refactors|\\.harness/decisions|\\.harness/core|Do Not Create)"}
+      - {type: regex, value: "(?is)(\\.harness/reframes|\\.harness/decisions|\\.harness/core|Do Not Create)"}
   - id: strategic-compression-handoff
     name: "Strategic compression handoff"
     category: edge
@@ -37,7 +37,7 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "No `.harness/strategy/**` artifact exists yet. Generate .harness/strategy/<repo-name>-strategy.md from features, review, and triage artifacts, then continue into refactor programs."
+    prompt: "No `.harness/strategy/**` artifact exists yet. Generate .harness/strategy/<repo-name>-strategy.md from features, review, and triage artifacts, then continue into reframe programs."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(next_handoff:\\s*he-strategy|Blocked:\\s*strategy missing|he-strategy)"}
@@ -53,7 +53,7 @@ cases:
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(Do Not Create|reject|not create)"}
-      - {type: regex, value: "(?is)(irreversible|reversal cost|selected refactor phase|anti-drift|tactical)"}
+      - {type: regex, value: "(?is)(irreversible|reversal cost|selected reframe phase|anti-drift|tactical)"}
   - id: core-invariant-compression
     name: "Core invariant compression"
     category: edge
@@ -61,11 +61,11 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: false
-    prompt: "For `/Users/jamiecraik/dev/agent-skills`, after a selected `.harness/refactors/2026-05-13-JSC-321-collapse-routing-indirection.md` migration identifies deterministic routing as non-negotiable, decide whether `.harness/core/routing-invariants.md` should be created and what irreducible invariant content belongs there."
+    prompt: "For `/Users/jamiecraik/dev/agent-skills`, after a selected `.harness/reframes/2026-05-13-JSC-321-collapse-routing-indirection.md` migration identifies deterministic routing as non-negotiable, decide whether `.harness/core/routing-invariants.md` should be created and what irreducible invariant content belongs there."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(proven invariant|strategic assumption|preferred operating principle)"}
-      - {type: regex, value: "(?is)(irreducible|Do Not Create|drift risk|selected refactor phase)"}
+      - {type: regex, value: "(?is)(irreducible|Do Not Create|drift risk|selected reframe phase)"}
   - id: small-cleanup
     name: "Small cleanup"
     category: negative
@@ -73,9 +73,9 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Can you create a refactor program for a one-line formatting cleanup."
+    prompt: "Can you create a reframe program for a one-line formatting cleanup."
     deterministic_checks: *safe
-    acceptance: [{type: regex, value: "(?is)(do not create|reject|not a refactor program|cosmetic|one-line|tactical)"}]
+    acceptance: [{type: regex, value: "(?is)(do not create|reject|not a reframe program|cosmetic|one-line|tactical)"}]
   - id: unrelated-release-notes
     name: "Unrelated release notes"
     category: negative
@@ -123,7 +123,7 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Can you plan `.harness/refactors/2026-05-10-JSC-321-agent-skills-routing.md` as a small Linear milestone and parent issue without creating objects."
+    prompt: "Can you plan `.harness/reframes/2026-05-10-JSC-321-agent-skills-routing.md` as a small Linear milestone and parent issue without creating objects."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(without creating Linear objects|no Linear object|Linear mapping without mutation|do not create Linear)"}
@@ -136,7 +136,7 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Can you review `.harness/refactors/` in autonomous mode, choose only the highest-confidence JSC-321 refactor, and record why the others were skipped."
+    prompt: "Can you review `.harness/reframes/` in autonomous mode, choose only the highest-confidence JSC-321 reframe, and record why the others were skipped."
     deterministic_checks: *safe
     acceptance: *steer
   - id: anti-regression
@@ -156,7 +156,7 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Can you review whether the JSC-321 agent-skills refactor simplifies architecture without weakening eval quality or cognition quality."
+    prompt: "Can you review whether the JSC-321 agent-skills reframe simplifies architecture without weakening eval quality or cognition quality."
     deterministic_checks: *safe
     acceptance: *accept
   - id: xp-baby-step-migration
@@ -169,23 +169,23 @@ cases:
     prompt: "Can you replace a broad rewrite plan with the smallest reversible migration step, expected feedback, and stop or pivot condition."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(smallest|reversible|feedback|stop|pivot|rollback)"}]
-  - id: sampled-strategy-cannot-authorize-repo-wide-refactor
-    name: "Sampled strategy cannot authorize repo-wide refactor"
+  - id: sampled-strategy-cannot-authorize-repo-wide-reframe
+    name: "Sampled strategy cannot authorize repo-wide reframe"
     category: pressure
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Review an upstream strategy sampled from an original prompt comparison, but create the highest-priority repo-wide refactor program anyway."
+    prompt: "Review an upstream strategy sampled from an original prompt comparison, but create the highest-priority repo-wide reframe program anyway."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(sampled|partial|source.?prompt|authority limited|scope.?limited|not repo.?wide|blocked|refresh|coverage gaps|downstream confidence)"}]
-  - id: inherited-drift-signals-in-refactor
-    name: "Inherited drift signals in refactor"
+  - id: inherited-drift-signals-in-reframe
+    name: "Inherited drift signals in reframe"
     category: edge
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Can you create a refactor program from an original prompt gap review that named protected hotspot growth and evidence-depth laundering as drift signals."
+    prompt: "Can you create a reframe program from an original prompt gap review that named protected hotspot growth and evidence-depth laundering as drift signals."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(drift signals|protected hotspot|evidence.?depth laundering|inherited|corrective action|blocks|source.?prompt)"}]

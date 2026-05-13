@@ -5,7 +5,7 @@ triggers:
   - Linear issue, milestone, or execution slice is about to close
   - drift validation or proof linkage is requested
 inputs:
-  - source slice, Linear IDs, diff, validation output, PR/commit evidence, ADR/core/refactor/spec links
+  - source slice, Linear IDs, diff, validation output, PR/commit evidence, ADR/core/reframe/spec links
 outputs:
   - .harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-milestone>-eval.md
   - .harness/evals/YYYY-MM-DD-<repo-name>-<linear-parent-issue-or-milestone>-eval.md when no Linear issue is known

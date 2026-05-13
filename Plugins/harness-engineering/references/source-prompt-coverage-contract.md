@@ -7,7 +7,7 @@ prompt.
 ## Purpose
 
 Prevent shallow lifecycle artifacts from being promoted into authoritative
-strategy, refactor, Linear, ADR, or core guidance when they did not actually
+strategy, reframe, Linear, ADR, or core guidance when they did not actually
 cover the original prompt method.
 
 This contract protects against evidence-depth laundering: a valid sampled
@@ -27,7 +27,7 @@ Load this reference when any of these are true:
   provided as the baseline
 - downstream artifacts already exist and their authority depends on upstream
   prompt coverage
-- a strategy, refactor, Linear, ADR, or core artifact is about to rely on a
+- a strategy, reframe, Linear, ADR, or core artifact is about to rely on a
   sampled or partial upstream review
 
 Do not load this reference for ordinary HE stage routing when no prompt-method
@@ -69,17 +69,17 @@ next_route: continue | refresh_strategy | refresh_review | restrict_scope | ask_
   stage references, and inspection depth that matches the original prompt's
   requested scope.
 - `partial` or `weak` coverage may support local next steps, but it must not
-  authorize repo-wide refactors, Linear closure, ADR creation, or core invariant
+  authorize repo-wide reframes, Linear closure, ADR creation, or core invariant
   updates without a refresh.
 - Strategy, review, triage, and feature artifacts are cognition context; they do
   not grant implementation permission unless admitted through `he-spec`,
-  `he-plan`, `he-refactor`, `he-linear-plan`, or an equivalent execution slice.
+  `he-plan`, `he-reframe`, `he-linear-plan`, or an equivalent execution slice.
 - If the user asks for equivalence to the original prompt method and coverage is
   not equivalent, route to the earliest stage that can repair the gap, usually
   `he-strategy` or a deeper review refresh.
 - If downstream artifacts already exist, preserve their local validity while
   marking any repo-wide authority gap explicitly.
-- Downstream `he-refactor`, `he-linear-plan`, ADR, and core artifacts must
+- Downstream `he-reframe`, `he-linear-plan`, ADR, and core artifacts must
   inherit upstream evidence depth, coverage gaps, not-inspected classes, and
   confidence downgrades when they rely on sampled upstream evidence.
 - In headless mode, record assumptions instead of asking, and downgrade
@@ -93,7 +93,7 @@ Before claiming equivalence:
 - load the relevant stage source-prompt preservation reference where one exists
 - identify which source-prompt families are in scope: intent extraction,
   architecture review, triage, strategy compression, ADR compression, core
-  invariant compression, refactor program generation, Linear orchestration, and
+  invariant compression, reframe program generation, Linear orchestration, and
   eval/drift validation
 - compare source prompt requirements with the actual artifact sections
 - produce a compact coverage matrix that maps source-prompt requirements to HE
@@ -119,7 +119,7 @@ comparison into "covered" or "not covered". Record coverage by family:
 | Strategy | Did HE preserve what is core, what should be deleted, what creates leverage, what creates drag, and what future agents must preserve or may rewrite? |
 | ADR compression | Did HE preserve only expensive-to-reverse, architecture-shaping decisions and rejected alternatives? |
 | Core compression | Did HE create durable invariants instead of another review or onboarding document? |
-| Refactor programs | Did HE generate only high-leverage migration plans with phases, rollback, eval proof, and anti-regression constraints? |
+| Reframe programs | Did HE generate only high-leverage migration plans with phases, rollback, eval proof, and anti-regression constraints? |
 | Linear orchestration | Did HE route execution into the smallest useful active set without treating Linear as cognition storage? |
 | Eval/drift validation | Did HE preserve proof requirements, closure blockers, drift signals, and downstream confidence before recommending completion? |
 
@@ -132,12 +132,12 @@ Use precise language when scope is narrower than the source prompt:
 
 - `valid first-pass execution slice`: the HE run found a useful bounded next
   step, but did not perform the full source-prompt audit.
-- `valid local refactor candidate`: the refactor is supported for the named
+- `valid local reframe candidate`: the reframe is supported for the named
   subsystem, but not necessarily the highest repo-wide priority.
 - `execution-disciplined Linear plan`: the Linear shape is safe for the selected
   slice, but uninspected prompt-method concerns remain open.
 - `sampled cognition artifact`: the artifact can orient future work, but cannot
-  authorize repo-wide ADR/core/refactor/closure claims without refresh.
+  authorize repo-wide ADR/core/reframe/closure claims without refresh.
 
 ## Drift Signal Inheritance
 
@@ -174,7 +174,7 @@ For each inherited signal, retain:
 The comparison artifact should be explicit about what remains safe:
 
 - "valid local slice" is not the same as "complete repo-wide audit"
-- "high confidence for selected refactor" is not the same as "highest repo
+- "high confidence for selected reframe" is not the same as "highest repo
   priority"
 - "Linear plan is execution-disciplined" is not the same as "other prompt-method
   concerns are closed"
@@ -188,7 +188,7 @@ Block or ask once before advancing when:
 - the source prompt is missing but the user requested equivalence
 - evidence depth is sampled or inferred but downstream artifacts claim repo-wide
   authority
-- refactor, Linear, ADR, or core output would be created from weak upstream
+- reframe, Linear, ADR, or core output would be created from weak upstream
   evidence
 - coverage gaps affect architecture, routing, execution safety, governance,
   moat-critical behavior, or Linear closure

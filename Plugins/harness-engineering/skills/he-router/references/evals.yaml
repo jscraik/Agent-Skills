@@ -116,7 +116,7 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: false
-    prompt: "Can you determine whether the next stage should be strategy, refactor, Linear plan, or eval."
+    prompt: "Can you determine whether the next stage should be strategy, reframe, Linear plan, or eval."
     deterministic_checks: *safe
     acceptance: *accept
   - id: non-trigger-explanation
@@ -136,9 +136,9 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: false
-    prompt: "Can you route a trivial Harness reference wording cleanup without loading domain, strategy, refactor, Linear, security, or eval gates."
+    prompt: "Can you route a trivial Harness reference wording cleanup without loading domain, strategy, reframe, Linear, security, or eval gates."
     deterministic_checks: *safe
-    acceptance: [{type: regex, value: "(?is)(lightweight path|trivial|no domain|no .*strategy|no .*refactor|no .*Linear|no .*security|no .*eval|gate_profile|risk_class|skipped_contracts)"}]
+    acceptance: [{type: regex, value: "(?is)(lightweight path|trivial|no domain|no .*strategy|no .*reframe|no .*Linear|no .*security|no .*eval|gate_profile|risk_class|skipped_contracts)"}]
   - id: gate-selection-mixed-smallest-set
     name: "Gate selection mixed smallest set"
     category: edge
@@ -146,6 +146,6 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: false
-    prompt: "Can you route a request that mentions domain, security, and refactor words but only the approved slice changes docs wording; prove why mixed does not load everything."
+    prompt: "Can you route a request that mentions domain, security, and reframe words but only the approved slice changes docs wording; prove why mixed does not load everything."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(mixed|skipped_contracts|keyword|smallest|gate_profile)"}]

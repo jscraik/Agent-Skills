@@ -12,9 +12,9 @@ triggers:
   - the user needs explicit behavior, lifecycle, failure, observability, or validation rules before planning
 
 inputs:
-  - "approved execution slice: one milestone, one parent issue, one refactor phase, or one execution slice"
+  - "approved execution slice: one milestone, one parent issue, one reframe phase, or one execution slice"
   - "`.harness/linear/<repo-name>-linear-plan.md` for tracked coding-harness execution"
-  - "selected `.harness/refactors/<selected-refactor>.md` when the route is refactor or migration work"
+  - "selected `.harness/reframes/<selected-reframe>.md` when the route is reframe or migration work"
   - "`.harness/decisions/*.md`, `.harness/core/*.md`, and `.harness/brainstorm/*.md` as primary constraints and intent"
   - "a brainstorm path, existing spec path, parent spec path, UI source path, or clear feature description"
   - "Linear issue key/URL, or enough Linear metadata to create the tracker issue for non-trivial tracked work"
@@ -78,6 +78,6 @@ risks:
   - stale or generic external guidance; mitigate with bounded primary-source research and dated citations
   - prior-session drift; mitigate by treating session-collector output as supporting evidence, not tracker authority
   - advisory compression language; mitigate by making first-contact budget, standalone command admission, docs deletion budget, fresh-agent eval, ablation proof, and evidence-backed metrics blocking acceptance gates
-  - review-stack sprawl; mitigate by requiring one selected execution slice and treating secondary Harness roots as context unless admitted by the Linear/refactor slice
+  - review-stack sprawl; mitigate by requiring one selected execution slice and treating secondary Harness roots as context unless admitted by the Linear/reframe slice
   - model fog in dense specs; mitigate with one opening Bottom Line Up Front paragraph and No-Fog Gate for non-trivial artifacts
   - generated specs passing skill-source audits while remaining hard to review; mitigate with `check_generated_artifact_shape.py --kind spec` before handoff

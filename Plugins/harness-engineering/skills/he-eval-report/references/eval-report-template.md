@@ -36,7 +36,7 @@ Linear Project:
 Linear Milestone:
 Linear Parent Issue:
 Linear Sub-Issues:
-Refactor Program:
+Reframe Program:
 Plugin Harness Engineering Spec:
 Affected Files/Modules:
 Affected Workflows:
@@ -63,7 +63,7 @@ Traceability Repair:
 ## Source Artifact Trace
 Summary: <whether source artifacts support the closure claim>
 Linear Plan:
-Refactor Program:
+Reframe Program:
 Plugin HE Spec:
 ADRs:
 Core Invariants:

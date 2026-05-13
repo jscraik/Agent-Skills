@@ -40,7 +40,7 @@ from replacing working software.
 
 - `he-strategy`: compress direction into the smallest feedback-producing next
   slice; do not produce strategy that cannot change a decision.
-- `he-refactor`: stage migrations as baby steps with rollback and stop/pivot
+- `he-reframe`: stage migrations as baby steps with rollback and stop/pivot
   conditions before implementation.
 - `he-linear-plan`: sequence `Now` work by story/value, risk reduction, and
   feedback value, not technical neatness alone.
@@ -59,7 +59,7 @@ from replacing working software.
 - A handoff hides an unresolved blocker behind generic "follow-up" wording.
 - A workflow asks agents to infer state that can be read from a command or file.
 - A Linear plan creates work that has no stated story/value basis.
-- A strategy, refactor, or plan does not name the next feedback-producing slice.
+- A strategy, reframe, or plan does not name the next feedback-producing slice.
 - A heartbeat continues after stale evidence, unclear redaction, or failed gates.
 - A plugin confidence claim treats static plugin-eval budget failures as
   resolved without rooted runtime proof, observed usage, or an explicit

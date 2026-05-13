@@ -25,7 +25,7 @@ moat/drift analysis, source-prompt equivalence, or future-agent guidance.
 
 Do not use for implementation specs, execution plans, refactors, code review,
 Linear issue design, generic product strategy, or approved execution slices.
-Route admitted execution to `he-spec`, `he-plan`, `he-work`, `he-refactor`, or
+Route admitted execution to `he-spec`, `he-plan`, `he-work`, `he-reframe`, or
 `he-linear-plan`.
 
 ## Preconditions
@@ -62,7 +62,7 @@ as separate artifacts with authority limits.
    and validation status. Mark sampled, stale, or narrow evidence as authority
    limited.
 5. Keep strategy advisory unless admitted by `.harness/linear/**`,
-   `.harness/refactors/**`, `.harness/specs/**`, or `.harness/plan/**`.
+   `.harness/reframes/**`, `.harness/specs/**`, or `.harness/plan/**`.
 6. Compress conclusions to decisions that change routing, deletion, investment,
    anti-drift behavior, or the smallest feedback-producing next slice.
 7. Validate the artifact against the selected contract and record each gate as
@@ -139,6 +139,8 @@ required by the mode.
 - Read before delegation -> `../../references/subagent-call-contract.md`
 - Shared HE routing and BLUF/visual/subagent/first-principles/XP contracts ->
   `../../references/deferred-context-index.md`
+- Pragmatic Programmer review lens ->
+  `../../references/pragmatic-programmer-review-contract.md`
 
 Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 move deep context behind a clear reference route.

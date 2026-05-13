@@ -108,14 +108,14 @@ For short chat responses, summarize the same fields without losing blocker, trac
 - Do not let external review, CI, session, or user wording change HE domain meaning without translation through `domain-context-contract.md`.
 - When `domain_model.status` is ambiguous or conflicted, do not harden the next lifecycle stage until the owning artifact records the bounded context and closure_impact.
 - In coding-harness-managed repos, lifecycle transitions require populated or explicitly blocked Harness command bridge fields.
-- Do not load broad domain, strategy, refactor, Linear, security, specialist, or eval gates unless `gate_profile` proves the risk class and required contracts.
+- Do not load broad domain, strategy, reframe, Linear, security, specialist, or eval gates unless `gate_profile` proves the risk class and required contracts.
 - Do not claim release confidence while lifecycle evals time out; scope the claim to static wiring or route timeout repair.
 
 ## Stage Minimums
 
 - `he-router`: selected stage, confidence, matched rule, missing input if blocked.
 - `he-brainstorm`: problem frame, scope tier, spec decision, Linear tracker state for durable handoff, `.harness/brainstorm` or folded `.harness/ideate` artifact when written, next stage.
-- `he-spec`: accepted behavior contract for one selected milestone, parent issue, refactor phase, or execution slice; stable acceptance IDs; Linear Work Item Contract; `.harness/specs` artifact; explicit In Scope and Out of Scope boundaries; next planning slice.
+- `he-spec`: accepted behavior contract for one selected milestone, parent issue, reframe phase, or execution slice; stable acceptance IDs; Linear Work Item Contract; `.harness/specs` artifact; explicit In Scope and Out of Scope boundaries; next planning slice.
 - `he-plan`: stable units, dependencies, tests, rollback, `.harness/plan` artifact, Linear/spec/plan/PR traceability matrix, and proof the plan stays inside the selected execution slice.
 - `he-work`: changed slices, completed IDs, validation evidence, drift notes, PR/Linear handoff, and proof the implementation stayed inside the selected execution slice.
 - `he-code-review`: findings, readiness verdict, evidence ladder, next action.

@@ -69,7 +69,7 @@ Load references by trigger instead of by habit:
 | Existing tracked plan or Linear-backed slice is consumed | `references/linear-delta-capture-gate.md` | delta admitted, rejected, or blocked before scope changes |
 | Original prompt, external workflow, old manual method, or plugin comparison is the baseline | `references/source-prompt-coverage-contract.md` | source_prompt_status, evidence_depth, coverage_scope, not_inspected, repo-specific drift signals, authority limits, downstream_confidence, and next route |
 | Coding-harness-managed repo | `references/coding-harness-command-bridge.md`, `references/execution-slice-contract.md` | command evidence or explicit blocked bridge fields |
-| Stage could load broad domain, strategy, refactor, Linear, security, specialist, or eval gates | `references/gate-selection-contract.md` | smallest gate profile, required contracts, skipped contracts, and minimum proof |
+| Stage could load broad domain, strategy, reframe, Linear, security, specialist, or eval gates | `references/gate-selection-contract.md` | smallest gate profile, required contracts, skipped contracts, and minimum proof |
 | Stage would copy external process, add lifecycle surface area, expand governance, or preserve complexity without proven HE-specific failure evidence | `references/first-principles-contract.md` | first_principles_check with verified failure, smallest mechanism, decision type, rejected analogy, and proceed/ask/defer/reject/delete outcome |
 | Plugin hook, `hooks/hooks.json`, `.codex-plugin/plugin.json` hook declaration, or hook-enforced guardrail appears in scope | `references/plugin-hook-capability-contract.md` | plugin_hook_capability_check with feature gate status, fallback path, portability status, side-effect class, lifecycle authority, and outcome |
 | Domain-specific knowledge could sharpen output | `references/specialist-skill-steering-contract.md` | chosen specialist, skipped reason, or blocker |
@@ -138,10 +138,10 @@ Load references by trigger instead of by habit:
 - `references/source-prompt-coverage-contract.md`
 - `references/pragmatic-programmer-review-contract.md`
 
-`he-refactor`:
+`he-reframe`:
 
-- `skills/he-refactor/references/refactor-program-contract.md`
-- `skills/he-refactor/references/source-prompt-preservation.md`
+- `skills/he-reframe/references/reframe-program-contract.md`
+- `skills/he-reframe/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
 
 `he-linear-plan`:
@@ -226,7 +226,7 @@ section-by-section template.
 Disposition:
 
 - `moved-to-reference`: durable artifact routing, Linear mutation gates,
-  closure proof, review shape, and strategy/refactor/Linear output rules are
+  closure proof, review shape, and strategy/reframe/Linear output rules are
   preserved in the Stage Reference Map above and the linked stage references.
 - `superseded`: exact numbered procedure fragments were replaced by compact
   stage procedures plus shared BLUF, visual-reference, source-prompt, Linear,

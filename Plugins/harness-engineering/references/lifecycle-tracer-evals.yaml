@@ -100,16 +100,16 @@ cases:
     expected_artifact_root: .harness/review
     proof: "evidence matrix, moat/drift analysis, fact/interpretation/assumption separation"
 
-  - id: tracer-refactor
-    stage: he-refactor
+  - id: tracer-reframe
+    stage: he-reframe
     prompt: "Generate a high-leverage migration program with phases, rollback, Linear mapping, and eval proof."
-    expected_route: he-refactor
-    expected_artifact_root: .harness/refactors
+    expected_route: he-reframe
+    expected_artifact_root: .harness/reframes
     proof: "baby-step migration phases, rollback conditions, stop/pivot condition, eval requirements"
 
   - id: tracer-linear-plan
     stage: he-linear-plan
-    prompt: "Convert approved refactor programs into a small Linear execution plan without mutating Linear."
+    prompt: "Convert approved reframe programs into a small Linear execution plan without mutating Linear."
     expected_route: he-linear-plan
     expected_artifact_root: .harness/linear
     proof: "Now/Next/Later/Do Not Create, value basis, eval gates, human/agent route"

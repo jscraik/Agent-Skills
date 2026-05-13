@@ -4,7 +4,7 @@ purpose: "Map approved Harness Engineering cognition into a small, traceable Lin
 triggers:
   - Linear execution orchestration
   - ADR readiness gating before Linear execution
-  - mapping .harness refactors into milestones and parent issues
+  - mapping .harness reframes into milestones and parent issues
   - mapping compressed .harness decisions into execution constraints
   - matching repo project lookup in the JSC Dev Portfolio model
   - repo/location label and bounded deliverable routing
@@ -21,7 +21,7 @@ inputs:
   - .harness/strategy/*.md
   - .harness/core/*.md
   - .harness/decisions/*.md
-  - .harness/refactors/*.md
+  - .harness/reframes/*.md
   - existing .harness/linear/*.md
   - source-prompt coverage or original-method comparison artifacts when present
   - live Linear project, label, initiative, and duplicate-project evidence when tool access is available
@@ -50,7 +50,7 @@ non_goals:
   - update issue statuses
   - close or reopen work
   - write strategy artifacts
-  - write refactor programs
+  - write reframe programs
   - create noisy ADRs or decision records without a high-value architecture decision
   - implement code
   - edit generated command handles or runtime projections as canonical source

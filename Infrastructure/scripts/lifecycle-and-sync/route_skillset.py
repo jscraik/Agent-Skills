@@ -68,6 +68,7 @@ HE_FOLDED_STAGE_ALIASES = {
     "he-ideate": "he-brainstorm",
     "he-phase-heartbeat": "he-phase-work",
     "he-prune-branches": "he-router",
+    "he-refactor": "he-reframe",
     "he-refine": "he-improve",
     "he-reliability-review": "he-code-review",
     "he-tdd": "he-work",

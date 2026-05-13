@@ -63,7 +63,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `he-phase-work` — `Plugins/harness-engineering/skills`
 - `he-plan` — `Plugins/harness-engineering/skills`
 - `he-reconcile` — `Plugins/harness-engineering/skills`
-- `he-refactor` — `Plugins/harness-engineering/skills`
+- `he-reframe` — `Plugins/harness-engineering/skills`
 - `he-reinforce` — `Plugins/harness-engineering/skills`
 - `he-router` — `Plugins/harness-engineering/skills`
 - `he-strategy` — `Plugins/harness-engineering/skills`

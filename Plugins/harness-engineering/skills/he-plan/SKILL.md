@@ -13,7 +13,7 @@ next-stage authority. Higher-priority instructions and approval boundaries
 remain authoritative.
 
 ## When to Use
-Use after an approved spec, Linear issue, bug report, refactor phase, or
+Use after an approved spec, Linear issue, bug report, reframe phase, or
 execution slice needs sequencing before code changes. Inspect first, keep one
 selected slice, start with 2-3 focused evidence surfaces, and load more only
 when sequencing, validation, rollback, or handoff depends on it.

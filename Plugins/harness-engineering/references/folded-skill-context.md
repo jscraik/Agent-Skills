@@ -63,7 +63,7 @@ Disposition:
 - intentionally-discarded: truncated sentence fragments and duplicated prose
   that had no standalone operational value.
 
-## Preserved Source Coverage And First-Principles Refactor Lines
+## Preserved Source Coverage And First-Principles Reframe Lines
 
 The 2026-05-09 source-coverage and first-principles pass tightened several
 active lifecycle entrypoints. The durable context was moved into the active
@@ -75,18 +75,18 @@ canonical skill entrypoints.
 Disposition:
 - moved-to-reference: survivor-selection approval, Project Brain refresh
   blocking, UI-plan routing, small active Linear sets, XP operating constraints,
-  rollback-safe refactor staging, subtractive proof, and artifact validation.
+  rollback-safe reframe staging, subtractive proof, and artifact validation.
 - superseded: old one-line descriptions and partial numbered steps now covered
   by active skill descriptions and procedure sections.
 - intentionally-discarded: incomplete fragments such as truncated numbered
   lines, duplicated validator phrasing, and obsolete path hints.
 
-## Preserved Lifecycle Confidence Refactor Lines
+## Preserved Lifecycle Confidence Reframe Lines
 
 The 2026-05-09 HE confidence hardening pass renumbered active lifecycle
 entrypoint procedures so XP proof, release-eval confidence, and explicit
 routing boundaries could sit in the hot path. The durable context now lives in
-the active lifecycle review, spec, eval, Linear, heartbeat, refactor, and
+the active lifecycle review, spec, eval, Linear, heartbeat, reframe, and
 strategy contracts. Exact retired line preservation is intentionally avoided
 because the previous block mixed valid invariants with partial fragments,
 duplicate steps, and stale route wording.
@@ -95,7 +95,7 @@ Disposition:
 - moved-to-reference: non-CI readiness proof, content-shape classification,
   bounded behavior contracts, subtractive proof gates, agent-native audit
   triggers, validation evidence, small Linear active sets, heartbeat stop rules,
-  phase-scoped commits, rollback-safe refactors, and strategy compression.
+  phase-scoped commits, rollback-safe reframes, and strategy compression.
 - superseded: duplicate procedure lines that were renumbered into active
   lifecycle skills.
 - intentionally-discarded: truncated lines, repeated output field lists, and

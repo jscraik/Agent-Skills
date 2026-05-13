@@ -18,7 +18,7 @@ DEFAULT_SKILLS = (
     "he-spec",
     "he-code-review",
     "he-strategy",
-    "he-refactor",
+    "he-reframe",
     "he-linear-plan",
     "he-eval-report",
     "he-phase-work",

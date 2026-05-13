@@ -18,14 +18,19 @@ def test_lifecycle_tracer_covers_main_stages() -> None:
         "he-improve",
         "he-code-review",
         "he-heartbeat",
-        "he-compound",
+        "he-reconcile",
+        "he-reinforce",
         "he-eval-report",
         "he-strategy",
-        "he-refactor",
+        "he-reframe",
         "he-linear-plan",
     ]:
         assert f"stage: {stage}" in text
         assert f"expected_route: {stage}" in text
+
+    assert "stage: he-compound" in text
+    assert "expected_route: he-reconcile" in text
+    assert "expected_route: he-reinforce" in text
 
 
 def test_deferred_context_index_stays_router_with_preserved_context() -> None:

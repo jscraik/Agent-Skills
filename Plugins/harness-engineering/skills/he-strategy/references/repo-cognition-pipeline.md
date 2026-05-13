@@ -79,7 +79,7 @@ Without Leverage, Moat-Critical Systems, Fake Sophistication, Deletions,
 Refactor Candidates, Anti-Drift Priorities, Execution Priority Matrix,
 `Execution Routing Decisions (Linear | ADR | Refactor | Eval | Governance | Do
 Not Create)`, Recommended Eval Programs, Recommended Governance Changes,
-Recommended ADRs, Recommended Refactor Programs, Future Agent Risks,
+Recommended ADRs, Recommended Reframe Programs, Future Agent Risks,
 Compression Opportunities, Evidence Matrix.
 
 ## Drift, Moat, Clarification, Handoff
@@ -101,7 +101,7 @@ with the safest evidence-backed assumption. Record `clarification_status`,
 `ambiguity_impact`, and `assumption_risk`.
 
 Intent, review, and triage are durable secondary context. They do not authorize
-implementation. Route candidates to ADR, refactor program, Linear, eval program,
+implementation. Route candidates to ADR, reframe program, Linear, eval program,
 governance change, or `Do Not Create`. Write `No Linear items` when no Linear
 work is justified.
 

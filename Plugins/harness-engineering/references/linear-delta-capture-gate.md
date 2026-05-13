@@ -81,7 +81,7 @@ sections:
 ```md
 ## Approved Current Slice
 
-The single milestone, parent issue, refactor phase, or execution slice that
+The single milestone, parent issue, reframe phase, or execution slice that
 `he-spec`, `he-plan`, or `he-work` may consume now.
 
 ## Linear Delta Capture

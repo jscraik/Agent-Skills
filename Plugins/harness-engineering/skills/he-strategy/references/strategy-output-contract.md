@@ -34,7 +34,7 @@ status when a map or diagram would reduce review effort.
 
 - Strategy, review, triage, feature, ADR, and core artifacts are secondary
   context. They do not authorize implementation unless admitted by
-  `.harness/linear/**`, `.harness/refactors/**`, `.harness/specs/**`, or
+  `.harness/linear/**`, `.harness/reframes/**`, `.harness/specs/**`, or
   `.harness/plan/**`.
 - Do not overwrite existing `.harness` artifacts unless explicitly asked.
 - Use bounded research for current standards or prior-art claims; cite sources

@@ -71,4 +71,5 @@ Read when:
 - broader HE contracts are triggered: `Plugins/harness-engineering/references/deferred-context-index.md`
 - delegation or subagent work is triggered: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - artifact identity, BLUF output, or review visuals are required: `Plugins/harness-engineering/references/artifact-routing-contract.md`, `Plugins/harness-engineering/references/bluf-review-contract.md`, `Plugins/harness-engineering/references/visual-reference-contract.md`
+- pragmatic review criteria are triggered: `Plugins/harness-engineering/references/pragmatic-programmer-review-contract.md`
 - detailed doctrine is necessary: `Infrastructure/references/harness-engineering/he-code-review-doctrine.md`

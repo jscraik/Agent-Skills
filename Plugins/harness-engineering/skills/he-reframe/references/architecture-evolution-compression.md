@@ -1,12 +1,12 @@
 # Architecture Evolution Compression
 
-Use when a user asks `he-refactor` to preserve or execute the broader prompt
-family around strategic compression, refactor programs, ADR compression, and core
+Use when a user asks `he-reframe` to preserve or execute the broader prompt
+family around strategic compression, reframe programs, ADR compression, and core
 invariants.
 
-`he-refactor` owns deterministic refactor programs under `.harness/refactors/`.
+`he-reframe` owns deterministic reframe programs under `.harness/reframes/`.
 It may generate ADR or core-invariant candidates only when they are directly
-required to make a selected refactor program safe, durable, or anti-drift. It
+required to make a selected reframe program safe, durable, or anti-drift. It
 must not create strategy, ADR, or core artifacts as process theater, and it
 must never author `.harness/strategy/**`; formal strategy artifacts belong to
 `he-strategy`.
@@ -16,8 +16,8 @@ must never author `.harness/strategy/**`; formal strategy artifacts belong to
 | Lane | Owner behavior | Output |
 | --- | --- | --- |
 | Strategic compression | Treat as upstream input or route to `he-strategy` when no strategy artifact exists. Do not repeat reviews or author strategy files from this skill. | `.harness/strategy/<repo-name>-strategy.md` via `he-strategy`, or `Blocked: strategy missing`. |
-| Refactor program generation | Primary `he-refactor` lane. Generate only high-leverage, staged, rollback-safe migration programs. | `.harness/refactors/YYYY-MM-DD-JSC-###-<slug>.md` or repo-name equivalent. |
-| ADR compression | Create only high-value architectural memory when a refactor would otherwise lose irreversible tradeoff reasoning. | `.harness/decisions/ADR-###-<slug>.md`, or `Do Not Create`. |
+| Reframe program generation | Primary `he-reframe` lane. Generate only high-leverage, staged, rollback-safe migration programs. | `.harness/reframes/YYYY-MM-DD-JSC-###-<slug>.md` or repo-name equivalent. |
+| ADR compression | Create only high-value architectural memory when a reframe would otherwise lose irreversible tradeoff reasoning. | `.harness/decisions/ADR-###-<slug>.md`, or `Do Not Create`. |
 | Core invariant compression | Create or update only irreducible operating rules that future agents must preserve across migrations. | `.harness/core/<invariant-domain>.md`, or `Do Not Create`. |
 
 ## Strategic Compression Intake
@@ -37,15 +37,15 @@ When reading `.harness/features`, `.harness/review`, `.harness/triage`, and
 
 If a strategy artifact is missing and the request depends on it, return
 `next_handoff: he-strategy` or `Blocked: strategy missing`; do not author a
-repo-wide strategy inside `he-refactor`.
+repo-wide strategy inside `he-reframe`.
 
-If the user explicitly asks for a combined workflow, `he-refactor` may produce a
-transient Strategic Compression Intake summary to select or block refactor work,
+If the user explicitly asks for a combined workflow, `he-reframe` may produce a
+transient Strategic Compression Intake summary to select or block reframe work,
 but formal `.harness/strategy/**` creation still routes to `he-strategy`.
 
-## Refactor Program Gate
+## Reframe Program Gate
 
-Create a refactor program only when completion meaningfully improves one or more
+Create a reframe program only when completion meaningfully improves one or more
 of: structural complexity, orchestration determinism, routing clarity, context
 load, cognition quality, governance simplicity, eval reliability, moat-critical
 stability, plugin/skill boundaries, or Linear execution hygiene.
@@ -67,10 +67,10 @@ ADR creation requires all of:
 - named irreversible or expensive-to-reverse decision;
 - explicit reversal cost if the decision is undocumented;
 - failed `Do Not Create` subtraction test;
-- linkage to a selected refactor phase.
+- linkage to a selected reframe phase.
 
 Do not create ADRs for implementation details, temporary experiments, low-impact
-refactors, cosmetics, or framework preferences without strategic impact.
+reframes, cosmetics, or framework preferences without strategic impact.
 
 ## Core Invariant Gate
 
@@ -88,7 +88,7 @@ Core invariant creation requires all of:
 - named invariant domain;
 - classification as `proven invariant`, `strategic assumption`, or `preferred operating principle`;
 - explanation of the drift or reversal risk if omitted;
-- linkage to a selected refactor phase or anti-drift closure proof.
+- linkage to a selected reframe phase or anti-drift closure proof.
 
 ## Downstream Handoff Criteria
 
@@ -121,7 +121,7 @@ Do not create Linear objects. Map future execution only:
 - Cross-repo project: Portfolio Ops
 - Repo-specific work: matching repo project when known
 
-Every refactor program must define an eval artifact before closure:
+Every reframe program must define an eval artifact before closure:
 
 `.harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<slug>-eval.md`
 

@@ -19,7 +19,7 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
         "he-phase-heartbeat",
         "he-phase-work",
         "he-reconcile",
-        "he-refactor",
+        "he-reframe",
         "he-reinforce",
         "he-router",
         "he-spec",

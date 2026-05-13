@@ -39,6 +39,7 @@ RESERVED_SKILL_HANDLES = {
     "reviewers",
 }
 FOLDED_SKILL_HANDLE_ALIASES = {
+    "he-refactor": "he-reframe",
     "he-phase-heartbeat": "he-phase-work",
     "he-ideate": "he-brainstorm",
     "he-refine": "he-improve",

@@ -6,7 +6,7 @@
     "he-router": "This HE request could be he-spec, he-plan, or he-work; choose the right stage without guessing.",
     "he-eval-report": "Generate the eval report and drift validation before Linear completion.",
     "he-strategy": "Create a repository intent and architecture review with moat analysis.",
-    "he-refactor": "Generate a high-leverage refactor program with rollback conditions.",
+    "he-reframe": "Generate a high-leverage reframe program with rollback conditions.",
     "he-linear-plan": "Create a Linear execution plan with Now / Next / Later and Portfolio Ops routing.",
     "he-phase-work": "Use he-phase-work for an approved phase loop with a 10 minute heartbeat, collector evidence, review gates, git staging, Linear updates, and stop rules."
   },
@@ -156,9 +156,10 @@
     },
     {
       "priority": 33,
-      "rule": "refactor-program",
-      "route": "he-refactor",
+      "rule": "reframe-program",
+      "route": "he-reframe",
       "signals": [
+        "reframe program",
         "refactor program",
         "migration program",
         "architectural migration",
@@ -393,7 +394,7 @@
     "he-compound": "$harness-engineering:he-compound <deprecated-compatibility-request>",
     "he-eval-report": "$harness-engineering:he-eval-report <completed-slice-or-pr>",
     "he-strategy": "$harness-engineering:he-strategy <strategy-or-review-request>",
-    "he-refactor": "$harness-engineering:he-refactor <migration-candidate>",
+    "he-reframe": "$harness-engineering:he-reframe <migration-candidate>",
     "he-linear-plan": "$harness-engineering:he-linear-plan <harness-artifacts>",
     "he-phase-work": "$harness-engineering:he-phase-work <approved-phase-plan-and-cadence>"
   },
@@ -451,14 +452,14 @@
       "output": "dated .harness strategy/review/triage/features artifact or ADR/core compression decision"
     },
     {
-      "intent": "refactor-program",
-      "skill": "he-refactor",
+      "intent": "reframe-program",
+      "skill": "he-reframe",
       "required_inputs": [
         "strategy/review/triage evidence",
         "migration candidate",
         "affected systems"
       ],
-      "output": "dated .harness/refactors program with phases, rollback, eval proof, and Linear mapping"
+      "output": "dated .harness/reframes program with phases, rollback, eval proof, and Linear mapping"
     },
     {
       "intent": "linear-execution-plan",
@@ -734,7 +735,7 @@
         "security-lens-reviewer"
       ]
     },
-    "he-refactor": {
+    "he-reframe": {
       "policy": "conditional",
       "baseline_roles": [
         "repo-research-analyst",

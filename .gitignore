@@ -123,6 +123,8 @@ Infrastructure/reports/data/candidates.json
 !.harness/linear/**
 !.harness/refactors/
 !.harness/refactors/**
+!.harness/reframes/
+!.harness/reframes/**
 !.harness/features/
 !.harness/features/**
 !.harness/strategy/
@@ -205,5 +207,7 @@ Infrastructure/artifacts/skills/**/[0-9]*
 .harness/media/20*
 .harness/refactors/20*/*.md
 .harness/refactors/20*
+.harness/reframes/20*/*.md
+.harness/reframes/20*
 .harness/linear/20*/**
 .harness/linear/20*.md
