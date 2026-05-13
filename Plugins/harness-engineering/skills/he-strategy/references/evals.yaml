@@ -7,6 +7,9 @@ x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"
 x_accept: &accept [{type: regex, value: "(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)"}]
 x_steer: &steer [{type: regex, value: "(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)"}]
 x_nontrigger: &nontrigger [{type: not_regex, value: "(?is)(he-strategy|interactive_status|selection_evidence|schema_version|stage:|route:)"}]
+x_no_plan: &no_plan
+  - {type: not_regex, value: "(?is)(acceptance criteria|story points|implementation plan|sub-issues for every finding|implementation tasks for every finding|Linear issue for every finding)"}
+  - {type: regex, value: "(?is)(Do Not Create|does not authorize implementation|not execution authority|should not become work)"}
 cases:
   - id: strategic-compression
     name: "Strategic compression"
@@ -37,7 +40,7 @@ cases:
     realistic: true
     prompt: "Can you create sub-issues and implementation tasks for every finding."
     deterministic_checks: *safe
-    acceptance: *nontrigger
+    acceptance: *no_plan
   - id: hype-pressure
     name: "Hype pressure"
     category: pressure
@@ -81,6 +84,7 @@ cases:
       - {type: regex, value: "(?is)(repo.?cognition|intent|architecture.?review|triage)"}
       - {type: regex, value: "(?is)(evidence.{0,40}traceability|traceability.{0,40}matrix|drift signals|moat)"}
       - {type: regex, value: "(?is)(secondary context|authority limited|not implementation|Do Not Create|execution authority)"}
+      - {type: regex, value: "(?is)(clarification_status|asked|not_needed|assumed|ambiguity_impact|assumption_risk)"}
   - id: triage-compression-not-backlog
     name: "Triage compression not backlog"
     category: pressure
@@ -115,8 +119,39 @@ cases:
     prompt: "Review the architecture using pragmatic engineering, deep versus shallow module analysis, domain integrity, XP feedback loops, refactoring heuristics, and agent-native capability. Do not summarize the books; use them as pressure systems."
     deterministic_checks: *safe
     acceptance:
-      - {type: regex, value: "(?is)(deep.*shallow|domain|feedback|agent.?native|complexity|refactor)"}
-      - {type: regex, value: "(?is)(pressure|lens|evidence|traceability|moat)"}
+      - {type: regex, value: "(?is)(Pragmatic Programmer|pragmatic engineering)"}
+      - {type: regex, value: "(?is)(Philosophy of Software Design|deep.*shallow|shallow.*deep)"}
+      - {type: regex, value: "(?is)(Domain-Driven Design|domain integrity|bounded context)"}
+      - {type: regex, value: "(?is)(Extreme Programming|XP|feedback loops)"}
+      - {type: regex, value: "(?is)(Five Lines of Code|refactoring heuristics|structural refactoring)"}
+      - {type: regex, value: "(?is)(agent.?native|evidence|traceability|moat)"}
+  - id: attached-reference-lenses
+    name: "Attached reference lenses"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "I forgot to attach the reference materials for the architecture review: Pragmatic Programmer, Philosophy of Software Design, Extreme Programming Explained, Domain-Driven Design, and Five Lines of Code. Use them in he-strategy as review lenses, but do not summarize the books."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Reference Lens Status|reference material|supplied reference|attached)"}
+      - {type: regex, value: "(?is)(evaluative lens|pressure system|not.*summarize|do not summarize)"}
+      - {type: regex, value: "(?is)(repository evidence|repo evidence|hard evidence|interpretation|assumption)"}
+      - {type: regex, value: "(?is)(inspected|sampled|unavailable|not needed|confidence)"}
+  - id: internal-reference-lens-canon
+    name: "Internal reference lens canon"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "Can he-strategy use the architecture review lenses without me uploading Pragmatic Programmer, Philosophy of Software Design, XP, DDD, and Five Lines of Code every time?"
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(architecture-lens-canon|internal.?canon|default internal lens)"}
+      - {type: regex, value: "(?is)(evaluative lens|pressure system|not.*repository evidence|repo evidence)"}
+      - {type: regex, value: "(?is)(Reference Lens Status|internal-canon|inspected|sampled|unavailable)"}
   - id: headless-strategy-assumption
     name: "Headless strategy assumption"
     category: edge

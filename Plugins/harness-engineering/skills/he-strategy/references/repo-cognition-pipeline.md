@@ -1,244 +1,110 @@
 # Repository Cognition Pipeline
 
-Use this reference when the user asks for the full repo-intent, architecture
-review, and structural triage workflow, or says the current `he-strategy`
-contract does not capture their long-form prompt deeply enough.
+Use when the user asks for the full repo-intent, architecture-review, and
+structural-triage workflow, or says `he-strategy` does not capture the long-form
+prompt deeply enough. This is a multi-artifact strategy pipeline, not generic
+documentation.
 
-This is a multi-artifact strategy pipeline, not a generic documentation task.
-It exists to turn implementation reality into durable cognition surfaces that
-future humans and coding agents can use without rereading the whole repo.
+## Select This Mode
 
-## Pipeline Mode
+Select `repo-cognition-pipeline` only when more than one of these is requested
+as a sequence: repo intent under `.harness/features/`, architecture cognition
+review under `.harness/review/`, structural triage under `.harness/triage/`.
+Use a single mode from `strategy-output-contract.md` when only one artifact is
+requested.
 
-Select `repo-cognition-pipeline` only when the user explicitly asks for more
-than one of these artifacts in sequence:
+## Artifact Sequence
 
-- repository intent under `.harness/features/`
-- architecture cognition review under `.harness/review/`
-- structural triage under `.harness/triage/`
+1. Intent: `.harness/features/YYYY-MM-DD-JSC-###-<slug>-intent.md` when Linear
+   context is known, otherwise `.harness/features/YYYY-MM-DD-<repo-name>-intent.md`.
+   Explain what the repo is trying to become, what must stay stable, what must
+   not drift, what is leverage, and what is accidental complexity.
+2. Architecture review: `.harness/review/YYYY-MM-DD-JSC-###-<slug>-architecture-review.md`
+   or `.harness/review/YYYY-MM-DD-<repo-name>-architecture-review.md`. Pressure-test
+   coherence, modularity, domain integrity, agent-native architecture,
+   governance, complexity, and moat claims.
+3. Triage: `.harness/triage/YYYY-MM-DD-JSC-###-<slug>-triage.md` or
+   `.harness/triage/YYYY-MM-DD-<repo-name>-triage.md`. Compress intent and review
+   into execution routing, deletions, anti-drift protections, ADR/refactor/eval/
+   governance candidates, and findings that should not become work.
 
-When only one artifact is requested, use the matching single mode from
-`strategy-output-contract.md`.
+Do not skip directly to triage unless intent and review are fresh enough. If
+stale, sampled, or absent, refresh them or mark triage authority limited.
 
-## Required Artifact Sequence
+## Evidence and Stance
 
-1. Intent artifact:
-   - path: `.harness/features/YYYY-MM-DD-<repo-name>-intent.md`
-   - purpose: explain what the repository is trying to become, what must stay
-     stable, what must never drift, what is intentional leverage, and what is
-     accidental complexity.
-2. Architecture review:
-   - path: `.harness/review/YYYY-MM-DD-<repo-name>-architecture-review.md`
-   - purpose: pressure-test coherence, modularity, domain integrity,
-     agent-native architecture, governance, complexity, and moat claims through
-     pragmatic engineering lenses.
-3. Structural triage:
-   - path: `.harness/triage/YYYY-MM-DD-<repo-name>-triage.md`
-   - purpose: compress the intent and review into execution priorities,
-     deletion candidates, anti-drift protections, ADR candidates, refactor
-     programs, Linear initiatives, and work that should explicitly not become
-     a work item.
+Inspect implementation reality before strategic claims: source, configs,
+manifests, scripts, CI/CD, tests, docs, prompts, skills, workflows, hooks,
+harness files, architecture boundaries, telemetry/observability, validation
+loops, orchestration, MCP integrations, memory/context systems, product language,
+roadmap/TODO/dead code, repeated abstractions, and coupling. Use bounded sampling
+only when necessary; record inspected, not inspected, sufficiency, confidence
+downgrade, and refresh needs.
 
-Do not skip directly to triage unless current intent and review artifacts are
-fresh enough to support it. If they are stale, sampled, or absent, either
-refresh them or mark triage authority limited.
+Every major conclusion must separate hard evidence, strong inference, and weak
+assumption/speculation. Do not infer capability from README language, skill
+names, or aspiration alone.
 
-## Evidence Depth
+## Lenses
 
-Inspect implementation reality before strategic claims. Relevant surfaces
-include source code, configs, manifests, scripts, CI/CD, tests, docs, prompts,
-skills, workflows, hooks, agent harness files, architecture boundaries,
-telemetry, observability, infrastructure assumptions, validation loops,
-orchestration logic, MCP integrations, memory/context systems, product language,
-roadmap signals, TODO clusters, dead code, repeated abstractions, and coupling
-patterns.
+Apply pragmatic engineering, Philosophy of Software Design, DDD, XP/feedback,
+structural refactoring, agent-native architecture, and moat pressure lenses. Do
+not summarize books. Use supplied reference material when present; otherwise load
+`architecture-lens-canon.md` and mark `Reference Lens Status` as
+`internal-canon`. Attached material status values: `inspected`, `sampled`,
+`unavailable`, `not needed`, `internal-canon`.
 
-Use bounded sampling only when repo size or time makes full inspection
-impractical. When sampling, record:
+## Required Sections
 
-- inspected surfaces
-- not-inspected surfaces
-- why the sample is sufficient or insufficient
-- confidence downgrade
-- follow-up refresh needed before using the artifact as repo-wide authority
+Intent must include: Project Intent, Core Thesis, Strategic Direction, Intended
+Users, Non-Goals, System Philosophy, Architectural Patterns, Agent-Native Design
+Assumptions, Harness/Governance Model, Critical Constraints, Stable Interfaces,
+Sources of Complexity, Sources of Leverage, Probable Moat, Drift Risks, What
+Future Agents Should Preserve/Challenge, Open Questions, Recommended Decisions,
+Strategic Contradictions, Suggested Simplifications, Missing Capabilities,
+Long-Term Scalability Concerns, Drift Detection Signals, Evidence & Traceability
+Matrix.
 
-## Required Analysis Stance
+Architecture review must include: Executive Summary, Reference Lens Status,
+Architectural Risk Assessment, Repository Cognition Review, Complexity Audit,
+Deep vs Shallow Module Analysis, Domain Integrity Review, Skill/Plugin
+Architecture Review, Agent-Native Capability Review, Governance & Workflow
+Review, Refactor Recommendations, Anti-Patterns, Drift Risks, Technical Debt,
+Strategic Review, Simplifications, Deletions, Core Investments, Scalability
+Risks, Moat Analysis, Competitive Replication Risk, Evidence Matrix.
 
-Every major conclusion must separate:
+Triage must include: Executive Triage Summary, Immediate Architectural Risks,
+Strategic/Architectural/Operational/Governance/Agent-Native Findings, Complexity
+Without Leverage, Moat-Critical Systems, Fake Sophistication, Deletions,
+Refactor Candidates, Anti-Drift Priorities, Execution Priority Matrix,
+`Execution Routing Decisions (Linear | ADR | Refactor | Eval | Governance | Do
+Not Create)`, Recommended Eval Programs, Recommended Governance Changes,
+Recommended ADRs, Recommended Refactor Programs, Future Agent Risks,
+Compression Opportunities, Evidence Matrix.
 
-- hard evidence from repo files, validation output, or generated artifacts
-- strong inference from repeated implementation patterns
-- weak assumption or speculation
+## Drift, Moat, Clarification, Handoff
 
-Do not infer capabilities from README language, skill names, or architectural
-aspiration alone. Strategy must be grounded in behavior, contracts, validators,
-runtime paths, or repeated implementation shape.
+Drift signals should include measurable indicators where possible, why they
+matter, likely cause, operational impact, severity, corrective action, and
+whether they block merges/releases.
 
-## Strategic Lenses
-
-Apply these lenses when the artifact asks for architecture review, moat review,
-or strategic critique:
-
-- Pragmatic Programmer: entropy, DRY, orthogonality, reversibility, tracer
-  bullets, automation maturity, operational friction, broken windows.
-- Philosophy of Software Design: deep versus shallow modules, change
-  amplification, information leakage, hidden dependencies, pass-through
-  abstractions, cognitive load.
-- Domain-Driven Design: ubiquitous language, bounded contexts, context leakage,
-  model integrity, anti-corruption boundaries, strategic domain cohesion.
-- Extreme Programming: feedback loops, CI quality, humane iteration,
-  pairability, sustainable cadence, test realism, incremental safety.
-- Structural refactoring: giant orchestrators, hidden temporal coupling, mixed
-  abstraction levels, brittle conditionals, mechanical simplification seams.
-- Agent-native architecture: discoverability, context loading, deterministic
-  execution, machine-readable boundaries, eval integration, memory architecture,
-  prompt composability, local reasoning, and token cost.
-
-Do not summarize these schools. Use them as pressure systems for judging this
-repository.
-
-## Mandatory Sections For The Full Pipeline
-
-Intent artifacts must include:
-
-- Project Intent
-- Core Thesis
-- Strategic Direction
-- Intended Users
-- Non-Goals
-- System Philosophy
-- Architectural Patterns
-- Agent-Native Design Assumptions
-- Harness/Governance Model
-- Critical Constraints
-- Stable Interfaces
-- Sources of Complexity
-- Sources of Leverage
-- Probable Moat
-- Drift Risks
-- What Future Agents Should Preserve
-- What Future Agents Should Challenge
-- Open Questions
-- Recommended Decisions
-- Strategic Contradictions
-- Suggested Simplifications
-- Missing Capabilities
-- Long-Term Scalability Concerns
-- Drift Detection Signals
-- Evidence & Traceability Matrix
-
-Architecture reviews must include:
-
-- Executive Summary
-- Architectural Risk Assessment
-- Repository Cognition Review
-- Complexity Audit
-- Deep vs Shallow Module Analysis
-- Domain Integrity Review
-- Skill/Plugin Architecture Review
-- Agent-Native Capability Review
-- Governance & Workflow Review
-- Refactor Recommendations
-- Anti-Patterns Identified
-- Drift Risks
-- Technical Debt Hotspots
-- Strategic Review
-- Recommended Simplifications
-- Recommended Deletions
-- Recommended Core Investments
-- Long-Term Scalability Risks
-- Moat Analysis
-- Competitive Replication Risk
-- Evidence & Traceability Matrix
-
-Triage artifacts must include:
-
-- Executive Triage Summary
-- Immediate Architectural Risks
-- Strategic Findings
-- Architectural Findings
-- Operational Findings
-- Governance Findings
-- Agent-Native Findings
-- Complexity Without Leverage
-- Moat-Critical Systems
-- Fake Sophistication Signals
-- Recommended Deletions
-- Refactor Candidates
-- Anti-Drift Priorities
-- Execution Priority Matrix
-- Recommended Linear Initiatives
-- Recommended ADRs
-- Recommended Refactor Programs
-- Future Agent Operational Risks
-- Recommended Compression Opportunities
-- Evidence & Traceability Matrix
-
-## Drift Detection Signals
-
-For every intent or architecture review, define explicit drift indicators. Use
-measurable thresholds where possible:
-
-- duplicated orchestration logic exceeds one canonical owner per workflow
-- prompt/context grows without eval or outcome improvement
-- skills become undiscoverable or generated handles drift from source
-- governance rules are not enforced by CI or local validation
-- runtime paths sidestep validation loops
-- memory/context systems become non-deterministic
-- compatibility layers survive past their decision deadline
-- framework/tool proliferation grows without capability consolidation
-- onboarding or repo discovery requires broad transcript archaeology
-- PR validation time increases without stronger safety evidence
-- unresolved TODO or dead-workflow debt exceeds the repo's chosen threshold
-
-For each signal include why it matters, likely root cause, operational impact,
-severity, corrective action, and whether it should block merges or releases.
-
-## Moat Pressure Test
-
-Do not treat sophistication as moat. Explicitly decide whether defensibility
-comes from data, workflow discipline, eval quality, orchestration reliability,
-governance, repository cognition, trust, switching cost, developer habit, or
-distribution.
-
-Answer directly:
-
-- what is actually hard to copy
-- what only feels sophisticated
-- what should be protected
-- what should be simplified because it weakens the moat
-- what assumptions are likely false
-- whether the moat survives simplification
-- why competitors would or would not catch up quickly
-
-If no real moat exists, say so.
-
-## Clarification Loop
+Moat analysis must decide what is hard to copy, what only feels sophisticated,
+what to protect, what to simplify, what assumptions are likely false, whether the
+moat survives simplification, and whether competitors could catch up quickly. If
+no real moat exists, say so.
 
 Ask focused clarification questions only when the answer materially changes
 architecture direction, product intent, moat, governance, agent workflows,
-scalability, UX philosophy, or commercial positioning.
+scalability, UX philosophy, or commercial positioning. Use `request_user_input`
+when available; otherwise ask directly or record an open question and continue
+with the safest evidence-backed assumption. Record `clarification_status`,
+`ambiguity_impact`, and `assumption_risk`.
 
-Use `request_user_input` when available. If it is unavailable in the current
-runtime, ask directly or record the ambiguity as an explicit open question and
-continue with the safest evidence-backed assumption.
+Intent, review, and triage are durable secondary context. They do not authorize
+implementation. Route candidates to ADR, refactor program, Linear, eval program,
+governance change, or `Do Not Create`. Write `No Linear items` when no Linear
+work is justified.
 
-## Authority And Handoff
-
-Intent, review, and triage artifacts are durable secondary context. They do not
-authorize implementation by themselves.
-
-After triage, route execution candidates to the smallest appropriate artifact:
-
-- ADR for policy or architectural decisions
-- refactor program for structural migrations
-- Linear initiative/project/issue for execution tracking
-- eval program for behavior proof
-- governance change for anti-drift enforcement
-- `Do Not Create` for findings that sound sophisticated but should not become
-  work
-
-End with a short strategic assessment that is direct enough to be useful:
-coherence, complexity justification, real leverage, drag, deletion candidates,
-smallest compelling version, biggest failure mode, and the single best next
-strategic move.
+End with `Direct Strategic Critique`: coherence, complexity justification, real
+leverage, drag, deletion candidates, smallest compelling version, biggest failure
+mode, and the single best next strategic move.

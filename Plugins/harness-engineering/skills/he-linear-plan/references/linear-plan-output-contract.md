@@ -18,6 +18,7 @@ Linear.
 - Executive Linear Routing Summary
 - Target Linear Destination
 - Existing Project Match
+- ADR / Decision Artifact Readiness
 - Proposed Milestones
 - Proposed Parent Issues
 - Proposed Sub-Issues
@@ -51,6 +52,10 @@ Linear.
   `not_applicable`
 - `live_linear_blocker` when live tracking is expected but not completed
 - `required_confirmation` when mutation approval is missing
+- `decision_artifact_status`: one of `present`, `missing`, `blocked`,
+  `upstream_required`, or `not_applicable`
+- `existing_project_match`: project name, live evidence source, status,
+  duplicate/canceled alternatives, and mutation safety
 - `repo_location_label` for every issue payload, preferably `Repo › ...`
 - `project_assignment_reason`: bounded deliverable reason or `empty`
 - `cycle_assignment_reason`: current execution commitment reason or `empty`
@@ -94,14 +99,16 @@ existing issue over creating a duplicate.
 
 ## Filing Model
 
-Repo identity belongs in labels, not projects. Every issue payload must include
-a repo/location label, preferably `Repo › ...`; legacy plain repo labels remain
-valid only until migrated.
+Repo identity belongs in labels and project routing must follow live evidence.
+Every issue payload must include a repo/location label, preferably `Repo › ...`;
+legacy plain repo labels remain valid only until migrated.
 
-Projects are bounded deliverables, not permanent repo containers. Leave
-`project` empty for speculative ideas, isolated backlog items, maintenance,
-exploratory tasks, operational debt, and repo-owned work that is not part of an
-active deliverable. Use `cycle` only for current execution commitment.
+In the JSC Dev Portfolio model, existing repo control projects are valid
+project-level destinations for repo-specific execution. Do not create duplicate
+repo projects. Leave `project` empty for speculative ideas, isolated backlog
+items, maintenance, exploratory tasks, operational debt, and repo-owned work
+that is not part of active execution. Use `cycle` only for current execution
+commitment.
 
 Prefer labels and views for repo slices, triage, maintenance queues, backlog
 review, roadmap lanes, missing-project review, and active work by repo. Escalate
@@ -138,11 +145,14 @@ Use this template for proposed issues. Do not create them during the plan.
 
 - Repo-specific identity routes through a repo/location label, preferably
   `Repo › ...`; legacy plain repo labels remain valid until migrated.
-- Repo-specific work must not create or assume a matching repo-container
-  project.
+- Repo-specific execution routes to the matching live repo control project when
+  available and verified.
+- Repo-specific work must not create or assume a new matching repo project when
+  an existing canonical project is available.
 - Cross-repo workflow, reporting, shared governance, labels, or portfolio
-  hygiene remains label/view organized unless it belongs to a bounded
-  deliverable requiring project-level coordination.
+  hygiene routes to `Portfolio Ops` when live evidence confirms it and the work
+  needs project-level coordination; otherwise keep it as plan-only or
+  needs-human-triage.
 - Portfolio-level operating model work may attach to `Dev Portfolio` only when
   the initiative improves review, prioritization, or sequencing.
 - Do not create new initiatives, projects, labels, issues, comments, or status
@@ -156,6 +166,25 @@ Use this template for proposed issues. Do not create them during the plan.
   review, inherit evidence depth, coverage gaps, not-inspected surfaces,
   repo-specific drift signals, authority limits, and downstream confidence into
   the Linear plan before recommending active work.
+- If source artifacts imply architecture-shaping, governance-defining,
+  moat-critical, routing, or expensive-to-reverse decisions, require
+  `.harness/decisions/**` readiness or mark `decision_artifact_status:
+  upstream_required`; do not convert missing ADR reasoning into extra Linear
+  objects.
+
+## JSC Dev Portfolio Defaults
+
+Use these defaults only when the request, artifacts, or live Linear evidence
+confirms Jamie/JSC portfolio work:
+
+- Workspace/team `Jscraik`; team key `JSC`.
+- Top-level initiative `Dev Portfolio`.
+- Cross-repo project `Portfolio Ops`.
+- Repo-specific work routes to the matching live repo control project.
+
+Do not create a new initiative or project unless the existing Dev Portfolio,
+Portfolio Ops, and repo-project structure cannot represent the work cleanly and
+the user approves the new object.
 
 ## Priority Rules
 

@@ -171,25 +171,23 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
             "",
             f"# {display_name} Handle",
             "",
-            f"Generated command handle for a child skill under the `{handle.owner}` router heading.",
-            "The real workflow is not here.",
+            f"Generated command handle for a child skill under the `{handle.owner}` router.",
             f"Canonical source path: `{source_path}`.",
             "",
-            "When invoked:",
+            "Invoke:",
             (
-                "1. In Agent Skills Kit with `./bin/ask`, run "
+                "1. If this is the Agent Skills Kit repo and `./bin/ask` exists, run "
                 f"`./bin/ask skills resolve {handle.handle} --json`."
             ),
-            f"2. Otherwise, load `{source_path}` directly.",
-            "3. Follow the loaded module contract.",
             (
-                "4. If missing, search only the owner skill tree for this exact handle."
+                "2. Resolve internally; mention routing only if blocked, ambiguous, or user-visible."
             ),
-            (
-                "5. If the contract cannot load, fail closed: report the blocker and do not perform the workflow."
-            ),
+            f"3. Otherwise, load `{source_path}` directly.",
+            "4. Follow the loaded module contract.",
+            "5. If missing, search only the owner skill tree for this exact handle.",
+            "6. If the contract cannot load, fail closed and report the blocker.",
             "",
-            "When used as another skill's target, pass the resolved card to the active orchestrator and wait for orchestration.",
+            "As another skill's target, pass the resolved card to the active orchestrator and wait.",
             "",
         ]
     )

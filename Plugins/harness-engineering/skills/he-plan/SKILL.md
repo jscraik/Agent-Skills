@@ -23,6 +23,15 @@ run technical review, review with professional engineering confidence
 standards, or supplies the senior software engineering reviewer /
 implementation-risk analyst / Codex harness engineer / Skill Factory validation
 partner / media artifact operator / adversarial validation partner prompt shape.
+The exact prompt "deepen plan and run a technical review" is an operator
+correction signal: improve the existing canonical plan, apply professional
+technical review, repair fixable-now gaps, and rerun focused artifact-shape,
+BLUF, traceability, and validation gates before handoff.
+The long role-stack prompt beginning "You are GPT-5.5 acting as a senior
+software engineering reviewer, systems architect, implementation-risk analyst,
+specification maintainer, and adversarial validation partner" plus "Review
+the plan below using professional engineering confidence standards" is the
+same route for plans.
 In that mode load `references/professional-confidence-review.md` and treat the
 plan and spec as untrusted until validated.
 If that reference cannot load but the request includes concrete plan/spec
@@ -102,8 +111,12 @@ For non-trivial generated plans, run or block
 `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
 <plan-path> --json`; block handoff when the opening BLUF is missing, vague,
 duplicated through the body, or disconnected from validation evidence. Also
-block when work-unit objective, validation evidence, stop conditions, or
-rollback notes are missing.
+run or block
+`python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py
+<plan-path> --kind plan --json`; block handoff when the plan is missing the
+execution-first section spine, stable `PU-*` units, source ID mapping,
+allowed/forbidden paths, validation evidence, stop conditions, rollback notes,
+handoff state, or a visual-reference decision.
 
 ## Evidence Requirements
 Every plan cites source paths or issue IDs, stable IDs, acceptance IDs,

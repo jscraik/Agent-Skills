@@ -19,6 +19,16 @@ inspect repo, tracker, artifact, and source evidence before asking, then ask onl
 when intent/tradeoffs are undiscoverable. Load the selected slice plus 2-3
 focused surfaces unless blocked.
 
+Also use when the user says "deepen spec and run a technical review" or similar.
+Treat that as an explicit request to improve the existing canonical spec, apply
+professional technical review, repair fixable-now gaps, and rerun focused
+artifact-shape, BLUF, traceability, and validation gates before handoff.
+The long role-stack prompt beginning "You are GPT-5.5 acting as a senior
+software engineering reviewer, systems architect, implementation-risk analyst,
+specification maintainer, adversarial validation partner, and media artifact
+operator" is the same route for specs, with media/visual-reference evidence
+treated as an explicit review surface.
+
 ## When Not to Use
 Do not use for implementation, review-only feedback, task planning, runtime
 install/sync, broad strategy, or unselected ideas. Stop when no selected slice
@@ -86,6 +96,12 @@ For non-trivial generated specs, run or block
 `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
 <spec-path> --json`; block handoff when the opening BLUF is missing, vague,
 duplicated through the body, or disconnected from evidence.
+Also run or block
+`python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py
+<spec-path> --kind spec --json`; block handoff when the spec body is
+process-heavy, missing reader-first sections, missing stable requirement or
+acceptance IDs, missing conformance rules for data/interface contracts, or
+missing a visual-reference decision.
 
 ## Failure Mode
 If evidence, live tracker linkage, artifact permission, or routing is missing,

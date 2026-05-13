@@ -33,6 +33,10 @@ PATTERNS = {
     "skill_md_not_found": re.compile(r"SKILL\.md\s+not\s+found", re.I),
     "skill_frontmatter_missing": re.compile(r"SKILL\.md\s+frontmatter\s+missing", re.I),
     "skill_path_missing": re.compile(r"skill path does not exist|cannot read [^\n]{0,240}SKILL\.md", re.I),
+    "operator_prompt_he_spec_deepen_review": re.compile(r"\bdeepen\s+spec\s+and\s+run\s+a\s+technical\s+review\b", re.I),
+    "operator_prompt_he_plan_deepen_review": re.compile(r"\bdeepen\s+plan\s+and\s+run\s+a\s+technical\s+review\b", re.I),
+    "operator_prompt_he_spec_role_stack": re.compile(r"senior software engineering reviewer, systems architect, implementation-risk analyst, specification maintainer, adversarial validation partner, and media artifact operator[\s\S]{0,1200}Investigate, review, and improve the specification", re.I),
+    "operator_prompt_he_plan_role_stack": re.compile(r"senior software engineering reviewer, systems architect, implementation-risk analyst, specification maintainer, and adversarial validation partner[\s\S]{0,600}Review the plan below using professional engineering confidence standards", re.I),
     "tool_exec_failed": re.compile(r"exec_command failed", re.I),
     "tool_stdin_failed": re.compile(r"write_stdin failed:\s*stdin is closed for this session", re.I),
     "nonzero_exit": re.compile(r"Process exited with code ([1-9][0-9]*)", re.I),
@@ -58,6 +62,11 @@ SKILL_ERROR_CONTEXT_RE = re.compile(r"ERROR:|FileNotFoundError|Traceback|\bfail(
 PRIMARY_EXIT_RE = re.compile(r"Process exited with code (\d+)", re.I)
 CODE_DUMP_RE = re.compile(r'(^|\n)\s*(?:\d+\s+)?#!/usr/bin/env python3|(^|\n)\s*"""', re.I)
 PATH_LINE_LISTING_RE = re.compile(r"(?m)^\s*/[^\n]+:\d+:")
+OPERATOR_PROMPT_SELF_NOISE_RE = re.compile(
+    r"\[\d+\]\s+tool exec (?:call|result):|re\.compile\(|\*\*\* Begin Patch|"
+    r"operator_prompt_he_|/bin/zsh -c|importlib\.util|\"command\"\s*:",
+    re.I,
+)
 
 
 @dataclass(frozen=True)
@@ -149,6 +158,14 @@ def iter_lines_recent_window(fpath: Path, max_bytes_per_file: int) -> Iterator[s
 
 
 def extract_skill(text: str) -> str | None:
+    if PATTERNS["operator_prompt_he_spec_deepen_review"].search(text):
+        return "he-spec"
+    if PATTERNS["operator_prompt_he_plan_deepen_review"].search(text):
+        return "he-plan"
+    if PATTERNS["operator_prompt_he_spec_role_stack"].search(text):
+        return "he-spec"
+    if PATTERNS["operator_prompt_he_plan_role_stack"].search(text):
+        return "he-plan"
     m = SKILL_INVOKE_RE.search(text)
     if m:
         return m.group(1).lower()
@@ -175,6 +192,19 @@ def extract_text_candidates(line: str) -> list[str]:
         return [text]
 
     out: list[str] = []
+
+    def append_operator_prompt(value: object) -> None:
+        if not isinstance(value, str):
+            return
+        lower = value.lower()
+        if (
+            "deepen spec and run a technical review" in lower
+            or "deepen plan and run a technical review" in lower
+            or "professional engineering confidence standards" in lower
+            or "media artifact operator" in lower
+        ):
+            out.append(value)
+
     if isinstance(obj.get("error"), str):
         out.append(obj["error"])
     if isinstance(obj.get("toolUseResult"), str):
@@ -187,6 +217,15 @@ def extract_text_candidates(line: str) -> list[str]:
             out.append(payload["output"])
         if isinstance(payload.get("error"), str):
             out.append(payload["error"])
+        append_operator_prompt(payload.get("message"))
+        content = payload.get("content")
+        if isinstance(content, list):
+            for item in content:
+                if isinstance(item, str):
+                    append_operator_prompt(item)
+                elif isinstance(item, dict):
+                    append_operator_prompt(item.get("text"))
+                    append_operator_prompt(item.get("input_text"))
         rv = payload.get("return_value")
         if isinstance(rv, dict):
             if isinstance(rv.get("output"), str):
@@ -198,6 +237,15 @@ def extract_text_candidates(line: str) -> list[str]:
     if isinstance(message, dict):
         if isinstance(message.get("error"), str):
             out.append(message["error"])
+        append_operator_prompt(message.get("content"))
+        content = message.get("content")
+        if isinstance(content, list):
+            for item in content:
+                if isinstance(item, str):
+                    append_operator_prompt(item)
+                elif isinstance(item, dict):
+                    append_operator_prompt(item.get("text"))
+                    append_operator_prompt(item.get("input_text"))
 
     return [x for x in out if isinstance(x, str) and x.strip()]
 
@@ -253,6 +301,8 @@ def scan_source(
                             continue
                         if "```diff" in text.lower():
                             continue
+                    if pname.startswith("operator_prompt_he_") and OPERATOR_PROMPT_SELF_NOISE_RE.search(text):
+                        continue
 
                     snippet = redact(text)
                     norm = normalize_for_dedupe(f"{pname}|{skill or '-'}|{snippet[:500]}")
@@ -347,7 +397,6 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--otel-logs", type=Path, default=Path.home() / ".codex" / "state" / "otel-collector" / "logs.ndjson")
     parser.add_argument("--otel-traces", type=Path, default=Path.home() / ".codex" / "state" / "otel-collector" / "traces.ndjson")
     parser.add_argument("--codex-projects", type=Path, default=Path.home() / ".codex" / "projects")
-    parser.add_argument("--codex-history", type=Path, default=Path.home() / ".codex" / "history.jsonl")
     parser.add_argument("--kimi-sessions", type=Path, default=Path.home() / ".kimi" / "sessions")
     args = parser.parse_args(argv)
 
@@ -361,7 +410,6 @@ def main(argv: list[str]) -> int:
         ("otel_logs", args.otel_logs),
         ("otel_traces", args.otel_traces),
         ("codex_projects", args.codex_projects),
-        ("codex_history", args.codex_history),
         ("kimi_sessions", args.kimi_sessions),
     ]
 

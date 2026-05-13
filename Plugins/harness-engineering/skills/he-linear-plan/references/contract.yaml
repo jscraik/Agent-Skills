@@ -3,7 +3,10 @@ purpose: "Map approved Harness Engineering cognition into a small, traceable Lin
 
 triggers:
   - Linear execution orchestration
+  - ADR readiness gating before Linear execution
   - mapping .harness refactors into milestones and parent issues
+  - mapping compressed .harness decisions into execution constraints
+  - matching repo project lookup in the JSC Dev Portfolio model
   - repo/location label and bounded deliverable routing
   - Now / Next / Later / Do Not Create classification
   - dependency and eval gate planning
@@ -20,6 +23,8 @@ inputs:
   - .harness/decisions/*.md
   - .harness/refactors/*.md
   - existing .harness/linear/*.md
+  - source-prompt coverage or original-method comparison artifacts when present
+  - live Linear project, label, initiative, and duplicate-project evidence when tool access is available
   - Linear issue, project, milestone, and initiative identifiers when available
 
 outputs:
@@ -30,6 +35,8 @@ outputs:
     note: "Dated Linear identifiers are preferred for new plans."
   - ready_to_create_payloads: "Included in the artifact only; not applied without explicit confirmation."
   - story_value_basis: "Required for each Now item; include user/operator value, expected feedback signal, and risk-reduction reason."
+  - decision_artifact_status: "Required when architecture-shaping, governance-defining, moat-critical, routing, or expensive-to-reverse decisions influence execution; use present, missing, blocked, not_applicable, or upstream_required."
+  - existing_project_match: "Required when repo-specific work is routed; identify the matched repo project, the evidence source, duplicate/canceled alternatives, and whether mutation is safe."
   - linear_mutation_status: "Required on every output; use not_requested, confirmation_required, blocked, created, updated, or not_applicable."
   - bug_payload: "When issue_type is bug, preserve reproduction, expected behavior, actual behavior, affected surface, severity, and validation evidence."
   - visual_references: "Required when issue trees, dependencies, eval gates, Now/Next/Later classifications, or human/agent route splits benefit from Mermaid or table-first review."
@@ -42,12 +49,14 @@ non_goals:
   - close or reopen work
   - write strategy artifacts
   - write refactor programs
+  - create noisy ADRs or decision records without a high-value architecture decision
   - implement code
   - edit generated command handles or runtime projections as canonical source
 
 conditional_capabilities:
   - "With explicit post-plan approval, known destination, and a small confirmed object set, the skill may perform the approved Linear mutation and must report exact object IDs."
   - "Without explicit approval, ready-to-create payloads remain unapplied plan data."
+  - "When ADR compression is part of the workflow, require .harness/decisions readiness before live Linear routing or hand off upstream; do not bury missing decision reasoning in Linear issue text."
 
 risks:
   - Linear issue explosion
@@ -57,12 +66,15 @@ risks:
   - treating every finding as work
   - hiding cross-repo work in a repo-specific project
   - closure without eval proof
+  - treating missing ADRs as permission to create more Linear work
+  - ignoring existing repo control projects and creating duplicate projects
+  - reopening canceled, archived, or trashed projects without explicit approval
   - ready-to-create payloads being mistaken for applied changes
   - technically neat work being promoted to Now without story value or a feedback signal
   - local artifacts hiding missing live Linear mutation, confirmation, or connector blockers
   - multi-issue plans hiding dependency or route complexity that should be visible as an issue tree, dependency map, or eval-gate table
 
-observability: "Record source artifacts read, target Linear destination, repo/location label, project assignment reason or empty, cycle assignment reason or empty, existing project match or needs_human_triage reason, Now / Next / Later / Do Not Create classification, story/value basis for Now items, dependency map, eval gate map, human versus agent execution route, visual reference status, GitHub PR tracking rule, delivery evidence rule, evidence and traceability matrix, dated output path or Do Not Create classification, Linear mutation status, and validation outcomes recorded as pass, fail, or blocked."
+observability: "Record source artifacts read, ADR status, live Linear evidence or blocker, destination, repo/location label, existing project match, duplicate/canceled findings, project/cycle reasons, Now/Next/Later/Do Not Create, Now value basis, dependencies, eval gates, human/agent route, visual reference status, PR/release evidence rules, traceability, output path or Do Not Create, Linear mutation status, and pass/fail/blocked validation."
 
 rollback_procedure: "If the destination is wrong, mark needs_human_triage and do not create objects; if the plan creates backlog noise, collapse to fewer parent issues or classify as Do Not Create; if a Linear object was accidentally created, stop and ask the user before modifying or deleting it; do not recommend closure unless eval and drift proof are present."
 
@@ -73,7 +85,9 @@ linear_operating_model:
   top_level_initiative: Dev Portfolio
   repo_location_label_preferred_format: "Repo › <repo-name>"
   repo_location_label_legacy_allowed: true
-  project_policy: "projects are bounded deliverables, not repo containers"
+  portfolio_control_project: Portfolio Ops
+  repo_project_policy: "When a matching live repo control project exists, route repo-specific execution there and keep active milestones small; do not create a duplicate repo project. If no matching project exists, recommend creation only when continuing repo-specific execution cannot be represented cleanly under Portfolio Ops or labels/views."
+  project_policy: "projects are execution control surfaces with bounded milestones, not unfiltered backlog dumps"
   cycle_policy: "cycles are current execution commitments only"
   cross_repo_project_policy: "use a bounded project only when coordination, delivery tracking, or multi-issue execution requires it"
   default_new_initiative_policy: "do not create unless existing structure cannot represent the work cleanly"

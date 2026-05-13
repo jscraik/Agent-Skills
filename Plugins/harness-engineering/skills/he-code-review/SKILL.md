@@ -68,5 +68,6 @@ Read when:
 - review depth, confidence caps, repeated feedback, or output shape is needed: `Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md`
 - disputed behavior or proof-loop guidance is needed: `Plugins/harness-engineering/skills/he-code-review/references/review-loop-patterns.md`
 - broader HE contracts are triggered: `Plugins/harness-engineering/references/deferred-context-index.md`
+- delegation or subagent work is triggered: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - artifact identity, BLUF output, or review visuals are required: `Plugins/harness-engineering/references/artifact-routing-contract.md`, `Plugins/harness-engineering/references/bluf-review-contract.md`, `Plugins/harness-engineering/references/visual-reference-contract.md`
 - detailed doctrine is necessary: `Infrastructure/references/harness-engineering/he-code-review-doctrine.md`

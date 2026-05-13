@@ -13,6 +13,19 @@ from pathlib import Path
 FIELD_RE = re.compile(r"(?m)^(BLUF|Decision Needed|Top Risks|Next Action):\s*\S")
 BLUF_RE = re.compile(r"(?m)^BLUF:\s*(\S.+)$")
 BLUF_ONLY_SUMMARY_RE = re.compile(r"(?m)^##\s+BLUF-Only Summary\s*$")
+BLUF_HEADING_RE = re.compile(r"(?m)^#{2,6}\s+BLUF\b")
+VAGUE_BLUF_RE = re.compile(
+    r"\b(explores|considerations|various|potentially|range of|aims to|seeks to)\b",
+    re.IGNORECASE,
+)
+ACTION_RE = re.compile(
+    r"\b(approve|block|revise|split|build|plan|implement|handoff|route|stop|next|must|should|needs?)\b",
+    re.IGNORECASE,
+)
+RISK_RE = re.compile(
+    r"\b(risk|blocked|blocker|unsafe|unclear|missing|fails?|failure|drift|consequence|because|until)\b",
+    re.IGNORECASE,
+)
 
 
 def strip_frontmatter(text: str) -> str:
@@ -39,12 +52,19 @@ def validate(path: Path, *, compact: bool) -> list[str]:
 
     if BLUF_ONLY_SUMMARY_RE.search(text):
         errors.append("BLUF-Only Summary is no longer allowed; use one opening BLUF paragraph")
+    if BLUF_HEADING_RE.search(text):
+        errors.append("BLUF must be a single opening field, not a repeated heading")
 
-    blufs = [match.group(1).strip() for match in BLUF_RE.finditer(text)]
+    bluf_matches = list(BLUF_RE.finditer(text))
+    blufs = [match.group(1).strip() for match in bluf_matches]
     if not blufs:
         errors.append("missing non-empty opening BLUF line")
     if len(blufs) > 1:
         errors.append(f"expected exactly one BLUF line, found {len(blufs)}")
+    if bluf_matches and "## Command Summary" in text:
+        command_summary = text.split("## Command Summary", 1)[1].split("\n## ", 1)[0]
+        if bluf_matches[0].group(0) not in command_summary:
+            errors.append("BLUF must appear inside the opening Command Summary")
     for index, bluf in enumerate(blufs, start=1):
         word_count = len(bluf.split())
         if word_count < 12:
@@ -53,6 +73,12 @@ def validate(path: Path, *, compact: bool) -> list[str]:
             errors.append(f"BLUF {index} is too long ({word_count} words)")
         if bluf.endswith(":"):
             errors.append(f"BLUF {index} ends like a label instead of a sentence")
+        if VAGUE_BLUF_RE.search(bluf):
+            errors.append(f"BLUF {index} uses vague review prose instead of a bottom line")
+        if not ACTION_RE.search(bluf):
+            errors.append(f"BLUF {index} does not state a decision, action, or next step")
+        if not RISK_RE.search(bluf):
+            errors.append(f"BLUF {index} does not state a risk, blocker, consequence, or reason")
 
     return errors
 

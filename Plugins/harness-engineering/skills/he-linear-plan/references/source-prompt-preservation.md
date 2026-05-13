@@ -14,6 +14,9 @@ turning partial cognition into broad execution authority.
 - read `.harness/features`, `.harness/review`, `.harness/triage`,
   `.harness/strategy`, `.harness/core`, `.harness/decisions`, and
   `.harness/refactors`
+- treat `.harness/decisions` as compressed architecture memory, not backlog
+  input; if high-value ADRs are missing, mark decision readiness blocked or
+  route to the upstream decision-compression step
 - generate `.harness/linear/**` execution plans
 - prefer dated Linear filenames for new plans
 - use the existing JSC operating model when the request or artifacts confirm
@@ -21,14 +24,19 @@ turning partial cognition into broad execution authority.
   - Workspace/team: Jscraik
   - Team key: JSC
   - Top-level initiative: Dev Portfolio
-  - Cross-repo control project: Portfolio Ops
-  - Repo-specific work: matching repo project
+- Cross-repo control project: Portfolio Ops
+- Repo-specific work: matching repo project
 - mark `needs_human_triage` instead of assuming JSC values when the Linear
   workspace, team, initiative, project, or repo route cannot be proven
 - do not create new initiatives or projects by default
 - carry repo-specific identity with a repo/location label, preferably
   `Repo › ...`; legacy plain repo labels remain valid until migrated
-- use projects only for bounded deliverables with clear completion states
+- route repo-specific execution into the matching live repo control project
+  when confirmed; use milestones and parent issues to keep the active slice
+  bounded
+- use projects only when they are live repo control surfaces, bounded
+  deliverables, or cross-repo coordination containers with clear completion
+  states
 - leave project empty for speculative, exploratory, maintenance, operational
   debt, or ungrouped repo-owned work
 - route cross-repo bounded deliverables to an appropriate project only when
@@ -72,6 +80,14 @@ If upstream coverage is partial, sampled, weak, inferred, or unknown, keep the
 Linear plan local to the selected slice and classify uninspected prompt-method
 concerns as `Next`, `Later`, `Do Not Create`, or `Blocked` instead of treating
 them as closed.
+
+## ADR Readiness Guard
+
+Do not turn the Architectural Decision Compression prompt into Linear backlog.
+The ADR phase exists to preserve expensive-to-reverse reasoning and anti-drift
+constraints. If the required ADR set is absent, noisy, duplicated, or merely
+generic architecture prose, the Linear plan must say so and avoid promoting that
+uncertain decision surface into active execution.
 
 ## Confirmation Gate
 

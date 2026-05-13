@@ -1,7 +1,9 @@
 # Source Prompt Preservation
 
 This reference preserves the behavior of the original user-proposed Refactor
-Program Generation & Architectural Migration prompt.
+Program Generation & Architectural Migration prompt, plus the adjacent
+architecture-evolution compression prompts that now shape `he-refactor`
+routing.
 
 When a refactor candidate comes from an HE strategy/review that was compared
 against an original prompt method, also load
@@ -9,7 +11,20 @@ against an original prompt method, also load
 The refactor program must inherit upstream evidence depth and coverage gaps
 instead of converting sampled cognition into repo-wide migration authority.
 
-## Preserved Requirements
+## Preserved Prompt Families
+
+`he-refactor` owns deterministic architecture-evolution programs. It must not
+become a generic review, roadmap, or skill-package refactoring prompt. Preserve
+these lane boundaries:
+
+| Prompt family | `he-refactor` responsibility |
+| --- | --- |
+| Strategic Compression & Direction | Treat `.harness/strategy/**` as upstream input. If strategy is missing and required, route formal strategy authoring to `he-strategy` or mark `Blocked: strategy missing`; `he-refactor` may produce only a transient strategic intake summary during explicit combined workflows. |
+| Refactor Program Generation & Architectural Migration | Own this lane. Generate only high-leverage, evidence-backed, rollback-safe migration programs in `.harness/refactors/**`. |
+| Architectural Decision Compression | Generate compact ADR candidates only when a selected migration needs durable architectural memory. Return `Do Not Create` for tactical, reversible, or low-impact decisions. |
+| Core Knowledge Compression & Architectural Invariants | Generate compact invariant candidates only when a selected migration needs durable future-agent operating rules. Exclude tactical detail, onboarding prose, and generic principles. |
+
+## Preserved Refactor Requirements
 
 - read `.harness/features`, `.harness/review`, `.harness/triage`,
   `.harness/strategy`, `.harness/decisions`, and `.harness/core`

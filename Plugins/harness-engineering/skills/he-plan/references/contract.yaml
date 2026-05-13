@@ -42,6 +42,7 @@ outputs:
   - explicit classification of assumptions, blockers, and deferred implementation unknowns
   - evidence-backed confidence statement with verified facts, assumptions, blocked validations, and confidence ceilings
   - "reviewability surface for non-trivial plans: Command Summary with exactly one opening BLUF paragraph, Do/Do Not boundaries where useful, stop conditions, rollback notes, and No-Fog Gate"
+  - deterministic generated-artifact shape validation for non-trivial plans, including execution-first section order, stable PU IDs, source ID mapping, rollback, handoff, and visual-reference decision
   - next-stage handoff to he-work, Linear workflow, document review, or folded he-deepen-plan
 
 observability: >
@@ -87,3 +88,4 @@ risks:
   - model fog in dense plans; mitigate with one opening Bottom Line Up Front paragraph and No-Fog Gate before handoff
   - process-heavy plans that obscure execution order; mitigate by keeping Harness metadata in frontmatter, status blocks, or appendices and making the main plan objective -> source contract -> work units -> validation -> rollback -> handoff
   - visual ambiguity in complex plans; mitigate with Mermaid/table-first diagrams and generated media only when it materially improves human review
+  - generated plans passing skill-source audits while remaining hard to execute from; mitigate with `check_generated_artifact_shape.py --kind plan` before handoff

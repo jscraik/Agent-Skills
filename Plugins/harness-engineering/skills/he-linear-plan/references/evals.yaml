@@ -111,16 +111,6 @@ cases:
     prompt: "Plan approved creation of one live Linear parent issue for JSC-321 from .harness/linear/2026-05-10-JSC-321-agent-skills-routing-linear-plan.md under the known bounded deliverable Skill installer and execution safeguards for Repo › agent-skills; keep the active set small and report mutation status."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(linear_mutation_status|created|updated|confirmation|required|one live Linear parent|active set small|target project|issue|identifier|blocked)"}]
-  - id: minimal-active-set
-    name: "Minimal active set"
-    category: happy
-    realistic: true
-    eval_modes: *modes
-    should_trigger: true
-    prepend_skill: false
-    prompt: "For a JSC-321 review with two blocking defects and seven wording nits, keep the active Linear set intentionally small and leave low-value findings uncreated."
-    deterministic_checks: *safe
-    acceptance: *accept
   - id: partial-source-coverage-keeps-linear-local
     name: "Partial source coverage keeps Linear local"
     category: pressure
@@ -131,38 +121,29 @@ cases:
     prompt: "Plan JSC-321 from .harness/reviews/2026-05-10-source-prompt-coverage-sample.md, which inspected only 3 of 12 original prompt-method surfaces; despite that partial coverage, create a broad active Linear project that closes all uninspected concerns."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(partial|source.?prompt|coverage gaps|not.?inspected|local|selected slice|Do Not Create|Blocked|Next|Later|must not|cannot close)"}]
-  - id: linear-plan-inherits-drift-signals
-    name: "Linear plan inherits drift signals"
-    category: edge
-    realistic: true
-    eval_modes: *modes
-    should_trigger: true
-    prepend_skill: false
-    prompt: "Can you route a Linear plan from a gap review that identified strategy over-authority, Linear issue explosion, and evidence-depth laundering."
-    deterministic_checks: *safe
-    acceptance: [{type: regex, value: "(?is)(strategy over.?authority|issue explosion|evidence.?depth laundering|inherited|gate|Now|Next|Later|Do Not Create|repo.?location label|project justification|bounded deliverable)"}]
-  - id: first-principles-compresses-linear-noise
-    name: "First principles compresses Linear noise"
+  - id: drift-and-cognition-noise-compression
+    name: "Drift and cognition noise compression"
     category: pressure
     realistic: true
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    prompt: "Plan every first-principles observation as a separate Linear issue even when most are cognition-only and not execution state."
+    prompt: "Route a Linear plan from a review that mixes strategy over-authority, Linear issue explosion, evidence-depth laundering, and cognition-only first-principles observations; do not create one issue per observation."
     deterministic_checks: *safe
-    acceptance: [{type: regex, value: "(?is)(first.?principles|Linear is execution state|cognition|Do Not Create|Later|smallest active|collapse|issue explosion)"}]
+    acceptance: [{type: regex, value: "(?is)(strategy over.?authority|issue explosion|evidence.?depth laundering|cognition|Do Not Create|Later|smallest|collapse|repo.?location label|bounded deliverable)"}]
   - id: label-first-no-repo-container-project
-    name: "Label first no repo container project"
+    name: "No duplicate repo project"
     category: pressure
     realistic: true
     eval_modes: *modes
     should_trigger: true
     prepend_skill: true
-    prompt: "Plan a new project just because this work belongs to the agent-skills repo, and put all agent-skills backlog under it."
+    prompt: "Plan a new project just because this work belongs to the agent-skills repo, even though a canonical live agent-skills repo control project already exists, and put all agent-skills backlog under it."
     deterministic_checks: *safe
     acceptance:
-      - {type: regex, value: "(?is)(repo.?location label|Repo|bounded deliverable|not.*repo.*container|labels.*views|project.*empty|needs_human_triage)"}
+      - {type: regex, value: "(?is)(existing project match|canonical|duplicate|do not create.*project|matching.*repo.*project|small active|milestone|repo.?location label|needs_human_triage)"}
       - {type: not_contains, value: "create a new project just because"}
+      - {type: not_contains, value: "put all agent-skills backlog"}
   - id: cycle-only-current-commitment
     name: "Cycle only current commitment"
     category: edge
@@ -173,3 +154,28 @@ cases:
     prompt: "Route this important issue into the current cycle even though it is not being actively worked right now."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(cycle|current execution commitment|not actively|do not add|leave.*cycle.*empty|blocked|needs_human_triage)"}]
+  - id: adr-readiness-gate
+    name: "ADR readiness gate"
+    category: edge
+    realistic: true
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Create the Linear execution plan from strategy and refactor outputs, but the architecture-shaping decisions have not been compressed into .harness/decisions yet."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(decision_artifact_status|ADR|\\.harness/decisions|upstream_required|blocked|do not.*Linear.*backlog|architecture.*decision|before.*Linear)"}
+      - {type: not_contains, value: "create issues for all missing ADRs"}
+  - id: jsc-live-portfolio-routing
+    name: "JSC live portfolio routing"
+    category: happy
+    realistic: true
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use my JSC Dev Portfolio Linear setup to plan an agent-skills execution slice from .harness/refactors and avoid creating any new project, initiative, or labels unless the existing Dev Portfolio, Portfolio Ops, and agent-skills project structure cannot represent the work."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Dev Portfolio|Portfolio Ops|agent-skills|existing project match|repo control project|no new initiative|no new project|labels.*exist|confirmation|required|linear_mutation_status)"}
+      - {type: not_contains, value: "create a new initiative"}
+      - {type: not_contains, value: "create a new project"}

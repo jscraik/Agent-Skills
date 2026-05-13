@@ -41,6 +41,7 @@ outputs:
   - "XP operating artifact: blackboard_delta for new or changed durable requirements"
   - exact parallel research support via repo-research-analyst, learnings-researcher, and conditional external-research roles when needed
   - "reviewability surface for non-trivial specs: Command Summary with exactly one opening BLUF paragraph, Do/Do Not boundaries where useful, and No-Fog Gate"
+  - deterministic generated-artifact shape validation for non-trivial specs, including reader-first section order, stable IDs, conformance rules, and visual-reference decision
   - explicit validation and next-stage handoff guidance
 
 observability: >
@@ -78,3 +79,4 @@ risks:
   - advisory compression language; mitigate by making first-contact budget, standalone command admission, docs deletion budget, fresh-agent eval, ablation proof, and evidence-backed metrics blocking acceptance gates
   - review-stack sprawl; mitigate by requiring one selected execution slice and treating secondary Harness roots as context unless admitted by the Linear/refactor slice
   - model fog in dense specs; mitigate with one opening Bottom Line Up Front paragraph and No-Fog Gate for non-trivial artifacts
+  - generated specs passing skill-source audits while remaining hard to review; mitigate with `check_generated_artifact_shape.py --kind spec` before handoff

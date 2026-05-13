@@ -25,31 +25,32 @@ transcript.
 
 Use this default section order for standard specs:
 
-1. `Purpose`
-2. `Problem Statement`
-3. `User / Operator Scenarios`
-4. `Goals`
-5. `Non-Goals`
-6. `Current State / Evidence`
-7. `Proposed Behavior`
-8. `Requirements`
+1. `Command Summary`
+2. `Purpose`
+3. `Problem Statement`
+4. `User / Operator Scenarios`
+5. `Goals`
+6. `Non-Goals`
+7. `Current State / Evidence`
+8. `Proposed Behavior`
+9. `Requirements`
    - `Functional Requirements` with stable `FR-*` IDs
    - `Non-Functional Requirements` with stable `NFR-*` IDs when relevant
-9. `Interfaces`
-10. `Data / Domain Contract`
-11. `Security, Privacy, and Safety`
-12. `Accessibility and Operator Ergonomics`
-13. `Failure and Recovery`
-14. `Validation Plan`
-15. `Acceptance Criteria` with stable `SA-*` IDs
-16. `Visual References / Diagrams`
-17. `Implementation Notes`
-18. `Open Questions`
-19. `Decision`
-20. `Evidence and References`
-21. `Appendix A. Harness Metadata / Traceability`
-22. `Appendix B. Review Outcomes`
-23. `Appendix C. he-plan Handoff`
+10. `Interfaces`
+11. `Data / Domain Contract`
+12. `Security, Privacy, and Safety`
+13. `Accessibility and Operator Ergonomics`
+14. `Failure and Recovery`
+15. `Validation Plan`
+16. `Acceptance Criteria` with stable `SA-*` IDs
+17. `Visual References / Diagrams`
+18. `Implementation Notes`
+19. `Open Questions`
+20. `Decision`
+21. `Evidence and References`
+22. `Appendix A. Harness Metadata / Traceability`
+23. `Appendix B. Review Outcomes`
+24. `Appendix C. he-plan Handoff`
 
 For `spec_depth: lite`, keep the same order but collapse adjacent sections when
 that does not hide requirements, risk, or validation. For `spec_depth: full`,
@@ -131,4 +132,4 @@ Sections: overview, components, states, tokens, flows, accessibility, responsive
 
 ## Verification
 
-Verify required frontmatter and sections, stable `SA` or `VAC` IDs, tracked-work Linear traceability, explicit `linear_mutation_status`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <spec-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>` for tracked specs.
+Verify required frontmatter and sections, stable `SA` or `VAC` IDs, tracked-work Linear traceability, explicit `linear_mutation_status`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <spec-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>` for tracked specs. For non-trivial generated specs, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <spec-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <spec-path> --kind spec --json` so reader-first structure, IDs, conformance rules, and visual-reference decisions are validated before handoff.

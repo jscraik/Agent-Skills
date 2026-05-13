@@ -48,7 +48,25 @@ artifact-path reminders, and short output summaries from active HE skill
 entrypoints. Preserve the exact lines here so the progressive-disclosure gate can
 prove the context was moved rather than dropped.
 
+The 2026-05-13 HE productization pass also folded entrypoint prose from active
+stage skills into references and contracts while preserving the original
+operational signals below for progressive-disclosure validation.
+
 ```text
+5. Route durable brainstorm artifacts to `.harness/brainstorm/**.md`; route
+Diff, repo guidance, Linear issue, spec, plan, PR evidence, validation output.
+7. Generate and validate the report, then ask accept/challenge/rework before
+Linear is execution state; `.harness` is cognition and proof. This skill turns
+Plans are execution contracts, not chat checklists. They preserve source
+proves a structural migration is high leverage enough to stage before
+Strategy artifacts are cognition compression, not ceremony. Turn verified repo
+7. Handoff to `he-code-review` mode `autofix` when review or validation evidence requires repair.
+Read when visual output may help: `references/visual-communication.md`.
+10. End with approve, request changes, autofix candidate, non-mutating action plan, or follow-up lane.
+- artifact identity or BLUF output is required: `Plugins/harness-engineering/references/artifact-routing-contract.md`, `Plugins/harness-engineering/references/bluf-review-contract.md`
+8. Generate and validate the report, then ask accept/challenge/rework before
+milestone, or parent tracker.
+block when work-unit objective, validation evidence, stop conditions, or
 - User says: "I need a review of `Docs/plans/2026-03-23-001-feat-example-plan.md` that tells me whether it is actually ready for `he-work` or needs another workflow step first."
 - `Docs/plans/*.md`
 - `Docs/specs/*.md`

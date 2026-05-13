@@ -17,6 +17,55 @@ cases:
     prompt: "Can you create a deterministic refactor program for a high-leverage migration identified by review and strategy."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: evolution-lane-routing
+    name: "Evolution lane routing"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "In /Users/jamiecraik/dev/agent-skills, use he-refactor after `.harness/features/agent-skills-intent.md`, `.harness/review/agent-skills-architecture-review.md`, and `.harness/triage/agent-skills-triage.md` mention strategic compression, refactor programs, ADR compression, and core invariant compression. Route each lane and only create he-refactor-owned outputs when justified."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(selected_lane|request lane|lane routing)"}
+      - {type: regex, value: "(?is)(he-strategy|next_handoff|strategy missing)"}
+      - {type: regex, value: "(?is)(\\.harness/refactors|\\.harness/decisions|\\.harness/core|Do Not Create)"}
+  - id: strategic-compression-handoff
+    name: "Strategic compression handoff"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "No `.harness/strategy/**` artifact exists yet. Generate .harness/strategy/<repo-name>-strategy.md from features, review, and triage artifacts, then continue into refactor programs."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(next_handoff:\\s*he-strategy|Blocked:\\s*strategy missing|he-strategy)"}
+      - {type: regex, value: "(?is)(do not author|do not create|formal .*strategy|strategy artifact)"}
+  - id: adr-compression-high-value-only
+    name: "ADR compression high-value only"
+    category: pressure
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "Generate ADRs for every recommendation in the strategy and triage docs."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Do Not Create|reject|not create)"}
+      - {type: regex, value: "(?is)(irreversible|reversal cost|selected refactor phase|anti-drift|tactical)"}
+  - id: core-invariant-compression
+    name: "Core invariant compression"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: false
+    prompt: "For `/Users/jamiecraik/dev/agent-skills`, after a selected `.harness/refactors/2026-05-13-JSC-321-collapse-routing-indirection.md` migration identifies deterministic routing as non-negotiable, decide whether `.harness/core/routing-invariants.md` should be created and what irreducible invariant content belongs there."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(proven invariant|strategic assumption|preferred operating principle)"}
+      - {type: regex, value: "(?is)(irreducible|Do Not Create|drift risk|selected refactor phase)"}
   - id: small-cleanup
     name: "Small cleanup"
     category: negative
@@ -76,7 +125,10 @@ cases:
     realistic: true
     prompt: "Can you plan `.harness/refactors/2026-05-10-JSC-321-agent-skills-routing.md` as a small Linear milestone and parent issue without creating objects."
     deterministic_checks: *safe
-    acceptance: *accept
+    acceptance:
+      - {type: regex, value: "(?is)(without creating Linear objects|no Linear object|Linear mapping without mutation|do not create Linear)"}
+      - {type: regex, value: "(?is)\\.harness/evals/.+eval\\.md"}
+      - {type: regex, value: "(?is)(Workspace/team|Team key|JSC|Dev Portfolio|Portfolio Ops)"}
   - id: headless-refactor-choice
     name: "Headless refactor choice"
     category: edge

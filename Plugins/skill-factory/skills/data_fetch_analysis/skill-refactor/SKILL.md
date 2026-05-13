@@ -57,7 +57,7 @@ evidence with external docs when the question is about observed local behavior.
 1. Define scope and evidence boundaries; start with 2-3 focused surfaces before expanding.
 2. Prefer session-collector bundles or bounded extracts over raw transcripts.
 3. Include review artifacts, CodeRabbit/Codex findings, validation logs, and Plugin Eval reports when supplied.
-4. Group failures by root cause: coverage gap, instruction drift, routing mismatch, quality regression, context-package conflict, missing observation path.
+4. Group failures by root cause: coverage gap, instruction drift, routing mismatch, quality regression, artifact-shape gap, BLUF-semantics gap, visual-reference gap, generated-artifact validator gap, context-package conflict, missing observation path.
 5. Mark recurring PR/Codex/CodeRabbit/validator issues as `context feedback`; cite the proving artifact.
 6. Recommend a lane: improve with `skill-builder`, capture with `skillify`, merge/fold/retire with approval, or keep observing.
 7. Rank by impact, confidence, and implementation cost.
@@ -100,8 +100,33 @@ For Skill Factory handoff, include:
 Use collector-native labels exactly as supplied in `collector_root_causes`.
 Common collector labels include `coverage-gap`, `routing-mismatch`,
 `quality-regression`, `missing-validation`, and `environment-blocker`. Add
-derived labels such as `instruction-drift`, `context-package-conflict`, and
-`missing-observation-path` only under `normalized_root_causes`.
+derived labels such as `instruction-drift`, `artifact-shape-gap`,
+`reader-contract-gap`, `template-overapplication`, `bluf-semantics-gap`,
+`visual-reference-gap`, `generated-artifact-validator-gap`,
+`context-package-conflict`, and `missing-observation-path` only under
+`normalized_root_causes`.
+
+When a user-corrected failure names `$he-spec`, `$he-plan`, `.harness/specs/**`,
+or `.harness/plan/**`, preserve the named artifact owner as the affected skill
+even if the collector's generic `affected_skills` field points elsewhere. If
+collector stage signals include `he-spec` or `he-plan` but the affected-skill
+field maps to an unrelated skill such as `simplify`, report an attribution
+warning and include the artifact owner in `affected_skill_or_plugin`.
+
+Treat repeated operator prompts as explicit evidence. "deepen spec and run a
+technical review" maps to `affected_skill_or_plugin: he-spec` with normalized
+root causes `artifact-shape-gap`, `reader-contract-gap`, or
+`generated-artifact-validator-gap` as supported by artifact evidence. "deepen
+plan and run a technical review" maps to `affected_skill_or_plugin: he-plan`
+with the same normalized root-cause options plus `execution-contract-gap` when
+plan units, validation, rollback, or handoff evidence is missing.
+Also treat the long GPT-5.5 senior-reviewer prompts as explicit evidence:
+the spec prompt includes "specification maintainer, adversarial validation
+partner, and media artifact operator" plus "Investigate, review, and improve
+the specification"; the plan prompt includes "specification maintainer, and
+adversarial validation partner" plus "Review the plan below using professional
+engineering confidence standards." Map those to `he-spec` and `he-plan`
+respectively before deriving root causes.
 
 For recurring failure claims, require at least one of: two or more evidence
 anchors showing the same root cause; one high-confidence collector handoff plus

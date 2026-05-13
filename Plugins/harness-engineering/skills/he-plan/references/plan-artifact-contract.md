@@ -20,6 +20,7 @@ jsc-283-packaged-skill-behavior-assurance`, not the date.
 - Keep execution-time unknowns explicit. Do not pretend exact helper names, query shapes, or runtime discoveries are settled.
 - For tracked work, include a Linear/spec/plan/PR matrix with PR evidence left pending until delivery.
 - For tracked work, run `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <plan-path>` and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <plan-path>`.
+- For non-trivial generated plans, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <plan-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <plan-path> --kind plan --json` so the opening BLUF, execution-first body, plan units, source mapping, rollback, handoff, and visual-reference decision are validated before handoff.
 
 ## Execution-First Plan Template
 

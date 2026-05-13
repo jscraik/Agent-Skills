@@ -21,16 +21,21 @@ delivery evidence.
   codebase, or operational surface.
 - Prefer repo/location labels in the format `Repo › ...`.
 - Legacy plain repo labels remain valid only until migrated.
-- Use labels and views by default for repo slices, maintenance queues, security
+- Use labels and views by default for intake, maintenance queues, security
   backlog, roadmap lanes, issue triage, operational filtering, backlog review,
-  missing project review, and active work by repo.
-- Assign a project only when the issue contributes to a concrete bounded
-  deliverable with a clear completion state.
+  missing project review, and work not yet part of active execution.
+- When the JSC Dev Portfolio model is confirmed and a matching live repo control
+  project exists, repo-specific execution belongs in that project as the control
+  surface, with milestones or parent issues carrying the bounded slice.
+- Assign a project only when live evidence proves the destination and the issue
+  contributes to active repo execution, a concrete bounded deliverable, or
+  cross-repo coordination with a clear completion state.
 - Leave `project` empty for speculative ideas, isolated backlog items,
   maintenance work, exploratory tasks, operational debt, or repo-owned work not
   yet part of an active deliverable.
-- Do not create a project simply because a repository, subsystem, or domain
-  exists.
+- Do not create a new project simply because a repository, subsystem, or domain
+  exists. Existing repo control projects may be used; duplicate repo projects
+  must not be created.
 - Use `cycle` only for work actively being committed to now.
 - Keep speculative and future work lightweight: repo/location label, type label
   when clear, roadmap lane when clear, and no project or cycle until justified.
@@ -40,13 +45,15 @@ delivery evidence.
 
 Projects should emerge from multiple related issues, a clearly defined outcome,
 active coordination needs, meaningful delivery tracking, or execution spanning
-multiple work items. Remain in labels and views until the work proves stronger
-structure is necessary.
+multiple work items. In the JSC Dev Portfolio model, existing repo control
+projects are the durable project-level route for repo-specific execution; new
+projects still require explicit justification and approval.
 
-Use initiatives only for top-level strategic grouping. `Dev Portfolio` may be
-used as a portfolio-level rollup, but it must not replace useful project
-boundaries or become a dumping ground for unrelated work. Leave initiative
-empty when it does not improve review, prioritization, or sequencing.
+Use initiatives only for top-level strategic grouping. `Dev Portfolio` is the
+default top-level initiative for Jamie/JSC portfolio work when live evidence
+confirms the setup, but it must not replace useful project boundaries or become
+a dumping ground for unrelated work. Leave initiative empty when it does not
+improve review, prioritization, or sequencing.
 
 ## Repo Labels
 
@@ -123,3 +130,18 @@ Linear tool capability confirms issues support `labels`, `project`, `cycle`,
 missing from the live workspace, return `label_status: blocked` with a
 ready-to-create reusable label payload instead of silently weakening the filing
 rule.
+
+## JSC Portfolio Setup Evidence
+
+When the user asks to use the JSC portfolio setup, verify live state where
+tools allow it before planning mutation.
+
+Observed live model evidence from 2026-05-13 plugin reads:
+
+- `Dev Portfolio` exists as the top-level initiative.
+- `agent-skills` has a canonical repo control project plus a canceled duplicate;
+  use the canonical project and do not create another.
+- `Portfolio Ops` exists for cross-repo coordination; contradictory archived,
+  trashed, or backlog state blocks mutation until confirmed.
+- Common operating labels already exist; propose new labels only when repeated
+  work cannot fit existing labels.

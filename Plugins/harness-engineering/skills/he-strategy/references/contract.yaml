@@ -6,6 +6,7 @@ triggers:
   - architecture review
   - structural triage
   - repo cognition pipeline
+  - source-prompt equivalence comparison
   - strategic compression
   - ADR compression
   - core invariant compression
@@ -14,6 +15,8 @@ triggers:
 
 inputs:
   - repository source, configs, scripts, tests, CI, docs, prompts, skills, and workflows
+  - user-supplied reference material for review lenses, including books, notes, excerpts, or PDFs
+  - references/architecture-lens-canon.md when no fresh reference attachments are supplied
   - .harness/features/*.md
   - .harness/review/*.md
   - .harness/triage/*.md
@@ -42,6 +45,7 @@ outputs:
     pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slug>-triage.md"
   - root: ".harness/features + .harness/review + .harness/triage"
     mode: repo-cognition-pipeline
+    pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-intent.md, YYYY-MM-DD-JSC-###-<slug>-architecture-review.md, YYYY-MM-DD-JSC-###-<slug>-triage.md"
     pattern_without_linear: "YYYY-MM-DD-<repo-name>-intent.md, YYYY-MM-DD-<repo-name>-architecture-review.md, YYYY-MM-DD-<repo-name>-triage.md"
     note: "Use only when the user explicitly asks for intent, architecture review, and triage as one pipeline. Intent and review must feed triage; triage must compress rather than repeat."
   - root: .harness/strategy
@@ -77,7 +81,15 @@ risks:
   - strategy relationships hidden in prose instead of a map or matrix when visual structure would reduce review effort
   - full-pipeline requests collapsing into a single generic strategy document
 
-observability: "Record source artifacts read, inspection method or command, affected systems or modules, confidence level, operational impact, drift or moat impact when relevant, fact/interpretation/assumption separation, visual reference status, dated output path or Do Not Create classification, source prompt family coverage when applicable, evidence and traceability matrix, and validation outcomes recorded as pass, fail, or blocked."
+overlays:
+  source_prompt_equivalence:
+    status: cross_cutting
+    applies_when: "The user asks whether a skill, artifact, or workflow captures an original prompt or prior method."
+    required_fields: "coverage verdict, covered requirements, missing requirements, evidence depth, source prompt family, downstream confidence, and gaps that require a patch, handoff, or Do Not Create classification."
+
+observability: "Record source artifacts read, inspection method or command, affected systems or modules, confidence level, operational impact, drift or moat impact when relevant, fact/interpretation/assumption separation, clarification_status as asked/not_needed/assumed, ambiguity_impact, assumption_risk, visual reference status, dated output path or Do Not Create classification, source prompt family coverage when applicable, evidence and traceability matrix, and validation outcomes recorded as pass, fail, or blocked."
+
+reference_material_policy: "When the user supplies architecture or refactoring reference material, use it as an evaluative lens, not as repository evidence and not as material to summarize. When no fresh attachments are supplied, use references/architecture-lens-canon.md as the internal default lens set and record availability as internal-canon. Record which references were inspected, sampled, unavailable, not needed, or internal-canon. Do not claim attachment-specific coverage unless the material was actually inspected. Repository conclusions still require repo evidence."
 
 rollback_procedure: "If an artifact is wrong, identify unsupported conclusions, move them to Unknown or remove them, replace low-value governance with Do Not Create, and never delete existing .harness artifacts without explicit user approval."
 
