@@ -21,7 +21,14 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file",
+      "lint_failure",
+      "test_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -41,7 +48,13 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "git_state",
+      "lint_failure",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -61,7 +74,13 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -79,7 +98,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -97,7 +120,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -113,7 +140,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -133,7 +164,12 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file",
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -151,7 +187,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-compound"
+    "selected_he_stage": "he-compound",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -167,7 +208,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -185,7 +230,12 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -201,7 +251,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-compound"
+    "selected_he_stage": "he-compound",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -219,7 +273,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-compound"
+    "selected_he_stage": "he-compound",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -231,7 +290,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-compound"
+    "selected_he_stage": "he-compound",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -251,7 +311,13 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-compound"
+    "selected_he_stage": "he-compound",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -267,7 +333,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -279,7 +349,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -295,7 +366,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-brainstorm"
+    "selected_he_stage": "he-brainstorm",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -307,7 +382,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-code-review"
+    "selected_he_stage": "he-code-review",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -319,7 +395,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -335,7 +412,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -347,7 +428,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -365,7 +447,12 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -381,7 +468,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -397,7 +488,11 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -415,7 +510,11 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -433,7 +532,11 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -451,7 +554,12 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -469,7 +577,12 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -487,7 +600,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-compound"
+    "selected_he_stage": "he-compound",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -505,7 +623,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -523,7 +646,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -541,7 +668,12 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -561,7 +693,12 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file",
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -583,7 +720,14 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -601,7 +745,12 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file",
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -617,7 +766,11 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -633,7 +786,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -651,7 +808,11 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -663,7 +824,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-router"
+    "selected_he_stage": "he-router",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -675,7 +837,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-router"
+    "selected_he_stage": "he-router",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -697,7 +860,14 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-router"
+    "selected_he_stage": "he-router",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file",
+      "test_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -715,7 +885,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -735,7 +910,13 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -753,7 +934,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-brainstorm"
+    "selected_he_stage": "he-brainstorm",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -771,7 +957,12 @@
       "network"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "network"
+    ]
   },
   {
     "actions": [
@@ -783,7 +974,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-work"
+    "selected_he_stage": "he-work",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -795,7 +987,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -813,7 +1006,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-compound"
+    "selected_he_stage": "he-compound",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -825,7 +1023,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -837,7 +1036,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -849,7 +1049,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -865,7 +1066,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -887,7 +1092,14 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-brainstorm"
+    "selected_he_stage": "he-brainstorm",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file",
+      "lint_failure",
+      "test_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -899,7 +1111,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -917,7 +1130,12 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-brainstorm"
+    "selected_he_stage": "he-brainstorm",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "test_failure",
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -933,7 +1151,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-work"
+    "selected_he_stage": "he-work",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -945,7 +1167,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -957,7 +1180,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -975,7 +1199,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-work"
+    "selected_he_stage": "he-work",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -987,7 +1216,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -999,7 +1229,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -1017,7 +1248,12 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -1035,7 +1271,12 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file",
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -1047,7 +1288,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -1059,7 +1301,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -1071,7 +1314,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -1083,7 +1327,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-plan"
+    "selected_he_stage": "he-plan",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -1101,7 +1346,12 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-code-review"
+    "selected_he_stage": "he-code-review",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file",
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -1117,7 +1367,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-code-review"
+    "selected_he_stage": "he-code-review",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -1129,7 +1383,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-code-review"
+    "selected_he_stage": "he-code-review",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -1141,7 +1396,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-code-review"
+    "selected_he_stage": "he-code-review",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -1159,7 +1415,12 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-compound"
+    "selected_he_stage": "he-compound",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -1175,7 +1436,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-code-review"
+    "selected_he_stage": "he-code-review",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -1197,7 +1462,14 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-compound"
+    "selected_he_stage": "he-compound",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -1215,7 +1487,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -1235,7 +1511,13 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-brainstorm"
+    "selected_he_stage": "he-brainstorm",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "test_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -1257,7 +1539,14 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-work"
+    "selected_he_stage": "he-work",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file",
+      "test_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -1269,7 +1558,8 @@
     ],
     "recurring_signals": [],
     "schema_version": 1,
-    "selected_he_stage": "he-code-review"
+    "selected_he_stage": "he-code-review",
+    "outcome": "pass"
   },
   {
     "actions": [
@@ -1291,7 +1581,13 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -1311,7 +1607,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -1331,7 +1632,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -1349,7 +1655,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -1367,7 +1677,11 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -1385,7 +1699,11 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-fix-bugs"
+    "selected_he_stage": "he-fix-bugs",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -1401,7 +1719,11 @@
       "missing_file"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-code-review"
+    "selected_he_stage": "he-code-review",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file"
+    ]
   },
   {
     "actions": [
@@ -1425,7 +1747,15 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -1449,7 +1779,15 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-work"
+    "selected_he_stage": "he-work",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -1471,7 +1809,14 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-brainstorm"
+    "selected_he_stage": "he-brainstorm",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file",
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -1491,7 +1836,13 @@
       "lint_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-router"
+    "selected_he_stage": "he-router",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file",
+      "git_state",
+      "lint_failure"
+    ]
   },
   {
     "actions": [
@@ -1515,7 +1866,15 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-spec"
+    "selected_he_stage": "he-spec",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -1537,7 +1896,14 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-work"
+    "selected_he_stage": "he-work",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "missing_file",
+      "lint_failure",
+      "network",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -1561,7 +1927,15 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-work"
+    "selected_he_stage": "he-work",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -1579,7 +1953,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-code-review"
+    "selected_he_stage": "he-code-review",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state"
+    ]
   },
   {
     "actions": [
@@ -1599,7 +1978,13 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-work"
+    "selected_he_stage": "he-work",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -1619,7 +2004,13 @@
       "test_failure"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-brainstorm"
+    "selected_he_stage": "he-brainstorm",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ]
   },
   {
     "actions": [
@@ -1639,6 +2030,12 @@
       "git_state"
     ],
     "schema_version": 1,
-    "selected_he_stage": "he-reliability-review"
+    "selected_he_stage": "he-reliability-review",
+    "outcome": "blocked",
+    "blocker_reasons": [
+      "lint_failure",
+      "test_failure",
+      "git_state"
+    ]
   }
 ]

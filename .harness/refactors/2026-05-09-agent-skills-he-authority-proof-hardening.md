@@ -281,10 +281,21 @@ Can run in parallel: `no`
 
 Validation requirements:
 
-- Packaging hygiene gate.
-- Focused `he-eval-report` validator test.
-- Lifecycle release eval runner degraded-mode test.
-- Router sample skip/fail test.
+- Command: `python3 Plugins/harness-engineering/scripts/check_packaging_hygiene.py`
+  Acceptance: exit code 0; stdout contains "packaging hygiene: pass"
+  Script: Plugins/harness-engineering/scripts/check_packaging_hygiene.py
+
+- Command: `python3 -m pytest Plugins/harness-engineering/skills/he-eval-report/tests/ -q`
+  Acceptance: exit code 0; all tests pass with no failures
+  Script: Plugins/harness-engineering/skills/he-eval-report/tests/
+
+- Command: `python3 Plugins/harness-engineering/scripts/run_lifecycle_release_evals.py --degraded-mode`
+  Acceptance: exit code 0; stdout contains "degraded mode: pass" or expected degraded behavior reported
+  Script: Plugins/harness-engineering/scripts/run_lifecycle_release_evals.py
+
+- Command: `python3 -m pytest Plugins/harness-engineering/scripts/ -k "router_sample" -q`
+  Acceptance: exit code 0; router sample skip/fail behavior confirmed
+  Script: Plugins/harness-engineering/scripts/ (router sample test)
 
 Rollback conditions:
 

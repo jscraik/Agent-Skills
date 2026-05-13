@@ -1,3 +1,16 @@
+---
+schema_version: 1
+artifact_id: 2026-05-10-he-fix-bugs-codex-harness-skill
+artifact_type: generated-image-sidecar
+canonical_slug: 2026-05-10-he-fix-bugs-codex-harness-skill
+title: From Prompt Skill -> Codex Harness Skill
+harness_stage: he-media
+status: blocked
+date: 2026-05-10
+repository_image_path: .harness/media/2026-05-10-he-fix-bugs-codex-harness-skill.png
+prompt_metadata_path: .harness/media/2026-05-10-he-fix-bugs-codex-harness-skill-prompt.md
+---
+
 # From Prompt Skill -> Codex Harness Skill
 
 ## Purpose
