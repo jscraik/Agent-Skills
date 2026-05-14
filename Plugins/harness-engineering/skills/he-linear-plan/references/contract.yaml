@@ -29,6 +29,7 @@ inputs:
   - live Linear project, label, initiative, and duplicate-project evidence when tool access is available
   - Linear issue, project, milestone, and initiative identifiers when available
   - actual Linear plugin/app evidence for team, project, initiative, label, duplicate, archived, canceled, and trashed state when the Linear connector is available
+  - actual Linear plugin/app evidence for issue-label, project-label, tag, template, state, cycle, milestone, and status compatibility when creation or update is planned
 
 outputs:
   - root: .harness/linear
@@ -43,6 +44,8 @@ outputs:
   - core_artifact_status: "Required when architecture, routing, execution, governance, cognition, moat, anti-drift, or future-agent invariants influence execution; use present, missing, blocked, not_applicable, or upstream_required. This skill consumes .harness/core evidence but does not generate it."
   - existing_project_match: "Required when repo-specific work is routed; identify the matched repo project, the evidence source, duplicate/canceled alternatives, and whether mutation is safe."
   - live_linear_setup_status: "Required when Linear connector evidence is available or requested; use verified, blocked, partial, unavailable, or not_applicable and include team, initiative, repo project, Portfolio Ops, labels, duplicate, archived, canceled, trashed, and mutation-safety evidence."
+  - label_status: "Required when planned objects need labels/tags; use verified, blocked, partial, unavailable, or not_applicable and distinguish issue labels, project labels, repo/location labels, type labels, roadmap labels, policy labels, and reusable ready-to-create label payloads."
+  - template_status: "Required when issue creation/update is planned; use selected, blocked, unavailable, or not_applicable and include the selected Bug, Feature, Research, Release, or Governance / Policy template or the blocker preventing template-safe creation."
   - linear_mutation_status: "Required on every output; use not_requested, confirmation_required, blocked, created, updated, or not_applicable."
   - git_staging_status: "Required when a local Linear plan artifact is written or updated; stage only current-turn files."
   - staged_paths: "Repo-relative paths staged for handoff, or empty when staging is blocked/not_applicable."
@@ -83,12 +86,15 @@ risks:
   - ignoring existing repo control projects and creating duplicate projects
   - reopening canceled, archived, or trashed projects without explicit approval
   - treating contradictory live project state, such as canonical plus trashed or backlog plus mutation target, as safe routing
+  - treating labels, tags, or templates as implied by prose when the live Linear setup has not been verified
+  - conflating issue labels with project labels and silently filing objects with the wrong label surface
+  - creating untemplated Linear issues when template availability, template name, or template ID cannot be verified
   - ready-to-create payloads being mistaken for applied changes
   - technically neat work being promoted to Now without story value or a feedback signal
   - local artifacts hiding missing live Linear mutation, confirmation, or connector blockers
   - multi-issue plans hiding dependency or route complexity that should be visible as an issue tree, dependency map, or eval-gate table
 
-observability: "Record source artifacts read, ADR status, core artifact status, live Linear setup status, live Linear evidence or blocker, destination, repo/location label, existing project match, duplicate/canceled/archived/trashed findings, project/cycle reasons, Now/Next/Later/Do Not Create, Now value basis, dependencies, eval gates, human/agent route, visual reference status, PR/release evidence rules, traceability, output path or Do Not Create, Linear mutation status, and pass/fail/blocked validation."
+observability: "Record source artifacts read, ADR status, core artifact status, live Linear setup status, live Linear evidence or blocker, destination, repo/location label, existing project match, duplicate/canceled/archived/trashed findings, issue-label status, project-label status, tag compatibility, template status, project/cycle reasons, Now/Next/Later/Do Not Create, Now value basis, dependencies, eval gates, human/agent route, visual reference status, PR/release evidence rules, traceability, output path or Do Not Create, Linear mutation status, and pass/fail/blocked validation."
 
 rollback_procedure: "If the destination is wrong, mark needs_human_triage and do not create objects; if the plan creates backlog noise, collapse to fewer parent issues or classify as Do Not Create; if a Linear object was accidentally created, stop and ask the user before modifying or deleting it; do not recommend closure unless eval and drift proof are present."
 

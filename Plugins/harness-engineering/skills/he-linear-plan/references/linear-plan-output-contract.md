@@ -59,6 +59,16 @@ Linear.
   `upstream_required`, or `not_applicable`
 - `existing_project_match`: project name, live evidence source, status,
   duplicate/canceled alternatives, and mutation safety
+- `live_linear_setup_status`: one of `verified`, `blocked`, `partial`,
+  `unavailable`, or `not_applicable`; include team, initiative, repo project,
+  Portfolio Ops, duplicate, canceled, archived, trashed, and mutation-safety
+  evidence when the connector is available or requested
+- `label_status`: one of `verified`, `blocked`, `partial`, `unavailable`, or
+  `not_applicable`; distinguish issue labels, project labels, repo/location
+  labels, type labels, roadmap labels, policy labels, and tags
+- `template_status`: one of `selected`, `blocked`, `unavailable`, or
+  `not_applicable`; identify the chosen template or the blocker preventing
+  template-safe creation
 - `repo_location_label` for every issue payload, preferably `Repo › ...`
 - `project_assignment_reason`: bounded deliverable reason or `empty`
 - `cycle_assignment_reason`: current execution commitment reason or `empty`
@@ -83,14 +93,20 @@ matching template:
 - `Release`: release planning, validation, or cut work.
 - `Governance / Policy`: policy, control, or process-rule changes.
 
-If no template fits, ask before creating the issue. Do not silently create an
-untemplated issue.
+If no template fits, ask before creating the issue. If the live Linear tool
+surface cannot verify template names or template IDs, set `template_status: blocked`
+or `template_status: unavailable`, include the closest intended
+template type, and keep `linear_mutation_status: blocked` or
+`confirmation_required`. Do not silently create an untemplated issue.
 
 ## Label Policy
 
 Use existing labels first. Prefer already-live labels such as Developer
 Experience, Reliability, Governance, Automation, type labels, roadmap labels,
-repo/location labels, and policy labels when they preserve routing value. Propose
+repo/location labels, and policy labels when they preserve routing value. Linear
+"tags" in user prompts map to the live label surface unless the connector
+exposes a distinct tag object. Distinguish issue labels from project labels; a
+project label match is not proof that the issue label can be applied. Propose
 new labels only when the same missing label would be reused across multiple
 future work items; explain why existing labels are insufficient and avoid
 one-off labels.
@@ -104,8 +120,17 @@ Type label and one Roadmap label:
 - Release -> Release + Reliability + Type > Docs + Roadmap > Roadmap: Now
 - Governance / Policy -> Policy + Governance + Type > Docs + Roadmap > Roadmap: Next
 
+Use the exact live label names/IDs from Linear when they differ in display form
+from this conceptual mapping, for example `Bug` with parent `Type (workspace)`
+instead of inventing a literal `Type > Bug` label.
+
 If classification is unclear, keep the issue in Triage and ask. Prefer updating an
 existing issue over creating a duplicate.
+
+When the live workspace lacks a required mapped label, set `label_status: blocked`
+or `partial` and include a reusable ready-to-create label payload. Do
+not silently weaken the mapping by dropping type, roadmap, repo/location, policy,
+or operating labels.
 
 ## Filing Model
 
@@ -167,6 +192,17 @@ Use this template for proposed issues. Do not create them during the plan.
   the initiative improves review, prioritization, or sequencing.
 - Do not create new initiatives, projects, labels, issues, comments, or status
   changes without explicit user confirmation after plan review.
+- When the Linear connector is available or the user asks to check the actual
+  `@linear` setup, verify profile/team, `Dev Portfolio`, matching repo project,
+  `Portfolio Ops`, duplicate projects, canceled/archived/trashed state, issue
+  labels, project labels, statuses, cycles/milestones when relevant, and issue
+  template availability before recommending mutation.
+- If live state is contradictory, for example a canonical repo project is both
+  the intended destination and `trashed:true`, set `live_linear_setup_status: blocked`,
+  preserve the evidence, and keep mutation blocked until the user
+  confirms the intended target.
+- If exact project lookup is tool-sensitive, prefer stable IDs from list results
+  and mark the ambiguity instead of creating or selecting by approximate name.
 - If destination cannot be proven, mark `needs_human_triage` and ask once when
   interactive steering is available.
 - User pressure to create one issue per observation must preserve the filter:
@@ -198,6 +234,12 @@ confirms Jamie/JSC portfolio work:
 - Top-level initiative `Dev Portfolio`.
 - Cross-repo project `Portfolio Ops`.
 - Repo-specific work routes to the matching live repo control project.
+- Query issue labels in the JSC team scope and project labels separately.
+- Treat project labels, issue labels, and user-facing "tags" as separate
+  compatibility checks even when names overlap.
+- Use the matching issue template for each ready-to-create payload; if template
+  names or IDs are not available from the active tool surface, mark template
+  creation blocked or confirmation-gated.
 
 Do not create a new initiative or project unless the existing Dev Portfolio,
 Portfolio Ops, and repo-project structure cannot represent the work cleanly and

@@ -126,22 +126,50 @@ Linear when the distinction matters.
 ## Live Linear Validation
 
 Linear tool capability confirms issues support `labels`, `project`, `cycle`,
-`links`, `state`, `priority`, and `delegate` fields. If required labels are
-missing from the live workspace, return `label_status: blocked` with a
-ready-to-create reusable label payload instead of silently weakening the filing
-rule.
+`links`, `state`, `priority`, and `delegate` fields. Before recommending live
+mutation, reconcile the actual Linear setup with the plan:
+
+- profile and OAuth connectivity
+- JSC team and `JSC` key
+- `Dev Portfolio` initiative
+- matching repo project and duplicate/canceled/archived/trashed alternatives
+- `Portfolio Ops` for cross-repo work
+- issue statuses and current execution states
+- project labels and issue labels as separate surfaces
+- repo/location, type, roadmap, policy, and operating labels/tags
+- milestones and cycles when proposed
+- issue template names or IDs for the selected issue kind
+
+User-facing "tags" map to Linear labels unless the active connector exposes a
+distinct tag object. If required labels/tags are missing from the live
+workspace, return `label_status: blocked` with a ready-to-create reusable label
+payload instead of silently weakening the filing rule. If the correct issue
+template cannot be verified, return `template_status: blocked` or
+`template_status: unavailable` and do not create untemplated issues.
 
 ## JSC Portfolio Setup Evidence
 
 When the user asks to use the JSC portfolio setup, verify live state where
 tools allow it before planning mutation.
 
-Observed live model evidence from 2026-05-13 plugin reads:
+Observed live model evidence from 2026-05-14 plugin reads:
 
-- `Dev Portfolio` exists as the top-level initiative.
-- `agent-skills` has a canonical repo control project plus a canceled duplicate;
-  use the canonical project and do not create another.
-- `Portfolio Ops` exists for cross-repo coordination; contradictory archived,
-  trashed, or backlog state blocks mutation until confirmed.
-- Common operating labels already exist; propose new labels only when repeated
-  work cannot fit existing labels.
+- The authenticated user was available through the Linear app, and the `JSC`
+  team resolved to `Jscraik`.
+- `Dev Portfolio` resolved as the top-level initiative.
+- `agent-skills` resolved to a canonical repo control project plus a canceled
+  duplicate. The canonical result also reported `trashed:true`, which blocks
+  mutation until the intended live destination is confirmed.
+- `Portfolio Ops` resolved for cross-repo coordination, but name lookup can be
+  tool-sensitive; prefer stable IDs from list results and block mutation on
+  trashed/backlog contradictions until confirmed.
+- Common operating project labels and team-scoped issue labels exist for
+  Developer Experience, Reliability, Governance, and Automation.
+- The JSC issue-label surface includes `agent-skills` under `Repo`, Roadmap
+  lanes, and type labels such as `Bug`, `Feature`, `Research`, `Docs`, and
+  `Refactor`; use exact live label names/IDs rather than inventing display-only
+  labels.
+- Template availability was evidenced from Linear documentation, but the active
+  app tool surface did not expose a template listing call in this session. Treat
+  exact template IDs/names as `template_status: blocked` or
+  `confirmation_required` unless the user or tool context supplies them.
