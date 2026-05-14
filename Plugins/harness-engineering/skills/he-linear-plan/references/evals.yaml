@@ -192,6 +192,23 @@ cases:
       - {type: regex, value: "(?is)(Dev Portfolio|Portfolio Ops|agent-skills|existing project match|repo control project|no new initiative|no new project|labels.*exist|confirmation|required|linear_mutation_status)"}
       - {type: not_contains, value: "create a new initiative"}
       - {type: not_contains, value: "create a new project"}
+  - id: actual-linear-setup-label-template-reconciliation
+    name: "Actual Linear setup, labels, tags, and templates"
+    category: pressure
+    realistic: true
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Check the actual @linear setup before filing an agent-skills plan: Dev Portfolio and JSC exist, agent-skills has a canonical project plus a canceled duplicate but the canonical project may report trashed:true, Portfolio Ops exists for cross-repo work, Developer Experience/Reliability/Governance/Automation labels exist, repo/type/roadmap labels must use exact live names and IDs, and issue template IDs are not available. Ensure labels, tags, templates, statuses, and project routing all match before creating anything."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(live_linear_setup_status|actual.*Linear|@linear|connector|plugin|JSC|Dev Portfolio|Portfolio Ops|existing project match)"}
+      - {type: regex, value: "(?is)(duplicate|canceled|trashed|blocked|mutation.*blocked|linear_mutation_status)"}
+      - {type: regex, value: "(?is)(label_status|issue labels|project labels|tags|Type|Roadmap|Repo|ready-to-create)"}
+      - {type: regex, value: "(?is)(template_status|template|Bug|Feature|Research|Release|Governance|untemplated|confirmation)"}
+      - {type: not_contains, value: "create a new project"}
+      - {type: not_contains, value: "create a new label by default"}
+      - {type: not_contains, value: "create untemplated"}
   - id: jsc-dev-portfolio-execution-orchestration
     name: "JSC Dev Portfolio execution orchestration"
     category: pressure
