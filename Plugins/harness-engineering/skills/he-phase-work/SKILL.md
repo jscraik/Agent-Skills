@@ -39,7 +39,8 @@ Phase work is not just a timer. The heartbeat wakes the thread every 10 minutes;
 
 - Workspace path, approved artifact, target issue/PR, stop condition, phase, and expected validation.
 - Cadence is always a 10 minute thread heartbeat through he-heartbeat.
-- Collector bundle path, or permission to generate one from `~/.agents/session-collector`.
+- Collector bundle path, or permission to generate one from `~/.agents/session-collector`,
+  plus Codex provenance status when the phase loop cites session evidence.
 - Branch, dirty state, changed files, review policy, and write, Linear, git staging, and automation authority.
 
 ## Outputs
@@ -49,12 +50,17 @@ When structured, return `schema_version: 1`, `phase_work_id`, `heartbeat_id`, `t
 Also include selected stage `he-phase-work`, `subagent_policy`,
 `roles_used`, `roles_recommended`, and `roles_missing` from the shared subagent
 call policy.
+When PR-bound or session-evidence-backed, include `codex_provenance` and
+`pr_safety_trace` using the shared provenance contracts.
 
 ## Preconditions
 
 - Approved phase plan is discoverable and current.
 - Local instructions and deeper `AGENTS.md` guidance are checked.
-- Collector evidence is fresh and redacted, or the recovery step is known.
+- Collector evidence is fresh and redacted when required by the phase loop. If
+  the loop cites session evidence, provenance is classified as found,
+  not_found, blocked, or not_applicable before continuation; otherwise record
+  provenance as not_applicable.
 - Unrelated edits and next-phase scope are excluded.
 - Authority is explicit for repo writes, Linear writes, and scoped git add.
 
@@ -75,19 +81,22 @@ call policy.
    `~/.codex/agents/manifest.json`, and follow the shared subagent call policy
    before calling or recommending helper roles.
 3. Ensure there is exactly one matching 10 minute he-heartbeat scheduler for the target, or block if automation authority is missing. The heartbeat prompt must wake this workflow and return to these gates.
-4. Read or generate the bounded collector bundle. Use the artifacts named in the [phase gate contract](references/phase-gate-contract.md) unless raw fallback is required.
-5. Select the first incomplete, reopened, or evidence-missing approved phase. Do not pull scope from adjacent specs, review notes, or follow-up ideas.
-6. If evidence is missing, stale, unredacted, or ambiguous, set `slack_policy: blocked`, report the smallest recovery step, and stop the phase loop.
-7. Continue only the active phase through `he-work`.
-8. At phase end, run the gate sequence: `simplify`, the smallest relevant tests or validation command, conditional `he-fix-bugs` only when failing evidence exists, and `he-code-review`.
-9. Update Linear for the phase only when tracker-write authority is explicit; otherwise record `linear_update_status: blocked` with the exact update text to apply.
-10. Apply the git staging contract to files changed in the completed phase only; report unrelated dirty paths and do not stage them.
-11. Repeat by heartbeat until all phases are complete or a stop rule fires.
-12. After the final phase, run `he-eval-report`, then `he-reinforce`, then `he-reconcile`, and apply one final scoped `git add` only for closeout artifacts produced by those stages.
+4. Read or generate the bounded collector bundle. Use the artifacts named in the [phase gate contract](references/phase-gate-contract.md); do not inspect raw transcript, rollout, OTEL, hook, or tool-event fallback yet.
+5. Classify Codex provenance from collector public output before any raw transcript, rollout, OTEL, hook, or tool-event fallback. Use raw fallback only after the collector source is missing, blocked, or explicitly insufficient, and record the fallback as sensitive local evidence.
+6. Select the first incomplete, reopened, or evidence-missing approved phase. Do not pull scope from adjacent specs, review notes, or follow-up ideas.
+7. If evidence is missing, stale, unredacted, provenance-blocked, or ambiguous, set `slack_policy: blocked`, report the smallest recovery step, and stop the phase loop.
+8. Continue only the active phase through `he-work`.
+9. At phase end, run the gate sequence: `simplify`, the smallest relevant tests or validation command, conditional `he-fix-bugs` only when failing evidence exists, and `he-code-review`.
+10. Update Linear for the phase only when tracker-write authority is explicit; otherwise record `linear_update_status: blocked` with the exact update text to apply.
+11. Apply the git staging contract to files changed in the completed phase only; report unrelated dirty paths and do not stage them.
+12. Repeat by heartbeat until all phases are complete or a stop rule fires.
+13. After the final phase, run `he-eval-report`, then `he-reinforce`, then `he-reconcile`, and apply one final scoped `git add` only for closeout artifacts produced by those stages.
 
 ## Validation Gates
 
 - Collector bundle exists with required artifacts.
+- Codex provenance is classified as found, not_found, blocked, or not_applicable when session evidence is cited.
+- PR-bound handoff has a public-safe HE trace ID and redaction status, or a blocker explains why it cannot be produced.
 - Cadence is 10 minutes; do not substitute a different interval for phase work.
 - Destination, target, stop condition, Linear authority, git staging authority, and forbidden unattended actions are explicit.
 - Selected phase maps to the approved plan scope.
@@ -100,6 +109,7 @@ call policy.
 ## Evidence Requirements
 
 - Link each continuation, stop, Linear update, staging action, or confidence claim to live state, collector artifacts, validation, review findings, or tracker evidence.
+- Do not infer tests, correctness, Linear updates, PR readiness, or closure from provenance alone.
 - Separate verified facts, assumptions, inferred risks, unknowns, and runtime-validation claims.
 - Do not use mailbox/status text as completion evidence when artifacts or review reports were requested.
 
@@ -162,6 +172,7 @@ call policy.
 - Read when: resolving helper roles, subagent policy, or fallback reporting -> [Plugins/harness-engineering/references/subagent-call-contract.md](../../references/subagent-call-contract.md)
 - Read when: checking stage-to-role mappings or missing-role fallback -> [Plugins/harness-engineering/references/subagent-routing.md](../../references/subagent-routing.md)
 - Read when: preserving sustainable cadence, bounded slack, and stale-evidence stop rules -> [Plugins/harness-engineering/references/xp-operating-contract.md](../../references/xp-operating-contract.md)
+- Read when: session collector, Codex provenance, trace IDs, or PR safety trace affects phase continuation -> [Plugins/harness-engineering/references/codex-provenance-contract.md](../../references/codex-provenance-contract.md), [Plugins/harness-engineering/references/pr-safety-trace-contract.md](../../references/pr-safety-trace-contract.md)
 
 ## Output Format
 

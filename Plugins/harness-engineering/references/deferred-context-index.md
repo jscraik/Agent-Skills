@@ -36,6 +36,9 @@ the reference below, and let validators catch stale duplicated procedure text.
   - `references/session-evidence-contract.md`
   - `references/session-evidence-skillify-triage.md`
   - `references/session-evidence-trace-context.md`
+  - `references/session-evidence-extraction.md`
+  - `references/codex-provenance-contract.md`
+  - `references/pr-safety-trace-contract.md`
 - Review, ideation, and agent-native lenses:
   - `references/bluf-review-contract.md`
   - `references/visual-reference-contract.md`
@@ -68,6 +71,7 @@ Load references by trigger instead of by habit:
 | Non-trivial tracked work | `references/linear-tracker-gate.md` | resolved, created, blocked, or user-opted-out tracker status |
 | Existing tracked plan or Linear-backed slice is consumed | `references/linear-delta-capture-gate.md` | delta admitted, rejected, or blocked before scope changes |
 | Original prompt, external workflow, old manual method, or plugin comparison is the baseline | `references/source-prompt-coverage-contract.md` | source_prompt_status, evidence_depth, coverage_scope, not_inspected, repo-specific drift signals, authority limits, downstream_confidence, and next route |
+| Artifact, handoff, or PR cites Codex sessions, session collector, rollout, transcript, OTEL, thread ID, turn ID, or trace ID | `references/session-evidence-trace-context.md`, `references/codex-provenance-contract.md`, `references/pr-safety-trace-contract.md` | he_trace_id, provenance source/status, redaction status, public-safe trace fields, proof limits, and no raw sensitive local IDs or paths in public text |
 | Coding-harness-managed repo | `references/coding-harness-command-bridge.md`, `references/execution-slice-contract.md` | command evidence or explicit blocked bridge fields |
 | Stage could load broad domain, strategy, reframe, Linear, security, specialist, or eval gates | `references/gate-selection-contract.md` | smallest gate profile, required contracts, skipped contracts, and minimum proof |
 | Stage would copy external process, add lifecycle surface area, expand governance, or preserve complexity without proven HE-specific failure evidence | `references/first-principles-contract.md` | first_principles_check with verified failure, smallest mechanism, decision type, rejected analogy, and proceed/ask/defer/reject/delete outcome |
@@ -187,13 +191,13 @@ Authoritative preservation locations:
 
 - `fixtures/budget-archive/**`
 - `fixtures/preserved-context/**`
-- stage `references/source-prompt-preservation.md` files
+- stage-specific source-prompt preservation references
 
 Historical compact-entrypoint lines from prior compression passes belong in:
 
 - `fixtures/budget-archive/**`
 - `fixtures/preserved-context/**`
-- stage `references/source-prompt-preservation.md` files
+- stage-specific source-prompt preservation references
 
 Do not duplicate active `SKILL.md` procedure text here. If future agents need
 an old line for migration evidence, link the historical fixture path and state
