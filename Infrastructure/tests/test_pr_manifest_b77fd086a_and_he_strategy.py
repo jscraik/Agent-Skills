@@ -76,10 +76,10 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 def _load_command_surface() -> dict[str, Any]:
     """
-    Load and parse the command-surface JSON file.
+    Read COMMAND_SURFACE_PATH and parse its contents as JSON.
     
     Returns:
-        dict[str, Any]: The top-level JSON object parsed from COMMAND_SURFACE_PATH.
+        dict[str, Any]: The parsed top-level JSON object from COMMAND_SURFACE_PATH.
     """
     return json.loads(COMMAND_SURFACE_PATH.read_text(encoding="utf-8"))
 
@@ -133,9 +133,9 @@ class TestManifestRevisionBump(unittest.TestCase):
 
     def test_agent_ops_revision_is_b77fd086a(self) -> None:
         """
-        Ensure every record in the agent-ops manifest contains a git-style hash in `provenance.source_revision`.
+        Verify all records in the agent-ops manifest have git-shaped `provenance.source_revision` values.
         
-        Asserts each record's `provenance.source_revision` matches the repository's revision pattern (a hexadecimal git hash).
+        Asserts each record's `provenance.source_revision` matches the repository revision pattern (a hexadecimal git hash).
         """
         self._assert_all_revisions(SKILLSET_DIR / "agent-ops" / "manifest.jsonl")
 
@@ -148,26 +148,47 @@ class TestManifestRevisionBump(unittest.TestCase):
         self._assert_all_revisions(SKILLSET_DIR / "backend-platform" / "manifest.jsonl")
 
     def test_content_publishing_revision_is_b77fd086a(self) -> None:
+        """
+        Validate that every record in .skillsets/content-publishing/manifest.jsonl has a git-like provenance.source_revision.
+        """
         self._assert_all_revisions(SKILLSET_DIR / "content-publishing" / "manifest.jsonl")
 
     def test_frontend_ui_revision_is_b77fd086a(self) -> None:
         """
-        Assert that every record in the frontend-ui manifest has a git-shaped `provenance.source_revision`.
+        Verify every record in the frontend-ui manifest contains a git-shaped `provenance.source_revision`.
+        
+        This test delegates to the common revision assertion helper to validate each manifest entry's
+        `provenance.source_revision` matches the repository's revision pattern.
         """
         self._assert_all_revisions(SKILLSET_DIR / "frontend-ui" / "manifest.jsonl")
 
     def test_harness_engineering_revision_is_b77fd086a(self) -> None:
+        """
+        Validates that every record in .skillsets/harness-engineering/manifest.jsonl contains a git-style provenance.source_revision.
+        
+        This test delegates to the common manifest assertion helper to run per-record subtests and pattern checks.
+        """
         self._assert_all_revisions(SKILLSET_DIR / "harness-engineering" / "manifest.jsonl")
 
     def test_mobile_native_revision_is_b77fd086a(self) -> None:
+        """
+        Assert every record in .skillsets/mobile-native/manifest.jsonl contains a git-like source_revision.
+        
+        This test verifies each record's `provenance.source_revision` matches the repository's git-hash-shaped revision pattern (hex characters, length ≥ 7).
+        """
         self._assert_all_revisions(SKILLSET_DIR / "mobile-native" / "manifest.jsonl")
 
     def test_plugin_factory_revision_is_b77fd086a(self) -> None:
+        """
+        Check that every record in .skillsets/plugin-factory/manifest.jsonl contains a git-like `provenance.source_revision` value.
+        """
         self._assert_all_revisions(SKILLSET_DIR / "plugin-factory" / "manifest.jsonl")
 
     def test_product_strategy_revision_is_b77fd086a(self) -> None:
         """
-        Validates that every record in product-strategy/manifest.jsonl has provenance.source_revision set to the expected new revision b77fd086a.
+        Asserts every record in product-strategy/manifest.jsonl has a git-like hex string in `provenance.source_revision`.
+        
+        This test checks that each manifest record's `provenance.source_revision` is a hex revision value matching the repository's expected git-hash shape.
         """
         self._assert_all_revisions(SKILLSET_DIR / "product-strategy" / "manifest.jsonl")
 
@@ -181,17 +202,17 @@ class TestManifestRevisionBump(unittest.TestCase):
 
     def test_skill_factory_revision_is_b77fd086a(self) -> None:
         """
-        Verify every record in the skill-factory manifest contains a git-style `provenance.source_revision`.
+        Check that every record in the skill-factory manifest has a git-shaped `provenance.source_revision`.
         
-        Asserts the manifest is non-empty and that each record's `provenance.source_revision` matches the repository's expected hash-shaped revision pattern.
+        Asserts the manifest is non-empty and each record's `provenance.source_revision` matches the repository's expected hash-shaped revision pattern.
         """
         self._assert_all_revisions(SKILLSET_DIR / "skill-factory" / "manifest.jsonl")
 
     def test_no_manifest_contains_old_revision_4f340e4f0(self) -> None:
         """
-        Assert that no manifest.jsonl record in any skillset contains the old source revision '4f340e4f0'.
+        Assert no manifest.jsonl record under .skillsets/* contains the old source revision '4f340e4f0'.
         
-        For each record in .skillsets/*/manifest.jsonl this test checks `provenance.source_revision` and fails if it equals OLD_MANIFEST_REVISION.
+        Iterates each manifest and fails if any record's `provenance.source_revision` equals `OLD_MANIFEST_REVISION`.
         """
         for path in sorted(SKILLSET_DIR.glob("*/manifest.jsonl")):
             records = _load_jsonl(path)
@@ -228,9 +249,10 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
 
     def setUp(self) -> None:
         """
-        Load the command-surface.json file and cache its top-level handles list for test methods.
+        Prepare parsed command-surface JSON and cache its handles for use by tests.
         
-        Stores the parsed JSON object in self._data and assigns its "handles" list (or an empty list if missing) to self._handles.
+        Parses the repository command-surface file into `self._data` and sets `self._handles`
+        to the top-level `"handles"` list from that data, or an empty list if the key is missing.
         """
         self._data = _load_command_surface()
         self._handles = self._data.get("handles", [])
@@ -305,10 +327,9 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
 
     def test_coding_harness_old_sha256_not_present(self) -> None:
         """
-        Verify the `coding-harness` handle in command-surface.json does not use the old SHA256.
+        Assert the 'coding-harness' handle in command-surface.json does not use the legacy SHA256.
         
-        Asserts that a handle named "coding-harness" exists and that its `provenance.source_sha256`
-        is not equal to `CODING_HARNESS_OLD_SHA256`; fails if the handle is missing or the SHA256 matches the old value.
+        Fails the test if the 'coding-harness' handle is missing or if its `provenance.source_sha256` equals `CODING_HARNESS_OLD_SHA256`.
         """
         entry = next(
             (h for h in self._handles if h.get("handle") == "coding-harness"), None
@@ -323,10 +344,9 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
 
     def test_he_strategy_sha256_is_hash_shaped(self) -> None:
         """
-        Verify the `he-strategy` handle's provenance SHA256 in command-surface.json is a 64-character hexadecimal string.
+        Verify the 'he-strategy' handle in command-surface.json has a 64-character hexadecimal provenance SHA256.
         
-        Raises:
-            AssertionError: If the `he-strategy` handle is missing or its `provenance.source_sha256` is not a 64-character hex string.
+        Asserts that the handle is present and that its `provenance.source_sha256` matches a 64-hex-character pattern.
         """
         entry = next(
             (h for h in self._handles if h.get("handle") == "he-strategy"), None
@@ -357,6 +377,11 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
         )
 
     def test_all_source_revisions_are_valid_git_hashes(self) -> None:
+        """
+        Assert that every handle in the loaded command-surface has a provenance.source_revision matching the expected git-hash pattern.
+        
+        This test iterates over the parsed `handles` list and creates a subTest for each handle, validating that the handle's `provenance.source_revision` conforms to `_REVISION_PATTERN`.
+        """
         for entry in self._handles:
             rev = entry.get("provenance", {}).get("source_revision", "")
             with self.subTest(handle=entry.get("handle", "?")):
@@ -385,6 +410,11 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         self._case_ids = {c["id"] for c in self._cases}
 
     def test_schema_version_is_2_0(self) -> None:
+        """
+        Assert that the evals.yaml declares schema_version "2.0".
+        
+        Checks the loaded `evals.yaml` top-level `schema_version` value equals the string "2.0" and fails the test with a clear message if it does not.
+        """
         self.assertEqual(
             str(self._evals.get("schema_version", "")),
             "2.0",
@@ -393,17 +423,17 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
 
     def test_skill_name_is_he_strategy(self) -> None:
         """
-        Assert the evals.yaml 'skill_name' field equals "he-strategy".
+        Verify the evals.yaml top-level "skill_name" is "he-strategy".
         
-        Checks that the loaded evals document contains the key `skill_name` with the exact value "he-strategy"; the test fails if the value differs or is missing.
+        Asserts that the parsed evals document contains the key "skill_name" with the exact value "he-strategy".
         """
         self.assertEqual(self._evals.get("skill_name"), "he-strategy")
 
     def test_stated_vs_implied_intent_case_present(self) -> None:
         """
-        Ensure the evals configuration contains the "stated-vs-implied-intent" case ID.
+        Check that the evals configuration includes the "stated-vs-implied-intent" case ID.
         
-        Raises an assertion failure if that case ID is not present in the loaded `cases` set.
+        Fails the test if that case ID is not present in the loaded `cases` set.
         """
         self.assertIn(
             "stated-vs-implied-intent",
@@ -423,9 +453,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
 
     def test_first_principles_rejects_template_copying_case_present(self) -> None:
         """
-        Asserts that the evals.yaml contains the "first-principles-rejects-template-copying" case ID.
-        
-        Raises an assertion failure with a clear message if the case ID is missing.
+        Assert presence of the "first-principles-rejects-template-copying" case ID in the loaded evals.yaml cases.
         """
         self.assertIn(
             "first-principles-rejects-template-copying",
@@ -435,9 +463,9 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
 
     def test_stated_vs_implied_intent_is_realistic(self) -> None:
         """
-        Assert the "stated-vs-implied-intent" eval case is realistic and contains required metadata.
+        Check that the "stated-vs-implied-intent" eval case is realistic and includes required metadata.
         
-        Verifies the case with id "stated-vs-implied-intent" has a truthy `realistic` flag and includes the `why_realistic` and `expected_behavior` fields.
+        Asserts the case's `realistic` flag is truthy and that the `why_realistic` and `expected_behavior` keys are present.
         """
         case = next(c for c in self._cases if c["id"] == "stated-vs-implied-intent")
         self.assertTrue(
@@ -453,9 +481,9 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
 
     def test_stated_vs_implied_intent_acceptance_checks_stated_and_implied(self) -> None:
         """
-        Asserts the 'stated-vs-implied-intent' eval case acceptance contains language for both stated intent and implied intent.
+        Verify the 'stated-vs-implied-intent' case acceptance contains both stated and implied intent language.
         
-        Fails the test if the case's acceptance values do not mention both "stated intent" and "implied intent" (case-insensitive).
+        Asserts the concatenated acceptance values include phrases matching "stated intent" and "implied intent" (case-insensitive).
         """
         case = next(c for c in self._cases if c["id"] == "stated-vs-implied-intent")
         acceptance = case.get("acceptance", [])
@@ -495,9 +523,9 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
 
     def test_stated_vs_implied_intent_acceptance_checks_evidence_surfaces(self) -> None:
         """
-        Ensure the "stated-vs-implied-intent" eval's acceptance text references at least one concrete evidence surface.
+        Assert the `stated-vs-implied-intent` case acceptance references at least one concrete evidence surface.
         
-        Checks that the acceptance criteria mention one or more of: "command surface", "tests", "validation gate", or "runtime path" (case-insensitive).
+        Checks (case-insensitive) that the acceptance text mentions at least one of: "command surface", "tests", "validation gate", or "runtime path".
         """
         case = next(c for c in self._cases if c["id"] == "stated-vs-implied-intent")
         acceptance = case.get("acceptance", [])
@@ -531,9 +559,9 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
 
     def test_first_principles_acceptance_requires_rejection_language(self) -> None:
         """
-        Require that the "first-principles-rejects-template-copying" eval case's acceptance text enforces rejection or template-copying guardrail language.
+        Assert that the first-principles rejection case's acceptance text enforces rejection or template-copying guardrails.
         
-        Checks that the case's acceptance entries contain at least one of the observable phrases: "first principles", "reject", "Do Not Create", or "template" (case-insensitive).
+        Checks that at least one acceptance `value` contains one of: "first principles", "reject", "Do Not Create", or "template" (case-insensitive).
         """
         case = next(
             c for c in self._cases
@@ -600,9 +628,9 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
 
     def test_xp_feedback_slice_acceptance_covers_smallest_feedback_stop_pivot(self) -> None:
         """
-        Asserts that the `xp-feedback-slice` eval case acceptance patterns mention smallest/feedback/stop/pivot/evidence language.
+        Checks that the `xp-feedback-slice` eval case acceptance text includes at least one of: "smallest", "feedback", "stop", "pivot", or "evidence".
         
-        If the `xp-feedback-slice` case is not present the test is skipped. The test combines all acceptance `value` strings and asserts the combined text matches any of: "smallest", "feedback", "stop", "pivot", or "evidence" (case-insensitive).
+        Skips the test if the `xp-feedback-slice` case is not present. The assertion is performed case-insensitively against the case's acceptance values.
         """
         case = next((c for c in self._cases if c["id"] == "xp-feedback-slice"), None)
         if case is None:
@@ -626,22 +654,22 @@ class TestHeStrategySkillMd(unittest.TestCase):
 
     def setUp(self) -> None:
         """
-        Load the he-strategy SKILL.md content into the test instance for use by test methods.
+        Prepare the test fixture by loading the he-strategy SKILL.md into the instance for use by test methods.
         
-        Reads SKILL_MD_PATH using UTF-8 encoding and stores the file contents on self._text.
+        Sets `self._text` to the contents of `SKILL_MD_PATH`. Raises `AssertionError` if the required file is missing.
         """
         self._text = _read_required_text(SKILL_MD_PATH, "SKILL.md")
 
     def test_skill_md_exists(self) -> None:
         """
-        Check that the he-strategy SKILL.md file exists at the expected repository path.
-        
-        Raises:
-            AssertionError: if the SKILL.md file is missing.
+        Asserts the he-strategy SKILL.md file exists at the expected repository path.
         """
         self.assertTrue(SKILL_MD_PATH.exists(), "SKILL.md is missing")
 
     def test_skill_md_has_frontmatter_name(self) -> None:
+        """
+        Assert that the SKILL.md frontmatter includes the literal 'name: he-strategy'.
+        """
         self.assertIn("name: he-strategy", self._text)
 
     def test_skill_md_has_required_sections(self) -> None:
@@ -681,7 +709,7 @@ class TestHeStrategySkillMd(unittest.TestCase):
 
     def test_skill_md_references_source_prompt_preservation(self) -> None:
         """
-        Check that SKILL.md contains a reference to "source-prompt-preservation.md".
+        Asserts the SKILL.md content includes a reference to "source-prompt-preservation.md".
         """
         self.assertIn("source-prompt-preservation.md", self._text)
 
@@ -702,6 +730,11 @@ class TestHeStrategySkillMd(unittest.TestCase):
         self.assertIn("Do not\ncreate Linear work", self._text.replace("  ", " "))
 
     def test_skill_md_not_empty(self) -> None:
+        """
+        Assert that the SKILL.md file contains more than 500 characters.
+        
+        Ensures the loaded skill documentation is not empty or trivially short by requiring its length to exceed 500 characters.
+        """
         self.assertGreater(len(self._text), 500)
 
 
@@ -715,9 +748,12 @@ class TestSourcePromptPreservation(unittest.TestCase):
 
     def setUp(self) -> None:
         """
-        Load the `source-prompt-preservation.md` fixture into `self._text` for use by the tests.
+        Load the source-prompt-preservation.md fixture into the test instance.
         
-        Reads the file at SOURCE_PROMPT_MD_PATH and stores its UTF-8 text content on the test instance as `self._text`. Raises AssertionError if the required file is missing.
+        Stores the file's UTF-8 contents at self._text for use by the tests.
+        
+        Raises:
+            AssertionError: If the required file is missing or cannot be read.
         """
         self._text = _read_required_text(
             SOURCE_PROMPT_MD_PATH, "source-prompt-preservation.md"
@@ -742,6 +778,11 @@ class TestSourcePromptPreservation(unittest.TestCase):
         )
 
     def test_implied_intent_requirement_present(self) -> None:
+        """
+        Asserts that the source-prompt-preservation document includes the phrase "implied intent".
+        
+        Performs a case-insensitive check of the loaded document text and fails the test if the phrase is missing.
+        """
         self.assertIn(
             "implied intent",
             self._text.lower(),
@@ -760,9 +801,9 @@ class TestSourcePromptPreservation(unittest.TestCase):
     def test_evidence_surfaces_enumerated(self) -> None:
         # The doc must list concrete evidence surfaces for the comparison
         """
-        Verify that source-prompt-preservation.md enumerates the concrete evidence surfaces used for stated-vs-implied comparisons.
+        Assert that source-prompt-preservation.md enumerates concrete evidence surfaces for stated-vs-implied comparisons.
         
-        Asserts the document mentions (case-insensitively) the following evidence surfaces: "command surfaces", "tests", "validation gates", and "runtime paths".
+        Checks (case-insensitive) that the document mentions: "command surfaces", "tests", "validation gates", and "runtime paths".
         """
         for surface in ["command surfaces", "tests", "validation gates", "runtime paths"]:
             with self.subTest(surface=surface):
@@ -802,7 +843,7 @@ class TestStrategyOutputContract(unittest.TestCase):
 
     def setUp(self) -> None:
         """
-        Load the strategy-output-contract.md text into self._text for use by the test methods.
+        Load the required strategy-output-contract.md text into self._text for use by the test methods.
         
         Raises:
             AssertionError: if the required file is missing or cannot be read.
@@ -848,9 +889,7 @@ class TestStrategyOutputContract(unittest.TestCase):
 
     def test_do_not_create_guardrail_present(self) -> None:
         """
-        Asserts that the strategy output contract documents the "Do Not Create" guardrail.
-        
-        Checks that the loaded strategy output contract text contains the exact phrase "Do Not Create".
+        Ensure the strategy output contract includes the exact guardrail phrase "Do Not Create".
         """
         self.assertIn("Do Not Create", self._text)
 
@@ -867,15 +906,15 @@ class TestStrategyOutputContract(unittest.TestCase):
 
     def test_evidence_traceability_matrix_required(self) -> None:
         """
-        Asserts that the strategy output contract document includes an evidence and traceability matrix.
+        Verify the strategy output contract document includes the phrase "evidence and traceability matrix".
         
-        Checks that the lowercase form of the loaded document text contains the phrase "evidence and traceability matrix".
+        Checks that the loaded document text contains that phrase (case-insensitive).
         """
         self.assertIn("evidence and traceability matrix", self._text.lower())
 
     def test_stop_or_pivot_condition_required(self) -> None:
         """
-        Verify the strategy-output-contract document requires a "stop or pivot condition".
+        Asserts that the strategy-output-contract document includes the phrase "stop or pivot condition".
         """
         self.assertIn("stop or pivot condition", self._text.lower())
 
