@@ -2,24 +2,6 @@
 
 A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
 
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
 A governed **Agent Skills Kit** repository for Codex and AI coding agents.
 Author skills once, validate quality, expose `$` command handles, and sync
 routed skills and plugins into runtime projections through the `ask` CLI.
