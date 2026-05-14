@@ -68,6 +68,8 @@ Assumptions and requirements:
 - The skill body is navigation-first and delegates deep detail to `references/`.
 - Every skill must satisfy the enforced agent-native contract: execution boundaries, expected artifacts, repair/failure behavior, and validation or acceptance criteria.
   Read when: applying that contract to generated artifacts, CLIs, subagents, credentials, or multi-phase repair: [agent-native skill contract](../../../../../Infrastructure/references/agent-native-skill-contract.md).
+- For non-trivial operational skills, apply the agent-native operational pattern extraction checklist before drafting: requested vs implied work, tool resolution, stale-evidence handling, inspectable outputs, safety class, retry, and closeout.
+  Read when: adapting reusable patterns from compact operational skills without copying local assumptions or prose style: [external skill pattern extraction](../../../../../Infrastructure/references/external-skill-patterns.md).
 - Every non-trivial skill must satisfy the OpenAI-style design contract: one primary user intent, explicit side-effect class, minimized context surface, stable output contract, and confirmation behavior for consequential writes.
   Read when: shaping triggers, side effects, structured output, or headless assumptions: [OpenAI-style plugin design contract](../../../../../Infrastructure/references/openai-style-plugin-design-contract.md).
 - Read when: choosing whether the requested factory work should build a new artifact, improve an existing one, stay docs-only, or stop: [First-principles factory gate](../../../../../Infrastructure/references/first-principles-factory-gate.md).
@@ -149,6 +151,7 @@ python3 scripts/init_skill.py <skill-name> --path <output-directory> [--resource
 4. Implement reusable resources first, then update `SKILL.md` so it points to those resources.
    - If slimming `SKILL.md`, move required detail to `references/` before deleting prose and add a `Read when: <condition>` signpost from `SKILL.md`.
    - Keep the agent-native contract explicit in `SKILL.md`; do not hide ownership boundaries, artifact expectations, repair behavior, or acceptance criteria only in deep references.
+   - For operational skills, preserve the first-command/tool-resolution path and the final proof path in the entrypoint; move bulky command examples and environment notes to references.
    - Keep the OpenAI-style design checkpoint explicit for non-trivial skills: primary intent, side-effect class, output shape, steering behavior, and validation evidence.
 5. Generate or refresh `agents/openai.yaml` when needed:
 
