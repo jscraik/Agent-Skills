@@ -16,17 +16,14 @@ requested.
 ## Artifact Sequence
 
 1. Intent: `.harness/features/YYYY-MM-DD-JSC-###-<slug>-intent.md` when Linear
-   context is known, otherwise `.harness/features/YYYY-MM-DD-<repo-name>-intent.md`.
-   Explain what the repo is trying to become, what must stay stable, what must
-   not drift, what is leverage, and what is accidental complexity.
+   is known, otherwise `.harness/features/YYYY-MM-DD-<repo-name>-intent.md`.
+   Explain direction, stability, drift risk, leverage, and accidental complexity.
 2. Architecture review: `.harness/review/YYYY-MM-DD-JSC-###-<slug>-architecture-review.md`
-   or `.harness/review/YYYY-MM-DD-<repo-name>-architecture-review.md`. Pressure-test
-   coherence, modularity, domain integrity, agent-native architecture,
-   governance, complexity, and moat claims.
-3. Triage: `.harness/triage/YYYY-MM-DD-JSC-###-<slug>-triage.md` or
-   `.harness/triage/YYYY-MM-DD-<repo-name>-triage.md`. Compress intent and review
-   into execution routing, deletions, anti-drift protections, ADR/refactor/eval/
-   governance candidates, and findings that should not become work.
+   or repo-name equivalent. Pressure-test coherence, modularity, domain
+   integrity, agent-native design, governance, complexity, and moat claims.
+3. Triage: `.harness/triage/YYYY-MM-DD-JSC-###-<slug>-triage.md` or repo-name
+   equivalent. Compress intent/review into routing, deletions, anti-drift
+   protections, ADR/refactor/eval/governance candidates, and `Do Not Create`.
 
 Do not skip directly to triage unless intent and review are fresh enough. If
 stale, sampled, or absent, refresh them or mark triage authority limited.
@@ -34,12 +31,15 @@ stale, sampled, or absent, refresh them or mark triage authority limited.
 ## Evidence and Stance
 
 Inspect implementation reality before strategic claims: source, configs,
-manifests, scripts, CI/CD, tests, docs, prompts, skills, workflows, hooks,
-harness files, architecture boundaries, telemetry/observability, validation
-loops, orchestration, MCP integrations, memory/context systems, product language,
-roadmap/TODO/dead code, repeated abstractions, and coupling. Use bounded sampling
-only when necessary; record inspected, not inspected, sufficiency, confidence
-downgrade, and refresh needs.
+scripts, CI/CD, tests, docs, prompts, skills, workflows, hooks, harness files,
+boundaries, telemetry, validation, orchestration, MCP, memory/context, product
+language, roadmap/TODO/dead code, repeated abstractions, and coupling. Record
+sampling limits, sufficiency, confidence downgrade, and refresh needs.
+
+For repo intent, compare stated intent from docs/prompts/product language with
+implied intent from code, command surfaces, validation, tests, runtime paths,
+naming, generated artifacts, and coupling. Call out alignment, contradiction,
+missing proof, and code that reveals a different strategy than prose.
 
 Every major conclusion must separate hard evidence, strong inference, and weak
 assumption/speculation. Do not infer capability from README language, skill
@@ -56,31 +56,56 @@ not summarize books. Use supplied reference material when present; otherwise loa
 
 ## Required Sections
 
-Intent must include: Project Intent, Core Thesis, Strategic Direction, Intended
-Users, Non-Goals, System Philosophy, Architectural Patterns, Agent-Native Design
-Assumptions, Harness/Governance Model, Critical Constraints, Stable Interfaces,
-Sources of Complexity, Sources of Leverage, Probable Moat, Drift Risks, What
-Future Agents Should Preserve/Challenge, Open Questions, Recommended Decisions,
-Strategic Contradictions, Suggested Simplifications, Missing Capabilities,
-Long-Term Scalability Concerns, Drift Detection Signals, Evidence & Traceability
-Matrix.
+Intent must include: Project Intent, Stated Intent, Implied Intent, Alignment,
+Core Thesis, Strategic Direction, Intended Users, Non-Goals, System Philosophy,
+Architectural Patterns, Agent-Native Assumptions, Harness/Governance Model,
+Critical Constraints, Stable Interfaces, Complexity, Leverage, Probable Moat,
+Drift Risks, Future-Agent Preserve/Challenge, Open Questions, Recommended
+Decisions, Strategic Contradictions, Simplifications, Missing Capabilities,
+Scalability Concerns, Drift Detection Signals, Evidence & Traceability Matrix.
 
 Architecture review must include: Executive Summary, Reference Lens Status,
 Architectural Risk Assessment, Repository Cognition Review, Complexity Audit,
 Deep vs Shallow Module Analysis, Domain Integrity Review, Skill/Plugin
 Architecture Review, Agent-Native Capability Review, Governance & Workflow
-Review, Refactor Recommendations, Anti-Patterns, Drift Risks, Technical Debt,
-Strategic Review, Simplifications, Deletions, Core Investments, Scalability
-Risks, Moat Analysis, Competitive Replication Risk, Evidence Matrix.
+Review, Refactor Recommendations, Anti-Patterns Identified, Drift Risks,
+Technical Debt Hotspots, Strategic Review, Recommended Simplifications/
+Deletions/Core Investments, Long-Term Scalability Risks, Moat Analysis,
+Competitive Replication Risk, Evidence & Traceability Matrix.
 
 Triage must include: Executive Triage Summary, Immediate Architectural Risks,
-Strategic/Architectural/Operational/Governance/Agent-Native Findings, Complexity
-Without Leverage, Moat-Critical Systems, Fake Sophistication, Deletions,
-Refactor Candidates, Anti-Drift Priorities, Execution Priority Matrix,
-`Execution Routing Decisions (Linear | ADR | Refactor | Eval | Governance | Do
-Not Create)`, Recommended Eval Programs, Recommended Governance Changes,
-Recommended ADRs, Recommended Reframe Programs, Future Agent Risks,
-Compression Opportunities, Evidence Matrix.
+Strategic Findings, Architectural Findings, Operational Findings, Governance
+Findings, Agent-Native Findings, Complexity Without Leverage, Moat-Critical
+Systems, Fake Sophistication Signals, Recommended Deletions, Refactor
+Candidates, Anti-Drift Priorities, Execution Priority Matrix, Recommended Linear
+Initiatives, Recommended ADRs, Recommended Refactor Programs, Future Agent
+Operational Risks, Recommended Compression Opportunities, Evidence &
+Traceability Matrix.
+
+## Structural Triage Contract
+
+Structural triage consumes fresh-enough `.harness/features/*.md` and
+`.harness/review/*.md`; it classifies and routes instead of repeating,
+specifying, or backlog-dumping.
+
+Per finding: buckets strategic/architectural/operational/agent-native/
+governance/technical-debt; leverage `high|medium|low|false_sophistication`;
+route `Linear initiative|project|issue|ADR|refactor program|eval program|
+governance change|routing change|anti-drift enforcement|Do Not Create`;
+`should_become_work`; fact/interpretation/speculation; files/modules;
+confidence; operational/strategic impact; why it matters.
+
+Risk rows: severity, likelihood, blast radius, response. Complexity/deletion
+rows: why-exists, why-survived, why-harmful/removable, action
+`remove|collapse|merge|simplify|ignore|preserve`. Matrix columns:
+impact `critical|high|medium|low`; complexity `trivial|moderate|difficult|migration-risk`;
+importance `moat-critical|operational|architectural|cosmetic`; risk
+`drift|migration|regression|governance|cognition`; route; `should_become_work`.
+
+Anti-drift rows: determinism, cognition, local reasoning, hidden coupling,
+execution simplicity, future-agent reasoning. Future-agent risks: context cost,
+orchestration ambiguity, misleading abstractions, local reasoning, determinism,
+discoverability, token cost.
 
 ## Drift, Moat, Clarification, Handoff
 
@@ -99,6 +124,10 @@ scalability, UX philosophy, or commercial positioning. Use `request_user_input`
 when available; otherwise ask directly or record an open question and continue
 with the safest evidence-backed assumption. Record `clarification_status`,
 `ambiguity_impact`, and `assumption_risk`.
+
+When requested, save the artifact, use `request_user_input` for focused review
+when available, apply material corrections, and record
+`post_artifact_review_status`; mark unavailable review loops `blocked`.
 
 Intent, review, and triage are durable secondary context. They do not authorize
 implementation. Route candidates to ADR, reframe program, Linear, eval program,

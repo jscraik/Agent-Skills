@@ -14,15 +14,17 @@ that material and record its attachment status separately.
 
 ## Lens Checklist
 
-| Lens | Use it to test | Watch for |
+Use these as pressure prompts, not book summaries.
+
+| Lens | Test | Watch for |
 | --- | --- | --- |
-| Pragmatic engineering | Whether the repo helps humans and agents ship useful, reversible work without entropy. | Duplicate command contracts, routing drift, stale projections, docs not enforced by tooling, clever automation with manual sync cost. |
-| Philosophy of Software Design | Whether modules are deep enough to justify their interfaces and reduce cognitive load. | Pass-through wrappers, broad orchestrators, terminology drift, hidden dependencies, mixed abstraction levels, complexity laundering. |
-| Domain-Driven Design | Whether language and bounded contexts protect model integrity. | Fractured vocabulary, generated/runtime projections treated as source, overlapping skill/plugin ownership, context maps that exist only in prose. |
-| XP / feedback | Whether change can proceed safely in small, observable slices. | Slow or flaky gates, CI/local drift, keyword-only evals, large plans without feedback slices, weak stop/pivot conditions. |
-| Structural refactoring | Where complexity can be reduced mechanically without inventing a framework. | Giant files, repeated mode switches, nested policy conditionals, temporal coupling, spread-out state mutation, helpers that obscure intent. |
-| Agent-native architecture | Whether agents can discover, route, validate, and reason locally. | Ambiguous handles, projection/source drift, prompt growth without eval proof, missing authority boundaries, high-context workflows. |
-| Moat pressure | Whether defensibility is real operational leverage or impressive complexity. | Fake sophistication, unmeasured reliability claims, non-compounding process, weak trust surfaces, complexity that would vanish under simplification. |
+| Pragmatic engineering | DRY, orthogonality, reversibility, tracer-bullet paths, automation maturity, knowledge capture, and whether tooling reduces entropy. | Duplicate command contracts, routing drift, stale projections, unenforced docs, automation with manual sync cost. |
+| Philosophy of Software Design | Deep/shallow modules, pass-through abstractions, information leakage, change amplification, mixed levels, hidden dependencies, interface obviousness. | Complexity laundering, broad orchestrators, terminology drift, helpers that obscure intent. |
+| Domain-Driven Design | Ubiquitous language, bounded context integrity, anti-corruption boundaries, domain/service separation, model and naming stability. | Fractured vocabulary, generated/runtime projections treated as source, prose-only context maps, code that merely moves files and prompts. |
+| XP / feedback | Feedback-loop speed, CI/local parity, small safe slices, test realism, observability, stop/pivot conditions, whether change encourages learning or fear. | Slow/flaky gates, keyword-only evals, large plans without feedback slices. |
+| Structural refactoring | Giant orchestrators, temporal coupling, procedural leakage, spread state mutation, brittle conditionals, low-signal complexity, agent regression risk. | Repeated mode switches, nested policy conditionals, refactor choke points. |
+| Agent-native architecture | Skill/plugin discoverability, deterministic execution, context efficiency, machine-readable boundaries, validation loops, memory, workflow composability. | Ambiguous handles, projection/source drift, prompt growth without eval proof, missing authority boundaries. |
+| Moat pressure | What is hard to copy, measurable, compounding, and still valuable after simplification. | Fake sophistication, unmeasured reliability claims, weak trust surfaces, complexity that a smaller competitor could delete. |
 
 ## Required Claim Shape
 

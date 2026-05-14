@@ -18,9 +18,11 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Can you compress the intent, review, and triage artifacts into a durable strategic direction document."
+    prompt: "Read .harness/features, .harness/review, and .harness/triage; produce .harness/strategy/<repo-name>-strategy.md as strategic compression, not roadmap/review repeat. Include irreducible core, actual/false moat, deletions/core investments, non-negotiables, safe rewrite zones, risks, future-agent guidance, evidence."
     deterministic_checks: *safe
-    acceptance: *accept
+    acceptance:
+      - {type: regex, value: "(?is)(strategic compression|not.*roadmap|Irreducible Core|Actual Moat|False Moat)"}
+      - {type: regex, value: "(?is)(Should Be Deleted|Become Core|Non-Negotiables|Safe To Rewrite|Evidence & Traceability Matrix)"}
   - id: false-moat
     name: "False moat"
     category: happy
@@ -97,6 +99,18 @@ cases:
     acceptance:
       - {type: regex, value: "(?is)(high.?leverage|low.?leverage|false sophistication|deletion|should not become work|Do Not Create)"}
       - {type: regex, value: "(?is)(execution priority|anti.?drift|compression|triage)"}
+  - id: structural-triage-execution-prioritization
+    name: "Structural triage execution prioritization"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "Read .harness/features and .harness/review; produce .harness/triage/<repo-name>-triage.md. Do not repeat/spec. Separate leverage from false sophistication, classify, mark non-work, route justified items, include Execution Priority Matrix and evidence."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(structural.?triage|not.*backlog|should not become work|Do Not Create)"}
+      - {type: regex, value: "(?is)(Strategic Findings|Complexity Without Leverage|Fake Sophistication|Recommended Deletions|Execution Priority Matrix|Evidence & Traceability Matrix)"}
   - id: intent-artifact-depth
     name: "Intent artifact depth"
     category: edge
@@ -104,11 +118,26 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills` and generate a durable repo intent artifact using the plugin and skill architecture, `.skillsets` routing, projection sync, and validation wrappers as evidence. Make it about what the repo is trying to become, what must never drift, what is intentional leverage versus accidental complexity, and what future agents should preserve or challenge."
+    prompt: "Generate a repo intent artifact from agent-skills plugin/skill architecture, .skillsets routing, projection sync, and validators. Cover repo direction, drift limits, intentional leverage, accidental complexity, and future-agent preserve/challenge guidance."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(project intent|core thesis|stable interfaces|future agents|preserve|challenge)"}
       - {type: regex, value: "(?is)(intentional leverage|accidental complexity|must never drift|drift)"}
+      - {type: regex, value: "(?is)(stated intent|implied intent|docs.*code|code.*docs|implementation reality|prose claims)"}
+      - {type: regex, value: "(?is)(alignment|contradiction|missing proof|not.?inspected|evidence sufficiency)"}
+  - id: stated-vs-implied-intent
+    name: "Stated vs implied intent"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "Compare README/docs/product intent against Plugins, Skills, .skillsets, ./bin/ask, tests, validators, runtime paths, naming, generated artifacts, and coupling. Call out alignment, contradictions, proof gaps, confidence."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(stated intent|implied intent|docs|code|implementation reality)"}
+      - {type: regex, value: "(?is)(command surface|tests|validation gate|runtime path|naming|generated artifact|coupling)"}
+      - {type: regex, value: "(?is)(alignment|contradiction|missing proof|confidence|not.?inspected|evidence sufficiency)"}
   - id: architecture-review-lenses
     name: "Architecture review lenses"
     category: edge
@@ -116,7 +145,7 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Review the architecture using pragmatic engineering, deep versus shallow module analysis, domain integrity, XP feedback loops, refactoring heuristics, and agent-native capability. Do not summarize the books; use them as pressure systems."
+    prompt: "Review architecture using pragmatic engineering, deep/shallow modules, domain integrity, XP feedback, refactoring heuristics, and agent-native capability. Use lenses, not summaries."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(Pragmatic Programmer|pragmatic engineering)"}
@@ -125,6 +154,23 @@ cases:
       - {type: regex, value: "(?is)(Extreme Programming|XP|feedback loops)"}
       - {type: regex, value: "(?is)(Five Lines of Code|refactoring heuristics|structural refactoring)"}
       - {type: regex, value: "(?is)(agent.?native|evidence|traceability|moat)"}
+  - id: multi-disciplinary-architecture-review-depth
+    name: "Multi-disciplinary architecture review depth"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    prompt: "Produce .harness/review/<repo-name>-architecture-review.md using pragmatic, PoSD, XP, DDD, refactoring, agent-native, and moat lenses. Include sections, evidence matrix, direct critique, stated/implied intent, review loop."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(architecture.?review|repo.?cognition|Reference Lens Status|internal-canon|attached)"}
+      - {type: regex, value: "(?is)(Pragmatic|Philosophy of Software Design|Domain-Driven|Extreme Programming|Five Lines|structural refactoring)"}
+      - {type: regex, value: "(?is)(Executive Summary|Architectural Risk Assessment|Deep vs Shallow|Domain Integrity|Skill/Plugin|Agent-Native|Governance|Recommended Core Investments)"}
+      - {type: regex, value: "(?is)(Moat Analysis|Competitive Replication Risk|Direct Strategic Critique|Recommended Deletions)"}
+      - {type: regex, value: "(?is)(Evidence & Traceability Matrix|hard evidence|interpretation|speculation|confidence)"}
+      - {type: regex, value: "(?is)(stated intent|implied intent|docs.*code|code.*docs|implementation reality)"}
+      - {type: regex, value: "(?is)(post_artifact_review_status|request_user_input|review/refinement|blocked)"}
   - id: attached-reference-lenses
     name: "Attached reference lenses"
     category: edge

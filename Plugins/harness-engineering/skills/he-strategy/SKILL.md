@@ -112,14 +112,15 @@ Use plain Markdown, short sections, descriptive links, and non-color-only tables
 
 ## Examples
 
-- User asks: "Create `.harness/features/2026-05-13-agent-skills-intent.md`
-  from live `Plugins/`, `.skillsets/`, validator, and projection-sync evidence."
-- User asks: "Read `.harness/review/agent-skills-architecture-review.md` and
-  `.harness/triage/agent-skills-triage.md`; compress them into strategy or
+- When the user asks: "Inspect the current agent-skills checkout and create
+  `.harness/features/2026-05-13-agent-skills-intent.md` from live `Plugins/`,
+  `Skills/`, `.skillsets/`, validator, and projection-sync evidence."
+- When the user asks: "Read `.harness/review/agent-skills-architecture-review.md`
+  and `.harness/triage/agent-skills-triage.md`; compress them into strategy or
   return `Do Not Create` for low-value governance."
-- User asks: "Compare `$he-strategy` against my original repo cognition prompt
-  and report covered requirements, missing requirements, and downstream
-  confidence."
+- When the user asks: "Compare `$he-strategy` against my original repo cognition
+  prompt and report covered requirements, missing requirements, evidence depth,
+  not-inspected surfaces, and downstream confidence."
 
 ## Output Format
 

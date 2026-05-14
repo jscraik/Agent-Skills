@@ -5,64 +5,42 @@ strategy prompts without loading the full prompt text into `SKILL.md`.
 
 ## Covered Prompt Families
 
-- Repository Intent Extraction + Strategic Review
-- Multi-Disciplinary Architecture & Skill Review
-- Structural Triage & Execution Prioritization
-- Full Repository Cognition Pipeline: intent + architecture review + triage
-- Strategic Compression & Direction
-- Architectural Decision Compression
-- Core Knowledge Compression & Architectural Invariants
+Covered families: repo intent/strategy, architecture review, structural triage,
+repo cognition pipeline, strategic/decision/core compression.
 
 These are modes inside `he-strategy`, not separate top-level skills. When the
 user asks for intent, architecture review, and triage together, use
 `repo-cognition-pipeline` and load `repo-cognition-pipeline.md`.
 
-When the user asks whether HE output is equivalent to one of these original
-prompt workflows, load the shared source-prompt coverage contract at
-`Plugins/harness-engineering/references/source-prompt-coverage-contract.md`.
-Do not answer equivalence from the existence of matching artifacts alone.
+For equivalence checks, load
+`Plugins/harness-engineering/references/source-prompt-coverage-contract.md`;
+matching artifact names alone do not prove coverage.
 
 ## Preserved Requirements
 
 - infer intent from implementation reality, not marketing language
-- inspect repo source, configs, scripts, CI, tests, docs, prompts, skills,
-  workflows, hooks, integrations, governance, memory, and context systems when
-  relevant to the selected mode
+- compare docs/prompts/product intent with code-implied intent; report
+  alignment, contradiction, and missing proof
+- inspect relevant source, configs, CI, tests, docs, prompts, skills, hooks,
+  integrations, governance, memory, and context systems
 - separate verified facts, strong inferences, weak assumptions, and speculation
 - ask focused clarification questions only when ambiguity materially affects
   architecture, moat, governance, or agent workflow direction
-- evaluate agent-native design, deterministic execution, context management,
-  repository cognition, governance, validation loops, observability, typed
-  boundaries, maintainability, security posture, CI/CD maturity, prompt/skill
-  composability, operational resilience, and dependency discipline when relevant
+- evaluate agent-native design, determinism, context, governance, validation,
+  observability, typed boundaries, security, CI/CD, composability, resilience
 - explicitly pressure-test moat claims and false sophistication
 - define drift indicators and measurable anti-drift signals where possible
-- compress findings into leverage, deletion candidates, safe rewrite zones,
-  strategic priorities, non-negotiables, and future-agent guidance
+- for structural triage, consume prior intent/review artifacts without repeating
+  them; compress findings into leverage, deletion candidates, priorities,
+  non-negotiables, future-agent guidance, route, and `Do Not Create`
 - generate only high-value ADRs and only durable core invariant files
 - prevent ADR, governance, and artifact explosion
 - include an Evidence & Traceability Matrix for durable artifacts
+- for post-write review loops, save first, use `request_user_input` when
+  available, apply material corrections, and record `post_artifact_review_status`
 - record source prompt family coverage, evidence depth, coverage gaps,
   not-inspected surfaces, authority limits, original prompt coverage, and
   downstream confidence when comparing against an original prompt method
-
-## Real Output Patterns Observed
-
-The current repos use both legacy stable names and dated Linear names:
-
-- `.harness/features/agent-skills-intent.md`
-- `.harness/review/2026-05-08-JSC-283-...-technical-review.md`
-- `.harness/specs/2026-05-08-jsc-283-packaged-skill-behavior-assurance-spec.md`
-- `.harness/plan/2026-05-08-architecture-JSC-283-packaged-skill-behavior-assurance-plan.md`
-- `.harness/solutions/2026-05-08-jsc-283-packaged-skill-behavior-proof.md`
-- `.harness/strategy/agent-skills-strategy.md`
-- `.harness/decisions/ADR-007-portable-skill-and-memory-proof.md`
-- `.harness/core/architecture-invariants.md`
-
-For new lifecycle artifacts, prefer dated Linear filenames because they improve
-regression search, issue traceability, chronological review, and agentic
-retrieval. Keep stable canonical filenames for living policy surfaces such as
-core invariant files, and keep numbered ADR filenames for decision records.
 
 ## Compression Rule
 
@@ -76,7 +54,5 @@ Feature, review, triage, and strategy documents are secondary context. ADRs and
 core invariants may carry policy or decision weight, but implementation still
 requires admission through an execution slice.
 
-If source-prompt coverage is `partial`, `weak`, `sampled`, or `unknown`, the
-strategy artifact may still be useful as local cognition, but it must not be
-used as repo-wide authority for refactor, Linear, ADR, core, or closure claims
-without a deeper refresh.
+If coverage is `partial`, `weak`, `sampled`, or `unknown`, do not use the
+artifact as repo-wide authority without a deeper refresh.
