@@ -39,8 +39,9 @@ metadata:
 
 ## Outputs
 - `schema_version`
+- `heartbeat_status` as the first operational field: `created`, `updated`, `reused`, or `blocked`
 - active PR inventory with owner, branch, mergeability, checks, review-thread status, and blockers
-- heartbeat or cron status with stop rule
+- heartbeat or cron id/reuse evidence with explicit stop rule
 - fix ledger for CodeRabbit, Codex, and CI items
 - validation evidence with exact commands or tool outcomes
 - merge ledger with PR numbers and merge SHAs
@@ -48,7 +49,8 @@ metadata:
 - remaining blockers and next invocation when not complete
 
 ## Execution Boundaries
-- For any monitor, watch, keep-going, or until-green request, `[$he-heartbeat]` is mandatory: create or update exactly one thread heartbeat before starting the PR rotation unless a matching active heartbeat already exists.
+- For any monitor, watch, keep-going, or until-green request, `[$he-heartbeat]` is mandatory: create, update, or reuse exactly one thread heartbeat before starting the PR rotation unless a matching active heartbeat already exists. Start every sweep response by reporting `heartbeat_status`.
+- If heartbeat creation/reuse cannot be attempted because the automation surface, approval path, or local thread context is unavailable, set `heartbeat_status: blocked`, name the missing capability, and stop before PR rotation.
 - Use cron only when the user explicitly wants a detached workspace job; if the heartbeat/automation surface is unavailable, stop and report `blocked` instead of running an unmanaged long-lived sweep.
 - Use `[@github]` and `[@git-project-triage]` for open PR discovery, rotation order, mergeability, review state, and branch protection truth.
 - Use `[$autofix]`, `[@coderabbit]`, and `[@coderabbit]` subagent coverage for unresolved CodeRabbit threads and Codex P1-P3 findings.
@@ -59,7 +61,7 @@ metadata:
 ## Workflow
 1. Load applicable repo instructions, then record `git status --short --branch` and the active branch.
 2. Discover open PRs for the current project with GitHub and classify each PR by mergeability, required checks, review-thread state, CodeRabbit status, CircleCI status, and local branch/worktree ownership.
-3. Create or update one heartbeat with `he-heartbeat` unless a matching active automation already exists. Record the automation id or reuse evidence in the ledger before editing PRs. The stop rule is: all target PRs merged to `main`, cleanup completed, or a concrete blocker needs the user.
+3. Create, update, or reuse one heartbeat with `he-heartbeat` unless a matching active automation already exists. Record `heartbeat_status`, automation id or reuse evidence, and the stop rule before editing PRs. The stop rule is: all target PRs merged to `main`, cleanup completed, or a concrete blocker needs the user. If this step is blocked, stop here.
 4. Start a bounded rotation. For each PR, refresh live state before editing, after every push, and before merge.
 5. For unresolved review threads, invoke `autofix` with CodeRabbit and Codex inventory. Fix actionable items, classify stale or blocked items, and resolve only after evidence is current.
 6. For CI failures, invoke CircleCI coverage. Read the exact failed job logs, patch the smallest relevant cause, and rerun or wait for the affected checks.

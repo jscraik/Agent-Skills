@@ -16,7 +16,7 @@ metadata:
 ## Philosophy
 - Produce reproducible architecture artifacts before making architecture claims.
 - Start from live evidence and local patterns.
-- Do not remove important context for budget trimming; use progressive disclosure.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## When To Use
 - A repo architecture map or onboarding diagram is needed.

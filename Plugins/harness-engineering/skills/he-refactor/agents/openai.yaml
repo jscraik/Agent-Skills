@@ -1,3 +1,0 @@
-interface:
-  display_name: "Harness Engineering Refactor"
-  short_description: "Generate staged architectural refactor programs with rollback, eval proof, and Linear-ready mapping."

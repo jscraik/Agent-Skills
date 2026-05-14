@@ -16,7 +16,7 @@ metadata:
 ## Philosophy
 - Polish existing product UI without turning the work into a redesign.
 - Start from live evidence and local patterns.
-- Do not remove important context for budget trimming; use progressive disclosure.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## When To Use
 - UI polish, micro-interactions, transitions, or motion on an existing interface.

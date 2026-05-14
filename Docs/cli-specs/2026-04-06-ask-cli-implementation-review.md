@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-05-13 Refresh Note
+
+This report is a historical implementation review of the original 2026-04-06
+CLI slice. The live `ask` surface now includes product, runtime, reviewer,
+workout, MCP, and wiki topics in addition to the original repo, skills,
+plugins, evals, and graph surfaces. Use `./bin/ask --help` as the executable
+surface proof and
+[ask Product Golden Path Command Contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md)
+for the current product path.
+
 ## Executive Summary
 
 The `ask` (Agent Skills Kit) CLI has been reviewed against the `cli-spec` Gold Standard 2026 specification. Overall compliance is **GOOD** with minor issues identified.
@@ -12,7 +22,7 @@ The `ask` (Agent Skills Kit) CLI has been reviewed against the `cli-spec` Gold S
 | Component | Status | Notes |
 |-----------|--------|-------|
 | **ask CLI Core** | ✅ PASS | All core commands functional |
-| **cli-spec Skill** | ✅ PASS | Specification complete at `docs/cli-specs/2026-04-06-ask-cli-spec.md` |
+| **cli-spec Skill** | ✅ PASS | Specification complete at `Docs/cli-specs/2026-04-06-ask-cli-spec.md` |
 | **skill-creator** | ✅ PASS | Uses `ask skills init` command |
 | **skill-installer** | ✅ PASS | Uses `ask skills install` and `ask skills audit` |
 | **skill-builder** | ✅ PASS | Uses `ask evals run`, `ask repo validate` |

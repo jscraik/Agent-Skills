@@ -372,12 +372,12 @@ class TestGitignore(unittest.TestCase):
         """
         Asserts that specific curated `.harness/` root directories are marked as trackable in `.gitignore`.
 
-        Checks for the presence of negated ignore patterns that ensure the following curated roots are tracked: `!.harness/core/`, `!.harness/linear/`, `!.harness/refactors/`, `!.harness/specs/`, and `!.harness/review/`.
+        Checks for the presence of negated ignore patterns that ensure the following curated roots are tracked: `!.harness/core/`, `!.harness/linear/`, `!.harness/reframes/`, `!.harness/specs/`, and `!.harness/review/`.
         """
         for entry in [
             "!.harness/core/",
             "!.harness/linear/",
-            "!.harness/refactors/",
+            "!.harness/reframes/",
             "!.harness/specs/",
             "!.harness/review/",
         ]:

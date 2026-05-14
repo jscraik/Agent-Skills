@@ -29,8 +29,19 @@ Keep `SKILL.md` bodies at or below the 360-line split budget. When a skill
 exceeds that budget, move bulk detail to a focused reference file and leave a
 clear link in the `SKILL.md`.
 
-Do not delete important context just to reduce line count. Context is preserved
-by relocation, not removed.
+Do not delete important, still-valid context just to reduce line count. Preserve
+that context by relocation, not by leaving it in the entrypoint.
+
+Removed context must have a disposition:
+
+- `moved-to-reference`: still valid, reusable, and too bulky for `SKILL.md`.
+- `superseded`: replaced by a newer compressed rule or reference.
+- `intentionally-discarded`: stale, duplicated, unsafe, inappropriate,
+  contradicted by newer guidance, or no longer part of the skill contract.
+- `not-context`: formatting, navigation, repetition, or low-signal prose.
+
+Do not create context landfills. Deferred references should protect useful
+knowledge, not preserve stale or inappropriate text for its own sake.
 
 See [Tooling and Command Policy](/Docs/agents/02-tooling-policy.md#skill-line-budget-policy)
 for the detailed policy.

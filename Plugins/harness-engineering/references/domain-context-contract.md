@@ -31,7 +31,8 @@ Stage guidance:
 - `he-plan`: preserve canonical terms in plan units without renumbering source IDs.
 - `he-work`: stop when implementation reveals term drift and update the owning artifact before coding past it.
 - `he-code-review`: flag code, docs, spec, plan, or Linear term drift before readiness synthesis.
-- `he-compound`: reconcile stale or conflicting lifecycle artifacts before selecting the next stage.
+- `he-reconcile`: reconcile stale or conflicting lifecycle artifacts before selecting the next stage.
+- `he-reinforce`: capture verified solved-problem learning or refresh stale learning artifacts after evidence is proven.
 
 ## Context Map Envelope
 

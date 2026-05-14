@@ -1,6 +1,7 @@
 # Tooling and Command Policy
 
 ## Table of Contents
+
 - [Tools](#tools)
 - [Command preflight](#command-preflight)
 - [Verified command style](#verified-command-style)
@@ -9,11 +10,13 @@
 - [Skill line-budget policy](#skill-line-budget-policy)
 
 ## Tools
+
 - Use `rg`, `fd`, `jq` from repo workflow.
 - Read `~/.codex/instructions/tooling.md` for the current authoritative tool stack.
 - Default to `bash -lc` for shell tooling in this repository. Use `zsh -lc` only when you must validate zsh-specific behavior.
 
 ## Command preflight
+
 - Run `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required` before multi-step, destructive, or path-sensitive work.
 - The verified optional overrides are `--repo-fragment`, `--bins`, and `--paths`.
 - Confirm `pwd` is `/Users/jamiecraik/dev/Agent-Skills` before edits.
@@ -22,10 +25,12 @@
 - Do not source `Infrastructure/scripts/codex-preflight/codex-preflight.sh` or call `preflight_repo`; the current script is a bash CLI, not a shell function library.
 
 ## Verified command style
+
 - Keep command snippets backed by repo files before documenting them.
 - Prefer one-shot, reproducible commands.
 
 ## Package command map
+
 - Repository root is configuration-oriented and has no package manager install step.
 - Verified npm package roots from lockfiles:
   - `Skills/content-publishing/video-transcript-downloader/`
@@ -36,6 +41,7 @@
   - `npm --prefix <path> exec <bin>`
 
 ## Useful checks
+
 - `bash Infrastructure/scripts/codex-preflight/codex-preflight.sh --stack auto --mode required`
 - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
@@ -44,4 +50,13 @@
 
 ## Skill line-budget policy
 
-When a `SKILL.md` exceeds the 360-line split budget (`PD_SKILLMD_TOO_LONG`), **never delete content** to bring it under the limit. Move the bulk section(s) to `Infrastructure/references/<topic>.md` under the skill directory and replace with a one-line link. Removing blank lines or navigation-only TOC entries (no prose content) is acceptable as a last resort. Owner rule: context is never lost, only relocated.
+When a `SKILL.md` exceeds the 360-line split budget (`PD_SKILLMD_TOO_LONG`), do not delete important, still-valid context just to bring it under the limit. Move meaningful reusable detail to a focused reference under the skill directory and replace it with a one-line `Read when:` signpost.
+
+Context removed during compression must be classified:
+
+- `moved-to-reference`: still valid, reusable, and too bulky for `SKILL.md`.
+- `superseded`: replaced by a newer compressed rule or reference.
+- `intentionally-discarded`: stale, duplicated, unsafe, inappropriate, contradicted by newer guidance, or no longer part of the skill contract.
+- `not-context`: formatting, navigation, repetition, or low-signal prose.
+
+Blank lines, navigation-only TOC entries, repetition, and stale or inappropriate prose do not need preservation references. Owner rule: preserve knowledge, not word count.

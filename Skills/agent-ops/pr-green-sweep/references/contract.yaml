@@ -20,6 +20,7 @@ inputs:
   - merge_strategy
   - approval_posture
 outputs:
+  - heartbeat_status_first
   - pr_inventory
   - heartbeat_status
   - fix_ledger
@@ -37,6 +38,7 @@ safety:
   untrusted_inputs: true
   redact_secrets: true
   heartbeat_required_for_monitoring: true
+  heartbeat_block_stops_rotation: true
   duplicate_heartbeat_guard: true
   admin_merge_requires_explicit_approval: true
   destructive_cleanup_requires_merge_proof: true
@@ -51,6 +53,7 @@ delegation:
   he_router_prune_branches: "Post-merge branch and worktree pruning."
 validation:
   - heartbeat_created_or_reused_before_rotation
+  - heartbeat_blocker_reported_before_rotation
   - focused_repo_checks_for_each_fix
   - live_github_required_checks
   - live_review_thread_recheck

@@ -1,37 +1,32 @@
 schema_version: 1
 skill: docs-expert
-purpose: "Make repository documentation accurate, reader-first, and evidence-backed against live repo truth."
+purpose: Make repository docs accurate, reader-first, and evidence-backed.
 triggers:
-  - "Use when README, runbook, code-doc, config-doc, template, or public trust-surface documentation needs audit, rewrite, or validation."
-  - "Use when documentation claims must be checked against scripts, package commands, workflows, repository structure, or governance docs."
+  - README, runbook, code-doc, config-doc, template, or trust-surface docs need audit, rewrite, or validation.
+  - Documentation claims must be checked against scripts, commands, workflows, repo structure, support paths, or governance docs.
 non_goals:
-  - "Do not change runtime behavior, dependencies, CI policy, release state, or external trackers from this skill alone."
-  - "Route unrelated implementation, release, security, or workflow changes to the appropriate skill."
-inputs:
-  - user_request
-  - target_context
-  - evidence
-outputs:
-  - doc_audit_findings
-  - rewritten_docs
-  - evidence_map
-  - validation_status
-  - unresolved_unknowns
-risks:
-  - over_triggering
-  - untrusted_input
-  - validation_drift
-  - generated_projection_edits
-  - unsupported_operational_claims
+  - Do not change runtime behavior, dependencies, CI policy, release state, external trackers, generated projections, or user config from this skill alone.
+inputs: [user_request, doc_target, audience, reader_job, truth_files, validation_commands]
+outputs: [findings, rewritten_docs_or_patch_summary, evidence_map, validation_status, unknowns, handoff]
+quality_criteria:
+  skimmability: informative headings, short paragraphs, topic-first sentences, bullets, tables, and useful bolding
+  prose: simple unambiguous sentences, consistent terms, no reader-state assumptions
+  helpfulness: recovery steps for common failures, safe examples, expanded abbreviations where useful
+  readme_onboarding: verify headline counts, command examples, validation status, source/projection/runtime clarity, and first-run path
+  visuals: use diagrams, screenshots, or tables only for relationships, flows, state transitions, validation pipelines, or UI states; include adjacent prose
+evidence_requirements:
+  - Operational claims link to file, line, command output, or blocker.
+  - Validation results use pass, fail, blocked, or not applicable.
+  - Runtime availability is separate from source existence or strict audit.
+risks: [over_triggering, untrusted_input, validation_drift, projection_edits, unsupported_claims]
+approval_gates: [broad_rewrite, destructive_command, install_sync_publish_release, secret_access, user_global_config, external_write, ownership_conflict]
+validation: [strict_skill_audit, skill_gate, openai_skill_format, package_boundary_checks, plugin_eval_grade_a, docs_lint_or_blocked]
 safety:
   untrusted_inputs: true
   redact_secrets: true
   destructive_commands: false
-validation:
-  - skill_gate
-  - openai_skill_format
-  - plugin_eval_grade_a
-  - strict_skill_audit
-  - package_boundary_checks
-observability: "Report validation commands and outcomes."
-rollback_procedure: "Restore the canonical documentation source, regenerate projections only through the repo contract, then rerun strict audit, skill gate, OpenAI skill format, package boundary checks, and Plugin Eval where relevant."
+handoffs:
+  implementation: Use implementation skills for behavior changes.
+  verification: Use verification-before-completion for deterministic closeout.
+  memory: Use project-brain only when the user asks to preserve a learning.
+observability: Report commands, exact outcomes, blockers, and confidence limits.

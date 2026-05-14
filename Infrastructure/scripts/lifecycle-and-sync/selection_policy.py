@@ -70,6 +70,7 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "codex-hooks-builder",
     "coding-harness",
     "context7",
+    "imagegen",
     "docs-expert",
     "fix-mise",
     "improve-codebase-architecture",
@@ -88,7 +89,9 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
 
 # Plugin lane skills hidden from default flat discovery.
-PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = ()
+PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
+    "he-phase-heartbeat",
+)
 
 # Skills intentionally routed through the hidden `.system` lane while still
 # remaining plugin-owned in source. This keeps the bridge explicit and narrow.

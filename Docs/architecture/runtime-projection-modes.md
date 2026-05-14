@@ -4,7 +4,7 @@
 
 `flat`:
 
-- current default;
+- default projection mode when no override is supplied;
 - projects the allowlisted first-level skill surface;
 - keeps hidden/system bridge skills out of first-level runtime discovery.
 
@@ -50,7 +50,6 @@ Use the public command surfaces for proof:
 ```bash
 ask skills resolve he-heartbeat --json
 ask skills handles --check --json
-ask skills handles --check-command-handles --json
 ask reviewers resolve skillinspector --json
 ```
 
@@ -63,8 +62,8 @@ workspace sync, user sync, and live invocation are separate acceptance gates.
 Use the runtime topic for projection and budget reports:
 
 ```bash
-ask runtime surface --json
-ask runtime budget --json
+./bin/ask runtime surface --json --robot
+./bin/ask runtime budget --json --robot
 ```
 
 `ask runtime surface` reports the current visible runtime entries, hidden system
@@ -86,5 +85,5 @@ CLI arguments win over environment variables.
 Use flat mode as the escape hatch:
 
 ```bash
-python3 bin/ask skills sync --scope workspace --projection flat --json
+./bin/ask skills sync --scope workspace --projection flat --json --robot
 ```

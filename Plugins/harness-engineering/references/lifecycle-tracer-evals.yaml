@@ -58,12 +58,33 @@ cases:
     expected_artifact_root: automation
     proof: "heartbeat prompt, cadence, stop rule, residual risk"
 
-  - id: tracer-compound
-    stage: he-compound
+  - id: tracer-reconcile
+    stage: he-reconcile
     prompt: "Inspect live state and pick the next HE stage from Linear, spec, plan, PR, and validation evidence."
-    expected_route: he-compound
+    expected_route: he-reconcile
     expected_artifact_root: stage-map
     proof: "stage map, active owner, blockers, next action"
+
+  - id: tracer-reinforce
+    stage: he-reinforce
+    prompt: "Capture the verified solved validator problem into durable HE learning with overlap, redaction, and Project Brain checks."
+    expected_route: he-reinforce
+    expected_artifact_root: .harness/solutions
+    proof: "solved evidence, validation, overlap status, Project Brain status, discoverability"
+
+  - id: tracer-compound-compatibility-reconcile
+    stage: he-compound
+    prompt: "An old he-compound request for lifecycle state recovery should route to he-reconcile."
+    expected_route: he-reconcile
+    expected_artifact_root: stage-map
+    proof: "selected replacement: he-reconcile, authority limit, recommended next step"
+
+  - id: tracer-compound-compatibility-reinforce
+    stage: he-compound
+    prompt: "An old he-compound request for solved-problem capture should route to he-reinforce."
+    expected_route: he-reinforce
+    expected_artifact_root: .harness/solutions
+    proof: "selected replacement: he-reinforce, authority limit, recommended next step"
 
   - id: tracer-eval-report
     stage: he-eval-report
@@ -79,16 +100,16 @@ cases:
     expected_artifact_root: .harness/review
     proof: "evidence matrix, moat/drift analysis, fact/interpretation/assumption separation"
 
-  - id: tracer-refactor
-    stage: he-refactor
+  - id: tracer-reframe
+    stage: he-reframe
     prompt: "Generate a high-leverage migration program with phases, rollback, Linear mapping, and eval proof."
-    expected_route: he-refactor
-    expected_artifact_root: .harness/refactors
+    expected_route: he-reframe
+    expected_artifact_root: .harness/reframes
     proof: "baby-step migration phases, rollback conditions, stop/pivot condition, eval requirements"
 
   - id: tracer-linear-plan
     stage: he-linear-plan
-    prompt: "Convert approved refactor programs into a small Linear execution plan without mutating Linear."
+    prompt: "Convert approved reframe programs into a small Linear execution plan without mutating Linear."
     expected_route: he-linear-plan
     expected_artifact_root: .harness/linear
     proof: "Now/Next/Later/Do Not Create, value basis, eval gates, human/agent route"
@@ -128,10 +149,10 @@ cases:
     expected_artifact_root: .harness/evals
     proof: "XP lens applied: quality gates preserved, planned proof verified, missing proof blocks or needs rework"
 
-  - id: tracer-xp-phase-heartbeat-slack
-    stage: he-phase-heartbeat
+  - id: tracer-xp-phase-work-slack
+    stage: he-phase-work
     prompt: "Schedule phase continuation with sustainable cadence and stop if collector evidence or gates become stale."
-    expected_route: he-phase-heartbeat
+    expected_route: he-phase-work
     expected_artifact_root: automation
     proof: "XP lens applied: slack_policy, cadence, stale-evidence stop rule, and gated continuation"
 

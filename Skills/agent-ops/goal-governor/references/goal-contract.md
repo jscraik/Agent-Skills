@@ -37,11 +37,14 @@ goal:
   slug: example-goal
   status: active
   objective: "Make the Codex goal workflow auditable."
+  native_goal_id: goal_opaque_id
   native_objective: "/goal Follow docs/goals/example-goal/goal.md"
   native_status: active
   token_budget: null
   tokens_used: 0
   time_used_seconds: 0
+  native_created_at: "2026-05-13T10:00:00Z"
+  native_updated_at: "2026-05-13T10:00:00Z"
 rules:
   one_active_task: true
   require_fresh_verification: true
@@ -116,6 +119,7 @@ Treat verification as stale when:
 - Dirty fingerprint changed since verification.
 - The configured verification command no longer exists.
 - The board was resumed after a branch switch or long idle interval.
-- Native goal status, budget, token usage, or elapsed-time fields changed since the last reconciliation receipt.
+- Native goal identity, objective, status, budget, token usage, elapsed-time fields, or native timestamps changed since the last reconciliation receipt.
+- `/goal edit` or `objective_updated` context changed the live objective and the board has not recorded a reconciliation receipt.
 
 Stale verification routes to Scout, Judge, or PM recovery before Worker implementation.

@@ -57,7 +57,7 @@ Progressive-disclosure entrypoint for stage orchestration and durable learning c
 - Do not turn generic session-history search into a Harness Engineering stage; consume `skill-refactor` or `skillify` outputs when session evidence is relevant.
 - Do not let helper agents write intermediate files during learning capture.
 - Do not recommend deleting or ignoring protected process artifacts just to simplify the handoff.
-- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Anti-patterns
 

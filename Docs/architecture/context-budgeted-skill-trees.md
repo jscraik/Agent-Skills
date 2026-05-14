@@ -13,8 +13,8 @@ The model has three layers:
 
 ## Projection Modes
 
-`flat` is the default and preserves the existing allowlisted first-level skill
-surface.
+`flat` is the default projection mode when no override is supplied and preserves
+the existing allowlisted first-level skill surface.
 
 `rooted` projects root skill-set entrypoints plus generated command handles for
 command-visible latent modules. Each root skill routes to a single latent module
@@ -77,7 +77,7 @@ real workflow.
 Reviewer and inspector handles are intentionally separate from skill handles:
 
 ```bash
-python3 bin/ask reviewers resolve skillinspector --json
+./bin/ask reviewers resolve skillinspector --json --robot
 ```
 
 ## Routing
@@ -100,9 +100,8 @@ include `source_path`; only the selected module includes the loadable source pat
 Run:
 
 ```bash
-python3 bin/ask skills sync --projection rooted --dry-run --json
-python3 bin/ask skills handles --check --json
-python3 bin/ask skills handles --check-command-handles --json
+./bin/ask skills sync --projection rooted --dry-run --json --robot
+./bin/ask skills handles --check --json --robot
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json
 ```

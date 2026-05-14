@@ -1,11 +1,12 @@
 schema_version: 1
 
 purpose: >
-  Continue an approved Harness Engineering plan phase-by-phase under a heartbeat,
-  using session-collector evidence and pre-commit review gates to keep long
-  execution loops traceable.
+  Continue approved Harness Engineering phase work under a 10-minute heartbeat,
+  using session-collector evidence, phase gates, staging rules, tracker-update
+  boundaries, and pre-commit review gates to keep long execution loops traceable.
 
 triggers:
+  - user names he-phase-work for approved phase execution
   - user asks to monitor HE plan phases over time
   - user asks to keep he-work going until reviewed or committed
   - user asks for a heartbeat that runs simplify, bug fixing, or code review before commit
@@ -17,11 +18,13 @@ inputs:
   - dirty worktree state and expected validation commands
   - selected phase and review gate policy
   - authority for repo writes, external writes, local commits, and automation changes
+  - authority for git staging and Linear or tracker updates
 
 outputs:
   - heartbeat id, cadence, destination, target, and stop condition
   - collector bundle path and evidence artifacts used
   - active phase, changed files, review gates, validation, and commit status
+  - git_staging_status and linear_update_status for phase-boundary actions
   - blocker, smallest recovery step, slack_policy, blackboard_delta, and next wake-up
 
 non_goals:
@@ -33,6 +36,7 @@ risks:
   - stale chat memory; mitigate by reading live plan, git state, and collector bundle first
   - duplicate heartbeats; mitigate by searching existing automations before creating one
   - broad commits; mitigate by staging only the completed phase diff
+  - unauthorized tracker or staging side effects; mitigate by blocking Linear updates and git add unless authority is explicit
   - review gate theater; mitigate by making he-fix-bugs conditional on failing evidence
   - unsustainable cadence; mitigate by setting slack_policy and stopping when evidence is stale or gates are blocked
   - source/runtime drift; mitigate by editing canonical plugin source and refreshing projections through repo wrappers
@@ -47,6 +51,7 @@ execution_boundaries:
     - destructive cleanup
     - force-push, merge, deploy, tracker closure, review-thread resolution
     - broad commits or unrelated staging
+    - git staging or tracker updates without explicit authority for the exact target
     - secret access
   generated_surfaces:
     - .agents/**
@@ -55,8 +60,8 @@ execution_boundaries:
 
 observability: >
   Record target, cadence, heartbeat id, collector bundle path, active phase,
-  validation commands and outcomes, review gate results, commit status, blocker,
-  slack_policy, and stop rule status.
+  validation commands and outcomes, review gate results, git_staging_status,
+  linear_update_status, commit status, blocker, slack_policy, and stop rule status.
 
 rollback_procedure: >
   Pause or delete the heartbeat, preserve the last bundle path and phase evidence,

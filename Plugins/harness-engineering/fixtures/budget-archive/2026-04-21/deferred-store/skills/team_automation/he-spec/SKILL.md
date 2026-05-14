@@ -9,7 +9,7 @@ metadata:
 
 Use when the user needs a Harness Engineering specification artifact before planning or implementation.
 
-Context preservation: Do not remove important context for budget trimming; move it to references and index it in `Plugins/harness-engineering/references/deferred-context-index.md`.
+Context disposition: Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Philosophy
 

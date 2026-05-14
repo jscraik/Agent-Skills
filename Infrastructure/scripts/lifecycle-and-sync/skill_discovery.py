@@ -503,6 +503,10 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
             # Flat runtime intentionally hides plugin lane skills; advanced mode
             # augments from plugin sources so lanes remain discoverable.
             skill_dirs.extend(_sort_for_user_scope_precedence(_iter_plugin_skill_dirs()))
+        else:
+            # Keep governed system bridge skills visible from the default listing
+            # without forcing advanced-mode discovery.
+            skill_dirs.extend(_sort_for_user_scope_precedence(_iter_system_lane_skill_dirs()))
     elif source == "repo":
         skill_dirs = _sort_for_user_scope_precedence([
             *_iter_repo_skill_dirs(),
@@ -523,6 +527,10 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
                         *_iter_system_lane_skill_dirs(),
                     ])
                 )
+            else:
+                # Keep governed system bridge skills visible from the default listing
+                # when flat discovery is present.
+                skill_dirs.extend(_sort_for_user_scope_precedence(_iter_system_lane_skill_dirs()))
         else:
             skill_dirs = _sort_for_user_scope_precedence([
                 *_iter_repo_skill_dirs(),

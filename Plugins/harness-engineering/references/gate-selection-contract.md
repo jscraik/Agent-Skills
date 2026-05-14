@@ -1,7 +1,7 @@
 # Gate Selection Contract
 
 Use this contract when an HE stage could load broad review, domain, strategy,
-refactor, Linear, security, specialist, or eval gates.
+reframe, Linear, security, specialist, or eval gates.
 
 The goal is not maximum governance. The goal is the smallest proof surface that
 keeps the current slice production-grade: correct, validated, traceable,
@@ -51,9 +51,9 @@ gate_profile:
 
 `architecture_sensitive`
 
-- Work changes lifecycle routing, orchestration, refactor programs, core
+- Work changes lifecycle routing, orchestration, reframe programs, core
   invariants, skill boundaries, or reusable execution contracts.
-- Load the relevant architecture/refactor/ADR/core reference only for the
+- Load the relevant architecture/reframe/ADR/core reference only for the
   affected boundary.
 
 `closure_sensitive`
@@ -106,7 +106,7 @@ gate_profile:
 
 ## Negative Gate Rules
 
-- Do not create a refactor program for small local edits.
+- Do not create a reframe program for small local edits.
 - Do not invoke domain model gates for work with no domain semantics.
 - Do not select a specialist skill from keyword overlap alone.
 - Do not create or mutate Linear when work is explicitly untracked.
@@ -128,7 +128,7 @@ gate_profile:
 ## Drift Signals
 
 - Gate profile always says `mixed`.
-- A skill loads strategy, refactor, Linear, domain, and security context without
+- A skill loads strategy, reframe, Linear, domain, and security context without
   evidence.
 - Keyword matches select specialists without affected files, workflows, or proof
   needs.

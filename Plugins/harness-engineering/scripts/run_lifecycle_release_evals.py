@@ -18,10 +18,10 @@ DEFAULT_SKILLS = (
     "he-spec",
     "he-code-review",
     "he-strategy",
-    "he-refactor",
+    "he-reframe",
     "he-linear-plan",
     "he-eval-report",
-    "he-phase-heartbeat",
+    "he-phase-work",
     "he-plan",
     "he-work",
 )
@@ -34,6 +34,7 @@ SELECTION_SIGNAL_WARNING_MARKERS = (
 TOOL_PREFLIGHT_ERROR_CODES = {
     "ERR_ASK_UNAVAILABLE",
     "ERR_CODEX_AUTH_UNAVAILABLE",
+    "ERR_CODEX_RUNNER_PREFLIGHT",
     "ERR_UNSUPPORTED_FILTER",
 }
 
@@ -48,9 +49,12 @@ CODEX_RUNNER_PREFLIGHT_MARKERS = (
     "operation not permitted",
     "no events found in jsonl trace",
     "produced no final output",
+    "usage limit for gpt-5.3-codex-spark",
 )
 
 SLOW_CASE_DIAGNOSTIC_THRESHOLD_SECONDS = 120
+DEFAULT_EVAL_MODEL = "gpt-5.3-codex-spark"
+DEFAULT_CODEX_ARGS = ("--ignore-user-config",)
 
 
 def repo_root_from_script() -> Path:
@@ -127,6 +131,20 @@ def _classify_case_failures(parsed: dict[str, object]) -> dict[str, object]:
 
 
 def _case_has_tool_preflight_signal(case: dict[str, object], failure_strings: list[str]) -> bool:
+    """
+    Detects whether a case exhibits signs of a Codex runner "preflight" failure.
+    
+    Checks the provided failure_strings combined with any case["warnings"] for the phrase "codex returned non-zero exit code" together with any Codex runner preflight markers; if that combination is not found, inspects runner artifact files (when present and readable) for those markers.
+    
+    Parameters:
+        case (dict): Case dictionary that may include:
+            - "warnings": iterable of warning entries (will be stringified)
+            - "runners": mapping of runner names to result dicts, each may contain an "artifacts" dict with stderr/stdout/final/jsonl file path strings.
+        failure_strings (list[str]): List of failure messages (e.g., tier1 failures) to search.
+    
+    Returns:
+        `true` if the combined failure/warning text contains both the non-zero Codex exit phrase and a preflight marker, or if any readable runner artifact contains a preflight marker; `false` otherwise.
+    """
     warning_strings = [str(warning) for warning in (case.get("warnings") or [])]
     combined = "\n".join([*failure_strings, *warning_strings]).lower()
     if (
@@ -144,19 +162,112 @@ def _case_has_tool_preflight_signal(case: dict[str, object], failure_strings: li
         artifacts = runner_result.get("artifacts")
         if not isinstance(artifacts, dict):
             continue
-        stderr_path = artifacts.get("stderr")
-        if not isinstance(stderr_path, str):
-            continue
-        try:
-            stderr_text = Path(stderr_path).read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            continue
-        if any(marker in stderr_text.lower() for marker in CODEX_RUNNER_PREFLIGHT_MARKERS):
+        if _artifacts_have_codex_runner_preflight_signal(artifacts):
             return True
     return False
 
 
+def _artifact_file_has_codex_runner_preflight_signal(path: object) -> bool:
+    """
+    Detects whether an artifact file contains markers that indicate a Codex runner preflight failure.
+    
+    Parameters:
+        path: Path to an artifact file (expected as a string). If not a string or the file cannot be read, the function reports no preflight signal.
+    
+    Returns:
+        True if any Codex runner preflight marker is found in the file contents, False otherwise.
+    """
+    if not isinstance(path, str):
+        return False
+    try:
+        text = Path(path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+    return any(marker in text.lower() for marker in CODEX_RUNNER_PREFLIGHT_MARKERS)
+
+
+def _artifacts_have_codex_runner_preflight_signal(artifacts: dict[str, object]) -> bool:
+    for name in ("stderr", "stdout", "final", "jsonl"):
+        if _artifact_file_has_codex_runner_preflight_signal(artifacts.get(name)):
+            return True
+    return False
+
+
+def _artifact_tool_preflight_case(parsed: dict[str, object]) -> dict[str, object] | None:
+    """
+    Constructs a synthetic case entry when parsed artifacts indicate a Codex runner preflight failure.
+    
+    Parameters:
+        parsed (dict): Parsed JSON output from an evaluation run; expected to contain an "artifacts" mapping and optionally "case_filters" and "tier1_failures".
+    
+    Returns:
+        dict | None: A synthetic case dictionary with keys `id`, `name`, `category`, and `tier1_failures` when an artifact `stderr` contains a Codex runner preflight signal; `None` otherwise.
+    """
+    artifacts = parsed.get("artifacts")
+    if not isinstance(artifacts, dict):
+        return None
+    if not _artifacts_have_codex_runner_preflight_signal(artifacts):
+        return None
+
+    case_filters = parsed.get("case_filters")
+    case_id = case_filters[0] if isinstance(case_filters, list) and case_filters else None
+    return {
+        "id": case_id,
+        "name": case_id,
+        "category": None,
+        "tier1_failures": parsed.get("tier1_failures") or [
+            "[codex] Codex runner preflight failed before producing final output."
+        ],
+    }
+
+
+def _classify_eval_failures(parsed: dict[str, object]) -> dict[str, object]:
+    """
+    Augments a case-level failure classification with a synthetic tool-preflight case derived from top-level artifacts when present.
+    
+    If the parsed evaluation output contains an artifact-derived Codex runner preflight signal, this function appends a corresponding case entry to the `tool_preflight_cases` list (creating the list if necessary) and removes any matching case entry from `other_failure_cases`. If no artifact-derived preflight case is found, the original classification is returned unchanged.
+    
+    Parameters:
+        parsed (dict): Parsed evaluation output (JSON decoded) describing the run and its cases.
+    
+    Returns:
+        dict: A failure classification mapping that includes (when applicable) the keys `timeout_cases`, `content_failure_cases`, `tool_preflight_cases`, and `other_failure_cases`.
+    """
+    classification = _classify_case_failures(parsed)
+    artifact_case = _artifact_tool_preflight_case(parsed)
+    if artifact_case is None:
+        return classification
+
+    classification.setdefault("tool_preflight_cases", [])
+    tool_cases = classification.get("tool_preflight_cases")
+    if isinstance(tool_cases, list):
+        tool_cases.append(artifact_case)
+
+    other_cases = classification.get("other_failure_cases")
+    if isinstance(other_cases, list):
+        artifact_id = artifact_case.get("id")
+        classification["other_failure_cases"] = [
+            case
+            for case in other_cases
+            if not isinstance(case, dict) or case.get("id") != artifact_id
+        ]
+    return classification
+
+
 def _iter_case_warnings(parsed: dict[str, object]) -> list[dict[str, object]]:
+    """
+    Collects cases that contain warnings from a parsed evaluation result.
+    
+    Parameters:
+        parsed (dict): Parsed evaluation output expected to contain a "cases" iterable where each case may include "id", "name", "category", and "warnings".
+    
+    Returns:
+        list[dict]: A list of dictionaries for each case that had warnings. Each dictionary contains:
+            - "id": case id (or None if missing)
+            - "name": case name (or None if missing)
+            - "category": case category (or None if missing)
+            - "warnings": list of warning strings
+    """
     warning_cases: list[dict[str, object]] = []
     for case in parsed.get("cases", []):
         if not isinstance(case, dict):
@@ -522,6 +633,32 @@ def _run_skill_builder_eval(
     timeout_profile: str | None,
     codex_home: Path | None,
 ) -> dict[str, object]:
+    """
+    Run the skill-builder evaluation runner for a single skill and return a structured result.
+    
+    Parameters:
+        repo_root (Path): Repository root used as working directory for the runner.
+        skill_name (str): Name of the skill to evaluate.
+        mode (str): Evaluation mode, e.g., "smoke" or "release".
+        runner (str): Eval runner identifier (e.g., "codex" or "ask"); affects available flags.
+        cases (tuple[str, ...]): Specific case IDs to filter the run; empty means run all cases.
+        categories (tuple[str, ...]): Category filters (e.g., "happy", "edge"); empty means all categories.
+        per_skill_timeout_sec (int | None): Per-skill timeout override in seconds; when None a mode-based default is used.
+        model (str | None): Optional model identifier forwarded to the runner.
+        timeout_profile (str | None): Optional timeout profile forwarded to the runner.
+        codex_home (Path | None): Path to Codex home; used only when `runner == "codex"`.
+    
+    Returns:
+        dict[str, object]: Structured evaluation result containing keys including:
+            - "skill", "mode", "runner", "command"
+            - "returncode" (int), "duration_seconds" (float)
+            - "status" ("success" or "error" or "timeout"), "decision" (from parsed output)
+            - "tier1_failures", "tier2_findings" (from runner output)
+            - "failure_classification" (classification dict produced from parsed output)
+            - "case_filters", "category_filters" (echoed or derived)
+            - "artifacts" (dict), "errors" (list of error dicts)
+            - "raw_output" (stdout string), "raw_error" (stderr string)
+    """
     skill_path = _skill_path(skill_name)
     cmd = [
         sys.executable,
@@ -538,8 +675,8 @@ def _run_skill_builder_eval(
     _append_repeatable_filter(cmd, "--category", categories)
     if per_skill_timeout_sec:
         cmd.extend(["--timeout-sec", str(per_skill_timeout_sec)])
-    if model:
-        cmd.extend(["--model", model])
+    cmd.extend(["--model", DEFAULT_EVAL_MODEL])
+    _append_repeatable_filter(cmd, "--codex-arg", DEFAULT_CODEX_ARGS)
     if timeout_profile:
         cmd.extend(["--timeout-profile", timeout_profile])
     if codex_home and runner == "codex":
@@ -607,7 +744,7 @@ def _run_skill_builder_eval(
         "decision": decision,
         "tier1_failures": parsed.get("tier1_failures"),
         "tier2_findings": parsed.get("tier2_findings"),
-        "failure_classification": _classify_case_failures(parsed),
+        "failure_classification": _classify_eval_failures(parsed),
         "case_filters": parsed.get("case_filters", list(cases)),
         "category_filters": parsed.get("category_filters", list(categories)),
         "artifacts": parsed.get("artifacts", {}),
@@ -721,7 +858,40 @@ def _run_skill_builder_eval_split_cases(
     model: str | None,
     timeout_profile: str | None,
     codex_home: Path | None,
+    max_cases: int | None = None,
+    max_tool_preflight_failures: int = 1,
 ) -> dict[str, object]:
+    """
+    Run the skill-builder eval runner in split-per-case mode, execute each discovered case individually, and aggregate per-case results and failure classification.
+    
+    Parameters:
+        repo_root (Path): Repository root path used to locate the skill-builder runner.
+        skill_name (str): Name of the skill to evaluate.
+        mode (str): Evaluation mode, e.g., "smoke" or "release".
+        runner (str): Eval runner name passed to the skill-builder (e.g., "codex").
+        cases (tuple[str, ...]): Case filters passed to discovery; used to limit listed cases.
+        categories (tuple[str, ...]): Category filters passed to discovery.
+        per_skill_timeout_sec (int | None): Optional per-skill timeout (seconds) applied to each per-case invocation.
+        model (str | None): Optional model identifier forwarded to the skill-builder runner.
+        timeout_profile (str | None): Optional timeout profile forwarded to the skill-builder runner.
+        codex_home (Path | None): Optional Codex home directory used when the runner requires a Codex installation.
+    
+    Returns:
+        dict[str, object]: Aggregated evaluation result containing (among other keys):
+            - "skill", "mode", "runner", "command": metadata about this split run.
+            - "returncode": 0 when all cases passed, 2 when any case failed.
+            - "status": "success" when no failures, "timeout" if all failures timed out, otherwise "error".
+            - "decision": "pass" when no failures, otherwise "fail".
+            - "split_cases": True.
+            - "case_filters", "category_filters": lists of the input filters.
+            - "case_results": list of per-case result dicts as returned by the underlying runner.
+            - "slow_case_threshold_seconds", "slow_cases": slow-case diagnostics.
+            - "failure_classification": merged classification of case-level failures (timeout/content/tool_preflight/other).
+            - "errors": empty list when no failures, otherwise a single error dict whose code is
+                "ERR_CODEX_RUNNER_PREFLIGHT" if all failures are codex runner preflight failures, else "ERR_VALIDATION".
+            - "raw_output": JSON string summarizing per-case statuses and slow cases.
+            - "raw_error": empty string (no top-level stderr output for split runs).
+    """
     started_at = time.time()
     case_ids, discovery_error = _list_skill_builder_cases(
         repo_root,
@@ -733,22 +903,31 @@ def _run_skill_builder_eval_split_cases(
     if discovery_error is not None:
         return discovery_error
 
+    discovered_case_count = len(case_ids)
+    selected_case_ids = case_ids[:max_cases] if max_cases is not None else case_ids
     case_results: list[dict[str, object]] = []
-    for case_id in case_ids:
-        case_results.append(
-            _run_skill_builder_eval(
-                repo_root,
-                skill_name,
-                mode,
-                runner,
-                (case_id,),
-                (),
-                per_skill_timeout_sec,
-                model,
-                timeout_profile,
-                codex_home,
-            )
+    early_stop_reason: str | None = None
+    tool_preflight_failures = 0
+    for case_id in selected_case_ids:
+        result = _run_skill_builder_eval(
+            repo_root,
+            skill_name,
+            mode,
+            runner,
+            (case_id,),
+            (),
+            per_skill_timeout_sec,
+            model,
+            timeout_profile,
+            codex_home,
         )
+        case_results.append(result)
+        if _result_failure_class(result) != "tool_preflight":
+            continue
+        tool_preflight_failures += 1
+        if max_tool_preflight_failures and tool_preflight_failures >= max_tool_preflight_failures:
+            early_stop_reason = "tool_preflight_failure_limit"
+            break
 
     failed = [
         result
@@ -760,6 +939,19 @@ def _run_skill_builder_eval_split_cases(
         for result in case_results
         if result.get("returncode") == 124 or result.get("status") == "timeout"
     ]
+    failure_classification = _merged_case_failure_classification(case_results)
+    tool_preflight_cases = failure_classification.get("tool_preflight_cases")
+    non_tool_preflight_failures = (
+        failure_classification.get("content_failure_cases")
+        or failure_classification.get("timeout_cases")
+        or failure_classification.get("other_failure_cases")
+    )
+    all_failures_are_tool_preflight = (
+        bool(failed)
+        and isinstance(tool_preflight_cases, list)
+        and len(tool_preflight_cases) == len(failed)
+        and not non_tool_preflight_failures
+    )
     slow_cases = [
         {
             "id": (result.get("case_filters") or [None])[0]
@@ -779,7 +971,7 @@ def _run_skill_builder_eval_split_cases(
         "runner": runner,
         "command": (
             f"split release cases via {_skill_builder_runner_path(repo_root)} "
-            f"cases={','.join(case_ids) or '<none>'}"
+            f"cases={','.join(selected_case_ids) or '<none>'}"
         ),
         "returncode": 0 if not failed else 2,
         "duration_seconds": round(time.time() - started_at, 3),
@@ -787,16 +979,41 @@ def _run_skill_builder_eval_split_cases(
         "status": "success" if not failed else ("timeout" if len(timed_out) == len(failed) else "error"),
         "decision": "pass" if not failed else "fail",
         "split_cases": True,
+        "bounded_run": max_cases is not None or early_stop_reason is not None,
+        "max_cases": max_cases,
+        "max_tool_preflight_failures": max_tool_preflight_failures,
+        "discovered_case_count": discovered_case_count,
+        "executed_case_count": len(case_results),
+        "skipped_case_count": max(discovered_case_count - len(case_results), 0),
+        "early_stop_reason": early_stop_reason,
         "case_filters": list(cases),
         "category_filters": list(categories),
         "case_results": case_results,
         "slow_case_threshold_seconds": SLOW_CASE_DIAGNOSTIC_THRESHOLD_SECONDS,
         "slow_cases": slow_cases,
-        "failure_classification": _merged_case_failure_classification(case_results),
-        "errors": [] if not failed else [{"code": "ERR_VALIDATION", "message": "One or more split eval cases failed."}],
+        "failure_classification": failure_classification,
+        "errors": []
+        if not failed
+        else [
+            {
+                "code": "ERR_CODEX_RUNNER_PREFLIGHT"
+                if all_failures_are_tool_preflight
+                else "ERR_VALIDATION",
+                "message": "Codex live eval runner failed before producing final output."
+                if all_failures_are_tool_preflight
+                else "One or more split eval cases failed.",
+            }
+        ],
         "raw_output": json.dumps(
             {
                 "split_cases": True,
+                "bounded_run": max_cases is not None or early_stop_reason is not None,
+                "max_cases": max_cases,
+                "max_tool_preflight_failures": max_tool_preflight_failures,
+                "discovered_case_count": discovered_case_count,
+                "executed_case_count": len(case_results),
+                "skipped_case_count": max(discovered_case_count - len(case_results), 0),
+                "early_stop_reason": early_stop_reason,
                 "case_count": len(case_results),
                 "slow_case_threshold_seconds": SLOW_CASE_DIAGNOSTIC_THRESHOLD_SECONDS,
                 "slow_cases": slow_cases,
@@ -829,6 +1046,8 @@ def run_skill(
     timeout_profile: str | None,
     split_release_cases: bool,
     codex_home: Path | None,
+    max_cases: int | None = None,
+    max_tool_preflight_failures: int = 1,
 ) -> dict[str, object]:
     if eval_runner == "ask":
         if cases or categories or model or timeout_profile:
@@ -861,6 +1080,8 @@ def run_skill(
             model,
             timeout_profile,
             codex_home,
+            max_cases,
+            max_tool_preflight_failures,
         )
     return _run_skill_builder_eval(
         repo_root,
@@ -946,6 +1167,11 @@ def summarize(
     return {
         "schema_version": 1,
         "gate": "harness-engineering-lifecycle-evals",
+        "eval_runtime": {
+            "codex_model": DEFAULT_EVAL_MODEL,
+            "codex_args": list(DEFAULT_CODEX_ARGS),
+            "reasoning_flags": [],
+        },
         "status": "pass" if not failing and not failing_gates else "fail",
         "skills": [result["skill"] for result in results],
         "results": results,
@@ -995,13 +1221,19 @@ def main() -> int:
         choices=("happy", "edge", "negative", "pressure"),
         help="Run matching eval categories. Repeat for multiple categories.",
     )
-    parser.add_argument("--model", help="Model override for direct Codex eval runner.")
+    parser.add_argument(
+        "--model",
+        help=(
+            "Compatibility option. HE evals always run with "
+            f"{DEFAULT_EVAL_MODEL}; any other value is rejected."
+        ),
+    )
     parser.add_argument(
         "--codex-home",
         help=(
-            "Codex home for direct Codex eval runner. Defaults to CODEX_HOME or ~/.codex "
-            "so split release lanes use authenticated state instead of unauthenticated "
-            "temporary homes."
+            "Codex home for direct Codex eval runner. When omitted, the shared "
+            "skill eval runner creates an isolated writable CODEX_HOME for the "
+            "live eval process."
         ),
     )
     parser.add_argument(
@@ -1030,8 +1262,31 @@ def main() -> int:
         action="store_false",
         help="Run release cases in one skill-level process for legacy debugging.",
     )
+    parser.add_argument(
+        "--max-cases",
+        type=int,
+        help=(
+            "Bound split Codex release execution to the first N discovered cases. "
+            "Use for diagnostic loops; omit for full release coverage."
+        ),
+    )
+    parser.add_argument(
+        "--max-tool-preflight-failures",
+        type=int,
+        default=1,
+        help=(
+            "Stop split Codex release execution after N runner preflight failures. "
+            "Use 0 to run every selected case even when the live runner is unhealthy."
+        ),
+    )
     parser.add_argument("--json", action="store_true", help="Emit JSON only.")
     args = parser.parse_args()
+    if args.max_cases is not None and args.max_cases < 1:
+        parser.error("--max-cases must be greater than or equal to 1")
+    if args.max_tool_preflight_failures < 0:
+        parser.error("--max-tool-preflight-failures must be greater than or equal to 0")
+    if args.model and args.model != DEFAULT_EVAL_MODEL:
+        parser.error(f"--model is fixed to {DEFAULT_EVAL_MODEL} for HE evals")
 
     repo_root = repo_root_from_script()
     selected_skills = tuple(args.skill) if args.skill else DEFAULT_SKILLS
@@ -1042,11 +1297,7 @@ def main() -> int:
         if item.strip()
     )
     categories = tuple(args.category or ())
-    codex_home = (
-        Path(args.codex_home).expanduser().resolve()
-        if args.codex_home
-        else Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex").expanduser().resolve()
-    )
+    codex_home = Path(args.codex_home).expanduser().resolve() if args.codex_home else None
     results = [
         run_skill(
             repo_root,
@@ -1060,6 +1311,8 @@ def main() -> int:
             args.timeout_profile,
             args.split_release_cases,
             codex_home if args.eval_runner == "codex" else None,
+            args.max_cases,
+            args.max_tool_preflight_failures,
         )
         for skill in selected_skills
     ]

@@ -39,10 +39,15 @@ RESERVED_SKILL_HANDLES = {
     "reviewers",
 }
 FOLDED_SKILL_HANDLE_ALIASES = {
+    "he-refactor": "he-reframe",
+    "he-phase-heartbeat": "he-phase-work",
     "he-ideate": "he-brainstorm",
     "he-refine": "he-improve",
     "he-technical-review": "he-code-review",
     "he-reliability-review": "he-code-review",
+}
+HIDDEN_COMPATIBILITY_COMMAND_HANDLES = {
+    "he-phase-heartbeat",
 }
 
 
@@ -91,6 +96,8 @@ def _command_visibility_for(row: dict[str, Any]) -> str:
 
     module_id = str(row.get("id", ""))
     level = str(row.get("level", ""))
+    if str(row.get("runtime_visibility", "latent")) == "hidden":
+        return "none"
     if module_id.endswith("-router") or level in {"router", "compound"}:
         return "orchestrator"
     if module_id in {"skill-builder", "plugin-builder"}:
@@ -134,6 +141,39 @@ def _handle_from_manifest_row(row: dict[str, Any]) -> CommandHandle:
     )
 
 
+def _alias_handle_from_target(alias: str, target: CommandHandle) -> CommandHandle:
+    """Build a generated compatibility handle that resolves to a canonical target."""
+    return CommandHandle(
+        handle=alias,
+        kind=target.kind,
+        command_visibility=target.command_visibility,
+        runtime_visibility=target.runtime_visibility,
+        source_path=target.source_path,
+        command_handle_path=f".agents/skills/{alias}/SKILL.md",
+        owner=target.owner,
+        description=target.description,
+        invoke_via=target.invoke_via,
+        level=target.level,
+        provenance=target.provenance,
+    )
+
+
+def _with_folded_alias_handles(handles: list[CommandHandle]) -> list[CommandHandle]:
+    """Add generated command handles for folded aliases whose targets exist."""
+    by_handle = {handle.handle: handle for handle in handles}
+    extended = list(handles)
+    for alias, target_handle in sorted(FOLDED_SKILL_HANDLE_ALIASES.items()):
+        if alias in HIDDEN_COMPATIBILITY_COMMAND_HANDLES:
+            continue
+        if alias in by_handle:
+            continue
+        target = by_handle.get(target_handle)
+        if not target:
+            continue
+        extended.append(_alias_handle_from_target(alias, target))
+    return extended
+
+
 def _display_name(handle: CommandHandle) -> str:
     raw = handle.handle.replace("-", " ").strip()
     if not raw:
@@ -158,7 +198,7 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
     """Render a minimal Codex-visible SKILL.md command handle."""
     display_name = _display_name(handle)
     description = (
-        f"Explicit command handle for {display_name}. "
+        f"Internal entrypoint for {display_name}. "
         f"Use only when named as ${handle.handle}."
     )
     source_path = handle.source_path or "UNRESOLVED_SOURCE_PATH"
@@ -171,25 +211,23 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
             "",
             f"# {display_name} Handle",
             "",
-            f"Generated command handle for a child skill under the `{handle.owner}` router heading.",
-            "The real workflow is not here.",
-            f"Canonical source path: `{source_path}`.",
+            f"Internal activation entrypoint for a child skill under `{handle.owner}`.",
+            f"Source: `{source_path}`.",
             "",
-            "When invoked:",
+            "Invoke:",
             (
-                "1. In Agent Skills Kit with `./bin/ask`, run "
+                "1. If this is the Agent Skills Kit repo and `./bin/ask` exists, run "
                 f"`./bin/ask skills resolve {handle.handle} --json`."
             ),
-            f"2. Otherwise, load `{source_path}` directly.",
-            "3. Follow the loaded module contract.",
             (
-                "4. If missing, search only the owner skill tree for this exact handle."
+                "2. Keep handle, routing, and source mechanics out of user-facing replies on normal success."
             ),
-            (
-                "5. If the contract cannot load, fail closed: report the blocker and do not perform the workflow."
-            ),
+            f"3. Otherwise, load `{source_path}` directly.",
+            "4. Follow the loaded module contract.",
+            "5. If missing, search only the owner skill tree for this exact handle.",
+            "6. If blocked or ambiguous, fail closed and report only the blocker or choice needed.",
             "",
-            "When used as another skill's target, pass the resolved card to the active orchestrator and wait for orchestration.",
+            "As another skill's target, pass the resolved contract to the active orchestrator and wait.",
             "",
         ]
     )
@@ -198,7 +236,7 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
 def render_openai_yaml(handle: CommandHandle) -> str:
     """Render UI-facing metadata for a generated command handle."""
     display_name = _display_name(handle)
-    short_description = f"${handle.handle} - {display_name} command handle"
+    short_description = f"${handle.handle} - {display_name} entrypoint"
     return "\n".join(
         [
             "interface:",
@@ -216,7 +254,7 @@ def render_openai_yaml(handle: CommandHandle) -> str:
 def _validate_command_handle_payload(handle: CommandHandle, skill_body: str) -> list[dict[str, Any]]:
     violations: list[dict[str, Any]] = []
     frontmatter_description = (
-        f"Explicit command handle for {_display_name(handle)}. "
+        f"Internal entrypoint for {_display_name(handle)}. "
         f"Use only when named as ${handle.handle}."
     )
     if _word_count(frontmatter_description) > MAX_COMMAND_HANDLE_DESCRIPTION_WORDS:
@@ -247,7 +285,7 @@ def _validate_command_handle_payload(handle: CommandHandle, skill_body: str) -> 
 
 def _command_handle_write_rows(handles: list[CommandHandle]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for handle in handles:
+    for handle in _with_folded_alias_handles(handles):
         if not requires_generated_command_handle(handle):
             continue
         skill_body = render_skill_command_handle(handle)
@@ -284,7 +322,11 @@ def _is_generated_command_handle_dir(path: Path) -> bool:
         content = skill_file.read_text(encoding="utf-8")
     except OSError:
         return False
-    return "Generated command handle for a child skill under the" in content
+    generated_markers = (
+        "Generated command handle for a child skill under the",
+        "Internal activation entrypoint for a child skill under",
+    )
+    return any(marker in content for marker in generated_markers)
 
 
 def _prune_obsolete_command_handle_dirs(
@@ -584,7 +626,8 @@ def parse_command_handles(text: str, *, repo_root_path: Path | None = None) -> d
 
 def handles_report(*, repo_root_path: Path | None = None, include_handles: bool = True) -> dict[str, Any]:
     handles = build_skill_handles(repo_root_path=repo_root_path)
-    violations = validate_skill_handles(handles, repo_root_path=repo_root_path)
+    surfaced_handles = _with_folded_alias_handles(handles)
+    violations = validate_skill_handles(surfaced_handles, repo_root_path=repo_root_path)
     command_handle_rows = _command_handle_write_rows(handles)
     command_handle_violations = [
         violation
@@ -601,10 +644,10 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
         "policy_identity": policy_identity(),
         "generated_from": "rooted_manifests",
         "projection_path": COMMAND_SURFACE_PATH.as_posix(),
-        "handle_count": len(handles),
+        "handle_count": len(surfaced_handles),
         "generated_command_handle_count": command_handle_count,
         "violations": violations,
-        "handles": [handle.to_dict() for handle in handles] if include_handles else [],
+        "handles": [handle.to_dict() for handle in surfaced_handles] if include_handles else [],
         "notes": [
             "Skill handles are resolved from rooted manifest metadata.",
             "The command-surface manifest is a generated projection, not a source of truth.",

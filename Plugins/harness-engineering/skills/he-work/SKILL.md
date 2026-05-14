@@ -13,7 +13,7 @@ Treat tiny low-risk execution as no more than two files, no auth/security/permis
 ## Inputs
 Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees, optional active thread goal.
 ## Outputs
-Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff, slack_policy, and blackboard_delta.
+Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff, slack_policy, blackboard_delta, git_staging_status, and staged_paths.
 
 Always make steering and proof searchable in the output: include `interactive_status`, `selection_evidence`, `route`, `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`, and `blocked_reason`. When branch, goal, plan, Linear issue, selected slice, or multiple next stages conflict, ask once with `request_user_input` when available or return `interactive_status: blocked`; in unattended mode record `interactive_status: autonomous_assumption` only for non-mutating assumptions and keep mutation blocked without authority.
 ## Procedure
@@ -23,7 +23,11 @@ Always make steering and proof searchable in the output: include `interactive_st
 4. Keep `update_plan` as a live checklist; execute only the approved implementation unit.
 5. Before delegation or parallel work, run the work contract overlap check and use external delegation only for bounded non-overlapping slices or isolated worktrees.
 6. Run or explicitly block the smallest relevant validation gates, preserving exact command/path, actor, timestamp, recovery step, and rollback posture when blocked.
-7. Handoff to `he-code-review` mode `autofix` when review or validation evidence requires repair.
+7. Apply the git staging contract for files changed in this turn only; report any unrelated dirty paths without staging them.
+7. Apply the visual reference contract when user-visible behavior, screenshot
+   evidence, rollback state, validation evidence, or before/after state cannot
+   be reviewed clearly from text alone.
+8. Handoff to `he-code-review` mode `autofix` when review or validation evidence requires repair.
 For blocked coding-harness gates, preserve exact failing command/path, actor, timestamp, recovery step, and rollback posture in the handoff.
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed. Run exact gates for changed paths and report outcomes.
@@ -36,7 +40,7 @@ For direct-handle use, apply the OpenAI-style design contract: classify the stro
 - Dirty worktree ownership and active `/goal` conflicts are blockers, not context to overwrite.
 - Validation must run against the touched production path or be recorded as blocked with the smallest recovery step.
 ## Constraints
-Redact secrets; preserve user edits. Do not remove important context for budget trimming; move deep context to references.
+Redact secrets; preserve user edits. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 ## Anti-Patterns
 - Editing before checking the active branch, dirty state, and source artifact.
 - Editing when an active thread goal conflicts with the branch, issue, plan, or PR.
@@ -66,5 +70,6 @@ Reference `assets/` only for skill packaging and browseability; execution eviden
 - Work contract: `Plugins/harness-engineering/skills/he-work/references/work-execution-contract.md`
 - Modes: `Plugins/harness-engineering/skills/he-work/references/execution-modes.md`
 - UI plan routing: `Plugins/harness-engineering/references/ui-plan-routing-contract.md`
+- Visual reference contract: `Plugins/harness-engineering/references/visual-reference-contract.md`
 - Pragmatic operating invariants: `Plugins/harness-engineering/references/pragmatic-operating-invariants.md`
 - XP operating contract: `Plugins/harness-engineering/references/xp-operating-contract.md`

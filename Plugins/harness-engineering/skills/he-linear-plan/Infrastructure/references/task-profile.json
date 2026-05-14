@@ -12,9 +12,9 @@
     "block_on_missing_execution_buckets": true
   },
   "criteria": {
-    "clarity": "Linear destinations, active sets, dependencies, and execution route are explicit.",
-    "specificity": "Plans map to concrete .harness/linear files and dated Linear naming.",
-    "safety": "The skill prevents Linear issue explosion and side effects without confirmation."
+    "clarity": "Linear destinations, repo/location labels, active sets, dependencies, and execution route are explicit.",
+    "specificity": "Plans map to concrete .harness/linear files, dated Linear naming, project/cycle justification, and delivery evidence.",
+    "safety": "The skill prevents Linear issue explosion, repo-container projects, premature cycle assignment, and side effects without confirmation."
   },
   "delegation": {
     "preferred": "co-pilot",

@@ -46,6 +46,7 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
 
     def test_command_surface_resolves_folded_he_aliases(self) -> None:
         aliases = {
+            "he-phase-heartbeat": "he-phase-work",
             "he-ideate": "he-brainstorm",
             "he-refine": "he-improve",
             "he-technical-review": "he-code-review",
@@ -69,6 +70,10 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
         self.assertEqual(payload["projection_path"], ".skillsets/command-surface.json")
         self.assertIsInstance(payload["generated_command_handle_count"], int)
         self.assertGreaterEqual(payload["generated_command_handle_count"], 0)
+
+        handles = {handle["handle"]: handle for handle in payload["handles"]}
+        self.assertIn("he-phase-work", handles)
+        self.assertNotIn("he-phase-heartbeat", handles)
 
     def test_command_surface_marks_skill_builder_as_orchestrator(self) -> None:
         payload = command_surface.resolve_skill_handle("skill-builder", repo_root_path=REPO_ROOT)
@@ -120,17 +125,18 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
 
         command_handle = command_surface.render_skill_command_handle(handle)
 
-        self.assertIn("Generated command handle", command_handle)
+        self.assertIn("Internal activation entrypoint", command_handle)
         self.assertIn("./bin/ask skills resolve he-heartbeat --json", command_handle)
         self.assertIn("If this is the Agent Skills Kit repo and `./bin/ask` exists", command_handle)
         self.assertIn(
-            "Canonical source path: `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md`.",
+            "Source: `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md`.",
             command_handle,
         )
         self.assertIn(
             "Otherwise, load `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md` directly.",
             command_handle,
         )
+        self.assertIn("Keep handle, routing, and source mechanics out of user-facing replies", command_handle)
         self.assertNotIn("## Procedure", command_handle)
         self.assertEqual(command_surface._validate_command_handle_payload(handle, command_handle), [])
 
@@ -152,7 +158,7 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         stale = self.temp_dir / ".agents" / "skills" / "old-handle"
         stale.mkdir(parents=True)
         (stale / "SKILL.md").write_text(
-            "# Old Handle\n\nGenerated command handle for a child skill under the `agent-ops` router heading.\n",
+            "# Old Handle\n\nInternal activation entrypoint for a child skill under `agent-ops`.\n",
             encoding="utf-8",
         )
         manual = self.temp_dir / ".agents" / "skills" / "manual-skill"
@@ -174,7 +180,7 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         stale = self.temp_dir / ".agents" / "skills" / "old-handle"
         stale.mkdir(parents=True)
         (stale / "SKILL.md").write_text(
-            "# Old Handle\n\nGenerated command handle for a child skill under the `agent-ops` router heading.\n",
+            "# Old Handle\n\nInternal activation entrypoint for a child skill under `agent-ops`.\n",
             encoding="utf-8",
         )
         source_path = "Plugins/harness-engineering/skills/he-heartbeat/SKILL.md"
@@ -221,7 +227,7 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         stale = self.temp_dir / ".agents" / "skills" / "old-handle"
         stale.mkdir(parents=True)
         (stale / "SKILL.md").write_text(
-            "# Old Handle\n\nGenerated command handle for a child skill under the `agent-ops` router heading.\n",
+            "# Old Handle\n\nInternal activation entrypoint for a child skill under `agent-ops`.\n",
             encoding="utf-8",
         )
 

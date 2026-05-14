@@ -6,19 +6,38 @@ A governed **Agent Skills Kit** repository for Codex and AI coding agents. Autho
 
 A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
 
+A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+
+A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+
+A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+
+A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+
+A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+
+A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+
+A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
+
+A governed **Agent Skills Kit** repository for Codex and AI coding agents.
+Author skills once, validate quality, expose `$` command handles, and sync
+routed skills and plugins into runtime projections through the `ask` CLI.
+
 Agent Skills Kit is an **agent capability control plane** for Codex and AI
 coding agents.
 
 Teach your coding agents how your work actually works, then prove they
 remembered.
 
-This repository exposes **21 skills** through root-level skill surfaces,
-generated `$` command handles, and rooted runtime projections. The broader
-latent catalog currently contains 71 skills across 7 topic clusters (agent-ops:
-42, backend-platform: 4, content-publishing: 6, frontend-ui: 10,
-mobile-native: 1, product-strategy: 3, security-ops: 5). Author a capability
-once, route it intelligently, validate quality, project it safely into runtime,
-and keep the human and agent command surface small enough to use.
+This repository currently exposes **32 skills** in the default catalog: root
+routers plus policy-promoted command handles. The rooted command surface
+contains **108 generated `$` handles**, backed by first-party canonical skill
+source across 7 topic clusters (agent-ops: 44, backend-platform: 4,
+content-publishing: 6, frontend-ui: 10, mobile-native: 1, product-strategy: 3,
+security-ops: 5). Author a capability once, route it intelligently, validate
+quality, project it safely into runtime, and keep the human and agent command
+surface small enough to use.
 
 **What this gives you:**
 
@@ -34,6 +53,20 @@ and keep the human and agent command surface small enough to use.
 
 Start with the executable agent path below. The product framing and proof
 contract live in [Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md).
+
+## Contents
+
+- [Quick start](#quick-start)
+- [What you can do](#what-you-can-do)
+- [Distribution](#distribution)
+- [Robot mode for AI agents](#robot-mode-for-ai-agents)
+- [Programmatic usage](#programmatic-usage)
+- [Runtime and command surfaces](#runtime-and-command-surfaces)
+- [Skill graph](#skill-graph-manual-topic-clusters-non-canonical)
+- [Repository layout](#repository-layout)
+- [Documentation](#documentation)
+- [Privacy and Data Handling](#privacy-and-data-handling)
+- [Governance](#governance)
 
 ## Quick start
 
@@ -182,7 +215,7 @@ Errors include suggestions and examples:
 ERROR Unknown topic: 'invalid'
 
 Hint: Did you mean 'ask skills'?
-   Valid topics: repo, skills, runtime, plugins, evals, graph, mcp, wiki, workouts
+   Valid topics: repo, skills, reviewers, runtime, plugins, evals, workouts, graph, mcp, wiki
 
 Examples:
    - ./bin/ask skills list
@@ -228,11 +261,11 @@ This repo separates source, projection, and live runtime visibility:
 | `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes   | Regenerate only        |
 | `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection               | Refresh with user sync |
 
-`ask skills list --json` reports the current visible runtime surface. In the
-current rooted projection this is a compact first-level list of root routers
-plus generated command handles. `ask skills handles --json --no-handles`
-validates the full command surface and reports the current handle count and any
-violations.
+`ask skills list --json` reports the default catalog entries exposed to the
+runtime. `ask runtime surface --json` shows how those entries split between
+root routers, policy-promoted handles, plugin skills, and primary runtime
+skills. `ask skills handles --json --no-handles` validates the generated
+command surface and reports the current handle count and any violations.
 
 A generated command handle, such as `.agents/skills/he-heartbeat/SKILL.md`, is a small pointer that makes `$he-heartbeat` mentionable. It is not the real workflow. The handle resolves to a canonical source path through:
 
@@ -267,7 +300,7 @@ This table is a human-oriented grouping for quick navigation and is not used for
 
 | Topic              | Skills | Examples                                              |
 | ------------------ | ------ | ----------------------------------------------------- |
-| agent-ops          | 42     | docs-expert, autofix, unslopify, simplify             |
+| agent-ops          | 44     | docs-expert, autofix, unslopify, simplify             |
 | frontend-ui        | 10     | baseline-ui, frontend-ui-design, ui-visual-regression |
 | backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer               |
 | product-strategy   | 3      | architecture-interview, deep-interview, interview-me  |
@@ -286,7 +319,7 @@ agent-skills/
 |-- .workouts/                # Canonical skill workout fixtures
 |
 |-- Skills/                   # All canonical skills organised by topic cluster
-|   |-- agent-ops/            # 42 skills: docs-expert, autofix, unslopify, simplify, ...
+|   |-- agent-ops/            # 44 skills: docs-expert, autofix, unslopify, simplify, ...
 |   |-- frontend-ui/          # 10 skills: baseline-ui, frontend-ui-design, ui-visual-regression, ...
 |   |-- backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, ...
 |   |-- product-strategy/     #  3 skills: architecture-interview, deep-interview, interview-me

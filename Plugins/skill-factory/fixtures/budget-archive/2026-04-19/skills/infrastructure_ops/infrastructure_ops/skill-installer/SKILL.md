@@ -41,7 +41,7 @@ Provide:
 - `restart_required`
 
 ## Progressive disclosure policy
-Required operational context is never removed. Preserve context by relocating details into `references/`.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 Read when:
 - handling source and install safety caveats: [install flows](./references/install-flows.md)

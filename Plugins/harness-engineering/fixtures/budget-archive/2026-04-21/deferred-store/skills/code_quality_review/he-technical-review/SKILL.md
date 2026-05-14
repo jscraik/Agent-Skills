@@ -63,7 +63,7 @@ Route elsewhere:
 - Redact secrets, credentials, tokens, and sensitive data by default.
 - Do not implement unclear or unverified feedback.
 - If feedback conflicts with prior user decisions, escalate with evidence first.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Anti-Patterns
 

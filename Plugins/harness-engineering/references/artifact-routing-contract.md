@@ -13,7 +13,7 @@ artifact_id: <canonical-slug>-<stage-suffix>
 artifact_type: <he-stage-or-index-type>
 canonical_slug: <repo-name>-<linear-parent-issue-or-milestone>
 title: <human title matching first H1>
-harness_stage: he-spec|he-plan|he-eval-report|he-brainstorm|he-compound|he-strategy|he-refactor|he-linear-plan|he-phase-heartbeat
+harness_stage: he-spec|he-plan|he-eval-report|he-brainstorm|he-reconcile|he-reinforce|he-strategy|he-reframe|he-linear-plan|he-phase-work
 status: draft|active|blocked|complete|superseded
 date: YYYY-MM-DD
 traceability_required: true|false
@@ -24,7 +24,7 @@ linear_milestone: <milestone when tracked>
 
 Use `canonical_slug` as the chain key across `.harness/features`,
 `.harness/review`, `.harness/triage`, `.harness/strategy`,
-`.harness/refactors`, `.harness/decisions`, `.harness/core`,
+`.harness/reframes`, `.harness/decisions`, `.harness/core`,
 `.harness/linear`, `.harness/specs`, `.harness/plan`, `.harness/solutions`,
 `.harness/evals`, and related proof artifacts. Stage-specific titles may differ
 only by suffix, such as `Intent`, `Strategy`, `Refactor`, `Spec`, `Plan`,
@@ -45,7 +45,7 @@ New tracked issue artifacts should prefer dated Linear filenames:
 .harness/review/YYYY-MM-DD-JSC-###-<canonical-slug>-architecture-review.md
 .harness/triage/YYYY-MM-DD-JSC-###-<canonical-slug>-triage.md
 .harness/strategy/YYYY-MM-DD-JSC-###-<canonical-slug>-strategy.md
-.harness/refactors/YYYY-MM-DD-JSC-###-<refactor-slug>.md
+.harness/reframes/YYYY-MM-DD-JSC-###-<reframe-slug>.md
 .harness/linear/YYYY-MM-DD-JSC-###-<repo-name>-<slice-slug>-linear-plan.md
 .harness/specs/YYYY-MM-DD-JSC-###-<canonical-slug>-spec.md
 .harness/plan/YYYY-MM-DD-JSC-###-<canonical-slug>-plan.md
@@ -91,13 +91,13 @@ frontmatter conservative enough for simple parsers:
 | `he-strategy` strategic-compression mode | `.harness/strategy/**.md` |
 | `he-strategy` decision-compression mode | `.harness/decisions/**.md` |
 | `he-strategy` core-compression mode | `.harness/core/**.md` |
-| `he-refactor` | `.harness/refactors/**.md` |
+| `he-reframe` | `.harness/reframes/**.md` |
 | `he-linear-plan` | `.harness/linear/**.md` |
-| `he-phase-heartbeat` | automation/thread heartbeat plus phase status report |
+| `he-phase-work` | automation/thread heartbeat plus phase status report |
 | `he-spec` | `.harness/specs/**.md` |
 | `he-plan` | `.harness/plan/**.md` |
 | `he-plan` dedicated UI plan | `.harness/plan/**-ui-plan.md` |
-| `he-compound` learning capture | `.harness/solutions/**.md` |
+| `he-reinforce` learning capture | `.harness/solutions/**.md` |
 
 Use repo-relative paths in saved artifacts and handoffs. Chat may link absolute
 paths, but portable HE docs should keep the `.harness/...` form.
@@ -110,13 +110,13 @@ paths, but portable HE docs should keep the `.harness/...` form.
   `docs/ui-plan/`, `docs/ui-plans/`, or `docs/solutions/` artifact, read it as
   source evidence and write the replacement artifact under the matching
   `.harness` root. Preserve the legacy path as source evidence.
-- `he-work`, `he-code-review`, and `he-compound` may read legacy paths for
+- `he-work`, `he-code-review`, and `he-reinforce` may read legacy paths for
   compatibility, but their handoffs should point downstream agents at the
   `.harness` artifact when one exists or is created.
 - `docs/ui-plan/**` is treated as a legacy singular spelling of
   `docs/ui-plans/**`; new dedicated UI plans use `.harness/plan/**-ui-plan.md`.
 - `docs/solutions/**` is treated as the legacy reusable-solution library; new
-  `he-compound` captures use `.harness/solutions/**.md` and sync Project Brain
+  `he-reinforce` captures use `.harness/solutions/**.md` and sync Project Brain
   when the repo has that operating surface.
 - Folded `he-ideate` requests are served by `he-brainstorm`; use
   `.harness/ideate/**.md` only when the request is explicitly ideation/options

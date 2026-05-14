@@ -51,7 +51,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not broaden refinements into unrelated feature work.
 - Do not polish directly on `main` or `master`.
 - Do not skip server-health probing before asking the user to browse and react.
-- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Anti-patterns
 

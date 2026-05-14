@@ -324,7 +324,10 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertFalse(runtime_handle.is_symlink())
-        self.assertIn("Generated command handle", (runtime_handle / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertIn(
+            "Internal activation entrypoint",
+            (runtime_handle / "SKILL.md").read_text(encoding="utf-8"),
+        )
         self.assertEqual(source_skill_md.read_text(encoding="utf-8"), "# Canonical Source\n")
         self.assertTrue(
             any("Removed stale symlink" in item and "he-heartbeat" in item for item in result.data["logs"]),

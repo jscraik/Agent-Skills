@@ -16,7 +16,7 @@ metadata:
 ## Philosophy
 - Map ownership risk for sensitive paths from repository evidence.
 - Start from live evidence and local patterns.
-- Do not remove important context for budget trimming; use progressive disclosure.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## When To Use
 - The user asks who owns sensitive files or where bus factor is low.

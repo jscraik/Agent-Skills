@@ -22,7 +22,7 @@ from selection_policy import (  # type: ignore  # noqa: E402
     SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
 )
-from command_surface import build_skill_handles  # type: ignore  # noqa: E402
+from command_surface import build_skill_handles, _with_folded_alias_handles  # type: ignore  # noqa: E402
 from skill_discovery import (  # type: ignore  # noqa: E402
     HIDDEN_FLAT_SKILL_NAMES as DISCOVERY_HIDDEN_FLAT_SKILL_NAMES,
     PLUGIN_HIDDEN_LANE_SKILL_NAMES as DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
@@ -287,7 +287,7 @@ def _generated_command_handle_names() -> set[str]:
     """Return command handles intentionally projected as first-level runtime entries."""
     return {
         handle.handle
-        for handle in build_skill_handles()
+        for handle in _with_folded_alias_handles(build_skill_handles())
         if handle.kind == "skill" and handle.command_handle_path and handle.handle not in ROOT_SKILL_SETS
     }
 

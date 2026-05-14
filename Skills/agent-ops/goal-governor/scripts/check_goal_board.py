@@ -22,6 +22,7 @@ STATUSES = {"queued", "active", "blocked", "done"}
 NATIVE_STATUSES = {"active", "paused", "budgetLimited", "budget_limited", "complete", None}
 MAX_NATIVE_OBJECTIVE_CHARS = 4_000
 TASK_ID = re.compile(r"^T\d{3}$")
+NATIVE_GOAL_ID = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
 def fail(message: str) -> int:
@@ -46,69 +47,114 @@ def parse_scalar(value: str) -> Any:
         return value
 
 
-def parse_simple_yaml(text: str) -> Any:
+class SimpleYamlParser:
     """Parse the strict YAML subset emitted by Goal Governor templates."""
 
-    rows: list[tuple[int, str]] = []
-    for raw_line in text.splitlines():
-        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
-            continue
-        indent = len(raw_line) - len(raw_line.lstrip(" "))
-        rows.append((indent, raw_line.strip()))
+    def __init__(self, text: str) -> None:
+        self.rows = self._tokenize(text)
 
-    def parse_block(index: int, indent: int) -> tuple[Any, int]:
-        if index >= len(rows):
+    @staticmethod
+    def _tokenize(text: str) -> list[tuple[int, str]]:
+        rows: list[tuple[int, str]] = []
+        for raw_line in text.splitlines():
+            if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+                continue
+            indent = len(raw_line) - len(raw_line.lstrip(" "))
+            rows.append((indent, raw_line.strip()))
+        return rows
+
+    def parse(self) -> Any:
+        parsed, final_index = self._parse_block(0, self.rows[0][0] if self.rows else 0)
+        if final_index != len(self.rows):
+            raise ValueError("could not parse entire state.yaml")
+        return parsed
+
+    def _parse_block(self, index: int, indent: int) -> tuple[Any, int]:
+        if index >= len(self.rows):
             return {}, index
-        _, first = rows[index]
-        if first.startswith("- "):
-            values: list[Any] = []
-            while index < len(rows) and rows[index][0] == indent and rows[index][1].startswith("- "):
-                item_text = rows[index][1][2:].strip()
-                index += 1
-                item: Any
-                if not item_text:
-                    item, index = parse_block(index, indent + 2)
-                elif ":" in item_text:
-                    key, value = item_text.split(":", 1)
-                    item = {key.strip(): parse_scalar(value.strip()) if value.strip() else None}
-                    while index < len(rows) and rows[index][0] >= indent + 2:
-                        child_indent, child_text = rows[index]
-                        if child_indent != indent + 2 or ":" not in child_text:
-                            break
-                        child_key, child_value = child_text.split(":", 1)
-                        child_key = child_key.strip()
-                        child_value = child_value.strip()
-                        index += 1
-                        if child_value:
-                            item[child_key] = parse_scalar(child_value)
-                        else:
-                            child, index = parse_block(index, indent + 4)
-                            item[child_key] = child
-                else:
-                    item = parse_scalar(item_text)
-                values.append(item)
-            return values, index
+        if self.rows[index][1].startswith("- "):
+            return self._parse_sequence(index, indent)
+        return self._parse_mapping(index, indent)
 
-        mapping: dict[str, Any] = {}
-        while index < len(rows) and rows[index][0] == indent and not rows[index][1].startswith("- "):
-            _, text = rows[index]
-            if ":" not in text:
-                raise ValueError(f"invalid line: {text}")
-            key, value = text.split(":", 1)
-            key = key.strip()
-            value = value.strip()
+    def _parse_sequence(self, index: int, indent: int) -> tuple[list[Any], int]:
+        values: list[Any] = []
+        while self._is_sequence_item(index, indent):
+            item, index = self._parse_sequence_item(index, indent)
+            values.append(item)
+        return values, index
+
+    def _is_sequence_item(self, index: int, indent: int) -> bool:
+        return (
+            index < len(self.rows)
+            and self.rows[index][0] == indent
+            and self.rows[index][1].startswith("- ")
+        )
+
+    def _parse_sequence_item(self, index: int, indent: int) -> tuple[Any, int]:
+        item_text = self.rows[index][1][2:].strip()
+        index += 1
+        if not item_text:
+            return self._parse_block(index, indent + 2)
+        if ":" not in item_text:
+            return parse_scalar(item_text), index
+        item = self._parse_inline_mapping_item(item_text)
+        return self._parse_mapping_children(item, index, indent + 2)
+
+    def _parse_inline_mapping_item(self, item_text: str) -> dict[str, Any]:
+        key, value = item_text.split(":", 1)
+        value = value.strip()
+        return {key.strip(): parse_scalar(value) if value else None}
+
+    def _parse_mapping_children(
+        self, item: dict[str, Any], index: int, indent: int
+    ) -> tuple[dict[str, Any], int]:
+        while index < len(self.rows) and self.rows[index][0] >= indent:
+            child_indent, child_text = self.rows[index]
+            if child_indent != indent or ":" not in child_text:
+                break
+            child_key, child_value = child_text.split(":", 1)
             index += 1
-            if value:
-                mapping[key] = parse_scalar(value)
-            else:
-                child, index = parse_block(index, indent + 2)
-                mapping[key] = child
+            child_value = child_value.strip()
+            if child_value:
+                item[child_key.strip()] = parse_scalar(child_value)
+                continue
+            child, index = self._parse_block(index, indent + 2)
+            item[child_key.strip()] = child
+        return item, index
+
+    def _parse_mapping(self, index: int, indent: int) -> tuple[dict[str, Any], int]:
+        mapping: dict[str, Any] = {}
+        while self._is_mapping_item(index, indent):
+            key, value = self.rows[index][1].split(":", 1)
+            index = self._assign_mapping_value(mapping, key.strip(), value.strip(), index + 1, indent)
         return mapping, index
 
-    parsed, final_index = parse_block(0, rows[0][0] if rows else 0)
-    if final_index != len(rows):
-        raise ValueError("could not parse entire state.yaml")
-    return parsed
+    def _is_mapping_item(self, index: int, indent: int) -> bool:
+        return (
+            index < len(self.rows)
+            and self.rows[index][0] == indent
+            and not self.rows[index][1].startswith("- ")
+            and ":" in self.rows[index][1]
+        )
+
+    def _assign_mapping_value(
+        self,
+        mapping: dict[str, Any],
+        key: str,
+        value: str,
+        index: int,
+        indent: int,
+    ) -> int:
+        if value:
+            mapping[key] = parse_scalar(value)
+            return index
+        child, index = self._parse_block(index, indent + 2)
+        mapping[key] = child
+        return index
+
+
+def parse_simple_yaml(text: str) -> Any:
+    return SimpleYamlParser(text).parse()
 
 
 def load_yaml(path: Path) -> Any:
@@ -232,6 +278,11 @@ def validate_goal_section(state: dict[str, Any]) -> tuple[list[str], str | None]
     if native_status not in NATIVE_STATUSES:
         errors.append("goal.native_status must be active, paused, budgetLimited, budget_limited, or complete")
 
+    native_goal_id = goal.get("native_goal_id")
+    if native_goal_id is not None:
+        if not isinstance(native_goal_id, str) or not NATIVE_GOAL_ID.match(native_goal_id):
+            errors.append("goal.native_goal_id must be a non-empty opaque id when present")
+
     for field in ("tokens_used", "time_used_seconds"):
         value = goal.get(field)
         if value is not None and (not isinstance(value, int) or value < 0):
@@ -240,6 +291,11 @@ def validate_goal_section(state: dict[str, Any]) -> tuple[list[str], str | None]
     token_budget = goal.get("token_budget")
     if token_budget is not None and (not isinstance(token_budget, int) or token_budget <= 0):
         errors.append("goal.token_budget must be a positive integer when present")
+
+    for field in ("native_created_at", "native_updated_at"):
+        value = goal.get(field)
+        if value is not None and (not isinstance(value, str) or not value.strip()):
+            errors.append(f"goal.{field} must be a non-empty string when present")
 
     return errors, str(goal_status) if isinstance(goal_status, str) else None
 

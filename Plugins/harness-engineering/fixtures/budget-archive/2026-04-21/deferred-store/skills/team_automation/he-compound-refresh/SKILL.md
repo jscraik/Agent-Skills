@@ -64,7 +64,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not continue from stale thread memory when live state or session evidence is available.
 - Do not ask whether current code drift is "intentional"; this stage matches docs to current repository reality.
 - Do not use external docs when repository evidence is sufficient.
-- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Anti-patterns
 

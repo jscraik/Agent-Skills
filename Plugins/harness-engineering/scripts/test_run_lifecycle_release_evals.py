@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
+import tempfile
 import unittest
 from unittest import mock
 from pathlib import Path
@@ -13,10 +15,118 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from run_lifecycle_release_evals import _classify_case_failures, run_skill, summarize
+from run_lifecycle_release_evals import _classify_case_failures, _run_skill_builder_eval, run_skill, summarize
 
 
 class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
+    def test_cli_rejects_model_other_than_fixed_spark(self) -> None:
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT_DIR / "run_lifecycle_release_evals.py"),
+                "--mode",
+                "release",
+                "--eval-runner",
+                "codex",
+                "--skill",
+                "he-router",
+                "--model",
+                "gpt-5.4",
+                "--json",
+            ],
+            cwd=SCRIPT_DIR.parents[2],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("--model is fixed to gpt-5.3-codex-spark", result.stderr)
+
+    def test_direct_codex_eval_uses_fixed_spark_model_without_reasoning(self) -> None:
+        completed = mock.Mock(
+            returncode=0,
+            stdout=json.dumps({"decision": "pass"}),
+            stderr="",
+        )
+        with mock.patch("run_lifecycle_release_evals.subprocess.run", return_value=completed) as run:
+            result = _run_skill_builder_eval(
+                Path("/tmp/repo"),
+                "he-router",
+                "release",
+                "codex",
+                (),
+                (),
+                90,
+                "gpt-5.4",
+                None,
+                Path("/tmp/codex-home"),
+            )
+
+        self.assertEqual(result["status"], "success")
+        cmd = run.call_args.args[0]
+        self.assertIn("--model", cmd)
+        self.assertEqual(cmd[cmd.index("--model") + 1], "gpt-5.3-codex-spark")
+        self.assertIn("--codex-arg", cmd)
+        self.assertEqual(cmd[cmd.index("--codex-arg") + 1], "--ignore-user-config")
+        self.assertNotIn("--reasoning", cmd)
+        self.assertNotIn("--reasoning-effort", cmd)
+
+    def test_direct_codex_eval_omits_codex_home_by_default_for_runner_isolation(self) -> None:
+        completed = mock.Mock(
+            returncode=0,
+            stdout=json.dumps({"decision": "pass"}),
+            stderr="",
+        )
+        with mock.patch("run_lifecycle_release_evals.subprocess.run", return_value=completed) as run:
+            result = _run_skill_builder_eval(
+                Path("/tmp/repo"),
+                "he-router",
+                "release",
+                "codex",
+                (),
+                (),
+                90,
+                None,
+                None,
+                None,
+            )
+
+        self.assertEqual(result["status"], "success")
+        cmd = run.call_args.args[0]
+        self.assertNotIn("--codex-home", cmd)
+
+    def test_usage_limit_jsonl_classifies_as_tool_preflight(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            jsonl = Path(tmpdir) / "codex_events.jsonl"
+            jsonl.write_text(
+                '{"type":"error","message":"You have hit your usage limit for GPT-5.3-Codex-Spark."}\n',
+                encoding="utf-8",
+            )
+            parsed = {
+                "cases": [
+                    {
+                        "id": "explicit-eval-route",
+                        "name": "Explicit eval route",
+                        "category": "happy",
+                        "tier1_failures": ["[codex] codex returned non-zero exit code: 1"],
+                        "runners": {
+                            "codex": {
+                                "artifacts": {
+                                    "jsonl": str(jsonl),
+                                }
+                            }
+                        },
+                    }
+                ]
+            }
+
+            classified = _classify_case_failures(parsed)
+
+        self.assertEqual(len(classified["tool_preflight_cases"]), 1)
+        self.assertEqual(classified["tool_preflight_cases"][0]["id"], "explicit-eval-route")
+        self.assertEqual(classified["other_failure_cases"], [])
+
     def test_summarize_separates_timeout_content_tool_and_selection_signal(self) -> None:
         raw_selection_warning = json.dumps(
             {
@@ -287,6 +397,171 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
         self.assertEqual(summary["failure_breakdown"]["timeout_failures"], [])
         self.assertEqual(summary["failure_breakdown"]["content_failures"], [])
 
+    def test_split_case_execution_can_be_bounded_by_case_count(self) -> None:
+        with (
+            mock.patch(
+                "run_lifecycle_release_evals._list_skill_builder_cases",
+                return_value=(["case-a", "case-b", "case-c"], None),
+            ),
+            mock.patch("run_lifecycle_release_evals._run_skill_builder_eval") as run_case,
+        ):
+            run_case.return_value = {
+                "skill": "he-router",
+                "returncode": 0,
+                "status": "success",
+                "decision": "pass",
+                "case_filters": ["case-a"],
+                "failure_classification": {
+                    "timeout_cases": [],
+                    "content_failure_cases": [],
+                    "other_failure_cases": [],
+                    "tool_preflight_cases": [],
+                },
+                "raw_output": "",
+                "errors": [],
+            }
+
+            result = run_skill(
+                Path("/tmp/repo"),
+                "he-router",
+                "release",
+                "codex",
+                (),
+                (),
+                90,
+                None,
+                None,
+                True,
+                Path("/tmp/codex-home"),
+                1,
+            )
+
+        self.assertEqual(run_case.call_count, 1)
+        self.assertTrue(result["bounded_run"])
+        self.assertEqual(result["discovered_case_count"], 3)
+        self.assertEqual(result["executed_case_count"], 1)
+        self.assertEqual(result["skipped_case_count"], 2)
+        self.assertEqual(result["max_cases"], 1)
+
+    def test_split_case_execution_stops_after_tool_preflight_limit(self) -> None:
+        with (
+            mock.patch(
+                "run_lifecycle_release_evals._list_skill_builder_cases",
+                return_value=(["case-a", "case-b"], None),
+            ),
+            mock.patch("run_lifecycle_release_evals._run_skill_builder_eval") as run_case,
+        ):
+            run_case.return_value = {
+                "skill": "he-router",
+                "returncode": 1,
+                "status": "error",
+                "decision": "fail",
+                "case_filters": ["case-a"],
+                "failure_classification": {
+                    "timeout_cases": [],
+                    "content_failure_cases": [],
+                    "other_failure_cases": [],
+                    "tool_preflight_cases": [
+                        {
+                            "id": "case-a",
+                            "name": "case-a",
+                            "category": None,
+                            "tier1_failures": [
+                                "[codex] Codex runner preflight failed before producing final output."
+                            ],
+                        }
+                    ],
+                },
+                "raw_output": "",
+                "errors": [
+                    {
+                        "code": "ERR_CODEX_RUNNER_PREFLIGHT",
+                        "message": "Codex live eval runner failed before producing final output.",
+                    }
+                ],
+            }
+
+            result = run_skill(
+                Path("/tmp/repo"),
+                "he-router",
+                "release",
+                "codex",
+                (),
+                (),
+                90,
+                None,
+                None,
+                True,
+                Path("/tmp/codex-home"),
+            )
+
+        self.assertEqual(run_case.call_count, 1)
+        self.assertTrue(result["bounded_run"])
+        self.assertEqual(result["early_stop_reason"], "tool_preflight_failure_limit")
+        self.assertEqual(result["executed_case_count"], 1)
+        self.assertEqual(result["skipped_case_count"], 1)
+        self.assertEqual(result["errors"][0]["code"], "ERR_CODEX_RUNNER_PREFLIGHT")
+
+    def test_split_case_execution_can_disable_tool_preflight_early_stop(self) -> None:
+        with (
+            mock.patch(
+                "run_lifecycle_release_evals._list_skill_builder_cases",
+                return_value=(["case-a", "case-b"], None),
+            ),
+            mock.patch("run_lifecycle_release_evals._run_skill_builder_eval") as run_case,
+        ):
+            run_case.return_value = {
+                "skill": "he-router",
+                "returncode": 1,
+                "status": "error",
+                "decision": "fail",
+                "case_filters": ["case-a"],
+                "failure_classification": {
+                    "timeout_cases": [],
+                    "content_failure_cases": [],
+                    "other_failure_cases": [],
+                    "tool_preflight_cases": [
+                        {
+                            "id": "case-a",
+                            "name": "case-a",
+                            "category": None,
+                            "tier1_failures": [
+                                "[codex] Codex runner preflight failed before producing final output."
+                            ],
+                        }
+                    ],
+                },
+                "raw_output": "",
+                "errors": [
+                    {
+                        "code": "ERR_CODEX_RUNNER_PREFLIGHT",
+                        "message": "Codex live eval runner failed before producing final output.",
+                    }
+                ],
+            }
+
+            result = run_skill(
+                Path("/tmp/repo"),
+                "he-router",
+                "release",
+                "codex",
+                (),
+                (),
+                90,
+                None,
+                None,
+                True,
+                Path("/tmp/codex-home"),
+                None,
+                0,
+            )
+
+        self.assertEqual(run_case.call_count, 2)
+        self.assertFalse(result["bounded_run"])
+        self.assertIsNone(result["early_stop_reason"])
+        self.assertEqual(result["executed_case_count"], 2)
+        self.assertEqual(result["skipped_case_count"], 0)
+
     def test_codex_auth_preflight_error_is_classified_as_tool_preflight(self) -> None:
         summary = summarize(
             [
@@ -305,6 +580,8 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
         )
 
         breakdown = summary["failure_breakdown"]
+        self.assertEqual(summary["eval_runtime"]["codex_model"], "gpt-5.3-codex-spark")
+        self.assertEqual(summary["eval_runtime"]["reasoning_flags"], [])
         self.assertEqual(
             [item["skill"] for item in breakdown["tool_preflight_failures"]],
             ["he-spec"],

@@ -95,7 +95,7 @@ This entrypoint stays concise and keeps the full operational workflow in archive
 - Do not force a brainstorm when the request is already well specified.
 - Keep implementation details such as libraries, schemas, endpoints, and file layouts out of the requirements artifact unless the brainstorm is inherently technical.
 - Use Linear issues or comments for durable decision capture; do not create ADRs.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Anti-patterns
 

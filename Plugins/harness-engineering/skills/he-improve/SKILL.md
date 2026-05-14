@@ -41,7 +41,8 @@ untrusted until verified.
 Return `schema_version: 1` when structured. Include routing decision, evidence
 summary, prioritized gaps, patch summary, retained/moved references, validation
 commands with `pass|fail|blocked`, stop-rule status, rollback note, residual
-risk, blackboard delta when durable state changes, and next handoff.
+risk, blackboard delta when durable state changes, git staging status, staged
+paths, and next handoff.
 
 ## Preconditions
 
@@ -58,6 +59,8 @@ user-config-write, external-write, destructive, or completion-gating. Start with
    matters operationally.
 3. Patch one failure class at a time; move bulky detail to references instead of
    deleting it for budget.
+4. Apply the git staging contract for files changed in this turn only; report
+   unrelated dirty paths without staging them.
 4. Translate external material into invariants, evals, references, contracts, or
    an explicit rejection.
 5. For skill work, run the A/B/C spec-implementation-evaluation loop until the
@@ -66,6 +69,12 @@ user-config-write, external-write, destructive, or completion-gating. Start with
    store review-only media in the skill package.
 7. If the evidence points to a shared contract, patch that contract and its
    enforcing evals before adding another visible surface.
+8. Apply the BLUF review contract to non-trivial durable improvement reports or
+   loop artifacts so the target, gap, patch decision, validation blocker, and
+   stop rule are visible before detail.
+9. Apply the visual reference contract when an improvement report, media proof,
+   skill routing change, or before/after behavior comparison would otherwise be
+   hidden in prose.
 
 ## Validation
 
@@ -75,6 +84,9 @@ skill-package edits, run strict audit, OpenClaw, OpenAI format lint,
 progressive disclosure lint, Plugin Eval, relevant smoke/release evals, and
 focused package checks when available. Missing proof is `blocked` or `not-run`,
 never `pass`.
+For non-trivial generated improvement artifacts, run or block
+`python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
+<improvement-artifact-path> --json`.
 
 ## Safety Boundaries
 
@@ -134,7 +146,8 @@ loop artifacts, and review media belong in references, repo artifacts, or
 - Skill improvement loop: `Plugins/harness-engineering/references/skill-improvement-loop.md`.
 - Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`.
 - Shared subagent call policy: `../../references/subagent-call-contract.md`.
+- BLUF review contract: `../../references/bluf-review-contract.md`.
+- Visual reference contract: `../../references/visual-reference-contract.md`.
 - Deferred context index: `../../references/deferred-context-index.md`.
 
-Do not remove important context for budget trimming; move deep context to
-references with a clear route.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
