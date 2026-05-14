@@ -22,19 +22,19 @@ def test_execution_slice_contract_names_authority_inputs() -> None:
     """
     Check that the execution-slice contract names the required authority input file path patterns and the permitted selection concepts.
     
-    Asserts that the contract text includes authority input patterns such as harness linear plans, refactors, decisions, core, and brainstorm documents, and that it requires selecting exactly one of: milestone, parent issue, refactor phase, or execution slice.
+    Asserts that the contract text includes authority input patterns such as harness linear plans, reframes, decisions, core, and brainstorm documents, and that it requires selecting exactly one of: milestone, parent issue, reframe phase, or execution slice.
     """
     text = read(CONTRACT)
 
     for phrase in [
         ".harness/linear/*.md",
-        ".harness/refactors/<selected-refactor>.md",
+        ".harness/reframes/<selected-reframe>.md",
         ".harness/decisions/*.md",
         ".harness/core/*.md",
         ".harness/brainstorm/*.md",
         "one milestone",
         "one parent issue",
-        "one refactor phase",
+        "one reframe phase",
         "one execution slice",
     ]:
         assert phrase in text

@@ -1,44 +1,51 @@
-schema_version: 1
+schema_version: 2
 skill: improve-codebase-architecture
-purpose: "Find architecture moves that reduce cognitive load and improve leverage before broad refactors."
+purpose: "Recommend proof-backed architecture moves from fresh repo evidence."
 triggers:
-  - "Use when the user request matches the skill scope."
+  - "Architecture, module-boundary, interface, design-quality, or testability review."
+  - "Context-language, durable terminology, or Linear-backed design decision."
 non_goals:
-  - "Route unrelated work away from this skill."
+  - "Ordinary behavior-preserving cleanup."
+  - "Narrow bug fixes or local test repairs."
+  - "First-draft skill or plugin authoring."
+  - "Architecture ceremony without current repo evidence."
 inputs:
   - user_request
-  - target_context
-  - evidence
+  - target_repo_or_area
+  - fresh_evidence
+  - tracker_or_workpad
+  - reference_texts
 outputs:
-  - result
-  - evidence_summary
+  - schema_version
   - complexity_symptoms
+  - fresh_evidence
+  - missing_evidence
   - design_options
   - recommended_first_move
-  - reversibility
   - tracer_proof
   - decision_surface
-  - validation_status
+  - validation
+  - confidence
 risks:
   - over_triggering
   - untrusted_input
   - validation_drift
   - premature_redesign
   - complexity_displacement
-required_deep_review_fields:
-  - complexity_symptoms
-  - design_options.patch_design
-  - design_options.interface_design
-  - recommended_first_move
-  - tracer_proof
-  - reversibility
+  - runtime_visibility_overclaim
 safety:
   untrusted_inputs: true
   redact_secrets: true
   destructive_commands: false
+  generated_projection_edits_forbidden: true
 validation:
-  - plugin_eval_grade_a
   - strict_skill_audit
+  - skill_gate
+  - openai_skill_format
+  - smoke_evals_when_available
+  - release_evals_when_available
+  - package_boundary_checks
+  - plugin_eval
   - tracer_proof_or_blocker
-observability: "Report validation commands and outcomes."
-rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."
+observability: "Report exact files inspected, commands run, pass/fail/blocked/not applicable outcomes, and blocked validators with concrete blocker text."
+rollback_procedure: "Revert scoped skill-package edits, then rerun strict audit, skill gate, OpenAI format, evals where available, boundary checks, and Plugin Eval."

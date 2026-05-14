@@ -16,7 +16,11 @@ LIFECYCLE_SYNC_ROOT = SCRIPTS_ROOT / "lifecycle-and-sync"
 if str(LIFECYCLE_SYNC_ROOT) not in sys.path:
     sys.path.append(str(LIFECYCLE_SYNC_ROOT))
 
-from command_surface import handles_report
+from command_surface import (
+    FOLDED_SKILL_HANDLE_ALIASES,
+    HIDDEN_COMPATIBILITY_COMMAND_HANDLES,
+    handles_report,
+)
 
 RUNTIME_CACHE_RELATIVE_ROOT = Path(".agents/plugins-runtime/cache")
 PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED = "PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED"
@@ -69,8 +73,8 @@ def prune_command_handle_skill_entries(
     if not isinstance(handles, list):
         return [], []
 
-    logs: list[str] = []
-    deletes: list[str] = []
+    handles_to_prune: set[str] = set()
+    owner_handles: set[str] = set()
     for row in handles:
         if not isinstance(row, dict):
             continue
@@ -82,6 +86,17 @@ def prune_command_handle_skill_entries(
         handle = str(row.get("handle") or "").strip()
         if not handle or "/" in handle or ".." in handle:
             continue
+        owner_handles.add(handle)
+        handles_to_prune.add(handle)
+    for alias, target in FOLDED_SKILL_HANDLE_ALIASES.items():
+        if alias not in HIDDEN_COMPATIBILITY_COMMAND_HANDLES:
+            continue
+        if target in owner_handles and "/" not in alias and ".." not in alias:
+            handles_to_prune.add(alias)
+
+    logs: list[str] = []
+    deletes: list[str] = []
+    for handle in sorted(handles_to_prune):
         targets = [skills_root / handle]
         targets.extend(
             skill_md.parent

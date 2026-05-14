@@ -11,8 +11,8 @@ When structured context is needed, carry this shape:
 ```yaml
 schema_version: 1
 stage_context:
-  selected_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat|he-eval-report|he-strategy|he-refactor|he-linear-plan|he-phase-heartbeat
-  selected_slice: "<milestone, parent issue, refactor phase, or execution slice>"
+  selected_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat|he-eval-report|he-strategy|he-reframe|he-linear-plan|he-phase-work
+  selected_slice: "<milestone, parent issue, reframe phase, or execution slice>"
   slice_status: resolved|blocked|not_applicable
   tracker_status: resolved|created|blocked|not_applicable|user_opted_out
   artifact_identity_status: pass|blocked|not_applicable
@@ -25,6 +25,7 @@ stage_context:
   coding_harness_status: pass|blocked|not_applicable
   project_brain_status: updated|blocked|not_checked|not_applicable
   validation_status: pass|fail|blocked|not_run_with_reason|not_applicable
+  git_staging_status: staged|blocked|not_applicable
   blocker: "<smallest recovery step or null>"
 ```
 
@@ -37,7 +38,10 @@ stage_context:
 5. Run the Linear Delta Capture Gate when consuming existing tracked plans or Linear-backed slices.
 6. Apply specialist skill steering only when a proven domain need improves the current stage output without reopening scope.
 7. Apply interactive steering only when a consequential choice remains unresolved after source inspection; in headless/autonomous mode, record assumptions and blockers instead of asking.
-8. Emit the lifecycle exit contract at handoff.
+8. When the stage wrote or updated files, apply `git-staging-contract.md` before
+   handoff so current-turn artifacts are staged without sweeping unrelated
+   dirty work.
+9. Emit the lifecycle exit contract at handoff.
 
 ## Ownership
 

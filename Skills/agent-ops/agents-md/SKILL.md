@@ -31,6 +31,7 @@ Agent instructions should be short, scoped, evidence-verified, and routed throug
 - Instruction-surface findings or edited AGENTS files, with contradiction and precedence notes.
 - Context ledger: what stayed root, moved to docs, became nested scope, stayed supplemental, or was flagged for deletion, with evidence.
 - Context Pointer map: verified links, nested AGENTS files, skills, commands, headings, or code anchors that carry relocated context.
+- Required AGENTS contract status for subagents/review swarms and CODESTYLE fallback.
 - Validation commands and remaining instruction risks.
 - For conflicts, include `Decision required:` with the exact user choice needed.
 - For shrink/delete requests, include `Preservation rule:` when any memory,
@@ -52,7 +53,11 @@ Start with 2-3 focused surfaces before expanding scope.
 6. Build a context ledger before deleting or moving text. Use the routing categories in `references/agents-md-guidance.md`.
 7. Move durable detail into linked docs only when it reduces always-loaded budget and leaves a discoverable Context Pointer from the owning instruction surface.
 8. Preserve memory and handoff contracts, including Project Brain, Local Memory, `.harness/memory/LEARNINGS.md`, and live handoff files when repo evidence or user request makes them binding.
-9. Validate formatting, links, contradictions, discovery behavior, and workflow claims.
+9. Enforce the AGENTS authoring contracts in `references/agents-md-guidance.md`:
+   - Include or preserve the subagent/review-swarm contract when editing root, workflow, validation, review, or agent-use AGENTS guidance.
+   - Use the full contract for control-plane, harness, configs, CI, security, review-swarm, or multi-agent repos; use the compact contract for ordinary app repos unless repo evidence calls for the full version.
+   - If a project has no local `CODESTYLE.md`, add the global Codex CODESTYLE fallback at `~/dev/configs/codex/instructions/CODESTYLE` with a verified absolute path or a blocked status if the path cannot be read.
+10. Validate formatting, links, contradictions, discovery behavior, and workflow claims.
 
 ## Constraints
 - Redact secrets and sensitive data by default.
@@ -89,11 +94,13 @@ Start with 2-3 focused surfaces before expanding scope.
 - Do not bury operative rules only in linked docs when the rule must be auto-loaded for every task in scope.
 - Do not present linked Markdown as automatically discovered Codex instructions unless repo config or AGENTS discovery makes that true.
 - Do not treat shorter as better when shortening removes required context, validation evidence, or ownership boundaries.
+- Do not remove or omit the subagent/review-swarm contract from AGENTS surfaces that mention subagents, reviewers, swarms, delegated agents, or artifact review lanes.
+- Do not leave technical repositories without a CODESTYLE route. If no local `CODESTYLE.md` exists, point AGENTS to the global Codex CODESTYLE fallback at `~/dev/configs/codex/instructions/CODESTYLE` and require path verification.
 
 ## Examples
-- "Use $agents-md in `repo/api`. Root AGENTS says `npm test`, package docs say `pnpm test`, and CI runs `bun test`; find the contradiction and ask before editing."
-- "Shrink this repo root AGENTS.md, but preserve the Local Memory and release handoff rules by moving detail behind verified Context Pointers."
-- "Review the nested `apps/mobile/AGENTS.md` boundary and tell me what stays local, what should move to docs, and which pointers are dead."
+- "User says: use $agents-md in `payments-api`. Root `AGENTS.md` says `npm test`, `docs/tooling.md` says `pnpm test`, and `.github/workflows/test.yml` runs `bun test`; inspect the contradiction, identify the active instruction scope, and ask which command policy wins before editing."
+- "User says: shrink `coding-harness/AGENTS.md`, but validate that the Local Memory, Project Brain, review-swarm artifact, and release handoff rules remain preserved behind verified Context Pointers."
+- "User says: review `field-app/apps/mobile/AGENTS.md` against the repo root `AGENTS.md`; inspect what stays in the mobile scope, what moves to `docs/mobile-workflow.md`, and which existing links or commands are dead."
 
 ## Output Format
 Use compact markdown with these labels when applicable: `Decision required:`, `Context ledger:`, `Context Pointer map:`, `Preservation rule:`, `Validation:`, and `Blocked:`. Report commands as `pass`, `fail`, or `blocked`.

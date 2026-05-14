@@ -8,6 +8,8 @@ non_goals:
 inputs:
   - "prek.toml path"
   - "hook failure output"
+  - "prek stash patch path"
+  - "pre-commit and post-commit git status"
   - "runtime manager"
   - "migration source"
   - "validation command"
@@ -15,16 +17,22 @@ outputs:
   - "config guidance or patch"
   - "shim/install notes"
   - "failure diagnosis"
+  - "staged/unstaged state classification"
+  - "prek patch disposition: intended_work, generated_noise, unrelated_user_work, or unresolved"
   - "validation evidence"
   - "remaining blockers"
 risks:
   - over_triggering
   - untrusted_input
   - validation_drift
+  - partial_commit_stash_mutation
+  - accidental_user_work_capture
 safety:
   untrusted_inputs: true
   redact_secrets: true
   destructive_commands: false
+  no_verify_default: false
+  inspect_stash_patch_before_retry: true
 validation:
   - plugin_eval_grade_a
   - strict_skill_audit

@@ -39,7 +39,7 @@ Every surfaced survivor must include:
 - covered axis or axes;
 - evidence basis: `direct`, `repo`, `external`, or `reasoned`;
 - rejection reason for nearby weaker alternatives;
-- downstream route: `he-brainstorm`, `he-spec`, `he-plan`, `he-refactor`,
+- downstream route: `he-brainstorm`, `he-spec`, `he-plan`, `he-reframe`,
   `he-linear-plan`, `he-code-review`, `he-eval-report`, or `Do Not Create`.
 
 If two or more survivors remain and the choice would shape a downstream spec,

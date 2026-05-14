@@ -20,7 +20,7 @@ guidance remain binding.
   whether completion is blocked, needs rework, or safe with follow-up.
 
 ## When Not to Use
-- Do not use for implementation planning, code review, strategy, or refactor
+- Do not use for implementation planning, code review, strategy, or reframe
   design; hand off to the matching HE skill.
 - Do not use to close Linear, post external comments, publish, delete, approve,
   or update trackers. This skill may recommend after proof, not mutate external
@@ -29,7 +29,7 @@ guidance remain binding.
   source existence, or generated media prompts without persisted artifacts.
 
 ## Inputs
-Selected slice, source `.harness/{linear,refactors,decisions,core,strategy,triage,brainstorm,spec,plan,solutions}/`
+Selected slice, source `.harness/{linear,reframes,decisions,core,strategy,triage,brainstorm,spec,plan,solutions}/`
 artifacts, implementation diff, validation output, branch/PR evidence, Linear
 identifiers, proof artifacts, generated-media cache paths or repository media
 paths when media proof is part of the slice.
@@ -40,8 +40,12 @@ when Linear context is known, or `.harness/evals/YYYY-MM-DD-<repo>-<issue-or-mil
 otherwise. Include Artifact Identity frontmatter from
 `Plugins/harness-engineering/references/artifact-routing-contract.md` and return
 `schema_version`, evaluated slice, validation results, drift validation, proof
-artifacts, closure recommendation, follow-up work, blockers, next handoff, and
-confidence.
+artifacts, closure recommendation, follow-up work, blockers, git staging
+status, staged paths, Codex provenance status, PR safety trace status, next
+handoff, and confidence.
+Non-trivial reports also include the BLUF review surface so the closure
+recommendation, blocker consequence, and next action are visible before proof
+detail.
 
 ## Preconditions
 - Resolve exactly one evaluated slice; classify source artifacts by content
@@ -55,7 +59,7 @@ confidence.
 1. If asked to close work from implementation status alone, stop and classify
    closure as blocked until report, validation, drift proof, and
    accept/challenge/rework steering are complete.
-2. Compare implementation against the approved Linear plan, refactor program,
+2. Compare implementation against the approved Linear plan, reframe program,
    plugin HE spec, ADRs, core invariants, source-prompt coverage limits, and
    proof artifacts.
 3. Prove agentic eval validity: task, outcome, trajectory/process evidence,
@@ -69,7 +73,17 @@ confidence.
    sidecar path, and file-existence verification. A prompt alone is not proof.
 6. Run or explicitly block relevant validation gates; never invent passing
    results.
-7. Generate and validate the report, then ask accept/challenge/rework before
+7. When closure claims cite session, Codex, collector, rollout, transcript, or
+   telemetry evidence, classify Codex provenance and redaction status from the
+   session collector before recommending closure.
+8. Apply the BLUF review contract to non-trivial eval reports so the closure
+   recommendation, proof blocker, follow-up decision, and next action are
+   scannable before detailed evidence.
+9. Apply the visual reference contract when proof spans multiple gates,
+   artifacts, media files, validation outputs, or non-linear drift decisions;
+   prefer gate matrices and evidence-chain diagrams.
+10. Generate and validate the report, apply the git staging contract for the
+   report and any current-turn proof artifacts, then ask accept/challenge/rework before
    using `Complete` or `Complete with follow-up` as a Linear closure
    recommendation.
 
@@ -89,6 +103,11 @@ classify it, then rerun before proceeding to broader gates.
 ## Evidence Requirements
 - Every closure claim must link to observed command output, diff/PR evidence,
   source artifacts, Linear identifiers, report paths, or media files.
+- Provenance can support correlation and freshness only. It cannot prove tests
+  passed, implementation correctness, Linear updates, PR readiness, or closure
+  safety without separate evidence.
+- PR-bound eval summaries must use a public-safe HE trace ID and hashed or
+  presence-only provenance identifiers.
 - Runtime, hook, MCP, CI, Linear, generated-image, and validator claims require
   fresh observed output.
 - Media persistence is complete only when the `.harness/media/` PNG exists and
@@ -104,12 +123,13 @@ classify it, then rerun before proceeding to broader gates.
 
 ## Failure Handling
 If identifiers, source artifacts, validation evidence, report validation, media
-files, or the evaluated slice cannot be resolved, write the gap into the report,
+files, Codex provenance required for a claim, or the evaluated slice cannot be
+resolved, write the gap into the report,
 classify closure safety as `Blocked`, `Needs rework`, or `Unsafe to close`, and
 state the smallest repair before completion.
 
 ## Handoff Rules
-- Planning/design/code-review/refactor work: hand off to the matching HE skill.
+- Planning/design/code-review/reframe work: hand off to the matching HE skill.
 - Live Linear mutation: hand off to Linear tooling or `he-linear-plan` after
   explicit approval.
 - User/global config writes, external writes, or destructive changes: hand off
@@ -121,9 +141,10 @@ without surrounding prose, image-only proof, or conclusions that require reading
 unlinked logs.
 
 ## Output Format
-Use the template in `references/eval-report-template.md`. Closure recommendation
-must be one of `Complete`, `Complete with follow-up`, `Blocked`, `Needs rework`,
-or `Unsafe to close`; do not use completion recommendations until steering is
+Use the template in `references/eval-report-template.md` plus the BLUF review
+surface for non-trivial reports. Closure recommendation must be one of
+`Complete`, `Complete with follow-up`, `Blocked`, `Needs rework`, or
+`Unsafe to close`; do not use completion recommendations until steering is
 complete.
 
 ## Confidence Reporting
@@ -151,10 +172,18 @@ or media persistence is failed or blocked.
   `references/linear-completion-policy.md`.
 - Read when validating local contract/evals: `references/contract.yaml`,
   `references/evals.yaml`.
+- Read when report scanability/No-Fog structure matters:
+  `../../references/bluf-review-contract.md`.
+- Read when evidence chains, gate matrices, visual proof, screenshots, or
+  generated media need persistence rules:
+  `../../references/visual-reference-contract.md`.
+- Read when session collector, Codex provenance, trace IDs, or PR safety trace
+  supports a closure claim:
+  `../../references/codex-provenance-contract.md`,
+  `../../references/pr-safety-trace-contract.md`.
 - Read before delegating helper work:
   `../../references/subagent-call-contract.md`.
 - Read shared HE contracts only when the selected slice needs them:
   `Plugins/harness-engineering/references/deferred-context-index.md`.
 
-Do not remove important context for budget trimming; move deep context to
-references with a clear route.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

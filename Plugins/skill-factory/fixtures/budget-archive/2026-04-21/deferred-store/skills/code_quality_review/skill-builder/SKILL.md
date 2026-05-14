@@ -19,7 +19,7 @@ Harden existing Codex skills and plugin packages with evidence, small edits, and
 
 Evidence beats taste. Keep `SKILL.md` small, preserve nuance in references, and tie completion claims to commands or artifacts.
 
-Do not remove important context for budget trimming; move it to `references/` or `scripts/` and leave clear signposts in this entrypoint.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 Every skill must remain agent-native: `SKILL.md` must expose execution boundaries, expected artifacts, repair/failure behavior, and validation or acceptance criteria so another agent can run the workflow without hidden context. Read when: applying this contract to generated artifacts, CLIs, subagents, credentials, or multi-phase repair: [agent-native skill contract](../../../../../Infrastructure/references/agent-native-skill-contract.md).
 

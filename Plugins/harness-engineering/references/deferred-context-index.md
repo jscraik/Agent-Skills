@@ -23,6 +23,7 @@ the reference below, and let validators catch stale duplicated procedure text.
 - Lifecycle, artifact, slice, and tracker gates:
   - `references/stage-context-contract.md`
   - `references/lifecycle-exit-contract.md`
+  - `references/git-staging-contract.md`
   - `references/artifact-routing-contract.md`
   - `references/artifact-classification-and-traceability.md`
   - `references/execution-slice-contract.md`
@@ -35,7 +36,12 @@ the reference below, and let validators catch stale duplicated procedure text.
   - `references/session-evidence-contract.md`
   - `references/session-evidence-skillify-triage.md`
   - `references/session-evidence-trace-context.md`
+  - `references/session-evidence-extraction.md`
+  - `references/codex-provenance-contract.md`
+  - `references/pr-safety-trace-contract.md`
 - Review, ideation, and agent-native lenses:
+  - `references/bluf-review-contract.md`
+  - `references/visual-reference-contract.md`
   - `references/agent-native-audit-scorecard.md`
   - `references/brainstorm-topic-coverage-contract.md`
   - `references/document-review-finding-tiers.md`
@@ -57,14 +63,17 @@ Load references by trigger instead of by habit:
 
 | Stage or condition | Load | Expected proof |
 | --- | --- | --- |
-| Any stage writes durable docs, mutates files, or hands off | `references/stage-context-contract.md`, `references/lifecycle-exit-contract.md` | compact stage context plus exit status |
+| Any stage writes durable docs, mutates files, or hands off | `references/stage-context-contract.md`, `references/lifecycle-exit-contract.md`, `references/git-staging-contract.md` | compact stage context plus exit status plus git staging status for current-turn files |
+| Non-trivial durable HE artifact is operator-facing | `references/bluf-review-contract.md` | Command Summary with one opening BLUF paragraph, No-Fog Gate, or compact not-applicable reason |
+| Non-trivial artifact has flow, dependency, boundary, state, validation, rollback, UI, media, or source-of-truth complexity | `references/visual-reference-contract.md` | Mermaid/table/image reference, or compact not-needed reason |
 | Stage choice is ambiguous | `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/interactive-steering-contract.md` | selected stage or one blocking question |
 | `.harness` artifacts determine scope | `references/artifact-classification-and-traceability.md`, `references/artifact-routing-contract.md` | content-shape classification and Artifact Identity status |
 | Non-trivial tracked work | `references/linear-tracker-gate.md` | resolved, created, blocked, or user-opted-out tracker status |
 | Existing tracked plan or Linear-backed slice is consumed | `references/linear-delta-capture-gate.md` | delta admitted, rejected, or blocked before scope changes |
 | Original prompt, external workflow, old manual method, or plugin comparison is the baseline | `references/source-prompt-coverage-contract.md` | source_prompt_status, evidence_depth, coverage_scope, not_inspected, repo-specific drift signals, authority limits, downstream_confidence, and next route |
+| Artifact, handoff, or PR cites Codex sessions, session collector, rollout, transcript, OTEL, thread ID, turn ID, or trace ID | `references/session-evidence-trace-context.md`, `references/codex-provenance-contract.md`, `references/pr-safety-trace-contract.md` | he_trace_id, provenance source/status, redaction status, public-safe trace fields, proof limits, and no raw sensitive local IDs or paths in public text |
 | Coding-harness-managed repo | `references/coding-harness-command-bridge.md`, `references/execution-slice-contract.md` | command evidence or explicit blocked bridge fields |
-| Stage could load broad domain, strategy, refactor, Linear, security, specialist, or eval gates | `references/gate-selection-contract.md` | smallest gate profile, required contracts, skipped contracts, and minimum proof |
+| Stage could load broad domain, strategy, reframe, Linear, security, specialist, or eval gates | `references/gate-selection-contract.md` | smallest gate profile, required contracts, skipped contracts, and minimum proof |
 | Stage would copy external process, add lifecycle surface area, expand governance, or preserve complexity without proven HE-specific failure evidence | `references/first-principles-contract.md` | first_principles_check with verified failure, smallest mechanism, decision type, rejected analogy, and proceed/ask/defer/reject/delete outcome |
 | Plugin hook, `hooks/hooks.json`, `.codex-plugin/plugin.json` hook declaration, or hook-enforced guardrail appears in scope | `references/plugin-hook-capability-contract.md` | plugin_hook_capability_check with feature gate status, fallback path, portability status, side-effect class, lifecycle authority, and outcome |
 | Domain-specific knowledge could sharpen output | `references/specialist-skill-steering-contract.md` | chosen specialist, skipped reason, or blocker |
@@ -87,11 +96,11 @@ Load references by trigger instead of by habit:
 
 `he-spec`:
 
-- `references/he-spec-doctrine.md`
-- `skills/he-spec/references/autoresearch-2026-05-02.md`
-- `skills/he-spec/references/codex-and-session-evidence.md`
-- `skills/he-spec/references/spec-artifact-contract.md`
-- `skills/he-spec/references/spec-mode-rules.md`
+- `Plugins/harness-engineering/references/he-spec-doctrine.md`
+- `Plugins/harness-engineering/skills/he-spec/references/autoresearch-2026-05-02.md`
+- `Plugins/harness-engineering/skills/he-spec/references/codex-and-session-evidence.md`
+- `Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md`
+- `Plugins/harness-engineering/skills/he-spec/references/spec-mode-rules.md`
 
 `he-plan`:
 
@@ -114,6 +123,7 @@ Load references by trigger instead of by habit:
 
 - `skills/he-code-review/references/review-policy-index.md`
 - `skills/he-code-review/references/review-loop-patterns.md`
+- `skills/he-code-review/references/review-mode-contract.md`
 - `references/pragmatic-programmer-review-contract.md`
 
 `he-eval-report`:
@@ -132,10 +142,10 @@ Load references by trigger instead of by habit:
 - `references/source-prompt-coverage-contract.md`
 - `references/pragmatic-programmer-review-contract.md`
 
-`he-refactor`:
+`he-reframe`:
 
-- `skills/he-refactor/references/refactor-program-contract.md`
-- `skills/he-refactor/references/source-prompt-preservation.md`
+- `skills/he-reframe/references/reframe-program-contract.md`
+- `skills/he-reframe/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
 
 `he-linear-plan`:
@@ -144,12 +154,32 @@ Load references by trigger instead of by habit:
 - `skills/he-linear-plan/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
 
-`he-phase-heartbeat`:
+`he-phase-work`:
 
-- `skills/he-phase-heartbeat/references/phase-gate-contract.md`
-- `skills/he-phase-heartbeat/references/contract.yaml`
+- `skills/he-phase-work/references/phase-gate-contract.md`
+- `skills/he-phase-work/references/contract.yaml`
 
 ## Historical Context Policy
+
+Deferred context exists to keep meaningful, still-valid HE knowledge reachable
+without loading it by default. It is not a landfill for every line removed from
+`SKILL.md`.
+
+When compacting a stage entrypoint, classify removed material:
+
+- `moved-to-reference`: valid reusable behavior preserved in a stage reference,
+  shared contract, or fixture.
+- `superseded`: replaced by a newer compressed rule, route, contract, or
+  validator.
+- `intentionally-discarded`: stale, duplicated, unsafe, inappropriate,
+  contradicted by current HE guidance, or no longer part of the shipped
+  contract.
+- `not-context`: formatting, navigation, repeated prose, examples with no
+  durable value, or low-signal explanation.
+
+Only the `moved-to-reference` disposition belongs in this index. The other
+dispositions may be mentioned in review notes or change summaries when useful,
+but they should not be pasted into deferred context.
 
 ## Preserved Entry Point Lines
 
@@ -161,13 +191,13 @@ Authoritative preservation locations:
 
 - `fixtures/budget-archive/**`
 - `fixtures/preserved-context/**`
-- stage `references/source-prompt-preservation.md` files
+- stage-specific source-prompt preservation references
 
 Historical compact-entrypoint lines from prior compression passes belong in:
 
 - `fixtures/budget-archive/**`
 - `fixtures/preserved-context/**`
-- stage `references/source-prompt-preservation.md` files
+- stage-specific source-prompt preservation references
 
 Do not duplicate active `SKILL.md` procedure text here. If future agents need
 an old line for migration evidence, link the historical fixture path and state
@@ -189,3 +219,22 @@ entrypoint paragraphs. Their audit value is preserved by active stage diffs,
 the relevant `skills/**/references/source-prompt-preservation.md` files, and
 fixtures. Keep this index as a router only; do not paste retired procedure text
 back into this file.
+
+## 2026-05-12 BLUF Productization Disposition Notes
+
+The BLUF productization pass compressed several stage entrypoints. Meaningful
+behavior was moved to stage references, artifact contracts, and the BLUF review
+contract. BLUF now means one opening Bottom Line Up Front paragraph, not a
+section-by-section template.
+
+Disposition:
+
+- `moved-to-reference`: durable artifact routing, Linear mutation gates,
+  closure proof, review shape, and strategy/reframe/Linear output rules are
+  preserved in the Stage Reference Map above and the linked stage references.
+- `superseded`: exact numbered procedure fragments were replaced by compact
+  stage procedures plus shared BLUF, visual-reference, source-prompt, Linear,
+  and lifecycle contracts.
+- `intentionally-discarded`: incomplete line fragments and prompt snippets that
+  no longer form valid operational guidance are not preserved here.
+- `not-context`: numbering artifacts and partial copied lines are omitted.

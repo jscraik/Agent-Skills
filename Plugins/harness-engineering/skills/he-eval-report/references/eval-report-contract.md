@@ -18,7 +18,7 @@ inherit its coverage limits before recommending Linear closure.
 ## Proof Rules
 
 Identify the exact slice: Linear project, milestone, parent issue, sub-issues,
-refactor program, HE spec, affected files/modules/workflows, ADRs, and core
+reframe program, HE spec, affected files/modules/workflows, ADRs, and core
 invariants. Do not evaluate unrelated work.
 
 When upstream source-prompt coverage is partial, weak, sampled, inferred, or
@@ -35,7 +35,7 @@ existence verification. Prompt-only, visible-only, or cache-only media is
 blocked proof.
 
 If implementation artifacts promise proof after the fact but no source plan,
-spec, Linear plan, refactor program, or eval gate required that proof before
+spec, Linear plan, reframe program, or eval gate required that proof before
 implementation, classify the result as a planned-proof gap. Planned-proof gaps
 block closure for high-risk work unless the report records a justified
 exception and the smallest repair.

@@ -1,0 +1,70 @@
+schema_version: 1
+
+purpose: >
+  Continue an approved Harness Engineering plan phase-by-phase under a 10 minute
+  heartbeat, using session-collector evidence, phase tests, review gates, scoped
+  git staging, Linear updates, and final eval/reinforce/reconcile closeout to
+  keep long execution loops traceable.
+
+triggers:
+  - user asks to monitor HE plan phases over time
+  - user asks to keep he-work going until reviewed or committed
+  - user asks for a heartbeat that runs simplify, testing, bug fixing, code review, git add, and Linear updates by phase
+  - repeated session-collector evidence shows the same HE phase workflow recurs
+
+inputs:
+  - workspace path, plan path or issue/PR target, cadence, stop condition
+  - session-collector bundle path or permission to generate one from ~/.agents/session-collector
+  - dirty worktree state and expected validation commands
+  - selected phase and review gate policy
+  - authority for repo writes, Linear or tracker writes, scoped git staging, and automation changes
+
+outputs:
+  - heartbeat id, cadence, destination, target, and stop condition
+  - collector bundle path and evidence artifacts used
+  - active phase, changed files, phase gates, validation, git_staging_status, and linear_update_status
+  - final he-eval-report, he-reinforce, he-reconcile, and final scoped git add status
+  - blocker, smallest recovery step, slack_policy, blackboard_delta, and next wake-up
+
+non_goals:
+  - creating implementation plans from vague requirements
+  - replacing he-work, he-heartbeat, he-fix-bugs, he-code-review, or simplify
+  - unattended merge, deploy, tracker closure, force-push, or destructive cleanup
+
+risks:
+  - stale chat memory; mitigate by reading live plan, git state, and collector bundle first
+  - duplicate heartbeats; mitigate by searching existing automations before creating one
+  - broad staging; mitigate by staging only the completed phase diff
+  - unauthorized Linear writes; mitigate by requiring explicit tracker-write authority before each update
+  - review gate theater; mitigate by making he-fix-bugs conditional on failing evidence
+  - unsustainable cadence; mitigate by setting slack_policy and stopping when evidence is stale or gates are blocked
+  - source/runtime drift; mitigate by editing canonical plugin source and refreshing projections through repo wrappers
+  - false release confidence; mitigate by separating strict audit, Plugin Eval budget, release eval, cache sync, and runtime visibility evidence
+
+execution_boundaries:
+  owned_actions:
+    - schedule and gate approved phase continuation
+    - delegate active phase implementation to he-work
+    - record phase evidence and blocker state
+    - stage completed-phase files only when authority and review gates permit
+    - update Linear or tracker with phase evidence only when authority is explicit
+  forbidden_without_approval:
+    - destructive cleanup
+    - force-push, merge, deploy, tracker closure, review-thread resolution
+    - broad staging, unrelated staging, or commits
+    - secret access
+  generated_surfaces:
+    - .agents/**
+    - .skillsets/**
+    - Plugins/cache/**
+
+observability: >
+  Record target, cadence, heartbeat id, collector bundle path, active phase,
+  validation commands and outcomes, review gate results, git_staging_status,
+  linear_update_status, final closeout status, blocker, slack_policy, and stop
+  rule status.
+
+rollback_procedure: >
+  Pause or delete the heartbeat, preserve the last bundle path and phase evidence,
+  revert only the phase diff if rollback is required, and reroute the remaining
+  work through he-router or he-work.

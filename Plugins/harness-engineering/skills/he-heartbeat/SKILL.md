@@ -37,7 +37,7 @@ For direct-handle use, apply the OpenAI-style design contract: classify the stro
 - Duplicate automations create noisy state and must be avoided.
 - A stop rule is mandatory before scheduling.
 ## Constraints
-Redact secrets; do not create cron workarounds for short thread follow-up. Do not remove important context for budget trimming; move deep context to references. Keep scope tight: start with 2-3 focused surfaces and expand only when the next heartbeat needs more context.
+Redact secrets; do not create cron workarounds for short thread follow-up. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text. Keep scope tight: start with 2-3 focused surfaces and expand only when the next heartbeat needs more context.
 ## Anti-Patterns
 - Creating duplicate wakeups for the same PR, issue, or thread.
 - Running without an explicit stop condition or next visible update.

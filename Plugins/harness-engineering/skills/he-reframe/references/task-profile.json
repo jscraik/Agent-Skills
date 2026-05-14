@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "profile_id": "Plugins-harness-engineering-skills-he-reframe",
+  "scope_skill": "Plugins/harness-engineering/skills/he-reframe",
+  "scope_profile": "Plugins",
+  "rubric_version": "2026-05-01",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "min_score": 0.82,
+    "block_on_missing_migration_phases": true,
+    "block_on_unbounded_side_effects": true
+  },
+  "criteria": {
+    "clarity": "Refactor program boundaries, phases, and authority are explicit.",
+    "specificity": "Programs map to concrete .harness/reframes files and dated Linear naming.",
+    "safety": "The skill blocks reframe theater and requires rollback and eval proof."
+  },
+  "delegation": {
+    "preferred": "co-pilot",
+    "requires_human_review_for": [
+      "architecture-critical migrations",
+      "governance simplification",
+      "deletion candidates"
+    ]
+  },
+  "learning_posture": "guided"
+}

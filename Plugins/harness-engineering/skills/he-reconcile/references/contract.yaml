@@ -1,0 +1,63 @@
+schema_version: 1
+
+purpose: >
+  Reconcile Harness Engineering lifecycle state from repo, Linear, PR,
+  validation, session, and .harness evidence so the next agent can resume from
+  the earliest incomplete authorized stage without confusing local progress,
+  stale artifacts, or chat summaries with closure proof.
+
+triggers:
+  - the user wants the Harness Engineering workflow routed or resumed from the correct stage
+  - HE artifacts, tracker state, validation, PR state, or session evidence disagree
+  - source-prompt coverage or original-workflow equivalence must be checked before downstream routing
+  - repeated review or validation failure needs lifecycle state reconstruction
+
+inputs:
+  - a goal, workflow state, artifact path, source prompt, session bundle, or tracker identifier
+  - current Harness Engineering artifact paths when they exist
+  - PR, validation, Linear, Project Brain, or plugin-hook evidence when relevant
+  - constraints such as risk, compliance, accessibility, rollout sensitivity, or approval boundaries
+
+outputs:
+  - "a mode decision: full-lifecycle, resume-from-stage, source-prompt-coverage, repeated-failure-reconcile, conflict-reconcile, or closure-proof-route"
+  - "current stage, completed stages, blockers, and exact next Harness Engineering command"
+  - "command-level bridge evidence for Linear state, Harness transition, Project Brain freshness, and north-star evidence status when available"
+  - "for compression recovery, active_stage: spec_refresh_required and next_action: run he-spec with the agent-native compression contract"
+  - "source_prompt_coverage with status, evidence depth, gaps, drift signals, not-inspected evidence, and downstream confidence"
+  - "XP operating artifact: blackboard_delta summarizing durable state changes across stages"
+  - "lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields"
+  - "structured status output with schema_version: 1 when requested, including exact Harness command/path evidence for every blocked lifecycle field"
+  - "authority-limited route output that never treats safe_to_continue as permission for implementation, external tracker mutation, sync/install, destructive cleanup, or closure"
+  - "visual references when repo, tracker, PR, validation, session, and `.harness` sources disagree or route decisions are non-linear"
+
+non_goals:
+  - direct product-code implementation inside the reconcile skill
+  - skipping upstream Harness Engineering gates without evidence
+  - documenting solved or unverified problems as durable learnings
+  - refreshing Project Brain or .harness/solutions artifacts
+  - broad stale-doc sweeps without evidence
+  - deleting or ignoring Harness Engineering artifact directories
+  - advancing product-compression work to implementation when the current blocker is a missing spec acceptance gate
+  - declaring closure from local implementation status, passing tests, or checklist completion without fresh tracker, traceability, validation, and eval evidence
+  - editing generated runtime projections such as .agents/** instead of canonical plugin source
+
+risks:
+  - routing to the wrong stage; mitigate with artifact-first stage validation and explicit mode selection
+  - lifecycle drift; mitigate with command bridge state before choosing the next stage
+  - Project Brain drift; mitigate by reporting freshness and handing learning writes to he-reinforce
+  - stale or contradictory supplementary notes; mitigate by treating auto memory as secondary evidence and labeling it when used
+  - additive stage progress hiding product clutter; mitigate by requiring first-contact compression and ablation status before work/review handoff
+  - false closure; mitigate by routing closure pressure to he-eval-report and recording stale or unavailable external state as a blocker
+  - projection drift; mitigate by identifying canonical source paths before recommending edits or sync
+  - state conflicts hidden in prose; mitigate with source-of-truth comparison maps or route diagrams
+
+observability: >
+  Record selected mode, earliest incomplete stage, artifact paths checked,
+  tracker state, validation evidence, source-prompt status, lifecycle exit
+  status, authority limit, degraded evidence state, visual reference status, and
+  the exact next Harness Engineering command.
+
+rollback_procedure: >
+  Withdraw the stale recommendation and rerun stage detection against current
+  artifacts. If a downstream artifact was written by mistake, revert only that
+  artifact and preserve the evidence gap in the handoff.

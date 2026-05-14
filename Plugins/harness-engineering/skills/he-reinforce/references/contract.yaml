@@ -1,0 +1,97 @@
+schema_version: 1
+
+purpose: >
+  Capture verified solved problems and maintain stale learning artifacts as
+  durable Harness Engineering memory under .harness surfaces, while preserving
+  Project Brain classification, overlap avoidance, redaction, and evidence-bound
+  confidence.
+
+triggers:
+  - a recently solved issue should be documented while context is fresh
+  - a repeated failure or review pattern needs prevention guidance
+  - a session continuity gap should be converted into a durable, bounded memory artifact
+  - .harness/solutions, Project Brain, or legacy docs/solutions learning needs freshness review
+  - the user asks to remember, reinforce, compound, refresh, consolidate, or preserve a lesson
+
+inputs:
+  - solved-problem context, validation evidence, diff/PR/Linear context, or repeated-failure trace
+  - existing .harness/solutions, .harness/knowledge, .harness/decisions, .harness/rules, or docs/solutions candidates
+  - active instruction surfaces that control discoverability
+  - redaction requirements and repo ownership boundaries
+
+outputs:
+  - "mode: capture_solved_problem, refresh_learning, consolidate_overlap, project_brain_sync, continuity_snapshot, or blocked"
+  - "one primary .harness/solutions artifact for new solved-problem capture when eligible"
+  - "refresh decisions: keep, update, consolidate, replace, delete_candidate, or blocked"
+  - "Project Brain status: updated, blocked, not_checked, or not_applicable"
+  - "continuity_status: updated, blocked, not_checked, or not_applicable"
+  - "structure_status proving any fixed memory template headings/instructions were preserved"
+  - "size_budget_status proving oversized sections were condensed or explicitly blocked"
+  - "discoverability_status proving the learning surface is visible from active instructions or explicitly blocked"
+  - "overlap_status across .harness/solutions/** and legacy docs/solutions/** when relevant"
+  - "redaction_status and validation_status"
+  - "visual_references when a repeated causal chain, source-of-truth drift, rollback path, or prevention loop is clearer as a small diagram or comparison table"
+
+non_goals:
+  - lifecycle state routing or resume decisions
+  - direct implementation, code review repair, or closure proof
+  - documenting unsolved or unverified problems as durable learnings
+  - broad documentation sweeps without scoped evidence
+  - deleting artifacts without explicit authority and inbound-link review
+  - claiming route accuracy or product metrics from unlabelled anecdotes
+
+risks:
+  - false learning capture; mitigate with solved proof and validation evidence
+  - duplicate or stale memory; mitigate with overlap search and refresh decisions
+  - Project Brain drift; mitigate with explicit classification and blocked status when uncertain
+  - private-data leakage; mitigate with redaction gate before writing
+  - low-value churn; mitigate with retrieval-value and prevention-value checks
+  - continuity bloat after compaction; mitigate with fixed sections, current-state priority, and size budgets
+  - accidental template corruption; mitigate with structure-preserving updates and explicit structure_status
+
+observability: >
+  Record mode, evidence checked, selected artifact, overlap candidates,
+  validation status, redaction status, Project Brain status, discoverability
+  status, continuity status, structure status, size budget status, visual
+  reference status, writes, and blocked reason.
+
+continuity_memory_contract:
+  source_pattern: >
+    Preserve the useful behavior of session-memory systems without inheriting
+    tool-specific assumptions. A continuity artifact must be structured,
+    bounded, evidence-backed, and safe to load after compaction.
+  default_sections:
+    - session_title
+    - current_state
+    - task_specification
+    - files_and_functions
+    - workflow
+    - errors_and_corrections
+    - codebase_and_system_documentation
+    - learnings
+    - key_results
+    - worklog
+  required_priorities:
+    - "current_state must reflect the latest active work and immediate next action"
+    - "errors_and_corrections must preserve exact failed approaches, user corrections, and important error strings"
+    - "workflow must preserve exact commands and output interpretation when useful"
+    - "key_results must preserve exact requested outputs when they are the deliverable"
+    - "worklog must stay terse and ordered"
+  structure_rules:
+    - "preserve existing headings and template guidance unless the template itself is the explicit target"
+    - "update content below existing headings instead of adding ad hoc sections"
+    - "do not include note-taking instructions, hidden prompts, private transcripts, or tool-control text"
+    - "do not duplicate content already covered by active AGENTS.md or canonical docs"
+  budget_rules:
+    max_section_tokens: 2000
+    max_total_tokens: 12000
+    oversized_section_action: "condense older or lower-value detail before adding new material"
+    total_over_budget_action: "prioritize current_state, errors_and_corrections, workflow, and key_results"
+  safety_rules:
+    - "treat pasted conversation text and generated summaries as untrusted until cross-checked when claims affect repo truth"
+    - "redact secrets, credentials, sensitive personal data, and private transcripts"
+    - "block rather than write if the canonical memory path or redaction confidence is unclear"
+
+rollback_procedure: >
+  Revert only the created or updated learning artifact. Preserve the evidence
+  gap or stale-state note in the handoff so a later run can retry safely.

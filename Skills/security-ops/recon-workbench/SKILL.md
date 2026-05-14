@@ -16,7 +16,7 @@ metadata:
 ## Philosophy
 - Run rwb workflows under explicit authorization with deterministic evidence.
 - Start from live evidence and local patterns.
-- Do not remove important context for budget trimming; use progressive disclosure.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## When To Use
 - The user asks for rwb doctor, authorize, plan, run, summarize, manifest, validate, or reconcile.

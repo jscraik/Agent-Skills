@@ -13,14 +13,14 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `library_api_reference`: 2
 - `product_verification`: 4
 - `data_fetch_analysis`: 3
-- `team_automation`: 34
+- `team_automation`: 36
 - `scaffolding_templates`: 17
 - `code_quality_review`: 22
 - `ci_cd_deployment`: 0
 - `runbook`: 13
 - `infrastructure_ops`: 4
 - `invalid`: 0
-- `total_tagged`: 99
+- `total_tagged`: 101
 
 ## Semantic Types
 
@@ -59,9 +59,11 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `he-heartbeat` — `Plugins/harness-engineering/skills`
 - `he-improve` — `Plugins/harness-engineering/skills`
 - `he-linear-plan` — `Plugins/harness-engineering/skills`
-- `he-phase-heartbeat` — `Plugins/harness-engineering/skills`
+- `he-phase-work` — `Plugins/harness-engineering/skills`
 - `he-plan` — `Plugins/harness-engineering/skills`
-- `he-refactor` — `Plugins/harness-engineering/skills`
+- `he-reconcile` — `Plugins/harness-engineering/skills`
+- `he-reframe` — `Plugins/harness-engineering/skills`
+- `he-reinforce` — `Plugins/harness-engineering/skills`
 - `he-router` — `Plugins/harness-engineering/skills`
 - `he-strategy` — `Plugins/harness-engineering/skills`
 - `he-work` — `Plugins/harness-engineering/skills`
@@ -154,3 +156,4 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 ## Validation Notes
 
 - No invalid semantic type tags detected.
+

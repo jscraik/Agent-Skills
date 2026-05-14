@@ -169,31 +169,31 @@ def compute_catalog_parity(
     route_considered_total: int | None = None,
 ) -> dict[str, Any]:
     """
-    Compute a diagnostic report comparing the canonical skill count against observed counts and metadata across repository and runtime surfaces.
+    Produce a diagnostic report comparing the canonical catalog and active policy identity against observed counts and metadata across repository and runtime surfaces.
     
     Parameters:
-        repo_root (Path): Base path of the repository where README.md, SKILL.md and history artifacts are read.
-        strict (bool): When True, apply additional gating: require matching policy identity on policy-stamped surfaces and validate routing-quality history trends.
-        skills_list_count (int | None): Optional override for the observed "ask skills list" count; when None the repo discovery is used.
-        route_considered_total (int | None): Optional override for the observed "route considered metadata" count; when None the canonical count is used.
+        repo_root (Path): Repository root used to read README.md, SKILL.md, and history artifacts.
+        strict (bool): When True, require matching policy identity on stamped surfaces and enforce routing-quality history gates.
+        skills_list_count (int | None): Optional override for the observed "ask skills list" total; when None the canonical count is used.
+        route_considered_total (int | None): Optional override for the observed "route considered metadata" total; when None the canonical count is used.
     
     Returns:
-        report (dict[str, Any]): A diagnostic report containing:
-            - `schema_version`: schema identifier for this report.
-            - `policy_identity`: active policy identity used for comparison.
-            - `canonical_count`: canonical skill count discovered from the repository.
-            - `surfaces`: list of per-surface dicts with `surface_name`, `observed_count`, `canonical_count`, `parity_ok`, `policy_identity`, and `policy_identity_required`.
-            - `drift_detected`: `True` if any gating condition failed, otherwise `False`.
+        report (dict[str, Any]): Diagnostic report with the following keys:
+            - `schema_version`: report schema identifier.
+            - `policy_identity`: active policy identity used for comparisons.
+            - `canonical_count`: canonical skill count discovered from the catalog.
+            - `surfaces`: list of per-surface dictionaries containing `surface_name`, `observed_count`, `canonical_count`, `parity_ok`, `policy_identity`, and `policy_identity_required`.
+            - `drift_detected`: `True` if any gating condition failed, `False` otherwise.
             - `drift_class`: classification of the detected drift or `None`.
             - `blocking_reason`: short code describing why strict validation is blocked, or `None`.
             - `operator_action`: human-readable remediation guidance when blocked, or `None`.
             - `decision_status`: `"blocked_catalog_parity"` when blocked, otherwise `"resolved"`.
-            - `required_surfaces`: list of surfaces that are considered required.
-            - `strict_mode`: echo of the `strict` parameter.
+            - `required_surfaces`: list of surfaces considered required.
+            - `strict_mode`: echoes the `strict` parameter.
     """
-    # Keep parity anchored to repository-owned discovery so local flat runtime
-    # projection drift cannot spuriously block doctor-catalog/route workflows.
-    canonical_count = len(discover_catalog_entries(source="repo"))
+    # Use the same default user-visible catalog surface used for generated
+    # projections so canonical checks reflect runtime-discoverable skills.
+    canonical_count = len(discover_catalog_entries())
     active_policy_identity = get_policy_identity()
 
     readme_count = _extract_readme_count(repo_root / "README.md")

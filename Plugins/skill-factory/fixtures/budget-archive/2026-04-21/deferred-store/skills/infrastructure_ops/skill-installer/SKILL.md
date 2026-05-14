@@ -112,8 +112,8 @@ For non-trivial responses, include:
 - Safe provenance first: confirm source and destination before writing to disk.
 - Prefer explicit intent over clever inference: if the source/path is ambiguous, ask or stop.
 - Preserve reversibility: avoid destructive overwrite defaults and communicate restart expectations clearly.
-- Required operational context is never removed to shorten `SKILL.md`; relocate depth to `Infrastructure/references/` and add explicit progressive-disclosure signposts (for example: `Read when: <condition>`).
-- Do not remove important context for budget trimming; move it to `Infrastructure/references/` and add explicit `Read when` signposts in `SKILL.md`.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, inappropriate, superseded, or low-signal text.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Encouraging Variation
 
@@ -197,3 +197,4 @@ Read when:
 
 ## Remember
 - The agent is capable of extraordinary install work when provenance is explicit. Make source, destination, reversibility, and restart needs clear enough that the next agent can verify them without guessing.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

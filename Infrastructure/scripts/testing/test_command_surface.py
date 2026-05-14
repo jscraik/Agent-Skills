@@ -52,11 +52,12 @@ class CommandSurfaceTests(unittest.TestCase):
         body = render_skill_command_handle(handle)
 
         self.assertIn(
-            "Canonical source path: `Plugins/harness-engineering/skills/he-work/SKILL.md`.",
+            "Source: `Plugins/harness-engineering/skills/he-work/SKILL.md`.",
             body,
         )
         self.assertIn("If this is the Agent Skills Kit repo and `./bin/ask` exists", body)
         self.assertIn("Otherwise, load", body)
+        self.assertIn("Keep handle, routing, and source mechanics out of user-facing replies", body)
         self.assertIn("search only the owner skill tree", body)
         self.assertEqual(validate_command_handle_payload(handle, body), [])
 
@@ -125,7 +126,7 @@ class CommandSurfaceTests(unittest.TestCase):
         )
 
         body = render_skill_command_handle(handle)
-        self.assertIn("Canonical source path: `UNRESOLVED_SOURCE_PATH`.", body)
+        self.assertIn("Source: `UNRESOLVED_SOURCE_PATH`.", body)
         self.assertIn("search only the owner skill tree", body)
         self.assertEqual(validate_command_handle_payload(handle, body), [])
 

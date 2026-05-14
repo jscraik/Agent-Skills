@@ -52,7 +52,7 @@ Select exactly one `harness-engineering` stage and return one exact next skill i
 - Redact secrets and sensitive data from routing context.
 - If mapped roles are missing, include fallback guidance that references `[[codex-agent-creator]]`.
 - Do not select `he-work` when the request says review, implemented branch, PR, go/no-go, failing test, root cause, TDD, browser polish, measured optimization, or stale branch cleanup.
-- Do not remove important context for budget trimming; move it to references and index it in [../../references/deferred-context-index.md](../../references/deferred-context-index.md).
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Anti Patterns
 

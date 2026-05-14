@@ -1,6 +1,6 @@
 # UI Plan Routing Contract
 
-Use this when `he-plan`, `he-work`, `he-code-review`, or `he-compound` sees a
+Use this when `he-plan`, `he-work`, `he-code-review`, or `he-reconcile` sees a
 UI implementation plan path.
 
 ## Canonical Root
@@ -24,7 +24,7 @@ asks to maintain the existing repo convention.
   selected execution slice.
 - `he-code-review` may review a UI plan or UI-plan implementation for fidelity,
   accessibility, responsive behavior, and screenshot evidence.
-- `he-compound` may route or resume UI-plan work, but it should hand off to
+- `he-reconcile` may route or resume UI-plan work, but it should hand off to
   `he-plan`, `he-work`, or `he-code-review` instead of inventing UI execution
   scope.
 

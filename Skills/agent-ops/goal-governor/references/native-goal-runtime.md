@@ -2,31 +2,59 @@
 
 Read when reconciling Goal Governor boards with the live Codex `/goal` runtime.
 
-This reference was refreshed from `/Users/jamiecraik/dev/codex` on 2026-05-06 after the pull ending at merge commit `1487d2405`.
+This reference was refreshed from `/Users/jamiecraik/dev/codex` on 2026-05-13. The codex-repo MCP was attempted for cross-checking against `openai/codex@main`, but `mcp__codex_repo__search` and `mcp__codex_repo__fetch` did not return before the local timeout and were treated as blocked evidence for this pass.
 
-## Live Codex Surfaces
+## Current Evidence Surfaces
 
-- `/Users/jamiecraik/dev/codex/codex-rs/protocol/src/protocol.rs` defines native goal create/update/get request and response types.
-- `/Users/jamiecraik/dev/codex/codex-rs/core/src/goals.rs` owns goal state, lifecycle transitions, token budget accounting, and completion updates.
-- `/Users/jamiecraik/dev/codex/codex-rs/tui/src/chatwidget/goal_validation.rs` validates `/goal` objectives before native creation.
-- `/Users/jamiecraik/dev/codex/codex-rs/app-server/src/request_processors/thread_goal_processor.rs` exposes app-server thread goal operations.
+- `/Users/jamiecraik/dev/codex/codex-rs/features/src/lib.rs` defines `Feature::Goals` as an experimental feature with config key `goals`; it is disabled by default.
+- `/Users/jamiecraik/dev/codex/codex-rs/tools/src/tool_config.rs` exposes `goal_tools` only when `Feature::Goals` is enabled, then filters that exposure through `with_goal_tools_allowed`.
+- `/Users/jamiecraik/dev/codex/codex-rs/core/src/session/turn_context.rs` allows goal tools only for non-ephemeral turns with an available state database.
+- `/Users/jamiecraik/dev/codex/codex-rs/state/src/model/thread_goal.rs` defines persistent goal fields: `goal_id`, `objective`, `status`, `token_budget`, `tokens_used`, `time_used_seconds`, `created_at`, and `updated_at`.
+- `/Users/jamiecraik/dev/codex/codex-rs/state/src/runtime/goals.rs` owns state transitions, expected-goal-id guarded updates, token accounting, and budget-limit behavior.
+- `/Users/jamiecraik/dev/codex/codex-rs/core/src/context/goal_context.rs` wraps runtime-owned goal steering prompts in `<goal_context>` user-context fragments.
+- `/Users/jamiecraik/dev/codex/codex-rs/core/templates/goals/objective_updated.md` tells the model that edited objectives are user-provided data, supersede the previous objective, and do not justify `update_goal` unless the updated goal is actually complete.
+- `/Users/jamiecraik/dev/codex/codex-rs/tui/src/chatwidget/goal_validation.rs` enforces the native objective limit and instructs users to put longer instructions in a file.
+- `/Users/jamiecraik/dev/codex/codex-rs/tui/src/chatwidget/slash_dispatch.rs` handles `/goal edit`, `/goal pause`, `/goal resume`, `/goal clear`, and objective creation when the `goals` feature is enabled.
+- `/Users/jamiecraik/dev/codex/codex-rs/tui/src/chatwidget/goal_menu.rs` displays goal status, usage, and command hints; editing a `budgetLimited` or `complete` goal sets the edited status to `active` in the TUI path.
+- `/Users/jamiecraik/dev/codex/codex-rs/app-server/README.md` documents `thread/goal/set` and says clients can set `budgetLimited`; app-server tests show ephemeral threads reject goals and same-objective set calls can preserve `budgetLimited`.
 
 ## Runtime Facts
 
-- Use this skill to turn Codex's native `/goal` feature into an auditable operating loop. Native goals persist an objective; this skill governs the repo-visible plan, current task, verification evidence, and completion audit that keep the objective from drifting.
+- Native goals are feature-gated. Check the `goals` feature and current-turn tool exposure before assuming goal tools exist.
+- Ephemeral threads do not support goals because goal tools require a materialized thread and state database.
 - Native objective text must be non-empty and no more than 4,000 characters.
-- Native goal status uses `active`, `paused`, `budgetLimited`, and `complete`.
-- Goal Governor output normalizes native `budgetLimited` to `budget_limited`.
+- Native persistent storage uses status strings `active`, `paused`, `budget_limited`, and `complete`.
+- App-server JSON can expose the budget-limited state as `budgetLimited`. Goal Governor output normalizes either spelling to `budget_limited`.
+- Native `goal_id`, `created_at`, and `updated_at` identify the live objective version and help detect stale board reconciliation.
 - Native token budget, tokens used, elapsed seconds, and lifecycle timing are steering evidence, not completion proof.
+- `budget_limited` is terminal in the native status model, but runtime accounting can still include budget-limited goals for in-flight usage depending on the accounting mode.
+- `/goal edit` is not just prose. The TUI path opens an editor and can reactivate a budget-limited or complete goal after the user changes the objective.
+- App-server set/update behavior can preserve `budgetLimited` for the same objective, so the board must inspect the resulting native status instead of assuming an edit resumes work.
+- Goal-context prompts and `objective_updated.md` treat objectives as user-provided data. They steer the task while remaining subordinate to system, developer, repository, and safety instructions.
 - Native completion is not enough to mark a board complete. The board still requires a final PM or Judge audit receipt with `decision: complete`.
+
+## Doctor Checks
+
+Report each check as `pass`, `fail`, `blocked`, or `not applicable`:
+
+- `goals` feature configured or explicitly blocked.
+- Goal tools exposed for the current turn; non-ephemeral thread and state database are available when native tools are required.
+- Native objective is non-empty and no more than 4,000 characters.
+- Native status is reconciled from the actual runtime result, not inferred from requested command text.
+- Native `goal_id`, `created_at`, `updated_at`, token budget, tokens used, and elapsed seconds are captured when available.
+- App-server or tool path used for goal inspection is named in the receipt.
+- Repo board passes `python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py <goal-directory>`.
 
 ## Reconciliation Rules
 
 1. If native goal state is unavailable, report `native_goal_status: unknown` or `blocked` and continue only with board-safe read-only checks.
-2. If native status is `paused`, stop Worker implementation and ask for owner or PM direction.
-3. If native status is `budgetLimited`, classify scope, verification, and owner decision before Worker work.
-4. If native status is `complete` while board work remains active, route to PM or Judge reconciliation before editing implementation files.
-5. If board status is done while native status remains active, require a completion audit before updating the native goal.
+2. If goal tools are unavailable because the thread is ephemeral or state storage is absent, classify native inspection as blocked rather than assuming runtime absence.
+3. If native status is `paused`, stop Worker implementation and ask for owner or PM direction.
+4. If native status is `budgetLimited` or `budget_limited`, classify scope, verification, and owner decision before Worker work.
+5. If native status is `complete` while board work remains active, route to PM or Judge reconciliation before editing implementation files.
+6. If board status is done while native status remains active, require a completion audit before updating the native goal.
+7. If `goal_id` changed since the last board receipt, treat verification as stale until a reconciliation receipt explains whether the objective changed intentionally.
+8. If `/goal edit` or `objective_updated` context appears, re-read the board objective and native objective before continuing previous work.
 
 ## Board Metadata
 
@@ -34,14 +62,17 @@ When available, preserve native runtime metadata in `state.yaml`:
 
 ```yaml
 goal:
+  native_goal_id: goal_opaque_id
   native_objective: "/goal Follow docs/goals/example/goal.md"
   native_status: active
   token_budget: null
   tokens_used: 0
   time_used_seconds: 0
+  native_created_at: "2026-05-13T10:00:00Z"
+  native_updated_at: "2026-05-13T10:00:00Z"
 ```
 
-Treat changes to `native_status`, `token_budget`, `tokens_used`, or `time_used_seconds` as stale verification until a new reconciliation receipt records the decision.
+Treat changes to `native_goal_id`, `native_objective`, `native_status`, `token_budget`, `tokens_used`, `time_used_seconds`, or native timestamps as stale verification until a new reconciliation receipt records the decision.
 
 ## Preserved Root Context
 
@@ -51,13 +82,9 @@ Keep these root-instruction details discoverable after root compression:
 - Use when the user asks to create, continue, repair, audit, or operationalize a long-running Codex goal, especially when the work is broad, stale, blocked, multi-agent, high-risk, or likely to span more than one session.
 - In `create` mode, scaffold a goal board, verify the local Codex runtime can support goals, and print the `/goal Follow <goal.md>` command.
 - In `doctor` mode, check installation, Codex goal enablement, agent runtime depth, board validity, and verification freshness.
-- Inputs may include goal intent, an existing goal path, or a source artifact to import.
-- Outputs include a goal board health report with native/board reconciliation status and created or repaired board files when the selected mode allows edits.
 - Reconcile native goal state with board state. Treat mismatches as PM or Judge work before Worker implementation.
 - Ensure exactly one active task unless the user explicitly requested parallel Workers with disjoint `allowed_files`.
 - Refuse write-capable work until the active Worker task declares `allowed_files`, `verify`, and `stop_if`.
 - If verification is missing, red, stale, blocked, or from a different dirty fingerprint, recover verification before feature work.
-- After each task, append a machine-checkable receipt and select the next safe task.
 - Mark a goal complete only after a final Judge or PM audit receipt with `decision: complete`; then update the native goal status.
-- Do not remove important context for budget trimming; move deep context to references and keep it discoverable through the deferred context index.
-- Previous examples included creating a board for Codex config cleanup, continuing `docs/goals/codex-goal-governance/goal.md` after a branch switch, and doctoring goal enablement, worker scope, and Scout/Judge/Worker runtime health before harness execution.
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

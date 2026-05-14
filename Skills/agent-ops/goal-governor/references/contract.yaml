@@ -13,6 +13,7 @@ inputs:
   - "stop condition"
 outputs:
   - "native and board state reconciliation"
+  - "native goal identity and objective-edit reconciliation when available"
   - "next safe action"
   - "validation evidence"
   - "XP operating artifacts: blackboard delta and slack policy for long-running continuation"
@@ -24,6 +25,7 @@ non_goals:
 risks:
   - "stale board state can mislead continuation"
   - "native /goal objective can drift from the repo-visible board"
+  - "goal tools may be unavailable for ephemeral or state-less turns even when source support exists"
   - "unscoped workers can edit outside the intended boundary"
 output_contract:
   schema_version: "1"

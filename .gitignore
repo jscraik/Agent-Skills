@@ -68,6 +68,13 @@ Plugins/plugin-factory/skills/**/__pycache__/
 sync-symlink/
 **/.codex-repo-plugin-source
 
+# Runtime-generated command implementation artifacts from runtime split tooling
+# (limit to generated/runtime artifact surfaces only)
+Infrastructure/artifacts/**/*_impl.*
+Infrastructure/reports/**/*_impl.*
+
+# Keep source implementation scripts trackable
+!Infrastructure/scripts/**/*_impl.sh
 # Generated artifacts
 .diagram/*
 !.diagram/context/
@@ -118,6 +125,8 @@ Infrastructure/reports/data/candidates.json
 !.harness/linear/**
 !.harness/refactors/
 !.harness/refactors/**
+!.harness/reframes/
+!.harness/reframes/**
 !.harness/features/
 !.harness/features/**
 !.harness/strategy/
@@ -191,3 +200,16 @@ Plugins/cache/
 .agents/workflows/*
 !.agents/workflows/**
 .codex/config.toml
+
+# Ignore timestamped generated skill artifact runs under Infrastructure/artifacts
+Infrastructure/artifacts/skills/**/[0-9][0-9][0-9][0-9]*
+
+# Re-ignore generated timestamped .harness outputs after curated-doc exceptions.
+.harness/media/20*/*.md
+.harness/media/20*
+.harness/refactors/20*/*.md
+.harness/refactors/20*
+.harness/reframes/20*/*.md
+.harness/reframes/20*
+.harness/linear/20*/**
+.harness/linear/20*.md

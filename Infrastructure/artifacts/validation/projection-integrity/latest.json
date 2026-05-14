@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-05-10T15:41:14.002207+00:00",
+  "generated_at": "2026-05-12T23:21:04.712792+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -47,9 +47,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 61,
-      "source_manifest_sha256": "9545679e90614410674685ee8766f80299b97f23e013e431803be714a15e3b76",
-      "projection_manifest_sha256": "9545679e90614410674685ee8766f80299b97f23e013e431803be714a15e3b76",
+      "checked_files": 65,
+      "source_manifest_sha256": "52f91a5c42554ef6252d6272fe40df83475221659105f9d87099926a7057ae11",
+      "projection_manifest_sha256": "52f91a5c42554ef6252d6272fe40df83475221659105f9d87099926a7057ae11",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -79,9 +79,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 13,
-      "source_manifest_sha256": "cd44eef89dedb933825daf11de5025b8903f1485df56f8432732573535b53b99",
-      "projection_manifest_sha256": "cd44eef89dedb933825daf11de5025b8903f1485df56f8432732573535b53b99",
+      "checked_files": 14,
+      "source_manifest_sha256": "82ccbc2269e444d3b9a4c19e53195f82ab13dd13c63659f7c75adbd2aa6bface",
+      "projection_manifest_sha256": "82ccbc2269e444d3b9a4c19e53195f82ab13dd13c63659f7c75adbd2aa6bface",
       "manifest_mismatch": false,
       "status": "pass"
     }

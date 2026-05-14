@@ -48,7 +48,9 @@ If only a wrapper ran, report the wrapper label instead of the internal file nam
 | `release evals` | `./bin/ask evals run <path> --mode release --json --robot` or owned equivalent | first-class gate |
 | `package boundary checks` | `./bin/ask skills validate-boundaries <handle-or-path> --json --robot` or owned equivalent | first-class evidence check |
 | `sync/projection checks` | `./bin/ask skills prove <handle-or-path> --json --robot` or owned sync proof | first-class evidence check |
-| `docs/prose/spelling` | `vale <paths>` when installed, or another documented repo docs-quality wrapper | first-class only when a canonical docs-quality command actually ran |
+| `docs/prose/spelling` | `vale <paths>` execution is the only accepted evidence; repo docs-quality wrappers may orchestrate but do not replace the Vale output requirement | first-class only when Vale (or equivalent canonical docs-quality command) has run and produced output |
+| `eval realism` | explicit eval schema fields such as `realistic: true\|false`, strict audit findings, or owned eval-realism validator output | first-class when schema or validator evidence exists |
+| `media artifact persistence` | generated artifact path, prompt metadata path, sidecar, and existence check under `.harness/media/` or owned artifact location | first-class only for media/artifact asks |
 
 ## Special Cases
 
@@ -78,6 +80,34 @@ If only a wrapper ran, report the wrapper label instead of the internal file nam
 - If no canonical docs-quality command is identified, report `blocked` with the
   exact missing-tool or missing-command reason.
 
+### `eval realism`
+
+- Prefer explicit schema-backed evidence such as `realistic` (with values `true` or `false`),
+  `why_realistic`, `expected_behavior`, and `anti_overfit_notes`.
+- Natural-language markers are fallback evidence only.
+- Synthetic examples, trigger-word-only prompts, internal test-case phrasing, or
+  prompts that would not plausibly be sent by a user should be reported as
+  `fail` when the skill claims release readiness.
+- When evals exist and no explicit realism schema field or validator evidence
+  is available, report `eval realism` as `blocked` with reason
+  `missing realism evidence surface`; do not omit the row for release-readiness
+  claims.
+- Plugin Eval success does not override strict-audit or eval-realism failures.
+
+### `media artifact persistence`
+
+- Use only for requests that require generated media or concrete artifacts.
+- Report `pass` only when artifact existence and persistence are directly
+  evidenced by path, sidecar, and command/tool output.
+- If generation succeeds but the artifact path is not discoverable, report
+  `blocked`, not `pass`.
+- If generation is available and the user requested an artifact, prompt text
+  alone is a `fail`.
+- If generation is unavailable, report `blocked` with the exact unavailable
+  tool, approval, output-path, or policy reason.
+- If generation availability is `unknown`, report artifact persistence as
+  `blocked`; do not treat an unchecked tool surface as a fallback success.
+
 ### `package boundary checks`
 
 - A clean pass may still carry operational risk.
@@ -97,6 +127,46 @@ Evidence must not over-claim:
 - source existence does not prove runtime availability
 - wrapper success does not prove a nested script passed
 - projection existence does not prove canonical ownership
+- Plugin Eval success does not prove strict audit, eval realism, media
+  persistence, docs/prose/spelling, or runtime visibility
+- generated prompt text does not prove a generated media artifact exists
+- generated artifact churn does not prove semantic source changes
+- external docs prove external behavior only; they do not prove local repo
+  implementation, local runtime visibility, or prior session behavior
+- session evidence proves observed local behavior only; it does not prove current
+  external API or library semantics
+
+## Readiness Decision
+
+Report an overall readiness decision whenever claiming a skill is acceptable,
+release-ready, or fully hardened.
+
+### Gate Result Values
+
+Use only these result values for individual gate reporting:
+
+- `pass`
+- `fail`
+- `blocked`
+- `not applicable`
+
+### Readiness Decision Enum
+
+The overall readiness state uses a separate `readiness_decision` enum (distinct from gate `result`):
+
+- `pass`: every required gate is `pass` or `not applicable` with a reason
+- `fail`: one or more required gates is `fail`
+- `blocked`: one or more required gates is `blocked`
+- `unverified`: a required gate was not run or lacks evidence
+
+Evaluation order is deterministic and MUST use this precedence:
+`fail` > `blocked` > `unverified` > `pass`.
+When multiple conditions are true, choose the highest-precedence state.
+
+Note: Parsers and contract validators should treat `readiness_decision` (not gate `result`) as the source of overall readiness states. The value `unverified` is not allowed as a gate `result`.
+
+Include the controlling gate and reason. Do not narratively override the
+decision with a higher-confidence summary.
 
 ## Preferred Table Shape
 

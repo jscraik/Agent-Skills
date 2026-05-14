@@ -59,7 +59,7 @@ def test_he_code_review_retains_core_traceability_and_review_rules():
     doctrine = read(ROOT / "Infrastructure/references/harness-engineering/he-code-review-doctrine.md")
 
     assert "Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation" in skill_text
-    assert "Do not remove important context for budget trimming" in skill_text
+    assert "Apply the context-disposition policy" in skill_text
     assert "Review policy index" in skill_text
     assert "Do not close because of title similarity alone" in doctrine
     assert "security/supply-chain pass" in doctrine

@@ -47,7 +47,7 @@ Treat skill authoring as durable systems design:
 
 - Keep routing and execution intent explicit.
 - Never drop required context for brevity; move it into `references/` with explicit progressive-disclosure signposts.
-- Do not remove important context for budget trimming; move it to `references/` and add explicit `Read when` signposts in `SKILL.md`.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 - Prefer reusable artifacts over repeated one-off prose.
 - Optimize for maintainability by another agent with no prior context.
 

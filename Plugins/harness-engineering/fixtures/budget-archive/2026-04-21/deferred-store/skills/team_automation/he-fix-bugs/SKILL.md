@@ -75,7 +75,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not create GitHub issues or ADRs for QA intake unless the user explicitly overrides the Linear-first project convention.
 - Do not over-interview during QA intake; ask only the minimum short questions needed to file a durable issue.
 - Do not use shotgun debugging or bundle unrelated changes into one bug fix.
-- Do not remove important context for budget trimming; move it to references and index it in [../../../references/deferred-context-index.md](../../../references/deferred-context-index.md).
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Anti-patterns
 

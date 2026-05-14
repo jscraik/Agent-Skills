@@ -78,23 +78,23 @@ Related Core Invariants:
 
 # Linear Work Item Contract
 
-| Field | Value |
-| --- | --- |
-| Linear issue | `JSC-284` |
-| Child issues | `JSC-285`, `JSC-286`, `JSC-287` |
-| Project | `agent-skills` |
-| Milestone | `Command surface and ask reliability` |
-| Status | Done |
+| Field         | Value                                                 |
+| ------------- | ----------------------------------------------------- |
+| Linear issue  | `JSC-284`                                             |
+| Child issues  | `JSC-285`, `JSC-286`, `JSC-287`                       |
+| Project       | `agent-skills`                                        |
+| Milestone     | `Command surface and ask reliability`                 |
+| Status        | Done                                                  |
 | Closure proof | Linear comment `a54b9452-af8c-4498-bbba-ed61f92bd773` |
 
 # Linear Acceptance Traceability
 
-| Linear issue | Acceptance IDs |
-| --- | --- |
-| `JSC-284` | `SA-ASK-001` through `SA-ASK-015` |
-| `JSC-285` | `SA-ASK-001`, `SA-ASK-002`, `SA-ASK-010` |
-| `JSC-286` | `SA-ASK-003`, `SA-ASK-004`, `SA-ASK-005`, `SA-ASK-006`, `SA-ASK-009`, `SA-ASK-010`, `SA-ASK-011`, `SA-ASK-012`, `SA-ASK-013` |
-| `JSC-287` | `SA-ASK-007` |
+| Linear issue | Acceptance IDs                                                                                                               |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `JSC-284`    | `SA-ASK-001` through `SA-ASK-015`                                                                                            |
+| `JSC-285`    | `SA-ASK-001`, `SA-ASK-002`, `SA-ASK-010`                                                                                     |
+| `JSC-286`    | `SA-ASK-003`, `SA-ASK-004`, `SA-ASK-005`, `SA-ASK-006`, `SA-ASK-009`, `SA-ASK-010`, `SA-ASK-011`, `SA-ASK-012`, `SA-ASK-013` |
+| `JSC-287`    | `SA-ASK-007`                                                                                                                 |
 
 # Linear Definition of Done Status
 
@@ -348,7 +348,7 @@ Confidence: High
 
 Operational Impact: Better local reasoning around plugin cache behavior with no observed command drift.
 
-Blocks Completion: no for local implementation; yes for Linear closure until live tracker refresh is complete.
+Blocks Completion: no.
 
 # Routing Determinism Check
 
@@ -553,7 +553,7 @@ ADR Update: no ADR update required for this slice.
 
 Rationale: the proof taxonomy ADR is present, and existing core invariants already cover source/projection separation, command contract preservation, staged reversible execution, and proof-backed closure.
 
-Required Action: none before local closure; refresh Linear before tracker closure.
+Required Action: none before local closure.
 
 # Evidence & Traceability Matrix
 

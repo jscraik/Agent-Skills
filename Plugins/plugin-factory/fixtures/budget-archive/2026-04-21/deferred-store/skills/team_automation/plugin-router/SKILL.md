@@ -47,7 +47,7 @@ Return a routing handoff object with:
 
 Use the detailed routing protocol in `references/workflow.md`.
 
-Required operational context is never removed; detailed guidance is relocated to references, not trimmed.
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Execution Boundaries
 

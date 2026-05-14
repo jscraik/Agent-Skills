@@ -119,7 +119,7 @@ class SkillScanProgressiveDisclosureTests(TestCase):
             (refs_dir / "details.md").write_text("# details\n", encoding="utf-8")
             (skill_dir / "SKILL.md").write_text(
                 _skill_with_required_headings(
-                    "Required operational context is never removed.\n"
+                    "Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.\n"
                     "Read when: full decision context is needed.\n"
                     "See [details](./references/details.md).\n"
                 ),
@@ -307,7 +307,7 @@ Source existence is not runtime availability.
             # Create SKILL.md with relocation text in frontmatter but not in body
             frontmatter_with_relocation = """---
 name: sample-skill
-description: "Required operational context is never removed. Read when: details needed."
+description: "Apply the context-disposition policy. Read when: details needed."
 metadata:
   skill-type: scaffolding_templates
   notes: "See references/details.md for relocated context"
