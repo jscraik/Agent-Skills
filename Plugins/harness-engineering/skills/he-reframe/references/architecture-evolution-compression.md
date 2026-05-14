@@ -43,6 +43,11 @@ If the user explicitly asks for a combined workflow, `he-reframe` may produce a
 transient Strategic Compression Intake summary to select or block reframe work,
 but formal `.harness/strategy/**` creation still routes to `he-strategy`.
 
+When a strategy artifact exists, use its deletion candidates, architectural
+non-negotiables, safe rewrite zones, moat-critical systems, contradictions, and
+core investment priorities only to select, reject, or scope reframe candidates;
+do not re-expand them into another strategy review.
+
 ## Reframe Program Gate
 
 Create a reframe program only when completion meaningfully improves one or more
@@ -72,6 +77,21 @@ ADR creation requires all of:
 Do not create ADRs for implementation details, temporary experiments, low-impact
 reframes, cosmetics, or framework preferences without strategic impact.
 
+## ADR Record Contract
+
+Use `.harness/decisions/ADR-###-<slug>.md` for accepted ADR candidates. Keep
+records compressed and include only these sections unless repo-local ADR
+standards require more: `ADR-###`, Title, Status, Decision, Context, Why This
+Decision Exists, Alternatives Considered, Accepted Tradeoffs, Anti-Drift
+Constraints, Safe Revisit Conditions, Related Systems, Evidence.
+
+Status must be one of: `proposed`, `accepted`, `deprecated`, or
+`superseded`. Evidence must separate facts, interpretation, and assumptions.
+When ADR compression reads migration artifacts, treat existing
+`.harness/refactors/**` files as legacy source evidence and current
+`.harness/reframes/**` files as preferred migration evidence; do not create or
+revive legacy refactor roots from the ADR lane.
+
 ## Core Invariant Gate
 
 Create core invariant files only for durable, cross-run operating truths. Keep
@@ -89,6 +109,24 @@ Core invariant creation requires all of:
 - classification as `proven invariant`, `strategic assumption`, or `preferred operating principle`;
 - explanation of the drift or reversal risk if omitted;
 - linkage to a selected reframe phase or anti-drift closure proof.
+
+## Core Invariant Record Contract
+
+Use `.harness/core/<invariant-domain>.md` for accepted core candidates. Allowed
+default domains are architecture, routing, execution, governance, cognition,
+moat, anti-drift, and future-agent operating rules; add repo-local domains only
+when evidence proves the split reduces context load or drift risk.
+
+Keep each core file compressed and include: Purpose, Scope, Invariant
+Classification, Core Invariants, Forbidden Drift, Operational Justification,
+Evidence, Safe Revisit Conditions, and Future-Agent Rules. Evidence must map
+each invariant to repository behavior or prior `.harness` findings and must
+separate proven invariants, strategic assumptions, and preferred operating
+principles.
+
+Do not create every example core file by default. Merge adjacent low-volume
+domains when separation would add retrieval cost, governance surface, or
+maintenance burden without reducing drift risk.
 
 ## Downstream Handoff Criteria
 
@@ -120,6 +158,24 @@ Do not create Linear objects. Map future execution only:
 - Top-level initiative: Dev Portfolio
 - Cross-repo project: Portfolio Ops
 - Repo-specific work: matching repo project when known
+
+## Linear Execution Handoff Contract
+
+`he-reframe` may define Linear mapping inside selected reframe programs, but it
+must not author `.harness/linear/**` execution orchestration plans or create
+Linear objects. Formal Linear execution planning routes to `he-linear-plan`.
+
+When handing off to `he-linear-plan`, include: selected migration candidate,
+source artifacts read, current `.harness/reframes/**` inputs, legacy
+`.harness/refactors/**` inputs when present, phase ordering, validation and eval
+gates, rollback conditions, agent-safe or human-review classification,
+dependency notes, and Linear mapping without mutation.
+
+Preserve the JSC operating model: use `Dev Portfolio` as the top-level
+initiative, `Portfolio Ops` for cross-repo coordination, and the matching repo
+project for repo-specific work. Do not propose new initiatives, projects,
+labels, milestones, parent issues, or sub-issues from `he-reframe`; leave those
+decisions to `he-linear-plan` and human confirmation.
 
 Every reframe program must define an eval artifact before closure:
 

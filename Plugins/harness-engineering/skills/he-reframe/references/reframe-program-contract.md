@@ -47,6 +47,13 @@ Each phase must include:
 - Agent-safe: `yes`, `no`, or `assisted`
 - Human review required: `yes` or `no`
 
+## Root Cause Analysis Contract
+
+Root Cause Analysis must explain why the structure emerged, why it survived,
+whether the pressure is historical, strategic, accidental, or operational, and
+what forces keep it in place. Do not use vague labels such as "legacy" unless
+the cited evidence supports that history.
+
 ## High-Leverage Threshold
 
 Create a program only when completion materially improves architecture,

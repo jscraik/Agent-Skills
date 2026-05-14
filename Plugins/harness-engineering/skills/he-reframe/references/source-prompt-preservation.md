@@ -61,6 +61,11 @@ For new generated reframe programs, prefer:
 - `.harness/reframes/YYYY-MM-DD-JSC-###-<reframe-slug>.md`
 - `.harness/reframes/YYYY-MM-DD-<repo-name>-<reframe-slug>.md`
 
+If a user or legacy prompt requests `.harness/refactors/**`, translate the
+request to `.harness/reframes/**` unless repo-local compatibility evidence
+explicitly requires the legacy root. Existing `.harness/refactors/**` files may
+be read as source evidence; do not create new legacy-root programs by default.
+
 ## Boundary From Skill Refactoring
 
 `he-reframe` is for repository architecture migration programs. It should not
