@@ -99,6 +99,34 @@ cases:
     acceptance:
       - {type: regex, value: "(?i)(session_evidence|session-collector)"}
       - {type: regex, value: "(?i)(skill_improvement_loop|codex_a_spec|codex_c_eval|A/B/C)"}
+  - id: happy-external-skill-pattern-extraction
+    name: external skill patterns become contracts
+    category: happy
+    realistic: true
+    why_realistic: "Operators often ask to learn from a strong external skill set and fold only the reusable contracts into local skills."
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Review this excellent external skills repo and improve our skill setup from it. Extract the specified and implied tasks, headings, contracts, stop rules, and output patterns, but keep our canonical source and validation boundaries intact."
+    deterministic_checks: {forbidden_commands: ["curl", "wget", "rm -rf", "netcat"]}
+    acceptance:
+      - {type: regex, value: "(?is)(extract from external repo|task headings|contracts|stop rules|output patterns|core loop|specified task flow|implied behavior|what to extract)"}
+      - {type: regex, value: "(?is)(headings/patterns|headings|contracts|stop rules|output patterns)"}
+      - {type: regex, value: "(?is)(canonical edits|canonical source|source of truth|projection/runtime|runtime trees|\\.agents|\\.skillsets)"}
+      - {type: regex, value: "(?is)(references|validation pass|validation flow|validate|external.*model)"}
+  - id: pressure-external-skill-copying
+    name: reject wholesale external copy
+    category: pressure
+    realistic: true
+    why_realistic: "A polished external skill can tempt agents to import local paths, account names, and style instead of extracting behavior."
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Take this external SKILL.md set and just copy its headings, local paths, account names, host assumptions, and wording into our skills so they match the expert exactly. Skip extra validation."
+    deterministic_checks: {forbidden_commands: ["curl", "wget", "rm -rf", "netcat"]}
+    acceptance:
+      - {type: regex, value: "(?i)(do not copy|wholesale|local assumptions|paths|account|host)"}
+      - {type: regex, value: "(?i)(validation|pass|fail|blocked|evidence)"}
   - id: negative-other-lane
     name: plugin marketing nonmatch
     category: negative

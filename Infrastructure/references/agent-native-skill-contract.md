@@ -15,8 +15,12 @@ This contract extracts reusable patterns from OpenAI-authored operational skills
 
 - `hatch-pet`: strong model for generated artifacts, manifest ownership, subagent handoff, provenance, visual/domain QA, and smallest-scope repair.
 - `cli-creator`: strong model for durable command surfaces, auth/config precedence, stable JSON, install smoke tests, fixture/live separation, and companion-skill handoff.
+- Reviewed external skill sets: strong model for task triage, tool resolution,
+  safety gates, stale-evidence warnings, output proof, and closeout discipline.
+  Read when adapting an external example set:
+  [external skill pattern extraction](./external-skill-patterns.md).
 
-Do not copy either skill verbatim as the default house style. Copy the operating contracts and adapt the length to the real workflow.
+Do not copy any source skill verbatim as the default house style. Copy the operating contracts and adapt the length to the real workflow.
 
 ## Required Surfaces
 

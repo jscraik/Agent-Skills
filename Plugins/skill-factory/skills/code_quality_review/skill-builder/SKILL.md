@@ -101,7 +101,11 @@ If a missing required input changes the safe edit path, clarify with one direct 
    bounded collector evidence, a `skill-refactor` handoff, or a blocked status
    explaining why evidence could not be loaded.
 10. Apply the OpenAI-style design checkpoint: user intent, trigger precision, side effects, context cost, structured output, and eval evidence.
-11. Record exact command outcomes as `pass`, `fail`, or `blocked`; never infer runtime availability from source existence alone.
+11. When folding reusable patterns from another skill, translate the operating
+    behavior rather than copying prose: requested vs implied work, tool
+    resolution, stale-evidence checks, inspectable outputs, safety class,
+    retry, and closeout proof.
+12. Record exact command outcomes as `pass`, `fail`, or `blocked`; never infer runtime availability from source existence alone.
 
 ## Validation
 
@@ -214,6 +218,7 @@ Tie confidence to validator evidence, deterministic checks, runtime visibility, 
 Read when:
 
 - applying agent-native contracts: [agent-native skill contract](../../../../../Infrastructure/references/agent-native-skill-contract.md)
+- adapting compact operational-skill patterns without importing local assumptions: [external skill pattern extraction](../../../../../Infrastructure/references/external-skill-patterns.md)
 - auditing trigger, side effects, context cost, or structured output: [OpenAI-style plugin design contract](../../../../../Infrastructure/references/openai-style-plugin-design-contract.md)
 - choosing improve/create/docs-only/handoff/stop: [First-principles factory gate](../../../../../Infrastructure/references/first-principles-factory-gate.md)
 - naming validator rows and wrapper-versus-standalone status correctly: [skill validation reporting contract](../../../../../Infrastructure/references/skill-validation-reporting-contract.md)
