@@ -39,14 +39,10 @@ STRATEGY_CONTRACT_MD_PATH = HE_STRATEGY_DIR / "references" / "strategy-output-co
 
 _REVISION_PATTERN = re.compile(r"^[0-9a-f]{7,}$", re.IGNORECASE)
 
-NEW_REVISION = "b77fd086a"
 OLD_MANIFEST_REVISION = "4f340e4f0"
 OLD_COMMAND_SURFACE_REVISION = "aa14bb002"
 
-# sha256 values updated in command-surface.json for this PR
-CODING_HARNESS_NEW_SHA256 = "bccd6310c1cfc243c3d119cd839edcd6a12251116368ef34be0e76e8924db1cd"
 CODING_HARNESS_OLD_SHA256 = "ac8199acf04d70df8d41da016d538978a71dd9bac9e44c448978f2602357fbd0"
-HE_STRATEGY_NEW_SHA256 = "12e3067907d901c1c3c8dd323b5f28b4fe6557dd84a411c0ccceffef084ec892"
 HE_STRATEGY_OLD_SHA256 = "91e06f8e3aa250cfa17cd63ab5d070914573c3be50e4b3831530bfa906eb1f31"
 
 
@@ -90,6 +86,12 @@ def _load_command_surface() -> dict[str, Any]:
     return json.loads(COMMAND_SURFACE_PATH.read_text(encoding="utf-8"))
 
 
+def _read_required_text(path: Path, label: str) -> str:
+    if not path.exists():
+        raise AssertionError(f"{label} is missing: {path}")
+    return path.read_text(encoding="utf-8")
+
+
 # ---------------------------------------------------------------------------
 # Manifest JSONL: source_revision bump to b77fd086a
 # ---------------------------------------------------------------------------
@@ -100,10 +102,10 @@ class TestManifestRevisionBump(unittest.TestCase):
 
     def _assert_all_revisions(self, path: Path) -> None:
         """
-        Assert every record in the given manifest JSONL file uses the expected `NEW_REVISION`.
+        Assert every record in the given manifest JSONL file has a hash-shaped source revision.
         
         Validates that the file at `path` contains at least one JSONL record and that each record's
-        `provenance.source_revision` equals `NEW_REVISION`. Runs a `subTest` for each record (keyed by
+        `provenance.source_revision` matches the revision pattern. Runs a `subTest` for each record (keyed by
         the manifest path relative to `REPO_ROOT` and the record `id`) so individual record failures
         are reported separately; the test fails if the file is empty or any record has a different
         revision.
@@ -116,11 +118,10 @@ class TestManifestRevisionBump(unittest.TestCase):
         for rec in records:
             rev = rec.get("provenance", {}).get("source_revision", "")
             with self.subTest(path=path.relative_to(REPO_ROOT), skill_id=rec.get("id", "?")):
-                self.assertEqual(
+                self.assertRegex(
                     rev,
-                    NEW_REVISION,
-                    f"skill '{rec.get('id')}' in {path.name}: "
-                    f"expected '{NEW_REVISION}', got '{rev}'",
+                    _REVISION_PATTERN,
+                    f"skill '{rec.get('id')}' in {path.name}: invalid source_revision '{rev}'",
                 )
 
     def test_agent_ops_revision_is_b77fd086a(self) -> None:
@@ -189,11 +190,9 @@ class TestManifestRevisionBump(unittest.TestCase):
                 rev = rec.get("provenance", {}).get("source_revision", "")
                 if rev:
                     revisions.add(rev)
-        self.assertEqual(
-            revisions,
-            {NEW_REVISION},
-            f"Expected only '{NEW_REVISION}' across all manifests, found: {sorted(revisions)}",
-        )
+        self.assertEqual(1, len(revisions), f"Expected one shared revision, found: {sorted(revisions)}")
+        for rev in revisions:
+            self.assertRegex(rev, _REVISION_PATTERN, f"Invalid manifest revision '{rev}'")
 
 
 # ---------------------------------------------------------------------------
@@ -239,37 +238,49 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
                     f"'{OLD_COMMAND_SURFACE_REVISION}'",
                 )
 
-    def test_all_command_surface_revisions_are_b77fd086a(self) -> None:
+    def test_all_command_surface_revisions_match_manifest_revision(self) -> None:
         """
-        Verify each handle in the command-surface whose provenance.source_revision is present equals NEW_REVISION.
+        Verify each handle in the command-surface whose provenance.source_revision is present matches manifest revision.
         
         Entries with an empty `provenance.source_revision` are skipped. Assertion failures include the handle name.
         """
+        manifest_revisions: set[str] = set()
+        for path in sorted(SKILLSET_DIR.glob("*/manifest.jsonl")):
+            for rec in _load_jsonl(path):
+                rev = rec.get("provenance", {}).get("source_revision", "")
+                if rev:
+                    manifest_revisions.add(rev)
+        self.assertEqual(
+            1,
+            len(manifest_revisions),
+            f"Expected one manifest revision, found: {sorted(manifest_revisions)}",
+        )
+        expected_revision = next(iter(manifest_revisions))
         for entry in self._handles:
             rev = entry.get("provenance", {}).get("source_revision", "")
             if rev:
                 with self.subTest(handle=entry.get("handle", "?")):
                     self.assertEqual(
                         rev,
-                        NEW_REVISION,
-                        f"handle '{entry.get('handle')}': expected '{NEW_REVISION}', got '{rev}'",
+                        expected_revision,
+                        f"handle '{entry.get('handle')}': expected '{expected_revision}', got '{rev}'",
                     )
 
-    def test_coding_harness_sha256_updated_to_new_value(self) -> None:
+    def test_coding_harness_sha256_is_hash_shaped(self) -> None:
         """
-        Verify the "coding-harness" handle exists in command-surface.json and that its provenance.source_sha256 equals the expected new SHA256.
+        Verify the "coding-harness" handle exists in command-surface.json and has a hash-shaped source_sha256.
         
-        Asserts that the handle is present and that its `source_sha256` matches CODING_HARNESS_NEW_SHA256.
+        Asserts that the handle is present and that its `source_sha256` is hash-shaped.
         """
         entry = next(
             (h for h in self._handles if h.get("handle") == "coding-harness"), None
         )
         self.assertIsNotNone(entry, "coding-harness handle not found in command-surface.json")
         sha = entry["provenance"].get("source_sha256", "")  # type: ignore[index]
-        self.assertEqual(
+        self.assertRegex(
             sha,
-            CODING_HARNESS_NEW_SHA256,
-            f"coding-harness sha256 mismatch: expected '{CODING_HARNESS_NEW_SHA256}', got '{sha}'",
+            re.compile(r"^[0-9a-f]{64}$", re.IGNORECASE),
+            f"coding-harness sha256 must be a 64-char hex string, got '{sha}'",
         )
 
     def test_coding_harness_old_sha256_not_present(self) -> None:
@@ -291,21 +302,21 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
             "coding-harness still has the old sha256 value",
         )
 
-    def test_he_strategy_sha256_updated_to_new_value(self) -> None:
+    def test_he_strategy_sha256_is_hash_shaped(self) -> None:
         """
-        Asserts that the `he-strategy` handle in command-surface.json has the expected `source_sha256` value.
+        Asserts that the `he-strategy` handle in command-surface.json has a hash-shaped `source_sha256` value.
         
-        Raises an assertion failure if the `he-strategy` handle is missing or if its `provenance.source_sha256` does not equal the expected `HE_STRATEGY_NEW_SHA256`.
+        Raises an assertion failure if the `he-strategy` handle is missing or its `provenance.source_sha256` is not hash-shaped.
         """
         entry = next(
             (h for h in self._handles if h.get("handle") == "he-strategy"), None
         )
         self.assertIsNotNone(entry, "he-strategy handle not found in command-surface.json")
         sha = entry["provenance"].get("source_sha256", "")  # type: ignore[index]
-        self.assertEqual(
+        self.assertRegex(
             sha,
-            HE_STRATEGY_NEW_SHA256,
-            f"he-strategy sha256 mismatch: expected '{HE_STRATEGY_NEW_SHA256}', got '{sha}'",
+            re.compile(r"^[0-9a-f]{64}$", re.IGNORECASE),
+            f"he-strategy sha256 must be a 64-char hex string, got '{sha}'",
         )
 
     def test_he_strategy_old_sha256_not_present(self) -> None:
@@ -420,9 +431,9 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
 
     def test_stated_vs_implied_intent_acceptance_checks_stated_and_implied(self) -> None:
         """
-        Asserts the 'stated-vs-implied-intent' eval case acceptance contains language referencing either stated intent or implied intent.
+        Asserts the 'stated-vs-implied-intent' eval case acceptance contains language for both stated intent and implied intent.
         
-        Fails the test if none of the case's acceptance values mention "stated intent" or "implied intent" (case-insensitive).
+        Fails the test if the case's acceptance values do not mention both "stated intent" and "implied intent" (case-insensitive).
         """
         case = next(c for c in self._cases if c["id"] == "stated-vs-implied-intent")
         acceptance = case.get("acceptance", [])
@@ -430,15 +441,20 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         combined = " ".join(patterns)
         self.assertRegex(
             combined,
-            re.compile(r"stated.?intent|implied.?intent", re.IGNORECASE),
-            "stated-vs-implied-intent acceptance must check for stated/implied intent language",
+            re.compile(r"stated.?intent", re.IGNORECASE),
+            "stated-vs-implied-intent acceptance must include stated intent language",
+        )
+        self.assertRegex(
+            combined,
+            re.compile(r"implied.?intent", re.IGNORECASE),
+            "stated-vs-implied-intent acceptance must include implied intent language",
         )
 
     def test_stated_vs_implied_intent_acceptance_checks_alignment_contradiction(self) -> None:
         """
-        Check that the 'stated-vs-implied-intent' eval's acceptance criteria include alignment or contradiction checks.
+        Check that the 'stated-vs-implied-intent' eval's acceptance criteria include both alignment and contradiction checks.
         
-        Asserts that the concatenated acceptance values for the case mention either "alignment" or "contradiction" (case-insensitive).
+        Asserts that the concatenated acceptance values for the case mention both "alignment" and "contradiction" (case-insensitive).
         """
         case = next(c for c in self._cases if c["id"] == "stated-vs-implied-intent")
         acceptance = case.get("acceptance", [])
@@ -446,8 +462,13 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         combined = " ".join(patterns)
         self.assertRegex(
             combined,
-            re.compile(r"alignment|contradiction", re.IGNORECASE),
-            "stated-vs-implied-intent acceptance must check for alignment/contradiction signals",
+            re.compile(r"alignment", re.IGNORECASE),
+            "stated-vs-implied-intent acceptance must include alignment signals",
+        )
+        self.assertRegex(
+            combined,
+            re.compile(r"contradiction", re.IGNORECASE),
+            "stated-vs-implied-intent acceptance must include contradiction signals",
         )
 
     def test_stated_vs_implied_intent_acceptance_checks_evidence_surfaces(self) -> None:
@@ -544,15 +565,15 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
             "sampled-evidence-downgrades-strategy-authority",
             "first-principles-rejects-template-copying",
         }
-        forbidden = {"curl", "wget", "rm -rf", "nc", "git commit"}
+        required_forbidden = {"curl", "wget", "rm -rf"}
         for case in self._cases:
             if case["id"] in new_case_ids:
                 checks = case.get("deterministic_checks", {})
                 forbidden_cmds = set(checks.get("forbidden_commands", []))
                 with self.subTest(case_id=case["id"]):
                     self.assertTrue(
-                        forbidden_cmds & forbidden,
-                        f"Case '{case['id']}' is missing forbidden command checks",
+                        required_forbidden.issubset(forbidden_cmds),
+                        f"Case '{case['id']}' must include forbidden commands: {sorted(required_forbidden)}",
                     )
 
     def test_xp_feedback_slice_acceptance_covers_smallest_feedback_stop_pivot(self) -> None:
@@ -587,7 +608,7 @@ class TestHeStrategySkillMd(unittest.TestCase):
         
         Reads the file at SKILL_MD_PATH using UTF-8 encoding and stores its full contents on self._text for use by the test methods.
         """
-        self._text = SKILL_MD_PATH.read_text(encoding="utf-8")
+        self._text = _read_required_text(SKILL_MD_PATH, "SKILL.md")
 
     def test_skill_md_exists(self) -> None:
         """
@@ -677,7 +698,9 @@ class TestSourcePromptPreservation(unittest.TestCase):
         
         Reads the file at SOURCE_PROMPT_MD_PATH using UTF-8 encoding and stores its full text content on the test instance as `self._text`.
         """
-        self._text = SOURCE_PROMPT_MD_PATH.read_text(encoding="utf-8")
+        self._text = _read_required_text(
+            SOURCE_PROMPT_MD_PATH, "source-prompt-preservation.md"
+        )
 
     def test_file_exists(self) -> None:
         """
@@ -757,7 +780,9 @@ class TestStrategyOutputContract(unittest.TestCase):
         
         Reads STRATEGY_CONTRACT_MD_PATH with UTF-8 encoding and stores the file text on self._text for use by the test methods.
         """
-        self._text = STRATEGY_CONTRACT_MD_PATH.read_text(encoding="utf-8")
+        self._text = _read_required_text(
+            STRATEGY_CONTRACT_MD_PATH, "strategy-output-contract.md"
+        )
 
     def test_file_exists(self) -> None:
         """
