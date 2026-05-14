@@ -22,6 +22,10 @@ Do not answer equivalence from the existence of matching artifacts alone.
 ## Preserved Requirements
 
 - infer intent from implementation reality, not marketing language
+- compare stated intent from docs/prompts/product language with implied intent
+  from code, command surfaces, tests, validation gates, runtime paths, naming,
+  generated artifacts, and coupling patterns; report alignment, contradiction,
+  and missing proof
 - inspect repo source, configs, scripts, CI, tests, docs, prompts, skills,
   workflows, hooks, integrations, governance, memory, and context systems when
   relevant to the selected mode

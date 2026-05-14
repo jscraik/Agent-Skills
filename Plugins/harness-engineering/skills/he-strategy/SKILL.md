@@ -134,6 +134,9 @@ Use plain Markdown, short sections, descriptive links, and non-color-only tables
 - User asks: "Create a dated JSC-321 repo intent artifact from live source."
 - User asks: "Convert review and triage into evidence-backed strategy."
 - User asks: "Validate whether an ADR is justified, or return `Do Not Create`."
+- User asks: "Compare what the docs say this repo is for against what
+  the source, command surfaces, tests, validation gates, runtime paths, naming,
+  generated artifacts, and coupling imply."
 
 ## Output Format
 

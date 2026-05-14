@@ -52,9 +52,11 @@ Every output must include:
 
 ## Required Sections By Common Mode
 
-Intent artifacts should cover project intent, core thesis, stable interfaces,
-sources of leverage, drift risks, what future agents should preserve, open
-questions, and an evidence matrix.
+Intent artifacts should cover project intent, stated intent from docs/prompts,
+implied intent from implementation reality, stated vs implied alignment or
+contradiction, core thesis, stable interfaces, evidence sufficiency,
+not-inspected surfaces, sources of leverage, drift risks, what future agents
+should preserve, open questions, and an evidence matrix.
 
 Architecture reviews should cover risk, cognition, complexity, deep versus
 shallow modules, domain integrity, agent-native capability, governance,
