@@ -19,6 +19,7 @@ Linear.
 - Target Linear Destination
 - Existing Project Match
 - ADR / Decision Artifact Readiness
+- Core / Invariant Artifact Readiness
 - Proposed Milestones
 - Proposed Parent Issues
 - Proposed Sub-Issues
@@ -54,6 +55,8 @@ Linear.
 - `required_confirmation` when mutation approval is missing
 - `decision_artifact_status`: one of `present`, `missing`, `blocked`,
   `upstream_required`, or `not_applicable`
+- `core_artifact_status`: one of `present`, `missing`, `blocked`,
+  `upstream_required`, or `not_applicable`
 - `existing_project_match`: project name, live evidence source, status,
   duplicate/canceled alternatives, and mutation safety
 - `repo_location_label` for every issue payload, preferably `Repo › ...`
@@ -84,6 +87,13 @@ If no template fits, ask before creating the issue. Do not silently create an
 untemplated issue.
 
 ## Label Policy
+
+Use existing labels first. Prefer already-live labels such as Developer
+Experience, Reliability, Governance, Automation, type labels, roadmap labels,
+repo/location labels, and policy labels when they preserve routing value. Propose
+new labels only when the same missing label would be reused across multiple
+future work items; explain why existing labels are insufficient and avoid
+one-off labels.
 
 For every non-triage issue, apply the following exact mapping while keeping one
 Type label and one Roadmap label:
@@ -171,6 +181,13 @@ Use this template for proposed issues. Do not create them during the plan.
   `.harness/decisions/**` readiness or mark `decision_artifact_status:
   upstream_required`; do not convert missing ADR reasoning into extra Linear
   objects.
+- If the request is to create compressed architecture, routing, execution,
+  governance, cognition, moat, anti-drift, or future-agent invariants under
+  `.harness/core/**`, mark `core_artifact_status: upstream_required` or
+  `blocked` and route upstream to `he-strategy` or `he-reframe`. This skill may
+  consume `.harness/core/**` as execution constraints after the artifacts exist,
+  but it must not generate the core cognition layer or turn missing invariant
+  reasoning into Linear backlog.
 
 ## JSC Dev Portfolio Defaults
 

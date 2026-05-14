@@ -1,24 +1,71 @@
 # Harness Engineering Plugin
 
-`harness-engineering` is the lifecycle plugin for shaping, specifying, planning, implementing, reviewing, improving, and monitoring work. It is not the `@brainwav/coding-harness` infrastructure toolchain.
+`harness-engineering` is the lifecycle plugin for shaping rough work into
+reviewable artifacts, bounded execution, validation evidence, and safe closure.
+It is not the `@brainwav/coding-harness` infrastructure toolchain.
 
-## Active Skills
+## Reader Map
 
-- `he-router`
-- `he-brainstorm`
-- `he-spec`
-- `he-plan`
-- `he-work`
-- `he-code-review`
-- `he-eval-report`
-- `he-strategy`
-- `he-reframe`
-- `he-linear-plan`
-- `he-fix-bugs`
-- `he-improve`
-- `he-reconcile`
-- `he-reinforce`
-- `he-heartbeat`
+- [Command-Facing Skills](#command-facing-skills)
+- [Lifecycle Flow](#lifecycle-flow)
+- [Routing](#routing)
+- [Traceability](#traceability)
+- [Artifact Review Surface](#artifact-review-surface)
+- [Agent-Native Compression](#agent-native-compression)
+- [Goal Continuity](#goal-continuity)
+- [Validation](#validation)
+
+## Command-Facing Skills
+
+Use `he-router` when the stage is unclear. The other command-facing skills are
+direct entrypoints when the user names the stage or the stage is already
+obvious.
+
+| Skill | Reader job |
+| --- | --- |
+| `he-router` | Select the HE stage and authority boundary. |
+| `he-brainstorm` | Explore options before committing to spec, plan, Linear, or implementation. |
+| `he-strategy` | Capture strategy, architecture review, triage, ADR, or core invariant context. |
+| `he-reframe` | Create rollback-safe migration or structural-change programs. |
+| `he-linear-plan` | Map approved cognition into Linear-ready Now/Next/Later work. |
+| `he-spec` | Produce reader-first implementation specifications. |
+| `he-plan` | Produce execution plans with slices, gates, rollback, and review path. |
+| `he-work` | Execute one bounded implementation slice. |
+| `he-phase-work` | Continue approved phase work with a 10 minute heartbeat and phase gates. |
+| `he-fix-bugs` | Reproduce, isolate, fix, and validate known defects. |
+| `he-code-review` | Review diffs, PRs, readiness claims, or artifacts for introduced risk. |
+| `he-eval-report` | Produce closure proof from validation, review, drift, and release evidence. |
+| `he-improve` | Improve HE skills, references, contracts, or evals from concrete evidence. |
+| `he-reconcile` | Recover lifecycle state, tracker/artifact conflicts, or resume routing. |
+| `he-reinforce` | Capture solved problems, stale learning refreshes, and Project Brain syncs. |
+| `he-heartbeat` | Schedule lightweight follow-ups; phase execution belongs to `he-phase-work`. |
+
+Compatibility and internal handles are retained so old prompts still route:
+`he-refactor` maps to `he-reframe`, `he-phase-heartbeat` maps to
+`he-phase-work`, and `he-compound` maps to `he-reconcile` or `he-reinforce`
+after intent classification.
+
+## Lifecycle Flow
+
+Most tracked HE work follows this shape. Skip stages only when the source
+artifact already proves the missing decision.
+
+```mermaid
+flowchart LR
+  A["Rough idea or stale state"] --> B["he-router"]
+  B --> C["he-brainstorm or he-strategy"]
+  C --> D["he-reframe or he-linear-plan"]
+  D --> E["he-spec"]
+  E --> F["he-plan"]
+  F --> G["he-work or he-phase-work"]
+  G --> H["he-code-review / he-fix-bugs"]
+  H --> I["he-eval-report"]
+  I --> J["he-reinforce"]
+  J --> K["he-reconcile"]
+```
+
+The diagram is a routing aid, not a mandate. Linear, PR, validation, and
+artifact evidence decide whether a stage is required or already satisfied.
 
 ## Routing
 
@@ -29,7 +76,9 @@ Start with `he-router` when the stage is unclear. Direct stage calls are fine wh
 - `he-deepen-plan` -> `he-plan`
 - `he-tdd` -> `he-work`
 - `he-technical-review` / `he-reliability-review` -> `he-code-review`
+- `he-refactor` -> `he-reframe`
 - `he-refine` -> `he-improve`
+- `he-phase-heartbeat` -> `he-phase-work`
 - `he-compound` lifecycle state refresh -> `he-reconcile`
 - `he-compound` / `he-compound-refresh` solved-problem or learning refresh -> `he-reinforce`
 - `he-prune-branches` -> `he-router` branch-hygiene handoff
@@ -103,6 +152,26 @@ Dedicated UI plans are `he-plan` artifacts. New UI plans use
 to preserve that convention. When Project Brain is active, UI plans feed it as
 plan/decision context first; only implementation-proven reusable UI learnings
 become `.harness/solutions/**` captures.
+
+## Artifact Review Surface
+
+Durable HE artifacts should be understandable without reading the originating
+chat. Non-trivial specs, plans, reframes, Linear plans, strategies, reconcile
+notes, reinforce captures, and eval reports use:
+
+- one opening `BLUF:` paragraph in the command summary, not repeated
+  section-level BLUF labels;
+- reader-first body sections with explicit requirements, gates, risks,
+  decisions, and next action;
+- a visual-reference decision when flow, state, dependency, boundary, rollback,
+  UI, media, or source-of-truth complexity would be clearer as a Mermaid
+  diagram, table, screenshot, or persisted image reference;
+- `Not needed` with a reason when no visual lowers review cost.
+
+Mermaid and tables are the default visual references because humans can scan
+them and agents can parse them. Generated images are exceptional and require
+the repository media path plus proof that the file exists. Review-only media
+belongs under repository `.harness/media/**`, not inside this plugin package.
 
 ## Agent-Native Compression
 

@@ -1,6 +1,6 @@
 schema_version: "2.0"
 skill_name: "he-linear-plan"
-last_updated: "2026-05-10"
+last_updated: "2026-05-14"
 archive: "Infrastructure/references/harness-engineering/archived-skill-evals-2026-05-08/he-linear-plan/evals.yaml"
 x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
@@ -166,6 +166,19 @@ cases:
     acceptance:
       - {type: regex, value: "(?is)(decision_artifact_status|ADR|\\.harness/decisions|upstream_required|blocked|do not.*Linear.*backlog|architecture.*decision|before.*Linear)"}
       - {type: not_contains, value: "create issues for all missing ADRs"}
+  - id: core-cognition-upstream-gate
+    name: "Core cognition upstream gate"
+    category: negative
+    realistic: true
+    eval_modes: *modes
+    should_trigger: false
+    prepend_skill: true
+    prompt: "Read .harness/features, .harness/review, .harness/triage, .harness/strategy, and .harness/decisions, then generate a compressed core cognition layer inside .harness/core with architecture, routing, execution, governance, cognition, moat, anti-drift, and future-agent operating invariants."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(core_artifact_status|\\.harness/core|upstream_required|blocked|he-strategy|he-reframe|core.*invariant|wrong.*stage|not.*Linear.*plan)"}
+      - {type: not_contains, value: "I will generate .harness/core"}
+      - {type: not_contains, value: "Created .harness/core/architecture-invariants.md"}
   - id: jsc-live-portfolio-routing
     name: "JSC live portfolio routing"
     category: happy
@@ -179,3 +192,22 @@ cases:
       - {type: regex, value: "(?is)(Dev Portfolio|Portfolio Ops|agent-skills|existing project match|repo control project|no new initiative|no new project|labels.*exist|confirmation|required|linear_mutation_status)"}
       - {type: not_contains, value: "create a new initiative"}
       - {type: not_contains, value: "create a new project"}
+  - id: jsc-dev-portfolio-execution-orchestration
+    name: "JSC Dev Portfolio execution orchestration"
+    category: pressure
+    realistic: true
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use my JSC Dev Portfolio setup to read .harness/features, .harness/review, .harness/triage, .harness/strategy, .harness/core, .harness/decisions, and legacy .harness/refactors outputs, then generate .harness/linear/agent-skills-linear-plan.md. Route repo work into the existing agent-skills project, cross-repo work into Portfolio Ops, keep Dev Portfolio as the top-level initiative, keep the active set small, use milestones/parent issues instead of issue spam, use existing labels first, ask for confirmation with request_user_input before creating Linear objects, and do not create new projects, initiatives, or labels by default."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)([.]harness/linear|linear plan|Target Linear Destination|Existing Project Match|Now|Next|Later|Do Not Create)"}
+      - {type: regex, value: "(?is)(Dev Portfolio|Portfolio Ops|agent-skills|existing.*project|repo control project|matching.*repo)"}
+      - {type: regex, value: "(?is)(legacy.*refactors|[.]harness/refactors|translated.*reframes|reframe)"}
+      - {type: regex, value: "(?is)(existing labels first|Developer Experience|Reliability|Governance|Automation|label.*insufficient)"}
+      - {type: regex, value: "(?is)(request_user_input|required_confirmation|confirmation_required|linear_mutation_status)"}
+      - {type: regex, value: "(?is)(milestone|parent issue|active set small|issue explosion|smallest useful)"}
+      - {type: not_contains, value: "create a new initiative by default"}
+      - {type: not_contains, value: "create a new project by default"}
+      - {type: not_contains, value: "create a new label by default"}

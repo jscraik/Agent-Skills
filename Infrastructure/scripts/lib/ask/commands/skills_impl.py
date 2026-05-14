@@ -457,7 +457,7 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
     """
     entries = [
         entry
-        for entry in discover_catalog_entries(source="repo")
+        for entry in discover_catalog_entries()
         if entry.source_dir.is_relative_to(repo_root)
     ]
     catalog_count = len(entries)

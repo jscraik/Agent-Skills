@@ -14,9 +14,17 @@ turning partial cognition into broad execution authority.
 - read `.harness/features`, `.harness/review`, `.harness/triage`,
   `.harness/strategy`, `.harness/core`, `.harness/decisions`, and
   `.harness/reframes`
+- read `.harness/refactors/**` as legacy reframe-program input when present;
+  translate it into current `.harness/reframes/**` semantics and do not create
+  new legacy refactor-root artifacts from this skill
 - treat `.harness/decisions` as compressed architecture memory, not backlog
   input; if high-value ADRs are missing, mark decision readiness blocked or
   route to the upstream decision-compression step
+- treat `.harness/core` as compressed invariant memory, not a Linear-plan output
+  root; if architecture, routing, execution, governance, cognition, moat,
+  anti-drift, or future-agent operating invariants are missing, mark core
+  readiness blocked or `upstream_required` and route to `he-strategy` or
+  `he-reframe`
 - generate `.harness/linear/**` execution plans
 - prefer dated Linear filenames for new plans
 - use the existing JSC operating model when the request or artifacts confirm
@@ -49,6 +57,9 @@ turning partial cognition into broad execution authority.
 - convert reframe programs into minimal parent/sub-issue structures
 - include validation gates, rollback conditions, dependency maps, labels,
   priority, and human/agent execution routing
+- use existing labels first; propose new labels only when repeated work cannot
+  fit existing Developer Experience, Reliability, Governance, Automation, type,
+  roadmap, repo/location, or policy labels without losing routing value
 - do not mutate Linear without explicit confirmation
 - preserve upstream evidence depth, coverage gaps, not-inspected surfaces,
   repo-specific drift signals, authority limits, and downstream confidence
@@ -89,8 +100,24 @@ constraints. If the required ADR set is absent, noisy, duplicated, or merely
 generic architecture prose, the Linear plan must say so and avoid promoting that
 uncertain decision surface into active execution.
 
+## Core Invariant Readiness Guard
+
+Do not turn the Core Knowledge Compression prompt into a Linear backlog or a
+`.harness/core/**` write. The core phase exists to preserve irreducible
+architecture, routing, execution, governance, cognition, moat, anti-drift, and
+future-agent operating invariants. If the required core invariant layer is
+absent, noisy, generic, or unreviewed, the Linear plan must report
+`core_artifact_status: upstream_required` or `blocked`, route the work to
+`he-strategy` or `he-reframe`, and avoid promoting missing invariant reasoning
+into active Linear objects.
+
 ## Confirmation Gate
 
 The final workflow may ask for confirmation before creating or updating Linear
 objects. Until that confirmation exists, output only the plan and ready-to-create
 payloads.
+
+When `request_user_input` is available, use it for the post-plan confirmation
+question before creating or updating Linear objects. When it is unavailable,
+write `required_confirmation`, keep `linear_mutation_status:
+confirmation_required`, and stop before live mutation.
