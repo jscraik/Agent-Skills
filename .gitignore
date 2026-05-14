@@ -74,7 +74,7 @@ Infrastructure/artifacts/**/*_impl.*
 Infrastructure/reports/**/*_impl.*
 
 # Keep source implementation scripts trackable
-!Infrastructure/scripts/*_impl.sh
+!Infrastructure/scripts/**/*_impl.sh
 # Generated artifacts
 .diagram/*
 !.diagram/context/
