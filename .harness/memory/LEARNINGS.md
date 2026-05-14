@@ -194,14 +194,14 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-05-10 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:4203147734)
 
-**2026-05-11 [Codex]:** Bash command 'cat' failed with exit code 1 while reading an unavailable local path -> File read failed; verify the target path exists and is readable, check permissions, confirm the working directory is correct, then use an alternative read method or correct the path before retrying. Repeat-learning marker: this is a duplicate of prior cat exit-code-1 entries. Recommended diagnostic: run 'ls -la' on the target parent directory to confirm file presence and permissions. (auto-key:3040072751)
+**2026-05-11 [Codex]:** Bash command 'cat' failed with exit code 1 while reading an unavailable local path -> File read failed; verify the target path exists and is readable, check permissions, confirm the working directory is correct, then use an alternative read method or correct the path before retrying. argv/cwd/target-path not captured in runtime log; no artifact at .harness/memory/command-failure-3040072751.log. Recommended diagnostic: run `ls -la` on the suspected target directory to confirm file presence and permissions before retrying. (auto-key:3040072751)
 
-**2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2293629618)
+**2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-2293629618.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. (auto-key:2293629618)
 
-**2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3406616513)
+**2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-3406616513.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. (auto-key:3406616513)
 
-**2026-05-13 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1318967753)
+**2026-05-13 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-1318967753.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. (auto-key:1318967753)
 
-**2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3199628742)
+**2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-3199628742.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. (auto-key:3199628742)
 
-**2026-05-14 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2135778639)
+**2026-05-14 [Codex]:** Bash command 'python3' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-2135778639.log. Verify target path exists, check cwd, and use Read tool instead of shell python3 for file access. (auto-key:2135778639)
