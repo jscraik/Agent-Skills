@@ -249,6 +249,9 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
         to the top-level `"handles"` list from that data, or an empty list if the key is missing.
         """
         self._data = _load_command_surface()
+        self.assertIsInstance(
+            self._data, dict, "command-surface.json must deserialize to a mapping"
+        )
         self._handles = self._data.get("handles", [])
         self.assertIsInstance(self._handles, list, "'handles' must be a list")
         for i, entry in enumerate(self._handles):
@@ -400,6 +403,15 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         self.assertIsNotNone(case, f"Missing eval case '{case_id}'")
         return case  # type: ignore[return-value]
 
+    def _acceptance_values(self, case: dict[str, Any], case_id: str) -> list[str]:
+        acceptance = case.get("acceptance", [])
+        self.assertIsInstance(acceptance, list, f"Case '{case_id}' acceptance must be a list")
+        values: list[str] = []
+        for i, item in enumerate(acceptance):
+            self.assertIsInstance(item, dict, f"Case '{case_id}' acceptance[{i}] must be a mapping")
+            values.append(str(item.get("value", "")))
+        return values
+
     def test_schema_version_is_2_0(self) -> None:
         """
         Assert that the evals.yaml declares schema_version "2.0".
@@ -477,8 +489,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         Asserts the concatenated acceptance values include phrases matching "stated intent" and "implied intent" (case-insensitive).
         """
         case = self._get_case_by_id("stated-vs-implied-intent")
-        acceptance = case.get("acceptance", [])
-        patterns = [a.get("value", "") for a in acceptance]
+        patterns = self._acceptance_values(case, "stated-vs-implied-intent")
         combined = " ".join(patterns)
         self.assertRegex(
             combined,
@@ -498,8 +509,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         Asserts that the concatenated acceptance values for the case mention both "alignment" and "contradiction" (case-insensitive).
         """
         case = self._get_case_by_id("stated-vs-implied-intent")
-        acceptance = case.get("acceptance", [])
-        patterns = [a.get("value", "") for a in acceptance]
+        patterns = self._acceptance_values(case, "stated-vs-implied-intent")
         combined = " ".join(patterns)
         self.assertRegex(
             combined,
@@ -519,8 +529,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         Checks (case-insensitive) that the acceptance text mentions at least one of: "command surface", "tests", "validation gate", or "runtime path".
         """
         case = self._get_case_by_id("stated-vs-implied-intent")
-        acceptance = case.get("acceptance", [])
-        patterns = [a.get("value", "") for a in acceptance]
+        patterns = self._acceptance_values(case, "stated-vs-implied-intent")
         combined = " ".join(patterns)
         # Must reference concrete evidence surfaces from the prompt
         self.assertRegex(
@@ -536,8 +545,9 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         Checks that the case's acceptance content contains wording indicating sampled/partial evidence or explicit authority limits (for example: "sampled", "partial", "authority limited", "cannot", or "must not").
         """
         case = self._get_case_by_id("sampled-evidence-downgrades-strategy-authority")
-        acceptance = case.get("acceptance", [])
-        patterns = [a.get("value", "") for a in acceptance]
+        patterns = self._acceptance_values(
+            case, "sampled-evidence-downgrades-strategy-authority"
+        )
         combined = " ".join(patterns)
         self.assertRegex(
             combined,
@@ -552,8 +562,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         Checks that at least one acceptance `value` contains one of: "first principles", "reject", "Do Not Create", or "template" (case-insensitive).
         """
         case = self._get_case_by_id("first-principles-rejects-template-copying")
-        acceptance = case.get("acceptance", [])
-        patterns = [a.get("value", "") for a in acceptance]
+        patterns = self._acceptance_values(case, "first-principles-rejects-template-copying")
         combined = " ".join(patterns)
         self.assertRegex(
             combined,
@@ -628,8 +637,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         )
         if case is None:
             self.skipTest("xp-feedback-slice case not present")
-        acceptance = case.get("acceptance", [])
-        patterns = [a.get("value", "") for a in acceptance]
+        patterns = self._acceptance_values(case, "xp-feedback-slice")
         combined = " ".join(patterns)
         self.assertRegex(
             combined,
