@@ -38,6 +38,7 @@ SOURCE_PROMPT_MD_PATH = HE_STRATEGY_DIR / "references" / "source-prompt-preserva
 STRATEGY_CONTRACT_MD_PATH = HE_STRATEGY_DIR / "references" / "strategy-output-contract.md"
 
 _REVISION_PATTERN = re.compile(r"^[0-9a-f]{7,}$", re.IGNORECASE)
+EXPECTED_SOURCE_REVISION = "b77fd086a"
 
 OLD_MANIFEST_REVISION = "4f340e4f0"
 OLD_COMMAND_SURFACE_REVISION = "aa14bb002"
@@ -275,11 +276,11 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
         for entry in self._handles:
             rev = entry.get("provenance", {}).get("source_revision", "")
             with self.subTest(handle=entry.get("handle", "?")):
-                self.assertNotEqual(
+                self.assertEqual(
                     rev,
-                    OLD_COMMAND_SURFACE_REVISION,
-                    f"handle '{entry.get('handle')}' still references old revision "
-                    f"'{OLD_COMMAND_SURFACE_REVISION}'",
+                    EXPECTED_SOURCE_REVISION,
+                    f"handle '{entry.get('handle')}' should use source_revision "
+                    f"'{EXPECTED_SOURCE_REVISION}', got '{rev}'",
                 )
 
     def _get_handle_entry(self, handle_name: str) -> dict[str, Any]:
@@ -359,7 +360,7 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
         for entry in self._handles:
             rev = entry.get("provenance", {}).get("source_revision", "")
             with self.subTest(handle=entry.get("handle", "?")):
-                self.assertRegex(rev, _REVISION_PATTERN)
+                self.assertEqual(rev, EXPECTED_SOURCE_REVISION)
 
 
 # ---------------------------------------------------------------------------
