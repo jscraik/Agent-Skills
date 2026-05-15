@@ -1,0 +1,13 @@
+schema_version: "2.0"
+skill_name: "example-skill"
+cases:
+  - id: happy-example
+    name: Happy path
+    category: happy
+    eval_modes: [smoke]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Run the skill for a basic request."
+    acceptance:
+      - type: contains
+        value: "result"

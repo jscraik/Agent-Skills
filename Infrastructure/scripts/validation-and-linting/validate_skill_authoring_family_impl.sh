@@ -156,10 +156,17 @@ echo "[family-gate] Harness Engineering subagent routing passed"
 
 skill_dirs=(
   "Plugins/skill-factory/skills/code_quality_review/skill-builder"
-  "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
-  "Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
+  "skills-system/skill-creator"
+  "skills-system/skill-installer"
   "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
 )
+
+is_system_overlay_skill() {
+  case "$1" in
+    skills-system/skill-creator|skills-system/skill-installer) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 skill_builder_dir_candidates=(
   "Plugins/skill-factory/skills/code_quality_review/skill-builder"
   "Plugins/skill-factory/skills/skill-builder"
@@ -348,6 +355,14 @@ echo "[family-gate] validating authoring context-preservation contract"
 bash Infrastructure/scripts/validation-and-linting/validate_authoring_context_preservation.sh
 echo "[family-gate] authoring context-preservation contract passed"
 
+echo "[family-gate] validating active plugin archive links"
+python3 Infrastructure/scripts/validation-and-linting/check_plugin_active_archive_links.py --plugin skill-factory
+echo "[family-gate] active plugin archive links passed"
+
+echo "[family-gate] validating skill-factory system overlays"
+python3 Infrastructure/scripts/validation-and-linting/check_skill_factory_system_overlays.py
+echo "[family-gate] skill-factory system overlays passed"
+
 echo "[family-gate] validating he-improve example spec yaml fixtures"
 "${python_cmd[@]}" - <<'PY'
 from pathlib import Path
@@ -489,8 +504,8 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   run_first_principles_gate_pytest=0
 
   if changed_files_match "Plugins/skill-factory/skills/code_quality_review/skill-builder/*" || \
-     changed_files_match "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/*" || \
-     changed_files_match "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/*" || \
+     changed_files_match "skills-system/skill-creator/*" || \
+     changed_files_match "skills-system/skill-installer/*" || \
      changed_files_match "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/*" || \
      changed_files_match "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/*" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh" || \
@@ -768,6 +783,11 @@ else
   for skill_dir in "${skill_dirs[@]}"; do
     echo
     echo "[family-gate] === $skill_dir ==="
+    if is_system_overlay_skill "$skill_dir"; then
+      echo "[family-gate] system overlay structural suite skipped for preserved Codex .system skill body"
+      _set_outcome "$skill_dir" "passed"
+      continue
+    fi
     skill_slug="${skill_dir//\//-}"
     skill_log="$(mktemp "${TMPDIR:-/tmp}/skill-family-${skill_slug}.log.XXXXXX")"
 

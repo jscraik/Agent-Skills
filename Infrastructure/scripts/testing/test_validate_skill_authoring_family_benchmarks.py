@@ -250,18 +250,18 @@ See [details](./references/details.md).
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            skill_rel = "Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
+            skill_rel = "Plugins/skill-factory/skills/code_quality_review/skill-builder"
             skill_dir = root / skill_rel
             refs_dir = skill_dir / "references"
             refs_dir.mkdir(parents=True, exist_ok=True)
             (refs_dir / "note.md").write_text("# note\n", encoding="utf-8")
             (skill_dir / "SKILL.md").write_text(
                 """---
-name: skill-installer
+name: skill-builder
 description: test
 ---
 
-Install skills from trusted sources.
+Harden skills from trusted sources.
 """,
                 encoding="utf-8",
             )
@@ -341,14 +341,14 @@ See [governance](Infrastructure/references/governance-contract.md).
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            skill_rel = "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
+            skill_rel = "Plugins/skill-factory/skills/code_quality_review/skill-builder"
             skill_dir = root / skill_rel
             refs_dir = skill_dir / "references"
             refs_dir.mkdir(parents=True, exist_ok=True)
             (refs_dir / "details.md").write_text("# details\n", encoding="utf-8")
             (skill_dir / "SKILL.md").write_text(
                 """---
-name: skill-creator
+name: skill-builder
 description: never drop required context
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: skill-builder
-description: "Use when hardening an existing Codex skill or plugin for release readiness: audit, patch, reduce budget, add eval evidence, tighten safety gates, or prepare packaging/install handoff."
+description: "Use when the user asks to harden existing Codex skills/plugins: patch failing audits, reduce context budget, add evals, tighten safety/validation, or prepare release/install handoff."
 metadata:
   skill-type: code_quality_review
   lifecycle_state: active
@@ -17,11 +17,9 @@ Harden existing Codex skills and plugin packages with scoped edits, validator ev
 
 ## Philosophy
 
-Evidence beats taste. Keep `SKILL.md` as the compact execution map; move bulky review contracts, matrices, examples, and media protocols to routed references instead of deleting safety context for budget alone.
+Evidence beats taste. Keep `SKILL.md` as the compact execution map; move bulky review contracts, matrices, examples, and generated-artifact protocols to references instead of loading them by default.
 
-Preserve required context by relocating it to references or scripts; never drop required context merely to satisfy budget.
-
-Use the first-principles factory gate before non-trivial work: improve, create, stay docs-only, hand off, or stop. Report the gate result before readiness claims.
+Preserve required context by relocating it to references or scripts; discard only stale, duplicated, unsafe, superseded, or low-signal text.
 
 Default to repair when the user asks to update, harden, fix, tighten, improve,
 make acceptable, or prepare release readiness. A hardening request is not
@@ -52,14 +50,11 @@ Do not use for first-draft scaffolding (`skill-creator`), runtime install/listin
 
 - Target skill or plugin path, or enough evidence to resolve it.
 - Goal: audit, improve, benchmark-lite, graph, package, or install-distribute.
-- Evidence: failing gate output, eval cases, session evidence, or handoff notes.
+- Evidence: failing gate output, eval cases, supplied session evidence, or handoff notes.
 - Target environment and side-effect class.
-- Session-collector evidence is conditionally required for repeated-iteration,
-  prior-run, session-evidence, or "why does this keep happening" hardening:
-  use `skill_refactor_handoffs`, `skill_refactor_evidence`,
-  `skillify_candidates`, `skill_invocations`, or a bounded extract showing
-  repeated root causes. If unavailable, mark `session_evidence_summary.status`
-  as `blocked` with the exact missing bundle, command, or permission boundary.
+- Session evidence is optional unless the user supplies it or asks about prior
+  runs, repeated failures, telemetry, routing gaps, or observed usage. Route
+  broad evidence mining to `skill-refactor`.
 
 If a missing required input changes the safe edit path, clarify with one direct question. If risk is low, state the safest assumption and continue.
 
@@ -79,11 +74,9 @@ If a missing required input changes the safe edit path, clarify with one direct 
    `artifact_generation`, or `handoff_only`.
 4. For `auto_tighten_until_pass_or_blocked`, run this bounded loop:
    - resolve canonical source and ownership;
-   - create or update an evidence ledger for the run;
    - identify the smallest relevant failing gate or evidence-backed failure
      class;
    - patch one failure class in the canonical source;
-   - trace every edit to an evidence-backed finding;
    - rerun only the focused gate when validation is requested and allowed;
    - stop when the gate passes, a broader gate is required, or a precise
      blocker prevents progress.
@@ -97,61 +90,34 @@ If a missing required input changes the safe edit path, clarify with one direct 
    causes before patching: coverage gap, instruction drift, routing mismatch,
    quality regression, context-package conflict, missing observation path,
    missing validation, or environment blocker.
-9. For repeated-iteration hardening, do not skip session evidence silently. Use
-   bounded collector evidence, a `skill-refactor` handoff, or a blocked status
-   explaining why evidence could not be loaded.
-10. Apply the OpenAI-style design checkpoint: user intent, trigger precision, side effects, context cost, structured output, and eval evidence.
-11. When folding reusable patterns from another skill, translate the operating
+9. Apply the OpenAI-style design checkpoint: user intent, trigger precision, side effects, context cost, structured output, and eval evidence.
+10. When folding reusable patterns from another skill, translate the operating
     behavior rather than copying prose: requested vs implied work, tool
     resolution, stale-evidence checks, inspectable outputs, safety class,
     retry, and closeout proof.
-12. Record exact command outcomes as `pass`, `fail`, or `blocked`; never infer runtime availability from source existence alone.
+11. Record exact command outcomes as `pass`, `fail`, or `blocked`; never infer runtime availability from source existence alone.
 
 ## Validation
 
-Use repo wrappers from the repo root:
+Use the smallest tier that proves the change; widen only when the changed
+surface requires it.
 
-- `./bin/ask skills audit <target-skill-path> --level strict --json`
-- `./bin/ask evals run <target-skill-path> --mode smoke --json` when evals exist
-- `Infrastructure/bin/plugin-eval analyze <target-plugin-or-skill-path> --format markdown`
+- Fail fast on required gates: stop at the first failed gate and do not proceed
+  to broader validation until the failure is fixed or explicitly classified as
+  blocked/pre-existing.
+- Fast: YAML/frontmatter parse, strict audit for touched skills, referenced
+  file/script existence, and path ownership when canonical/runtime boundaries
+  are touched. For Skill Factory bridge work, include archive-link and
+  system-overlay checks.
+- Standard: smoke evals when behavior or eval files changed; Plugin Eval or
+  package audit when package-level behavior changed; context-budget/projection
+  hash checks when canonical skill sources changed.
+- Deep: release evals, security/provenance, install/runtime visibility,
+  cross-plugin projection sync, benchmark comparisons, and docs/prose gates only
+  for release, packaging, broad routing, or explicit user requests.
 
-Also run touched format, progressive-disclosure, OpenClaw, OpenAI-format, docs/prose, security, smoke, release, sync/projection, and package-boundary checks when relevant. Use only `pass`, `fail`, `blocked`, or `not applicable`; do not mark `pass` unless the validator ran or direct local evidence proves it. Fail fast, patch one failure class, and rerun the focused gate plus the smallest broader gate.
-
-Name gates using the repo's validator-reporting contract. Prefer canonical
-wrapper labels such as `OpenAI skill format` via `./bin/ask skills validate-openai-format`
-unless a standalone validator was independently run and evidenced. Do not claim
-a nested script passed when only a wrapper or broader audit ran.
-
-Release readiness requires the strictest relevant failure to win. Plugin Eval
-success, including an A grade or perfect score, does not override strict audit,
-eval realism, smoke/release eval, docs/prose/spelling, media persistence,
-package-boundary, or runtime visibility failures.
-
-Eval realism is a first-class readiness concern. Prefer schema-backed fields
-such as `realistic: true|false`, `why_realistic`, `expected_behavior`, and
-`anti_overfit_notes` when evals are present. Natural-language markers are only
-fallback evidence; synthetic examples, trigger-word-only prompts, or internal
-test-case phrasing are hardening failures until repaired or explicitly
-accepted.
-
-Docs/prose/spelling must be reported as `pass`, `fail`, `blocked`, or
-`not applicable`. Passing format or progressive-disclosure lint is not enough;
-if no canonical docs-quality command is available, report the exact missing
-gate as `blocked` and put `not configured` in notes.
-
-If validation is not requested, not allowed, unavailable, or blocked, do not
-claim the skill reached acceptable or release-ready status. Report readiness as
-`blocked` or `unverified` and name the exact gate that still needs to run.
-
-Use the hardening workflow reference for the evidence ledger, patch trace,
-artifact provenance, research decision, evidence pack, and readiness decision
-schemas. Keep the root `SKILL.md` compact; do not inline large evidence
-matrices here.
-
-When official or external documentation is needed, route it through the evidence
-model instead of broad prompt stuffing: use `openai-docs` for OpenAI/Codex/API
-claims and `context7` for current non-OpenAI library or API behavior. Record the
-retrieved source in the evidence ledger before changing the skill.
+Name every gate as `pass`, `fail`, `blocked`, or `not applicable`; do not
+claim release readiness when a required gate failed or could not run.
 
 ## Safety Boundaries
 
@@ -163,13 +129,9 @@ retrieved source in the evidence ledger before changing the skill.
 - Start with 2-3 focused surfaces; widen only after evidence shows stability.
 - Do not patch generated runtime projections when a canonical source path exists.
 - Do not store review-only media in a skill package; use `.harness/media/`.
-- Do not claim generated media exists locally unless the file was written and verified. If image generation is requested, treat prompt metadata, cache-copy, sidecar, and existence checks as evidence requirements.
-- Do not satisfy a media artifact request with only a prompt when generation is
-  available. Produce artifact evidence or mark generation/persistence
-  `blocked` with the exact tool, path, or approval limitation.
-- For media asks, record availability as `yes`, `no`, `blocked`, or `unknown`
-  with evidence. If availability is `unknown`, media artifact persistence is
-  `blocked`, not `pass`.
+- For generated media or concrete artifact asks, load
+  [generated artifact policy](./references/generated-artifact-policy.md) and
+  require file/path proof or a precise blocked status.
 - Do not treat generated projections, hook-rewritten artifacts, cache files, or
   runtime mirrors as canonical skill edits. Classify generated-artifact churn
   separately from semantic source changes.
@@ -195,19 +157,15 @@ retrieved source in the evidence ledger before changing the skill.
 
 ## Output Format
 
-For non-trivial work, return:
+Default closeout:
 
-- `schema_version: 1`
-- `mode`, `skill_path`, `builder_result`, and `first_principles_gate`
-- `context_routes`, `diff_summary`, `findings`, and `validations`
-- `security`, `safety`, `handoff`, and `next_step`
-- `session_evidence_summary` with `status`, `source`, `root_causes`, and
-  `blocked_by` for repeated-iteration hardening
-- `artifact_status` when media or concrete generated artifacts were requested
-- `evidence_ledger`, `patch_trace`, `readiness_decision`, and `evidence_debt`
-  for non-trivial hardening or creation work
+- changed files
+- important decisions
+- validation run, with exact `pass|fail|blocked` outcomes
+- residual risks, blockers, or next smallest gate
 
-For full hardening reviews, include a compact routing/evidence preamble, validator matrix, material findings, patch summary, second-pass result, final confidence, before/after impact, and media artifact plan when requested.
+Use full ledgers only for release readiness, audit artifacts, multi-class
+hardening, supplied session-evidence analysis, or explicit user requests.
 
 ## Confidence Reporting
 
@@ -223,6 +181,8 @@ Read when:
 - choosing improve/create/docs-only/handoff/stop: [First-principles factory gate](../../../../../Infrastructure/references/first-principles-factory-gate.md)
 - naming validator rows and wrapper-versus-standalone status correctly: [skill validation reporting contract](../../../../../Infrastructure/references/skill-validation-reporting-contract.md)
 - folding long review, validator, Codex-harness, or media workflows: [harness hardening workflow](./references/harness-hardening-workflow.md)
+- preserving positive/negative Skill Factory operator contracts: [operator pattern map](../../references/operator-pattern-map.md)
+- validating live deferred context: [live deferred context](../../references/live-deferred-context.md)
 - finding repository validators and helper scripts: `Infrastructure/scripts/`
 
 ## Examples

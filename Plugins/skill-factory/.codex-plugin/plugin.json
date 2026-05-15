@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "skill-factory",
   "version": "0.1.0",
-  "description": "Bundle for routing, creating, hardening, analyzing, skillifying, installing, and proving Codex skills.",
+  "description": "Bundle for routing, hardening, analyzing, skillifying, proving Codex skills, and attaching local references to Codex system authoring skills.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -15,9 +15,7 @@
     "skill-factory",
     "skill-factory-router",
     "skill-builder",
-    "skill-creator",
     "skill-refactor",
-    "skill-installer",
     "skillify",
     "codex"
   ],
@@ -34,7 +32,7 @@
   "interface": {
     "displayName": "Skill Factory",
     "shortDescription": "Route, create, harden, analyze, skillify, and install Codex skills",
-    "longDescription": "A Codex plugin package that exposes skill-factory-router, skill-creator, skill-builder, skill-refactor, skillify, and skill-installer as the Skill Factory lifecycle lanes. Use it to route ambiguous skill work, create first drafts, harden existing skills or plugins, analyze session and evaluation evidence, capture repeatable workflows, install valid packages, and prove runtime visibility.",
+    "longDescription": "A Codex plugin package that exposes skill-factory-router, skill-builder, skill-refactor, and skillify as Skill Factory lifecycle lanes, while extending the Codex .system skill-creator and skill-installer with local Skill Factory references and evals. Use it to route ambiguous skill work, harden existing skills or plugins, analyze session and evaluation evidence, capture repeatable workflows, and prove runtime visibility.",
     "developerName": "Jamie Craik",
     "category": "Productivity",
     "capabilities": [

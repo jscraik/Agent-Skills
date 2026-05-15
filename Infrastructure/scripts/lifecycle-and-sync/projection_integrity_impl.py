@@ -45,18 +45,6 @@ class MirrorProjection:
 
 SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
     SymlinkProjection(
-        name="skill-factory-skill-creator-alias",
-        alias_path="skills-system/skill-creator",
-        canonical_path="Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
-        tags=("skill-factory",),
-    ),
-    SymlinkProjection(
-        name="skill-factory-skill-installer-alias",
-        alias_path="skills-system/skill-installer",
-        canonical_path="Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
-        tags=("skill-factory",),
-    ),
-    SymlinkProjection(
         name="plugin-factory-plugin-creator-alias",
         alias_path="skills-system/plugin-creator",
         canonical_path="Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",

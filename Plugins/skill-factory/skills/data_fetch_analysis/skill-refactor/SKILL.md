@@ -1,6 +1,6 @@
 ---
 name: skill-refactor
-description: "WHAT: Analyze skill reliability from Codex session evidence. WHEN: Use when skill failures, routing gaps, quality regressions, or keep-improve-merge-retire decisions need evidence."
+description: "Use when the user asks to analyze bounded skill evidence: session failures, routing gaps, quality regressions, or keep/improve/merge/retire decisions."
 metadata:
   skill-type: data_fetch_analysis
 ---
@@ -32,20 +32,10 @@ Evidence first. Every recommendation should trace to a concrete session, artifac
 - Evidence paths: session bundle/extracts, review artifacts, validator logs, Plugin Eval reports.
 - Ranking criteria: severity, confidence, implementation cost.
 
-Preferred session-collector inputs include `skill_refactor_handoffs`,
-`skill_refactor_evidence`, `skillify_candidates`, `skill_invocations`,
-`skill_proof_candidates`, or bounded extracts from `~/.agents/session-collector/`
-outputs. Use raw transcripts only after bounded evidence is insufficient.
-Preserve collector-native root-cause labels when present; put derived analysis
-labels in `normalized_root_causes`.
-
-Preferred generated collector artifacts include `skill-invocations.json`,
-`skill-invocation-summary.json`, `skill-proof-candidates.json`,
-`skillify-candidates.json`, `skill-refactor-handoffs.json`, and
-`harness-engineering-evidence.json`. When using a combined collector bundle,
-prefer `evidence_layers.skill_refactor_handoffs`,
-`evidence_layers.skill_refactor_evidence`, and
-`evidence_layers.skillify_candidates` before raw session bodies.
+Preferred evidence includes bounded session-collector extracts, validation logs,
+review artifacts, and Plugin Eval reports. Use raw transcripts only after
+bounded evidence is insufficient. Preserve collector-native root-cause labels
+when present; put derived analysis labels in `normalized_root_causes`.
 
 For external knowledge, preserve route boundaries: use `openai-docs` only for
 official OpenAI/Codex/API/model/plugin/skill behavior, and use `context7` for
@@ -106,27 +96,10 @@ derived labels such as `instruction-drift`, `artifact-shape-gap`,
 `context-package-conflict`, and `missing-observation-path` only under
 `normalized_root_causes`.
 
-When a user-corrected failure names `$he-spec`, `$he-plan`, `.harness/specs/**`,
-or `.harness/plan/**`, preserve the named artifact owner as the affected skill
-even if the collector's generic `affected_skills` field points elsewhere. If
-collector stage signals include `he-spec` or `he-plan` but the affected-skill
-field maps to an unrelated skill such as `simplify`, report an attribution
-warning and include the artifact owner in `affected_skill_or_plugin`.
-
-Treat repeated operator prompts as explicit evidence. "deepen spec and run a
-technical review" maps to `affected_skill_or_plugin: he-spec` with normalized
-root causes `artifact-shape-gap`, `reader-contract-gap`, or
-`generated-artifact-validator-gap` as supported by artifact evidence. "deepen
-plan and run a technical review" maps to `affected_skill_or_plugin: he-plan`
-with the same normalized root-cause options plus `execution-contract-gap` when
-plan units, validation, rollback, or handoff evidence is missing.
-Also treat the long GPT-5.5 senior-reviewer prompts as explicit evidence:
-the spec prompt includes "specification maintainer, adversarial validation
-partner, and media artifact operator" plus "Investigate, review, and improve
-the specification"; the plan prompt includes "specification maintainer, and
-adversarial validation partner" plus "Review the plan below using professional
-engineering confidence standards." Map those to `he-spec` and `he-plan`
-respectively before deriving root causes.
+For Harness-specific `$he-spec`, `$he-plan`, `.harness/specs/**`, or
+`.harness/plan/**` attribution, load
+[Harness evidence mapping](./references/harness-evidence-mapping.md) only when
+those artifacts appear in the supplied evidence.
 
 For recurring failure claims, require at least one of: two or more evidence
 anchors showing the same root cause; one high-confidence collector handoff plus
@@ -164,7 +137,9 @@ observation or a narrow candidate fix rather than broad canonical changes.
 
 ## Failure mode
 
-If evidence sources are missing, unreadable, or too broad to inspect safely, stop and report the exact missing artifact or scope decision.
+If evidence sources are missing, unreadable, or too broad to inspect safely,
+ask for the narrow missing artifact. Stop only when conservative assumptions
+would change ownership, destructive behavior, publication, or external writes.
 
 ## Gotchas
 
@@ -176,8 +151,7 @@ If evidence sources are missing, unreadable, or too broad to inspect safely, sto
 
 ## Progressive Disclosure
 
-- Local contract, evals, and task profile: `references/`
-- Deferred scripts and archived package: `Infrastructure/references/deferred-skill-context/skill-factory-skill-refactor/`
+- Local contract, evals, task profile, and domain mappings: `references/`
 - Asset: `assets/skill-refactor.png`
 
 ## Validation

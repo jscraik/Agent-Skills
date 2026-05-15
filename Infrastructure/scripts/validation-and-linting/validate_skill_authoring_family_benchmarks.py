@@ -81,8 +81,8 @@ _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
     "Plugins/skill-factory/skills/code_quality_review/skill-builder",
-    "Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
-    "Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+    "skills-system/skill-creator",
+    "skills-system/skill-installer",
     "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
 )
 
@@ -134,8 +134,6 @@ _RECOMMENDED_CONTRACT_KEYS = {"rollback_procedure", "observability"}
 # Family members that must apply context disposition via progressive disclosure.
 _RELOCATION_GUARD_SKILLS = {
     "plugins/skill-factory/skills/code_quality_review/skill-builder",
-    "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
-    "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
 }
 
 _CONTEXT_POLICY_PATTERNS = (
