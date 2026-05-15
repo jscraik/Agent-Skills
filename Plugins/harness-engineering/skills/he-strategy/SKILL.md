@@ -74,10 +74,11 @@ Also include `he-strategy`, `subagent_policy`, `roles_used`,
 ## Validation
 
 After skill edits run strict audit, `skill_gate.py`, OpenClaw, OpenAI format
-lint, progressive-disclosure lint, family benchmarks, and Plugin Eval. For
-artifacts, verify naming, sources, evidence matrix, confidence, authority
-limits, and stop/pivot condition. Rerun failed gates. Mark spelling/prose
-validation `blocked` when no checker exists.
+lint, progressive-disclosure lint, family benchmarks, Plugin Eval, and Vale
+for Markdown prose. For artifacts, verify naming, sources, evidence matrix,
+confidence, authority limits, and stop/pivot condition. Rerun failed gates.
+Only mark prose validation `blocked` if Vale is temporarily unavailable and
+record waiver reason, ticket, and expiry.
 
 ## Constraints
 
