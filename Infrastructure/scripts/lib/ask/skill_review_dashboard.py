@@ -331,6 +331,7 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
     quality_score = int(quality_model["quality"] or 0)
     overall = round((quality_score + security_score + (impact_score if evals.get("available") else quality_score)) / 3)
     generated = _escape(data.get("generated_at") or "local report")
+    refresh_seconds = 15
 
     suggestions = tessl.get("suggestions") or plugin.get("findings") or []
     suggestion_html = "".join(f"<li>{_escape(item)}</li>" for item in suggestions[:8]) or "<li>No suggestions reported.</li>"
@@ -339,7 +340,7 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
     scorecard_path = evals.get("scorecard_path")
 
     document = f"""<!doctype html>
-<html lang=\"en\">
+<html lang=\"en\" data-auto-refresh-seconds=\"{refresh_seconds}\">
 <head>
 <meta charset=\"utf-8\">
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
@@ -357,7 +358,8 @@ code {{ background:#20242c; border:1px solid #303641; border-radius:6px; padding
 .nav a {{ display:block; color:var(--muted); padding:10px 12px; border-radius:8px; margin:4px 0; }}
 .nav a:hover,.nav a.active {{ color:var(--text); background:var(--panel-2); }}
 .main {{ padding:54px 48px 80px; max-width:1480px; }}
-.breadcrumb {{ color:var(--muted); font-size:13px; margin-bottom:24px; }}
+.breadcrumb {{ color:var(--muted); font-size:13px; margin-bottom:24px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }}
+.live-status {{ display:inline-flex; align-items:center; gap:6px; border:1px solid #24402a; border-radius:7px; padding:2px 8px; background:#0f1d13; color:var(--green); font-weight:800; }}
 .hero {{ display:grid; grid-template-columns:130px minmax(280px,1fr) 420px; gap:34px; align-items:center; border-bottom:1px solid var(--line); padding-bottom:36px; }}
 .hex {{ width:118px; height:102px; clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); background:#0f2015; border:1px solid #204d29; display:grid; place-items:center; font-size:34px; font-weight:800; color:var(--green); }}
 .lift {{ display:inline-flex; margin-top:10px; border:1px solid #264d30; border-radius:7px; padding:6px 12px; background:#102416; color:var(--green); font-weight:800; }}
@@ -428,6 +430,24 @@ document.addEventListener('DOMContentLoaded', () => {{
       next.click();
     }});
   }});
+  const refreshSeconds = Number(document.documentElement.dataset.autoRefreshSeconds || '0');
+  const countdown = document.querySelector('[data-refresh-countdown]');
+  if (Number.isFinite(refreshSeconds) && refreshSeconds > 0) {{
+    let remaining = refreshSeconds;
+    const paint = () => {{
+      if (countdown) countdown.textContent = remaining + 's';
+    }};
+    paint();
+    window.setInterval(() => {{
+      if (document.hidden) return;
+      remaining -= 1;
+      if (remaining <= 0) {{
+        window.location.reload();
+        return;
+      }}
+      paint();
+    }}, 1000);
+  }}
 }});
 </script>
 </head>
@@ -444,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {{
     </nav>
   </aside>
   <main class=\"main\">
-    <div class=\"breadcrumb\">Local / Skills / {_escape(target)} / review</div>
+    <div class=\"breadcrumb\"><span>Local / Skills / {_escape(target)} / review</span><span class=\"live-status\">Live local dashboard - refreshes in <span data-refresh-countdown>{refresh_seconds}s</span></span></div>
     <header id=\"overview\" class=\"hero\">
       <div><div class=\"hex\">{overall}</div>{impact_badge}</div>
       <div>
