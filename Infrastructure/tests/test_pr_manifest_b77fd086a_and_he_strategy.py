@@ -270,15 +270,26 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
                     f"'{OLD_COMMAND_SURFACE_REVISION}'",
                 )
 
+    def _get_handle_entry(self, handle_name: str) -> dict[str, Any]:
+        entry = next((h for h in self._handles if h.get("handle") == handle_name), None)
+        self.assertIsNotNone(entry, f"{handle_name} handle not found in command-surface.json")
+        return entry  # type: ignore[return-value]
+
+    def _get_handle_sha(self, entry: dict[str, Any], handle_name: str) -> str:
+        provenance = entry.get("provenance")
+        self.assertIsInstance(provenance, dict, f"{handle_name} must define provenance")
+        sha = provenance.get("source_sha256", "")
+        self.assertIsInstance(
+            sha, str, f"{handle_name} provenance.source_sha256 must be a string"
+        )
+        return sha
+
     def test_coding_harness_sha256_is_hash_shaped(self) -> None:
         """
         Ensure the "coding-harness" handle exists in command-surface.json and its `provenance.source_sha256` is a 64-character hexadecimal string.
         """
-        entry = next(
-            (h for h in self._handles if h.get("handle") == "coding-harness"), None
-        )
-        self.assertIsNotNone(entry, "coding-harness handle not found in command-surface.json")
-        sha = entry["provenance"].get("source_sha256", "")  # type: ignore[index]
+        entry = self._get_handle_entry("coding-harness")
+        sha = self._get_handle_sha(entry, "coding-harness")
         self.assertRegex(
             sha,
             re.compile(r"^[0-9a-f]{64}$", re.IGNORECASE),
@@ -291,11 +302,8 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
         
         Fails the test if the 'coding-harness' handle is missing or if its `provenance.source_sha256` equals `CODING_HARNESS_OLD_SHA256`.
         """
-        entry = next(
-            (h for h in self._handles if h.get("handle") == "coding-harness"), None
-        )
-        self.assertIsNotNone(entry, "coding-harness handle not found in command-surface.json")
-        sha = entry["provenance"].get("source_sha256", "")  # type: ignore[index]
+        entry = self._get_handle_entry("coding-harness")
+        sha = self._get_handle_sha(entry, "coding-harness")
         self.assertNotEqual(
             sha,
             CODING_HARNESS_OLD_SHA256,
@@ -308,11 +316,8 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
         
         Asserts that the handle is present and that its `provenance.source_sha256` matches a 64-hex-character pattern.
         """
-        entry = next(
-            (h for h in self._handles if h.get("handle") == "he-strategy"), None
-        )
-        self.assertIsNotNone(entry, "he-strategy handle not found in command-surface.json")
-        sha = entry["provenance"].get("source_sha256", "")  # type: ignore[index]
+        entry = self._get_handle_entry("he-strategy")
+        sha = self._get_handle_sha(entry, "he-strategy")
         self.assertRegex(
             sha,
             re.compile(r"^[0-9a-f]{64}$", re.IGNORECASE),
@@ -325,11 +330,8 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
         
         Asserts that a handle with "handle": "he-strategy" exists and that its `provenance.source_sha256` is not equal to `HE_STRATEGY_OLD_SHA256`.
         """
-        entry = next(
-            (h for h in self._handles if h.get("handle") == "he-strategy"), None
-        )
-        self.assertIsNotNone(entry, "he-strategy handle not found in command-surface.json")
-        sha = entry["provenance"].get("source_sha256", "")  # type: ignore[index]
+        entry = self._get_handle_entry("he-strategy")
+        sha = self._get_handle_sha(entry, "he-strategy")
         self.assertNotEqual(
             sha,
             HE_STRATEGY_OLD_SHA256,
@@ -365,7 +367,9 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         - `self._cases`: the list of case dictionaries from the document's `"cases"` key (empty list if absent).
         - `self._case_ids`: a set of all case `"id"` values.
         """
-        self._evals = yaml.safe_load(EVALS_YAML_PATH.read_text(encoding="utf-8"))
+        loaded = yaml.safe_load(EVALS_YAML_PATH.read_text(encoding="utf-8"))
+        self.assertIsInstance(loaded, dict, "evals.yaml must deserialize to a mapping")
+        self._evals = loaded
         self._cases: list[dict[str, Any]] = self._evals.get("cases", [])
         self.assertIsInstance(self._cases, list, "'cases' must be a list")
         self._case_ids = {
@@ -897,19 +901,18 @@ class TestStrategyOutputContract(unittest.TestCase):
         """
         self.assertIn("stop or pivot condition", self._text.lower())
 
-    def test_all_six_modes_documented(self) -> None:
+    def test_all_required_modes_documented(self) -> None:
         """
-        Check that the strategy output contract document lists all six required modes.
+        Check that the strategy output contract document lists all required modes.
         
-        Asserts that each of the mode labels "intent", "architecture-review", "triage",
-        "strategic-compression", "decision-compression", and "core-compression" appears
-        in the loaded strategy-output-contract.md text; fails with a message naming the
-        missing mode.
+        Asserts that each required mode label appears in the loaded
+        strategy-output-contract.md text; fails with a message naming the missing mode.
         """
         for mode in [
             "intent",
             "architecture-review",
             "triage",
+            "repo-cognition-pipeline",
             "strategic-compression",
             "decision-compression",
             "core-compression",
@@ -920,6 +923,11 @@ class TestStrategyOutputContract(unittest.TestCase):
                     self._text,
                     f"strategy-output-contract.md does not document mode '{mode}'",
                 )
+        self.assertIn(
+            "source-prompt-equivalence",
+            self._text,
+            "strategy-output-contract.md does not document 'source-prompt-equivalence' overlay",
+        )
 
 
 if __name__ == "__main__":

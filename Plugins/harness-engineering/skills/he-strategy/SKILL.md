@@ -102,12 +102,12 @@ For direct-handle use, classify the strongest side effect before proceeding.
 
 If evidence is missing, mark the conclusion `Unknown`. If the artifact would
 create low-value governance, return `Do Not Create`. If strategy would become
-implementation by stealth, stop and route to `he-refactor`, `he-linear-plan`,
+implementation by stealth, stop and route to `he-reframe`, `he-linear-plan`,
 `he-spec`, `he-plan`, or `he-work` only after an admitted execution slice exists.
 
 ## Handoff Rules
 
-- Hand off to `he-spec`, `he-plan`, `he-work`, `he-refactor`, or
+- Hand off to `he-spec`, `he-plan`, `he-work`, `he-reframe`, or
   `he-linear-plan` only when strategy exposes an execution slice.
 - Hand off to humans for ADRs, core invariant changes, strategic deletion, or
   unresolved instruction conflicts.

@@ -39,6 +39,9 @@ Every output must include:
 - confidence level for major conclusions
 - authority limits
 - validation outcomes (`pass`/`fail`/`blocked` with reason)
+- clarification status and ambiguity impact
+- assumption risk and confidence limits
+- post-artifact review status
 - smallest feedback-producing next slice
 - stop or pivot condition for the next slice
 - drift or moat impact where relevant
