@@ -152,6 +152,9 @@ impact, future-agent guidance, validation outcomes, and evidence traceability.
 ## References
 
 - Read when selecting mode output -> `references/strategy-output-contract.md`
+- Read when architecture lenses or internal canon fallback applies ->
+  `references/architecture-lens-canon.md`,
+  `references/repo-cognition-pipeline.md`
 - Read when comparing old prompt workflows -> `references/source-prompt-preservation.md`
 - Read when validating contract or eval coverage -> `references/contract.yaml`,
   `references/evals.yaml`
