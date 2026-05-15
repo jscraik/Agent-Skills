@@ -84,9 +84,9 @@ record waiver reason, ticket, and expiry.
 
 Redact secrets. Network, destructive filesystem, git write, package install,
 credential, deployment, and external mutation commands require user approval
-and active-rule support. Strategy is advisory unless admitted by
-`.harness/linear/**`, `.harness/refactors/**`, `.harness/specs/**`, or
-`.harness/plan/**`.
+ and active-rule support. Strategy is advisory unless admitted by
+ `.harness/linear/**`, `.harness/reframes/**`, `.harness/specs/**`, or
+ `.harness/plan/**`.
 
 ## Execution Boundaries
 

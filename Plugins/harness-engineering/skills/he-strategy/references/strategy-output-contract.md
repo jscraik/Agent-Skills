@@ -13,6 +13,9 @@ compact; this file carries the mode-specific output contract.
   no-Linear equivalent.
 - `triage`: write `.harness/triage/YYYY-MM-DD-JSC-###-<slug>-triage.md` or the
   no-Linear equivalent.
+- `repo-cognition-pipeline`: write one intent, one architecture review, and one
+  triage artifact in a single routed pass. Use this only when the user asks for
+  all three outputs together; intent and review must feed triage.
 - `strategic-compression`: write
   `.harness/strategy/YYYY-MM-DD-JSC-###-<slug>-strategy.md` or the no-Linear
   equivalent.
@@ -20,6 +23,10 @@ compact; this file carries the mode-specific output contract.
   `.harness/decisions/ADR-###-<slug>.md`; scan existing ADR numbers first.
 - `core-compression`: update or create stable living invariant files under
   `.harness/core/**`.
+- `source-prompt-equivalence` (cross-cutting overlay): when asked to compare a
+  prior prompt or method, include a coverage verdict, covered requirements,
+  missing requirements, evidence depth, source prompt family, and downstream
+  confidence limits.
 
 ## Required Output Contract
 
