@@ -79,7 +79,8 @@ def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
     assert "Evaluation Results" in html_text
     assert "Happy Path" in html_text
     assert 'href="#evals"' in html_text
-    assert 'data-auto-refresh-seconds="15"' in html_text
+    assert 'data-auto-refresh-seconds="0"' in html_text
+    assert "Static evidence snapshot" in html_text
 
 
 def test_run_evals_can_skip_dashboard(tmp_path: Path) -> None:
