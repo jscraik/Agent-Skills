@@ -23,6 +23,33 @@ superseded, or low-signal text.
 - For non-trivial create/reshape work, use
   `Infrastructure/references/first-principles-factory-gate.md` before claiming
   the skill should exist.
+- Start new reusable skills from the Skill Factory reference templates:
+  `Plugins/skill-factory/skills/code_quality_review/skill-builder/references/contract.template.yaml`
+  and `.../evals.template.yaml`. They encode the current operator shape.
+
+## Generated Skill Shape
+
+New or substantially rewritten skills should keep `SKILL.md` compact while
+preserving the operational details in references. Do not delete useful
+negative prompts, gotchas, constraints, examples, or failure ladders; move them
+behind progressive disclosure unless they are needed for routing or the first
+operator action.
+
+Every reusable skill draft should include or reference:
+
+- routing payload: domain, verbs, objects, constraints
+- immediate operator path: first command/tool/read and proceed rule
+- source order: local truth, live readback, docs/source/types, user confirmation
+- tool resolution: preferred tool, fallback, doctor/status check
+- freshness/proof: live read before writes and targeted readback after writes
+- boundaries: forbidden external/destructive/credential actions without intent
+- retry/stop: bounded retry, exact blocker, attempted fallback, next step
+- validation tiers: fast, standard, deep
+- concise closeout: changed files, decisions, validation, residual risks
+
+When wrapping `.system` skills, preserve upstream update flow with an overlay
+and attached references. Do not create a plugin-owned standalone fork of the
+upstream `SKILL.md`.
 
 ## Pattern References
 

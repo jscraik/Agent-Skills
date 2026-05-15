@@ -1,15 +1,74 @@
-purpose: "{{SKILL_NAME}} purpose: one sentence describing what this skill accomplishes."
+schema_version: "1.2"
+purpose: "{{SKILL_NAME}}: one sentence naming the domain, action, artifact, and success result."
 triggers:
-  - "When the user asks for X"
-  - "When files/types/keywords include Y"
+  - "User asks to operate on the domain/artifact this skill owns."
+  - "Request includes {{SKILL_NAME}}'s discriminative verbs, objects, or constraints."
+  - "A file/path/tool signal proves this is the narrow lane, not a neighboring skill."
 inputs:
-  - name: "input_1"
+  - name: "task_intent"
     type: "string"
     required: true
+  - name: "target_artifact_or_scope"
+    type: "path|string"
+    required: false
+  - name: "constraints"
+    type: "array|string"
+    required: false
 outputs:
-  - name: "output_1"
+  - name: "default_closeout"
     type: "markdown"
+    fields: ["changed_files", "important_decisions", "validation", "residual_risks"]
+  - name: "proof_artifact"
+    type: "path|command_output|structured_record"
 non_goals:
-  - "What the skill should not do"
+  - "Do not broaden into adjacent domains when another skill or ordinary answer is the better lane."
+  - "Do not require deep governance, history mining, or release checks for small safe edits."
 risks:
-  - "Safety/security risks and mitigations"
+  - "A vague description can trigger too often; keep routing metadata short and discriminative."
+  - "Always-on validation can create blocked states; use fast/standard/deep tiers."
+  - "Archive/deferred handles can hide stale runtime guidance; active handles must resolve to live canonical sources or explicit overlays."
+operator_contract:
+  description_contract: "domain: verbs, objects, constraints; no broad prose summary."
+  immediate_operator_path:
+    first_action: "Name the first command/tool/read that starts useful work."
+    proceed_rule: "Infer conservatively when inputs are missing; ask only for ownership, destructive behavior, publication, or external writes."
+  source_order:
+    - "local canonical source or user-provided artifact"
+    - "current live state/readback before any write"
+    - "official docs/source/types for dependency behavior"
+    - "user confirmation for irreversible or externally visible action"
+  tool_resolution:
+    preferred: "canonical repository wrapper, app tool, or documented binary"
+    fallback: "safe read-only fallback with the limitation reported"
+    doctor_or_status: "short preflight/version/status command when tool state matters"
+  freshness_rule:
+    discovery: "Cached or indexed reads are acceptable for finding candidates."
+    action_state: "Use a live targeted read before writes or status changes."
+    readback: "After writes, verify only the changed surface unless release scope requires more."
+  scope_defaults:
+    default: "narrowest target implied by the user request"
+    broaden_when:
+      - "shared contract changes"
+      - "package/release behavior changes"
+      - "validation proves neighboring artifacts must move together"
+  boundaries:
+    forbidden_without_explicit_request:
+      - "publishing externally"
+      - "destructive file/data operations"
+      - "credential, secret, or permission expansion"
+    no_drift:
+      - "do not copy upstream/system skills into standalone forks when an overlay/reference can preserve update flow"
+      - "do not put long examples, gotchas, negative prompts, or validation matrices in the hot path"
+  retry_and_stop:
+    retry: "Retry transient tool/UI/action failures once when the retry is cheap and safe."
+    stop: "Stop after bounded retry and report exact blocker, attempted fallback, and next step."
+  validation_tiers:
+    fast: "format/schema/lint for touched files"
+    standard: "skill smoke/eval or repository wrapper for changed behavior"
+    deep: "release, projection, security, benchmark, or cross-plugin checks only for broad/package-impacting changes"
+  concise_output:
+    default_fields: ["changed_files", "important_decisions", "validation_run", "residual_risks"]
+    full_ledger_when: ["audit", "release", "explicit user request", "multi-skill migration"]
+references:
+  - "Plugins/skill-factory/references/operator-pattern-map.md"
+  - "Plugins/skill-factory/references/live-deferred-context.md"
