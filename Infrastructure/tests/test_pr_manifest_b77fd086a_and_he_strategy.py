@@ -932,6 +932,19 @@ class TestStrategyOutputContract(unittest.TestCase):
         """
         self.assertIn("stop or pivot condition", self._text.lower())
 
+    def test_required_contract_keys_present(self) -> None:
+        for key in [
+            "`he-strategy`",
+            "`subagent_policy`",
+            "`roles_used`, `roles_recommended`, and `roles_missing`",
+        ]:
+            with self.subTest(key=key):
+                self.assertIn(
+                    key,
+                    self._text,
+                    f"strategy-output-contract.md missing required contract key(s): {key}",
+                )
+
     def test_all_required_modes_documented(self) -> None:
         """
         Check that the strategy output contract document lists all required modes.
