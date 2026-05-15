@@ -137,6 +137,9 @@ def _audit_security_summary(audit_data: dict[str, Any]) -> dict[str, Any]:
 
 
 def _case_runner_status(case: dict[str, Any]) -> tuple[int, str, list[str]]:
+    if case.get("blocked") is True:
+        warnings = [str(item) for item in _as_list(case.get("warnings"))]
+        return 0, "blocked", warnings[:4]
     if case.get("passed") is True:
         return 100, "passed", []
     failures = [str(item) for item in _as_list(case.get("tier1_failures"))]
@@ -149,7 +152,11 @@ def _case_runner_status(case: dict[str, Any]) -> tuple[int, str, list[str]]:
 
 
 def _scorecard_percent(scorecard: dict[str, Any]) -> int:
-    cases = [case for case in _as_list(scorecard.get("cases")) if isinstance(case, dict)]
+    cases = [
+        case
+        for case in _as_list(scorecard.get("cases"))
+        if isinstance(case, dict) and case.get("blocked") is not True
+    ]
     if not cases:
         return 0
     passed = sum(1 for case in cases if case.get("passed") is True)
@@ -189,11 +196,14 @@ def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[st
         }
     cases = []
     passed = 0
+    blocked = 0
     for case in _as_list(scorecard.get("cases")):
         if not isinstance(case, dict):
             continue
         score, status, notes = _case_runner_status(case)
-        if score == 100:
+        if status == "blocked":
+            blocked += 1
+        elif score == 100:
             passed += 1
         cases.append({
             "id": case.get("id") or "case",
@@ -206,7 +216,8 @@ def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[st
             "runner_mode": scorecard.get("runner_mode") or "unknown",
         })
     total = len(cases)
-    score = round((passed / total) * 100) if total else 0
+    scored_total = max(total - blocked, 0)
+    score = round((passed / scored_total) * 100) if scored_total else 0
     previous_score = None
     trend_ratio = None
     if len(scorecards) >= 2:
@@ -221,7 +232,13 @@ def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[st
     return {
         "available": bool(total),
         "score": score,
-        "message": f"{passed}/{total} latest eval cases passed." if total else "Latest scorecard had no cases.",
+        "scored_cases": scored_total,
+        "blocked_cases": blocked,
+        "message": (
+            f"{passed}/{scored_total} latest eval cases passed; {blocked} blocked by runner environment."
+            if blocked
+            else (f"{passed}/{total} latest eval cases passed." if total else "Latest scorecard had no cases.")
+        ),
         "cases": cases,
         "scorecard_path": str(scorecard.get("_path")) if scorecard.get("_path") else None,
         "run_id": scorecard.get("run_id"),
@@ -329,7 +346,7 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
     if isinstance(evals.get("trend_ratio"), (int, float)) and evals["trend_ratio"] > 1:
         impact_badge = f"<span class=\"lift\">+ {evals['trend_ratio']}x</span>"
     quality_score = int(quality_model["quality"] or 0)
-    overall = round((quality_score + security_score + (impact_score if evals.get("available") else quality_score)) / 3)
+    overall = round((quality_score + security_score + (impact_score if evals.get("scored_cases") else quality_score)) / 3)
     generated = _escape(data.get("generated_at") or "local report")
     refresh_seconds = 15
     validation_active = bool(data.get("validation_active") or data.get("dashboard_refresh_active"))

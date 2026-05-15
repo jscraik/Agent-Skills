@@ -83,6 +83,90 @@ def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
     assert "Static evidence snapshot" in html_text
 
 
+def test_run_evals_renders_dashboard_for_failed_scorecard(tmp_path: Path) -> None:
+    scorecard_path = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-2/scorecard.json"
+    scorecard_path.parent.mkdir(parents=True)
+    scorecard_path.write_text(
+        json.dumps({
+            "skill": "example-skill",
+            "skill_path": "Plugins/example-skill",
+            "eval_mode": "smoke",
+            "runner_mode": "codex",
+            "run_id": "run-2",
+            "cases": [
+                {
+                    "id": "blocked-path",
+                    "name": "Blocked Path",
+                    "passed": False,
+                    "tier1_failures": ["codex returned non-zero exit code: 1"],
+                    "warnings": [],
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    completed = mock.Mock(
+        returncode=2,
+        stdout=f"Skill evals: example-skill\nScorecard: {scorecard_path}\nRESULT: FAIL\n",
+        stderr="runner failed",
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke")
+
+    assert result.status == "error"
+    assert result.errors[0].code == "ERR_VALIDATION"
+    assert result.data["dashboard_path"] == "Infrastructure/artifacts/skill-reviews/example-skill-dashboard-smoke.html"
+    assert result.data["dashboard_tab"] == "evals"
+    assert result.data["scorecard_path"] == "Infrastructure/artifacts/skills/example-skill/run-2/scorecard.json"
+
+    html_path = tmp_path / result.data["dashboard_path"]
+    html_text = html_path.read_text(encoding="utf-8")
+    assert "Evaluation Results" in html_text
+    assert "Blocked Path" in html_text
+    assert "codex returned non-zero exit code: 1" in html_text
+
+
+def test_run_evals_dashboard_marks_blocked_runner_environment(tmp_path: Path) -> None:
+    scorecard_path = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-3/scorecard.json"
+    scorecard_path.parent.mkdir(parents=True)
+    scorecard_path.write_text(
+        json.dumps({
+            "skill": "example-skill",
+            "skill_path": "Plugins/example-skill",
+            "eval_mode": "smoke",
+            "runner_mode": "codex",
+            "run_id": "run-3",
+            "blocked_cases": 1,
+            "cases": [
+                {
+                    "id": "nested-sandbox",
+                    "name": "Nested Sandbox",
+                    "passed": False,
+                    "blocked": True,
+                    "tier1_failures": [],
+                    "warnings": ["[codex] blocked_runtime: runner could not execute local commands"],
+                }
+            ],
+        }),
+        encoding="utf-8",
+    )
+    completed = mock.Mock(
+        returncode=2,
+        stdout=f"Skill evals: example-skill\nScorecard: {scorecard_path}\nRESULT: FAIL\n",
+        stderr="runner blocked",
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke")
+
+    assert result.status == "error"
+    html_text = (tmp_path / result.data["dashboard_path"]).read_text(encoding="utf-8")
+    assert "0/0 latest eval cases passed; 1 blocked by runner environment." in html_text
+    assert "Nested Sandbox" in html_text
+    assert "blocked_runtime" in html_text
+
+
 def test_run_evals_can_skip_dashboard(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="Skill evals: example-skill\n", stderr="")
 

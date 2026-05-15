@@ -43,6 +43,7 @@ from run_skill_evals import (
     _preflight_codex_live_runner,
     _filter_cases_for_eval_mode,
     _isolated_codex_home_for_eval,
+    _is_runner_runtime_blocked,
     _is_smoke_only_case,
     _write_junit_report,
     evaluate_assertions_text,
@@ -80,6 +81,26 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
         self.assertEqual(failures, ["regex failed: /(?i)red_signal/"])
 
+    def test_contains_assertions_are_case_insensitive_for_agent_prose(self) -> None:
+        self.assertEqual(
+            evaluate_assertions_text(
+                "Validation: blocked by sandbox startup error",
+                [{"type": "contains", "value": "validation"}],
+                skill_name="skill-builder",
+                selected_skill=None,
+            ),
+            [],
+        )
+        self.assertEqual(
+            evaluate_assertions_text(
+                "This belongs in skill-factory, not Skill-Builder.",
+                [{"type": "not_contains", "value": "skill-builder"}],
+                skill_name="skill-builder",
+                selected_skill=None,
+            ),
+            ["not_contains failed: 'skill-builder'"],
+        )
+
     def test_acceptance_skip_reason_only_triggers_for_empty_nonzero_output(self) -> None:
         self.assertEqual(
             _acceptance_skip_reason(exit_code=1, output_text=""),
@@ -91,6 +112,22 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         )
         self.assertIsNone(_acceptance_skip_reason(exit_code=1, output_text="partial response"))
         self.assertIsNone(_acceptance_skip_reason(exit_code=0, output_text=""))
+
+    def test_runtime_blocker_detection_catches_nested_codex_sandbox_failures(self) -> None:
+        self.assertTrue(
+            _is_runner_runtime_blocked(
+                output_text="Blocked: every local command fails with sandbox_apply: Operation not permitted",
+                stdout_text="",
+                stderr_text="",
+            )
+        )
+        self.assertFalse(
+            _is_runner_runtime_blocked(
+                output_text="Validation: pass",
+                stdout_text="",
+                stderr_text="",
+            )
+        )
 
     def test_forbidden_short_command_matches_tokens_not_substrings(self) -> None:
         events = [
@@ -540,6 +577,58 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             release_manifest["artifacts"]["release_manifest"],
             summary["artifacts"]["release_manifest"],
         )
+
+    def test_discovery_smoke_requires_explicit_smoke_mode_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_dir = Path(tmpdir) / "behavior-skill"
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                textwrap.dedent(
+                    """
+                    ---
+                    name: behavior-skill
+                    ---
+
+                    ## Workflow
+                    Do behavior work.
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+            (refs_dir / "evals.yaml").write_text(
+                textwrap.dedent(
+                    """
+                    schema_version: "2.0"
+                    cases:
+                      - id: behavior
+                        name: behavior
+                        prompt: Review this skill behavior.
+                        acceptance:
+                          - contains: "validation"
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            reports_dir = Path(tmpdir) / "reports"
+            with unittest.mock.patch("sys.stderr") as stderr:
+                exit_code = main(
+                    [
+                        str(skill_dir),
+                        "--runner",
+                        "discovery-smoke",
+                        "--reports-dir",
+                        str(reports_dir),
+                        "--format",
+                        "json",
+                    ]
+                )
+
+            self.assertEqual(exit_code, 1)
+            self.assertIn("requires eval cases with `smoke_mode`", "".join(call.args[0] for call in stderr.write.call_args_list if call.args))
 
     def test_discovery_smoke_uses_skill_specific_questions_and_canonical_sections(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

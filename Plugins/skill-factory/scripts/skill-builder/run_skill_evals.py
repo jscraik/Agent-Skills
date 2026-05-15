@@ -641,6 +641,10 @@ def _to_text_blob(data: Any) -> str:
     return json.dumps(data, ensure_ascii=False, indent=2)
 
 
+def _contains_text(haystack: str, needle: str) -> bool:
+    return needle.casefold() in haystack.casefold()
+
+
 def _evaluate_skill_selection_assertion(
     assertion: Dict[str, Any],
     *,
@@ -688,11 +692,11 @@ def evaluate_assertions_text(
 
         if t == "contains":
             needle = _to_text_blob(v)
-            if needle not in text:
+            if not _contains_text(text, needle):
                 failures.append(f"contains failed: {needle!r}")
         elif t == "not_contains":
             needle = _to_text_blob(v)
-            if needle in text:
+            if _contains_text(text, needle):
                 failures.append(f"not_contains failed: {needle!r}")
         elif t == "regex":
             pattern = _to_text_blob(v)
@@ -1598,6 +1602,15 @@ def _is_codex_untrusted_repo_error(stderr_text: str) -> bool:
     return ("not inside a trusted directory" in low) and ("skip-git-repo-check" in low)
 
 
+def _is_runner_runtime_blocked(*, output_text: str, stdout_text: str, stderr_text: str) -> bool:
+    low = "\n".join([output_text or "", stdout_text or "", stderr_text or ""]).lower()
+    return (
+        "sandbox_apply: operation not permitted" in low
+        or "host_execution_untrusted" in low
+        or ("sandbox-exec" in low and "operation not permitted" in low)
+    )
+
+
 def _is_codex_reasoning_summary_unsupported(stderr_text: str) -> bool:
     low = (stderr_text or "").lower()
     return ("unsupported parameter" in low) and ("reasoning.summary" in low)
@@ -2197,6 +2210,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     has_smoke_cases = any(c.smoke_mode for c in cases)
     if smoke_runners_only and has_smoke_cases:
         cases = [c for c in cases if c.smoke_mode]
+    elif smoke_runners_only:
+        print(
+            "ERROR: discovery-smoke runner requires eval cases with `smoke_mode`; "
+            "none matched the selected filters. Use a live runner such as `codex` "
+            "for behavior evals, or add discovery-specific smoke_mode cases.",
+            file=sys.stderr,
+        )
+        return 1
     elif not smoke_runners_only and has_smoke_cases:
         cases = [c for c in cases if not _is_smoke_only_case(c)]
 
@@ -2321,6 +2342,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "passed": True,
         "tier1_failures": 0,
         "tier2_findings": 0,
+        "blocked_cases": 0,
         "preflight_warnings": preflight_warnings,
         "readiness_summary": readiness_summary,
         "round_state_summary": round_state_summary,
@@ -2329,6 +2351,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     any_tier1_failed = False
     any_tier2_failed = False
+    any_blocked = False
 
     for idx, c in enumerate(cases, 1):
         case_slug = _safe_slug(c.id or c.name)
@@ -2447,6 +2470,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             runner_tier2_findings: List[str] = []
             runner_warnings: List[str] = list(runner_exec_warnings)
             runner_metrics: Dict[str, Any] = {}
+            runner_blocked_runtime = False
             events: Optional[List[Dict[str, Any]]] = None
 
             if rc != 0:
@@ -2507,12 +2531,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "selection evidence as acceptable for this negative case."
                 )
 
+            runner_blocked_runtime = _is_runner_runtime_blocked(
+                output_text=output_text,
+                stdout_text=stdout,
+                stderr_text=stderr,
+            )
+            if runner_blocked_runtime:
+                runner_warnings.append(
+                    "blocked_runtime: runner could not execute local commands; this is an eval environment "
+                    "blocker, not a skill behavior failure."
+                )
+
             # Assertions + rubric parsing
             parsed_json: Optional[Any] = None
             used_json_assertions = False
             acceptance_skip_reason = _acceptance_skip_reason(exit_code=rc, output_text=output_text)
 
-            if acceptance_skip_reason is not None:
+            if runner_blocked_runtime:
+                pass
+            elif acceptance_skip_reason is not None:
                 runner_warnings.append(acceptance_skip_reason)
             else:
                 if schema_path and runner_name == "codex":
@@ -2558,7 +2595,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
             # Check agent self-assessment: if agent explicitly reports "Fail", treat as hard failure
             agent_self_assessment = _parse_agent_self_assessment(output_text)
-            if agent_self_assessment is False:
+            if agent_self_assessment is False and not runner_blocked_runtime:
                 runner_tier1_failures.append(
                     "Agent self-assessment reports explicit failure (e.g., 'Pass/fail: Fail'). "
                     "Treating this as a hard failure regardless of exit_code."
@@ -2585,7 +2622,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             runner_record = {
                 "runner": runner_name,
                 "exit_code": rc,
-                "passed": len(runner_tier1_failures) == 0,
+                "passed": (len(runner_tier1_failures) == 0) and not runner_blocked_runtime,
+                "blocked": runner_blocked_runtime,
                 "tier1_failures": runner_tier1_failures,
                 "tier2_findings": runner_tier2_findings,
                 "warnings": runner_warnings,
@@ -2608,10 +2646,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         case_tier1_failed = len(case_tier1_failures) > 0
         case_tier2_failed = len(case_tier2_findings) > 0
+        case_blocked = any(bool(record.get("blocked")) for record in runner_records.values())
 
         case_pass = (not case_tier1_failed) and (
             args.tier2_mode != "fail" or (not case_tier2_failed)
         )
+        case_pass = case_pass and not case_blocked
 
         case_record = {
             "id": c.id,
@@ -2635,6 +2675,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "dir": _make_relative(case_dir, workspace_root),
             "runners": runner_records,
             "passed": case_pass,
+            "blocked": case_blocked,
             "tier1_failed": case_tier1_failed,
             "tier2_failed": case_tier2_failed,
             "tier1_failures": case_tier1_failures,
@@ -2666,11 +2707,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if case_tier1_failed:
             any_tier1_failed = True
             summary["tier1_failures"] += 1
+        if case_blocked:
+            any_blocked = True
+            summary["blocked_cases"] += 1
         if case_tier2_failed:
             any_tier2_failed = True
             summary["tier2_findings"] += 1
 
-    summary["passed"] = (not any_tier1_failed) and (
+    summary["passed"] = (not any_blocked) and (not any_tier1_failed) and (
         args.tier2_mode != "fail" or (not any_tier2_failed)
     )
     summary["decision"] = "pass" if summary["passed"] else "fail"

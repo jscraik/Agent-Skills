@@ -175,6 +175,15 @@ def run_evals(repo_root: Path, path: str, mode: str = "smoke", dashboard: bool =
         else:
             result.status = "error"
             result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Evaluation run failed."))
+            if dashboard and _scorecard_path_from_output(repo_root, process.stdout) is not None:
+                try:
+                    result.data.update(_render_eval_dashboard(repo_root, path, mode, process.stdout))
+                except Exception as e:  # noqa: BLE001
+                    result.errors.append(ErrorObject(
+                        code="ERR_RUNTIME",
+                        message=f"Evaluation failed, and dashboard rendering also failed: {e}",
+                        fix_suggestion="Inspect raw_output and raw_error; the scorecard path may be malformed or unreadable.",
+                    ))
     except subprocess.TimeoutExpired as e:
         result.status = "error"
         result.data["raw_output"] = _as_text(e.stdout)
