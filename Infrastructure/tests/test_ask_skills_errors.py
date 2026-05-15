@@ -316,6 +316,8 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertEqual(result.data["dashboard_path"], "Infrastructure/artifacts/skill-reviews/example-skill.html")
         self.assertTrue(result.data["dashboard_url"].startswith("file://"))
         self.assertIn("ASK Local Review", html_text)
+        self.assertIn('role="tablist"', html_text)
+        self.assertIn('role="tabpanel"', html_text)
         self.assertIn("Quality", html_text)
         self.assertIn("Evals Not Run Yet", html_text)
         self.assertIn("local_internal_only", html_text)

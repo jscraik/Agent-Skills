@@ -370,10 +370,15 @@ code {{ background:#20242c; border:1px solid #303641; border-radius:6px; padding
 .good {{ color:var(--green); }} .warn {{ color:var(--yellow); }} .bad {{ color:var(--red); }}
 .bar .good {{ background:var(--green); }} .bar .warn {{ background:var(--yellow); }} .bar .bad {{ background:var(--red); }}
 .metric p,.section-head p {{ color:var(--muted); margin:0; }}
-.tabs {{ display:flex; gap:22px; border-bottom:1px solid var(--line); margin:26px 0 42px; }}
-.tabs a {{ color:var(--muted); padding:0 0 12px; border-bottom:2px solid transparent; font-weight:700; }}
-.tabs a:hover {{ color:var(--text); border-color:var(--text); }}
+.tabs {{ display:flex; align-items:flex-end; gap:4px; border-bottom:1px solid var(--line); margin:26px 0 42px; overflow-x:auto; }}
+.tabs a {{ color:var(--muted); min-width:112px; text-align:center; padding:12px 18px 13px; border:1px solid transparent; border-bottom:0; border-radius:8px 8px 0 0; font-weight:800; position:relative; }}
+.tabs a:hover {{ color:var(--text); background:#11141a; border-color:#2b3039; }}
+.tabs a:focus-visible {{ outline:2px solid var(--cyan); outline-offset:2px; }}
+.tabs a[aria-selected="true"] {{ color:var(--text); background:var(--panel); border-color:var(--line); box-shadow:0 1px 0 var(--panel); }}
+.tabs a[aria-selected="true"]::after {{ content:""; position:absolute; left:14px; right:14px; bottom:-1px; height:3px; border-radius:99px 99px 0 0; background:var(--text); }}
 section {{ margin:0 0 58px; }}
+.tab-panel {{ display:none; }}
+.tab-panel.is-active {{ display:block; }}
 .section-head {{ display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:22px; }}
 h2 {{ font-size:28px; margin:0; letter-spacing:0; }}
 h3 {{ font-size:20px; margin:0 0 10px; }}
@@ -391,8 +396,40 @@ td span {{ color:var(--muted); }}
 .suggestions li,.empty-state p {{ color:var(--muted); margin:10px 0; }}
 .evidence-list {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }}
 .evidence-list a,.evidence-list div {{ border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }}
-@media (max-width: 1100px) {{ .shell {{ grid-template-columns:1fr; }} .sidebar {{ position:relative; height:auto; }} .hero {{ grid-template-columns:1fr; }} .grid,.evidence-list {{ grid-template-columns:1fr; }} }}
+@media (max-width: 1100px) {{ .shell {{ grid-template-columns:1fr; }} .sidebar {{ position:relative; height:auto; }} .hero {{ grid-template-columns:1fr; }} .grid,.evidence-list {{ grid-template-columns:1fr; }} .tabs a {{ min-width:104px; }} }}
 </style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {{
+  const ids = ['quality', 'evals', 'security', 'evidence'];
+  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+  const panels = Array.from(document.querySelectorAll('.tab-panel'));
+  function activate(id) {{
+    const target = ids.includes(id) ? id : 'quality';
+    tabs.forEach((tab) => {{
+      const selected = tab.getAttribute('href') === '#' + target;
+      tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+      tab.setAttribute('tabindex', selected ? '0' : '-1');
+    }});
+    panels.forEach((panel) => {{
+      const selected = panel.id === target;
+      panel.classList.toggle('is-active', selected);
+      panel.toggleAttribute('hidden', !selected);
+    }});
+  }}
+  activate(window.location.hash.slice(1));
+  window.addEventListener('hashchange', () => activate(window.location.hash.slice(1)));
+  tabs.forEach((tab, index) => {{
+    tab.addEventListener('keydown', (event) => {{
+      const delta = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+      if (!delta) return;
+      event.preventDefault();
+      const next = tabs[(index + delta + tabs.length) % tabs.length];
+      next.focus();
+      next.click();
+    }});
+  }});
+}});
+</script>
 </head>
 <body>
 <div class=\"shell\">
@@ -420,11 +457,11 @@ td span {{ color:var(--muted); }}
         {_render_bar('Security', security_score, 'Internal local audit and OpenClaw warning summary.')}
       </div>
     </header>
-    <nav class=\"tabs\">
-      <a href=\"#quality\">Quality</a><a href=\"#evals\">Evals</a><a href=\"#security\">Security</a><a href=\"#evidence\">Evidence</a>
+    <nav class=\"tabs\" role=\"tablist\" aria-label=\"Review result sections\">
+      <a role=\"tab\" aria-selected=\"true\" aria-controls=\"quality\" tabindex=\"0\" href=\"#quality\">Quality</a><a role=\"tab\" aria-selected=\"false\" aria-controls=\"evals\" tabindex=\"-1\" href=\"#evals\">Evals</a><a role=\"tab\" aria-selected=\"false\" aria-controls=\"security\" tabindex=\"-1\" href=\"#security\">Security</a><a role=\"tab\" aria-selected=\"false\" aria-controls=\"evidence\" tabindex=\"-1\" href=\"#evidence\">Evidence</a>
     </nav>
 
-    <section id=\"quality\">
+    <section id=\"quality\" class=\"tab-panel is-active\" role=\"tabpanel\">
       <div class=\"section-head\"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class=\"pill {_status_class(quality_score)}\">{quality_score}%</span></div>
       <div class=\"grid\">
         <div class=\"panel\"><h3>Discovery</h3><p>Description activation quality</p><strong class=\"{_status_class(tessl['description_score'])}\">{tessl['description_score']}%</strong></div>
@@ -438,16 +475,16 @@ td span {{ color:var(--muted); }}
       <div class=\"suggestions\"><h3>Suggestions</h3><ul>{suggestion_html}</ul></div>
     </section>
 
-    <section id=\"evals\">
+    <section id=\"evals\" class=\"tab-panel\" role=\"tabpanel\" hidden>
       {_render_eval_cases(evals)}
     </section>
 
-    <section id=\"security\">
+    <section id=\"security\" class=\"tab-panel\" role=\"tabpanel\" hidden>
       <div class=\"section-head\"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class=\"pill {_status_class(security_score)}\">{security_score}%</span></div>
       <div class=\"suggestions\"><h3>Findings</h3><ul>{security_html}</ul></div>
     </section>
 
-    <section id=\"evidence\">
+    <section id=\"evidence\" class=\"tab-panel\" role=\"tabpanel\" hidden>
       <div class=\"section-head\"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class=\"evidence-list\">
         <a href=\"{_file_url(report_path)}\">Review JSON<br><span>{_escape(report_path.relative_to(repo_root) if report_path.is_relative_to(repo_root) else report_path)}</span></a>
