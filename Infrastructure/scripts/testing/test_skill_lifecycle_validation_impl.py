@@ -482,6 +482,29 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("Plugin-shadowing check failed", result.stderr)
             self.assertIn("- demo-shadow", result.stderr)
 
+    def test_plugin_shadowing_check_ignores_plugin_fixtures(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            write_text(
+                repo_root
+                / "Plugins"
+                / "demo-plugin"
+                / "fixtures"
+                / "archive"
+                / "skills"
+                / "archived-lane"
+                / "SKILL.md",
+                "# archived fixture skill",
+            )
+            write_text(
+                repo_root / ".agents" / "skills" / "archived-lane" / "SKILL.md",
+                "# flat skill",
+            )
+
+            result = run_shadow_check(repo_root)
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertIn("Plugin-shadowing check passed", result.stdout)
+
     def test_plugin_shadowing_check_allows_system_bridge_overlap(self) -> None:
         selection_policy = load_selection_policy_module()
         allowlisted = tuple(selection_policy.SYSTEM_BRIDGE_SKILL_NAMES)

@@ -2,6 +2,7 @@
 name: he-router
 description: "Selects one Harness Engineering stage for mixed requests. Use when a request could mean brainstorm, spec, plan, work, review, eval, Linear planning, reconcile, reinforce, heartbeat, branch hygiene, or specialist steering."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 
@@ -102,6 +103,13 @@ package; never hand-edit `.agents/skills/he-router` as source.
 Hand off only after `selected_stage`, evidence source, and next invocation are
 clear. Use `../../references/subagent-call-contract.md` before helper
 delegation. Use goal continuity only for explicit durable continuation.
+
+## Examples
+- When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,
+  start from the canonical Harness Engineering evidence and route the next action
+  with validation status.
+- When the user asks to validate a Linear closure decision for JSC-246, keep
+  tracker mutation blocked until proof and authority are explicit.
 
 ## Gotchas
 - Folded aliases are modes, not missing skills.

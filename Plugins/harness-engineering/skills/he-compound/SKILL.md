@@ -2,6 +2,7 @@
 name: he-compound
 description: "WHAT: Diagnose deprecated he-compound compatibility requests and redirect them to he-reconcile or he-reinforce. WHEN: Use when older Harness prompts need lifecycle recovery, solved-problem capture, or learning refresh compatibility."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
   lifecycle: deprecated
 ---
@@ -65,10 +66,12 @@ routing as if validation passed, and report the blocked gate.
 
 ## Examples
 
-- "Use he-compound to refresh harness state" routes to `he-reconcile`.
-- "Use he-compound to remember this solved problem" routes to `he-reinforce`.
-- "Use he-compound, not sure which phase failed" routes to `he-router` or a
-  single clarification question.
+- When the user asks to inspect the JSC-301 harness state with the deprecated
+  `he-compound` handle, route lifecycle recovery to `he-reconcile`.
+- When the user asks to validate a solved auth preflight failure for future runs,
+  route learning capture to `he-reinforce`.
+- When the user asks to diagnose a failed phase without enough context, route to
+  `he-router` or ask one clarification question.
 
 ## Safety Boundaries
 
@@ -96,6 +99,7 @@ Return `schema_version`, `selected_replacement`, `matched_intent`,
 `authority_limit`, `missing_input`, and `recommended_next_step`.
 
 ## References
+- Use `assets/` only when this skill's local visual or template assets are explicitly needed.
 
 Replacement skills:
 

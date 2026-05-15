@@ -2,6 +2,7 @@
 name: he-work
 description: "Implement approved Harness Engineering plan slices with strict scope control. Use when code or artifact changes are authorized by a bounded plan, validation commands are known, and the work can preserve traceability, rollback, and handoff evidence."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 # Harness Engineering Work

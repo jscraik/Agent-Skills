@@ -2,6 +2,7 @@
 name: he-plan
 description: "Create bounded Harness Engineering execution plans from approved specs or issue slices. Use when work needs ordered implementation units, explicit scope boundaries, rollback posture, traceability, and validation gates before code changes."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 
@@ -107,6 +108,13 @@ and evidence that would change confidence.
 Professional confidence review output must use these exact headings unless the
 - See references/hot-path-folded-context.md for folded output format detail.
 
+## Examples
+- When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,
+  start from the canonical Harness Engineering evidence and route the next action
+  with validation status.
+- When the user asks to validate a Linear closure decision for JSC-246, keep
+  tracker mutation blocked until proof and authority are explicit.
+
 ## Gotchas
 - `update_plan` is live progress UI, not a durable HE plan artifact.
 - Secondary docs are context unless the approved slice admits them.
@@ -115,6 +123,7 @@ Professional confidence review output must use these exact headings unless the
   and handoff separated from review metadata.
 
 ## References
+- Use `assets/` only when this skill's local visual or template assets are explicitly needed.
 Read when: plan body and identity rules ->
 `references/plan-artifact-contract.md`.
 Read when: handoff state matters -> `references/post-plan-handoff.md`.

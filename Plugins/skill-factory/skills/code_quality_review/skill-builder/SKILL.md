@@ -43,6 +43,13 @@ Read when: load `../../../references/skill-builder/harness-hardening-workflow.md
 
 Ask one direct question if target path or write authority is ambiguous.
 
+## Discovery Interview
+
+- Ask one round at a time.
+- Use a plain-language question.
+- Explain why the round matters.
+- Avoid dumping the whole interview plan at once.
+
 ## Outputs
 
 - Focused canonical-source patch.
@@ -127,4 +134,5 @@ Fail fast: stop at the first failed required gate, classify it, and do not proce
 - Local operating guide: `../../../references/skill-builder/operating-guide.md`
 - First-principles factory gate: `Infrastructure/references/first-principles-factory-gate.md`
 - Local contract and evals: `references/`
+- Discovery interview: [discovery interview](./references/discovery-interview.md)
 - Repository validators and helper scripts: `Plugins/skill-factory/scripts/skill-builder/` and `Infrastructure/scripts/`

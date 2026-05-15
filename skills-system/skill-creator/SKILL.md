@@ -9,6 +9,21 @@ metadata:
 
 This skill provides guidance for creating effective skills.
 
+## Agent Skills Kit Overlay
+
+When running inside the Agent Skills Kit repository and `./bin/ask` exists, preserve this upstream `.system` skill as the authoring guide but create or reshape repo-owned skills through canonical source paths:
+
+```bash
+./bin/ask skills init <skill-name> --category <Skills/category> --description "<routing description>" --json --robot
+```
+
+- First-party sources live under `Skills/<topic-cluster>/<skill-name>`; plugin-owned skills live under `Plugins/<plugin>/skills/**`.
+- Before creating a new repo-owned skill, inventory existing skills with `./bin/ask skills list --advanced --json` and targeted searches. Improve or blend into an existing owner when the new idea is mostly an extension of current behavior.
+- Do not create or edit runtime projections such as `.agents/**`, `.skillsets/**`, `skills-codex/**`, or `$CODEX_HOME/skills/**` as the source of truth.
+- Use `skills-system/skill-creator/scripts/init_skill.py` directly only outside Agent Skills Kit or when explicitly creating an unmanaged draft at a chosen path.
+- For local Skill Factory governance, read `references/skill-factory/foundations.md` before non-trivial create, reshape, or improvement work.
+- After canonical edits, run the smallest relevant repo validation and sync/proof commands before claiming runtime availability.
+
 ## About Skills
 
 Skills are modular, self-contained folders that extend Codex's capabilities by providing
@@ -279,6 +294,12 @@ To establish the skill's contents, analyze each concrete example to create a lis
 At this point, it is time to actually create the skill.
 
 Skip this step only if the skill being developed already exists. In this case, continue to the next step.
+
+Inside Agent Skills Kit, initialize repo-owned skills with `./bin/ask skills init` so the destination stays in the canonical git source tree:
+
+```bash
+./bin/ask skills init <skill-name> --category <Skills/category> --description "<routing description>" --json --robot
+```
 
 When creating a new skill from scratch, always run the `init_skill.py` script. The script conveniently generates a new template skill directory that automatically includes everything a skill requires, making the skill creation process much more efficient and reliable.
 

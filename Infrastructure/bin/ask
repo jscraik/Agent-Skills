@@ -686,7 +686,7 @@ def main():
     
     evals_run_parser = evals_subparsers.add_parser("run", help="Run evaluation cases for a skill", parents=[global_parser])
     evals_run_parser.add_argument("path", help="Path to the skill directory")
-    evals_run_parser.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Evaluation mode"); evals_run_parser.add_argument("--no-dashboard", action="store_true", help="Skip rendering the local review dashboard after evals")
+    evals_run_parser.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Evaluation mode"); evals_run_parser.add_argument("--runner", choices=["codex", "discovery-smoke"], default="codex", help="Evaluation runner. Use discovery-smoke for local-only contract smoke scorecards that do not call a model."); evals_run_parser.add_argument("--no-dashboard", action="store_true", help="Skip rendering the local review dashboard after evals")
     evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
     evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
 
@@ -1112,7 +1112,7 @@ def main():
 
     elif args.topic == "evals":
         if args.action == "run":
-            result = run_evals(repo_root, path=args.path, mode=args.mode, dashboard=not args.no_dashboard)
+            result = run_evals(repo_root, path=args.path, mode=args.mode, dashboard=not args.no_dashboard, runner=args.runner)
         elif args.action == "benchmark":
             result = benchmark_portfolio(repo_root)
         elif args.action == "dashboard":

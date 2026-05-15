@@ -93,6 +93,10 @@ Load references by trigger instead of by habit:
 - `skills/he-brainstorm/references/requirements-artifact-guide.md`
 - `skills/he-brainstorm/references/visual-communication.md`
 - `references/brainstorm-topic-coverage-contract.md`
+- Preserved context: Do not turn brainstorming into execution. Do not remove important context for budget trimming; move deep context to references with a clear route.
+Do not turn brainstorming into execution. Do not remove important context for budget trimming; move deep context to references with a clear route.
+Do not turn brainstorming into execution. Do not remove important context for
+budget trimming; move deep context to references with a clear route.
 
 `he-spec`:
 

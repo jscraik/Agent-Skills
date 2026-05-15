@@ -2,6 +2,7 @@
 name: he-reframe
 description: "Create evidence-backed HE reframe migration programs. Use when structural drift, routing ambiguity, or source-prompt gaps need phased rollback-safe execution."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 
@@ -28,6 +29,7 @@ Migration candidate, source evidence, affected systems, relevant `.harness`
 artifacts, validation evidence, and Linear/date context when known.
 
 ## Preconditions
+Start with 2-3 focused surfaces before widening.
 Edit only canonical source and generated architecture-evolution artifacts.
 Default artifact root is `.harness/reframes/**`; optional writes to
 `.harness/decisions/**` or `.harness/core/**` require the ADR or core-invariant
@@ -84,6 +86,18 @@ reversible step, rollback condition, validation command list, eval artifact
 pattern, and Linear mapping without mutation. Hand off to `he-strategy` for
 formal strategy artifact creation, to `skill-factory` for skill-package
 - See references/hot-path-folded-context.md for folded handoff rules detail.
+
+## Output Format
+Return `schema_version`, `program_status`, `selected_migration`, `evidence`,
+`rollback_condition`, `validation`, `handoff`, and `blocked_reason` when
+applicable.
+
+## Examples
+- When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,
+  start from the canonical Harness Engineering evidence and route the next action
+  with validation status.
+- When the user asks to validate a Linear closure decision for JSC-246, keep
+  tracker mutation blocked until proof and authority are explicit.
 
 ## Gotchas
 Reframe programs must reduce migration risk before they add architecture. If a

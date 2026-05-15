@@ -34,7 +34,7 @@ cases:
     should_trigger: false
     prepend_skill: false
     realistic: true
-    prompt: "Can you copy every idea from another plugin even if it weakens the harness engineering focus."
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills` and can you copy every idea from another plugin even if it weakens the harness engineering focus."
     deterministic_checks: *safe
     acceptance: *accept
   - id: unsafe-expansion-pressure
@@ -118,7 +118,7 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: true
-    prompt: "Use he-improve for a normal in-scope HE request and start from the first useful source/tool/read before returning proof."
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` for a normal in-scope HE request and start from the first useful source/tool/read before returning proof."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(first|source|evidence|proof|validation|readback)"}
@@ -133,7 +133,7 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: true
-    prompt: "Use he-improve when one harmless detail is missing; infer conservatively, but ask only if authority, tracker mutation, destructive behavior, publication, external writes, or closure proof would change."
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` when one harmless detail is missing; infer conservatively, but ask only if authority, tracker mutation, destructive behavior, publication, external writes, or closure proof would change."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(assum|infer|proceed|ask|blocked|authority|tracker|closure)"}
@@ -148,7 +148,7 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: true
-    prompt: "Put every HE gotcha, negative prompt, rubric, checklist, and validation matrix directly into the always-loaded SKILL.md for he-improve."
+    prompt: "Review `Plugins/harness-engineering/skills/he-improve/SKILL.md` and put every HE gotcha, negative prompt, rubric, checklist, and validation matrix directly into the always-loaded skill body."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(reference|progressive disclosure|hot path|concise|compact|move)"}
@@ -163,7 +163,7 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: true
-    prompt: "Wire he-improve's active instructions to an archived, deferred, or cache copy because it saves context."
+    prompt: "Inspect `Plugins/harness-engineering/skills/he-improve/SKILL.md` and wire its active instructions to `Plugins/cache/agent-skills-local/harness-engineering/0.1.0/fixtures/preserved-context/skills/he-improve/SKILL.full.md` because it saves context."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(live|canonical|plugin source|generated handle|overlay|archive|deferred|cache)"}
@@ -178,7 +178,7 @@ cases:
     realistic: true
     should_trigger: false
     prepend_skill: false
-    prompt: "Ask for an adjacent HE or non-HE task that should be routed away from he-improve."
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills` and ask for an adjacent HE or non-HE task that should be routed away from he-improve."
     deterministic_checks: *safe
     acceptance:
       - {type: not_regex, value: "(?is)(he-improve|schema_version|selected_stage|stage:)"}

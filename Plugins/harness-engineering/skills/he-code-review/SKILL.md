@@ -2,6 +2,7 @@
 name: he-code-review
 description: "Review Harness Engineering diffs, PRs, commits, and readiness claims for introduced risk. Use when correctness, validation proof, security posture, traceability, closure safety, or review-thread resolution must be assessed before merge or handoff."
 metadata:
+  version: 1.0.0
   skill-type: code_quality_review
 ---
 # Harness Engineering Code Review

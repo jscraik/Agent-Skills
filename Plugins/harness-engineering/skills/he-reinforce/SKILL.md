@@ -2,6 +2,7 @@
 name: he-reinforce
 description: "Create or refresh evidence-bound Harness Engineering learning artifacts from verified solved problems. Use when a fix worked, a repeated failure should become durable knowledge, or .harness/solutions and Project Brain need maintenance."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 
@@ -98,6 +99,13 @@ Structured output: `schema_version`, `mode`, `selected_artifact`,
 `redaction_status`, `writes`, `git_staging_status`, `staged_paths`,
 `blocked_reason`, and `handoff`.
 
+## Examples
+- When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,
+  start from the canonical Harness Engineering evidence and route the next action
+  with validation status.
+- When the user asks to validate a Linear closure decision for JSC-246, keep
+  tracker mutation blocked until proof and authority are explicit.
+
 ## Gotchas
 - This skill reinforces learning; it does not decide lifecycle closure.
 - One high-value artifact beats several vague notes.
@@ -107,6 +115,7 @@ Structured output: `schema_version`, `mode`, `selected_artifact`,
 - See references/hot-path-folded-context.md for folded gotchas detail.
 
 ## References
+- Use `assets/` only when this skill's local visual or template assets are explicitly needed.
 Read `references/contract.yaml` for the full reinforcement contract and
 `references/evals.yaml` for validation scenarios. Use shared HE references only
 when active: solution capture, artifact routing, session evidence, Project Brain

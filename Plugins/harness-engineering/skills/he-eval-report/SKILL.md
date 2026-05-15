@@ -2,6 +2,7 @@
 name: he-eval-report
 description: "Generate closure-grade HE eval and drift proof for one execution slice. Use when Linear, milestone, or source-prompt closure needs validation evidence."
 metadata:
+  version: 1.0.0
   skill-type: code_quality_review
 ---
 
@@ -65,6 +66,8 @@ artifacts, closure recommendation, follow-up work, blockers, git staging
 
 ## Validation
 Run these from the repo root and record exact `pass|fail|blocked` outcomes.
+Fail fast: stop at the first failed gate and do not proceed until the blocker
+is fixed or explicitly classified.
 Use each command with the report path argument:
 - `python3 Plugins/harness-engineering/skills/he-eval-report/scripts/validate_eval_report.py`
 - `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py`
@@ -108,6 +111,14 @@ surface for non-trivial reports. Closure recommendation must be one of
 `Complete`, `Complete with follow-up`, `Blocked`, `Needs rework`, or
 `Unsafe to close`; do not use completion recommendations until steering is
 complete.
+
+## Examples
+- When the user asks to validate `.harness/evals/2026-05-12-JSC-246-account-settings-eval.md`
+  and it lacks test output, classify closure as `Blocked` or `Needs rework`
+  and name the missing validation gate.
+- When the user asks to inspect generated media cited only by cache prompt,
+  require a persisted `.harness/media/` PNG and sidecar before treating it as
+  proof.
 
 ## Gotchas
 - Generated media is not persisted proof until the repository PNG and sidecar

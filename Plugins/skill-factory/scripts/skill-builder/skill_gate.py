@@ -12,7 +12,7 @@ Enforces:
 - Basic safety hygiene (redaction language; fail-fast gating)
 
 Usage:
-  ~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>
+  python Plugins/skill-factory/scripts/skill-builder/skill_gate.py <path/to/skill-dir-or-SKILL.md>
 
 Exit codes:
   0  pass
@@ -20,7 +20,7 @@ Exit codes:
   2  gate failed (one or more FAIL findings)
 
 Recommended CI:
-  ~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/skill_gate.py ~/dev/agent-skills/.agents/skills/<skill-name> --format json
+  python Plugins/skill-factory/scripts/skill-builder/skill_gate.py Plugins/<plugin>/skills/<skill-name> --format json
 """
 
 from __future__ import annotations
@@ -54,7 +54,7 @@ except ModuleNotFoundError:  # pragma: no cover
     sys.stderr.write(
         "ERROR: PyYAML is required to run skill_gate.py.\n\n"
         "Fix (recommended):\n"
-        "  ~/.venvs/pyyaml/bin/python Skills/skill-builder/Infrastructure/scripts/skill_gate.py <path/to/skill-dir-or-SKILL.md>\n\n"
+        "  python Plugins/skill-factory/scripts/skill-builder/skill_gate.py <path/to/skill-dir-or-SKILL.md>\n\n"
         "Notes:\n"
         "  - Do not use Skills/skill-builder/.venv/bin/python (this repo does not ship that venv).\n"
         "  - If ~/.venvs/pyyaml doesn't exist, create a venv with PyYAML installed."
@@ -89,6 +89,11 @@ class SkillDoc:
 from yaml_frontmatter import parse_frontmatter as _parse_frontmatter_shared  # noqa: E402  # type: ignore[import]
 from yaml_frontmatter import read_text as _read_text  # noqa: E402  # type: ignore[import]
 from yaml_frontmatter import resolve_skill_md_path as _resolve_skill_md_path  # noqa: E402  # type: ignore[import]
+from eval_signal_contract import (  # noqa: E402
+    EXPECTED_SIGNAL_BUDGET_KEY,
+    EXPECTED_SIGNAL_KEYS,
+    parse_min_expected_signal_score,
+)
 
 
 def load_skill(path_like: str, strict_line1: bool) -> SkillDoc:
@@ -407,6 +412,8 @@ def _iter_scan_targets(skill_dir: Path) -> List[Tuple[Path, bool]]:
             continue
         if ".git" in path.parts:
             continue
+        if "__pycache__" in path.parts or path.suffix in {".pyc", ".pyo"}:
+            continue
         if _is_ignored(path, skill_dir, ignore_patterns):
             continue
         targets.append((path, _is_text_file(path)))
@@ -445,6 +452,8 @@ _DEFAULT_PI_EXPECTED_PATH_PATTERNS = (
     "scripts/run_skill_evals.py",
     "scripts/run_skill_graph_smoke.py",
     "scripts/test_*.py",
+    # Legacy Skill Builder package layout retained for archived fixtures and
+    # old evidence bundles. New skills should use skill-local references/ and scripts/.
     "Infrastructure/references/evals*.yaml",
     "Infrastructure/references/evals-v2-migration.md",
     "Infrastructure/references/destructive-commands.rules",
@@ -554,6 +563,7 @@ def check_codex_frontmatter(doc: SkillDoc, *, min_desc_len: int) -> List[Finding
 
     name = fm.get("name")
     desc = fm.get("description")
+    metadata = fm.get("metadata")
 
     if not isinstance(name, str) or not name.strip():
         out.append(Finding(Level.FAIL, "FM_NAME_MISSING", "Missing/invalid `name` (required)."))
@@ -566,6 +576,12 @@ def check_codex_frontmatter(doc: SkillDoc, *, min_desc_len: int) -> List[Finding
             out.append(Finding(Level.FAIL, "FM_NAME_TOO_LONG", f"`name` too long ({len(name)} > 100)."))
         if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name.strip()):
             out.append(Finding(Level.WARN, "FM_NAME_STYLE", "Consider kebab-case name (lowercase + hyphens)."))
+
+    if metadata is not None:
+        if not isinstance(metadata, dict):
+            out.append(Finding(Level.WARN, "FM_METADATA_NOT_MAPPING", "`metadata` should be a YAML mapping when present."))
+        elif not metadata.get("version"):
+            out.append(Finding(Level.WARN, "FM_METADATA_VERSION_MISSING", "`metadata.version` is recommended for local Tessl review compatibility."))
 
     if not isinstance(desc, str) or not desc.strip():
         out.append(Finding(Level.FAIL, "FM_DESC_MISSING", "Missing/invalid `description` (required)."))
@@ -623,7 +639,7 @@ def check_progressive_disclosure(doc: SkillDoc, *, max_lines: int, max_codeblock
         out.append(Finding(
             Level.FAIL,
             "PD_SKILLMD_TOO_LONG",
-            f"SKILL.md exceeds line budget ({total_lines} > {max_lines}). Move bulk content to Infrastructure/references/ and Infrastructure/scripts/.",
+            f"SKILL.md exceeds line budget ({total_lines} > {max_lines}). Move bulk content to references/ and scripts/.",
         ))
 
     blocks = _code_fence_blocks(doc.body)
@@ -633,7 +649,7 @@ def check_progressive_disclosure(doc: SkillDoc, *, max_lines: int, max_codeblock
             out.append(Finding(
                 Level.WARN,
                 "PD_LARGE_CODEBLOCK",
-                f"Large code block detected ({blines} lines). Prefer Infrastructure/scripts/ and reference them from SKILL.md.",
+                f"Large code block detected ({blines} lines). Prefer scripts/ and reference them from SKILL.md.",
                 evidence=f"codeblock #{i}: {blines} lines",
             ))
 
@@ -1134,7 +1150,7 @@ def check_security_eval_coverage(skill_dir: Path, *, require_security_evals: boo
                 Finding(
                     Level.FAIL,
                     "SEC_EVALS_MISSING",
-                    "Infrastructure/references/evals.yaml not found; required when --require-security-evals is set.",
+                    "references/evals.yaml not found; required when --require-security-evals is set.",
                 )
             )
         return out
@@ -1223,7 +1239,7 @@ def check_security_eval_coverage(skill_dir: Path, *, require_security_evals: boo
 
     level = Level.FAIL if require_security_evals else Level.WARN
     for code, message in missing:
-        out.append(Finding(level, code, message, evidence="Infrastructure/references/evals.yaml"))
+        out.append(Finding(level, code, message, evidence="references/evals.yaml"))
 
     return out
 
@@ -1503,6 +1519,40 @@ def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require
                                 "EVALS_BUDGETS_SHAPE",
                                 f"Case #{i} `budgets` must be a mapping when provided.",
                             ))
+                        elif isinstance(c.get("budgets"), dict):
+                            min_signal = c["budgets"].get(EXPECTED_SIGNAL_BUDGET_KEY)
+                            if min_signal is not None and parse_min_expected_signal_score(c["budgets"]) is None:
+                                out.append(Finding(
+                                    Level.FAIL,
+                                    "EVALS_MIN_EXPECTED_SIGNAL_SCORE_SHAPE",
+                                    f"Case #{i} `budgets.{EXPECTED_SIGNAL_BUDGET_KEY}` must be numeric when provided.",
+                                ))
+
+                        if "expected_signals" in c:
+                            signals = c["expected_signals"]
+                            if not isinstance(signals, dict):
+                                out.append(Finding(
+                                    Level.FAIL,
+                                    "EVALS_EXPECTED_SIGNALS_SHAPE",
+                                    f"Case #{i} `expected_signals` must be a mapping when provided.",
+                                ))
+                            else:
+                                for signal_key, signal_value in signals.items():
+                                    if signal_key not in EXPECTED_SIGNAL_KEYS:
+                                        out.append(Finding(
+                                            Level.WARN,
+                                            "EVALS_EXPECTED_SIGNALS_UNKNOWN_KEY",
+                                            (
+                                                f"Case #{i} `expected_signals.{signal_key}` is not used by the local eval runner. "
+                                                f"Known keys: {', '.join(sorted(EXPECTED_SIGNAL_KEYS))}."
+                                            ),
+                                        ))
+                                    if not isinstance(signal_value, list):
+                                        out.append(Finding(
+                                            Level.FAIL,
+                                            "EVALS_EXPECTED_SIGNALS_LIST_SHAPE",
+                                            f"Case #{i} `expected_signals.{signal_key}` must be a list.",
+                                        ))
             except Exception as e:
                 out.append(Finding(Level.FAIL, "EVALS_INVALID", f"evals.yaml invalid: {e}"))
 
@@ -1521,8 +1571,8 @@ def check_repo_references(doc: SkillDoc) -> List[Finding]:
 
     if scripts:
         names = [p.name for p in scripts]
-        if not _has_any(body, ["Infrastructure/scripts/"] + names):
-            out.append(Finding(Level.WARN, "REPO_SCRIPTS_UNREFERENCED", "Infrastructure/scripts/ exists but is not referenced in SKILL.md."))
+        if not _has_any(body, ["scripts/"] + names):
+            out.append(Finding(Level.WARN, "REPO_SCRIPTS_UNREFERENCED", "scripts/ exists but is not referenced in SKILL.md."))
 
     for rel_dir, files in [("references", refs), ("assets", assets)]:
         if files:
@@ -1698,8 +1748,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Require frontmatter to start on line 1 with `---`.",
     )
 
-    p.add_argument("--no-require-contract", action="store_true", help="Do not require Infrastructure/references/contract.yaml.")
-    p.add_argument("--no-require-evals", action="store_true", help="Do not require Infrastructure/references/evals.yaml.")
+    p.add_argument("--no-require-contract", action="store_true", help="Do not require references/contract.yaml.")
+    p.add_argument("--no-require-evals", action="store_true", help="Do not require references/evals.yaml.")
     p.add_argument("--no-require-philosophy", action="store_true", help="Do not require a Philosophy/Principles section.")
     p.add_argument("--no-require-redaction", action="store_true", help="Do not require redaction language in Constraints/Safety.")
     p.add_argument("--require-fail-fast", action="store_true", help="Require fail-fast language in Validation section (FAIL if absent).")

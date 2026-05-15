@@ -1,25 +1,5 @@
 # Agent Skills
 
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
-A governed **Agent Skills Kit** repository for Codex and AI coding agents. Author skills once, validate quality, expose `$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI.
-
 A governed **Agent Skills Kit** repository for Codex and AI coding agents.
 Author skills once, validate quality, expose `$` command handles, and sync
 routed skills and plugins into runtime projections through the `ask` CLI.
@@ -30,12 +10,10 @@ coding agents.
 Teach your coding agents how your work actually works, then prove they
 remembered.
 
-This repository currently exposes **32 skills** in the default catalog: root
+This repository currently exposes **33 skills** in the default catalog: root
 routers plus policy-promoted command handles. The rooted command surface
-contains **108 generated `$` handles**, backed by first-party canonical skill
-source across 7 topic clusters (agent-ops: 44, backend-platform: 4,
-content-publishing: 6, frontend-ui: 10, mobile-native: 1, product-strategy: 3,
-security-ops: 5). Author a capability once, route it intelligently, validate
+contains **105 generated `$` handles**, backed by first-party canonical skill
+source across 7 topic clusters (agent-ops: 45, backend-platform: 4, content-publishing: 6, frontend-ui: 10, mobile-native: 1, product-strategy: 3, security-ops: 5). Author a capability once, route it intelligently, validate
 quality, project it safely into runtime, and keep the human and agent command
 surface small enough to use.
 
@@ -49,7 +27,8 @@ surface small enough to use.
 - **Prevent drift** - Separate canonical source from generated manifests,
   runtime projections, plugin caches, and historical evidence.
 - **Prove quality** - Use `ask` for audits, runtime budget checks, repo surface
-  ownership, workout/eval evidence, and machine-readable closeout.
+  ownership, workout/eval evidence, Codex review closeout, and
+  machine-readable completion evidence.
 
 Start with the executable agent path below. The product framing and proof
 contract live in [Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md).
@@ -158,6 +137,10 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 
 # Verify generated command handles match rooted manifests
 ./bin/ask skills handles --check --check-command-handles --json
+
+# Run Codex review closeout on dirty or branch work
+./bin/ask skills resolve codex-review --json
+bash Skills/agent-ops/codex-review/scripts/codex-review --help
 ```
 
 `ask skills external-review` is a local/internal validation lane for comparing
@@ -193,6 +176,10 @@ context that would not be self-contained in an external tile package.
 
 # What must pass before I claim done?
 ./bin/ask repo closeout --changed --json --robot
+
+# When review evidence is required before shipping
+./bin/ask skills resolve codex-review --json --robot
+bash Skills/agent-ops/codex-review/scripts/codex-review --mode auto
 ```
 
 ### Manage lifecycle
@@ -321,7 +308,7 @@ This table is a human-oriented grouping for quick navigation and is not used for
 
 | Topic              | Skills | Examples                                              |
 | ------------------ | ------ | ----------------------------------------------------- |
-| agent-ops          | 44     | docs-expert, autofix, unslopify, simplify             |
+| agent-ops          | 49     | docs-expert, codex-review, autofix, simplify          |
 | frontend-ui        | 10     | baseline-ui, frontend-ui-design, ui-visual-regression |
 | backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer               |
 | product-strategy   | 3      | architecture-interview, deep-interview, interview-me  |
@@ -340,7 +327,7 @@ agent-skills/
 |-- .workouts/                # Canonical skill workout fixtures
 |
 |-- Skills/                   # All canonical skills organised by topic cluster
-|   |-- agent-ops/            # 44 skills: docs-expert, autofix, unslopify, simplify, ...
+|   |-- agent-ops/            # 49 skills: docs-expert, codex-review, autofix, simplify, ...
 |   |-- frontend-ui/          # 10 skills: baseline-ui, frontend-ui-design, ui-visual-regression, ...
 |   |-- backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, ...
 |   |-- product-strategy/     #  3 skills: architecture-interview, deep-interview, interview-me

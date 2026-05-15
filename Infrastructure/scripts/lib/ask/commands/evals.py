@@ -8,7 +8,7 @@ from ask.envelope import CallResult, ErrorObject
 from ask.skill_review_dashboard import render_skill_review_dashboard
 
 
-SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts"
+SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/scripts/skill-builder"
 SMOKE_CASE_TIMEOUT_SECONDS = 600
 SMOKE_EVAL_TIMEOUT_SECONDS = 10800
 RELEASE_EVAL_TIMEOUT_SECONDS = 21600
@@ -135,17 +135,24 @@ def _render_eval_dashboard(repo_root: Path, skill_path: str, mode: str, raw_outp
     }
 
 
-def run_evals(repo_root: Path, path: str, mode: str = "smoke", dashboard: bool = True) -> CallResult:
+def run_evals(
+    repo_root: Path,
+    path: str,
+    mode: str = "smoke",
+    dashboard: bool = True,
+    runner: str = "codex",
+) -> CallResult:
     """Runs evaluation cases for a skill."""
     result = CallResult()
 
     cmd = [
         sys.executable, f"{SKILL_BUILDER_SCRIPTS}/run_skill_evals.py",
         path,
-        "--eval-mode", mode
+        "--eval-mode", mode,
+        "--runner", runner,
     ]
     timeout = RELEASE_EVAL_TIMEOUT_SECONDS if mode == "release" else 300
-    if mode == "smoke":
+    if mode == "smoke" and runner == "codex":
         cmd.extend([
             "--model",
             SMOKE_EVAL_MODEL,
@@ -154,6 +161,8 @@ def run_evals(repo_root: Path, path: str, mode: str = "smoke", dashboard: bool =
             "--codex-arg",
             "--ignore-user-config",
         ])
+        timeout = SMOKE_EVAL_TIMEOUT_SECONDS
+    elif mode == "smoke":
         timeout = SMOKE_EVAL_TIMEOUT_SECONDS
 
     try:

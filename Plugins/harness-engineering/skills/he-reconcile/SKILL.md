@@ -2,6 +2,7 @@
 name: he-reconcile
 description: "Analyze repo, tracker, PR, validation, session, and .harness evidence. Use when multi-stage Harness Engineering work needs safe resume routing."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 
@@ -36,6 +37,7 @@ provenance, PR safety trace status, and handoff.
 Resolve canonical repo/source and cited evidence before treating it as fact.
 Classify side effects before acting. Learning capture is out of scope and must
 hand off to `he-reinforce`.
+Start with 2-3 focused surfaces before widening.
 
 ## Procedure
 1. Reconstruct lifecycle state from live repo, tracker, PR, validation, session,
@@ -67,6 +69,8 @@ systems, refresh Project Brain, create learnings, or perform destructive
 actions without explicit authority. A route or `safe_to_continue` status cannot
 authorize implementation, tracker mutation, sync/install, destructive cleanup,
 - See references/hot-path-folded-context.md for folded safety boundaries detail.
+Redact secrets, credentials, API keys, tokens, PII, and sensitive local data by
+default.
 
 ## Failure Handling
 If evidence, tracker linkage, source baseline, route, destination, or authority
@@ -87,6 +91,13 @@ Structured output: `schema_version`, `mode`, `stage_map`,
 `source_prompt_coverage`, `repeated_failure_state`, `blackboard_delta`,
 `retained_references`, `validation`, `git_staging_status`, `staged_paths`,
 `codex_provenance`, `pr_safety_trace`, `handoff`, and `blocked_reason`.
+
+## Examples
+- When the user asks to inspect `.harness/session-evidence/latest.md` and it
+  conflicts with `.harness/plan/JSC-246-plan.md`, route to the earliest
+  incomplete stage and mark stale plan evidence as degraded.
+- When the user asks to validate closure from implementation status alone, route
+  to `he-eval-report` instead of declaring completion.
 
 ## Gotchas
 - State reconstruction and routing only; not implementation.

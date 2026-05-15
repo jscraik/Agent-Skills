@@ -13,12 +13,13 @@ Do not hand-edit runtime projections.
 - [Summary](#summary)
 - [Catalog](#catalog)
 - [.Agents — Skills](#.agents-skills)
+- [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 32
+- `total_skills`: 33
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: 0194570d229fbe4d
+- `policy_identity`: e2574136d9411e33
 
 ## Catalog
 
@@ -33,6 +34,7 @@ Do not hand-edit runtime projections.
 - `codex-agent-creator` — Internal entrypoint for Codex Agent Creator. Use only when named as $codex-agent-creator.
 - `codex-automation-architect` — Internal entrypoint for Codex Automation Architect. Use only when named as $codex-automation-architect.
 - `codex-hooks-builder` — Internal entrypoint for Codex Hooks Builder. Use only when named as $codex-hooks-builder.
+- `codex-review` — Internal entrypoint for Codex Review. Use only when named as $codex-review.
 - `coding-harness` — Internal entrypoint for Coding Harness. Use only when named as $coding-harness.
 - `content-publishing` — Route writing, publishing, editorial, docs, and content operations work while keeping detailed content modules latent.
 - `context7` — Internal entrypoint for Context7. Use only when named as $context7.
@@ -40,7 +42,6 @@ Do not hand-edit runtime projections.
 - `fix-mise` — Internal entrypoint for Fix Mise. Use only when named as $fix-mise.
 - `frontend-ui` — Route frontend interface, design-system, browser, and user-experience work while keeping component-level skills latent until selected.
 - `harness-engineering` — Route Harness Engineering lifecycle and session-evidence requests when users need brainstorming, planning, implementation, review, fixes, heartbeats, or prior-run improvement.
-- `imagegen` — Internal entrypoint for Imagegen. Use only when named as $imagegen.
 - `improve-codebase-architecture` — Internal entrypoint for Improve Codebase Architecture. Use only when named as $improve-codebase-architecture.
 - `keep-codex-fast` — Internal entrypoint for Keep Codex Fast. Use only when named as $keep-codex-fast.
 - `mobile-native` — Route mobile-native app, platform, device, and app-store work without loading unrelated implementation skills.
@@ -56,4 +57,8 @@ Do not hand-edit runtime projections.
 - `triage` — Internal entrypoint for Triage. Use only when named as $triage.
 - `ubiquitous-language` — Internal entrypoint for Ubiquitous Language. Use only when named as $ubiquitous-language.
 - `verification-before-completion` — Internal entrypoint for Verification Before Completion. Use only when named as $verification-before-completion.
+
+## Skills System
+
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
 

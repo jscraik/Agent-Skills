@@ -2,6 +2,7 @@
 name: he-fix-bugs
 description: "Debug and repair validated Harness Engineering defects with bounded scope, reproduction evidence, root-cause notes, regression protection, and validation proof. Use when a bug is already evidenced and the fix should not expand into broad improvement work."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 # Harness Engineering Fix Bugs

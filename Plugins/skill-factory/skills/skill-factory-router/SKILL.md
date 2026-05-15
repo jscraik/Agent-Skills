@@ -1,6 +1,6 @@
 ---
 name: skill-factory-router
-description: "Routes Codex skill lifecycle requests to one Skill Factory lane. Use when users ask to create a skill, skillify a workflow, fix or audit a skill, improve skill quality, analyze routing failures, install a skill, or decide whether to keep, merge, split, or retire skill guidance."
+description: "Routes Codex skill lifecycle requests by selecting one Skill Factory lane, mode, and handoff. Use when users ask to create a skill, skillify a workflow, fix or audit a skill, improve skill quality, analyze routing failures, install a skill, or decide whether to keep, merge, split, or retire skill guidance."
 metadata:
   version: "1.0.0"
   skill-type: team_automation
@@ -57,7 +57,19 @@ Explicit lane names win unless the user names multiple lanes or asks for an unsa
 
 ## Handoff Template
 
-Return: `schema_version: 1`, `selected_lane`, `mode`, `rationale`, `next_step`, and `blocked_by`. Example: `selected_lane: skill-builder`, `mode: harden`, and `next_step: read the skill-builder workflow and patch the canonical target skill`.
+Return:
+
+```yaml
+schema_version: 1
+selected_lane: .system/skill-creator|skillify|skill-builder|skill-refactor|.system/skill-installer
+mode: create|capture|harden|analyze|install
+rationale: <one sentence tied to the request shape>
+next_step: <specific skill or system lane to load next>
+first_principles_check:
+  required: true|false
+  result: skill|docs|script|hook|validator|rule|answer|not_checked
+blocked_by: null
+```
 
 ## Examples
 
@@ -66,7 +78,21 @@ Return: `schema_version: 1`, `selected_lane`, `mode`, `rationale`, `next_step`, 
 - When the user asks, "Which HE skill should we merge or retire after these session failures?" -> `selected_lane: skill-refactor`, `mode: analyze`.
 - When the user says, "Install this skill and validate Codex can see it." -> `selected_lane: .system/skill-installer`, `mode: install`.
 
-## Constraints
+Example return:
+
+```yaml
+schema_version: 1
+selected_lane: skill-builder
+mode: harden
+rationale: The user has an existing skill with Tessl and local audit findings.
+next_step: Load skill-builder, patch the canonical target skill, then rerun strict audit and local external review.
+first_principles_check:
+  required: false
+  result: not_checked
+blocked_by: null
+```
+
+## Constraints And Boundaries
 
 - Keep routing read-only.
 - Prefer explicit user lane names unless multiple lanes or unsafe actions are requested.
@@ -75,7 +101,6 @@ Return: `schema_version: 1`, `selected_lane`, `mode`, `rationale`, `next_step`, 
 
 ## Execution Boundaries
 
-- This router is read-only.
 - Do not edit, install, sync, refresh projections, publish, or mutate trackers here.
 - Do not load every reference before selecting a lane.
 - Treat archive and deferred-store content as historical evidence, not live runtime context.

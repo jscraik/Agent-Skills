@@ -12,7 +12,7 @@ Turn a proven workflow into a reusable skill package. Preserve repeatable behavi
 
 ## Philosophy
 
-Capture the smallest validated workflow. Prefer current evidence, clear triggers, local checks, and the smallest viable package boundary.
+Start with 2-3 focused surfaces and capture the smallest validated workflow.
 
 ## When To Use
 
@@ -44,15 +44,7 @@ Ask one direct question if destination, owner, or repeatability is unclear.
 
 ## Extraction Checklist
 
-| Field | Capture |
-| --- | --- |
-| Triggers | Natural phrases plus close variants |
-| Anti-triggers | Similar requests to hand off or decline |
-| Inputs/outputs | Required paths, owners, commands, final artifact shape |
-| Safety/tools | Side effects, approvals, required commands or tools |
-| Validation | Smallest local proof command |
-
-Stop before writing when source evidence cannot fill triggers, inputs, outputs, and validation.
+Capture trigger phrases, anti-triggers, required inputs, final output shape, side effects, approvals, required tools, and the smallest local proof command. Stop before writing when source evidence cannot fill triggers, inputs, outputs, and validation.
 
 ## Minimal Package
 
@@ -60,9 +52,26 @@ Create this minimal package: `<skill-name>/SKILL.md`, `references/contract.yaml`
 
 Add `scripts/`, `assets/`, or extra references only when needed.
 
+Minimal `SKILL.md` body: frontmatter with `name`, trigger-rich `description`, and `metadata.version`; then `When To Use`, `Inputs`, `Workflow`, `Output Template`, `Execution Boundaries`, `Anti-Patterns`, and `Validation` sections. The validation section must say to run `./bin/ask skills audit <skill-path> --level strict --json --robot` and fail fast at the first failed gate.
+
 ## Output Template
 
-Return: `schema_version: 1`, `mode: create_skill`, `skill_path`, `source_evidence`, `first_principles_gate`, `files_changed`, `validation`, and `blocked_by`.
+Return:
+
+```yaml
+schema_version: 1
+mode: create_skill
+skill_path: <canonical package path>
+source_evidence: [<bounded report or workflow note>]
+first_principles_gate:
+  decision: BUILD_SKILL|USE_DOCS|USE_SCRIPT|USE_RULE|ANSWER_DIRECTLY
+  reason: <why this is the smallest durable artifact>
+files_changed: [<path>]
+validation:
+  - command: <exact command>
+    outcome: pass|fail|blocked
+blocked_by: null
+```
 
 ## Examples
 
@@ -73,6 +82,8 @@ Expected output: create `SKILL.md` with frontmatter name `release-triage`, a des
 Also add `references/contract.yaml` with owner `release-engineering`, side effect class `repo-write`, required release/repository inputs, expected blocker and recommendation outputs, and validation command `./bin/ask repo closeout --changed --json --robot`.
 
 Add `references/evals.yaml` with one CI failure scenario and one missing-evidence scenario that requires asking for the release identifier rather than inventing state.
+
+Example return: `skill_path: Plugins/release/skills/release-triage`, `first_principles_gate.decision: BUILD_SKILL`, `files_changed: [SKILL.md, references/contract.yaml, references/evals.yaml]`, and validation command `./bin/ask skills audit Plugins/release/skills/release-triage --level strict --json --robot` with outcome `pass`.
 
 ## Constraints
 
@@ -121,4 +132,4 @@ If repeatability, ownership, or validation cannot be proven, stop and return a b
 
 Run `./bin/ask skills audit <skill-path> --level strict --json --robot`, then `python3 Infrastructure/bin/ask skills external-review <skill-path> --audit-level compat --json`.
 
-Fail fast: stop at the first failed required gate, classify it, and do not proceed to sync, commit, publish, or install until fixed or explicitly blocked.
+Fail fast: stop at the first failed gate, classify it, and do not proceed to sync, commit, publish, or install until fixed or explicitly blocked.

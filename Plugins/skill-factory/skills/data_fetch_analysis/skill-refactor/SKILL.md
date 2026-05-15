@@ -12,7 +12,7 @@ Analyze bounded evidence about skill reliability and turn it into a lifecycle de
 
 ## Philosophy
 
-Make lifecycle decisions from bounded evidence. Prefer a narrow, reversible recommendation over broad skill churn from weak signals.
+Decide from bounded evidence; prefer narrow, reversible lifecycle moves.
 
 ## When To Use
 
@@ -50,6 +50,10 @@ Prefer bounded reports over raw transcripts. Summarize sensitive evidence instea
 5. Recommend one lane: keep, observe, improve, capture, merge/fold with approval, or retire with approval.
 6. If recommending `skill-builder`, include concrete repair items: target file, finding class, expected gate, minimum patch surface, and blocker.
 
+## Validation Checkpoints
+
+Each finding cites one current source, uses one primary root-cause label, and stops at the first failed gate. Merge, fold, retire, install, publish, and projection refresh decisions become explicit approval handoffs. `skill-builder` handoffs name target file, finding class, expected gate, minimum patch surface, and residual risk.
+
 ## Root Cause Labels
 
 - coverage gap
@@ -65,27 +69,36 @@ Prefer bounded reports over raw transcripts. Summarize sensitive evidence instea
 
 ## Evidence Strength
 
-| Strength | Requirement |
-| --- | --- |
-| weak | One unconfirmed signal or stale artifact |
-| moderate | One current report plus matching local evidence |
-| strong | Two independent current evidence anchors or one user-corrected failure plus matching validation |
+- weak: one unconfirmed signal or stale artifact.
+- moderate: one current report plus matching local evidence.
+- strong: two independent current anchors, or one user-corrected failure plus matching validation.
 
 Do not recommend broad canonical changes from weak evidence.
 
 ## Output Template
 
-Return: `schema_version: 1`, `mode: skill_lifecycle_analysis`, `scope`, `evidence_strength`, `evidence_anchors`, `root_causes`, `recommendation`, `builder_repair_items`, `validation_status`, and `blocked_by`.
+Use this shape:
+
+```yaml
+schema_version: 1
+mode: skill_lifecycle_analysis
+scope: <skill-or-plugin-family>
+evidence_strength: weak|moderate|strong
+evidence_anchors: [{source: <path-or-command>, signal: <what-it-proves>}]
+root_causes: [{label: <root-cause-label>, evidence: <short citation>}]
+recommendation: keep|observe|improve_with_skill_builder|capture|merge_with_approval|retire_with_approval
+builder_repair_items:
+  - target_file: <canonical source path>
+    finding_class: trigger|content|eval|budget|reference|safety|validation
+validation_status: pass|fail|blocked|not_run
+blocked_by: null
+```
 
 ## Examples
 
 When the user says, "Plugin Eval and Tessl disagree on this skill; can you inspect the evidence and recommend the lifecycle lane?", use this analysis shape.
 
-Expected analysis:
-- Evidence strength: moderate, because two evaluators disagree.
-- Root cause: reader-contract gap and missing worked example.
-- Recommendation: `improve_with_skill_builder`.
-- Repair item: add compact inline workflow and output template, then rerun `ask skills external-review`.
+Expected analysis: evidence strength `moderate`, root cause `reader-contract gap`, recommendation `improve_with_skill_builder`, repair class `content`, and expected gate `ask skills external-review`.
 
 ## Constraints
 
@@ -128,4 +141,4 @@ If evidence is stale, missing, contradictory, or too broad, return `blocked_by` 
 
 Run `./bin/ask skills audit Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --level strict --json --robot`, then `python3 Infrastructure/bin/ask skills external-review Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --audit-level compat --json`.
 
-Fail fast: stop at the first failed required gate, classify it, and do not proceed to sync, commit, publish, or install until it is fixed or explicitly blocked.
+Fail fast: stop at the first failed gate, classify it, and do not proceed to sync, commit, publish, or install until it is fixed or explicitly blocked.

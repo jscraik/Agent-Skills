@@ -3,8 +3,22 @@ from __future__ import annotations
 import html
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+SKILL_BUILDER_SCRIPT_DIR = REPO_ROOT / "Plugins" / "skill-factory" / "scripts" / "skill-builder"
+if str(SKILL_BUILDER_SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SKILL_BUILDER_SCRIPT_DIR))
+
+from eval_signal_contract import (  # noqa: E402
+    EXPECTED_SIGNAL_COMPOSITE_KEY,
+    EXPECTED_SIGNAL_FORBIDDEN_FOUND_KEY,
+    EXPECTED_SIGNAL_METRIC_KEY,
+    EXPECTED_SIGNAL_MISSING_KEY,
+    EXPECTED_SIGNAL_RISK_FACTORS_KEY,
+)
 
 
 def _as_dict(value: Any) -> dict[str, Any]:
@@ -151,6 +165,28 @@ def _case_runner_status(case: dict[str, Any]) -> tuple[int, str, list[str]]:
     return 0, "not passed", []
 
 
+def _case_expected_signal_notes(case: dict[str, Any]) -> tuple[int | None, list[str]]:
+    scores: list[int] = []
+    notes: list[str] = []
+    for runner in _as_dict(case.get("runners")).values():
+        if not isinstance(runner, dict):
+            continue
+        expected = _as_dict(_as_dict(runner.get("metrics")).get(EXPECTED_SIGNAL_METRIC_KEY))
+        score = expected.get(EXPECTED_SIGNAL_COMPOSITE_KEY)
+        if isinstance(score, int):
+            scores.append(score)
+        notes.extend(str(item) for item in _as_list(expected.get(EXPECTED_SIGNAL_RISK_FACTORS_KEY)))
+        missing = _as_list(expected.get(EXPECTED_SIGNAL_MISSING_KEY))
+        forbidden = _as_list(expected.get(EXPECTED_SIGNAL_FORBIDDEN_FOUND_KEY))
+        if missing:
+            notes.append(f"missing signals: {len(missing)}")
+        if forbidden:
+            notes.append(f"forbidden signals: {len(forbidden)}")
+    if not scores:
+        return None, []
+    return round(sum(scores) / len(scores)), notes[:4]
+
+
 def _scorecard_percent(scorecard: dict[str, Any]) -> int:
     cases = [
         case
@@ -201,6 +237,10 @@ def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[st
         if not isinstance(case, dict):
             continue
         score, status, notes = _case_runner_status(case)
+        signal_score, signal_notes = _case_expected_signal_notes(case)
+        if isinstance(signal_score, int):
+            notes.append(f"expected signals: {signal_score}%")
+        notes.extend(signal_notes)
         if status == "blocked":
             blocked += 1
         elif score == 100:
@@ -213,6 +253,7 @@ def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[st
             "baseline_score": None,
             "status": status,
             "notes": notes,
+            "expected_signal_score": signal_score,
             "runner_mode": scorecard.get("runner_mode") or "unknown",
         })
     total = len(cases)
@@ -245,6 +286,7 @@ def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[st
         "eval_mode": scorecard.get("eval_mode"),
         "previous_score": previous_score,
         "trend_ratio": trend_ratio,
+        "expected_signal_summary": scorecard.get("expected_signal_summary"),
     }
 
 

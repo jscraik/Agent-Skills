@@ -2,7 +2,7 @@
 """OpenClaw-style skill operational-readiness + security-risk guard.
 
 Usage:
-  python Infrastructure/scripts/openclaw_skill_guard.py <skill-dir> [--mode readiness|security|both] [--format text|json]
+  python Plugins/skill-factory/scripts/skill-builder/openclaw_skill_guard.py <skill-dir> [--mode readiness|security|both] [--format text|json]
 
 Exit codes:
   0 pass (no critical findings)
@@ -139,18 +139,18 @@ def readiness_checks(skill_dir: Path) -> List[Finding]:
         out.append(Finding("critical", "readiness.frontmatter_invalid", "SKILL.md frontmatter missing name/description", "SKILL.md"))
 
     if not refs.exists():
-        out.append(Finding("warn", "readiness.references_missing", "Missing Infrastructure/references/ directory"))
+        out.append(Finding("warn", "readiness.references_missing", "Missing references/ directory"))
     else:
         if not (refs / "contract.yaml").exists():
-            out.append(Finding("warn", "readiness.contract_missing", "Missing Infrastructure/references/contract.yaml"))
+            out.append(Finding("warn", "readiness.contract_missing", "Missing references/contract.yaml"))
         if not (refs / "evals.yaml").exists():
-            out.append(Finding("warn", "readiness.evals_missing", "Missing Infrastructure/references/evals.yaml"))
+            out.append(Finding("warn", "readiness.evals_missing", "Missing references/evals.yaml"))
 
     scripts = skill_dir / "scripts"
     if scripts.exists():
         py_or_js = list(scripts.rglob("*.py")) + list(scripts.rglob("*.js")) + list(scripts.rglob("*.ts"))
         if not py_or_js:
-            out.append(Finding("info", "readiness.scripts_empty", "Infrastructure/scripts/ exists but has no .py/.js/.ts files"))
+            out.append(Finding("info", "readiness.scripts_empty", "scripts/ exists but has no .py/.js/.ts files"))
 
     out.append(Finding("info", "readiness.checked", "Operational readiness checks completed"))
     return out

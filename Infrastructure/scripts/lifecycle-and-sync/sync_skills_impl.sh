@@ -666,6 +666,14 @@ if [ "$skills_dir_writable" = "1" ]; then
     skill_dir_abs="$repo_root/$skill_dir"
     discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
     if is_plugin_owned_skill_path "$skill_path"; then
+      if [ -e "$skills_dir/$skill_name" ] || [ -L "$skills_dir/$skill_name" ]; then
+        if rm -rf -- "${skills_dir:?}/${skill_name:?}"; then
+          echo "Removed stale plugin-owned flat skill: $skill_name"
+        else
+          echo "[WARN] Could not remove stale plugin-owned skill $skill_name at $skills_dir (continuing anyway)."
+          continue
+        fi
+      fi
       if ! is_plugin_visible_router_skill_name "$skill_name"; then
         echo "Skipping plugin-owned skill from flat projection: $skill_name"
         continue

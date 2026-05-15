@@ -47,10 +47,12 @@ from run_skill_evals import (
     _is_smoke_only_case,
     _write_junit_report,
     evaluate_assertions_text,
+    evaluate_expected_signals,
     load_evals,
     load_neutral_baseline_approvals,
     main,
     run_discovery_smoke,
+    summarize_expected_signal_results,
 )
 from deterministic_trace_checks import evaluate_trace
 
@@ -193,6 +195,85 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
         approvals = load_neutral_baseline_approvals(evals_path)
         self.assertIn("planner-approved-neutral-baseline-skill-builder", approvals)
+
+    def test_load_evals_parses_expected_signals(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: signal-case
+                        name: Signal case
+                        prompt: Check the skill.
+                        acceptance:
+                          - contains: done
+                        expected_signals:
+                          required_terms:
+                            - canonical source
+                          forbidden_terms:
+                            - runtime projection
+                        budgets:
+                          min_expected_signal_score: 90
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+
+        self.assertEqual(cases[0].expected_signals["required_terms"], ["canonical source"])
+        self.assertEqual(cases[0].expected_signals["forbidden_terms"], ["runtime projection"])
+        self.assertEqual(cases[0].budgets["min_expected_signal_score"], 90)
+
+    def test_expected_signals_score_missing_forbidden_and_flow_risk(self) -> None:
+        result = evaluate_expected_signals(
+            "Read SKILL.md, then edit the runtime projection, then run pytest.",
+            {
+                "required_terms": ["read SKILL.md", "record evidence"],
+                "forbidden_terms": ["runtime projection"],
+                "flow_steps": ["read SKILL.md", "record evidence", "run pytest"],
+            },
+        )
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertLess(result["composite"], 80)
+        self.assertIn("required term: record evidence", result["missing_signals"])
+        self.assertIn("forbidden term: runtime projection", result["forbidden_signals_found"])
+        self.assertIn("forbidden signals present", result["risk_factors"])
+
+    def test_expected_signal_summary_collects_risky_cases(self) -> None:
+        summary = summarize_expected_signal_results(
+            [
+                {
+                    "id": "case-a",
+                    "runners": {
+                        "discovery-smoke": {
+                            "metrics": {
+                                "expected_signals": {
+                                    "composite": 75,
+                                    "risk_factors": ["expected signal score below 80"],
+                                }
+                            }
+                        }
+                    },
+                },
+                {
+                    "id": "case-b",
+                    "runners": {
+                        "discovery-smoke": {
+                            "metrics": {"expected_signals": {"composite": 100, "risk_factors": []}}
+                        }
+                    },
+                },
+            ]
+        )
+
+        self.assertEqual(summary["runs"], 2)
+        self.assertEqual(summary["average"], 88)
+        self.assertEqual(summary["minimum"], 75)
+        self.assertEqual(summary["risky_cases"][0]["case"], "case-a")
 
     def test_smoke_mode_filters_release_only_and_pressure_cases(self) -> None:
         cases = [
@@ -543,6 +624,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                         name: discovery smoke
                         prompt: Help define the skill.
                         smoke_mode: discovery-round-one
+                        should_trigger: true
                         acceptance:
                           - contains: "Round 1 question:"
                     """
@@ -571,6 +653,8 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             release_manifest = json.loads((report_dirs[-1] / "release_manifest.json").read_text(encoding="utf-8"))
 
         self.assertIn("junit", summary["artifacts"])
+        self.assertEqual(summary["cases"][0]["warnings"], [])
+        self.assertTrue(summary["cases"][0]["runners"]["discovery-smoke"]["metrics"]["selected_skill"])
         self.assertIn("release_manifest", summary["artifacts"])
         self.assertEqual(release_manifest["artifacts"]["junit"], summary["artifacts"]["junit"])
         self.assertEqual(

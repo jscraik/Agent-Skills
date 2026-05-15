@@ -2,6 +2,7 @@
 name: he-spec
 description: "Create bounded, evidence-backed Harness Engineering specs from approved intent. Use when a selected issue, milestone, reframe phase, or execution slice needs acceptance criteria, traceability, risk gates, and validation boundaries before planning or implementation."
 metadata:
+  version: 1.0.0
   skill-type: product_verification
 ---
 
@@ -87,6 +88,13 @@ after stable acceptance and validation gates, and to hooks, CI, validators, MCP,
 or human approval for enforceable runtime behavior. Use specialists only when
 source evidence proves the risk.
 
+## Examples
+- When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,
+  start from the canonical Harness Engineering evidence and route the next action
+  with validation status.
+- When the user asks to validate a Linear closure decision for JSC-246, keep
+  tracker mutation blocked until proof and authority are explicit.
+
 ## Gotchas
 - Stage context is required; local docs do not replace tracker/source traceability.
 - Secondary strategy, triage, review, or feature docs are evidence only unless
@@ -103,6 +111,7 @@ cite commands, files, tracker objects, or blocked checks; never report 100%
 unless deterministic or directly proven.
 
 ## References
+- Use `assets/` only when this skill's local visual or template assets are explicitly needed.
 Read when: mode/artifact shape -> `references/spec-mode-rules.md`,
 `references/spec-artifact-contract.md`.
 Read when: prior Codex/session evidence matters ->

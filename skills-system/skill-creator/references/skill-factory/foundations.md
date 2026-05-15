@@ -11,6 +11,9 @@ superseded, or low-signal text.
 
 - Use the upstream `.system/skill-creator` `SKILL.md` as the base authoring
   procedure.
+- In Agent Skills Kit, use `./bin/ask skills init <skill-name> --category <Skills/category> --description "<routing description>" --json --robot` for repo-owned creation so writes land in canonical source.
+- Use `skills-system/skill-creator/scripts/init_skill.py` directly only outside Agent Skills Kit or for an explicitly unmanaged draft path.
+- Before creating a new skill, search the advanced skill inventory and nearby canonical sources for an owner to improve. Create a separate package only when the trigger, procedure, or lifecycle contract is distinct.
 - Keep Skill Factory additions under `skills-system/skill-creator/references/skill-factory/`.
 - Do not recreate a plugin-owned `Plugins/skill-factory/**/skill-creator/SKILL.md`.
 - For small private helper skills, infer conservatively and keep traceability

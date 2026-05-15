@@ -2,6 +2,7 @@
 name: he-improve
 description: "Improve existing Harness Engineering skills, references, contracts, and evals from concrete evidence such as failed evals, repeated review findings, usage traces, or documented regressions. Use when a bounded hardening pass is required; do not use for speculative redesign."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 
@@ -90,6 +91,13 @@ changes to the human operator.
 Use concise sections: `Routing`, `Evidence`, `Gaps`, `Patch`, `Validation`,
 `Stop Rule`, `Rollback`, `Risks`, and `Next Handoff`.
 
+## Examples
+- When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,
+  start from the canonical Harness Engineering evidence and route the next action
+  with validation status.
+- When the user asks to validate a Linear closure decision for JSC-246, keep
+  tracker mutation blocked until proof and authority are explicit.
+
 ## Gotchas
 - Path fragments and bundle names are evidence labels, not routing authority.
 - Product-surface compression usually belongs in shared contracts and evals
@@ -97,6 +105,7 @@ Use concise sections: `Routing`, `Evidence`, `Gaps`, `Patch`, `Validation`,
 - Session evidence is not a raw transcript dump; use a bounded evidence bundle.
 
 ## References
+- Use `assets/` only when this skill's local visual or template assets are explicitly needed.
 - Contract and eval routing: `references/contract.yaml`, `references/evals.yaml`.
 - Skill improvement loop: `Plugins/harness-engineering/references/skill-improvement-loop.md`.
 - Agent-native compression: `Plugins/harness-engineering/references/agent-native-compression-contract.md`.

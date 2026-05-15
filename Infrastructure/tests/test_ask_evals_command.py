@@ -43,6 +43,25 @@ def test_release_evals_do_not_force_smoke_model(tmp_path: Path) -> None:
     assert "--model" not in cmd
 
 
+def test_smoke_evals_can_use_discovery_smoke_without_codex_args(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            runner="discovery-smoke",
+        )
+
+    assert result.status == "success"
+    cmd = run.call_args.args[0]
+    assert "--runner" in cmd
+    assert cmd[cmd.index("--runner") + 1] == "discovery-smoke"
+    assert "--model" not in cmd
+    assert "--ignore-user-config" not in cmd
+
+
 def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
     scorecard_path = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-1/scorecard.json"
     scorecard_path.parent.mkdir(parents=True)
@@ -54,7 +73,25 @@ def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
             "runner_mode": "codex",
             "run_id": "run-1",
             "cases": [
-                {"id": "happy-path", "name": "Happy Path", "passed": True, "tier1_failures": [], "warnings": []}
+                {
+                    "id": "happy-path",
+                    "name": "Happy Path",
+                    "passed": True,
+                    "tier1_failures": [],
+                    "warnings": [],
+                    "runners": {
+                        "codex": {
+                            "metrics": {
+                                "expected_signals": {
+                                    "composite": 92,
+                                    "risk_factors": [],
+                                    "missing_signals": [],
+                                    "forbidden_signals_found": [],
+                                }
+                            }
+                        }
+                    },
+                }
             ],
         }),
         encoding="utf-8",
@@ -78,6 +115,7 @@ def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
     html_text = html_path.read_text(encoding="utf-8")
     assert "Evaluation Results" in html_text
     assert "Happy Path" in html_text
+    assert "expected signals: 92%" in html_text
     assert 'href="#evals"' in html_text
     assert 'data-auto-refresh-seconds="0"' in html_text
     assert "Static evidence snapshot" in html_text
@@ -175,3 +213,14 @@ def test_run_evals_can_skip_dashboard(tmp_path: Path) -> None:
 
     assert result.status == "success"
     assert "dashboard_path" not in result.data
+
+
+def test_dashboard_report_uses_canonical_skill_builder_scripts(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="Dashboard JSON: out.json\n", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+        result = evals.dashboard_report(tmp_path)
+
+    assert result.status == "success"
+    cmd = run.call_args.args[0]
+    assert cmd[1] == "Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py"

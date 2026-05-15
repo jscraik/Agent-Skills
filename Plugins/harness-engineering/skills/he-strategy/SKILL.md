@@ -2,6 +2,7 @@
 name: he-strategy
 description: "Compress HE cognition artifacts into evidence-backed strategy. Use when intent, review, triage, ADR, core, or source-prompt comparison evidence needs durable direction."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 
@@ -82,6 +83,13 @@ by stealth, stop and route only after an admitted execution slice exists.
   unresolved instruction conflicts.
 - Use hooks, CI, MCP tools, or validators for enforcement; this skill does not
 - See references/hot-path-folded-context.md for folded handoff rules detail.
+
+## Examples
+- When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,
+  start from the canonical Harness Engineering evidence and route the next action
+  with validation status.
+- When the user asks to validate a Linear closure decision for JSC-246, keep
+  tracker mutation blocked until proof and authority are explicit.
 
 ## Gotchas
 - Polished strategy can still be narrow evidence; label coverage limits.

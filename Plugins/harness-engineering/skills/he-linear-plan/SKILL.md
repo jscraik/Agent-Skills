@@ -2,6 +2,7 @@
 name: he-linear-plan
 description: "Convert approved HE cognition into small live-ready Linear execution tracking. Use when strategy, reframe, plan, bug, or source-prompt evidence needs scoped issue, milestone, or project routing with explicit confirmation before any live mutation."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 
@@ -91,6 +92,13 @@ Route architecture/strategy to `he-strategy`, reframes to `he-reframe`,
 ADRs or missing decision compression to the upstream ADR-producing HE step,
 specs/plans to the matching HE skill, and unapproved live Linear mutation to
 human confirmation. Connector/auth failure returns blocked plus payload.
+
+## Examples
+- When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,
+  start from the canonical Harness Engineering evidence and route the next action
+  with validation status.
+- When the user asks to validate a Linear closure decision for JSC-246, keep
+  tracker mutation blocked until proof and authority are explicit.
 
 ## Gotchas
 Linear is execution state; `.harness` keeps cognition and proof.

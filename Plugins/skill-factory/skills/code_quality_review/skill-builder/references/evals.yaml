@@ -5,6 +5,32 @@ neutral_baseline_approvals:
     rationale: archived fixture baseline for comparison contracts
     approved_by: archive-fixture
 cases:
+  - id: discovery-round-one-contract
+    name: discovery round one contract
+    category: happy
+    eval_modes: [smoke]
+    smoke_mode: discovery-round-one
+    realistic: false
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Improve the local skill-builder skill, but the user has not provided the target skill path, the failing score, or edit authority yet."
+    acceptance:
+      - {type: contains, value: "## Inputs"}
+      - {type: contains, value: "Round 1 question:"}
+      - {type: contains, value: "Why this matters"}
+  - id: discovery-confirmation-contract
+    name: discovery confirmation contract
+    category: happy
+    eval_modes: [smoke]
+    smoke_mode: discovery-round-six
+    realistic: false
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Confirm the final local-only skill-builder improvement summary before implementation starts, after discovery identified the target path, failing eval, and allowed edits."
+    acceptance:
+      - {type: contains, value: "## Skill Summary"}
+      - {type: contains, value: "Does this capture"}
+      - {type: contains, value: "Anything to add or change"}
   - id: happy-basic
     name: happy basic
     category: happy
@@ -93,6 +119,13 @@ cases:
     neutral_baseline_approval_id: planner-approved-neutral-baseline-skill-builder
     comparison_inputs: {prompt_set: frozen-first-response-contract}
     deterministic_checks: {forbidden_commands: ["rm -rf", "git push", "curl", "wget"]}
+    expected_signals:
+      required_terms:
+        - "## Inputs"
+        - "prior baseline"
+        - "local skill"
+      forbidden_terms:
+        - ".agents/skills"
     acceptance: [{type: contains, value: "## Inputs"}]
   - id: negative-nonmatch
     name: unrelated request

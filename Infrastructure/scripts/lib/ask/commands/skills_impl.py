@@ -570,6 +570,31 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
     readme_path = repo_root / "README.md"
     if readme_path.exists():
         readme_content = readme_path.read_text(encoding="utf-8")
+        command_surface_path = repo_root / ".skillsets" / "command-surface.json"
+        command_handle_count: int | None = None
+        if command_surface_path.exists():
+            try:
+                command_surface = json.loads(command_surface_path.read_text(encoding="utf-8"))
+                handles = command_surface.get("handles")
+                if isinstance(handles, list):
+                    command_handle_count = len(handles)
+            except (OSError, json.JSONDecodeError):
+                command_handle_count = None
+
+        manifest_counts: dict[str, int] = {}
+        skillsets_dir = repo_root / ".skillsets"
+        if skillsets_dir.exists():
+            for manifest_path in sorted(skillsets_dir.glob("*/manifest.jsonl")):
+                try:
+                    rows = [
+                        line
+                        for line in manifest_path.read_text(encoding="utf-8").splitlines()
+                        if line.strip()
+                    ]
+                except OSError:
+                    continue
+                manifest_counts[manifest_path.parent.name] = len(rows)
+
         updated_readme, replacements = re.subn(
             r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
             f"A governed repository of **{catalog_count} skills** for AI coding agents",
@@ -595,6 +620,52 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
             updated_readme,
             count=1,
         )
+        updated_readme = re.sub(
+            r"(?:A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\. Author skills once, validate quality, expose `\$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI\.\n\n)+(?=A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\.\nAuthor skills once)",
+            "",
+            updated_readme,
+        )
+        updated_readme = re.sub(
+            r"This repository currently exposes \*\*\d+ skills\*\* in the default catalog",
+            f"This repository currently exposes **{catalog_count} skills** in the default catalog",
+            updated_readme,
+            count=1,
+        )
+        if command_handle_count is not None:
+            updated_readme = re.sub(
+                r"contains \*\*\d+ generated `\$` handles\*\*",
+                f"contains **{command_handle_count} generated `$` handles**",
+                updated_readme,
+                count=1,
+            )
+        if manifest_counts:
+            preferred_order = (
+                "agent-ops",
+                "backend-platform",
+                "content-publishing",
+                "frontend-ui",
+                "mobile-native",
+                "product-strategy",
+                "security-ops",
+            )
+            cluster_counts = {
+                name: count
+                for name, count in manifest_counts.items()
+                if name in preferred_order
+            }
+            if cluster_counts:
+                cluster_summary = ", ".join(
+                    f"{name}: {cluster_counts[name]}"
+                    for name in preferred_order
+                    if name in cluster_counts
+                )
+                updated_readme = re.sub(
+                    r"source across \d+ topic clusters \([^)]*\)",
+                    f"source across {len(cluster_counts)} topic clusters ({cluster_summary})",
+                    updated_readme,
+                    count=1,
+                    flags=re.DOTALL,
+                )
         updated_readme = re.sub(
             r"currently expects \*\*\d+\*\* skills",
             f"currently expects **{catalog_count}** skills",
@@ -908,24 +979,25 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
         gates["generated_command_handle_check"],
         gates["workspace_command_handle_exists"],
     )
-    user_runtime_ready = (
-        (gates["codex_user_link"] and gates["codex_user_command_handle_exists"])
-        or (gates["agents_user_link"] and gates["agents_user_command_handle_exists"])
+    codex_runtime_ready = (
+        gates["codex_user_link"] and gates["codex_user_command_handle_exists"]
     )
     proof = {
         "schema_version": "command-handle-proof.v1",
         "handle": normalized,
-        "status": "pass" if all(core_gates) and user_runtime_ready else "fail",
+        "status": "pass" if all(core_gates) and codex_runtime_ready else "fail",
         "gates": gates,
         "gate_policy": {
             "required": [
                 "resolver",
                 "generated_command_handle_check",
                 "workspace_command_handle_exists",
-            ],
-            "user_runtime_any_of": [
                 "codex_user_link",
+                "codex_user_command_handle_exists",
+            ],
+            "supporting_runtime_diagnostics": [
                 "agents_user_link",
+                "agents_user_command_handle_exists",
             ],
         },
         "resolution": resolution,
@@ -2640,8 +2712,7 @@ def improve_skills(
     required = proof.get("gate_policy", {}).get("required", []) if isinstance(proof, dict) else []
     required_gates_passed = all(bool(gates.get(gate)) for gate in required)
     user_runtime_ready = bool(
-        (gates.get("codex_user_link") and gates.get("codex_user_command_handle_exists"))
-        or (gates.get("agents_user_link") and gates.get("agents_user_command_handle_exists"))
+        gates.get("codex_user_link") and gates.get("codex_user_command_handle_exists")
     )
     rationale = recommended.get("rationale") or []
     capability = {
@@ -2698,14 +2769,8 @@ def improve_skills(
                 )
                 fallback_required_gates_passed = all(bool(fallback_gates.get(gate)) for gate in fallback_required)
                 fallback_user_runtime_ready = bool(
-                    (
-                        fallback_gates.get("codex_user_link")
-                        and fallback_gates.get("codex_user_command_handle_exists")
-                    )
-                    or (
-                        fallback_gates.get("agents_user_link")
-                        and fallback_gates.get("agents_user_command_handle_exists")
-                    )
+                    fallback_gates.get("codex_user_link")
+                    and fallback_gates.get("codex_user_command_handle_exists")
                 )
                 improvement["status"] = "resolved_with_fallback"
                 improvement["route_state"] = "resolved_with_fallback"

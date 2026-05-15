@@ -8,6 +8,14 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+from eval_signal_contract import (
+    EXPECTED_SIGNAL_COMPOSITE_KEY,
+    EXPECTED_SIGNAL_FORBIDDEN_FOUND_KEY,
+    EXPECTED_SIGNAL_METRIC_KEY,
+    EXPECTED_SIGNAL_MISSING_KEY,
+    EXPECTED_SIGNAL_RISK_FACTORS_KEY,
+)
+
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Aggregate skill eval scorecards into dashboard JSON/Markdown.")
@@ -30,6 +38,14 @@ def _to_int(value: Any) -> int:
         except Exception:
             return 0
     return 0
+
+
+def _as_dict(value: Any) -> Dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: Any) -> List[Any]:
+    return value if isinstance(value, list) else []
 
 
 def load_scorecard(path: Path) -> Dict[str, Any]:
@@ -62,6 +78,49 @@ def collect_scorecards(root: Path) -> Dict[str, List[Tuple[str, Dict[str, Any]]]
     return by_skill
 
 
+def summarize_expected_signals(cases: List[Any]) -> Dict[str, Any]:
+    scores: List[int] = []
+    risky_cases: List[Dict[str, Any]] = []
+    missing_count = 0
+    forbidden_count = 0
+
+    for case in cases:
+        if not isinstance(case, dict):
+            continue
+        case_risks: List[str] = []
+        for runner in _as_dict(case.get("runners")).values():
+            if not isinstance(runner, dict):
+                continue
+            expected = _as_dict(_as_dict(runner.get("metrics")).get(EXPECTED_SIGNAL_METRIC_KEY))
+            score = expected.get(EXPECTED_SIGNAL_COMPOSITE_KEY)
+            if isinstance(score, int):
+                scores.append(score)
+            risks = [str(item) for item in _as_list(expected.get(EXPECTED_SIGNAL_RISK_FACTORS_KEY))]
+            missing = _as_list(expected.get(EXPECTED_SIGNAL_MISSING_KEY))
+            forbidden = _as_list(expected.get(EXPECTED_SIGNAL_FORBIDDEN_FOUND_KEY))
+            missing_count += len(missing)
+            forbidden_count += len(forbidden)
+            case_risks.extend(risks)
+            if missing:
+                case_risks.append(f"missing signals: {len(missing)}")
+            if forbidden:
+                case_risks.append(f"forbidden signals: {len(forbidden)}")
+        if case_risks:
+            risky_cases.append({
+                "case": case.get("id") or case.get("name") or "case",
+                EXPECTED_SIGNAL_RISK_FACTORS_KEY: case_risks[:4],
+            })
+
+    return {
+        "runs": len(scores),
+        "average": round(sum(scores) / len(scores)) if scores else None,
+        "minimum": min(scores) if scores else None,
+        "missing_signal_count": missing_count,
+        "forbidden_signal_count": forbidden_count,
+        "risky_cases": risky_cases,
+    }
+
+
 def summarize_run(obj: Dict[str, Any]) -> Dict[str, Any]:
     cases = obj.get("cases") if isinstance(obj.get("cases"), list) else []
     tier1 = 0
@@ -81,6 +140,8 @@ def summarize_run(obj: Dict[str, Any]) -> Dict[str, Any]:
         tier1 = _to_int(obj.get("tier1_failures", 0))
         tier2 = _to_int(obj.get("tier2_findings", 0))
 
+    expected_signal_summary = _as_dict(obj.get("expected_signal_summary")) or summarize_expected_signals(cases)
+
     return {
         "runner_mode": obj.get("runner_mode"),
         "tier2_mode": obj.get("tier2_mode"),
@@ -90,6 +151,7 @@ def summarize_run(obj: Dict[str, Any]) -> Dict[str, Any]:
         "tier2_cases": tier2,
         "passed": bool(obj.get("passed", tier1 == 0)),
         "path": obj.get("_path"),
+        "expected_signal_summary": expected_signal_summary,
     }
 
 
@@ -147,8 +209,8 @@ def to_markdown(dashboard: Dict[str, Any]) -> str:
     lines.append("")
     lines.append("## Latest by skill")
     lines.append("")
-    lines.append("| Skill | Cases | Tier1 failed | Tier2 | Passed | Trend (tier1/tier2) |")
-    lines.append("|---|---:|---:|---:|:---:|---:|")
+    lines.append("| Skill | Cases | Tier1 failed | Tier2 | Expected signals | Passed | Trend (tier1/tier2) |")
+    lines.append("|---|---:|---:|---:|---:|:---:|---:|")
 
     for skill, record in sorted(dashboard["skills"].items()):
         latest = record.get("latest") or {}
@@ -156,10 +218,13 @@ def to_markdown(dashboard: Dict[str, Any]) -> str:
         trend_text = "-"
         if trend:
             trend_text = f"{trend.get('tier1_delta', 0)}/{trend.get('tier2_delta', 0)}"
+        signal_summary = latest.get("expected_signal_summary") if isinstance(latest, dict) else {}
+        signal_average = _as_dict(signal_summary).get("average")
+        signal_text = f"{signal_average}%" if isinstance(signal_average, int) else "-"
 
         lines.append(
             "| "
-            + f"{skill} | {latest.get('cases', 0)} | {latest.get('tier1_failed_cases', 0)} | {latest.get('tier2_cases', 0)} | "
+            + f"{skill} | {latest.get('cases', 0)} | {latest.get('tier1_failed_cases', 0)} | {latest.get('tier2_cases', 0)} | {signal_text} | "
             + ("✅" if latest.get("passed") else "❌")
             + f" | {trend_text} |"
         )

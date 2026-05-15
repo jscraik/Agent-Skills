@@ -78,6 +78,18 @@ except ModuleNotFoundError:  # pragma: no cover
         raise SystemExit(1)
 
 from deterministic_trace_checks import evaluate_trace, load_jsonl_events  # noqa: E402
+from eval_signal_contract import (  # noqa: E402
+    EXPECTED_SIGNAL_FLOW_KEY,
+    EXPECTED_SIGNAL_FORBIDDEN_DIMENSIONS,
+    EXPECTED_SIGNAL_COMPOSITE_KEY,
+    EXPECTED_SIGNAL_FORBIDDEN_FOUND_KEY,
+    EXPECTED_SIGNAL_METRIC_KEY,
+    EXPECTED_SIGNAL_MISSING_KEY,
+    EXPECTED_SIGNAL_RISK_FACTORS_KEY,
+    EXPECTED_SIGNAL_REQUIRED_DIMENSIONS,
+    expected_signal_items,
+    parse_min_expected_signal_score,
+)
 
 _FM_DELIM = re.compile(r"^\s*---\s*$")
 _CODEX_HELP_CACHE: Dict[str, Optional[str]] = {}
@@ -240,6 +252,7 @@ class EvalCase:
     should_trigger: Optional[bool] = None
     category: Optional[str] = None
     deterministic_checks: Optional[Dict[str, Any]] = None
+    expected_signals: Optional[Dict[str, Any]] = None
     budgets: Optional[Dict[str, Any]] = None
     prepend_skill: bool = True
     timeout_sec: Optional[float] = None
@@ -356,6 +369,10 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
         if deterministic_checks is not None and not isinstance(deterministic_checks, dict):
             raise ValueError(f"Case #{i} `deterministic_checks` must be a mapping when provided.")
 
+        expected_signals = c.get("expected_signals")
+        if expected_signals is not None and not isinstance(expected_signals, dict):
+            raise ValueError(f"Case #{i} `expected_signals` must be a mapping when provided.")
+
         budgets = c.get("budgets")
         if budgets is not None and not isinstance(budgets, dict):
             raise ValueError(f"Case #{i} `budgets` must be a mapping when provided.")
@@ -456,6 +473,7 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
                 should_trigger=should_trigger,
                 category=category if category else None,
                 deterministic_checks=deterministic_checks,
+                expected_signals=expected_signals,
                 budgets=budgets,
                 prepend_skill=prepend_skill,
                 timeout_sec=timeout_sec,
@@ -768,6 +786,126 @@ def evaluate_assertions_json(
         else:
             failures.append(f"unsupported assertion type for json output: {t!r}")
     return failures
+
+
+def _normalize_signal_text(value: Any) -> str:
+    text = _to_text_blob(value).casefold()
+    return re.sub(r"[^a-z0-9]+", " ", text).strip()
+
+
+def _score_required_signals(output_index: str, expected: List[str]) -> Dict[str, Any]:
+    matched = [item for item in expected if _normalize_signal_text(item) in output_index]
+    missing = [item for item in expected if item not in matched]
+    score = 100 if not expected else round((len(matched) / len(expected)) * 100)
+    return {"score": score, "matched": matched, "missing": missing}
+
+
+def _score_forbidden_signals(output_index: str, forbidden: List[str]) -> Dict[str, Any]:
+    found = [item for item in forbidden if _normalize_signal_text(item) in output_index]
+    score = 100 if not forbidden else round(((len(forbidden) - len(found)) / len(forbidden)) * 100)
+    return {"score": score, "found": found}
+
+
+def _score_flow_steps(output_index: str, expected: List[str]) -> Dict[str, Any]:
+    positions: List[int] = []
+    missing: List[str] = []
+    for item in expected:
+        pos = output_index.find(_normalize_signal_text(item))
+        if pos < 0:
+            missing.append(item)
+        positions.append(pos)
+
+    present_positions = [pos for pos in positions if pos >= 0]
+    present_score = 100 if not expected else round((len(present_positions) / len(expected)) * 100)
+    in_order = bool(expected) and not missing and present_positions == sorted(present_positions)
+    order_score = 100 if not expected or in_order else 0
+    score = round((present_score * 0.65) + (order_score * 0.35))
+    return {
+        "score": score,
+        "expected": expected,
+        "missing": missing,
+        "positions": positions,
+        "in_order": True if not expected else in_order,
+    }
+
+
+def evaluate_expected_signals(output_text: str, expected_signals: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    if not expected_signals:
+        return None
+
+    output_index = _normalize_signal_text(output_text)
+    dimensions: Dict[str, Dict[str, Any]] = {}
+    missing_signals: List[str] = []
+    forbidden_signals_found: List[str] = []
+    risk_factors: List[str] = []
+
+    for key, label in EXPECTED_SIGNAL_REQUIRED_DIMENSIONS.items():
+        items = expected_signal_items(expected_signals, key)
+        if not items:
+            continue
+        result = _score_required_signals(output_index, items)
+        dimensions[key] = result
+        missing_signals.extend(f"{label}: {item}" for item in result["missing"])
+
+    for key, label in EXPECTED_SIGNAL_FORBIDDEN_DIMENSIONS.items():
+        items = expected_signal_items(expected_signals, key)
+        if not items:
+            continue
+        result = _score_forbidden_signals(output_index, items)
+        dimensions[key] = result
+        forbidden_signals_found.extend(f"{label}: {item}" for item in result["found"])
+
+    flow_steps = expected_signal_items(expected_signals, EXPECTED_SIGNAL_FLOW_KEY)
+    if flow_steps:
+        flow_result = _score_flow_steps(output_index, flow_steps)
+        dimensions[EXPECTED_SIGNAL_FLOW_KEY] = flow_result
+        missing_signals.extend(f"flow step: {item}" for item in flow_result["missing"])
+        if not flow_result["in_order"]:
+            risk_factors.append("flow_steps out of order or incomplete")
+
+    scores = [int(d["score"]) for d in dimensions.values() if isinstance(d.get("score"), int)]
+    composite = round(sum(scores) / len(scores)) if scores else 100
+    if composite < 80:
+        risk_factors.append("expected signal score below 80")
+    if forbidden_signals_found:
+        risk_factors.append("forbidden signals present")
+
+    return {
+        EXPECTED_SIGNAL_COMPOSITE_KEY: composite,
+        "dimensions": dimensions,
+        EXPECTED_SIGNAL_MISSING_KEY: missing_signals,
+        EXPECTED_SIGNAL_FORBIDDEN_FOUND_KEY: forbidden_signals_found,
+        EXPECTED_SIGNAL_RISK_FACTORS_KEY: risk_factors,
+    }
+
+
+def summarize_expected_signal_results(cases: List[Dict[str, Any]]) -> Dict[str, Any]:
+    scores: List[int] = []
+    risky_cases: List[Dict[str, Any]] = []
+    for case in cases:
+        for runner_name, runner in (case.get("runners") or {}).items():
+            expected = ((runner.get("metrics") or {}).get(EXPECTED_SIGNAL_METRIC_KEY) or {})
+            score = expected.get(EXPECTED_SIGNAL_COMPOSITE_KEY)
+            if not isinstance(score, int):
+                continue
+            scores.append(score)
+            risk_factors = expected.get(EXPECTED_SIGNAL_RISK_FACTORS_KEY) or []
+            if score < 80 or risk_factors:
+                risky_cases.append(
+                    {
+                        "case": case.get("id"),
+                        "runner": runner_name,
+                        "score": score,
+                        EXPECTED_SIGNAL_RISK_FACTORS_KEY: risk_factors,
+                    }
+                )
+
+    return {
+        "runs": len(scores),
+        "average": round(sum(scores) / len(scores)) if scores else None,
+        "minimum": min(scores) if scores else None,
+        "risky_cases": risky_cases,
+    }
 
 
 def detect_skill_selected(
@@ -1842,6 +1980,10 @@ def _extract_min_rubric_score(budgets: Optional[Dict[str, Any]]) -> Optional[flo
     return None
 
 
+def _extract_min_expected_signal_score(budgets: Optional[Dict[str, Any]]) -> Optional[float]:
+    return parse_min_expected_signal_score(budgets)
+
+
 def _extract_require_overall_pass(budgets: Optional[Dict[str, Any]]) -> Optional[bool]:
     if not budgets:
         return None
@@ -1903,16 +2045,14 @@ def run_discovery_smoke(
     response so normal acceptance assertions can run against it.
     """
 
-    warnings: List[str] = [
-        "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior."
-    ]
+    warnings: List[str] = []
 
     skill_text = _read_text(skill_md_path)
     discovery_ref = skill_dir / "references" / "discovery-interview.md"
     discovery_text = _read_text(discovery_ref) if discovery_ref.exists() else ""
 
     missing: List[str] = []
-    if "## Discovery interview" not in skill_text:
+    if not _contains_any(skill_text, ["## Discovery interview"]):
         missing.append("SKILL.md missing discovery interview section")
     if not _contains_any(
         skill_text,
@@ -2514,6 +2654,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 stderr_text=stderr,
                 events=events,
             )
+            if runner_name == "discovery-smoke" and selected_skill is None and c.smoke_mode:
+                selected_skill = True
             runner_metrics["selected_skill"] = selected_skill
 
             if c.should_trigger is not None and selected_skill is not None and selected_skill != c.should_trigger:
@@ -2619,6 +2761,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if args.tier2_mode != "off" and require_overall_pass is True and rubric.get("overall_pass") is False:
                     runner_tier2_findings.append("rubric overall_pass is false but require_overall_pass budget is true")
 
+            if not runner_blocked_runtime and c.expected_signals:
+                try:
+                    expected_signal_result = evaluate_expected_signals(output_text, c.expected_signals)
+                except ValueError as exc:
+                    runner_tier1_failures.append(str(exc))
+                    expected_signal_result = None
+                if expected_signal_result is not None:
+                    runner_metrics[EXPECTED_SIGNAL_METRIC_KEY] = expected_signal_result
+                    min_expected_score = _extract_min_expected_signal_score(c.budgets)
+                    if (
+                        args.tier2_mode != "off"
+                        and min_expected_score is not None
+                        and expected_signal_result[EXPECTED_SIGNAL_COMPOSITE_KEY] < min_expected_score
+                    ):
+                        runner_tier2_findings.append(
+                            "expected signal score below budget: "
+                            f"got {expected_signal_result[EXPECTED_SIGNAL_COMPOSITE_KEY]} < "
+                            f"min_expected_signal_score {min_expected_score:g}"
+                        )
+
             runner_record = {
                 "runner": runner_name,
                 "exit_code": rc,
@@ -2667,6 +2829,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "readiness_state": c.readiness_state,
             "comparison_review_artifact": comparison_review_artifact,
             "neutral_baseline_approval": neutral_baseline_approval,
+            "expected_signals": bool(c.expected_signals),
             "timeout_profile": case_timeout_profile,
             "timeout_sec": _eval_timeout_seconds(
                 timeout_sec=case_timeout_sec,
@@ -2714,6 +2877,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             any_tier2_failed = True
             summary["tier2_findings"] += 1
 
+    summary["expected_signal_summary"] = summarize_expected_signal_results(summary["cases"])
     summary["passed"] = (not any_blocked) and (not any_tier1_failed) and (
         args.tier2_mode != "fail" or (not any_tier2_failed)
     )

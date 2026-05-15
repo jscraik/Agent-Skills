@@ -20,7 +20,7 @@ if str(RUNTIME_SEP_DIR) not in sys.path:
 
 from generate_root_skill_sets import build_roots  # type: ignore  # noqa: E402
 from generate_skillset_manifests import build_manifest_report  # type: ignore  # noqa: E402
-from command_surface import build_skill_handles, _with_folded_alias_handles  # type: ignore  # noqa: E402
+from command_surface import build_command_surface_handles  # type: ignore  # noqa: E402
 from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity  # type: ignore  # noqa: E402
 from yaml_compat import load_yaml_mapping  # type: ignore  # noqa: E402
 
@@ -89,7 +89,7 @@ def generated_command_handle_names() -> set[str]:
     """Return command handles intentionally projected as first-level runtime entries."""
     return {
         handle.handle
-        for handle in _with_folded_alias_handles(build_skill_handles())
+        for handle in build_command_surface_handles()
         if handle.kind == "skill" and handle.command_handle_path and handle.handle not in ROOT_SKILL_SET_NAMES
     }
 
