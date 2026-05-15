@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from unittest import mock
@@ -40,3 +41,52 @@ def test_release_evals_do_not_force_smoke_model(tmp_path: Path) -> None:
     assert result.status == "success"
     cmd = run.call_args.args[0]
     assert "--model" not in cmd
+
+
+def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
+    scorecard_path = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-1/scorecard.json"
+    scorecard_path.parent.mkdir(parents=True)
+    scorecard_path.write_text(
+        json.dumps({
+            "skill": "example-skill",
+            "skill_path": "Plugins/example-skill",
+            "eval_mode": "smoke",
+            "runner_mode": "codex",
+            "run_id": "run-1",
+            "cases": [
+                {"id": "happy-path", "name": "Happy Path", "passed": True, "tier1_failures": [], "warnings": []}
+            ],
+        }),
+        encoding="utf-8",
+    )
+    completed = mock.Mock(
+        returncode=0,
+        stdout=f"Skill evals: example-skill\nScorecard: {scorecard_path}\nRESULT: PASS\n",
+        stderr="",
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke")
+
+    assert result.status == "success"
+    assert result.data["dashboard_path"] == "Infrastructure/artifacts/skill-reviews/example-skill-dashboard-smoke.html"
+    assert result.data["dashboard_tab"] == "evals"
+    assert result.data["scorecard_path"] == "Infrastructure/artifacts/skills/example-skill/run-1/scorecard.json"
+    assert result.data["browser_instruction"] == "Open dashboard_url in the Codex in-app browser after evals complete."
+
+    html_path = tmp_path / result.data["dashboard_path"]
+    html_text = html_path.read_text(encoding="utf-8")
+    assert "Evaluation Results" in html_text
+    assert "Happy Path" in html_text
+    assert 'href="#evals"' in html_text
+    assert 'data-auto-refresh-seconds="15"' in html_text
+
+
+def test_run_evals_can_skip_dashboard(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="Skill evals: example-skill\n", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False)
+
+    assert result.status == "success"
+    assert "dashboard_path" not in result.data
