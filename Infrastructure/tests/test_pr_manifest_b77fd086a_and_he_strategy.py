@@ -66,7 +66,13 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
             if not raw:
                 continue
             try:
-                records.append(json.loads(raw))
+                parsed = json.loads(raw)
+                if not isinstance(parsed, dict):
+                    raise AssertionError(
+                        f"Invalid JSON object on line {lineno} of {path}: "
+                        f"expected object, got {type(parsed).__name__}"
+                    )
+                records.append(parsed)
             except json.JSONDecodeError as exc:
                 raise AssertionError(
                     f"Invalid JSON on line {lineno} of {path}: {exc}"
@@ -244,6 +250,9 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
         """
         self._data = _load_command_surface()
         self._handles = self._data.get("handles", [])
+        self.assertIsInstance(self._handles, list, "'handles' must be a list")
+        for i, entry in enumerate(self._handles):
+            self.assertIsInstance(entry, dict, f"handles[{i}] must be a mapping")
 
     def test_file_is_valid_json(self) -> None:
         """
@@ -372,6 +381,8 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         self._evals = loaded
         self._cases: list[dict[str, Any]] = self._evals.get("cases", [])
         self.assertIsInstance(self._cases, list, "'cases' must be a list")
+        for i, case in enumerate(self._cases):
+            self.assertIsInstance(case, dict, f"cases[{i}] must be a mapping")
         self._case_ids = {
             c.get("id")
             for c in self._cases

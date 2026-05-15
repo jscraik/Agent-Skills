@@ -47,6 +47,8 @@ Every output must include:
 - drift or moat impact where relevant
 - future-agent guidance
 - evidence and traceability matrix
+- `he-strategy`
+- `subagent_policy`
 - `roles_used`, `roles_recommended`, and `roles_missing`
 
 Keep this list aligned with the required output contract in
