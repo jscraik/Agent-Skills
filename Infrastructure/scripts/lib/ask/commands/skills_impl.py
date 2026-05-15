@@ -326,12 +326,17 @@ def _safe_tessl_skill_key(raw_name: str) -> str:
 
 def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root: Path) -> tuple[Path, dict[str, str]]:
     """Create a disposable Tessl tile package for a SKILL.md-first local skill."""
-    source_skill = repo_root / audit_target_path / "SKILL.md"
+    source_skill_dir = repo_root / audit_target_path
+    source_skill = source_skill_dir / "SKILL.md"
     fields = _read_skill_frontmatter_fields(source_skill)
     skill_key = _safe_tessl_skill_key(fields.get("name") or Path(audit_target_path).name)
     tile_skill_dir = temp_root / "skills" / skill_key
-    tile_skill_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(source_skill, tile_skill_dir / "SKILL.md")
+    shutil.copytree(
+        source_skill_dir,
+        tile_skill_dir,
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".git", "agents"),
+        dirs_exist_ok=True,
+    )
 
     tile = {
         "name": f"local/{skill_key}",

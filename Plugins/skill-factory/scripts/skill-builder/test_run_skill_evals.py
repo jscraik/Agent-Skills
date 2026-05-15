@@ -14,10 +14,11 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
-REPO_ROOT = SCRIPT_DIR.parents[2]
+REPO_ROOT = SCRIPT_DIR.parents[3]
 repo_root_str = str(REPO_ROOT)
 if repo_root_str not in sys.path:
     sys.path.insert(0, repo_root_str)
+SKILL_DIR = SCRIPT_DIR.parents[1] / "skills" / "code_quality_review" / "skill-builder"
 
 try:
     from defusedxml import ElementTree as ET
@@ -122,7 +123,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(result.hard_failures, ["forbidden command was executed: 'nc'"])
 
     def test_repo_evals_include_family_contract_cases(self) -> None:
-        evals_path = SCRIPT_DIR.parent / "references" / "evals.yaml"
+        evals_path = SKILL_DIR / "references" / "evals.yaml"
 
         cases = load_evals(evals_path)
         case_map = {case.id: case for case in cases}
@@ -140,7 +141,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             self.assertEqual(case_map[case_id].timeout_profile, "codex-heavy")
 
     def test_builder_round_metadata_case_has_baseline_contract_fields(self) -> None:
-        evals_path = SCRIPT_DIR.parent / "references" / "evals.yaml"
+        evals_path = SKILL_DIR / "references" / "evals.yaml"
         cases = load_evals(evals_path)
         case_map = {case.id: case for case in cases}
         target = case_map["builder-round-metadata-contract"]
@@ -269,7 +270,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(cases[0].eval_modes, ("smoke", "release"))
 
     def test_new_family_contract_cases_survive_smoke_filter(self) -> None:
-        evals_path = SCRIPT_DIR.parent / "references" / "evals.yaml"
+        evals_path = SKILL_DIR / "references" / "evals.yaml"
 
         cases = load_evals(evals_path)
         selected = _filter_cases_for_eval_mode(cases, eval_mode="smoke")

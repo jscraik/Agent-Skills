@@ -13,7 +13,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 SCRIPT_DIR = Path(__file__).parent
-REPO_ROOT = SCRIPT_DIR.parents[5]
+REPO_ROOT = SCRIPT_DIR.parents[3]
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 

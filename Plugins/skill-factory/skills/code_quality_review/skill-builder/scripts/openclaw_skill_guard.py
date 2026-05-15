@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import runpy
+import sys
 
-globals().update(runpy.run_path(str(Path(__file__).with_suffix(".pyw")), run_name=__name__))
+_IMPL_PATH = Path(__file__).resolve().parents[4] / "scripts" / "skill-builder" / "openclaw_skill_guard.py"
+_IMPL_DIR = _IMPL_PATH.parent
+if str(_IMPL_DIR) not in sys.path:
+    sys.path.insert(0, str(_IMPL_DIR))
+
+globals().update(runpy.run_path(str(_IMPL_PATH), run_name=__name__))
