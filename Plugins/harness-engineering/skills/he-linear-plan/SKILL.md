@@ -116,6 +116,8 @@ For non-trivial generated Linear plans, run or block
   evidence, or view-first organization matters: `references/linear-filing-rule.md`
 - Read when validating package contract/evals: `references/contract.yaml`,
   `references/evals.yaml`, `references/task-profile.json`
+- Read when subagent roles are called or recommended:
+  `../../references/subagent-call-contract.md`
 - Read when source-prompt or original-method evidence is involved:
   `references/source-prompt-preservation.md`,
   `../../references/source-prompt-coverage-contract.md`

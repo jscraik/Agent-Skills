@@ -128,5 +128,6 @@ call policy.
 Use concise prose for simple blockers. For structured reports, emit `schema_version: 1`, output fields, exact validation outcomes, and next safe action.
 
 ## References
+- ../../references/subagent-call-contract.md for shared subagent call policy.
 - ../../references/deferred-context-index.md for folded/discarded context.
 - Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

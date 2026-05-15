@@ -125,6 +125,8 @@ complete.
   `references/evals.yaml`.
 - Read when report scanability/No-Fog structure matters:
   `../../references/bluf-review-contract.md`.
+- Read when subagent roles are called or recommended:
+  `../../references/subagent-call-contract.md`.
 - Read when evidence chains, gate matrices, visual proof, screenshots, or
   generated media need persistence rules:
 - See references/hot-path-folded-context.md for folded references detail.
