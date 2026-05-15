@@ -407,7 +407,12 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         """
         self._evals = yaml.safe_load(EVALS_YAML_PATH.read_text(encoding="utf-8"))
         self._cases: list[dict[str, Any]] = self._evals.get("cases", [])
-        self._case_ids = {c["id"] for c in self._cases}
+        self.assertIsInstance(self._cases, list, "'cases' must be a list")
+        self._case_ids = {
+            c.get("id")
+            for c in self._cases
+            if isinstance(c, dict) and c.get("id")
+        }
 
     def test_schema_version_is_2_0(self) -> None:
         """
@@ -726,8 +731,9 @@ class TestHeStrategySkillMd(unittest.TestCase):
 
     def test_skill_md_execution_boundaries_excludes_implementation(self) -> None:
         self.assertIn("## Execution Boundaries", self._text)
-        # Execution boundary section must state strategy does not create Linear work
-        self.assertIn("Do not\ncreate Linear work", self._text.replace("  ", " "))
+        # Execution boundary section must state strategy does not create Linear work.
+        normalized = " ".join(self._text.split())
+        self.assertIn("Do not create Linear work", normalized)
 
     def test_skill_md_not_empty(self) -> None:
         """

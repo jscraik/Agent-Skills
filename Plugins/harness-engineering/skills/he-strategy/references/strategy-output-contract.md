@@ -40,7 +40,7 @@ Every output must include:
 
 - Strategy, review, triage, feature, ADR, and core artifacts do not authorize
   implementation unless admitted by `.harness/linear/**`,
-  `.harness/refactors/**`, `.harness/specs/**`, or `.harness/plan/**`.
+  `.harness/reframes/**`, `.harness/specs/**`, or `.harness/plan/**`.
 - Do not overwrite existing `.harness` artifacts unless the user explicitly
   asks for that exact artifact to be updated.
 - Use bounded web research for current standards, competitive/prior-art claims,

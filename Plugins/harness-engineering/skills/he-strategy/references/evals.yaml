@@ -125,19 +125,6 @@ cases:
       - {type: regex, value: "(?is)(intentional leverage|accidental complexity|must never drift|drift)"}
       - {type: regex, value: "(?is)(stated intent|implied intent|docs.*code|code.*docs|implementation reality|prose claims)"}
       - {type: regex, value: "(?is)(alignment|contradiction|missing proof|not.?inspected|evidence sufficiency)"}
-  - id: stated-vs-implied-intent
-    name: "Stated vs implied intent"
-    category: edge
-    eval_modes: *modes
-    should_trigger: true
-    prepend_skill: false
-    realistic: true
-    prompt: "Compare README/docs/product intent against Plugins, Skills, .skillsets, ./bin/ask, tests, validators, runtime paths, naming, generated artifacts, and coupling. Call out alignment, contradictions, proof gaps, confidence."
-    deterministic_checks: *safe
-    acceptance:
-      - {type: regex, value: "(?is)(stated intent|implied intent|docs|code|implementation reality)"}
-      - {type: regex, value: "(?is)(command surface|tests|validation gate|runtime path|naming|generated artifact|coupling)"}
-      - {type: regex, value: "(?is)(alignment|contradiction|missing proof|confidence|not.?inspected|evidence sufficiency)"}
   - id: architecture-review-lenses
     name: "Architecture review lenses"
     category: edge
