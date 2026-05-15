@@ -245,6 +245,8 @@ class TestAskSkillsErrors(unittest.TestCase):
         for call in mock_run.call_args_list:
             self.assertNotIn("npx", call.args[0])
             self.assertNotIn("publish", call.args[0])
+        tessl_call = mock_run.call_args_list[1]
+        self.assertIn("agent-skills-tessl-", tessl_call.kwargs["env"]["HOME"])
 
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")

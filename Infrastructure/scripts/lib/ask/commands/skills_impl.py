@@ -282,14 +282,18 @@ def _run_captured_tool(
     repo_root: Path,
     command: list[str],
     timeout_seconds: int = 120,
+    env_overrides: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Run a local validation tool with bounded runtime and captured output."""
+    env = _subprocess_env_with_uv_cache()
+    if env_overrides:
+        env.update(env_overrides)
     return subprocess.run(
         command,
         cwd=str(repo_root),
         capture_output=True,
         text=True,
-        env=_subprocess_env_with_uv_cache(),
+        env=env,
         timeout=timeout_seconds,
     )
 
@@ -1730,16 +1734,26 @@ def external_review_skill(
             ))
         else:
             with tempfile.TemporaryDirectory(prefix="agent-skills-tessl-") as tessl_tmp:
-                tile_path, tile_info = _write_tessl_tile_wrapper(repo_root, audit_target_path, Path(tessl_tmp))
+                tessl_tmp_path = Path(tessl_tmp)
+                tile_path, tile_info = _write_tessl_tile_wrapper(repo_root, audit_target_path, tessl_tmp_path)
+                tessl_home = tessl_tmp_path / "home"
+                tessl_home.mkdir(parents=True, exist_ok=True)
+                tessl_env = {"HOME": str(tessl_home)}
                 result.data["tessl_tile"] = {
                     **tile_info,
                     "mode": "temporary_wrapper",
                     "reason": "Tessl validates tile.json packages; canonical repo skills remain SKILL.md-first.",
+                    "tessl_home": str(tessl_home),
                 }
 
                 lint_command = [tessl_bin, "skill", "lint", str(tile_path)]
                 try:
-                    lint_proc = _run_captured_tool(repo_root=repo_root, command=lint_command, timeout_seconds=timeout_seconds)
+                    lint_proc = _run_captured_tool(
+                        repo_root=repo_root,
+                        command=lint_command,
+                        timeout_seconds=timeout_seconds,
+                        env_overrides=tessl_env,
+                    )
                     lint_payload = _completed_process_payload(lint_proc)
                     lint_payload["status"] = "success" if lint_proc.returncode == 0 else "error"
                     result.data["tessl_lint"] = lint_payload
@@ -1763,7 +1777,12 @@ def external_review_skill(
                 if include_tessl_review and review_confirmed_local:
                     review_command = [tessl_bin, "skill", "review", str(tile_path)]
                     try:
-                        review_proc = _run_captured_tool(repo_root=repo_root, command=review_command, timeout_seconds=timeout_seconds)
+                        review_proc = _run_captured_tool(
+                            repo_root=repo_root,
+                            command=review_command,
+                            timeout_seconds=timeout_seconds,
+                            env_overrides=tessl_env,
+                        )
                         review_payload = _completed_process_payload(review_proc)
                         review_payload["status"] = "success" if review_proc.returncode == 0 else "error"
                         result.data["tessl_review"] = review_payload
