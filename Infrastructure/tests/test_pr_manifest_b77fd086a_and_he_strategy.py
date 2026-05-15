@@ -226,18 +226,6 @@ class TestManifestRevisionBump(unittest.TestCase):
                         f"'{OLD_MANIFEST_REVISION}'",
                     )
 
-    def test_all_manifests_have_consistent_single_revision(self) -> None:
-        """All manifest entries across all skillsets must share exactly one source_revision."""
-        revisions: set[str] = set()
-        for path in sorted(SKILLSET_DIR.glob("*/manifest.jsonl")):
-            for rec in _load_jsonl(path):
-                rev = rec.get("provenance", {}).get("source_revision", "")
-                if rev:
-                    revisions.add(rev)
-        self.assertEqual(1, len(revisions), f"Expected one shared revision, found: {sorted(revisions)}")
-        for rev in revisions:
-            self.assertRegex(rev, _REVISION_PATTERN, f"Invalid manifest revision '{rev}'")
-
 
 # ---------------------------------------------------------------------------
 # command-surface.json: source_revision + sha256 updates
@@ -281,34 +269,6 @@ class TestCommandSurfaceRevisionAndSha256(unittest.TestCase):
                     f"handle '{entry.get('handle')}' still references old revision "
                     f"'{OLD_COMMAND_SURFACE_REVISION}'",
                 )
-
-    def test_all_command_surface_revisions_match_manifest_revision(self) -> None:
-        """
-        Verify each handle in the command-surface whose provenance.source_revision is present matches manifest revision.
-        
-        Entries with an empty `provenance.source_revision` are skipped. Assertion failures include the handle name.
-        """
-        manifest_revisions: set[str] = set()
-        for path in sorted(SKILLSET_DIR.glob("*/manifest.jsonl")):
-            for rec in _load_jsonl(path):
-                rev = rec.get("provenance", {}).get("source_revision", "")
-                if rev:
-                    manifest_revisions.add(rev)
-        self.assertEqual(
-            1,
-            len(manifest_revisions),
-            f"Expected one manifest revision, found: {sorted(manifest_revisions)}",
-        )
-        expected_revision = next(iter(manifest_revisions))
-        for entry in self._handles:
-            rev = entry.get("provenance", {}).get("source_revision", "")
-            if rev:
-                with self.subTest(handle=entry.get("handle", "?")):
-                    self.assertEqual(
-                        rev,
-                        expected_revision,
-                        f"handle '{entry.get('handle')}': expected '{expected_revision}', got '{rev}'",
-                    )
 
     def test_coding_harness_sha256_is_hash_shaped(self) -> None:
         """

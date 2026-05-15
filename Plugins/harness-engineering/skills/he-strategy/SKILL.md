@@ -78,7 +78,9 @@ lint, progressive-disclosure lint, family benchmarks, Plugin Eval, and Vale
 for Markdown prose. For artifacts, verify naming, sources, evidence matrix,
 confidence, authority limits, and stop/pivot condition. Rerun failed gates.
 Only mark prose validation `blocked` if Vale is temporarily unavailable and
-record waiver reason, ticket, and expiry.
+record a waiver using
+`<!-- vale off -- reason: <reason>; ticket: <ticket>; expires: <date> -->`
+with a corresponding `<!-- vale on -->`.
 
 ## Constraints
 

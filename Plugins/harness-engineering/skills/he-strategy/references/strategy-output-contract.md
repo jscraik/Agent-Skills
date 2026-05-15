@@ -50,8 +50,9 @@ Every output must include:
   `.harness/reframes/**`, `.harness/specs/**`, or `.harness/plan/**`.
 - Do not overwrite existing `.harness` artifacts unless the user explicitly
   asks for that exact artifact to be updated.
-- Use bounded web research for current standards, competitive/prior-art claims,
-  or any fact likely to have changed; cite sources or mark evidence unavailable.
+- When network access is approved by active rules, use bounded web research for
+  current standards, competitive/prior-art claims, or any fact likely to have
+  changed; cite sources or mark evidence unavailable.
 - Classify low-value governance as `Do Not Create` instead of writing another
   document.
 - Exclude strategic conclusions that cannot change a decision, alter routing,
