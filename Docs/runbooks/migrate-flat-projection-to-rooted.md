@@ -3,7 +3,7 @@
 ## Preconditions
 
 - `python3 bin/ask skills sync --projection rooted --dry-run --json` passes.
-- `python3 bin/ask skills handles --check --json` passes.
+- `python3 bin/ask skills handles --check --json` passes for command-surface projection freshness.
 - `python3 bin/ask skills handles --check-command-handles --json` passes.
 - `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json` passes.
   (This validates the current flat baseline before migration; `--projection` defaults to `flat` in `check_context_budget.py`.)
@@ -60,7 +60,7 @@ Do not collapse these gates into one proof:
 1. Resolver gate: `python3 bin/ask skills resolve <handle> --json` returns one
    canonical `source_path`.
 2. Command-surface gate: `python3 bin/ask skills handles --check --json` passes
-   and `.skillsets/command-surface.json` is generated from rooted manifests.
+   and `.skillsets/command-surface.json` matches rooted manifests.
 3. Runtime-handle gate: `python3 bin/ask skills handles --check-command-handles
 --json` passes and `.agents/skills/<handle>/SKILL.md` exists.
 4. Workspace sync gate: `python3 bin/ask skills sync --scope workspace

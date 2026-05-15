@@ -6,6 +6,7 @@ import subprocess
 import re
 import sys
 import importlib.util
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, List, Optional
@@ -37,6 +38,7 @@ from projection_engine import (  # noqa: E402
 )
 from command_surface import (  # noqa: E402
     check_command_handles,
+    check_command_surface_projection,
     handles_report,
     parse_command_handles,
     resolve_reviewer_handle,
@@ -117,6 +119,7 @@ def _subprocess_env_with_uv_cache() -> dict[str, str]:
         tmp_root = env.get("TMPDIR") or "/tmp"
         env["UV_CACHE_DIR"] = str(Path(tmp_root) / "agent-skills-uv-cache")
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
+    env.setdefault("TESSL_AUTO_UPDATE_INTERVAL_MINUTES", "0")
     return env
 
 
@@ -262,6 +265,87 @@ def _run_validation_command(
         )
     )
     return result
+
+
+def _completed_process_payload(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
+    """Return stable JSON data for a validation subprocess result."""
+    return {
+        "command": list(proc.args) if isinstance(proc.args, list) else proc.args,
+        "exit_code": proc.returncode,
+        "stdout": proc.stdout,
+        "stderr": proc.stderr,
+    }
+
+
+def _run_captured_tool(
+    *,
+    repo_root: Path,
+    command: list[str],
+    timeout_seconds: int = 120,
+) -> subprocess.CompletedProcess[str]:
+    """Run a local validation tool with bounded runtime and captured output."""
+    return subprocess.run(
+        command,
+        cwd=str(repo_root),
+        capture_output=True,
+        text=True,
+        env=_subprocess_env_with_uv_cache(),
+        timeout=timeout_seconds,
+    )
+
+
+def _read_skill_frontmatter_fields(skill_md: Path) -> dict[str, str]:
+    """Extract simple scalar fields from SKILL.md frontmatter."""
+    fields: dict[str, str] = {}
+    text = skill_md.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return fields
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        key = key.strip()
+        value = value.strip().strip("\"'")
+        if key in {"name", "description"} and value:
+            fields[key] = value
+    return fields
+
+
+def _safe_tessl_skill_key(raw_name: str) -> str:
+    """Return a conservative tile skill key for a temporary Tessl wrapper."""
+    key = re.sub(r"[^a-z0-9-]+", "-", raw_name.lower()).strip("-")
+    return key or "skill"
+
+
+def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root: Path) -> tuple[Path, dict[str, str]]:
+    """Create a disposable Tessl tile package for a SKILL.md-first local skill."""
+    source_skill = repo_root / audit_target_path / "SKILL.md"
+    fields = _read_skill_frontmatter_fields(source_skill)
+    skill_key = _safe_tessl_skill_key(fields.get("name") or Path(audit_target_path).name)
+    tile_skill_dir = temp_root / "skills" / skill_key
+    tile_skill_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source_skill, tile_skill_dir / "SKILL.md")
+
+    tile = {
+        "name": f"local/{skill_key}",
+        "summary": fields.get("description") or f"Local validation wrapper for {skill_key}.",
+        "version": "0.0.0-local",
+        "skills": {
+            skill_key: {
+                "path": f"skills/{skill_key}/SKILL.md",
+            },
+        },
+    }
+    tile_path = temp_root / "tile.json"
+    tile_path.write_text(json.dumps(tile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return tile_path, {
+        "tile_path": str(tile_path),
+        "skill_key": skill_key,
+        "source_skill": audit_target_path,
+    }
 
 
 @dataclass(frozen=True)
@@ -673,6 +757,7 @@ def skills_handles(
     include_handles: bool = True,
     write_projection: bool = False,
     write_command_handle_files: bool = False,
+    check_projection: bool = False,
     check_command_handle_files: bool = False,
     dry_run: bool = False,
 ) -> CallResult:
@@ -688,6 +773,10 @@ def skills_handles(
         result.data["command_surface_projection_write"] = write_command_surface_projection(
             repo_root_path=repo_root,
             dry_run=dry_run,
+        )
+    if check or check_projection:
+        result.data["command_surface_projection_check"] = check_command_surface_projection(
+            repo_root_path=repo_root,
         )
     if write_command_handle_files:
         result.data["command_handle_write"] = write_command_handles(
@@ -707,6 +796,7 @@ def skills_handles(
         )
     for key, message in (
         ("command_surface_projection_write", "Command-surface projection write failed."),
+        ("command_surface_projection_check", "Command-surface projection check failed."),
         ("command_handle_write", "Command-handle generation failed."),
         ("command_handle_check", "Command-handle validation failed."),
     ):
@@ -1532,6 +1622,201 @@ def validate_openai_skill_format(repo_root: Path, skill_path: str, mode: str = "
             f"against {shlex.quote(audit_target_path)}."
         ),
     )
+
+
+def external_review_skill(
+    repo_root: Path,
+    skill_path: str,
+    *,
+    audit_level: str = "strict",
+    skip_plugin_eval: bool = False,
+    skip_tessl: bool = False,
+    include_tessl_review: bool = False,
+    timeout_seconds: int = 180,
+    report_path: Optional[str] = None,
+) -> CallResult:
+    """Run the local-only second-review lane for one skill.
+
+    This command intentionally never publishes or registers a skill. Tessl is
+    used only as an installed local CLI, never through npx, and the LLM-judge
+    tessl skill review step is guarded until an operator explicitly marks the
+    environment as local-only safe with TESSL_REVIEW_CONFIRMED_LOCAL_ONLY=1.
+    """
+    result = CallResult()
+    result.status = "success"
+
+    _, path_error = _validate_repo_relative_skill_path(repo_root, skill_path)
+    if path_error:
+        return path_error
+
+    audit_target, audit_target_path = _normalize_skill_target_path(skill_path)
+    target_abs = (repo_root / audit_target).resolve()
+    if not target_abs.is_dir() or not (target_abs / "SKILL.md").is_file():
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="Skill path must resolve to a directory containing SKILL.md.",
+            fix_suggestion=f"Check the path and rerun against a canonical skill directory: {audit_target_path}",
+        ))
+        return result
+
+    result.data["policy"] = {
+        "mode": "local_internal_only",
+        "no_publish": True,
+        "no_registry_upload": True,
+        "uses_npx": False,
+        "tessl_review_requires_local_only_confirmation": True,
+    }
+    result.data["target"] = audit_target_path
+
+    audit_result = audit_skill(repo_root, audit_target_path, level=audit_level)
+    result.data["ask_audit"] = {
+        "status": audit_result.status,
+        "data": audit_result.data,
+        "errors": [getattr(error, "__dict__", error) for error in audit_result.errors],
+    }
+    if audit_result.status != "success":
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="Internal ask skill audit failed during external-review lane.",
+            fix_suggestion="Inspect data.ask_audit for the exact failing gate.",
+        ))
+
+    if not skip_plugin_eval:
+        plugin_eval_bin = shutil.which("plugin-eval")
+        if not plugin_eval_bin:
+            result.status = "error"
+            result.data["plugin_eval"] = {"status": "blocked_missing_binary", "command": "plugin-eval analyze"}
+            result.errors.append(ErrorObject(
+                code="ERR_DEPENDENCY",
+                message="plugin-eval is not installed or not on PATH.",
+                fix_suggestion="Install or expose plugin-eval, then rerun this local-only review lane.",
+            ))
+        else:
+            command = [plugin_eval_bin, "analyze", audit_target_path, "--format", "markdown"]
+            try:
+                proc = _run_captured_tool(repo_root=repo_root, command=command, timeout_seconds=timeout_seconds)
+                payload = _completed_process_payload(proc)
+                payload["status"] = "success" if proc.returncode == 0 else "error"
+                result.data["plugin_eval"] = payload
+                if proc.returncode != 0:
+                    result.status = "error"
+                    result.errors.append(ErrorObject(
+                        code="ERR_VALIDATION",
+                        message="plugin-eval analysis failed during external-review lane.",
+                        fix_suggestion="Inspect data.plugin_eval for full output.",
+                    ))
+            except subprocess.TimeoutExpired:
+                result.status = "error"
+                result.data["plugin_eval"] = {"status": "timeout", "command": command, "timeout_seconds": timeout_seconds}
+                result.errors.append(ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"plugin-eval timed out after {timeout_seconds} seconds.",
+                    fix_suggestion="Rerun with a higher --timeout-seconds value if the target is intentionally large.",
+                ))
+    else:
+        result.data["plugin_eval"] = {"status": "skipped"}
+
+    if not skip_tessl:
+        tessl_bin = shutil.which("tessl")
+        if not tessl_bin:
+            result.status = "error"
+            result.data["tessl_lint"] = {"status": "blocked_missing_binary", "command": "tessl skill lint"}
+            result.errors.append(ErrorObject(
+                code="ERR_DEPENDENCY",
+                message="Tessl CLI is not installed or not on PATH; external-style local lint could not run.",
+                fix_suggestion="Install Tessl as a local machine tool and rerun. This command will not invoke npx or publish anything.",
+            ))
+        else:
+            with tempfile.TemporaryDirectory(prefix="agent-skills-tessl-") as tessl_tmp:
+                tile_path, tile_info = _write_tessl_tile_wrapper(repo_root, audit_target_path, Path(tessl_tmp))
+                result.data["tessl_tile"] = {
+                    **tile_info,
+                    "mode": "temporary_wrapper",
+                    "reason": "Tessl validates tile.json packages; canonical repo skills remain SKILL.md-first.",
+                }
+
+                lint_command = [tessl_bin, "skill", "lint", str(tile_path)]
+                try:
+                    lint_proc = _run_captured_tool(repo_root=repo_root, command=lint_command, timeout_seconds=timeout_seconds)
+                    lint_payload = _completed_process_payload(lint_proc)
+                    lint_payload["status"] = "success" if lint_proc.returncode == 0 else "error"
+                    result.data["tessl_lint"] = lint_payload
+                    if lint_proc.returncode != 0:
+                        result.status = "error"
+                        result.errors.append(ErrorObject(
+                            code="ERR_VALIDATION",
+                            message="Tessl skill lint failed during local-only external review.",
+                            fix_suggestion="Inspect data.tessl_lint for Tessl's validation output.",
+                        ))
+                except subprocess.TimeoutExpired:
+                    result.status = "error"
+                    result.data["tessl_lint"] = {"status": "timeout", "command": lint_command, "timeout_seconds": timeout_seconds}
+                    result.errors.append(ErrorObject(
+                        code="ERR_RUNTIME",
+                        message=f"Tessl skill lint timed out after {timeout_seconds} seconds.",
+                        fix_suggestion="Check the local Tessl installation and rerun once it responds normally.",
+                    ))
+
+                review_confirmed_local = os.environ.get("TESSL_REVIEW_CONFIRMED_LOCAL_ONLY") == "1"
+                if include_tessl_review and review_confirmed_local:
+                    review_command = [tessl_bin, "skill", "review", str(tile_path)]
+                    try:
+                        review_proc = _run_captured_tool(repo_root=repo_root, command=review_command, timeout_seconds=timeout_seconds)
+                        review_payload = _completed_process_payload(review_proc)
+                        review_payload["status"] = "success" if review_proc.returncode == 0 else "error"
+                        result.data["tessl_review"] = review_payload
+                        if review_proc.returncode != 0:
+                            result.status = "error"
+                            result.errors.append(ErrorObject(
+                                code="ERR_VALIDATION",
+                                message="Tessl skill review failed during local-only external review.",
+                                fix_suggestion="Inspect data.tessl_review for full output.",
+                            ))
+                    except subprocess.TimeoutExpired:
+                        result.status = "error"
+                        result.data["tessl_review"] = {"status": "timeout", "command": review_command, "timeout_seconds": timeout_seconds}
+                        result.errors.append(ErrorObject(
+                            code="ERR_RUNTIME",
+                            message=f"Tessl skill review timed out after {timeout_seconds} seconds.",
+                            fix_suggestion="Check the local Tessl installation and rerun once it responds normally.",
+                        ))
+                elif include_tessl_review:
+                    result.status = "error"
+                    result.data["tessl_review"] = {
+                        "status": "blocked_privacy_policy",
+                        "required_confirmation_env": "TESSL_REVIEW_CONFIRMED_LOCAL_ONLY=1",
+                    }
+                    result.errors.append(ErrorObject(
+                        code="ERR_VALIDATION",
+                        message="Tessl skill review was requested but is blocked until the environment is confirmed local-only safe.",
+                        fix_suggestion="Confirm Tessl review does not transmit skill content, then rerun with TESSL_REVIEW_CONFIRMED_LOCAL_ONLY=1.",
+                    ))
+                else:
+                    result.data["tessl_review"] = {
+                        "status": "skipped_privacy_policy",
+                        "reason": "LLM-judge review is not run unless local-only behavior is confirmed.",
+                    }
+    else:
+        result.data["tessl_lint"] = {"status": "skipped"}
+        result.data["tessl_review"] = {"status": "skipped"}
+
+    if report_path:
+        report_target, report_error = _validate_repo_relative_skill_path(repo_root, report_path)
+        if report_error:
+            return report_error
+        assert report_target is not None
+        report_target.parent.mkdir(parents=True, exist_ok=True)
+        report_payload = {
+            "status": result.status,
+            "data": result.data,
+            "errors": [getattr(error, "__dict__", error) for error in result.errors],
+        }
+        report_target.write_text(json.dumps(report_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        result.data["report_path"] = report_target.relative_to(repo_root).as_posix()
+
+    return result
 
 
 def validate_skill_boundaries(repo_root: Path, handle: str) -> CallResult:

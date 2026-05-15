@@ -321,7 +321,32 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
 
 
-class TestCommittedCommandSurface(unittest.TestCase):
+class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):
+    def test_committed_command_surface_matches_rooted_manifests(self) -> None:
+        """Committed command-surface projection must match the rooted manifests exactly."""
+        surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+        if not surface_path.exists():
+            self.skipTest("command-surface.json not present in repo")
+
+        payload = command_surface.check_command_surface_projection(repo_root_path=REPO_ROOT)
+
+        self.assertEqual(payload["status"], "pass", payload.get("violations"))
+        self.assertEqual(payload["violations"], [])
+
+    def test_command_surface_projection_check_reports_drift(self) -> None:
+        """Projection check must fail when the committed command surface is stale."""
+        repo_root = self.temp_dir / "repo"
+        shutil.copytree(REPO_ROOT / ".skillsets", repo_root / ".skillsets")
+        (repo_root / ".skillsets" / "command-surface.json").write_text("{}\n", encoding="utf-8")
+
+        payload = command_surface.check_command_surface_projection(repo_root_path=repo_root)
+
+        self.assertEqual(payload["status"], "fail")
+        self.assertIn(
+            "COMMAND_SURFACE_PROJECTION_DRIFT",
+            {violation.get("code") for violation in payload["violations"]},
+        )
+
     def test_committed_command_surface_json_has_valid_structure(self) -> None:
         """The committed .skillsets/command-surface.json must be valid JSON with expected top-level keys."""
         surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"

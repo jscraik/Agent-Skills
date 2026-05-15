@@ -22,6 +22,10 @@ VALID_ACTIONS = {
         "starter",
         "sync",
         "audit",
+        "external-review",
+        "validate-skill-gate",
+        "validate-openai-format",
+        "validate-boundaries",
         "install",
         "fold",
         "init",
@@ -60,6 +64,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask skills proof he-heartbeat --json",
         "ask skills route \"find the right security skill\"",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
+        "ask skills external-review Skills/backend-platform/cli-spec --json",
     ],
     "reviewers": [
         "ask reviewers resolve skillinspector --json",
@@ -148,6 +153,10 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("skills", "audit"): [
         "ask skills audit Skills/backend-platform/cli-spec --level compat",
+    ],
+    ("skills", "external-review"): [
+        "ask skills external-review Skills/backend-platform/cli-spec --json",
+        "ask skills external-review Plugins/skill-factory/skills/code_quality_review/skill-builder --report-path artifacts/skill-reviews/skill-builder.json --json",
     ],
     ("skills", "goal"): [
         "ask skills goal \"implement auth safely\"",

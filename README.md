@@ -115,7 +115,7 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 # List the visible runtime surface
 ./bin/ask skills list
 
-# Check all generated command handles
+# Check the committed command-surface projection
 ./bin/ask skills handles --check --json
 
 # Resolve a command-visible skill handle
@@ -143,6 +143,9 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 # Full security audit
 ./bin/ask skills audit backend/cli-spec --level strict
 
+# Local-only external-style second review
+./bin/ask skills external-review backend/cli-spec --json
+
 # Run evaluation suite
 ./bin/ask evals run backend/cli-spec --mode smoke
 
@@ -154,8 +157,23 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 ./bin/ask runtime budget --json
 
 # Verify generated command handles match rooted manifests
-./bin/ask skills handles --check --json
+./bin/ask skills handles --check --check-command-handles --json
 ```
+
+`ask skills external-review` is a local/internal validation lane for comparing
+repo-native skill checks with a second external-style reviewer. It runs the
+internal `ask skills audit` lane, `plugin-eval analyze`, and installed Tessl CLI
+local lint when available. It never invokes `npx`, never publishes, and never
+uploads to a registry. The Tessl LLM-judge review step is skipped unless a human
+has confirmed that the local Tessl installation does not transmit skill content
+and reruns with `TESSL_REVIEW_CONFIRMED_LOCAL_ONLY=1`.
+
+Tessl validates tile packages, while this repository keeps canonical skills as
+`SKILL.md`-first source directories. The command therefore creates a temporary
+local-only `tile.json` wrapper around a copied `SKILL.md` and runs Tessl against
+that disposable package. Tessl failures about missing files or links outside the
+tile are preserved as findings; they show where a skill depends on repo-local
+context that would not be self-contained in an external tile package.
 
 ### Agent-facing golden paths
 
@@ -264,8 +282,10 @@ This repo separates source, projection, and live runtime visibility:
 `ask skills list --json` reports the default catalog entries exposed to the
 runtime. `ask runtime surface --json` shows how those entries split between
 root routers, policy-promoted handles, plugin skills, and primary runtime
-skills. `ask skills handles --json --no-handles` validates the generated
-command surface and reports the current handle count and any violations.
+skills. `ask skills handles --check --json --no-handles` validates command
+metadata and verifies that `.skillsets/command-surface.json` matches rooted
+manifests. Add `--check-command-handles` when picker/runtime pointer files under
+`.agents/skills/**` must also be verified.
 
 A generated command handle, such as `.agents/skills/he-heartbeat/SKILL.md`, is a small pointer that makes `$he-heartbeat` mentionable. It is not the real workflow. The handle resolves to a canonical source path through:
 

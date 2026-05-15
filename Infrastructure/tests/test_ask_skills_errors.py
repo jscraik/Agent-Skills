@@ -9,10 +9,11 @@ from unittest.mock import patch
 repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands.skills import (
+from ask.commands.skills_impl import (
     _subprocess_env_with_uv_cache,
     _summarize_family_benchmark_failure,
     audit_skill,
+    external_review_skill,
     install_skill,
 )
 
@@ -40,20 +41,20 @@ class TestAskSkillsErrors(unittest.TestCase):
         summary = _summarize_family_benchmark_failure(stdout="", stderr="baseline file missing")
         self.assertEqual(summary, "baseline file missing")
 
-    @patch.dict("ask.commands.skills.os.environ", {"TMPDIR": "/tmp/codex-test"}, clear=True)
+    @patch.dict("ask.commands.skills_impl.os.environ", {"TMPDIR": "/tmp/codex-test"}, clear=True)
     def test_subprocess_env_defaults_uv_cache_to_tmp(self):
         env = _subprocess_env_with_uv_cache()
 
         self.assertEqual(env["UV_CACHE_DIR"], "/tmp/codex-test/agent-skills-uv-cache")
 
-    @patch.dict("ask.commands.skills.os.environ", {"UV_CACHE_DIR": "/custom/uv-cache"}, clear=True)
+    @patch.dict("ask.commands.skills_impl.os.environ", {"UV_CACHE_DIR": "/custom/uv-cache"}, clear=True)
     def test_subprocess_env_preserves_existing_uv_cache(self):
         env = _subprocess_env_with_uv_cache()
 
         self.assertEqual(env["UV_CACHE_DIR"], "/custom/uv-cache")
 
-    @patch("ask.commands.skills._get_python_command", return_value=["python3"])
-    @patch("ask.commands.skills.subprocess.run")
+    @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])
+    @patch("ask.commands.skills_impl.subprocess.run")
     def test_audit_skill_strict_includes_family_failure_context(self, mock_run, _mock_python):
         family_stdout = "\n".join([
             "[family-benchmark] failures:",
@@ -82,8 +83,8 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertIsNotNone(error.fix_suggestion)
         self.assertIn("data.family_benchmarks", error.fix_suggestion)
 
-    @patch("ask.commands.skills._get_python_command", return_value=["python3"])
-    @patch("ask.commands.skills.subprocess.run")
+    @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])
+    @patch("ask.commands.skills_impl.subprocess.run")
     def test_audit_skill_strict_normalizes_skill_file_for_strict_gates(self, mock_run, _mock_python):
         mock_run.side_effect = [
             subprocess.CompletedProcess(args=[], returncode=0, stdout="diagnostics ok", stderr=""),
@@ -108,7 +109,7 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertNotIn("Skills/agent-ops/autofix/SKILL.md", family_cmd)
         self.assertNotIn("Skills/agent-ops/autofix/SKILL.md", openclaw_cmd)
 
-    @patch("ask.commands.skills.subprocess.run")
+    @patch("ask.commands.skills_impl.subprocess.run")
     def test_install_skill_skips_validation_flag_when_unsupported(self, mock_run):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
@@ -123,7 +124,7 @@ class TestAskSkillsErrors(unittest.TestCase):
                 ),
             ]
 
-            with patch("ask.commands.skills._get_python_command", return_value=["python3"]):
+            with patch("ask.commands.skills_impl._get_python_command", return_value=["python3"]):
                 result = install_skill(
                     repo_root=repo_root,
                     url="https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication",
@@ -135,7 +136,7 @@ class TestAskSkillsErrors(unittest.TestCase):
         install_cmd = mock_run.call_args_list[1].args[0]
         self.assertNotIn("--validation-level", install_cmd)
 
-    @patch("ask.commands.skills.subprocess.run")
+    @patch("ask.commands.skills_impl.subprocess.run")
     def test_install_skill_uses_validation_flag_when_supported(self, mock_run):
         """
         Verifies that when the installer advertises `--validation-level` in its usage output, install_skill enables and passes that flag.
@@ -155,7 +156,7 @@ class TestAskSkillsErrors(unittest.TestCase):
                 ),
             ]
 
-            with patch("ask.commands.skills._get_python_command", return_value=["python3"]):
+            with patch("ask.commands.skills_impl._get_python_command", return_value=["python3"]):
                 result = install_skill(
                     repo_root=repo_root,
                     url="https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication",
@@ -167,7 +168,7 @@ class TestAskSkillsErrors(unittest.TestCase):
         install_cmd = mock_run.call_args_list[1].args[0]
         self.assertIn("--validation-level", install_cmd)
 
-    @patch("ask.commands.skills.subprocess.run")
+    @patch("ask.commands.skills_impl.subprocess.run")
     def test_install_skill_remediate_requires_flag_support(self, mock_run):
         """
         Verifies that install_skill errors when remediation is requested but the installer does not support `--remediate`.
@@ -181,7 +182,7 @@ class TestAskSkillsErrors(unittest.TestCase):
                 subprocess.CompletedProcess(args=[], returncode=0, stdout="usage: installer [--url URL --dest DEST]", stderr=""),
             ]
 
-            with patch("ask.commands.skills._get_python_command", return_value=["python3"]):
+            with patch("ask.commands.skills_impl._get_python_command", return_value=["python3"]):
                 result = install_skill(
                     repo_root=repo_root,
                     url="https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication",
@@ -194,6 +195,89 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
         self.assertIn("does not support --remediate", result.errors[0].message)
         self.assertEqual(mock_run.call_count, 1)
+
+    @patch("ask.commands.skills_impl.audit_skill")
+    @patch("ask.commands.skills_impl.shutil.which")
+    @patch("ask.commands.skills_impl.subprocess.run")
+    def test_external_review_is_local_only_and_skips_tessl_review_by_default(
+        self,
+        mock_run,
+        mock_which,
+        mock_audit,
+    ):
+        skill_dir = "Skills/backend-platform/example-skill"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            target = repo_root / skill_dir
+            target.mkdir(parents=True)
+            (target / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
+
+            audit = type("AuditResult", (), {})()
+            audit.status = "success"
+            audit.data = {"diagnostics": {"exit_code": 0}}
+            audit.errors = []
+            mock_audit.return_value = audit
+            mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl"} else None
+            mock_run.side_effect = [
+                subprocess.CompletedProcess(
+                    args=["/usr/local/bin/plugin-eval", "analyze", skill_dir, "--format", "markdown"],
+                    returncode=0,
+                    stdout="plugin-eval ok",
+                    stderr="",
+                ),
+                subprocess.CompletedProcess(
+                    args=["/usr/local/bin/tessl", "skill", "lint", skill_dir],
+                    returncode=0,
+                    stdout="tessl lint ok",
+                    stderr="",
+                ),
+            ]
+
+            result = external_review_skill(repo_root=repo_root, skill_path=skill_dir)
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(result.data["policy"]["no_publish"])
+        self.assertFalse(result.data["policy"]["uses_npx"])
+        self.assertEqual(result.data["plugin_eval"]["status"], "success")
+        self.assertEqual(result.data["tessl_lint"]["status"], "success")
+        self.assertEqual(result.data["tessl_review"]["status"], "skipped_privacy_policy")
+        self.assertEqual(mock_run.call_count, 2)
+        for call in mock_run.call_args_list:
+            self.assertNotIn("npx", call.args[0])
+            self.assertNotIn("publish", call.args[0])
+
+    @patch("ask.commands.skills_impl.audit_skill")
+    @patch("ask.commands.skills_impl.shutil.which")
+    def test_external_review_blocks_tessl_review_without_local_confirmation(self, mock_which, mock_audit):
+        skill_dir = "Skills/backend-platform/example-skill"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            target = repo_root / skill_dir
+            target.mkdir(parents=True)
+            (target / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
+
+            audit = type("AuditResult", (), {})()
+            audit.status = "success"
+            audit.data = {"diagnostics": {"exit_code": 0}}
+            audit.errors = []
+            mock_audit.return_value = audit
+            mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl"} else None
+
+            with patch("ask.commands.skills_impl.subprocess.run") as mock_run:
+                mock_run.side_effect = [
+                    subprocess.CompletedProcess(args=[], returncode=0, stdout="plugin-eval ok", stderr=""),
+                    subprocess.CompletedProcess(args=[], returncode=0, stdout="tessl lint ok", stderr=""),
+                ]
+                result = external_review_skill(
+                    repo_root=repo_root,
+                    skill_path=skill_dir,
+                    include_tessl_review=True,
+                )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.data["tessl_review"]["status"], "blocked_privacy_policy")
+        self.assertTrue(any("local-only safe" in error.message for error in result.errors))
+        self.assertEqual(mock_run.call_count, 2)
 
 
 if __name__ == "__main__":

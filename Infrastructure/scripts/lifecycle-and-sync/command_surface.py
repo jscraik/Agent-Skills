@@ -684,6 +684,53 @@ def write_command_surface_projection(*, repo_root_path: Path | None = None, dry_
     }
 
 
+def check_command_surface_projection(*, repo_root_path: Path | None = None) -> dict[str, Any]:
+    """Verify the committed command-surface projection matches rooted manifests."""
+    root = repo_root_path or repo_root()
+    payload = command_surface_projection(repo_root_path=root, include_handles=True)
+    destination = root / COMMAND_SURFACE_PATH
+    violations = list(payload.get("violations", []))
+
+    actual_payload: dict[str, Any] | None = None
+    if not destination.exists():
+        violations.append({
+            "code": "COMMAND_SURFACE_PROJECTION_MISSING",
+            "path": COMMAND_SURFACE_PATH.as_posix(),
+        })
+    else:
+        try:
+            actual_payload = json.loads(destination.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            violations.append({
+                "code": "COMMAND_SURFACE_PROJECTION_INVALID_JSON",
+                "path": COMMAND_SURFACE_PATH.as_posix(),
+                "error": str(exc),
+            })
+        except OSError as exc:
+            violations.append({
+                "code": "COMMAND_SURFACE_PROJECTION_UNREADABLE",
+                "path": COMMAND_SURFACE_PATH.as_posix(),
+                "error": str(exc),
+            })
+
+    if actual_payload is not None and actual_payload != payload:
+        violations.append({
+            "code": "COMMAND_SURFACE_PROJECTION_DRIFT",
+            "path": COMMAND_SURFACE_PATH.as_posix(),
+            "expected_handle_count": payload.get("handle_count"),
+            "actual_handle_count": actual_payload.get("handle_count"),
+        })
+
+    return {
+        "schema_version": "command-surface-check.v1",
+        "status": "pass" if not violations else "fail",
+        "path": COMMAND_SURFACE_PATH.as_posix(),
+        "handle_count": payload.get("handle_count"),
+        "generated_command_handle_count": payload.get("generated_command_handle_count"),
+        "violations": violations,
+    }
+
+
 def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool = False) -> dict[str, Any]:
     """Write or preview generated runtime command handles for non-root handles."""
     root = repo_root_path or repo_root()

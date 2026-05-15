@@ -544,6 +544,7 @@ def main():
     skills_handles_parser.add_argument("--check", action="store_true", help="Fail when command-handle validation finds drift")
     skills_handles_parser.add_argument("--no-handles", action="store_true", help="Omit the full handle list from JSON output")
     skills_handles_parser.add_argument("--write-projection", action="store_true", help="Write .skillsets/command-surface.json from rooted manifests")
+    skills_handles_parser.add_argument("--check-projection", action="store_true", help="Verify .skillsets/command-surface.json matches rooted manifests")
     skills_handles_parser.add_argument("--write-command-handles", action="store_true", help="Write generated runtime command handles for non-root handles")
     skills_handles_parser.add_argument("--check-command-handles", action="store_true", help="Verify generated runtime command handles exist and match rooted manifests")
     skills_handles_parser.add_argument("--dry-run", action="store_true", help="Preview generated projection or command-handle writes without changing files")
@@ -589,6 +590,10 @@ def main():
     skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
     skills_audit_parser.add_argument("path", help="Path to the skill directory")
     skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
+    skills_external_review_parser = skills_subparsers.add_parser("external-review", help="Run the local-only external-style skill review lane", parents=[global_parser]); skills_external_review_parser.add_argument("path", help="Path to the skill directory")
+    skills_external_review_parser.add_argument("--audit-level", choices=["compat", "strict"], default="strict", help="Internal ask audit depth"); skills_external_review_parser.add_argument("--skip-plugin-eval", action="store_true", help="Skip plugin-eval comparison")
+    skills_external_review_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl local lint"); skills_external_review_parser.add_argument("--include-tessl-review", action="store_true", help="Run Tessl review only when local-only confirmation env is set")
+    skills_external_review_parser.add_argument("--timeout-seconds", type=int, default=180, help="Timeout for each local reviewer command"); skills_external_review_parser.add_argument("--report-path", help="Optional repo-relative JSON report path")
     skills_gate_parser = skills_subparsers.add_parser("validate-skill-gate", help="Run the canonical skill gate", parents=[global_parser])
     skills_gate_parser.add_argument("path", help="Path to the skill directory")
     skills_openai_parser = skills_subparsers.add_parser("validate-openai-format", help="Run the canonical OpenAI skill format validator", parents=[global_parser])
@@ -959,6 +964,7 @@ def main():
                 check=args.check,
                 include_handles=not args.no_handles,
                 write_projection=args.write_projection,
+                check_projection=args.check_projection,
                 write_command_handle_files=args.write_command_handles,
                 check_command_handle_files=args.check_command_handles,
                 dry_run=args.dry_run,
@@ -1006,6 +1012,8 @@ def main():
             result = skills_commands.sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run, projection=args.projection, plugin_cache_refresh=args.plugin_cache_refresh)
         elif args.action == "audit":
             result = skills_commands.audit_skill(repo_root, skill_path=args.path, level=args.level)
+        elif args.action == "external-review":
+            result = skills_commands.external_review_skill(repo_root, skill_path=args.path, audit_level=args.audit_level, skip_plugin_eval=args.skip_plugin_eval, skip_tessl=args.skip_tessl, include_tessl_review=args.include_tessl_review, timeout_seconds=args.timeout_seconds, report_path=args.report_path)
         elif args.action == "validate-skill-gate":
             result = skills_commands.validate_skill_gate(repo_root, skill_path=args.path)
         elif args.action == "validate-openai-format":
@@ -1021,7 +1029,7 @@ def main():
         else:
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=f"{action_msg} for topic 'skills'", fix_suggestion="Valid actions: list, budget, handles, resolve, parse, proof, prove, explain, route, goal, improve, starter, sync, audit, validate-skill-gate, validate-openai-format, validate-boundaries, install, fold, init"))
+            result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=f"{action_msg} for topic 'skills'", fix_suggestion="Valid actions: list, budget, handles, resolve, parse, proof, prove, explain, route, goal, improve, starter, sync, audit, external-review, validate-skill-gate, validate-openai-format, validate-boundaries, install, fold, init"))
 
     elif args.topic == "reviewers":
         if args.action == "resolve":
