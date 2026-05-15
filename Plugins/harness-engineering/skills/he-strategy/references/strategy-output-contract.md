@@ -79,7 +79,8 @@ should preserve, open questions, and an evidence matrix.
 
 Architecture reviews should cover risk, cognition, complexity, deep versus
 shallow modules, domain integrity, agent-native capability, governance,
-anti-patterns, moat analysis, and evidence matrix.
+anti-patterns, moat analysis, direct strategic critique, reference lens status,
+and evidence matrix.
 
 Triage artifacts should compress findings into strategic, architectural,
 operational, governance, agent-native, technical debt, false sophistication,

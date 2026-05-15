@@ -616,7 +616,18 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
             case_id = case.get("id") if isinstance(case, dict) else None
             if case_id in new_case_ids:
                 checks = case.get("deterministic_checks", {})
-                forbidden_cmds = set(checks.get("forbidden_commands", []))
+                self.assertIsInstance(
+                    checks,
+                    dict,
+                    f"Case '{case_id}' deterministic_checks must be a mapping",
+                )
+                forbidden_list = checks.get("forbidden_commands", [])
+                self.assertIsInstance(
+                    forbidden_list,
+                    list,
+                    f"Case '{case_id}' forbidden_commands must be a list",
+                )
+                forbidden_cmds = {str(cmd) for cmd in forbidden_list}
                 with self.subTest(case_id=case_id):
                     self.assertTrue(
                         required_forbidden.issubset(forbidden_cmds),
