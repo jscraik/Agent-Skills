@@ -37,11 +37,17 @@ Every output must include:
 - hard evidence, interpretation, and assumptions
 - affected systems or modules
 - confidence level for major conclusions
+- authority limits
+- validation outcomes (`pass`/`fail`/`blocked` with reason)
 - smallest feedback-producing next slice
 - stop or pivot condition for the next slice
 - drift or moat impact where relevant
 - future-agent guidance
 - evidence and traceability matrix
+- `roles_used`, `roles_recommended`, and `roles_missing`
+
+Keep this list aligned with the required output contract in
+`Plugins/harness-engineering/skills/he-strategy/SKILL.md`.
 
 ## Mode Guardrails
 

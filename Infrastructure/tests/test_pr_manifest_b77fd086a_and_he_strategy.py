@@ -374,6 +374,17 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
             if isinstance(c, dict) and c.get("id")
         }
 
+    def _get_case_by_id(self, case_id: str) -> dict[str, Any]:
+        case = next(
+            (
+                c for c in self._cases
+                if isinstance(c, dict) and c.get("id") == case_id
+            ),
+            None,
+        )
+        self.assertIsNotNone(case, f"Missing eval case '{case_id}'")
+        return case  # type: ignore[return-value]
+
     def test_schema_version_is_2_0(self) -> None:
         """
         Assert that the evals.yaml declares schema_version "2.0".
@@ -432,7 +443,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         
         Asserts the case's `realistic` flag is truthy and that the `why_realistic` and `expected_behavior` keys are present.
         """
-        case = next(c for c in self._cases if c["id"] == "stated-vs-implied-intent")
+        case = self._get_case_by_id("stated-vs-implied-intent")
         self.assertTrue(
             case.get("realistic"),
             "stated-vs-implied-intent should be marked realistic: true",
@@ -450,7 +461,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         
         Asserts the concatenated acceptance values include phrases matching "stated intent" and "implied intent" (case-insensitive).
         """
-        case = next(c for c in self._cases if c["id"] == "stated-vs-implied-intent")
+        case = self._get_case_by_id("stated-vs-implied-intent")
         acceptance = case.get("acceptance", [])
         patterns = [a.get("value", "") for a in acceptance]
         combined = " ".join(patterns)
@@ -471,7 +482,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         
         Asserts that the concatenated acceptance values for the case mention both "alignment" and "contradiction" (case-insensitive).
         """
-        case = next(c for c in self._cases if c["id"] == "stated-vs-implied-intent")
+        case = self._get_case_by_id("stated-vs-implied-intent")
         acceptance = case.get("acceptance", [])
         patterns = [a.get("value", "") for a in acceptance]
         combined = " ".join(patterns)
@@ -492,7 +503,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         
         Checks (case-insensitive) that the acceptance text mentions at least one of: "command surface", "tests", "validation gate", or "runtime path".
         """
-        case = next(c for c in self._cases if c["id"] == "stated-vs-implied-intent")
+        case = self._get_case_by_id("stated-vs-implied-intent")
         acceptance = case.get("acceptance", [])
         patterns = [a.get("value", "") for a in acceptance]
         combined = " ".join(patterns)
@@ -509,10 +520,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         
         Checks that the case's acceptance content contains wording indicating sampled/partial evidence or explicit authority limits (for example: "sampled", "partial", "authority limited", "cannot", or "must not").
         """
-        case = next(
-            c for c in self._cases
-            if c["id"] == "sampled-evidence-downgrades-strategy-authority"
-        )
+        case = self._get_case_by_id("sampled-evidence-downgrades-strategy-authority")
         acceptance = case.get("acceptance", [])
         patterns = [a.get("value", "") for a in acceptance]
         combined = " ".join(patterns)
@@ -528,10 +536,7 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         
         Checks that at least one acceptance `value` contains one of: "first principles", "reject", "Do Not Create", or "template" (case-insensitive).
         """
-        case = next(
-            c for c in self._cases
-            if c["id"] == "first-principles-rejects-template-copying"
-        )
+        case = self._get_case_by_id("first-principles-rejects-template-copying")
         acceptance = case.get("acceptance", [])
         patterns = [a.get("value", "") for a in acceptance]
         combined = " ".join(patterns)
@@ -565,12 +570,13 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
             "first-principles-rejects-template-copying",
         }
         for case in self._cases:
-            if case["id"] in new_case_ids:
-                with self.subTest(case_id=case["id"]):
+            case_id = case.get("id") if isinstance(case, dict) else None
+            if case_id in new_case_ids:
+                with self.subTest(case_id=case_id):
                     modes = case.get("eval_modes", [])
-                    self.assertIn("smoke", modes, f"Case '{case['id']}' missing 'smoke' eval mode")
+                    self.assertIn("smoke", modes, f"Case '{case_id}' missing 'smoke' eval mode")
                     self.assertIn(
-                        "release", modes, f"Case '{case['id']}' missing 'release' eval mode"
+                        "release", modes, f"Case '{case_id}' missing 'release' eval mode"
                     )
 
     def test_forbidden_commands_block_applies_to_new_cases(self) -> None:
@@ -582,13 +588,14 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         }
         required_forbidden = {"curl", "wget", "rm -rf"}
         for case in self._cases:
-            if case["id"] in new_case_ids:
+            case_id = case.get("id") if isinstance(case, dict) else None
+            if case_id in new_case_ids:
                 checks = case.get("deterministic_checks", {})
                 forbidden_cmds = set(checks.get("forbidden_commands", []))
-                with self.subTest(case_id=case["id"]):
+                with self.subTest(case_id=case_id):
                     self.assertTrue(
                         required_forbidden.issubset(forbidden_cmds),
-                        f"Case '{case['id']}' must include forbidden commands: {sorted(required_forbidden)}",
+                        f"Case '{case_id}' must include forbidden commands: {sorted(required_forbidden)}",
                     )
 
     def test_xp_feedback_slice_acceptance_covers_smallest_feedback_stop_pivot(self) -> None:
@@ -597,7 +604,13 @@ class TestHeStrategyEvalsYaml(unittest.TestCase):
         
         Skips the test if the `xp-feedback-slice` case is not present. The assertion is performed case-insensitively against the case's acceptance values.
         """
-        case = next((c for c in self._cases if c["id"] == "xp-feedback-slice"), None)
+        case = next(
+            (
+                c for c in self._cases
+                if isinstance(c, dict) and c.get("id") == "xp-feedback-slice"
+            ),
+            None,
+        )
         if case is None:
             self.skipTest("xp-feedback-slice case not present")
         acceptance = case.get("acceptance", [])
