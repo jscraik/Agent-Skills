@@ -62,11 +62,13 @@ Also include `he-strategy`, `subagent_policy`, `roles_used`,
    is secondary context, not implementation permission.
 6. Apply source-prompt, first-principles contract, XP operating contract, and
    other shared HE contracts only when their triggers apply.
-7. If evidence is sampled, stale, or narrow, label authority limited and record
+7. Apply the context-disposition policy before trimming any section; preserve
+   mandatory markers in-place and move deep detail into routed references.
+8. If evidence is sampled, stale, or narrow, label authority limited and record
    downstream confidence plus refresh work.
-8. Compress conclusions to decisions that change routing, deletion, investment,
+9. Compress conclusions to decisions that change routing, deletion, investment,
    anti-drift behavior, or the smallest feedback-producing next slice.
-9. Validate the artifact against the selected mode contract and record each
+10. Validate the artifact against the selected mode contract and record each
    gate as `pass`, `fail`, or `blocked`.
 
 ## Validation
