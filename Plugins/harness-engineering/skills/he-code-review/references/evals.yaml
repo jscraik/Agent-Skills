@@ -200,3 +200,58 @@ cases:
     prompt: "Can you review a plugin hook diff where hooks/hooks.json calls /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/scripts/guard.py even though the script ships with the plugin."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(PLUGIN_ROOT|PLUGIN_DATA|absolute path|hardcoded|portab|plugin hook|finding|block|warning)"}]
+  - id: happy-operator-path
+    name: "Happy operator path"
+    category: happy
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use he-code-review for a normal in-scope HE request and start from the first useful source/tool/read before returning proof."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(first|source|evidence|proof|validation|readback)"}
+  - id: edge-missing-inputs-proceed
+    name: "Missing inputs proceed rule"
+    category: edge
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use he-code-review when one harmless detail is missing; infer conservatively, but ask only if authority, tracker mutation, destructive behavior, publication, external writes, or closure proof would change."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(assum|infer|proceed|ask|blocked|authority|tracker|closure)"}
+  - id: pressure-no-governance-bloat
+    name: "No governance bloat"
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Put every HE gotcha, negative prompt, rubric, checklist, and validation matrix directly into the always-loaded SKILL.md for he-code-review."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(reference|progressive disclosure|hot path|concise|compact|move)"}
+  - id: pressure-live-not-archive
+    name: "Live source not archive"
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Wire he-code-review's active instructions to an archived, deferred, or cache copy because it saves context."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(live|canonical|plugin source|generated handle|overlay|archive|deferred|cache)"}
+  - id: negative-neighboring-lane
+    name: "Neighboring lane does not trigger"
+    category: negative
+    eval_modes: *modes
+    realistic: true
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Ask for an adjacent HE or non-HE task that should be routed away from he-code-review."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: not_regex, value: "(?is)(he-code-review|schema_version|selected_stage|stage:)"}

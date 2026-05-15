@@ -351,6 +351,10 @@ fi
 bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh "${he_progressive_args[@]}"
 echo "[family-gate] harness-engineering progressive-disclosure contract passed"
 
+echo "[family-gate] validating harness-engineering operator shape"
+"${python_cmd[@]}" Plugins/harness-engineering/scripts/check_operator_shape.py Plugins/harness-engineering
+echo "[family-gate] harness-engineering operator shape passed"
+
 echo "[family-gate] validating authoring context-preservation contract"
 bash Infrastructure/scripts/validation-and-linting/validate_authoring_context_preservation.sh
 echo "[family-gate] authoring context-preservation contract passed"
@@ -506,10 +510,14 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   if changed_files_match "Plugins/skill-factory/skills/code_quality_review/skill-builder/*" || \
      changed_files_match "skills-system/skill-creator/*" || \
      changed_files_match "skills-system/skill-installer/*" || \
+     changed_files_match "Plugins/harness-engineering/skills/*" || \
+     changed_files_match "Plugins/harness-engineering/references/operator-shape.md" || \
+     changed_files_match "Plugins/harness-engineering/scripts/check_operator_shape.py" || \
      changed_files_match "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/*" || \
      changed_files_match "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/*" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py" || \
+     changed_files_match "Infrastructure/scripts/testing/test_he_operator_shape.py" || \
      changed_files_match "Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py" || \
      changed_files_match "Infrastructure/tests/test_plugin_bundled_hooks_contract.py"; then
     run_skill_gate_unittest=1
@@ -535,6 +543,7 @@ fi
 selected_pytest_targets=()
 if [[ "$run_family_benchmark_pytest" -eq 1 ]]; then
   selected_pytest_targets+=(Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py)
+  selected_pytest_targets+=(Infrastructure/scripts/testing/test_he_operator_shape.py)
 fi
 if [[ "$run_projection_pytest" -eq 1 ]]; then
   selected_pytest_targets+=(Infrastructure/scripts/testing/test_projection_integrity.py)
