@@ -199,7 +199,7 @@ class TestAskSkillsErrors(unittest.TestCase):
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")
     @patch("ask.commands.skills_impl.subprocess.run")
-    def test_external_review_is_local_only_and_skips_tessl_review_by_default(
+    def test_external_review_runs_tessl_review_by_default(
         self,
         mock_run,
         mock_which,
@@ -231,6 +231,12 @@ class TestAskSkillsErrors(unittest.TestCase):
                     stdout="tessl lint ok",
                     stderr="",
                 ),
+                subprocess.CompletedProcess(
+                    args=["/usr/local/bin/tessl", "skill", "review", skill_dir],
+                    returncode=0,
+                    stdout="tessl review ok",
+                    stderr="",
+                ),
             ]
 
             result = external_review_skill(repo_root=repo_root, skill_path=skill_dir)
@@ -240,17 +246,20 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertFalse(result.data["policy"]["uses_npx"])
         self.assertEqual(result.data["plugin_eval"]["status"], "success")
         self.assertEqual(result.data["tessl_lint"]["status"], "success")
-        self.assertEqual(result.data["tessl_review"]["status"], "skipped_privacy_policy")
-        self.assertEqual(mock_run.call_count, 2)
+        self.assertEqual(result.data["tessl_review"]["status"], "success")
+        self.assertEqual(mock_run.call_count, 3)
         for call in mock_run.call_args_list:
             self.assertNotIn("npx", call.args[0])
             self.assertNotIn("publish", call.args[0])
         tessl_call = mock_run.call_args_list[1]
         self.assertIn("agent-skills-tessl-", tessl_call.kwargs["env"]["HOME"])
+        review_call = mock_run.call_args_list[2]
+        self.assertEqual(review_call.args[0][1:3], ["skill", "review"])
+        self.assertIn("agent-skills-tessl-", review_call.kwargs["env"]["HOME"])
 
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")
-    def test_external_review_blocks_tessl_review_without_local_confirmation(self, mock_which, mock_audit):
+    def test_external_review_can_skip_tessl_review(self, mock_which, mock_audit):
         skill_dir = "Skills/backend-platform/example-skill"
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
@@ -273,12 +282,11 @@ class TestAskSkillsErrors(unittest.TestCase):
                 result = external_review_skill(
                     repo_root=repo_root,
                     skill_path=skill_dir,
-                    include_tessl_review=True,
+                    skip_tessl_review=True,
                 )
 
-        self.assertEqual(result.status, "error")
-        self.assertEqual(result.data["tessl_review"]["status"], "blocked_privacy_policy")
-        self.assertTrue(any("local-only safe" in error.message for error in result.errors))
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["tessl_review"]["status"], "skipped")
         self.assertEqual(mock_run.call_count, 2)
 
 

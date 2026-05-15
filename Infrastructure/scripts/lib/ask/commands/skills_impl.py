@@ -347,6 +347,7 @@ def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root
     tile_path.write_text(json.dumps(tile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return tile_path, {
         "tile_path": str(tile_path),
+        "review_path": str(tile_skill_dir),
         "skill_key": skill_key,
         "source_skill": audit_target_path,
     }
@@ -1635,16 +1636,16 @@ def external_review_skill(
     audit_level: str = "strict",
     skip_plugin_eval: bool = False,
     skip_tessl: bool = False,
-    include_tessl_review: bool = False,
+    skip_tessl_review: bool = False,
     timeout_seconds: int = 180,
     report_path: Optional[str] = None,
 ) -> CallResult:
     """Run the local-only second-review lane for one skill.
 
     This command intentionally never publishes or registers a skill. Tessl is
-    used only as an installed local CLI, never through npx, and the LLM-judge
-    tessl skill review step is guarded until an operator explicitly marks the
-    environment as local-only safe with TESSL_REVIEW_CONFIRMED_LOCAL_ONLY=1.
+    used only as an installed local CLI, never through npx. Tessl describes
+    ``skill review`` as a local terminal review for private and work-in-progress
+    skills, so it is part of the default second-review lane.
     """
     result = CallResult()
     result.status = "success"
@@ -1669,7 +1670,8 @@ def external_review_skill(
         "no_publish": True,
         "no_registry_upload": True,
         "uses_npx": False,
-        "tessl_review_requires_local_only_confirmation": True,
+        "tessl_review_default": "enabled_local_cli",
+        "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
     }
     result.data["target"] = audit_target_path
 
@@ -1773,9 +1775,8 @@ def external_review_skill(
                         fix_suggestion="Check the local Tessl installation and rerun once it responds normally.",
                     ))
 
-                review_confirmed_local = os.environ.get("TESSL_REVIEW_CONFIRMED_LOCAL_ONLY") == "1"
-                if include_tessl_review and review_confirmed_local:
-                    review_command = [tessl_bin, "skill", "review", str(tile_path)]
+                if not skip_tessl_review:
+                    review_command = [tessl_bin, "skill", "review", tile_info["review_path"]]
                     try:
                         review_proc = _run_captured_tool(
                             repo_root=repo_root,
@@ -1801,21 +1802,10 @@ def external_review_skill(
                             message=f"Tessl skill review timed out after {timeout_seconds} seconds.",
                             fix_suggestion="Check the local Tessl installation and rerun once it responds normally.",
                         ))
-                elif include_tessl_review:
-                    result.status = "error"
-                    result.data["tessl_review"] = {
-                        "status": "blocked_privacy_policy",
-                        "required_confirmation_env": "TESSL_REVIEW_CONFIRMED_LOCAL_ONLY=1",
-                    }
-                    result.errors.append(ErrorObject(
-                        code="ERR_VALIDATION",
-                        message="Tessl skill review was requested but is blocked until the environment is confirmed local-only safe.",
-                        fix_suggestion="Confirm Tessl review does not transmit skill content, then rerun with TESSL_REVIEW_CONFIRMED_LOCAL_ONLY=1.",
-                    ))
                 else:
                     result.data["tessl_review"] = {
-                        "status": "skipped_privacy_policy",
-                        "reason": "LLM-judge review is not run unless local-only behavior is confirmed.",
+                        "status": "skipped",
+                        "reason": "Skipped by --skip-tessl-review.",
                     }
     else:
         result.data["tessl_lint"] = {"status": "skipped"}

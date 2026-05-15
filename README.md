@@ -162,11 +162,12 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 
 `ask skills external-review` is a local/internal validation lane for comparing
 repo-native skill checks with a second external-style reviewer. It runs the
-internal `ask skills audit` lane, `plugin-eval analyze`, and installed Tessl CLI
-local lint when available. It never invokes `npx`, never publishes, and never
-uploads to a registry. The Tessl LLM-judge review step is skipped unless a human
-has confirmed that the local Tessl installation does not transmit skill content
-and reruns with `TESSL_REVIEW_CONFIRMED_LOCAL_ONLY=1`.
+internal `ask skills audit` lane, `plugin-eval analyze`, installed Tessl CLI
+local lint, and Tessl local skill review when available. It never invokes `npx`,
+never publishes, and never uploads to a registry. Tessl documents this CLI path
+as reviewing locally from your machine for private repos and work-in-progress
+skills, with results only visible to you. Use `--skip-tessl-review` only when
+you need structural Tessl lint without the best-practice review output.
 
 Tessl validates tile packages, while this repository keeps canonical skills as
 `SKILL.md`-first source directories. The command therefore creates a temporary

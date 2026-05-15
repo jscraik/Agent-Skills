@@ -592,7 +592,7 @@ def main():
     skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
     skills_external_review_parser = skills_subparsers.add_parser("external-review", help="Run the local-only external-style skill review lane", parents=[global_parser]); skills_external_review_parser.add_argument("path", help="Path to the skill directory")
     skills_external_review_parser.add_argument("--audit-level", choices=["compat", "strict"], default="strict", help="Internal ask audit depth"); skills_external_review_parser.add_argument("--skip-plugin-eval", action="store_true", help="Skip plugin-eval comparison")
-    skills_external_review_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl local lint"); skills_external_review_parser.add_argument("--include-tessl-review", action="store_true", help="Run Tessl review only when local-only confirmation env is set")
+    skills_external_review_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl local lint and review"); skills_external_review_parser.add_argument("--skip-tessl-review", action="store_true", help="Skip Tessl local best-practice review")
     skills_external_review_parser.add_argument("--timeout-seconds", type=int, default=180, help="Timeout for each local reviewer command"); skills_external_review_parser.add_argument("--report-path", help="Optional repo-relative JSON report path")
     skills_gate_parser = skills_subparsers.add_parser("validate-skill-gate", help="Run the canonical skill gate", parents=[global_parser])
     skills_gate_parser.add_argument("path", help="Path to the skill directory")
@@ -1013,7 +1013,7 @@ def main():
         elif args.action == "audit":
             result = skills_commands.audit_skill(repo_root, skill_path=args.path, level=args.level)
         elif args.action == "external-review":
-            result = skills_commands.external_review_skill(repo_root, skill_path=args.path, audit_level=args.audit_level, skip_plugin_eval=args.skip_plugin_eval, skip_tessl=args.skip_tessl, include_tessl_review=args.include_tessl_review, timeout_seconds=args.timeout_seconds, report_path=args.report_path)
+            result = skills_commands.external_review_skill(repo_root, skill_path=args.path, audit_level=args.audit_level, skip_plugin_eval=args.skip_plugin_eval, skip_tessl=args.skip_tessl, skip_tessl_review=args.skip_tessl_review, timeout_seconds=args.timeout_seconds, report_path=args.report_path)
         elif args.action == "validate-skill-gate":
             result = skills_commands.validate_skill_gate(repo_root, skill_path=args.path)
         elif args.action == "validate-openai-format":
