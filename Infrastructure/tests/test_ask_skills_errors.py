@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 import tempfile
@@ -16,6 +17,7 @@ from ask.commands.skills_impl import (
     external_review_skill,
     install_skill,
 )
+from ask.skill_review_dashboard import render_skill_review_dashboard
 
 
 class TestAskSkillsErrors(unittest.TestCase):
@@ -256,6 +258,119 @@ class TestAskSkillsErrors(unittest.TestCase):
         review_call = mock_run.call_args_list[2]
         self.assertEqual(review_call.args[0][1:3], ["skill", "review"])
         self.assertIn("agent-skills-tessl-", review_call.kwargs["env"]["HOME"])
+
+    @patch("ask.commands.skills_impl.audit_skill")
+    @patch("ask.commands.skills_impl.shutil.which")
+    @patch("ask.commands.skills_impl.subprocess.run")
+    def test_external_review_dashboard_writes_local_html(
+        self,
+        mock_run,
+        mock_which,
+        mock_audit,
+    ):
+        skill_dir = "Plugins/skill-factory/skills/code_quality_review/example-skill"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            target = repo_root / skill_dir
+            target.mkdir(parents=True)
+            (target / "SKILL.md").write_text("---\nname: example-skill\ndescription: Use when reviewing examples.\n---\n\n# Example\n", encoding="utf-8")
+
+            audit = type("AuditResult", (), {})()
+            audit.status = "success"
+            audit.data = {"openclaw": {"stdout": "Summary: 0 critical · 0 warn"}}
+            audit.errors = []
+            mock_audit.return_value = audit
+            mock_which.side_effect = lambda name: f"/usr/local/bin/{name}" if name in {"plugin-eval", "tessl"} else None
+            mock_run.side_effect = [
+                subprocess.CompletedProcess(args=[], returncode=0, stdout="Score: 91/100\nGrade: A\nRisk: low\nChecks: 0 fail, 0 warn", stderr=""),
+                subprocess.CompletedProcess(args=[], returncode=0, stdout="Overall: PASSED (0 errors, 0 warnings)", stderr=""),
+                subprocess.CompletedProcess(
+                    args=[],
+                    returncode=0,
+                    stdout=(
+                        "Review Score: 92%\n"
+                        "Description: 100%\n"
+                        "Content: 85%\n"
+                        "  specificity: 3/3 - Specific trigger terms.\n"
+                        "  conciseness: 2/3 - Slightly verbose.\n"
+                        "    Suggestions:\n"
+                        "      - Tighten repeated guidance.\n"
+                    ),
+                    stderr="",
+                ),
+            ]
+
+            result = external_review_skill(
+                repo_root=repo_root,
+                skill_path=skill_dir,
+                audit_level="compat",
+                report_path="Infrastructure/artifacts/skill-reviews/example-skill.json",
+                dashboard=True,
+                dashboard_path="Infrastructure/artifacts/skill-reviews/example-skill.html",
+            )
+
+            html_path = repo_root / result.data["dashboard_path"]
+            html_text = html_path.read_text(encoding="utf-8")
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["dashboard_path"], "Infrastructure/artifacts/skill-reviews/example-skill.html")
+        self.assertTrue(result.data["dashboard_url"].startswith("file://"))
+        self.assertIn("ASK Local Review", html_text)
+        self.assertIn("Quality", html_text)
+        self.assertIn("Evals Not Run Yet", html_text)
+        self.assertIn("local_internal_only", html_text)
+
+    def test_review_dashboard_renders_latest_eval_scorecard(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            report_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.json"
+            report_path.parent.mkdir(parents=True)
+            report_path.write_text(
+                json.dumps({
+                    "status": "success",
+                    "data": {
+                        "target": "Plugins/skill-factory/skills/code_quality_review/example-skill",
+                        "ask_audit": {"data": {"openclaw": {"stdout": "Summary: 0 critical · 0 warn"}}},
+                        "plugin_eval": {"stdout": "Score: 88/100\nGrade: B"},
+                        "tessl_review": {
+                            "stdout": (
+                                "Review Score: 90%\n"
+                                "Description: 100%\n"
+                                "Content: 80%\n"
+                                "Overall: PASSED (0 errors, 0 warnings)\n"
+                                "  actionability: 3/3 - Clear steps."
+                            )
+                        },
+                    },
+                    "errors": [],
+                }),
+                encoding="utf-8",
+            )
+            scorecard_path = repo_root / "Infrastructure/artifacts/skills/example-skill/20260515-180000-000000/scorecard.json"
+            scorecard_path.parent.mkdir(parents=True)
+            scorecard_path.write_text(
+                """{
+  "run_id": "20260515-180000-000000",
+  "eval_mode": "smoke",
+  "runner_mode": "codex",
+  "cases": [
+    {"id": "happy-path", "name": "Happy Path", "category": "happy", "passed": true, "tier1_failures": [], "warnings": []},
+    {"id": "edge-case", "name": "Edge Case", "category": "edge", "passed": false, "tier1_failures": ["missing required output"], "warnings": []}
+  ]
+}
+""",
+                encoding="utf-8",
+            )
+
+            html_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.html"
+            render_skill_review_dashboard(report_path=report_path, output_path=html_path, repo_root=repo_root)
+            html_text = html_path.read_text(encoding="utf-8")
+
+        self.assertIn("Evaluation Results", html_text)
+        self.assertIn("Happy Path", html_text)
+        self.assertIn("Edge Case", html_text)
+        self.assertIn("Not run", html_text)
+        self.assertIn("50%", html_text)
 
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")

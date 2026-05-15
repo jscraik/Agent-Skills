@@ -58,6 +58,7 @@ from ask.selection_contract import (  # noqa: E402
     canonical_sort_key,
 )
 from ask.skill_analytics import skill_invocation_analytics  # noqa: E402
+from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: E402
 
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
@@ -1644,6 +1645,8 @@ def external_review_skill(
     skip_tessl_review: bool = False,
     timeout_seconds: int = 180,
     report_path: Optional[str] = None,
+    dashboard: bool = False,
+    dashboard_path: Optional[str] = None,
 ) -> CallResult:
     """Run the local-only second-review lane for one skill.
 
@@ -1816,6 +1819,7 @@ def external_review_skill(
         result.data["tessl_lint"] = {"status": "skipped"}
         result.data["tessl_review"] = {"status": "skipped"}
 
+    report_target: Optional[Path] = None
     if report_path:
         report_target, report_error = _validate_repo_relative_skill_path(repo_root, report_path)
         if report_error:
@@ -1828,7 +1832,44 @@ def external_review_skill(
             "errors": [getattr(error, "__dict__", error) for error in result.errors],
         }
         report_target.write_text(json.dumps(report_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        result.data["report_path"] = report_target.relative_to(repo_root).as_posix()
+        result.data["report_path"] = report_target.relative_to(repo_root.resolve()).as_posix()
+
+    if dashboard:
+        if report_target is None:
+            default_report = Path("Infrastructure") / "artifacts" / "skill-reviews" / f"{target_abs.name}.json"
+            report_target = (repo_root / default_report).resolve()
+            report_target.parent.mkdir(parents=True, exist_ok=True)
+            report_payload = {
+                "status": result.status,
+                "data": result.data,
+                "errors": [getattr(error, "__dict__", error) for error in result.errors],
+            }
+            report_target.write_text(json.dumps(report_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            result.data["report_path"] = report_target.relative_to(repo_root.resolve()).as_posix()
+
+        if dashboard_path:
+            dashboard_target, dashboard_error = _validate_repo_relative_skill_path(repo_root, dashboard_path)
+            if dashboard_error:
+                return dashboard_error
+            assert dashboard_target is not None
+        else:
+            dashboard_target = report_target.with_suffix(".html")
+        try:
+            rendered_dashboard = render_skill_review_dashboard(
+                report_path=report_target,
+                output_path=dashboard_target,
+                repo_root=repo_root,
+            )
+        except Exception as exc:
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_RUNTIME",
+                message=f"Failed to render local skill review dashboard: {exc}",
+                fix_suggestion="Inspect the JSON report and rerun with --dashboard once the report shape is valid.",
+            ))
+        else:
+            result.data["dashboard_path"] = rendered_dashboard.relative_to(repo_root.resolve()).as_posix()
+            result.data["dashboard_url"] = rendered_dashboard.resolve().as_uri()
 
     return result
 

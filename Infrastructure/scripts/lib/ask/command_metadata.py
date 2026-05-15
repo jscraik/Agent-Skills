@@ -157,6 +157,7 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("skills", "external-review"): [
         "ask skills external-review Skills/backend-platform/cli-spec --json",
         "ask skills external-review Plugins/skill-factory/skills/code_quality_review/skill-builder --report-path artifacts/skill-reviews/skill-builder.json --json",
+        "ask skills external-review Plugins/skill-factory/skills/code_quality_review/skill-builder --dashboard --json",
     ],
     ("skills", "goal"): [
         "ask skills goal \"implement auth safely\"",
