@@ -153,7 +153,5 @@ resolver, or unsafe authority gap.
 
 Deferred context index: `../../references/deferred-context-index.md`.
 Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
-references with a clear route.
-Apply the context-disposition policy by moving important still-valid context to
-references and intentionally discarding stale, duplicated, unsafe, superseded,
-or low-signal text.
+Read when closure proof could be mistaken for live tracker mutation:
+`../../references/closure-mutation-contract.md`.

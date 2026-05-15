@@ -120,6 +120,10 @@ cases:
     acceptance: [{type: regex, value: "(?is)(first.?principles|verified failure|smallest|copied|Do Not Create|ask|survivor|evidence)"}]
   - id: happy-operator-path
     name: "Happy operator path"
+    origin:
+      type: upstream_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'slow start or generic governance-first execution'
     category: happy
     eval_modes: *modes
     realistic: true
@@ -131,6 +135,10 @@ cases:
       - {type: regex, value: "(?is)(first|source|evidence|proof|validation|readback)"}
   - id: edge-missing-inputs-proceed
     name: "Missing inputs proceed rule"
+    origin:
+      type: user_correction
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'unnecessary blocked states for harmless missing details'
     category: edge
     eval_modes: *modes
     realistic: true
@@ -142,6 +150,10 @@ cases:
       - {type: regex, value: "(?is)(assum|infer|proceed|ask|blocked|authority|tracker|closure)"}
   - id: pressure-no-governance-bloat
     name: "No governance bloat"
+    origin:
+      type: negative_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'always-loaded gotchas, rubrics, and validation matrices'
     category: pressure
     eval_modes: [release]
     realistic: true
@@ -153,6 +165,10 @@ cases:
       - {type: regex, value: "(?is)(reference|progressive disclosure|hot path|concise|compact|move)"}
   - id: pressure-live-not-archive
     name: "Live source not archive"
+    origin:
+      type: negative_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'archive, deferred, or cache paths becoming active authority'
     category: pressure
     eval_modes: [release]
     realistic: true
@@ -164,6 +180,10 @@ cases:
       - {type: regex, value: "(?is)(live|canonical|plugin source|generated handle|overlay|archive|deferred|cache)"}
   - id: negative-neighboring-lane
     name: "Neighboring lane does not trigger"
+    origin:
+      type: routing_regression
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'false trigger on adjacent HE or non-HE work'
     category: negative
     eval_modes: *modes
     realistic: true

@@ -355,6 +355,18 @@ echo "[family-gate] validating harness-engineering operator shape"
 "${python_cmd[@]}" Plugins/harness-engineering/scripts/check_operator_shape.py Plugins/harness-engineering
 echo "[family-gate] harness-engineering operator shape passed"
 
+echo "[family-gate] validating harness-engineering hot-path budget"
+"${python_cmd[@]}" Plugins/harness-engineering/scripts/check_hot_path_budget.py Plugins/harness-engineering
+echo "[family-gate] harness-engineering hot-path budget passed"
+
+echo "[family-gate] validating harness-engineering reference integrity"
+"${python_cmd[@]}" Plugins/harness-engineering/scripts/check_reference_integrity.py Plugins/harness-engineering
+echo "[family-gate] harness-engineering reference integrity passed"
+
+echo "[family-gate] validating harness-engineering closure/mutation contract"
+"${python_cmd[@]}" Plugins/harness-engineering/scripts/check_lifecycle_mutation_contract.py Plugins/harness-engineering
+echo "[family-gate] harness-engineering closure/mutation contract passed"
+
 echo "[family-gate] validating authoring context-preservation contract"
 bash Infrastructure/scripts/validation-and-linting/validate_authoring_context_preservation.sh
 echo "[family-gate] authoring context-preservation contract passed"
@@ -512,12 +524,18 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
      changed_files_match "skills-system/skill-installer/*" || \
      changed_files_match "Plugins/harness-engineering/skills/*" || \
      changed_files_match "Plugins/harness-engineering/references/operator-shape.md" || \
+     changed_files_match "Plugins/harness-engineering/references/closure-mutation-contract.md" || \
      changed_files_match "Plugins/harness-engineering/scripts/check_operator_shape.py" || \
+     changed_files_match "Plugins/harness-engineering/scripts/check_hot_path_budget.py" || \
+     changed_files_match "Plugins/harness-engineering/scripts/check_reference_integrity.py" || \
+     changed_files_match "Plugins/harness-engineering/scripts/check_lifecycle_mutation_contract.py" || \
+     changed_files_match "Plugins/harness-engineering/scripts/report_legacy_migration.py" || \
      changed_files_match "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/*" || \
      changed_files_match "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/*" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py" || \
      changed_files_match "Infrastructure/scripts/testing/test_he_operator_shape.py" || \
+     changed_files_match "Infrastructure/scripts/testing/test_he_refinement_checks.py" || \
      changed_files_match "Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py" || \
      changed_files_match "Infrastructure/tests/test_plugin_bundled_hooks_contract.py"; then
     run_skill_gate_unittest=1
@@ -544,6 +562,7 @@ selected_pytest_targets=()
 if [[ "$run_family_benchmark_pytest" -eq 1 ]]; then
   selected_pytest_targets+=(Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py)
   selected_pytest_targets+=(Infrastructure/scripts/testing/test_he_operator_shape.py)
+  selected_pytest_targets+=(Infrastructure/scripts/testing/test_he_refinement_checks.py)
 fi
 if [[ "$run_projection_pytest" -eq 1 ]]; then
   selected_pytest_targets+=(Infrastructure/scripts/testing/test_projection_integrity.py)

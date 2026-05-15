@@ -209,6 +209,9 @@ For non-trivial generated Linear plans, run or block
 - Read when issue trees, dependencies, eval gates, route splits, or generated
   media need visual proof rules:
   `../../references/visual-reference-contract.md`
+- Read when local planning, closure proof, and live Linear mutation state must
+  stay separate:
+  `../../references/closure-mutation-contract.md`
 - Read when routing, steering, artifact, XP, or subagent details are needed:
   `../../references/deferred-context-index.md`
 

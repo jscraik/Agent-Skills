@@ -164,5 +164,7 @@ Read when source-of-truth conflicts or route decisions need diagrams:
 Read when session collector, Codex provenance, trace IDs, or PR safety traces
 matter: `../../references/codex-provenance-contract.md` and
 `../../references/pr-safety-trace-contract.md`.
+Read when local proof and live tracker mutation state might be conflated:
+`../../references/closure-mutation-contract.md`.
 
 Deferred context index: `../../references/deferred-context-index.md`.

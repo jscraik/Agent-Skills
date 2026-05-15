@@ -181,6 +181,8 @@ or media persistence is failed or blocked.
   supports a closure claim:
   `../../references/codex-provenance-contract.md`,
   `../../references/pr-safety-trace-contract.md`.
+- Read when closure proof could be mistaken for live tracker mutation:
+  `../../references/closure-mutation-contract.md`.
 - Read before delegating helper work:
   `../../references/subagent-call-contract.md`.
 - Read shared HE contracts only when the selected slice needs them:
