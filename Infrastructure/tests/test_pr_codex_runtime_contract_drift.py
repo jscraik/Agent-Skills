@@ -484,6 +484,8 @@ class TestCodexAutomationArchitectCommandSurface(unittest.TestCase):
         data = json.loads(COMMAND_SURFACE_PATH.read_text(encoding="utf-8"))
         handles: list[dict] = data.get("handles", [])
         cls.entry = _find_handle(handles, "codex-automation-architect")
+        if cls.entry is None:
+            raise AssertionError("codex-automation-architect not found in command-surface.json")
 
     def test_entry_exists(self):
         self.assertIsNotNone(
@@ -587,6 +589,8 @@ class TestCodexAgentCreatorCommandSurface(unittest.TestCase):
         data = json.loads(COMMAND_SURFACE_PATH.read_text(encoding="utf-8"))
         handles: list[dict] = data.get("handles", [])
         cls.entry = _find_handle(handles, "codex-agent-creator")
+        if cls.entry is None:
+            raise AssertionError("codex-agent-creator not found in command-surface.json")
 
     def test_entry_exists(self):
         self.assertIsNotNone(self.entry, "codex-agent-creator not found in command-surface.json")
@@ -625,6 +629,8 @@ class TestCodexEnvironmentCreatorCommandSurface(unittest.TestCase):
         data = json.loads(COMMAND_SURFACE_PATH.read_text(encoding="utf-8"))
         handles: list[dict] = data.get("handles", [])
         cls.entry = _find_handle(handles, "codex-environment-creator")
+        if cls.entry is None:
+            raise AssertionError("codex-environment-creator not found in command-surface.json")
 
     def test_entry_exists(self):
         self.assertIsNotNone(
@@ -674,6 +680,8 @@ class TestCodexHooksBuilderCommandSurface(unittest.TestCase):
         data = json.loads(COMMAND_SURFACE_PATH.read_text(encoding="utf-8"))
         handles: list[dict] = data.get("handles", [])
         cls.entry = _find_handle(handles, "codex-hooks-builder")
+        if cls.entry is None:
+            raise AssertionError("codex-hooks-builder not found in command-surface.json")
 
     def test_entry_exists(self):
         self.assertIsNotNone(
@@ -817,6 +825,8 @@ class TestAgentOpsManifestCodexEnvironmentCreator(unittest.TestCase):
     def setUpClass(cls):
         cls.records = _load_jsonl(AGENT_OPS_MANIFEST)
         cls.entry = _find_record(cls.records, "codex-environment-creator")
+        if cls.entry is None:
+            raise AssertionError("codex-environment-creator not found in agent-ops manifest")
 
     def test_entry_exists(self):
         self.assertIsNotNone(
