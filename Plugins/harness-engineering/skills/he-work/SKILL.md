@@ -82,4 +82,7 @@ Reference `assets/` only for skill packaging and browseability; execution eviden
 ## References
 - Stage and execution detail: `../../references/skills/he-work/work-execution-contract.md`, `../../references/skills/he-work/execution-modes.md`
 - Shared gates: `../../references/stage-context-contract.md`, `../../references/execution-slice-contract.md`, `../../references/subagent-call-contract.md`
+- Approval flow: `../shared/references/approval-flow.md`
 - UI or visual proof: `../../references/ui-plan-routing-contract.md`, `../../references/visual-reference-contract.md`
+- Deferred context index: `../../references/deferred-context-index.md`
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

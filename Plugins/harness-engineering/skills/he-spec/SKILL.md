@@ -126,3 +126,6 @@ Reference `assets/` only for skill packaging and browseability; spec evidence be
 - Spec modes/artifacts: `../../references/skills/he-spec/spec-mode-rules.md`, `../../references/skills/he-spec/spec-artifact-contract.md`
 - Session evidence: `../../references/skills/he-spec/codex-and-session-evidence.md`
 - Reviewability: `../../references/bluf-review-contract.md`, `../../references/visual-reference-contract.md`
+- Shared subagent call policy: `../../references/subagent-call-contract.md`
+- Deferred context index: `../../references/deferred-context-index.md`
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

@@ -97,6 +97,6 @@ Reference `assets/` only for skill packaging and browseability; review evidence 
 - Proof loops: `../../references/skills/he-code-review/review-loop-patterns.md`
 - Shared HE contracts: `../../references/deferred-context-index.md`, `../../references/subagent-call-contract.md`
 - Provenance safety: `../../references/codex-provenance-contract.md`, `../../references/pr-safety-trace-contract.md`
-- Detailed doctrine: `../../../Infrastructure/references/harness-engineering/he-code-review-doctrine.md`
+- Detailed doctrine: `../../../../Infrastructure/references/harness-engineering/he-code-review-doctrine.md`
 
 Codex-compatible findings must be tight: exact file, line, impact, and remediation.
