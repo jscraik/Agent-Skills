@@ -113,6 +113,44 @@ _READINESS_STATE_CHOICES = {
     "downstream_ready",
 }
 _METRIC_AVAILABILITY_CHOICES = {"available", "unavailable"}
+SNYK_MANIFEST_NAMES: Set[str] = {
+    "package.json",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "pyproject.toml",
+    "requirements.txt",
+    "Pipfile",
+    "poetry.lock",
+    "go.mod",
+    "Cargo.toml",
+    "Gemfile",
+    "Gemfile.lock",
+    "composer.json",
+    "composer.lock",
+    "pom.xml",
+    "build.gradle",
+    "build.gradle.kts",
+    "gradle.lockfile",
+    "settings.gradle",
+    "settings.gradle.kts",
+    "packages.config",
+    "Paket.dependencies",
+    "pubspec.yaml",
+    "Package.swift",
+}
+SNYK_MANIFEST_SUFFIXES: Tuple[str, ...] = (".csproj", ".fsproj", ".vbproj")
+SNYK_MANIFEST_EXCLUDED_DIRS: Set[str] = {
+    ".git",
+    ".venv",
+    "__pycache__",
+    "budget-archive",
+    "node_modules",
+    "cache",
+    "artifacts",
+    "fixtures",
+    "tmp",
+}
 
 # Script-level options (used to disambiguate `--codex-arg --foo` intent).
 _SCRIPT_OPTIONS: Set[str] = {
@@ -1964,6 +2002,127 @@ def _make_relative(path: Optional[Path], base: Path) -> str:
         return str(path)
 
 
+
+
+def _release_dependency_scan_roots(skill_dir: Path) -> List[Path]:
+    roots = [skill_dir]
+    parts = skill_dir.parts
+    if "Plugins" in parts:
+        idx = parts.index("Plugins")
+        if len(parts) > idx + 2 and "skills" in parts[idx + 2 :]:
+            plugin_root = Path(*parts[: idx + 2])
+            if plugin_root not in roots:
+                roots.append(plugin_root)
+    return roots
+
+
+def _is_snyk_manifest(path: Path) -> bool:
+    return path.name in SNYK_MANIFEST_NAMES or path.name.endswith(SNYK_MANIFEST_SUFFIXES)
+
+
+def _dependency_manifest_paths(skill_dir: Path, *, limit: int = 25) -> List[Path]:
+    manifests: List[Path] = []
+    seen: Set[Path] = set()
+    for root in _release_dependency_scan_roots(skill_dir):
+        for candidate in sorted(root.rglob("*")):
+            if not candidate.is_file() or not _is_snyk_manifest(candidate):
+                continue
+            relative_parts = candidate.relative_to(root).parts[:-1]
+            if any(part in SNYK_MANIFEST_EXCLUDED_DIRS for part in relative_parts):
+                continue
+            if candidate in seen:
+                continue
+            seen.add(candidate)
+            manifests.append(candidate)
+            if len(manifests) >= limit:
+                return manifests
+    return manifests
+
+
+def _snyk_release_gate(
+    *,
+    skill_dir: Path,
+    workspace_root: Path,
+    timeout_seconds: int = 180,
+) -> Dict[str, Any]:
+    scan_roots = _release_dependency_scan_roots(skill_dir)
+    scan_target = scan_roots[-1]
+    manifests = _dependency_manifest_paths(skill_dir)
+    gate: Dict[str, Any] = {
+        "schema_version": "skill-release-snyk-gate.v1",
+        "required": bool(manifests),
+        "status": "not_applicable",
+        "reason": "No supported dependency manifest found under the skill package.",
+        "manifest_paths": [_make_relative(path, workspace_root) for path in manifests],
+        "command": None,
+        "exit_code": None,
+        "stdout": "",
+        "stderr": "",
+    }
+    if not manifests:
+        return gate
+
+    snyk_bin = shutil.which("snyk")
+    if not snyk_bin:
+        gate.update({
+            "status": "blocked_missing_binary",
+            "reason": "Snyk CLI is required for release evals of manifest-backed skill packages.",
+            "command": "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>",
+        })
+        return gate
+
+    command = [
+        snyk_bin,
+        "test",
+        "--all-projects",
+        "--detection-depth=6",
+        "--severity-threshold=high",
+        "--exclude=node_modules,cache,artifacts,tmp,fixtures,budget-archive",
+        "--json",
+        str(scan_target),
+    ]
+    gate["command"] = command
+    try:
+        proc = sp.run(command, cwd=str(workspace_root), capture_output=True, text=True, timeout=timeout_seconds)
+    except sp.TimeoutExpired as exc:
+        gate.update({
+            "status": "timeout",
+            "reason": f"Snyk timed out after {timeout_seconds} seconds.",
+            "stdout": exc.stdout or "",
+            "stderr": exc.stderr or "",
+        })
+        return gate
+
+    gate.update({"exit_code": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+    combined_output = f"{proc.stdout}\n{proc.stderr}".lower()
+    if proc.returncode == 0:
+        gate["status"] = "success"
+        gate["reason"] = "Snyk dependency screening passed for the manifest-backed skill package."
+    elif (
+        "use snyk auth" in combined_output
+        or "not authenticated" in combined_output
+        or "authentication required" in combined_output
+        or "snyk_token" in combined_output
+    ):
+        gate["status"] = "blocked_auth"
+        gate["reason"] = "Snyk authentication is required for release evals of manifest-backed skill packages."
+    elif "could not detect supported target files" in combined_output or "no supported files" in combined_output:
+        gate["status"] = "blocked_no_supported_projects"
+        gate["reason"] = "Dependency manifests were present, but Snyk did not detect a supported project."
+    elif proc.returncode == 1:
+        gate["status"] = "advisory"
+        gate["reason"] = "Snyk reported high-severity dependency advisories."
+    else:
+        gate["status"] = "error"
+        gate["reason"] = "Snyk failed during release dependency screening."
+    return gate
+
+
+def _snyk_release_gate_passed(gate: Dict[str, Any]) -> bool:
+    if not gate.get("required"):
+        return True
+    return gate.get("status") == "success"
+
 def _extract_min_rubric_score(budgets: Optional[Dict[str, Any]]) -> Optional[float]:
     if not budgets:
         return None
@@ -2488,6 +2647,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "round_state_summary": round_state_summary,
         "neutral_baseline_approvals_used": [],
     }
+    if args.eval_mode == "release":
+        summary["security_dependency_screening"] = _snyk_release_gate(
+            skill_dir=skill_dir,
+            workspace_root=workspace_root,
+        )
+    else:
+        summary["security_dependency_screening"] = {
+            "schema_version": "skill-release-snyk-gate.v1",
+            "required": False,
+            "status": "skipped",
+            "reason": "Snyk dependency screening is required only for release evals of manifest-backed skill packages.",
+            "manifest_paths": [],
+            "command": None,
+            "exit_code": None,
+            "stdout": "",
+            "stderr": "",
+        }
 
     any_tier1_failed = False
     any_tier2_failed = False
@@ -2878,10 +3054,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             summary["tier2_findings"] += 1
 
     summary["expected_signal_summary"] = summarize_expected_signal_results(summary["cases"])
-    summary["passed"] = (not any_blocked) and (not any_tier1_failed) and (
+    snyk_gate_passed = _snyk_release_gate_passed(summary["security_dependency_screening"])
+    summary["passed"] = (not any_blocked) and (not any_tier1_failed) and snyk_gate_passed and (
         args.tier2_mode != "fail" or (not any_tier2_failed)
     )
     summary["decision"] = "pass" if summary["passed"] else "fail"
+    if not snyk_gate_passed:
+        snyk_status = str(summary["security_dependency_screening"].get("status", ""))
+        summary["decision"] = "blocked" if snyk_status.startswith("blocked") else "fail"
     summary["exit_code"] = 0 if summary["passed"] else 2
 
     summary_path = reports_base / "summary.json"
@@ -2924,6 +3104,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "readiness_summary": summary["readiness_summary"],
             "round_state_summary": summary["round_state_summary"],
             "neutral_baseline_approvals_used": summary["neutral_baseline_approvals_used"],
+            "security_dependency_screening": summary["security_dependency_screening"],
             "reports_base": _rel(reports_base),
         },
         "artifacts": summary["artifacts"],

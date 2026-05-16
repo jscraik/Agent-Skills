@@ -44,6 +44,7 @@ If only a wrapper ran, report the wrapper label instead of the internal file nam
 | `OpenAI skill format` | `./bin/ask skills validate-openai-format <path> --mode strict --json --robot` | first-class wrapper gate |
 | `OpenClaw` | strict audit output or dedicated local evidence | report only when explicit evidence exists |
 | `Plugin Eval` | `Infrastructure/bin/plugin-eval analyze <path> --format markdown` | first-class gate |
+| `Snyk dependency screening` | `./bin/ask skills external-review <path> --include-snyk --json --robot` or release eval `security_dependency_screening` artifact | first-class gate for manifest-backed release candidates |
 | `smoke evals` | `./bin/ask evals run <path> --mode smoke --json --robot` | first-class gate |
 | `release evals` | `./bin/ask evals run <path> --mode release --json --robot` or owned equivalent | first-class gate |
 | `package boundary checks` | `./bin/ask skills validate-boundaries <handle-or-path> --json --robot` or owned equivalent | first-class evidence check |
@@ -93,6 +94,18 @@ If only a wrapper ran, report the wrapper label instead of the internal file nam
   `missing realism evidence surface`; do not omit the row for release-readiness
   claims.
 - Plugin Eval success does not override strict-audit or eval-realism failures.
+
+### `Snyk dependency screening`
+
+- Required for release-readiness claims on manifest-backed skill or plugin
+  packages.
+- Report `not applicable` only when no supported dependency manifest exists
+  under the candidate package.
+- For manifest-backed candidates, `not_applicable`,
+  `blocked_no_supported_projects`, `blocked_missing_binary`, `blocked_auth`,
+  `timeout`, `advisory`, or `error` prevents release readiness.
+- Use the high-severity threshold so local release evals and CI enforce the same
+  dependency-screening bar.
 
 ### `media artifact persistence`
 

@@ -50,6 +50,25 @@ class OpenClawSkillGuardTests(unittest.TestCase):
         findings = scan_source(src, "Infrastructure/scripts/test.py")
         self.assertTrue(any(f.code == "security.potential_exfiltration" and f.level == "warn" for f in findings))
 
+    def test_detects_file_read_plus_variable_fetch_send(self) -> None:
+        src = (
+            "const endpoint = process.argv[2]\n"
+            "const data = readFileSync('/tmp/secret.txt', 'utf8')\n"
+            "fetch(endpoint, { method: 'POST', body: data })\n"
+        )
+        findings = scan_source(src, "Infrastructure/scripts/test.ts")
+        codes = {f.code for f in findings}
+        self.assertIn("security.network_usage", codes)
+        self.assertIn("security.potential_exfiltration", codes)
+
+    def test_ignores_comment_only_network_context_for_file_read(self) -> None:
+        src = (
+            "data = Path('/tmp/secret.txt').read_text()\n"
+            "# fetch(endpoint, { method: 'POST', body: data })\n"
+        )
+        findings = scan_source(src, "Infrastructure/scripts/test.py")
+        self.assertFalse(any(f.code == "security.potential_exfiltration" for f in findings))
+
     def test_detects_unsafe_deserialization(self) -> None:
         src = "payload = pickle.loads(blob)\n"
         findings = scan_source(src, "Infrastructure/scripts/test.py")
