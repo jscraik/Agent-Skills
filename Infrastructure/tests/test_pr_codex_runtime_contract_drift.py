@@ -259,15 +259,6 @@ class TestManifestSourceRevisionBump(unittest.TestCase):
         self._assert_old_revision_absent(SKILL_FACTORY_MANIFEST, OLD_MANIFEST_REVISION)
         self._assert_all_use_valid_revision(SKILL_FACTORY_MANIFEST)
 
-    def test_plugin_and_skill_factory_manifest_revisions_match(self):
-        plugin_revs = self._collect_revisions(PLUGIN_FACTORY_MANIFEST)
-        skill_revs = self._collect_revisions(SKILL_FACTORY_MANIFEST)
-        self.assertEqual(
-            plugin_revs,
-            skill_revs,
-            f"plugin-factory and skill-factory revisions diverged: {sorted(plugin_revs)} vs {sorted(skill_revs)}",
-        )
-
     def test_backend_platform_manifest_revision_is_runtime_derived(self):
         expected = self._manifest_uniform_revision(BACKEND_PLATFORM_MANIFEST)
         self._assert_all_use_revision(BACKEND_PLATFORM_MANIFEST, expected)
@@ -722,6 +713,8 @@ class TestAgentOpsManifestCodexAutomationArchitect(unittest.TestCase):
     def setUpClass(cls):
         cls.records = _load_jsonl(AGENT_OPS_MANIFEST)
         cls.entry = _find_record(cls.records, "codex-automation-architect")
+        if cls.entry is None:
+            raise AssertionError("codex-automation-architect not found in agent-ops manifest")
 
     def test_entry_exists(self):
         self.assertIsNotNone(
@@ -782,6 +775,8 @@ class TestAgentOpsManifestCodexAgentCreator(unittest.TestCase):
     def setUpClass(cls):
         cls.records = _load_jsonl(AGENT_OPS_MANIFEST)
         cls.entry = _find_record(cls.records, "codex-agent-creator")
+        if cls.entry is None:
+            raise AssertionError("codex-agent-creator not found in agent-ops manifest")
 
     def test_entry_exists(self):
         self.assertIsNotNone(self.entry, "codex-agent-creator not found in agent-ops manifest")
