@@ -40,11 +40,13 @@ if existing_trace_checks is not None:
 from run_skill_evals import (
     EvalCase,
     _acceptance_skip_reason,
+    _dependency_manifest_paths,
     _preflight_codex_live_runner,
     _filter_cases_for_eval_mode,
     _isolated_codex_home_for_eval,
     _is_runner_runtime_blocked,
     _is_smoke_only_case,
+    _snyk_release_gate_passed,
     _write_junit_report,
     evaluate_assertions_text,
     evaluate_expected_signals,
@@ -58,6 +60,39 @@ from deterministic_trace_checks import evaluate_trace
 
 
 class RunSkillEvalsModeTests(unittest.TestCase):
+    def test_snyk_release_gate_is_not_required_for_skill_md_only_package(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_dir = Path(tmpdir) / "demo-skill"
+            skill_dir.mkdir()
+            (skill_dir / "SKILL.md").write_text("---\nname: demo-skill\n---\n", encoding="utf-8")
+
+            self.assertEqual(_dependency_manifest_paths(skill_dir), [])
+            self.assertTrue(_snyk_release_gate_passed({"required": False, "status": "not_applicable"}))
+
+    def test_snyk_release_gate_requires_success_for_manifest_backed_packages(self) -> None:
+        self.assertTrue(_snyk_release_gate_passed({"required": True, "status": "success"}))
+        for status in (
+            "blocked_missing_binary",
+            "blocked_auth",
+            "blocked_no_supported_projects",
+            "advisory",
+            "error",
+            "timeout",
+        ):
+            self.assertFalse(_snyk_release_gate_passed({"required": True, "status": status}))
+
+    def test_dependency_manifest_detection_ignores_generated_dependency_dirs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_dir = Path(tmpdir) / "demo-skill"
+            skill_dir.mkdir()
+            (skill_dir / "package.json").write_text("{}", encoding="utf-8")
+            (skill_dir / "node_modules" / "nested").mkdir(parents=True)
+            (skill_dir / "node_modules" / "nested" / "package.json").write_text("{}", encoding="utf-8")
+
+            manifests = _dependency_manifest_paths(skill_dir)
+
+        self.assertEqual([path.name for path in manifests], ["package.json"])
+
     def test_bare_regex_acceptance_shorthand_is_supported(self) -> None:
         self.assertEqual(
             evaluate_assertions_text(

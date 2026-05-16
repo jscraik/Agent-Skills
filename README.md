@@ -125,6 +125,9 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 # Local-only external-style second review
 ./bin/ask skills external-review backend/cli-spec --json
 
+# External dependency advisory screening with Snyk
+./bin/ask skills external-review backend/cli-spec --include-snyk --json
+
 # Run evaluation suite
 ./bin/ask evals run backend/cli-spec --mode smoke
 
@@ -151,6 +154,14 @@ never publishes, and never uploads to a registry. Tessl documents this CLI path
 as reviewing locally from your machine for private repos and work-in-progress
 skills, with results only visible to you. Use `--skip-tessl-review` only when
 you need structural Tessl lint without the best-practice review output.
+
+Snyk dependency screening is opt-in for local external reviews because it uses an
+external advisory service. Pass `--include-snyk` to run `snyk test` with the
+same high-severity dependency bar used by release evals and CircleCI. The lane
+reports `not_applicable` for `SKILL.md`-only packages without supported
+dependency manifests, and blocks release readiness when manifest-backed packages
+cannot authenticate, cannot find supported projects, or report high-severity
+advisories.
 
 Tessl validates tile packages, while this repository keeps canonical skills as
 `SKILL.md`-first source directories. The command therefore creates a temporary
