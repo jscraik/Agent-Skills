@@ -2196,15 +2196,8 @@ def _make_relative(path: Optional[Path], base: Path) -> str:
 
 
 def _release_dependency_scan_roots(skill_dir: Path) -> List[Path]:
-    roots = [skill_dir]
-    parts = skill_dir.parts
-    if "Plugins" in parts:
-        idx = parts.index("Plugins")
-        if len(parts) > idx + 2 and "skills" in parts[idx + 2 :]:
-            plugin_root = Path(*parts[: idx + 2])
-            if plugin_root not in roots:
-                roots.append(plugin_root)
-    return roots
+    # Restrict release dependency scans to the target skill package only.
+    return [skill_dir]
 
 
 def _is_snyk_manifest(path: Path) -> bool:
@@ -2215,18 +2208,35 @@ def _dependency_manifest_paths(skill_dir: Path, *, limit: int = 25) -> List[Path
     manifests: List[Path] = []
     seen: Set[Path] = set()
     for root in _release_dependency_scan_roots(skill_dir):
-        for candidate in sorted(root.rglob("*")):
-            if not candidate.is_file() or not _is_snyk_manifest(candidate):
-                continue
-            relative_parts = candidate.relative_to(root).parts[:-1]
-            if any(part in SNYK_MANIFEST_EXCLUDED_DIRS for part in relative_parts):
-                continue
-            if candidate in seen:
-                continue
-            seen.add(candidate)
-            manifests.append(candidate)
-            if len(manifests) >= limit:
-                return manifests
+        for manifest_name in sorted(SNYK_MANIFEST_NAMES):
+            for candidate in root.rglob(manifest_name):
+                if not candidate.is_file():
+                    continue
+                relative_parts = candidate.relative_to(root).parts[:-1]
+                if any(part in SNYK_MANIFEST_EXCLUDED_DIRS for part in relative_parts):
+                    continue
+                if candidate in seen:
+                    continue
+                seen.add(candidate)
+                manifests.append(candidate)
+                if len(manifests) >= limit:
+                    return manifests
+        for suffix in sorted(SNYK_MANIFEST_SUFFIXES):
+            for candidate in root.rglob(f"*{suffix}"):
+                if not candidate.is_file():
+                    continue
+                if candidate.name in SNYK_MANIFEST_NAMES:
+                    # Already captured by exact-name scan.
+                    continue
+                relative_parts = candidate.relative_to(root).parts[:-1]
+                if any(part in SNYK_MANIFEST_EXCLUDED_DIRS for part in relative_parts):
+                    continue
+                if candidate in seen:
+                    continue
+                seen.add(candidate)
+                manifests.append(candidate)
+                if len(manifests) >= limit:
+                    return manifests
     return manifests
 
 
@@ -2297,6 +2307,9 @@ def _snyk_release_gate(
     ):
         gate["status"] = "blocked_auth"
         gate["reason"] = "Snyk authentication is required for release evals of manifest-backed skill packages."
+    elif proc.returncode == 3:
+        gate["status"] = "not_applicable"
+        gate["reason"] = "Snyk did not detect supported dependency manifests in the target skill scope."
     elif "could not detect supported target files" in combined_output or "no supported files" in combined_output:
         gate["status"] = "blocked_no_supported_projects"
         gate["reason"] = "Dependency manifests were present, but Snyk did not detect a supported project."

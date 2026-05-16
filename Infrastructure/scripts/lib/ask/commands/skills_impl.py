@@ -1932,6 +1932,11 @@ def external_review_skill(
                 snyk_text = f"{snyk_proc.stdout}\n{snyk_proc.stderr}".lower()
                 if snyk_proc.returncode == 0:
                     snyk_payload["status"] = "success"
+                elif snyk_proc.returncode == 3:
+                    snyk_payload["status"] = "not_applicable"
+                    snyk_payload["reason"] = (
+                        "Snyk did not detect supported dependency manifests for this SKILL.md-first package."
+                    )
                 elif "could not detect supported target files" in snyk_text or "no supported files" in snyk_text:
                     snyk_payload["status"] = "not_applicable"
                     snyk_payload["reason"] = (
