@@ -1329,6 +1329,24 @@ def _doctor_warning(warning_class: str, message: str) -> dict[str, str]:
     }
 
 
+def _skill_target_summary(
+    *,
+    query: str,
+    target_kind: Any,
+    handle: Any,
+    source_path: Any,
+    audit_target: Any,
+) -> dict[str, Any]:
+    """Return compact target identity for readiness payload consumers."""
+    return {
+        "query": query,
+        "target_kind": target_kind,
+        "handle": handle,
+        "canonical_source_path": source_path,
+        "audit_target": audit_target,
+    }
+
+
 def _skill_doctor_check_summary(checks: dict[str, Any]) -> dict[str, Any]:
     """Return compact doctor check counts for automation consumers."""
     status_counts: dict[str, int] = {}
@@ -1556,11 +1574,18 @@ def _capability_lifecycle_event(
     details: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Return a structured lifecycle event for capability diagnostics."""
+    subject_key = str(handle or audit_target or source_path or query)
     event = {
         "schema_version": "capability-lifecycle-event.v1",
         "event_type": event_type,
         "event_definition": CAPABILITY_LIFECYCLE_EVENT_TYPES.get(event_type),
         "occurred_at": datetime.now(timezone.utc).isoformat(),
+        "event_identity": {
+            "event_type": event_type,
+            "subject_key": subject_key,
+            "target_kind": target_kind,
+            "status": status,
+        },
         "subject": {
             "query": query,
             "target_kind": target_kind,
@@ -2318,6 +2343,13 @@ def skills_package(
         "handle": target_info.get("handle"),
         "canonical_source_path": source_path_value,
         "audit_target": audit_target,
+        "target_summary": _skill_target_summary(
+            query=query,
+            target_kind=target_info.get("target_kind"),
+            handle=target_info.get("handle"),
+            source_path=source_path_value,
+            audit_target=audit_target,
+        ),
         "status": status,
         "strict": strict,
         "package_contract": package_contract,
@@ -2531,6 +2563,13 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
         "handle": normalized_handle,
         "canonical_source_path": source_path_value,
         "audit_target": audit_target,
+        "target_summary": _skill_target_summary(
+            query=query,
+            target_kind=target_kind,
+            handle=normalized_handle,
+            source_path=source_path_value,
+            audit_target=audit_target,
+        ),
         "status": doctor_status,
         "blockers": blockers,
         "warnings": warnings,

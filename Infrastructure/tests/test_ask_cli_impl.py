@@ -927,6 +927,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "success")
         package = output["data"]["skill_package"]
         self.assertEqual(package["schema_version"], "skill-package-readiness.v1")
+        self.assertEqual(package["target_summary"]["handle"], "skill-builder")
+        self.assertEqual(package["target_summary"]["target_kind"], package["target_kind"])
         self.assertIn("version", package["package_contract"]["required_fields"]["present"])
         self.assertEqual(package["readiness_summary"]["readiness_level"], package["package_contract"]["readiness_level"])
         self.assertIn("version", package["readiness_summary"]["present_fields"])
@@ -954,6 +956,8 @@ class TestAskCLI(unittest.TestCase):
             package["operation_context"]["validation_commands"],
         )
         self.assertEqual(package["lifecycle_events"][1]["details"]["gate_summary"], package["gate_summary"])
+        self.assertEqual(package["lifecycle_events"][1]["event_identity"]["event_type"], "package_readiness_checked")
+        self.assertEqual(package["lifecycle_events"][1]["event_identity"]["subject_key"], "skill-builder")
         self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
 
     def test_skills_package_human_output(self):
@@ -1018,11 +1022,15 @@ class TestAskCLI(unittest.TestCase):
         doctor = output["data"]["skill_doctor"]
         self.assertEqual(doctor["schema_version"], "skill-doctor.v1")
         self.assertEqual(doctor["target_kind"], "canonical_source_path")
+        self.assertEqual(doctor["target_summary"]["query"], "Skills/agent-ops/autofix")
+        self.assertEqual(doctor["target_summary"]["canonical_source_path"], doctor["canonical_source_path"])
         self.assertIn("canonical_source", doctor["check_summary"]["check_names"])
         self.assertEqual(doctor["check_summary"]["check_count"], len(doctor["checks"]))
         self.assertIn("missing", doctor["check_summary"]["status_counts"])
         self.assertEqual(doctor["lifecycle_event"]["schema_version"], "capability-lifecycle-event.v1")
         self.assertEqual(doctor["lifecycle_event"]["event_type"], "skill_doctor_completed")
+        self.assertEqual(doctor["lifecycle_event"]["event_identity"]["target_kind"], "canonical_source_path")
+        self.assertEqual(doctor["lifecycle_event"]["event_identity"]["subject_key"], "Skills/agent-ops/autofix")
         self.assertIn("blocked_user_input", doctor["readiness_taxonomy"]["blockers"])
         self.assertEqual(doctor["contract_schemas"]["doctor"], "skill-doctor.v1")
         self.assertEqual(doctor["contract_schemas"]["events"], "skill-events.v1")
