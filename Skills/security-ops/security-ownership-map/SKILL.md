@@ -59,6 +59,18 @@ metadata:
 - Redact secrets and sensitive data by default.
 - Avoid destructive commands unless explicitly requested and rollback is clear.
 
+## Execution Boundaries
+- Use read-only git history, CODEOWNERS, and repository metadata inspection by default.
+- Keep artifacts inside the requested repository or explicit output path.
+- Do not contact contributors, mutate CODEOWNERS, change branch protection, or open tracker issues unless separately requested.
+- Do not publish raw private emails, sensitive commit content, or secret-looking snippets in chat output.
+
+## Failure Mode
+- If history depth, CODEOWNERS, author identity, or sensitive-path rules are missing, report the gap before making ownership claims.
+- If scripts or git commands fail, classify whether the blocker is repository state, permissions, tooling, or ambiguous scope.
+- If evidence conflicts, show both sources and avoid assigning personal accountability beyond observable history.
+- If output artifacts cannot be written, return a blocked result with the exact filesystem error.
+
 ## Validation
 - Run the smallest command or test that exercises the changed behavior.
 - Use strict skill audit and Plugin Eval when changing this skill.
@@ -71,6 +83,12 @@ metadata:
 - Hiding uncertainty or missing evidence.
 - Loading archived context before the active workflow proves it is needed.
 
+## Gotchas
+- Git authorship is evidence of change history, not proof of current ownership or accountability.
+- CODEOWNERS coverage can be stale, overbroad, or narrower than actual maintainer knowledge.
+- Security ownership reports should prioritize remediation paths over blame.
+- Cookbook secure-quality patterns can shape the review questions, but local git evidence is the source of truth.
+
 ## Examples
 - Map auth ownership for the last 12 months.
 - Compare CODEOWNERS against who actually touches crypto files.
@@ -78,6 +96,7 @@ metadata:
 
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
+- For Cookbook-derived guardrail and secure quality gate ownership checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
 - Use references/contract.yaml for the machine-readable contract.
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.

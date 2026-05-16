@@ -191,6 +191,10 @@ Include:
 
 Do not run another Codex review solely to improve the final report wording. If the final helper run exited 0 and produced no accepted/actionable findings, report that exact run as clean.
 
+## Progressive Disclosure
+
+- For Cookbook-derived iterative repair, structured output, and secure quality gate checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
+
 ## See Also
 
 | Skill | When to use together |
