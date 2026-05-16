@@ -63,6 +63,8 @@ and plugin design contract needed to choose the lane.
 - Do not execute lane-specific implementation from this router; hand off only.
 - Do not select multiple primary lanes in one response.
 - Keep routing evidence-based; avoid preference-based routing.
+- Do not treat plugin discovery as proof that bundled skills, hooks, MCP
+  servers, apps, or external providers will run successfully.
 
 ## Constraints
 
@@ -85,6 +87,8 @@ lane.
 
 Read when:
 - You need complete routing decision and handoff protocol details: [references/workflow.md](./references/workflow.md).
+- You need current Codex plugin manifest, MCP, hook, or startup-sync boundaries
+  before selecting a lane: [plugin runtime route notes](./references/current-codex-plugin-runtime.md).
 
 ## Validation
 
@@ -119,3 +123,5 @@ deterministically.
   `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Local skill shape contract:
   `Infrastructure/references/agent-native-skill-contract.md`
+- Runtime route notes:
+  `references/current-codex-plugin-runtime.md`

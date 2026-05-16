@@ -2,9 +2,12 @@
 
 ## Canonical Path
 
-Default to `.codex/environments/environment.toml` for repo-local project setup and actions.
+Do not assume a single path until the request is classified.
 
-Do not confuse this file with `$CODEX_HOME/environments.toml`, which recent Codex runtime code uses to configure execution environment providers and default environment selection.
+Use `$CODEX_HOME/environments.toml` for current Codex runtime exec-server
+provider selection. Use repo-local `.codex/environments/environment.toml` only
+when the target Codex app or repo has live evidence that it consumes project
+bootstrap or action files.
 
 Common drift paths to triage before editing:
 
@@ -15,9 +18,10 @@ Common drift paths to triage before editing:
 
 If multiple files exist, identify which one is consumed by the current Codex runtime, preserve user changes, and migrate only after reporting the conflict.
 
-## Current Minimal Shape
+## Project Bootstrap Shape
 
-Live Codex source and `codex-repo` evidence currently show this project file shape:
+Some Codex app workflows and older local control planes use this project file
+shape:
 
 ```toml
 version = 1
@@ -32,11 +36,15 @@ icon = "run"
 command = "repo-owned command"
 ```
 
-Treat this as a current evidence point, not a permanent schema guarantee. Re-check Codex docs or source before adding new keys.
+Treat this as a project-specific contract, not the current Rust runtime
+exec-server provider schema. Re-check Codex docs, app tooling, or repo
+validators before creating it.
 
 ## Runtime Provider Shape
 
-Recent `~/dev/codex` updates added `$CODEX_HOME/environments.toml` as a runtime provider file. Use it only when the request is about Codex runtime environment selection, remote exec servers, or disabling default shell/filesystem access.
+As of `~/dev/codex` commit `cb1ef6edae52`, runtime behavior uses `$CODEX_HOME/environments.toml` as a runtime
+provider file. Use it only when the request is about Codex runtime environment
+selection, remote exec servers, or disabling default shell/filesystem access.
 
 Observed current shape:
 
@@ -84,7 +92,7 @@ Current rules from the live fork:
 
 ## Triage Checklist
 
-- Canonical path exists or a drift path needs migration.
+- Runtime or project path exists, or a drift path needs migration.
 - Request is classified as project bootstrap file or CODEX_HOME runtime provider file.
 - TOML parses and uses expected scalar, table, and array-of-table shapes.
 - `version` is an integer and `name` is a stable project identifier.
@@ -108,7 +116,7 @@ For triage or update work, report:
 ```yaml
 schema_version: 1
 mode: create|triage|update
-target_path: .codex/environments/environment.toml
+target_path: .codex/environments/environment.toml | $CODEX_HOME/environments.toml
 path_decision: canonical|migrated|blocked
 changes:
   - summary

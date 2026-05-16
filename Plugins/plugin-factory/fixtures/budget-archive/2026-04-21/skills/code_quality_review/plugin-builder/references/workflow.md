@@ -29,6 +29,23 @@ runtime behavior:
   plugin-owned files instead of local absolute paths;
 - include the `plugin_hooks` feature-gate caveat in release or install notes.
 
+## Current Codex Runtime Checks
+
+Use `current-codex-plugin-runtime.md` before claiming compatibility with current
+Codex builds:
+
+- manifest path fields for `skills`, `mcpServers`, `apps`, and `hooks` must use
+  `./...`, remain inside the plugin root, and avoid `..`;
+- plugin MCP config accepts either a `.mcp.json` object with `mcpServers` or a
+  direct server map, then normalizes entries into current MCP server config;
+- duplicate plugin MCP server names are skipped with a warning, so a passing
+  package check is not enough to prove that all servers are active;
+- plugin-bundled hooks can come from manifest hook paths, inline manifest hook
+  objects, or the default `hooks/hooks.json` path;
+- hook commands should prefer `PLUGIN_ROOT` and `PLUGIN_DATA`;
+- install or discovery success is not runtime proof for skills, hooks, MCP
+  servers, apps, or external provider availability.
+
 ## Command Matrix
 
 ```bash
@@ -42,6 +59,9 @@ python3 -m unittest Infrastructure.tests.test_plugin_bundled_hooks_contract -v
 
 - malformed `.codex-plugin/plugin.json`
 - malformed or undiscoverable plugin-bundled hook config
+- manifest path escapes the plugin root or does not use the required `./...`
+  shape for a plugin-relative file
+- duplicate plugin MCP server name hides a bundled server at startup
 - missing required policy/category fields in marketplace entry
 - unresolved source-to-skill mapping during conversion
 
