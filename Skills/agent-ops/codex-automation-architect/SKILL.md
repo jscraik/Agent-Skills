@@ -1,6 +1,6 @@
 ---
 name: codex-automation-architect
-description: Design, review, and validate Codex app automations when recurring background workflows need safe scheduling, scope, preflight, and consolidation.
+description: Use when designing, reviewing, or updating Codex app automations, cron jobs, scheduled tasks, recurring runs, or heartbeat follow-ups.
 metadata:
   skill-type: team_automation
   lifecycle_state: active
@@ -34,6 +34,9 @@ metadata:
 - schedule or trigger
 - sandbox posture
 - validation and rollback expectations
+- existing automation ids or `$CODEX_HOME/automations/*/automation.toml` evidence
+- Codex app dynamic tool availability (`automation_update` and
+  `automation_list`, possibly deferred behind `tool_search`)
 
 ## Outputs
 - automation design
@@ -46,10 +49,17 @@ metadata:
 ## Workflow
 - Start with 2-3 focused surfaces before expanding scope.
 - Confirm the automation goal and whether it should be recurring at all.
-- Map project path, permissions, schedule, and expected outputs.
-- Prefer existing automation surfaces before creating a new one.
+- Resolve existing automations first by id, name, prompt, and local TOML
+  evidence; prefer update or consolidation over duplicate creation.
+- Map kind (`cron` or `heartbeat`), destination, project path, execution
+  environment, permissions, schedule, and expected outputs.
+- Prefer heartbeats for current-thread follow-ups, especially short delays;
+  prefer cron for detached workspace jobs.
+- Use suggested create/update when proposing worktree automations with a
+  non-null local environment setup config so the user can review before save.
 - Define preflight, stop conditions, observability, and rollback.
-- Validate the final plan or config with repo checks.
+- Validate the final plan or config with repo checks and the Codex app
+  automation tool response.
 
 ## Constraints
 - Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
@@ -57,6 +67,27 @@ metadata:
 - Redact secrets, tokens, credentials, personal data, and sensitive operational details by default.
 - Keep writes inside the repo-owned source path unless the user explicitly approves another target.
 - Avoid destructive commands unless explicitly requested and rollback is clear.
+- Do not hand-write raw automation directives or RRULEs in user-facing prose
+  when the Codex app tool can carry the structured schedule.
+- Preserve existing automation fields on update unless the user asks to change
+  them.
+
+## Execution Boundaries
+- Use the Codex app automation tool for create, update, view, and delete actions; do not invent an out-of-band persistence path.
+- Inspect existing automation TOML only to identify and preserve current fields before an update.
+- Keep automation prompts scoped to the task itself; carry schedule, workspace, execution environment, and thread destination through structured tool fields.
+- Use suggested create or suggested update for worktree automations that include a local environment setup config.
+
+## Failure Mode
+- If the matching existing automation cannot be resolved confidently, stop and report the ambiguity instead of creating a duplicate.
+- If the requested schedule, project path, or execution environment is outside the tool contract, classify the blocker and propose the nearest supported shape.
+- If validation or setup evidence is missing, leave the automation paused or in suggested form and record the concrete missing check.
+
+## Gotchas
+- Heartbeats are attached follow-ups for a thread; cron automations are detached workspace jobs.
+- Worktree automations with non-null local environment setup config require review through the suggested modes.
+- Update calls should preserve unspecified fields, including status, model, reasoning effort, workspace paths, and prompt text.
+- The automation prompt should not restate the schedule or workspace because those are structured fields.
 
 ## Validation
 - Run the smallest command or test that exercises the changed behavior.
@@ -69,6 +100,8 @@ metadata:
 - Replacing repo contracts with generic advice.
 - Hiding uncertainty or missing evidence.
 - Loading archived context before the active workflow proves it is needed.
+- Creating a second automation when a paused or active existing one matches the
+  same name, prompt, or project path.
 
 ## Examples
 - Design a weekly Codex automation that triages stale PRs safely.
@@ -78,6 +111,7 @@ metadata:
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
 - Use references/contract.yaml for the machine-readable contract.
+- Use references/tool-examples.md for current automation tool request shapes.
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.
 - Use Infrastructure/references/deferred-skill-context/agent-ops-codex-automation-architect/ for legacy examples, scripts, assets, or long-form details.

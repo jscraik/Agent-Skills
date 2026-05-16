@@ -24,7 +24,7 @@ runtime_contract:
   feature_keys:
     current: hooks
     compatibility_alias: codex_hooks
-    requirement: "Check the target runtime and official Codex docs before choosing a feature flag. Treat hooks and codex_hooks as compatibility aliases when both are accepted, and do not remove codex_hooks unless the target runtime or docs explicitly deprecate it."
+    requirement: "Current ~/dev/codex marks hooks as stable and default-enabled. Use hooks for new config only when a toggle is needed; treat codex_hooks as a legacy alias."
     conflict_rule: "When official docs and local runtime/schema evidence disagree, state the conflict and follow the target runtime's schema or validator."
   events:
     - SessionStart
@@ -77,8 +77,15 @@ runtime_contract:
     - user_config_inline_hooks
     - project_hooks_json
     - project_config_inline_hooks
-    - managed_hooks_directory
+    - managed_requirements_hooks
     - plugin_bundled_hooks
+  current_runtime_notes:
+    executable_handler: "command"
+    skipped_handlers: [prompt, agent, async_command]
+    trust: "Non-managed command hooks require enabled state and a matching trusted_hash unless trust is bypassed by the runtime."
+    managed_only: "allow_managed_hooks_only is requirements-only; config.toml does not enable it."
+    plugin_env: [PLUGIN_ROOT, PLUGIN_DATA, CLAUDE_PLUGIN_ROOT, CLAUDE_PLUGIN_DATA]
+    output_spill: "Large model-visible hook text is truncated and saved under the OS temp hook_outputs directory."
 risks:
   - over_triggering
   - untrusted_input

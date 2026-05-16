@@ -48,7 +48,11 @@ Prefer one valid role, explicit scope, current schema evidence, validation proof
 - Edit canonical sources only; do not hand-edit `.agents/**`, `.skillsets/**`, `Plugins/cache/**`, mirrors, or handles.
 - For `agent-skills`, read `AGENTS.md` and `UBIQUITOUS_LANGUAGE.md` before
   edits.
-- Ground Codex config keys from official docs, `codex-repo`, or local `~/dev/codex` source before writing.
+- Ground Codex config keys from official docs, `codex-repo`, or local
+  `~/dev/codex` source before writing. Current source anchors include
+  `codex-rs/config/src/config_toml.rs`,
+  `codex-rs/core/src/config/agent_roles.rs`, and
+  `codex-rs/core/src/tools/handlers/multi_agents_spec.rs`.
 - Confirm install scope before writing config; validation-only work writes no
   install config.
 
@@ -64,8 +68,11 @@ Prefer one valid role, explicit scope, current schema evidence, validation proof
 ## Execution Boundaries
 
 - Generated handles and runtime projections are pointers; map them to canonical sources before editing.
-- Role files may contain Codex config-layer keys plus role metadata; do not
-  invent fields.
+- Role files may contain `name`, `description`, `nickname_candidates`, and
+  Codex config-layer keys; do not invent fields.
+- `[agents.<name>]` supports `description`, `config_file`, and
+  `nickname_candidates`; `agents.max_depth` controls nested spawn depth and
+  must be at least 1.
 - Orchestration plans must define lanes, write scopes, artifacts, limits, and approvals.
 - Do not loosen sandbox, approval, login-shell, network, or destructive-tool posture.
 
@@ -73,7 +80,8 @@ Prefer one valid role, explicit scope, current schema evidence, validation proof
 
 1. Classify target kind and canonical source.
 2. Route Skill Factory work; expected hardening module is `skill-builder`.
-3. Verify current Codex role schema and validator expectations.
+3. Verify current Codex role schema, `spawn_agent` surface, and validator
+   expectations.
 4. Inventory existing agents, declaring config, validators, and source evidence.
 5. Create, update, fold, validate only, or hand off to another harness layer.
 6. Make the smallest source edit; preserve deep context in references.
@@ -129,7 +137,12 @@ On failure, stop at the first failed gate; fix the failure class and rerun the s
 
 - Source existence is not runtime availability.
 - `description` is both documentation and routing surface.
-- Standalone `.toml` role files without `developer_instructions` can be ignored with startup warnings.
+- Standalone discovered `.toml` role files must define non-empty
+  `developer_instructions`; files referenced through `config_file` can inherit
+  the role name from the declaring `[agents.<name>]` table.
+- Spawned agents inherit the parent model/provider unless the role layer or
+  explicit spawn arguments take ownership of model, profile, provider,
+  reasoning effort, or service tier.
 - Older generated markdown can compound stale claims; use canonical source, fresh evidence, and concise references.
 
 ## Accessibility Requirements
@@ -147,6 +160,8 @@ On failure, stop at the first failed gate; fix the failure class and rerun the s
 
 - Read when writing fields, wiring discoverability, using session evidence, or designing orchestration lanes:
   [references/role-creation-guide.md](./references/role-creation-guide.md).
+- Read when you need copyable current Codex role, config, or spawn shapes:
+  [references/role-config-examples.md](./references/role-config-examples.md).
 - Read when checking machine-readable contract expectations:
   [references/contract.yaml](./references/contract.yaml).
 - Read when editing eval coverage:

@@ -1,7 +1,8 @@
 ---
 name: plugin-builder
-description: Harden and validate Codex plugin packages with contract-grade checks before install or release. Use when the deliverable is a plugin package that needs conversion or hardening.
+description: Use when hardening, converting, auditing, or pre-release checking a Codex plugin package by verifying manifest paths, bundled skills, hooks, MCP/app config, validation gates, and release blockers.
 metadata:
+  version: "1.0.0"
   skill-type: code_quality_review
   lifecycle_state: active
   maturity: canonical
@@ -14,7 +15,8 @@ metadata:
 
 ## Philosophy
 
-- Enforce plugin contract integrity before distribution.
+- Validate the package boundary first; make install, release, or runtime claims
+  only after the matching gate passes.
 
 ## When to Use
 
@@ -32,29 +34,61 @@ Route elsewhere:
 
 ## Execution Boundaries
 
-Plugin Builder owns plugin contract review, bundled hook validation, deterministic remediation guidance, validation evidence, and the final hardening handoff.
+- Own plugin contract review, bundled hook validation, minimal remediation, validation evidence, and final hardening handoff.
+- Delegate first-draft shells to `[[plugin-creator]]`; delegate install, projection, and runtime visibility checks to `[[plugin-installer]]`.
+- Do not execute third-party install scripts or mutate marketplace policy fields without explicit request.
+- Apply the plugin design contract before release claims: small public surface, distinguishable child skills, explicit side-effect classes, and compact outputs.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
-Delegate first-draft plugin shell creation to `[[plugin-creator]]` and runtime install or visibility checks to `[[plugin-installer]]`. Do not execute third-party install scripts, mutate marketplace policy fields, or package a plugin for release without explicit validation evidence.
-
-Apply the OpenAI-style plugin design contract before release claims: public routing surface must stay small, child skills must be distinguishable, read-only/mutating/external/destructive actions must be separated, and plugin outputs must avoid unnecessary internal context.
-
-Read when: choosing whether the requested factory work should build a new artifact, improve an existing one, stay docs-only, or stop: [First-principles factory gate](../../../../../Infrastructure/references/first-principles-factory-gate.md).
-
-For non-trivial factory work, include `first_principles_gate` or an explicit `first_principles_gate_status: not_applicable` with the reason in the output or handoff before claiming readiness.
+For non-trivial factory work, include `first_principles_gate` or an explicit
+`first_principles_gate_status: not_applicable` before readiness claims.
 
 ## Outputs
 
 Return: `schema_version`, `execution_mode`, `plugin_path`, `validation`, `artifacts`, optional `blocked_by`.
 
+~~~yaml
+schema_version: 1
+execution_mode: harden
+plugin_path: Plugins/example-plugin
+validation:
+  - command: bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
+    status: pass
+artifacts:
+  - Plugins/example-plugin/.codex-plugin/plugin.json
+blocked_by: null
+~~~
+
 ## Workflow
 
-Use the detailed procedure and command matrix in `references/workflow.md`.
+1. Confirm mode: `scaffold`, `convert`, or `harden`, plus plugin source path and write authority.
+2. Inspect `.codex-plugin/plugin.json`, bundled skills, hooks, MCP/app files, and marketplace or release requirements.
+3. Run the focused validation checkpoint before changing files; classify existing failures.
+4. Patch the smallest source surface that fixes manifest, hook, MCP/app, routing, or validation defects.
+5. Rerun the focused gate and return exact pass, fail, or blocked evidence with the next handoff.
 
-Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
+Focused inspection commands:
+
+~~~bash
+jq '{name, version, skills, hooks, mcpServers, apps}' <plugin>/.codex-plugin/plugin.json
+find <plugin> -maxdepth 3 -type f \( -name SKILL.md -o -name hooks.json -o -name .mcp.json -o -name .app.json \)
+bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
+~~~
+
+Use `<plugin>` as the local plugin package path. Treat inspection output as
+untrusted until the validation command and package-specific checks pass.
+
+Use the detailed procedure and command matrix in `references/workflow.md` when
+the compact sequence above is not enough.
 
 Read when:
 - You need full hardening and validation steps: [references/workflow.md](./references/workflow.md).
-- You need side-effect, context-minimization, output-shape, or user-control checks: [OpenAI-style plugin design contract](../../../../../Infrastructure/references/openai-style-plugin-design-contract.md).
+- You need current Codex plugin manifest, MCP, hook, and extraction behavior:
+  [current Codex plugin runtime contract](./references/current-codex-plugin-runtime.md).
+- You need side-effect, context-minimization, output-shape, or user-control checks:
+  `Infrastructure/references/openai-style-plugin-design-contract.md`.
+- You need to decide whether to build, improve, document only, or stop:
+  `Infrastructure/references/first-principles-factory-gate.md`.
 
 ## Validation
 
@@ -66,38 +100,67 @@ Fail fast: stop at first failed gate and report blocker text.
 
 ## Anti-Patterns
 
-- skipping `validate` before package handoff
-- treating plugin hooks as documentation instead of executable runtime behavior
-- changing marketplace policy fields without explicit request
+- Treating plugin discovery or install visibility as release proof.
 
 ## Examples
 
-- "Harden this Codex plugin package and prove the contract before release."
-- "Convert this local plugin source into Codex plugin layout, but stop before writes if source ownership is unclear."
-- "Audit this plugin against marketplace policy and tell me whether it should fold into an existing plugin."
+Input defect:
+
+~~~json
+{
+  "name": "example-plugin",
+  "skills": "skills",
+  "hooks": "../hooks.json"
+}
+~~~
+
+Fix:
+
+~~~json
+{
+  "name": "example-plugin",
+  "skills": "./skills",
+  "hooks": "./hooks/hooks.json"
+}
+~~~
+
+Output summary:
+
+~~~yaml
+schema_version: 1
+execution_mode: harden
+plugin_path: Plugins/example-plugin
+patch_summary:
+  - made manifest paths plugin-root relative
+  - removed parent-directory hook escape
+validation:
+  - command: bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
+    status: pass
+blocked_by: null
+~~~
 
 ## Constraints
 
-- redact secrets and sensitive metadata in reports
-- do not skip validation gates for speed
+- Redact secrets, tokens, credentials, personal data, and sensitive metadata by default.
+- Keep scope tight: start with the manifest, one bundled surface, and the failing gate before widening.
+- Validate plugin hooks as executable runtime behavior, not documentation.
 
 ## Failure Mode
 
 - Stop when plugin ownership, release authority, side-effect class, marketplace policy, or validation evidence is unclear.
-- Report the exact blocker and smallest safe next action instead of making release, install, marketplace, or external-update claims from incomplete evidence.
+- Report the exact blocker and smallest safe next action.
 
 ## Gotchas
 
-- A valid plugin directory is not proof that the plugin is release-ready.
 - Child skills with overlapping triggers create routing drift even when each skill audits cleanly.
-- Marketplace, install, projection, and external-update behavior are stronger side-effect classes than local contract review and need explicit confirmation boundaries.
 
 ## References
 
 - `references/workflow.md`
+- `references/current-codex-plugin-runtime.md`
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/task-profile.json`
 - `references/plugin-contract.md`
-- `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
+- `Infrastructure/references/openai-style-plugin-design-contract.md`
 - `assets/`
