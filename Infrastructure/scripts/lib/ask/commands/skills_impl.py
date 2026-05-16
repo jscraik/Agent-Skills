@@ -1376,6 +1376,10 @@ def _skill_memory_operation_context() -> dict[str, Any]:
             "./bin/ask skills memory search <query> --json --robot",
             "./bin/ask skills memory read <entry-id-or-path> --json --robot",
         ],
+        "validation_commands": [
+            "./bin/ask skills memory search projection --json --robot",
+            "./bin/ask memory search projection --json --robot",
+        ],
     }
 
 
@@ -1640,6 +1644,11 @@ def skills_events(repo_root: Path, event_type: str | None = None) -> CallResult:
         "event_types": event_types,
         "event_consumers": event_consumers,
         "event_summary": _skill_event_summary(event_consumers),
+        "validation_commands": [
+            "./bin/ask skills events --json --robot",
+            "./bin/ask skills events <event-type> --json --robot",
+            "./bin/ask skills handles --check --json --robot --no-handles",
+        ],
         "eval_blocker_classes": {
             blocker_class: DOCTOR_BLOCKER_TAXONOMY[blocker_class]
             for blocker_class in EVAL_BLOCKER_CLASSES
@@ -1722,6 +1731,33 @@ def _skill_profiles_operation_context() -> dict[str, Any]:
     }
 
 
+def _skill_profile_summary(profiles: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Return compact profile coverage counts for automation consumers."""
+    by_write_policy: dict[str, int] = {}
+    by_permission: dict[str, int] = {}
+    root_count = 0
+    stop_condition_count = 0
+    for profile in profiles.values():
+        write_policy = str(profile.get("write_policy") or "unknown")
+        by_write_policy[write_policy] = by_write_policy.get(write_policy, 0) + 1
+        roots = profile.get("allowed_roots", [])
+        root_count += len(roots) if isinstance(roots, list) else 0
+        stop_conditions = profile.get("stop_conditions", [])
+        stop_condition_count += len(stop_conditions) if isinstance(stop_conditions, list) else 0
+        permissions = profile.get("permissions", [])
+        if isinstance(permissions, list):
+            for permission in permissions:
+                key = str(permission)
+                by_permission[key] = by_permission.get(key, 0) + 1
+    return {
+        "profile_count": len(profiles),
+        "by_write_policy": by_write_policy,
+        "by_permission": by_permission,
+        "allowed_root_count": root_count,
+        "stop_condition_count": stop_condition_count,
+    }
+
+
 def skills_profiles(repo_root: Path, profile: str | None = None) -> CallResult:
     """Return profile-v2-style operation modes for skill lifecycle work."""
     result = CallResult()
@@ -1760,6 +1796,7 @@ def skills_profiles(repo_root: Path, profile: str | None = None) -> CallResult:
         "selected_profile": profile_key,
         "profile_names": list(selected_profiles),
         "available_profiles": sorted(profiles),
+        "profile_summary": _skill_profile_summary(selected_profiles),
         "profiles": _profiles_with_effective_roots(selected_profiles),
         "profile_order": ["authoring", "package-review", "plugin-share", "eval", "live-mutation"],
         "agent_summary": (
@@ -2012,6 +2049,10 @@ def _skill_package_operation_context() -> dict[str, Any]:
         "events": {
             "package_readiness_checked": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["package_readiness_checked"],
         },
+        "validation_commands": [
+            "./bin/ask skills package <handle-or-path> --json --robot",
+            "./bin/ask skills events package_readiness_checked --json --robot",
+        ],
     }
 
 
@@ -2038,6 +2079,11 @@ def _skill_doctor_operation_context() -> dict[str, Any]:
             "./bin/ask skills package <handle-or-path> --json --robot",
             "./bin/ask skills prove <handle> --json --robot",
             "./bin/ask skills events --json --robot",
+        ],
+        "validation_commands": [
+            "./bin/ask skills doctor <handle-or-path> --json --robot",
+            "./bin/ask skills audit <handle-or-path> --level strict --json --robot",
+            "./bin/ask skills events skill_doctor_completed --json --robot",
         ],
     }
 

@@ -949,6 +949,10 @@ class TestAskCLI(unittest.TestCase):
             "./bin/ask skills package <handle-or-path> --json --robot",
             package["operation_context"]["events"]["package_readiness_checked"]["producer_commands"],
         )
+        self.assertIn(
+            "./bin/ask skills events package_readiness_checked --json --robot",
+            package["operation_context"]["validation_commands"],
+        )
         self.assertEqual(package["lifecycle_events"][1]["details"]["gate_summary"], package["gate_summary"])
         self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
 
@@ -1029,6 +1033,10 @@ class TestAskCLI(unittest.TestCase):
             "./bin/ask skills doctor <handle-or-path> --json --robot",
             doctor["operation_context"]["events"]["skill_doctor_completed"]["producer_commands"],
         )
+        self.assertIn(
+            "./bin/ask skills events skill_doctor_completed --json --robot",
+            doctor["operation_context"]["validation_commands"],
+        )
         self.assertIn("eval_blocked", doctor["lifecycle_event_types"])
         package_readiness = doctor["checks"]["capability_metadata"]["package_readiness"]
         self.assertIn("version", package_readiness["required_fields"]["present"])
@@ -1052,6 +1060,9 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(profiles["selected_profile"], "eval")
         self.assertEqual(profiles["profile_names"], ["eval"])
         self.assertIn("package-review", profiles["available_profiles"])
+        self.assertEqual(profiles["profile_summary"]["profile_count"], 1)
+        self.assertIn("artifact_write_only", profiles["profile_summary"]["by_write_policy"])
+        self.assertIn("repo_read", profiles["profile_summary"]["by_permission"])
         self.assertEqual(list(profiles["profiles"]), ["eval"])
         self.assertEqual(profiles["operation_context"]["profile_model"], "profile-v2-inspired")
         self.assertEqual(profiles["operation_context"]["contract_schemas"]["doctor"], "skill-doctor.v1")
@@ -1113,6 +1124,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("skill_loaded", events["available_event_types"])
         self.assertEqual(events["event_summary"]["event_count"], events["event_count"])
         self.assertGreaterEqual(events["event_summary"]["by_profile"]["eval"], 1)
+        self.assertIn("./bin/ask skills events --json --robot", events["validation_commands"])
         self.assertIn("eval_blocked", events["event_types"])
         self.assertIn("eval", events["event_consumers"]["eval_blocked"]["profiles"])
         self.assertIn("./bin/ask skills prove <handle> --json --robot", events["event_consumers"]["eval_completed"]["producer_commands"])
@@ -1182,6 +1194,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(memory["operation_context"]["provider_contract"]["mutation_policy"], "read_only")
         self.assertIn("provenance", memory["operation_context"]["provider_contract"]["required_entry_fields"])
         self.assertIn("eval", memory["operation_context"]["consumer_profiles"])
+        self.assertIn("./bin/ask memory search projection --json --robot", memory["operation_context"]["validation_commands"])
         self.assertGreaterEqual(memory["source_summary"]["source_count"], 1)
         self.assertEqual(memory["mode"], "search")
         self.assertGreaterEqual(memory["entry_count"], 1)
