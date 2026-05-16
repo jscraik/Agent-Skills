@@ -101,7 +101,7 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
     review_root.mkdir(parents=True, exist_ok=True)
     report_path = review_root / f"{_safe_slug(skill_identifier)}-eval-latest.json"
     report = {
-        "status": "success",
+        "status": "not_run",
         "data": {
             "target": skill_path,
             "generated_at": _utc_now_iso(),
@@ -110,7 +110,8 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                 "data": {
                     "openclaw": {
                         "status": "not_run",
-                        "stdout": "Summary: 0 critical · 0 warn",
+                        "stdout": "OpenClaw scan not run in eval-only mode.",
+                        "reason": "eval_only_mode_skips_openclaw",
                     }
                 }
             },

@@ -50,7 +50,9 @@ jobs:
             fi
 
             if [ "$SNYK_EXIT" -ne 0 ]; then
-              echo "⚠ Snyk exited with code $SNYK_EXIT (non-vulnerability error); not failing PR pipeline"
+              echo "❌ Snyk exited with code $SNYK_EXIT (runtime/configuration error)"
+              echo "See Snyk CLI output above for remediation details"
+              exit "$SNYK_EXIT"
             else
               echo "✅ Snyk scan passed"
             fi

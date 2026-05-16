@@ -223,14 +223,14 @@ def _validate_repo_relative_skill_path(repo_root: Path, skill_path: str) -> tupl
     return resolved_path, None
 
 
-def _normalize_skill_target_path(skill_path: str) -> tuple[Path, str]:
+def _normalize_skill_target_path(repo_root: Path, skill_path: str) -> tuple[Path, str]:
     """Return the directory target and normalized repo-relative path for a skill input."""
     audit_target = Path(skill_path)
     if audit_target.name == "SKILL.md":
         audit_target = audit_target.parent
     if audit_target.is_absolute():
         try:
-            audit_target = audit_target.resolve().relative_to(Path.cwd().resolve())
+            audit_target = audit_target.resolve().relative_to(repo_root.resolve())
         except ValueError:
             pass
     return audit_target, audit_target.as_posix()
@@ -1556,7 +1556,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     if path_error:
         return path_error
 
-    audit_target, audit_target_path = _normalize_skill_target_path(skill_path)
+    audit_target, audit_target_path = _normalize_skill_target_path(repo_root, skill_path)
     if Path(audit_target_path).is_absolute():
         try:
             audit_target_path = Path(audit_target_path).resolve().relative_to(repo_root.resolve()).as_posix()
@@ -1669,7 +1669,7 @@ def validate_skill_gate(repo_root: Path, skill_path: str) -> CallResult:
     if path_error:
         return path_error
 
-    audit_target, audit_target_path = _normalize_skill_target_path(skill_path)
+    audit_target, audit_target_path = _normalize_skill_target_path(repo_root, skill_path)
     python = _get_python_command(["pyyaml", "jsonschema"])
     gate_script = _resolve_skill_builder_script(repo_root, "skill_gate")
     gate_cmd = python + [
@@ -1697,7 +1697,7 @@ def validate_openai_skill_format(repo_root: Path, skill_path: str, mode: str = "
     if path_error:
         return path_error
 
-    _, audit_target_path = _normalize_skill_target_path(skill_path)
+    _, audit_target_path = _normalize_skill_target_path(repo_root, skill_path)
     command = [
         "bash",
         "Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh",
@@ -1745,7 +1745,7 @@ def external_review_skill(
     if path_error:
         return path_error
 
-    audit_target, audit_target_path = _normalize_skill_target_path(skill_path)
+    audit_target, audit_target_path = _normalize_skill_target_path(repo_root, skill_path)
     target_abs = (repo_root / audit_target).resolve()
     if not target_abs.is_dir() or not (target_abs / "SKILL.md").is_file():
         result.status = "error"
@@ -2017,7 +2017,9 @@ def external_review_skill(
 
     if dashboard:
         if report_target is None:
-            default_report = Path("Infrastructure") / "artifacts" / "skill-reviews" / f"{target_abs.name}.json"
+            target_rel = target_abs.relative_to(repo_root.resolve()).as_posix()
+            target_slug = re.sub(r"[^A-Za-z0-9._-]+", "-", target_rel).strip("-") or target_abs.name
+            default_report = Path("Infrastructure") / "artifacts" / "skill-reviews" / f"{target_slug}.json"
             report_target = (repo_root / default_report).resolve()
             report_target.parent.mkdir(parents=True, exist_ok=True)
             report_payload = {

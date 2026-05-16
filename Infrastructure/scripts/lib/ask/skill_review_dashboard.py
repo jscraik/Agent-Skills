@@ -138,10 +138,13 @@ def _audit_security_summary(audit_data: dict[str, Any]) -> dict[str, Any]:
             critical_count += 1
         if "warn" in lower:
             warn_count += 1
-    if "0 critical" in stdout.lower():
-        critical_count = 0
-    if "0 warn" in stdout.lower() or "0 warnings" in stdout.lower():
-        warn_count = 0
+
+    # Prefer explicit summary counts when available; otherwise fall back to line heuristics.
+    summary_match = re.search(r"Summary:\s*(\d+)\s+critical\b[^\n]*?(\d+)\s+warn", stdout, re.IGNORECASE)
+    if summary_match:
+        critical_count = int(summary_match.group(1))
+        warn_count = int(summary_match.group(2))
+
     return {
         "critical_count": critical_count,
         "warning_count": warn_count,
@@ -225,8 +228,10 @@ def _latest_scorecard(repo_root: Path, target_identifier: str) -> tuple[dict[str
             continue
         if not isinstance(payload, dict):
             continue
-        skill_path = str(payload.get("skill_path") or "")
-        if skill_path and _canonical_target_identifier(skill_path, repo_root) != target_identifier:
+        skill_path = str(payload.get("skill_path") or "").strip()
+        if not skill_path:
+            continue
+        if _canonical_target_identifier(skill_path, repo_root) != target_identifier:
             continue
         matching.append(path)
 
@@ -530,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {{
       if (countdown) countdown.textContent = remaining + 's';
     }};
     paint();
-    window.setInterval(() => {{
+    const tick = window.setInterval(() => {{
       if (document.hidden) return;
       remaining -= 1;
       if (remaining <= 0) {{
@@ -539,6 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {{
       }}
       paint();
     }}, 1000);
+    window.addEventListener('beforeunload', () => window.clearInterval(tick), {{ once: true }});
   }}
 }});
 </script>

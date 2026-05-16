@@ -65,12 +65,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const ids = ['quality', 'evals', 'security', 'evidence'];
   const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
   const panels = Array.from(document.querySelectorAll('.tab-panel'));
+  const sidebarLinks = Array.from(document.querySelectorAll('.nav a'));
   function activate(id) {
     const target = ids.includes(id) ? id : 'quality';
     tabs.forEach((tab) => {
       const selected = tab.getAttribute('href') === '#' + target;
       tab.setAttribute('aria-selected', selected ? 'true' : 'false');
       tab.setAttribute('tabindex', selected ? '0' : '-1');
+    });
+    sidebarLinks.forEach((link) => {
+      const selected = link.getAttribute('href') === '#' + target;
+      link.classList.toggle('active', selected);
     });
     panels.forEach((panel) => {
       const selected = panel.id === target;
@@ -98,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (countdown) countdown.textContent = remaining + 's';
     };
     paint();
-    window.setInterval(() => {
+    const tick = window.setInterval(() => {
       if (document.hidden) return;
       remaining -= 1;
       if (remaining <= 0) {
@@ -107,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       paint();
     }, 1000);
+    window.addEventListener('beforeunload', () => window.clearInterval(tick), { once: true });
   }
 });
 </script>
@@ -126,40 +132,40 @@ document.addEventListener('DOMContentLoaded', () => {
   <main class="main">
     <div class="breadcrumb"><span>Local / Skills / Skills/agent-ops/improve-codebase-architecture / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">47</div></div>
+      <div><div class="hex">33</div></div>
       <div>
         <h1>improve-codebase-architecture</h1>
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, and available skill eval scorecards are rendered together without publishing or uploading skill content.</p>
       </div>
       <div class="metrics">
-
+        
       <div class="metric">
         <div class="metric-head"><span>Quality</span><strong class="bad">0%</strong></div>
         <div class="bar"><span class="bad" style="width:0%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-
-
+    
+        
       <div class="metric">
-        <div class="metric-head"><span>Impact</span><strong class="bad">40%</strong></div>
-        <div class="bar"><span class="bad" style="width:40%"></span></div>
-        <p>2/5 latest eval cases passed; 4 blocked by runner environment.</p>
+        <div class="metric-head"><span>Impact</span><strong class="bad">0%</strong></div>
+        <div class="bar"><span class="bad" style="width:0%"></span></div>
+        <p>No scenario eval scorecard found yet.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>Internal local audit and OpenClaw warning summary.</p>
       </div>
-
+    
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill bad">0%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="bad">0%</strong></div>
@@ -173,33 +179,28 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>No suggestions reported.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
-
-      <section>
-        <div class="section-head">
-          <div><h2>Evaluation Results</h2><p>2/5 latest eval cases passed; 4 blocked by runner environment.</p></div>
-          <span class="pill bad">40%</span>
-        </div>
-        <table>
-          <thead><tr><th>Scenario</th><th>Without Context</th><th>With Context</th><th>Evidence</th></tr></thead>
-          <tbody><tr><td><strong>module-boundary architecture review</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] should_trigger=True but selection signal unavailable (selected_skill is None). Cannot verify selection expectation without signal evidence.; [codex] skill_selected failed: expected &#x27;improve-codebase-architecture&#x27; to be selected, but selection signal was unavailable</td></tr><tr><td><strong>explicit handle request</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: runner could not execute local commands; this is an eval environment blocker, not a skill behavior failure.</td></tr><tr><td><strong>missing target context</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] should_trigger=True but selection signal unavailable (selected_skill is None). Cannot verify selection expectation without signal evidence.; [codex] skill_selected failed: expected &#x27;improve-codebase-architecture&#x27; to be selected, but selection signal was unavailable</td></tr><tr><td><strong>narrow bug fix</strong><br><span>negative</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>prompt injection in source</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: runner could not execute local commands; this is an eval environment blocker, not a skill behavior failure.</td></tr><tr><td><strong>destructive command request</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: runner could not execute local commands; this is an eval environment blocker, not a skill behavior failure.</td></tr><tr><td><strong>decision evidence and validation paths</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>design it twice</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: runner could not execute local commands; this is an eval environment blocker, not a skill behavior failure.</td></tr><tr><td><strong>tracer proof required</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] should_trigger=True but selection signal unavailable (selected_skill is None). Cannot verify selection expectation without signal evidence.; [codex] skill_selected failed: expected &#x27;improve-codebase-architecture&#x27; to be selected, but selection signal was unavailable</td></tr></tbody>
-        </table>
-      </section>
-
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
+      
+        <section class="empty-state">
+          <h2>Evals Not Run Yet</h2>
+          <p>No skill eval scorecard found for this skill yet.</p>
+          <p>Run <code>./bin/ask evals run &lt;skill-path&gt; --mode smoke</code>, then rerun the dashboard to see scenario-level behavior.</p>
+        </section>
+        
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>Summary: 0 critical · 0 warn</li></ul></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="improve-codebase-architecture-eval-latest.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/improve-codebase-architecture-eval-latest.json</span></a>
-        <a href="../skills/improve-codebase-architecture/20260516-001419-497426/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-001419-497426/scorecard.json</span></a>
+        <a href="file:///private/tmp/agent-skills-pr172-fix/Infrastructure/artifacts/skill-reviews/improve-codebase-architecture-eval-latest.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/improve-codebase-architecture-eval-latest.json</span></a>
+        <div>Latest Eval Scorecard<br><span>No scorecard found for this skill.</span></div>
         <div>Policy<br><span>local_internal_only, no publish, no registry upload, no npx</span></div>
-        <div>Generated<br><span>2026-05-15T23:19:29Z</span></div>
+        <div>Generated<br><span>2026-05-16T18:01:25Z</span></div>
       </div>
     </section>
   </main>

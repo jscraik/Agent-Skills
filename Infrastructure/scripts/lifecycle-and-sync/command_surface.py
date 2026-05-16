@@ -63,6 +63,9 @@ class CommandHandle:
     description: str
     invoke_via: str | None = None
     level: str | None = None
+    alias_of: str | None = None
+    alias_kind: str | None = None
+    deprecation_state: str | None = None
     provenance: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -154,6 +157,9 @@ def _alias_handle_from_target(alias: str, target: CommandHandle) -> CommandHandl
         description=target.description,
         invoke_via=target.invoke_via,
         level=target.level,
+        alias_of=target.handle,
+        alias_kind="folded_compatibility",
+        deprecation_state="deprecated",
         provenance=target.provenance,
     )
 

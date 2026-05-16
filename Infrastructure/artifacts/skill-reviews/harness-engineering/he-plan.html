@@ -47,10 +47,6 @@ h3 { font-size:20px; margin:0 0 10px; }
 .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
 .panel { border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:20px; }
 .panel strong { display:block; font-size:24px; margin-top:8px; }
-.plugin-posture { margin-top:18px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:start; }
-.plugin-posture ul { grid-column:1 / -1; margin:0; padding-left:18px; color:var(--muted); }
-.plugin-score { display:flex; align-items:center; gap:12px; }
-.posture-detail { grid-column:1 / -1; margin:0; color:var(--muted); }
 .pill { display:inline-flex; align-items:center; border-radius:7px; padding:3px 8px; font-weight:800; background:#1b2220; border:1px solid #2d4733; }
 .pill.warn { background:#2a2618; border-color:#504721; } .pill.bad { background:#2c1d1b; border-color:#56302b; }
 table { width:100%; border-collapse:collapse; }
@@ -63,19 +59,23 @@ td span { color:var(--muted); }
 .evidence-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .evidence-list a,.evidence-list div { border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }
 @media (max-width: 1100px) { .shell { grid-template-columns:1fr; } .sidebar { position:relative; height:auto; } .hero { grid-template-columns:1fr; } .grid,.evidence-list { grid-template-columns:1fr; } .tabs a { min-width:104px; } }
-@media (max-width: 700px) { .plugin-posture { grid-template-columns:1fr; } .plugin-score { justify-content:flex-start; } }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const ids = ['quality', 'evals', 'security', 'evidence'];
   const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
   const panels = Array.from(document.querySelectorAll('.tab-panel'));
+  const sidebarLinks = Array.from(document.querySelectorAll('.nav a'));
   function activate(id) {
     const target = ids.includes(id) ? id : 'quality';
     tabs.forEach((tab) => {
       const selected = tab.getAttribute('href') === '#' + target;
       tab.setAttribute('aria-selected', selected ? 'true' : 'false');
       tab.setAttribute('tabindex', selected ? '0' : '-1');
+    });
+    sidebarLinks.forEach((link) => {
+      const selected = link.getAttribute('href') === '#' + target;
+      link.classList.toggle('active', selected);
     });
     panels.forEach((panel) => {
       const selected = panel.id === target;
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (countdown) countdown.textContent = remaining + 's';
     };
     paint();
-    window.setInterval(() => {
+    const tick = window.setInterval(() => {
       if (document.hidden) return;
       remaining -= 1;
       if (remaining <= 0) {
@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       paint();
     }, 1000);
+    window.addEventListener('beforeunload', () => window.clearInterval(tick), { once: true });
   }
 });
 </script>
@@ -131,54 +132,45 @@ document.addEventListener('DOMContentLoaded', () => {
   <main class="main">
     <div class="breadcrumb"><span>Local / Skills / Plugins/harness-engineering/skills/he-plan / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">95</div><span class="lift">+ 1.05x</span></div>
+      <div><div class="hex">80</div></div>
       <div>
         <h1>he-plan</h1>
-        <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
+        <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, and available skill eval scorecards are rendered together without publishing or uploading skill content.</p>
       </div>
       <div class="metrics">
-
+        
       <div class="metric">
         <div class="metric-head"><span>Quality</span><strong class="warn">85%</strong></div>
         <div class="bar"><span class="warn" style="width:85%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-
-
+    
+        
       <div class="metric">
-        <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
-        <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>22/22 latest eval cases passed.</p>
+        <div class="metric-head"><span>Impact</span><strong class="bad">54%</strong></div>
+        <div class="bar"><span class="bad" style="width:54%"></span></div>
+        <p>7/13 latest eval cases passed.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
+        <p>Internal local audit and OpenClaw warning summary.</p>
       </div>
-
+    
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">85%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">85%</strong></div>
         <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="warn">77%</strong></div>
         <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="good">100%</strong></div>
-      </div>
-      <div class="panel plugin-posture">
-        <div>
-          <h3>Plugin Eval</h3>
-          <p>Budget and Codex ergonomics guardrail. Local policy accepts <code>B+</code> or better when there are no failure-level findings and local/Tessl gates pass.</p>
-        </div>
-        <div class="plugin-score"><span class="pill warn">A</span><strong class="good">95%</strong></div>
-        <p class="posture-detail warn">Acceptable as a budget guardrail when local audit and Tessl quality pass; track warnings as follow-up or prove observed usage.</p>
-        <ul><li>Score: 95/100</li><li>Grade: A</li><li>Risk: medium</li><li>Checks: 0 fail, 1 warn, 2 info</li><li>Active budget: 1123 tokens (good)</li><li>Observed usage: not supplied</li></ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
@@ -194,45 +186,32 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Add more natural language trigger variations such as &#x27;plan the implementation&#x27;, &#x27;break down work&#x27;, &#x27;create execution plan&#x27;, or &#x27;plan before coding&#x27; to improve discoverability for users who may not use the exact domain terms.</li><li>Tighten the &#x27;Inputs&#x27; section into a structured list or table rather than a comma-separated run-on, and remove any items that are self-evident from context.</li><li>Consider providing the bundle files (plan-artifact-contract.md, planning-depth.md, etc.) so the references section delivers on its progressive disclosure promise.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
-
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
+      
       <section>
         <div class="section-head">
-          <div><h2>Evaluation Results</h2><p>22/22 latest eval cases passed.</p></div>
-          <span class="pill good">100%</span>
+          <div><h2>Evaluation Results</h2><p>7/13 latest eval cases passed.</p></div>
+          <span class="pill bad">54%</span>
         </div>
         <table>
-          <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
-          <tbody><tr><td><strong>Bounded execution plan</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Post plan handoff</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Direct code change</strong><br><span>negative</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Unsafe scope pressure</strong><br><span>pressure</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Specialist skill fit</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Missing validation route</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Headless plan assumption</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Artifact naming</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Out of scope filter</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Aggregate boundary plan</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>First principles routes Type 1 to proof</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>First principles allows Type 2 fast path</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Plugin hooks feature gated plan</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Linear mutation status visible</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Professional confidence review trigger</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Skill hardening review trigger</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Professional confidence review blocks ambiguous current</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Current plan/spec resolution</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Spec-coupled plan revision</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Confidence ceiling when runtime untested</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Stale artifact freshness</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Infographic artifact required</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
+          <thead><tr><th>Scenario</th><th>Without Context</th><th>With Context</th><th>Evidence</th></tr></thead>
+          <tbody><tr><td><strong>Bounded execution plan</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 124</td></tr><tr><td><strong>Post plan handoff</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/</td></tr><tr><td><strong>Direct code change</strong><br><span>negative</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Unsafe scope pressure</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Specialist skill fit</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/</td></tr><tr><td><strong>Missing validation route</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/</td></tr><tr><td><strong>Headless plan assumption</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/</td></tr><tr><td><strong>Artifact naming</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/</td></tr><tr><td><strong>Out of scope filter</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Aggregate boundary plan</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>First principles routes Type 1 to proof</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>First principles allows Type 2 fast path</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Plugin hooks feature gated plan</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
         </table>
       </section>
-
+    
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
-      <div class="panel plugin-posture">
-        <div>
-          <h3>Snyk Advisory</h3>
-          <p>Optional CLI-backed external security signal. It stays disabled unless the review is run with <code>--include-snyk</code>.</p>
-        </div>
-        <div class="plugin-score"><span class="pill good">skipped</span><strong class="good">100%</strong></div>
-        <p class="posture-detail good">Snyk advisory not requested</p>
-        <ul>
-          <li>Projects scanned: 0; vulnerabilities: 0</li>
-          <li>Critical: 0; High: 0; Medium: 0; Low: 0</li>
-          <li>Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.</li>
-        </ul>
-      </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="Infrastructure/artifacts/skill-reviews/harness-engineering/he-plan.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/harness-engineering/he-plan.json</span></a>
-        <a href="Infrastructure/artifacts/skills/he-plan/20260512-214045-750133/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/he-plan/20260512-214045-750133/scorecard.json</span></a>
-        <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
+        <a href="file:///private/tmp/agent-skills-pr172-fix/Infrastructure/artifacts/skill-reviews/harness-engineering/he-plan.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/harness-engineering/he-plan.json</span></a>
+        <a href="file:///private/tmp/agent-skills-pr172-fix/Infrastructure/artifacts/skills/he-plan/20260509-235410-828008/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/he-plan/20260509-235410-828008/scorecard.json</span></a>
+        <div>Policy<br><span>local_internal_only, no publish, no registry upload, no npx</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
     </section>

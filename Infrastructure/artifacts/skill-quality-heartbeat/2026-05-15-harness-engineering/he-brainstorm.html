@@ -65,12 +65,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const ids = ['quality', 'evals', 'security', 'evidence'];
   const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
   const panels = Array.from(document.querySelectorAll('.tab-panel'));
+  const sidebarLinks = Array.from(document.querySelectorAll('.nav a'));
   function activate(id) {
     const target = ids.includes(id) ? id : 'quality';
     tabs.forEach((tab) => {
       const selected = tab.getAttribute('href') === '#' + target;
       tab.setAttribute('aria-selected', selected ? 'true' : 'false');
       tab.setAttribute('tabindex', selected ? '0' : '-1');
+    });
+    sidebarLinks.forEach((link) => {
+      const selected = link.getAttribute('href') === '#' + target;
+      link.classList.toggle('active', selected);
     });
     panels.forEach((panel) => {
       const selected = panel.id === target;
@@ -98,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (countdown) countdown.textContent = remaining + 's';
     };
     paint();
-    window.setInterval(() => {
+    const tick = window.setInterval(() => {
       if (document.hidden) return;
       remaining -= 1;
       if (remaining <= 0) {
@@ -107,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       paint();
     }, 1000);
+    window.addEventListener('beforeunload', () => window.clearInterval(tick), { once: true });
   }
 });
 </script>
@@ -132,34 +138,34 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, and available skill eval scorecards are rendered together without publishing or uploading skill content.</p>
       </div>
       <div class="metrics">
-
+        
       <div class="metric">
         <div class="metric-head"><span>Quality</span><strong class="warn">80%</strong></div>
         <div class="bar"><span class="warn" style="width:80%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="bad">55%</strong></div>
         <div class="bar"><span class="bad" style="width:55%"></span></div>
         <p>6/11 latest eval cases passed.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>Internal local audit and OpenClaw warning summary.</p>
       </div>
-
+    
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">80%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">82%</strong></div>
@@ -180,8 +186,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Replace jargon like &#x27;evidence-labeled survivor options&#x27; and &#x27;stage routing&#x27; with plainer language, e.g., &#x27;label options with supporting evidence, identify risks, and route work to the appropriate stage (spec, plan, Linear ticket, or implementation)&#x27;.</li><li>Add narrowing qualifiers to broad triggers like &#x27;brainstorm&#x27; to reduce conflict risk, e.g., &#x27;brainstorm engineering approaches&#x27; or &#x27;brainstorm solutions to ambiguous requirements&#x27;.</li><li>Replace the inline Output Format description with a concrete YAML or JSON template showing all fields with placeholder values, making it copy-paste ready.</li><li>Consolidate Guardrails, Execution Boundaries, and Constraints into a single section to reduce redundancy and save tokens.</li><li>Provide at least one complete example showing full input context and the exact structured output (with all schema fields populated) rather than just describing the scenario.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
-
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
+      
       <section>
         <div class="section-head">
           <div><h2>Evaluation Results</h2><p>6/11 latest eval cases passed.</p></div>
@@ -192,19 +198,19 @@ document.addEventListener('DOMContentLoaded', () => {
           <tbody><tr><td><strong>Domain survivor selection</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Direction options needed</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Survivor selection ambiguous</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/</td></tr><tr><td><strong>Session evidence input</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Premature implementation request</strong><br><span>negative</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Prompt injection pressure</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>False sophistication filter</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/</td></tr><tr><td><strong>Headless assumption recording</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>External pattern review</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Now next later shape</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>First principles brainstorm survivor selection</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr></tbody>
         </table>
       </section>
-
+    
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="Infrastructure/artifacts/skill-quality-heartbeat/2026-05-15-harness-engineering/he-brainstorm.json">Review JSON<br><span>Infrastructure/artifacts/skill-quality-heartbeat/2026-05-15-harness-engineering/he-brainstorm.json</span></a>
-        <a href="Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/scorecard.json</span></a>
+        <a href="file:///private/tmp/agent-skills-pr172-fix/Infrastructure/artifacts/skill-quality-heartbeat/2026-05-15-harness-engineering/he-brainstorm.json">Review JSON<br><span>Infrastructure/artifacts/skill-quality-heartbeat/2026-05-15-harness-engineering/he-brainstorm.json</span></a>
+        <a href="file:///private/tmp/agent-skills-pr172-fix/Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only, no publish, no registry upload, no npx</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
