@@ -26,7 +26,7 @@ boundary guard into source drift.
 
 ## Output Shape
 
-~~~yaml
+```yaml
 validation:
   - command: ./bin/ask skills audit /owner/repo/.codex/skills/name --level strict --json --robot
     status: blocked
@@ -36,4 +36,4 @@ validation:
 blocked_by:
   class: repository_boundary
   next_step: use owner repo validators or add an explicit owner-repo audit lane
-~~~
+```

@@ -42,7 +42,7 @@ validators before creating it.
 
 ## Runtime Provider Shape
 
-Current `~/dev/codex` uses `$CODEX_HOME/environments.toml` as a runtime
+As of `~/dev/codex` commit `cb1ef6edae52`, runtime behavior uses `$CODEX_HOME/environments.toml` as a runtime
 provider file. Use it only when the request is about Codex runtime environment
 selection, remote exec servers, or disabling default shell/filesystem access.
 

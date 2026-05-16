@@ -33,7 +33,7 @@ Start with 2-3 focused surfaces. A passing or precisely classified gate beats a 
 - Portfolio analysis, keep/merge/retire decisions, or session mining -> `skill-refactor`.
 - Plugin package lifecycle work -> `plugin-factory`.
 
-Read when: load `../../../references/skill-builder/harness-hardening-workflow.md` only when the target needs multi-round repair, benchmark interpretation, or release evidence beyond the compact workflow here.
+Read when: load `../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/harness-hardening-workflow.md` only when the target needs multi-round repair, benchmark interpretation, or release evidence beyond the compact workflow here.
 
 ## Inputs
 
@@ -133,9 +133,9 @@ Fail fast: stop at the first failed required gate, classify it, and do not proce
 
 - Generated artifact handling: [generated artifact policy](./references/generated-artifact-policy.md)
 - Cross-repo audit boundary handling: [repo-local audit boundaries](./references/repo-local-audit-boundaries.md)
-- Long hardening workflow: `../../../references/skill-builder/harness-hardening-workflow.md`
-- Local operating guide: `../../../references/skill-builder/operating-guide.md`
+- Long hardening workflow: `../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/harness-hardening-workflow.md`
+- Local operating guide: `../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/operating-guide.md`
 - First-principles factory gate: `Infrastructure/references/first-principles-factory-gate.md`
 - Local contract and evals: `references/`
 - Discovery interview: [discovery interview](./references/discovery-interview.md)
-- Repository validators and helper scripts: `Plugins/skill-factory/scripts/skill-builder/` and `Infrastructure/scripts/`
+- Repository validators and helper scripts: `Plugins/skill-factory/fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/scripts/` and `Infrastructure/scripts/`

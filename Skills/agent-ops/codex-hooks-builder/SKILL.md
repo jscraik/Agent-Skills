@@ -55,9 +55,9 @@ metadata:
 - Check current Codex hook docs, local schema, or runtime evidence before changing event names, matchers, feature flags, or output handling.
 - Model the supported events explicitly: SessionStart, PreToolUse, PermissionRequest, PostToolUse, PreCompact, PostCompact, UserPromptSubmit, and Stop.
 - Check the target runtime and official Codex docs before adding hook feature
-  toggles. Current `~/dev/codex` marks `[features].hooks` as stable and
-  enabled by default; `codex_hooks` is a legacy alias, not the preferred new
-  key.
+  toggles. As of `~/dev/codex` commit `cb1ef6edae52`, `[features].hooks` is
+  stable and enabled by default; `codex_hooks` is a legacy alias, not the
+  preferred new key.
 - Account for every active hook source: user `hooks.json`, inline `[hooks]`
   in config layers, project `.codex` files, managed requirements hooks,
   plugin-bundled hooks, and hook state entries that disable or trust commands.

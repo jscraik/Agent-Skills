@@ -24,7 +24,8 @@ runtime_contract:
   feature_keys:
     current: hooks
     compatibility_alias: codex_hooks
-    requirement: "Current ~/dev/codex marks hooks as stable and default-enabled. Use hooks for new config only when a toggle is needed; treat codex_hooks as a legacy alias."
+    as_of_commit: "cb1ef6edae52"
+    requirement: "As of ~/dev/codex commit cb1ef6edae52, hooks are stable and default-enabled. Use hooks for new config only when a toggle is needed; treat codex_hooks as a legacy alias."
     conflict_rule: "When official docs and local runtime/schema evidence disagree, state the conflict and follow the target runtime's schema or validator."
   events:
     - SessionStart
