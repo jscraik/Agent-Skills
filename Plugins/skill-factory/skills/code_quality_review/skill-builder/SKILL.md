@@ -33,7 +33,7 @@ Start with 2-3 focused surfaces. A passing or precisely classified gate beats a 
 - Portfolio analysis, keep/merge/retire decisions, or session mining -> `skill-refactor`.
 - Plugin package lifecycle work -> `plugin-factory`.
 
-Read when: load `../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/harness-hardening-workflow.md` only when the target needs multi-round repair, benchmark interpretation, or release evidence beyond the compact workflow here.
+Read when: load `references/harness-hardening-workflow.md` when the target needs multi-round repair, benchmark interpretation, or release evidence beyond the compact workflow here. Archive snapshots under `fixtures/budget-archive/**` are historical-only.
 
 ## Inputs
 
@@ -131,11 +131,12 @@ Fail fast: stop at the first failed required gate, classify it, and do not proce
 
 ## References
 
-- Generated artifact handling: [generated artifact policy](../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/generated-artifact-policy.md)
-- Cross-repo audit boundary handling: [repo-local audit boundaries](../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/repo-local-audit-boundaries.md)
-- Long hardening workflow: `../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/harness-hardening-workflow.md`
-- Local operating guide: `../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/operating-guide.md`
+- Generated artifact handling: [generated artifact policy](references/generated-artifact-policy.md)
+- Cross-repo audit boundary handling: [repo-local audit boundaries](references/repo-local-audit-boundaries.md)
+- Long hardening workflow: `references/harness-hardening-workflow.md`
+- Local operating guide: `references/operating-guide.md`
 - First-principles factory gate: `../../../../../Infrastructure/references/first-principles-factory-gate.md`
 - Local contract and evals: `references/`
-- Discovery interview: [discovery interview](../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/discovery-interview.md)
-- Repository validators and helper scripts: `Plugins/skill-factory/fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/scripts/` and `Infrastructure/scripts/`
+- Discovery interview: [discovery interview](references/discovery-interview.md)
+- Repository validators and helper scripts: `scripts/` and `Infrastructure/scripts/`
+- Archive snapshots (historical-only): `../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/`

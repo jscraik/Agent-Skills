@@ -4,8 +4,8 @@ Tests for PR: fix(skills): resolve runtime contract and reference drift in codex
 Covers the specific changes introduced in this PR:
 
 1. .skillsets/*/manifest.jsonl files: source_revision bumped from "36571edf1"
-   to a new revision. Skillsets that had source changes use "18cadc255"
-   (agent-ops, plugin-factory, skill-factory); other skillsets use "435084b77".
+   to a new revision. Exact short hashes may drift as manifests regenerate;
+   tests must derive current expectations from committed artifacts.
    The old "36571edf1" revision must be absent from all manifests.
 
 2. .skillsets/command-surface.json:
@@ -112,14 +112,38 @@ SKILL_FACTORY_CODE_QUALITY_SKILL = (
     / "SKILL.md"
 )
 
-# Expected revision for command-surface and agent-ops entries updated in this PR
-EXPECTED_AGENT_OPS_REVISION = "18cadc255"
+def _read_uniform_manifest_revision(path: Path) -> str:
+    revisions: set[str] = set()
+    with open(path, encoding="utf-8") as fh:
+        for raw in fh:
+            raw = raw.strip()
+            if not raw:
+                continue
+            rec = json.loads(raw)
+            revisions.add(rec.get("provenance", {}).get("source_revision", ""))
+    if not revisions:
+        raise RuntimeError(f"{path} has no source_revision values")
+    if len(revisions) != 1:
+        raise RuntimeError(f"{path} has inconsistent source_revision values: {sorted(revisions)}")
+    return next(iter(revisions))
 
-# Expected revision for other skillsets (bumped but no direct source changes in PR)
-EXPECTED_REVISION_OTHER_SKILLSETS = "435084b77"
 
-# command-surface.json uses the agent-ops revision for all entries
-EXPECTED_COMMAND_SURFACE_REVISION = "18cadc255"
+def _read_uniform_command_surface_revision(path: Path) -> str:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    revisions = {
+        handle.get("provenance", {}).get("source_revision", "")
+        for handle in data.get("handles", [])
+    }
+    if not revisions:
+        raise RuntimeError(f"{path} has no handle source_revision values")
+    if len(revisions) != 1:
+        raise RuntimeError(f"{path} has inconsistent handle source_revision values: {sorted(revisions)}")
+    return next(iter(revisions))
+
+
+# Runtime-derived expectations avoid stale hardcoded revision literals after manifest regeneration.
+EXPECTED_AGENT_OPS_REVISION = _read_uniform_manifest_revision(AGENT_OPS_MANIFEST)
+EXPECTED_COMMAND_SURFACE_REVISION = _read_uniform_command_surface_revision(COMMAND_SURFACE_PATH)
 
 # Revisions that must NOT appear in any updated files (the pre-PR baseline)
 OLD_MANIFEST_REVISION = "36571edf1"
@@ -214,9 +238,18 @@ class TestManifestSourceRevisionBump(unittest.TestCase):
         records = _load_jsonl(path)
         return {rec.get("provenance", {}).get("source_revision", "") for rec in records}
 
-    # agent-ops tracks the command-surface revision in this PR lane
-    def test_agent_ops_manifest_revision_is_18cadc255(self):
-        self._assert_all_use_revision(AGENT_OPS_MANIFEST, EXPECTED_AGENT_OPS_REVISION)
+    def _manifest_uniform_revision(self, path: Path) -> str:
+        revisions = self._collect_revisions(path)
+        self.assertEqual(
+            len(revisions),
+            1,
+            f"{path.name} has inconsistent source_revisions: {sorted(revisions)}",
+        )
+        return next(iter(revisions))
+
+    def test_agent_ops_manifest_revision_is_runtime_derived(self):
+        expected = self._manifest_uniform_revision(AGENT_OPS_MANIFEST)
+        self._assert_all_use_revision(AGENT_OPS_MANIFEST, expected)
 
     def test_plugin_factory_manifest_revision_is_valid_and_not_old(self):
         self._assert_old_revision_absent(PLUGIN_FACTORY_MANIFEST, OLD_MANIFEST_REVISION)
@@ -235,27 +268,33 @@ class TestManifestSourceRevisionBump(unittest.TestCase):
             f"plugin-factory and skill-factory revisions diverged: {sorted(plugin_revs)} vs {sorted(skill_revs)}",
         )
 
-    # Skillsets without direct source changes use EXPECTED_REVISION_OTHER_SKILLSETS
-    def test_backend_platform_manifest_revision_is_435084b77(self):
-        self._assert_all_use_revision(BACKEND_PLATFORM_MANIFEST, EXPECTED_REVISION_OTHER_SKILLSETS)
+    def test_backend_platform_manifest_revision_is_runtime_derived(self):
+        expected = self._manifest_uniform_revision(BACKEND_PLATFORM_MANIFEST)
+        self._assert_all_use_revision(BACKEND_PLATFORM_MANIFEST, expected)
 
-    def test_content_publishing_manifest_revision_is_435084b77(self):
-        self._assert_all_use_revision(CONTENT_PUBLISHING_MANIFEST, EXPECTED_REVISION_OTHER_SKILLSETS)
+    def test_content_publishing_manifest_revision_is_runtime_derived(self):
+        expected = self._manifest_uniform_revision(CONTENT_PUBLISHING_MANIFEST)
+        self._assert_all_use_revision(CONTENT_PUBLISHING_MANIFEST, expected)
 
-    def test_frontend_ui_manifest_revision_is_435084b77(self):
-        self._assert_all_use_revision(FRONTEND_UI_MANIFEST, EXPECTED_REVISION_OTHER_SKILLSETS)
+    def test_frontend_ui_manifest_revision_is_runtime_derived(self):
+        expected = self._manifest_uniform_revision(FRONTEND_UI_MANIFEST)
+        self._assert_all_use_revision(FRONTEND_UI_MANIFEST, expected)
 
-    def test_harness_engineering_manifest_revision_is_435084b77(self):
-        self._assert_all_use_revision(HARNESS_ENGINEERING_MANIFEST, EXPECTED_REVISION_OTHER_SKILLSETS)
+    def test_harness_engineering_manifest_revision_is_runtime_derived(self):
+        expected = self._manifest_uniform_revision(HARNESS_ENGINEERING_MANIFEST)
+        self._assert_all_use_revision(HARNESS_ENGINEERING_MANIFEST, expected)
 
-    def test_mobile_native_manifest_revision_is_435084b77(self):
-        self._assert_all_use_revision(MOBILE_NATIVE_MANIFEST, EXPECTED_REVISION_OTHER_SKILLSETS)
+    def test_mobile_native_manifest_revision_is_runtime_derived(self):
+        expected = self._manifest_uniform_revision(MOBILE_NATIVE_MANIFEST)
+        self._assert_all_use_revision(MOBILE_NATIVE_MANIFEST, expected)
 
-    def test_product_strategy_manifest_revision_is_435084b77(self):
-        self._assert_all_use_revision(PRODUCT_STRATEGY_MANIFEST, EXPECTED_REVISION_OTHER_SKILLSETS)
+    def test_product_strategy_manifest_revision_is_runtime_derived(self):
+        expected = self._manifest_uniform_revision(PRODUCT_STRATEGY_MANIFEST)
+        self._assert_all_use_revision(PRODUCT_STRATEGY_MANIFEST, expected)
 
-    def test_security_ops_manifest_revision_is_435084b77(self):
-        self._assert_all_use_revision(SECURITY_OPS_MANIFEST, EXPECTED_REVISION_OTHER_SKILLSETS)
+    def test_security_ops_manifest_revision_is_runtime_derived(self):
+        expected = self._manifest_uniform_revision(SECURITY_OPS_MANIFEST)
+        self._assert_all_use_revision(SECURITY_OPS_MANIFEST, expected)
 
     # Old baseline revision must be absent everywhere
     def test_agent_ops_manifest_old_revision_absent(self):
