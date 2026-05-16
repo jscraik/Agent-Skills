@@ -16,7 +16,7 @@ triggers:
 inputs:
   - repository source, configs, scripts, tests, CI, docs, prompts, skills, and workflows
   - user-supplied reference material for review lenses, including books, notes, excerpts, or PDFs
-  - references/architecture-lens-canon.md when no fresh reference attachments are supplied
+  - ../../references/skills/he-strategy/architecture-lens-canon.md when no fresh reference attachments are supplied
   - .harness/features/*.md
   - .harness/review/*.md
   - .harness/triage/*.md
@@ -89,7 +89,7 @@ overlays:
 
 observability: "Record source artifacts read, inspection method or command, affected systems or modules, confidence level, operational impact, drift or moat impact when relevant, fact/interpretation/assumption separation, clarification_status as asked/not_needed/assumed, ambiguity_impact, assumption_risk, visual reference status, dated output path or Do Not Create classification, source prompt family coverage when applicable, evidence and traceability matrix, and validation outcomes recorded as pass, fail, or blocked."
 
-reference_material_policy: "When the user supplies architecture or refactoring reference material, use it as an evaluative lens, not as repository evidence and not as material to summarize. When no fresh attachments are supplied, use references/architecture-lens-canon.md as the internal default lens set and record availability as internal-canon. Record which references were inspected, sampled, unavailable, not needed, or internal-canon. Do not claim attachment-specific coverage unless the material was actually inspected. Repository conclusions still require repo evidence."
+reference_material_policy: "When the user supplies architecture or refactoring reference material, use it as an evaluative lens, not as repository evidence and not as material to summarize. When no fresh attachments are supplied, use ../../references/skills/he-strategy/architecture-lens-canon.md as the internal default lens set and record availability as internal-canon. Record which references were inspected, sampled, unavailable, not needed, or internal-canon. Do not claim attachment-specific coverage unless the material was actually inspected. Repository conclusions still require repo evidence."
 
 rollback_procedure: "If an artifact is wrong, identify unsupported conclusions, move them to Unknown or remove them, replace low-value governance with Do Not Create, and never delete existing .harness artifacts without explicit user approval."
 

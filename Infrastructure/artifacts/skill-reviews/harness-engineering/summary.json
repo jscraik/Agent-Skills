@@ -1,0 +1,90 @@
+{
+  "generated_from": "fresh external-review artifacts",
+  "counts": {
+    "total": 10,
+    "status_success": 10,
+    "status_error": 0,
+    "plugin_pass": 0,
+    "plugin_budget_guardrail": 0,
+    "plugin_blocking": 10,
+    "plugin_failures": 0,
+    "plugin_warnings": 0,
+    "tessl_review_70_plus": 0,
+    "tessl_review_below_70": 0,
+    "tessl_content_70_plus": 0,
+    "tessl_content_below_70": 0,
+    "tessl_lint_warning_artifacts": 0
+  },
+  "reports": [
+    {
+      "skill": "he-code-review",
+      "status": "success",
+      "plugin_posture": "blocking",
+      "dashboard": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-code-review.html",
+      "report": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-code-review.json"
+    },
+    {
+      "skill": "he-eval-report",
+      "status": "success",
+      "plugin_posture": "blocking",
+      "dashboard": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-eval-report.html",
+      "report": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-eval-report.json"
+    },
+    {
+      "skill": "he-linear-plan",
+      "status": "success",
+      "plugin_posture": "blocking",
+      "dashboard": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-linear-plan.html",
+      "report": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-linear-plan.json"
+    },
+    {
+      "skill": "he-phase-heartbeat",
+      "status": "success",
+      "plugin_posture": "blocking",
+      "dashboard": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-phase-heartbeat.html",
+      "report": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-phase-heartbeat.json"
+    },
+    {
+      "skill": "he-phase-work",
+      "status": "success",
+      "plugin_posture": "blocking",
+      "dashboard": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-phase-work.html",
+      "report": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-phase-work.json"
+    },
+    {
+      "skill": "he-plan",
+      "status": "success",
+      "plugin_posture": "blocking",
+      "dashboard": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-plan.html",
+      "report": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-plan.json"
+    },
+    {
+      "skill": "he-reframe",
+      "status": "success",
+      "plugin_posture": "blocking",
+      "dashboard": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-reframe.html",
+      "report": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-reframe.json"
+    },
+    {
+      "skill": "he-spec",
+      "status": "success",
+      "plugin_posture": "blocking",
+      "dashboard": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-spec.html",
+      "report": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-spec.json"
+    },
+    {
+      "skill": "he-strategy",
+      "status": "success",
+      "plugin_posture": "blocking",
+      "dashboard": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-strategy.html",
+      "report": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-strategy.json"
+    },
+    {
+      "skill": "he-work",
+      "status": "success",
+      "plugin_posture": "blocking",
+      "dashboard": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-work.html",
+      "report": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-work.json"
+    }
+  ]
+}\n
