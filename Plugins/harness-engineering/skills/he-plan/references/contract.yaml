@@ -80,7 +80,7 @@ risks:
   - additive compatibility dominating subtractive clarity; mitigate by sequencing default-help budget, agent-catalog budget, docs front-door collapse, standalone-command admission tests, fresh-agent eval, and ablation proof as blocking units
   - compression plans remaining too subjective to implement; mitigate by requiring exact public command names, hidden command names, future command admission criteria, and generated snapshot commands in the plan artifact
   - execution-slice drift; mitigate by loading `../../references/execution-slice-contract.md` and blocking any plan unit that is not admitted by the selected Linear/reframe slice
-  - first-pass plan reviews remaining too shallow; mitigate by routing deepen/technical-review/professional-confidence prompts to `../../references/skills/he-plan/professional-confidence-review.md`
+  - first-pass plan reviews remaining too shallow; mitigate by routing deepen/technical-review/professional-confidence prompts to `../../../references/skills/he-plan/professional-confidence-review.md`
   - current shorthand producing invented plan/spec context; mitigate by requiring concrete source resolution or blocked unclear_source_of_truth status
   - plan/spec drift after material plan revision; mitigate by requiring associated spec update, proposed patch, or blocked status
   - overconfident readiness claims; mitigate with confidence ceilings tied to missing spec, ownership, validation, rollback, smoke/release evidence, runtime testing, and implementation testing
