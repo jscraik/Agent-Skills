@@ -1,11 +1,12 @@
 schema_version: "1.0"
 skill: "codex-environment-creator"
 type: runbook
-purpose: "Create, triage, and update repo-local Codex environment TOML files with canonical path, setup, action, and validation evidence."
+purpose: "Create, triage, and update Codex environment TOML files with ownership, setup/action or exec-server provider schema, and validation evidence."
 triggers:
   - "Create or update .codex/environments/environment.toml"
   - "Triage Codex environment setup failures"
   - "Triage CODEX_HOME/environments.toml runtime provider selection"
+  - "Configure URL or stdio exec-server environments"
   - "Resolve environmental.toml or environmentals path drift"
   - "Add repo-owned setup scripts or Codex actions"
 non_goals:
@@ -26,7 +27,7 @@ outputs:
   - "validation evidence"
   - "cache and residual risk notes"
 runtime_contract:
-  canonical_path: ".codex/environments/environment.toml"
+  project_bootstrap_path: ".codex/environments/environment.toml"
   runtime_provider_path: "$CODEX_HOME/environments.toml"
   drift_aliases:
     - ".codex/environmental.toml"
@@ -48,8 +49,11 @@ runtime_contract:
     - "default omitted selects local"
     - "default none disables the default model-facing environment"
     - "configured ids cannot be local or none"
+    - "configured ids are unique, at most 64 chars, and contain only ASCII letters, digits, '-' or '_'"
     - "each configured environment sets exactly one of url or program"
     - "url transports require ws or wss"
+    - "args, env, and cwd require program"
+    - "connect_timeout_sec requires url; initialize_timeout_sec applies to url and stdio"
 risks:
   - "path drift"
   - "schema drift"

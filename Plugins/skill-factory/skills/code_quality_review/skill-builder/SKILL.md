@@ -33,7 +33,7 @@ Start with 2-3 focused surfaces. A passing or precisely classified gate beats a 
 - Portfolio analysis, keep/merge/retire decisions, or session mining -> `skill-refactor`.
 - Plugin package lifecycle work -> `plugin-factory`.
 
-Read when: load `../../../references/skill-builder/harness-hardening-workflow.md` only when the target needs multi-round repair, benchmark interpretation, or release evidence beyond the compact workflow here.
+Read when: load `references/harness-hardening-workflow.md` when the target needs multi-round repair, benchmark interpretation, or release evidence beyond the compact workflow here. Archive snapshots under `fixtures/budget-archive/**` are historical-only.
 
 ## Inputs
 
@@ -71,6 +71,7 @@ Ask one direct question if target path or write authority is ambiguous.
 - Tessl low content score: add one compact workflow, worked example, or output shape.
 - Plugin Eval token warning: move bulky detail to references or plugin-owned scripts.
 - Missing tile content: add the referenced file, fix the link, or classify it as intentionally repo-local.
+- Repository-boundary audit block: treat `ERR_PATH_TRAVERSAL` from an absolute path outside this repository as an audit boundary, not proof the skill is broken. Use the owner repo validators, then report the skill audit as blocked with the exact boundary text.
 - Broken audit or eval: patch the smallest source defect, then rerun the exact failing command.
 
 ## Constraints
@@ -115,6 +116,7 @@ If the finding points to package architecture rather than skill prose, record th
 ## Gotchas
 
 - Generated cache warnings must be classified before changing source.
+- Repo-local skills outside `agent-skills` may be canonical in their owning repository, while still blocked by `./bin/ask skills audit` path guards here. Do not copy them into `.agents/**`, cache, or temporary mirrors just to appease the audit; validate in the owner repo and preserve the blocker.
 
 ## Anti-Patterns
 
@@ -123,16 +125,18 @@ If the finding points to package architecture rather than skill prose, record th
 
 ## Validation
 
-Run `./bin/ask skills audit <target> --level strict --json --robot`, then `python3 Infrastructure/bin/ask skills external-review <target> --audit-level compat --json`.
+Run `./bin/ask skills audit <target> --level strict --json --robot`, then `python3 Infrastructure/bin/ask skills audit <target> --level compat --json --robot`.
 
 Fail fast: stop at the first failed required gate, classify it, and do not proceed to sync, commit, publish, or install until it is fixed or explicitly blocked.
 
 ## References
 
-- Generated artifact handling: [generated artifact policy](./references/generated-artifact-policy.md)
-- Long hardening workflow: `../../../references/skill-builder/harness-hardening-workflow.md`
-- Local operating guide: `../../../references/skill-builder/operating-guide.md`
-- First-principles factory gate: `Infrastructure/references/first-principles-factory-gate.md`
+- Generated artifact handling: [generated artifact policy](references/generated-artifact-policy.md)
+- Cross-repo audit boundary handling: [repo-local audit boundaries](references/repo-local-audit-boundaries.md)
+- Long hardening workflow: `references/harness-hardening-workflow.md`
+- Local operating guide: `references/operating-guide.md`
+- First-principles factory gate: `../../../../../Infrastructure/references/first-principles-factory-gate.md`
 - Local contract and evals: `references/`
-- Discovery interview: [discovery interview](./references/discovery-interview.md)
-- Repository validators and helper scripts: `Plugins/skill-factory/scripts/skill-builder/` and `Infrastructure/scripts/`
+- Discovery interview: [discovery interview](references/discovery-interview.md)
+- Repository validators and helper scripts: `scripts/` and `Infrastructure/scripts/`
+- Archive snapshots (historical-only): `../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/`

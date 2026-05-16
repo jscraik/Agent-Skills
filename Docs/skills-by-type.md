@@ -11,16 +11,16 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 ## Summary
 
 - `library_api_reference`: 2
-- `product_verification`: 4
+- `product_verification`: 3
 - `data_fetch_analysis`: 3
-- `team_automation`: 36
+- `team_automation`: 37
 - `scaffolding_templates`: 16
-- `code_quality_review`: 22
+- `code_quality_review`: 23
 - `ci_cd_deployment`: 0
 - `runbook`: 13
 - `infrastructure_ops`: 3
 - `invalid`: 0
-- `total_tagged`: 99
+- `total_tagged`: 100
 
 ## Semantic Types
 
@@ -33,7 +33,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 
 - `agentation` — `Skills/frontend-ui`
 - `design-system` — `Skills/frontend-ui`
-- `he-spec` — `Plugins/harness-engineering/skills`
 - `ui-visual-regression` — `Skills/frontend-ui`
 
 ### Data Fetch Analysis
@@ -65,6 +64,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `he-reframe` — `Plugins/harness-engineering/skills`
 - `he-reinforce` — `Plugins/harness-engineering/skills`
 - `he-router` — `Plugins/harness-engineering/skills`
+- `he-spec` — `Plugins/harness-engineering/skills`
 - `he-strategy` — `Plugins/harness-engineering/skills`
 - `he-work` — `Plugins/harness-engineering/skills`
 - `interview-me` — `Skills/product-strategy`
@@ -106,6 +106,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `autofix` — `Skills/agent-ops`
 - `baseline-ui` — `Skills/frontend-ui`
 - `best-practices` — `Skills/security-ops`
+- `codex-review` — `Skills/agent-ops`
 - `docs-expert` — `Skills/agent-ops`
 - `elixir-pro` — `Skills/agent-ops`
 - `evals-router` — `Skills/agent-ops`
