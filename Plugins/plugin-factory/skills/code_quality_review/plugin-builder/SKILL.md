@@ -84,11 +84,11 @@ the compact sequence above is not enough.
 Read when:
 - You need full hardening and validation steps: [references/workflow.md](./references/workflow.md).
 - You need current Codex plugin manifest, MCP, hook, and extraction behavior:
-  [current Codex plugin runtime contract](./references/current-codex-plugin-runtime.md).
+  [current Codex plugin runtime contract](../../plugin-factory-router/references/current-codex-plugin-runtime.md).
 - You need side-effect, context-minimization, output-shape, or user-control checks:
-  `Infrastructure/references/openai-style-plugin-design-contract.md`.
+  `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`.
 - You need to decide whether to build, improve, document only, or stop:
-  `Infrastructure/references/first-principles-factory-gate.md`.
+  `../../../../../Infrastructure/references/first-principles-factory-gate.md`.
 
 ## Validation
 
@@ -157,10 +157,10 @@ blocked_by: null
 ## References
 
 - `references/workflow.md`
-- `references/current-codex-plugin-runtime.md`
+- `../../plugin-factory-router/references/current-codex-plugin-runtime.md`
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/task-profile.json`
 - `references/plugin-contract.md`
-- `Infrastructure/references/openai-style-plugin-design-contract.md`
+- `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
 - `assets/`

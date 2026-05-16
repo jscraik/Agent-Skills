@@ -131,11 +131,11 @@ Fail fast: stop at the first failed required gate, classify it, and do not proce
 
 ## References
 
-- Generated artifact handling: [generated artifact policy](./references/generated-artifact-policy.md)
-- Cross-repo audit boundary handling: [repo-local audit boundaries](./references/repo-local-audit-boundaries.md)
+- Generated artifact handling: [generated artifact policy](../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/generated-artifact-policy.md)
+- Cross-repo audit boundary handling: [repo-local audit boundaries](../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/repo-local-audit-boundaries.md)
 - Long hardening workflow: `../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/harness-hardening-workflow.md`
 - Local operating guide: `../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/operating-guide.md`
-- First-principles factory gate: `Infrastructure/references/first-principles-factory-gate.md`
+- First-principles factory gate: `../../../../../Infrastructure/references/first-principles-factory-gate.md`
 - Local contract and evals: `references/`
-- Discovery interview: [discovery interview](./references/discovery-interview.md)
+- Discovery interview: [discovery interview](../../../fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/references/discovery-interview.md)
 - Repository validators and helper scripts: `Plugins/skill-factory/fixtures/budget-archive/2026-04-21/skills/code_quality_review/skill-builder/scripts/` and `Infrastructure/scripts/`
