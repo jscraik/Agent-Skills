@@ -1575,10 +1575,18 @@ def _capability_lifecycle_event(
 ) -> dict[str, Any]:
     """Return a structured lifecycle event for capability diagnostics."""
     subject_key = str(handle or audit_target or source_path or query)
+    event_consumer = CAPABILITY_LIFECYCLE_EVENT_CONSUMERS.get(event_type, {})
+    producer_commands = event_consumer.get("producer_commands", [])
+    observer_commands = event_consumer.get("observer_commands", [])
     event = {
         "schema_version": "capability-lifecycle-event.v1",
         "event_type": event_type,
         "event_definition": CAPABILITY_LIFECYCLE_EVENT_TYPES.get(event_type),
+        "contract_schemas": {
+            "lifecycle_event": "capability-lifecycle-event.v1",
+            "events": "skill-events.v1",
+            "profiles": "skill-operation-profiles.v1",
+        },
         "occurred_at": datetime.now(timezone.utc).isoformat(),
         "event_identity": {
             "event_type": event_type,
@@ -1586,6 +1594,8 @@ def _capability_lifecycle_event(
             "target_kind": target_kind,
             "status": status,
         },
+        "producer_command": producer_commands[0] if producer_commands else None,
+        "observer_command": observer_commands[0] if observer_commands else None,
         "subject": {
             "query": query,
             "target_kind": target_kind,

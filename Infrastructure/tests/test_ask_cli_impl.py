@@ -958,6 +958,18 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package["lifecycle_events"][1]["details"]["gate_summary"], package["gate_summary"])
         self.assertEqual(package["lifecycle_events"][1]["event_identity"]["event_type"], "package_readiness_checked")
         self.assertEqual(package["lifecycle_events"][1]["event_identity"]["subject_key"], "skill-builder")
+        self.assertEqual(
+            package["lifecycle_events"][1]["contract_schemas"]["lifecycle_event"],
+            "capability-lifecycle-event.v1",
+        )
+        self.assertEqual(
+            package["lifecycle_events"][1]["producer_command"],
+            "./bin/ask skills package <handle-or-path> --json --robot",
+        )
+        self.assertEqual(
+            package["lifecycle_events"][1]["observer_command"],
+            "./bin/ask skills events package_readiness_checked --json --robot",
+        )
         self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
 
     def test_skills_package_human_output(self):
@@ -1029,8 +1041,17 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("missing", doctor["check_summary"]["status_counts"])
         self.assertEqual(doctor["lifecycle_event"]["schema_version"], "capability-lifecycle-event.v1")
         self.assertEqual(doctor["lifecycle_event"]["event_type"], "skill_doctor_completed")
+        self.assertEqual(doctor["lifecycle_event"]["contract_schemas"]["events"], "skill-events.v1")
         self.assertEqual(doctor["lifecycle_event"]["event_identity"]["target_kind"], "canonical_source_path")
         self.assertEqual(doctor["lifecycle_event"]["event_identity"]["subject_key"], "Skills/agent-ops/autofix")
+        self.assertEqual(
+            doctor["lifecycle_event"]["producer_command"],
+            "./bin/ask skills doctor <handle-or-path> --json --robot",
+        )
+        self.assertEqual(
+            doctor["lifecycle_event"]["observer_command"],
+            "./bin/ask skills events skill_doctor_completed --json --robot",
+        )
         self.assertIn("blocked_user_input", doctor["readiness_taxonomy"]["blockers"])
         self.assertEqual(doctor["contract_schemas"]["doctor"], "skill-doctor.v1")
         self.assertEqual(doctor["contract_schemas"]["events"], "skill-events.v1")
