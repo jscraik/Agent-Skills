@@ -9,11 +9,43 @@ cases:
     should_trigger: true
     prepend_skill: true
     prompt: "Use the skill for a normal in-scope request with one target artifact and a clear success result."
+    deterministic_checks:
+      max_command_executions: 10
+      required_paths: []
+      forbidden_paths: []
+    budgets:
+      max_total_tokens: 4000
+      max_duplicate_command_ratio: 0.35
     acceptance:
       - type: contains
         value: "first"
       - type: regex
         value: "(?i)(proof|validation|readback)"
+  - id: implicit-trigger
+    name: Implicit trigger
+    category: happy
+    eval_modes: [smoke, release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Natural-language in-scope request without naming the skill."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "example-skill"
+  - id: contextual-trigger
+    name: Contextual trigger
+    category: edge
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Noisy realistic prompt that should still need this skill's workflow."
+    comparison_inputs:
+      baseline_type: no_skill
+      recommended_trials: "3-5 outside this runner when nondeterminism matters"
+    acceptance:
+      - type: skill_selected
+        expected_skill: "example-skill"
   - id: edge-missing-inputs-proceed
     name: Missing inputs proceed rule
     category: edge

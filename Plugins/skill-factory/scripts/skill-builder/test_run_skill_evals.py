@@ -41,11 +41,13 @@ from run_skill_evals import (
     EvalCase,
     _acceptance_skip_reason,
     _dependency_manifest_paths,
+    _evaluate_workspace_path_checks,
     _preflight_codex_live_runner,
     _filter_cases_for_eval_mode,
     _isolated_codex_home_for_eval,
     _is_runner_runtime_blocked,
     _is_smoke_only_case,
+    _skillbench_eval_quality,
     _snyk_release_gate_passed,
     _write_junit_report,
     evaluate_assertions_text,
@@ -92,6 +94,112 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             manifests = _dependency_manifest_paths(skill_dir)
 
         self.assertEqual([path.name for path in manifests], ["package.json"])
+
+    def test_skillbench_eval_quality_reports_regression_coverage(self) -> None:
+        cases = [
+            EvalCase(
+                id="explicit",
+                name="Explicit",
+                prompt="Use the skill.",
+                acceptance=[],
+                should_trigger=True,
+                category="happy",
+                prepend_skill=True,
+                deterministic_checks={"max_command_executions": 5},
+                budgets={"max_total_tokens": 4000},
+            ),
+            EvalCase(
+                id="implicit",
+                name="Implicit",
+                prompt="Natural in-scope request.",
+                acceptance=[],
+                should_trigger=True,
+                category="happy",
+                prepend_skill=False,
+                output_schema="rubric.schema.json",
+            ),
+            EvalCase(
+                id="contextual",
+                name="Contextual",
+                prompt="Noisy in-scope request.",
+                acceptance=[],
+                should_trigger=True,
+                category="edge",
+                prepend_skill=False,
+                comparison_inputs={"baseline_type": "no_skill", "recommended_trials": 3},
+            ),
+            EvalCase(
+                id="negative",
+                name="Negative",
+                prompt="Adjacent request.",
+                acceptance=[],
+                should_trigger=False,
+                category="negative",
+                prepend_skill=False,
+            ),
+        ]
+
+        quality = _skillbench_eval_quality(cases)
+
+        self.assertEqual(quality["status"], "pass")
+        self.assertEqual(quality["missing_required"], [])
+        self.assertTrue(quality["checks"]["paired_baseline"])
+        self.assertEqual(quality["counts"]["negative_control_cases"], 1)
+
+    def test_skillbench_eval_quality_advises_on_thin_eval_sets(self) -> None:
+        quality = _skillbench_eval_quality(
+            [
+                EvalCase(
+                    id="only",
+                    name="Only",
+                    prompt="Use the skill.",
+                    acceptance=[],
+                    should_trigger=True,
+                    category="happy",
+                    prepend_skill=True,
+                )
+            ]
+        )
+
+        self.assertEqual(quality["status"], "advisory")
+        self.assertIn("implicit_trigger", quality["missing_required"])
+        self.assertIn("negative_control", quality["missing_required"])
+
+    def test_workspace_path_checks_validate_outputs_and_cleanliness(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            (root / "expected.txt").write_text("ok", encoding="utf-8")
+            (root / "unexpected.txt").write_text("extra", encoding="utf-8")
+
+            failures = _evaluate_workspace_path_checks(
+                root,
+                {
+                    "required_paths": ["expected.txt", "missing.txt"],
+                    "forbidden_paths": ["unexpected.txt"],
+                },
+            )
+
+        self.assertIn("required path not found: 'missing.txt'", failures)
+        self.assertIn("forbidden path exists: 'unexpected.txt'", failures)
+
+    def test_workspace_path_checks_reject_paths_outside_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            failures = _evaluate_workspace_path_checks(
+                root,
+                {
+                    "required_paths": ["../outside.txt"],
+                    "forbidden_paths": ["../also-outside.txt"],
+                },
+            )
+
+        self.assertEqual(
+            failures,
+            [
+                "required path escapes workspace: '../outside.txt'",
+                "forbidden path escapes workspace: '../also-outside.txt'",
+            ],
+        )
 
     def test_bare_regex_acceptance_shorthand_is_supported(self) -> None:
         self.assertEqual(
@@ -691,6 +799,11 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(summary["cases"][0]["warnings"], [])
         self.assertTrue(summary["cases"][0]["runners"]["discovery-smoke"]["metrics"]["selected_skill"])
         self.assertIn("release_manifest", summary["artifacts"])
+        self.assertIn("skillbench_eval_quality", summary)
+        self.assertEqual(
+            release_manifest["run"]["skillbench_eval_quality"],
+            summary["skillbench_eval_quality"],
+        )
         self.assertEqual(release_manifest["artifacts"]["junit"], summary["artifacts"]["junit"])
         self.assertEqual(
             release_manifest["artifacts"]["release_manifest"],

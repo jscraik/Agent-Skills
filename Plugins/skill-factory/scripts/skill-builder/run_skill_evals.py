@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import atexit
 import datetime as dt
+import fnmatch
 import html
 import json
 import os
@@ -113,6 +114,17 @@ _READINESS_STATE_CHOICES = {
     "downstream_ready",
 }
 _METRIC_AVAILABILITY_CHOICES = {"available", "unavailable"}
+_SKILLBENCH_EFFICIENCY_KEYS = {
+    "max_command_budget",
+    "max_command_executions",
+    "max_duplicate_command_ratio",
+    "max_input_tokens",
+    "max_output_tokens",
+    "max_reasoning_tokens",
+    "max_repeated_command_count",
+    "max_total_tokens",
+    "max_turns",
+}
 SNYK_MANIFEST_NAMES: Set[str] = {
     "package.json",
     "package-lock.json",
@@ -528,6 +540,185 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
             )
         )
     return cases
+
+
+def _skillbench_eval_quality(cases: Sequence[EvalCase]) -> Dict[str, Any]:
+    """Summarize whether an eval suite has SkillBench-style regression coverage."""
+    counts = {
+        "total_cases": len(cases),
+        "explicit_trigger_cases": 0,
+        "implicit_trigger_cases": 0,
+        "contextual_trigger_cases": 0,
+        "negative_control_cases": 0,
+        "pressure_cases": 0,
+        "deterministic_check_cases": 0,
+        "efficiency_budget_cases": 0,
+        "structured_grading_cases": 0,
+        "paired_baseline_cases": 0,
+    }
+
+    for case in cases:
+        category = case.category or ""
+        should_trigger = case.should_trigger
+        if should_trigger is True and case.prepend_skill:
+            counts["explicit_trigger_cases"] += 1
+        if should_trigger is True and not case.prepend_skill and category == "happy":
+            counts["implicit_trigger_cases"] += 1
+        if should_trigger is True and not case.prepend_skill and category == "edge":
+            counts["contextual_trigger_cases"] += 1
+        if should_trigger is False or category == "negative":
+            counts["negative_control_cases"] += 1
+        if category == "pressure":
+            counts["pressure_cases"] += 1
+        if case.deterministic_checks:
+            counts["deterministic_check_cases"] += 1
+        if _case_has_efficiency_budget(case):
+            counts["efficiency_budget_cases"] += 1
+        if case.output_schema or case.expected_signals or _case_has_structured_budget(case):
+            counts["structured_grading_cases"] += 1
+        if case.baseline_type or case.comparison_inputs:
+            counts["paired_baseline_cases"] += 1
+
+    checks = {
+        "explicit_trigger": counts["explicit_trigger_cases"] > 0,
+        "implicit_trigger": counts["implicit_trigger_cases"] > 0,
+        "contextual_trigger": counts["contextual_trigger_cases"] > 0,
+        "negative_control": counts["negative_control_cases"] > 0,
+        "deterministic_behavior": counts["deterministic_check_cases"] > 0,
+        "efficiency_budget": counts["efficiency_budget_cases"] > 0,
+        "structured_or_signal_grading": counts["structured_grading_cases"] > 0,
+        "paired_baseline": counts["paired_baseline_cases"] > 0,
+    }
+    required_for_regression = [
+        "explicit_trigger",
+        "implicit_trigger",
+        "negative_control",
+        "deterministic_behavior",
+        "efficiency_budget",
+    ]
+    recommended = ["contextual_trigger", "structured_or_signal_grading", "paired_baseline"]
+    missing_required = [name for name in required_for_regression if not checks[name]]
+    missing_recommended = [name for name in recommended if not checks[name]]
+
+    return {
+        "schema_version": "skillbench-eval-quality.v1",
+        "status": "pass" if not missing_required else "advisory",
+        "counts": counts,
+        "checks": checks,
+        "missing_required": missing_required,
+        "missing_recommended": missing_recommended,
+        "guidance": [
+            "Use a small prompt set with explicit, implicit, contextual, and negative-control cases.",
+            "Pair outcome assertions with deterministic trace/file checks and efficiency budgets.",
+            "Add structured grading only where deterministic checks cannot express the convention.",
+            "Track paired baseline or no-skill comparison cases for mature release evals.",
+            "Run repeated trials outside this runner when nondeterminism matters; compare pass-rate distribution, not a single run.",
+        ],
+    }
+
+
+def _case_has_efficiency_budget(case: EvalCase) -> bool:
+    for source in (case.deterministic_checks, case.budgets):
+        if isinstance(source, dict) and any(key in source for key in _SKILLBENCH_EFFICIENCY_KEYS):
+            return True
+    return False
+
+
+def _case_has_structured_budget(case: EvalCase) -> bool:
+    budgets = case.budgets if isinstance(case.budgets, dict) else {}
+    return any(
+        key in budgets
+        for key in (
+            "min_rubric_score",
+            "require_overall_pass",
+            "min_expected_signal_score",
+            "require_selection_signal",
+        )
+    )
+
+
+def _evaluate_workspace_path_checks(
+    workspace_root: Path,
+    deterministic_checks: Optional[Dict[str, Any]],
+) -> List[str]:
+    if not isinstance(deterministic_checks, dict):
+        return []
+
+    failures: List[str] = []
+    for raw_path in _list_of_strings(deterministic_checks.get("required_paths")):
+        checked = _resolve_check_path(workspace_root, raw_path)
+        if checked is None:
+            failures.append(f"required path escapes workspace: {raw_path!r}")
+        elif not checked.exists():
+            failures.append(f"required path not found: {raw_path!r}")
+
+    for raw_path in _list_of_strings(deterministic_checks.get("forbidden_paths")):
+        checked = _resolve_check_path(workspace_root, raw_path)
+        if checked is None:
+            failures.append(f"forbidden path escapes workspace: {raw_path!r}")
+        elif checked.exists():
+            failures.append(f"forbidden path exists: {raw_path!r}")
+
+    if deterministic_checks.get("require_clean_git_status") is True:
+        failures.extend(_evaluate_clean_git_status(workspace_root, deterministic_checks))
+
+    return failures
+
+
+def _resolve_check_path(workspace_root: Path, raw_path: str) -> Optional[Path]:
+    candidate = Path(raw_path)
+    if not candidate.is_absolute():
+        candidate = workspace_root / candidate
+    try:
+        resolved = candidate.resolve()
+        resolved.relative_to(workspace_root.resolve())
+    except ValueError:
+        return None
+    return resolved
+
+
+def _evaluate_clean_git_status(workspace_root: Path, deterministic_checks: Dict[str, Any]) -> List[str]:
+    if not (workspace_root / ".git").exists():
+        return ["require_clean_git_status requested but workspace is not a git repository"]
+    proc = sp.run(
+        ["git", "status", "--porcelain"],
+        cwd=str(workspace_root),
+        text=True,
+        stdout=sp.PIPE,
+        stderr=sp.PIPE,
+        check=False,
+    )
+    if proc.returncode != 0:
+        return [f"git status --porcelain failed: {proc.stderr.strip() or proc.stdout.strip()}"]
+
+    allowed_patterns = _list_of_strings(deterministic_checks.get("git_status_allowlist"))
+    dirty_entries = [line for line in proc.stdout.splitlines() if line.strip()]
+    unexpected = [line for line in dirty_entries if not _git_status_line_allowed(line, allowed_patterns)]
+    if unexpected:
+        preview = "; ".join(unexpected[:5])
+        suffix = "" if len(unexpected) <= 5 else f"; +{len(unexpected) - 5} more"
+        return [f"git status not clean: {preview}{suffix}"]
+    return []
+
+
+def _git_status_line_allowed(line: str, allowed_patterns: Sequence[str]) -> bool:
+    if not allowed_patterns:
+        return False
+    path = line[3:] if len(line) > 3 else line
+    return any(
+        fnmatch.fnmatch(path, pattern) or fnmatch.fnmatch(line, pattern)
+        for pattern in allowed_patterns
+    )
+
+
+def _list_of_strings(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        return [item for item in value if isinstance(item, str) and item.strip()]
+    return []
 
 
 def _case_matches_eval_mode(case: EvalCase, *, eval_mode: str) -> bool:
@@ -2646,6 +2837,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "readiness_summary": readiness_summary,
         "round_state_summary": round_state_summary,
         "neutral_baseline_approvals_used": [],
+        "skillbench_eval_quality": _skillbench_eval_quality(cases),
     }
     if args.eval_mode == "release":
         summary["security_dependency_screening"] = _snyk_release_gate(
@@ -2822,6 +3014,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 runner_tier1_failures.append(
                     "deterministic_checks/budgets requested but Codex JSONL was not captured (enable --capture-jsonl)."
                 )
+
+            runner_tier1_failures.extend(
+                _evaluate_workspace_path_checks(workspace_root, c.deterministic_checks)
+            )
 
             selected_skill = detect_skill_selected(
                 skill_name=skill_name,
@@ -3105,6 +3301,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "round_state_summary": summary["round_state_summary"],
             "neutral_baseline_approvals_used": summary["neutral_baseline_approvals_used"],
             "security_dependency_screening": summary["security_dependency_screening"],
+            "skillbench_eval_quality": summary["skillbench_eval_quality"],
             "reports_base": _rel(reports_base),
         },
         "artifacts": summary["artifacts"],
