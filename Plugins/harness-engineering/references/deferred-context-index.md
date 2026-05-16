@@ -230,6 +230,7 @@ They are historical anchors, not active procedure text.
 - See references/hot-path-folded-context.md for folded philosophy detail.
 - A completed HE slice needs closure proof before Linear issue, milestone,
 Use when approved \`.harness\` cognition needs Linear routing: destination,
+Use when approved `.harness` cognition needs Linear routing: destination,
 description: "Plan and run approved Harness Engineering phase work with a 10 minute heartbeat, evidence checkpoints, review gates, staging rules, tracker-update boundaries, and safe continuation rules. Use when a bounded plan, issue, or PR needs recurring phase execution without autonomous closure."
 description: "Plan and run approved Harness Engineering phase work with a 10-minute heartbeat, evidence checkpoints, review gates, staging rules, tracker-update boundaries, and safe continuation rules. Use when a bounded plan, issue, or PR needs recurring phase execution without autonomous closure."
 description: "Coordinate approved Harness Engineering phase work with a 10 minute he-heartbeat scheduler, per-phase he-work execution, phase gates, Linear updates, scoped git staging, and final eval/reinforcement/reconciliation closeout. Use when an approved plan needs recurring phase execution with reviewable evidence."
