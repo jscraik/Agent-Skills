@@ -1715,6 +1715,7 @@ def external_review_skill(
     skip_plugin_eval: bool = False,
     skip_tessl: bool = False,
     skip_tessl_review: bool = False,
+    include_snyk: bool = False,
     timeout_seconds: int = 180,
     report_path: Optional[str] = None,
     dashboard: bool = False,
@@ -1752,6 +1753,12 @@ def external_review_skill(
         "uses_npx": False,
         "tessl_review_default": "enabled_local_cli",
         "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+        "snyk_role": "optional_external_security_advisory",
+        "snyk_default": "disabled_until_requested",
+        "snyk_privacy_basis": (
+            "Snyk CLI performs external dependency advisory analysis. It is outside the default "
+            "local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted."
+        ),
     }
     result.data["target"] = audit_target_path
 
@@ -1890,6 +1897,98 @@ def external_review_skill(
     else:
         result.data["tessl_lint"] = {"status": "skipped"}
         result.data["tessl_review"] = {"status": "skipped"}
+
+    if include_snyk:
+        snyk_bin = shutil.which("snyk")
+        snyk_command_display = "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>"
+        if not snyk_bin:
+            result.status = "error"
+            result.data["snyk"] = {
+                "status": "blocked_missing_binary",
+                "command": snyk_command_display,
+            }
+            result.errors.append(ErrorObject(
+                code="ERR_DEPENDENCY",
+                message="Snyk CLI is not installed or not on PATH; dependency advisory analysis could not run.",
+                fix_suggestion="Install or expose the Snyk CLI, authenticate it if required, then rerun with --include-snyk.",
+            ))
+        else:
+            snyk_command = [
+                snyk_bin,
+                "test",
+                "--all-projects",
+                "--detection-depth=6",
+                "--severity-threshold=high",
+                "--json",
+                audit_target_path,
+            ]
+            try:
+                snyk_proc = _run_captured_tool(
+                    repo_root=repo_root,
+                    command=snyk_command,
+                    timeout_seconds=timeout_seconds,
+                )
+                snyk_payload = _completed_process_payload(snyk_proc)
+                snyk_text = f"{snyk_proc.stdout}\n{snyk_proc.stderr}".lower()
+                if snyk_proc.returncode == 0:
+                    snyk_payload["status"] = "success"
+                elif snyk_proc.returncode == 3:
+                    snyk_payload["status"] = "not_applicable"
+                    snyk_payload["reason"] = (
+                        "Snyk did not detect supported dependency manifests for this SKILL.md-first package."
+                    )
+                elif "could not detect supported target files" in snyk_text or "no supported files" in snyk_text:
+                    snyk_payload["status"] = "not_applicable"
+                    snyk_payload["reason"] = (
+                        "No supported dependency manifests were detected for this SKILL.md-first package."
+                    )
+                elif (
+                    "use snyk auth" in snyk_text
+                    or "not authenticated" in snyk_text
+                    or "authentication required" in snyk_text
+                    or "snyk_token" in snyk_text
+                ):
+                    snyk_payload["status"] = "blocked_auth"
+                    snyk_payload["reason"] = (
+                        "Snyk CLI authentication is unavailable. Run snyk auth locally or provide "
+                        "SNYK_TOKEN in CI before rerunning --include-snyk."
+                    )
+                elif snyk_proc.returncode == 1:
+                    snyk_payload["status"] = "advisory"
+                else:
+                    snyk_payload["status"] = "error"
+                result.data["snyk"] = snyk_payload
+                if snyk_payload["status"] == "blocked_auth":
+                    result.status = "error"
+                    result.errors.append(ErrorObject(
+                        code="ERR_AUTH",
+                        message="Snyk dependency advisory analysis could not authenticate.",
+                        fix_suggestion="Run snyk auth locally or set SNYK_TOKEN in CI, then rerun with --include-snyk.",
+                    ))
+                elif snyk_payload["status"] in {"advisory", "error"}:
+                    result.status = "error"
+                    result.errors.append(ErrorObject(
+                        code="ERR_VALIDATION",
+                        message="Snyk dependency advisory analysis failed or reported high-severity findings.",
+                        fix_suggestion="Inspect data.snyk for vulnerability details, unsupported-project output, or authentication errors.",
+                    ))
+            except subprocess.TimeoutExpired:
+                result.status = "error"
+                result.data["snyk"] = {
+                    "status": "timeout",
+                    "command": snyk_command,
+                    "timeout_seconds": timeout_seconds,
+                }
+                result.errors.append(ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"Snyk dependency advisory analysis timed out after {timeout_seconds} seconds.",
+                    fix_suggestion="Rerun with a higher --timeout-seconds value if the target contains many manifests.",
+                ))
+    else:
+        result.data["snyk"] = {
+            "status": "skipped",
+            "reason": "Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.",
+        }
 
     report_target: Optional[Path] = None
     if report_path:

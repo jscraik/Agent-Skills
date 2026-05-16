@@ -7,6 +7,9 @@
 # - negative control
 # - edge case
 # - pressure case
+# - at least one deterministic output/path check
+# - at least one efficiency budget
+# - paired no-skill or neutral baseline metadata for mature release suites
 
 schema_version: "2.0"
 
@@ -22,6 +25,8 @@ cases:
     deterministic_checks:
       required_event_types: ["turn.started"]
       max_command_executions: 10
+      required_paths: []
+      forbidden_paths: []
     budgets:
       max_total_tokens: 4000
       max_duplicate_command_ratio: 0.35
@@ -47,6 +52,9 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Realistic noisy prompt that still needs this skill's workflow."
+    comparison_inputs:
+      baseline_type: no_skill
+      recommended_trials: "3-5 outside this runner when nondeterminism matters"
     deterministic_checks:
       max_duplicate_command_ratio: 0.5
     budgets:

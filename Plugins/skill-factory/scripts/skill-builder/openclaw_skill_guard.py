@@ -219,7 +219,7 @@ SOURCE_RULES: List[Rule] = [
         "security.network_usage",
         "Network calls detected in scripts.",
         compile_safe_regex(
-            r"\b(?:requests\.(?:get|post|put|patch|delete|request)\(|httpx\.(?:get|post|put|patch|delete|request|Client)\(|axios\.(?:get|post|put|patch|delete|request)\(|fetch\(\s*[\"'`](?:https?:)?//|curl\s+-[A-Za-z])",
+            r"\b(?:requests\.(?:get|post|put|patch|delete|request)\(|httpx\.(?:get|post|put|patch|delete|request|Client)\(|axios\.(?:get|post|put|patch|delete|request)\(|fetch\s*\(|urllib\.request\.urlopen\(|curl\s+-[A-Za-z])",
             allow_nested=True,
         ),
         remediation="Document and enforce explicit network allowlists and offline defaults.",
@@ -267,6 +267,7 @@ SOURCE_RULES: List[Rule] = [
             r"|axios\.(?:get|post|put|patch|delete|request|create)\s*\("
             r"|httpx\.(?:get|post|put|patch|delete|request|Client|AsyncClient)\s*\("
             r"|http\.request\s*\("
+            r"|urllib\.request\.urlopen\s*\("
             r")",
             re.DOTALL,
         ),
@@ -321,6 +322,70 @@ def _line_text(text: str, idx: int) -> str:
     if end == -1:
         end = len(text)
     return text[start:end]
+
+
+def _strip_comments_for_heuristics(source: str) -> str:
+    """Remove Python/JS-style comments while preserving line numbers and string contents."""
+    stripped = []
+    quote: str | None = None
+    escaped = False
+    in_block_comment = False
+    i = 0
+
+    while i < len(source):
+        ch = source[i]
+        nxt = source[i + 1] if i + 1 < len(source) else ""
+
+        if in_block_comment:
+            if ch == "*" and nxt == "/":
+                in_block_comment = False
+                i += 2
+                continue
+            if ch == "\n":
+                stripped.append("\n")
+            i += 1
+            continue
+
+        if quote:
+            stripped.append(ch)
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == quote:
+                quote = None
+            i += 1
+            continue
+
+        if ch in {"'", '"', "`"}:
+            quote = ch
+            stripped.append(ch)
+            i += 1
+            continue
+
+        if ch == "#":
+            while i < len(source) and source[i] != "\n":
+                i += 1
+            if i < len(source):
+                stripped.append("\n")
+            continue
+
+        if ch == "/" and nxt == "/":
+            while i < len(source) and source[i] != "\n":
+                i += 1
+            if i < len(source):
+                stripped.append("\n")
+            continue
+
+        if ch == "/" and nxt == "*":
+            in_block_comment = True
+            i += 2
+            continue
+
+        stripped.append(ch)
+        i += 1
+
+    return "".join(stripped)
 
 
 def _should_skip_match(_code: str, line_text: str) -> bool:
@@ -413,6 +478,7 @@ def scan_source(text: str, rel_file: str) -> List[Finding]:
         List[Finding]: A list of findings produced by applying LINE_RULES (at most one finding per line-level rule) and SOURCE_RULES (at most one finding per source-level rule). Certain matches are suppressed by heuristics (e.g., subprocess usage when `shell=False` or an argv list is detected; websocket ports in {80, 443, 3000, 8080, 8443} are ignored).
     """
     out: List[Finding] = []
+    heuristic_text = _strip_comments_for_heuristics(text)
 
     for rule in LINE_RULES:
         if rule.requires_context and not rule.requires_context.search(text):
@@ -444,14 +510,14 @@ def scan_source(text: str, rel_file: str) -> List[Finding]:
             break
 
     for rule in SOURCE_RULES:
-        if rule.requires_context and not rule.requires_context.search(text):
+        if rule.requires_context and not rule.requires_context.search(heuristic_text):
             continue
         start = 0
-        while start < len(text):
-            m = rule.pattern.search(text, start)
+        while start < len(heuristic_text):
+            m = rule.pattern.search(heuristic_text, start)
             if not m:
                 break
-            line_text = _line_text(text, m.start())
+            line_text = _line_text(heuristic_text, m.start())
             if _should_skip_source_match(rule.code, line_text):
                 # Advance by one character so we can recover from broad matches
                 # that start in comments and span into executable lines.
@@ -471,7 +537,7 @@ def scan_source(text: str, rel_file: str) -> List[Finding]:
                     rule.code,
                     rule.message,
                     rel_file,
-                    _line_no(text, m.start()),
+                    _line_no(heuristic_text, m.start()),
                     remediation=rule.remediation,
                 )
             )
