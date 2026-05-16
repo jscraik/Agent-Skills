@@ -1,0 +1,28 @@
+schema_version: 1
+skill: zshell-expert
+purpose: Diagnose and improve zsh startup, completion, prompt, shell option, plugin, login-shell, PATH, and zsh scripting issues. Use when zsh config, shell startup latency, completions, aliases, functions, or zsh-specific behavior need evidence-backed fixes.
+triggers:
+  - zsh startup files, completions, aliases, prompt, PATH, plugin managers, or zsh scripts need fixes.
+  - zsh -lc automation fails from login-shell drift, quoting, globbing, arrays, or startup side effects.
+non_goals:
+  - Do not hide real failures with broad ignores or replace canonical repo validation without evidence.
+inputs: [user_request, failing_command, diagnostic_output, target_files, local_config, validation_contract]
+outputs: [root_cause, patch_summary, validation_status, remaining_risk, blockers]
+quality_criteria:
+  evidence: exact diagnostics and command outcomes are preserved.
+  minimality: fixes are scoped to the failing contract.
+  safety: redaction and narrow suppressions are used when applicable.
+  repo_alignment: local wrappers, config ownership, and AGENTS guidance are followed.
+evidence_requirements:
+  - Report exact command outcomes.
+  - Cite files, diagnostics, or config that drove the fix.
+  - Classify blocked validation separately from fixed validation.
+risks: [overbroad_ignore, generated_drift, environment_blocker, validation_contract_drift]
+approval_gates: [network_access, destructive_command, user_global_config, broad_suppression]
+validation: [focused_tool_run, repo_wrapper_when_defined, strict_skill_audit]
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+rollback_procedure: Revert only files changed by this skill and restore previous validation config if the new rule is too broad.
+observability: Report exact commands, diagnostics, blockers, validation ownership, and confidence limits.
