@@ -1,6 +1,6 @@
 ---
 name: codex-environment-creator
-description: Use when a project needs .codex/environments/environment.toml created, triaged, or updated with safe setup scripts, actions, and validation evidence.
+description: Use when a project or Codex runtime needs environment TOML created, triaged, or updated with safe setup, actions, exec-server providers, and validation evidence.
 metadata:
   skill-type: runbook
   lifecycle_state: active
@@ -22,6 +22,7 @@ metadata:
 - The user asks to create, repair, audit, or update a Codex environment file.
 - A project needs `.codex/environments/environment.toml` to bootstrap dependencies or expose Codex actions.
 - A Codex runtime needs `$CODEX_HOME/environments.toml` triaged for local, remote, or disabled execution environment selection.
+- A Codex exec-server provider needs URL or stdio transport entries validated.
 - There is drift between `.codex/environments/environment.toml`, misspelled `.codex/environmentals/*` paths, repo docs, or setup scripts.
 - Codex environment cache behavior, setup script churn, or action names need triage.
 
@@ -37,6 +38,8 @@ metadata:
 - repo setup, maintenance, and validation commands
 - desired actions and icons
 - current Codex docs, live fork, or codex-repo evidence when schema behavior is uncertain
+- evidence source for whether the request is project bootstrap/actions or
+  runtime exec-server provider selection
 
 ## Outputs
 - environment file changes or triage findings
@@ -49,12 +52,21 @@ metadata:
 ## Execution Boundaries
 - Edit only canonical repo-owned environment files unless the user explicitly asks for a migration or external target.
 - The agent may create `.codex/environments/` and `.codex/environments/environment.toml` inside the target project.
-- `$CODEX_HOME/environments.toml` is a user/runtime environment-provider file, not a project bootstrap file; inspect or edit it only when the user asks about runtime environment selection, remote exec servers, or disabled shell/filesystem access.
+- `$CODEX_HOME/environments.toml` is a user/runtime exec-server provider file,
+  not a project bootstrap/action file; inspect or edit it only when the user
+  asks about runtime environment selection, remote exec servers, or disabled
+  shell/filesystem access.
 - The agent may inspect package and tooling files, but should run install or setup commands only when they are the smallest safe validation step.
 - The user owns cloud environment administration, cache resets, secret updates, and destructive cleanup decisions unless they explicitly delegate them.
 
 ## Workflow
-1. Confirm target scope and ownership. Prefer repo-local `.codex/environments/environment.toml` for project bootstrap and actions; use `$CODEX_HOME/environments.toml` only for Codex runtime environment-provider selection. Treat `.codex/environmental.toml`, `.codex/environmentals/environmental.toml`, and `.codex/environmentals/enviromental.toml` as aliases or drift until live repo evidence proves otherwise.
+1. Confirm target scope and ownership. For current `~/dev/codex`, verify
+   whether repo-local `.codex/environments/environment.toml` is actually
+   consumed before creating it; use `$CODEX_HOME/environments.toml` for Codex
+   runtime environment-provider selection. Treat `.codex/environmental.toml`,
+   `.codex/environmentals/environmental.toml`, and
+   `.codex/environmentals/enviromental.toml` as aliases or drift until live repo
+   evidence proves otherwise.
 2. Inspect 2-3 focused surfaces first: the existing environment file, repo instructions such as `AGENTS.md` or `README.md`, and package or tooling files.
 3. If Codex environment behavior is uncertain, check current OpenAI Codex docs and the live Codex source or `codex-repo` MCP before inventing keys.
 4. Parse TOML with a real parser when available. Preserve comments, key order, and existing actions unless they are wrong or obsolete.
@@ -65,7 +77,9 @@ metadata:
 6. Build setup scripts from repo-owned commands. Prefer wrapper gates such as `./bin/ask`, `make`, `pnpm`, `uv`, `cargo`, or documented scripts over ad hoc dependency installs.
 7. Keep setup safe for cached environments. Remember that Codex may cache setup output; changing setup scripts, maintenance scripts, environment variables, or secrets can invalidate cache state.
 8. Keep actions explicit and operator-friendly. Use stable `name`, `icon`, and `command` fields; do not hide destructive actions behind friendly names.
-9. For `$CODEX_HOME/environments.toml`, use the runtime-provider rules in `references/environment-authoring.md` before editing defaults, remote transports, or disabled access.
+9. For `$CODEX_HOME/environments.toml`, use the runtime-provider rules in
+   `references/environment-authoring.md` before editing defaults, URL or stdio
+   transports, relative cwd, timeouts, or disabled access.
 10. Validate with the smallest real check: TOML parse, repo environment validator, focused setup dry-run, or documented preflight. Report exact pass, fail, or blocked outcomes.
 
 ## Constraints
@@ -98,6 +112,8 @@ metadata:
 ## Gotchas
 - Jamie often says "environmental.toml"; verify whether the repo actually consumes `.codex/environments/environment.toml`.
 - Recent Codex runtime work also uses `$CODEX_HOME/environments.toml`; do not confuse it with per-project `.codex/environments/environment.toml`.
+- Current `~/dev/codex` falls back to legacy `CODEX_EXEC_SERVER_URL` only when
+  `$CODEX_HOME/environments.toml` is missing.
 - An empty `[setup].script` can be intentional when actions are the only useful repo-local commands.
 - Codex cloud cache behavior can make a stale setup result look like a TOML problem.
 - Action labels and icons can be validated by repo-specific gates; preserve existing names unless there is evidence they are wrong.
@@ -114,6 +130,8 @@ metadata:
 - Use `references/evals.yaml` for benchmark and trigger coverage.
 - Use `references/task-profile.json` for evaluator thresholds.
 - Read when: you need schema, path, setup, action, and cache guidance: `references/environment-authoring.md`.
+- Read when: you need copyable local, URL provider, or program provider shapes:
+  `references/provider-examples.md`.
 
 ## See Also
 

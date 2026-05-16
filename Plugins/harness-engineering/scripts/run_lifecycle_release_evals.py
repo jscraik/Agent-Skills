@@ -133,15 +133,15 @@ def _classify_case_failures(parsed: dict[str, object]) -> dict[str, object]:
 def _case_has_tool_preflight_signal(case: dict[str, object], failure_strings: list[str]) -> bool:
     """
     Detects whether a case exhibits signs of a Codex runner "preflight" failure.
-    
+
     Checks the provided failure_strings combined with any case["warnings"] for the phrase "codex returned non-zero exit code" together with any Codex runner preflight markers; if that combination is not found, inspects runner artifact files (when present and readable) for those markers.
-    
+
     Parameters:
         case (dict): Case dictionary that may include:
             - "warnings": iterable of warning entries (will be stringified)
             - "runners": mapping of runner names to result dicts, each may contain an "artifacts" dict with stderr/stdout/final/jsonl file path strings.
         failure_strings (list[str]): List of failure messages (e.g., tier1 failures) to search.
-    
+
     Returns:
         `true` if the combined failure/warning text contains both the non-zero Codex exit phrase and a preflight marker, or if any readable runner artifact contains a preflight marker; `false` otherwise.
     """
@@ -170,10 +170,10 @@ def _case_has_tool_preflight_signal(case: dict[str, object], failure_strings: li
 def _artifact_file_has_codex_runner_preflight_signal(path: object) -> bool:
     """
     Detects whether an artifact file contains markers that indicate a Codex runner preflight failure.
-    
+
     Parameters:
         path: Path to an artifact file (expected as a string). If not a string or the file cannot be read, the function reports no preflight signal.
-    
+
     Returns:
         True if any Codex runner preflight marker is found in the file contents, False otherwise.
     """
@@ -196,10 +196,10 @@ def _artifacts_have_codex_runner_preflight_signal(artifacts: dict[str, object]) 
 def _artifact_tool_preflight_case(parsed: dict[str, object]) -> dict[str, object] | None:
     """
     Constructs a synthetic case entry when parsed artifacts indicate a Codex runner preflight failure.
-    
+
     Parameters:
         parsed (dict): Parsed JSON output from an evaluation run; expected to contain an "artifacts" mapping and optionally "case_filters" and "tier1_failures".
-    
+
     Returns:
         dict | None: A synthetic case dictionary with keys `id`, `name`, `category`, and `tier1_failures` when an artifact `stderr` contains a Codex runner preflight signal; `None` otherwise.
     """
@@ -224,12 +224,12 @@ def _artifact_tool_preflight_case(parsed: dict[str, object]) -> dict[str, object
 def _classify_eval_failures(parsed: dict[str, object]) -> dict[str, object]:
     """
     Augments a case-level failure classification with a synthetic tool-preflight case derived from top-level artifacts when present.
-    
+
     If the parsed evaluation output contains an artifact-derived Codex runner preflight signal, this function appends a corresponding case entry to the `tool_preflight_cases` list (creating the list if necessary) and removes any matching case entry from `other_failure_cases`. If no artifact-derived preflight case is found, the original classification is returned unchanged.
-    
+
     Parameters:
         parsed (dict): Parsed evaluation output (JSON decoded) describing the run and its cases.
-    
+
     Returns:
         dict: A failure classification mapping that includes (when applicable) the keys `timeout_cases`, `content_failure_cases`, `tool_preflight_cases`, and `other_failure_cases`.
     """
@@ -257,10 +257,10 @@ def _classify_eval_failures(parsed: dict[str, object]) -> dict[str, object]:
 def _iter_case_warnings(parsed: dict[str, object]) -> list[dict[str, object]]:
     """
     Collects cases that contain warnings from a parsed evaluation result.
-    
+
     Parameters:
         parsed (dict): Parsed evaluation output expected to contain a "cases" iterable where each case may include "id", "name", "category", and "warnings".
-    
+
     Returns:
         list[dict]: A list of dictionaries for each case that had warnings. Each dictionary contains:
             - "id": case id (or None if missing)
@@ -635,7 +635,7 @@ def _run_skill_builder_eval(
 ) -> dict[str, object]:
     """
     Run the skill-builder evaluation runner for a single skill and return a structured result.
-    
+
     Parameters:
         repo_root (Path): Repository root used as working directory for the runner.
         skill_name (str): Name of the skill to evaluate.
@@ -647,7 +647,7 @@ def _run_skill_builder_eval(
         model (str | None): Optional model identifier forwarded to the runner.
         timeout_profile (str | None): Optional timeout profile forwarded to the runner.
         codex_home (Path | None): Path to Codex home; used only when `runner == "codex"`.
-    
+
     Returns:
         dict[str, object]: Structured evaluation result containing keys including:
             - "skill", "mode", "runner", "command"
@@ -863,7 +863,7 @@ def _run_skill_builder_eval_split_cases(
 ) -> dict[str, object]:
     """
     Run the skill-builder eval runner in split-per-case mode, execute each discovered case individually, and aggregate per-case results and failure classification.
-    
+
     Parameters:
         repo_root (Path): Repository root path used to locate the skill-builder runner.
         skill_name (str): Name of the skill to evaluate.
@@ -875,7 +875,7 @@ def _run_skill_builder_eval_split_cases(
         model (str | None): Optional model identifier forwarded to the skill-builder runner.
         timeout_profile (str | None): Optional timeout profile forwarded to the skill-builder runner.
         codex_home (Path | None): Optional Codex home directory used when the runner requires a Codex installation.
-    
+
     Returns:
         dict[str, object]: Aggregated evaluation result containing (among other keys):
             - "skill", "mode", "runner", "command": metadata about this split run.

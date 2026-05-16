@@ -113,6 +113,51 @@ _READINESS_STATE_CHOICES = {
     "downstream_ready",
 }
 _METRIC_AVAILABILITY_CHOICES = {"available", "unavailable"}
+RUNNER_BLOCKER_TAXONOMY: Dict[str, str] = {
+    "blocked_user_input": "The runner requested user input and should not be classified as a hang.",
+    "blocked_auth": "The runner stopped on authentication or credential setup.",
+    "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
+    "timeout_no_output": "The runner timed out without producing final output.",
+    "timeout_partial_output": "The runner timed out after producing partial output.",
+}
+SNYK_MANIFEST_NAMES: Set[str] = {
+    "package.json",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "pyproject.toml",
+    "requirements.txt",
+    "Pipfile",
+    "poetry.lock",
+    "go.mod",
+    "Cargo.toml",
+    "Gemfile",
+    "Gemfile.lock",
+    "composer.json",
+    "composer.lock",
+    "pom.xml",
+    "build.gradle",
+    "build.gradle.kts",
+    "gradle.lockfile",
+    "settings.gradle",
+    "settings.gradle.kts",
+    "packages.config",
+    "Paket.dependencies",
+    "pubspec.yaml",
+    "Package.swift",
+}
+SNYK_MANIFEST_SUFFIXES: Tuple[str, ...] = (".csproj", ".fsproj", ".vbproj")
+SNYK_MANIFEST_EXCLUDED_DIRS: Set[str] = {
+    ".git",
+    ".venv",
+    "__pycache__",
+    "budget-archive",
+    "node_modules",
+    "cache",
+    "artifacts",
+    "fixtures",
+    "tmp",
+}
 
 # Script-level options (used to disambiguate `--codex-arg --foo` intent).
 _SCRIPT_OPTIONS: Set[str] = {
@@ -1741,12 +1786,62 @@ def _is_codex_untrusted_repo_error(stderr_text: str) -> bool:
 
 
 def _is_runner_runtime_blocked(*, output_text: str, stdout_text: str, stderr_text: str) -> bool:
-    low = "\n".join([output_text or "", stdout_text or "", stderr_text or ""]).lower()
-    return (
-        "sandbox_apply: operation not permitted" in low
-        or "host_execution_untrusted" in low
-        or ("sandbox-exec" in low and "operation not permitted" in low)
-    )
+    return _classify_runner_blocker(
+        output_text=output_text,
+        stdout_text=stdout_text,
+        stderr_text=stderr_text,
+    ) is not None
+
+
+def _classify_runner_blocker(
+    *,
+    output_text: str,
+    stdout_text: str,
+    stderr_text: str,
+    exit_code: Optional[int] = None,
+) -> Optional[str]:
+    text = "\n".join([output_text or "", stdout_text or "", stderr_text or ""])
+    low = text.lower()
+
+    user_input_markers = [
+        "user_input_requested_during_turn",
+        "request_user_input",
+        "requested user input",
+        "waiting on user",
+        "needs user input",
+        "blocked_user_input",
+    ]
+    if any(marker in low for marker in user_input_markers):
+        return "blocked_user_input"
+
+    auth_markers = [
+        "not logged in",
+        "/login",
+        "unauthenticated",
+        "authentication required",
+        "missing authenticated codex state",
+        "blocked_auth",
+    ]
+    if any(marker in low for marker in auth_markers):
+        return "blocked_auth"
+
+    if exit_code == 124:
+        return "timeout_partial_output" if text.strip() else "timeout_no_output"
+
+    runtime_markers = [
+        "sandbox_apply: operation not permitted",
+        "host_execution_untrusted",
+        "sandbox-exec",
+        "operation not permitted",
+        "ran out of room in the model's context window",
+        "context window",
+        "start a new thread",
+        "blocked_runtime",
+    ]
+    if any(marker in low for marker in runtime_markers):
+        return "blocked_runtime"
+
+    return None
 
 
 def _is_codex_reasoning_summary_unsupported(stderr_text: str) -> bool:
@@ -1962,6 +2057,126 @@ def _make_relative(path: Optional[Path], base: Path) -> str:
         return str(path.relative_to(base))
     except ValueError:
         return str(path)
+
+
+def _release_dependency_scan_roots(skill_dir: Path) -> List[Path]:
+    roots = [skill_dir]
+    parts = skill_dir.parts
+    if "Plugins" in parts:
+        idx = parts.index("Plugins")
+        if len(parts) > idx + 2 and "skills" in parts[idx + 2 :]:
+            plugin_root = Path(*parts[: idx + 2])
+            if plugin_root not in roots:
+                roots.append(plugin_root)
+    return roots
+
+
+def _is_snyk_manifest(path: Path) -> bool:
+    return path.name in SNYK_MANIFEST_NAMES or path.name.endswith(SNYK_MANIFEST_SUFFIXES)
+
+
+def _dependency_manifest_paths(skill_dir: Path, *, limit: int = 25) -> List[Path]:
+    manifests: List[Path] = []
+    seen: Set[Path] = set()
+    for root in _release_dependency_scan_roots(skill_dir):
+        for candidate in sorted(root.rglob("*")):
+            if not candidate.is_file() or not _is_snyk_manifest(candidate):
+                continue
+            relative_parts = candidate.relative_to(root).parts[:-1]
+            if any(part in SNYK_MANIFEST_EXCLUDED_DIRS for part in relative_parts):
+                continue
+            if candidate in seen:
+                continue
+            seen.add(candidate)
+            manifests.append(candidate)
+            if len(manifests) >= limit:
+                return manifests
+    return manifests
+
+
+def _snyk_release_gate(
+    *,
+    skill_dir: Path,
+    workspace_root: Path,
+    timeout_seconds: int = 180,
+) -> Dict[str, Any]:
+    scan_roots = _release_dependency_scan_roots(skill_dir)
+    scan_target = scan_roots[-1]
+    manifests = _dependency_manifest_paths(skill_dir)
+    gate: Dict[str, Any] = {
+        "schema_version": "skill-release-snyk-gate.v1",
+        "required": bool(manifests),
+        "status": "not_applicable",
+        "reason": "No supported dependency manifest found under the skill package.",
+        "manifest_paths": [_make_relative(path, workspace_root) for path in manifests],
+        "command": None,
+        "exit_code": None,
+        "stdout": "",
+        "stderr": "",
+    }
+    if not manifests:
+        return gate
+
+    snyk_bin = shutil.which("snyk")
+    if not snyk_bin:
+        gate.update({
+            "status": "blocked_missing_binary",
+            "reason": "Snyk CLI is required for release evals of manifest-backed skill packages.",
+            "command": "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>",
+        })
+        return gate
+
+    command = [
+        snyk_bin,
+        "test",
+        "--all-projects",
+        "--detection-depth=6",
+        "--severity-threshold=high",
+        "--exclude=node_modules,cache,artifacts,tmp,fixtures,budget-archive",
+        "--json",
+        str(scan_target),
+    ]
+    gate["command"] = command
+    try:
+        proc = sp.run(command, cwd=str(workspace_root), capture_output=True, text=True, timeout=timeout_seconds)
+    except sp.TimeoutExpired as exc:
+        gate.update({
+            "status": "timeout",
+            "reason": f"Snyk timed out after {timeout_seconds} seconds.",
+            "stdout": exc.stdout or "",
+            "stderr": exc.stderr or "",
+        })
+        return gate
+
+    gate.update({"exit_code": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+    combined_output = f"{proc.stdout}\n{proc.stderr}".lower()
+    if proc.returncode == 0:
+        gate["status"] = "success"
+        gate["reason"] = "Snyk dependency screening passed for the manifest-backed skill package."
+    elif (
+        "use snyk auth" in combined_output
+        or "not authenticated" in combined_output
+        or "authentication required" in combined_output
+        or "snyk_token" in combined_output
+    ):
+        gate["status"] = "blocked_auth"
+        gate["reason"] = "Snyk authentication is required for release evals of manifest-backed skill packages."
+    elif "could not detect supported target files" in combined_output or "no supported files" in combined_output:
+        gate["status"] = "blocked_no_supported_projects"
+        gate["reason"] = "Dependency manifests were present, but Snyk did not detect a supported project."
+    elif proc.returncode == 1:
+        gate["status"] = "advisory"
+        gate["reason"] = "Snyk reported high-severity dependency advisories."
+    else:
+        gate["status"] = "error"
+        gate["reason"] = "Snyk failed during release dependency screening."
+    return gate
+
+
+def _snyk_release_gate_passed(gate: Dict[str, Any]) -> bool:
+    if not gate.get("required"):
+        return True
+    return gate.get("status") == "success"
 
 
 def _extract_min_rubric_score(budgets: Optional[Dict[str, Any]]) -> Optional[float]:
@@ -2483,11 +2698,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "tier1_failures": 0,
         "tier2_findings": 0,
         "blocked_cases": 0,
+        "blocked_class_summary": {key: 0 for key in RUNNER_BLOCKER_TAXONOMY},
+        "blocker_taxonomy": RUNNER_BLOCKER_TAXONOMY,
         "preflight_warnings": preflight_warnings,
         "readiness_summary": readiness_summary,
         "round_state_summary": round_state_summary,
         "neutral_baseline_approvals_used": [],
     }
+    if args.eval_mode == "release":
+        summary["security_dependency_screening"] = _snyk_release_gate(
+            skill_dir=skill_dir,
+            workspace_root=workspace_root,
+        )
+    else:
+        summary["security_dependency_screening"] = {
+            "schema_version": "skill-release-snyk-gate.v1",
+            "required": False,
+            "status": "skipped",
+            "reason": "Snyk dependency screening is required only for release evals of manifest-backed skill packages.",
+            "manifest_paths": [],
+            "command": None,
+            "exit_code": None,
+            "stdout": "",
+            "stderr": "",
+        }
 
     any_tier1_failed = False
     any_tier2_failed = False
@@ -2531,6 +2765,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         case_tier1_failures: List[str] = []
         case_tier2_findings: List[str] = []
         case_warnings: List[str] = []
+        case_blocked_reasons: List[str] = []
+        case_notes: List[str] = []
         runner_records: Dict[str, Any] = {}
 
         for runner_name in selected_runners:
@@ -2609,18 +2845,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             runner_tier1_failures: List[str] = []
             runner_tier2_findings: List[str] = []
             runner_warnings: List[str] = list(runner_exec_warnings)
+            runner_notes: List[str] = []
             runner_metrics: Dict[str, Any] = {}
             runner_blocked_runtime = False
             events: Optional[List[Dict[str, Any]]] = None
-
-            if rc != 0:
-                runner_tier1_failures.append(f"{runner_name} returned non-zero exit code: {rc}")
-                if runner_name == "codex" and _is_codex_untrusted_repo_error(stderr):
-                    runner_warnings.append(
-                        "Codex rejected this workspace as untrusted. "
-                        "Use a trusted git repo as --workspace, or pass "
-                        "--codex-arg=--skip-git-repo-check for ephemeral temp directories."
-                    )
 
             if runner_name == "codex" and jsonl_path is not None:
                 events, parse_warnings = load_jsonl_events(jsonl_path)
@@ -2662,27 +2890,51 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 runner_tier1_failures.append(
                     f"should_trigger failed: expected {c.should_trigger}, detected {selected_skill}"
                 )
+            budgets = c.budgets if isinstance(c.budgets, dict) else {}
+            require_selection_signal = bool(budgets.get("require_selection_signal"))
             if c.should_trigger is True and selected_skill is None:
-                runner_tier1_failures.append(
+                message = (
                     f"should_trigger={c.should_trigger} but selection signal unavailable (selected_skill is None). "
                     f"Cannot verify selection expectation without signal evidence."
                 )
+                if require_selection_signal:
+                    runner_tier1_failures.append(message)
+                else:
+                    runner_notes.append(
+                        message
+                        + " Discovery-smoke or budgets.require_selection_signal=true should own hard selection proof."
+                    )
             if c.should_trigger is False and selected_skill is None:
-                runner_warnings.append(
+                runner_notes.append(
                     "should_trigger=false and selection signal unavailable; treating absence of positive "
                     "selection evidence as acceptable for this negative case."
                 )
 
-            runner_blocked_runtime = _is_runner_runtime_blocked(
+            runner_blocker_class = _classify_runner_blocker(
                 output_text=output_text,
                 stdout_text=stdout,
                 stderr_text=stderr,
+                exit_code=rc,
             )
+            runner_blocked_runtime = runner_blocker_class is not None
+            runner_blocked_reasons: List[str] = []
             if runner_blocked_runtime:
-                runner_warnings.append(
-                    "blocked_runtime: runner could not execute local commands; this is an eval environment "
-                    "blocker, not a skill behavior failure."
+                definition = RUNNER_BLOCKER_TAXONOMY.get(
+                    runner_blocker_class or "blocked_runtime",
+                    "The eval runner was blocked before skill behavior could be judged.",
                 )
+                runner_blocked_reasons.append(
+                    f"{runner_blocker_class}: {definition} "
+                    "This is an eval runner blocker, not a skill behavior failure."
+                )
+            elif rc != 0:
+                runner_tier1_failures.append(f"{runner_name} returned non-zero exit code: {rc}")
+                if runner_name == "codex" and _is_codex_untrusted_repo_error(stderr):
+                    runner_warnings.append(
+                        "Codex rejected this workspace as untrusted. "
+                        "Use a trusted git repo as --workspace, or pass "
+                        "--codex-arg=--skip-git-repo-check for ephemeral temp directories."
+                    )
 
             # Assertions + rubric parsing
             parsed_json: Optional[Any] = None
@@ -2786,9 +3038,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "exit_code": rc,
                 "passed": (len(runner_tier1_failures) == 0) and not runner_blocked_runtime,
                 "blocked": runner_blocked_runtime,
+                "blocker_class": runner_blocker_class,
+                "blocked_reasons": runner_blocked_reasons,
                 "tier1_failures": runner_tier1_failures,
                 "tier2_findings": runner_tier2_findings,
                 "warnings": runner_warnings,
+                "notes": runner_notes,
                 "artifacts": {
                     "dir": _make_relative(runner_dir, workspace_root),
                     "final": _make_relative(runner_dir / "final.txt", workspace_root),
@@ -2805,10 +3060,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             case_tier1_failures.extend([f"[{runner_name}] {x}" for x in runner_tier1_failures])
             case_tier2_findings.extend([f"[{runner_name}] {x}" for x in runner_tier2_findings])
             case_warnings.extend([f"[{runner_name}] {x}" for x in runner_warnings])
+            case_blocked_reasons.extend([f"[{runner_name}] {x}" for x in runner_blocked_reasons])
+            case_notes.extend([f"[{runner_name}] {x}" for x in runner_notes])
 
         case_tier1_failed = len(case_tier1_failures) > 0
         case_tier2_failed = len(case_tier2_findings) > 0
         case_blocked = any(bool(record.get("blocked")) for record in runner_records.values())
+        case_blocker_classes = sorted(
+            {
+                str(record.get("blocker_class"))
+                for record in runner_records.values()
+                if record.get("blocker_class")
+            }
+        )
 
         case_pass = (not case_tier1_failed) and (
             args.tier2_mode != "fail" or (not case_tier2_failed)
@@ -2839,11 +3103,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "runners": runner_records,
             "passed": case_pass,
             "blocked": case_blocked,
+            "blocker_classes": case_blocker_classes,
+            "blocked_reasons": case_blocked_reasons,
             "tier1_failed": case_tier1_failed,
             "tier2_failed": case_tier2_failed,
             "tier1_failures": case_tier1_failures,
             "tier2_findings": case_tier2_findings,
             "warnings": case_warnings,
+            "notes": case_notes,
         }
 
         (case_dir / "result.json").write_text(json.dumps(case_record, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -2873,15 +3140,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if case_blocked:
             any_blocked = True
             summary["blocked_cases"] += 1
+            for blocker_class in case_blocker_classes:
+                summary["blocked_class_summary"][blocker_class] = summary["blocked_class_summary"].get(blocker_class, 0) + 1
         if case_tier2_failed:
             any_tier2_failed = True
             summary["tier2_findings"] += 1
 
     summary["expected_signal_summary"] = summarize_expected_signal_results(summary["cases"])
-    summary["passed"] = (not any_blocked) and (not any_tier1_failed) and (
+    snyk_gate_passed = _snyk_release_gate_passed(summary["security_dependency_screening"])
+    summary["passed"] = (not any_blocked) and (not any_tier1_failed) and snyk_gate_passed and (
         args.tier2_mode != "fail" or (not any_tier2_failed)
     )
     summary["decision"] = "pass" if summary["passed"] else "fail"
+    if not snyk_gate_passed:
+        snyk_status = str(summary["security_dependency_screening"].get("status", ""))
+        summary["decision"] = "blocked" if snyk_status.startswith("blocked") else "fail"
     summary["exit_code"] = 0 if summary["passed"] else 2
 
     summary_path = reports_base / "summary.json"
@@ -2924,6 +3197,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "readiness_summary": summary["readiness_summary"],
             "round_state_summary": summary["round_state_summary"],
             "neutral_baseline_approvals_used": summary["neutral_baseline_approvals_used"],
+            "security_dependency_screening": summary["security_dependency_screening"],
             "reports_base": _rel(reports_base),
         },
         "artifacts": summary["artifacts"],
@@ -2958,10 +3232,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 print(f"    - TIER1: {f}")
             for f in c["tier2_findings"]:
                 print(f"    - TIER2: {f}")
-        if any_tier2_failed and args.tier2_mode == "warn":
+        if summary["passed"] and any_tier2_failed and args.tier2_mode == "warn":
             print("RESULT: PASS (tier-2 findings present; warn mode)")
+        elif summary["passed"]:
+            print("RESULT: PASS")
         else:
-            print(f"RESULT: {'PASS' if summary['passed'] else 'FAIL'}")
+            print("RESULT: FAIL")
 
     return int(summary["exit_code"])
 

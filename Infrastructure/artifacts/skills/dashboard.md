@@ -1,8 +1,8 @@
 # Skill Quality Dashboard
 
 - Skills: 29
-- Runs: 433
-- Latest tier1-failing skills: 18
+- Runs: 440
+- Latest tier1-failing skills: 17
 - Latest tier2-findings skills: 0
 
 ## Latest by skill
@@ -29,7 +29,7 @@
 | he-spec | 18 | 2 | 0 | - | ❌ | -16/0 |
 | he-strategy | 21 | 21 | 0 | - | ❌ | 3/0 |
 | he-work | 11 | 11 | 0 | - | ❌ | 11/0 |
-| improve-codebase-architecture | 9 | 6 | 0 | - | ❌ | 5/0 |
+| improve-codebase-architecture | 1 | 0 | 0 | - | ❌ | 0/0 |
 | keep-codex-fast | 9 | 9 | 0 | - | ❌ | 0/0 |
 | pr-green-sweep | 9 | 0 | 0 | - | ✅ | 0/0 |
 | simplify | 5 | 5 | 0 | - | ❌ | 0/0 |

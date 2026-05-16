@@ -22,6 +22,7 @@ When running inside the Agent Skills Kit repository and `./bin/ask` exists, pres
 - Do not create or edit runtime projections such as `.agents/**`, `.skillsets/**`, `skills-codex/**`, or `$CODEX_HOME/skills/**` as the source of truth.
 - Use `skills-system/skill-creator/scripts/init_skill.py` directly only outside Agent Skills Kit or when explicitly creating an unmanaged draft at a chosen path.
 - For local Skill Factory governance, read `references/skill-factory/foundations.md` before non-trivial create, reshape, or improvement work.
+- For non-trivial skills, create or update eval coverage during authoring, not after closeout. Read `references/skill-factory/codex-eval-creation-loop.md` before claiming the new or improved skill is ready.
 - After canonical edits, run the smallest relevant repo validation and sync/proof commands before claiming runtime availability.
 
 ## About Skills
@@ -366,6 +367,33 @@ Do not include any other fields in YAML frontmatter.
 ##### Body
 
 Write instructions for using the skill and its bundled resources.
+
+### Codex Eval Loop
+
+For non-trivial new skills and meaningful skill improvements, draft evals while
+the skill is being written. Use realistic user prompts, include at least one
+negative or pressure case when routing/safety matters, and record expectations
+that can be checked from outputs or run traces.
+
+Inside Agent Skills Kit, keep evals in the repo-native shape:
+
+- Add or update `references/evals.yaml` for the skill.
+- Compare the new skill against either no-skill behavior, the previous skill
+  version, or the closest local owner when that comparison would expose whether
+  the skill adds real value.
+- Prefer deterministic checks for commands, artifacts, schemas, and forbidden
+  actions; use rubric or reviewer checks only for qualitative qualities.
+- Treat timing, token use, command count, and repeated helper creation as
+  improvement signals. If multiple eval runs reinvent the same helper, consider
+  adding a script or reference to the skill.
+- Critique the evals themselves: flag assertions that are too easy, unverifiable,
+  or missing the main outcome.
+- Before a **Release-Readiness Claim**, run the appropriate `./bin/ask evals run
+  <skill-path> --mode smoke|release --json --robot` gate plus strict audit and
+  the Second-Review Lane required by the reporting contract.
+
+Read `references/skill-factory/codex-eval-creation-loop.md` for the full
+iteration pattern and reporting shape.
 
 ### Step 5: Validate the Skill
 

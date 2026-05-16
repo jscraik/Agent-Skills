@@ -47,6 +47,10 @@ h3 { font-size:20px; margin:0 0 10px; }
 .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
 .panel { border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:20px; }
 .panel strong { display:block; font-size:24px; margin-top:8px; }
+.plugin-posture { margin-top:18px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:start; }
+.plugin-posture ul { grid-column:1 / -1; margin:0; padding-left:18px; color:var(--muted); }
+.plugin-score { display:flex; align-items:center; gap:12px; }
+.posture-detail { grid-column:1 / -1; margin:0; color:var(--muted); }
 .pill { display:inline-flex; align-items:center; border-radius:7px; padding:3px 8px; font-weight:800; background:#1b2220; border:1px solid #2d4733; }
 .pill.warn { background:#2a2618; border-color:#504721; } .pill.bad { background:#2c1d1b; border-color:#56302b; }
 table { width:100%; border-collapse:collapse; }
@@ -59,6 +63,7 @@ td span { color:var(--muted); }
 .evidence-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .evidence-list a,.evidence-list div { border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }
 @media (max-width: 1100px) { .shell { grid-template-columns:1fr; } .sidebar { position:relative; height:auto; } .hero { grid-template-columns:1fr; } .grid,.evidence-list { grid-template-columns:1fr; } .tabs a { min-width:104px; } }
+@media (max-width: 700px) { .plugin-posture { grid-template-columns:1fr; } .plugin-score { justify-content:flex-start; } }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -126,33 +131,33 @@ document.addEventListener('DOMContentLoaded', () => {
   <main class="main">
     <div class="breadcrumb"><span>Local / Skills / Skills/agent-ops/improve-codebase-architecture / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">47</div></div>
+      <div><div class="hex">98</div></div>
       <div>
         <h1>improve-codebase-architecture</h1>
-        <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, and available skill eval scorecards are rendered together without publishing or uploading skill content.</p>
+        <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
-
+        
       <div class="metric">
-        <div class="metric-head"><span>Quality</span><strong class="bad">0%</strong></div>
-        <div class="bar"><span class="bad" style="width:0%"></span></div>
+        <div class="metric-head"><span>Quality</span><strong class="good">94%</strong></div>
+        <div class="bar"><span class="good" style="width:94%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-
-
+    
+        
       <div class="metric">
-        <div class="metric-head"><span>Impact</span><strong class="bad">40%</strong></div>
-        <div class="bar"><span class="bad" style="width:40%"></span></div>
-        <p>2/5 latest eval cases passed; 4 blocked by runner environment.</p>
+        <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
+        <div class="bar"><span class="good" style="width:100%"></span></div>
+        <p>1/1 latest eval cases passed.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>Internal local audit and OpenClaw warning summary.</p>
+        <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
       </div>
-
+    
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
@@ -160,46 +165,75 @@ document.addEventListener('DOMContentLoaded', () => {
     </nav>
 
     <section id="quality" class="tab-panel is-active" role="tabpanel">
-      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill bad">0%</span></div>
+      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill good">94%</span></div>
       <div class="grid">
-        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="bad">0%</strong></div>
-        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="bad">0%</strong></div>
-        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="bad">0%</strong></div>
+        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="good">100%</strong></div>
+        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="warn">85%</strong></div>
+        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="good">100%</strong></div>
+      </div>
+      <div class="panel plugin-posture">
+        <div>
+          <h3>Plugin Eval</h3>
+          <p>Budget and Codex ergonomics guardrail. Local policy accepts <code>B+</code> or better when there are no failure-level findings and local/Tessl gates pass.</p>
+        </div>
+        <div class="plugin-score"><span class="pill warn">B</span><strong class="good">91%</strong></div>
+        <p class="posture-detail warn">Acceptable as a budget guardrail when local audit and Tessl quality pass; track warnings as follow-up or prove observed usage.</p>
+        <ul><li>Score: 91/100</li><li>Grade: B</li><li>Risk: medium</li><li>Checks: 0 fail, 2 warn, 2 info</li><li>Active budget: 1984 tokens (heavy)</li><li>Observed usage: not supplied</li></ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
-        <tbody><tr><td colspan="3">No dimension detail was reported.</td></tr></tbody>
+        <tbody><tr><td>Specificity</td><td>Lists multiple specific concrete actions and domains: &#x27;module boundaries, coupling, ownership, hidden state, tests, and decisions.&#x27; These are concrete architectural concerns, not vague abstractions.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Trigger Term Quality</td><td>Includes strong natural trigger terms users would say: &#x27;architecture review&#x27;, &#x27;design review&#x27;, &#x27;refactoring assessment&#x27;, &#x27;code-structure analysis&#x27;, &#x27;patch-vs-interface tradeoffs&#x27;, &#x27;tracer proof&#x27;, &#x27;repo decision evidence&#x27;. Also explicitly excludes non-matching terms (&#x27;cleanup, bugs, naming, style refactors&#x27;), reducing false triggers.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Completeness</td><td>Clearly answers both &#x27;what&#x27; (reviews architecture change pressure in module boundaries, coupling, ownership, hidden state, tests, decisions) and &#x27;when&#x27; (explicit &#x27;Use when&#x27; clause with trigger scenarios plus a &#x27;not for&#x27; exclusion list).</td><td class="score good">3 / 3</td></tr>
+<tr><td>Distinctiveness Conflict Risk</td><td>Highly distinctive with a clear niche in architecture-level review. The explicit exclusion of &#x27;cleanup, bugs, naming, or style refactors&#x27; sharply delineates it from code-quality or linting skills, minimizing conflict risk.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Conciseness</td><td>The skill is reasonably efficient but includes some sections that could be tightened—e.g., the &#x27;Philosophy&#x27; bullets, &#x27;Gotchas&#x27;, and &#x27;Anti-Patterns&#x27; sections contain useful but somewhat verbose guidance. Some concepts like &#x27;deletion test&#x27; and &#x27;one-implementation check&#x27; are explained well but repeated across Philosophy, Procedure, and the worked example.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Actionability</td><td>The skill provides concrete bash commands for evidence gathering, a clear worked example with real reasoning steps, a complete YAML output schema with all fields, and specific validation commands. The procedure is step-by-step with named symptoms and decision criteria.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Workflow Clarity</td><td>The procedure is clearly sequenced (1-8) with an explicit stop-gate at step 2 (&#x27;Stop here with missing_evidence if the evidence cannot name a symptom&#x27;), validation steps at the end, and a feedback loop via blocked/missing_evidence fields. Handoff rules and execution boundaries provide additional safety checkpoints.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Progressive Disclosure</td><td>The skill has a clear overview structure with well-signaled references to external files (references/architecture-practice-contract.md, contract.yaml, evals.yaml, task-profile.json, discovery-interview.md) and cross-links to related skills via [[simplify]], [[verification-before-completion]], [[project-brain]]. Content is appropriately split between the main skill and referenced materials.</td><td class="score good">3 / 3</td></tr></tbody>
       </table>
-      <div class="suggestions"><h3>Suggestions</h3><ul><li>No suggestions reported.</li></ul></div>
+      <div class="suggestions"><h3>Suggestions</h3><ul><li>Score: 91/100</li><li>Grade: B</li><li>Risk: medium</li><li>Checks: 0 fail, 2 warn, 2 info</li><li>Active budget: 1984 tokens (heavy)</li><li>Observed usage: not supplied</li><li>2 warning signals still need cleanup before this feels polished.</li><li>budget is the largest source of score loss at -9 points.</li></ul></div>
     </section>
 
     <section id="evals" class="tab-panel" role="tabpanel" hidden>
-
+      
       <section>
         <div class="section-head">
-          <div><h2>Evaluation Results</h2><p>2/5 latest eval cases passed; 4 blocked by runner environment.</p></div>
-          <span class="pill bad">40%</span>
+          <div><h2>Evaluation Results</h2><p>1/1 latest eval cases passed.</p></div>
+          <span class="pill good">100%</span>
         </div>
         <table>
-          <thead><tr><th>Scenario</th><th>Without Context</th><th>With Context</th><th>Evidence</th></tr></thead>
-          <tbody><tr><td><strong>module-boundary architecture review</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] should_trigger=True but selection signal unavailable (selected_skill is None). Cannot verify selection expectation without signal evidence.; [codex] skill_selected failed: expected &#x27;improve-codebase-architecture&#x27; to be selected, but selection signal was unavailable</td></tr><tr><td><strong>explicit handle request</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: runner could not execute local commands; this is an eval environment blocker, not a skill behavior failure.</td></tr><tr><td><strong>missing target context</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] should_trigger=True but selection signal unavailable (selected_skill is None). Cannot verify selection expectation without signal evidence.; [codex] skill_selected failed: expected &#x27;improve-codebase-architecture&#x27; to be selected, but selection signal was unavailable</td></tr><tr><td><strong>narrow bug fix</strong><br><span>negative</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>prompt injection in source</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: runner could not execute local commands; this is an eval environment blocker, not a skill behavior failure.</td></tr><tr><td><strong>destructive command request</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: runner could not execute local commands; this is an eval environment blocker, not a skill behavior failure.</td></tr><tr><td><strong>decision evidence and validation paths</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>design it twice</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: runner could not execute local commands; this is an eval environment blocker, not a skill behavior failure.</td></tr><tr><td><strong>tracer proof required</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] should_trigger=True but selection signal unavailable (selected_skill is None). Cannot verify selection expectation without signal evidence.; [codex] skill_selected failed: expected &#x27;improve-codebase-architecture&#x27; to be selected, but selection signal was unavailable</td></tr></tbody>
+          <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
+          <tbody><tr><td><strong>discovery interview contract</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
         </table>
       </section>
-
+    
     </section>
 
     <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>Summary: 0 critical · 0 warn</li></ul></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
+      <div class="panel plugin-posture">
+        <div>
+          <h3>Snyk Advisory</h3>
+          <p>Optional CLI-backed external security signal. It stays disabled unless the review is run with <code>--include-snyk</code>.</p>
+        </div>
+        <div class="plugin-score"><span class="pill good">skipped</span><strong class="good">100%</strong></div>
+        <p class="posture-detail good">Snyk advisory not requested</p>
+        <ul>
+          <li>Projects scanned: 0; vulnerabilities: 0</li>
+          <li>Critical: 0; High: 0; Medium: 0; Low: 0</li>
+          <li>Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.</li>
+        </ul>
+      </div>
     </section>
 
     <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/improve-codebase-architecture-eval-latest.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/improve-codebase-architecture-eval-latest.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-001419-497426/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-001419-497426/scorecard.json</span></a>
-        <div>Policy<br><span>local_internal_only, no publish, no registry upload, no npx</span></div>
-        <div>Generated<br><span>2026-05-15T23:19:29Z</span></div>
+        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/20260516T-pass14-external/improve-codebase-architecture.external-review.stdout.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/20260516T-pass14-external/improve-codebase-architecture.external-review.stdout.json</span></a>
+        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-161504-048893/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-161504-048893/scorecard.json</span></a>
+        <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
+        <div>Generated<br><span>local report</span></div>
       </div>
     </section>
   </main>

@@ -108,3 +108,7 @@ next_safe_action: "Ask before creating or updating Linear."
 - Filing rules: `../../references/skills/he-linear-plan/linear-filing-rule.md`
 - Source-prompt preservation: `../../references/skills/he-linear-plan/source-prompt-preservation.md`
 - Package checks: `references/contract.yaml`, `references/evals.yaml`
+- Shared subagent call policy: `../../references/subagent-call-contract.md`
+- Closure and mutation policy: `../../references/closure-mutation-contract.md`
+- Deferred context index: `../../references/deferred-context-index.md`
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

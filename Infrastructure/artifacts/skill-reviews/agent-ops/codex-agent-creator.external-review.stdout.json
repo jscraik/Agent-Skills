@@ -1,0 +1,118 @@
+{
+  "status": "error",
+  "trace_id": "8e1e7af6-ee1f-49a5-9a51-f9e4f6e2684b",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills external-review Skills/agent-ops/codex-agent-creator --audit-level strict --dashboard --report-path Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.json --dashboard-path Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.html --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "policy": {
+      "mode": "local_internal_only",
+      "no_publish": true,
+      "no_registry_upload": true,
+      "uses_npx": false,
+      "tessl_review_default": "enabled_local_cli",
+      "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+      "primary_gate": "local_eval_ask_audit",
+      "external_quality_judge": "tessl_review",
+      "plugin_eval_role": "budget_and_ergonomics_guardrail",
+      "plugin_eval_min_acceptable_grade": "B+",
+      "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
+      "snyk_role": "optional_external_security_advisory",
+      "snyk_default": "disabled_until_requested",
+      "snyk_privacy_basis": "Snyk CLI security analysis may contact Snyk services. It is never run by default in this local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted."
+    },
+    "target": "Skills/agent-ops/codex-agent-creator",
+    "ask_audit": {
+      "status": "success",
+      "data": {
+        "diagnostics": {
+          "exit_code": 0,
+          "stdout": "\n📋 Diagnostic report: Skills/agent-ops/codex-agent-creator\n--------------------------------------------------\n  \u001b[32m✓\u001b[0m skill directory: Found at Skills/agent-ops/codex-agent-creator\n  \u001b[32m✓\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m✓\u001b[0m nested .git: No nested .git directory\n  \u001b[90m○\u001b[0m symlink (codex): Rooted latent skill is routed through .skillsets/agent-ops/manifest.jsonl and is not expected as a first-level user-runtime symlink: codex-agent-creator\n  \u001b[90m○\u001b[0m symlink (agents): Rooted latent skill is routed through .skillsets/agent-ops/manifest.jsonl and is not expected as a first-level user-runtime symlink: codex-agent-creator\n  \u001b[32m✓\u001b[0m skill index: Listed in SKILL.md index\n  \u001b[90m○\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m✓\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n✅ All checks passed\n",
+          "stderr": ""
+        },
+        "security_gate": {
+          "exit_code": 0,
+          "stdout": "Skill: codex-agent-creator\nPath:  /Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md\n\nWARN FM_METADATA_VERSION_MISSING: `metadata.version` is recommended for local Tessl review compatibility.\nWARN RESEARCH_EVALS_REALISTIC_FIELD_MISSING: Some trigger eval cases omit `realistic: true|false`; explicit declarations prevent style-word heuristics from becoming the source of truth. | missing=11/11\nWARN RESEARCH_SCOPE_OVERBUNDLED: Skill/package scope looks broad across many surfaces without explicit narrowing guidance. Prefer the smallest viable package boundary first. | surfaces=6\n\nRESULT: PASS\n",
+          "stderr": ""
+        },
+        "family_benchmarks": {
+          "exit_code": 0,
+          "stdout": "[family-benchmark] checked skills:\n  - Skills/agent-ops/codex-agent-creator\n[family-benchmark] pass: all family benchmark checks satisfied\n",
+          "stderr": ""
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "stdout": "OpenClaw skill guard: codex-agent-creator\nSummary: 0 critical · 0 warn · 2 info\nINFO readiness.checked: Operational readiness checks completed\nINFO security.no_scripts: No executable scripts found; static security scan skipped\n",
+          "stderr": ""
+        }
+      },
+      "errors": []
+    },
+    "plugin_eval": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/plugin-eval",
+        "analyze",
+        "Skills/agent-ops/codex-agent-creator",
+        "--format",
+        "markdown"
+      ],
+      "exit_code": 0,
+      "stdout": "# Plugin Eval Report: codex-agent-creator\n\n## At a Glance\n- Score: 95/100\n- Grade: A\n- Risk: medium\n- Checks: 0 fail, 1 warn, 2 info\n- Active budget: 2176 tokens (heavy)\n- Observed usage: not supplied\n\n## Why It Matters\n- 1 warning signal still need cleanup before this feels polished.\n- budget is the largest source of score loss at -4.5 points.\n- Active budget pressure is high enough that token cost may dominate the user experience.\n- No observed usage is attached yet, so budget conclusions are still based on static estimates.\n\n## Fix First\n- [warn/warning] invoke_cost_tokens is heavy relative to the current Codex baseline. Why: Budget pressure matters because always-loaded or frequently-loaded text can make the workflow feel expensive fast. Fix: Reduce repeated instruction text and move detail into deferred supporting files.\n\n## Recommended Next Step\n- Measure real token usage next\n- Why: The static budget looks heavy, so live usage is the fastest way to confirm whether the cost is acceptable.\n- Chat request: \"Measure the real token usage of this skill.\"\n- Local command: `plugin-eval start ~/dev/agent-skills/Skills/agent-ops/codex-agent-creator --request 'Measure the real token usage of this skill.' --format markdown`\n\n## Details\n<details>\n<summary>Watch next</summary>\n\n- No secondary findings queued.\n</details>\n<details>\n<summary>Improvement brief</summary>\n\n- Raise the evaluation from grade A (95/100) with a focus on the highest-signal structural and budget issues first.\n- Goal: Reduce repeated instruction text and move detail into deferred supporting files.\n- Measure: token-usage-observer\n- Measure: task-outcome-scorecard\n- Measure: latency-efficiency\n- Suggested prompt: Use the skill-creator guidance to improve codex-agent-creator. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard, latency-efficiency. Address invoke_cost_tokens-budget-high: invoke_cost_tokens is heavy relative to the current Codex baseline.\n</details>\n<details>\n<summary>Budgets and observed usage</summary>\n\n- trigger_cost_tokens: 38 (good)\n- invoke_cost_tokens: 2138 (heavy)\n- deferred_cost_tokens: 3821 (moderate)\n- total_tokens: 5997 (heavy)\n\n- No observed usage supplied.\n</details>\n<details>\n<summary>Measurement plan</summary>\n\nCombine cost, outcome, and trust signals so you can tell whether the skill or plugin is genuinely helping instead of only looking well-structured on paper.\n\n- Token Usage Observer [high] Measure how many tokens the skill or plugin actually burns in representative runs. Signals: observed_usage_sample_count, observed_input_tokens_avg, observed_total_tokens_avg, estimate_vs_observed_input_ratio. Evidence: Responses API usage logs, Codex-like session exports, JSONL traces captured from local benchmarking harnesses.\n- Task Outcome Scorecard [high] Measure whether the skill helps users finish the intended job with fewer retries and less cleanup. Signals: task_success_rate, first_pass_success_rate, retry_rate, human_override_rate. Evidence: Task run logs, Structured user acceptance checklist, Before/after comparison runs on the same prompts.\n- Tool Call Audit [medium] Check whether the agent uses the right tools, arguments, and sequencing when the skill is active. Signals: tool_call_success_rate, invalid_tool_argument_rate, recoverable_tool_failure_rate. Evidence: Tool invocation traces, Recorded sessions, Golden-path scenario replays.\n- Latency And Efficiency [high] Track whether the skill speeds users up enough to justify its cost. Signals: p50_time_to_first_acceptable_answer_seconds, p95_time_to_task_completion_seconds, tokens_per_successful_run. Evidence: Benchmark harness timings, Manual stopwatch runs on canonical tasks, Responses API timestamps combined with usage logs.\n- Human Rubric Review [medium] Capture clarity, trust, and usefulness signals that automated checks will miss. Signals: clarity_score_avg, confidence_score_avg, follow_up_question_rate. Evidence: Reviewer scorecards, Team rubric sheets, Annotated transcripts.\n</details>\n<details>\n<summary>Use From Codex Chat</summary>\n\nStart with a natural chat request, then let plugin-eval show the exact local command sequence behind it.\n\nStart with this chat request: \"Evaluate this skill.\"\nWhy this path: Plugin Eval recommended Evaluate Skill from the current local state for this skill.\nQuick local entrypoint: plugin-eval start ~/dev/agent-skills/Skills/agent-ops/codex-agent-creator --request 'Evaluate this skill.' --format markdown\nPlugin Eval will run first: plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/codex-agent-creator --format markdown\n\nOther chat requests you can use:\n- Full Skill Analysis: say \"Give me a full analysis of this skill, including benchmark setup.\" -> plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/codex-agent-creator --format markdown\n- Evaluate Skill: say \"Evaluate this skill.\" -> plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/codex-agent-creator --format markdown\n- Explain Token Budget: say \"Explain the token budget for this skill.\" -> plugin-eval explain-budget ~/dev/agent-skills/Skills/agent-ops/codex-agent-creator --format markdown\n- Measure Real Token Usage: say \"Measure the real token usage of this skill.\" -> plugin-eval init-benchmark ~/dev/agent-skills/Skills/agent-ops/codex-agent-creator\n- Benchmark With Starter Scenarios: say \"Help me benchmark this skill.\" -> plugin-eval init-benchmark ~/dev/agent-skills/Skills/agent-ops/codex-agent-creator\n- Start Here: say \"What should I run next?\" -> plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/codex-agent-creator --format markdown\n</details>\n<details>\n<summary>Checks</summary>\n\n- [WARN] invoke_cost_tokens-budget-high: invoke_cost_tokens is heavy relative to the current Codex baseline. Evidence: Value: 2138 tokens Baseline samples: skills=8, plugins=118 Remediation: Reduce repeated instruction text and move detail into deferred supporting files.\n- [INFO] coverage-artifacts-unavailable: No coverage artifacts were found for this target. Evidence: Skills/agent-ops/codex-agent-creator Remediation: Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring.\n</details>\n<details>\n<summary>Metrics</summary>\n\n- skill_line_count: 180 lines (good)\n- description_length_chars: 132 chars (good)\n- relative_link_count: 4 links (good)\n- code_fence_count: 0 blocks (good)\n- support_file_count: 5 files (good)\n- trigger_cost_tokens: 38 tokens (good)\n- invoke_cost_tokens: 2138 tokens (heavy)\n- deferred_cost_tokens: 3821 tokens (moderate)\n- coverage_artifact_count: 0 files (info)\n</details>\n<details>\n<summary>Score details</summary>\n\n- Starting score: 100\n- Total deductions: -4.75\n- Final score: 95\n- Risk: Contains 1 warning signal that still need attention.\n\n- -4.5 points: invoke_cost_tokens-budget-high [warn/warning] invoke_cost_tokens is heavy relative to the current Codex baseline.\n- -0.25 points: coverage-artifacts-unavailable [info/info] No coverage artifacts were found for this target.\n\n- budget: -4.5 points across 1 check\n- coverage: -0.25 points across 1 check\n</details>\n",
+      "stderr": "",
+      "status": "success"
+    },
+    "tessl_tile": {
+      "tile_path": "/tmp/agent-skills-tessl-8w6d1cet/tile.json",
+      "review_path": "/tmp/agent-skills-tessl-8w6d1cet/skills/codex-agent-creator",
+      "skill_key": "codex-agent-creator",
+      "source_skill": "Skills/agent-ops/codex-agent-creator",
+      "mode": "temporary_wrapper",
+      "reason": "Tessl validates tile.json packages; canonical repo skills remain SKILL.md-first.",
+      "tessl_home": "/tmp/agent-skills-tessl-8w6d1cet/home"
+    },
+    "tessl_lint": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/tessl",
+        "skill",
+        "lint",
+        "/tmp/agent-skills-tessl-8w6d1cet/tile.json"
+      ],
+      "exit_code": 1,
+      "stdout": "By using Tessl, you agree to our Terms: https://tessl.io/policies/terms\n\n",
+      "stderr": "✘ Missing tile content:\n- File not found: skills/codex-agent-creator/references/role-creation-guide.md (referenced from skills/codex-agent-creator/SKILL.md)\n- File not found: skills/codex-agent-creator/references/role-config-examples.md (referenced from skills/codex-agent-creator/SKILL.md)\n- File not found: skills/codex-agent-creator/references/contract.yaml (referenced from skills/codex-agent-creator/SKILL.md)\n- File not found: skills/codex-agent-creator/references/evals.yaml (referenced from skills/codex-agent-creator/SKILL.md)\n",
+      "status": "error"
+    },
+    "tessl_review": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/tessl",
+        "skill",
+        "review",
+        "/tmp/agent-skills-tessl-8w6d1cet/skills/codex-agent-creator"
+      ],
+      "exit_code": 0,
+      "stdout": "\nValidation Checks\n\n  ✔ skill_md_line_count - SKILL.md line count is 180 (<= 500)\n  ✔ frontmatter_valid - YAML frontmatter is valid\n  ✔ name_field - 'name' field is valid: 'codex-agent-creator'\n  ✔ description_field - 'description' field is valid (132 chars)\n  ✔ compatibility_field - 'compatibility' field not present (optional)\n  ✔ allowed_tools_field - 'allowed-tools' field not present (optional)\n  ⚠ metadata_version - 'metadata.version' is missing\n  ✔ metadata_field - 'metadata' contains 7 entries\n  ✔ license_field - 'license' field not present (optional)\n  ✔ frontmatter_unknown_keys - No unknown frontmatter keys found\n  ✔ body_present - SKILL.md body is present\n\nOverall: PASSED (0 errors, 1 warnings)\n\nJudge Evaluation\n\n  Description: 75%\n    specificity: 2/3 - Lists several concrete actions (create, validate, install, fold, troubleshoot) but the domain objects ('Codex custom subagent role TOML', 'agent discoverability config') are somewhat niche and not fully elaborated in terms of what those actions produce or entail.\n    trigger_term_quality: 2/3 - Includes some relevant keywords like 'TOML', 'subagent', 'Codex', 'role', and 'config', but uses specialized jargon ('fold', 'agent discoverability config') that users may not naturally say. Missing common variations or simpler phrasings a user might use.\n    completeness: 3/3 - Explicitly answers both 'what' (create, validate, install, fold, troubleshoot Codex custom subagent role TOML and agent discoverability config) and 'when' (starts with 'Use when asked to...'), providing clear trigger guidance.\n    distinctiveness_conflict_risk: 3/3 - Highly specific niche targeting Codex custom subagent role TOML and agent discoverability config. Very unlikely to conflict with other skills due to the narrow, well-defined domain.\n\n    Assessment: The description has a clear 'Use when' clause and targets a very specific niche, making it strong on completeness and distinctiveness. However, the specialized jargon may not match how users naturally phrase requests, and the specific actions could be elaborated further to clarify what each entails (e.g., what 'fold' means in this context).\n\n    Suggestions:\n      - Add more natural trigger terms or synonyms users might say, such as 'agent configuration', 'TOML config files', 'custom roles', or 'subagent setup'.\n      - Clarify domain-specific terms like 'fold' and 'agent discoverability config' so the description is self-explanatory without prior context.\n\n  Content: 35%\n    conciseness: 1/3 - The skill is extremely verbose with many sections that describe abstract processes, policies, and philosophical guidance rather than concrete instructions. Much of the content (Philosophy, Evidence Requirements, Safety Boundaries, Accessibility Requirements, Anti-Patterns) reads like organizational policy documentation that Claude doesn't need spelled out at this length. Many sections use vague, bureaucratic language ('side-effect class', 'evidence ledger', 'confidence bands') without defining them concretely.\n    actionability: 2/3 - The skill provides some concrete guidance like specific file paths (codex-rs/config/src/config_toml.rs), specific config keys (name, description, nickname_candidates), and a validation command (./bin/ask skills audit...). However, it lacks any executable code examples, concrete TOML templates, or copy-paste-ready role definitions. The procedure steps are abstract ('Classify target kind and canonical source') rather than showing exactly what to do.\n    workflow_clarity: 2/3 - The 8-step procedure provides a sequence, and the validation gates section includes a feedback loop ('stop at the first failed gate; fix the failure class and rerun'). However, the steps themselves are abstract and lack concrete validation checkpoints within the procedure. The separation of procedure from validation gates makes the workflow harder to follow as an integrated process.\n    progressive_disclosure: 2/3 - The Context Routes section provides well-signaled one-level-deep references to supporting files (role-creation-guide.md, role-config-examples.md, contract.yaml, evals.yaml). However, no bundle files were provided to verify these references exist, and the main body contains substantial inline content that could be offloaded (Anti-Patterns, Gotchas, Safety Boundaries could be in references). The skill is quite long for what could be a more concise overview pointing to detailed materials.\n\n    Assessment: This skill reads more like an organizational policy document than an actionable skill for Claude. It is heavy on abstract governance language (evidence ledgers, confidence bands, side-effect classes, harness placement) but light on concrete, executable examples like actual TOML templates or step-by-step commands. The structure is reasonable with clear section headers and reference links, but the verbosity and abstraction significantly reduce its practical utility.\n\n    Suggestions:\n      - Add a concrete, copy-paste-ready TOML role file example at the top (Quick Start) showing a minimal valid agent role with required fields like developer_instructions, name, and description.\n      - Replace abstract procedure steps like 'Classify target kind and canonical source' with concrete instructions showing exact commands or file operations to perform.\n      - Consolidate or remove sections that describe policies Claude can infer (Philosophy, Accessibility Requirements, much of Safety Boundaries) to reduce token usage by ~40%.\n      - Move Anti-Patterns, Gotchas, and Evidence Requirements into a reference file and link to it, keeping only the most critical 2-3 items inline.\n\nReview Score: 63%\nOnly SKILL.md was reviewed. Log in with tessl login to include all supporting files in the review.\n\n",
+      "stderr": "- Reviewing skill...\n⚠ Skill is valid but could be improved.\n",
+      "status": "success"
+    },
+    "snyk": {
+      "status": "skipped",
+      "reason": "Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted."
+    },
+    "report_path": "Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.json",
+    "dashboard_path": "Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.html",
+    "dashboard_url": "file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.html"
+  },
+  "telemetry": {
+    "latency_ms": 3044
+  },
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "message": "Tessl skill lint failed during local-only external review.",
+      "fix_suggestion": "Inspect data.tessl_lint for Tessl's validation output."
+    }
+  ]
+}

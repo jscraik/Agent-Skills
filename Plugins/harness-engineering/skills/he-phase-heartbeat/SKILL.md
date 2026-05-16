@@ -39,6 +39,10 @@ active phase, live-state status, validation outcomes, `slack_policy`,
 `stop_rule_status`, and `next_safe_action`.
 
 ## Procedure
+Apply the context-disposition policy: move important still-valid context to
+references, and intentionally discard stale, duplicated, unsafe, superseded, or
+low-signal text.
+
 1. Confirm the approved plan path, target issue/PR, workspace, branch, dirty
    state, active phase, validation command, and stop condition.
 2. Reuse an existing matching 10 minute `he-heartbeat`; create one only when

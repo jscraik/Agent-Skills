@@ -1,0 +1,96 @@
+{
+  "status": "error",
+  "trace_id": "2ad01d0f-8f73-46af-abde-3f5f18fe6911",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "evals run Skills/agent-ops/agents-md --mode smoke --runner discovery-smoke --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "lifecycle_events": [
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_started",
+        "event_definition": "A workout, smoke eval, or proof run started for a capability.",
+        "occurred_at": "2026-05-16T13:42:17Z",
+        "subject": {
+          "query": "Skills/agent-ops/agents-md",
+          "target_kind": "skill_path",
+          "handle": "agents-md",
+          "canonical_source_path": "Skills/agent-ops/agents-md",
+          "eval_mode": "smoke",
+          "runner": "discovery-smoke"
+        },
+        "outcome": {
+          "status": "running",
+          "blocker_classes": [],
+          "warning_classes": []
+        }
+      },
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_completed",
+        "event_definition": "A workout, smoke eval, or proof run completed with pass or fail status.",
+        "occurred_at": "2026-05-16T13:42:17Z",
+        "subject": {
+          "query": "Skills/agent-ops/agents-md",
+          "target_kind": "skill_path",
+          "handle": "agents-md",
+          "canonical_source_path": "Skills/agent-ops/agents-md",
+          "eval_mode": "smoke",
+          "runner": "discovery-smoke"
+        },
+        "outcome": {
+          "status": "fail",
+          "blocker_classes": [],
+          "warning_classes": []
+        }
+      }
+    ],
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "eval_completed",
+      "event_definition": "A workout, smoke eval, or proof run completed with pass or fail status.",
+      "occurred_at": "2026-05-16T13:42:17Z",
+      "subject": {
+        "query": "Skills/agent-ops/agents-md",
+        "target_kind": "skill_path",
+        "handle": "agents-md",
+        "canonical_source_path": "Skills/agent-ops/agents-md",
+        "eval_mode": "smoke",
+        "runner": "discovery-smoke"
+      },
+      "outcome": {
+        "status": "fail",
+        "blocker_classes": [],
+        "warning_classes": []
+      }
+    },
+    "lifecycle_event_types": {
+      "eval_started": "A workout, smoke eval, or proof run started for a capability.",
+      "eval_blocked": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+      "eval_completed": "A workout, smoke eval, or proof run completed with pass or fail status."
+    },
+    "raw_output": "",
+    "raw_error": "ERROR: discovery-smoke runner requires eval cases with `smoke_mode`; none matched the selected filters. Use a live runner such as `codex` for behavior evals, or add discovery-specific smoke_mode cases.\n",
+    "eval_status": "fail",
+    "blocker_class": null,
+    "blocker_taxonomy": {
+      "blocked_user_input": "The runner requested user input and should not be treated as hung.",
+      "blocked_auth": "The runner stopped on authentication or credential setup.",
+      "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
+      "timeout_no_output": "The eval timed out without producing final output.",
+      "timeout_partial_output": "The eval timed out after producing partial output."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 62
+  },
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "message": "Evaluation run failed."
+    }
+  ]
+}

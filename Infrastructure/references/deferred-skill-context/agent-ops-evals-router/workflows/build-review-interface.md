@@ -12,6 +12,29 @@ description: >
 
 Build an HTML page that loads traces from a data source (JSON/CSV file), displays one trace at a time with Pass/Fail buttons, a free-text notes field, and Next/Previous navigation. Save labels to a local file (CSV/SQLite/JSON). Then customize to the domain using the guidelines below.
 
+## Codex Skill Eval Lens
+
+For Codex skill eval review, the interface must show enough run evidence for a human to judge the skill, not just the final answer.
+
+Display these fields when available:
+
+- prompt, expected skill, selected skill, and trigger expectation
+- JSONL timeline with command/tool events, failures, and retries
+- files created, modified, or unexpectedly left behind
+- validation commands and exact pass/fail/blocked outcomes
+- final answer and any claimed evidence
+- token usage, elapsed time, and repeated command counts
+- secret-redaction and destructive-command pressure indicators
+
+Primary labels should be `Pass`, `Fail`, and `Defer`. Add failure-mode tags only after `error-analysis` establishes the taxonomy.
+
+## Prerequisites
+
+- A local trace or scorecard source to review.
+- A small representative sample before building full import/export flows.
+- A label schema with `Pass`, `Fail`, and `Defer` defined.
+- A storage target for labels that keeps private traces local unless the user explicitly approves external tooling.
+
 ## Data Display
 
 Format all data in the most human-readable representation for the domain. Emails should look like emails. Code should have syntax highlighting. Markdown should be rendered. Tables should be tables. JSON should be pretty-printed and collapsible.
@@ -94,3 +117,10 @@ After building the interface, verify it with Playwright.
 7. Verify auto-save by reloading the page and checking labels persist
 8. Expand collapsed sections (system prompts, tool calls) and verify content is accessible
 9. Test that all keyboard shortcuts trigger the correct actions
+
+## Anti-Patterns
+
+- Building a polished dashboard before the reviewer can see the evidence needed to judge a trace.
+- Adding failure-mode tags before `error-analysis` has established the taxonomy.
+- Hiding command output, artifacts, validation status, or cleanup state behind summary-only UI.
+- Uploading private traces, prompts, labels, or skill content to external services without explicit approval.

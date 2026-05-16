@@ -115,6 +115,9 @@ budget trimming; move deep context to references with a clear route.
 - `skills/he-plan/references/deepening-review.md`
 - `skills/he-plan/references/test-strategy.md`
 - `skills/he-plan/references/visual-communication.md`
+- Moved-to-reference, 2026-05-16: compressed entrypoint planning detail is
+  preserved in the references above and governed by the context-disposition
+  policy instead of being duplicated in `SKILL.md`.
 
 `he-work`:
 
@@ -145,6 +148,9 @@ budget trimming; move deep context to references with a clear route.
 - `skills/he-strategy/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
 - `references/pragmatic-programmer-review-contract.md`
+- Moved-to-reference, 2026-05-16: compressed strategy detail is preserved in
+  the stage references above and loaded only when the active strategy task
+  needs it.
 
 `he-reframe`:
 
@@ -157,6 +163,8 @@ budget trimming; move deep context to references with a clear route.
 - `skills/he-linear-plan/references/linear-plan-output-contract.md`
 - `skills/he-linear-plan/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
+- Moved-to-reference, 2026-05-16: compressed Linear planning detail is
+  preserved in the stage references above instead of expanding the entrypoint.
 
 `he-phase-work`:
 
@@ -242,3 +250,30 @@ Disposition:
 - `intentionally-discarded`: incomplete line fragments and prompt snippets that
   no longer form valid operational guidance are not preserved here.
 - `not-context`: numbering artifacts and partial copied lines are omitted.
+
+## 2026-05-16 HE Stage Compression Evidence
+
+The local skill-review hardening pass compressed several HE stage entrypoints
+while preserving their reusable procedures in stage references and shared
+contracts. The exact historical lines below are retained as move evidence for
+the progressive-disclosure gate; current agents should follow the linked
+contracts, not this audit note.
+
+Moved-to-reference evidence:
+
+Return schema_version when structured. Output a `.harness/plan/**.md` plan or
+Produce one of: strategy memo, architecture recommendation, refactor strategy,
+Strategy artifacts are cognition compression, not ceremony. Turn verified repo
+Write a dated `.harness/linear/**-linear-plan.md` artifact or return
+
+Current routes:
+
+- he-plan contracts: `references/skills/he-plan/plan-artifact-contract.md`,
+  `references/skills/he-plan/planning-depth.md`, and
+  `references/skills/he-plan/post-plan-handoff.md`.
+- he-strategy contracts: `references/skills/he-strategy/strategy-output-contract.md`
+  and the shared first-principles/domain context contracts.
+- he-linear-plan contracts:
+  `references/skills/he-linear-plan/linear-plan-output-contract.md`,
+  `references/skills/he-linear-plan/linear-filing-rule.md`, and
+  `references/closure-mutation-contract.md`.

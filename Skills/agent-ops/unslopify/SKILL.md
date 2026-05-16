@@ -1,7 +1,8 @@
 ---
 name: unslopify
-description: "WHAT: Run focused cleanup audits and safe removal planning. WHEN: Use when stale-code checks, dead exports, quality-risk reduction, or scoped cleanup evidence are needed."
+description: "Audit unused functions, dead exports, orphaned modules, stale imports, unreachable code, and tech-debt cleanup candidates with evidence-backed removal guidance. Use when unused code, dead code, remove unused imports, stale-code checks, or scoped cleanup evidence are needed."
 metadata:
+  version: 0.1.0
   skill-type: runbook
   lifecycle_state: active
   maturity: validated
@@ -10,9 +11,7 @@ metadata:
   metadata_source: frontmatter
   risk: medium
   projection: latent
-  handles:
-    - unslopify
-    - $unslopify
+  handles: "unslopify, $unslopify"
   canonical_handle: unslopify
   runtime_visibility: latent
   command_visibility: target
@@ -62,6 +61,14 @@ review or package hardening that does not depend on route availability.
 ## Deliverables
 
 Return `schema_version: 1`, cleanup ledger, evidence for each action, changed files, validation outcomes, rollback notes, skipped work, and residual risk.
+
+## Discovery Interview
+
+- Ask one round at a time.
+- Use a plain-language question.
+- Explain why this matters for the current skill decision.
+- avoid dumping the whole interview plan at once.
+- Read `references/discovery-interview.md` when the request is underspecified.
 
 ## Workflow
 

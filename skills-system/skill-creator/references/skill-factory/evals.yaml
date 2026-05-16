@@ -127,6 +127,20 @@ cases:
     acceptance:
       - {type: regex, value: "(?i)(do not copy|wholesale|local assumptions|paths|account|host)"}
       - {type: regex, value: "(?i)(validation|pass|fail|blocked|evidence)"}
+  - id: happy-codex-eval-loop
+    name: skill creation includes Codex eval loop
+    category: happy
+    realistic: true
+    why_realistic: "Operators want new skills to ship with eval prompts and readiness gates instead of relying on manual impressions."
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Create a Codex skill from this repeated workflow and include the eval plan while you author it: realistic prompts, with-skill versus baseline comparison, deterministic checks, weak-eval critique, and readiness evidence."
+    acceptance:
+      - {type: regex, value: '(?is)(references/evals\.yaml|evals\.yaml|eval cases|realistic prompts)'}
+      - {type: regex, value: "(?is)(baseline|previous skill|comparator|with-skill|without skill|no-skill)"}
+      - {type: regex, value: "(?is)(deterministic checks|commands|artifacts|run traces|weak eval|assertions)"}
+      - {type: regex, value: "(?is)(pass|fail|blocked|validation evidence|readiness)"}
   - id: negative-other-lane
     name: plugin marketing nonmatch
     category: negative

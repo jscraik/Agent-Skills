@@ -24,6 +24,10 @@ Selected mode, repo files, relevant `.harness/**` artifacts, source prompt famil
 Write one selected artifact under `.harness/features/`, `.harness/review/`, `.harness/triage/`, `.harness/strategy/`, `.harness/decisions/`, or `.harness/core/`; otherwise return `Do Not Create`.
 
 ## Procedure
+Apply the context-disposition policy: move important still-valid context to
+references, and intentionally discard stale, duplicated, unsafe, superseded, or
+low-signal text.
+
 1. Select one mode. If the user asks for the full repo cognition pipeline, produce separate intent, architecture review, and triage artifacts.
 2. Start with 2-3 focused surfaces. If they do not prove the claim, read one more. Stop at five unless the user asks for deeper research.
 3. For each conclusion, split `fact` from `interpretation`:

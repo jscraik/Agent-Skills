@@ -68,7 +68,37 @@ def _first_match(pattern: str, text: str, default: Any = None) -> Any:
     return match.group(1)
 
 
-def _parse_tessl_review(stdout: str) -> dict[str, Any]:
+def _grade_rank(grade: Any) -> int:
+    raw = str(grade or "").strip().upper()
+    ranks = {
+        "A+": 12,
+        "A": 11,
+        "A-": 10,
+        "B+": 9,
+        "B": 8,
+        "B-": 7,
+        "C+": 6,
+        "C": 5,
+        "C-": 4,
+        "D": 3,
+        "F": 0,
+    }
+    match = re.match(r"([A-F][+-]?)\b", raw)
+    return ranks.get(match.group(1), -1) if match else -1
+
+
+def _parse_tessl_review(stdout: str, status: str = "") -> dict[str, Any]:
+    if status in {"not_run", "skipped"}:
+        return {
+            "review_score": 0,
+            "description_score": 0,
+            "content_score": 0,
+            "validation_score": 0,
+            "dimensions": [],
+            "suggestions": [stdout.strip() or "Tessl review was not run for this report."],
+            "status": status,
+        }
+
     review_score = _percent(_first_match(r"Review Score:\s*(\d+(?:\.\d+)?)%", stdout, 0))
     description = _percent(_first_match(r"Description:\s*(\d+(?:\.\d+)?)%", stdout, 0))
     content = _percent(_first_match(r"Content:\s*(\d+(?:\.\d+)?)%", stdout, 0))
@@ -105,21 +135,61 @@ def _parse_tessl_review(stdout: str) -> dict[str, Any]:
         "validation_score": validation,
         "dimensions": dimensions,
         "suggestions": suggestions,
+        "status": status or "reported",
     }
 
 
-def _parse_plugin_eval(stdout: str) -> dict[str, Any]:
+def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
+    if status in {"not_run", "skipped"}:
+        return {
+            "score": 0,
+            "grade": status.replace("_", " "),
+            "risk": status.replace("_", " "),
+            "checks": status.replace("_", " "),
+            "fail_count": 0,
+            "warn_count": 0,
+            "posture": "skipped",
+            "posture_detail": stdout.strip() or "Plugin Eval was not run for this report.",
+            "findings": [],
+            "status": status,
+        }
+
     score_raw = _first_match(r"Score:\s*(\d+)\s*/\s*100", stdout, None)
     grade = _first_match(r"Grade:\s*([^\n]+)", stdout, "Not reported")
     risk = _first_match(r"Risk:\s*([^\n]+)", stdout, "Not reported")
     checks = _first_match(r"Checks:\s*([^\n]+)", stdout, "Not reported")
     findings = [line.strip("- ") for line in stdout.splitlines() if line.strip().startswith("- ")][:8]
+    fail_count = int(_first_match(r"(\d+)\s+fail", str(checks), 0) or 0)
+    warn_count = int(_first_match(r"(\d+)\s+warn", str(checks), 0) or 0)
+    grade_text = grade.strip() if isinstance(grade, str) else grade
+    grade_acceptable = _grade_rank(grade_text) >= _grade_rank("B+")
+    if fail_count:
+        posture = "blocking"
+        posture_detail = "Plugin Eval has failure-level findings and must block release confidence."
+    elif not grade_acceptable:
+        posture = "blocking"
+        posture_detail = "Plugin Eval is below the B+ local acceptance floor."
+    elif warn_count:
+        posture = "budget_guardrail"
+        posture_detail = (
+            "Acceptable as a budget guardrail when local audit and Tessl quality pass; "
+            "track warnings as follow-up or prove observed usage."
+        )
+    else:
+        posture = "pass"
+        posture_detail = "Plugin Eval meets the local budget and ergonomics guardrail."
     return {
         "score": int(score_raw) if score_raw is not None else 0,
-        "grade": grade.strip() if isinstance(grade, str) else grade,
+        "grade": grade_text,
         "risk": risk.strip() if isinstance(risk, str) else risk,
         "checks": checks.strip() if isinstance(checks, str) else checks,
+        "fail_count": fail_count,
+        "warn_count": warn_count,
+        "grade_acceptable": grade_acceptable,
+        "posture": posture,
+        "posture_detail": posture_detail,
         "findings": findings,
+        "status": status or "reported",
     }
 
 
@@ -150,10 +220,101 @@ def _audit_security_summary(audit_data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _parse_snyk_security(snyk_data: dict[str, Any]) -> dict[str, Any]:
+    status = str(snyk_data.get("status") or "not_reported")
+    stdout = str(snyk_data.get("stdout") or "")
+    stderr = str(snyk_data.get("stderr") or "")
+    severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+    project_count = 0
+    vuln_count = 0
+    notes: list[str] = []
+
+    def visit_report(report: Any) -> None:
+        nonlocal project_count, vuln_count
+        if not isinstance(report, dict):
+            return
+        project_count += 1
+        vulns = report.get("vulnerabilities")
+        if isinstance(vulns, list):
+            vuln_count += len(vulns)
+            for vuln in vulns:
+                if not isinstance(vuln, dict):
+                    continue
+                severity = str(vuln.get("severity") or "").lower()
+                if severity in severity_counts:
+                    severity_counts[severity] += 1
+        summary = report.get("summary")
+        if isinstance(summary, str) and summary:
+            notes.append(summary)
+        error = report.get("error") or report.get("message")
+        if isinstance(error, str) and error:
+            notes.append(error)
+
+    if stdout.strip():
+        try:
+            parsed = json.loads(stdout)
+        except json.JSONDecodeError:
+            notes.append(stdout.strip().splitlines()[0][:220])
+        else:
+            if isinstance(parsed, list):
+                for item in parsed:
+                    visit_report(item)
+            else:
+                visit_report(parsed)
+    if stderr.strip():
+        notes.append(stderr.strip().splitlines()[0][:220])
+
+    if status == "skipped":
+        posture = "skipped"
+        score = 100
+        headline = "Snyk advisory not requested"
+    elif status == "not_applicable":
+        posture = "skipped"
+        score = 100
+        headline = "Snyk found no supported project files in this skill folder"
+    elif status.startswith("blocked"):
+        posture = "blocked"
+        score = 70
+        headline = "Snyk advisory blocked"
+    elif status == "timeout":
+        posture = "blocked"
+        score = 70
+        headline = "Snyk advisory timed out"
+    elif severity_counts["critical"] or severity_counts["high"]:
+        posture = "advisory"
+        score = 45
+        headline = "Snyk reported high-severity security advisories"
+    elif severity_counts["medium"] or severity_counts["low"] or status == "advisory":
+        posture = "advisory"
+        score = 70
+        headline = "Snyk reported security advisories"
+    else:
+        posture = "pass"
+        score = 100
+        headline = "Snyk advisory clean"
+
+    reason = snyk_data.get("reason")
+    if isinstance(reason, str) and reason:
+        notes.insert(0, reason)
+
+    return {
+        "status": status,
+        "posture": posture,
+        "score": score,
+        "headline": headline,
+        "project_count": project_count,
+        "vulnerability_count": vuln_count,
+        "severity_counts": severity_counts,
+        "notes": notes[:8],
+    }
+
+
 def _case_runner_status(case: dict[str, Any]) -> tuple[int, str, list[str]]:
     if case.get("blocked") is True:
-        warnings = [str(item) for item in _as_list(case.get("warnings"))]
-        return 0, "blocked", warnings[:4]
+        blocked_reasons = [str(item) for item in _as_list(case.get("blocked_reasons"))]
+        if not blocked_reasons:
+            blocked_reasons = [str(item) for item in _as_list(case.get("warnings"))]
+        return 0, "blocked", blocked_reasons[:4]
     if case.get("passed") is True:
         return 100, "passed", []
     failures = [str(item) for item in _as_list(case.get("tier1_failures"))]
@@ -276,7 +437,8 @@ def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[st
         "scored_cases": scored_total,
         "blocked_cases": blocked,
         "message": (
-            f"{passed}/{scored_total} latest eval cases passed; {blocked} blocked by runner environment."
+            f"{passed}/{total} latest eval cases passed; {blocked} blocked by runner environment; "
+            f"{scored_total} scored."
             if blocked
             else (f"{passed}/{total} latest eval cases passed." if total else "Latest scorecard had no cases.")
         ),
@@ -292,8 +454,16 @@ def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[st
 
 def _quality_model(report: dict[str, Any]) -> dict[str, Any]:
     data = _as_dict(report.get("data"))
-    tessl = _parse_tessl_review(str(_as_dict(data.get("tessl_review")).get("stdout") or ""))
-    plugin = _parse_plugin_eval(str(_as_dict(data.get("plugin_eval")).get("stdout") or ""))
+    tessl_data = _as_dict(data.get("tessl_review"))
+    plugin_data = _as_dict(data.get("plugin_eval"))
+    tessl = _parse_tessl_review(
+        str(tessl_data.get("stdout") or ""),
+        str(tessl_data.get("status") or ""),
+    )
+    plugin = _parse_plugin_eval(
+        str(plugin_data.get("stdout") or ""),
+        str(plugin_data.get("status") or ""),
+    )
     quality = tessl["review_score"] or round((tessl["description_score"] + tessl["content_score"] + tessl["validation_score"]) / 3)
     if not quality:
         quality = plugin["score"]
@@ -329,6 +499,22 @@ def _render_dimension_rows(dimensions: list[dict[str, Any]]) -> str:
     return "\n".join(rows)
 
 
+def _plugin_posture_class(plugin: dict[str, Any]) -> str:
+    if plugin.get("posture") == "blocking":
+        return "bad"
+    if plugin.get("posture") == "budget_guardrail":
+        return "warn"
+    return "good"
+
+
+def _snyk_posture_class(snyk: dict[str, Any]) -> str:
+    if snyk.get("posture") in {"pass", "skipped"}:
+        return "good"
+    if snyk.get("posture") == "blocked":
+        return "warn"
+    return "bad"
+
+
 def _render_eval_cases(evals: dict[str, Any]) -> str:
     if not evals.get("available"):
         return f"""
@@ -342,9 +528,14 @@ def _render_eval_cases(evals: dict[str, Any]) -> str:
     for case in _as_list(evals.get("cases")):
         pct = int(case.get("score") or 0)
         baseline = case.get("baseline_score")
+        status = str(case.get("status") or "")
         baseline_cell = (
             f"<td class=\"score {_status_class(int(baseline))}\">{int(baseline)}%</td>"
             if isinstance(baseline, int)
+            else "<td><span>Blocked</span></td>"
+            if status == "blocked"
+            else "<td><span>Passed</span></td>"
+            if status == "passed"
             else "<td><span>Not run</span></td>"
         )
         rows.append(
@@ -362,11 +553,50 @@ def _render_eval_cases(evals: dict[str, Any]) -> str:
           <span class=\"pill {_status_class(int(evals.get('score') or 0))}\">{int(evals.get('score') or 0)}%</span>
         </div>
         <table>
-          <thead><tr><th>Scenario</th><th>Without Context</th><th>With Context</th><th>Evidence</th></tr></thead>
+          <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
           <tbody>{''.join(rows)}</tbody>
         </table>
       </section>
     """
+
+
+def _render_review_mode_details(details: dict[str, Any]) -> str:
+    lanes = [
+        ("local_evals", "Local Evals"),
+        ("plugin_eval", "Plugin Eval"),
+        ("tessl_lint", "Tessl Lint"),
+        ("tessl_review", "Tessl Review"),
+        ("snyk", "Snyk"),
+    ]
+    rows: list[str] = []
+    for key, label in lanes:
+        lane = _as_dict(details.get(key))
+        if not lane:
+            continue
+        role = lane.get("role") or "Not described in this report."
+        command = lane.get("command") or "not recorded"
+        badges = []
+        for field in ("status", "default", "release_required", "canonical_source_shape"):
+            value = lane.get(field)
+            if value:
+                badges.append(f"{field.replace('_', ' ')}: {_escape(value)}")
+        badge_html = "".join(f"<span class=\"lane-badge\">{badge}</span>" for badge in badges)
+        rows.append(
+            "<div class=\"review-lane\">"
+            f"<div><h3>{_escape(label)}</h3><p>{_escape(role)}</p>{badge_html}</div>"
+            f"<code>{_escape(command)}</code>"
+            "</div>"
+        )
+    if not rows:
+        return ""
+    return (
+        "<div class=\"review-lanes\">"
+        "<div class=\"section-head\"><div><h2>Review Lanes</h2>"
+        "<p>How this local dashboard separates behavior checks, static guardrails, Tessl review, and optional security screening.</p>"
+        "</div></div>"
+        f"{''.join(rows)}"
+        "</div>"
+    )
 
 
 def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_root: Path) -> Path:
@@ -375,6 +605,8 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
         raise ValueError("Review report must be a JSON object.")
 
     data = _as_dict(report.get("data"))
+    policy = _as_dict(data.get("policy"))
+    review_mode_details = _as_dict(data.get("review_mode_details"))
     target = str(data.get("target") or "unknown-skill")
     skill_name = Path(target).name
     quality_model = _quality_model(report)
@@ -382,7 +614,10 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
     plugin = quality_model["plugin"]
     evals = _eval_model(repo_root, report, target)
     security = _audit_security_summary(_as_dict(data.get("ask_audit")))
-    security_score = 100 if security["critical_count"] == 0 and security["warning_count"] == 0 else 70
+    snyk = _parse_snyk_security(_as_dict(data.get("snyk")))
+    base_security_score = 100 if security["critical_count"] == 0 and security["warning_count"] == 0 else 70
+    snyk_score = int(snyk.get("score") or 100)
+    security_score = min(base_security_score, snyk_score)
     impact_score = int(evals.get("score") or 0)
     impact_badge = ""
     if isinstance(evals.get("trend_ratio"), (int, float)) and evals["trend_ratio"] > 1:
@@ -395,9 +630,16 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
 
     suggestions = tessl.get("suggestions") or plugin.get("findings") or []
     suggestion_html = "".join(f"<li>{_escape(item)}</li>" for item in suggestions[:8]) or "<li>No suggestions reported.</li>"
+    plugin_findings_html = "".join(f"<li>{_escape(item)}</li>" for item in plugin.get("findings", [])[:6]) or "<li>No Plugin Eval findings reported.</li>"
+    plugin_posture_class = _plugin_posture_class(plugin)
     security_lines = security.get("lines") or []
     security_html = "".join(f"<li>{_escape(item)}</li>" for item in security_lines) or "<li>No local security warnings or errors were reported by the internal audit.</li>"
+    snyk_class = _snyk_posture_class(snyk)
+    severity = _as_dict(snyk.get("severity_counts"))
+    snyk_notes = _as_list(snyk.get("notes"))
+    snyk_notes_html = "".join(f"<li>{_escape(item)}</li>" for item in snyk_notes) or "<li>No Snyk notes reported.</li>"
     scorecard_path = evals.get("scorecard_path")
+    review_lanes_html = _render_review_mode_details(review_mode_details)
 
     document = f"""<!doctype html>
 <html lang=\"en\" data-auto-refresh-seconds=\"{refresh_seconds if validation_active else 0}\">
@@ -448,6 +690,10 @@ h3 {{ font-size:20px; margin:0 0 10px; }}
 .grid {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }}
 .panel {{ border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:20px; }}
 .panel strong {{ display:block; font-size:24px; margin-top:8px; }}
+.plugin-posture {{ margin-top:18px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:start; }}
+.plugin-posture ul {{ grid-column:1 / -1; margin:0; padding-left:18px; color:var(--muted); }}
+.plugin-score {{ display:flex; align-items:center; gap:12px; }}
+.posture-detail {{ grid-column:1 / -1; margin:0; color:var(--muted); }}
 .pill {{ display:inline-flex; align-items:center; border-radius:7px; padding:3px 8px; font-weight:800; background:#1b2220; border:1px solid #2d4733; }}
 .pill.warn {{ background:#2a2618; border-color:#504721; }} .pill.bad {{ background:#2c1d1b; border-color:#56302b; }}
 table {{ width:100%; border-collapse:collapse; }}
@@ -459,7 +705,15 @@ td span {{ color:var(--muted); }}
 .suggestions li,.empty-state p {{ color:var(--muted); margin:10px 0; }}
 .evidence-list {{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }}
 .evidence-list a,.evidence-list div {{ border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }}
+.review-lanes {{ margin-top:24px; }}
+.review-lane {{ display:grid; grid-template-columns:minmax(0,1fr) minmax(220px,420px); gap:18px; align-items:start; border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:16px; margin:12px 0; }}
+.review-lane h3 {{ margin:0 0 4px; }}
+.review-lane p {{ margin:0 0 10px; color:var(--muted); }}
+.review-lane code {{ display:block; white-space:normal; overflow-wrap:anywhere; }}
+.lane-badge {{ display:inline-flex; margin:0 6px 6px 0; border:1px solid #303641; border-radius:7px; padding:2px 7px; background:#171b22; color:var(--muted); font-size:12px; font-weight:800; }}
 @media (max-width: 1100px) {{ .shell {{ grid-template-columns:1fr; }} .sidebar {{ position:relative; height:auto; }} .hero {{ grid-template-columns:1fr; }} .grid,.evidence-list {{ grid-template-columns:1fr; }} .tabs a {{ min-width:104px; }} }}
+@media (max-width: 900px) {{ .review-lane {{ grid-template-columns:1fr; }} }}
+@media (max-width: 700px) {{ .plugin-posture {{ grid-template-columns:1fr; }} .plugin-score {{ justify-content:flex-start; }} }}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {{
@@ -530,12 +784,12 @@ document.addEventListener('DOMContentLoaded', () => {{
       <div><div class=\"hex\">{overall}</div>{impact_badge}</div>
       <div>
         <h1>{_escape(skill_name)}</h1>
-        <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, and available skill eval scorecards are rendered together without publishing or uploading skill content.</p>
+        <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class=\"metrics\">
         {_render_bar('Quality', quality_score, 'Best-practice fit from Tessl plus internal review signals.')}
         {_render_bar('Impact', impact_score, evals.get('message') if evals.get('available') else 'No scenario eval scorecard found yet.')}
-        {_render_bar('Security', security_score, 'Internal local audit and OpenClaw warning summary.')}
+        {_render_bar('Security', security_score, 'Internal audit, OpenClaw, and optional Snyk CLI advisory summary.')}
       </div>
     </header>
     <nav class=\"tabs\" role=\"tablist\" aria-label=\"Review result sections\">
@@ -548,6 +802,15 @@ document.addEventListener('DOMContentLoaded', () => {{
         <div class=\"panel\"><h3>Discovery</h3><p>Description activation quality</p><strong class=\"{_status_class(tessl['description_score'])}\">{tessl['description_score']}%</strong></div>
         <div class=\"panel\"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class=\"{_status_class(tessl['content_score'])}\">{tessl['content_score']}%</strong></div>
         <div class=\"panel\"><h3>Validation</h3><p>Format and structure checks</p><strong class=\"{_status_class(tessl['validation_score'])}\">{tessl['validation_score']}%</strong></div>
+      </div>
+      <div class=\"panel plugin-posture\">
+        <div>
+          <h3>Plugin Eval</h3>
+          <p>Budget and Codex ergonomics guardrail. Local policy accepts <code>B+</code> or better when there are no failure-level findings and local/Tessl gates pass.</p>
+        </div>
+        <div class=\"plugin-score\"><span class=\"pill {plugin_posture_class}\">{_escape(plugin.get('grade') or 'Not reported')}</span><strong class=\"{_status_class(int(plugin.get('score') or 0))}\">{int(plugin.get('score') or 0)}%</strong></div>
+        <p class=\"posture-detail {_escape(plugin_posture_class)}\">{_escape(plugin.get('posture_detail'))}</p>
+        <ul>{plugin_findings_html}</ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
@@ -563,6 +826,19 @@ document.addEventListener('DOMContentLoaded', () => {{
     <section id=\"security\" class=\"tab-panel\" role=\"tabpanel\" hidden>
       <div class=\"section-head\"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class=\"pill {_status_class(security_score)}\">{security_score}%</span></div>
       <div class=\"suggestions\"><h3>Findings</h3><ul>{security_html}</ul></div>
+      <div class=\"panel plugin-posture\">
+        <div>
+          <h3>Snyk Advisory</h3>
+          <p>Optional CLI-backed external security signal. It stays disabled unless the review is run with <code>--include-snyk</code>.</p>
+        </div>
+        <div class=\"plugin-score\"><span class=\"pill {snyk_class}\">{_escape(snyk.get('status'))}</span><strong class=\"{_status_class(snyk_score)}\">{snyk_score}%</strong></div>
+        <p class=\"posture-detail {_escape(snyk_class)}\">{_escape(snyk.get('headline'))}</p>
+        <ul>
+          <li>Projects scanned: {_escape(snyk.get('project_count'))}; vulnerabilities: {_escape(snyk.get('vulnerability_count'))}</li>
+          <li>Critical: {_escape(severity.get('critical', 0))}; High: {_escape(severity.get('high', 0))}; Medium: {_escape(severity.get('medium', 0))}; Low: {_escape(severity.get('low', 0))}</li>
+          {snyk_notes_html}
+        </ul>
+      </div>
     </section>
 
     <section id=\"evidence\" class=\"tab-panel\" role=\"tabpanel\" hidden>
@@ -570,9 +846,10 @@ document.addEventListener('DOMContentLoaded', () => {{
       <div class=\"evidence-list\">
         <a href=\"{_file_url(report_path)}\">Review JSON<br><span>{_escape(report_path.relative_to(repo_root) if report_path.is_relative_to(repo_root) else report_path)}</span></a>
         {f'<a href=\"{_file_url(Path(scorecard_path))}\">Latest Eval Scorecard<br><span>{_escape(Path(scorecard_path).relative_to(repo_root) if Path(scorecard_path).is_relative_to(repo_root) else scorecard_path)}</span></a>' if scorecard_path else '<div>Latest Eval Scorecard<br><span>No scorecard found for this skill.</span></div>'}
-        <div>Policy<br><span>local_internal_only, no publish, no registry upload, no npx</span></div>
+        <div>Policy<br><span>{_escape(policy.get('mode') or 'local_internal_only')}; primary gate: {_escape(policy.get('primary_gate') or 'local_eval_ask_audit')}; Plugin Eval floor: {_escape(policy.get('plugin_eval_min_acceptable_grade') or 'B+')}; Snyk: {_escape(policy.get('snyk_default') or 'disabled_until_explicit_confirmation')}</span></div>
         <div>Generated<br><span>{generated}</span></div>
       </div>
+      {review_lanes_html}
     </section>
   </main>
 </div>

@@ -31,6 +31,7 @@ RESERVED_SKILL_HANDLES = {
     "evals",
     "graph",
     "mcp",
+    "memory",
     "wiki",
     "workouts",
     "skill",

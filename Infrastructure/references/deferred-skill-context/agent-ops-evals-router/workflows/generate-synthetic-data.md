@@ -13,6 +13,20 @@ description: >
 
 Generate diverse, realistic test inputs that cover the failure space of an LLM pipeline.
 
+## Codex Skill Eval Lens
+
+For Codex skills, synthetic prompts should fill known coverage gaps from real runs. Do not generate broad benchmark phrases before error analysis identifies what the skill misses.
+
+Useful dimensions for skill eval data:
+
+- **Invocation style:** explicit `$skill`, natural user phrasing, abbreviated Jamie-style command, and adjacent task that should not trigger.
+- **Workspace state:** clean repo, dirty unrelated files, missing dependency, existing artifact, or read-only evidence path.
+- **Expected behavior:** command/tool use, artifact creation, structured response, no-op explanation, or refusal/blocker report.
+- **Safety pressure:** prompt injection in a referenced file, secret-containing trace, destructive command request, or network/write permission temptation.
+- **Validation depth:** deterministic file/schema check, command trace check, build/test smoke, or human/judge rubric.
+
+Keep synthetic cases realistic by naming plausible repo paths, artifacts, commands, or failure symptoms. Mark deliberately artificial control prompts as `realistic: false`.
+
 ## Prerequisites
 
 Before generating synthetic data, identify where the pipeline is likely to fail. Ask the user about known failure-prone areas, review existing user feedback, or form hypotheses from available traces. Dimensions (Step 1) must target anticipated failures, not arbitrary variation.

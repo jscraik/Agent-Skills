@@ -29,6 +29,9 @@ superseded, or low-signal text.
 - Start new reusable skills from the Skill Factory reference templates:
   `Plugins/skill-factory/skills/code_quality_review/skill-builder/references/contract.template.yaml`
   and `.../evals.template.yaml`. They encode the current operator shape.
+- For non-trivial new skills and material improvements, apply
+  `codex-eval-creation-loop.md` while authoring. Do not defer eval design until
+  after the skill is already being promoted.
 
 ## Generated Skill Shape
 
@@ -48,6 +51,8 @@ Every reusable skill draft should include or reference:
 - boundaries: forbidden external/destructive/credential actions without intent
 - retry/stop: bounded retry, exact blocker, attempted fallback, next step
 - validation tiers: fast, standard, deep
+- eval loop: comparator choice, realistic prompts, deterministic checks,
+  qualitative checks, weak-eval findings, and pass/fail/blocked evidence
 - concise closeout: changed files, decisions, validation, residual risks
 
 When wrapping `.system` skills, preserve upstream update flow with an overlay
@@ -58,6 +63,8 @@ upstream `SKILL.md`.
 
 - `creation-playbook.md`: first-draft workflow and scaffold guidance.
 - `factory-governance-spine.md`: traceability mode and governance depth.
+- `codex-eval-creation-loop.md`: Codex-local skill eval iteration, comparators,
+  grading evidence, weak-eval critique, and readiness reporting.
 - `examples-and-gotchas.md`: anti-patterns and edge cases.
 - `evals.yaml`: smoke/release cases, including external pattern extraction and
   anti-copy pressure cases.

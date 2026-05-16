@@ -533,7 +533,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
     def test_selection_policy_identity_matches_discovery_identity(self) -> None:
         """
         Assert selection policy identity matches skill discovery identity.
-        
+
         Verifies that `selection_policy.policy_identity()` and `skill_discovery.get_policy_identity()`
         produce the same value, ensuring both modules expose a consistent policy identity used for selection.
         """
@@ -718,7 +718,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
     def test_skill_discovery_advanced_merges_plugin_lanes_when_flat_missing_them(self) -> None:
         """
         Ensure advanced discovery can merge plugin lanes when flat projection is missing them.
-        
+
         Sets up a repository where the runtime (flat) projection exposes only `coderabbit` while the
         plugin canonical source contains lane skills (`code-review`). Asserts that
         default visibility returns what flat projects and advanced visibility merges in plugin lanes.
@@ -951,7 +951,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
     def test_sync_script_consumes_selection_policy_exports(self) -> None:
         """
         Ensure the sync script references the selection policy and its exported constants required for skill syncing.
-        
+
         Asserts that Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh contains `selection_policy.py` and the exports:
         `SELECTION_POLICY_REPO_SCAN_ROOTS`, `SELECTION_POLICY_EXCLUDED_SEGMENTS`,
         `SELECTION_POLICY_HIDDEN_FLAT_SKILLS`, `SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS`,
@@ -970,7 +970,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
     def test_sync_script_projects_profile_plugin_source_mirrors(self) -> None:
         """
         Verify the sync script mirrors plugin source directories into profile plugin roots so marketplace source paths remain resolvable.
-        
+
         Asserts that sync_skills.sh invokes sync_home_plugin_mirrors with both the profile plugins root and individual profile plugins paths, ensuring copied marketplace.json entries like ./Plugins/<name> continue to point to valid plugin locations.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
@@ -1006,7 +1006,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
     def test_sync_script_repairs_repo_backed_home_plugin_root_symlinks(self) -> None:
         """
         Verify the sync script replaces repo-backed home plugin-root symlinks with real directories before mirroring profile plugin roots.
-        
+
         Asserts the sync script contains the repair helper invocation `ensure_real_home_plugin_root()`, a replacement log message, and specific calls for profile plugin roots and subsequent `sync_home_plugin_mirrors` invocation.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")
@@ -1032,7 +1032,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
     def test_sync_script_installs_home_plugins_as_copied_directories(self) -> None:
         """
         Checks that the sync script installs home plugins as copied directories rather than symlinks.
-        
+
         Asserts the script invokes the copy-based installer invocation, writes a marker file containing the source real path into the target, and contains the log message `Installed home plugin copy`.
         """
         content = SYNC_SCRIPT.read_text(encoding="utf-8")

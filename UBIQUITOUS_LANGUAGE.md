@@ -3,8 +3,8 @@
 ## Scope and Sources
 
 - Scope: `agent-skills` repository operations, skill authoring, skill sync, and runtime visibility.
-- Sources: current conversation, `AGENTS.md`, `README.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, and `Skills/agent-ops/ubiquitous-language/SKILL.md`.
-- Last updated: 2026-04-26
+- Sources: current conversation, `AGENTS.md`, `README.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, `Infrastructure/references/skill-validation-reporting-contract.md`, `skills-system/skill-installer/SKILL.md`, `skills-system/skill-installer/references/skill-factory/install-flows.md`, and `Skills/agent-ops/ubiquitous-language/SKILL.md`.
+- Last updated: 2026-05-16
 
 ## Canonical Terms
 
@@ -24,6 +24,11 @@
 | **Feature Worktree** | A separate checkout and branch used for isolated feature work without disturbing dirty changes in the primary checkout. | worktree, clean checkout | High |
 | **Projection Refresh Lane** | A bounded change path where generated projections are refreshed from canonical sources instead of hand-edited. | sync pass, generated update | Medium |
 | **Strict Skill Audit** | The `./bin/ask skills audit <path> --level strict` check that validates skill structure, runtime links, security gates, family benchmarks, and readiness. | check the skill, make sure it works | High |
+| **External Skill Intake** | The staged decision process for evaluating an outside skill as a source proposal before writing it into canonical repo source. | install external skill, copy skill in | High |
+| **Intake Decision** | The machine-readable `data.intake_decision` result that classifies an external skill as `install_new`, `blend_into_existing`, `keep_separate`, `reject_duplicate`, or `needs_human_choice` before canonical writes. | install result, precheck, vibes check | High |
+| **Manifest-Backed Candidate** | A skill or plugin candidate containing supported dependency manifests such as `package.json`, `pyproject.toml`, `requirements.txt`, `Gemfile`, `go.mod`, or lockfiles. | package skill, dependency skill | High |
+| **Release-Readiness Claim** | A statement or promotion action that treats a skill as ready for canonical routing, command-handle exposure, blending into an owner skill, or production use. | gold-ready, done, production-ish | High |
+| **Second-Review Lane** | The local `ask skills external-review` path that combines strict audit evidence with Plugin Eval, Tessl local review, and optional Snyk dependency screening. | external review, plugin eval pass | Medium |
 | **Mise Trust Blocker** | A local runtime state where `mise` refuses to load the worktree config until the specific `.mise.toml` is trusted. | mise broken, toolchain issue | High |
 | **Policy Identity** | The deterministic hash representing the active selection and discovery policy. | policy hash, sync hash | Medium |
 
@@ -39,6 +44,8 @@
 | "make it available" | Ensure Codex runtime discovery can see a skill, not just that source files exist. | "Add the skill to the default visible runtime surface when appropriate, run workspace and user sync, and verify `./bin/ask skills list --json` includes it." |
 | "check it works" | Produce fresh evidence for the changed surface. | "Run the smallest relevant validation command for the changed skill or sync policy and report exact pass/fail/blocker output." |
 | "update the plugin" | Change the canonical plugin source and refresh materialized runtime mirrors. | "Patch `Plugins/<plugin>`, run the relevant plugin validation, then run `./bin/ask skills sync --scope user --projection rooted` or `./bin/ask plugins sync-local-runtime` so copied plugin mirrors are replaced." |
+| "install this external skill" | Run **External Skill Intake** before writing canonical source. | "Run `./bin/ask skills install <github-url> --dry-run --json --robot`, inspect `data.intake_decision`, then install, blend, keep separate, reject, or stop for a human ownership choice." |
+| "is this skill ready?" | Verify the **Release-Readiness Claim** with required gates. | "Run strict audit, second-review lane, smoke evals when cases exist, and release evals before command-handle promotion or canonical routing; include Snyk only for manifest-backed candidates." |
 
 ## Relationships
 
@@ -50,6 +57,9 @@
 - The **Visible Runtime Surface** is controlled by `DEFAULT_VISIBLE_FLAT_SKILL_NAMES`, not by the mere presence of a `SKILL.md` file.
 - A **Feature Worktree** can intentionally diverge from the primary checkout; uncommitted skills in the primary checkout are not automatically present in the feature worktree.
 - **Strict Skill Audit** depends on local runtime health; a **Mise Trust Blocker** must be fixed before treating audit failure as a skill defect.
+- **External Skill Intake** produces an **Intake Decision** before canonical writes; `reject_duplicate` and `needs_human_choice` stop the install path.
+- A **Manifest-Backed Candidate** needs Snyk dependency screening before a **Release-Readiness Claim**; pure `SKILL.md`-first candidates without supported manifests report Snyk as not applicable.
+- The **Second-Review Lane** does not replace local evals; it supplies static quality, package-shape, and optional dependency-security evidence.
 - `SKILL.md` at the repo root is a generated index surface and should be refreshed by sync, not hand-edited.
 
 ## Example Dialogue

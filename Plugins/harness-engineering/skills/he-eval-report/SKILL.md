@@ -99,4 +99,5 @@ next_safe_action: "Create follow-up for missing browser regression coverage."
 - Report contract/template/schema: `../../references/skills/he-eval-report/eval-report-contract.md`, `../../references/skills/he-eval-report/eval-report-template.md`, `../../references/skills/he-eval-report/eval-report-schema.json`
 - Drift and closure policy: `../../references/skills/he-eval-report/drift-taxonomy.md`, `../../references/skills/he-eval-report/linear-completion-policy.md`
 - Local eval contract: `references/contract.yaml`, `references/evals.yaml`
-- Shared proof rules: `../../references/deferred-context-index.md`, `../../references/closure-mutation-contract.md`
+- Shared proof rules: `../../references/deferred-context-index.md`, `../../references/closure-mutation-contract.md`, `../../references/subagent-call-contract.md`
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

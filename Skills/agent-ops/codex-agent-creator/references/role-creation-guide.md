@@ -9,6 +9,9 @@ privacy, confidence, or orchestration details.
   before writing them.
 - Treat `agents.<name>.config_file`, `description`, and `nickname_candidates`
   as discoverability keys, not the whole role body.
+- Treat `agents.max_depth` as the nested-spawn guard. Current Codex requires it
+  to be at least 1; swarms that need child reviewers need a depth that allows
+  that topology.
 - A role file is a config layer. Relative `config_file` paths resolve from the
   declaring `config.toml`.
 - In projected runtime config, a relative `config_file` can resolve from the
@@ -26,12 +29,14 @@ privacy, confidence, or orchestration details.
 
 ## Role File Shape
 
-- Include `name`, `description`, `developer_instructions`, `model`, and
-  `model_reasoning_effort` unless a repo-owned validator proves a narrower
-  contract.
+- Include `name`, `description`, and `developer_instructions` for standalone
+  discovered role files unless a repo-owned validator proves a narrower
+  contract. Add `model`, `model_reasoning_effort`, profiles, sandbox, or
+  approval keys only when the role intentionally owns those choices.
 - Standalone discovered files need `name`, `description`, and
   `developer_instructions`. Files referenced by `[agents.<name>].config_file`
-  may inherit the role name from the declaring table.
+  may inherit the role name from the declaring table and may supply the
+  description through either the table or role file after merge.
 - Use structured TOML fields for runtime settings.
 - Put durable behavior, expected artifacts, safety boundaries, and validation
   obligations in `developer_instructions`.
@@ -99,6 +104,9 @@ privacy, confidence, or orchestration details.
 
 - Codex subagents inherit the parent model by default. Role files should not
   encourage model overrides unless the user or task explicitly requires it.
+- The v2 `spawn_agent` tool requires `task_name` and `message`, exposes
+  `agent_type` only when role metadata is visible, and treats model,
+  `reasoning_effort`, and service tier as optional overrides.
 - Do not make a subagent mandatory for ordinary tasks. Spawning still requires
   explicit user authorization for delegation, parallel agents, or subagents.
 - Before a swarm, define lanes, disjoint write scopes, artifact paths,

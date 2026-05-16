@@ -1,8 +1,8 @@
 schema_version: "1.2"
-purpose: "example-skill: one sentence naming the domain, action, artifact, and success result."
+purpose: "SKILL_NAME: one sentence naming the domain, action, artifact, and success result."
 triggers:
   - "User asks to operate on the domain/artifact this skill owns."
-  - "Request includes the skill's discriminative verbs, objects, or constraints."
+  - "Request includes SKILL_NAME's discriminative verbs, objects, or constraints."
   - "A file/path/tool signal proves this is the narrow lane, not a neighboring skill."
 inputs:
   - name: "task_intent"

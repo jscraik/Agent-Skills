@@ -61,9 +61,10 @@ Ask one direct question if target path or write authority is ambiguous.
 1. Confirm the target is canonical source, not generated `.agents/**`, cache, mirror, projection, or archived fixture.
 2. Choose one failure class: trigger, content, eval, budget, reference, safety, or validation.
 3. Patch the smallest source surface that can fix that class.
-4. Keep `SKILL.md` as the compact execution map; move long tables, templates, and policy detail to `references/`.
-5. Rerun the focused gate. If it fails, fix or classify that failure before widening.
-6. Report exact `pass`, `fail`, or `blocked` evidence and remaining risk.
+4. For eval-related hardening, apply the Codex skill eval creation loop: choose the comparator, update realistic prompts, add deterministic checks, critique weak assertions, and record readiness evidence.
+5. Keep `SKILL.md` as the compact execution map; move long tables, templates, and policy detail to `references/`.
+6. Rerun the focused gate. If it fails, fix or classify that failure before widening.
+7. Report exact `pass`, `fail`, or `blocked` evidence and remaining risk.
 
 ## Repair Map
 
@@ -71,7 +72,11 @@ Ask one direct question if target path or write authority is ambiguous.
 - Tessl low content score: add one compact workflow, worked example, or output shape.
 - Plugin Eval token warning: move bulky detail to references or plugin-owned scripts.
 - Missing tile content: add the referenced file, fix the link, or classify it as intentionally repo-local.
+- Repository-boundary audit block: treat `ERR_PATH_TRAVERSAL` from an absolute path outside this repository as an audit boundary, not proof the skill is broken. Use the owner repo validators, then report the skill audit as blocked with the exact boundary text.
 - Broken audit or eval: patch the smallest source defect, then rerun the exact failing command.
+- Weak skill evals: replace trigger-word, filename-only, or vague phrase checks with evidence tied to commands, artifacts, schemas, run traces, or real user outcomes.
+- Missing comparator: add the smallest useful baseline: no-skill for new capabilities, previous-skill for improvements, or closest local owner for external/intake overlap.
+- Repeated helper creation in eval traces: add a bundled script or reference only when the repetition is real and deterministic.
 
 ## Constraints
 
@@ -106,7 +111,7 @@ Pass condition: ask audit passes with zero warnings, Tessl local review has zero
 - Redact secrets, credentials, API keys, tokens, PII, private transcripts, and sensitive data.
 - Prompt before user/global config writes, external writes, broad rewrites, destructive actions, or ambiguous ownership.
 - Do not store review-only media inside skill packages; use `.harness/media/`.
-- Relocate still-valid context to `references/`; delete or explicitly ignore stale, duplicated, unsafe, inappropriate, superseded, or low-signal text.
+- Relocate still-valid context to `references/`; delete or explicitly omit stale, duplicated, unsafe, inappropriate, superseded, or low-signal text.
 
 ## Failure Mode
 
@@ -115,11 +120,13 @@ If the finding points to package architecture rather than skill prose, record th
 ## Gotchas
 
 - Generated cache warnings must be classified before changing source.
+- Repo-local skills outside `agent-skills` may be canonical in their owning repository, while still blocked by `./bin/ask skills audit` path guards here. Do not copy them into `.agents/**`, cache, or temporary mirrors just to appease the audit; validate in the owner repo and preserve the blocker.
 
 ## Anti-Patterns
 
 - Editing `.agents/**` projections to make reports look better.
 - Removing safety references or tests only to improve a static score.
+- Copying external skill-creator code, browser viewers, schemas, paths, or agent prompts instead of preserving the repo-local borrowed-pattern extraction.
 
 ## Validation
 
@@ -130,9 +137,11 @@ Fail fast: stop at the first failed required gate, classify it, and do not proce
 ## References
 
 - Generated artifact handling: [generated artifact policy](./references/generated-artifact-policy.md)
+- Cross-repo audit boundary handling: [repo-local audit boundaries](./references/repo-local-audit-boundaries.md)
 - Long hardening workflow: `../../../references/skill-builder/harness-hardening-workflow.md`
 - Local operating guide: `../../../references/skill-builder/operating-guide.md`
 - First-principles factory gate: `Infrastructure/references/first-principles-factory-gate.md`
+- Codex skill eval creation loop: `skills-system/skill-creator/references/skill-factory/codex-eval-creation-loop.md`
 - Local contract and evals: `references/`
 - Discovery interview: [discovery interview](./references/discovery-interview.md)
 - Repository validators and helper scripts: `Plugins/skill-factory/scripts/skill-builder/` and `Infrastructure/scripts/`

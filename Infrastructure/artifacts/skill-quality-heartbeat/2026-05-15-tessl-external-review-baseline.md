@@ -185,4 +185,3 @@ Proposed threshold for this family during hardening:
 
 5. Release confidence
    - A skill is ready only when internal and Tessl-backed external signals agree, or any disagreement is explicitly classified.
-

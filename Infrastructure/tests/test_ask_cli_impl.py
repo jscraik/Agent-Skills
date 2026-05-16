@@ -18,14 +18,14 @@ class TestAskCLI(unittest.TestCase):
         # Using -p to pass a dummy command if needed, or just root --json
         cmd = [sys.executable, "Infrastructure/bin/ask", "--json"]
         result = _run_cli(cmd)
-        
+
         self.assertEqual(result.returncode, 0, f"CLI failed with stderr: {result.stderr}")
-        
+
         try:
             output = json.loads(result.stdout)
         except json.JSONDecodeError:
             self.fail("CLI output was not valid JSON")
-            
+
         # Verify mandatory envelope fields
         self.assertIn("status", output)
         self.assertIn("trace_id", output)
@@ -53,7 +53,7 @@ class TestAskCLI(unittest.TestCase):
     def test_skills_list(self):
         """
         Validate that the CLI `ask skills list --json` exposes a skills catalogue with the expected envelope and fields.
-        
+
         Checks:
         - the process exits successfully (return code 0),
         - top-level `status` equals "success",
@@ -62,10 +62,10 @@ class TestAskCLI(unittest.TestCase):
         """
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--json"]
         result = _run_cli(cmd)
-        
+
         self.assertEqual(result.returncode, 0)
         output = json.loads(result.stdout)
-        
+
         self.assertEqual(output["status"], "success")
         self.assertIn("skills", output["data"])
         self.assertIsInstance(output["data"]["skills"], list)
@@ -755,7 +755,7 @@ class TestAskCLI(unittest.TestCase):
     def test_skills_goal_json_contract(self):
         """
         Ensure the `ask skills goal create` CLI returns a JSON envelope containing a `goal_decision` with required fields.
-        
+
         Asserts the top-level `status` and `data` keys exist and that `data.goal_decision` includes `schema_version`, `decision_status`, `policy_identity`, `recommended_candidate`, and `alternative_candidates`.
         """
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "goal", "create auth integration", "--json"]
@@ -802,7 +802,7 @@ class TestAskCLI(unittest.TestCase):
     def test_repo_doctor_catalog_json_contract(self):
         """
         Verify `ask repo doctor-catalog --json` returns a catalog parity payload with required fields.
-        
+
         Asserts the CLI emits non-empty JSON and that `data.catalog_parity` contains `schema_version`, `drift_detected` and `surfaces`.
         """
         cmd = [__import__("sys").executable, "Infrastructure/bin/ask", "repo", "doctor-catalog", "--json"]
@@ -877,7 +877,7 @@ class TestAskCLI(unittest.TestCase):
     def test_goal_alias_normalization(self):
         """
         Ensure the `goal create` CLI alias returns a skills-style goal decision in the JSON envelope.
-        
+
         Runs `bin/ask goal create auth integration --json`, asserts stdout contains JSON and that `data.goal_decision` exists.
         """
         cmd = [__import__("sys").executable, "Infrastructure/bin/ask", "goal", "create auth integration", "--json"]
@@ -905,7 +905,7 @@ class TestAskCLI(unittest.TestCase):
     def test_skills_starter_mode(self):
         """
         Verify the CLI `skills starter` command returns starter-mode catalogue metadata for the chosen archetype.
-        
+
         Runs `bin/ask skills starter --archetype delivery --limit 5 --json` and asserts the process exits with code 0, the JSON envelope `status` is `"success"`, `data.starter_mode` is truthy, `data.starter_archetype` equals `"delivery"`, and `data.skills` is a list.
         """
         cmd = [__import__("sys").executable, "Infrastructure/bin/ask", "skills", "starter", "--archetype", "delivery", "--limit", "5", "--json"]
@@ -916,6 +916,478 @@ class TestAskCLI(unittest.TestCase):
         self.assertTrue(output["data"].get("starter_mode"))
         self.assertEqual(output["data"].get("starter_archetype"), "delivery")
         self.assertIsInstance(output["data"].get("skills"), list)
+
+    def test_skills_package_command(self):
+        """Verify ask skills package exposes package readiness metadata."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-builder", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills package failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        package = output["data"]["skill_package"]
+        self.assertEqual(package["schema_version"], "skill-package-readiness.v1")
+        self.assertIn("version", package["package_contract"]["required_fields"]["present"])
+        self.assertEqual(package["readiness_summary"]["readiness_level"], package["package_contract"]["readiness_level"])
+        self.assertIn("version", package["readiness_summary"]["present_fields"])
+        self.assertEqual(
+            package["readiness_summary"]["missing_field_count"],
+            len(package["package_contract"]["required_fields"]["missing"]),
+        )
+        self.assertEqual(package["gate_summary"]["promotion_status"], "blocked_validation")
+        self.assertFalse(package["gate_summary"]["promotion_ready"])
+        self.assertFalse(package["package_contract"]["install_gate"]["install_ready"])
+        self.assertEqual(package["package_contract"]["install_gate"]["checkout_test"]["status"], "not_run")
+        self.assertEqual(package["package_contract"]["promotion_gate"]["status"], "blocked_validation")
+        self.assertFalse(package["package_contract"]["promotion_gate"]["promotion_ready"])
+        self.assertEqual(package["contract_schemas"]["package"], "skill-package-readiness.v1")
+        self.assertEqual(package["contract_schemas"]["profiles"], "skill-operation-profiles.v1")
+        self.assertEqual(package["operation_context"]["primary_profile"], "package-review")
+        self.assertEqual(package["operation_context"]["promotion_profile"], "plugin-share")
+        self.assertIn("metadata contract", package["operation_context"]["profiles"]["package-review"]["required_evidence"])
+        self.assertIn(
+            "./bin/ask skills package <handle-or-path> --json --robot",
+            package["operation_context"]["events"]["package_readiness_checked"]["producer_commands"],
+        )
+        self.assertEqual(package["lifecycle_events"][1]["details"]["gate_summary"], package["gate_summary"])
+        self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
+
+    def test_skills_package_human_output(self):
+        """Verify ask skills package has a useful non-JSON readiness render."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-builder", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills package output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Skill package: skill-builder", result.stdout)
+        self.assertIn("Install ready:", result.stdout)
+        self.assertIn("Promotion:", result.stdout)
+        self.assertIn("Next:", result.stdout)
+
+    def test_skills_package_checkout_test_command_records_evidence(self):
+        """Verify ask skills package --checkout-test records local install-gate evidence."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "package",
+            "skill-builder",
+            "--checkout-test",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills package checkout output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        package = output["data"]["skill_package"]
+        checkout = package["package_contract"]["install_gate"]["checkout_test"]
+        self.assertEqual(checkout["status"], "blocked_validation")
+        self.assertEqual(package["gate_summary"]["checkout_test_status"], "blocked_validation")
+        self.assertEqual(package["gate_summary"]["promotion_status"], "blocked_validation")
+        self.assertIn("source_readable:true", checkout["evidence"])
+        self.assertTrue(any(item.startswith("missing_package_metadata:") for item in checkout["evidence"]))
+
+    def test_skills_package_strict_command_blocks_metadata_gaps(self):
+        """Verify ask skills package --strict fails closed in JSON and exit status."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-builder", "--strict", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"skills package strict output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        package = output["data"]["skill_package"]
+        self.assertTrue(package["strict"])
+        self.assertEqual(package["status"], "blocked")
+        self.assertEqual(package["blockers"][0]["class"], "blocked_validation")
+        self.assertIn("compatible_roles", package["package_contract"]["required_fields"]["missing"])
+        self.assertIn("compatible_roles", package["package_contract"]["install_gate"]["blocked_reasons"])
+        self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
+
+    def test_skills_doctor_command_exposes_lifecycle_and_readiness(self):
+        """Verify ask skills doctor exposes lifecycle and readiness contracts."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "doctor", "Skills/agent-ops/autofix", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills doctor failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        doctor = output["data"]["skill_doctor"]
+        self.assertEqual(doctor["schema_version"], "skill-doctor.v1")
+        self.assertEqual(doctor["target_kind"], "canonical_source_path")
+        self.assertIn("canonical_source", doctor["check_summary"]["check_names"])
+        self.assertEqual(doctor["check_summary"]["check_count"], len(doctor["checks"]))
+        self.assertIn("missing", doctor["check_summary"]["status_counts"])
+        self.assertEqual(doctor["lifecycle_event"]["schema_version"], "capability-lifecycle-event.v1")
+        self.assertEqual(doctor["lifecycle_event"]["event_type"], "skill_doctor_completed")
+        self.assertIn("blocked_user_input", doctor["readiness_taxonomy"]["blockers"])
+        self.assertEqual(doctor["contract_schemas"]["doctor"], "skill-doctor.v1")
+        self.assertEqual(doctor["contract_schemas"]["events"], "skill-events.v1")
+        self.assertEqual(doctor["operation_context"]["primary_profile"], "authoring")
+        self.assertIn("package-review", doctor["operation_context"]["next_profiles"])
+        self.assertIn("skill audit", doctor["operation_context"]["profiles"]["authoring"]["required_evidence"])
+        self.assertIn(
+            "./bin/ask skills doctor <handle-or-path> --json --robot",
+            doctor["operation_context"]["events"]["skill_doctor_completed"]["producer_commands"],
+        )
+        self.assertIn("eval_blocked", doctor["lifecycle_event_types"])
+        package_readiness = doctor["checks"]["capability_metadata"]["package_readiness"]
+        self.assertIn("version", package_readiness["required_fields"]["present"])
+        self.assertFalse(package_readiness["promotion_gate"]["share_ready"])
+        package_contract = doctor["checks"]["capability_metadata"]["package_contract"]
+        self.assertEqual(package_contract["role_compatibility"], package_readiness["role_compatibility"])
+        self.assertEqual(package_contract["runtime_contract"], package_readiness["runtime_contract"])
+        self.assertEqual(package_contract["install_gate"], package_readiness["install_gate"])
+        self.assertEqual(package_contract["promotion_gate"], package_readiness["promotion_gate"])
+
+    def test_skills_profiles_command_returns_selected_profile(self):
+        """Verify ask skills profiles exposes one operation-mode contract."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "profiles", "eval", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills profiles failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        profiles = output["data"]["skill_profiles"]
+        self.assertEqual(profiles["schema_version"], "skill-operation-profiles.v1")
+        self.assertEqual(profiles["selected_profile"], "eval")
+        self.assertEqual(profiles["profile_names"], ["eval"])
+        self.assertIn("package-review", profiles["available_profiles"])
+        self.assertEqual(list(profiles["profiles"]), ["eval"])
+        self.assertEqual(profiles["operation_context"]["profile_model"], "profile-v2-inspired")
+        self.assertEqual(profiles["operation_context"]["contract_schemas"]["doctor"], "skill-doctor.v1")
+        self.assertEqual(profiles["operation_context"]["contract_schemas"]["memory"], "skill-memory-provider.v1")
+        self.assertIn("eval", profiles["operation_context"]["routing_contracts"]["events"])
+        self.assertEqual(
+            profiles["operation_context"]["consumer_commands"]["events"],
+            "./bin/ask skills events --json --robot",
+        )
+        self.assertIn("Skills", profiles["workspace_roots"]["canonical_skill_roots"])
+        self.assertIn(".agents/skills", profiles["workspace_roots"]["runtime_projection_roots"])
+        self.assertIn("timeout_no_output", profiles["profiles"]["eval"]["stop_conditions"])
+        self.assertIn("timeout_no_output", profiles["profiles"]["eval"]["stop_condition_definitions"])
+        self.assertIn("blocked_user_input", profiles["profiles"]["eval"]["eval_blocker_classes"])
+        self.assertEqual(
+            profiles["profiles"]["eval"]["effective_roots"],
+            ["Skills/**", "Infrastructure/workouts/**", "Infrastructure/artifacts/**"],
+        )
+
+    def test_skills_profiles_human_output(self):
+        """Verify ask skills profiles has a useful non-JSON selected-profile render."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "profiles", "package-review", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills profiles output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Skill profiles: pass", result.stdout)
+        self.assertIn("Profile: package-review", result.stdout)
+        self.assertIn("Intent: Check a skill or plugin package before promotion.", result.stdout)
+        self.assertIn("Write policy: reports_only_unless_fix_requested", result.stdout)
+
+    def test_skills_profiles_command_blocks_unknown_profile(self):
+        """Verify ask skills profiles fails closed for unknown operation modes."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "profiles", "unsafe-live-linear", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"skills profiles output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        profiles = output["data"]["skill_profiles"]
+        self.assertEqual(profiles["status"], "blocked")
+        self.assertEqual(profiles["requested_profile"], "unsafe-live-linear")
+        self.assertIn("live-mutation", profiles["available_profiles"])
+
+    def test_skills_events_command_returns_lifecycle_contract(self):
+        """Verify ask skills events exposes the lifecycle event contract."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "events", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills events failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        events = output["data"]["skill_events"]
+        self.assertEqual(events["schema_version"], "skill-events.v1")
+        self.assertEqual(events["event_schema"], "capability-lifecycle-event.v1")
+        self.assertEqual(events["contract_schemas"]["profiles"], "skill-operation-profiles.v1")
+        self.assertEqual(events["contract_schemas"]["package"], "skill-package-readiness.v1")
+        self.assertGreaterEqual(events["event_count"], 8)
+        self.assertIn("eval_blocked", events["event_names"])
+        self.assertIn("skill_loaded", events["available_event_types"])
+        self.assertEqual(events["event_summary"]["event_count"], events["event_count"])
+        self.assertGreaterEqual(events["event_summary"]["by_profile"]["eval"], 1)
+        self.assertIn("eval_blocked", events["event_types"])
+        self.assertIn("eval", events["event_consumers"]["eval_blocked"]["profiles"])
+        self.assertIn("./bin/ask skills prove <handle> --json --robot", events["event_consumers"]["eval_completed"]["producer_commands"])
+        self.assertIn("blocked_user_input", events["eval_blocker_classes"])
+        self.assertIn("timeout_partial_output", events["eval_blocker_classes"])
+        self.assertEqual(events["blocker_taxonomy"]["blocked_auth"], events["eval_blocker_classes"]["blocked_auth"])
+        self.assertIn("strict_audit_not_run", events["warning_taxonomy"])
+        self.assertIn("skill_doctor_completed", events["event_order"])
+        self.assertEqual(events["selected_event_type"], None)
+
+    def test_skills_events_command_returns_selected_event(self):
+        """Verify ask skills events can narrow to a single event type."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "events", "eval_blocked", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills events failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        events = output["data"]["skill_events"]
+        self.assertEqual(events["selected_event_type"], "eval_blocked")
+        self.assertEqual(events["event_names"], ["eval_blocked"])
+        self.assertIn("eval_completed", events["available_event_types"])
+        self.assertEqual(events["event_summary"]["event_count"], 1)
+        self.assertEqual(list(events["event_types"]), ["eval_blocked"])
+        self.assertEqual(list(events["event_consumers"]), ["eval_blocked"])
+        self.assertEqual(events["contract_schemas"]["events"], "skill-events.v1")
+        self.assertIn("blocker", events["event_types"]["eval_blocked"])
+        self.assertIn("eval", events["event_consumers"]["eval_blocked"]["profiles"])
+        self.assertIn("blocked_auth", events["eval_blocker_classes"])
+
+    def test_skills_events_human_output(self):
+        """Verify ask skills events has a useful non-JSON selected-event render."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "events", "eval_blocked", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills events output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Skill events: pass", result.stdout)
+        self.assertIn("Event: eval_blocked", result.stdout)
+        self.assertIn("Definition:", result.stdout)
+
+    def test_skills_events_command_blocks_unknown_event(self):
+        """Verify ask skills events fails closed for unknown event types."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "events", "made_up_event", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"skills events output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        events = output["data"]["skill_events"]
+        self.assertEqual(events["status"], "blocked")
+        self.assertEqual(events["requested_event_type"], "made_up_event")
+        self.assertIn("eval_blocked", events["available_event_types"])
+
+    def test_skills_memory_search_command_returns_provider_entries(self):
+        """Verify ask skills memory search exposes provenance-bearing entries."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "memory", "search", "projection", "--limit", "3", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills memory search failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        memory = output["data"]["skill_memory"]
+        self.assertEqual(memory["schema_version"], "skill-memory-provider.v1")
+        self.assertEqual(memory["provider_model"], "extension-like-read-only")
+        self.assertEqual(memory["contract_schemas"]["memory"], "skill-memory-provider.v1")
+        self.assertEqual(memory["contract_schemas"]["profiles"], "skill-operation-profiles.v1")
+        self.assertEqual(memory["operation_context"]["provider_model"], "extension-like-read-only")
+        self.assertEqual(memory["operation_context"]["provider_contract"]["mutation_policy"], "read_only")
+        self.assertIn("provenance", memory["operation_context"]["provider_contract"]["required_entry_fields"])
+        self.assertIn("eval", memory["operation_context"]["consumer_profiles"])
+        self.assertGreaterEqual(memory["source_summary"]["source_count"], 1)
+        self.assertEqual(memory["mode"], "search")
+        self.assertGreaterEqual(memory["entry_count"], 1)
+        self.assertEqual(memory["entry_summary"]["returned_count"], memory["entry_count"])
+        self.assertGreaterEqual(memory["entry_summary"]["total_count"], memory["entry_count"])
+        self.assertIn("provenance", memory["entries"][0])
+        self.assertIn("freshness", memory["entries"][0])
+
+    def test_skills_memory_search_command_blocks_missing_query(self):
+        """Verify ask skills memory search requires a query from the CLI path."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "memory", "search", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"skills memory output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        memory = output["data"]["skill_memory"]
+        self.assertEqual(memory["status"], "blocked")
+        self.assertEqual(memory["mode"], "search")
+        self.assertIn("requires a non-empty query", memory["agent_summary"])
+
+    def test_skills_memory_search_command_blocks_negative_limit(self):
+        """Verify ask skills memory search rejects negative limits."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "memory",
+            "search",
+            "projection",
+            "--limit",
+            "-1",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"skills memory output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        memory = output["data"]["skill_memory"]
+        self.assertEqual(memory["status"], "blocked")
+        self.assertEqual(memory["mode"], "search")
+        self.assertIn("limit must be non-negative", memory["agent_summary"])
+
+    def test_skills_memory_list_source_filter_limits_entries(self):
+        """Verify ask skills memory list preserves provider source filtering."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "memory",
+            "list",
+            "--source",
+            "harness-solutions",
+            "--limit",
+            "2",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills memory list output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        memory = output["data"]["skill_memory"]
+        self.assertEqual(memory["entry_count"], 2)
+        self.assertGreaterEqual(memory["total_count"], 2)
+        self.assertIn("./bin/ask skills memory search <query> --json --robot", memory["operation_context"]["follow_up_commands"])
+        self.assertTrue(all(entry["source_id"] == "harness-solutions" for entry in memory["entries"]))
+
+    def test_skills_memory_read_command_returns_content_and_provenance(self):
+        """Verify ask skills memory read exposes durable content with provenance."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "memory",
+            "read",
+            ".harness/memory/LEARNINGS.md",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills memory read output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        memory = output["data"]["skill_memory"]
+        self.assertEqual(memory["mode"], "read")
+        entry = memory["entry"]
+        self.assertEqual(entry["path"], ".harness/memory/LEARNINGS.md")
+        self.assertEqual(entry["provenance"]["provider"], "harness-memory")
+        self.assertIn("# Learnings", entry["content"])
+
+    def test_skills_memory_read_command_blocks_missing_identifier(self):
+        """Verify ask skills memory read fails closed without an entry id."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "memory", "read", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"skills memory read output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        memory = output["data"]["skill_memory"]
+        self.assertEqual(memory["status"], "blocked")
+        self.assertEqual(memory["mode"], "read")
+        self.assertIn("requires an entry id", memory["agent_summary"])
+
+    def test_memory_search_command_returns_provider_entries(self):
+        """Verify ask memory search exposes the same provenance-bearing provider entries."""
+        cmd = ["python3", "Infrastructure/bin/ask", "memory", "search", "projection", "--limit", "1", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"memory search failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        memory = output["data"]["memory"]
+        self.assertEqual(memory["schema_version"], "memory-provider.v1")
+        self.assertEqual(memory["count"], 1)
+        entry = memory["results"][0]
+        self.assertEqual(entry["provenance"]["provider"], entry["source_id"])
+        self.assertEqual(entry["provenance"]["repo_relative_path"], entry["path"])
+
+    def test_memory_search_human_output_lists_entry_paths(self):
+        """Verify ask memory search has a useful non-JSON provider render."""
+        cmd = ["python3", "Infrastructure/bin/ask", "memory", "search", "projection", "--limit", "1", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"memory output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Found 1 memory entry.", result.stdout)
+        self.assertIn("docs-agent-guidance:docs-agents-04-validation-md", result.stdout)
+        self.assertIn("Docs/agents/04-validation.md", result.stdout)
+
+    def test_memory_list_source_filter_limits_entries(self):
+        """Verify ask memory list honors source filtering from the CLI path."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "memory",
+            "list",
+            "--source",
+            "harness-solutions",
+            "--limit",
+            "2",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"memory list output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        memory = output["data"]["memory"]
+        self.assertEqual(memory["count"], 2)
+        self.assertGreaterEqual(memory["total_count"], 2)
+        self.assertTrue(all(entry["source_id"] == "harness-solutions" for entry in memory["entries"]))
+
+    def test_memory_list_command_blocks_negative_limit(self):
+        """Verify ask memory list rejects negative limits."""
+        cmd = ["python3", "Infrastructure/bin/ask", "memory", "list", "--limit", "-1", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"memory list output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("limit must be non-negative", output["errors"][0]["message"])
+
+    def test_memory_read_command_returns_content_and_provenance(self):
+        """Verify ask memory read exposes durable content with provenance."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "memory",
+            "read",
+            ".harness/memory/LEARNINGS.md",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"memory read output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        memory = output["data"]["memory"]
+        entry = memory["entry"]
+        self.assertEqual(entry["path"], ".harness/memory/LEARNINGS.md")
+        self.assertEqual(entry["provenance"]["provider"], "harness-memory")
+        self.assertIn("# Learnings", entry["content"])
+
+    def test_memory_read_command_blocks_missing_identifier(self):
+        """Verify ask memory read parser reports the missing identifier clearly."""
+        cmd = ["python3", "Infrastructure/bin/ask", "memory", "read", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"memory read output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("arguments are required: identifier", output["errors"][0]["message"])
+        self.assertIn("ask memory read .harness/memory/LEARNINGS.md --json", output["errors"][0]["message"])
+
+    def test_memory_command_blocks_missing_action(self):
+        """Verify ask memory fails closed when no provider mode is selected."""
+        cmd = ["python3", "Infrastructure/bin/ask", "memory", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"memory output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
 
     def test_plugins_list_state(self):
         """CA1: Verify ask plugins list returns lifecycle state groups."""
@@ -933,10 +1405,10 @@ class TestAskCLI(unittest.TestCase):
         """CA2: Verify ask skills sync --dry-run returns a plan without changes."""
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "sync", "--dry-run", "--json"]
         result = _run_cli(cmd)
-        
+
         self.assertEqual(result.returncode, 0)
         output = json.loads(result.stdout)
-        
+
         self.assertEqual(output["status"], "success")
         self.assertIn("plan", output["data"])
         self.assertIn("symlinks", output["data"]["plan"])
@@ -1066,6 +1538,14 @@ class TestAskCLI(unittest.TestCase):
         if output["status"] == "success":
             self.assertIn("skill_name", output["data"])
             self.assertTrue(output["data"].get("dry_run", False), "Expected dry_run to be True")
+            intake = output["data"].get("intake_decision")
+            self.assertIsInstance(intake, dict)
+            self.assertEqual(intake.get("schema_version"), "skill-install-intake.v1")
+            self.assertIn(intake.get("outcome"), intake.get("allowed_outcomes", []))
+            self.assertIn("post_install_gates", intake)
+            readiness = output["data"].get("readiness_policy")
+            self.assertTrue(readiness.get("full_evals_required_before_promotion"))
+            self.assertTrue(readiness.get("external_skill_install_is_intake_not_copy"))
 
     def test_trace_id_from_env(self):
         """CA2: ASK_TRACE_ID environment variable propagates to output."""

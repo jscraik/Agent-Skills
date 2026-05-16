@@ -81,4 +81,5 @@ handoff: he-plan
 - Reframe contract: `../../references/skills/he-reframe/reframe-program-contract.md`
 - Architecture compression: `../../references/skills/he-reframe/architecture-evolution-compression.md`
 - Source-prompt preservation: `../../references/skills/he-reframe/source-prompt-preservation.md`
-- Shared contracts: `../../references/deferred-context-index.md`, `../../references/source-prompt-coverage-contract.md`
+- Shared contracts: `../../references/deferred-context-index.md`, `../../references/source-prompt-coverage-contract.md`, `../../references/subagent-call-contract.md`
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

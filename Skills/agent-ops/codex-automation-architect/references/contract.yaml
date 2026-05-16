@@ -11,12 +11,23 @@ inputs:
   - "schedule or trigger"
   - "sandbox posture"
   - "validation and rollback expectations"
+  - "existing automation inventory"
+  - "Codex app automation tool availability"
 outputs:
   - "automation design"
   - "risk and scope review"
   - "preflight plan"
   - "validation evidence"
   - "rollout or consolidation notes"
+runtime_contract:
+  tools:
+    - "codex_app.automation_update"
+    - "codex_app.automation_list"
+    - "tool_search when dynamic tools are deferred"
+  kinds: [cron, heartbeat]
+  execution_environments: [local, worktree]
+  update_rule: "Prefer updating an existing automation over creating a duplicate; preserve fields unless the user asks to change them."
+  review_rule: "Use suggested create/update for worktree automations with non-null local environment setup config."
 risks:
   - over_triggering
   - untrusted_input
