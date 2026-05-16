@@ -90,3 +90,4 @@ future_agent_guidance:
 - Architecture lenses: `../../references/skills/he-strategy/architecture-lens-canon.md`
 - Source-prompt comparison: `../../references/skills/he-strategy/source-prompt-preservation.md`
 - Shared HE gates: `../../references/subagent-call-contract.md`, `../../references/deferred-context-index.md`
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

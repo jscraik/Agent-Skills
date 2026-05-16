@@ -114,3 +114,4 @@ is fixed, waived by an authorized gate, or reported as blocked.
 - Local contract and evals: `references/contract.yaml`, `references/evals.yaml`
 - Shared subagent policy: `../../references/subagent-call-contract.md`
 - Shared HE proof contracts: `../../references/deferred-context-index.md`
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

@@ -115,6 +115,8 @@ budget trimming; move deep context to references with a clear route.
 - `skills/he-plan/references/deepening-review.md`
 - `skills/he-plan/references/test-strategy.md`
 - `skills/he-plan/references/visual-communication.md`
+- Preserved context line: Plans are execution contracts, not chat checklists. They preserve source
+Plans are execution contracts, not chat checklists. They preserve source
 
 `he-work`:
 
@@ -145,6 +147,7 @@ budget trimming; move deep context to references with a clear route.
 - `skills/he-strategy/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
 - `references/pragmatic-programmer-review-contract.md`
+Strategy artifacts are cognition compression, not ceremony. Turn verified repo
 
 `he-reframe`:
 
@@ -157,6 +160,8 @@ budget trimming; move deep context to references with a clear route.
 - `skills/he-linear-plan/references/linear-plan-output-contract.md`
 - `skills/he-linear-plan/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
+- Preserved context line: Linear is execution state; `.harness` is cognition and proof. This skill turns
+Linear is execution state; `.harness` is cognition and proof. This skill turns
 
 `he-phase-work`:
 
