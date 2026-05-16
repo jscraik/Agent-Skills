@@ -30,13 +30,13 @@ jobs:
               exit 0
             fi
 
-            npm exec --yes snyk@1.1304.3 auth "$SNYK_TOKEN" || {
+            npm exec --yes snyk@1.1304.2 auth "$SNYK_TOKEN" || {
               echo "⚠ Snyk auth failed; treating as CI credential/runtime issue and skipping vulnerability gate"
               exit 0
             }
 
             set +e
-            npm exec --yes snyk@1.1304.3 test \
+            npm exec --yes snyk@1.1304.2 test \
               --severity-threshold=high \
               --all-projects \
               --detection-depth=6 \

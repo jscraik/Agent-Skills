@@ -35,7 +35,7 @@
         },
         "security_gate": {
           "exit_code": 0,
-          "stdout": "Skill: he-improve\nPath:  /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-improve/SKILL.md\n\n\nRESULT: PASS\n",
+          "stdout": "Skill: he-improve\nPath:  Plugins/harness-engineering/skills/he-improve/SKILL.md\n\n\nRESULT: PASS\n",
           "stderr": ""
         },
         "family_benchmarks": {
@@ -53,7 +53,7 @@
     },
     "plugin_eval": {
       "command": [
-        "/Users/jamiecraik/.local/bin/plugin-eval",
+        "plugin-eval",
         "analyze",
         "Plugins/harness-engineering/skills/he-improve",
         "--format",
@@ -75,7 +75,7 @@
     },
     "tessl_lint": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "lint",
         "/tmp/agent-skills-tessl-z0kzzbba/tile.json"
@@ -87,7 +87,7 @@
     },
     "tessl_review": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "review",
         "/tmp/agent-skills-tessl-z0kzzbba/skills/he-improve"
@@ -103,7 +103,7 @@
     },
     "report_path": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-improve.json",
     "dashboard_path": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-improve.html",
-    "dashboard_url": "file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/harness-engineering/he-improve.html"
+    "dashboard_url": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-improve.html"
   },
   "telemetry": {
     "latency_ms": 4318

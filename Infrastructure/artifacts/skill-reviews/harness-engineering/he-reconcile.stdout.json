@@ -35,7 +35,7 @@
         },
         "security_gate": {
           "exit_code": 0,
-          "stdout": "Skill: he-reconcile\nPath:  /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-reconcile/SKILL.md\n\n\nRESULT: PASS\n",
+          "stdout": "Skill: he-reconcile\nPath:  Plugins/harness-engineering/skills/he-reconcile/SKILL.md\n\n\nRESULT: PASS\n",
           "stderr": ""
         },
         "family_benchmarks": {
@@ -53,7 +53,7 @@
     },
     "plugin_eval": {
       "command": [
-        "/Users/jamiecraik/.local/bin/plugin-eval",
+        "plugin-eval",
         "analyze",
         "Plugins/harness-engineering/skills/he-reconcile",
         "--format",
@@ -75,7 +75,7 @@
     },
     "tessl_lint": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "lint",
         "/tmp/agent-skills-tessl-otdgmlbm/tile.json"
@@ -87,7 +87,7 @@
     },
     "tessl_review": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "review",
         "/tmp/agent-skills-tessl-otdgmlbm/skills/he-reconcile"
@@ -103,7 +103,7 @@
     },
     "report_path": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-reconcile.json",
     "dashboard_path": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-reconcile.html",
-    "dashboard_url": "file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/harness-engineering/he-reconcile.html"
+    "dashboard_url": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-reconcile.html"
   },
   "telemetry": {
     "latency_ms": 3836

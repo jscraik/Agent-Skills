@@ -20,7 +20,7 @@
         "security_gate": {
           "exit_code": 0,
           "stderr": "",
-          "stdout": "Skill: he-brainstorm\nPath:  /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-brainstorm/SKILL.md\n\n\nRESULT: PASS\n"
+          "stdout": "Skill: he-brainstorm\nPath:  Plugins/harness-engineering/skills/he-brainstorm/SKILL.md\n\n\nRESULT: PASS\n"
         }
       },
       "errors": [],
@@ -28,7 +28,7 @@
     },
     "plugin_eval": {
       "command": [
-        "/Users/jamiecraik/.local/bin/plugin-eval",
+        "plugin-eval",
         "analyze",
         "Plugins/harness-engineering/skills/he-brainstorm",
         "--format",
@@ -62,7 +62,7 @@
     "target": "Plugins/harness-engineering/skills/he-brainstorm",
     "tessl_lint": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "lint",
         "/tmp/agent-skills-tessl-8exzvpd5/tile.json"
@@ -74,7 +74,7 @@
     },
     "tessl_review": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "review",
         "/tmp/agent-skills-tessl-8exzvpd5/skills/he-brainstorm"

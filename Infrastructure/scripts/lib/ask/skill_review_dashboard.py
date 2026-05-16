@@ -199,29 +199,55 @@ def _scorecard_percent(scorecard: dict[str, Any]) -> int:
     return round((passed / len(cases)) * 100)
 
 
-def _latest_scorecard(repo_root: Path, skill_name: str) -> dict[str, Any] | None:
-    root = repo_root / "Infrastructure" / "artifacts" / "skills" / skill_name
+def _canonical_target_identifier(target: str, repo_root: Path | None = None) -> str:
+    path = Path(target)
+    if path.name == "SKILL.md":
+        path = path.parent
+    root = repo_root.resolve() if repo_root else Path.cwd().resolve()
+    if path.is_absolute():
+        try:
+            path = path.resolve().relative_to(root)
+        except ValueError:
+            return path.as_posix()
+    return path.as_posix()
+
+
+def _latest_scorecard(repo_root: Path, target_identifier: str) -> tuple[dict[str, Any] | None, list[Path]]:
+    root = repo_root / "Infrastructure" / "artifacts" / "skills"
     if not root.exists():
-        return None
-    scorecards = sorted(root.glob("*/scorecard.json"))
-    if not scorecards:
-        return None
-    path = scorecards[-1]
+        return None, []
+
+    matching: list[Path] = []
+    for path in root.glob("*/**/scorecard.json"):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+        skill_path = str(payload.get("skill_path") or "")
+        if skill_path and _canonical_target_identifier(skill_path, repo_root) != target_identifier:
+            continue
+        matching.append(path)
+
+    matching.sort(key=lambda item: item.stat().st_mtime)
+    if not matching:
+        return None, []
+
+    latest = matching[-1]
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(latest.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return None
+        return None, matching
     if not isinstance(payload, dict):
-        return None
-    payload["_path"] = path
-    return payload
+        return None, matching
+    payload["_path"] = latest
+    return payload, matching
 
 
 def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[str, Any]:
-    target_name = Path(target).name
-    root = repo_root / "Infrastructure" / "artifacts" / "skills" / target_name
-    scorecards = sorted(root.glob("*/scorecard.json")) if root.exists() else []
-    scorecard = _latest_scorecard(repo_root, target_name)
+    target_identifier = _canonical_target_identifier(target, repo_root)
+    scorecard, scorecards = _latest_scorecard(repo_root, target_identifier)
     if not scorecard:
         return {
             "available": False,
@@ -466,12 +492,17 @@ document.addEventListener('DOMContentLoaded', () => {{
   const ids = ['quality', 'evals', 'security', 'evidence'];
   const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
   const panels = Array.from(document.querySelectorAll('.tab-panel'));
+  const sidebarLinks = Array.from(document.querySelectorAll('.nav a'));
   function activate(id) {{
     const target = ids.includes(id) ? id : 'quality';
     tabs.forEach((tab) => {{
       const selected = tab.getAttribute('href') === '#' + target;
       tab.setAttribute('aria-selected', selected ? 'true' : 'false');
       tab.setAttribute('tabindex', selected ? '0' : '-1');
+    }});
+    sidebarLinks.forEach((link) => {{
+      const selected = link.getAttribute('href') === '#' + target;
+      link.classList.toggle('active', selected);
     }});
     panels.forEach((panel) => {{
       const selected = panel.id === target;
@@ -539,10 +570,10 @@ document.addEventListener('DOMContentLoaded', () => {{
       </div>
     </header>
     <nav class=\"tabs\" role=\"tablist\" aria-label=\"Review result sections\">
-      <a role=\"tab\" aria-selected=\"true\" aria-controls=\"quality\" tabindex=\"0\" href=\"#quality\">Quality</a><a role=\"tab\" aria-selected=\"false\" aria-controls=\"evals\" tabindex=\"-1\" href=\"#evals\">Evals</a><a role=\"tab\" aria-selected=\"false\" aria-controls=\"security\" tabindex=\"-1\" href=\"#security\">Security</a><a role=\"tab\" aria-selected=\"false\" aria-controls=\"evidence\" tabindex=\"-1\" href=\"#evidence\">Evidence</a>
+      <a id=\"tab-quality\" role=\"tab\" aria-selected=\"true\" aria-controls=\"quality\" tabindex=\"0\" href=\"#quality\">Quality</a><a id=\"tab-evals\" role=\"tab\" aria-selected=\"false\" aria-controls=\"evals\" tabindex=\"-1\" href=\"#evals\">Evals</a><a id=\"tab-security\" role=\"tab\" aria-selected=\"false\" aria-controls=\"security\" tabindex=\"-1\" href=\"#security\">Security</a><a id=\"tab-evidence\" role=\"tab\" aria-selected=\"false\" aria-controls=\"evidence\" tabindex=\"-1\" href=\"#evidence\">Evidence</a>
     </nav>
 
-    <section id=\"quality\" class=\"tab-panel is-active\" role=\"tabpanel\">
+    <section id=\"quality\" class=\"tab-panel is-active\" role=\"tabpanel\" aria-labelledby=\"tab-quality\">
       <div class=\"section-head\"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class=\"pill {_status_class(quality_score)}\">{quality_score}%</span></div>
       <div class=\"grid\">
         <div class=\"panel\"><h3>Discovery</h3><p>Description activation quality</p><strong class=\"{_status_class(tessl['description_score'])}\">{tessl['description_score']}%</strong></div>
@@ -556,16 +587,16 @@ document.addEventListener('DOMContentLoaded', () => {{
       <div class=\"suggestions\"><h3>Suggestions</h3><ul>{suggestion_html}</ul></div>
     </section>
 
-    <section id=\"evals\" class=\"tab-panel\" role=\"tabpanel\" hidden>
+    <section id=\"evals\" class=\"tab-panel\" role=\"tabpanel\" aria-labelledby=\"tab-evals\" hidden>
       {_render_eval_cases(evals)}
     </section>
 
-    <section id=\"security\" class=\"tab-panel\" role=\"tabpanel\" hidden>
+    <section id=\"security\" class=\"tab-panel\" role=\"tabpanel\" aria-labelledby=\"tab-security\" hidden>
       <div class=\"section-head\"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class=\"pill {_status_class(security_score)}\">{security_score}%</span></div>
       <div class=\"suggestions\"><h3>Findings</h3><ul>{security_html}</ul></div>
     </section>
 
-    <section id=\"evidence\" class=\"tab-panel\" role=\"tabpanel\" hidden>
+    <section id=\"evidence\" class=\"tab-panel\" role=\"tabpanel\" aria-labelledby=\"tab-evidence\" hidden>
       <div class=\"section-head\"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class=\"evidence-list\">
         <a href=\"{_file_url(report_path)}\">Review JSON<br><span>{_escape(report_path.relative_to(repo_root) if report_path.is_relative_to(repo_root) else report_path)}</span></a>

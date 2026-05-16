@@ -35,7 +35,7 @@
         },
         "security_gate": {
           "exit_code": 0,
-          "stdout": "Skill: he-reframe\nPath:  /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-reframe/SKILL.md\n\n\nRESULT: PASS\n",
+          "stdout": "Skill: he-reframe\nPath:  Plugins/harness-engineering/skills/he-reframe/SKILL.md\n\n\nRESULT: PASS\n",
           "stderr": ""
         },
         "family_benchmarks": {
@@ -53,7 +53,7 @@
     },
     "plugin_eval": {
       "command": [
-        "/Users/jamiecraik/.local/bin/plugin-eval",
+        "plugin-eval",
         "analyze",
         "Plugins/harness-engineering/skills/he-reframe",
         "--format",
@@ -75,7 +75,7 @@
     },
     "tessl_lint": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "lint",
         "/tmp/agent-skills-tessl-6xklfnzp/tile.json"
@@ -87,7 +87,7 @@
     },
     "tessl_review": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "review",
         "/tmp/agent-skills-tessl-6xklfnzp/skills/he-reframe"
@@ -103,7 +103,7 @@
     },
     "report_path": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-reframe.json",
     "dashboard_path": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-reframe.html",
-    "dashboard_url": "file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/harness-engineering/he-reframe.html"
+    "dashboard_url": "Infrastructure/artifacts/skill-reviews/harness-engineering/he-reframe.html"
   },
   "telemetry": {
     "latency_ms": 3729

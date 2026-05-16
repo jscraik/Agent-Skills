@@ -13,7 +13,7 @@
     },
     "plugin_eval": {
       "command": [
-        "/Users/jamiecraik/.local/bin/plugin-eval",
+        "plugin-eval",
         "analyze",
         "Plugins/skill-factory/skills/code_quality_review/skill-builder",
         "--format",
@@ -35,7 +35,7 @@
     "target": "Plugins/skill-factory/skills/code_quality_review/skill-builder",
     "tessl_lint": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "lint",
         "/tmp/agent-skills-tessl-aamhvmla/tile.json"
@@ -47,7 +47,7 @@
     },
     "tessl_review": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "review",
         "/tmp/agent-skills-tessl-aamhvmla/skills/skill-builder"

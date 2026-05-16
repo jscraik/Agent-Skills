@@ -228,6 +228,11 @@ def _normalize_skill_target_path(skill_path: str) -> tuple[Path, str]:
     audit_target = Path(skill_path)
     if audit_target.name == "SKILL.md":
         audit_target = audit_target.parent
+    if audit_target.is_absolute():
+        try:
+            audit_target = audit_target.resolve().relative_to(Path.cwd().resolve())
+        except ValueError:
+            pass
     return audit_target, audit_target.as_posix()
 
 
@@ -1552,6 +1557,11 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         return path_error
 
     audit_target, audit_target_path = _normalize_skill_target_path(skill_path)
+    if Path(audit_target_path).is_absolute():
+        try:
+            audit_target_path = Path(audit_target_path).resolve().relative_to(repo_root.resolve()).as_posix()
+        except ValueError:
+            pass
 
     python = _get_python_command(["pyyaml", "jsonschema"])
 

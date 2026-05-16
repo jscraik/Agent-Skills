@@ -19,6 +19,17 @@ def _safe_slug(value: str) -> str:
     slug = re.sub(r"[^A-Za-z0-9._-]+", "-", value.strip()).strip("-")
     return slug or "skill"
 
+def _canonical_skill_identifier(repo_root: Path, skill_path: str) -> str:
+    candidate = Path(skill_path)
+    if candidate.name == "SKILL.md":
+        candidate = candidate.parent
+    if candidate.is_absolute():
+        try:
+            candidate = candidate.resolve().relative_to(repo_root.resolve())
+        except ValueError:
+            return candidate.as_posix()
+    return candidate.as_posix()
+
 
 def _utc_now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -61,12 +72,12 @@ def _read_scorecard(path: Path | None) -> dict:
     return data if isinstance(data, dict) else {}
 
 
-def _latest_review_report(repo_root: Path, skill_name: str) -> Path | None:
+def _latest_review_report(repo_root: Path, skill_identifier: str) -> Path | None:
     review_root = repo_root / "Infrastructure" / "artifacts" / "skill-reviews"
     if not review_root.exists():
         return None
     candidates: list[Path] = []
-    for report_path in review_root.glob("*.json"):
+    for report_path in review_root.rglob("*.json"):
         try:
             report = json.loads(report_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -74,18 +85,21 @@ def _latest_review_report(repo_root: Path, skill_name: str) -> Path | None:
         data = report.get("data") if isinstance(report, dict) else None
         if not isinstance(data, dict):
             continue
-        target_name = Path(str(data.get("target") or "")).name
-        if target_name == skill_name and not report_path.name.endswith("-eval-latest.json"):
+        target = str(data.get("target") or "")
+        if not target:
+            continue
+        target_identifier = _canonical_skill_identifier(repo_root, target)
+        if target_identifier == skill_identifier and not report_path.name.endswith("-eval-latest.json"):
             candidates.append(report_path)
     if not candidates:
         return None
     return max(candidates, key=lambda path: path.stat().st_mtime)
 
 
-def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path: str) -> Path:
+def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path: str, skill_identifier: str) -> Path:
     review_root = repo_root / "Infrastructure" / "artifacts" / "skill-reviews"
     review_root.mkdir(parents=True, exist_ok=True)
-    report_path = review_root / f"{_safe_slug(skill_name)}-eval-latest.json"
+    report_path = review_root / f"{_safe_slug(skill_identifier)}-eval-latest.json"
     report = {
         "status": "success",
         "data": {
@@ -116,18 +130,19 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
 def _render_eval_dashboard(repo_root: Path, skill_path: str, mode: str, raw_output: str) -> dict:
     scorecard_path = _scorecard_path_from_output(repo_root, raw_output)
     scorecard = _read_scorecard(scorecard_path)
-    skill_name = str(scorecard.get("skill") or Path(skill_path).name)
     source_skill_path = str(scorecard.get("skill_path") or skill_path)
-    report_path = _latest_review_report(repo_root, skill_name)
+    skill_identifier = _canonical_skill_identifier(repo_root, source_skill_path)
+    skill_name = str(scorecard.get("skill") or Path(skill_identifier).name)
+    report_path = _latest_review_report(repo_root, skill_identifier)
     if report_path is None:
-        report_path = _write_eval_only_review_report(repo_root, skill_name, source_skill_path)
+        report_path = _write_eval_only_review_report(repo_root, skill_name, source_skill_path, skill_identifier)
 
-    dashboard_path = repo_root / "Infrastructure" / "artifacts" / "skill-reviews" / f"{_safe_slug(skill_name)}-dashboard-{mode}.html"
+    dashboard_path = repo_root / "Infrastructure" / "artifacts" / "skill-reviews" / f"{_safe_slug(skill_identifier)}-dashboard-{mode}.html"
     rendered = render_skill_review_dashboard(report_path=report_path, output_path=dashboard_path, repo_root=repo_root)
     relative_dashboard = rendered.relative_to(repo_root).as_posix() if rendered.is_relative_to(repo_root) else str(rendered)
     return {
         "dashboard_path": relative_dashboard,
-        "dashboard_url": rendered.resolve().as_uri(),
+        "dashboard_url": relative_dashboard,
         "dashboard_tab": "evals",
         "dashboard_source_report": report_path.relative_to(repo_root).as_posix() if report_path.is_relative_to(repo_root) else str(report_path),
         "scorecard_path": scorecard_path.relative_to(repo_root).as_posix() if scorecard_path and scorecard_path.is_relative_to(repo_root) else (str(scorecard_path) if scorecard_path else None),

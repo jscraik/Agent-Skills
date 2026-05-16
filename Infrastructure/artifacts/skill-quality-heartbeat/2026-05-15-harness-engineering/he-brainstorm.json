@@ -13,7 +13,7 @@
     },
     "plugin_eval": {
       "command": [
-        "/Users/jamiecraik/.local/bin/plugin-eval",
+        "plugin-eval",
         "analyze",
         "Plugins/harness-engineering/skills/he-brainstorm",
         "--format",
@@ -35,7 +35,7 @@
     "target": "Plugins/harness-engineering/skills/he-brainstorm",
     "tessl_lint": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "lint",
         "/tmp/agent-skills-tessl-j0iqmvev/tile.json"
@@ -47,7 +47,7 @@
     },
     "tessl_review": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "review",
         "/tmp/agent-skills-tessl-j0iqmvev/skills/he-brainstorm"
