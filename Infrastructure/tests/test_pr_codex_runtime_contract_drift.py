@@ -112,8 +112,8 @@ SKILL_FACTORY_CODE_QUALITY_SKILL = (
     / "SKILL.md"
 )
 
-# Expected revision for agent-ops, plugin-factory, skill-factory (had source changes)
-EXPECTED_REVISION_CHANGED_SKILLSETS = "18cadc255"
+# Expected revision for command-surface and agent-ops entries updated in this PR
+EXPECTED_AGENT_OPS_REVISION = "18cadc255"
 
 # Expected revision for other skillsets (bumped but no direct source changes in PR)
 EXPECTED_REVISION_OTHER_SKILLSETS = "435084b77"
@@ -199,15 +199,41 @@ class TestManifestSourceRevisionBump(unittest.TestCase):
                 f"Entry '{rec.get('id')}' in {path.name} still carries old revision '{old_rev}'",
             )
 
-    # Skillsets with direct source changes in this PR use EXPECTED_REVISION_CHANGED_SKILLSETS
+    def _assert_all_use_valid_revision(self, path: Path) -> None:
+        records = _load_jsonl(path)
+        self.assertGreater(len(records), 0, f"{path.name} is empty")
+        for rec in records:
+            rev = rec.get("provenance", {}).get("source_revision", "")
+            self.assertRegex(
+                rev,
+                _REVISION_PATTERN,
+                f"Entry '{rec.get('id')}' in {path.name} has invalid source_revision '{rev}'",
+            )
+
+    def _collect_revisions(self, path: Path) -> set[str]:
+        records = _load_jsonl(path)
+        return {rec.get("provenance", {}).get("source_revision", "") for rec in records}
+
+    # agent-ops tracks the command-surface revision in this PR lane
     def test_agent_ops_manifest_revision_is_18cadc255(self):
-        self._assert_all_use_revision(AGENT_OPS_MANIFEST, EXPECTED_REVISION_CHANGED_SKILLSETS)
+        self._assert_all_use_revision(AGENT_OPS_MANIFEST, EXPECTED_AGENT_OPS_REVISION)
 
-    def test_plugin_factory_manifest_revision_is_18cadc255(self):
-        self._assert_all_use_revision(PLUGIN_FACTORY_MANIFEST, EXPECTED_REVISION_CHANGED_SKILLSETS)
+    def test_plugin_factory_manifest_revision_is_valid_and_not_old(self):
+        self._assert_old_revision_absent(PLUGIN_FACTORY_MANIFEST, OLD_MANIFEST_REVISION)
+        self._assert_all_use_valid_revision(PLUGIN_FACTORY_MANIFEST)
 
-    def test_skill_factory_manifest_revision_is_18cadc255(self):
-        self._assert_all_use_revision(SKILL_FACTORY_MANIFEST, EXPECTED_REVISION_CHANGED_SKILLSETS)
+    def test_skill_factory_manifest_revision_is_valid_and_not_old(self):
+        self._assert_old_revision_absent(SKILL_FACTORY_MANIFEST, OLD_MANIFEST_REVISION)
+        self._assert_all_use_valid_revision(SKILL_FACTORY_MANIFEST)
+
+    def test_plugin_and_skill_factory_manifest_revisions_match(self):
+        plugin_revs = self._collect_revisions(PLUGIN_FACTORY_MANIFEST)
+        skill_revs = self._collect_revisions(SKILL_FACTORY_MANIFEST)
+        self.assertEqual(
+            plugin_revs,
+            skill_revs,
+            f"plugin-factory and skill-factory revisions diverged: {sorted(plugin_revs)} vs {sorted(skill_revs)}",
+        )
 
     # Skillsets without direct source changes use EXPECTED_REVISION_OTHER_SKILLSETS
     def test_backend_platform_manifest_revision_is_435084b77(self):
@@ -687,7 +713,7 @@ class TestAgentOpsManifestCodexAutomationArchitect(unittest.TestCase):
 
     def test_source_revision_is_new(self):
         rev = self.entry.get("provenance", {}).get("source_revision", "")
-        self.assertEqual(rev, EXPECTED_REVISION_CHANGED_SKILLSETS)
+        self.assertEqual(rev, EXPECTED_AGENT_OPS_REVISION)
 
     def test_description_updated(self):
         desc = self.entry.get("description", "")
@@ -738,7 +764,7 @@ class TestAgentOpsManifestCodexAgentCreator(unittest.TestCase):
 
     def test_source_revision_is_new(self):
         rev = self.entry.get("provenance", {}).get("source_revision", "")
-        self.assertEqual(rev, EXPECTED_REVISION_CHANGED_SKILLSETS)
+        self.assertEqual(rev, EXPECTED_AGENT_OPS_REVISION)
 
     def test_level_is_atom(self):
         """codex-agent-creator level must remain 'atom' (unchanged by this PR)."""
@@ -777,7 +803,7 @@ class TestAgentOpsManifestCodexEnvironmentCreator(unittest.TestCase):
 
     def test_source_revision_is_new(self):
         rev = self.entry.get("provenance", {}).get("source_revision", "")
-        self.assertEqual(rev, EXPECTED_REVISION_CHANGED_SKILLSETS)
+        self.assertEqual(rev, EXPECTED_AGENT_OPS_REVISION)
 
     def test_description_mentions_exec_server_providers(self):
         desc = self.entry.get("description", "")

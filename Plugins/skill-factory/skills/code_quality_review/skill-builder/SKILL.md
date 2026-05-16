@@ -125,7 +125,7 @@ If the finding points to package architecture rather than skill prose, record th
 
 ## Validation
 
-Run `./bin/ask skills audit <target> --level strict --json --robot`, then `python3 Infrastructure/bin/ask skills external-review <target> --audit-level compat --json`.
+Run `./bin/ask skills audit <target> --level strict --json --robot`, then `python3 Infrastructure/bin/ask skills audit <target> --level compat --json --robot`.
 
 Fail fast: stop at the first failed required gate, classify it, and do not proceed to sync, commit, publish, or install until it is fixed or explicitly blocked.
 
