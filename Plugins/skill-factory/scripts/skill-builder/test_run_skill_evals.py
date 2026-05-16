@@ -23,7 +23,7 @@ SKILL_DIR = SCRIPT_DIR.parents[1] / "skills" / "code_quality_review" / "skill-bu
 try:
     from defusedxml import ElementTree as ET
 except ModuleNotFoundError:
-    from xml.etree import ElementTree as ET
+    ET = None
 
 existing_runner = sys.modules.get("run_skill_evals")
 if existing_runner is not None:
@@ -494,6 +494,8 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertIn("Using isolated CODEX_HOME", "\n".join(warnings))
 
     def test_write_junit_report_outputs_failures(self) -> None:
+        if ET is None:
+            self.skipTest("defusedxml is required for XML parsing assertions")
         summary = {
             "skill": "skill-builder",
             "generated_at": "2026-03-21T00:00:00Z",
@@ -539,6 +541,8 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertIsNotNone(cases[1].find("failure"))
 
     def test_write_junit_report_marks_tier2_fail_mode_cases_as_failures(self) -> None:
+        if ET is None:
+            self.skipTest("defusedxml is required for XML parsing assertions")
         summary = {
             "skill": "skill-builder",
             "generated_at": "2026-03-21T00:00:00Z",
