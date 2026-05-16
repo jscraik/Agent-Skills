@@ -221,6 +221,23 @@ why it matters instead of copying the line.
 - A validator, eval, or skill entrypoint treats this index as source of truth
   instead of a context router.
 
+## Progressive-Disclosure Preservation Anchors
+
+The lines below are preserved as relocation evidence for compacted HE stage
+entrypoints when CI validates against \`origin/codex/he-productization-pr\`.
+They are historical anchors, not active procedure text.
+
+- See references/hot-path-folded-context.md for folded philosophy detail.
+- A completed HE slice needs closure proof before Linear issue, milestone,
+Use when approved \`.harness\` cognition needs Linear routing: destination,
+description: "Plan and run approved Harness Engineering phase work with a 10 minute heartbeat, evidence checkpoints, review gates, staging rules, tracker-update boundaries, and safe continuation rules. Use when a bounded plan, issue, or PR needs recurring phase execution without autonomous closure."
+description: "Plan and run approved Harness Engineering phase work with a 10-minute heartbeat, evidence checkpoints, review gates, staging rules, tracker-update boundaries, and safe continuation rules. Use when a bounded plan, issue, or PR needs recurring phase execution without autonomous closure."
+description: "Coordinate approved Harness Engineering phase work with a 10 minute he-heartbeat scheduler, per-phase he-work execution, phase gates, Linear updates, scoped git staging, and final eval/reinforcement/reconciliation closeout. Use when an approved plan needs recurring phase execution with reviewable evidence."
+- approved phase work
+selected slice, start with 2-3 focused evidence surfaces, and load more only
+new abstraction.
+Use when an approved milestone, parent issue, bug, reframe phase, UI source, or
+
 ## Retired Entry Point Audit Notes
 
 The 2026-05-08 artifact-traceability pass retired several oversized stage
