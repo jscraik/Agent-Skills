@@ -100,6 +100,7 @@ metadata:
 ## Progressive Disclosure
 - For Cookbook-derived MCP, Responses API, and tool-orchestration checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
 - Start here for routing, safety, workflow, and validation.
+- Use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md` for integration-boundary and protocol contract lenses.
 - Use references/contract.yaml for the machine-readable contract.
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.

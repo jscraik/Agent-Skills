@@ -166,4 +166,6 @@ blocked_by: null
 - `references/task-profile.json`
 - `references/plugin-contract.md`
 - `Infrastructure/references/openai-style-plugin-design-contract.md`
+- `Infrastructure/references/software-literature-expert-lens-pack.md`
+- `Infrastructure/references/software-literature-skill-expertise-map.md`
 - `assets/`

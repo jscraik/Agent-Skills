@@ -116,5 +116,7 @@ Output: route to `write-judge-prompt`, require labeled pass/fail examples, and m
 
 ## Progressive Disclosure
 - Start with this active contract.
+- For Cookbook-derived eval flywheel, structured judge, and multimodal eval checks, use `Infrastructure/references/openai-cookbook-expert-lens-pack.md` and `Infrastructure/references/openai-cookbook-skill-expertise-map.md`.
+- For software-literature evaluation loop checks, use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Archived source, scripts, assets, and long-form references live under `Infrastructure/references/deferred-skill-context/agent-ops-evals-router/`.
 - Load only the specific archived file needed for the current task.

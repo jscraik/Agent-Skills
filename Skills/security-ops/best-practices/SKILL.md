@@ -86,5 +86,6 @@ Audit, review, and harden Better Auth integrations. Use when the user wants Bett
 ## Progressive Disclosure
 - Start with this active contract.
 - For Cookbook-derived guardrail and secure quality gate checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
+- For software-literature dependency, integration, and operational-security lenses, use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Archived source, scripts, assets, and long-form references live under `Infrastructure/references/deferred-skill-context/security-ops-best-practices/`.
 - Load only the specific archived file needed for the current task.

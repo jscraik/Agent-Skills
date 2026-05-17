@@ -97,6 +97,7 @@ metadata:
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
 - For Cookbook-derived guardrail and secure quality gate ownership checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
+- Use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md` for dependency, integration, and operational-security ownership lenses.
 - Use references/contract.yaml for the machine-readable contract.
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.
