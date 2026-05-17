@@ -1097,7 +1097,12 @@ class TestAskCLI(unittest.TestCase):
             len(profiles["profiles"]["eval"]["required_evidence"]),
         )
         self.assertIn("artifact_write_only", profiles["profile_summary"]["by_write_policy"])
+        self.assertEqual(profiles["profile_summary"]["write_policy_count"], 1)
         self.assertIn("repo_read", profiles["profile_summary"]["by_permission"])
+        self.assertEqual(
+            profiles["profile_summary"]["permission_count"],
+            len(profiles["profile_summary"]["by_permission"]),
+        )
         self.assertEqual(list(profiles["profiles"]), ["eval"])
         self.assertEqual(profiles["operation_context"]["profile_model"], "profile-v2-inspired")
         self.assertEqual(profiles["operation_context"]["contract_schemas"]["doctor"], "skill-doctor.v1")
