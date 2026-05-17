@@ -259,12 +259,9 @@ contracts. The exact historical lines below are retained as move evidence for
 the progressive-disclosure gate; current agents should follow the linked
 contracts, not this audit note.
 
-Moved-to-reference evidence:
-
-Return schema_version when structured. Output a `.harness/plan/**.md` plan or
-Produce one of: strategy memo, architecture recommendation, refactor strategy,
-Strategy artifacts are cognition compression, not ceremony. Turn verified repo
-Write a dated `.harness/linear/**-linear-plan.md` artifact or return
+Moved-to-reference evidence is archived under `fixtures/budget-archive/**`
+and `fixtures/preserved-context/**`. This active router keeps only the current
+reference destinations below.
 
 Current routes:
 

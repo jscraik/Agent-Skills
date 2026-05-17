@@ -82,6 +82,7 @@ def dispatch_workouts(repo_root: Path, args: Any) -> CallResult:
     result = CallResult()
     action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
     result.status = "error"
+    result.data["validation_commands"] = [_workouts_validation_command("list")]
     result.errors.append(ErrorObject(
         code="ERR_VALIDATION",
         message=f"{action_msg} for topic 'workouts'",
@@ -106,6 +107,9 @@ def render_workouts_human(args: Any, result: CallResult) -> None:
     elif args.action == "promote":
         promotion = result.data.get("promotion", {})
         print(f"Promotion state: {promotion.get('state', 'unknown')}")
+    commands = result.data.get("validation_commands") or []
+    if commands:
+        print(f"Validation: {commands[0]}")
 
 
 def _timestamp() -> str:
@@ -144,6 +148,27 @@ def _safe_filename(value: str) -> str:
         filename (str): Filename-safe string derived from `value`.
     """
     return _safe_id(value).replace("/", "__")
+
+
+def _workouts_validation_command(
+    action: str,
+    workout_id: str | None = None,
+    *,
+    attempts: int | None = None,
+    if_better: bool = False,
+    dry_run: bool = False,
+) -> str:
+    parts = ["./bin/ask", "workouts", action]
+    if workout_id:
+        parts.append(_safe_id(workout_id))
+    if attempts is not None and attempts != 1:
+        parts.extend(["--attempts", str(attempts)])
+    if if_better:
+        parts.append("--if-better")
+    if dry_run:
+        parts.append("--dry-run")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
 
 
 def _sha256(path: Path) -> str:
@@ -666,6 +691,7 @@ def list_workouts(repo_root: Path) -> CallResult:
     result.status = "success"
     result.data["workouts"] = workouts
     result.data["count"] = len(workouts)
+    result.data["validation_commands"] = [_workouts_validation_command("list")]
     return result
 
 
@@ -685,6 +711,9 @@ def run_workout(repo_root: Path, workout_id: str, *, attempts: int = 1) -> CallR
             - errors: populated with `ErrorObject` entries on validation failures or if one or more attempts fail.
     """
     result = CallResult()
+    result.data["validation_commands"] = [
+        _workouts_validation_command("run", workout_id, attempts=attempts)
+    ]
     try:
         directory, config = _load_workout(repo_root, workout_id)
     except (FileNotFoundError, ValueError) as exc:
@@ -856,6 +885,7 @@ def score_workout(repo_root: Path, workout_id: str) -> CallResult:
         CallResult: Result object populated as described above.
     """
     result = CallResult()
+    result.data["validation_commands"] = [_workouts_validation_command("score", workout_id)]
     scorecard_path = _telemetry_dir(repo_root) / "scorecards" / f"{_safe_filename(workout_id)}.json"
     if not scorecard_path.is_file():
         result.status = "error"
@@ -908,9 +938,15 @@ def promote_workout(repo_root: Path, workout_id: str, *, if_better: bool = False
     """
     score = score_workout(repo_root, workout_id)
     if score.status != "success":
+        score.data["validation_commands"] = [
+            _workouts_validation_command("promote", workout_id, if_better=if_better, dry_run=dry_run)
+        ]
         return score
 
     result = CallResult()
+    result.data["validation_commands"] = [
+        _workouts_validation_command("promote", workout_id, if_better=if_better, dry_run=dry_run)
+    ]
     scorecard = score.data["scorecard"]
     telemetry_dir = _telemetry_dir(repo_root)
     target_source = str(scorecard.get("target_source_path") or "")

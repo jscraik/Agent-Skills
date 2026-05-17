@@ -3,6 +3,7 @@ from __future__ import annotations
 """Skill graph navigation and discovery for agent-native workflows."""
 import json
 import re
+import shlex
 from pathlib import Path
 from collections import Counter, defaultdict, deque
 from ask.envelope import CallResult, ErrorObject
@@ -18,6 +19,28 @@ TOPIC_CLUSTERS = {
     "mobile-native",
 }
 TOPIC_WIKILINK_RE = re.compile(r"\[\[([a-z0-9_-]+)\]\]")
+
+
+def _graph_validation_command(
+    action: str,
+    *args: str,
+    depth: int | None = None,
+    reverse: bool = False,
+    topic: str | None = None,
+    tier: str | None = None,
+) -> str:
+    """Build the replay command for read-only graph discovery operations."""
+    parts = ["./bin/ask", "graph", action, *args]
+    if depth is not None:
+        parts.extend(["--depth", str(depth)])
+    if reverse:
+        parts.append("--reverse")
+    if topic:
+        parts.extend(["--topic-filter", topic])
+    if tier:
+        parts.extend(["--tier", tier])
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
 
 
 def _topic_from_category(category: str) -> str | None:
@@ -273,13 +296,16 @@ def graph_related(repo_root: Path, skill: str, depth: int = 1, reverse: bool = F
                   topic: str = None, tier: str = None) -> CallResult:
     """Finds related skills in the skill graph."""
     result = CallResult()
+    result.data["validation_commands"] = [
+        _graph_validation_command("related", skill, depth=depth, reverse=reverse, topic=topic, tier=tier)
+    ]
     data, error = _load_graph(repo_root)
 
     if error:
         result.status = "error"
         result.errors.append(error)
         return result
-    
+
     node_map, fwd, rev = _build_index(data)
     start, ambiguous = _find_node(data, skill)
 
@@ -306,13 +332,13 @@ def graph_related(repo_root: Path, skill: str, depth: int = 1, reverse: bool = F
     visited: dict[str, int] = {start: 0}
     queue = deque([(start, 0)])
     related = []
-    
+
     while queue:
         current, d = queue.popleft()
         if d >= depth:
             continue
         edges = sorted(adj.get(current, []),
-                      key=lambda e: (-e.get("weight", 1.0), 
+                      key=lambda e: (-e.get("weight", 1.0),
                                     -in_deg.get(e["to"] if not reverse else e["from"], 0)))
         for edge in edges:
             peer = edge["from"] if reverse else edge["to"]
@@ -334,9 +360,9 @@ def graph_related(repo_root: Path, skill: str, depth: int = 1, reverse: bool = F
                 "description": edge.get("desc", ""),
                 "in_links": in_deg.get(peer, 0),
             })
-    
+
     related.sort(key=lambda r: (-r["weight"], -r["in_links"]))
-    
+
     result.status = "success"
     result.data["skill"] = start
     result.data["node"] = node_map.get(start, {})
@@ -350,16 +376,17 @@ def graph_related(repo_root: Path, skill: str, depth: int = 1, reverse: bool = F
 def graph_find(repo_root: Path, query: str, topic: str = None, tier: str = None) -> CallResult:
     """Full-text search across skill names and topics."""
     result = CallResult()
+    result.data["validation_commands"] = [_graph_validation_command("find", query, topic=topic, tier=tier)]
     data, error = _load_graph(repo_root)
 
     if error:
         result.status = "error"
         result.errors.append(error)
         return result
-    
+
     ql = query.lower()
     scored: list[tuple[float, dict]] = []
-    
+
     for n in data["nodes"]:
         nid = n["id"]
         score = 0
@@ -379,9 +406,9 @@ def graph_find(repo_root: Path, query: str, topic: str = None, tier: str = None)
             continue
         score += n.get("in_degree", 0) * 0.5
         scored.append((score, n))
-    
+
     scored.sort(key=lambda x: -x[0])
-    
+
     result.status = "success"
     result.data["query"] = query
     result.data["matches"] = [n for _, n in scored]
@@ -392,13 +419,14 @@ def graph_find(repo_root: Path, query: str, topic: str = None, tier: str = None)
 def graph_info(repo_root: Path, skill: str) -> CallResult:
     """Returns full node details including topic, tier, degree, and links."""
     result = CallResult()
+    result.data["validation_commands"] = [_graph_validation_command("info", skill)]
     data, error = _load_graph(repo_root)
 
     if error:
         result.status = "error"
         result.errors.append(error)
         return result
-    
+
     node_map, fwd, rev = _build_index(data)
     start, ambiguous = _find_node(data, skill)
 
@@ -422,7 +450,7 @@ def graph_info(repo_root: Path, skill: str) -> CallResult:
     n = node_map.get(start, {"id": start})
     out_edges = sorted(fwd.get(start, []), key=lambda e: -e.get("weight", 1.0))
     in_edges = sorted(rev.get(start, []), key=lambda e: -e.get("weight", 1.0))
-    
+
     result.status = "success"
     result.data["skill"] = start
     result.data["node"] = n
@@ -444,13 +472,14 @@ def graph_info(repo_root: Path, skill: str) -> CallResult:
 def graph_chain(repo_root: Path, from_skill: str, to_skill: str) -> CallResult:
     """Finds the shortest path between two skills."""
     result = CallResult()
+    result.data["validation_commands"] = [_graph_validation_command("chain", from_skill, to_skill)]
     data, error = _load_graph(repo_root)
 
     if error:
         result.status = "error"
         result.errors.append(error)
         return result
-    
+
     node_map, fwd, rev = _build_index(data)
     start, start_ambiguous = _find_node(data, from_skill)
     end, end_ambiguous = _find_node(data, to_skill)
@@ -515,21 +544,22 @@ def graph_chain(repo_root: Path, from_skill: str, to_skill: str) -> CallResult:
 def graph_list(repo_root: Path, topic: str = None, tier: str = None) -> CallResult:
     """Lists all skills with optional filtering."""
     result = CallResult()
+    result.data["validation_commands"] = [_graph_validation_command("list", topic=topic, tier=tier)]
     data, error = _load_graph(repo_root)
 
     if error:
         result.status = "error"
         result.errors.append(error)
         return result
-    
+
     nodes = data["nodes"]
     if topic:
         nodes = [n for n in nodes if n.get("topic") == topic]
     if tier:
         nodes = [n for n in nodes if n.get("tier") == tier]
-    
+
     nodes = sorted(nodes, key=lambda n: (-n.get("in_degree", 0), n["id"]))
-    
+
     result.status = "success"
     result.data["skills"] = nodes
     result.data["count"] = len(nodes)
@@ -540,18 +570,19 @@ def graph_list(repo_root: Path, topic: str = None, tier: str = None) -> CallResu
 def graph_topics(repo_root: Path) -> CallResult:
     """Lists all topic clusters in the skill graph."""
     result = CallResult()
+    result.data["validation_commands"] = [_graph_validation_command("topics")]
     data, error = _load_graph(repo_root)
 
     if error:
         result.status = "error"
         result.errors.append(error)
         return result
-    
+
     topics: dict[str, int] = defaultdict(int)
     for n in data["nodes"]:
         topic = n.get("topic", "unknown")
         topics[topic] += 1
-    
+
     result.status = "success"
     result.data["topics"] = dict(sorted(topics.items(), key=lambda x: -x[1]))
     result.data["count"] = len(topics)

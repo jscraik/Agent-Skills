@@ -3,6 +3,7 @@ import re
 import os
 import json
 import shutil
+import shlex
 from pathlib import Path
 from typing import Any, List, Optional
 
@@ -38,26 +39,33 @@ _LOCAL_PLUGIN_ROOTS = ("Plugins", "plugins", ".agents/plugins")
 def _to_absolute_path(path: Path) -> Path:
     """
     Return an absolute Path with '~' expanded while preserving symlinks.
-    
+
     Returns:
         Path: Absolute path with the user home expanded; symbolic links are not resolved.
     """
     return Path(path.expanduser()).absolute()
 
 
-def _runtime_error_result(message: str, *, fix_suggestion: str) -> CallResult:
+def _runtime_error_result(
+    message: str,
+    *,
+    fix_suggestion: str,
+    validation_command: str | None = None,
+) -> CallResult:
     """
     Create a CallResult representing a runtime error with a single `ERR_RUNTIME` error object.
-    
+
     Parameters:
         message (str): Human-readable description of the runtime error.
         fix_suggestion (str): Suggested action the operator can take to fix the error.
-    
+
     Returns:
         CallResult: A result with `status` set to `"error"` and `errors` containing one `ErrorObject` with `code` `"ERR_RUNTIME"`, the provided `message`, and `fix_suggestion`.
     """
     result = CallResult()
     result.status = "error"
+    if validation_command:
+        result.data["validation_commands"] = [validation_command]
     result.errors.append(
         ErrorObject(
             code="ERR_RUNTIME",
@@ -68,19 +76,26 @@ def _runtime_error_result(message: str, *, fix_suggestion: str) -> CallResult:
     return result
 
 
-def _validation_error_result(message: str, *, fix_suggestion: str) -> CallResult:
+def _validation_error_result(
+    message: str,
+    *,
+    fix_suggestion: str,
+    validation_command: str | None = None,
+) -> CallResult:
     """
     Create a CallResult representing a validation error.
-    
+
     Parameters:
         message (str): Human-readable validation message describing the problem.
         fix_suggestion (str): Recommended corrective action or command the user can run.
-    
+
     Returns:
         CallResult: A result with `status` set to "error" and a single `ErrorObject` with code `ERR_VALIDATION`, containing the provided message and fix suggestion.
     """
     result = CallResult()
     result.status = "error"
+    if validation_command:
+        result.data["validation_commands"] = [validation_command]
     result.errors.append(
         ErrorObject(
             code="ERR_VALIDATION",
@@ -91,17 +106,102 @@ def _validation_error_result(message: str, *, fix_suggestion: str) -> CallResult
     return result
 
 
+def _plugin_init_validation_command(
+    name: str,
+    *,
+    category: str = _DEFAULT_PLUGIN_CATEGORY,
+    with_marketplace: bool = False,
+    companion_folders: Optional[List[str]] = None,
+    action: str = "init",
+) -> str:
+    parts = ["./bin/ask", "plugins", action, name]
+    if category != _DEFAULT_PLUGIN_CATEGORY:
+        parts.extend(["--category", category])
+    if with_marketplace:
+        parts.append("--with-marketplace")
+    for folder in companion_folders or []:
+        if folder in {"scripts", "assets", "references", "workflows"}:
+            parts.append(f"--with-{folder}")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _plugin_install_validation_command(
+    url: str,
+    plugin_path: str,
+    *,
+    name: str | None = None,
+    ref: str | None = None,
+    dest: str = "Plugins/third-party",
+    validation_level: str = "compat",
+    allow_untrusted_source: bool = False,
+    allow_unpinned_ref: bool = False,
+    dry_run: bool = False,
+    action: str = "install",
+) -> str:
+    parts = ["./bin/ask", "plugins", action, url, "--path", plugin_path]
+    if name:
+        parts.extend(["--name", name])
+    if ref:
+        parts.extend(["--ref", ref])
+    if dest != "Plugins/third-party":
+        parts.extend(["--dest", dest])
+    if validation_level != "compat":
+        parts.extend(["--validation-level", validation_level])
+    if allow_untrusted_source:
+        parts.append("--allow-untrusted-source")
+    if allow_unpinned_ref:
+        parts.append("--allow-unpinned-ref")
+    if dry_run:
+        parts.append("--dry-run")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _plugin_harden_validation_command(
+    plugin_path: str,
+    *,
+    require_marketplace: bool = True,
+    marketplace_path: str = ".agents/Plugins/marketplace.json",
+    run_compat: bool = True,
+    run_marketplace_audit: bool = True,
+    allow_legacy_marketplace_path: bool = True,
+) -> str:
+    parts = ["./bin/ask", "plugins", "harden", plugin_path]
+    if marketplace_path != ".agents/Plugins/marketplace.json":
+        parts.extend(["--marketplace-path", marketplace_path])
+    if not run_compat:
+        parts.append("--skip-compat")
+    if not run_marketplace_audit:
+        parts.append("--skip-marketplace-audit")
+    if not require_marketplace:
+        parts.append("--no-require-marketplace")
+    if not allow_legacy_marketplace_path:
+        parts.append("--strict-marketplace-path")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _plugin_validation_command(action: str, *args: str, **flags: bool) -> str:
+    parts = ["./bin/ask", "plugins", action, *args]
+    for flag, enabled in flags.items():
+        if enabled:
+            parts.append(f"--{flag.replace('_', '-')}")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
 def _resolve_script_path(repo_root: Path, candidates: tuple[str, ...]) -> Path:
     """
     Selects the first existing helper script from a list of relative candidate paths under a repository root.
-    
+
     Parameters:
         repo_root (Path): Root directory to resolve candidate relative paths against.
         candidates (tuple[str, ...]): Ordered relative paths to check under `repo_root`.
-    
+
     Returns:
         Path: The path to the first candidate that exists as a file.
-    
+
     Raises:
         FileNotFoundError: If none of the candidates exist; the error message lists the checked paths.
     """
@@ -121,12 +221,12 @@ def _resolve_script_path_or_runtime_error(
 ) -> tuple[Optional[Path], Optional[CallResult]]:
     """
     Resolve the first existing script path from a list of candidate relative paths under `repo_root`, or produce a runtime error result if none are found.
-    
+
     Parameters:
         repo_root (Path): Repository root against which candidate paths are resolved.
         candidates (tuple[str, ...]): Relative file paths (candidates) to check under `repo_root`, in order of preference.
         fix_suggestion (str): Human-facing suggestion to fix the problem when no candidate is found.
-    
+
     Returns:
         tuple[Optional[Path], Optional[CallResult]]: A pair where the first element is the resolved Path when found and the second is None; or the first element is None and the second is a `CallResult` describing the runtime error and containing `fix_suggestion`.
     """
@@ -139,10 +239,10 @@ def _resolve_script_path_or_runtime_error(
 def _normalize_plugin_name(raw_name: str) -> str:
     """
     Normalize a raw plugin name into a filesystem- and URL-safe kebab-case identifier.
-    
+
     Parameters:
         raw_name (str): The original plugin name.
-    
+
     Returns:
         str: The name lowercased with each sequence of non-alphanumeric characters replaced by a single hyphen, leading and trailing hyphens removed, and consecutive hyphens collapsed.
     """
@@ -259,11 +359,11 @@ def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> Cal
     Use this after changing or updating any local plugin source or
     `Plugins/marketplace.json`. Runtime plugin mirrors are copied directories,
     not symlinks, so they must be replaced to make plugin changes visible.
-    
+
     Parameters:
         repo_root (Path): Path to the repository root containing the Plugins/ tree and Plugins/marketplace.json.
         dry_run (bool): If True, performs a simulation without making filesystem changes.
-    
+
     Returns:
         CallResult: On success, contains status "success" and data with:
             - message (str): Short success message.
@@ -274,18 +374,22 @@ def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> Cal
         On error, returns a CallResult with status "error" and an ErrorObject describing the problem (e.g., missing/invalid marketplace manifest or no Codex profile homes found).
     """
     result = CallResult()
+    validation_command = _plugin_validation_command("sync-local-runtime", dry_run=dry_run)
+    result.data["validation_commands"] = [validation_command]
     try:
         marketplace_path, entries = _load_local_marketplace(repo_root)
     except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
         return _runtime_error_result(
             str(exc),
             fix_suggestion="Ensure Plugins/marketplace.json exists and contains valid local plugin entries.",
+            validation_command=validation_command,
         )
 
     if not entries:
         return _validation_error_result(
             "No local plugins were found in Plugins/marketplace.json.",
             fix_suggestion="Add local plugin entries before replacing runtime mirrors.",
+            validation_command=validation_command,
         )
 
     home = Path.home()
@@ -299,6 +403,7 @@ def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> Cal
         return _validation_error_result(
             "No Codex home directories were found under the current user home.",
             fix_suggestion="Create ~/.codex first, then rerun the sync command.",
+            validation_command=validation_command,
         )
 
     runtime_reports: list[dict[str, Any]] = []
@@ -333,13 +438,13 @@ def _extract_plugin_root_from_output(
 ) -> Path:
     """
     Derives the absolute plugin root path from scaffold creator output or computes a fallback under the repository.
-    
+
     Parameters:
         stdout (str): Captured stdout from the plugin creator script; may contain a scaffold summary with the created path.
         repo_root (Path): Repository root used to resolve relative created paths and to construct fallback locations.
         raw_name (str): Original plugin name provided to the creator; used (after normalization) as the final path segment when falling back.
         fallback_parent (str): Repository-relative parent under which to place the fallback plugin folder (default: "Plugins/third-party").
-    
+
     Returns:
         Path: Absolute path to the plugin root extracted from output, or the computed fallback path under `repo_root`.
     """
@@ -384,11 +489,12 @@ def _resolve_canonical_plugin_dest(repo_root: Path, dest: str) -> tuple[Path, st
 def list_plugins_state(repo_root: Path) -> CallResult:
     """
     Retrieve a snapshot of the repository's plugin lifecycle state.
-    
+
     Returns:
         CallResult: status set to "success" and `data` populated with the plugin state snapshot obtained from the repository.
     """
     result = CallResult()
+    result.data["validation_commands"] = [_plugin_validation_command("list")]
     snapshot = collect_plugin_state(repo_root)
     result.status = "success"
     result.data.update(snapshot)
@@ -398,6 +504,7 @@ def list_plugins_state(repo_root: Path) -> CallResult:
 def status_plugin_state(repo_root: Path, name: str) -> CallResult:
     """Return read-only lifecycle state for a single plugin."""
     result = CallResult()
+    result.data["validation_commands"] = [_plugin_validation_command("status", name)]
     snapshot = collect_plugin_state(repo_root, plugin_name=name)
     plugins = snapshot["installed_state"]["plugins"]
     if not plugins:
@@ -418,13 +525,14 @@ def status_plugin_state(repo_root: Path, name: str) -> CallResult:
 def doctor_plugins_state(repo_root: Path) -> CallResult:
     """
     Run plugin health diagnostics and return a CallResult containing the diagnostic snapshot.
-    
+
     Populates result.data with the collected snapshot from the plugin state doctor. If the snapshot's health_state.status is "healthy" the result.status is set to "success". If not healthy, result.status is set to "error", result.data["operator_action"] is set to instruct inspection of data.health_state.blockers, and an ErrorObject with code "ERR_VALIDATION" and a fix suggestion is appended to result.errors.
-    
+
     Returns:
         CallResult: The call result containing the diagnostic snapshot and status.
     """
     result = CallResult()
+    result.data["validation_commands"] = [_plugin_validation_command("doctor")]
     snapshot = collect_plugin_state(repo_root, run_doctor=True)
     result.data.update(snapshot)
     if snapshot["health_state"]["status"] == "healthy":
@@ -449,19 +557,20 @@ def init_plugin(
     category: str = _DEFAULT_PLUGIN_CATEGORY,
     with_marketplace: bool = False,
     companion_folders: Optional[List[str]] = None,
+    action: str = "init",
 ) -> CallResult:
     """
     Create a new plugin scaffold in the repository.
-    
+
     Initialises a plugin scaffold by invoking the repository's creator script and, when requested, creates additional companion folders that are not handled by the creator.
-    
+
     Parameters:
         repo_root (Path): Path to the repository root where the creator script is resolved and executed.
         name (str): Name to give the new plugin (used by the creator script and for fallback paths).
         category (str): Canonical plugin category under Plugins/ where the plugin will be created.
         with_marketplace (bool): If true, instruct the creator script to include marketplace-related scaffolding.
         companion_folders (Optional[List[str]]): Optional list of companion folder types to include. Values must be in the allowed companion-folder set; some types are passed to the creator as `--with-<folder>` flags while others are created manually under the generated plugin root.
-    
+
     Returns:
         CallResult: Result object with `status` set to `"success"` or `"error"`. On success, `data` contains:
             - `message`: short success message
@@ -471,12 +580,28 @@ def init_plugin(
         On error, `errors` contains one or more ErrorObject entries and `data` may include `raw_output` and `raw_error`.
     """
     result = CallResult()
+    result.data["validation_commands"] = [
+        _plugin_init_validation_command(
+            name,
+            category=category,
+            with_marketplace=with_marketplace,
+            companion_folders=companion_folders,
+            action=action,
+        )
+    ]
     try:
         parent_path, canonical_parent = _resolve_canonical_plugin_dest(repo_root, category)
     except ValueError as exc:
         return _validation_error_result(
             f"Invalid plugin category '{category}': {exc}",
             fix_suggestion=f"Use a category under Plugins/, for example: Plugins/{_DEFAULT_PLUGIN_CATEGORY}.",
+            validation_command=_plugin_init_validation_command(
+                name,
+                category=category,
+                with_marketplace=with_marketplace,
+                companion_folders=companion_folders,
+                action=action,
+            ),
         )
 
     if companion_folders:
@@ -501,6 +626,7 @@ def init_plugin(
         ),
     )
     if resolve_error:
+        resolve_error.data["validation_commands"] = result.data["validation_commands"]
         return resolve_error
     assert creator_script is not None
 
@@ -571,10 +697,11 @@ def install_plugin(
     allow_untrusted_source: bool = False,
     allow_unpinned_ref: bool = False,
     dry_run: bool = False,
+    action: str = "install",
 ) -> CallResult:
     """
     Install a plugin from a GitHub repository into the repo's plugins area using the resolved plugin-installer script.
-    
+
     Parameters:
         repo_root (Path): Repository root used to resolve scripts and relative destinations.
         url (str): GitHub repository URL or archive location to install from.
@@ -586,7 +713,7 @@ def install_plugin(
         allow_untrusted_source (bool): Allow installing from an untrusted source; passed through to the installer.
         allow_unpinned_ref (bool): Allow installing an unpinned ref; passed through to the installer.
         dry_run (bool): If true, do not run the installer; return a best-effort plan including a suggested next-step command.
-    
+
     Returns:
         CallResult: Result with `status` set to "success" or "error".
           - On dry-run: `data` includes `dry_run`, `url`, `plugin_path`, `plugin_name`, `target_path` and `metadata["next_steps"]`.
@@ -594,6 +721,19 @@ def install_plugin(
           - On failure: `errors` contains an `ERR_RUNTIME` error with installer stderr; if an explicit `--name` conflicts with an existing path, `errors` contains `ERR_CONFLICT`.
     """
     result = CallResult()
+    validation_command = _plugin_install_validation_command(
+        url,
+        plugin_path,
+        name=name,
+        ref=ref,
+        dest=dest,
+        validation_level=validation_level,
+        allow_untrusted_source=allow_untrusted_source,
+        allow_unpinned_ref=allow_unpinned_ref,
+        dry_run=dry_run,
+        action=action,
+    )
+    result.data["validation_commands"] = [validation_command]
 
     try:
         dest_path, canonical_dest = _resolve_canonical_plugin_dest(repo_root, dest)
@@ -601,6 +741,7 @@ def install_plugin(
         return _validation_error_result(
             f"Invalid plugin destination '{dest}': {exc}",
             fix_suggestion="Use a destination under Plugins/<category>, for example Plugins/third-party.",
+            validation_command=validation_command,
         )
     requested_name = (name or "").strip() or None
     target_path = dest_path / requested_name if requested_name else None
@@ -611,6 +752,7 @@ def install_plugin(
         result.data["url"] = url
         result.data["plugin_path"] = plugin_path
         result.data["plugin_name"] = requested_name or "unknown"
+        result.data["validation_commands"] = [validation_command]
         if target_path is not None:
             try:
                 result.data["target_path"] = str(target_path.relative_to(repo_root))
@@ -635,6 +777,7 @@ def install_plugin(
         ),
     )
     if resolve_error:
+        resolve_error.data["validation_commands"] = [validation_command]
         return resolve_error
     assert installer_script is not None
 
@@ -717,7 +860,7 @@ def harden_plugin(
 ) -> CallResult:
     """
     Run the plugin-builder hardening steps (validate, optional compatibility audit, optional marketplace audit) for a plugin package.
-    
+
     Parameters:
         repo_root (Path): Repository root used as the working directory and base for resolving relative paths.
         plugin_path (str): Path to the plugin package; may be absolute or relative to `repo_root`.
@@ -726,7 +869,7 @@ def harden_plugin(
         run_compat (bool): If true, run the `audit-compat` compatibility audit step.
         run_marketplace_audit (bool): If true, run the `audit-marketplace` step against the repository plugins list.
         allow_legacy_marketplace_path (bool): If true, allow legacy marketplace path behaviour by adding the corresponding flag to builder commands.
-    
+
     Returns:
         CallResult: On success, status is `"success"` and `data` contains:
             - `message`: human-readable confirmation including the plugin name,
@@ -734,6 +877,14 @@ def harden_plugin(
             - `command_runs`: list of executed commands with their stdout/stderr and return codes.
         On failure, status is `"error"`, `errors` includes an `ERR_RUNTIME` entry describing the failing step, and `data["command_runs"]` contains the recorded command outputs for diagnosis.
     """
+    validation_command = _plugin_harden_validation_command(
+        plugin_path,
+        require_marketplace=require_marketplace,
+        marketplace_path=marketplace_path,
+        run_compat=run_compat,
+        run_marketplace_audit=run_marketplace_audit,
+        allow_legacy_marketplace_path=allow_legacy_marketplace_path,
+    )
     builder_script, resolve_error = _resolve_script_path_or_runtime_error(
         repo_root,
         _PLUGIN_BUILDER_SCRIPT_CANDIDATES,
@@ -743,6 +894,7 @@ def harden_plugin(
         ),
     )
     if resolve_error:
+        resolve_error.data["validation_commands"] = [validation_command]
         return resolve_error
     assert builder_script is not None
 
@@ -754,6 +906,7 @@ def harden_plugin(
         return _validation_error_result(
             f"Plugin path '{plugin_root}' is not a directory.",
             fix_suggestion="Pass a valid plugin directory path (for example: Plugins/<name>).",
+            validation_command=validation_command,
         )
 
     marketplace = Path(marketplace_path)
@@ -765,11 +918,11 @@ def harden_plugin(
     def _run(command: list[str], step: str) -> bool:
         """
         Record and run a shell command step, appending its execution details to `command_runs`.
-        
+
         Parameters:
         	command (list[str]): Command and arguments to execute (executable first element).
         	step (str): Short identifier for the step recorded alongside the command output.
-        
+
         Returns:
         	bool: `True` if the command exited with code 0, `False` otherwise.
         """
@@ -800,17 +953,18 @@ def harden_plugin(
     def _fail(step_name: str) -> CallResult:
         """
         Create a CallResult representing a runtime failure for the given hardening step.
-        
+
         The returned result has `status` set to `"error"`, contains a single `ErrorObject` with code `ERR_RUNTIME` and a message identifying the failing step, and includes the `command_runs` list under `data["command_runs"]`.
-        
+
         Parameters:
             step_name (str): Name of the hardening step that failed.
-        
+
         Returns:
             CallResult: A failure result populated with an `ERR_RUNTIME` error and the recorded command runs.
         """
         failure = CallResult()
         failure.status = "error"
+        failure.data["validation_commands"] = [validation_command]
         failure.errors.append(
             ErrorObject(
                 code="ERR_RUNTIME",
@@ -856,6 +1010,7 @@ def harden_plugin(
 
     result = CallResult()
     result.status = "success"
+    result.data["validation_commands"] = [validation_command]
     result.data["message"] = f"Hardened plugin '{plugin_root.name}'"
     result.data["plugin_path"] = str(plugin_root)
     result.data["command_runs"] = command_runs
@@ -906,31 +1061,40 @@ def uninstall_plugin(repo_root: Path, name: str, *, dry_run: bool = False) -> Ca
     import shutil
     import subprocess
     result = CallResult()
+    validation_command = _plugin_validation_command("uninstall", name, dry_run=dry_run)
+    result.data["validation_commands"] = [validation_command]
 
     plugins_dir = repo_root / "Plugins"
     if not plugins_dir.exists():
         return _validation_error_result(
-            "Plugins/ directory does not exist.", 
-            fix_suggestion="Ensure you are running the command from the root of a valid skills repository."
+            "Plugins/ directory does not exist.",
+            fix_suggestion="Ensure you are running the command from the root of a valid skills repository.",
+            validation_command=validation_command,
         )
 
-    # Try to locate the plugin in any category (e.g., third-party, github)
     found_path = None
+    direct_path = plugins_dir / name
+    if direct_path.is_dir():
+        found_path = direct_path
+
+    # Try to locate categorized plugins (e.g. third-party/demo-plugin, github/demo-plugin).
     for category in plugins_dir.iterdir():
-        if category.is_dir() and (category / name).is_dir():
+        if found_path is None and category.is_dir() and (category / name).is_dir():
             found_path = category / name
             break
 
     if not found_path:
         return _validation_error_result(
             f"Plugin '{name}' not found under Plugins/.",
-            fix_suggestion="Use 'ask plugins list' to check installed plugins."
+            fix_suggestion="Use 'ask plugins list' to check installed plugins.",
+            validation_command=validation_command,
         )
 
     if dry_run:
         result.status = "success"
         result.metadata["next_steps"] = [f"ask plugins uninstall {name}"]
         result.data["dry_run"] = True
+        result.data["plugin_name"] = name
         result.data["target_path"] = str(found_path.relative_to(repo_root))
         return result
 
@@ -939,14 +1103,14 @@ def uninstall_plugin(repo_root: Path, name: str, *, dry_run: bool = False) -> Ca
         ["git", "ls-files", "--error-unmatch", str(found_path)],
         cwd=repo_root, capture_output=True
     )
-    
+
     if git_check.returncode == 0:
         cmd = ["git", "rm", "-r", "--quiet", str(found_path)]
         process = subprocess.run(cmd, cwd=repo_root, capture_output=True, text=True)
         if process.returncode != 0:
             result.status = "error"
             result.errors.append(ErrorObject(
-                code="ERR_RUNTIME", 
+                code="ERR_RUNTIME",
                 message=f"Git rm failed: {process.stderr}",
                 fix_suggestion="Manually remove directory."
             ))
@@ -961,7 +1125,7 @@ def uninstall_plugin(repo_root: Path, name: str, *, dry_run: bool = False) -> Ca
 
     # Config sync after file removal
     sync_ok = _sync_plugin_config(name, remove=True)
-    
+
     result.status = "success"
     msg = f"Uninstalled plugin '{name}'."
     if sync_ok:
@@ -969,7 +1133,7 @@ def uninstall_plugin(repo_root: Path, name: str, *, dry_run: bool = False) -> Ca
     result.data["message"] = msg
     result.data["plugin_name"] = name
     result.data["target_path"] = str(found_path.relative_to(repo_root))
-    
+
     # Let user know to run validation for global parity (like baseline.json sync)
     result.metadata["next_steps"] = ["ask repo validate"]
     return result

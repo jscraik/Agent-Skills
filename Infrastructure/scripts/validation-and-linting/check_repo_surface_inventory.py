@@ -155,10 +155,10 @@ def _normalize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
 def classify_path(path: str | Path) -> SurfaceFinding:
     """
     Classify a repository file path into a SurfaceFinding that describes its ownership policy surface, status, and recommended next steps.
-    
+
     Parameters:
         path (str | Path): Repository-relative file path to classify. The path is normalized (POSIX, no leading "./") before classification.
-    
+
     Returns:
         SurfaceFinding: A finding containing `path`, `classification`, `status`, `code`, `severity`, `blocking`, optional `allowlist_entry`, `reason`, `recommendation`, and `metadata` (which may include normalized `next_steps`).
     """
@@ -647,10 +647,17 @@ def build_report(findings: list[SurfaceFinding], *, strict: bool) -> dict[str, A
     counts_by_classification: dict[str, int] = {}
     counts_by_status: dict[str, int] = {}
     counts_by_code: dict[str, int] = {}
+    blocking_counts_by_classification: dict[str, int] = {}
+    blocking_counts_by_code: dict[str, int] = {}
     for finding in findings:
         counts_by_classification[finding.classification] = counts_by_classification.get(finding.classification, 0) + 1
         counts_by_status[finding.status] = counts_by_status.get(finding.status, 0) + 1
         counts_by_code[finding.code] = counts_by_code.get(finding.code, 0) + 1
+        if finding.blocking:
+            blocking_counts_by_classification[finding.classification] = (
+                blocking_counts_by_classification.get(finding.classification, 0) + 1
+            )
+            blocking_counts_by_code[finding.code] = blocking_counts_by_code.get(finding.code, 0) + 1
 
     blocking_count = sum(1 for finding in findings if finding.blocking)
     status = "warning" if blocking_count else "success"
@@ -668,6 +675,8 @@ def build_report(findings: list[SurfaceFinding], *, strict: bool) -> dict[str, A
             "counts_by_classification": dict(sorted(counts_by_classification.items())),
             "counts_by_status": dict(sorted(counts_by_status.items())),
             "counts_by_code": dict(sorted(counts_by_code.items())),
+            "blocking_counts_by_classification": dict(sorted(blocking_counts_by_classification.items())),
+            "blocking_counts_by_code": dict(sorted(blocking_counts_by_code.items())),
         },
         "findings": [asdict(finding) for finding in findings],
         "metadata": {

@@ -43,3 +43,33 @@ cases:
       - {type: regex, value: "(?is)(codex-eval-creation-loop|borrowed-pattern|local extraction|do not copy|external)"}
       - {type: regex, value: "(?is)(comparator|baseline|previous skill|no-skill|local owner)"}
       - {type: regex, value: "(?is)(weak eval|deterministic checks|pass|fail|blocked|readiness)"}
+  - id: route-literature-lens-eval-design
+    name: route software literature lenses for eval design
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: true
+    prepend_skill: true
+    prompt: "Use $evals-router to improve a skill eval suite using the software literature lens pack. Keep it bounded: pick only the Story Slicer, Use-Case Flow Designer, and XP Feedback Coach lenses; add realistic actor-goal prompts, a negative path, deterministic checks, and pass/fail/blocked evidence without citing books as proof."
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
+    acceptance:
+      - {type: skill_selected, expected_skill: evals-router}
+      - {type: regex, value: "(?is)(software-literature-expert-lens-pack|Story Slicer|Use-Case Flow Designer|XP Feedback Coach)"}
+      - {type: regex, value: "(?is)(actor-goal|negative path|deterministic checks|pass|fail|blocked)"}
+      - {type: regex, value: "(?is)(repo evidence|not.*book.*proof|do not cite.*book)"}
+  - id: route-otel-observability-lane
+    name: route OTel-inspired local eval observability
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: true
+    prepend_skill: true
+    prompt: "Use $evals-router to decide how to adapt Braintrust/OpenTelemetry-style observability into our own local skill eval package. We want trace observability and datasets from failed eval runs, but we do not want to use actual Braintrust, and local deterministic checks, codex_events.jsonl, strict audit, Snyk, Tessl, and Plugin Eval must remain separate gates. If the local collector, export target, or network is missing, classify observability as blocked or not configured instead of failing the skill eval."
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
+    acceptance:
+      - {type: skill_selected, expected_skill: evals-router}
+      - {type: regex, value: "(?is)(eval-observability-otel-contract|OTel|OpenTelemetry|Braintrust)"}
+      - {type: regex, value: "(?is)(inspiration|pattern|local eval package|own.*package|not.*actual Braintrust|not.*Braintrust integration)"}
+      - {type: regex, value: "(?is)(optional|opt-in|observability|trace|dataset|local export)"}
+      - {type: regex, value: "(?is)(not.*replace|separate.*gate|deterministic|codex_events|local artifact)"}
+      - {type: regex, value: "(?is)(blocked|not_configured|collector|network|export target|exporter failure)"}

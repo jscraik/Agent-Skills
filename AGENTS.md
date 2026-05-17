@@ -20,6 +20,46 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   docs, read [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md).
 - Edit canonical sources, not runtime projections. See
   [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
+- Treat every Jamie steering or review feedback item as a high-signal candidate
+  until classified otherwise, not as disposable chat context. Before repeating a
+  corrected behavior or fixing a review comment line-locally, apply the
+  [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md)
+  protocol.
+- After high-signal steering, do not resume ordinary task work until the uptake
+  record states the operating failure, blocker, environment refinement,
+  mechanism, proof, and repeat prevention, and the steering uptake validator
+  passes.
+- When the needed context may sit outside the current turn, scale OODA
+  horizontally across adjacent organizational activity and vertically across
+  stacked trajectories. Identify the compaction, harness, environment, repo,
+  tracker, or review boundary; resume or query the smallest target context
+  window that can reflect on it when available; then record what changed before
+  acting.
+- If Jamie says the agent is failing to operate effectively, repeating prior
+  steering, or making him give the same feedback twice, treat that as a
+  lane-changing stop signal. Halt the active implementation or review lane,
+  close or cancel stale child agents when needed, make the smallest durable
+  environment refinement, validate it, and report proof before resuming.
+- When repo doctor, closeout, or another validator reports diagnostic findings,
+  classify the dominant category, owner or decision boundary, and next action
+  before calling the debt nonblocking.
+- When feedback names one API, function, command, test, doc section, review
+  line, error, or example but expresses a transferable principle, extract the
+  generalized rule and classify similar cases in the nearest relevant surface
+  before claiming uptake.
+- Do not fight repeated errors. If the same command, validator, tool call, or
+  implementation attempt hits the same error twice, stop retrying, research 3-5
+  plausible fixes using the web when available or repo-local docs when network
+  is blocked, choose the most efficient safe fix, implement it, and record the
+  evidence.
+- Product posture: agents should set themselves up after being dropped into a
+  workspace. Do not require the customer to integrate scattered docs, scripts,
+  projections, and setup steps before the agent can report readiness. See
+  [Zero-Setup Agent Workspace](./Docs/agents/21-zero-setup-agent-workspace.md).
+- Systems-thinking posture: spot blockers, design mechanisms that let people
+  and agents systematically overcome them, and explain how code carries that
+  mechanism. See
+  [Systems Thinking Product Rule](./Docs/agents/22-systems-thinking-product-rule.md).
 
 ## Common Commands
 
@@ -45,6 +85,8 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   [Skill Management](./Docs/agents/17-skill-management.md)
 - Browser and local preview fallback:
   [Browser and Local Preview](./Docs/agents/18-browser-and-local-preview.md)
+- Turning steering and review comments into durable agent behavior:
+  [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md)
 - Instruction cleanup notes and stale guidance to remove:
   [Contradictions and Cleanup](./Docs/agents/05-contradictions-and-cleanup.md)
 
