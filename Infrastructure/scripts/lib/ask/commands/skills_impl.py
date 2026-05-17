@@ -1629,6 +1629,9 @@ def _skill_event_summary(event_consumers: dict[str, dict[str, Any]]) -> dict[str
         "producer_command_count": producer_count,
         "observer_command_count": observer_count,
         "by_profile": by_profile,
+        "profile_count": len(by_profile),
+        "profile_names": sorted(by_profile),
+        "has_profiles": bool(by_profile),
     }
 
 
