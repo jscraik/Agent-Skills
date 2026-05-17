@@ -1775,6 +1775,7 @@ def _skill_profile_summary(profiles: dict[str, dict[str, Any]]) -> dict[str, Any
     by_permission: dict[str, int] = {}
     root_count = 0
     stop_condition_count = 0
+    required_evidence_count = 0
     for profile in profiles.values():
         write_policy = str(profile.get("write_policy") or "unknown")
         by_write_policy[write_policy] = by_write_policy.get(write_policy, 0) + 1
@@ -1782,6 +1783,8 @@ def _skill_profile_summary(profiles: dict[str, dict[str, Any]]) -> dict[str, Any
         root_count += len(roots) if isinstance(roots, list) else 0
         stop_conditions = profile.get("stop_conditions", [])
         stop_condition_count += len(stop_conditions) if isinstance(stop_conditions, list) else 0
+        required_evidence = profile.get("required_evidence", [])
+        required_evidence_count += len(required_evidence) if isinstance(required_evidence, list) else 0
         permissions = profile.get("permissions", [])
         if isinstance(permissions, list):
             for permission in permissions:
@@ -1789,10 +1792,13 @@ def _skill_profile_summary(profiles: dict[str, dict[str, Any]]) -> dict[str, Any
                 by_permission[key] = by_permission.get(key, 0) + 1
     return {
         "profile_count": len(profiles),
+        "profile_names": sorted(profiles),
+        "has_profiles": bool(profiles),
         "by_write_policy": by_write_policy,
         "by_permission": by_permission,
         "allowed_root_count": root_count,
         "stop_condition_count": stop_condition_count,
+        "required_evidence_count": required_evidence_count,
     }
 
 

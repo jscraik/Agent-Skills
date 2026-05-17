@@ -1090,6 +1090,12 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(profiles["profile_names"], ["eval"])
         self.assertIn("package-review", profiles["available_profiles"])
         self.assertEqual(profiles["profile_summary"]["profile_count"], 1)
+        self.assertEqual(profiles["profile_summary"]["profile_names"], ["eval"])
+        self.assertTrue(profiles["profile_summary"]["has_profiles"])
+        self.assertEqual(
+            profiles["profile_summary"]["required_evidence_count"],
+            len(profiles["profiles"]["eval"]["required_evidence"]),
+        )
         self.assertIn("artifact_write_only", profiles["profile_summary"]["by_write_policy"])
         self.assertIn("repo_read", profiles["profile_summary"]["by_permission"])
         self.assertEqual(list(profiles["profiles"]), ["eval"])
