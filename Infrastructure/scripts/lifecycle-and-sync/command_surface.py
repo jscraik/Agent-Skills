@@ -660,6 +660,7 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
             "The command-surface manifest is a generated projection, not a source of truth.",
             "Generated command handles are runtime pointers for $ invocation; they are not canonical skill sources.",
             "Generated command handles are written only for handles absent from rooted runtime projection.",
+            "Folded-mode aliases are represented as generated compatibility handles that resolve to their canonical target.",
             "Reviewer handles are intentionally kept outside the skill command surface.",
         ],
     }

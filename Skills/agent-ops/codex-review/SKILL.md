@@ -1,6 +1,6 @@
 ---
 name: codex-review
-description: "WHAT: Review local dirty changes, committed branches, and PR diffs with Codex CLI. Use when the user asks for Codex review, autoreview, independent model review, pre-ship validation, or merge-readiness evidence."
+description: "Review local dirty changes, committed branches, and PR diffs with Codex CLI. Use when the user asks for Codex review, autoreview, independent model review, pre-ship validation, or merge-readiness evidence."
 metadata:
   skill-type: code_quality_review
 ---

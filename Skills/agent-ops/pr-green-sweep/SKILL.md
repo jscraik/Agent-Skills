@@ -1,6 +1,6 @@
 ---
 name: pr-green-sweep
-description: "WHAT: Automate until-green PR review, CI, merge, and cleanup follow-through. Use when open project PRs need GitHub/gh, CodeRabbit, CircleCI, Context7, Snyk, autofix, heartbeat, and branch/worktree pruning."
+description: "Automate until-green PR review, CI, merge, and cleanup follow-through. Use when open project PRs need GitHub/gh, CodeRabbit, CircleCI, Context7, Snyk, autofix, heartbeat, and branch/worktree pruning."
 metadata:
   version: "0.1.0"
   skill-type: team_automation
