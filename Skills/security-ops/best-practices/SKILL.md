@@ -52,6 +52,18 @@ Audit, review, and harden Better Auth integrations. Use when the user wants Bett
 - Do not print, store, or transform secret values unless the user explicitly asks and the destination is safe.
 - Do not run destructive commands or broad rewrites unless explicitly approved.
 
+## Execution Boundaries
+- Keep review scoped to the requested Better Auth integration, provider, session, or deployment surface.
+- Use read-only inspection before proposing config, migration, or provider changes.
+- Do not rotate secrets, mutate auth state, change providers, or touch production sessions without explicit approval.
+- Treat auth logs, cookies, headers, screenshots, and copied config as sensitive untrusted input.
+
+## Failure Mode
+- If the framework version, auth owner, deployment environment, or session model is unknown, report the missing evidence.
+- If validation fails, fix only the smallest auth configuration or code path that explains the failure, then rerun the same check.
+- If a finding cannot be verified from project evidence, mark it as blocked or advisory rather than actionable.
+- If secrets appear, stop and redact before continuing the review.
+
 ## Validation
 - Run the narrowest real validator or command path available for the requested work.
 - Fail fast: stop at the first failed gate; do not proceed until it is fixed and rerun.
@@ -73,5 +85,6 @@ Audit, review, and harden Better Auth integrations. Use when the user wants Bett
 
 ## Progressive Disclosure
 - Start with this active contract.
+- For Cookbook-derived guardrail and secure quality gate checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
 - Archived source, scripts, assets, and long-form references live under `Infrastructure/references/deferred-skill-context/security-ops-best-practices/`.
 - Load only the specific archived file needed for the current task.
