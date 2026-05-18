@@ -1,6 +1,6 @@
 # OpenAI Cookbook Skill Opportunity Intake
 
-Source snapshot: `/private/tmp/openai-cookbook-snapshot.NpmZZC/tree`
+Source snapshot: local snapshot of the OpenAI Cookbook repository
 
 This intake maps OpenAI Cookbook material to Agent Skills Kit changes. Treat it
 as an external pattern extraction surface: improve canonical skill sources when
@@ -14,7 +14,7 @@ repeatable workflow.
 - The usable working tree came from
   `https://github.com/openai/openai-cookbook/archive/refs/heads/main.tar.gz`.
 - The snapshot is large, roughly 1 GB after extraction, and should stay in
-  `/private/tmp`; do not vendor Cookbook files into this repository.
+  a local scratch directory; do not vendor Cookbook files into this repository.
 
 ## Highest-Value Existing Skill Improvements
 

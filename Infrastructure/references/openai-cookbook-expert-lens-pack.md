@@ -16,10 +16,10 @@ Initial intake: openai-cookbook-skill-opportunities.md.
 ## Source Boundary
 
 Source snapshot used for this extraction:
-/private/tmp/openai-cookbook-snapshot.NpmZZC/tree.
+local snapshot of the OpenAI Cookbook repository.
 
 Jamie also has the source archive at
-/Users/jamiecraik/Downloads/openai-cookbook-main.zip.
+the public OpenAI Cookbook repository archive.
 
 Use source paths as provenance only. Do not vendor Cookbook files into this
 repository, paste notebook code into skill entrypoints, or cite a Cookbook

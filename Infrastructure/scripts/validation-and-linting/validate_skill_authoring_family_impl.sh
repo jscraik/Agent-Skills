@@ -88,18 +88,18 @@ use_pyyaml_venv_python() {
 
 use_uv_python_launcher() {
   command -v uv >/dev/null 2>&1 || return 1
-  uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1 || return 1
-  python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
-  python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
+  uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=(uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python)
+  python_cmd_display="uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python"
   return 0
 }
 
 use_mise_python_launcher() {
   command -v mise >/dev/null 2>&1 || return 1
   command -v uv >/dev/null 2>&1 || return 1
-  mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1 || return 1
-  python_cmd=(mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python)
-  python_cmd_display="mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python"
+  mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=(mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python)
+  python_cmd_display="mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python"
   return 0
 }
 
@@ -496,8 +496,8 @@ fi
 
 if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
   pytest_cmd=("${python_cmd[@]}" -m pytest)
-elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest --version >/dev/null 2>&1; then
-  pytest_cmd=("${uv_pytest_env[@]}" uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest)
+elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema pytest --version >/dev/null 2>&1; then
+  pytest_cmd=("${uv_pytest_env[@]}" uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema pytest)
   echo "[family-gate] using uv ephemeral pytest runner (UV_CACHE_DIR=$uv_pytest_cache_dir)"
 elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3.12 pytest --version >/dev/null 2>&1; then
   pytest_cmd=("${uv_pytest_env[@]}" uv run --python 3.12 pytest)

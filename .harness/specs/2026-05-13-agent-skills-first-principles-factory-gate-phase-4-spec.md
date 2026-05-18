@@ -262,6 +262,7 @@ requiring the reader to open every earlier phase artifact.
 Minimum planning validation:
 
 ~~~bash
+vale sync && vale .harness/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md
 python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md
 python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md
 python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md --json

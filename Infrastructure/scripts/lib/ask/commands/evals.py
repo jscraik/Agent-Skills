@@ -58,17 +58,29 @@ def _as_text(value, encoding="utf-8") -> str:
 def _resolve_eval_skill_path(repo_root: Path, path: str) -> str:
     """Resolve generated runtime skill paths back to canonical eval sources."""
     requested = Path(path)
-    if (repo_root / requested / "references" / "evals.yaml").is_file():
-        return path
-
     parts = requested.parts
     if len(parts) >= 3 and parts[0] == ".agents" and parts[1] == "skills":
         handle = parts[2]
-        skills_root = repo_root / "Skills"
-        if skills_root.is_dir():
-            for candidate in sorted(skills_root.glob(f"*/{handle}")):
+        source_roots = [
+            repo_root / "Skills",
+            repo_root / "Plugins",
+            repo_root / "skills-system",
+        ]
+        for source_root in source_roots:
+            if not source_root.is_dir():
+                continue
+            if source_root.name == "Plugins":
+                candidates = source_root.glob(f"*/skills/**/{handle}")
+            elif source_root.name == "skills-system":
+                candidates = [source_root / handle]
+            else:
+                candidates = source_root.glob(f"*/{handle}")
+            for candidate in sorted(candidates):
                 if (candidate / "references" / "evals.yaml").is_file():
                     return candidate.relative_to(repo_root).as_posix()
+
+    if (repo_root / requested / "references" / "evals.yaml").is_file():
+        return path
 
     return path
 
