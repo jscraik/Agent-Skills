@@ -1,0 +1,10 @@
+{
+  "schema_version": "1",
+  "mode": "warn",
+  "status": "active",
+  "description": "Skill-builder benchmark policy used by CI workflow wiring. The default PR structure gate disables benchmarks, while manual eval-baseline runs may use this file in warn mode.",
+  "thresholds": {
+    "minimum_grade": "B+",
+    "blocking_mode": "warn"
+  }
+}
