@@ -108,6 +108,42 @@ class TestSkillScopePrecedence(unittest.TestCase):
             {violation["code"] for violation in report["violations"]},
         )
 
+    def test_runtime_budget_allows_same_cache_skill_name_across_plugin_namespaces(self) -> None:
+        self._write_skill(
+            "Plugins/cache/openai-curated/cloudflare/v1/skills/agents-sdk",
+            "Cloudflare Agents SDK skill.",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-curated/openai-developers/v1/skills/agents-sdk",
+            "OpenAI Developers Agents SDK skill.",
+        )
+
+        with self._patched_repo(default_visible=set()):
+            report = verify_runtime_budget.build_report()
+
+        self.assertNotIn(
+            "UNRESOLVED_SCOPE_COLLISIONS",
+            {violation["code"] for violation in report["violations"]},
+        )
+
+    def test_runtime_budget_fails_same_cache_skill_name_within_plugin_namespace(self) -> None:
+        self._write_skill(
+            "Plugins/cache/openai-curated/cloudflare/v1/skills/agents-sdk",
+            "Cloudflare Agents SDK skill.",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-curated/cloudflare/v2/skills/agents-sdk",
+            "Second Cloudflare Agents SDK skill.",
+        )
+
+        with self._patched_repo(default_visible=set()):
+            report = verify_runtime_budget.build_report()
+
+        self.assertIn(
+            "UNRESOLVED_SCOPE_COLLISIONS",
+            {violation["code"] for violation in report["violations"]},
+        )
+
     def test_rooted_runtime_allows_primary_runtime_lane(self) -> None:
         for skill_set in verify_runtime_budget.ROOT_SKILL_SETS:
             self._write_skill(f".agents/skills/{skill_set}", f"{skill_set} root skill set.")

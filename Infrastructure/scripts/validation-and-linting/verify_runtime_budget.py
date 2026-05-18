@@ -62,6 +62,36 @@ def _candidate_payload(*, name: str, source_dir: Path) -> dict[str, str]:
     }
 
 
+def _scope_collision_key(name: str, source_dir: Path) -> str:
+    """
+    Return the ownership key used for same-scope collision checks.
+
+    Cached curated plugins are exposed to Codex under a plugin-qualified
+    namespace such as `cloudflare:agents-sdk` or
+    `openai-developers:agents-sdk`. Their on-disk skill directory basename is
+    still `agents-sdk`, so using only the basename would report a false
+    same-scope collision between independent plugin namespaces.
+    """
+    try:
+        rel_parts = source_dir.relative_to(REPO_ROOT).parts
+    except ValueError:
+        try:
+            rel_parts = source_dir.resolve().relative_to(REPO_ROOT).parts
+        except ValueError:
+            return name
+
+    if (
+        len(rel_parts) >= 7
+        and rel_parts[0] == "Plugins"
+        and rel_parts[1] == "cache"
+        and rel_parts[5] == "skills"
+    ):
+        provider = rel_parts[2]
+        plugin = rel_parts[3]
+        return f"{provider}/{plugin}:{name}"
+    return name
+
+
 def _word_count(text: str) -> int:
     return len([word for word in text.split() if word.strip()])
 
@@ -124,7 +154,7 @@ def _scope_payloads() -> tuple[dict[str, int], list[dict[str, str]], list[dict[s
         }
         by_scope[scope].append(payload)
         if scope in SCOPE_PRECEDENCE:
-            by_name[name].append(payload)
+            by_name[_scope_collision_key(name, skill_dir)].append(payload)
 
     scope_counts = {
         scope: len(by_scope.get(scope, []))
