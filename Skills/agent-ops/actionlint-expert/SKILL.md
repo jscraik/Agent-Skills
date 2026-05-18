@@ -76,6 +76,14 @@ Adding broad ignores before proving a false positive; changing package managers 
 - User request: "Ignore this failure for now." Require evidence that it is a false positive or classify it as blocked instead of suppressing a real defect.
 
 ## Progressive Disclosure
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[yaml]] | Inspect GitHub Actions workflow YAML alongside actionlint diagnostics |
+| [[github-actions]] | Debug workflow execution after static workflow validation |
+
+## Progressive Disclosure
 - references/contract.yaml: machine-readable contract.
 - references/evals.yaml: benchmark cases.
 - references/task-profile.json: evaluator thresholds.

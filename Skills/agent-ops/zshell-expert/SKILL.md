@@ -76,6 +76,14 @@ Adding broad ignores before proving a false positive; changing package managers 
 - User request: "Ignore this failure for now." Require evidence that it is a false positive or classify it as blocked instead of suppressing a real defect.
 
 ## Progressive Disclosure
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[bash]] | Repair shell script behavior with POSIX or Bash compatibility awareness |
+| [[codex-environment-creator]] | Validate shell/runtime assumptions in Codex environment setup |
+
+## Progressive Disclosure
 - references/contract.yaml: machine-readable contract.
 - references/evals.yaml: benchmark cases.
 - references/task-profile.json: evaluator thresholds.
