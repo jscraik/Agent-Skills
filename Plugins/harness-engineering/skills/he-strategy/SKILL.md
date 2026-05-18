@@ -92,5 +92,6 @@ future_agent_guidance:
 - Mode contracts: `../../references/skills/he-strategy/strategy-output-contract.md`
 - Repo cognition pipeline: `../../references/skills/he-strategy/repo-cognition-pipeline.md`
 - Architecture lenses: `../../references/skills/he-strategy/architecture-lens-canon.md`
+- Pragmatic review lens: `../../references/pragmatic-programmer-review-contract.md`
 - Source-prompt comparison: `../../references/skills/he-strategy/source-prompt-preservation.md`
 - Shared HE gates: `../../references/subagent-call-contract.md`, `../../references/deferred-context-index.md`

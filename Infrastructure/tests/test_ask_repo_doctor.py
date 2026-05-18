@@ -88,6 +88,7 @@ def _handles_result(violations: int = 0) -> CallResult:
 
 
 def _surface_result(warning_count: int = 0) -> CallResult:
+    blocking_counts = {"tracked_historical_artifact": warning_count} if warning_count else {}
     return _result(
         data={
             "repo_surface": {
@@ -96,6 +97,10 @@ def _surface_result(warning_count: int = 0) -> CallResult:
                     "total_paths": 20,
                     "blocking_findings": warning_count,
                     "counts_by_code": {"tracked_historical_artifact": warning_count},
+                    "blocking_counts_by_code": blocking_counts,
+                    "blocking_counts_by_classification": (
+                        {"historical_artifact": warning_count} if warning_count else {}
+                    ),
                 },
             }
         },
@@ -138,6 +143,7 @@ def _bootstrap_proof(
 
 
 def _closeout_doctor_payload(warning_count: int = 0, diagnostic_debt: list[dict] | None = None) -> dict:
+    blocking_counts = {"tracked_historical_artifact": warning_count} if warning_count else {}
     return {
         "blocking": False,
         "diagnostic_debt": diagnostic_debt or [],
@@ -156,6 +162,18 @@ def _closeout_doctor_payload(warning_count: int = 0, diagnostic_debt: list[dict]
                     "blocking_findings": warning_count,
                     "total_paths": 20,
                     "counts_by_code": {"tracked_historical_artifact": warning_count},
+                    "blocking_counts_by_code": blocking_counts,
+                    "blocking_counts_by_classification": (
+                        {"historical_artifact": warning_count} if warning_count else {}
+                    ),
+                    "diagnostic_summary": {
+                        "diagnostic_class": "repo_surface_ownership_debt",
+                        "top_blocking_codes": [
+                            {"code": "tracked_historical_artifact", "count": warning_count}
+                        ] if warning_count else [],
+                        "next_action": "classify_allowlist_or_cleanup_tracked_surface",
+                        "operator_rule": "Do not flatten diagnostics.",
+                    },
                 }
             },
         },
@@ -245,6 +263,15 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertFalse(doctor["blocking"])
         self.assertEqual(doctor["blockers"], [])
         self.assertEqual(doctor["diagnostic_debt"][0]["id"], "repo_surface")
+        self.assertIn("tracked_historical_artifact=7", doctor["diagnostic_debt"][0]["summary"])
+        self.assertEqual(
+            doctor["signals"]["repo_surface"]["details"]["diagnostic_summary"]["diagnostic_class"],
+            "repo_surface_ownership_debt",
+        )
+        self.assertEqual(
+            doctor["signals"]["repo_surface"]["details"]["diagnostic_summary"]["top_blocking_codes"],
+            [{"code": "tracked_historical_artifact", "count": 7}],
+        )
         self.assertEqual(doctor["next_command"], "./bin/ask repo surface --json --robot")
         self.assertEqual(doctor["next_command_kind"], "diagnostic_advisory")
         self.assertFalse(doctor["next_command_blocks_task"])
@@ -404,7 +431,15 @@ class TestAskRepoDoctor(unittest.TestCase):
         )
         self.assertEqual(
             [command["id"] for command in closeout["focused_validation"]],
-            ["repo_doctor", "skill_handles", "changed_validation"],
+            [
+                "repo_doctor",
+                "skill_profiles_readiness",
+                "skill_events_readiness",
+                "skill_memory_readiness",
+                "skill_package_readiness",
+                "skill_handles",
+                "changed_validation",
+            ],
         )
 
     def test_closeout_skips_changed_file_detection_without_changed_flag(self) -> None:
@@ -489,10 +524,21 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(closeout["sync"]["validation_commands"], [])
         self.assertEqual(
             [command["id"] for command in closeout["focused_validation"]],
-            ["repo_doctor", "changed_validation"],
+            [
+                "repo_doctor",
+                "skill_profiles_readiness",
+                "skill_events_readiness",
+                "skill_memory_readiness",
+                "skill_package_readiness",
+                "changed_validation",
+            ],
         )
         self.assertEqual(closeout["surface_policy"]["status"], "warning")
         self.assertEqual(closeout["surface_policy"]["blocking_findings"], 7)
+        self.assertEqual(
+            closeout["surface_policy"]["diagnostic_summary"]["top_blocking_codes"],
+            [{"code": "tracked_historical_artifact", "count": 7}],
+        )
         self.assertEqual(closeout["runtime_budget"]["status"], "pass")
         self.assertTrue(closeout["commit_readiness"]["ready"])
         self.assertEqual(closeout["commit_readiness"]["blockers"], [])

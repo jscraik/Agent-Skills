@@ -88,18 +88,18 @@ use_pyyaml_venv_python() {
 
 use_uv_python_launcher() {
   command -v uv >/dev/null 2>&1 || return 1
-  uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1 || return 1
-  python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
-  python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
+  uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=(uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python)
+  python_cmd_display="uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python"
   return 0
 }
 
 use_mise_python_launcher() {
   command -v mise >/dev/null 2>&1 || return 1
   command -v uv >/dev/null 2>&1 || return 1
-  mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1 || return 1
-  python_cmd=(mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python)
-  python_cmd_display="mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python"
+  mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=(mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python)
+  python_cmd_display="mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python"
   return 0
 }
 

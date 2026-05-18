@@ -232,7 +232,7 @@ check_matches_validation_scope() {
       ;;
     lint)
       case "$slug" in
-        docs-lint|ask-bootstrap-docs|skill-types|openai-format|progressive-disclosure)
+        docs-lint|ask-bootstrap-docs|steering-uptake|skill-types|openai-format|progressive-disclosure)
           return 0
           ;;
       esac
@@ -296,6 +296,9 @@ should_run_check() {
       ;;
     docs-lint|ask-bootstrap-docs)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
+      ;;
+    steering-uptake)
+      [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 || "$scope_has_steering" -eq 1 ]]
       ;;
     verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|provider-policy|selection-contract|router-schema|ask-cli-modularity|selection-gate-severity)
       [[ "$scope_has_validation_core" -eq 1 ]]
@@ -470,12 +473,19 @@ scope_has_skill_graph=0
 scope_has_authoring_family=0
 scope_has_runtime_separation=0
 scope_has_validation_core=0
+scope_has_steering=0
 scope_forced_validation_fallback=0
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   for changed_file in "${changed_files[@]}"; do
     case "$changed_file" in
       *.md|Docs/*|instructions/*)
         scope_has_docs=1
+        ;;
+    esac
+
+    case "$changed_file" in
+      .harness/quality/steering-uptake.md)
+        scope_has_steering=1
         ;;
     esac
 
@@ -517,7 +527,7 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
     esac
   done
 
-  if [[ "$scope_has_docs" -eq 0 && "$scope_has_skill_graph" -eq 0 && "$scope_has_authoring_family" -eq 0 && "$scope_has_runtime_separation" -eq 0 && "$scope_has_validation_core" -eq 0 ]]; then
+  if [[ "$scope_has_docs" -eq 0 && "$scope_has_skill_graph" -eq 0 && "$scope_has_authoring_family" -eq 0 && "$scope_has_runtime_separation" -eq 0 && "$scope_has_validation_core" -eq 0 && "$scope_has_steering" -eq 0 ]]; then
     echo "🧭 Changed-files scope classification missed all known buckets; falling back to baseline required validation"
     scope_has_validation_core=1
     scope_forced_validation_fallback=1
@@ -538,6 +548,7 @@ fi
 
 schedule_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json
 schedule_check required ask-bootstrap-docs "🧭 Verifying ask bootstrap docs..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_ask_bootstrap_docs.py
+schedule_check required steering-uptake "🧭 Verifying steering uptake ledger..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py
 schedule_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/verify_verify_work_scope_flags.py
 schedule_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/verify_question_lifecycle_contract.py
 schedule_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" Infrastructure/scripts/test_skill_lifecycle_validation.py

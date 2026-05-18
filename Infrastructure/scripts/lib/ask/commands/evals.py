@@ -1,6 +1,7 @@
 import datetime as dt
 import json
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -21,6 +22,10 @@ EVAL_BLOCKER_TAXONOMY = {
     "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
     "timeout_no_output": "The eval timed out without producing final output.",
     "timeout_partial_output": "The eval timed out after producing partial output.",
+    "blocked_missing_tool": "A required local command, runtime, package, or validator is unavailable.",
+    "blocked_missing_artifact": "An expected report, transcript, output, or generated artifact is absent.",
+    "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
+    "blocked_validation": "A structural or policy validation gate failed for the capability.",
 }
 
 
@@ -53,6 +58,18 @@ def _as_text(value, encoding="utf-8") -> str:
     if isinstance(value, bytes):
         return value.decode(encoding, errors="replace")
     return str(value)
+
+
+def _evals_run_validation_command(path: str, *, mode: str, runner: str, dashboard: bool) -> str:
+    parts = ["./bin/ask", "evals", "run", path, "--mode", mode, "--runner", runner]
+    if not dashboard:
+        parts.append("--no-dashboard")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _evals_validation_command(action: str) -> str:
+    return " ".join(shlex.quote(part) for part in ["./bin/ask", "evals", action, "--json", "--robot"])
 
 
 def _resolve_eval_skill_path(repo_root: Path, path: str) -> str:
@@ -179,6 +196,36 @@ def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool =
     if any(marker in low for marker in auth_markers):
         return "blocked_auth"
 
+    missing_tool_markers = [
+        "command not found",
+        "no such file or directory",
+        "missing binary",
+        "missing executable",
+        "blocked_missing_tool",
+    ]
+    if any(marker in low for marker in missing_tool_markers):
+        return "blocked_missing_tool"
+
+    missing_artifact_markers = [
+        "missing artifact",
+        "expected artifact",
+        "scorecard not found",
+        "no scorecard",
+        "blocked_missing_artifact",
+    ]
+    if any(marker in low for marker in missing_artifact_markers):
+        return "blocked_missing_artifact"
+
+    environment_markers = [
+        "wrong cwd",
+        "repo mismatch",
+        "workspace root",
+        "permission profile",
+        "blocked_environment",
+    ]
+    if any(marker in low for marker in environment_markers):
+        return "blocked_environment"
+
     runtime_markers = [
         "sandbox_apply: operation not permitted",
         "host_execution_untrusted",
@@ -190,6 +237,15 @@ def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool =
     ]
     if any(marker in low for marker in runtime_markers):
         return "blocked_runtime"
+
+    validation_markers = [
+        "blocked_validation",
+        "validation failed",
+        "strict audit failed",
+        "policy validation",
+    ]
+    if any(marker in low for marker in validation_markers):
+        return "blocked_validation"
 
     return None
 
@@ -348,6 +404,9 @@ def run_evals(
     if path != requested_path:
         result.data["requested_path"] = requested_path
         result.data["resolved_skill_path"] = path
+    result.data["validation_commands"] = [
+        _evals_run_validation_command(path, mode=mode, runner=runner, dashboard=dashboard)
+    ]
 
     cmd = [
         sys.executable, f"{SKILL_BUILDER_SCRIPTS}/run_skill_evals.py",
@@ -456,6 +515,7 @@ def run_evals(
 def benchmark_portfolio(repo_root: Path) -> CallResult:
     """Runs the full repository skill benchmark suite."""
     result = CallResult()
+    result.data["validation_commands"] = [_evals_validation_command("benchmark")]
 
     cmd = [sys.executable, f"{SKILL_BUILDER_SCRIPTS}/benchmark_skill_portfolio.py"]
     try:
@@ -483,6 +543,7 @@ def benchmark_portfolio(repo_root: Path) -> CallResult:
 def dashboard_report(repo_root: Path) -> CallResult:
     """Generates the skill evaluation dashboard."""
     result = CallResult()
+    result.data["validation_commands"] = [_evals_validation_command("dashboard")]
 
     cmd = [sys.executable, f"{SKILL_BUILDER_SCRIPTS}/build_skill_eval_dashboard.py"]
     try:

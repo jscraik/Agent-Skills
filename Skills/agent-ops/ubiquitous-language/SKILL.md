@@ -3,6 +3,7 @@ name: ubiquitous-language
 description: Build shared project vocabulary, glossary terms, aliases, prompt translations, and agent instruction links when wording is fuzzy or overloaded.
 metadata:
   skill-type: team_automation
+  version: "1.0.0"
 ---
 
 # Ubiquitous Language
@@ -49,6 +50,13 @@ The glossary should include canonical terms, aliases, relationships, prompt tran
 - Ask before finalizing a material policy or scope decision that cannot be inferred.
 - Mark low-confidence terminology choices.
 
+## Execution Boundaries
+
+- Edit only the glossary, nearby instruction pointer, or explicitly requested vocabulary artifact.
+- Treat generated projections and runtime mirrors as read-only unless the repo contract says otherwise.
+- Do not infer authority from private logs, screenshots, or transcripts without user approval.
+- Stop before broad documentation rewrites when a glossary entry or pointer is enough.
+
 ## Anti-Patterns
 
 - Turning the glossary into a generic programming dictionary.
@@ -74,6 +82,7 @@ If the scope, source glossary, or authority for a terminology change is unclear,
 Never drop required context for brevity; move it into references or deferred context and link it here.
 
 - Local contract, evals, and task profile: `references/`
+- Read when: terminology work needs DDD-style bounded-context and source/projection language checks: `Infrastructure/references/software-literature-expert-lens-pack.md` and the Ubiquitous Language row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Output template: `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/references/output-format.md`
 - Archived long-form workflow: `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/`
 
