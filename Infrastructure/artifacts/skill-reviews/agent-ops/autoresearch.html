@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <p>Budget and Codex ergonomics guardrail. Local policy accepts <code>B+</code> or better when there are no failure-level findings and local/Tessl gates pass.</p>
         </div>
         <div class="plugin-score"><span class="pill warn">B</span><strong class="good">91%</strong></div>
-        <p class="posture-detail warn">Acceptable as a budget guardrail when local audit and Tessl quality pass; track warnings as follow-up or prove observed usage.</p>
+        <p class="posture-detail warn">Warning as a budget guardrail when local audit and Tessl quality pass; track warnings as follow-up or prove observed usage.</p>
         <ul><li>Score: 91/100</li><li>Grade: B</li><li>Risk: medium</li><li>Checks: 0 fail, 2 warn, 2 info</li><li>Active budget: 1955 tokens (heavy)</li><li>Observed usage: not supplied</li></ul>
       </div>
       <table>
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>Internal security gate evidence is recorded in the paired external-review artifact; review that artifact before treating this dashboard as a pass.</li></ul></div>
       <div class="panel plugin-posture">
         <div>
           <h3>Snyk Advisory</h3>
@@ -230,9 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
     <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260513-021557-265499/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/autoresearch/20260513-021557-265499/scorecard.json</span></a>
-        <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
+        <a href="Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.json</span></a>
+        <a href="Infrastructure/artifacts/skills/autoresearch/20260513-021557-265499/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/autoresearch/20260513-021557-265499/scorecard.json</span></a>
+        <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
     </section>

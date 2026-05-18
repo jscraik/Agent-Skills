@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>7/7 latest eval cases passed.</p>
+        <p>Latest smoke evidence is recorded separately; review the paired smoke artifact before treating this dashboard as a pass.</p>
       </div>
     
         
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       <section>
         <div class="section-head">
-          <div><h2>Evaluation Results</h2><p>7/7 latest eval cases passed.</p></div>
+          <div><h2>Evaluation Results</h2><p>Latest smoke evidence is recorded separately; review the paired smoke artifact before treating this dashboard as a pass.</p></div>
           <span class="pill good">100%</span>
         </div>
         <table>
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>Internal security gate evidence is recorded in the paired external-review artifact; review that artifact before treating this dashboard as a pass.</li></ul></div>
       <div class="panel plugin-posture">
         <div>
           <h3>Snyk Advisory</h3>
@@ -230,8 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
     <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json</span></a>
+        <a href="Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json</span></a>
+        <a href="Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>

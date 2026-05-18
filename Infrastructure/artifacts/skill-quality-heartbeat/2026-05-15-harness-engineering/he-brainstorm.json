@@ -38,7 +38,7 @@
         "tessl",
         "skill",
         "lint",
-        "/tmp/agent-skills-tessl-j0iqmvev/tile.json"
+        "<tmp-tessl-workdir>.json"
       ],
       "exit_code": 0,
       "status": "success",
@@ -50,7 +50,7 @@
         "tessl",
         "skill",
         "review",
-        "/tmp/agent-skills-tessl-j0iqmvev/skills/he-brainstorm"
+        "<tmp-tessl-workdir>"
       ],
       "exit_code": 0,
       "status": "success",
@@ -60,11 +60,11 @@
     "tessl_tile": {
       "mode": "temporary_wrapper",
       "reason": "Tessl validates tile.json packages; canonical repo skills remain SKILL.md-first.",
-      "review_path": "/tmp/agent-skills-tessl-j0iqmvev/skills/he-brainstorm",
+      "review_path": "<tmp-tessl-workdir>",
       "skill_key": "he-brainstorm",
       "source_skill": "Plugins/harness-engineering/skills/he-brainstorm",
-      "tessl_home": "/tmp/agent-skills-tessl-j0iqmvev/home",
-      "tile_path": "/tmp/agent-skills-tessl-j0iqmvev/tile.json"
+      "tessl_home": "<tmp-tessl-workdir>",
+      "tile_path": "<tmp-tessl-workdir>.json"
     }
   },
   "errors": [],

@@ -74,7 +74,7 @@
     },
     "raw_output": "",
     "raw_error": "ERROR: discovery-smoke runner requires eval cases with `smoke_mode`; none matched the selected filters. Use a live runner such as `codex` for behavior evals, or add discovery-specific smoke_mode cases.\n",
-    "eval_status": "fail",
+    "eval_status": "blocked",
     "blocker_class": null,
     "blocker_taxonomy": {
       "blocked_user_input": "The runner requested user input and should not be treated as hung.",

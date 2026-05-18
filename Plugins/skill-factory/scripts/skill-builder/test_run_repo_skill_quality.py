@@ -54,7 +54,7 @@ class RunRepoSkillQualityTests(unittest.TestCase):
     def test_baseline_archive_stub_loads_from_projected_path(self) -> None:
         baseline = (
             REPO_ROOT
-            / "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/skill-quality-baseline.json"
+            / "Plugins/skill-factory/references/skill-builder/skill-quality-baseline.json"
         )
 
         allowed_failures = run_repo_skill_quality._load_allowed_structure_failures_from_baseline(baseline)
