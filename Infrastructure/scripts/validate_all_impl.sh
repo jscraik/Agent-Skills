@@ -487,6 +487,7 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
 
     case "$changed_file" in
       Plugins/skill-factory/skills/code_quality_review/skill-builder/*|\
+      Plugins/skill-factory/scripts/skill-builder/*|\
       skills-system/skill-creator/*|\
       skills-system/skill-installer/*|\
       Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/*|\
