@@ -142,6 +142,8 @@ Fail fast: stop at the first failed required gate, classify it, and do not proce
 - Local operating guide: `../../../references/skill-builder/operating-guide.md`
 - First-principles factory gate: `Infrastructure/references/first-principles-factory-gate.md`
 - Codex skill eval creation loop: `skills-system/skill-creator/references/skill-factory/codex-eval-creation-loop.md`
+- Cookbook-derived skill improvement, documentation interface, and structured output lenses: `Infrastructure/references/openai-cookbook-expert-lens-pack.md`, `Infrastructure/references/openai-cookbook-skill-expertise-map.md`
+- Software-literature skill quality lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
 - Local contract and evals: `references/`
 - Discovery interview: [discovery interview](./references/discovery-interview.md)
 - Repository validators and helper scripts: `Plugins/skill-factory/scripts/skill-builder/` and `Infrastructure/scripts/`

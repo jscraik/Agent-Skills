@@ -94,3 +94,4 @@ future_agent_guidance:
 - Architecture lenses: `../../references/skills/he-strategy/architecture-lens-canon.md`
 - Source-prompt comparison: `../../references/skills/he-strategy/source-prompt-preservation.md`
 - Shared HE gates: `../../references/subagent-call-contract.md`, `../../references/deferred-context-index.md`
+- Software-literature strategy lenses: `../../../../Infrastructure/references/software-literature-expert-lens-pack.md`, `../../../../Infrastructure/references/software-literature-skill-expertise-map.md`

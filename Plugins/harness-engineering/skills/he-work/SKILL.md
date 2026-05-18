@@ -85,4 +85,6 @@ Reference `assets/` only for skill packaging and browseability; execution eviden
 - Approval flow: `../shared/references/approval-flow.md`
 - UI or visual proof: `../../references/ui-plan-routing-contract.md`, `../../references/visual-reference-contract.md`
 - Deferred context index: `../../references/deferred-context-index.md`
+- Cookbook-derived execution-plan and iterative repair lenses: `../../../../Infrastructure/references/openai-cookbook-expert-lens-pack.md`, `../../../../Infrastructure/references/openai-cookbook-skill-expertise-map.md`
+- Software-literature execution lenses: `../../../../Infrastructure/references/software-literature-expert-lens-pack.md`, `../../../../Infrastructure/references/software-literature-skill-expertise-map.md`
 - Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

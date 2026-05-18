@@ -129,6 +129,7 @@ confidence: medium
 
 - Practice contract: [references/architecture-practice-contract.md](references/architecture-practice-contract.md)
 - Machine contracts: [references/contract.yaml](references/contract.yaml), [references/evals.yaml](references/evals.yaml), [references/task-profile.json](references/task-profile.json)
+- Software-literature architecture lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
 - Deferred context: Infrastructure/references/deferred-skill-context/agent-ops-improve-codebase-architecture/
 
 ## See Also

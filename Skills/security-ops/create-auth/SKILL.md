@@ -52,6 +52,13 @@ Create, migrate, or validate Better Auth implementation work. Use when the user 
 - Do not print, store, or transform secret values unless the user explicitly asks and the destination is safe.
 - Do not run destructive commands or broad rewrites unless explicitly approved.
 
+## Execution Boundaries
+- Keep changes inside the requested auth integration, provider, session, or middleware surface.
+- Do not rotate secrets, mutate production auth state, change providers, or run migrations without explicit approval and rollback evidence.
+
+## Failure Mode
+- If auth ownership, framework version, secret source, callback URL, or validation path is unclear, stop with the missing input.
+
 ## Validation
 - Run the narrowest real validator or command path available for the requested work.
 - Fail fast: stop at the first failed gate; do not proceed until it is fixed and rerun.
@@ -73,5 +80,6 @@ Create, migrate, or validate Better Auth implementation work. Use when the user 
 
 ## Progressive Disclosure
 - Start with this active contract.
+- For software-literature auth, dependency, and integration lenses, use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Archived source, scripts, assets, and long-form references live under `Infrastructure/references/deferred-skill-context/security-ops-create-auth/`.
 - Load only the specific archived file needed for the current task.

@@ -101,6 +101,7 @@ Equivalence evidence: same default, same explicit override path, existing timeou
 
 - Local contract, evals, and task profile: `references/`
 - Read when: reviewer agents need concrete reuse, quality, and efficiency checks: `references/reviewer-rubric.md`
+- Software-literature simplification lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
 - Refactor planning detail: `Infrastructure/references/deferred-skill-context/agent-ops-simplify/references/refactor-planning-gate.md`
 - Archived long-form playbooks and examples: `Infrastructure/references/deferred-skill-context/agent-ops-simplify/`
 

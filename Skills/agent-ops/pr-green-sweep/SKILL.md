@@ -108,6 +108,7 @@ metadata:
 
 ## Progressive Disclosure
 - Start here for routing, boundaries, and stop rules.
+- For Cookbook-derived PR repair and secure quality gate checks, use `Infrastructure/references/openai-cookbook-expert-lens-pack.md` and `Infrastructure/references/openai-cookbook-skill-expertise-map.md`.
 - Use `references/contract.yaml` for the machine-readable contract.
 - Use `references/evals.yaml` for trigger and safety benchmark expectations.
 - Use `references/task-profile.json` for evaluator thresholds.

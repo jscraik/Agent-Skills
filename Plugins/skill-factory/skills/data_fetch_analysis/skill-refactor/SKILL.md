@@ -155,6 +155,7 @@ If evidence is stale, missing, contradictory, or too broad, return `blocked_by` 
 - Harness-specific evidence mapping: [Harness evidence mapping](./references/harness-evidence-mapping.md)
 - Visual asset for package browsers: [skill-refactor.png](./assets/skill-refactor.png)
 - First-principles factory gate: `Infrastructure/references/first-principles-factory-gate.md`
+- Software-literature refactoring and skill lifecycle lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
 - Local contract, evals, and task profile: `references/`
 
 ## Validation

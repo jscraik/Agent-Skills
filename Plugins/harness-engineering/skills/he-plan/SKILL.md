@@ -88,4 +88,6 @@ Reference `assets/` only for skill packaging and browseability; plan evidence be
 - Handoff: `../../references/skills/he-plan/post-plan-handoff.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`
 - Deferred context index: `../../references/deferred-context-index.md`
+- Cookbook-derived execution-plan and evaluation flywheel lenses: `../../../../Infrastructure/references/openai-cookbook-expert-lens-pack.md`, `../../../../Infrastructure/references/openai-cookbook-skill-expertise-map.md`
+- Software-literature planning lenses: `../../../../Infrastructure/references/software-literature-expert-lens-pack.md`, `../../../../Infrastructure/references/software-literature-skill-expertise-map.md`
 - Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

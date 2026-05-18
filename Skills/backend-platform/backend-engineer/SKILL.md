@@ -86,5 +86,6 @@ Plan, implement, and validate backend service changes. Use when patching or addi
 ## Progressive Disclosure
 - Start with this active contract.
 - For Cookbook-derived Responses API, structured output, and tool-orchestration checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
+- For software-literature data, integration, and domain-boundary checks, use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Archived source, scripts, assets, and long-form references live under `Infrastructure/references/deferred-skill-context/backend-platform-backend-engineer/`.
 - Load only the specific archived file needed for the current task.

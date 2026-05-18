@@ -56,6 +56,13 @@ Plan, diagnose, and validate 1Password CLI workflows. Use when tasks need op CLI
 - Do not print, store, or transform secret values unless the user explicitly asks and the destination is safe.
 - Do not run destructive commands or broad rewrites unless explicitly approved.
 
+## Execution Boundaries
+- Prefer read-only 1Password diagnostics and command plans before any credential-dependent execution.
+- Do not print secret values, write credentials to disk, change vault items, or alter global shell/auth config without explicit approval.
+
+## Failure Mode
+- If 1Password sign-in, vault selection, item reference, or injection path is unclear, stop with the exact missing prerequisite.
+
 ## Validation
 - Run the narrowest real validator or command path available for the requested work.
 - Fail fast: stop at the first failed gate; do not proceed until it is fixed and rerun.
@@ -77,5 +84,6 @@ Plan, diagnose, and validate 1Password CLI workflows. Use when tasks need op CLI
 
 ## Progressive Disclosure
 - Start with this active contract.
+- For software-literature dependency, integration, and operational-security lenses, use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Archived source, scripts, assets, and long-form references live under `Infrastructure/references/deferred-skill-context/security-ops-1password/`.
 - Load only the specific archived file needed for the current task.

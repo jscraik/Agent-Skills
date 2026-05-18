@@ -114,6 +114,8 @@ Fail fast: stop at first failed gate and report blocker text.
 - `references/task-profile.json`
 - `references/plugin-json-spec.md`
 - `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
+- `../../../../../Infrastructure/references/software-literature-expert-lens-pack.md`
+- `../../../../../Infrastructure/references/software-literature-skill-expertise-map.md`
 - `assets/`
 
 ## Remember
