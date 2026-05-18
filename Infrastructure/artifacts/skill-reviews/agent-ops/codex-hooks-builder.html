@@ -161,10 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a role="tab" id="tab-quality" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" id="tab-evals" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" id="tab-security" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" id="tab-evidence" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill bad">56%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">72%</strong></div>
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Add a &#x27;what&#x27; clause before the &#x27;Use when&#x27; that describes concrete capabilities, e.g., &#x27;Generates hook pack scaffolding, validates hooks.json schema, migrates hook configurations between versions, and troubleshoots hook execution errors.&#x27;</li><li>Expand the action verbs into more specific outcomes — instead of &#x27;creating&#x27; say &#x27;scaffolding new hook packs with proper directory structure&#x27;; instead of &#x27;validating&#x27; say &#x27;checking hooks.json against the expected schema and verifying script permissions&#x27;.</li><li>Add concrete, executable examples: include a complete hooks.json file, a sample hook script, and the exact commands to validate and install them.</li><li>Drastically reduce the Workflow section by removing internal runtime implementation details (plugin substitutions, compact stdout behavior, managed-only mode nuances) and moving them to a referenced file.</li><li>Replace the vague Examples section with 1-2 full input/output demonstrations showing a hook pack creation from start to finish with actual file contents.</li><li>Consolidate the Gotchas, Anti-Patterns, Constraints, and Execution Boundaries sections—they overlap significantly and could be a single concise &#x27;Rules&#x27; section.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
       
         <section class="empty-state">
           <h2>Evals Not Run Yet</h2>
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
       <div class="panel plugin-posture">
@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
         <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/codex-hooks-builder.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/codex-hooks-builder.json</span></a>

@@ -210,8 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
     </section>
 
     <section id="security" class="tab-panel" role="tabpanel" hidden>
-      <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
+      <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill bad">0%</span></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>SEC_EXECUTION_BOUNDARIES_MISSING: execution boundaries section missing</li></ul></div>
       <div class="panel plugin-posture">
         <div>
           <h3>Snyk Advisory</h3>
@@ -230,8 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
     <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/simplify.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/simplify.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260503-214905-089118/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/simplify/20260503-214905-089118/scorecard.json</span></a>
+        <a href="Infrastructure/artifacts/skill-reviews/agent-ops/simplify.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/simplify.json</span></a>
+        <a href="Infrastructure/artifacts/skills/simplify/20260503-214905-089118/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/simplify/20260503-214905-089118/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>

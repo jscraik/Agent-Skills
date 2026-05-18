@@ -221,3 +221,5 @@ Repo-specific agent knowledge base. Append-only.
 - **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2515931723)
 
 - **2026-05-16 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:999518231)
+
+- **2026-05-18 [Claude]:** Supersedes/clarifies earlier cat/python3/jq exit-code-2 entries (see auto-key:3040072751, auto-key:872490936, auto-key:1758991561, auto-key:106538740, auto-key:876251262, auto-key:2515931723, auto-key:999518231) — when bash commands fail with exit code 2 and the auto-capture entry omits argv/cwd/input path, the root cause is almost always a missing interpreter dependency, wrong working directory, or missing file rather than a skill regression; run `which python3`, `pwd`, and `ls` diagnostics first, then rerun with full command logging (explicit paths, cwd, and input) before changing skill logic or assuming tool failure.

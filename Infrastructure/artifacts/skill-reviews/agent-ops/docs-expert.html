@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>7/7 latest eval cases passed.</p>
+        <p>7/7 latest eval cases passed. Note: smoke eval requires smoke_mode cases.</p>
       </div>
     
         
@@ -161,10 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a role="tab" id="tab-quality" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" id="tab-evals" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" id="tab-security" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" id="tab-evidence" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill bad">66%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">82%</strong></div>
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Add more specific concrete actions beyond &#x27;audited, rewritten, validated&#x27;—e.g., &#x27;checks for stale instructions, verifies code examples match actual source, flags outdated dependency references&#x27;</li><li>Strengthen distinctiveness by clarifying what &#x27;live repository evidence&#x27; means in practice, e.g., &#x27;cross-references documentation claims against actual file structure, configs, and code&#x27;</li><li>Add concrete, executable examples: show a specific README audit with actual commands (e.g., `grep -rn &#x27;npm install&#x27; README.md` to verify install instructions match package.json), sample input/output pairs, and a filled-in output format template.</li><li>Make the Procedure steps actionable: replace abstract instructions like &#x27;Inspect 2-3 focused truth surfaces&#x27; with specific guidance like &#x27;Check that file paths mentioned in docs exist: `find . -name &quot;filename&quot;`, verify CLI commands run: `command --help`, confirm version numbers match package.json/pyproject.toml&#x27;.</li><li>Provide a concrete output format example with actual JSON/markdown showing what a completed findings report looks like, rather than just listing field names.</li><li>Trim redundant conceptual sections (Philosophy, Anti-Patterns, Gotchas) or merge them into tighter inline notes within the Procedure, as Claude already understands these documentation principles.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
       
       <section>
         <div class="section-head">
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
       <div class="panel plugin-posture">
@@ -227,11 +227,11 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json</span></a>
+        <a href="Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json</span></a>
+        <a href="Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>

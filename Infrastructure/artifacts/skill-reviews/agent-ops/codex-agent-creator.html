@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>WARN FM_METADATA_VERSION_MISSING: `metadata.version` is recommended for local Tessl review compatibility.</li><li>WARN RESEARCH_EVALS_REALISTIC_FIELD_MISSING: Some trigger eval cases omit `realistic: true|false`; explicit declarations prevent style-word heuristics from becoming the source of truth. | missing=11/11</li><li>WARN RESEARCH_SCOPE_OVERBUNDLED: Skill/package scope looks broad across many surfaces without explicit narrowing guidance. Prefer the smallest viable package boundary first. | surfaces=6</li></ul></div>
       <div class="panel plugin-posture">
         <div>
           <h3>Snyk Advisory</h3>
@@ -230,8 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
     <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260510-155933-562190/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/codex-agent-creator/20260510-155933-562190/scorecard.json</span></a>
+        <a href="Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.json</span></a>
+        <a href="Infrastructure/artifacts/skills/codex-agent-creator/20260510-155933-562190/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/codex-agent-creator/20260510-155933-562190/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
