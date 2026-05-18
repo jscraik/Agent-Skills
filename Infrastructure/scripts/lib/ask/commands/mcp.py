@@ -31,6 +31,14 @@ FALLBACK_PYTHONS = (
 )
 
 
+def _mcp_validation_command(action: str, *, dry_run: bool = False) -> str:
+    parts = ["./bin/ask", "mcp", action]
+    if dry_run:
+        parts.append("--dry-run")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
 def is_valid_env_var_name(value):
     return isinstance(value, str) and ENV_VAR_RE.fullmatch(value) is not None
 
@@ -183,6 +191,7 @@ def build_codex_mcp_config(codex_config):
 def sync_mcp(repo_root: Path, dry_run: bool = False) -> CallResult:
     """Export MCP configuration from Codex TOML to JSON."""
     result = CallResult()
+    result.data["validation_commands"] = [_mcp_validation_command("sync", dry_run=dry_run)]
 
     if tomllib is None and not list(_iter_fallback_pythons()):
         result.status = "error"

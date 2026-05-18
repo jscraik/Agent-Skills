@@ -1,6 +1,6 @@
 # Agent Skills
 
-A governed **Agent Skills Kit** repository for Codex and AI coding agents.
+A governed repository of skills and capability routes for Codex and AI coding agents.
 Author skills once, validate quality, expose `$` command handles, and sync
 routed skills and plugins into runtime projections through the `ask` CLI.
 

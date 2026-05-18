@@ -29,6 +29,7 @@ node_modules/
 .ruff_cache/
 .mypy_cache/
 .coverage
+.cache/
 .venv/
 .venv-skillpack/
 .venv-skill-builder/

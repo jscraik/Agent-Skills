@@ -38,19 +38,20 @@ Use this default section order for standard specs:
    - `Non-Functional Requirements` with stable `NFR-*` IDs when relevant
 10. `Interfaces`
 11. `Data / Domain Contract`
-12. `Security, Privacy, and Safety`
-13. `Accessibility and Operator Ergonomics`
-14. `Failure and Recovery`
-15. `Validation Plan`
-16. `Acceptance Criteria` with stable `SA-*` IDs
-17. `Visual References / Diagrams`
-18. `Implementation Notes`
-19. `Open Questions`
-20. `Decision`
-21. `Evidence and References`
-22. `Appendix A. Harness Metadata / Traceability`
-23. `Appendix B. Review Outcomes`
-24. `Appendix C. he-plan Handoff`
+12. `Enforcement Contract`
+13. `Security, Privacy, and Safety`
+14. `Accessibility and Operator Ergonomics`
+15. `Failure and Recovery`
+16. `Validation Plan`
+17. `Acceptance Criteria` with stable `SA-*` IDs
+18. `Visual References / Diagrams`
+19. `Implementation Notes`
+20. `Open Questions`
+21. `Decision`
+22. `Evidence and References`
+23. `Appendix A. Harness Metadata / Traceability`
+24. `Appendix B. Review Outcomes`
+25. `Appendix C. he-plan Handoff`
 
 For `spec_depth: lite`, keep the same order but collapse adjacent sections when
 that does not hide requirements, risk, or validation. For `spec_depth: full`,
@@ -82,6 +83,31 @@ Scenario and conformance requirements:
   and safety invariants.
 - UI specs must use `Dedicated UI Spec` instead of forcing visual behavior into
   this standard template.
+
+Enforcement Contract requirements:
+
+- Every standard spec must include an `Enforcement Contract` section using the
+  Skills SDK apparatus lens:
+  `Infrastructure/references/skills-sdk-apparatus-lens.md`.
+- The section must explicitly name `essential_decisions`,
+  `fillable_gaps`, `guardrails`, `refusal_triggers`,
+  `durable_memory`, and `professional_output`.
+- Essential decisions are the choices the implementation agent must not invent:
+  public API shape, status enums, error taxonomy, persistence model, security
+  boundary, package ownership, data schema, or lifecycle semantics.
+- Fillable gaps are the low-risk code or documentation areas an agent may
+  generate inside those locked decisions.
+- Guardrails must be independent checks, preferably commands, schemas, tests,
+  evals, doctor/prove gates, or structural audits that fail when the generated
+  output crosses the boundary.
+- Refusal triggers must describe when the downstream agent stops instead of
+  filling a gap, such as a new public API decision, ambiguous data model,
+  missing validator, risky migration, or auth/security uncertainty.
+- Durable memory must name where transferable feedback is recorded so the same
+  correction does not need to be given twice.
+- Professional output must name the closeout evidence required before a done
+  claim: files changed, exact commands, pass/fail state, blockers, warnings,
+  next action, and rollback.
 
 Visual reference requirements:
 
@@ -134,4 +160,4 @@ Sections: overview, components, states, tokens, flows, accessibility, responsive
 
 ## Verification
 
-Verify required frontmatter and sections, stable `SA` or `VAC` IDs, tracked-work Linear traceability, explicit `linear_mutation_status`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <spec-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>` for tracked specs. For non-trivial generated specs, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <spec-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <spec-path> --kind spec --json` so reader-first structure, IDs, conformance rules, and visual-reference decisions are validated before handoff.
+Verify required frontmatter and sections, stable `SA` or `VAC` IDs, tracked-work Linear traceability, explicit `linear_mutation_status`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <spec-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>` for tracked specs. For non-trivial generated specs, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <spec-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <spec-path> --kind spec --json` so reader-first structure, IDs, conformance rules, the Enforcement Contract, and visual-reference decisions are validated before handoff.

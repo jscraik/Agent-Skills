@@ -49,11 +49,10 @@ jobs:
         run: python -m pip install --upgrade pip pyyaml pytest
       - name: Tier-1 structure gate (skill_gate)
         run: |
-          python Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_repo_skill_quality.py \
+          python Plugins/skill-factory/scripts/skill-builder/run_repo_skill_quality.py \
             --root . \
-            --baseline-file Plugins/skill-factory/skills/code_quality_review/skill-builder/references/skill-quality-baseline.json \
+            --baseline-file Plugins/skill-factory/references/skill-builder/skill-quality-baseline.json \
             --benchmark-mode off \
-            --benchmark-config Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json \
             --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
             --sarif-out Infrastructure/artifacts/skills/skill-structure-gates.sarif \
             --format text
@@ -127,20 +126,19 @@ jobs:
         run: python -m pip install --upgrade pip pyyaml pytest
       - name: Run dual-run evals (requires codex/claude binaries + auth)
         run: |
-          python Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/run_repo_skill_quality.py \
+          python Plugins/skill-factory/scripts/skill-builder/run_repo_skill_quality.py \
             --root . \
             --run-evals \
             --dual-run \
             --capture-jsonl \
             --tier2-mode "${{ inputs.tier2_mode }}" \
             --benchmark-mode warn \
-            --benchmark-config Plugins/skill-factory/skills/code_quality_review/skill-builder/references/benchmark-policy.json \
             --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
             --sarif-out Infrastructure/artifacts/skills/skill-structure-gates.sarif \
             --format text
       - name: Build dashboard
         run: |
-          python Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/build_skill_eval_dashboard.py \
+          python Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py \
             --reports-root Infrastructure/artifacts/skills \
             --out-json Infrastructure/artifacts/skills/dashboard.json \
             --out-md Infrastructure/artifacts/skills/dashboard.md

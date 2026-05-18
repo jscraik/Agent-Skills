@@ -20,10 +20,7 @@ if repo_root_str not in sys.path:
     sys.path.insert(0, repo_root_str)
 SKILL_DIR = SCRIPT_DIR.parents[1] / "skills" / "code_quality_review" / "skill-builder"
 
-try:
-    from defusedxml import ElementTree as ET
-except ModuleNotFoundError:
-    from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as ET  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
 
 existing_runner = sys.modules.get("run_skill_evals")
 if existing_runner is not None:

@@ -6,6 +6,6 @@
 /scripts/codex-preflight.sh @jscraik
 /scripts/verify-work.sh @jscraik
 /scripts/validate-codestyle.sh @jscraik
-/Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh @jscraik
+/scripts/prepare-worktree.sh @jscraik
 /scripts/harness-cli.sh @jscraik
 /scripts/check-environment.sh @jscraik

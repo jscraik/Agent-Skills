@@ -259,12 +259,9 @@ contracts. The exact historical lines below are retained as move evidence for
 the progressive-disclosure gate; current agents should follow the linked
 contracts, not this audit note.
 
-Moved-to-reference evidence:
-
-Return schema_version when structured. Output a `.harness/plan/**.md` plan or
-Produce one of: strategy memo, architecture recommendation, refactor strategy,
-Strategy artifacts are cognition compression, not ceremony. Turn verified repo
-Write a dated `.harness/linear/**-linear-plan.md` artifact or return
+Moved-to-reference evidence is archived under `fixtures/budget-archive/**`
+and `fixtures/preserved-context/**`. This active router keeps only the current
+reference destinations below.
 
 Current routes:
 
@@ -277,3 +274,32 @@ Current routes:
   `references/skills/he-linear-plan/linear-plan-output-contract.md`,
   `references/skills/he-linear-plan/linear-filing-rule.md`, and
   `references/closure-mutation-contract.md`.
+
+## 2026-05-18 HE Entrypoint Follow-Up Disposition
+
+The PR #181 follow-up kept `he-linear-plan`, `he-plan`, and `he-strategy`
+entrypoints compact after branch stacking moved their detailed procedures into
+stage references. The removed hot-path lines are not discarded; they are routed
+through the contracts below so future agents can load deep context deliberately.
+
+Disposition:
+
+- `he-linear-plan` moved-to-reference: Linear output shape, filing rules,
+  source-prompt preservation, closure and mutation boundaries, subagent policy,
+  and package checks live in `references/skills/he-linear-plan/**`,
+  `references/closure-mutation-contract.md`, and
+  `references/subagent-call-contract.md`.
+  Relocation evidence:
+Use when approved `.harness` cognition needs Linear routing: target project,
+- `he-plan` moved-to-reference: plan artifact shape, planning depth,
+  post-plan handoff, source evidence, validation, rollback, enforcement
+  contracts, and generated-artifact checks live in
+  `references/skills/he-plan/**` and the shared lifecycle contracts.
+  Relocation evidence:
+Plans are execution contracts, not chat checklists. They preserve source
+- `he-strategy` moved-to-reference: strategy output shape, first-principles
+  framing, domain context, migration phase selection, rollback posture, and
+  next-stage routing live in `references/skills/he-strategy/**` and the
+  shared source-prompt and lifecycle contracts.
+  Relocation evidence:
+Strategy artifacts are cognition compression, not ceremony. Turn verified repo

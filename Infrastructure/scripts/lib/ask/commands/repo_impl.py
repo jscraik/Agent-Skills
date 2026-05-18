@@ -8,7 +8,7 @@ from typing import Any, List
 from ask.bootstrap import run_bootstrap_checks
 from ask.envelope import CallResult, ErrorCode, ErrorObject
 from ask.catalog_parity import compute_catalog_parity
-from ask.commands.skills import skills_budget, skills_handles
+from ask.commands.skills import skills_budget, skills_events, skills_handles, skills_memory, skills_package, skills_profiles
 from ask.golden_path import build_golden_path_payload
 
 SCRIPT_TIMEOUT_SECONDS = 60
@@ -19,8 +19,12 @@ DOCTOR_SIGNAL_PRIORITY = {
     "catalog_parity": 30,
     "runtime_budget": 40,
     "command_handles": 50,
+    "capability_readiness": 55,
+    "memory_readiness": 56,
+    "package_readiness": 57,
     "repo_surface": 60,
 }
+PACKAGE_READINESS_SENTINEL = "skill-builder"
 GENERATED_SURFACE_PREFIXES = (
     ".agents/skills/",
     ".skillsets/",
@@ -29,6 +33,16 @@ GENERATED_SURFACE_PREFIXES = (
 CANONICAL_SKILL_PREFIXES = (
     "Skills/",
 )
+
+
+def _repo_validation_command(action: str, *args: str, **flags: bool) -> str:
+    parts = ["./bin/ask", "repo", action, *args]
+    for flag, enabled in flags.items():
+        if enabled:
+            parts.append(f"--{flag.replace('_', '-')}")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
 
 def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     """
@@ -44,6 +58,7 @@ def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
         CallResult: A CallResult with `status` set to `"success"` and the metadata above stored in `data`.
     """
     result = CallResult()
+    result.data["validation_commands"] = [_repo_validation_command("status", verbose=verbose)]
     result.data["repo_root"] = "."
     result.data["repo_root_resolved"] = str(repo_root.resolve())
     result.data["is_git"] = (repo_root / ".git").exists()
@@ -241,7 +256,7 @@ def _repo_status_signal(status_result: CallResult) -> dict[str, Any]:
             "severity": "blocker",
             "summary": _error_summary(status_result, "Repository status check failed."),
             "source": "repo_status",
-            "next_command": "./bin/ask repo status --json --robot",
+            "next_command": _repo_validation_command("status"),
         }
     if not status_result.data.get("is_git"):
         return {
@@ -249,7 +264,7 @@ def _repo_status_signal(status_result: CallResult) -> dict[str, Any]:
             "severity": "blocker",
             "summary": "Repository root is not a git repository.",
             "source": "repo_status",
-            "next_command": "./bin/ask repo status --json --robot",
+            "next_command": _repo_validation_command("status"),
         }
     return {
         "state": "pass",
@@ -270,7 +285,7 @@ def _projection_sync_signal(status_result: CallResult) -> dict[str, Any]:
             "severity": "warning",
             "summary": "Projection sync could not be checked because repo status failed.",
             "source": "repo_status",
-            "next_command": "./bin/ask repo status --json --robot",
+            "next_command": _repo_validation_command("status"),
         }
     if not status_result.data.get("is_git"):
         return {
@@ -278,7 +293,7 @@ def _projection_sync_signal(status_result: CallResult) -> dict[str, Any]:
             "severity": "warning",
             "summary": "Projection sync not checked because the repository root is not a git repository.",
             "source": "repo_status",
-            "next_command": "./bin/ask repo status --json --robot",
+            "next_command": _repo_validation_command("status"),
             "details": {"is_git": False},
         }
     if status_result.data.get("skills_synced"):
@@ -375,7 +390,7 @@ def _catalog_parity_signal(catalog_result: CallResult) -> dict[str, Any]:
             "severity": "blocker",
             "summary": f"Catalog parity drift detected: {report.get('drift_class')}.",
             "source": "doctor_catalog",
-            "next_command": "./bin/ask repo doctor-catalog --json --robot",
+            "next_command": _repo_validation_command("doctor-catalog"),
             "details": {
                 "decision_status": report.get("decision_status"),
                 "drift_class": report.get("drift_class"),
@@ -387,7 +402,7 @@ def _catalog_parity_signal(catalog_result: CallResult) -> dict[str, Any]:
         "severity": "blocker",
         "summary": _error_summary(catalog_result, "Catalog parity check failed."),
         "source": "doctor_catalog",
-        "next_command": "./bin/ask repo doctor-catalog --json --robot",
+        "next_command": _repo_validation_command("doctor-catalog"),
     }
 
 
@@ -467,15 +482,206 @@ def _command_handles_signal(handles_result: CallResult) -> dict[str, Any]:
     }
 
 
+def _capability_readiness_signal(
+    profiles_result: CallResult,
+    events_result: CallResult,
+) -> dict[str, Any]:
+    profiles = profiles_result.data.get("skill_profiles", {})
+    events = events_result.data.get("skill_events", {})
+    profile_overview = profiles.get("readiness_overview", {})
+    event_overview = events.get("readiness_overview", {})
+    eval_blocker_classes = sorted(
+        set(profiles.get("eval_blocker_classes", {})) | set(events.get("eval_blocker_classes", {}))
+    )
+    profile_gaps = int(profile_overview.get("contract_gap_count") or 0)
+    event_gaps = int(event_overview.get("contract_gap_count") or 0)
+    details = {
+        "profile_status": profiles.get("status"),
+        "profile_contract_status": profile_overview.get("contract_status"),
+        "profile_contract_gap_count": profile_gaps,
+        "profile_ready_sections": profile_overview.get("ready_contract_sections", []),
+        "profile_blocked_sections": profile_overview.get("blocked_contract_sections", []),
+        "event_status": events.get("status"),
+        "event_contract_status": event_overview.get("contract_status"),
+        "event_contract_gap_count": event_gaps,
+        "event_ready_sections": event_overview.get("ready_contract_sections", []),
+        "event_blocked_sections": event_overview.get("blocked_contract_sections", []),
+        "eval_blocker_classes": eval_blocker_classes,
+        "eval_blocker_class_count": len(eval_blocker_classes),
+    }
+    if profiles_result.status != "success":
+        return {
+            "state": "error",
+            "severity": "blocker",
+            "summary": _error_summary(profiles_result, "Skill profile readiness failed."),
+            "source": "skills_profiles",
+            "next_command": "./bin/ask skills profiles --json --robot",
+            "details": details,
+        }
+    if events_result.status != "success":
+        return {
+            "state": "error",
+            "severity": "blocker",
+            "summary": _error_summary(events_result, "Skill lifecycle event readiness failed."),
+            "source": "skills_events",
+            "next_command": "./bin/ask skills events --json --robot",
+            "details": details,
+        }
+    gap_count = profile_gaps + event_gaps
+    if gap_count:
+        return {
+            "state": "block",
+            "severity": "blocker",
+            "summary": f"Skill capability readiness has {gap_count} contract gap(s).",
+            "source": "skills_profiles+skills_events",
+            "next_command": "./bin/ask skills profiles --json --robot",
+            "details": details,
+        }
+    return {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Skill capability readiness contracts are ready.",
+        "source": "skills_profiles+skills_events",
+        "details": details,
+    }
+
+
+def _memory_readiness_signal(memory_result: CallResult) -> dict[str, Any]:
+    memory = memory_result.data.get("skill_memory", {})
+    source_summary = memory.get("source_summary", {})
+    entry_summary = memory.get("entry_summary", {})
+    entry_count = int(memory.get("entry_count") or 0)
+    available_sources = source_summary.get("available_sources", [])
+    details = {
+        "status": memory.get("status"),
+        "schema_version": memory.get("schema_version"),
+        "provider_model": memory.get("provider_model"),
+        "mode": memory.get("mode"),
+        "query": memory.get("query"),
+        "entry_count": entry_count,
+        "total_count": int(memory.get("total_count") or entry_count),
+        "source_count": source_summary.get("source_count", 0),
+        "available_sources": available_sources,
+        "missing_sources": source_summary.get("missing_sources", []),
+        "by_source": entry_summary.get("by_source", {}),
+        "by_freshness": entry_summary.get("by_freshness", {}),
+        "validation_command": "./bin/ask skills memory search projection --json --robot",
+    }
+    if memory_result.status != "success":
+        return {
+            "state": "error",
+            "severity": "blocker",
+            "summary": _error_summary(memory_result, "Skill memory readiness failed."),
+            "source": "skills_memory",
+            "next_command": "./bin/ask skills memory search projection --json --robot",
+            "details": details,
+        }
+    if not available_sources:
+        return {
+            "state": "warn",
+            "severity": "warning",
+            "summary": "Skill memory provider has no available source roots.",
+            "source": "skills_memory",
+            "next_command": "./bin/ask skills memory list --json --robot",
+            "details": details,
+        }
+    if entry_count == 0:
+        return {
+            "state": "warn",
+            "severity": "warning",
+            "summary": "Skill memory provider is available but returned no projection evidence.",
+            "source": "skills_memory",
+            "next_command": "./bin/ask skills memory search projection --json --robot",
+            "details": details,
+        }
+    return {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Skill memory provider returned searchable readiness evidence.",
+        "source": "skills_memory",
+        "details": details,
+    }
+
+
+def _package_readiness_signal(package_result: CallResult) -> dict[str, Any]:
+    package = package_result.data.get("skill_package", {})
+    package_contract = package.get("package_contract", {})
+    required_fields = package_contract.get("required_fields", {})
+    gate_summary = package.get("gate_summary", {})
+    promotion_gate = package_contract.get("promotion_gate", {})
+    install_gate = package_contract.get("install_gate", {})
+    details = {
+        "status": package.get("status"),
+        "schema_version": package.get("schema_version"),
+        "target": package.get("query"),
+        "handle": package.get("handle"),
+        "readiness_level": package_contract.get("readiness_level"),
+        "present_fields": required_fields.get("present", []),
+        "missing_fields": required_fields.get("missing", []),
+        "missing_field_count": len(required_fields.get("missing", [])),
+        "install_ready": gate_summary.get("install_ready"),
+        "promotion_status": gate_summary.get("promotion_status"),
+        "promotion_ready": gate_summary.get("promotion_ready"),
+        "checkout_test_status": gate_summary.get("checkout_test_status"),
+        "blocked_reasons": gate_summary.get("blocked_reasons", []),
+        "share_ready": promotion_gate.get("share_ready"),
+        "compatible_roles_declared": package_contract.get("role_compatibility", {}).get("declared"),
+        "runtime_contract_declared": package_contract.get("runtime_contract", {}).get("declared"),
+        "checkout_test_required": install_gate.get("checkout_test", {}).get("required"),
+        "validation_command": (
+            f"./bin/ask skills package {PACKAGE_READINESS_SENTINEL} "
+            "--checkout-test --json --robot"
+        ),
+    }
+    if package_result.status != "success":
+        return {
+            "state": "error",
+            "severity": "blocker",
+            "summary": _error_summary(package_result, "Skill package readiness failed."),
+            "source": "skills_package",
+            "next_command": details["validation_command"],
+            "details": details,
+        }
+    if package.get("status") == "blocked":
+        return {
+            "state": "block",
+            "severity": "blocker",
+            "summary": package.get("agent_summary") or "Skill package readiness is blocked.",
+            "source": "skills_package",
+            "next_command": details["validation_command"],
+            "details": details,
+        }
+    if package.get("status") == "warning" or details["blocked_reasons"]:
+        return {
+            "state": "warn",
+            "severity": "warning",
+            "summary": package.get("agent_summary") or "Skill package readiness has metadata gaps.",
+            "source": "skills_package",
+            "next_command": details["validation_command"],
+            "details": details,
+        }
+    return {
+        "state": "pass",
+        "severity": "info",
+        "summary": "Skill package readiness contract is ready.",
+        "source": "skills_package",
+        "details": details,
+    }
+
+
 def _repo_surface_signal(surface_result: CallResult) -> dict[str, Any]:
     report = surface_result.data.get("repo_surface", {})
     summary = report.get("summary", {})
     blocking_findings = summary.get("blocking_findings", 0)
+    diagnostic_summary = _repo_surface_diagnostic_summary(summary)
     details = {
         "status": report.get("status"),
         "total_paths": summary.get("total_paths"),
         "blocking_findings": blocking_findings,
         "counts_by_code": summary.get("counts_by_code", {}),
+        "blocking_counts_by_code": summary.get("blocking_counts_by_code", {}),
+        "blocking_counts_by_classification": summary.get("blocking_counts_by_classification", {}),
+        "diagnostic_summary": diagnostic_summary,
     }
     if surface_result.status != "success":
         return {
@@ -483,16 +689,16 @@ def _repo_surface_signal(surface_result: CallResult) -> dict[str, Any]:
             "severity": "blocker",
             "summary": _error_summary(surface_result, "Repo surface inventory failed."),
             "source": "repo_surface",
-            "next_command": "./bin/ask repo surface --json --robot",
+            "next_command": _repo_validation_command("surface"),
             "details": details,
         }
     if report.get("status") == "warning" or blocking_findings:
         return {
             "state": "warn",
             "severity": "warning",
-            "summary": f"Repo surface has {blocking_findings} diagnostic finding(s).",
+            "summary": _repo_surface_warning_summary(blocking_findings, diagnostic_summary),
             "source": "repo_surface",
-            "next_command": "./bin/ask repo surface --json --robot",
+            "next_command": _repo_validation_command("surface"),
             "details": details,
         }
     return {
@@ -504,13 +710,56 @@ def _repo_surface_signal(surface_result: CallResult) -> dict[str, Any]:
     }
 
 
+def _top_count_items(counts: dict[str, Any], *, limit: int = 3) -> list[dict[str, int]]:
+    normalized: list[dict[str, int]] = []
+    for code, count in counts.items():
+        if isinstance(code, str) and isinstance(count, int) and count > 0:
+            normalized.append({"code": code, "count": count})
+    return sorted(normalized, key=lambda item: (-item["count"], item["code"]))[:limit]
+
+
+def _repo_surface_diagnostic_summary(summary: dict[str, Any]) -> dict[str, Any]:
+    blocking_counts = summary.get("blocking_counts_by_code", {})
+    if not isinstance(blocking_counts, dict) or not blocking_counts:
+        blocking_counts = summary.get("counts_by_code", {})
+    if not isinstance(blocking_counts, dict):
+        blocking_counts = {}
+    top_codes = _top_count_items(blocking_counts)
+    return {
+        "diagnostic_class": "repo_surface_ownership_debt",
+        "top_blocking_codes": top_codes,
+        "next_action": "classify_allowlist_or_cleanup_tracked_surface",
+        "operator_rule": (
+            "Do not flatten high-count repo-surface findings into generic "
+            "nonblocking debt; report dominant categories, owner decision, "
+            "and the next classification command."
+        ),
+    }
+
+
+def _repo_surface_warning_summary(blocking_findings: int, diagnostic_summary: dict[str, Any]) -> str:
+    top_codes = diagnostic_summary.get("top_blocking_codes", [])
+    if isinstance(top_codes, list) and top_codes:
+        formatted = ", ".join(
+            f"{item['code']}={item['count']}"
+            for item in top_codes
+            if isinstance(item, dict) and item.get("code") and item.get("count")
+        )
+        if formatted:
+            return (
+                f"Repo surface has {blocking_findings} ownership diagnostic finding(s); "
+                f"top categories: {formatted}."
+            )
+    return f"Repo surface has {blocking_findings} ownership diagnostic finding(s)."
+
+
 def _unknown_signal_error_signal(exc: Exception) -> dict[str, Any]:
     return {
         "state": "error",
         "severity": "blocker",
         "summary": f"Repo doctor failed while composing signals: {type(exc).__name__}.",
         "source": "repo_doctor",
-        "next_command": "./bin/ask repo status --json --robot",
+        "next_command": _repo_validation_command("status"),
         "details": {
             "error_type": type(exc).__name__,
         },
@@ -538,6 +787,18 @@ def _repo_status_skipped_downstream_signals(reason: str) -> dict[str, dict[str, 
         ),
         "command_handles": _skipped_signal(
             f"Command-handle validation skipped {reason}.",
+            "repo_status",
+        ),
+        "capability_readiness": _skipped_signal(
+            f"Capability readiness skipped {reason}.",
+            "repo_status",
+        ),
+        "memory_readiness": _skipped_signal(
+            f"Memory readiness skipped {reason}.",
+            "repo_status",
+        ),
+        "package_readiness": _skipped_signal(
+            f"Package readiness skipped {reason}.",
             "repo_status",
         ),
         "repo_surface": _skipped_signal(
@@ -609,6 +870,26 @@ def repo_doctor(repo_root: Path) -> CallResult:
                             skills_handles(repo_root, check=True, include_handles=False)
                         )
                     ),
+                    "capability_readiness": _safe_signal(
+                        lambda: _capability_readiness_signal(
+                            skills_profiles(repo_root),
+                            skills_events(repo_root),
+                        )
+                    ),
+                    "memory_readiness": _safe_signal(
+                        lambda: _memory_readiness_signal(
+                            skills_memory(repo_root, "search", query="projection", limit=3)
+                        )
+                    ),
+                    "package_readiness": _safe_signal(
+                        lambda: _package_readiness_signal(
+                            skills_package(
+                                repo_root,
+                                PACKAGE_READINESS_SENTINEL,
+                                checkout_test=True,
+                            )
+                        )
+                    ),
                     "repo_surface": _safe_signal(
                         lambda: _repo_surface_signal(repo_surface(repo_root))
                     ),
@@ -616,7 +897,7 @@ def repo_doctor(repo_root: Path) -> CallResult:
             )
     payload = build_golden_path_payload(
         signals=signals,
-        normal_next_command="./bin/ask repo status --json --robot",
+        normal_next_command=_repo_validation_command("status"),
         signal_priorities=DOCTOR_SIGNAL_PRIORITY,
     )
     result.data["doctor"] = payload
@@ -671,17 +952,10 @@ def collect_changed_files(repo_root: Path) -> list[str]:
     return sorted(changed)
 
 
-def _quote_paths(paths: list[str]) -> str:
-    return " ".join(shlex.quote(path) for path in paths)
-
-
 def _validation_command_for_changed_files(changed_files: list[str]) -> str:
     if not changed_files:
-        return "./bin/ask repo validate --json --robot"
-    return (
-        "./bin/ask repo validate --changed-files "
-        f"{_quote_paths(changed_files)} --json --robot"
-    )
+        return _repo_validation_command("validate")
+    return _repo_validation_command("validate", "--changed-files", *changed_files)
 
 
 def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
@@ -752,6 +1026,69 @@ def _closeout_surface_policy(doctor_payload: dict[str, Any]) -> dict[str, Any]:
         "blocking_findings": details.get("blocking_findings", 0),
         "total_paths": details.get("total_paths"),
         "counts_by_code": details.get("counts_by_code", {}),
+        "blocking_counts_by_code": details.get("blocking_counts_by_code", {}),
+        "blocking_counts_by_classification": details.get("blocking_counts_by_classification", {}),
+        "diagnostic_summary": details.get("diagnostic_summary", {}),
+    }
+
+
+def _closeout_capability_readiness(doctor_payload: dict[str, Any]) -> dict[str, Any]:
+    signal = doctor_payload.get("signals", {}).get("capability_readiness", {})
+    details = signal.get("details", {})
+    profile_gap_count = int(details.get("profile_contract_gap_count") or 0)
+    event_gap_count = int(details.get("event_contract_gap_count") or 0)
+    return {
+        "status": signal.get("state"),
+        "summary": signal.get("summary"),
+        "profile_contract_status": details.get("profile_contract_status"),
+        "profile_contract_gap_count": profile_gap_count,
+        "profile_ready_sections": details.get("profile_ready_sections", []),
+        "profile_blocked_sections": details.get("profile_blocked_sections", []),
+        "event_contract_status": details.get("event_contract_status"),
+        "event_contract_gap_count": event_gap_count,
+        "event_ready_sections": details.get("event_ready_sections", []),
+        "event_blocked_sections": details.get("event_blocked_sections", []),
+        "eval_blocker_classes": details.get("eval_blocker_classes", []),
+        "eval_blocker_class_count": int(details.get("eval_blocker_class_count") or 0),
+        "contract_gap_count": profile_gap_count + event_gap_count,
+    }
+
+
+def _closeout_memory_readiness(doctor_payload: dict[str, Any]) -> dict[str, Any]:
+    signal = doctor_payload.get("signals", {}).get("memory_readiness", {})
+    details = signal.get("details", {})
+    return {
+        "status": signal.get("state"),
+        "summary": signal.get("summary"),
+        "provider_model": details.get("provider_model"),
+        "schema_version": details.get("schema_version"),
+        "entry_count": int(details.get("entry_count") or 0),
+        "total_count": int(details.get("total_count") or 0),
+        "available_sources": details.get("available_sources", []),
+        "missing_sources": details.get("missing_sources", []),
+        "by_source": details.get("by_source", {}),
+        "by_freshness": details.get("by_freshness", {}),
+        "validation_command": details.get("validation_command"),
+    }
+
+
+def _closeout_package_readiness(doctor_payload: dict[str, Any]) -> dict[str, Any]:
+    signal = doctor_payload.get("signals", {}).get("package_readiness", {})
+    details = signal.get("details", {})
+    return {
+        "status": signal.get("state"),
+        "summary": signal.get("summary"),
+        "target": details.get("target"),
+        "schema_version": details.get("schema_version"),
+        "readiness_level": details.get("readiness_level"),
+        "missing_fields": details.get("missing_fields", []),
+        "missing_field_count": int(details.get("missing_field_count") or 0),
+        "install_ready": details.get("install_ready"),
+        "promotion_status": details.get("promotion_status"),
+        "promotion_ready": details.get("promotion_ready"),
+        "checkout_test_status": details.get("checkout_test_status"),
+        "blocked_reasons": details.get("blocked_reasons", []),
+        "validation_command": details.get("validation_command"),
     }
 
 
@@ -760,7 +1097,30 @@ def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any
         {
             "id": "repo_doctor",
             "reason": "Confirm golden-path health before claiming completion.",
-            "command": "./bin/ask repo doctor --json --robot",
+            "command": _repo_validation_command("doctor"),
+        },
+        {
+            "id": "skill_profiles_readiness",
+            "reason": "Validate skill operation-profile readiness contracts directly.",
+            "command": "./bin/ask skills profiles --json --robot",
+        },
+        {
+            "id": "skill_events_readiness",
+            "reason": "Validate skill lifecycle-event readiness contracts directly.",
+            "command": "./bin/ask skills events --json --robot",
+        },
+        {
+            "id": "skill_memory_readiness",
+            "reason": "Validate searchable skill memory provider evidence directly.",
+            "command": "./bin/ask skills memory search projection --json --robot",
+        },
+        {
+            "id": "skill_package_readiness",
+            "reason": "Validate version and role-aware package readiness directly.",
+            "command": (
+                f"./bin/ask skills package {PACKAGE_READINESS_SENTINEL} "
+                "--checkout-test --json --robot"
+            ),
         }
     ]
     if any(path.startswith(GENERATED_SURFACE_PREFIXES) for path in changed_files):
@@ -784,7 +1144,7 @@ def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any
             {
                 "id": "repo_status",
                 "reason": "No changed files were detected; confirm clean repository state.",
-                "command": "./bin/ask repo status --json --robot",
+                "command": _repo_validation_command("status"),
             }
         )
     return commands
@@ -826,7 +1186,7 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
     ready = not blockers
     next_command: str | None
     if changed_files_error:
-        next_command = "./bin/ask repo status --json --robot"
+        next_command = _repo_validation_command("status")
     elif doctor_payload.get("blocking"):
         next_command = doctor_payload.get("next_command")
     elif sync_report["needed"]:
@@ -835,14 +1195,14 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
         next_command = (
             _diagnostic_debt_next_command(diagnostic_debt)
             or doctor_payload.get("next_command")
-            or "./bin/ask repo doctor --json --robot"
+            or _repo_validation_command("doctor")
         )
     elif sync_report["validation_commands"]:
         next_command = sync_report["validation_commands"][0]
     elif changed_files:
         next_command = _validation_command_for_changed_files(changed_files)
     else:
-        next_command = "./bin/ask repo status --json --robot"
+        next_command = _repo_validation_command("status")
 
     payload = {
         "agent_summary": (
@@ -856,6 +1216,9 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
         "changed_files_error": changed_files_error,
         "sync": sync_report,
         "runtime_budget": _closeout_runtime_budget(doctor_payload),
+        "capability_readiness": _closeout_capability_readiness(doctor_payload),
+        "memory_readiness": _closeout_memory_readiness(doctor_payload),
+        "package_readiness": _closeout_package_readiness(doctor_payload),
         "surface_policy": _closeout_surface_policy(doctor_payload),
         "focused_validation": focused_validation,
         "diagnostic_debt": diagnostic_debt,
@@ -884,6 +1247,7 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
 def provider_audit(repo_root: Path) -> CallResult:
     """Run the OpenAI provider policy audit and return its JSON report."""
     result = CallResult()
+    result.data["validation_commands"] = [_repo_validation_command("provider-audit")]
     cmd = [
         sys.executable,
         "Infrastructure/scripts/validation-and-linting/verify_provider_policy.py",
@@ -967,6 +1331,7 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
               Inventory failures use "ERR_VALIDATION"; inventory command timeouts use "ERR_TIMEOUT".
     """
     result = CallResult()
+    result.data["validation_commands"] = [_repo_validation_command("surface", strict=strict)]
     cmd = [
         sys.executable,
         "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
@@ -1094,6 +1459,8 @@ def check_hub_stability(repo_root: Path, changed_files: List[str] | None = None)
           - `errors` (List[ErrorObject]): For each string in `data.errors`, an `ErrorObject` with `code="ERR_VALIDATION"` is appended to the result's `errors` list.
     """
     result = CallResult()
+    validation_args = ["--changed-files", *changed_files] if changed_files else []
+    result.data["validation_commands"] = [_repo_validation_command("check-stability", *validation_args)]
 
     # Build list of all SKILL.md files
     stable_skills = []
