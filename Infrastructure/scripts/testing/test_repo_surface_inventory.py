@@ -48,6 +48,23 @@ def test_skill_source_path_is_source() -> None:
     assert finding.blocking is False
 
 
+def test_git_ls_files_omits_worktree_deleted_paths(monkeypatch, tmp_path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    kept = repo / "kept.txt"
+    kept.write_text("kept", encoding="utf-8")
+
+    class Completed:
+        stdout = "kept.txt\ndeleted.txt\n"
+
+    def fake_run(*args, **kwargs):
+        return Completed()
+
+    monkeypatch.setattr(MODULE.subprocess, "run", fake_run)
+
+    assert MODULE.git_ls_files(repo) == ["kept.txt"]
+
+
 def test_plugin_fixtures_are_classified_before_plugin_source_catchall() -> None:
     finding = MODULE.classify_path(
         "Plugins/harness-engineering/fixtures/budget-archive/2026-04-21/references/routing.md"
@@ -78,6 +95,25 @@ def test_skillsets_are_generated_tracked_projections() -> None:
         assert finding.status == "ok"
         assert finding.code == "generated_skillset_projection"
         assert finding.blocking is False
+
+
+def test_skills_system_is_governed_system_skill_surface() -> None:
+    finding = MODULE.classify_path("skills-system/imagegen/SKILL.md")
+
+    assert finding.classification == "generated_tracked"
+    assert finding.status == "ok"
+    assert finding.code == "system_skill_surface"
+    assert finding.blocking is False
+    assert "skills-system-upstream.lock.json" in finding.reason
+
+
+def test_skills_system_stray_path_still_requires_ownership_decision() -> None:
+    finding = MODULE.classify_path("skills-system/generated-skill/SKILL.md")
+
+    assert finding.classification == "unknown"
+    assert finding.status == "unknown"
+    assert finding.code == "ownership_decision_required"
+    assert finding.blocking is True
 
 
 def test_harness_database_is_runtime_state_violation() -> None:

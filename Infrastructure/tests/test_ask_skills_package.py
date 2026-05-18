@@ -24,21 +24,21 @@ class TestAskSkillsPackage(unittest.TestCase):
         self.assertEqual(result.status, "success")
         package = result.data["skill_package"]
         self.assertEqual(package["schema_version"], "skill-package-readiness.v1")
-        self.assertEqual(package["gate_summary"]["promotion_status"], "blocked_validation")
+        self.assertEqual(package["gate_summary"]["promotion_status"], "ready_pending_checkout")
         self.assertFalse(package["gate_summary"]["promotion_ready"])
         contract = package["package_contract"]
         self.assertEqual(contract["values"]["version"], "1.0.0")
         self.assertEqual(contract["values"]["maturity"], "canonical")
-        self.assertIn("compatible_roles", contract["required_fields"]["missing"])
-        self.assertFalse(contract["install_gate"]["install_ready"])
-        self.assertIn("compatible_roles", contract["install_gate"]["blocked_reasons"])
+        self.assertEqual(contract["required_fields"]["missing"], [])
+        self.assertTrue(contract["install_gate"]["install_ready"])
+        self.assertEqual(contract["install_gate"]["blocked_reasons"], [])
         self.assertEqual(contract["install_gate"]["checkout_test"]["status"], "not_run")
-        self.assertEqual(contract["promotion_gate"]["status"], "blocked_validation")
+        self.assertEqual(contract["promotion_gate"]["status"], "ready_pending_checkout")
         self.assertFalse(contract["promotion_gate"]["promotion_ready"])
-        self.assertFalse(contract["promotion_gate"]["share_ready"])
-        self.assertIn("compatible_roles", contract["promotion_gate"]["blocked_reasons"])
-        self.assertIn("compatible_roles", contract["promotion_gate"]["recommended_next_fields"])
-        self.assertEqual(package["lifecycle_event"]["event_type"], "skill_loaded")
+        self.assertTrue(contract["promotion_gate"]["share_ready"])
+        self.assertEqual(contract["promotion_gate"]["blocked_reasons"], [])
+        self.assertEqual(contract["promotion_gate"]["recommended_next_fields"], [])
+        self.assertEqual(package["lifecycle_event"]["event_type"], "package_readiness_checked")
         self.assertEqual(
             [event["event_type"] for event in package["lifecycle_events"]],
             ["skill_loaded", "package_readiness_checked"],
@@ -50,7 +50,7 @@ class TestAskSkillsPackage(unittest.TestCase):
         )
         self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
 
-    def test_package_strict_fails_on_metadata_gaps(self) -> None:
+    def test_package_strict_accepts_complete_package_metadata(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
             "handle": "skill-builder",
@@ -58,14 +58,14 @@ class TestAskSkillsPackage(unittest.TestCase):
         }):
             result = skills_package(REPO_ROOT, "skill-builder", strict=True)
 
-        self.assertEqual(result.status, "error")
+        self.assertEqual(result.status, "success")
         package = result.data["skill_package"]
-        self.assertEqual(package["status"], "blocked")
-        self.assertEqual(package["blockers"][0]["class"], "blocked_validation")
+        self.assertEqual(package["status"], "pass")
+        self.assertEqual(package["blockers"], [])
         self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
-        self.assertIn("missing package metadata", package["blockers"][0]["message"])
-        self.assertTrue(result.errors)
-        self.assertIn("Strict package readiness failed", result.errors[0].message)
+        self.assertEqual(package["gate_summary"]["promotion_status"], "ready_pending_checkout")
+        self.assertEqual(package["package_contract"]["required_fields"]["missing"], [])
+        self.assertEqual(result.errors, [])
 
     def test_package_blocks_missing_source(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
@@ -88,6 +88,7 @@ class TestAskSkillsPackage(unittest.TestCase):
             package["package_contract"]["promotion_gate"]["status"],
             "blocked_missing_source",
         )
+        self.assertEqual(package["next_command"], "./bin/ask skills doctor missing-skill --json --robot")
 
     def test_package_checkout_test_blocks_missing_source(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
@@ -104,6 +105,7 @@ class TestAskSkillsPackage(unittest.TestCase):
             package["package_contract"]["install_gate"]["checkout_test"]["status"],
             "blocked_missing_source",
         )
+        self.assertEqual(package["next_command"], "./bin/ask skills doctor missing-skill --json --robot")
 
     def test_package_reads_nested_block_list_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -274,7 +276,7 @@ metadata:
         self.assertTrue(promotion["promotion_ready"])
         self.assertEqual(promotion["checkout_test_status"], "pass")
 
-    def test_package_checkout_test_blocks_metadata_gaps(self) -> None:
+    def test_package_checkout_test_records_skill_builder_evidence(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
             "handle": "skill-builder",
@@ -284,10 +286,16 @@ metadata:
 
         self.assertEqual(result.status, "success")
         package = result.data["skill_package"]
-        self.assertEqual(package["status"], "warning")
+        self.assertEqual(package["status"], "pass")
         checkout = package["package_contract"]["install_gate"]["checkout_test"]
-        self.assertEqual(checkout["status"], "blocked_validation")
-        self.assertTrue(any(item.startswith("missing_package_metadata:") for item in checkout["evidence"]))
+        self.assertEqual(checkout["status"], "pass")
+        self.assertIn(
+            "source_path:Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            checkout["evidence"],
+        )
+        self.assertIn("package_metadata_complete:true", checkout["evidence"])
+        self.assertEqual(package["gate_summary"]["promotion_status"], "ready")
+        self.assertTrue(package["gate_summary"]["promotion_ready"])
 
     def test_package_checkout_test_blocks_non_ready_share_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

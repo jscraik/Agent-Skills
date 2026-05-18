@@ -1,25 +1,33 @@
 #!/usr/bin/env python3
 import sys
-import os
 import argparse
 import time
-import difflib
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 repo_root_path = Path(__file__).resolve().parents[1]
 sys.path.append(str(repo_root_path / "scripts" / "lib"))
 sys.path.append(str(repo_root_path / "scripts"))
 sys.path.append(str(repo_root_path / "utilities" / "skill-builder" / "scripts"))
-from ask.envelope import CallResult, ErrorObject, ErrorCode, ExitCode
+from ask.envelope import CallResult, ErrorObject, ErrorCode
 from ask.context import find_repo_root
-from ask.command_metadata import (
-    ACTION_TO_TOPICS,
-    COMMAND_EXAMPLES,
-    FUZZY_MATCHES,
-    TOPIC_EXAMPLES,
-    VALID_ACTIONS,
-    VALID_TOPICS,
+from ask.command_metadata import VALID_ACTIONS, VALID_TOPICS
+from ask.cli_errors import (
+    _merge_corrections,
+    build_argument_error,
+    build_helpful_error,
+    build_unknown_action_result,
+    consume_global_prefix_flags,
+    parse_args_with_capture,
+    try_fuzzy_parse,
 )
+from ask.cli_args import build_global_parser, prepare_args
+from ask.cli_exit import exit_code_for_errors
+from ask.cli_output import (
+    print_first_validation_command,
+    print_readiness_overview,
+    replay_command,
+)
+from ask.cli_prompts import prompt_choice, prompt_nonempty, prompt_optional
 import ask.commands.skills as skills_commands
 from ask.commands.runtime import add_runtime_parser, dispatch_runtime
 from ask.commands.repo import (
@@ -49,365 +57,14 @@ from ask.commands.mcp import sync_mcp
 from ask.commands.memory import memory_list, memory_read, memory_search
 from ask.commands.wiki import wiki_lint, wiki_ingest, wiki_add, wiki_query, wiki_add_asset
 from ask.commands.workouts import add_workouts_parser, dispatch_workouts, render_workouts_human
-ERROR_MAP = {
-    ErrorCode.SUCCESS: ExitCode.SUCCESS,
-    ErrorCode.ERR_RUNTIME: ExitCode.ERR_RUNTIME,
-    ErrorCode.ERR_VALIDATION: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_PI_GUARD: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_PATH_TRAVERSAL: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_SCHEMA_INVALID: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_INVALID_HANDOFF: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_INVALID_STATE: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_INVALID_SCOPE: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_INVALID_PROJECTION_MODE: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_DEFERRED_PROJECTION_MODE: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_DEPENDENCY: ExitCode.ERR_DEPENDENCY,
-    ErrorCode.ERR_CONFLICT: ExitCode.ERR_CONFLICT,
-    ErrorCode.ERR_REDUNDANCY: ExitCode.ERR_CONFLICT,
-    ErrorCode.ERR_AUTH: ExitCode.ERR_AUTH,
-}
-def get_closest_match(query: str, options: List[str], cutoff: float = 0.6) -> Optional[str]:
-    """Find closest match using difflib."""
-    matches = difflib.get_close_matches(query, options, n=1, cutoff=cutoff)
-    return matches[0] if matches else None
-def format_correction(original: str, corrected: str, robot_mode: bool = False) -> str:
-    """Format a command correction message."""
-    if robot_mode:
-        return f"🤖 Robot mode: Interpreting '{original}' as '{corrected}'\n   💡 Tip: Use '{corrected}' for exact matching next time."
-    return f"💡 Did you mean: '{corrected}'? (Use --robot to auto-correct)"
-def _normalize_token(token: str) -> str:
-    """Normalize a command token for robust fuzzy matching."""
-    return token.strip().lower().replace("_", "-")
-def _extract_argparse_error(stderr_text: Optional[str]) -> Optional[str]:
-    """Extract the actionable argparse error line."""
-    if not stderr_text:
-        return None
-    lines = [line.strip() for line in stderr_text.splitlines() if line.strip()]
-    for line in lines:
-        if line.startswith("ask: error:"):
-            return line.replace("ask: error:", "", 1).strip()
-    return lines[-1] if lines else None
-def _example_commands(topic: Optional[str], action: Optional[str], *, limit: int = 3) -> List[str]:
-    """Return contextual command examples, preferring command-specific examples."""
-    if topic and action and (topic, action) in COMMAND_EXAMPLES:
-        return COMMAND_EXAMPLES[(topic, action)][:limit]
-    if topic and topic in TOPIC_EXAMPLES:
-        return TOPIC_EXAMPLES[topic][:limit]
-    fallback = []
-    for fallback_topic in ("skills", "repo", "graph"):
-        fallback.extend(TOPIC_EXAMPLES.get(fallback_topic, []))
-    return fallback[:limit]
-def _merge_corrections(existing: Optional[str], new_note: Optional[str]) -> Optional[str]:
-    """Merge correction notes without duplicating text blocks."""
-    if not existing:
-        return new_note
-    if not new_note:
-        return existing
-    if new_note in existing:
-        return existing
-    return f"{existing}\n{new_note}"
-def consume_global_prefix_flags(raw_args: List[str]) -> Tuple[List[str], List[str]]:
-    """Split leading global flags from positional command tokens."""
-    global_flags = {"--json", "--trace-id", "--robot", "--agent-mode", "-r", "--help", "-h"}
-    prefix_flags: List[str] = []
-    idx = 0
-    while idx < len(raw_args) and raw_args[idx].startswith("-"):
-        flag = raw_args[idx]
-        if flag not in global_flags:
-            break
-        prefix_flags.append(flag)
-        idx += 1
-        if flag in {"--trace-id"} and idx < len(raw_args) and not raw_args[idx].startswith("-"):
-            prefix_flags.append(raw_args[idx])
-            idx += 1
-    return prefix_flags, raw_args[idx:]
-def build_helpful_error(
-    topic: Optional[str],
-    action: Optional[str],
-    raw_args: List[str],
-    *,
-    parser_error: Optional[str] = None,
-) -> CallResult:
-    """Build a detailed error message when command intent is unclear."""
-    result = CallResult()
-    result.status = "error"
-    entered = "ask " + " ".join(raw_args) if raw_args else "ask"
-    _, working_args = consume_global_prefix_flags(raw_args)
-    parsed_error = _extract_argparse_error(parser_error)
-    error_msg = "I couldn't reliably determine command intent."
-    suggestions: List[str] = []
-    examples = _example_commands(topic, action, limit=3)
-    if not topic:
-        error_msg = "Missing or unknown command topic."
-        suggestions.append(f"Start with a topic: {', '.join(VALID_TOPICS)}")
-        if working_args:
-            first = _normalize_token(working_args[0])
-            action_topics = ACTION_TO_TOPICS.get(first, [])
-            if len(action_topics) == 1:
-                guessed_topic = action_topics[0]
-                suggestions.append(f"'{first}' is an action under '{guessed_topic}'. Try 'ask {guessed_topic} {first}'.")
-                examples = _example_commands(guessed_topic, first, limit=3)
-            elif len(action_topics) > 1:
-                topics_text = ", ".join(action_topics)
-                suggestions.append(f"'{first}' is ambiguous and exists under topics: {topics_text}.")
-            else:
-                guess = get_closest_match(first, VALID_TOPICS)
-                if guess:
-                    suggestions.append(f"Closest topic guess: 'ask {guess}'.")
-    elif topic not in VALID_TOPICS:
-        normalized_topic = _normalize_token(topic)
-        action_topics = ACTION_TO_TOPICS.get(normalized_topic, [])
-        if len(action_topics) == 1:
-            inferred_topic = action_topics[0]
-            error_msg = f"Unknown topic: '{topic}'"
-            suggestions.append(
-                f"'{normalized_topic}' is an action under '{inferred_topic}'. Try 'ask {inferred_topic} {normalized_topic}'."
-            )
-            examples = _example_commands(inferred_topic, normalized_topic, limit=3)
-        elif len(action_topics) > 1:
-            error_msg = f"Unknown topic: '{topic}'"
-            options = ", ".join(action_topics)
-            suggestions.append(
-                f"'{normalized_topic}' is ambiguous and can belong to: {options}. Use an explicit topic."
-            )
-            examples = [f"ask {candidate_topic} {normalized_topic}" for candidate_topic in action_topics[:3]]
-            examples.extend(_example_commands(None, None, limit=max(0, 3 - len(examples))))
-        else:
-            guess = get_closest_match(normalized_topic, VALID_TOPICS)
-            if guess:
-                error_msg = f"Unknown topic: '{topic}'"
-                suggestions.append(f"Closest topic guess: 'ask {guess}'.")
-                examples = _example_commands(guess, None, limit=3)
-            else:
-                error_msg = f"Unknown topic: '{topic}'"
-                suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
-    elif not action:
-        error_msg = f"Missing action for 'ask {topic}'"
-        valid_actions = VALID_ACTIONS.get(topic, [])
-        suggestions.append(f"Valid actions for '{topic}': {', '.join(valid_actions)}")
-        examples = _example_commands(topic, None, limit=3)
-    elif action not in VALID_ACTIONS.get(topic, []):
-        valid = VALID_ACTIONS.get(topic, [])
-        guess = get_closest_match(action, valid)
-        if guess:
-            error_msg = f"Unknown action: '{action}' for topic '{topic}'"
-            suggestions.append(f"Closest action guess: 'ask {topic} {guess}'.")
-            examples = _example_commands(topic, guess, limit=3)
-        else:
-            error_msg = f"Unknown action: '{action}' for topic '{topic}'"
-            suggestions.append(f"Valid actions for '{topic}': {', '.join(valid)}")
-            examples = _example_commands(topic, None, limit=3)
-    full_message = f"❌ {error_msg}\n\n   Entered: `{entered}`"
-    if parsed_error:
-        full_message += f"\n   Parser detail: {parsed_error}"
-    if suggestions:
-        full_message += "\n\n🧭 Guidance:\n"
-        full_message += "\n".join(f"   • {s}" for s in suggestions)
-    if examples:
-        full_message += "\n\n📚 Try one of these:\n"
-        full_message += "\n".join(f"   • {e}" for e in examples[:3])
-    fix_suggestion = "Use 'ask --help' for global usage or '<topic> <action> --help' for command details."
-    if topic in VALID_ACTIONS:
-        fix_suggestion = f"Valid actions: {', '.join(VALID_ACTIONS[topic])}"
-    result.errors.append(ErrorObject(
-        code=ErrorCode.ERR_VALIDATION,
-        message=full_message,
-        fix_suggestion=fix_suggestion,
-    ))
-    return result
-def build_argument_error(
-    topic: str,
-    action: str,
-    raw_args: List[str],
-    *,
-    parser_error: Optional[str] = None,
-) -> CallResult:
-    """Build a detailed error when command intent is clear but args are invalid."""
-    result = CallResult()
-    result.status = "error"
-    entered = "ask " + " ".join(raw_args) if raw_args else f"ask {topic} {action}"
-    parsed_error = _extract_argparse_error(parser_error) or "Argument syntax was invalid for this command."
-    examples = _example_commands(topic, action, limit=3)
-    message_lines = [
-        "❌ Command intent was understood, but argument syntax is invalid.",
-        "",
-        f"   Entered: `{entered}`",
-        f"   Parsed intent: `ask {topic} {action}`",
-        f"   Parser detail: {parsed_error}",
-        "",
-        "🧭 Guidance:",
-        f"   • Run `ask {topic} {action} --help` to see required/optional arguments.",
-    ]
-    if examples:
-        message_lines.append("   • Use one of the valid example forms below.")
-        message_lines.append("")
-        message_lines.append("📚 Valid examples:")
-        for example in examples:
-            message_lines.append(f"   • {example}")
-    result.errors.append(
-        ErrorObject(
-            code=ErrorCode.ERR_VALIDATION,
-            message="\n".join(message_lines),
-            fix_suggestion=f"Run 'ask {topic} {action} --help' and retry with the shown argument shape.",
-        )
-    )
-    return result
-def parse_args_with_capture(parser: argparse.ArgumentParser, argv: List[str]) -> Tuple[Optional[argparse.Namespace], Optional[int], str]:
-    """Parse CLI args while capturing argparse stderr for richer error reporting."""
-    import contextlib
-    import io
-    stderr_buffer = io.StringIO()
-    try:
-        with contextlib.redirect_stderr(stderr_buffer):
-            parsed = parser.parse_args(argv)
-        return parsed, None, stderr_buffer.getvalue()
-    except SystemExit as exc:
-        return None, int(exc.code), stderr_buffer.getvalue()
-def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Optional[str], Optional[str], List[str], Optional[str]]:
-    """
-    Try to parse args with fuzzy matching.
-    Returns: (topic, action, remaining_args, correction_note)
-    """
-    if not raw_args:
-        return None, None, [], None
-    prefix_flags, working_args = consume_global_prefix_flags(raw_args)
-    if not working_args:
-        return None, None, raw_args, None
-    correction_note: Optional[str] = None
-    first_token = _normalize_token(working_args[0])
-    second_token = _normalize_token(working_args[1]) if len(working_args) > 1 else None
-    if first_token == "goal":
-        topic = "skills"
-        action = "goal"
-        return topic, action, prefix_flags + working_args[1:], format_correction("goal", "skills goal", robot_mode)
-    if len(working_args) >= 2 and first_token == "doctor" and second_token == "catalog":
-        topic = "repo"
-        action = "doctor-catalog"
-        return topic, action, prefix_flags + working_args[2:], format_correction("doctor catalog", "repo doctor-catalog", robot_mode)
-    if len(working_args) >= 2:
-        swapped_topic_candidate = second_token
-        swapped_action_candidate = first_token
-        if swapped_topic_candidate in VALID_TOPICS:
-            swapped_valid_actions = VALID_ACTIONS.get(swapped_topic_candidate, [])
-            resolved_swapped_action = None
-            if swapped_action_candidate in swapped_valid_actions:
-                resolved_swapped_action = swapped_action_candidate
-            else:
-                mapped_action = FUZZY_MATCHES.get(swapped_action_candidate)
-                if mapped_action in swapped_valid_actions:
-                    resolved_swapped_action = mapped_action
-                else:
-                    guess_action = get_closest_match(swapped_action_candidate, swapped_valid_actions)
-                    if guess_action:
-                        resolved_swapped_action = guess_action
-            if resolved_swapped_action:
-                correction_note = format_correction(
-                    f"{working_args[0]} {working_args[1]}",
-                    f"{swapped_topic_candidate} {resolved_swapped_action}",
-                    robot_mode,
-                )
-                return (
-                    swapped_topic_candidate,
-                    resolved_swapped_action,
-                    prefix_flags + working_args[2:],
-                    correction_note,
-                )
-    topic = first_token
-    remaining = working_args[1:]
-    if topic not in VALID_TOPICS:
-        if topic in FUZZY_MATCHES and FUZZY_MATCHES[topic] in VALID_TOPICS:
-            corrected = FUZZY_MATCHES[topic]
-            correction_note = format_correction(working_args[0], corrected, robot_mode)
-            topic = corrected
-        else:
-            guess = get_closest_match(topic, VALID_TOPICS)
-            if guess:
-                correction_note = format_correction(working_args[0], guess, robot_mode)
-                topic = guess
-            else:
-                unique_topics = ACTION_TO_TOPICS.get(topic, [])
-                if len(unique_topics) == 1:
-                    inferred_topic = unique_topics[0]
-                    correction_note = format_correction(working_args[0], f"{inferred_topic} {topic}", robot_mode)
-                    return inferred_topic, topic, prefix_flags + working_args[1:], correction_note
-    action = None
-    action_index = None
-    for idx, token in enumerate(remaining):
-        if token.startswith("-"):
-            continue
-        action = _normalize_token(token)
-        action_index = idx
-        break
-    if action is not None:
-        valid_actions = VALID_ACTIONS.get(topic, [])
-        original_action = action
-        if action not in valid_actions:
-            mapped_action = FUZZY_MATCHES.get(action)
-            if mapped_action in valid_actions:
-                action = mapped_action
-            else:
-                guess = get_closest_match(action, valid_actions)
-                if guess:
-                    action = guess
-        if action != original_action:
-            correction_note = _merge_corrections(
-                correction_note,
-                format_correction(original_action, action, robot_mode),
-            )
-        remaining = remaining[:action_index] + remaining[action_index + 1:]
-    full_remaining = prefix_flags + remaining
-    return topic, action, full_remaining, correction_note
-def _safe_input(prompt: str) -> Optional[str]:
-    """Prompt with defensive handling of EOFError and KeyboardInterrupt."""
-    try:
-        return input(prompt)
-    except (EOFError, KeyboardInterrupt):
-        print("\n\nInteractive input cancelled by user.")
-        raise SystemExit(130)
-def _prompt_choice(prompt: str, options: List[str]) -> str:
-    """Prompt the operator for one option using 1-based indexing."""
-    print(prompt)
-    for idx, option in enumerate(options, start=1):
-        print(f"  {idx}. {option}")
-    while True:
-        raw = _safe_input("> ").strip()
-        if raw.isdigit():
-            choice = int(raw)
-            if 1 <= choice <= len(options):
-                return options[choice - 1]
-        if raw in options:
-            return raw
-        print(f"Please choose 1-{len(options)} or type an exact option value.")
-def _prompt_nonempty(prompt: str) -> str:
-    """Prompt until a non-empty string is entered."""
-    while True:
-        value = _safe_input(prompt).strip()
-        if value:
-            return value
-        print("This value cannot be empty.")
-def _prompt_optional(prompt: str) -> str:
-    """Prompt for an optional value (can be empty)."""
-    return _safe_input(prompt).strip()
 def main():
     start_time = time.time()
-    raw_args = sys.argv[1:]
-    alias_correction_note = None
-    prefix_flags, positional_args = consume_global_prefix_flags(raw_args)
-    first_positional = _normalize_token(positional_args[0]) if positional_args else None
-    second_positional = _normalize_token(positional_args[1]) if len(positional_args) > 1 else None
-    if first_positional == "goal":
-        raw_args = [*prefix_flags, "skills", "goal", *positional_args[1:]]
-        alias_correction_note = "💡 Alias: 'ask goal' maps to 'ask skills goal'."
-    elif first_positional == "doctor" and second_positional == "catalog":
-        raw_args = [*prefix_flags, "repo", "doctor-catalog", *positional_args[2:]]
-        alias_correction_note = "💡 Alias: 'ask doctor catalog' maps to 'ask repo doctor-catalog'."
-    robot_mode = any(flag in raw_args for flag in ["--robot", "--agent-mode", "-r"])
-    filtered_args = [a for a in raw_args if a not in ["--robot", "--agent-mode", "-r"]]
-    global_parser = argparse.ArgumentParser(add_help=False)
-    global_parser.add_argument("--json", action="store_true", help="Output results in JSON format for programmatic use")
-    global_parser.add_argument("--trace-id", help="Trace ID for correlating logs", default=os.environ.get("ASK_TRACE_ID"))
-    global_parser.add_argument("--robot", "--agent-mode", "-r", dest="robot_mode", action="store_true",
-                               help="AI-agent mode: honors clear intent despite minor syntax issues, emits correction notes, and returns detailed guided errors on ambiguity")
+    prepared_args = prepare_args(sys.argv[1:])
+    raw_args = prepared_args.raw_args
+    filtered_args = prepared_args.filtered_args
+    alias_correction_note = prepared_args.alias_correction_note
+    robot_mode = prepared_args.robot_mode
+    global_parser = build_global_parser()
     parser = argparse.ArgumentParser(
         prog="ask",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -733,6 +390,7 @@ def main():
                         if correction_note:
                             print(f"{correction_note}\n")
                         print(result.errors[0].message)
+                        print_first_validation_command(result.data)
                     sys.exit(2)
             else:
                 result = build_helpful_error(
@@ -750,6 +408,7 @@ def main():
                     if correction_note:
                         print(f"{correction_note}\n")
                     print(result.errors[0].message)
+                    print_first_validation_command(result.data)
                 sys.exit(2)
         else:
             potential_topic, potential_action, _, _ = try_fuzzy_parse(raw_args, robot_mode=False)
@@ -776,6 +435,7 @@ def main():
                 print(result.to_json())
             else:
                 print(result.errors[0].message)
+                print_first_validation_command(result.data)
             sys.exit(2)
     if args is None:
         result = CallResult()
@@ -827,13 +487,10 @@ def main():
         elif args.action == "surface":
             result = repo_surface(repo_root, strict=args.strict)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'repo'",
-                fix_suggestion="Valid actions: status, validate, check-stability, doctor, closeout, doctor-catalog, provider-audit, surface"
-            ))
+            result = build_unknown_action_result(
+                "repo",
+                args.action,
+            )
     elif args.topic == "skills":
         if args.action == "list":
             result = skills_commands.list_skills(
@@ -936,20 +593,18 @@ def main():
         elif args.action == "init":
             result = skills_commands.init_skill(repo_root, name=args.name, category=args.category, description=args.description)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=f"{action_msg} for topic 'skills'", fix_suggestion="Valid actions: list, budget, handles, resolve, parse, proof, prove, explain, doctor, package, profiles, events, memory, route, goal, improve, starter, sync, audit, external-review, validate-skill-gate, validate-openai-format, validate-boundaries, install, fold, init"))
+            result = build_unknown_action_result(
+                "skills",
+                args.action,
+            )
     elif args.topic == "reviewers":
         if args.action == "resolve":
             result = skills_commands.reviewers_resolve(repo_root, handle=args.handle)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'reviewers'",
-                fix_suggestion="Valid actions: resolve"
-            ))
+            result = build_unknown_action_result(
+                "reviewers",
+                args.action,
+            )
     elif args.topic == "runtime":
         result = dispatch_runtime(repo_root, args)
     elif args.topic == "plugins":
@@ -978,6 +633,7 @@ def main():
                 category=args.category,
                 with_marketplace=args.with_marketplace,
                 companion_folders=companion,
+                action=args.action,
             )
         elif args.action in {"install", "import"}:
             result = install_plugin(
@@ -991,6 +647,7 @@ def main():
                 allow_untrusted_source=args.allow_untrusted_source,
                 allow_unpinned_ref=args.allow_unpinned_ref,
                 dry_run=args.dry_run,
+                action=args.action,
             )
         elif args.action == "harden":
             result = harden_plugin(
@@ -1009,13 +666,10 @@ def main():
                 dry_run=args.dry_run,
             )
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'plugins'",
-                fix_suggestion="Valid actions: list, status, doctor, sync-local-runtime, init, create, install, import, harden, uninstall"
-            ))
+            result = build_unknown_action_result(
+                "plugins",
+                args.action,
+            )
     elif args.topic == "evals":
         if args.action == "run":
             result = run_evals(repo_root, path=args.path, mode=args.mode, dashboard=not args.no_dashboard, runner=args.runner)
@@ -1024,13 +678,10 @@ def main():
         elif args.action == "dashboard":
             result = dashboard_report(repo_root)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'evals'",
-                fix_suggestion="Valid actions: run, benchmark, dashboard"
-            ))
+            result = build_unknown_action_result(
+                "evals",
+                args.action,
+            )
     elif args.topic == "workouts":
         result = dispatch_workouts(repo_root, args)
     elif args.topic == "graph":
@@ -1048,24 +699,18 @@ def main():
         elif args.action == "topics":
             result = graph_topics(repo_root)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'graph'",
-                fix_suggestion="Valid actions: related, find, info, chain, list, topics"
-            ))
+            result = build_unknown_action_result(
+                "graph",
+                args.action,
+            )
     elif args.topic == "mcp":
         if args.action == "sync":
             result = sync_mcp(repo_root, dry_run=args.dry_run)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'mcp'",
-                fix_suggestion="Valid actions: sync"
-            ))
+            result = build_unknown_action_result(
+                "mcp",
+                args.action,
+            )
     elif args.topic == "memory":
         if args.action == "list":
             result = memory_list(repo_root, source_id=args.source_id, limit=args.limit)
@@ -1074,13 +719,10 @@ def main():
         elif args.action == "search":
             result = memory_search(repo_root, query=args.query, source_id=args.source_id, limit=args.limit)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'memory'",
-                fix_suggestion="Valid actions: list, read, search"
-            ))
+            result = build_unknown_action_result(
+                "memory",
+                args.action,
+            )
     elif args.topic == "wiki":
         if args.action == "lint":
             result = wiki_lint(repo_root, wiki_root=args.wiki_root, max_age_days=args.max_age_days)
@@ -1113,18 +755,18 @@ def main():
                     )
                 else:
                     print("🧭 Wiki triage questionnaire")
-                    title = title or _prompt_nonempty("Title: ")
-                    summary = summary or _prompt_nonempty("Summary: ")
-                    source = source or _prompt_nonempty("Source: ")
-                    intent = intent or _prompt_choice(
+                    title = title or prompt_nonempty("Title: ")
+                    summary = summary or prompt_nonempty("Summary: ")
+                    source = source or prompt_nonempty("Source: ")
+                    intent = intent or prompt_choice(
                         "Intent:",
                         ["finding", "playbook", "design-asset", "lesson-learned"],
                     )
-                    status = status or _prompt_choice(
+                    status = status or prompt_choice(
                         "Status:",
                         ["needs-verification", "verified", "fix-now"],
                     )
-                    destination = destination or _prompt_choice(
+                    destination = destination or prompt_choice(
                         "Destination:",
                         ["failures", "playbooks", "assets/ui", "learnings"],
                     )
@@ -1141,6 +783,25 @@ def main():
                 required_missing.append("status")
             if result.status != "error" and required_missing:
                 result.status = "error"
+                validation_parts = ["./bin/ask", "wiki", "add"]
+                if title:
+                    validation_parts.append(title)
+                if summary:
+                    validation_parts.extend(["--summary", summary])
+                if source:
+                    validation_parts.extend(["--source", source])
+                if intent:
+                    validation_parts.extend(["--intent", intent])
+                if status:
+                    validation_parts.extend(["--status", status])
+                if destination:
+                    validation_parts.extend(["--destination", destination])
+                for tag in tags:
+                    validation_parts.extend(["--tag", tag])
+                if args.dry_run:
+                    validation_parts.append("--dry-run")
+                validation_parts.extend(["--json", "--robot"])
+                result.data["validation_commands"] = [replay_command(*validation_parts)]
                 result.errors.append(
                     ErrorObject(
                         code=ErrorCode.ERR_VALIDATION,
@@ -1187,15 +848,15 @@ def main():
                     )
                 else:
                     print("🖼️ Wiki asset questionnaire")
-                    asset_path = asset_path or _prompt_nonempty("Asset path: ")
-                    title = title or _prompt_nonempty("Title: ")
-                    summary = summary or _prompt_nonempty("Summary: ")
-                    source = source or _prompt_optional("Source (optional): ")
-                    status = status or _prompt_choice(
+                    asset_path = asset_path or prompt_nonempty("Asset path: ")
+                    title = title or prompt_nonempty("Title: ")
+                    summary = summary or prompt_nonempty("Summary: ")
+                    source = source or prompt_optional("Source (optional): ")
+                    status = status or prompt_choice(
                         "Status:",
                         ["needs-verification", "verified", "fix-now"],
                     )
-                    destination = destination or _prompt_choice(
+                    destination = destination or prompt_choice(
                         "Destination:",
                         ["assets/ui", "learnings"],
                     )
@@ -1210,6 +871,25 @@ def main():
             destination = destination or "assets/ui"
             if result.status != "error" and required_missing:
                 result.status = "error"
+                validation_parts = ["./bin/ask", "wiki", "add-asset"]
+                if asset_path:
+                    validation_parts.append(asset_path)
+                if title:
+                    validation_parts.extend(["--title", title])
+                if summary:
+                    validation_parts.extend(["--summary", summary])
+                if source:
+                    validation_parts.extend(["--source", source])
+                if status:
+                    validation_parts.extend(["--status", status])
+                if destination:
+                    validation_parts.extend(["--destination", destination])
+                for tag in tags:
+                    validation_parts.extend(["--tag", tag])
+                if args.dry_run:
+                    validation_parts.append("--dry-run")
+                validation_parts.extend(["--json", "--robot"])
+                result.data["validation_commands"] = [replay_command(*validation_parts)]
                 result.errors.append(
                     ErrorObject(
                         code=ErrorCode.ERR_VALIDATION,
@@ -1230,13 +910,10 @@ def main():
                     dry_run=args.dry_run,
                 )
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'wiki'",
-                fix_suggestion="Valid actions: lint, ingest, add, query, add-asset"
-            ))
+            result = build_unknown_action_result(
+                "wiki",
+                args.action,
+            )
     result.metadata["command"] = " ".join(sys.argv[1:])
     if correction_note:
         result.metadata["correction_note"] = correction_note.replace("\n", " ")
@@ -1252,6 +929,7 @@ def main():
                     print(f"✅ Success: {result.metadata['command']}")
                     print(f"  Root: {result.data['repo_root']}")
                     print(f"  Synced: {result.data['skills_synced']}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "repo" and args.action == "validate":
                     print(f"✅ Validation passed! ({result.data['warn_only_issues']} warnings)")
                     if result.data.get("scope") and result.data.get("scope") != "all":
@@ -1262,6 +940,7 @@ def main():
                     print(f"✅ Stability check passed ({result.data['stable_count']} stable skills)")
                     if args.changed_files:
                         print(f"   Checked {result.data['checked_files']} changed file(s)")
+                    print_first_validation_command(result.data)
                 elif args.topic == "repo" and args.action == "doctor":
                     doctor = result.data.get("doctor", result.data)
                     for line in render_golden_path_summary(
@@ -1270,6 +949,66 @@ def main():
                         status_icon="✅",
                     ):
                         print(line)
+                    signals = doctor.get("signals", {})
+                    capability = signals.get("capability_readiness", {}).get("details", {})
+                    memory = signals.get("memory_readiness", {}).get("details", {})
+                    package = signals.get("package_readiness", {}).get("details", {})
+                    if capability:
+                        print(
+                            "  Capability readiness: "
+                            f"{signals.get('capability_readiness', {}).get('state')} "
+                            f"({capability.get('profile_contract_gap_count', 0)} profile gaps, "
+                            f"{capability.get('event_contract_gap_count', 0)} event gaps)"
+                        )
+                    if memory:
+                        print(
+                            "  Memory readiness: "
+                            f"{signals.get('memory_readiness', {}).get('state')} "
+                            f"({memory.get('entry_count', 0)} entries, "
+                            f"{memory.get('provider_model')})"
+                        )
+                    if package:
+                        print(
+                            "  Package readiness: "
+                            f"{signals.get('package_readiness', {}).get('state')} "
+                            f"({package.get('target')}, "
+                            f"{package.get('missing_field_count', 0)} missing fields)"
+                        )
+                elif args.topic == "repo" and args.action == "closeout":
+                    closeout = result.data.get("repo_closeout", {})
+                    readiness = closeout.get("commit_readiness", {})
+                    capability = closeout.get("capability_readiness", {})
+                    memory = closeout.get("memory_readiness", {})
+                    package = closeout.get("package_readiness", {})
+                    focused = closeout.get("focused_validation", [])
+                    print(f"Repo closeout: {closeout.get('agent_summary')}")
+                    print(f"  Commit ready: {readiness.get('ready')}")
+                    print(
+                        "  Capability readiness: "
+                        f"{capability.get('status')} "
+                        f"({capability.get('contract_gap_count', 0)} gaps)"
+                    )
+                    blocker_classes = capability.get("eval_blocker_classes") or []
+                    if blocker_classes:
+                        print(
+                            "  Eval blocker classes: "
+                            f"{capability.get('eval_blocker_class_count', len(blocker_classes))} "
+                            f"({', '.join(blocker_classes)})"
+                        )
+                    print(
+                        "  Memory readiness: "
+                        f"{memory.get('status')} "
+                        f"({memory.get('entry_count', 0)} entries)"
+                    )
+                    print(
+                        "  Package readiness: "
+                        f"{package.get('status')} "
+                        f"({package.get('missing_field_count', 0)} missing fields)"
+                    )
+                    if focused:
+                        ids = [item.get("id") for item in focused if item.get("id")]
+                        print(f"  Focused validation: {', '.join(ids)}")
+                    print(f"  Next: {closeout.get('next_command')}")
                 elif args.topic == "repo" and args.action == "doctor-catalog":
                     report = result.data.get("catalog_parity", {})
                     print(f"✅ Catalog parity: {report.get('decision_status', 'resolved')}")
@@ -1288,6 +1027,7 @@ def main():
                         "✅ Provider policy: "
                         f"{report.get('status')} ({report.get('violation_count', 0)} violation(s))"
                     )
+                    print_first_validation_command(result.data)
                 elif args.topic == "repo" and args.action == "surface":
                     report = result.data.get("repo_surface", {})
                     summary = report.get("summary", {})
@@ -1297,6 +1037,7 @@ def main():
                         f"{summary.get('blocking_findings', 0)} blocking finding(s), "
                         f"status={report.get('status')}"
                     )
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")
                     for skill in result.data["skills"]:
@@ -1310,6 +1051,7 @@ def main():
                             f"Starter mode: archetype={result.data.get('starter_archetype')} "
                             f"limit={result.data.get('starter_limit')}"
                         )
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "budget":
                     report = result.data.get("runtime_budget", {})
                     print(
@@ -1317,6 +1059,7 @@ def main():
                         f"{report.get('default_visible_count')}/{report.get('default_visible_max')} default skills, "
                         f"{report.get('advanced_visible_count')} advanced"
                     )
+                    print_first_validation_command(report)
                 elif args.topic == "skills" and args.action == "handles":
                     surface = result.data.get("command_surface", {})
                     print(
@@ -1325,6 +1068,7 @@ def main():
                     )
                     if result.data.get("policy_identity"):
                         print(f"  Policy identity: {result.data['policy_identity']}")
+                    print_first_validation_command(surface)
                     violations = result.data.get("violations", [])
                     if violations:
                         print(f"  Violations: {len(violations)}")
@@ -1335,43 +1079,94 @@ def main():
                     print(f"  Source: {resolution.get('source_path')}")
                     if resolution.get("invoke_via"):
                         print(f"  Invoke via: {resolution.get('invoke_via')}")
+                    print_first_validation_command(resolution)
                 elif args.topic == "skills" and args.action == "proof":
                     proof = result.data.get("proof", {})
                     print(f"✅ Skill handle proof: ${proof.get('handle')} ({proof.get('status')})")
+                    if proof.get("runtime_satisfied_by"):
+                        print(f"  runtime satisfied by: {proof.get('runtime_satisfied_by')}")
+                    gate_policy = proof.get("gate_policy") or {}
+                    required_gates = gate_policy.get("required") or []
+                    if required_gates:
+                        print(f"  required gates: {', '.join(required_gates)}")
                     for gate, passed in proof.get("gates", {}).items():
                         marker = "pass" if passed else "fail"
                         print(f"  {gate}: {marker}")
                     live = proof.get("live_codex_invocation", {})
                     if live.get("status"):
                         print(f"  live invocation: {live.get('status')}")
+                    print_first_validation_command(proof)
+                elif args.topic == "skills" and args.action == "prove":
+                    scorecard = result.data.get("skill_proof", {})
+                    print(f"Skill proof scorecard: ${scorecard.get('handle')}")
+                    for section in ("reachability", "structural_quality", "analytics", "outcome_proof"):
+                        section_payload = scorecard.get(section) or {}
+                        if section_payload.get("status"):
+                            print(f"  {section}: {section_payload.get('status')}")
+                    print_first_validation_command(scorecard)
+                    if scorecard.get("next_command"):
+                        print(f"Next: {scorecard.get('next_command')}")
                 elif args.topic == "skills" and args.action == "explain":
                     explanation = result.data.get("explanation", {})
                     print(f"ℹ️  Skill: ${explanation.get('handle')} ({explanation.get('status')})")
                     print(explanation.get("agent_summary", ""))
                     print(f"Source: {explanation.get('canonical_source_path')}")
+                    print_first_validation_command(explanation)
                     print(f"Next: {explanation.get('next_command')}")
                 elif args.topic == "skills" and args.action == "doctor":
                     doctor = result.data.get("skill_doctor", {})
                     print(f"Skill doctor: {doctor.get('query')} ({doctor.get('status')})")
                     print(doctor.get("agent_summary", ""))
                     print(f"Source: {doctor.get('canonical_source_path')}")
+                    event = doctor.get("lifecycle_event") or {}
+                    if event.get("event_type"):
+                        print(f"Event: {event.get('event_type')}")
+                    warning_classes = [warning.get("class") for warning in doctor.get("warnings", []) if warning.get("class")]
+                    if warning_classes:
+                        print(f"Warning classes: {', '.join(warning_classes)}")
+                    check_summary = doctor.get("check_summary") or {}
+                    if check_summary.get("status_counts"):
+                        counts = check_summary.get("status_counts") or {}
+                        rendered_counts = [f"{key}={counts[key]}" for key in sorted(counts)]
+                        print(f"Checks: {', '.join(rendered_counts)}")
+                    print_first_validation_command(doctor)
                     print(f"Next: {doctor.get('next_command')}")
                 elif args.topic == "skills" and args.action == "package":
                     package = result.data.get("skill_package", {})
                     gate = package.get("gate_summary", {})
+                    contract = package.get("package_contract", {})
+                    values = contract.get("values", {})
+                    roles = (contract.get("role_compatibility") or {}).get("roles") or []
+                    runtime_needs = (contract.get("runtime_contract") or {}).get("needs") or []
                     print(f"Skill package: {package.get('query')} ({package.get('status')})")
                     print(package.get("agent_summary", ""))
                     print(f"Source: {package.get('canonical_source_path')}")
+                    event = package.get("lifecycle_event") or {}
+                    if event.get("event_type"):
+                        print(f"Event: {event.get('event_type')}")
+                    if contract.get("readiness_level"):
+                        print(f"Readiness level: {contract.get('readiness_level')}")
+                    if roles:
+                        print(f"Compatible roles: {', '.join(roles)}")
+                    if runtime_needs:
+                        print(f"Runtime needs: {len(runtime_needs)} declared")
+                    if values.get("provenance"):
+                        print(f"Provenance: {values.get('provenance')}")
                     print(f"Install ready: {gate.get('install_ready')}")
+                    if gate.get("checkout_test_status"):
+                        print(f"Checkout test: {gate.get('checkout_test_status')}")
                     print(f"Promotion: {gate.get('promotion_status')}")
                     blocked = gate.get("blocked_reasons") or []
                     if blocked:
                         print(f"Blocked reasons: {', '.join(blocked)}")
+                    print_first_validation_command(package)
                     print(f"Next: {package.get('next_command')}")
                 elif args.topic == "skills" and args.action == "profiles":
                     profiles = result.data.get("skill_profiles", {})
                     print(f"Skill profiles: {profiles.get('status')}")
                     print(profiles.get("agent_summary", ""))
+                    print_readiness_overview(profiles)
+                    print_first_validation_command(profiles)
                     profile_map = profiles.get("profiles", {})
                     selected = profiles.get("selected_profile")
                     if selected and selected in profile_map:
@@ -1387,6 +1182,8 @@ def main():
                     events = result.data.get("skill_events", {})
                     print(f"Skill events: {events.get('status')}")
                     print(events.get("agent_summary", ""))
+                    print_readiness_overview(events)
+                    print_first_validation_command(events)
                     selected = events.get("selected_event_type")
                     event_types = events.get("event_types", {})
                     if selected and selected in event_types:
@@ -1398,6 +1195,12 @@ def main():
                     memory = result.data.get("skill_memory", {})
                     print(f"Skill memory: {memory.get('mode')} ({memory.get('status')})")
                     print(memory.get("agent_summary", ""))
+                    if memory.get("provider_model"):
+                        print(f"Provider: {memory.get('provider_model')}")
+                    print_first_validation_command(memory)
+                    sources = (memory.get("source_summary") or {}).get("available_sources") or []
+                    if sources:
+                        print(f"Sources: {', '.join(sources)}")
                     if memory.get("entry"):
                         print(f"Entry: {memory['entry'].get('path')}")
                     elif memory.get("entries") is not None:
@@ -1411,12 +1214,14 @@ def main():
                         print(f"  Skill mentions: {len(parsed['skill_mentions'])}")
                     if parsed.get("reviewer_mentions"):
                         print(f"  Reviewer mentions: {len(parsed['reviewer_mentions'])}")
+                    print_first_validation_command(parsed)
                 elif args.topic == "reviewers" and args.action == "resolve":
                     resolution = result.data.get("resolution", {})
                     handle = resolution.get("canonical_handle") or resolution.get("handle")
                     print(f"✅ Reviewer handle: @{handle}")
                     print(f"  Visibility: {resolution.get('command_visibility')}")
                     print(f"  Source: {resolution.get('source_path')}")
+                    print_first_validation_command(resolution)
                 elif args.topic == "runtime" and args.action in ("surface", "budget"):
                     report = result.data.get("runtime_surface") or result.data.get("runtime_budget", {})
                     label = "surface" if args.action == "surface" else "budget"
@@ -1426,6 +1231,7 @@ def main():
                         f"{report.get('default_visible_count')}/{report.get('default_visible_max')} default skills, "
                         f"{report.get('hidden_system_count')} system lane"
                     )
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "route":
                     decision = result.data["decision"]
                     print(f"🧭 Route decision: {decision['decision_status']}")
@@ -1456,6 +1262,7 @@ def main():
                                 f"  - {candidate.get('name')} ({candidate.get('path')}) "
                                 f"confidence={candidate.get('confidence', 0.0):.4f}"
                             )
+                    print_first_validation_command(decision)
                 elif args.topic == "skills" and args.action == "goal":
                     goal = result.data["goal_decision"]
                     print(f"🎯 Goal decision: {goal['decision_status']}")
@@ -1476,6 +1283,7 @@ def main():
                         print("Disambiguation prompts:")
                         for prompt in prompts:
                             print(f"  - {prompt}")
+                    print_first_validation_command(goal)
                 elif args.topic == "skills" and args.action == "improve":
                     improvement = result.data["improvement"]
                     print(f"🎯 Skill improvement: {improvement['status']}")
@@ -1485,6 +1293,7 @@ def main():
                         print(f"Recommended: ${recommended.get('handle')} ({recommended.get('path')})")
                     reachability = improvement.get("reachability", {})
                     print(f"Reachability: {reachability.get('status')}")
+                    print_first_validation_command(improvement)
                     if improvement.get("next_command"):
                         print(f"Next: {improvement['next_command']}")
                 elif args.topic == "skills" and args.action == "starter":
@@ -1494,6 +1303,7 @@ def main():
                     )
                     for skill in result.data["skills"]:
                         print(f"  - {skill['name']} [{skill['category']}]")
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "sync":
                     print(f"✅ Planned sync: {len(result.data['plan']['symlinks'])} symlinks.")
                     for log in result.data.get("logs", []):
@@ -1502,11 +1312,48 @@ def main():
                         print("  (Dry run - no changes made)")
                     if result.data.get("policy_identity"):
                         print(f"  Policy identity: {result.data['policy_identity']}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "workouts":
                     render_workouts_human(args, result)
                 elif args.topic == "skills" and args.action == "audit":
                     print(f"✅ Audit passed: {args.path}")
                     print(result.data["diagnostics"]["stdout"])
+                    print_first_validation_command(result.data)
+                elif args.topic == "skills" and args.action == "validate-skill-gate":
+                    gate = result.data.get("skill_gate", {})
+                    print(f"✅ Skill gate passed: {args.path}")
+                    if gate.get("stdout"):
+                        print(gate["stdout"])
+                    print_first_validation_command(result.data)
+                elif args.topic == "skills" and args.action == "validate-openai-format":
+                    report = result.data.get("openai_skill_format", {})
+                    print(f"✅ OpenAI skill format passed: {args.path}")
+                    if report.get("stdout"):
+                        print(report["stdout"])
+                    print_first_validation_command(result.data)
+                elif args.topic == "skills" and args.action == "validate-boundaries":
+                    boundary = result.data.get("boundary_check", {})
+                    handle = boundary.get("handle", args.handle)
+                    print("✅ Skill boundaries passed: $" + str(handle))
+                    if boundary.get("canonical_skill_path"):
+                        print(f"Canonical source: {boundary.get('canonical_skill_path')}")
+                    if boundary.get("command_handle_path"):
+                        print(f"Command handle: {boundary.get('command_handle_path')}")
+                    notes = boundary.get("notes") or []
+                    for note in notes:
+                        print(f"Note: {note}")
+                    print_first_validation_command(result.data)
+                elif args.topic == "skills" and args.action == "external-review":
+                    print(f"External review: {result.status}")
+                    print(f"Target: {result.data.get('target', args.path)}")
+                    ask_audit = result.data.get("ask_audit", {})
+                    if ask_audit.get("status"):
+                        print(f"Ask audit: {ask_audit.get('status')}")
+                    for key in ("plugin_eval", "tessl_lint", "tessl_review", "snyk"):
+                        payload = result.data.get(key) or {}
+                        if payload.get("status"):
+                            print(f"{key}: {payload.get('status')}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "install":
                     if result.data.get("dry_run"):
                         print("🔍 Dry run - would install:")
@@ -1515,17 +1362,21 @@ def main():
                         print(f"   Target: {result.data.get('target_path')}")
                         if result.data.get('remediate'):
                             print("   Remediate: Yes (scaffold missing files)")
+                        print_first_validation_command(result.data)
                         print("\n💡 To actually install, run:")
                         print(f"   {result.metadata.get('next_steps', ['ask skills install <url>'])[0]}")
                     else:
                         print(f"✅ Installed skill: {result.data.get('skill_name', args.url)}")
                         print(result.data.get("raw_output", ""))
+                        print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "fold":
                     print(f"✅ Result: {result.data['recommendation']}")
                     print(f"  Overlap Score: {result.data['overlap_score']}")
                     print(f"  Rationale: {result.data['rationale']}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "init":
                     print(f"✅ {result.data['message']}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action in {"init", "create"}:
                     print(f"✅ {result.data['message']}")
                     print(result.data.get("raw_output", ""))
@@ -1548,6 +1399,7 @@ def main():
                         print("Blockers:")
                         for blocker in blockers:
                             print(f"  - {blocker}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action == "sync-local-runtime":
                     if result.data.get("dry_run"):
                         print("🔍 Dry run - would replace local-plugin runtime mirrors:")
@@ -1560,6 +1412,7 @@ def main():
                         removed = report.get("removed_entries") or []
                         if removed:
                             print(f"    removed: {', '.join(removed)}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action in {"install", "import"}:
                     if result.data.get("dry_run"):
                         print("🔍 Dry run - would install plugin:")
@@ -1567,12 +1420,25 @@ def main():
                         print(f"   Source path: {result.data.get('plugin_path')}")
                         print(f"   Name: {result.data.get('plugin_name')}")
                         print(f"   Target: {result.data.get('target_path')}")
+                        print_first_validation_command(result.data)
                         print("\n💡 To actually install, run:")
                         print(f"   {result.metadata.get('next_steps', ['ask plugins install <url> --path <path>'])[0]}")
                     else:
                         print(f"✅ {result.data.get('message', 'Plugin installed.')}")
                         if result.data.get("raw_output"):
                             print(result.data["raw_output"])
+                        print_first_validation_command(result.data)
+                elif args.topic == "plugins" and args.action == "uninstall":
+                    if result.data.get("dry_run"):
+                        print("🔍 Dry run - would uninstall plugin:")
+                        print(f"   Name: {result.data.get('plugin_name', args.name)}")
+                        print(f"   Target: {result.data.get('target_path')}")
+                        print_first_validation_command(result.data)
+                        print("\n💡 To actually uninstall, run:")
+                        print(f"   {result.metadata.get('next_steps', ['ask plugins uninstall <name>'])[0]}")
+                    else:
+                        print(f"✅ {result.data.get('message', 'Plugin uninstalled.')}")
+                        print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action == "harden":
                     print(f"✅ {result.data.get('message', 'Plugin hardening checks passed.')}")
                     command_runs = result.data.get("command_runs", [])
@@ -1580,16 +1446,20 @@ def main():
                         print("Checks run:")
                         for run in command_runs:
                             print(f"  - {run.get('step')}: {run.get('command')}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "evals":
                     if args.action == "run":
                         print(f"✅ Evaluation complete for {args.path}")
                         print(result.data.get("raw_output", ""))
                         if result.data.get("dashboard_url"): print(f"Dashboard: {result.data['dashboard_url']}#{result.data.get('dashboard_tab', 'evals')}")
+                        print_first_validation_command(result.data)
                     elif args.action == "benchmark":
                         print("✅ Benchmark suite complete.")
                         print(result.data.get("raw_output", ""))
+                        print_first_validation_command(result.data)
                     elif args.action == "dashboard":
                         print(f"✅ {result.data['message']}")
+                        print_first_validation_command(result.data)
                 elif args.topic == "mcp" and args.action == "sync":
                     if result.data.get("dry_run"):
                         print(f"🔍 Dry run - would sync {result.data['server_count']} MCP server(s):")
@@ -1599,6 +1469,7 @@ def main():
                     else:
                         print(f"✅ Synced {result.data['server_count']} MCP servers to {result.data['target_path']}")
                         print("   Re-run `codex mcp list` or restart Codex to pick up changes.")
+                    print_first_validation_command(result.data)
                 elif args.topic == "memory":
                     memory = result.data.get("memory", {})
                     print(f"✅ {memory.get('agent_summary', 'Memory provider complete.')}")
@@ -1612,6 +1483,7 @@ def main():
                         print(f"   Entry: {entry.get('id')} ({entry.get('path')})")
                         print(f"   Source: {entry.get('source', {}).get('label')}")
                         print(entry.get("content", ""))
+                    print_first_validation_command(result.data)
                 elif args.topic == "wiki":
                     if args.action == "lint":
                         print(f"✅ {result.data.get('message', 'Wiki lint passed.')}")
@@ -1650,6 +1522,7 @@ def main():
                         print(f"   Asset source: {result.data.get('asset_source')}")
                         print(f"   Asset stored: {result.data.get('asset_stored_path')}")
                         print(f"   Note: {result.data.get('note_path')}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "graph":
                     if args.action == "related":
                         print(f"\n📊 {result.data['skill']} [{result.data['direction']}, depth={result.data['depth']}]")
@@ -1662,12 +1535,14 @@ def main():
                                 print(f"      {r['description'][:70]}")
                         if result.data['count'] > 15:
                             print(f"\n   ... and {result.data['count'] - 15} more")
+                        print_first_validation_command(result.data)
                         print()
                     elif args.action == "find":
                         print(f"\n🔍 Search: '{result.data['query']}' ({result.data['count']} match(es))\n")
                         for n in result.data['matches'][:20]:
                             tier_icon = "★" if n.get('tier') == 'stable' else ("◆" if n.get('tier') == 'growing' else "◇")
                             print(f"   {tier_icon} {n['id']} [{n.get('topic', '?')}] ↓{n.get('in_degree', 0)}")
+                        print_first_validation_command(result.data)
                         print()
                     elif args.action == "info":
                         n = result.data['node']
@@ -1684,6 +1559,7 @@ def main():
                             for e in out_edges[:10]:
                                 w = f" ×{e['weight']:.1f}" if e.get('weight', 1) > 1.2 else ""
                                 print(f"      → {e['to']}{w}")
+                        print_first_validation_command(result.data)
                         print()
                     elif args.action == "chain":
                         if result.data['reachable']:
@@ -1691,6 +1567,7 @@ def main():
                             print(f"\n🔗 Chain ({result.data['hops']} hops):\n   {path_str}\n")
                         else:
                             print(f"\n❌ No path found from {result.data['from']} to {result.data['to']}\n")
+                        print_first_validation_command(result.data)
                     elif args.action == "list":
                         filters = result.data['filters']
                         filter_str = f"topic={filters['topic']}" if filters['topic'] else "all"
@@ -1700,11 +1577,13 @@ def main():
                         for n in result.data['skills']:
                             tier_icon = "★" if n.get('tier') == 'stable' else ("◆" if n.get('tier') == 'growing' else "◇")
                             print(f"   {tier_icon} {n['id']:<35} [{n.get('topic', '?')}] ↓{n.get('in_degree', 0)}")
+                        print_first_validation_command(result.data)
                         print()
                     elif args.action == "topics":
                         print(f"\n🏷️  Topic Clusters ({result.data['count']} topics)\n")
                         for topic, count in result.data['topics'].items():
                             print(f"   {topic:<25} {count} skill(s)")
+                        print_first_validation_command(result.data)
                         print()
             else:
                 parser.print_help()
@@ -1724,6 +1603,7 @@ def main():
                             f"  - {candidate.get('name')} ({candidate.get('path')}) "
                             f"confidence={candidate.get('confidence', 0.0):.4f}"
                         )
+                print_first_validation_command(decision)
                 print("")
             if args.topic == "skills" and args.action == "goal" and result.data.get("goal_decision"):
                 goal = result.data["goal_decision"]
@@ -1737,6 +1617,7 @@ def main():
                     print("Disambiguation prompts:")
                     for prompt in prompts:
                         print(f"  - {prompt}")
+                print_first_validation_command(goal)
                 print("")
             error_message = error.message
             if args.topic == "skills" and args.action == "audit" and " First failures:" in error_message:
@@ -1772,6 +1653,8 @@ def main():
                 elif args.action in ("install", "fold", "init"):
                     if "raw_output" in result.data: print(result.data["raw_output"])
                     if "raw_error" in result.data: print(result.data["raw_error"])
+                    if args.action in {"fold", "init"}:
+                        print_first_validation_command(result.data)
                     if args.action == "init":
                         print("\n📚 Init examples:")
                         print("   ask skills init my-skill --category frontend-ui --description 'Does X'")
@@ -1779,9 +1662,20 @@ def main():
                     elif args.action == "install":
                         print("\n📚 Install examples:")
                         print("   ask skills install https://github.com/user/repo --remediate")
-            elif args.topic == "plugins" and args.action in ("init", "create", "install", "import", "harden", "sync-local-runtime"):
+                elif args.topic == "skills":
+                    print_first_validation_command(result.data)
+            elif args.topic == "plugins" and args.action in (
+                "init",
+                "create",
+                "install",
+                "import",
+                "harden",
+                "sync-local-runtime",
+                "uninstall",
+            ):
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])
+                print_first_validation_command(result.data)
                 if "command_runs" in result.data:
                     print("\n🔧 Command execution details:")
                     for run in result.data["command_runs"]:
@@ -1803,19 +1697,26 @@ def main():
                 print("   ask plugins install https://github.com/<owner>/<repo> --path Plugins/<name>")
                 print("   ask plugins harden Plugins/my-plugin")
                 print("   ask plugins sync-local-runtime")
+            elif args.topic == "plugins":
+                print_first_validation_command(result.data)
+            elif args.topic == "reviewers":
+                print_first_validation_command(result.data)
             elif args.topic == "evals":
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])
+                print_first_validation_command(result.data)
                 print("\n📚 Eval examples:")
                 print("   ask evals run backend/cli-spec --mode smoke")
                 print("   ask evals run backend/cli-spec --mode release")
             elif args.topic == "graph":
+                print_first_validation_command(result.data)
                 print("\n📚 Graph examples:")
                 print("   ask graph find security")
                 print("   ask graph related skill-builder --depth 2")
                 print("   ask graph chain skill-creator skill-installer")
                 print("   ask graph info cli-spec")
             elif args.topic == "repo":
+                print_first_validation_command(result.data)
                 if args.action == "validate":
                     print(result.data.get("raw_output", ""))
                 if args.action == "check-stability" and "errors" in result.data:
@@ -1841,10 +1742,16 @@ def main():
                 print("   ask repo surface --json")
                 print("   ask repo check-stability --changed-files backend/cli-spec/SKILL.md")
             elif args.topic == "mcp":
+                print_first_validation_command(result.data)
                 print("\n📚 MCP examples:")
                 print("   ask mcp sync")
                 print("   ask mcp sync --dry-run")
+            elif args.topic == "memory":
+                print_first_validation_command(result.data)
+            elif args.topic == "runtime":
+                print_first_validation_command(result.data)
             elif args.topic == "wiki":
+                print_first_validation_command(result.data)
                 print("\n📚 Wiki examples:")
                 print("   ask wiki lint")
                 print("   ask wiki ingest 'Title' --summary 'Summary' --source '<source>'")
@@ -1852,10 +1759,16 @@ def main():
                 print("   ask wiki query 'prompt injection'")
                 print("   ask wiki add-asset ./tmp/screenshot.png --title 'UI reference' --summary 'Capture for reuse'")
                 print("   ask wiki add-asset --interactive")
+            elif args.topic == "workouts":
+                print_first_validation_command(result.data)
+                print("\n📚 Workout examples:")
+                print("   ask workouts list")
+                print("   ask workouts run agent-ops/verification-before-completion --attempts 2")
+                print("   ask workouts score agent-ops/verification-before-completion")
+                print("   ask workouts promote agent-ops/verification-before-completion --dry-run")
     if result.status == "success":
         sys.exit(0)
     else:
-        error_code = result.errors[0].code if result.errors else "ERR_RUNTIME"
-        sys.exit(ERROR_MAP.get(error_code, 1))
+        sys.exit(exit_code_for_errors(result.errors))
 if __name__ == "__main__":
     main()

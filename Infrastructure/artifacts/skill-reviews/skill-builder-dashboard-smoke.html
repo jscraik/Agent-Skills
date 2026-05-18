@@ -47,6 +47,10 @@ h3 { font-size:20px; margin:0 0 10px; }
 .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
 .panel { border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:20px; }
 .panel strong { display:block; font-size:24px; margin-top:8px; }
+.plugin-posture { margin-top:18px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:start; }
+.plugin-posture ul { grid-column:1 / -1; margin:0; padding-left:18px; color:var(--muted); }
+.plugin-score { display:flex; align-items:center; gap:12px; }
+.posture-detail { grid-column:1 / -1; margin:0; color:var(--muted); }
 .pill { display:inline-flex; align-items:center; border-radius:7px; padding:3px 8px; font-weight:800; background:#1b2220; border:1px solid #2d4733; }
 .pill.warn { background:#2a2618; border-color:#504721; } .pill.bad { background:#2c1d1b; border-color:#56302b; }
 table { width:100%; border-collapse:collapse; }
@@ -58,7 +62,15 @@ td span { color:var(--muted); }
 .suggestions li,.empty-state p { color:var(--muted); margin:10px 0; }
 .evidence-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .evidence-list a,.evidence-list div { border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }
+.review-lanes { margin-top:24px; }
+.review-lane { display:grid; grid-template-columns:minmax(0,1fr) minmax(220px,420px); gap:18px; align-items:start; border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:16px; margin:12px 0; }
+.review-lane h3 { margin:0 0 4px; }
+.review-lane p { margin:0 0 10px; color:var(--muted); }
+.review-lane code { display:block; white-space:normal; overflow-wrap:anywhere; }
+.lane-badge { display:inline-flex; margin:0 6px 6px 0; border:1px solid #303641; border-radius:7px; padding:2px 7px; background:#171b22; color:var(--muted); font-size:12px; font-weight:800; }
 @media (max-width: 1100px) { .shell { grid-template-columns:1fr; } .sidebar { position:relative; height:auto; } .hero { grid-template-columns:1fr; } .grid,.evidence-list { grid-template-columns:1fr; } .tabs a { min-width:104px; } }
+@media (max-width: 900px) { .review-lane { grid-template-columns:1fr; } }
+@media (max-width: 700px) { .plugin-posture { grid-template-columns:1fr; } .plugin-score { justify-content:flex-start; } }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -129,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div><div class="hex">96</div></div>
       <div>
         <h1>skill-builder</h1>
-        <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, and available skill eval scorecards are rendered together without publishing or uploading skill content.</p>
+        <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
 
@@ -150,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>Internal local audit and OpenClaw warning summary.</p>
+        <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
       </div>
 
       </div>
@@ -165,6 +177,15 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="good">100%</strong></div>
         <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="warn">70%</strong></div>
         <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="good">100%</strong></div>
+      </div>
+      <div class="panel plugin-posture">
+        <div>
+          <h3>Plugin Eval</h3>
+          <p>Budget and Codex ergonomics guardrail. Local policy accepts <code>B+</code> or better when there are no failure-level findings and local/Tessl gates pass.</p>
+        </div>
+        <div class="plugin-score"><span class="pill good">A</span><strong class="good">100%</strong></div>
+        <p class="posture-detail good">Plugin Eval meets the local budget and ergonomics guardrail.</p>
+        <ul><li>Score: 100/100</li><li>Grade: A</li><li>Risk: low</li><li>Checks: 0 fail, 0 warn, 2 info</li><li>Active budget: 1689 tokens (moderate)</li><li>Observed usage: not supplied</li></ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
@@ -188,8 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="pill good">100%</span>
         </div>
         <table>
-          <thead><tr><th>Scenario</th><th>Without Context</th><th>With Context</th><th>Evidence</th></tr></thead>
-          <tbody><tr><td><strong>discovery round one contract</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>discovery confirmation contract</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
+          <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
+          <tbody><tr><td><strong>discovery round one contract</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>discovery confirmation contract</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
         </table>
       </section>
 
@@ -198,16 +219,30 @@ document.addEventListener('DOMContentLoaded', () => {
     <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
+      <div class="panel plugin-posture">
+        <div>
+          <h3>Snyk Advisory</h3>
+          <p>Optional CLI-backed external security signal. It stays disabled unless the review is run with <code>--include-snyk</code>.</p>
+        </div>
+        <div class="plugin-score"><span class="pill good">not_reported</span><strong class="good">100%</strong></div>
+        <p class="posture-detail good">Snyk advisory clean</p>
+        <ul>
+          <li>Projects scanned: 0; vulnerabilities: 0</li>
+          <li>Critical: 0; High: 0; Medium: 0; Low: 0</li>
+          <li>No Snyk notes reported.</li>
+        </ul>
+      </div>
     </section>
 
     <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
         <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/skill-builder-dashboard-smoke.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/skill-builder-dashboard-smoke.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260515-221710-797963/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/skill-builder/20260515-221710-797963/scorecard.json</span></a>
-        <div>Policy<br><span>local_internal_only, no publish, no registry upload, no npx</span></div>
+        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260517-215241-926662/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/skill-builder/20260517-215241-926662/scorecard.json</span></a>
+        <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_explicit_confirmation</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
+
     </section>
   </main>
 </div>

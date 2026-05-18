@@ -128,6 +128,7 @@ confidence: medium
 ## References
 
 - Practice contract: [references/architecture-practice-contract.md](references/architecture-practice-contract.md)
+- Code expert lenses: `Infrastructure/references/software-literature-expert-lens-pack.md` and the Improve Codebase Architecture row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Machine contracts: [references/contract.yaml](references/contract.yaml), [references/evals.yaml](references/evals.yaml), [references/task-profile.json](references/task-profile.json)
 - Deferred context: Infrastructure/references/deferred-skill-context/agent-ops-improve-codebase-architecture/
 

@@ -39,6 +39,7 @@ SPEC_SECTIONS = [
     "Requirements",
     "Interfaces",
     "Data / Domain Contract",
+    "Enforcement Contract",
     "Security, Privacy, and Safety",
     "Failure and Recovery",
     "Validation Plan",
@@ -54,6 +55,7 @@ PLAN_SECTIONS = [
     "Scope and Boundaries",
     "Current State / Evidence",
     "Implementation Strategy",
+    "Enforcement Contract",
     "Work Units",
     "Validation Gates",
     "Review Plan",
@@ -78,6 +80,14 @@ CONFORMANCE_TERMS = (
     "versioning",
     "consumer behavior",
     "error handling",
+)
+ENFORCEMENT_TERMS = (
+    "essential_decisions",
+    "fillable_gaps",
+    "guardrails",
+    "refusal_triggers",
+    "durable_memory",
+    "professional_output",
 )
 
 
@@ -113,6 +123,18 @@ def has_visual_decision(text: str) -> bool:
     )
 
 
+def check_enforcement_contract(text: str) -> list[str]:
+    errors: list[str] = []
+    body = section_body(text, "Enforcement Contract")
+    if not body.strip():
+        return ["Enforcement Contract section is empty"]
+    lower = body.lower()
+    for term in ENFORCEMENT_TERMS:
+        if term not in lower:
+            errors.append(f"Enforcement Contract missing required field: {term}")
+    return errors
+
+
 def check_section_order(found: list[str], required: list[str]) -> list[str]:
     errors: list[str] = []
     cursor = -1
@@ -130,6 +152,7 @@ def check_section_order(found: list[str], required: list[str]) -> list[str]:
 
 def validate_spec(text: str) -> list[str]:
     errors = check_section_order(headings(text), SPEC_SECTIONS)
+    errors.extend(check_enforcement_contract(text))
 
     prefix = text.split("## Purpose", 1)[0]
     forbidden_prefix = ("Mode Decision", "Selection Evidence", "Blackboard Delta", "Validation Outcomes")
@@ -152,6 +175,7 @@ def validate_spec(text: str) -> list[str]:
 
 def validate_plan(text: str) -> list[str]:
     errors = check_section_order(headings(text), PLAN_SECTIONS)
+    errors.extend(check_enforcement_contract(text))
     work_units = section_body(text, "Work Units")
     if not PU_RE.search(work_units):
         errors.append("Work Units section missing stable PU-* IDs")

@@ -9,6 +9,7 @@ cases:
   why_realistic: A user has named agents-md and asks Codex to inspect a local repo path before making changes, which is the normal first-turn discovery shape.
   eval_modes:
   - smoke
+  - release
   smoke_mode: discovery-round-one
   should_trigger: true
   prepend_skill: true
@@ -272,3 +273,87 @@ cases:
   - type: regex
     value: "(?i)(CODESTYLE|global Codex CODESTYLE|configs/codex/instructions/CODESTYLE|verified path|blocked|local)"
   why_realistic: The prompt describes a concrete local agent-skills workflow with an action, artifact, or safety constraint that this skill is expected to handle.
+- id: edge-steering-uptake
+  name: repeated steering becomes durable mechanism
+  category: edge
+  realistic: true
+  eval_modes:
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: Use $agents-md to update a root AGENTS.md after Jamie says "don't make me say this again" about agents fixing review comments line-locally without checking sibling patterns. Preserve the rule as a durable operating mechanism, require a bounded pattern sweep, and explain the validator or proof future agents should run before resuming ordinary work.
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+  acceptance:
+  - type: skill_selected
+    expected_skill: agents-md
+  - type: regex
+    value: "(?i)(steering|durable|operating failure|pattern sweep|sibling|proof|validator|resume)"
+  why_realistic: Mirrors recent agent-skills and coding-harness guidance where repeated steering must become a durable mechanism rather than chat context.
+- id: edge-zero-setup-workspace
+  name: zero setup workspace dissemination
+  category: edge
+  realistic: true
+  eval_modes:
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: Use $agents-md to review a draft AGENTS.md for a new control-plane repo. The file points to five setup docs but has no single readiness command, no blocker classification, and no guidance for generated/runtime projections. Tighten it so a fresh Codex agent can land in the workspace, self-orient, report readiness, or give exact blockers without asking the user to wire the repo together.
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+  acceptance:
+  - type: skill_selected
+    expected_skill: agents-md
+  - type: regex
+    value: "(?i)(zero.setup|readiness|bootstrap|blocker|self-orient|generated|runtime projection|workspace)"
+  why_realistic: Captures the zero-setup agent workspace posture recently added to the agent-skills and coding-harness instruction surfaces.
+- id: edge-real-path-validation
+  name: exact production path validation
+  category: edge
+  realistic: true
+  eval_modes:
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: Use $agents-md to harden AGENTS.md validation guidance for a TypeScript CLI repo. The current text says "run tests" and "looks verified"; change it so agents run the narrowest check first and only claim behavior verified when the exact touched function, CLI command, shell script, validator, route, or workflow actually ran. If credentials or services block the exact path, require blocked evidence instead of optimistic language.
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+  acceptance:
+  - type: skill_selected
+    expected_skill: agents-md
+  - type: regex
+    value: "(?i)(narrowest|exact.*(path|function|CLI|validator|workflow)|blocked|pass|fail|verified)"
+  why_realistic: Reflects the coding-harness validation update that prevents agents from overstating production-path verification.
+- id: edge-project-brain-memory-preservation
+  name: Project Brain and Local Memory preservation
+  category: edge
+  realistic: true
+  eval_modes:
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: Use $agents-md to shrink a root AGENTS.md that has Project Brain, Local Memory, .harness/README.md, .harness/active-artifacts.md, and learning-loop closeout rules. Keep durable tracked memory surfaces discoverable, separate local runtime caches from tracked control-plane files, and do not let secondary strategy or triage context drive implementation unless an admitted plan/spec/refactor slice references it.
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+  acceptance:
+  - type: skill_selected
+    expected_skill: agents-md
+  - type: regex
+    value: "(?i)(Project Brain|Local Memory|tracked|runtime cache|active-artifacts|secondary context|plan|spec|refactor)"
+  why_realistic: Carries forward the coding-harness Project Brain and Local Memory rules without copying repo-specific implementation detail.
