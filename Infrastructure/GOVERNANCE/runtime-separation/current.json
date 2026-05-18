@@ -1,7 +1,29 @@
 {
-  "issues": [],
+  "issues": [
+    {
+      "blocker_id": "harness-engineering:plugin-package-root-parity",
+      "check": "plugin_package_root_parity.harness-engineering",
+      "decision_status": "blocked",
+      "drift_class": "plugin_package_root_parity_failed",
+      "returncode": 1
+    },
+    {
+      "blocker_id": "plugin-factory:plugin-package-root-parity",
+      "check": "plugin_package_root_parity.plugin-factory",
+      "decision_status": "blocked",
+      "drift_class": "plugin_package_root_parity_failed",
+      "returncode": 1
+    },
+    {
+      "blocker_id": "skill-factory:plugin-package-root-parity",
+      "check": "plugin_package_root_parity.skill-factory",
+      "decision_status": "blocked",
+      "drift_class": "plugin_package_root_parity_failed",
+      "returncode": 1
+    }
+  ],
   "schema_version": "runtime-separation-current.v1",
-  "status": "healthy",
+  "status": "degraded",
   "summary": {
     "canonical_root_digest": "fabbe04d4ccdc50e8ffd0acaf517fe3e4d038524e12087a14beb4e24b23ae204",
     "command_checks": {

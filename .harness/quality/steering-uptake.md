@@ -728,13 +728,13 @@ Intent radius: repository
 Blocker: There was no executable requirement to search equivalent APIs or
 classify similar cases before closing a local fix.
 
-Generalized rule: API-shape feedback is a transferable design rule by default;
-agents must look for equivalent interfaces before treating one local fix as
-complete.
+Generalized rule: Operational failure APIs should expose meaningful authority,
+invariants, and error semantics in their shape instead of hiding diagnosis
+behind bare booleans or vague helper convenience.
 
-Similar-case disposition: Policy surfaces were updated now; source-code cases
-are classified during the concrete API/package review that names the layer to
-search.
+Similar-case disposition: Policy and validator behavior fixed now; source-code
+API sweeps are deferred to the named package or layer for each concrete review
+so predicate helpers and public migrations can be classified correctly.
 
 Pattern sweep: Checked review guidance, validation guidance, glossary, steering
 ledger, and the dedicated interface-design policy surface for API/helper design
@@ -801,13 +801,13 @@ Intent radius: repository
 Blocker: Setup responsibility was not clearly owned by agent-facing product
 surfaces, so future work could ship instructions without self-setup proof.
 
-Generalized rule: Agent-facing product surfaces must own discoverable setup,
-readiness proof, and blocker classification instead of pushing integration work
-onto Jamie.
+Generalized rule: Agent-facing products should make the agent responsible for
+discovering, bootstrapping, validating, and reporting workspace readiness
+rather than requiring Jamie to integrate scattered pieces manually.
 
-Similar-case disposition: Policy and glossary surfaces were updated now;
-specific setup/install/doctor flows are deferred until their owning command or
-SDK surface is being implemented or reviewed.
+Similar-case disposition: Policy surfaces fixed now; concrete setup, install,
+doctor, or projection flows require source-specific implementation work when
+those flows are active.
 
 Pattern sweep: Checked root instructions, skill-management guidance, glossary,
 instruction index, and steering ledger for setup expectations that could leave
@@ -872,13 +872,11 @@ Intent radius: repository
 Blocker: Systems-thinking language was not yet tied to a required operating
 shape that future agents must use during product or meta-work.
 
-Generalized rule: Systems-thinking work must convert a blocker into a durable
-mechanism with proof and a named remaining limit; polished explanation is not a
-system.
+Generalized rule: Systems-thinking work must translate a blocker into a
+durable mechanism with proof and a stated remaining limit.
 
-Similar-case disposition: Policy surfaces were updated now; domain-specific
-mechanisms are classified when a concrete blocker or implementation lane is in
-scope.
+Similar-case disposition: Product and steering policy surfaces fixed now;
+domain-specific mechanisms are handled in the relevant implementation lane.
 
 Pattern sweep: Checked root instructions, zero-setup policy, instruction index,
 glossary, and steering ledger for the umbrella blocker-to-mechanism operating

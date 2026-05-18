@@ -89,7 +89,7 @@ First hardening order:
 | Skill | plugin-eval | Tessl Description | Tessl Content | Priority Note |
 | --- | ---: | ---: | ---: | --- |
 | he-brainstorm | 95/A | 57% | 50% | Replace HE jargon with concrete exploration/decision language |
-| he-code-review | 81/C | 100% | 42% | Description strong; body needs output example and jargon cleanup |
+| he-code-review | 81/C | 100% | 42% | Description strong; body needs an output example and jargon cleanup |
 | he-compound | 100/A | 60% | 70% | Remove duplicated context-disposition text; clarify lifecycle terms |
 | he-eval-report | 77/C | 75% | 35% | Needs concrete eval report example and clearer closure triggers |
 | he-fix-bugs | 100/A | 75% | 50% | Add reproduction/root-cause/test/patch trigger terms and commands |
