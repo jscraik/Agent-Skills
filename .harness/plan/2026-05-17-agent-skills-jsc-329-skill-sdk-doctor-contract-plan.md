@@ -220,7 +220,7 @@ guardrails:
 - `./bin/ask skills doctor context7 --json --robot`
 - `./bin/ask skills package context7 --json --robot`
 - `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`
-- `python3 Infrastructure/scripts/testing/test_validate_steering_uptake.py -q`
+- `python3 -m pytest Infrastructure/scripts/testing/test_validate_steering_uptake.py -q`
 - `./bin/ask repo validate --changed-files <changed-files> --json --robot`
 - `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/plan/2026-05-17-agent-skills-jsc-329-skill-sdk-doctor-contract-plan.md --kind plan --json`
 
