@@ -129,6 +129,7 @@ If gates fail, cleanup scope is unclear, reference evidence is missing, or valid
 Never drop required context for brevity; move it into references or deferred context and link it here.
 
 - Local contract, evals, and task profile: `references/`
+- Read when: cleanup needs code-literature lenses for dead-code proof, small reversible batches, or slop removal: `Infrastructure/references/software-literature-expert-lens-pack.md` and the Unslopify row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Archived full workflow: `Infrastructure/references/deferred-skill-context/agent-ops-unslopify/`
 
 ## Validation

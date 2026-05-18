@@ -173,3 +173,18 @@ cases:
       - {type: regex, value: "(?is)(codex-eval-creation-loop|local.*extraction|do not copy|external)"}
       - {type: regex, value: "(?is)(comparator|baseline|previous skill|no-skill|closest local owner)"}
       - {type: regex, value: "(?is)(weak eval|deterministic checks|pass|fail|blocked|readiness)"}
+  - id: code-expert-lens-hardening
+    name: harden skill with bounded code expert lenses
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_profile: codex-heavy
+    should_trigger: true
+    realistic: true
+    prepend_skill: true
+    prompt: "Harden an existing Codex skill using code expert lenses. Keep SKILL.md compact, load Infrastructure/references/software-literature-expert-lens-pack.md only when needed, choose at most three lenses, require repo evidence for every finding, and add or update one eval that proves the lens changed behavior."
+    deterministic_checks: {forbidden_commands: ["rm -rf", "git push", "curl", "wget", "netcat"]}
+    acceptance:
+      - {type: regex, value: "(?is)(software-literature-expert-lens-pack|code expert|lens)"}
+      - {type: regex, value: "(?is)(at most three|1-3|smallest.*lens)"}
+      - {type: regex, value: "(?is)(repo evidence|local evidence|not.*book.*proof)"}
+      - {type: regex, value: "(?is)(eval|proves.*behavior|changed behavior)"}

@@ -32,6 +32,9 @@ def test_smoke_evals_use_codex_spark_without_reasoning_level(tmp_path: Path) -> 
     assert "--profile" not in cmd
     assert "--codex-arg" in cmd
     assert cmd[cmd.index("--codex-arg") + 1] == "--ignore-user-config"
+    assert result.data["validation_commands"] == [
+        "./bin/ask evals run Plugins/example-skill --mode smoke --runner codex --json --robot"
+    ]
 
 
 def test_release_evals_do_not_force_smoke_model(tmp_path: Path) -> None:
@@ -85,7 +88,20 @@ def test_evals_resolve_runtime_projection_to_canonical_source(tmp_path: Path) ->
     assert result.status == "success"
     assert result.data["requested_path"] == ".agents/skills/evals-router"
     assert result.data["resolved_skill_path"] == "Skills/agent-ops/evals-router"
+    assert result.data["validation_commands"] == [
+        "./bin/ask evals run Skills/agent-ops/evals-router --mode smoke --runner discovery-smoke --no-dashboard --json --robot"
+    ]
     assert run.call_args.args[0][2] == "Skills/agent-ops/evals-router"
+
+
+def test_benchmark_portfolio_exposes_validation_command(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="Benchmark OK\n", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.benchmark_portfolio(tmp_path)
+
+    assert result.status == "success"
+    assert result.data["validation_commands"] == ["./bin/ask evals benchmark --json --robot"]
 
 
 def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
@@ -337,6 +353,66 @@ def test_run_evals_classifies_user_input_blocker_without_scorecard(tmp_path: Pat
     assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == ["blocked_user_input"]
 
 
+def test_eval_blocker_taxonomy_matches_capability_readiness_classes() -> None:
+    expected = {
+        "blocked_user_input",
+        "blocked_auth",
+        "blocked_runtime",
+        "timeout_no_output",
+        "timeout_partial_output",
+        "blocked_missing_tool",
+        "blocked_missing_artifact",
+        "blocked_environment",
+        "blocked_validation",
+    }
+
+    assert set(evals.EVAL_BLOCKER_TAXONOMY) == expected
+
+
+def test_run_evals_classifies_missing_tool_blocker_without_scorecard(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=1, stdout="", stderr="plugin-eval: command not found")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False)
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_missing_tool"
+    assert result.data["blocker_class"] == "blocked_missing_tool"
+
+
+def test_run_evals_classifies_missing_artifact_blocker_without_scorecard(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=1, stdout="", stderr="scorecard not found after eval run")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False)
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_missing_artifact"
+    assert result.data["blocker_class"] == "blocked_missing_artifact"
+
+
+def test_run_evals_classifies_environment_blocker_without_scorecard(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=1, stdout="", stderr="repo mismatch: selected workspace root is wrong")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False)
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_environment"
+    assert result.data["blocker_class"] == "blocked_environment"
+
+
+def test_run_evals_classifies_validation_blocker_without_scorecard(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=1, stdout="", stderr="strict audit failed during policy validation")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False)
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["blocker_class"] == "blocked_validation"
+
+
 def test_run_evals_classifies_timeout_without_output(tmp_path: Path) -> None:
     timeout = subprocess.TimeoutExpired(
         cmd=["run_skill_evals.py"],
@@ -512,5 +588,6 @@ def test_dashboard_report_uses_canonical_skill_builder_scripts(tmp_path: Path) -
         result = evals.dashboard_report(tmp_path)
 
     assert result.status == "success"
+    assert result.data["validation_commands"] == ["./bin/ask evals dashboard --json --robot"]
     cmd = run.call_args.args[0]
     assert cmd[1] == "Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py"

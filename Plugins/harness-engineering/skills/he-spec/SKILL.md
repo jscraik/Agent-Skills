@@ -23,7 +23,7 @@ Do not write implementation plans, code, Linear payloads, strategy, or review fi
 - Known owner authority, validation command, observability signal, rollback/supersession rule, and relevant `.harness/**` evidence.
 
 ## Outputs
-Write a spec or replacement section, or return `blocked`. Include stable acceptance IDs, source evidence, validation command, pass/fail condition, observability, rollback/supersession, risks, owner evidence, and handoff.
+Write a spec or replacement section, or return `blocked`. Include stable acceptance IDs, source evidence, validation command, pass/fail condition, observability, rollback/supersession, risks, owner evidence, an enforcement contract, and handoff.
 
 ## Modes
 - `standard-spec`: create a new behavior contract from a selected issue, strategy slice, bug, or requirement.
@@ -35,23 +35,26 @@ Write a spec or replacement section, or return `blocked`. Include stable accepta
 1. Choose one mode from `Modes`; if two apply, prefer `revision` for existing specs and `dedicated-ui-spec` for browser-visible behavior.
 2. Verify the source artifact exists and the selected behavior is unambiguous.
 3. Write acceptance criteria as stable IDs. Each ID needs behavior, source evidence, validation, risk, observability, and rollback/supersession.
-4. Keep implementation notes secondary. The main spec is behavior, not task sequence.
-5. Run the artifact gate in `Validation`. Fix the missing field, broken structure, or absent source once and re-run; if the same gate still fails, return blocked with the exact command and output.
-6. Hand off to `he-plan` only after acceptance IDs and validation are explicit.
+4. Add an Enforcement Contract before handoff. Lock essential decisions, name fillable gaps, bind guardrails to commands, define refusal triggers, name durable memory, and specify professional output evidence. For SDK, public API, schema, CLI, package, or agent-facing work, treat this as the mini-contract that prevents an agent from inventing the high-leverage decisions while still allowing bounded code generation.
+5. Keep implementation notes secondary. The main spec is behavior and contract, not task sequence.
+6. Run the artifact gate in `Validation`. Fix the missing field, broken structure, or absent source once and re-run; if the same gate still fails, return blocked with the exact command and output.
+7. Hand off to `he-plan` only after acceptance IDs, validation, and the enforcement contract are explicit.
 
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed until fixed, waived by an authorized gate, or reported as blocked.
 
 ~~~bash
 test -f <source-artifact>
-rg -n "AC-|acceptance|validation|rollback|observability" <spec-path>
+rg -n "AC-|acceptance|validation|rollback|observability|essential_decisions|fillable_gaps|guardrails|refusal_triggers|durable_memory|professional_output" <spec-path>
 python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <spec-path> --json
+python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <spec-path> --kind spec --json
 ~~~
 
 Pass/fail criteria:
 - `test -f` passes only when the cited source artifact exists locally. If the source is remote or from chat, cite the exact URL/message and mark local file proof unavailable.
-- `rg` passes only when the spec includes acceptance IDs plus validation, rollback, and observability terms.
+- `rg` passes only when the spec includes acceptance IDs plus validation, rollback, observability, and enforcement-contract terms.
 - `check_bluf_structure.py` passes only when it exits 0 and returns JSON without structural errors.
+- `check_generated_artifact_shape.py` passes only when the durable spec shape, stable IDs, visual decision, conformance rules, and Enforcement Contract are present.
 - If any required validation is impossible in the current environment, report `blocked_validation` with the missing permission, file, or tool.
 
 ## Failure Mode
@@ -81,6 +84,19 @@ acceptance:
     behavior: "Dashboard refresh runs only after skill validation or eval commands"
     source: "User browser feedback on local dashboard"
     validation: "python3 -m pytest Infrastructure/tests/test_ask_evals_command.py -q"
+enforcement_contract:
+  essential_decisions:
+    - "Refresh is validation-triggered, not time-triggered or page-load-triggered."
+  fillable_gaps:
+    - "Agent may adjust local renderer wiring inside the existing dashboard module."
+  guardrails:
+    - "python3 -m pytest Infrastructure/tests/test_ask_evals_command.py -q"
+  refusal_triggers:
+    - "Stop if a new public dashboard schema or runtime projection edit is required."
+  durable_memory:
+    - "Record transferable trigger semantics in the spec, plan, and closeout artifact."
+  professional_output:
+    - "Report files changed, exact validation commands, pass/fail state, blockers, and rollback path."
 observability: "Generated HTML includes updated timestamp and source report path"
 rollback: "Disable auto-open/refresh and keep artifact generation only"
 handoff:
@@ -124,6 +140,7 @@ Reference `assets/` only for skill packaging and browseability; spec evidence be
 
 ## References
 - Spec modes/artifacts: `../../references/skills/he-spec/spec-mode-rules.md`, `../../references/skills/he-spec/spec-artifact-contract.md`
+- Skills SDK apparatus lens: `../../../../Infrastructure/references/skills-sdk-apparatus-lens.md`
 - Session evidence: `../../references/skills/he-spec/codex-and-session-evidence.md`
 - Reviewability: `../../references/bluf-review-contract.md`, `../../references/visual-reference-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`

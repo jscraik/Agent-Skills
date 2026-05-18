@@ -286,7 +286,7 @@ def _validate_command_handle_payload(handle: CommandHandle, skill_body: str) -> 
 
 def _command_handle_write_rows(handles: list[CommandHandle]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for handle in handles:
+    for handle in _with_folded_alias_handles(handles):
         if not requires_generated_command_handle(handle):
             continue
         skill_body = render_skill_command_handle(handle)

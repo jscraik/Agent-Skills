@@ -26,16 +26,24 @@ jobs:
               exit 1
             fi
             echo "✅ SNYK_TOKEN present"
-      - snyk/scan:
-          command: test
-          fail-on-issues: true
-          monitor-on-build: false
-          severity-threshold: high
-          token-variable: SNYK_TOKEN
-          additional-test-arguments: >-
-            --all-projects
-            --detection-depth=6
-            --exclude=node_modules,cache,artifacts,tmp
+      - run:
+          name: Install Snyk CLI
+          command: |
+            curl -fsSL --compressed --retry 6 --retry-all-errors \
+              https://static.snyk.io/cli/latest/snyk-linux -o /tmp/snyk-linux
+            curl -fsSL --compressed --retry 6 --retry-all-errors \
+              https://static.snyk.io/cli/latest/snyk-linux.sha256 -o /tmp/snyk.sha256
+            (cd /tmp && sha256sum -c snyk.sha256)
+            sudo install -m 0755 /tmp/snyk-linux /usr/local/bin/snyk
+            snyk config set disableSuggestions=true
+      - run:
+          name: Run Snyk
+          command: |
+            snyk test \
+              --severity-threshold=high \
+              --all-projects \
+              --detection-depth=6 \
+              --exclude=node_modules,cache,artifacts,tmp
       - run:
           name: Validate Repository
           command: |
