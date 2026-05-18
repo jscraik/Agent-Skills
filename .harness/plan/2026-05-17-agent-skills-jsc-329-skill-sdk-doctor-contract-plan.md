@@ -557,7 +557,7 @@ Handoff state:
 | Gate | Phase | Required | Command | Expected Outcome |
 | --- | --- | --- | --- | --- |
 | Source spec exists | pre-implementation | yes | test -f .harness/specs/2026-05-17-agent-skills-jsc-329-skill-sdk-doctor-contract-spec.md | exit 0 |
-| Source spec has acceptance/validation/rollback/scope | pre-implementation | yes | rg -n "AC-|acceptance|validation|rollback|scope" .harness/specs/2026-05-17-agent-skills-jsc-329-skill-sdk-doctor-contract-spec.md | finds source contract terms |
+| Source spec has acceptance/validation/rollback/scope | pre-implementation | yes | `rg -n "AC-\|acceptance\|validation\|rollback\|scope" .harness/specs/2026-05-17-agent-skills-jsc-329-skill-sdk-doctor-contract-spec.md` | finds source contract terms |
 | Required shape negative fixtures | implementation | yes | python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q | rejects wrong field types, empty semantic fields, and opaque contract_schemas placeholders |
 | SDK layer mapping fixtures | implementation | yes | python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q | known checks/blockers/warnings/evidence groups map to approved SDK layer values or preserve original class with sdk_layer unknown |
 | Production sdk_layer fields | implementation | yes | python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q | known readiness classes expose sdk_layer in data.skill_doctor JSON, not only fixture mapping |
