@@ -74,7 +74,7 @@ The plan must produce implementation steps that prove:
 | artifacts/reviews/jsc329_round1_architecture_strategist.md | Required fields needed semantic content, public check names needed mapping discipline, and the second skill needed a distinct representativeness axis. |
 | .harness/linear/2026-05-17-agent-skills-skill-sdk-doctor-contract-linear-plan.md | Live Linear issue JSC-329 is the execution handle. |
 | .harness/quality/steering-uptake.md | RF-0 closeout gate and repeated-feedback uptake evidence. |
-| ~/dev/codex commits e7bffc5a2, f0166cadb, 4c8977231, a28024802, and 326e31ab6 | Upstream Python SDK lessons: normalize convenient inputs into typed contracts, return public domain result objects, expose attempt-local setup/login handles, split helper logic away from the facade, and test public exports/signatures. |
+| https://github.com/openai/codex commits e7bffc5a2, f0166cadb, 4c8977231, a28024802, and 326e31ab6 | Upstream Python SDK lessons: normalize convenient inputs into typed contracts, return public domain result objects, expose attempt-local setup/login handles, split helper logic away from the facade, and test public exports/signatures. |
 | openai/openai-python temporary design-reference clone | Reference architecture for Python SDK ergonomics, generated type stewardship, hosted skill resource vocabulary, version/content surfaces, cursor pagination, raw/streaming escape hatches, error taxonomy, and docs discipline; dependency use requires a concrete OpenAI API boundary and is not part of this doctor fixture slice. |
 
 ## Scope and Boundaries
@@ -129,7 +129,7 @@ The current plan is implementation-ready only as a bounded he-work handoff, not 
 
 | Evidence | Finding | Required Plan Adjustment |
 | --- | --- | --- |
-| Live `./bin/ask skills doctor context7 --json --robot` | The payload is parseable and `data.skill_doctor.status=blocked`, but the observed blocker is `blocked_validation` while `next_command` points to `./bin/ask skills proof context7 --json --robot`. | PU-002 must add a fixture for the current baseline class: structural validation blockers select the audit/validation remediation command before proof/outcome commands, or record why no blocker command is available. |
+| Live `./bin/ask skills doctor context7 --json --robot` | The payload is parseable and `data.skill_doctor.status=blocked`, but the observed blocker is `blocked_validation` while `next_command` points to `./bin/ask skills prove context7 --json --robot`. | PU-002 must add a fixture for the current baseline class: structural validation blockers select the audit/validation remediation command before proof/outcome commands, or record why no blocker command is available. |
 | `Infrastructure/tests/test_ask_skills_doctor.py` | The current pass test permits `checks.outcome_proof.status=available_not_run` with final `status=pass`. | PU-002 must update behavior/tests so available-not-run critical outcome proof maps to warning by default, or require explicit profile evidence that outcome proof is non-critical for that pass case. |
 | Plan frontmatter and review appendix | Prior review labels say approved, but implementation has not run the new gates yet. | Closeout must report confidence as evidence-limited until focused tests, live probes, representativeness, and changed-file validation pass. |
 
@@ -324,7 +324,7 @@ Steps:
 - Assert status precedence through observable payloads rather than duplicating implementation logic.
 - Assert next_command key presence for all observed statuses and prove its value follows this order: actionable blocker, warning-only remediation, pass proof/inspection command, explicit null with evidence that no safe command exists.
 - Add a mixed blocker/warning fixture proving next_command cannot point at a warning while an actionable blocker exists.
-- Add a structural-validation blocker fixture based on the current context7 class: when `blocked_validation` includes or can derive an audit/validation command, next_command must select that blocker command before `skills proof <handle>`.
+- Add a structural-validation blocker fixture based on the current context7 class: when `blocked_validation` includes or can derive an audit/validation command, next_command must select that blocker command before `skills prove <handle>`.
 - Update the existing pass fixture that currently accepts `outcome_proof.available_not_run`: final pass is invalid unless the fixture declares a profile where outcome proof is explicitly non-critical and records that classification in operation_context. The default expected status for available-not-run outcome proof is warning.
 - Preserve existing non-zero error behavior when blockers are present.
 - Treat skipped, missing, unavailable, and not-run critical checks as apparatus failures or warnings that must remain visible. They must not be hidden behind a coherent agent_summary.

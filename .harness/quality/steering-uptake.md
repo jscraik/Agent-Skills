@@ -753,14 +753,6 @@ Exclusions: Repository source APIs until a concrete implementation package or
 review target is named; policy uptake happens here, code sweep happens in that
 bounded package.
 
-Generalized rule: Operational failure APIs should expose meaningful authority,
-invariants, and error semantics in their shape instead of hiding diagnosis
-behind bare booleans or vague helper convenience.
-
-Similar-case disposition: Policy and validator behavior fixed now; source-code
-API sweeps are deferred to the named package or layer for each concrete review
-so predicate helpers and public migrations can be classified correctly.
-
 Disposition: policy surface updates now; source-code sweeps occur when a
 concrete code review comment identifies the repository package or API layer to
 search.
@@ -833,14 +825,6 @@ glossary definitions, and ledger records.
 Exclusions: Specific installer or doctor implementations until a setup flow is
 under active implementation.
 
-Generalized rule: Agent-facing products should make the agent responsible for
-discovering, bootstrapping, validating, and reporting workspace readiness rather
-than requiring Jamie to integrate scattered pieces manually.
-
-Similar-case disposition: Policy surfaces fixed now; concrete setup, install,
-doctor, or projection flows require source-specific implementation work when
-those flows are active.
-
 Disposition: policy surface updates now; not applicable to source code until a
 specific setup/install/doctor flow is being implemented or reviewed.
 
@@ -911,12 +895,6 @@ active ledger rule, and uptake records.
 
 Exclusions: Domain implementation files because this is the operating rule for
 how future domain mechanisms are framed.
-
-Generalized rule: Systems-thinking work must translate a blocker into a
-durable mechanism with proof and a stated remaining limit.
-
-Similar-case disposition: Product and steering policy surfaces fixed now;
-domain-specific mechanisms are handled in the relevant implementation lane.
 
 Disposition: policy surface updates now; no code sweep because this is a product
 operating rule until applied to a concrete blocker or implementation lane.
@@ -1486,7 +1464,7 @@ Vertical OODA: The rule carries from bootstrap setup to projection generation,
 surface inventory, doctor, closeout, final reporting, and future heartbeat
 continuation.
 
-Durable surface: `/Users/jamiecraik/.local/bin/ask`,
+Durable surface: `./bin/ask`,
 `.skillsets/command-surface.json`,
 `Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py`,
 `Infrastructure/scripts/testing/test_repo_surface_inventory.py`,
