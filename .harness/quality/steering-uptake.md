@@ -1416,3 +1416,102 @@ Validation: Run `bash scripts/check-environment.sh`,
 
 Repeat prevention: Do not leave a concrete readiness command failure in the
 final answer as a residual risk when the files in scope can be fixed safely.
+
+## Uptake Record: 2026-05-18 closeout diagnostics must become fixes
+
+Operating failure: Closeout diagnostic debt was reported as nonblocking without
+first repairing the safely fixable parts or refining the diagnostic mechanism
+that made the debt repeat.
+
+Feedback type: validation_gap
+
+Intent radius: repository
+
+Blocker: `ask_bootstrap` had no PATH shim even though the PATH already included
+`~/.local/bin`, command-surface projection drift made `repo doctor` fail despite
+zero handle violations, and repo-surface diagnostics kept counting cleanup
+candidates after they were deleted from the working tree.
+
+Generalized rule: A nonblocking closeout diagnostic is still operating evidence.
+Before final closeout, repair safe findings, mechanize the validator so the fix
+is visible before commit, or name the owner and retained-debt class explicitly.
+
+Similar-case disposition: Ask bootstrap PATH readiness, command-surface
+projection drift, duplicated `Infrastructure/Infrastructure/**` cleanup, pending
+deletion visibility, and `skills-system/**` ownership classification are fixed
+now; the remaining repo-surface debt is classified historical artifact debt with
+the exact dominant codes still reported by doctor.
+
+Repeated error protocol: The same residual diagnostic was surfaced back to the
+user after prior steering. The fix path stopped ordinary readiness work, repaired
+the PATH shim, regenerated the canonical projection, deleted the smallest safe
+duplicated artifact slice, and changed inventory classification/visibility rules
+instead of retrying closeout with a better explanation.
+
+Pattern sweep: Checked bootstrap diagnostics, doctor signal output,
+command-surface projection writer/checker, repo-surface findings, duplicated
+Infrastructure references, skills-system ownership docs, system-skill lockfile,
+selection policy, projection-integrity bridge aliases, and steering uptake
+requirements.
+
+Sweep scope: Repo readiness diagnostics and closeout reporting surfaces.
+
+Search terms: ask_bootstrap, PATH shim, command-surface projection,
+COMMAND_SURFACE_PROJECTION_DRIFT, repo_surface, duplicated_infrastructure_path,
+skills-system, system bridge, closeout diagnostic debt.
+
+Matches considered: `scripts/bootstrap-ask.sh`,
+`Infrastructure/scripts/lib/ask/bootstrap.py`, `.skillsets/command-surface.json`,
+`scripts/lifecycle-and-sync/command_surface.py`,
+`Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py`,
+`Docs/agents/15-repo-surface-ownership.md`,
+`Infrastructure/GOVERNANCE/skills-system-upstream.lock.json`,
+`scripts/lifecycle-and-sync/selection_policy.py`, and this ledger.
+
+Exclusions: The remaining tracked historical artifacts and generated work areas
+because they require a larger archival cleanup decision; they are no longer
+mixed with unknown ownership or duplicated-path findings after this repair.
+
+Disposition: fixed now by installing the existing PATH shim target,
+regenerating `.skillsets/command-surface.json`, deleting six duplicated
+`Infrastructure/Infrastructure/**` artifacts after reference scan, excluding
+worktree-deleted paths from live surface inventory, and classifying
+`skills-system/**` as governed generated-tracked system-skill surface.
+
+Horizontal OODA: This failure affects any agent that treats doctor/closeout
+diagnostics as advisory prose instead of operational state to repair or classify
+before continuing.
+
+Vertical OODA: The rule carries from bootstrap setup to projection generation,
+surface inventory, doctor, closeout, final reporting, and future heartbeat
+continuation.
+
+Durable surface: `/Users/jamiecraik/.local/bin/ask`,
+`.skillsets/command-surface.json`,
+`Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py`,
+`Infrastructure/scripts/testing/test_repo_surface_inventory.py`,
+`Docs/agents/15-repo-surface-ownership.md`, and this ledger.
+
+Environment refinement: The local PATH now resolves `ask` to this repo's
+`bin/ask`; repo-surface inventory now reflects working-tree deletions before
+commit; `skills-system/**` has an encoded ownership class tied to the lockfile.
+
+Mechanism: Future runs prove the repair with `bash scripts/bootstrap-ask.sh
+--json`, `./bin/ask skills handles --check --no-handles --json --robot`,
+`python3 -m pytest Infrastructure/scripts/testing/test_repo_surface_inventory.py
+-q`, and `./bin/ask repo doctor --json --robot`.
+
+Proof: Bootstrap reports `status: success` with `path_discovery_status: pass`;
+command handles report zero violations and projection check pass; repo-surface
+blocking categories no longer include `duplicated_infrastructure_path` or
+`ownership_decision_required`.
+
+Validation: Run `bash scripts/bootstrap-ask.sh --json`,
+`./bin/ask skills handles --check --no-handles --json --robot`,
+`python3 -m pytest Infrastructure/scripts/testing/test_repo_surface_inventory.py
+-q`, `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py
+--json`, and `./bin/ask repo doctor --json --robot`.
+
+Repeat prevention: Do not call closeout findings harmless until the exact
+safe-to-fix subset has been fixed and the remaining diagnostic class is narrower
+than the one Jamie challenged.
