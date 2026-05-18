@@ -1802,8 +1802,15 @@ class TestAskCLI(unittest.TestCase):
             "./bin/ask skills events skill_doctor_completed --json --robot",
         )
         self.assertIn("blocked_user_input", doctor["readiness_taxonomy"]["blockers"])
-        self.assertEqual(doctor["contract_schemas"]["doctor"], "skill-doctor.v1")
-        self.assertEqual(doctor["contract_schemas"]["events"], "skill-events.v1")
+        self.assertEqual(doctor["contract_schemas"]["doctor"]["version"], "skill-doctor.v1")
+        self.assertEqual(doctor["contract_schemas"]["doctor"]["owner"], "Agent Skills Kit")
+        self.assertTrue(
+            doctor["contract_schemas"]["doctor"].get("path")
+            or doctor["contract_schemas"]["doctor"].get("missing_schema_reason")
+        )
+        self.assertEqual(doctor["contract_schemas"]["events"]["version"], "skill-events.v1")
+        self.assertEqual(doctor["contract_schema_versions"]["doctor"], "skill-doctor.v1")
+        self.assertEqual(doctor["contract_schema_versions"]["events"], "skill-events.v1")
         self.assertEqual(doctor["operation_context"]["primary_profile"], "authoring")
         self.assertIn("package-review", doctor["operation_context"]["next_profiles"])
         self.assertIn("skill audit", doctor["operation_context"]["profiles"]["authoring"]["required_evidence"])
@@ -1816,6 +1823,8 @@ class TestAskCLI(unittest.TestCase):
             doctor["operation_context"]["validation_commands"],
         )
         self.assertIn("eval_blocked", doctor["lifecycle_event_types"])
+        self.assertIn("Packaging", doctor["sdk_layers"])
+        self.assertEqual(doctor["checks"]["package_readiness"]["sdk_layer"], "Packaging")
         package_readiness = doctor["checks"]["capability_metadata"]["package_readiness"]
         self.assertIn("version", package_readiness["required_fields"]["present"])
         self.assertFalse(package_readiness["promotion_gate"]["share_ready"])
@@ -1842,7 +1851,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Skill doctor: skill-builder", result.stdout)
         self.assertIn("Event: skill_doctor_completed", result.stdout)
         self.assertIn("Warning classes: outcome_proof_missing", result.stdout)
-        self.assertIn("Checks: missing=1, pass=5", result.stdout)
+        self.assertIn("Checks: missing=1, pass=6", result.stdout)
         self.assertIn("Validation: ./bin/ask skills doctor <handle-or-path> --json --robot", result.stdout)
         self.assertIn("Next:", result.stdout)
 

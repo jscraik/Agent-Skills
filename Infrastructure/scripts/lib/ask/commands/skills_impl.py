@@ -1270,6 +1270,62 @@ DOCTOR_WARNING_TAXONOMY: dict[str, str] = {
 }
 
 
+DOCTOR_SDK_LAYERS: tuple[str, ...] = (
+    "Contracts",
+    "Catalog",
+    "Authoring",
+    "Validation",
+    "Packaging",
+    "Runtime Adapters",
+    "Evidence",
+    "Memory",
+)
+
+
+DOCTOR_CHECK_SDK_LAYERS: dict[str, str] = {
+    "resolver": "Catalog",
+    "runtime_reachability": "Runtime Adapters",
+    "canonical_source": "Authoring",
+    "structural_audit": "Validation",
+    "capability_metadata": "Catalog",
+    "package_readiness": "Packaging",
+    "outcome_proof": "Evidence",
+}
+
+
+DOCTOR_BLOCKER_SDK_LAYERS: dict[str, str] = {
+    "blocked_resolution": "Catalog",
+    "blocked_runtime": "Runtime Adapters",
+    "blocked_missing_source": "Authoring",
+    "blocked_validation": "Validation",
+    "blocked_user_input": "Runtime Adapters",
+    "blocked_auth": "Runtime Adapters",
+    "timeout_no_output": "Runtime Adapters",
+    "timeout_partial_output": "Runtime Adapters",
+    "blocked_missing_tool": "Validation",
+    "blocked_missing_artifact": "Evidence",
+    "blocked_environment": "Runtime Adapters",
+}
+
+
+DOCTOR_WARNING_SDK_LAYERS: dict[str, str] = {
+    "metadata_incomplete": "Catalog",
+    "capability_contract_incomplete": "Packaging",
+    "outcome_proof_missing": "Evidence",
+    "strict_audit_not_run": "Validation",
+}
+
+
+DOCTOR_CONTRACT_SCHEMA_VERSIONS: dict[str, str] = {
+    "doctor": "skill-doctor.v1",
+    "events": "skill-events.v1",
+    "lifecycle_event": "capability-lifecycle-event.v1",
+    "profiles": "skill-operation-profiles.v1",
+    "package": "skill-package-readiness.v1",
+    "memory": "skill-memory-provider.v1",
+}
+
+
 EVAL_BLOCKER_CLASSES: list[str] = [
     "blocked_user_input",
     "blocked_auth",
@@ -1383,9 +1439,43 @@ SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
 }
 
 
+def _doctor_contract_schema_refs() -> dict[str, dict[str, str]]:
+    """Return consumer-usable schema references for doctor payload surfaces."""
+    missing_schema_reason = (
+        "Governed inline contract; concrete schema file is deferred until "
+        "external consumers require it."
+    )
+    return {
+        schema_name: {
+            "name": schema_name,
+            "version": version,
+            "owner": "Agent Skills Kit",
+            "stability": "experimental",
+            "missing_schema_reason": missing_schema_reason,
+        }
+        for schema_name, version in DOCTOR_CONTRACT_SCHEMA_VERSIONS.items()
+    }
+
+
+def _doctor_contract_schema_versions() -> dict[str, str]:
+    """Return legacy scalar schema versions for existing doctor consumers."""
+    return dict(DOCTOR_CONTRACT_SCHEMA_VERSIONS)
+
+
+def _doctor_sdk_layer_for(kind: str, name: str) -> str:
+    """Return the public Skills SDK layer for a doctor contract object."""
+    layer_maps = {
+        "check": DOCTOR_CHECK_SDK_LAYERS,
+        "blocker": DOCTOR_BLOCKER_SDK_LAYERS,
+        "warning": DOCTOR_WARNING_SDK_LAYERS,
+    }
+    return layer_maps.get(kind, {}).get(name, "Contracts")
+
+
 def _doctor_blocker(blocker_class: str, message: str) -> dict[str, str]:
     return {
         "class": blocker_class,
+        "sdk_layer": _doctor_sdk_layer_for("blocker", blocker_class),
         "message": message,
         "definition": DOCTOR_BLOCKER_TAXONOMY.get(blocker_class, "Unclassified doctor blocker."),
     }
@@ -1394,6 +1484,7 @@ def _doctor_blocker(blocker_class: str, message: str) -> dict[str, str]:
 def _doctor_warning(warning_class: str, message: str) -> dict[str, str]:
     return {
         "class": warning_class,
+        "sdk_layer": _doctor_sdk_layer_for("warning", warning_class),
         "message": message,
         "definition": DOCTOR_WARNING_TAXONOMY.get(warning_class, "Unclassified doctor warning."),
     }
@@ -2327,9 +2418,59 @@ def skills_profiles(repo_root: Path, profile: str | None = None) -> CallResult:
 
 
 def _doctor_check(status: str, **details: Any) -> dict[str, Any]:
-    payload = {"status": status}
+    check_name = str(details.pop("check_name", "") or "")
+    payload = {
+        "status": status,
+        "sdk_layer": _doctor_sdk_layer_for("check", check_name),
+    }
     payload.update(details)
     return payload
+
+
+def _skill_doctor_next_command(
+    *,
+    blockers: list[dict[str, str]],
+    warnings: list[dict[str, str]],
+    checks: dict[str, Any],
+    normalized_handle: Any,
+    query: str,
+    audit_target: str | None,
+    strict: bool,
+) -> str:
+    """Select the most actionable follow-up command from classified doctor evidence."""
+    blocker_classes = [blocker.get("class") for blocker in blockers]
+    if "blocked_validation" in blocker_classes:
+        command = checks.get("structural_audit", {}).get("command")
+        if command:
+            return str(command)
+        if audit_target:
+            return _skills_validation_command("audit", audit_target, "--level", "compat")
+    if "blocked_runtime" in blocker_classes:
+        command = checks.get("runtime_reachability", {}).get("command")
+        if command:
+            return str(command)
+    if "blocked_missing_source" in blocker_classes:
+        return _skills_validation_command("resolve", str(normalized_handle or query))
+    if "blocked_resolution" in blocker_classes:
+        return _skills_validation_command("resolve", str(normalized_handle or query))
+    if blockers:
+        return _skills_validation_command("doctor", str(normalized_handle or query))
+
+    warning_classes = {warning.get("class") for warning in warnings}
+    package_or_metadata_warning = bool(
+        {"metadata_incomplete", "capability_contract_incomplete"} & warning_classes
+    )
+    if package_or_metadata_warning and audit_target and not strict:
+        return _skills_validation_command("audit", audit_target, "--level", "strict")
+    if "capability_contract_incomplete" in warning_classes:
+        return _skills_validation_command("package", str(normalized_handle or query))
+    if "outcome_proof_missing" in warning_classes:
+        return _skills_validation_command("prove", str(normalized_handle or query))
+    if warnings and audit_target and not strict:
+        return _skills_validation_command("audit", audit_target, "--level", "strict")
+    if normalized_handle:
+        return _skills_validation_command("prove", str(normalized_handle))
+    return _skills_validation_command("audit", str(audit_target), "--level", "strict")
 
 
 def _capability_metadata_status(frontmatter: dict[str, Any]) -> dict[str, Any]:
@@ -2916,6 +3057,7 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
         resolver_pass = isinstance(resolution, dict) and resolution.get("status") == "ok"
         checks["resolver"] = _doctor_check(
             _status_from_bool(resolver_pass),
+            check_name="resolver",
             handle=normalized_handle,
             error_code=(resolution or {}).get("error_code") if isinstance(resolution, dict) else None,
             operator_action=(resolution or {}).get("operator_action") if isinstance(resolution, dict) else None,
@@ -2930,11 +3072,12 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
 
         proof_result = skills_proof(repo_root, str(normalized_handle))
         proof = proof_result.data.get("proof", {})
-        checks["runtime_reachability"] = {
-            "status": proof.get("status", "fail") if isinstance(proof, dict) else "fail",
-            "command": _skills_validation_command("proof", str(normalized_handle)),
-            "gates": proof.get("gates", {}) if isinstance(proof, dict) else {},
-        }
+        checks["runtime_reachability"] = _doctor_check(
+            proof.get("status", "fail") if isinstance(proof, dict) else "fail",
+            check_name="runtime_reachability",
+            command=_skills_validation_command("proof", str(normalized_handle)),
+            gates=proof.get("gates", {}) if isinstance(proof, dict) else {},
+        )
         if proof_result.status != "success":
             blockers.append(
                 _doctor_blocker(
@@ -2945,12 +3088,14 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
     else:
         checks["resolver"] = _doctor_check(
             "skipped",
+            check_name="resolver",
             reason="Path targets are audited as canonical source; command-handle proof requires a handle.",
         )
 
     source_exists = bool(target_info.get("source_exists"))
     checks["canonical_source"] = _doctor_check(
         _status_from_bool(source_exists),
+        check_name="canonical_source",
         source_path=source_path_value,
     )
     if not source_exists:
@@ -2967,6 +3112,7 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
         diagnostics = audit_result.data.get("diagnostics", {})
         checks["structural_audit"] = _doctor_check(
             "pass" if audit_result.status == "success" else "fail",
+            check_name="structural_audit",
             level=audit_level,
             command=_skills_validation_command("audit", audit_target, "--level", audit_level),
             diagnostics_exit_code=diagnostics.get("exit_code"),
@@ -2981,6 +3127,7 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
     else:
         checks["structural_audit"] = _doctor_check(
             "skipped",
+            check_name="structural_audit",
             level=audit_level,
             reason="No canonical source target available.",
         )
@@ -2992,6 +3139,7 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
         except OSError:
             frontmatter = {}
     metadata_status = _capability_metadata_status(frontmatter)
+    metadata_status.setdefault("sdk_layer", _doctor_sdk_layer_for("check", "capability_metadata"))
     checks["capability_metadata"] = metadata_status
     if metadata_status["status"] == "warning":
         warnings.append(
@@ -3000,14 +3148,33 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
                 "Recommended frontmatter fields are incomplete.",
             )
         )
+    package_readiness = metadata_status.get("package_readiness", {})
+    package_status = "pass"
+    if isinstance(package_readiness, dict) and package_readiness.get("required_fields", {}).get("missing"):
+        package_status = "warning"
+        warnings.append(
+            _doctor_warning(
+                "capability_contract_incomplete",
+                "Package/share readiness metadata is incomplete.",
+            )
+        )
+    checks["package_readiness"] = _doctor_check(
+        package_status,
+        check_name="package_readiness",
+        package_readiness=package_readiness,
+        required_fields=package_readiness.get("required_fields", {}) if isinstance(package_readiness, dict) else {},
+        install_gate=package_readiness.get("install_gate", {}) if isinstance(package_readiness, dict) else {},
+        promotion_gate=package_readiness.get("promotion_gate", {}) if isinstance(package_readiness, dict) else {},
+    )
 
     workout_handle = str(normalized_handle or (Path(audit_target).name if audit_target else "")).strip()
     workouts = _skill_workout_candidates(repo_root, workout_handle) if workout_handle else []
-    checks["outcome_proof"] = {
-        "status": "available_not_run" if workouts else "missing",
-        "workout_candidates": workouts,
-        "evidence_class": "outcome_proof",
-    }
+    checks["outcome_proof"] = _doctor_check(
+        "available_not_run" if workouts else "missing",
+        check_name="outcome_proof",
+        workout_candidates=workouts,
+        evidence_class="outcome_proof",
+    )
     if not workouts:
         warnings.append(
             _doctor_warning(
@@ -3015,27 +3182,16 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
                 "No matching workout was found for this capability.",
             )
         )
-    if blockers:
-        doctor_status = "blocked"
-        next_command = (
-            checks.get("runtime_reachability", {}).get("command")
-            or checks.get("structural_audit", {}).get("command")
-            or _skills_validation_command("resolve", str(normalized_handle or query))
-        )
-    elif warnings:
-        doctor_status = "warning"
-        next_command = (
-            _skills_validation_command("audit", audit_target, "--level", "strict")
-            if audit_target and not strict
-            else _skills_validation_command("prove", str(normalized_handle or query))
-        )
-    else:
-        doctor_status = "pass"
-        next_command = (
-            _skills_validation_command("prove", str(normalized_handle))
-            if normalized_handle
-            else _skills_validation_command("audit", str(audit_target), "--level", "strict")
-        )
+    doctor_status = "blocked" if blockers else ("warning" if warnings else "pass")
+    next_command = _skill_doctor_next_command(
+        blockers=blockers,
+        warnings=warnings,
+        checks=checks,
+        normalized_handle=normalized_handle,
+        query=query,
+        audit_target=audit_target,
+        strict=strict,
+    )
 
     handle_label = "$" + str(normalized_handle) if normalized_handle else query
     lifecycle_event = _capability_lifecycle_event(
@@ -3070,14 +3226,9 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
             "blockers": DOCTOR_BLOCKER_TAXONOMY,
             "warnings": DOCTOR_WARNING_TAXONOMY,
         },
-        "contract_schemas": {
-            "doctor": "skill-doctor.v1",
-            "events": "skill-events.v1",
-            "lifecycle_event": "capability-lifecycle-event.v1",
-            "profiles": "skill-operation-profiles.v1",
-            "package": "skill-package-readiness.v1",
-            "memory": "skill-memory-provider.v1",
-        },
+        "sdk_layers": list(DOCTOR_SDK_LAYERS),
+        "contract_schemas": _doctor_contract_schema_refs(),
+        "contract_schema_versions": _doctor_contract_schema_versions(),
         "operation_context": _skill_doctor_operation_context(),
         "lifecycle_event": lifecycle_event,
         "lifecycle_event_types": CAPABILITY_LIFECYCLE_EVENT_TYPES,
