@@ -14,6 +14,12 @@
 - Fresh-checkout command reachability:
   `bash scripts/bootstrap-ask.sh --json`, then
   `python3 bin/ask repo status --json`.
+- Git hook readiness:
+  `bash scripts/install-prek-hooks.sh` installs `prek` hooks and patches the
+  generated shims to use repo-local `.cache/prek` for `PREK_HOME`. This avoids
+  repeated Codex sandbox failures on `~/.cache/prek/prek.log` during commit and
+  push. `bash scripts/check-environment.sh` fails if installed hooks exist but
+  do not carry the repo-local `PREK_HOME` patch.
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (project-local default scope)
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --workspace-governance` (explicit workspace scope)
 - `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/**`, `Plugins/cache/**`, and `runtime/**`)

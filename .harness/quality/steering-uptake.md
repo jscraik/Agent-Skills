@@ -1252,3 +1252,89 @@ and pytest for Infrastructure/scripts/testing/test_validate_steering_uptake.py.
 Repeat prevention: Future feedback uptake must ask what class of behavior the
 example points to across the whole work surface, rather than patching only the
 named instance.
+
+## Uptake Record: 2026-05-18 repo-local prek hook home
+
+Operating failure: A known repeated commit/push blocker stayed as recovery
+memory instead of becoming a workspace readiness mechanism.
+
+Feedback type: validation_gap
+
+Intent radius: repository
+
+Blocker: Generated `prek` git hooks defaulted to `$PREK_HOME/prek.log`, which
+resolved to `~/.cache/prek/prek.log` in Codex sandboxed pushes and required
+extra home-directory write access after validation had already passed.
+
+Generalized rule: Repeated hook-enforced delivery failures must be promoted into
+setup/readiness contracts, not handled as per-push permission exceptions.
+
+Similar-case disposition: Prek hook install, worktree readiness, environment
+check, root instructions, validation docs, workflow docs, glossary, and this
+ledger are fixed now; unrelated hook runtime blockers remain classified by their
+own exact failing path.
+
+Repeated error protocol: The same `~/.cache/prek/prek.log` failure occurred
+across commit and push lanes, so the fix path compared plausible options before
+implementation: request home-cache permission per command, bypass hooks, set
+`PREK_HOME` per command, patch generated hooks manually, or add a repo installer
+that makes generated hooks use repo-local cache state.
+
+Pattern sweep: Checked generated git hook shims, `prek.toml`, Makefile hook
+targets, worktree readiness, environment checks, validation docs, workflow docs,
+glossary, and memory references for `prek` cache blockers.
+
+Sweep scope: Git hook setup/readiness surfaces and agent-facing validation docs.
+
+Search terms: prek, PREK_HOME, prek.log, .cache/prek, pre-push, pre-commit,
+hook, worktree-ready, check-environment.
+
+Matches considered: Generated `.git/hooks/pre-commit`, `.git/hooks/commit-msg`,
+`.git/hooks/pre-push`, `prek.toml`, `Makefile`, `scripts/check-environment_impl.sh`,
+`Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh`, and validation
+documentation.
+
+Exclusions: Other hook failures such as lint, Semgrep, generated projection
+drift, stale git metadata, and external network/auth failures because they do not
+share the `PREK_HOME` log path root cause.
+
+Disposition: fixed now by adding `scripts/install-prek-hooks.sh`, routing
+`make worktree-ready` through `scripts/prepare-worktree.sh`, patching worktree
+preparation to install repo-local `PREK_HOME` hooks even without `package.json`,
+and making environment validation fail when installed hooks lack the patch.
+
+Horizontal OODA: The blocker affects every branch and worktree that commits or
+pushes through `prek`, especially Codex sandbox sessions with restricted
+home-directory writes.
+
+Vertical OODA: The rule carries from fresh workspace setup, hook installation,
+commit validation, pre-push validation, PR delivery, and future closeout
+evidence.
+
+Durable surface: `scripts/install-prek-hooks.sh`, `scripts/prepare-worktree.sh`,
+`Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh`,
+`scripts/check-environment_impl.sh`, `Makefile`, `AGENTS.md`,
+`Docs/agents/04-validation.md`, `Docs/agents/13-workflow-and-safety-guidance.md`,
+`UBIQUITOUS_LANGUAGE.md`, and this ledger.
+
+Environment refinement: Hook installation now rewrites generated `prek` shims
+to set `PREK_HOME="$REPO_ROOT/.cache/prek"`, and environment validation reports
+a concrete fix command if an installed hook is missing that repo-local cache
+patch.
+
+Mechanism: Future agents run `bash scripts/install-prek-hooks.sh` or
+`make worktree-ready`; the generated hook writes `prek.log` inside the
+workspace, so a normal hook-enforced commit or push no longer needs
+`~/.cache/prek` write permission.
+
+Proof: `prek --help` and `prek hook-impl --help` show `--log-file` defaults to
+`$PREK_HOME/prek.log`; the installer sets `PREK_HOME` in generated hook shims
+before `prek hook-impl` runs.
+
+Validation: Run `bash scripts/install-prek-hooks.sh`, inspect the generated hook
+for `PREK_HOME`, run `bash scripts/check-environment.sh` or focused shell syntax
+checks, then rerun the normal hook-enforced push path.
+
+Repeat prevention: Do not widen sandbox permissions for this known `prek.log`
+failure first. Repair hook readiness with the repo installer, then use the normal
+hook-enforced git path.

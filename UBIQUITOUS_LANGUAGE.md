@@ -38,6 +38,7 @@
 | **Generalized Feedback Rule** | The transferable principle implied by a local feedback example, stated without the incidental function, command, test, doc section, line, error, or file name. | local fix, review nit | High |
 | **Similar-Case Disposition** | The classification of equivalent cases found during a pattern sweep: fixed now, different semantics, deferred with reason, or not applicable. | sweep done, grep result | High |
 | **Repeated Error Research Gate** | The troubleshooting rule that the same error twice stops retries and triggers research of 3-5 plausible fixes, selection of the efficient safe option, implementation, and evidence. | keep trying, fight the error | High |
+| **Repo-Local Prek Home** | The repository-owned `.cache/prek` directory used by generated git hook shims through `PREK_HOME`, preventing Codex sandboxed commit/push hooks from writing `~/.cache/prek/prek.log`. | home prek cache, local workaround | High |
 | **Durable Surface** | The canonical repo file or generated-source owner that should carry a steering rule so future agents inherit it. | note, reminder, chat context | High |
 | **Horizontal OODA Context** | Awareness of adjacent organizational activity that may change how an agent should orient before acting. | background noise, extra context | Medium |
 | **Vertical OODA Context** | Awareness that an agent is acting across stacked trajectories, not only the current turn or current patch. | thread memory, task history | Medium |

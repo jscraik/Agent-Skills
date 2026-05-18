@@ -14,6 +14,10 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   `python3 bin/ask repo status --json`.
 - Use `./bin/ask` for repo operations; it forwards to
   `Infrastructure/bin/ask`.
+- Before committing or pushing from a fresh or repaired worktree, run
+  `bash scripts/install-prek-hooks.sh` or `make worktree-ready`. The installer
+  forces generated `prek` git hooks to use repo-local `.cache/prek` so Codex
+  sandboxed pushes do not fail on `~/.cache/prek/prek.log` write access.
 - The repository root has no package manager install step. Use repo wrappers at
   the root, and use package commands only inside verified package roots.
 - Before changing skills, sync policy, runtime projections, or agent-facing

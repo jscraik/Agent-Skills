@@ -50,6 +50,19 @@ When modifying shell scripts or configuration files, always use non-interactive 
 When working with git branches, prefer to merge over rebase for complex histories (>50 commits). Always run `ask repo status` and resolve conflicts systematically before proceeding with changes.
 For git operations like cherry-picking or branch syncing, prefer branch-aware merge/rebase flows that keep full-context history visible, and avoid direct low-level file restore commands.
 
+Before commit or push, make sure generated `prek` hooks use repo-local cache
+state:
+
+```bash
+bash scripts/install-prek-hooks.sh
+```
+
+This patches the generated git hook shims to set
+`PREK_HOME="$REPO_ROOT/.cache/prek"`. If a hook fails with
+`failed to open file ... ~/.cache/prek/prek.log`, do not retry the same push
+with broader home-directory write access. Run the installer, then rerun the
+normal hook-enforced commit or push path.
+
 ## Configuration Files
 
 For YAML schema changes and configuration files, validate against the schema immediately after editing. Do not assume syntax is correct without verification.
