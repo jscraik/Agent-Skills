@@ -46,6 +46,17 @@ Do not use for ordinary product implementation, generic repo maintenance, or plu
 
 Explicit lane names win unless the user names multiple lanes or asks for an unsafe action.
 
+`next_handoff` must use this shape when present:
+
+- `lane`: one of the Skill Factory lanes
+- `mode`: the target lane mode
+- `condition`: the concrete completion condition for the primary lane
+- `expected_input`: structured artifacts the target lane must receive
+- `blocked_by`: blockers that prevent the handoff, or an empty list
+
+If a second lane is required and `next_handoff` is omitted, the route is
+incomplete.
+
 ## Procedure
 
 1. Identify the target artifact and desired outcome.
