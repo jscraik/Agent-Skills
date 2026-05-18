@@ -142,4 +142,3 @@ The imagegen surface may not always use one environment variable or provider. Th
 - In PU-005 and PU-006, treat missing waiver authority metadata as a blocked gate.
 - In closeout, report imagegen status separately as generated, blocked, or skipped.
 
-WROTE: .harness/review/2026-05-17-agent-skills-jsc-329-skill-sdk-doctor-contract-decision-deepening-technical-review.md
