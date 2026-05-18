@@ -41,6 +41,26 @@ Prefer bounded reports over raw transcripts. Summarize sensitive evidence instea
 - Evidence strength and root-cause labels.
 - Concrete repair items when the next step is `skill-builder`.
 
+Preferred session-collector inputs include `skill_refactor_handoffs`,
+`skill_refactor_evidence`, `skillify_candidates`, `skill_invocations`,
+`skill_proof_candidates`, or bounded extracts from `~/.agents/session-collector/`
+outputs. Use raw transcripts only after bounded evidence is insufficient.
+Preserve collector-native root-cause labels when present; put derived analysis
+labels in `normalized_root_causes`.
+
+Preferred generated collector artifacts include `skill-invocations.json`,
+`skill-invocation-summary.json`, `skill-proof-candidates.json`,
+`skillify-candidates.json`, `skill-refactor-handoffs.json`, and
+`harness-engineering-evidence.json`. When using a combined collector bundle,
+prefer `evidence_layers.skill_refactor_handoffs`,
+`evidence_layers.skill_refactor_evidence`, and
+`evidence_layers.skillify_candidates` before raw session bodies.
+
+For external knowledge, preserve route boundaries: use `openai-docs` only for
+official OpenAI/Codex/API/model/plugin/skill behavior, and use `context7` for
+current non-OpenAI dependency or API documentation. Do not replace local session
+evidence with external docs when the question is about observed local behavior.
+
 ## Workflow
 
 1. Define scope and evidence boundaries. Start with 2-3 focused surfaces.

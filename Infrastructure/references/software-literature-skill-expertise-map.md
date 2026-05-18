@@ -1,80 +1,99 @@
 # Software Literature Skill Expertise Map
 
-Use this map to decide where software-literature lenses should strengthen
-skills. The lenses are optional expert checks, not authority. Keep SKILL.md
-front doors compact and link to
-Infrastructure/references/software-literature-expert-lens-pack.md only when the
-task needs the lens.
+Use this map when deciding where the books staged in tmp/ can strengthen the skill system. The books are expertise sources, not content to paste into skills: extract small decision lenses, evaluator checks, and review questions; do not copy chapters, examples, diagrams, or proprietary text into repository skill files.
 
-## Source Boundary
+Companion reusable lens pack: [software-literature-expert-lens-pack.md](./software-literature-expert-lens-pack.md).
 
-Use source titles as provenance only. Do not copy book text, chapter summaries,
-examples, diagrams, or proprietary phrasing into skill packages. Convert ideas
-into original checks, eval probes, output contracts, and stop conditions.
+## Source Inventory
+
+| Source in tmp/ | Expertise lens to extract | Best use |
+| --- | --- | --- |
+| Clean Code A Handbook of Agile Software Craftsmanship copy.pdf | readability, naming, small functions, error handling, testable code, cleanup discipline | Code review and unslopifying implementation output. |
+| Designing Data-Intensive Applications - Martin Kleppmann copy.pdf | data modeling, consistency, replication, partitioning, streams, batch/online boundaries, reliability tradeoffs | Backend, architecture, integration, and production-readiness skills. |
+| Domain Driven Design Tackling Complexity in the Heart of Software - Eric Evans copy.pdf | ubiquitous language, bounded contexts, model integrity, domain/service separation, anti-corruption layers | Architecture, language, specification, and product-discovery skills. |
+| Enterprise Integration Patterns - Designing, Building And Deploying Messaging copy.pdf | message channels, routing, transformation, correlation, idempotent receivers, integration ownership | MCP, CLI, backend integration, workflow, and event-driven skills. |
+| Erich Gamma, Richard Helm, Ralph Johnson, John M. Vlissides-Design Patterns_ Elements of Reusable Object-Oriented Software  -Addison-Wesley Professional (1994) copy.pdf | reusable collaboration patterns, object boundaries, extension points, composition over inheritance | Architecture and refactoring skills, especially when naming structural alternatives. |
+| Extreme-programming-explained-embrace-change-2 (1) copy.pdf | feedback loops, small releases, test-first thinking, collective ownership, sustainable pace | Evals, planning, validation, and Harness Engineering execution skills. |
+| Five Lines of Code_ How and when to refactor copy.epub | small mechanical refactoring moves, rules of thumb, behavior preservation | Simplification, refactoring, and skill-builder rewrite loops. |
+| Martin Fowler - Refactoring - Improving the Design of Existing Code copy.pdf | catalogued behavior-preserving transformations, code smells, incremental improvement | Code review, simplify, fix-bugs, and architecture-first refactoring. |
+| Pattern-Oriented Software Architecture, Volume 1 - A System Of Patterns copy.pdf | layered systems, pipes and filters, brokers, microkernel, reflection, architectural pattern tradeoffs | System architecture, plugin architecture, and integration design. |
+| philosophy_of_software_design copy.md | deep modules, shallow modules, information hiding, change amplification, complexity diagnosis | Architecture critique, skill design, code simplification, and repo cognition. |
+| the-pragmatic-programmer copy.pdf | DRY, orthogonality, reversibility, tracer bullets, automation, broken windows, knowledge capture | Agent operations, repo hygiene, review contracts, and delivery discipline. |
+| User-Stories-Applied-Mike-Cohn copy.pdf | user roles, goal-oriented stories, acceptance criteria, splitting and prioritization | Product strategy, HE spec, eval prompts, and skill acceptance examples. |
+| Writing Effective Use Cases copy.pdf | actor-goal flows, main success scenarios, extensions, scope levels, preconditions/postconditions | Product specs, CLI/app flows, negative-path evals, and agent workflow design. |
 
 ## Primary Skill Targets
 
-| Skill | Lenses | Use |
+| Skill | Add these lenses | Why it helps |
 | --- | --- | --- |
-| Skills/agent-ops/improve-codebase-architecture | Deep Module Examiner, Architectural Pattern Cartographer, Pattern Catalog Skeptic, Domain Language Guardian, Pragmatic Delivery Partner | Architecture pressure tests, boundary choices, patch-vs-interface tradeoffs, tracer proof. |
-| Skills/agent-ops/simplify | Micro-Refactoring Surgeon, Refactoring Catalog Operator, Clean Code Craftsperson, Deep Module Examiner | Behavior-preserving simplification and small reversible cleanup. |
-| Skills/agent-ops/unslopify | Micro-Refactoring Surgeon, Clean Code Craftsperson, Pragmatic Delivery Partner | Dead-code and slop cleanup with evidence and rollback. |
-| Skills/agent-ops/ubiquitous-language | Domain Language Guardian, Use-Case Flow Designer | Glossaries, aliases, bounded contexts, source/projection terminology discipline. |
-| Skills/agent-ops/evals-router | Story Slicer, Use-Case Flow Designer, XP Feedback Coach, Pragmatic Delivery Partner | Realistic eval prompts, negative paths, acceptance checks, pass/fail/blocked evidence. |
-| Skills/agent-ops/verification-before-completion | XP Feedback Coach, Pragmatic Delivery Partner | Validation freshness, exact evidence, blocked state discipline. |
-| Skills/agent-ops/coding-harness | XP Feedback Coach, Pragmatic Delivery Partner, Domain Language Guardian, Data-Intensive Systems Critic | Execution loops, stable vocabulary, production-like data and integration checks. |
-| Skills/backend-platform/backend-engineer | Data-Intensive Systems Critic, Integration Pattern Mechanic, Domain Language Guardian, Pragmatic Delivery Partner, Clean Code Craftsperson | Data consistency, reliability, integration and backend implementation tradeoffs. |
-| Skills/backend-platform/mcp-builder | Integration Pattern Mechanic, Data-Intensive Systems Critic, Architectural Pattern Cartographer, Pragmatic Delivery Partner | Tool/resource/message contracts, idempotency, auth, schema, protocol verification. |
-| Skills/backend-platform/cli-spec | Use-Case Flow Designer, Story Slicer, Pragmatic Delivery Partner | Actor-goal CLI flows, extension paths, acceptance evidence. |
-| Skills/product-strategy/architecture-interview | Architectural Pattern Cartographer, Data-Intensive Systems Critic, Integration Pattern Mechanic, Deep Module Examiner | Decision interviews for alternatives, data/integration risk, complexity symptoms. |
-| Skills/product-strategy/deep-interview | Use-Case Flow Designer, Story Slicer, Domain Language Guardian | Product discovery, actor goals, domain vocabulary, acceptance criteria. |
-| Plugins/skill-factory/skills/code_quality_review/skill-builder | Deep Module Examiner, Use-Case Flow Designer, Refactoring Catalog Operator, XP Feedback Coach, Pragmatic Delivery Partner | Skill hardening, compact contracts, eval-backed iteration, progressive disclosure. |
-| Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor | Refactoring Catalog Operator, Micro-Refactoring Surgeon, Deep Module Examiner | Mechanical skill rewrites and context-budget reductions. |
-| Plugins/skill-factory/skills/scaffolding_templates/skillify | Story Slicer, Use-Case Flow Designer, XP Feedback Coach | New skill success criteria, negative prompts, evaluator-ready examples. |
-| Plugins/plugin-factory routed skills | Architectural Pattern Cartographer, Integration Pattern Mechanic, Data-Intensive Systems Critic, Pragmatic Delivery Partner | Package boundaries, tool contracts, dependency posture, integration failure handling. |
+| Skills/agent-ops/improve-codebase-architecture | DDIA, DDD, Enterprise Integration Patterns, POSA, GoF, Philosophy of Software Design, Refactoring, Pragmatic Programmer | This is the main architecture pressure-test skill. It should turn literature into questions about boundaries, data contracts, reversibility, and complexity symptoms. |
+| Skills/agent-ops/simplify | Five Lines of Code, Refactoring, Clean Code, Philosophy of Software Design, Pragmatic Programmer | Simplification needs small behavior-preserving moves, not broad aesthetic cleanup. |
+| Skills/agent-ops/unslopify | Clean Code, Refactoring, Five Lines of Code, Pragmatic Programmer | This skill benefits from sharper checks for vague naming, ceremony, dead prose, and unverified polish. |
+| Skills/agent-ops/ubiquitous-language | Domain-Driven Design | This is the obvious owner for bounded-context language, alias cleanup, and source/projection terminology discipline. |
+| Skills/agent-ops/evals-router | XP, User Stories Applied, Writing Effective Use Cases, Pragmatic Programmer | Evals should prove behavior through small feedback loops, actor-goal prompts, negative paths, and observable acceptance checks. |
+| Skills/agent-ops/verification-before-completion | XP, Pragmatic Programmer | The skill can use feedback-loop and automation discipline to classify pass/fail/blocked evidence cleanly. |
+| Skills/agent-ops/coding-harness | XP, Pragmatic Programmer, DDD, DDIA | Harness work needs feedback loops, stable vocabulary, and production-like data/integration thinking. |
+| Skills/backend-platform/backend-engineer | DDIA, Enterprise Integration Patterns, DDD, Pragmatic Programmer, Clean Code | Backend implementation should expose data consistency, integration, and reliability tradeoffs earlier. |
+| Skills/backend-platform/mcp-builder | Enterprise Integration Patterns, DDIA, POSA, Pragmatic Programmer | MCP tools are integration boundaries; message shape, idempotence, routing, and failure semantics matter. |
+| Skills/backend-platform/cli-spec | Writing Effective Use Cases, User Stories Applied, Pragmatic Programmer | CLI specs become stronger when commands map to actor goals, main flows, extensions, and acceptance evidence. |
+| Skills/product-strategy/architecture-interview | DDD, DDIA, Enterprise Integration Patterns, POSA, Philosophy of Software Design | Architecture interviews should expose bounded contexts, data/integration risks, and complexity symptoms before implementation starts. |
+| Skills/product-strategy/deep-interview | User Stories Applied, Writing Effective Use Cases, DDD | Product discovery should capture actor goals, domain vocabulary, scope, extensions, and acceptance criteria. |
+| Plugins/harness-engineering/skills/he-spec | User Stories Applied, Writing Effective Use Cases, DDD, XP | Specs should define user intent, domain terms, main/alternative flows, and feedback-ready acceptance criteria. |
+| Plugins/harness-engineering/skills/he-plan | XP, User Stories Applied, Writing Effective Use Cases, Pragmatic Programmer | Plans should split work into thin feedback slices with clear stop conditions and validation evidence. |
+| Plugins/harness-engineering/skills/he-code-review | Clean Code, Refactoring, Five Lines of Code, DDIA, EIP, DDD, Pragmatic Programmer | Code review should combine code smell detection with data/integration and domain-boundary review. |
+| Plugins/harness-engineering/skills/he-strategy | Philosophy of Software Design, DDD, XP, Pragmatic Programmer, DDIA, POSA | This skill already has an architecture lens canon; use the staged books to refresh that canon when needed. |
+| Plugins/harness-engineering/skills/he-work | XP, Pragmatic Programmer, Refactoring | Execution work should stay small, validated, reversible, and learning-oriented. |
+| Plugins/skill-factory/skills/code_quality_review/skill-builder | Clean Code, Five Lines of Code, Refactoring, Philosophy of Software Design, XP | Skill editing needs concise structure, trigger clarity, progressive disclosure, and eval-backed iteration. |
+| Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor | Refactoring, Five Lines of Code, Philosophy of Software Design | This is the direct home for mechanical skill rewrites and context budget reductions. |
+| Plugins/skill-factory/skills/scaffolding_templates/skillify | User Stories Applied, Writing Effective Use Cases, XP | New skill scaffolds should include success criteria, negative prompts, and evaluator-ready examples from the start. |
+| Plugins/plugin-factory routed skills | POSA, Enterprise Integration Patterns, Pragmatic Programmer, DDIA | Plugin design needs stronger package boundaries, tool contracts, dependency posture, and integration failure handling. |
 
 ## Secondary Skill Targets
 
-| Skill family | Lenses | Use |
+| Skill family | Useful source material | Suggested use |
 | --- | --- | --- |
-| Skills/security-ops/* | Pragmatic Delivery Partner, Data-Intensive Systems Critic, Integration Pattern Mechanic | Dependency, data-flow, secrets, manifest, and external API checks. |
-| Skills/frontend-ui/design-system | Deep Module Examiner, Domain Language Guardian, Use-Case Flow Designer | Component boundaries, design-system vocabulary, and user-flow acceptance checks. |
-| Skills/content-publishing/llm-wiki | Pragmatic Delivery Partner, Domain Language Guardian | Knowledge capture, source-of-truth boundaries, glossary discipline. |
-| Skills/agent-ops/docs-expert | Pragmatic Delivery Partner, Domain Language Guardian, Use-Case Flow Designer | Docs as operational interfaces with owners, flows, and exception paths. |
+| Skills/security-ops/* | Pragmatic Programmer, DDIA, EIP | Add dependency, integration, and operational-security questions where the skill touches manifests, data flows, secrets, or external APIs. |
+| Skills/frontend-ui/design-system | Philosophy of Software Design, DDD, Use Cases | Use for design-system vocabulary, component boundary clarity, and user-flow acceptance checks. |
+| Skills/content-publishing/llm-wiki | Pragmatic Programmer, DDD | Improve knowledge capture, glossary discipline, and source-of-truth boundaries. |
+| Skills/agent-ops/docs-expert | Pragmatic Programmer, DDD, Use Cases | Strengthen docs as operational interfaces: clear owners, vocabulary, main flows, and exception paths. |
 
-## Wiring Rules
+## How To Use The Material
 
-1. Add a compact Read when hook, not the lens content, to SKILL.md.
-2. Select at most three lenses per invocation.
-3. Add eval prompts only for skills where the lens changes behavior.
-4. Treat the lens as a question generator; local repo evidence supplies answers.
-5. If the shared pack is unavailable, report lens_status: missing_reference
-   instead of inventing book coverage.
+1. Start from the target skill's purpose and pick at most three lenses.
+2. Convert each lens into checks or questions, not summaries.
+3. Keep the SKILL.md trigger and front-door instructions small.
+4. Put longer lens packs in references/ files owned by the skill or by Infrastructure/references/.
+5. Add eval prompts that prove the lens changed behavior.
+6. For copyrighted sources, cite only the title as inspiration and store derived, high-level review questions.
+
+## Good Extraction Shape
+
+Use this shape when turning one book into skill material:
+
+~~~yaml
+source_title: Domain Driven Design
+skill_targets:
+  - Skills/agent-ops/ubiquitous-language
+  - Skills/product-strategy/architecture-interview
+lens:
+  - Ask what term the user, repo docs, CLI, and runtime projection each use.
+  - Identify bounded contexts before merging concepts.
+  - Mark anti-corruption boundaries where external tools or plugins impose foreign terms.
+eval_checks:
+  - Given mixed source/projection wording, does the skill normalize to canonical repo terms?
+  - Given a proposed skill blend, does it identify duplicate or conflicting bounded contexts?
+do_not_do:
+  - Do not paste book definitions or long excerpts.
+  - Do not replace repo evidence with domain theory.
+~~~
 
 ## Highest-Leverage Wiring Order
 
 1. Skills/agent-ops/improve-codebase-architecture
 2. Skills/agent-ops/evals-router
 3. Plugins/skill-factory/skills/code_quality_review/skill-builder
-4. Skills/agent-ops/simplify
-5. Skills/agent-ops/unslopify
-6. Skills/agent-ops/ubiquitous-language
-7. Skills/backend-platform/backend-engineer
-8. Skills/backend-platform/mcp-builder
-9. Skills/product-strategy/architecture-interview
+4. Plugins/harness-engineering/skills/he-spec
+5. Plugins/harness-engineering/skills/he-code-review
+6. Skills/backend-platform/backend-engineer
 
-## Eval Probe Shape
-
-~~~yaml
-prompt: "Use the skill to improve a weak AGENTS.md without losing validation."
-expected_lenses:
-  - Pragmatic Delivery Partner
-  - Use-Case Flow Designer
-must_do:
-  - cite local evidence
-  - name smallest move
-  - report validation or blocked reason
-must_not_do:
-  - cite a book as proof
-  - broaden into unrelated refactor
-~~~
+This order gives the biggest compounding return: architecture decides what should change, evals prove it, skill-builder preserves the new behavior, HE spec and review carry it into daily work, and backend-platform gets the data and integration rigor where production risk is highest.

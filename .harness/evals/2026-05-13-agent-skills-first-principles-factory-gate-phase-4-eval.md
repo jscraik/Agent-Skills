@@ -147,8 +147,7 @@ Blocks Closure: no for Phase 4 complete-with-follow-up; yes for any stronger uni
 Summary: Focused validation passed after using the repo-recognized PyYAML interpreter for YAML parsing.
 
 Command or Method:
-`/Users/jamiecraik/.venvs/pyyaml/bin/python - <<'PY' ... yaml.safe_load(...) ... PY`
-
+`python3 - <<'PY' ... yaml.safe_load(...) ... PY`
 Result: pass.
 
 Evidence: parsed all three edited eval files and reported 10 skillify cases, 10 skill-refactor cases, and 11 plugin-factory-router cases with the expected new IDs present.

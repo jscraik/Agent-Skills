@@ -131,6 +131,7 @@ Operate `@brainwav/coding-harness` with command-accurate, preview-first validati
 
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
+- For Cookbook-derived execution-plan and secure quality gate checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
 - Use `references/contract.yaml` for the machine-readable contract.
 - Use `references/evals.yaml` for benchmark and quality gates.
 - Use `references/task-profile.json` for evaluator thresholds.

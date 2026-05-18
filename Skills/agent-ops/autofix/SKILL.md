@@ -91,6 +91,7 @@ Outputs: `schema_version`, inventory by source and priority, fixed/reviewed/defe
 
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
+- For Cookbook-derived iterative repair and secure quality gate checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
 - Use `references/contract.yaml` for the machine-readable contract.
 - Use `references/evals.yaml` and `references/task-profile.json` for quality gates.
 - Use `Infrastructure/references/deferred-skill-context/agent-ops-autofix/` for long-form context.
