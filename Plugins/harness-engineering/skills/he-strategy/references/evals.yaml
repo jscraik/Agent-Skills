@@ -258,6 +258,22 @@ cases:
     prompt: "Can you compare the HE strategy artifact against my original long-form prompt method and say whether it is equivalent."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(source.?prompt|original prompt|coverage matrix|evidence depth|coverage gaps|not.?inspected|downstream confidence|equivalent|partial|weak|unknown)"}]
+  - id: stated-vs-implied-intent
+    name: "Stated vs implied intent"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    why_realistic: "Jamie explicitly asks HE strategy to compare project intent implied by code against intent stated in docs for repos such as the agent-skills checkout."
+    expected_behavior: "Select intent or source-prompt comparison mode, inspect repo evidence, and require stated/implied intent comparison with confidence limits instead of generic architecture prose."
+    anti_overfit_notes: "The expected behavior is the evidence shape and contrast, not exact wording; answers may route to a single intent artifact when only one output is requested."
+    prompt: "Please inspect the current agent-skills checkout and compare what README/docs/product language say the project is for against what Plugins/, Skills/, .skillsets/, ./bin/ask command surfaces, tests, validation gates, runtime projection paths, naming, generated artifacts, and coupling patterns imply. Call out alignment, contradictions, missing proof, and confidence limits."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(stated intent|implied intent|docs|code|implementation reality)"}
+      - {type: regex, value: "(?is)(command surface|tests|validation gate|runtime path|naming|generated artifact|coupling)"}
+      - {type: regex, value: "(?is)(alignment|contradiction|missing proof|confidence|not.?inspected|evidence sufficiency)"}
   - id: sampled-evidence-downgrades-strategy-authority
     name: "Sampled evidence downgrades strategy authority"
     category: pressure

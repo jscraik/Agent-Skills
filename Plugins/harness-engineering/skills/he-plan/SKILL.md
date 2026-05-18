@@ -21,7 +21,7 @@ Do not invent requirements, write specs, mutate Linear, implement code, or revie
 Source spec/issue/plan, selected slice, repo instructions, dirty state, validation commands, risk notes, owner/authority evidence, and relevant `.harness/**` artifacts.
 
 ## Outputs
-Write a plan artifact or return `blocked`. Include mode, source slice, units, allowed files/boundaries, validation, rollback, risks, blockers, and handoff.
+Write a plan artifact or return `blocked`. Include mode, source slice, units, allowed files/boundaries, validation, rollback, risks, blockers, an enforcement contract, and handoff.
 
 ## Procedure
 1. Choose mode:
@@ -31,17 +31,19 @@ Write a plan artifact or return `blocked`. Include mode, source slice, units, al
    - ambiguous next stage -> `blocked`
 2. Verify source artifact exists and names acceptance, validation, rollback, and scope.
 3. Break the work into small ordered units. Each unit needs allowed files or boundaries, expected behavior, validation, and rollback.
-4. Add risk and stop conditions. Do not plan unapproved external mutation, destructive commands, or broad refactors.
-5. Run the artifact gate. Fix once and re-run; if still failing, return blocked.
-6. Hand off to `he-work` only when the first unit is selected and validation is explicit.
+4. Translate the spec's Enforcement Contract into execution controls. Each relevant unit must preserve essential decisions, identify fillable gaps, bind guardrails to commands, inherit refusal triggers, name durable memory, and specify professional output evidence. For SDK, public API, schema, CLI, package, or agent-facing work, do this before assigning files so scope is constrained by guardrails rather than prose intent.
+5. Add risk and stop conditions. Do not plan unapproved external mutation, destructive commands, or broad refactors.
+6. Run the artifact gate. Fix once and re-run; if still failing, return blocked.
+7. Hand off to `he-work` only when the first unit is selected and validation is explicit.
 
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed until fixed, waived by an authorized gate, or reported as blocked.
 
 ~~~bash
 test -f <source-spec-or-plan>
-rg -n "AC-|acceptance|validation|rollback|scope" <source-spec-or-plan>
+rg -n "AC-|acceptance|validation|rollback|scope|essential_decisions|fillable_gaps|guardrails|refusal_triggers|durable_memory|professional_output" <source-spec-or-plan>
 python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <plan-path> --json
+python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <plan-path> --kind plan --json
 ~~~
 
 ## Failure Mode
@@ -68,6 +70,19 @@ selected_stage: he-plan
 mode: standard-plan
 plan_path: .harness/plan/JSC-246-dashboard-scorecard.md
 source_slice: "Dashboard score summary and validation evidence"
+enforcement_contract:
+  essential_decisions:
+    - "Dashboard summary count must reflect scorecard JSON, not rendered row count."
+  fillable_gaps:
+    - "Agent may update renderer helper logic and focused tests inside allowed files."
+  guardrails:
+    - "python3 -m pytest Infrastructure/tests/test_ask_evals_command.py -q"
+  refusal_triggers:
+    - "Stop if source scorecard schema or public CLI output shape must change."
+  durable_memory:
+    - "Capture the count-source rule in the plan and closeout artifact."
+  professional_output:
+    - "Report exact files, validation command outcome, blocker state, and rollback path."
 units:
   - id: U1
     change: "Align dashboard summary count with scorecard JSON"
@@ -84,6 +99,7 @@ Reference `assets/` only for skill packaging and browseability; plan evidence be
 
 ## References
 - Plan contracts: `../../references/skills/he-plan/plan-artifact-contract.md`, `../../references/skills/he-plan/planning-depth.md`
+- Skills SDK apparatus lens: `../../../../Infrastructure/references/skills-sdk-apparatus-lens.md`
 - Test strategy: `../../references/skills/he-plan/test-strategy.md`
 - Handoff: `../../references/skills/he-plan/post-plan-handoff.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`

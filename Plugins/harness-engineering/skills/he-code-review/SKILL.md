@@ -95,6 +95,7 @@ Reference `assets/` only for skill packaging and browseability; review evidence 
 - Review modes: `../../references/skills/he-code-review/review-mode-contract.md`
 - Review policy index: `../../references/skills/he-code-review/review-policy-index.md`
 - Proof loops: `../../references/skills/he-code-review/review-loop-patterns.md`
+- Pragmatic review lens: `../../references/pragmatic-programmer-review-contract.md`
 - Shared HE contracts: `../../references/deferred-context-index.md`, `../../references/subagent-call-contract.md`
 - Provenance safety: `../../references/codex-provenance-contract.md`, `../../references/pr-safety-trace-contract.md`
 - Detailed doctrine: `../../../../Infrastructure/references/harness-engineering/he-code-review-doctrine.md`

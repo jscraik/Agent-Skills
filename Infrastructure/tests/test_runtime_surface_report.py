@@ -105,6 +105,21 @@ class TestRuntimeSurfaceReport(unittest.TestCase):
         self.assertEqual(result.errors[0].code, ErrorCode.ERR_RUNTIME)
         self.assertEqual(result.data["runtime_surface_status"], "error")
 
+    def test_runtime_missing_action_exposes_validation_command(self) -> None:
+        result = runtime.dispatch_runtime(
+            REPO_ROOT,
+            SimpleNamespace(action=None, default_max=30),
+        )
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(
+            result.data["validation_commands"],
+            ["./bin/ask runtime surface --json --robot"],
+        )
+        self.assertEqual(len(result.errors), 1)
+        self.assertEqual(result.errors[0].code, ErrorCode.ERR_VALIDATION)
+        self.assertIn("missing action", result.errors[0].message)
+
 
 if __name__ == "__main__":
     unittest.main()

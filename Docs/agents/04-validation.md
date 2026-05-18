@@ -14,6 +14,12 @@
 - Fresh-checkout command reachability:
   `bash scripts/bootstrap-ask.sh --json`, then
   `python3 bin/ask repo status --json`.
+- Git hook readiness:
+  `bash scripts/install-prek-hooks.sh` installs `prek` hooks and patches the
+  generated shims to use repo-local `.cache/prek` for `PREK_HOME`. This avoids
+  repeated Codex sandbox failures on `~/.cache/prek/prek.log` during commit and
+  push. `bash scripts/check-environment.sh` fails if installed hooks exist but
+  do not carry the repo-local `PREK_HOME` patch.
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (project-local default scope)
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --workspace-governance` (explicit workspace scope)
 - `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/**`, `Plugins/cache/**`, and `runtime/**`)
@@ -21,6 +27,15 @@
   - default scope is staged diff locally and base-ref diff in CI; override with `PATH_OWNERSHIP_GUARD_SCOPE`.
 - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
 - `python3 Infrastructure/scripts/validation-and-linting/docs_lint.py --mode warn --config Infrastructure/docs-policy.json`
+- `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`
+  validates the steering uptake ledger when agent operating rules, review
+  feedback uptake, or high-signal steering surfaces change.
+- `python3 -m pytest Infrastructure/scripts/testing/test_validate_steering_uptake.py -q`
+  proves steering uptake cannot pass as ceremony by rejecting records that lack
+  operating failure, blocker, mechanism, or proof fields.
+- Interface-design changes should have tests that read as policy checks for
+  authority, ownership, invariants, and operation-context errors. See
+  [Misuse-Resistant Interface Design](/Docs/agents/20-misuse-resistant-interface-design.md).
 - `just validate` (or `bash Infrastructure/scripts/validate_all.sh`)
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`
 - Use the repo-local wrapper above instead of the global `~/.codex` `verify-work` helper for this repository.

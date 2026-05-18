@@ -47,6 +47,18 @@ Start with 2-3 focused surfaces before expanding scope.
 - Keep writes scoped to the requested repo or artifact surface.
 - Fail fast: stop at the first failed gate, fix it, and rerun before continuing.
 
+## Execution Boundaries
+- Keep edits inside the requested frontend surface, component, route, or design artifact.
+- Do not change backend contracts, auth, billing, data models, or deployment settings unless separately requested.
+- Do not expose private screenshots, user data, credentials, or sensitive copy in generated artifacts.
+- Use browser or screenshot verification when rendered behavior, responsive fit, or visual fidelity matters.
+
+## Failure Mode
+- If stack, route, component ownership, or design intent is unclear, stop with the missing input instead of inventing a direction.
+- If visual verification fails, fix the smallest layout, state, or accessibility issue and rerun the same check.
+- If a referenced asset or design source is unavailable, report the gap and avoid claiming fidelity.
+- If tests pass but screenshots show overlap or clipped text, treat the UI as not done.
+
 ## Validation
 - Run Plugin Eval and strict skill audit after editing this skill.
 - Fail fast: stop at first failed gate; do not proceed until it is fixed and rerun.
@@ -58,11 +70,17 @@ Start with 2-3 focused surfaces before expanding scope.
 - Do not own token-governance as the primary outcome; route to design-system.
 - Do not invent audience, task, or tone when those decisions are missing.
 
+## Gotchas
+- A visually plausible screen can still fail if empty, loading, error, mobile, or keyboard states are missing.
+- Multimodal eval patterns are useful for checking rendered artifacts, but local browser evidence is still required.
+- Do not bury feature instructions in visible UI text that belongs in docs or tooltips.
+
 ## Examples
 - "Redesign this cramped settings screen and keep it accessible."
 - "Build the dashboard layout with proper empty, loading, and error states."
 
 ## Progressive Disclosure
+- For Cookbook-derived multimodal eval and documentation interface checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
 - Archived full context: Infrastructure/references/deferred-skill-context/frontend-ui-frontend-ui-design/.
 - Load archived references, scripts, prompts, templates, or assets only when the active workflow needs that exact detail.
 - Keep the active path compact. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

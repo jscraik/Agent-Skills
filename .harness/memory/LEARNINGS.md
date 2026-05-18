@@ -208,16 +208,20 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:703433997)
 
-**2026-05-15 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3377052620)
+- **2026-05-15 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3377052620)
 
-**2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:872490936)
+- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:872490936)
 
-**2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1758991561)
+- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1758991561)
 
-**2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:106538740)
+- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:106538740)
 
-**2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:876251262)
+- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:876251262)
 
-**2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2515931723)
+- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2515931723)
 
-**2026-05-16 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:999518231)
+- **2026-05-16 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:999518231)
+
+- **2026-05-17 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:4191692106)
+
+- **2026-05-17 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1301257671)

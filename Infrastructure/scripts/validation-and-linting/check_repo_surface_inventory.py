@@ -18,6 +18,16 @@ DEFAULT_ALLOWLIST = Path("Infrastructure") / "policy" / "repo_surface_allowlist.
 
 SEVERITY_ORDER = {"error": 0, "warning": 1, "info": 2}
 
+SYSTEM_SKILL_SURFACE_PREFIXES = (
+    "skills-system/.codex-system-skills.marker",
+    "skills-system/imagegen",
+    "skills-system/openai-docs",
+    "skills-system/plugin-creator",
+    "skills-system/plugin-installer",
+    "skills-system/skill-creator",
+    "skills-system/skill-installer",
+)
+
 
 @dataclass(frozen=True)
 class AllowlistEntry:
@@ -58,6 +68,10 @@ def _path_parts(path: str) -> tuple[str, ...]:
 
 def _starts_with(path: str, prefix: str) -> bool:
     return path == prefix or path.startswith(f"{prefix}/")
+
+
+def _is_governed_system_skill_surface(path: str) -> bool:
+    return any(_starts_with(path, prefix) for prefix in SYSTEM_SKILL_SURFACE_PREFIXES)
 
 
 def _matches_plugin_subpath(path: str, subpath: str) -> bool:
@@ -155,10 +169,10 @@ def _normalize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
 def classify_path(path: str | Path) -> SurfaceFinding:
     """
     Classify a repository file path into a SurfaceFinding that describes its ownership policy surface, status, and recommended next steps.
-    
+
     Parameters:
         path (str | Path): Repository-relative file path to classify. The path is normalized (POSIX, no leading "./") before classification.
-    
+
     Returns:
         SurfaceFinding: A finding containing `path`, `classification`, `status`, `code`, `severity`, `blocking`, optional `allowlist_entry`, `reason`, `recommendation`, and `metadata` (which may include normalized `next_steps`).
     """
@@ -256,6 +270,19 @@ def classify_path(path: str | Path) -> SurfaceFinding:
             metadata={"next_steps": ["validate_projection_if_changed"]},
         )
 
+    if _starts_with(normalized, "skills-system") and _is_governed_system_skill_surface(normalized):
+        return _make_finding(
+            normalized,
+            classification="generated_tracked",
+            status="ok",
+            code="system_skill_surface",
+            severity="info",
+            blocking=False,
+            reason="skills-system contains the governed system-skill bridge pinned by Infrastructure/GOVERNANCE/skills-system-upstream.lock.json.",
+            recommendation="Refresh only through the system-skills upstream lock and projection-integrity workflow; do not hand-fork OpenAI-owned SKILL.md bodies.",
+            metadata={"next_steps": ["preserve_system_skills_lock", "validate_projection_if_changed"]},
+        )
+
     if _starts_with(normalized, "skills-system"):
         return _make_finding(
             normalized,
@@ -264,8 +291,8 @@ def classify_path(path: str | Path) -> SurfaceFinding:
             code="ownership_decision_required",
             severity="error",
             blocking=True,
-            reason="skills-system ownership is explicitly unresolved by policy.",
-            recommendation="Document vendoring/update command, active runtime reader, or cleanup evidence.",
+            reason="skills-system path is outside the governed system-skill lock or bridge prefixes.",
+            recommendation="Document the reader or update command, add it to the system-skills lock/bridge contract, or remove the stray path.",
             metadata={"next_steps": ["identify_reader_or_update_command", "document_owner"]},
         )
 
@@ -640,17 +667,25 @@ def git_ls_files(repo_root: Path) -> list[str]:
         text=True,
         capture_output=True,
     )
-    return [line for line in result.stdout.splitlines() if line.strip()]
+    paths = [line for line in result.stdout.splitlines() if line.strip()]
+    return [path for path in paths if (repo_root / path).exists()]
 
 
 def build_report(findings: list[SurfaceFinding], *, strict: bool) -> dict[str, Any]:
     counts_by_classification: dict[str, int] = {}
     counts_by_status: dict[str, int] = {}
     counts_by_code: dict[str, int] = {}
+    blocking_counts_by_classification: dict[str, int] = {}
+    blocking_counts_by_code: dict[str, int] = {}
     for finding in findings:
         counts_by_classification[finding.classification] = counts_by_classification.get(finding.classification, 0) + 1
         counts_by_status[finding.status] = counts_by_status.get(finding.status, 0) + 1
         counts_by_code[finding.code] = counts_by_code.get(finding.code, 0) + 1
+        if finding.blocking:
+            blocking_counts_by_classification[finding.classification] = (
+                blocking_counts_by_classification.get(finding.classification, 0) + 1
+            )
+            blocking_counts_by_code[finding.code] = blocking_counts_by_code.get(finding.code, 0) + 1
 
     blocking_count = sum(1 for finding in findings if finding.blocking)
     status = "warning" if blocking_count else "success"
@@ -668,10 +703,12 @@ def build_report(findings: list[SurfaceFinding], *, strict: bool) -> dict[str, A
             "counts_by_classification": dict(sorted(counts_by_classification.items())),
             "counts_by_status": dict(sorted(counts_by_status.items())),
             "counts_by_code": dict(sorted(counts_by_code.items())),
+            "blocking_counts_by_classification": dict(sorted(blocking_counts_by_classification.items())),
+            "blocking_counts_by_code": dict(sorted(blocking_counts_by_code.items())),
         },
         "findings": [asdict(finding) for finding in findings],
         "metadata": {
-            "inventory_scope": "tracked_files",
+            "inventory_scope": "tracked_existing_files",
             "strict": strict,
             "next_steps": [
                 _next_step(
@@ -790,7 +827,7 @@ def main() -> int:
                                 },
                             }
                         ],
-                        "metadata": {"inventory_scope": "tracked_files", "strict": args.strict},
+                        "metadata": {"inventory_scope": "tracked_existing_files", "strict": args.strict},
                     },
                     sort_keys=True,
                 )
