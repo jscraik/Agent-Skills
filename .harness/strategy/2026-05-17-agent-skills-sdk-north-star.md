@@ -46,7 +46,7 @@ That promise should stay operational, not poetic:
 - `./bin/ask skills --help` already exposes SDK-shaped verbs: `doctor`, `package`, `profiles`, `events`, `memory`, `route`, `prove`, `audit`, `validate-skill-gate`, `validate-openai-format`, `validate-boundaries`, `install`, `fold`, and `sync`.
 - `./bin/ask skills profiles --json --robot` already describes operation profiles such as `authoring`, `package-review`, `plugin-share`, `eval`, and `live-mutation`.
 - `./bin/ask skills events --json --robot` already declares lifecycle events including `skill_loaded`, `skill_doctor_completed`, `package_readiness_checked`, `eval_started`, `eval_blocked`, `eval_completed`, `projection_synced`, and `manifest_changed`.
-- The May 2026 Codex Python SDK changes in `~/dev/codex` add useful SDK precedent: plain string turn input as a thin convenience over typed input, a public `TurnResult` object instead of raw app-server payloads, first-class login handles with `wait()` and `cancel()`, internal helper modules that keep the public facade small, public API signature tests, docs/examples/notebook parity, and validation commands that compile, lint, and smoke the changed SDK surface.
+- The May 2026 Codex Python SDK changes in the `openai/openai-python` public repository (https://github.com/openai/openai-python) add useful SDK precedent: plain string turn input as a thin convenience over typed input, a public `TurnResult` object instead of raw app-server payloads, first-class login handles with `wait()` and `cancel()`, internal helper modules that keep the public facade small, public API signature tests, docs/examples/notebook parity, and validation commands that compile, lint, and smoke the changed SDK surface.
 
 ## Upstream Python SDK Lessons
 

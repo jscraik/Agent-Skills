@@ -167,7 +167,7 @@ Vertical OODA: Agents must orient across stacked trajectories including prior
 steering, current plan and spec, validation gates, review loops, generated
 projections, compaction recovery, and future-agent inheritance.
 
-Durable surface: AGENTS.md, docs/agents/19-high-signal-steering-feedback.md,
+Durable surface: AGENTS.md, Docs/agents/19-high-signal-steering-feedback.md,
 .harness/quality/steering-uptake.md,
 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py, and
 Infrastructure/scripts/testing/test_validate_steering_uptake.py.
@@ -245,7 +245,7 @@ Vertical OODA: The rule must carry from review comment to pattern search,
 match disposition, code or policy change, validation, and closeout so future
 agents cannot stop at the named line.
 
-Durable surface: docs/agents/19-high-signal-steering-feedback.md,
+Durable surface: Docs/agents/19-high-signal-steering-feedback.md,
 .harness/quality/steering-uptake.md,
 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py, and
 Infrastructure/scripts/testing/test_validate_steering_uptake.py.
@@ -320,7 +320,7 @@ Vertical OODA: The rule carries from first failure to second failure, research,
 option comparison, implementation, validation, and final evidence.
 
 Durable surface: AGENTS.md, Docs/agents/13-workflow-and-safety-guidance.md,
-docs/agents/19-high-signal-steering-feedback.md, .harness/quality/steering-uptake.md,
+Docs/agents/19-high-signal-steering-feedback.md, .harness/quality/steering-uptake.md,
 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py, and
 Infrastructure/scripts/testing/test_validate_steering_uptake.py.
 

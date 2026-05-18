@@ -311,7 +311,7 @@ When the feedback mentions cross-boundary context, target context windows,
 stacked trajectories, or OODA beyond the current turn, the record must also
 include:
 
-- \`OODA scaling protocol:\`
+- `OODA scaling protocol:`
 
 That line must name horizontal OODA, vertical OODA, compaction, harness,
 environment boundaries, target context window reflection, and how the result is
