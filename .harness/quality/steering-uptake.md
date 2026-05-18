@@ -19,11 +19,101 @@ classify the blocker, make an environment refinement in a durable
 surface, validate the mechanism, and report proof that the repeated correction
 should be harder to reproduce.
 
+The larger perspective rule is active: before applying principle-shaped
+feedback, identify the class of failure and use correction -> pattern -> sweep -> classification -> enforcement.
+Search sibling instances or equivalent cases inside the chosen radius before
+editing only the named site, unless the sweep proves the issue is genuinely
+local.
+
 When context may sit beyond the active turn, the active rule must scale
 horizontal OODA across adjacent organizational activity and vertical OODA across
 stacked trajectories. The agent must identify the cross-boundary compaction,
 harness, environment, repo, tracker, or review boundary and use the smallest
 available target context window to reflect before acting.
+
+## Uptake Record: 2026-05-18 larger perspective pattern uptake
+
+Operating failure: The agent can still agree that feedback is high-signal while
+operationally treating one named site as the whole task instead of asking what
+class of failure the feedback revealed.
+
+Feedback type: agent_operating_rule
+
+Intent radius: repository
+
+Blocker: Jamie has to repeat the same correction across a codebase when agents
+do not search sibling instances or equivalent cases before applying
+principle-shaped feedback line-locally.
+
+Generalized rule: Feedback that names one function, file, command, test, doc
+section, review line, error, or example may be evidence of a broader class of
+failure; extract the pattern, sweep the relevant surface, classify matches, and
+add enforcement before claiming uptake.
+
+Similar-case disposition: Root guide, high-signal steering protocol, steering
+ledger, validator active-rule requirements, and validator regression tests are
+fixed now; source-code sweeps remain task-specific and must run when a concrete
+API, package, skill, or workflow receives principle-shaped feedback.
+
+Pattern sweep: Checked root instructions, the high-signal steering protocol,
+the active steering ledger, validator active-rule phrase checks, and validator
+tests for places where the larger-perspective behavior could remain only
+advice.
+
+Sweep scope: Root guide, high-signal steering protocol, steering ledger,
+steering uptake validator, and steering uptake validator tests.
+
+Search terms: larger perspective, class of failure, correction -> pattern ->
+sweep -> classification -> enforcement, sibling instances, equivalent cases,
+line-local, transferable principle.
+
+Matches considered: Root high-signal steering bullets, Larger Perspective Rule
+section, active ledger rule, active-rule validator phrase list, and regression
+tests for missing active-rule posture.
+
+Exclusions: Concrete production APIs and skill eval suites because this uptake
+changes the reusable operating mechanism; future task-specific feedback must run
+its own bounded source sweep in the relevant radius.
+
+Disposition: fixed now by adding the larger-perspective loop to root guidance,
+making it explicit in the steering protocol, requiring the active ledger rule to
+name the loop and equivalent-case search, and adding a regression test for
+active rules that omit it.
+
+Horizontal OODA: The correction applies across code review, SDK design, skill
+authoring, validator work, docs, and harness workflows because Jamie often gives
+one concrete example to communicate a wider operating or design rule.
+
+Vertical OODA: The rule must carry from steering to pattern extraction, sibling
+search, match classification, durable enforcement, validation, closeout, and
+future-agent inheritance.
+
+Durable surface: AGENTS.md, Docs/agents/19-high-signal-steering-feedback.md,
+.harness/quality/steering-uptake.md,
+Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py, and
+Infrastructure/scripts/testing/test_validate_steering_uptake.py.
+
+Environment refinement: The repo now has an explicit larger-perspective rule
+and the steering uptake validator rejects active ledger rules that omit the
+class-of-failure, sibling-instance, equivalent-case, and correction-pattern-
+sweep-classification-enforcement language.
+
+Mechanism: Future agents cannot make a valid high-signal uptake record unless
+the active rule itself encodes broader pattern uptake, and transferable records
+already require sweep scope, search terms, matches considered, exclusions,
+generalized rule, and similar-case disposition.
+
+Proof: The new regression test constructs an otherwise complete steering ledger
+whose active rule lacks larger-perspective pattern uptake and expects validation
+failure.
+
+Validation: Run python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json
+and python3 -m pytest Infrastructure/scripts/testing/test_validate_steering_uptake.py -q.
+
+Repeat prevention: When Jamie points at one example but the feedback expresses a
+principle, agents must identify the class of failure, search sibling instances
+or equivalent cases, classify matches, and add enforcement before reporting the
+work as handled.
 
 ## Uptake Record: 2026-05-17 cross-boundary OODA reflection
 

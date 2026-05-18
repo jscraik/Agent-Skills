@@ -83,11 +83,14 @@ def test_api_design_feedback_requires_semantic_pattern_sweep(tmp_path):
 
 ## Active Rule
 
-Every Jamie steering item is a high-signal candidate until classified.
-Do not resume ordinary task work until environment refinement is proven by a
-systems thinker.
-Use horizontal OODA and vertical OODA when steering spans a cross-boundary
-target context window outside the active turn.
+	Every Jamie steering item is a high-signal candidate until classified.
+	Do not resume ordinary task work until environment refinement is proven by a
+	systems thinker.
+	Use the larger perspective rule: identify the class of failure, then follow
+	correction -> pattern -> sweep -> classification -> enforcement across sibling
+	instances or equivalent cases before claiming uptake.
+	Use horizontal OODA and vertical OODA when steering spans a cross-boundary
+	target context window outside the active turn.
 
 ## Uptake Record: bool return feedback
 
@@ -390,6 +393,9 @@ def test_incidental_diagnostic_and_repeated_error_words_do_not_trigger_specializ
 Every Jamie steering item is a high-signal candidate until classified.
 Do not resume ordinary task work until environment refinement is proven by a
 systems thinker.
+Use the larger perspective rule: identify the class of failure, then follow
+correction -> pattern -> sweep -> classification -> enforcement across sibling instances
+or equivalent cases before claiming uptake.
 Use horizontal OODA and vertical OODA when steering spans a cross-boundary
 target context window outside the active turn.
 
@@ -545,6 +551,78 @@ Repeat prevention: Missing halt posture should block closeout.
     assert any("do not resume ordinary task work" in error for error in result["errors"])
     assert any("environment refinement" in error for error in result["errors"])
     assert any("systems thinker" in error for error in result["errors"])
+
+
+def test_active_rule_requires_larger_perspective_pattern_uptake(tmp_path):
+    validator = _load_validator()
+    ledger = tmp_path / "steering-uptake.md"
+    ledger.write_text(
+        """# Steering Uptake Ledger
+
+## Active Rule
+
+Every Jamie steering item is a high-signal candidate until classified.
+Do not resume ordinary task work until environment refinement is proven by a
+systems thinker.
+Use horizontal OODA and vertical OODA when steering spans a cross-boundary
+target context window outside the active turn.
+
+## Uptake Record: otherwise complete record
+
+Operating failure: The agent fixed the named site without asking what class of failure it represented.
+
+Feedback type: agent_operating_rule
+
+Intent radius: repository
+
+Blocker: Future agents may still apply principle-shaped feedback line-locally.
+
+Generalized rule: Feedback must be interpreted as a possible class of failure.
+
+Similar-case disposition: policy surface fixed now.
+
+Pattern sweep: Searched steering surfaces.
+
+Sweep scope: steering protocol and ledger.
+
+Search terms: class of failure, sibling instances, equivalent cases.
+
+Matches considered: active rule and high-signal protocol.
+
+Exclusions: source code, because this fixture validates active-rule wording.
+
+Disposition: fixed now.
+
+Horizontal OODA: Repo operating context.
+
+Vertical OODA: Future steering and closeout.
+
+Durable surface: Steering ledger.
+
+Environment refinement: Validator should reject the active rule.
+
+Mechanism: The active rule must require larger-perspective pattern uptake.
+
+Proof: This fixture omits the required wording.
+
+Validation: Validator should fail.
+
+Repeat prevention: Missing larger-perspective posture should block closeout.
+""",
+        encoding="utf-8",
+    )
+
+    result = validator.validate_ledger(ledger)
+
+    assert result["status"] == "fail"
+    assert any("larger perspective" in error for error in result["errors"])
+    assert any("class of failure" in error for error in result["errors"])
+    assert any("sibling instances" in error for error in result["errors"])
+    assert any("equivalent cases" in error for error in result["errors"])
+    assert any(
+        "correction -> pattern -> sweep -> classification -> enforcement" in error
+        for error in result["errors"]
+    )
 
 
 def test_current_ledger_satisfies_systems_thinking_contract():

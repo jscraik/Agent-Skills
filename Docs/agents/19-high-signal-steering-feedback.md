@@ -103,6 +103,34 @@ Do not wait for phrases such as "high signal" or "never again" before doing
 this classification. Those phrases only raise confidence that the feedback is
 durable; they are not the entry condition.
 
+## Larger Perspective Rule
+
+Principle-shaped feedback is not a request to patch only the named example. The
+agent must first ask what class of failure the feedback reveals.
+
+Use this loop:
+
+Correction -> Pattern -> Sweep -> Classification -> Enforcement
+
+The named function, file, command, review line, failing test, or doc paragraph is
+often the pointer, not the whole problem. If the feedback can be restated without
+the local proper noun or path and still makes sense as a design, workflow, API,
+validation, safety, or documentation rule, treat it as transferable until the
+repo evidence proves otherwise.
+
+Required behavior:
+
+1. State the class of failure in repo language.
+2. Search sibling instances or equivalent cases in the nearest relevant surface.
+3. Classify each match as fixed now, different semantics, deferred with reason,
+   or not applicable.
+4. Add or update the enforcement surface: tests, validators, docs, skill
+   contracts, evals, or review checklists.
+5. Report the sweep and enforcement before claiming the feedback was handled.
+
+Do not let one successful local edit masquerade as system learning. A line-local
+fix is acceptable only after the pattern sweep proves that the feedback is local.
+
 ## Steering Override Halt
 
 When Jamie says the agent is failing to operate effectively, repeating prior

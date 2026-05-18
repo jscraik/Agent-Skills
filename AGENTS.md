@@ -47,6 +47,11 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   line, error, or example but expresses a transferable principle, extract the
   generalized rule and classify similar cases in the nearest relevant surface
   before claiming uptake.
+- Before applying principle-shaped feedback, ask what class of failure the
+  feedback reveals. Use the loop: correction -> pattern -> sweep ->
+  classification -> enforcement. Search sibling instances or equivalent cases in
+  the chosen radius before editing only the named site, unless the sweep proves
+  the issue is genuinely local.
 - Do not fight repeated errors. If the same command, validator, tool call, or
   implementation attempt hits the same error twice, stop retrying, research 3-5
   plausible fixes using the web when available or repo-local docs when network
