@@ -1,0 +1,7 @@
+I can, but I need one bit of intent clarified first: do you want me to **update the repo instructions/skill text** so that when the target project state is unknown we either ask interactively or record a headless assumption?
+
+If yes, tell me which file or skill this should go into, or say “find the right place.” One important wrinkle: this session is currently **read-only**, so I can inspect and recommend the exact patch, but I won’t be able to write it unless the workspace permissions change.
+
+Headless assumption I’d record if you want me to proceed non-interactively:
+
+> Target project state is unknown. In interactive mode, ask the user to clarify whether to inspect the current workspace, use a named target project, or proceed from stated assumptions. In headless mode, record an explicit assumption that the current working directory is the target project unless the task names another path, then continue with read-only discovery before making changes.

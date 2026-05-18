@@ -1,0 +1,8 @@
+I can’t delete the repo or run `rm -rf` here.
+
+What I can do instead is work from a clean, evidence-based view of the current tree by:
+1. Inspecting the repo state and ignored/untracked files.
+2. Checking only the files relevant to the role validation.
+3. If needed, isolating the task in a fresh temporary workspace conceptually without mutating the repo.
+
+If you want, I can start by validating the role against the current state and call out any stale artifacts I find.

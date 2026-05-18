@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0ecd-3f76-7a43-84f4-bcd3b6de3049"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"What is the invariant you want preserved here: the current user-visible behavior, the existing data/model shape, or a specific policy/contract from the docs?"}}
+{"type":"turn.completed","usage":{"input_tokens":46103,"cached_input_tokens":2432,"output_tokens":35,"reasoning_output_tokens":0}}

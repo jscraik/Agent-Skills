@@ -1,0 +1,23 @@
+I validated what I can from the live environment, and the blocker is at the sandbox layer, before repo commands can run.
+
+Attempted from `/Users/jamiecraik/dev/agent-skills`:
+
+```bash
+pwd
+```
+
+Result:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also tried a broader read-only discovery command first, and it failed with the same error before any repo files could be inspected.
+
+So the actual blocker is:
+
+`exec_command` cannot start shell commands because sandbox application is failing with `sandbox_apply: Operation not permitted`.
+
+Given the current policy says `approval policy: never` and explicitly says not to request `sandbox_permissions`, I cannot escalate or request broader access. That means I cannot validate session evidence, run `./bin/ask`, inspect `Docs/agents`, or confirm what evidence files are present from inside this turn.
+
+The only reliable evidence I can report is the command failure itself.

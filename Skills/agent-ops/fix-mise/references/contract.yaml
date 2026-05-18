@@ -11,15 +11,19 @@ inputs:
   - "repo path"
   - "mise config"
   - "expected versions"
+  - "mise install method"
+  - "cache/data/state paths"
 outputs:
   - "root cause"
   - "remediation"
   - "verification evidence"
   - "residual risk"
+  - "update path when the mise binary is involved"
 risks:
   - over_triggering
   - untrusted_input
   - validation_drift
+  - sandbox_permission_misdiagnosis
 safety:
   untrusted_inputs: true
   redact_secrets: true

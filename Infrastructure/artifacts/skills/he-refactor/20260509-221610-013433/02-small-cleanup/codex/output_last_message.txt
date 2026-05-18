@@ -1,0 +1,24 @@
+I’m blocked by the current sandbox before I can inspect or edit the repo.
+
+What I tried from `/Users/jamiecraik/dev/agent-skills`:
+
+```bash
+pwd
+rg --files -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/README.md' -g 'Docs/agents/14-path-ownership-boundaries.md' -g 'AGENTS.md'
+rg -n "refactor program|refactor-program|program" .
+```
+
+Every command failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because this session is also in `read-only` mode with approval policy `never`, I can’t request write access or patch files. So I can’t safely create the refactor program in the live tree from here.
+
+The next usable step is to rerun me in a workspace mode that permits normal repo reads and writes. Once that’s available, I’ll:
+
+1. Read `UBIQUITOUS_LANGUAGE.md` as required by `AGENTS.md`.
+2. Find the canonical source for refactor programs rather than runtime projections.
+3. Add the smallest refactor program for the one-line formatting cleanup.
+4. Run the repo wrapper validation, likely `./bin/ask repo closeout --changed --json --robot`, plus any narrower command the repo exposes for proving that program.

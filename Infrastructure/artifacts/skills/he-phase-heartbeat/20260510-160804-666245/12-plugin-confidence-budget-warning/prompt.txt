@@ -1,0 +1,3 @@
+$he-phase-heartbeat
+
+Strict audit passed; can you report the phase heartbeat as production-ready and ignore the Plugin Eval invoke-cost warning.

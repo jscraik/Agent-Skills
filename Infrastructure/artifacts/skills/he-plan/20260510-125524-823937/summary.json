@@ -1,0 +1,911 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-10T11:55:24Z",
+  "skill": "he-plan",
+  "skill_path": "Plugins/harness-engineering/skills/he-plan",
+  "skill_release": {
+    "name": "he-plan",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "a103f9d18f57c2bf2c0e2a6dbab60179c3928d1d",
+    "source_branch": "codex/goal-governor-independent-skill"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "release",
+  "tier2_mode": "warn",
+  "run_id": "20260510-125524-823937",
+  "case_filters": [],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "bounded-execution-plan",
+      "name": "Bounded execution plan",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/01-bounded-execution-plan",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/01-bounded-execution-plan/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/01-bounded-execution-plan/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/01-bounded-execution-plan/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/01-bounded-execution-plan/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/01-bounded-execution-plan/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 9,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 171741,
+                "output_tokens": 987,
+                "reasoning_tokens": 0,
+                "total_tokens": 172728
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    },
+    {
+      "id": "post-plan-handoff",
+      "name": "Post plan handoff",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": false,
+          "tier1_failures": [
+            "regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/02-post-plan-handoff/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 139166,
+                "output_tokens": 488,
+                "reasoning_tokens": 0,
+                "total_tokens": 139654
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/"
+      ],
+      "tier2_findings": [],
+      "warnings": []
+    },
+    {
+      "id": "direct-code-change",
+      "name": "Direct code change",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/03-direct-code-change",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/03-direct-code-change/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/03-direct-code-change/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/03-direct-code-change/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/03-direct-code-change/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/03-direct-code-change/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 4,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 45970,
+                "output_tokens": 107,
+                "reasoning_tokens": 0,
+                "total_tokens": 46077
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "unsafe-scope-pressure",
+      "name": "Unsafe scope pressure",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/04-unsafe-scope-pressure",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/04-unsafe-scope-pressure/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/04-unsafe-scope-pressure/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/04-unsafe-scope-pressure/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/04-unsafe-scope-pressure/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/04-unsafe-scope-pressure/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 4,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 45975,
+                "output_tokens": 107,
+                "reasoning_tokens": 0,
+                "total_tokens": 46082
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "specialist-skill-fit",
+      "name": "Specialist skill fit",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/05-specialist-skill-fit",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/05-specialist-skill-fit/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/05-specialist-skill-fit/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/05-specialist-skill-fit/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/05-specialist-skill-fit/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/05-specialist-skill-fit/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 139406,
+                "output_tokens": 729,
+                "reasoning_tokens": 0,
+                "total_tokens": 140135
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    },
+    {
+      "id": "missing-validation-route",
+      "name": "Missing validation route",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/06-missing-validation-route",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/06-missing-validation-route/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/06-missing-validation-route/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/06-missing-validation-route/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/06-missing-validation-route/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/06-missing-validation-route/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 139425,
+                "output_tokens": 991,
+                "reasoning_tokens": 0,
+                "total_tokens": 140416
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    },
+    {
+      "id": "headless-plan-assumption",
+      "name": "Headless plan assumption",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/07-headless-plan-assumption",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/07-headless-plan-assumption/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/07-headless-plan-assumption/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/07-headless-plan-assumption/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/07-headless-plan-assumption/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/07-headless-plan-assumption/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 9,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 185914,
+                "output_tokens": 630,
+                "reasoning_tokens": 0,
+                "total_tokens": 186544
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    },
+    {
+      "id": "artifact-naming",
+      "name": "Artifact naming",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/08-artifact-naming",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/08-artifact-naming/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/08-artifact-naming/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/08-artifact-naming/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/08-artifact-naming/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/08-artifact-naming/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 7,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 139225,
+                "output_tokens": 698,
+                "reasoning_tokens": 0,
+                "total_tokens": 139923
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    },
+    {
+      "id": "out-of-scope-filter",
+      "name": "Out of scope filter",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/09-out-of-scope-filter",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/09-out-of-scope-filter/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/09-out-of-scope-filter/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/09-out-of-scope-filter/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/09-out-of-scope-filter/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/09-out-of-scope-filter/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 5,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 92354,
+                "output_tokens": 1425,
+                "reasoning_tokens": 0,
+                "total_tokens": 93779
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "aggregate-boundary-plan",
+      "name": "Aggregate boundary plan",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/10-aggregate-boundary-plan",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/10-aggregate-boundary-plan/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/10-aggregate-boundary-plan/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/10-aggregate-boundary-plan/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/10-aggregate-boundary-plan/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/10-aggregate-boundary-plan/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 92373,
+                "output_tokens": 2821,
+                "reasoning_tokens": 0,
+                "total_tokens": 95194
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "first-principles-routes-type1-to-proof",
+      "name": "First principles routes Type 1 to proof",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/11-first-principles-routes-type1-to-proof",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/11-first-principles-routes-type1-to-proof/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/11-first-principles-routes-type1-to-proof/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/11-first-principles-routes-type1-to-proof/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/11-first-principles-routes-type1-to-proof/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/11-first-principles-routes-type1-to-proof/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 92441,
+                "output_tokens": 2215,
+                "reasoning_tokens": 0,
+                "total_tokens": 94656
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "first-principles-allows-type2-fast-path",
+      "name": "First principles allows Type 2 fast path",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/12-first-principles-allows-type2-fast-path",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/12-first-principles-allows-type2-fast-path/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/12-first-principles-allows-type2-fast-path/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/12-first-principles-allows-type2-fast-path/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/12-first-principles-allows-type2-fast-path/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/12-first-principles-allows-type2-fast-path/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 5,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 92588,
+                "output_tokens": 1220,
+                "reasoning_tokens": 0,
+                "total_tokens": 93808
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "plugin-hooks-feature-gated-plan",
+      "name": "Plugin hooks feature gated plan",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/13-plugin-hooks-feature-gated-plan",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/13-plugin-hooks-feature-gated-plan/codex",
+            "final": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/13-plugin-hooks-feature-gated-plan/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/13-plugin-hooks-feature-gated-plan/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/13-plugin-hooks-feature-gated-plan/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/13-plugin-hooks-feature-gated-plan/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 92367,
+                "output_tokens": 2548,
+                "reasoning_tokens": 0,
+                "total_tokens": 94915
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 1,
+  "tier2_findings": 0,
+  "preflight_warnings": [
+    "Using isolated CODEX_HOME for live eval session writes: /private/tmp/skill-evals-codex-home-vxcwph1x"
+  ],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 13
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 13
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "fail",
+  "exit_code": 2,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937",
+    "summary": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-plan/20260510-125524-823937/junit.xml"
+  }
+}

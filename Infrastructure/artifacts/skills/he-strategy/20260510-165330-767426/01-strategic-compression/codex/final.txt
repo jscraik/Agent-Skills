@@ -1,0 +1,16 @@
+I’m blocked by the execution sandbox before I can read or write anything in `/Users/jamiecraik/dev/agent-skills`.
+
+Even read-only commands are failing immediately:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I confirmed this happens for both repo reads and a minimal `pwd`, so I can’t currently inspect the intent/review/triage artifacts, read the required project docs, or create the strategic direction document in the workspace.
+
+What I need next is either:
+
+1. A working filesystem sandbox for `/Users/jamiecraik/dev/agent-skills`, so I can read the artifacts and write the durable doc in the right canonical location.
+2. Or, paste the relevant intent/review/triage artifacts here, and I can compress them into a polished strategic direction document in the chat for you to place once the workspace is usable.
+
+Given the repo instructions, I don’t want to invent the document location or content without reading `UBIQUITOUS_LANGUAGE.md`, path ownership guidance, and the actual artifacts.

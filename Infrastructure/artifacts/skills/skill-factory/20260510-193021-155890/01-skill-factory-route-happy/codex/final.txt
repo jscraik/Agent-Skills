@@ -1,0 +1,23 @@
+`schema_version: 1`
+
+`gate_status: blocked`
+
+I couldn’t complete the `skill-factory` route because every attempted repo read/command failed before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Exact routing command required by the skill, which I could not run:
+
+```bash
+python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "skill-factory" --task "<request>" --json
+```
+
+I also could not read the local canonical source at:
+
+```text
+/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-factory/SKILL.md
+```
+
+Since the skill’s execution boundary says to stop if routing/source/permission is unclear, I’m stopping here rather than guessing the specialist.

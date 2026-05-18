@@ -1,0 +1,7 @@
+Create a production-grade technical infographic titled "From Prompt Skill -> Codex Harness Skill".
+
+Style: dark OpenAI-style systems visual, professional engineering aesthetic, clean typography zones, no fake dashboards, no invented metrics, no fake logos, no sci-fi framing.
+
+Composition: left side shows a brittle prompt-skill blob with assumptions, vague prompting, hidden behavior, local-only artifacts, and bloated context. Right side shows a governed Codex harness skill with AGENTS.md precedence, rules and command boundaries, hooks and validation gates, Skill Factory strict audit, OpenClaw, openai_skill.py, skill_gate.py, Plugin Eval, smoke evals, release evals, MCP/tool boundaries, evidence artifacts, traces, rollback paths, confidence scoring, human approval gates, composable skills, observability, deterministic checks, .harness/media, context budget, invoke cost, and compatibility aliases for legacy headings.
+
+Visual language: modular layered architecture, trace lines, verification gates, artifact nodes, negative space for deterministic overlay text added later. Keep generated text minimal and abstract; deterministic labels will be overlaid separately.

@@ -1,0 +1,3 @@
+$skill-builder
+
+Route a plugin-only authoring request to the correct handoff.

@@ -1,0 +1,5 @@
+Specialist: `skill-factory`
+
+Source path: [/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-factory/SKILL.md](/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-factory/SKILL.md)
+
+This request fits the skill-factory route because it’s about skill governance and routing, not general repo work.

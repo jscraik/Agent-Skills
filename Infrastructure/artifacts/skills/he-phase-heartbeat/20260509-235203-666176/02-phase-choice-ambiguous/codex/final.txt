@@ -1,0 +1,5 @@
+Yes. I’ll treat this as a workflow constraint:
+
+After I produce a plan, I should consider that multiple next stages may be valid, and I should ask you which path to take before starting implementation/work.
+
+I’ll pause at that decision point instead of assuming the next stage.

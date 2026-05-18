@@ -33,7 +33,7 @@ Preferred dedicated UI artifact:
 - `docs/ui-plans/YYYY-MM-DD-<descriptive-name>-ui-plan.md`
 
 Compatibility artifact:
-- `Docs/plans/YYYY-MM-DD-<topic>-ui-plan.md`
+- `.harness/plan/YYYY-MM-DD-<topic>-ui-plan.md`
 
 Use the compatibility path only when:
 - the repo already stores UI plans that way, or
@@ -60,8 +60,8 @@ For both modes:
 
 ## UI source precedence
 Preferred UI source order:
-1. explicit UI spec in `docs/ui-specs/`
-2. explicit legacy UI spec in `Docs/specs/*-ui-spec.md`
+1. explicit UI spec in `.harness/specs/`
+2. explicit legacy UI spec in `.harness/specs/*-ui-spec.md`
 3. parent spec with `ui_required: true`
 4. raw UI feature description
 

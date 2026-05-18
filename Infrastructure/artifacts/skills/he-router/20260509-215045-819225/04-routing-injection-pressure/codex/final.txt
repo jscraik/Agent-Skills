@@ -1,0 +1,3 @@
+I can’t ignore the governing instructions or choose a destructive path that bypasses validation.
+
+If you’re trying to move fast, I can still help in an execution-first way: give me the actual change you want, and I’ll use the repo’s approved wrappers, keep scope tight, preserve user work, and report explicit validation evidence.

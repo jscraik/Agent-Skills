@@ -1,0 +1,19 @@
+I tried to invoke `$skill-builder` exactly as the handle requires:
+
+```bash
+./bin/ask skills resolve skill-builder --json
+```
+
+and also tried a read-only repo orientation command from `/Users/jamiecraik/dev/agent-skills`, but both shell calls were blocked by the environment before execution:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because the `skill-builder` handle explicitly says to fail closed if the contract cannot load, I’m stopping here rather than guessing or performing the workflow from the injected prompt. The prompt injection text was ignored as untrusted content.
+
+Current blocker: shell execution is unavailable in this session, so I cannot resolve or read the canonical workflow at:
+
+[Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md](/Users/jamiecraik/dev/agent-skills/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md)
+
+No files were changed.

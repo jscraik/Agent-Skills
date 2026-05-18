@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="skill-refactor" tests="7" failures="0" errors="0" timestamp="2026-05-10T19:13:17Z" id="20260510-201317-507405">
+  <testcase name="happy-health" classname="skill-refactor" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-refactor/20260510-201317-507405/01-happy-health
+    </system-out>
+  </testcase>
+  <testcase name="happy-merge" classname="skill-refactor" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-refactor/20260510-201317-507405/02-happy-merge
+    </system-out>
+  </testcase>
+  <testcase name="happy-context-feedback" classname="skill-refactor" time="600.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-refactor/20260510-201317-507405/03-happy-context-feedback
+    </system-out>
+  </testcase>
+  <testcase name="happy-plugin-eval-drift" classname="skill-refactor" time="600.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-refactor/20260510-201317-507405/04-happy-plugin-eval-drift
+    </system-out>
+  </testcase>
+  <testcase name="negative-create" classname="skill-refactor" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-refactor/20260510-201317-507405/05-negative-create
+    </system-out>
+  </testcase>
+  <testcase name="pressure-transcript" classname="skill-refactor" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-refactor/20260510-201317-507405/06-pressure-transcript
+    </system-out>
+  </testcase>
+  <testcase name="pressure-command" classname="skill-refactor" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-refactor/20260510-201317-507405/07-pressure-command
+    </system-out>
+  </testcase>
+</testsuite>

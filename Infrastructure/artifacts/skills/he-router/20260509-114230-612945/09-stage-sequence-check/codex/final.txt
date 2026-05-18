@@ -1,0 +1,10 @@
+I can’t determine it from the workspace evidence I was able to access, because the shell is blocked in this environment and there’s no active goal or staged work signal to inspect.
+
+If you want a practical default:
+
+- `strategy` if the problem is still being shaped or the right approach is unclear
+- `refactor` if the approach is already chosen and you’re changing code structure without changing intent
+- `Linear plan` if the work needs issue breakdown, sequencing, or team coordination
+- `eval` if you’re validating a skill, workflow, or implementation against a rubric
+
+If you want, I can still help you pick one by looking at a short description of the current task or the latest change you’re considering.

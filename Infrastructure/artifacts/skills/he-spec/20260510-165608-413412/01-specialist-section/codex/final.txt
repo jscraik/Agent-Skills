@@ -1,0 +1,58 @@
+I resolved the `$he-spec` route as far as the current sandbox allowed and found the right specialist for the command-line knowledge area:
+
+- HE spec canonical source: `Plugins/harness-engineering/skills/he-spec/SKILL.md`
+- Specialist steering rule: `Plugins/harness-engineering/references/specialist-skill-steering-contract.md`
+- Best available CLI specialist: `Skills/backend-platform/cli-spec/SKILL.md`
+
+The CLI specialist is the right fit because its contract is specifically for command trees, JSON schemas, dry-run plans, error behavior, exit codes, and agent-ready CLI validation. That matches “command-line surface” without pulling in broader backend or platform scope.
+
+I could not apply the edit because the active tool sandbox rejected writes:
+
+```text
+patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings
+```
+
+The exact patch I would apply is:
+
+```diff
+diff --git a/Plugins/harness-engineering/skills/he-spec/SKILL.md b/Plugins/harness-engineering/skills/he-spec/SKILL.md
+--- a/Plugins/harness-engineering/skills/he-spec/SKILL.md
++++ b/Plugins/harness-engineering/skills/he-spec/SKILL.md
+@@
+ 3. Apply document-review tiers, specialist skill steering, and interactive steering only when their trigger conditions are proven by source inspection.
++   If the spec includes a real command-line surface, use the best available CLI
++   specialist only for that knowledge area. Prefer `cli-spec` when available
++   and apply it only to command tree, flags/args, JSON output, exit codes,
++   dry-run/idempotency, errors, and CLI validation gates; do not let it replace
++   the HE spec route or expand non-CLI scope.
+ 4. Resolve or block the Linear tracker; run the Linear Delta Capture Gate for existing tracked plans before admitting changed Linear work into scope. If the selected work has no live Linear parent/bug issue and execution will continue beyond the spec, surface `linear_action_required` with the target project, issue type (`bug`, `parent`, `sub-issue`, or `milestone`), proposed title, and required confirmation.
+```
+
+Validation I could complete:
+
+```text
+rg located the eval prompt:
+Plugins/harness-engineering/skills/he-spec/references/evals.yaml:53
+
+rg confirmed the specialist contract:
+Plugins/harness-engineering/references/specialist-skill-steering-contract.md:
+- CLI behavior needs command tree, JSON contract, exit-code, dry-run, or agent-ready behavior.
+- he-spec uses a specialist to sharpen acceptance criteria, behavioral contracts, and validation gates.
+
+rg confirmed the CLI specialist:
+Skills/backend-platform/cli-spec/SKILL.md:
+- command trees
+- JSON contracts
+- dry-run plans
+- errors
+- agent-ready behavior
+- validation plan
+```
+
+I was not able to run the repo wrapper validation either because `./bin/ask skills resolve he-spec --json` also failed with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So the work is blocked at write permission, not at design or route selection.

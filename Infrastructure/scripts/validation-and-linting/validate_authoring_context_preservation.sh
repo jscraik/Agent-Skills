@@ -5,7 +5,7 @@ script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd -P "$script_dir/../../.." && pwd -P)"
 cd "$repo_root"
 
-marker="Do not remove important context for budget trimming"
+marker="Apply the context-disposition policy"
 
 skills=(
   "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md"

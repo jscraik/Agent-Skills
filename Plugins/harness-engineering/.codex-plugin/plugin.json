@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "harness-engineering",
   "version": "0.1.0",
-  "description": "Harness Engineering lifecycle router and stages.",
+  "description": "Harness Engineering lifecycle router, strategy, reframe, Linear planning, and closure-proof stages.",
   "author": {
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
@@ -14,6 +14,8 @@
     "harness",
     "engineering",
     "plan",
+    "strategy",
+    "reframe",
     "review",
     "linear"
   ],
@@ -28,8 +30,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Harness Engineering",
-    "shortDescription": "Route HE brainstorm, spec, plan, work, review, and follow-up.",
-    "longDescription": "Harness Engineering workflow orchestration with Linear/spec/plan/PR traceability.",
+    "shortDescription": "Route HE strategy, reframe, Linear, spec, plan, work, review, and follow-up.",
+    "longDescription": "Harness Engineering workflow orchestration with dated Linear-style .harness artifacts, strategy/reframe cognition, Linear/spec/plan/PR traceability, and eval closure proof.",
     "developerName": "Jamie Craik",
     "category": "Coding",
     "capabilities": [

@@ -1,0 +1,26 @@
+{
+  "runner": "discovery-smoke",
+  "exit_code": 2,
+  "passed": false,
+  "tier1_failures": [
+    "discovery-smoke returned non-zero exit code: 2",
+    "regex failed: /(?is)(can.t create one issue per observation|cannot create one issue per observation|issue explosion|smallest|filter|collapse|Do Not Create|selected slice|avoid splitting|meaningful concern|low-value duplicates|sensible issue breakdown|leverage in mind|not going to follow|fail.closed|stopping here|contract cannot load|report the blocker)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+    "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+    "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+  ],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260510-172920-394634/04-issue-explosion-pressure/discovery-smoke",
+    "final": "Infrastructure/artifacts/skills/he-linear-plan/20260510-172920-394634/04-issue-explosion-pressure/discovery-smoke/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260510-172920-394634/04-issue-explosion-pressure/discovery-smoke/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260510-172920-394634/04-issue-explosion-pressure/discovery-smoke/stderr.txt",
+    "jsonl": null
+  },
+  "metrics": {
+    "selected_skill": null
+  },
+  "used_schema": false
+}

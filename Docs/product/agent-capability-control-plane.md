@@ -32,7 +32,7 @@ agent capabilities:
 | Remember workflows | Agents can reuse local review, validation, delivery, and operating standards.                                              | `Skills/**`, `Plugins/**`, `.agents/skills/**`, `ask skills resolve`, `ask skills goal`            |
 | Keep context small | Agents see routed front doors and command handles instead of every full workflow body.                                     | `ask runtime budget --json --robot`, rooted projection, generated `$handle` surfaces               |
 | Prevent drift      | Canonical source, generated manifests, runtime projections, plugin caches, and artifacts have distinct ownership.          | `ask repo surface --json`, `ask repo doctor-catalog --json --robot`, repo surface ownership policy |
-| Prove quality      | A capability should have structural, security, projection, runtime, and outcome evidence before it is treated as reliable. | `ask skills audit`, `ask skills proof`, workouts, evals, validation logs, closeout evidence        |
+| Prove quality      | A capability should have structural, security, projection, runtime, and outcome evidence before it is treated as reliable. | `ask skills audit`, `ask skills prove`, workouts, evals, validation logs, closeout evidence        |
 
 ## First Five Minutes
 
@@ -40,15 +40,22 @@ Use these commands to orient a human or coding agent:
 
 ```bash
 ./bin/ask repo status --json --robot
-./bin/ask repo doctor-catalog --json --robot
-./bin/ask repo surface --json
-./bin/ask runtime budget --json --robot
-./bin/ask skills handles --check --json
+./bin/ask repo doctor --json --robot
+./bin/ask skills improve "<goal>" --json --robot
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
 ```
 
 These are deliberately namespace-first. New product commands should stay under
 `repo` or `skills` until evidence proves a top-level alias reduces real
 operator friction.
+
+Use the diagnostic commands directly when investigating one surface:
+`./bin/ask repo doctor-catalog --json --robot`,
+`./bin/ask repo surface --json --robot`,
+`./bin/ask runtime budget --json --robot`, and
+`./bin/ask skills handles --check --json --robot`.
 
 The next command contracts are specified in
 [ask Product Golden Path Command Contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md):
@@ -57,7 +64,7 @@ The next command contracts are specified in
 - `ask repo onboard`
 - `ask skills improve`
 - `ask skills explain`
-- `ask skills proof`
+- `ask skills prove`
 - `ask repo next`
 - `ask repo closeout`
 
@@ -84,7 +91,7 @@ Minimum proof format:
   "commands": [
     "./bin/ask skills audit <path> --level strict",
     "./bin/ask runtime budget --json --robot",
-    "./bin/ask skills proof <handle> --json --robot"
+    "./bin/ask skills prove <handle> --json --robot"
   ],
   "status": "proven"
 }
@@ -117,11 +124,13 @@ The repo surface control-plane plan established the first infrastructure slice:
 Baseline facts from the implementation:
 
 - `ask runtime budget --json --robot` passes while keeping
-  `advanced_visible_count` and first-level handle count visible.
+  `advanced_visible_count: 173` and `first_level_default_count: 118` visible.
 - `ask repo surface --json` reports tracked-surface policy debt without deleting
   files.
 - `ask repo doctor-catalog --json --robot` verifies the canonical skill count
-  across README, `SKILL.md`, `ask skills list`, and route metadata.
+  `32` across README, `SKILL.md`, `ask skills list`, and route metadata.
+- `ask skills handles --json --no-handles --robot` reports `108` generated
+  command handles from rooted manifests with no command-surface violations.
 - `ask skills goal "use he-work to implement P5 product framing and outcome
   proof documentation for JSC-246" --json --robot` resolves to `he-work`.
 

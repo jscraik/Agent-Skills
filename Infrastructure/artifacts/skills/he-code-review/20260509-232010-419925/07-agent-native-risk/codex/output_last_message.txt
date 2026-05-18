@@ -1,0 +1,38 @@
+I’m blocked from doing the actual review in the current environment.
+
+What happened:
+
+- I tried to read the governing skill instructions, `UBIQUITOUS_LANGUAGE.md`, and the working-tree diff from `/Users/jamiecraik/dev/agent-skills`.
+- Every shell command failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+- Because the sandbox is currently `read-only` and approval policy is `never`, I cannot request broader filesystem permissions or run with an override.
+- I also attempted to fall back to the GitHub connector to find the repository, but that MCP call was cancelled before returning data.
+
+So I do not have enough live repo evidence to responsibly say whether the new skill routing is discoverable and deterministic. I’d be guessing, and for this kind of review the details matter: routing docs, generated projections, handle names, conflict resolution order, validation behavior, and test/doctor output all need to line up.
+
+The exact review I would run once file access works:
+
+```bash
+./bin/ask repo doctor --json --robot
+git status --short
+git diff --stat
+git diff -- Docs .agents Skills Infrastructure
+rg -n "route|routing|discover|determin|skill|handle|projection|canonical" .
+./bin/ask repo closeout --changed --json --robot
+```
+
+For this specific question, I’d be looking for these failure modes:
+
+- **Undiscoverable routing:** new routes exist only in prose or only in generated/runtime projections, without canonical source updates.
+- **Ambiguous handles:** two skills, plugins, or docs expose overlapping names/triggers without a documented priority rule.
+- **Non-deterministic selection:** route order depends on filesystem traversal, glob ordering, JSON object order, search ranking, or prompt wording instead of explicit precedence.
+- **Projection drift:** runtime `.agents/...` files diverge from canonical sources, or the change edits projections directly.
+- **Missing proof path:** no command, fixture, or test demonstrates that future agents can resolve the same skill from the same query.
+- **Stale instruction map:** `Docs/agents/README.md`, path ownership docs, or skill management docs no longer point agents to the new routing mechanism.
+- **No negative cases:** validation proves happy-path discovery but not collision handling, unknown routes, deprecated aliases, or plugin/skill name overlap.
+
+At the moment my review result is: **blocked, no findings validated**. The environment prevented reading the repo, so I can’t provide file/line findings yet.

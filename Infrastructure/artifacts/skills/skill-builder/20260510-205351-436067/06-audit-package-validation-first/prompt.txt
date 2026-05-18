@@ -1,0 +1,3 @@
+$skill-builder
+
+Audit a skill package and run validation before suggesting edits.

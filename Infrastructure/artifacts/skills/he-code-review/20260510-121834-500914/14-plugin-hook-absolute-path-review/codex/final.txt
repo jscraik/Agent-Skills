@@ -1,0 +1,29 @@
+**Findings**
+
+- **High: `hooks/hooks.json` hard-codes Jamie’s local checkout path to `guard.py`.**
+  In the hook entry that invokes `/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/scripts/guard.py`, the plugin becomes non-portable. Any user who installs or syncs the plugin somewhere else, uses a runtime projection, runs from CI, or checks out the repo under a different path will get a broken hook even though the script is actually packaged with the plugin. This also violates the spirit of plugin shipping: the hook should bind to the script relative to the plugin/install location, not to one developer’s source tree.
+
+  The fix should make the hook resolve the bundled script from the plugin itself. Depending on the hook runner contract, that probably means one of:
+
+  ```json
+  "command": "Plugins/harness-engineering/scripts/guard.py"
+  ```
+
+  or:
+
+  ```json
+  "command": "./Plugins/harness-engineering/scripts/guard.py"
+  ```
+
+  or a small wrapper/launcher that derives the plugin root before executing `scripts/guard.py`.
+
+  If this `hooks/hooks.json` is itself inside the plugin package, the most robust shape is usually to make the command relative to that hook file or to the plugin root, for example `scripts/guard.py`, assuming the hook runner supports plugin-relative paths.
+
+**Open Questions**
+
+- I could not verify the exact line number locally because every shell command, including read-only `pwd` and `git diff`, failed with `sandbox_apply: Operation not permitted` in this session.
+- The key thing to confirm in this repo is the hook runner’s path resolution contract: repo-root relative, current-working-directory relative, plugin-root relative, or no relative support. The correct fix should match that contract rather than guessing.
+
+**Validation**
+
+- Local validation not run: the shell sandbox rejected read-only commands before I could inspect `git diff`, `hooks/hooks.json`, or run the repo wrappers.

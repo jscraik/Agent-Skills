@@ -1,31 +1,100 @@
 # Harness Engineering Deferred Context Index
 
-HE active files must stay real plugin-owned text. Historical snapshots live under `fixtures/**` or `Infrastructure/references/harness-engineering/deferred-context-index.full.md`; active paths must not symlink into archives.
+HE active files must stay real plugin-owned text. Historical snapshots live
+under `fixtures/**` or a dedicated archive reference; active paths must not
+symlink into archives.
 
-Use this when compact stage files defer context. Do not trim silently: move durable behavior to a stage reference, link it here, and keep enough wording for validators and future agents.
+Use this index only when a compact stage file defers context. Do not paste
+active procedure bodies here. Move durable behavior to a stage reference, link
+the reference below, and let validators catch stale duplicated procedure text.
 
-## Runtime References
+## Runtime Reference Map
 
-- Routing and domain context: `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/domain-model-routing.md`, `references/domain-context-contract.md`, `references/design-complexity-contract.md`
-- Lifecycle and tracker gates: `references/lifecycle-exit-contract.md`, `references/linear-tracker-gate.md`, `references/coding-harness-command-bridge.md`, `references/goal-continuity.md`
-- Intake and evidence: `references/qa-intake-routing.md`, `references/session-evidence-contract.md`, `references/session-evidence-skillify-triage.md`
-- Skill improvement: `references/skill-improvement-loop.md`
-- Delegation: `references/subagent-routing.md`, `references/subagent-call-contract.md`
-- Folded compatibility: `references/folded-skill-context.md`
+- Routing and domain context:
+  - `references/routing-map.json`
+  - `references/deterministic-stage-routing.md`
+  - `references/domain-model-routing.md`
+  - `references/domain-context-contract.md`
+  - `references/domain-model-production-contract.md`
+  - `references/design-complexity-contract.md`
+  - `references/gate-selection-contract.md`
+  - `references/first-principles-contract.md`
+  - `references/plugin-hook-capability-contract.md`
+- Lifecycle, artifact, slice, and tracker gates:
+  - `references/stage-context-contract.md`
+  - `references/lifecycle-exit-contract.md`
+  - `references/git-staging-contract.md`
+  - `references/artifact-routing-contract.md`
+  - `references/artifact-classification-and-traceability.md`
+  - `references/execution-slice-contract.md`
+  - `references/linear-tracker-gate.md`
+  - `references/coding-harness-command-bridge.md`
+  - `references/goal-continuity.md`
+- Intake and evidence:
+  - `references/qa-intake-routing.md`
+  - `references/source-prompt-coverage-contract.md`
+  - `references/session-evidence-contract.md`
+  - `references/session-evidence-skillify-triage.md`
+  - `references/session-evidence-trace-context.md`
+  - `references/session-evidence-extraction.md`
+  - `references/codex-provenance-contract.md`
+  - `references/pr-safety-trace-contract.md`
+- Review, ideation, and agent-native lenses:
+  - `references/bluf-review-contract.md`
+  - `references/visual-reference-contract.md`
+  - `references/agent-native-audit-scorecard.md`
+  - `references/brainstorm-topic-coverage-contract.md`
+  - `references/document-review-finding-tiers.md`
+  - `references/specialist-skill-steering-contract.md`
+  - `references/pragmatic-programmer-review-contract.md`
+  - `references/xp-operating-contract.md`
+- Skill improvement:
+  - `references/skill-improvement-loop.md`
+  - `references/plugin-eval-confidence-contract.md`
+- Delegation:
+  - `references/subagent-routing.md`
+  - `references/subagent-call-contract.md`
+- Folded compatibility:
+  - `references/folded-skill-context.md`
 
-## Stage Preserved Context
+## Conditional Loading Map
 
-`he-plan` keeps plan-mode, synthesis, deepening, testing, handoff, and visual planning doctrine in:
+Load references by trigger instead of by habit:
 
-- `Plugins/harness-engineering/references/he-plan-doctrine.md`
-- `Plugins/harness-engineering/skills/he-plan/references/codex-plan-mode.md`
-- `Plugins/harness-engineering/skills/he-plan/references/plan-artifact-contract.md`
-- `Plugins/harness-engineering/skills/he-plan/references/planning-depth.md`
-- `Plugins/harness-engineering/skills/he-plan/references/deepening-review.md`
-- `Plugins/harness-engineering/skills/he-plan/references/test-strategy.md`
-- `Plugins/harness-engineering/skills/he-plan/references/visual-communication.md`
+| Stage or condition | Load | Expected proof |
+| --- | --- | --- |
+| Any stage writes durable docs, mutates files, or hands off | `references/stage-context-contract.md`, `references/lifecycle-exit-contract.md`, `references/git-staging-contract.md` | compact stage context plus exit status plus git staging status for current-turn files |
+| Non-trivial durable HE artifact is operator-facing | `references/bluf-review-contract.md` | Command Summary with one opening BLUF paragraph, No-Fog Gate, or compact not-applicable reason |
+| Non-trivial artifact has flow, dependency, boundary, state, validation, rollback, UI, media, or source-of-truth complexity | `references/visual-reference-contract.md` | Mermaid/table/image reference, or compact not-needed reason |
+| Stage choice is ambiguous | `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/interactive-steering-contract.md` | selected stage or one blocking question |
+| `.harness` artifacts determine scope | `references/artifact-classification-and-traceability.md`, `references/artifact-routing-contract.md` | content-shape classification and Artifact Identity status |
+| Non-trivial tracked work | `references/linear-tracker-gate.md` | resolved, created, blocked, or user-opted-out tracker status |
+| Existing tracked plan or Linear-backed slice is consumed | `references/linear-delta-capture-gate.md` | delta admitted, rejected, or blocked before scope changes |
+| Original prompt, external workflow, old manual method, or plugin comparison is the baseline | `references/source-prompt-coverage-contract.md` | source_prompt_status, evidence_depth, coverage_scope, not_inspected, repo-specific drift signals, authority limits, downstream_confidence, and next route |
+| Artifact, handoff, or PR cites Codex sessions, session collector, rollout, transcript, OTEL, thread ID, turn ID, or trace ID | `references/session-evidence-trace-context.md`, `references/codex-provenance-contract.md`, `references/pr-safety-trace-contract.md` | he_trace_id, provenance source/status, redaction status, public-safe trace fields, proof limits, and no raw sensitive local IDs or paths in public text |
+| Coding-harness-managed repo | `references/coding-harness-command-bridge.md`, `references/execution-slice-contract.md` | command evidence or explicit blocked bridge fields |
+| Stage could load broad domain, strategy, reframe, Linear, security, specialist, or eval gates | `references/gate-selection-contract.md` | smallest gate profile, required contracts, skipped contracts, and minimum proof |
+| Stage would copy external process, add lifecycle surface area, expand governance, or preserve complexity without proven HE-specific failure evidence | `references/first-principles-contract.md` | first_principles_check with verified failure, smallest mechanism, decision type, rejected analogy, and proceed/ask/defer/reject/delete outcome |
+| Plugin hook, `hooks/hooks.json`, `.codex-plugin/plugin.json` hook declaration, or hook-enforced guardrail appears in scope | `references/plugin-hook-capability-contract.md` | plugin_hook_capability_check with feature gate status, fallback path, portability status, side-effect class, lifecycle authority, and outcome |
+| Domain-specific knowledge could sharpen output | `references/specialist-skill-steering-contract.md` | chosen specialist, skipped reason, or blocker |
+| User choice affects downstream scope | `references/interactive-steering-contract.md` | asked choice, headless assumption, or blocked state |
+| Product compression is the blocker | `references/agent-native-compression-contract.md` | subtractive proof, fresh-agent eval, and ablation gate |
+| HE plugin confidence or budget quality is claimed | `references/plugin-eval-confidence-contract.md` | static plugin-eval result, rooted handle proof, release eval lane, and cache-sync status |
+| Lifecycle stage risks ceremony, broad scope, weak feedback, or unclear value | `references/xp-operating-contract.md` | smallest valuable slice, feedback signal, slack policy, or blocked reason |
+| Review or closure touches agent-facing workflow surfaces | `references/agent-native-audit-scorecard.md` | scorecard findings or not-applicable reason |
+| Solved-problem evidence should persist | `references/solution-capture-contract.md` | refreshed existing solution or new `.harness/solutions/**` capture |
 
-`he-spec` keeps collaboration, session evidence, source parity, artifact templates, and autoresearch decisions in:
+## Stage Reference Map
+
+`he-brainstorm`:
+
+- `skills/he-brainstorm/references/brainstorm-workflow-details.md`
+- `skills/he-brainstorm/references/discovery-interview.md`
+- `skills/he-brainstorm/references/requirements-artifact-guide.md`
+- `skills/he-brainstorm/references/visual-communication.md`
+- `references/brainstorm-topic-coverage-contract.md`
+
+`he-spec`:
 
 - `Plugins/harness-engineering/references/he-spec-doctrine.md`
 - `Plugins/harness-engineering/skills/he-spec/references/autoresearch-2026-05-02.md`
@@ -33,102 +102,139 @@ Use this when compact stage files defer context. Do not trim silently: move dura
 - `Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md`
 - `Plugins/harness-engineering/skills/he-spec/references/spec-mode-rules.md`
 
-`he-work` keeps execution lessons, work patterns, execution modes, and handoff rules in:
+`he-plan`:
 
-- `Plugins/harness-engineering/skills/he-work/references/work-execution-contract.md`
-- `Plugins/harness-engineering/skills/he-work/references/codex-execution-lessons.md`
-- `Plugins/harness-engineering/skills/he-work/references/handoff-and-shipping.md`
-- `Plugins/harness-engineering/skills/he-work/references/execution-modes.md`
+- `references/he-plan-doctrine.md`
+- `skills/he-plan/references/codex-plan-mode.md`
+- `skills/he-plan/references/plan-artifact-contract.md`
+- `skills/he-plan/references/planning-depth.md`
+- `skills/he-plan/references/deepening-review.md`
+- `skills/he-plan/references/test-strategy.md`
+- `skills/he-plan/references/visual-communication.md`
 
-`he-router`, `he-work`, and `he-heartbeat` preserve goal-continuity routing in:
+`he-work`:
 
-- `Plugins/harness-engineering/references/goal-continuity.md`
+- `skills/he-work/references/work-execution-contract.md`
+- `skills/he-work/references/codex-execution-lessons.md`
+- `skills/he-work/references/handoff-and-shipping.md`
+- `skills/he-work/references/execution-modes.md`
 
-`he-code-review` preserves repeated review-feedback routing in:
+`he-code-review`:
 
-- `Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md`
-- `Plugins/harness-engineering/skills/he-code-review/references/evals.yaml`
+- `skills/he-code-review/references/review-policy-index.md`
+- `skills/he-code-review/references/review-loop-patterns.md`
+- `skills/he-code-review/references/review-mode-contract.md`
+- `references/pragmatic-programmer-review-contract.md`
 
-The 2026-05-06 goal-continuity merge preserved these compact-entrypoint lines
-outside the runtime bodies:
+`he-eval-report`:
 
-```text
-description: "WHAT: Review HE PRs, diffs, CI, traceability, and autofix loops. Use when merge readiness or review fixes need evidence."
-Find introduced risk before summaries. Code review should be precise enough for Codex inline findings and broad enough to catch traceability, validation, and readiness gaps.
-Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, next handoff.
-Read changed files; lead with file:line findings; check `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`; in coding-harness-managed repos also check Project Brain, north-star evidence, and Harness review gates; use `evidence_ladder`; Codex-compatible findings must be tight; then approve/request/autofix.
-description: "WHAT: Automate HE wakeups, monitoring, until-green checks, and follow-through. Use when later thread continuation is needed."
-Continue only with a clear stop rule. Heartbeats should preserve context, not create background noise.
-Target thread/workspace, cadence, stop condition, issue/PR/check links.
-Prefer thread heartbeat for this conversation; encode stop criteria; avoid duplicate automations.
-Route with `route_skillset.py`; keep request text data-only; load only the chosen stage; before any new skill package is proposed, use session-evidence-skillify-triage.md; path fragments and bundle names are evidence labels for collector-backed improvement.
-Plan/todo, Linear issue, branch, PR, validation output, dirty worktrees.
-Mark current active state; Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; run or explicitly block coding-harness blast-radius/policy/preflight/validation gates and record exact command/path plus smallest recovery step when blocked; handoff to he-code-review mode:autofix when needed.
-```
+- `skills/he-eval-report/references/eval-report-contract.md`
+- `skills/he-eval-report/references/eval-report-template.md`
+- `skills/he-eval-report/references/eval-report-schema.json`
+- `skills/he-eval-report/references/drift-taxonomy.md`
+- `skills/he-eval-report/references/linear-completion-policy.md`
+- `references/source-prompt-coverage-contract.md`
 
-The 2026-05-07 design-complexity and XP operating-contract rewrite preserved these compact-entrypoint lines outside the runtime bodies:
+`he-strategy`:
 
-```text
-Return schema_version when structured. Stated / Inferred / Out of scope, options, risks, warrant notes, and next stage.
-Return schema_version when structured. schema_version: 1, severity findings, traceability, blockers, verdict, next handoff, repeated context-feedback candidates.
-Return schema_version when structured. Stage map, active owner, blockers, next action, and retained references.
-Return schema_version when structured. Root cause, fix, validation, rollback note, next review handoff.
-Reproduce first; inspect changed path; patch narrowly; validate exact failure path.
-Return schema_version when structured. Gap list, prioritized improvements, validation, retained references.
-Before any new skill package is proposed, inspect existing surfaces; start with 2-3 focused surfaces at most, choose one primary target and at most two supporting references; label path fragments and bundle names as evidence labels; close coverage-gap items; for skill work, run the A/B/C spec-implementation-evaluation loop until the stop rule passes or a concrete blocker remains.
-Return schema_version when structured. durable plan, complete replacement plan when revising, repo-relative file paths, risks, validation, Linear/spec/plan/PR traceability matrix.
-Return `schema_version` when structured, plus `selected_stage`, `source_path`, `folded_mode`, `blocker`, and `lifecycle_exit_status`.
-Return schema_version when structured. schema_version: 1, complete replacement spec section, Linear Acceptance Traceability, acceptance IDs, validation plan.
-Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff.
-Return schema_version when structured. Goal status, heartbeat decision, stop rule, next wakeup, and residual risk.
-Return schema_version when structured. Board health report, native/board reconciliation, next safe action, machine-checkable validation evidence, residual risks, and owner-input blockers.
-Existing board files pass `scripts/check_goal_board.py`.
-   - Existing board files pass `scripts/check_goal_board.py`.
-python3 scripts/check_goal_board.py <goal-directory>
-Return schema_version when structured. Heartbeat prompt, status, stop rule, `next_invocation`, `subagent_policy`, and next user-visible update.
-```
+- `skills/he-strategy/references/strategy-output-contract.md`
+- `skills/he-strategy/references/source-prompt-preservation.md`
+- `references/source-prompt-coverage-contract.md`
+- `references/pragmatic-programmer-review-contract.md`
 
-## Preservation Contract
+`he-reframe`:
 
-- Active `SKILL.md` files stay concise and routing-safe.
-- Removed operational prose belongs in stage-local `references/*` or `Infrastructure/references/harness-engineering/deferred-context-index.full.md`.
-- `fixtures/preserved-context/**` preserves legacy full-stage guides for audit and migration comparison only.
+- `skills/he-reframe/references/reframe-program-contract.md`
+- `skills/he-reframe/references/source-prompt-preservation.md`
+- `references/source-prompt-coverage-contract.md`
 
-## Active Entrypoint Rewrite Preservation
+`he-linear-plan`:
 
-The PR 152 review-fix pass preserved removed Goal Governor validator wording
-while replacing the active command examples with the canonical packaged path:
+- `skills/he-linear-plan/references/linear-plan-output-contract.md`
+- `skills/he-linear-plan/references/source-prompt-preservation.md`
+- `references/source-prompt-coverage-contract.md`
 
-```text
-   - Existing board files pass `./bin/ask check_goal_board <goal-directory>`.
-   - Existing board files pass `./bin/ask check_goal_board <goal-directory> --robot`.
-   - Agent-driven runs append `--robot` to `./bin/ask check_goal_board <goal-directory>` for stable parsing.
-```
+`he-phase-work`:
 
-The 2026-05-03 Harness Engineering tightening preserved these compact-entrypoint lines outside the runtime bodies:
+- `skills/he-phase-work/references/phase-gate-contract.md`
+- `skills/he-phase-work/references/contract.yaml`
 
-```text
-Explore first; separate evidence from guesses; route to he-spec, he-plan, or he-work only when ready.
-description: "Use when fuzzy intent needs grounded HE options before spec, plan, or work."
-Read changed files; lead with file:line findings; check `Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation`; use `evidence_ladder`; Codex-compatible findings must be tight; then approve/request/autofix.
-description: "Use when HE PRs, diffs, commits, CI, readiness, traceability, or autofix need review."
-Inspect live state; pick stage order; keep Linear/spec/plan/PR links; refresh Project Brain when repository context changes.
-description: "Use when HE work spans Linear, spec, plan, work, review, and PR state."
-description: "Use when HE test, QA, CI, incident, or regression failures need reproduction and fixes."
-description: "Use when HE wakeups, monitoring, until-green checks, or thread follow-through are needed."
-Before any new skill package is proposed, inspect existing surfaces; label path fragments and bundle names as evidence labels; close coverage-gap items.
-Redact secrets; preserve important context in references. Do not remove important context for budget trimming; move deep context to references.
-description: "Use when HE hardening, optimization, polish, or capability improvement needs measurement."
-Explore first, ask second; use update_plan only for live progress; turn scope into ordered implementation units.
-description: "Use when approved specs or Linear issues need execution-ready HE plans before work."
-- "Route this old `$he-refine` request through the current Harness Engineering surface."
-- "The user asked for brainstorm and implementation in one message; decide the first lifecycle stage and preserve Linear traceability."
-- "This HE request mentions a bug, plan drift, and CodeRabbit comments; pick the right stage and tell me what evidence is missing."
-description: "Selects the correct Harness Engineering lifecycle stage and compatibility alias route. Use when a request is ambiguous, mixes brainstorm/spec/plan/work/review intent, references folded he-* aliases, or needs Linear/session evidence checked before loading a deeper stage."
-Inspect session-collector evidence and repo truth; define scope, assumptions, assets/icon-small.png if packaging matters, and handoff to plan.
-description: "Use when HE work needs Linear-backed scope, requirements, acceptance, and validation."
-- For `JSC-246`, implement the approved account settings flow plan in delegate mode, keep `update_plan` as the live checklist, and return changed files plus verified slices.
-- For a tiny low-risk fix, capture the current active state, make the smallest traceable edit, run the exact gate, and hand off to `he-code-review mode:autofix` if review findings remain.
-Mark current active state; Explore first, ask second; `update_plan` is live checklist only; use external-delegate for bounded slices; handoff to he-code-review mode:autofix when needed.
-description: "Use when approved HE plans or tiny low-risk tasks need traceable execution."
-```
+## Historical Context Policy
+
+Deferred context exists to keep meaningful, still-valid HE knowledge reachable
+without loading it by default. It is not a landfill for every line removed from
+`SKILL.md`.
+
+When compacting a stage entrypoint, classify removed material:
+
+- `moved-to-reference`: valid reusable behavior preserved in a stage reference,
+  shared contract, or fixture.
+- `superseded`: replaced by a newer compressed rule, route, contract, or
+  validator.
+- `intentionally-discarded`: stale, duplicated, unsafe, inappropriate,
+  contradicted by current HE guidance, or no longer part of the shipped
+  contract.
+- `not-context`: formatting, navigation, repeated prose, examples with no
+  durable value, or low-signal explanation.
+
+Only the `moved-to-reference` disposition belongs in this index. The other
+dispositions may be mentioned in review notes or change summaries when useful,
+but they should not be pasted into deferred context.
+
+## Preserved Entry Point Lines
+
+Preserved entrypoint lines from earlier compression rounds are intentionally
+stored in archival fixtures and stage-specific preservation references, not in
+this active router index.
+
+Authoritative preservation locations:
+
+- `fixtures/budget-archive/**`
+- `fixtures/preserved-context/**`
+- stage-specific source-prompt preservation references
+
+Historical compact-entrypoint lines from prior compression passes belong in:
+
+- `fixtures/budget-archive/**`
+- `fixtures/preserved-context/**`
+- stage-specific source-prompt preservation references
+
+Do not duplicate active `SKILL.md` procedure text here. If future agents need
+an old line for migration evidence, link the historical fixture path and state
+why it matters instead of copying the line.
+
+## Drift Signals
+
+- The same reference appears twice under different labels.
+- Preserved text copies active stage procedure instead of linking archival context.
+- A preserved line contradicts the current stage entrypoint.
+- This file grows faster than the referenced stage contracts.
+- A validator, eval, or skill entrypoint treats this index as source of truth
+  instead of a context router.
+
+## Retired Entry Point Audit Notes
+
+The 2026-05-08 artifact-traceability pass retired several oversized stage
+entrypoint paragraphs. Their audit value is preserved by active stage diffs,
+the relevant `skills/**/references/source-prompt-preservation.md` files, and
+fixtures. Keep this index as a router only; do not paste retired procedure text
+back into this file.
+
+## 2026-05-12 BLUF Productization Disposition Notes
+
+The BLUF productization pass compressed several stage entrypoints. Meaningful
+behavior was moved to stage references, artifact contracts, and the BLUF review
+contract. BLUF now means one opening Bottom Line Up Front paragraph, not a
+section-by-section template.
+
+Disposition:
+
+- `moved-to-reference`: durable artifact routing, Linear mutation gates,
+  closure proof, review shape, and strategy/reframe/Linear output rules are
+  preserved in the Stage Reference Map above and the linked stage references.
+- `superseded`: exact numbered procedure fragments were replaced by compact
+  stage procedures plus shared BLUF, visual-reference, source-prompt, Linear,
+  and lifecycle contracts.
+- `intentionally-discarded`: incomplete line fragments and prompt snippets that
+  no longer form valid operational guidance are not preserved here.
+- `not-context`: numbering artifacts and partial copied lines are omitted.

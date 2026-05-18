@@ -119,7 +119,7 @@ class SkillScanProgressiveDisclosureTests(TestCase):
             (refs_dir / "details.md").write_text("# details\n", encoding="utf-8")
             (skill_dir / "SKILL.md").write_text(
                 _skill_with_required_headings(
-                    "Required operational context is never removed.\n"
+                    "Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.\n"
                     "Read when: full decision context is needed.\n"
                     "See [details](./references/details.md).\n"
                 ),
@@ -186,6 +186,79 @@ class SkillScanProgressiveDisclosureTests(TestCase):
 
             self.assertEqual(rc, 0)
 
+    def test_strict_mode_accepts_harness_style_header_aliases(self) -> None:
+        """
+        Verify strict linting accepts the newer harness-style skill headers.
+
+        These headings intentionally avoid the older family names while still
+        exposing inputs, outputs, boundaries, validation, evidence, and repair
+        behaviour.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            skill_dir = root / "Plugins" / "plugin-factory" / "skills" / "team_automation" / "not-router"
+            skill_dir.mkdir(parents=True, exist_ok=True)
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: harness-style-skill
+description: test
+metadata:
+  skill-type: scaffolding_templates
+---
+
+## Purpose
+Use this for tests.
+
+## When to Use
+Use this when a bounded workflow needs proof.
+
+## When Not to Use
+Do not use this when the task belongs to another skill.
+
+## Inputs
+The user request, target source path, and current validator output.
+
+## Outputs
+Changed files, validation evidence, rollback path, and residual risks.
+
+## Preconditions
+Canonical source and required permissions are known.
+
+## Codex Harness Placement
+Respect higher-priority repo instructions and command boundaries.
+
+## Execution Boundaries
+Only edit canonical sources and do not touch generated runtime projections.
+
+## Validation Gates
+Run the focused validator and report pass, fail, or blocked.
+
+## Evidence Requirements
+Tie claims to validator output or source evidence.
+
+## Safety Boundaries
+Ask before destructive, broad, external, or ambiguous writes.
+
+## Failure Handling
+Stop after the first failure class, fix it, and rerun the same gate.
+
+## Handoff Rules
+Hand off when the task belongs to another skill or requires human approval.
+
+## Gotchas
+Source existence is not runtime availability.
+""",
+                encoding="utf-8",
+            )
+
+            with (
+                mock.patch.object(self.module, "REPO_ROOT", root),
+                mock.patch.object(self.module, "ROOTS", ("Plugins",)),
+            ):
+                rc = self.module.cmd_lint_progressive_disclosure("strict")
+
+            self.assertEqual(rc, 0)
+
     def test_strict_mode_accepts_infrastructure_references_links(self) -> None:
         """
         Verifies that strict progressive-disclosure linting accepts SKILL.md link references that use an Infrastructure/... path.
@@ -234,7 +307,7 @@ class SkillScanProgressiveDisclosureTests(TestCase):
             # Create SKILL.md with relocation text in frontmatter but not in body
             frontmatter_with_relocation = """---
 name: sample-skill
-description: "Required operational context is never removed. Read when: details needed."
+description: "Apply the context-disposition policy. Read when: details needed."
 metadata:
   skill-type: scaffolding_templates
   notes: "See references/details.md for relocated context"

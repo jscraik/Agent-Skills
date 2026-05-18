@@ -1,0 +1,9 @@
+I’m blocked by the current environment: every repo command is failing immediately with `sandbox-exec: sandbox_apply: Operation not permitted`, so I can’t inspect the headless repro, make the fix, or update validation notes from the live tree.
+
+If you want, send me one of these and I can continue right away:
+
+1. The failing command/output from the headless repro.
+2. The relevant files or diff for the bug area.
+3. A repo mode that allows local file access so I can patch and verify directly.
+
+Once I can read the tree, I’ll make the narrow fix and write the chosen scope assumption into the validation notes exactly as requested.

@@ -7,6 +7,16 @@ inputs: [user_request, optional_repo_path, optional_plugin_url, constraints]
 outputs: [selected_lane, rationale, next_invocation, blocked_missing_input]
 risks: [untrusted_plugin_content, over_routing, unsafe_installation]
 safety: {untrusted_inputs: true, redact_secrets: true, execute_code: false}
+design_contract:
+  reference: Infrastructure/references/openai-style-plugin-design-contract.md
+  required_checks:
+    - coherent_plugin_boundary
+    - small_public_routing_surface
+    - mutually_distinguishable_child_skills
+    - side_effect_classes
+    - progressive_disclosure_references
+    - deterministic_install_projection_behavior
+    - plugin_level_eval_coverage
 validation: [strict_skill_audit, plugin_eval_grade_a]
 observability: "Report selected lane, evidence, missing input, and validation outcome."
 rollback_procedure: "Restore router SKILL.md and references from git, then rerun strict audit and Plugin Eval."

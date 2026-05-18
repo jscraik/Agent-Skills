@@ -1,0 +1,3 @@
+Yes. I’ll treat `Linear` object creation as confirmation-gated in autonomous mode, and I won’t create any Linear issues, projects, comments, or other objects unless you explicitly confirm first.
+
+If you want, I can also help encode that as a persistent repo/workflow rule so it’s easier to preserve across future turns.

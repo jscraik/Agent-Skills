@@ -1,0 +1,1 @@
+Can you in headless mode, record assumptions instead of asking and avoid irreversible actions.

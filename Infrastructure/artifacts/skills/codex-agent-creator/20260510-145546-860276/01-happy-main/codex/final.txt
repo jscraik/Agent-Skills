@@ -1,0 +1,58 @@
+To validate a Codex custom subagent TOML, I need these exact inputs from you:
+
+1. The TOML file itself, or the absolute path to it.
+   - Example: `/Users/jamiecraik/dev/configs/codex/agents/my-agent.toml`
+   - This is the minimum required artifact for a role-file validation.
+
+2. The intended scope of the role.
+   - `validation-only`
+   - `global`
+   - `project`
+   - `repo-owned`
+   - This matters because the validator and expected discoverability wiring differ by scope.
+
+3. The declaring config path, if the TOML is referenced through `[agents.<name>]`.
+   - Example: `/Users/jamiecraik/dev/configs/codex/config.toml`
+   - If the file is standalone under an `agents/` directory, I still need the parent config root so I can check discoverability correctly.
+
+4. The target agent name exactly as it should be loaded.
+   - This is needed to verify `name`, `description`, and any `agents.<name>` wiring are aligned.
+
+5. The validation goal.
+   - `syntax only`
+   - `schema / field contract`
+   - `discoverability`
+   - `runtime posture`
+   - `full role validation`
+   - The repo guidance says to validate the role file first, then any touched config, then the smallest broader workflow gate.
+
+6. The current Codex contract source to trust, if you want me to verify field compatibility against live schema evidence.
+   - Either:
+     - local `~/dev/codex` schema evidence, or
+     - official OpenAI docs if the local schema is unavailable.
+   - This is important because the repo explicitly says not to claim config keys are current without verifying schema evidence.
+
+7. Any relevant config-layer context if the TOML is not standalone.
+   - `config.toml`
+   - `.codex/agents/*.toml`
+   - any discoverability wiring that points at the role file
+
+8. If you want me to check whether this role should be reused, folded, or renamed instead of created anew, I need the existing nearby roles you consider candidates.
+   - That can be a folder path, a list of role names, or the directory to scan.
+
+9. If the TOML contains generated or user-supplied instructions, I need to know whether any part of it is sensitive, private, or from raw transcripts.
+   - I will treat that content as untrusted and redact or ignore unsafe parts during validation.
+
+If you want the shortest possible handoff, send me:
+
+- the TOML path,
+- the scope,
+- the declaring config path if any,
+- and whether you want `syntax`, `schema`, `discoverability`, or `full` validation.
+
+Relevant repo guidance:
+- [Skills/agent-ops/codex-agent-creator/SKILL.md](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/SKILL.md)
+- [Skills/agent-ops/codex-agent-creator/references/role-creation-guide.md](/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-agent-creator/references/role-creation-guide.md)
+- [Infrastructure/references/agent-native-skill-contract.md](/Users/jamiecraik/dev/agent-skills/Infrastructure/references/agent-native-skill-contract.md)
+
+If you want, I can turn this into a one-line input template you can paste back with the file path filled in.

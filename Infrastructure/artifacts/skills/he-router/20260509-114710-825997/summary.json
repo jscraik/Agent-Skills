@@ -1,0 +1,786 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-09T10:47:10Z",
+  "skill": "he-router",
+  "skill_path": "Plugins/harness-engineering/skills/he-router",
+  "skill_release": {
+    "name": "he-router",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "cf174fe5f500a67e8f08c666c9d8716be4c2a86b",
+    "source_branch": "codex/goal-governor-independent-skill"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "discovery-smoke",
+  "eval_mode": "standard",
+  "tier2_mode": "off",
+  "run_id": "20260509-114710-825997",
+  "case_filters": [],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "ambiguous-stage-route",
+      "name": "Ambiguous stage route",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/01-ambiguous-stage-route",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/01-ambiguous-stage-route/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/01-ambiguous-stage-route/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/01-ambiguous-stage-route/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/01-ambiguous-stage-route/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "explicit-eval-route",
+      "name": "Explicit eval route",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/02-explicit-eval-route",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/02-explicit-eval-route/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/02-explicit-eval-route/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/02-explicit-eval-route/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/02-explicit-eval-route/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "unrelated-image-request",
+      "name": "Unrelated image request",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/03-unrelated-image-request",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/03-unrelated-image-request/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/03-unrelated-image-request/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/03-unrelated-image-request/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/03-unrelated-image-request/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "routing-injection-pressure",
+      "name": "Routing injection pressure",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/04-routing-injection-pressure",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/04-routing-injection-pressure/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/04-routing-injection-pressure/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/04-routing-injection-pressure/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/04-routing-injection-pressure/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "available-specialist-route",
+      "name": "Available specialist route",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/05-available-specialist-route",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/05-available-specialist-route/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/05-available-specialist-route/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/05-available-specialist-route/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/05-available-specialist-route/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "production-domain-inferred-route",
+      "name": "Production domain inferred route",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/06-production-domain-inferred-route",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2",
+            "regex failed: /(?is)(account lifecycle|permissions|persistence|billing workflow|system of record|domain model|bounded context|he-spec|he-brainstorm|ask)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/06-production-domain-inferred-route/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/06-production-domain-inferred-route/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/06-production-domain-inferred-route/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/06-production-domain-inferred-route/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2",
+        "[discovery-smoke] regex failed: /(?is)(account lifecycle|permissions|persistence|billing workflow|system of record|domain model|bounded context|he-spec|he-brainstorm|ask)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "headless-router-assumption",
+      "name": "Headless router assumption",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/07-headless-router-assumption",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2",
+            "regex failed: /(?is)(autonomous mode|assumption|irreversible|least destructive|safe)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/07-headless-router-assumption/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/07-headless-router-assumption/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/07-headless-router-assumption/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/07-headless-router-assumption/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2",
+        "[discovery-smoke] regex failed: /(?is)(autonomous mode|assumption|irreversible|least destructive|safe)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "artifact-path-selection",
+      "name": "Artifact path selection",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/08-artifact-path-selection",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/08-artifact-path-selection/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/08-artifact-path-selection/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/08-artifact-path-selection/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/08-artifact-path-selection/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "stage-sequence-check",
+      "name": "Stage sequence check",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/09-stage-sequence-check",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/09-stage-sequence-check/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/09-stage-sequence-check/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/09-stage-sequence-check/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/09-stage-sequence-check/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "non-trigger-explanation",
+      "name": "Non trigger explanation",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/10-non-trigger-explanation",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/10-non-trigger-explanation/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/10-non-trigger-explanation/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/10-non-trigger-explanation/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/10-non-trigger-explanation/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "gate-selection-trivial-docs-negative",
+      "name": "Gate selection trivial docs negative",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/11-gate-selection-trivial-docs-negative",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2",
+            "regex failed: /(?is)(lightweight path|trivial|no domain|no .*strategy|no .*refactor|no .*Linear|no .*security|no .*eval|gate_profile|risk_class|skipped_contracts)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/11-gate-selection-trivial-docs-negative/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/11-gate-selection-trivial-docs-negative/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/11-gate-selection-trivial-docs-negative/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/11-gate-selection-trivial-docs-negative/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2",
+        "[discovery-smoke] regex failed: /(?is)(lightweight path|trivial|no domain|no .*strategy|no .*refactor|no .*Linear|no .*security|no .*eval|gate_profile|risk_class|skipped_contracts)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "gate-selection-mixed-smallest-set",
+      "name": "Gate selection mixed smallest set",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 60.0,
+      "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/12-gate-selection-mixed-smallest-set",
+      "runners": {
+        "discovery-smoke": {
+          "runner": "discovery-smoke",
+          "exit_code": 2,
+          "passed": false,
+          "tier1_failures": [
+            "discovery-smoke returned non-zero exit code: 2",
+            "regex failed: /(?is)(mixed|skipped_contracts|keyword|smallest|gate_profile)/"
+          ],
+          "tier2_findings": [],
+          "warnings": [
+            "discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+            "discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/12-gate-selection-mixed-smallest-set/discovery-smoke",
+            "final": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/12-gate-selection-mixed-smallest-set/discovery-smoke/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/12-gate-selection-mixed-smallest-set/discovery-smoke/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/12-gate-selection-mixed-smallest-set/discovery-smoke/stderr.txt",
+            "jsonl": null
+          },
+          "metrics": {
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": false,
+      "tier1_failed": true,
+      "tier2_failed": false,
+      "tier1_failures": [
+        "[discovery-smoke] discovery-smoke returned non-zero exit code: 2",
+        "[discovery-smoke] regex failed: /(?is)(mixed|skipped_contracts|keyword|smallest|gate_profile)/"
+      ],
+      "tier2_findings": [],
+      "warnings": [
+        "[discovery-smoke] discovery-smoke emitted a contract-derived response; this is a fast smoke check, not live model behavior.",
+        "[discovery-smoke] discovery-smoke contract gaps: SKILL.md missing discovery interview section; SKILL.md missing one-round-at-a-time guidance; SKILL.md missing plain-language question guidance; SKILL.md missing why-this-matters guidance; SKILL.md missing no-full-plan-dump guidance; discovery-interview.md not found",
+        "[discovery-smoke] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    }
+  ],
+  "passed": false,
+  "tier1_failures": 12,
+  "tier2_findings": 0,
+  "preflight_warnings": [],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 12
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 12
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "fail",
+  "exit_code": 2,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997",
+    "summary": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-router/20260509-114710-825997/junit.xml"
+  }
+}

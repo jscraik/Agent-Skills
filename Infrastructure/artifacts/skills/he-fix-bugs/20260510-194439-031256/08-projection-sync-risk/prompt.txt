@@ -1,0 +1,1 @@
+After the canonical skill fix, check whether the generated runtime handle is stale before claiming the bug is fixed.

@@ -1,0 +1,6 @@
+I need one quick choice before I proceed:
+
+1. `Interactive` - I ask a follow-up and wait for your input.
+2. `Headless assumption` - I proceed and record an assumption about the project state.
+
+If you want, I can default to `headless assumption` and continue.

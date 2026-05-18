@@ -1,0 +1,1 @@
+In `/Users/jamiecraik/dev/agent-skills`, review `.harness/refactor/JSC-246-refactor.md`, `.harness/linear/JSC-246-workpad.md`, and Linear JSC-246 artifacts; upstream original prompt coverage was partial, so preserve what remains valid and mark what cannot be authoritative.

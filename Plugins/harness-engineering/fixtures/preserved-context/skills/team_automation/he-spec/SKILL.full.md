@@ -79,9 +79,9 @@ Do not proceed until the user has supplied a usable source.
 - a spec-mode choice: `standard-spec | dedicated-ui-spec`
 - a depth decision for standard specs: `none | lite | full`
 - a written artifact at one of:
-  - `Docs/specs/YYYY-MM-DD-<type>-<descriptive-name>-spec.md`
-  - `docs/ui-specs/YYYY-MM-DD-<descriptive-name>-ui-spec.md`
-  - compatibility mode: `Docs/specs/YYYY-MM-DD-<topic>-ui-spec.md` only when the repo or user explicitly requires the legacy path
+  - `.harness/specs/YYYY-MM-DD-<type>-<descriptive-name>-spec.md`
+  - `.harness/specs/YYYY-MM-DD-<descriptive-name>-ui-spec.md`
+  - compatibility mode: `.harness/specs/YYYY-MM-DD-<topic>-ui-spec.md` only when the repo or user explicitly requires the legacy path
 - stable acceptance IDs:
   - `SA1`, `SA2`, `SA3` for standard specs
   - `VAC1`, `VAC2`, `VAC3` for dedicated UI specs
@@ -153,13 +153,13 @@ Source resolution order:
   - active Linear issue from the user request, branch key, existing artifact frontmatter, or tracker context
   - explicit spec path
   - explicit brainstorm path
-  - matching recent spec in `Docs/specs/`
-  - matching recent brainstorm in `docs/brainstorms/`
+  - matching recent spec in `.harness/specs/`
+  - matching recent brainstorm in `.harness/brainstorm/`
   - raw feature description only
 - for dedicated UI specs:
-  - explicit UI source path in `docs/ui-specs/`
-  - explicit legacy UI source path in `Docs/specs/*-ui-spec.md`
-  - explicit parent spec path in `Docs/specs/`
+  - explicit UI source path in `.harness/specs/`
+  - explicit legacy UI source path in `.harness/specs/*-ui-spec.md`
+  - explicit parent spec path in `.harness/specs/`
   - explicit brainstorm path
   - matching recent parent spec
   - matching recent brainstorm
@@ -247,8 +247,8 @@ Use `Infrastructure/references/spec-quality-gates.md` for accessibility, idempot
 
 ### Phase 4: Write the artifact
 Ensure the destination directory exists before writing:
-- `Docs/specs/` for standard specs
-- `docs/ui-specs/` for dedicated UI specs
+- `.harness/specs/` for standard specs
+- `.harness/specs/` for dedicated UI specs
 
 Use the canonical frontmatter and required sections from `Infrastructure/references/spec-artifacts.md`.
 
@@ -290,9 +290,9 @@ Use `dedicated-ui-spec` when:
 See `Infrastructure/references/spec-modes.md` for the full compatibility matrix and companion UI-spec rules.
 
 ## Artifact contracts
-- standard specs default to `Docs/specs/YYYY-MM-DD-<type>-<descriptive-name>-spec.md`
-- dedicated UI specs prefer `docs/ui-specs/YYYY-MM-DD-<descriptive-name>-ui-spec.md`
-- use the legacy `Docs/specs/...-ui-spec.md` form only in compatibility mode, then rely on `Infrastructure/references/spec-artifacts.md` for templates and verification
+- standard specs default to `.harness/specs/YYYY-MM-DD-<type>-<descriptive-name>-spec.md`
+- dedicated UI specs prefer `.harness/specs/YYYY-MM-DD-<descriptive-name>-ui-spec.md`
+- use the legacy `.harness/specs/...-ui-spec.md` form only in compatibility mode, then rely on `Infrastructure/references/spec-artifacts.md` for templates and verification
 
 ## Empowerment
 
@@ -338,8 +338,8 @@ IMPORTANT: Outputs should vary based on spec mode, risk, system complexity, and 
 - No two specs should read the same unless the requirements, constraints, and source artifacts are effectively identical.
 
 ## Examples
-- "Turn `docs/brainstorms/2026-04-07-checkout-retry-requirements.md` into an implementation-grade spec with retry caps, idempotency keys, and failure telemetry before `he-plan`."
-- "Revise `Docs/specs/2026-03-21-session-rotation-spec.md` so token expiry behavior, rollback conditions, and observability events are explicit."
+- "Turn `.harness/brainstorm/2026-04-07-checkout-retry-requirements.md` into an implementation-grade spec with retry caps, idempotency keys, and failure telemetry before `he-plan`."
+- "Revise `.harness/specs/2026-03-21-session-rotation-spec.md` so token expiry behavior, rollback conditions, and observability events are explicit."
 - "This billing settings feature needs a companion UI contract before planning; write the UI spec with loading, empty, and error states plus `VAC` IDs."
 - "Convert this duplicate-webhook bug report into a spec with acceptance IDs and concrete validation steps that `he-plan` can execute without inventing behavior."
 ## References
@@ -364,4 +364,4 @@ IMPORTANT: Outputs should vary based on spec mode, risk, system complexity, and 
 
 ## Deferred Context Preservation
 
-Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.
+Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

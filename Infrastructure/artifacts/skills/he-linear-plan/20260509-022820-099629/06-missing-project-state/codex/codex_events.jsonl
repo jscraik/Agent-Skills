@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a5c-33c6-7582-b0b7-d7bec8684f47"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can handle that either way, but I need one choice from you first:\n\n1. `Interactive` - I’ll pause for your input at decision points.\n2. `Headless` - I’ll make reasonable assumptions and record them as I go.\n\nReply with `interactive` or `headless`."}}
+{"type":"turn.completed","usage":{"input_tokens":30265,"cached_input_tokens":2432,"output_tokens":169,"reasoning_output_tokens":102}}

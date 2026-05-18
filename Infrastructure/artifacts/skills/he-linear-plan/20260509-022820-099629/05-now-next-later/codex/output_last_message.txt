@@ -1,0 +1,8 @@
+Yes. A clean way to classify proposed work is:
+
+- `Now`: work that is urgent, high value, and ready to start immediately. It fits current goals, has enough context to act on, and should be done in the current cycle.
+- `Next`: important work that is a strong candidate after `Now` items, but is not the best use of attention today. It is queued and clearly worth doing soon.
+- `Later`: worthwhile work with lower urgency, higher uncertainty, or dependencies that are not ready yet. It should stay visible, but not compete for the current slot.
+- `Do Not Create`: work that should not be initiated at all, usually because it is out of scope, duplicative, harmful, too risky, or based on a bad assumption.
+
+If you want, I can also turn this into a simple decision rubric or classify a specific list of proposed items for you.

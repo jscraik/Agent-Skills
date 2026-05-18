@@ -1,0 +1,28 @@
+I can’t execute the repo loop from this session because shell access to the workspace is blocked here, so I couldn’t run `./bin/ask` or verify local files directly.
+
+What I *could* confirm from the repo docs is the approved phase flow and its gates:
+
+- `spec-driven-development` first, because the repo says to start with a spec for non-trivial work and to define success criteria before code.
+- Then `planning-and-task-breakdown`, with verifiable tasks, acceptance criteria, and dependency order.
+- Then `incremental-implementation` plus `test-driven-development`, with each slice built and verified before moving on.
+- Then `code-review-and-quality` as the merge gate.
+- Then `shipping-and-launch` for deploy safety and rollback readiness.
+
+The checkpoint / proof-gate / stop-condition interpretation is:
+
+- Checkpoint 1: spec approved, open questions resolved.
+- Checkpoint 2: plan approved, tasks are small and testable.
+- Checkpoint 3: each implementation slice has evidence, usually tests or runtime verification.
+- Checkpoint 4: review passes before merge or ship.
+- Stop conditions: unresolved ambiguity, missing verification evidence, failed tests, or review objections block advancement until corrected.
+
+That stop-condition framing is an inference from the repo’s “verification is non-negotiable” and “don’t advance until the current gate passes” guidance, rather than a separate local stop-conditions file I could inspect.
+
+Sources I used:
+- [AGENTS.md](https://github.com/addyosmani/agent-skills/blob/main/AGENTS.md)
+- [using-agent-skills/SKILL.md](https://github.com/addyosmani/agent-skills/blob/main/skills/using-agent-skills/SKILL.md)
+- [getting-started.md](https://github.com/addyosmani/agent-skills/blob/main/docs/getting-started.md)
+- [spec-driven-development/SKILL.md](https://github.com/addyosmani/agent-skills/blob/main/skills/spec-driven-development/SKILL.md)
+- [code-review-and-quality/SKILL.md](https://github.com/addyosmani/agent-skills/blob/main/skills/code-review-and-quality/SKILL.md)
+
+If you want, send me the concrete feature or task and I’ll apply this loop to it step by step next.

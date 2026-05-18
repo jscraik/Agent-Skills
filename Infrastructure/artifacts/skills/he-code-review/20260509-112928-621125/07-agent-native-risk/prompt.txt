@@ -1,0 +1,1 @@
+Can you review whether the new skill routing remains discoverable and deterministic for future agents.

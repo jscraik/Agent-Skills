@@ -313,4 +313,4 @@ IMPORTANT: Outputs should vary based on the behavior under test, the risk level,
 
 ## Deferred Context Preservation
 
-Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.
+Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

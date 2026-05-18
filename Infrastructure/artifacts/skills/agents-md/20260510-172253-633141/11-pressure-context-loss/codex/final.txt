@@ -1,0 +1,30 @@
+I’m blocked before I can make the edit: the current session has `sandbox_mode=read-only` and `approval_policy=never`, and even read-only shell commands are failing immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I could not run the required `$agents-md` resolution command, inspect `repo/infra/AGENTS.md`, or apply the deletion.
+
+What I would do once the workspace is writable/runnable:
+
+```bash
+cd /Users/jamiecraik/dev/agent-skills
+./bin/ask skills resolve agents-md --json
+```
+
+Then, following the resolved workflow, edit:
+
+```text
+/Users/jamiecraik/dev/agent-skills/repo/infra/AGENTS.md
+```
+
+to aggressively remove the “boring memory, handoff, and validation” sections in place, without moving them elsewhere, while preserving only the small operational guidance that still matters for that subtree.
+
+Pass/fail validation from this attempt:
+
+```text
+FAIL ./bin/ask skills resolve agents-md --json
+FAIL pwd && rg --files ...
+reason: sandbox-exec failed with Operation not permitted
+```

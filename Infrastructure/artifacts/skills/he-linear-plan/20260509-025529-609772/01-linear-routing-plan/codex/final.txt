@@ -1,0 +1,30 @@
+I mapped the approved harness artifacts into a small Linear execution plan, but I couldn’t persist the write back to Linear from this session because the connector canceled the save calls.
+
+**Plan**
+1. **Milestone: Agent Cockpit Compression Slice**
+   - **Issues:** `JSC-282`, `JSC-283`
+   - **Gate 1:** command truth inventory, mismatch classification, tiering, projection validation, first dispatch or demotion proof
+   - **Gate 2:** fixture matrix, static validation, clean install/init, update/idempotence, command-reference resolution
+   - **Exit:** `SA-010` to `SA-015`, `SA-020` to `SA-024`, `SA-030`, `SA-031`, `SA-033`, `SA-034`
+
+2. **Milestone: Governance Trust Repair Slice**
+   - **Issue:** `JSC-288`
+   - **Dependency:** start after local closure proof from `JSC-282` and `JSC-283`
+   - **Gate 1:** inventory governance truth surfaces, classify memory surfaces, define bounded-context ownership
+   - **Gate 2:** delete/generate/link duplicate prose, docs lint, contract validation, memory provenance checks, governance drift eval
+   - **Exit:** truth ownership is explicit and the active set stays small
+
+3. **Milestone: CI Migration Boundary Recovery Slice**
+   - **Issue:** `JSC-289`
+   - **Dependency:** follows the governance guardrails from the prior slice
+   - **Gate 1:** deterministic characterization baseline, public behavior capture, first extraction boundary
+   - **Gate 2:** focused CI migration tests, `typecheck`, `lint`, `bash scripts/verify-work.sh --fast`, architecture drift eval, CI migration eval artifact
+   - **Exit:** characterization is stable and no public behavior changes land before parity proof
+
+**Cross-cutting rules**
+- Reuse the existing `coding-harness` project and approved issues.
+- Keep blockers explicit.
+- Preserve `SA-033` rollback conditions and `SA-034` contract guarantees everywhere.
+- Do not expand scope into unrelated cleanup, UI work, plugins, or a new project.
+
+If you want, I can next turn this into a Linear issue description or a tighter milestone-by-milestone checklist you can paste directly into Linear.

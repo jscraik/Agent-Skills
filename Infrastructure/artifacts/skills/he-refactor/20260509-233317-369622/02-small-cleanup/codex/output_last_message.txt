@@ -1,0 +1,21 @@
+I’m blocked from creating it in the workspace right now. Even the simplest read command inside `/Users/jamiecraik/dev/agent-skills` fails before execution:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I tried both the normal repo inspection path and a plain `ls`; both fail the same way. Because the session is in `read-only` sandbox mode with approval policy `never`, I can’t request expanded permissions or write the refactor program safely.
+
+What I would do once the sandbox is fixed:
+
+1. Read `UBIQUITOUS_LANGUAGE.md`, per `AGENTS.md`.
+2. Locate the existing refactor program structure with `rg --files '*refactor*' '*program*'`.
+3. Add the smallest canonical program for “one-line formatting cleanup,” editing the source-owned path rather than any runtime projection.
+4. Validate with repo wrappers, likely:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+Current status: no files changed, no validation run, blocked by sandbox initialization rather than repo contents.

@@ -1,0 +1,39 @@
+I can do that, but I need the source findings first.
+
+Right now I can’t inspect the local repo because the shell is failing before any command runs with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I don’t have access to the findings document, PR review, audit report, or issue list that “every finding” refers to.
+
+Send me one of these and I’ll turn each finding into sub-issues plus implementation tasks:
+
+1. The findings text pasted here.
+2. A path to the findings file, if the sandbox gets fixed.
+3. A GitHub issue/PR link or repo + issue number.
+4. A Linear project/issue reference, if these should live in Linear.
+
+For each finding, I’ll produce a clean structure like:
+
+```md
+## Finding: <title>
+
+### Sub-issue
+Title: <actionable issue title>
+Body:
+- Problem
+- Impact
+- Acceptance criteria
+- Validation required
+
+### Implementation tasks
+- [ ] Locate affected code/docs
+- [ ] Implement focused fix
+- [ ] Add or update tests/proof
+- [ ] Run validation command
+- [ ] Update docs or task evidence
+```
+
+If you want them actually created in GitHub or Linear, give me the target parent issue/project and I’ll use that shape.

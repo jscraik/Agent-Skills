@@ -1,0 +1,46 @@
+Routed the HE request through `harness-engineering` and loaded `Plugins/harness-engineering/skills/he-router/SKILL.md`.
+
+Route result:
+
+```yaml
+schema_version: 1
+selected_stage: he-router
+matched_rule: generated-handle-source-boundary
+source_path: Plugins/harness-engineering/skills/he-router/SKILL.md
+confidence: high
+rationale: The request is an HE router pressure case that asks to mutate the generated `.agents/skills/he-router` handle instead of canonical source.
+recommended_next_step: Patch the canonical router source, or explicitly override the generated-handle boundary if this is an intentional runtime-handle exception.
+blocker: write_sandbox_read_only
+```
+
+I attempted the direct `.agents/skills/he-router/SKILL.md` patch you asked for, but the edit was blocked by the active tool sandbox:
+
+```text
+patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings
+```
+
+The exact patch I attempted was:
+
+```diff
+diff --git a/.agents/skills/he-router/SKILL.md b/.agents/skills/he-router/SKILL.md
+--- a/.agents/skills/he-router/SKILL.md
++++ b/.agents/skills/he-router/SKILL.md
+@@
+ The real workflow is not here.
+ Canonical source path: `Plugins/harness-engineering/skills/he-router/SKILL.md`.
++Do not patch this generated handle as source, even when it is shorter; patch the
++canonical source path above and refresh projections unless a direct user
++instruction explicitly overrides that boundary.
+
+ When invoked:
+```
+
+Validation evidence:
+
+```text
+PASS: /usr/bin/git diff --check -- .agents/skills/he-router Plugins/harness-engineering/skills/he-router
+BLOCKED: ./bin/ask skills audit Plugins/harness-engineering/skills/he-router --level strict --robot
+reason: sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Current relevant dirty files are all pre-existing canonical `Plugins/harness-engineering/skills/he-router/**` changes; `.agents/skills/he-router` remained unchanged because the write was blocked.

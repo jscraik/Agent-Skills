@@ -1,0 +1,5 @@
+What do you want for the harness request?
+
+1. `Brainstorm` - explore ideas and approaches without committing to a spec or plan.
+2. `Spec` - write a concrete requirements/spec document with scope and acceptance criteria.
+3. `Plan` - produce an execution plan with steps, owners, and sequencing.

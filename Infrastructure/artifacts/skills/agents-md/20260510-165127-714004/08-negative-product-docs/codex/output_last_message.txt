@@ -1,0 +1,9 @@
+I’m blocked from editing the README in this session because every shell command is failing before it can read the repo:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened even for a plain `ls` in `/Users/jamiecraik/dev/agent-skills`, so I can’t inspect `README.md`, read `UBIQUITOUS_LANGUAGE.md`, or apply a patch safely. The environment is also configured as read-only, so even if reads worked I would not be able to write the file from here.
+
+If you paste the current README product overview section, I can rewrite it directly in chat. Otherwise, once the sandbox/write access is fixed, I can make the edit in-place and validate the changed diff.

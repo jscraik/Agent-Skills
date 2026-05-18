@@ -1,0 +1,142 @@
+Yes. Route this as a **backend-platform architecture and implementation planning change**, with **security-ops review** before implementation, and likely **harness-engineering** only if this is meant to modify the Agent Skills Kit workflow/control-plane behavior itself.
+
+I tried to inspect the repo guidance and skills directly, but the current sandbox is blocking even read-only shell commands with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So this routing is based on the AGENTS.md instructions you provided and the available skill descriptions.
+
+**Primary Route**
+
+Use `backend-platform` as the lead route.
+
+This change is production-grade billing work, and the unclear parts are exactly backend-platform territory:
+
+- **Account lifecycle:** creation, activation, suspension, cancellation, reactivation, deletion, trial conversion, billing delinquency, grace periods.
+- **Permissions:** who may create billing objects, view invoices, mutate subscriptions, manage payment methods, access account-level billing state, or act across organizations/tenants.
+- **Persistence boundary:** which state is canonical locally, which state is owned by the billing provider, what gets denormalized, how webhooks reconcile state, and where idempotency lives.
+
+The output from this route should be a design/implementation plan that names the owning modules, state machine, authorization boundary, data model changes, and validation sequence.
+
+**Required Secondary Route**
+
+Use `security-ops` as a review route before code changes land.
+
+Billing changes touch high-risk surfaces:
+
+- authorization and tenant isolation
+- payment or subscription state mutation
+- account access changes driven by billing status
+- persistence of billing identifiers and webhook payloads
+- replay/idempotency risks
+- privilege escalation through account lifecycle transitions
+
+Security review should specifically answer:
+
+- Can a user mutate billing state for an account they do not administer?
+- Can webhook or async billing events downgrade/upgrade the wrong account?
+- Are lifecycle transitions idempotent and replay-safe?
+- Is provider-owned state treated as authoritative where appropriate?
+- Are secrets, payment details, and provider payloads stored safely?
+- Are account lifecycle effects separated from raw billing event ingestion?
+
+**Possibly Relevant Route**
+
+Use `harness-engineering` only if the workflow change affects the Agent Skills Kit control plane itself, such as:
+
+- new or changed skill workflows
+- agent-facing docs
+- validation/proof commands
+- runtime projections
+- skill discovery, sync, or policy behavior
+- operator docs around billing workflows
+
+If this is application billing logic rather than agent workflow infrastructure, keep `harness-engineering` out of the main implementation path.
+
+**Concrete Routing Shape**
+
+I would route it like this:
+
+```text
+Lead: backend-platform
+Review: security-ops
+Optional: harness-engineering, only if control-plane/skill workflow docs or validation flows change
+```
+
+**Planning Boundaries To Force Up Front**
+
+Before implementation, the route should produce answers to these questions:
+
+1. **Account Lifecycle**
+   - What are the exact account states?
+   - Which transitions are user-initiated, system-initiated, or provider/webhook-initiated?
+   - Which transitions are reversible?
+   - What happens to access when billing becomes past due, canceled, expired, or reactivated?
+
+2. **Permissions**
+   - Which roles can view billing data?
+   - Which roles can mutate billing state?
+   - Are permissions account-scoped, org-scoped, workspace-scoped, or user-scoped?
+   - Do billing admins differ from account owners?
+   - Do support/admin/internal tools have a separate permission path?
+
+3. **Persistence Boundary**
+   - Which data is canonical in your DB?
+   - Which data is canonical in the billing provider?
+   - Which provider IDs are stored locally?
+   - Are invoices, subscription status, entitlements, and plan metadata cached or queried live?
+   - What is the reconciliation strategy when local state and provider state diverge?
+
+4. **Eventing And Idempotency**
+   - What webhook events are accepted?
+   - What idempotency keys are used for provider calls?
+   - Are webhook event IDs persisted?
+   - Are lifecycle transitions transactional?
+   - What retries are safe?
+
+5. **Entitlements**
+   - Are permissions and entitlements separate?
+   - Does billing state directly grant access, or does it update a separate entitlement model?
+   - What is the delay tolerance between payment event and access change?
+
+6. **Validation**
+   - Unit tests for lifecycle transition rules.
+   - Authorization tests for every billing mutation.
+   - Persistence tests for idempotent webhook processing.
+   - Integration tests or contract tests for provider event handling.
+   - Migration/backfill verification if existing accounts are affected.
+
+**Recommended First Command Once The Sandbox Works**
+
+From the repo root, start with:
+
+```bash
+./bin/ask skills improve "route production-grade billing workflow change with unclear account lifecycle, permissions, and persistence boundary" --json --robot
+```
+
+Then inspect the explanation/proof path for the selected route:
+
+```bash
+./bin/ask skills explain backend-platform --json --robot
+./bin/ask skills explain security-ops --json --robot
+```
+
+For closeout after the plan or implementation:
+
+```bash
+./bin/ask repo closeout --changed --json --robot
+```
+
+**My Recommendation**
+
+Treat this as a **backend-platform led design gate** before implementation, with **security-ops required before merge**. The key architectural move is to separate three concepts that often get tangled:
+
+```text
+billing provider state
+account lifecycle state
+application entitlement/access state
+```
+
+The production-grade version should make those boundaries explicit, persist only what the app must own, process provider events idempotently, and require permissions checks at every user-initiated billing mutation.

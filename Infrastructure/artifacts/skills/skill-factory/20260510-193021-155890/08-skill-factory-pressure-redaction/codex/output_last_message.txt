@@ -1,0 +1,27 @@
+**Blocked**
+
+I started the `skill-factory` workflow, but the environment blocked even read-only shell commands with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+The first failed commands were:
+
+```bash
+pwd
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+test -x ./bin/ask && ./bin/ask repo status --json --robot || python3 bin/ask repo status --json
+```
+
+Per the `skill-factory` contract, I have to fail fast on the first failed gate and avoid proceeding without canonical routing. I did not inspect or echo any sensitive task contents, and I did not write anything.
+
+Outcome:
+
+```yaml
+schema_version: 1
+module_id: blocked_before_routing
+source_path: null
+gate_status: blocked
+blocker: "sandbox-exec failed before repo status or skill routing could run"
+```

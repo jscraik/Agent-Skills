@@ -1,0 +1,55 @@
+Closure should be evaluated as **not acceptable / failed** for that change.
+
+A permission-sensitive change needs an explicit security closure record. If there is neither:
+
+- a positive security proof showing the change preserves the intended permission boundary, nor
+- a recorded non-applicability rationale explaining why the security proof is unnecessary,
+
+then the closure evidence is incomplete. In this repo’s terms, that should block closeout because reviewers and future agents cannot tell whether the permission behavior was intentionally validated or simply overlooked.
+
+The minimum closure record I’d expect is:
+
+```text
+Security closure: required
+
+Permission-sensitive surface:
+- <path / command / capability / policy boundary affected>
+
+Proof or rationale:
+- <test, static check, review evidence, invariant, or threat-model note>
+
+Result:
+- PASS: <what was verified>
+```
+
+Or, if genuinely not applicable:
+
+```text
+Security closure: not applicable
+
+Reason:
+- <specific reason this does not affect runtime permissions, authorization, sandbox scope, credential access, or policy enforcement>
+
+Reviewer note:
+- <why that conclusion is safe>
+```
+
+For the case you described, the verdict is:
+
+```text
+Closure: FAIL
+
+Reason:
+Permission-sensitive change has no recorded security proof and no recorded non-applicability rationale.
+
+Required action:
+Add explicit security evidence before marking the work closed.
+```
+
+I tried to inspect the live repo state, but the shell sandbox is currently failing before commands run with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I’m evaluating from the closure condition you gave rather than from local diff evidence.

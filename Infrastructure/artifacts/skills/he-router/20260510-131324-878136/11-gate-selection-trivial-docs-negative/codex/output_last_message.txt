@@ -1,0 +1,19 @@
+I can route this as a **trivial Harness reference wording cleanup** and intentionally avoid loading the domain, strategy, refactor, Linear, security, or eval gates.
+
+I tried to read the Harness routing skill and repo context, but the current sandbox is blocking even read-only shell commands:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I can’t safely inspect or edit the live tree in this turn. Given your constraint, the light route I’d apply is:
+
+- Scope: wording-only cleanup for a Harness reference.
+- Gates skipped by request: domain, strategy, refactor, Linear, security, eval.
+- Repo guidance still applicable from your AGENTS context:
+  - Use canonical sources, not runtime projections.
+  - For skill or agent-facing docs, read `UBIQUITOUS_LANGUAGE.md` before editing.
+  - Prefer `./bin/ask` wrappers for repo operations.
+  - Validate with `./bin/ask repo closeout --changed --json --robot` after the edit.
+
+I’m blocked from doing the actual file read/write because the sandbox rejects all shell execution, including `pwd`.

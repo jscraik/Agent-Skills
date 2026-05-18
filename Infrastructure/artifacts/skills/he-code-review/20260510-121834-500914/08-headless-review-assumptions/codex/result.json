@@ -1,0 +1,34 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions/codex",
+    "final": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/he-code-review/20260510-121834-500914/08-headless-review-assumptions/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 9,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 185819,
+        "output_tokens": 623,
+        "reasoning_tokens": 0,
+        "total_tokens": 186442
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

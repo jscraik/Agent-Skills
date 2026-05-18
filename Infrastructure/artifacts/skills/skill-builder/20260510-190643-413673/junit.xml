@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="skill-builder" tests="14" failures="6" errors="0" timestamp="2026-05-10T18:06:43Z" id="20260510-190643-413673">
+  <testcase name="happy-basic" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">
+[codex] required command not found: &#x27;bash&#x27;
+[codex] contains failed: &#x27;schema_version&#x27;
+    </failure>
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/01-happy-basic
+    </system-out>
+  </testcase>
+  <testcase name="clarification-package-ambiguous" classname="skill-builder" time="180.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/02-clarification-package-ambiguous
+    </system-out>
+  </testcase>
+  <testcase name="plugin-only-handoff" classname="skill-builder" time="180.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/03-plugin-only-handoff
+    </system-out>
+  </testcase>
+  <testcase name="mixed-authoring-install-handoff" classname="skill-builder" time="180.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/04-mixed-authoring-install-handoff
+    </system-out>
+  </testcase>
+  <testcase name="audit-package-validation-first" classname="skill-builder" time="180.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/05-audit-package-validation-first
+    </system-out>
+  </testcase>
+  <testcase name="provenance-import-rollback" classname="skill-builder" time="180.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/06-provenance-import-rollback
+    </system-out>
+  </testcase>
+  <testcase name="builder-round-metadata-contract" classname="skill-builder" time="180.0">
+    <failure message="tier1 failure">
+[codex] contains failed: &#x27;## Inputs&#x27;
+    </failure>
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/07-builder-round-metadata-contract
+    </system-out>
+  </testcase>
+  <testcase name="edge-ambiguous" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">
+[codex] contains failed: &#x27;required&#x27;
+    </failure>
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/08-edge-ambiguous
+    </system-out>
+  </testcase>
+  <testcase name="edge-path" classname="skill-builder" time="60.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/09-edge-path
+    </system-out>
+  </testcase>
+  <testcase name="negative-nonmatch" classname="skill-builder" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/10-negative-nonmatch
+    </system-out>
+  </testcase>
+  <testcase name="pressure-pi" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">
+[codex] contains failed: &#x27;safety&#x27;
+    </failure>
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/11-pressure-pi
+    </system-out>
+  </testcase>
+  <testcase name="pressure-time" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">
+[codex] contains failed: &#x27;pass|fail|blocked&#x27;
+    </failure>
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/12-pressure-time
+    </system-out>
+  </testcase>
+  <testcase name="edge-constraints" classname="skill-builder" time="60.0">
+    <failure message="tier1 failure">
+[codex] required command not found: &#x27;bash&#x27;
+[codex] contains failed: &#x27;blocked&#x27;
+    </failure>
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/13-edge-constraints
+    </system-out>
+  </testcase>
+  <testcase name="negative-other-lane" classname="skill-builder" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/skill-builder/20260510-190643-413673/14-negative-other-lane
+    </system-out>
+  </testcase>
+</testsuite>

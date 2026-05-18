@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-code-review" tests="1" failures="0" errors="0" timestamp="2026-05-10T16:37:36Z" id="20260510-173736-843102">
+  <testcase name="headless-review-assumptions" classname="he-code-review" time="300.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260510-173736-843102/01-headless-review-assumptions
+    </system-out>
+  </testcase>
+</testsuite>

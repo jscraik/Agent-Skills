@@ -1,0 +1,27 @@
+I’m blocked from performing the unattended code review in this environment.
+
+What I tried:
+
+- `./bin/ask skills resolve he-code-review --json`
+- Reading the canonical workflow file at `Plugins/harness-engineering/skills/he-code-review/SKILL.md`
+- Reading required repo guidance like `UBIQUITOUS_LANGUAGE.md`
+- Checking `git status --short`
+- Looking for MCP workspace resources as a fallback
+
+Every local shell read failed immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+The MCP resource list is also empty, so I don’t currently have another path to inspect the repo, resolve the skill contract, read diffs, or gather review evidence.
+
+Assumptions recorded:
+
+- You intended `$he-code-review` to run the canonical HE code review workflow, likely against the current working tree or active branch.
+- “Unattended review” means I should not pause for non-blocking clarification, and should instead list assumptions and confidence in the review output.
+- Because the skill handle says to fail closed if the contract cannot load, I should not improvise the workflow without reading the real skill contract.
+
+Confidence: high that the blocker is environmental rather than repo-specific, because even simple read-only commands are rejected before execution.
+
+No review findings were produced because I could not inspect the code or load the review workflow.

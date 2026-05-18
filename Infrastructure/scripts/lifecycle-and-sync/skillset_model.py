@@ -17,6 +17,8 @@ from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity
 from skill_discovery import (
     REPO_ROOT,
     classify_skill_scope,
+    SYSTEM_BRIDGE_SKILL_NAMES,
+    iter_system_lane_skill_dirs,
     iter_plugin_skill_dirs,
     iter_repo_skill_dirs,
     normalize_skill_description,
@@ -170,6 +172,20 @@ def listish(value: str | None) -> list[str]:
 
 
 def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str | None, str]:
+    """
+    Infer the root skill-set for a skill directory using frontmatter declarations and repository path heuristics.
+
+    Checks frontmatter for declared skill-set keys (multiple spellings accepted) and returns the normalized value when it matches a known root skill-set. When no declaration is present, infers the skill-set from the repository-relative path using canonical patterns (e.g., skills/<root_skill_set>/..., plugins/<plugin>/skills/..., skills-system/<name>) and special handling for system-bridge skills. If the path cannot be relativized to the repository or no rule matches, the result is treated as untagged.
+
+    Parameters:
+        source_dir (Path): Directory containing the skill (expected to contain SKILL.md).
+        frontmatter (dict[str, str]): Parsed SKILL.md frontmatter keys and values.
+
+    Returns:
+        tuple[str | None, str]: (skill_set, status)
+            - skill_set: a root skill-set name when determined, otherwise `None`.
+            - status: one of "declared", "inferred", "system-bridge", or "untagged" indicating how the value was obtained.
+    """
     declared = (
         frontmatter.get("metadata.skill-set")
         or frontmatter.get("metadata.skill_set")
@@ -188,6 +204,9 @@ def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str 
         except ValueError:
             return None, "untagged"
     lowered = tuple(part.lower() for part in parts)
+    scope = classify_skill_scope(source_dir)
+    if scope == "system" and source_dir.name in SYSTEM_BRIDGE_SKILL_NAMES:
+        return "agent-ops", "system-bridge"
     if len(lowered) >= 2 and lowered[0] == "skills":
         if lowered[1] == "project":
             return None, "untagged"
@@ -199,6 +218,8 @@ def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str 
             plugin_name = lowered[skills_index - 1]
             if plugin_name in ROOT_SKILL_SETS:
                 return plugin_name, "inferred"
+    if lowered and lowered[0] == "skills-system" and source_dir.name in SYSTEM_BRIDGE_SKILL_NAMES:
+        return "agent-ops", "system-bridge"
     return None, "untagged"
 
 
@@ -255,14 +276,25 @@ def runtime_visibility_for(frontmatter: dict[str, str]) -> str:
 
 
 def iter_candidate_skill_dirs() -> list[Path]:
+    """
+    Collect candidate skill directories for projection.
+
+    Scans repository, plugin, and system-lane skill locations and selects directories that contain a SKILL.md. Excludes directories whose classified scope is "primary-runtime", "external", or "unknown". For scope "system" only includes directories whose name appears in SYSTEM_BRIDGE_SKILL_NAMES. Results are deduplicated and returned sorted by the repository-relative path produced by rel().
+
+    Returns:
+        list[Path]: Unique candidate skill directory paths sorted by repository-relative path.
+    """
     seen: set[tuple[int, int] | str] = set()
     dirs: list[Path] = []
-    for skill_dir in [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs()]:
+    for skill_dir in [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs(), *iter_system_lane_skill_dirs()]:
         skill_md = skill_dir / "SKILL.md"
         if not skill_md.exists():
             continue
         scope = classify_skill_scope(skill_dir)
-        if scope in {"system", "primary-runtime", "external", "unknown"}:
+        if scope == "system":
+            if skill_dir.name not in SYSTEM_BRIDGE_SKILL_NAMES:
+                continue
+        elif scope in {"primary-runtime", "external", "unknown"}:
             continue
         try:
             stat = skill_dir.stat()
@@ -275,8 +307,59 @@ def iter_candidate_skill_dirs() -> list[Path]:
         dirs.append(skill_dir)
     return sorted(dirs, key=rel)
 
+def canonical_source_path_for_row(source_dir: Path, scope: str, skill_set: str | None) -> str:
+    """
+    Produce a repo-relative canonical path to the SKILL.md used for manifest provenance.
+
+    Returns a canonical virtual path mapping used solely for manifest provenance—not the actual
+    filesystem location. When the skill is a system-scoped bridge entry (scope == "system",
+    skill_set == "agent-ops", the directory name is in SYSTEM_BRIDGE_SKILL_NAMES, and its parent
+    directory is ".system"), returns "skills-system/{skill_name}/SKILL.md". Otherwise returns the
+    repo-relative path to source_dir / "SKILL.md".
+
+    Note: The "skills-system/..." form is a canonical virtual path for manifest provenance. The actual
+    source file may reside elsewhere in the filesystem. Downstream tooling reading manifests should
+    use the source_path as a provenance identifier; to locate the real filesystem path, resolve via
+    the skill discovery logic or the actual source_dir.
+
+    Parameters:
+        source_dir (Path): Directory containing the skill's SKILL.md.
+        scope (str): Classified scope of the skill (e.g., "system").
+        skill_set (str | None): Inferred or declared root skill set name.
+
+    Returns:
+        str: Repo-relative posix path to the canonical SKILL.md location (a virtual path for manifest
+             provenance, may not correspond to the real filesystem location for system bridge skills).
+
+    Helper references:
+        - SYSTEM_BRIDGE_SKILL_NAMES: constant listing recognized system bridge skill names.
+        - rel(): helper function to convert Path to repo-relative posix string.
+    """
+    if (
+        scope == "system"
+        and skill_set == "agent-ops"
+        and source_dir.name in SYSTEM_BRIDGE_SKILL_NAMES
+        and source_dir.parent.name == ".system"
+    ):
+        return f"skills-system/{source_dir.name}/SKILL.md"
+    return rel(source_dir / "SKILL.md")
+
 
 def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
+    """
+    Builds SkillModule records for all discovered candidate skill directories and collects any unmapped candidates.
+
+    Each discovered skill directory with a SKILL.md is parsed and normalized into a SkillModule (including inferred or declared skill_set, level, scope, triggers, exclusions, risk, runtime_visibility, description, metadata status, canonical source_path, and provenance). The returned modules are sorted by (skill_set, id, source_path).
+
+    Returns:
+        tuple[
+            list[SkillModule],             # List of built SkillModule objects, sorted by (skill_set, id, source_path).
+            list[dict[str, str]]           # List of unmapped candidate records; each dict contains:
+                                           #   - "id": directory name,
+                                           #   - "source_path": repository-relative path to SKILL.md,
+                                           #   - "reason": short status explaining why it could not be assigned.
+        ]
+    """
     modules: list[SkillModule] = []
     unmapped: list[dict[str, str]] = []
     revision = source_revision()
@@ -292,13 +375,19 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
             unmapped.append({"id": source_dir.name, "source_path": rel(skill_md), "reason": skill_set_status})
             continue
         level, _level_status = infer_level(source_dir.name, frontmatter, description)
+        scope = classify_skill_scope(source_dir)
+        source_path = canonical_source_path_for_row(
+            source_dir=source_dir,
+            scope=scope,
+            skill_set=skill_set,
+        )
         metadata_status = "frontmatter" if frontmatter else "inferred"
         modules.append(
             SkillModule(
                 id=source_dir.name,
                 skill_set=skill_set,
                 level=level,
-                source_path=rel(skill_md),
+                source_path=source_path,
                 triggers=triggers_for(source_dir.name, frontmatter, description),
                 exclusions=exclusions_for(frontmatter),
                 risk=risk_for(frontmatter),

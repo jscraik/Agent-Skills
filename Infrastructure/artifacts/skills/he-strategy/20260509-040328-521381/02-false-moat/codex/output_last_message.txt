@@ -1,0 +1,24 @@
+**Verdict**
+
+The moat looks **more like complexity today** than a durable advantage, with one real exception: if the system measurably makes agents better at finding, trusting, and executing the right skill faster than a simpler setup, then the moat is real.
+
+**Why I’m skeptical**
+
+- The strongest evidence points to a **discoverability problem** being actively fixed, not a naturally strong moat. One memory says the skill graph had **92 isolated nodes and 0 density**, and the fix was to add topic maps and backlinks to improve routing.
+- Another memory says **sink nodes make skills invisible to autonomous agent routing**. That means the “moat” depends on careful graph hygiene and honest backlinks, which are easy to lose and hard to defend.
+- The architecture described in the ADR is ambitious: canonical sources, runtime projections, visible runtime surface, generated command handles, advanced discovery, audit, and policy identity. That is useful infrastructure, but it can also become **coordination overhead** if every surface has to stay in sync.
+- A separate project assessment in memory flags the classic failure mode: **too many overlapping truth surfaces**. That’s the exact shape of “complexity disguised as leverage.”
+
+**What would make it a real moat**
+
+- Agents reliably complete more tasks with fewer dead ends than they do in a generic docs-and-skills repo.
+- Discoverability is enforced by tests or automated checks, not by manual curation.
+- The system has a measurable advantage in onboarding, task success, or reduced drift.
+- The canonical sources and runtime projections are genuinely hard to replicate because they are backed by accumulated usage data, workflow integration, or a feedback loop competitors would not have.
+
+**My read**
+
+- **Right now:** weak moat, meaningful complexity tax.
+- **If the graph and validation layer keep proving better outcomes:** it can become a moat, but the moat would be the **operational system**, not the docs themselves.
+
+I wasn’t able to inspect the live files in this session, so this is a pressure test based on the repo knowledge I could reach, not a line-by-line audit. If you want, I can turn this into a sharper “moat vs complexity” scorecard against the specific claim text once you paste it in.

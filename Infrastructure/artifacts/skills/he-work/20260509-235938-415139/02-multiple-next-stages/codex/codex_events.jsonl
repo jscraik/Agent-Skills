@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0ef8-18fd-7d02-b614-d9113dffca6a"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"The plan is complete, and both `work` and `refactor` are valid next stages.\n\nWhich direction should I take next?\n\n1. `work`: start implementing the planned changes.\n2. `refactor`: clean up or restructure first before implementation."}}
+{"type":"turn.completed","usage":{"input_tokens":46027,"cached_input_tokens":39296,"output_tokens":97,"reasoning_output_tokens":39}}

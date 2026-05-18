@@ -1,0 +1,9 @@
+The repair needed before completion is the missing **Linear backlink**.
+
+Specifically, the report should be updated so that:
+- the related Linear issue/task is linked from the report, and
+- the backlink is visible in the report metadata, footer, or evidence section, depending on the repo’s convention.
+
+If the report already has evidence but no Linear reference, it should **not** be marked complete yet. The blocker is the missing traceability link, not the evidence itself.
+
+If you want, I can help you turn that into a precise completion check or wording for the report.

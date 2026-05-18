@@ -8,6 +8,11 @@ from typing import Any, List, Optional
 
 from ask.envelope import CallResult, ErrorObject
 from ask.plugin_state import collect_plugin_state
+from ask.services.plugin_sources import (
+    copy_directory_contents as _copy_directory_contents,
+    load_local_marketplace as _load_local_marketplace,
+    materialize_first_level_skill_aliases as _materialize_first_level_skill_aliases,
+)
 
 # Allow-list for companion folder types per plugin-creator contract
 _ALLOWED_COMPANION_FOLDERS = {"skills", "hooks", "scripts", "assets", "mcp", "apps", "references", "workflows"}
@@ -145,109 +150,6 @@ def _normalize_plugin_name(raw_name: str) -> str:
     normalized = _PLUGIN_NAME_SANITIZE_RE.sub("-", normalized).strip("-")
     normalized = re.sub(r"-{2,}", "-", normalized)
     return normalized
-
-
-def _load_local_marketplace(repo_root: Path) -> tuple[Path, list[dict[str, Any]]]:
-    """
-    Load and filter the repository's Plugins/marketplace.json for local plugin entries.
-    
-    Reads Plugins/marketplace.json under repo_root, validates that its top-level "plugins" value is a list, and returns the manifest path plus a list of entries filtered to those whose source.type is "local" and whose name and path are strings.
-    
-    Parameters:
-        repo_root (Path): Repository root directory containing the Plugins/ directory.
-    
-    Returns:
-        tuple[Path, list[dict[str, Any]]]: A tuple where the first element is the absolute Path to Plugins/marketplace.json and the second is a list of objects each with keys "name" (str) and "path" (str) for local-source plugins.
-    
-    Raises:
-        FileNotFoundError: If Plugins/marketplace.json does not exist.
-        ValueError: If the manifest does not contain a top-level "plugins" list.
-    """
-    marketplace_path = repo_root / "Plugins" / "marketplace.json"
-    if not marketplace_path.is_file():
-        raise FileNotFoundError(f"Local marketplace manifest missing: {marketplace_path}")
-
-    payload = json.loads(marketplace_path.read_text(encoding="utf-8"))
-    raw_plugins = payload.get("plugins", [])
-    if not isinstance(raw_plugins, list):
-        raise ValueError("Plugins/marketplace.json must contain a top-level 'plugins' list.")
-
-    entries: list[dict[str, Any]] = []
-    for item in raw_plugins:
-        if not isinstance(item, dict):
-            continue
-        name = item.get("name")
-        source = item.get("source", {})
-        if not isinstance(name, str) or not isinstance(source, dict):
-            continue
-        if source.get("source") != "local":
-            continue
-        path = source.get("path")
-        if not isinstance(path, str):
-            continue
-        entries.append({"name": name, "path": path})
-    return marketplace_path, entries
-
-
-def _copy_directory_contents(source_dir: Path, target_dir: Path) -> None:
-    """
-    Replace the contents of target_dir with the first-level entries from source_dir.
-    
-    Ensures target_dir exists, removes any existing children in target_dir (files and symlinks are unlinked, directories are removed), then copies each immediate child of source_dir into target_dir. Symlinks are recreated pointing to the same target (preserving whether the link refers to a directory), directories are copied recursively while preserving symlinks inside them, and regular files are copied with metadata.
-    Parameters:
-        source_dir (Path): Directory whose immediate children will be copied into target_dir.
-        target_dir (Path): Destination directory whose existing contents will be replaced.
-    """
-    target_dir.mkdir(parents=True, exist_ok=True)
-    for child in list(target_dir.iterdir()):
-        if child.is_symlink() or child.is_file():
-            child.unlink()
-        else:
-            shutil.rmtree(child)
-
-    for child in source_dir.iterdir():
-        destination = target_dir / child.name
-        if child.is_symlink():
-            destination.symlink_to(os.readlink(child), target_is_directory=child.is_dir())
-        elif child.is_dir():
-            shutil.copytree(child, destination, symlinks=True)
-        else:
-            shutil.copy2(child, destination)
-
-
-def _materialize_first_level_skill_aliases(plugin_root: Path) -> None:
-    """
-    Replace first-level symlinked directories under `plugin_root/skills` with real directory copies.
-    
-    Scans the immediate children of `plugin_root/skills` and, for each entry that is a symlink whose resolved target is a directory, removes the symlink and copies the target directory into its place (preserving symlinks inside the copied tree). Entries whose names start with `_` or are in the internal hidden set are skipped. No action is taken if `plugin_root/skills` does not exist.
-    """
-    skills_root = plugin_root / "skills"
-    if not skills_root.is_dir():
-        return
-
-    hidden_entries = {
-        "agents",
-        "assets",
-        "examples",
-        "fixtures",
-        "infrastructure_ops",
-        "references",
-        "rules",
-        "scaffolding_templates",
-        "scripts",
-        "shared",
-        "team_automation",
-        "templates",
-        "code_quality_review",
-    }
-    for child in skills_root.iterdir():
-        if child.name.startswith("_") or child.name in hidden_entries or not child.is_symlink():
-            continue
-        resolved = child.resolve(strict=True)
-        if not resolved.is_dir():
-            continue
-        child.unlink()
-        shutil.copytree(resolved, child, symlinks=True)
 
 
 def _sync_one_runtime_root(

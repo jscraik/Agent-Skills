@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-refactor" tests="12" failures="2" errors="0" timestamp="2026-05-10T12:39:52Z" id="20260510-133952-330318">
+  <testcase name="migration-program" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/01-migration-program
+    </system-out>
+  </testcase>
+  <testcase name="small-cleanup" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/02-small-cleanup
+    </system-out>
+  </testcase>
+  <testcase name="unsafe-rewrite-pressure" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/03-unsafe-rewrite-pressure
+    </system-out>
+  </testcase>
+  <testcase name="phase-safety" classname="he-refactor" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 124
+    </failure>
+    <system-out>
+warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/04-phase-safety/codex/codex_events.jsonl
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/04-phase-safety
+    </system-out>
+  </testcase>
+  <testcase name="evidence-gap" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/05-evidence-gap
+    </system-out>
+  </testcase>
+  <testcase name="linear-mapping" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/06-linear-mapping
+    </system-out>
+  </testcase>
+  <testcase name="headless-refactor-choice" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/07-headless-refactor-choice
+    </system-out>
+  </testcase>
+  <testcase name="anti-regression" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/08-anti-regression
+    </system-out>
+  </testcase>
+  <testcase name="moat-preservation" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/09-moat-preservation
+    </system-out>
+  </testcase>
+  <testcase name="xp-baby-step-migration" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/10-xp-baby-step-migration
+    </system-out>
+  </testcase>
+  <testcase name="sampled-strategy-cannot-authorize-repo-wide-refactor" classname="he-refactor" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/11-sampled-strategy-cannot-authorize-repo-wide-refactor
+    </system-out>
+  </testcase>
+  <testcase name="inherited-drift-signals-in-refactor" classname="he-refactor" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 124
+    </failure>
+    <system-out>
+warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/12-inherited-drift-signals-in-refactor/codex/codex_events.jsonl
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-refactor/20260510-133952-330318/12-inherited-drift-signals-in-refactor
+    </system-out>
+  </testcase>
+</testsuite>

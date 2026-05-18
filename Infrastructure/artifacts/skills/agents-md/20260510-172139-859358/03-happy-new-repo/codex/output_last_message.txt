@@ -1,0 +1,57 @@
+Below is a solid first `AGENTS.md` draft for `/tmp/ledger-cli`. I kept it short enough to be practical for a small Python CLI repo, but explicit about the `uv` workflow and the non-standard CLI test check.
+
+```md
+---
+schema_version: 1
+---
+
+# ledger-cli Agent Guide
+
+`ledger-cli` is a small Python command-line repository. Keep changes minimal,
+prefer direct edits over abstraction, and use the repo's `uv` workflow for all
+Python commands.
+
+## Root Essentials
+
+- Use `uv` for Python execution and test runs.
+- Treat the repository as a small CLI codebase: prefer simple, explicit code
+  over frameworks, layers, or broad refactors.
+- Keep edits focused on the user's request. Avoid unrelated cleanup unless it is
+  necessary to complete the task.
+- If you add or change behavior, update the relevant tests in the same change.
+- There is no Project Brain or memory surface yet, so do not rely on persistent
+  repo memory or prior-session state. Reconstruct context from the working tree
+  and tracked files.
+
+## Validation
+
+- The primary check for this repo is:
+  - `uv run pytest -q tests/cli`
+- If you change code outside the CLI path, run the most targeted test command
+  that covers the change, plus the CLI check above when appropriate.
+- Prefer the smallest validation set that gives confidence in the change.
+- If tests fail, fix the cause rather than weakening the test or skipping the
+  check.
+
+## Python and CLI Conventions
+
+- Keep CLI behavior predictable and user-facing output stable unless the task
+  explicitly asks for a change.
+- Preserve existing argument names, exit codes, and error text where possible.
+- Match the repository's current style for formatting, typing, and imports.
+- When adding new commands or flags, include tests that exercise the CLI path
+  end to end.
+
+## Files and Scope
+
+- Edit canonical source files, not generated output or build artifacts.
+- Do not create new top-level conventions unless the task requires them.
+- If you are unsure which file owns behavior, inspect the existing tests first.
+
+## Reporting
+
+- Summarize what changed, what you validated, and any remaining risk.
+- Call out when validation was partial or unavailable.
+```
+
+If you want, I can also turn this into a more opinionated version that includes repo-specific sections like “Commands”, “Style”, and “Release/Packaging” once you share the actual tree.

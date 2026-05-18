@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a4a-a3aa-7743-9b16-7c9e60d1a9da"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. If there are multiple valid next stages after a plan, I’ll pause and ask you which direction you want before starting any work.\n\nIf you want, I can also format those options as:\n1. `Option A`\n2. `Option B`\n3. `Option C`\n\nso it’s easy to choose."}}
+{"type":"turn.completed","usage":{"input_tokens":30247,"cached_input_tokens":2432,"output_tokens":195,"reasoning_output_tokens":124}}

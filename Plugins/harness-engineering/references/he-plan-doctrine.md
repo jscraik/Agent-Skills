@@ -52,3 +52,17 @@ Use dependency graphs, interaction diagrams, comparison tables, or state diagram
 ## Handoff
 
 Hand off to `he-work` for implementation after the plan is complete. Use `he-deepen-plan` or document review when confidence gaps remain. `he-plan` itself remains plan-only.
+
+## Compression Recovery Plans
+
+For cockpit or golden-path recovery, the first slice should be boring and
+subtractive: name the exact first-contact budget, shrink default help, hide
+plumbing from agent catalogs, require full catalogs to sit behind an
+advanced/all flag, rewrite the README/front door around the golden path, add a
+failing help-budget test, add a failing standalone-command admission test, and
+create a fresh-agent eval fixture. Only then add metadata or policy surfaces.
+Each visible command family needs an ablation decision: keep visible, make
+reachable only through the golden path, merge into readiness/learning, hide as
+plumbing, or remove. Do not accept a compression plan that says "declutter" but
+does not list the concrete public rails, demoted commands, and future command
+admission criteria.

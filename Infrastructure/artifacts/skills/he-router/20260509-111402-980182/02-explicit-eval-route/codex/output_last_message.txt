@@ -1,0 +1,13 @@
+Yes. To prove a Linear milestone is safe to close, I’d usually want evidence for three things:
+
+1. `Scope complete` - all milestone issues are done or intentionally moved out.
+2. `No blockers` - no open dependencies, bugs, or approvals remain.
+3. `Verification passed` - any required tests, release checks, or acceptance criteria were completed.
+
+If you want, I can help you produce that proof for a specific milestone. Send me:
+
+1. The Linear project name
+2. The milestone name
+3. Any required closure standard, if your team has one
+
+Then I can help you check whether it is actually safe to close and summarize the evidence cleanly.

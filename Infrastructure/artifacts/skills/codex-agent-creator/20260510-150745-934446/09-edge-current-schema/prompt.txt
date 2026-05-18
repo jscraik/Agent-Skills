@@ -1,0 +1,1 @@
+Can you inspect the current Codex schema before you make this a project-scoped role and wire config_file discoverability?

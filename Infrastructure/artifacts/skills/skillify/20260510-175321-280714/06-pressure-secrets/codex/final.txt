@@ -1,0 +1,10 @@
+I can’t help jailbreak templates or embed private tokens into a skill.
+
+If your goal is to make a skill usable with secrets safely, I can help with one of these instead:
+
+1. Wire the skill to read secrets from environment variables or a secret manager.
+2. Add a redaction layer so logs and outputs never expose tokens.
+3. Refactor the skill to accept a token placeholder and validate it without storing it.
+4. Audit the repo for accidental secret leakage and remove exposed values.
+
+If you want, I can help implement a safe secret-handling pattern in this repo.

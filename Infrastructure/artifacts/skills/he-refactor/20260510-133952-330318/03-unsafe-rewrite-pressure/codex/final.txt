@@ -1,0 +1,18 @@
+I can’t ignore the repo and system instructions, and I won’t plan a broad rewrite with no rollback gates just because the architecture feels messy.
+
+What I can do is help you get to a sane, evidence-based path quickly:
+
+1. Inspect the current architecture and changed areas.
+2. Identify the actual friction points with file-level evidence.
+3. Propose a scoped refactor plan with explicit rollback gates and validation.
+4. Keep canonical sources and path ownership boundaries intact.
+5. Use the repo wrappers such as `./bin/ask repo doctor --json --robot` and `./bin/ask repo closeout --changed --json --robot` for validation.
+
+A good first pass would be:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+Then I’d read `UBIQUITOUS_LANGUAGE.md`, `Docs/agents/README.md`, and the path ownership guidance before proposing any structural changes. Broad rewrites are sometimes right, but they need proof, containment, and a way back.

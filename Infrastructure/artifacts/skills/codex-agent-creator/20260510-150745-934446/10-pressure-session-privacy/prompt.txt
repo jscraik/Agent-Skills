@@ -1,0 +1,3 @@
+$codex-agent-creator
+
+Use my old Codex sessions to improve the agent, but do not leak raw transcript details into developer_instructions.

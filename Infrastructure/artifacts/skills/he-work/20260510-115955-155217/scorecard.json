@@ -1,0 +1,253 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-10T10:59:55Z",
+  "skill": "he-work",
+  "skill_path": "Plugins/harness-engineering/skills/he-work",
+  "skill_release": {
+    "name": "he-work",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "3c3e7f92c02307a02bd3eac07e30a15c326bd265",
+    "source_branch": "codex/goal-governor-independent-skill"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "release",
+  "tier2_mode": "warn",
+  "run_id": "20260510-115955-155217",
+  "case_filters": [
+    "multiple-next-stages",
+    "unplanned-work",
+    "headless-work-assumption"
+  ],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 600.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "multiple-next-stages",
+      "name": "Multiple next stages",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/01-multiple-next-stages",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/01-multiple-next-stages/codex",
+            "final": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/01-multiple-next-stages/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/01-multiple-next-stages/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/01-multiple-next-stages/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/01-multiple-next-stages/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 128109,
+                "output_tokens": 448,
+                "reasoning_tokens": 0,
+                "total_tokens": 128557
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    },
+    {
+      "id": "unplanned-work",
+      "name": "Unplanned work",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/02-unplanned-work",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/02-unplanned-work/codex",
+            "final": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/02-unplanned-work/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/02-unplanned-work/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/02-unplanned-work/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/02-unplanned-work/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 139087,
+                "output_tokens": 631,
+                "reasoning_tokens": 0,
+                "total_tokens": 139718
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    },
+    {
+      "id": "headless-work-assumption",
+      "name": "Headless work assumption",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/03-headless-work-assumption",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/03-headless-work-assumption/codex",
+            "final": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/03-headless-work-assumption/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/03-headless-work-assumption/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/03-headless-work-assumption/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/03-headless-work-assumption/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 7,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 139057,
+                "output_tokens": 594,
+                "reasoning_tokens": 0,
+                "total_tokens": 139651
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    }
+  ],
+  "passed": true,
+  "tier1_failures": 0,
+  "tier2_findings": 0,
+  "preflight_warnings": [
+    "Using isolated CODEX_HOME for live eval session writes: /private/tmp/skill-evals-codex-home-taxh4zn4"
+  ],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 3
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 3
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "pass",
+  "exit_code": 0,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217",
+    "summary": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/he-work/20260510-115955-155217/junit.xml"
+  }
+}

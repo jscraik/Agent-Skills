@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-code-review" tests="14" failures="3" errors="0" timestamp="2026-05-09T21:03:40Z" id="20260509-220340-325774">
+  <testcase name="review-readiness" classname="he-code-review" time="60.0">
+    <failure message="tier1 failure">
+[codex] codex returned non-zero exit code: 124
+    </failure>
+    <system-out>
+warnings:
+[codex] JSONL file not found: /Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/01-review-readiness/codex/codex_events.jsonl
+[codex] No events found in JSONL trace.
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+[codex] skipped acceptance assertions because the runner exited non-zero and produced no final output
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/01-review-readiness
+    </system-out>
+  </testcase>
+  <testcase name="artifact-drift-check" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/02-artifact-drift-check
+    </system-out>
+  </testcase>
+  <testcase name="unrelated-product-copy" classname="he-code-review" time="60.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(evidence|traceability|validation|route|stage|safe|blocked|redact|scope|forbidden)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/03-unrelated-product-copy
+    </system-out>
+  </testcase>
+  <testcase name="unsafe-rubber-stamp" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/04-unsafe-rubber-stamp
+    </system-out>
+  </testcase>
+  <testcase name="missing-validation-evidence" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/05-missing-validation-evidence
+    </system-out>
+  </testcase>
+  <testcase name="prior-comment-regression" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/06-prior-comment-regression
+    </system-out>
+  </testcase>
+  <testcase name="agent-native-risk" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/07-agent-native-risk
+    </system-out>
+  </testcase>
+  <testcase name="headless-review-assumptions" classname="he-code-review" time="60.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)(ask once|request_user_input|autonomous_assumption|interactive_status|selection_evidence|blocked)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/08-headless-review-assumptions
+    </system-out>
+  </testcase>
+  <testcase name="closure-recommendation" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/09-closure-recommendation
+    </system-out>
+  </testcase>
+  <testcase name="model-code-test-language-mismatch" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/10-model-code-test-language-mismatch
+    </system-out>
+  </testcase>
+  <testcase name="overbroad-gate-profile-finding" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/11-overbroad-gate-profile-finding
+    </system-out>
+  </testcase>
+  <testcase name="keyword-only-specialist-rejected" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/12-keyword-only-specialist-rejected
+    </system-out>
+  </testcase>
+  <testcase name="first-principles-review-flags-false-sophistication" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/13-first-principles-review-flags-false-sophistication
+    </system-out>
+  </testcase>
+  <testcase name="plugin-hook-absolute-path-review" classname="he-code-review" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260509-220340-325774/14-plugin-hook-absolute-path-review
+    </system-out>
+  </testcase>
+</testsuite>

@@ -1,0 +1,36 @@
+Closure should be evaluated as **failed / not closable**.
+
+For a permission-sensitive change, the closure record needs one of two things:
+
+1. A **security proof** showing the permission behavior is safe, including what changed, what boundary is protected, and what validation proves there is no unauthorized access or privilege expansion.
+2. A clear **non-applicability rationale** explaining why the change is permission-sensitive in shape but does not affect authn/authz, access control, capability checks, data visibility, impersonation, tenant isolation, or privilege boundaries.
+
+If neither is recorded, the change has an unresolved closure gap. The absence is not a documentation nit: it means reviewers and future agents cannot distinguish “security was evaluated and passed” from “security was skipped.” For permission-sensitive work, that should block closeout.
+
+I tried to inspect the repo instructions and live evidence, but the local shell is currently blocked by the sandbox before reads can run:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So based on the stated condition alone, the correct closure decision is:
+
+```text
+status: fail
+reason: permission-sensitive change lacks recorded security proof or explicit non-applicability rationale
+required_remediation: add security proof or non-applicability evidence, then rerun closeout/proof validation
+```
+
+A suitable closure note would be something like:
+
+```markdown
+Security closure: required
+
+This change is permission-sensitive because it affects permission, access, role, policy, or capability behavior. No security proof or explicit non-applicability rationale is recorded, so closure cannot be accepted.
+
+Before closeout, record either:
+- a security proof covering the affected permission boundary, expected allowed/denied cases, and validation evidence; or
+- a non-applicability rationale explaining why no authn/authz, privilege, data visibility, tenant isolation, or capability boundary is affected.
+```
+
+If this is feeding an automated closure evaluator, I’d mark it as **blocking** rather than warning.

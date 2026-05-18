@@ -1,0 +1,32 @@
+I can do that, but I’m currently blocked from inspecting or editing the repo: even a plain read command fails in the sandbox.
+
+Command attempted:
+
+```bash
+pwd
+```
+
+Result:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also tried reading `UBIQUITOUS_LANGUAGE.md`, listing likely requirements files, and checking `git status`; all failed with the same sandbox error before the command could run.
+
+What I would do once the sandbox is usable:
+
+1. Read `UBIQUITOUS_LANGUAGE.md` as required by this repo before changing agent-facing docs or skill material.
+2. Locate the requirements/spec file that needs traceability.
+3. Add a source column or structured annotation for every requirement, using one of:
+   - `Source artifact`: exact file path, doc section, issue, PR, or design artifact.
+   - `Linear`: explicit ticket ID such as `ABC-123`.
+   - `Assumption`: clearly labeled, testable assumption when no source exists.
+4. Mark anything unsupported as an explicit assumption rather than letting it look like sourced truth.
+5. Run the repo validation command, likely:
+
+```bash
+./bin/ask repo closeout --changed --json --robot
+```
+
+Current status: no repo changes made because the filesystem command sandbox is failing before reads or edits can run.

@@ -1,0 +1,6 @@
+I can do that, but I need the actual observations or the review context first.
+
+If you want, paste:
+1. the findings list,
+2. the diff/review notes, or
+3. the repository/PR link and I’ll turn every observation into a separate issue, with no leverage filtering.

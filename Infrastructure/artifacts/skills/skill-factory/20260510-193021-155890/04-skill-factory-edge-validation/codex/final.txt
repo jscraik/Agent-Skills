@@ -1,0 +1,21 @@
+**Blocked**
+
+`skill-factory` routing did not produce a routed result because the required router command failed before it could run:
+
+```bash
+python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "skill-factory" --task "$skill-factory
+
+Can you validate the routed result and call out any blocker before continuing?" --json
+```
+
+Result:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Gate status: `blocked`
+
+Blocker: the current environment is `read-only` with approval policy `never`, and command execution is being rejected by the sandbox before the router can return `schema_version`, `module id`, or `source_path`.
+
+I have not loaded any child module or continued past the `skill-factory` route gate.

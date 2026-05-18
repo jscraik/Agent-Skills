@@ -1,0 +1,1 @@
+2026-05-10T15:54:52.168602Z ERROR codex_core::tools::router: error=patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings

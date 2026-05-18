@@ -1,0 +1,7 @@
+I can do that, but I’m blocked from reading the bundle in this session because the local shell sandbox is rejecting file access and I don’t have an alternate readable resource for `.harness/session-evidence/he-phase-heartbeat/jsc-246-20260509/`.
+
+If you want, I can still help in one of these ways:
+
+1. Paste the bundle contents here and I’ll return a redacted, bounded summary only.
+2. Point me at a readable copy of the files through the repo/tooling, and I’ll summarize them without quoting raw transcript text.
+3. I can give you a redaction template you can apply locally before sharing the evidence.

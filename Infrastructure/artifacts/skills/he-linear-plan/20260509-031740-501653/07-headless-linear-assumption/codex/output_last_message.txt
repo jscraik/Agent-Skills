@@ -1,0 +1,3 @@
+Yes. In autonomous mode, I’ll treat creation of Linear objects as confirmation-gated and will not create any without your explicit approval.
+
+If you want, I can also help encode that as a written operating rule in the repo so it’s preserved for future runs.

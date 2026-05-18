@@ -1,0 +1,3218 @@
+[
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-011",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "missing_file",
+      "approval_required",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short",
+      "zsh <path>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-012",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "lint_failure",
+      "permission",
+      "approval_required",
+      "network"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "cat <redacted>",
+      "zsh <path>",
+      "zsh test_validate_codex_config.py",
+      "zsh mise doctor",
+      "ls <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-015",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh test_validate_codex_config.py",
+      "<path> skills audit <redacted>",
+      "zsh <path>",
+      "zsh pnpm test",
+      "<path> repo validate"
+    ],
+    "workflow_name": "there-is-a-serious-mise-leak workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "permission",
+      "timeout"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "cat <redacted>",
+      "sed 1,220p <redacted>",
+      "sed 1,260p <redacted>",
+      "zsh <redacted> <redacted> <redacted>",
+      "git <redacted> diff <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-017",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "git <redacted> diff <redacted>",
+      "git <redacted> status <redacted>",
+      "sed 1,260p <redacted>",
+      "python <redacted> <redacted>",
+      "python <redacted>"
+    ],
+    "workflow_name": "why-is-the-codex-app-processes workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh cat AGENTS.md"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-022",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short",
+      "zsh <path>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-024",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-028",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-029",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-030",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-031",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-032",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-033",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-038",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-039",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh git status --short --branch"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-041",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-043",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <path>",
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-053",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <path>",
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-054",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short --branch && git diff --name-only"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-057",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "lint_failure",
+      "network",
+      "missing_file",
+      "permission",
+      "timeout",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "python <<PY from pathlib",
+      "sed 1,220p <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-059",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required",
+      "permission",
+      "git_state",
+      "timeout",
+      "test_failure"
+    ],
+    "procedure": [
+      "git status",
+      "nl <redacted> | sed",
+      "zsh <redacted>",
+      "sed 1,220p <redacted>",
+      "<path> skills audit <redacted>",
+      "git diff"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-060",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "<path> skills audit <redacted>",
+      "git commit",
+      "cat <redacted>",
+      "python <redacted>",
+      "python <redacted> <redacted>",
+      "bash <redacted>"
+    ],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "lint_failure",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh git status --short --branch && git diff --name-only && git diff --stat",
+      "zsh git diff --cached --name-only && echo \"---\" && git diff --cached --stat && echo \"===\" && git diff --cached"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-062",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <path>",
+      "zsh <redacted>",
+      "zsh pwd; git status --short --branch; git diff --name-only"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-063",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <path>",
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "timeout",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-064",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh 'rg \"missing `SA-ASK-014`|consume"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-065",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh cat AGENTS.md",
+      "zsh cat CODESTYLE.md"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-067",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "lint_failure",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-068",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "skillify",
+      "simplify"
+    ],
+    "validation": [],
+    "workflow_name": "skillify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh rg -n \"JSC-282\" -S .}",
+      "zsh rg -n \"JSC-282\" -S ."
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-071",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-072",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "permission",
+      "test_failure",
+      "timeout",
+      "git_state"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-074",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "use-pr-green-sweep-users-jamiecraik workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "lint_failure",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "sed 1,220p <redacted>",
+      "sed 220,420p <redacted>",
+      "sed 1,240p <redacted>",
+      "sed 1,280p <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-076",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "lint_failure",
+      "git_state",
+      "permission",
+      "approval_required",
+      "test_failure"
+    ],
+    "procedure": [
+      "git status",
+      "<path> skills audit <redacted>",
+      "sed 1,220p <redacted>",
+      "git diff",
+      "cat <redacted>",
+      "python <redacted> validate <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-077",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "<path> skills audit <redacted>",
+      "python <redacted> validate <redacted>",
+      "<path> repo validate",
+      "bash <path>",
+      "git commit",
+      "stat %N %Sp <path>"
+    ],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "missing_file",
+      "lint_failure",
+      "network",
+      "timeout",
+      "permission",
+      "test_failure",
+      "git_state"
+    ],
+    "procedure": [
+      "sed 1,240p <redacted>",
+      "sed 241,420p <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-081",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "permission",
+      "approval_required",
+      "timeout",
+      "test_failure"
+    ],
+    "procedure": [
+      "git status",
+      "zsh <redacted>",
+      "git diff",
+      "zsh <path>",
+      "git commit",
+      "cat <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-082",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "git commit",
+      "zsh <path>",
+      "pnpm skill:validate",
+      "git add <redacted> <path>",
+      "pnpm vitest run <path>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "lint_failure",
+      "network",
+      "permission",
+      "missing_file",
+      "test_failure",
+      "git_state"
+    ],
+    "procedure": [
+      "sed 1,220p <redacted>",
+      "sed 220,420p <redacted>",
+      "git remote && git",
+      "git ls-files <path> <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-083",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "permission"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-084",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "use-pr-green-sweep-users-jamiecraik workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "lint_failure",
+      "git_state",
+      "permission",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh git remote -v && git branch --show-current && git status --short --branch",
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-085",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd; git status --short --branch"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-086",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-088",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "permission",
+      "missing_file",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "git remote && git"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-090",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "timeout",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-091",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure",
+      "timeout"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd",
+      "zsh git status --short --branch",
+      "zsh cat CODESTYLE.md"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-092",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "lint_failure",
+      "permission",
+      "timeout",
+      "git_state"
+    ],
+    "procedure": [
+      "git remote && git"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-095",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "use-pr-green-sweep-users-jamiecraik workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "timeout",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "cat <redacted>",
+      "pwd",
+      "git status"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-098",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "X-writer workflow"
+  },
+  {
+    "failure_boundaries": [
+      "timeout",
+      "network",
+      "missing_file",
+      "approval_required",
+      "lint_failure"
+    ],
+    "procedure": [
+      "nl <redacted>",
+      "nl <path> | sed",
+      "nl <redacted> | sed",
+      "rg AGENTS.md <path> <path>",
+      "rg <redacted> AGENTS.md instructions",
+      "rg <redacted> <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-099",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "rg ready|packages:validate|test:skill|wiki:claims|publish-gate|imagegen-log|x:export|newsroom|docs:style package.json Makefile"
+    ],
+    "workflow_name": "X-writer workflow"
+  },
+  {
+    "failure_boundaries": [
+      "timeout",
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "procedure": [
+      "pnpm run check:fast",
+      "sed 1,220p <path>",
+      "pwd",
+      "git status",
+      "rg AGENTS.md package.json README.md",
+      "rg <redacted> AGENTS.md README.md"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-100",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "rg AGENTS.md package.json README.md",
+      "rg <redacted> AGENTS.md README.md",
+      "sed 1,220p validate_publication_gate.py",
+      "sed 220,520p validate_publication_gate.py",
+      "sed 1,260p validate_twitter_content_system.py"
+    ],
+    "workflow_name": "X-writer workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd",
+      "zsh git status --short --branch"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-101",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "design-system workflow"
+  },
+  {
+    "failure_boundaries": [
+      "timeout",
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "pwd",
+      "git status",
+      "rg AGENTS.md FORJAMIE.md package.json",
+      "sed 1,220p AGENTS.md",
+      "sed 1,220p <path>",
+      "rg <redacted> ."
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-102",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "design-system workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh pwd && git status --short --branch"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-104",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "timeout",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "nl <redacted> | sed",
+      "sed 1,220p <redacted>",
+      "git status",
+      "fd <redacted> .",
+      "sed 1,260p <redacted>",
+      "pwd"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-106",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "rg repo intent|intent|architecture|control plane|ask repo|repo validate|skills audit|manifest|sync|projection|line-budget|typed|schema|contract AGENTS.md UBIQUITOUS_LANGUAGE.md",
+      "rg <redacted> <path> <redacted>",
+      "sed 1,220p <redacted>",
+      "nl <redacted> | sed"
+    ],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "procedure": [
+      "sed 1,200p <redacted>",
+      "pwd",
+      "git status",
+      "sed 1,220p CODESTYLE.md",
+      "sed 1,220p <redacted>",
+      "rg <redacted> <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-107",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "timeout",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd",
+      "zsh git status --short --branch"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-108",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "timeout",
+      "lint_failure",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd",
+      "zsh git status -sb",
+      "zsh <path>",
+      "zsh jq \"{scripts:.scripts, bin:.bin, type:.type, engines:.engines}\" package.json"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-109",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "git status",
+      "zsh git status --short --branch",
+      "pnpm exec tsx <path>",
+      "sed 1,220p <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-110",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh pnpm skill:validate",
+      "bash <path>",
+      "git diff <path> <path>",
+      "pnpm exec vitest run"
+    ],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "lint_failure",
+      "timeout",
+      "test_failure",
+      "missing_file",
+      "network",
+      "permission"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-113",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "X-writer workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "timeout",
+      "missing_file",
+      "network",
+      "approval_required",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "cat <redacted>",
+      "cat <path>",
+      "zsh git status --short --branch",
+      "fd f . <path>",
+      "zsh pnpm docs:lint"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-114",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "fd f . <path>",
+      "fd 2 f <redacted>",
+      "fd f <redacted> .",
+      "fd f . .github",
+      "zsh <redacted>"
+    ],
+    "workflow_name": "design-system workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout",
+      "permission",
+      "test_failure",
+      "git_state"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "cat <redacted>",
+      "python <redacted> <redacted>",
+      "git status",
+      "zsh <path>",
+      "sed 1,220p <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-115",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [
+      "python <redacted>",
+      "<path> repo validate",
+      "git diff <redacted> <redacted>",
+      "python <redacted> <redacted> <redacted>",
+      "zsh <redacted>",
+      "rg <redacted> <redacted> <redacted>"
+    ],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "timeout",
+      "missing_file",
+      "approval_required",
+      "network",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "cat <path>",
+      "git status",
+      "zsh <path>",
+      "cat <redacted>",
+      "zsh git status --short --branch"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-116",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "rg <redacted> <redacted>",
+      "head 220 validate_x_content_writer.py",
+      "zsh writing_lab.py",
+      "zsh rg -n 'description|dependencies|optional-dependencies|dev-dependencies|python_requires|pyyaml|pytest' pyproject.toml package.json",
+      "zsh rg -n 'typescript|zod|pydantic|jsonschema|schema|dataclass|yaml.safe_load|validate_' scripts package.json pyproject.toml"
+    ],
+    "workflow_name": "X-writer workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-117",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "timeout",
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-118",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd; git status --short --branch; git diff --name-only",
+      "zsh <path>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-119",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "timeout",
+      "missing_file",
+      "network",
+      "permission",
+      "lint_failure"
+    ],
+    "procedure": [
+      "python <<PY import json",
+      "python <redacted>",
+      "sed 1,220p <path>",
+      "ps pid=,command= | grep"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-120",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "diagram-cli workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh pwd; git status --short --branch; git diff --name-only"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-121",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "timeout",
+      "lint_failure",
+      "network",
+      "approval_required",
+      "permission",
+      "git_state"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "cat <redacted>",
+      "sed 1,220p <redacted>",
+      "sed 1,240p <redacted>",
+      "git status"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-124",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh npm test",
+      "zsh npm run test:deep",
+      "rg <redacted> <redacted>"
+    ],
+    "workflow_name": "diagram-cli workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "permission",
+      "timeout",
+      "lint_failure",
+      "git_state"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-125",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "codex workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "lint_failure",
+      "git_state",
+      "permission"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh jq -r .scripts[\"test:related\"] package.json",
+      "jq .scripts[\"test:related\"] package.json",
+      "jq .scripts.check package.json",
+      "git remote"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-129",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [
+      "zsh <redacted>",
+      "zsh jq -r .scripts[\"test:related\"] package.json",
+      "jq .scripts[\"test:related\"] package.json"
+    ],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "permission",
+      "test_failure",
+      "git_state"
+    ],
+    "procedure": [
+      "git status",
+      "git stash list",
+      "git remote"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-130",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "approval_required",
+      "network",
+      "lint_failure",
+      "timeout"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh pwd",
+      "zsh git status --short --branch"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-132",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "lint_failure",
+      "permission",
+      "test_failure"
+    ],
+    "procedure": [
+      "python <redacted>",
+      "python <<PY from pathlib"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-133",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "timeout",
+      "lint_failure",
+      "permission"
+    ],
+    "procedure": [
+      "python <redacted>",
+      "git remote",
+      "gh repo view nameWithOwner,isPrivate,url",
+      "python <<PY import json"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-134",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-143",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "X-writer workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short --branch && git diff --name-only",
+      "zsh x_prompt_safety.py"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-144",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh x_prompt_safety.py",
+      "zsh <redacted>"
+    ],
+    "workflow_name": "X-writer workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "lint_failure",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-145",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <path>",
+      "zsh <redacted>"
+    ],
+    "workflow_name": "X-writer workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh cat AGENTS.md",
+      "zsh cat CODESTYLE.md"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-146",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-147",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-148",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-149",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "diagram-cli workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-150",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "diagram-cli workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-151",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "diagram-cli workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "permission",
+      "lint_failure",
+      "git_state"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-152",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout",
+      "git_state",
+      "permission",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "git status",
+      "sed 1,220p <redacted>",
+      "<redacted> <redacted> <redacted> curl",
+      "pnpm exec tsx <path>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-156",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "git diff <path> <path>",
+      "pnpm exec vitest run",
+      "rg includeLegacy|Legacy <path> <path>",
+      "pnpm exec biome check"
+    ],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "lint_failure",
+      "timeout",
+      "permission"
+    ],
+    "procedure": [
+      "zsh <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-159",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "use-pr-green-sweep-users-jamiecraik workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "lint_failure",
+      "missing_file",
+      "timeout",
+      "network",
+      "permission"
+    ],
+    "procedure": [
+      "cat <redacted>",
+      "bash <path>",
+      "git status",
+      "git diff config.toml validate-codex-config.py",
+      "nl validate-codex-config.py | sed",
+      "pwd"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-161",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "git diff config.toml validate-codex-config.py",
+      "nl validate-codex-config.py | sed",
+      "rg <redacted> validate-codex-config.py <path>",
+      "sed 240,310p validate-codex-config.py",
+      "sed 930,1090p validate-codex-config.py",
+      "rg <redacted> tests codex"
+    ],
+    "workflow_name": "fix-the-local-mise-leak workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "lint_failure",
+      "git_state",
+      "permission",
+      "timeout"
+    ],
+    "procedure": [
+      "python <<PY from pathlib",
+      "python <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-163",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "use-pr-green-sweep-users-jamiecraik workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "timeout",
+      "lint_failure",
+      "approval_required",
+      "git_state"
+    ],
+    "procedure": [
+      "ls",
+      "git status",
+      "cat <redacted>",
+      "env git diff",
+      "env git diff <path>",
+      "pwd"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-164",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "env wc <path> <path>",
+      "env pnpm vitest run",
+      "env pnpm run test:related"
+    ],
+    "workflow_name": "use-pr-green-sweep-users-jamiecraik workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "test_failure",
+      "lint_failure",
+      "network",
+      "approval_required",
+      "git_state",
+      "permission",
+      "timeout"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh",
+      "zsh <redacted> skills sync)\n\ntry:\n    _normalize_assert(contains",
+      "zsh <redacted> <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-167",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <redacted> skills sync)\n\ntry:\n    _normalize_assert(contains",
+      "zsh <redacted> <redacted>"
+    ],
+    "workflow_name": "use-pr-green-sweep-users-jamiecraik workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "lint_failure",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd && ls -la",
+      "zsh 'cd <redacted> &&"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-168",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "use-pr-green-sweep-users-jamiecraik workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "timeout",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh git remote -v && git config --get remote.origin.url"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-170",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh pwd && git status --short --branch"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-171",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <path>",
+      "zsh <redacted>"
+    ],
+    "workflow_name": "diagram-cli workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh pwd; git status --short --branch",
+      "zsh cat AGENTS.md",
+      "zsh <path>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-172",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "workflow_name": "diagram-cli workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "timeout",
+      "lint_failure",
+      "approval_required",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "git status",
+      "zsh <path>",
+      "git diff",
+      "pnpm typecheck",
+      "sed 1,220p <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-173",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [
+      "zsh <redacted>",
+      "pnpm exec biome check",
+      "pnpm test:artifacts:evals",
+      "zsh <path>",
+      "git diff <path> <path>",
+      "zsh pnpm test:artifacts:evals"
+    ],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "approval_required",
+      "network",
+      "timeout",
+      "permission",
+      "test_failure",
+      "git_state"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh",
+      "gh api graphql owner=jscraik",
+      "git status",
+      "nl <path> | sed",
+      "git diff"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-174",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh",
+      "gh api graphql owner=jscraik",
+      "env pnpm exec vitest",
+      "gh api graphql <redacted>",
+      "python <redacted>"
+    ],
+    "workflow_name": "use-pr-green-sweep-users-jamiecraik workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "permission",
+      "approval_required",
+      "timeout",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "git status",
+      "zsh <redacted>",
+      "cat <redacted>",
+      "git diff",
+      "git diff <redacted> <redacted>",
+      "python <redacted> <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-175",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [
+      "zsh <redacted>",
+      "python <redacted> <redacted>",
+      "<path> skills audit <redacted>",
+      "git commit",
+      "bash <redacted>",
+      "cat <redacted>"
+    ],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "approval_required",
+      "network",
+      "permission",
+      "timeout",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh",
+      "zsh git status --short --branch",
+      "zsh git status --short --branch --untracked-files=no",
+      "cat <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-176",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh",
+      "zsh pnpm test",
+      "bash <path>",
+      "zsh pnpm lint && pnpm typecheck && pnpm test"
+    ],
+    "workflow_name": "codex workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure",
+      "timeout",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "git status",
+      "git diff",
+      "nl validate_x_content_writer.py | sed",
+      "zsh git status --short --branch",
+      "nl <path> | sed"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-177",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "nl validate_x_content_writer.py | sed",
+      "gh pr view 12",
+      "gh pr list open",
+      "gh pr view 11",
+      "python <<PY from pathlib"
+    ],
+    "workflow_name": "X-writer workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "git status",
+      "sed 1,220p <redacted>",
+      "git diff",
+      "bash <path>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-178",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [
+      "zsh <redacted>",
+      "pnpm run test:skill",
+      "zsh <path>",
+      "git commit",
+      "zsh pnpm run test:skill",
+      "python validate_x_content_writer.py"
+    ],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required",
+      "permission",
+      "timeout",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "git status",
+      "git diff",
+      "sed 1,220p <redacted>",
+      "pnpm docs:lint",
+      "nl <redacted> | sed"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-179",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [
+      "zsh <redacted>",
+      "pnpm agent-design:test",
+      "bash <path>",
+      "pnpm <path> test",
+      "jq . <redacted> <redacted>",
+      "zsh pnpm agent-design:test"
+    ],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "lint_failure",
+      "timeout",
+      "network",
+      "approval_required",
+      "permission",
+      "test_failure",
+      "git_state"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "git status",
+      "git diff",
+      "bash <path>",
+      "sed 1,220p <redacted>",
+      "pnpm run writing:validate"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-180",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [
+      "zsh <redacted>",
+      "pnpm run writing:validate",
+      "pnpm run test:skill",
+      "pnpm run packages:validate",
+      "zsh pnpm run writing:validate",
+      "git commit"
+    ],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "lint_failure",
+      "network",
+      "timeout",
+      "approval_required",
+      "permission",
+      "git_state"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh git status --short --branch",
+      "git status",
+      "sed 1,260p <redacted>",
+      "sed 1,220p <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-181",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh npm run test:deep",
+      "zsh npm test",
+      "npm test <path> <path>",
+      "zsh npm run test:related"
+    ],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "missing_file",
+      "approval_required",
+      "lint_failure",
+      "network",
+      "permission",
+      "test_failure",
+      "timeout"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "sed 1,220p <redacted>",
+      "nl <redacted> | sed",
+      "nl <path> | sed",
+      "git status",
+      "zsh <path>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-182",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>",
+      "zsh pnpm test",
+      "zsh <path>",
+      "git commit",
+      "git diff validate-codex-config.py",
+      "rg validate_goal_feature|\\[feature\\]|goals|goal validate-codex-config.py test_validate_codex_config.py"
+    ],
+    "workflow_name": "codex workflow"
+  },
+  {
+    "failure_boundaries": [
+      "network",
+      "approval_required",
+      "missing_file",
+      "permission",
+      "git_state",
+      "lint_failure"
+    ],
+    "procedure": [
+      "zsh <redacted>",
+      "zsh git pull --no-rebase",
+      "zsh git status --short --branch",
+      "zsh <path>",
+      "zsh git pull",
+      "zsh git status -sb"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "high",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-183",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [
+      "zsh <redacted>"
+    ],
+    "workflow_name": "codex workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "lint_failure",
+      "missing_file",
+      "timeout",
+      "network",
+      "permission",
+      "test_failure",
+      "git_state"
+    ],
+    "procedure": [
+      "git remote && git",
+      "git config remote.origin.url"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-184",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "use-pr-green-sweep-users-jamiecraik workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "git_state",
+      "test_failure",
+      "permission",
+      "timeout"
+    ],
+    "procedure": [
+      "find <redacted> 3 f"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-185",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "agent-skills workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "git_state",
+      "permission",
+      "test_failure",
+      "timeout"
+    ],
+    "procedure": [
+      "git remote"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-186",
+    "source": "session-evidence",
+    "trigger_phrases": [],
+    "validation": [],
+    "workflow_name": "coding-harness workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "timeout",
+      "test_failure",
+      "git_state",
+      "permission"
+    ],
+    "procedure": [
+      "python <<PY from pathlib",
+      "python <redacted>"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-187",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify"
+    ],
+    "validation": [],
+    "workflow_name": "simplify workflow"
+  },
+  {
+    "failure_boundaries": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "lint_failure",
+      "timeout",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "procedure": [
+      "python <redacted>",
+      "python <<PY from pathlib"
+    ],
+    "redactions": [
+      "absolute paths and sensitive-looking values are summarized"
+    ],
+    "repeatability": "medium",
+    "required_inputs": [
+      "selected session evidence"
+    ],
+    "schema_version": 1,
+    "session_label": "session-188",
+    "source": "session-evidence",
+    "trigger_phrases": [
+      "simplify",
+      "skill-refactor",
+      "skillify"
+    ],
+    "validation": [],
+    "workflow_name": "simplify workflow"
+  }
+]

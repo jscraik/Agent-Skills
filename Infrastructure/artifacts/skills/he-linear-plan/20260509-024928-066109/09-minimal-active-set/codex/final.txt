@@ -1,0 +1,1 @@
+Yes. I’ll keep the active Linear set intentionally small and only create findings that are clearly actionable and high-signal. Low-value findings will stay uncreated.

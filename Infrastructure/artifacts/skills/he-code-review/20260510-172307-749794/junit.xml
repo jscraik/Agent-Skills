@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-code-review" tests="1" failures="0" errors="0" timestamp="2026-05-10T16:23:07Z" id="20260510-172307-749794">
+  <testcase name="artifact-drift-check" classname="he-code-review" time="300.0">
+    <system-out>
+artifacts_dir:
+Infrastructure/artifacts/skills/he-code-review/20260510-172307-749794/01-artifact-drift-check
+    </system-out>
+  </testcase>
+</testsuite>

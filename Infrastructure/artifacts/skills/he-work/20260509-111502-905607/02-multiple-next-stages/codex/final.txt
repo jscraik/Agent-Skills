@@ -1,0 +1,8 @@
+What would you like me to do next?
+
+If you mean the plan is complete and the next valid stages are either `work` or `refactor`, I can:
+1. Proceed with `work`
+2. Proceed with `refactor`
+3. Pause and wait for your choice
+
+Reply with `1`, `2`, or `3`.

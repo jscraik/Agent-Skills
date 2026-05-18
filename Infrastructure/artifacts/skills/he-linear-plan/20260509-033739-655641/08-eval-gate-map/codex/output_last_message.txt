@@ -1,0 +1,22 @@
+I mapped the parent issues by treating:
+- `build` as the implementation slice that introduces the capability,
+- `test` as the focused validation/fixture/acceptance work,
+- `drift` as parity, freshness, strictness, or identity mismatch detection,
+- `routing` as the user-facing command/selection surface,
+- `rollback` as the explicit revert or recovery path.
+
+| Parent issue | Build gate | Test gate | Drift gate | Routing gate | Rollback gate |
+|---|---|---|---|---|---|
+| `JSC-246` repo surface / agent capability control plane | `P0-P2`: policy, classifier, and `./bin/ask repo surface` route | Focused classifier and CLI tests, plus live JSON report evidence | Surface inventory, allowlist, unknown ownership, nested `Infrastructure/Infrastructure/**` detection, strict-mode violations | `P2` route plus later `repo doctor`, `repo onboard`, `skills improve`, `skills explain`, `skills prove`, `repo closeout` contracts | Non-destructive first slice, `P3` cleanup prep only after reference scans, and revert route/tests if needed |
+| `JSC-246` selection contract / skill-router gold standard | `P0-P3`: canonical catalog parity substrate, route/goal completion, catalog doctor strict-mode, starter/plugin hardening | Route-goal fixtures, strict catalog history tests, plugin read-only tests, and `P4` aggregate validation | Required-surface parity, policy identity, `doctor-catalog --strict`, canonical history drift, and severity mismatch controls | `skills route`, `skills goal`, `repo doctor-catalog`, starter discovery, and plugin visibility behavior | `doctor-catalog` strict-mode rollback semantics, plus `P4` validation/artifact closeout gating |
+| `JSC-246` product-factory / runtime separation | `P0-PE`: control-plane baseline, mechanics extraction, canonical relocation, runtime lane consolidation | Baseline comparator, reader compatibility, representative commands, and plugin lifecycle checks | Policy/discovery identity, canonical root digest, inventory completeness, path-consumer digests, and projection parity | Plugin discovery/activation, `plugins status`, `plugins doctor`, and path-compatibility behavior | Slice-level `rollback_commands`, purge/regenerate derived artifacts, baseline restore, and phase rollback checkpoints |
+| `JSC-246` agent-first golden path compression | `P0-P2`: repo status, catalog parity, runtime budget, handles, and surface signals composed into `repo doctor` | `repo doctor` CLI tests, golden-path envelope tests, and baseline fixture checks | Catalog parity drift, handle collisions, runtime budget violations, and repo-surface debt surfaced as diagnostic debt | `repo doctor`, `repo onboard`, `skills improve`, `skills explain`, `skills prove`, `repo next`, `repo closeout` | Revert the `repo doctor` route/helper and preserve existing `doctor-catalog`, `repo surface`, and `skills proof` behavior |
+
+Source links:
+- [2026-05-01 repo surface / agent capability control plane plan](https://github.com/jscraik/Agent-Skills/blob/main/Docs/plans/2026-05-01-feat-agent-capability-control-plane-and-repo-surface-contract-plan.md)
+- [2026-04-09 skill and plugin selection gold-standard plan](https://github.com/jscraik/Agent-Skills/blob/main/Docs/plans/2026-04-09-feat-skill-plugin-selection-gold-standard-upgrade-plan.md)
+- [2026-04-12 product-factory runtime separation plan](https://github.com/jscraik/Agent-Skills/blob/main/Docs/plans/2026-04-12-feat-product-factory-runtime-separation-plan.md)
+- [2026-03-04 intent-first skill router scorecard plan](https://github.com/jscraik/Agent-Skills/blob/main/Docs/plans/2026-03-04-feat-intent-first-skill-router-scorecard-plan.md)
+- [2026-05-06 agent-first golden path compression plan](https://github.com/jscraik/Agent-Skills/blob/main/Docs/plans/2026-05-06-feat-agent-first-golden-path-product-compression-plan.md)
+
+If you want, I can turn this into a tighter Linear-ready comment or a CSV-style matrix next.

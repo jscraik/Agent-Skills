@@ -1,0 +1,147 @@
+Yes. I would handle an irreversible HE routing change as a gated change proposal with proof requirements, not as a quick cleanup.
+
+The posture I’d use:
+
+**Plan First**
+1. Identify the exact routing behavior being changed.
+   - Current route owner or entrypoint.
+   - Proposed new route owner or entrypoint.
+   - All handles, docs, projections, commands, and generated/runtime surfaces affected.
+   - Why the change is irreversible or hard to roll back.
+
+2. Define the blast radius.
+   - Which HE workflows depend on the route today.
+   - Which skills, operator docs, sync policy, runtime projections, or discovery commands may change.
+   - Which user-facing commands might resolve differently after the change.
+   - Whether existing handles, aliases, or compatibility paths must remain.
+
+3. Establish the source of truth before editing.
+   - Read `UBIQUITOUS_LANGUAGE.md`.
+   - Read the relevant AGENTS instructions.
+   - Read path ownership guidance:
+     `Docs/agents/14-path-ownership-boundaries.md`
+   - Read validation and evidence rules:
+     `Docs/agents/04-validation.md`
+   - Read workflow/safety guidance:
+     `Docs/agents/13-workflow-and-safety-guidance.md`
+   - Read skill management rules if any skill routing changes:
+     `Docs/agents/17-skill-management.md`
+
+**Proof Before Implementation**
+Before touching files, I’d require concrete proof for the change:
+
+1. **Current-state proof**
+   - Exact commands showing how the route resolves today.
+   - Exact file paths that define the current route.
+   - Evidence from `./bin/ask skills explain <handle> --json --robot` or the relevant HE command.
+   - Any generated/runtime projection evidence proving what agents currently see.
+
+2. **Necessity proof**
+   - A short statement of the failure, ambiguity, or product need.
+   - Evidence that the current route causes incorrect behavior, stale discovery, duplicated ownership, or operator confusion.
+   - Why a reversible alias, deprecation, or documentation-only fix is insufficient.
+
+3. **Ownership proof**
+   - Confirmation of the canonical files to edit.
+   - Confirmation that runtime projections are not being edited directly.
+   - Any deeper `AGENTS.md` instructions governing those files.
+   - If multiple owners or documents disagree, cite the conflict before resolving it.
+
+4. **Migration proof**
+   - A before/after route matrix.
+   - Compatibility impact for existing handles and commands.
+   - Whether old routes fail closed, redirect, alias, or disappear.
+   - Any required sync/fold/regeneration step.
+
+5. **Validation proof**
+   - The exact validation command list to run after implementation.
+   - At minimum, likely:
+     ```bash
+     ./bin/ask repo doctor --json --robot
+     ./bin/ask skills explain <affected-handle> --json --robot
+     ./bin/ask skills prove <affected-handle> --json --robot
+     ./bin/ask repo closeout --changed --json --robot
+     ```
+   - Additional targeted tests for the changed routing path.
+   - Expected pass/fail criteria before merging.
+
+**Implementation Gate**
+I would not implement until the proof packet exists and answers these questions:
+
+- What exact route is changing?
+- What exact canonical source owns it?
+- What breaks if this is wrong?
+- What command proves the current behavior?
+- What command proves the new behavior?
+- What compatibility behavior is intentional?
+- What rollback or mitigation exists if consumers still rely on the old route?
+
+**Suggested Change Brief Template**
+```markdown
+# HE Routing Change Plan
+
+## Change
+Move/replace/remove routing for: `<route-or-handle>`
+
+## Why This Is Irreversible
+Explain why this is not a simple cleanup, including compatibility and discovery impact.
+
+## Current-State Evidence
+- Command:
+  `./bin/ask ...`
+- Result:
+  `<summarized JSON/result>`
+- Source files:
+  - `path/to/canonical/source`
+  - `path/to/generated/projection` if relevant, read-only evidence only
+
+## Proposed Behavior
+Before:
+`<input>` -> `<current route>`
+
+After:
+`<input>` -> `<new route>`
+
+## Ownership
+Canonical edit targets:
+- `...`
+
+Do not edit:
+- runtime projections unless the repo workflow explicitly regenerates them
+
+Applicable docs:
+- `UBIQUITOUS_LANGUAGE.md`
+- `Docs/agents/14-path-ownership-boundaries.md`
+- `Docs/agents/04-validation.md`
+- `Docs/agents/13-workflow-and-safety-guidance.md`
+
+## Migration / Compatibility
+State whether old handles:
+- remain aliases
+- emit deprecation guidance
+- fail intentionally
+- are removed
+
+## Validation Plan
+Run:
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask skills explain <handle> --json --robot
+./bin/ask skills prove <handle> --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+Pass criteria:
+- Route resolves to the new target.
+- Old behavior changes only where explicitly planned.
+- No runtime projection drift.
+- Closeout reports only intended files.
+
+## No-Go Conditions
+- Canonical source is unclear.
+- Existing route consumers are unknown.
+- Validation command for the new route is missing.
+- Compatibility decision is unspecified.
+```
+
+I tried to inspect the live repo before answering, but the shell sandbox failed at startup with `sandbox_apply: Operation not permitted`, so I could not gather exact paths or run `./bin/ask` evidence from this session. The right next step is to produce the proof packet from live commands first, then implement only after the route, ownership, compatibility behavior, and validation criteria are pinned down.

@@ -1,0 +1,25 @@
+I’m blocked before I can inspect or implement anything: every read-only shell command is being rejected by the sandbox with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That happened for `pwd`/`rg`, reading the relevant skill file, and `git status --short`, so I can’t currently verify the approved slice, inspect CLI code, read repo docs like `UBIQUITOUS_LANGUAGE.md`, or make a safe implementation plan from live evidence.
+
+Given the repo instructions you provided, the next correct move once the sandbox is healthy would be:
+
+1. Read the repo operating docs and ownership boundaries:
+   `UBIQUITOUS_LANGUAGE.md`, `Docs/agents/README.md`, `Docs/agents/02-tooling-policy.md`, `Docs/agents/04-validation.md`, `Docs/agents/14-path-ownership-boundaries.md`.
+
+2. Use the best matching specialist guidance for CLI behavior. From the available skills, I would start with `agent-ops` as the repo/workflow router, and if the slice is specifically about agent-facing CLI ergonomics or machine-readable behavior, I’d also apply the CLI-readiness review lens during validation.
+
+3. Inspect the approved slice in the working tree or planning docs, then implement against canonical sources only.
+
+4. Validate with repo wrappers, likely:
+   ```bash
+   ./bin/ask repo doctor --json --robot
+   ./bin/ask repo closeout --changed --json --robot
+   ```
+   plus any focused CLI command/tests discovered from the relevant package root.
+
+I’ll need the sandbox issue fixed, or the exact approved slice plus relevant files pasted here, before I can do the implementation safely.

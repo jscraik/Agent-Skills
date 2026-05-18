@@ -1,0 +1,56 @@
+Yes. A good way to do this is to make the plan start with an explicit **validation gate** and a **rollback trigger**, so implementation only proceeds when the success criteria are unambiguous.
+
+**Validation Gates**
+Use these as the “go/no-go” checks before and during implementation:
+
+1. `Scope gate`
+   - The change is bounded to the intended files, behavior, or skill path.
+   - No unrelated refactors, policy edits, or runtime-projection changes are included.
+
+2. `Requirements gate`
+   - The requested outcome is restated in measurable terms.
+   - Any open assumptions are documented and accepted before coding begins.
+
+3. `Canonical-source gate`
+   - The change targets the canonical source, not generated/runtime output.
+   - Any derived files are updated only if the source change requires regeneration.
+
+4. `Compatibility gate`
+   - Existing public behavior, contracts, and workflows remain intact unless the change explicitly calls for a breaking change.
+   - If there is a contract change, the downstream impact is identified first.
+
+5. `Validation gate`
+   - The implementation has a concrete test or check plan.
+   - Success is defined by passing repo-specific validation, not just “looks right.”
+
+6. `Review gate`
+   - The change has a clear diff that can be reviewed against the original intent.
+   - Any edge cases, failure modes, or safety concerns are explicitly called out.
+
+**Rollback Conditions**
+Use these to stop, revert, or pause before the change spreads:
+
+1. `Behavior regression`
+   - Existing expected behavior breaks in local validation or review.
+   - A previously passing check now fails without a deliberate, approved behavior change.
+
+2. `Contract mismatch`
+   - The implementation would alter an API, schema, skill contract, or agent-facing doc in a way that is not yet approved.
+
+3. `Scope drift`
+   - The work expands beyond the original objective.
+   - The fix starts requiring unrelated structural changes to succeed.
+
+4. `Validation failure`
+   - Required checks cannot be passed within the current design.
+   - Tests, proofs, or repo validations surface an issue that needs design revision.
+
+5. `Unsafe partial state`
+   - A partial edit would leave docs, skills, or runtime projections inconsistent.
+   - The repo would be in a state where downstream users could be misled.
+
+6. `Missing prerequisite`
+   - A required source doc, policy, or invariant is not available yet.
+   - The implementation depends on information that still needs to be confirmed.
+
+If you want, I can turn this into a ready-to-drop-in section for your planning doc with repo-specific wording and a short “definition of done” block.

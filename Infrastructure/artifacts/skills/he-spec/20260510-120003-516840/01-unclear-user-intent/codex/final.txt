@@ -1,0 +1,1 @@
+What invariant must remain true after this change: should the spec preserve the existing external behavior exactly, preserve only the user-visible contract while allowing internal shape to change, or preserve a specific data/model constraint that is easy to miss?

@@ -1,0 +1,119 @@
+I can spec it, but I could not write the repo artifact in this session because file writes are blocked by the active sandbox.
+
+I found the right target: [.harness/specs/2026-05-09-agent-skills-he-trust-defect-repair-spec.md](/Users/jamiecraik/dev/agent-skills/.harness/specs/2026-05-09-agent-skills-he-trust-defect-repair-spec.md). It is the active `JSC-299` HE Trust Defect Repair spec, and it already has the right surrounding acceptance matrix for SA-001 through SA-008.
+
+Write blocker:
+
+```text
+apply_patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings
+```
+
+I also tried the HE router command as required by the harness-engineering skill, but that was blocked before execution:
+
+```text
+approval required by policy, but AskForApproval is set to Never
+```
+
+Here is the spec delta I would add.
+
+```md
+## Plugin Hook Capability Check
+
+Bundled plugin hooks are allowed into this spec only as a conditional design
+candidate. They are not recommended for the first implementation slice unless
+fresh runtime evidence proves that repeated lifecycle-timed failure cannot be
+prevented by a smaller validator, eval, skill instruction, or release-runner
+gate.
+
+```yaml
+plugin_hook_capability_check:
+  verified_runtime_failure: "none_currently_proven_for_hook_recommendation"
+  proposed_hook_event: "Stop"
+  feature_gate_status: unknown
+  fallback_path: "he-eval-report closure validation plus lifecycle release evals and routing-map validators"
+  portability_check: partial
+  side_effect_class: completion_gate
+  lifecycle_authority: limited
+  outcome: defer
+```
+
+Decision:
+
+- Do not implement or recommend a bundled HE hook while the known failures can
+  be repaired by SA-001 through SA-008.
+- Reopen the hook candidate only if at least two independent runs show the same
+  HE runtime failure after the fallback validator/eval path is present and
+  passing in normal operation.
+- If reopened, the smallest safe hook is a `Stop` handoff guard that blocks or
+  warns only on a missing closure-proof artifact for the selected HE slice. It
+  must not write `.harness` artifacts, mutate Linear, run network commands, or
+  mark work complete.
+- Hook declarations must stay plugin-portable: use `hooks/hooks.json` and
+  `${PLUGIN_ROOT}` or `${PLUGIN_DATA}`, never Jamie-specific absolute paths.
+- Closure proof must include both hook-enabled behavior and fallback behavior
+  with `plugin_hooks` disabled or unavailable.
+```
+
+Add this acceptance row to the existing matrix:
+
+```md
+| SA-009 | Bundled HE hooks stay deferred unless repeated runtime failure proves hook timing is the smallest safe mechanism. | A runtime-failure ledger with at least two matching failures after fallback validators/evals are available, plus hook-enabled and hook-disabled proof if implemented. | Blocks hook recommendation if the failure is single-run, speculative, or preventable by validator/eval/skill changes. |
+```
+
+Add this behavior contract after the SA-004 section:
+
+```md
+### SA-009 Conditional Bundled Plugin Hook
+
+Owner surface:
+
+- `Plugins/harness-engineering/.codex-plugin/plugin.json`
+- `Plugins/harness-engineering/hooks/hooks.json`
+- `Plugins/harness-engineering/hooks/**`
+- `Plugins/harness-engineering/references/plugin-hook-capability-contract.md`
+
+Required implementation posture:
+
+- Default action is defer. Do not add hook files, manifest declarations, or
+  hook scripts during the Phase 1 repair unless fresh evidence proves the same
+  runtime failure recurred after the validator/eval fallback path was available.
+- The proof threshold is two matching runtime failures from independent runs
+  where the agent missed a closure-proof or handoff requirement that only a
+  lifecycle-timed hook could reasonably catch.
+- If the threshold is met, spec the first hook as a `Stop` handoff guard with a
+  visible message and explicit fallback command. `SessionStart` context primers
+  and `PreToolUse` blockers remain out of scope unless separate repeated
+  evidence proves they are smaller.
+- The hook must be feature-gated and portable. It must tolerate
+  `plugin_hooks` being disabled, unknown, or unavailable.
+- The hook must not create `.harness` artifacts, mutate Linear, run broad
+  validation, access credentials, call the network, or make completion claims.
+
+Blocking proof:
+
+- Before recommendation: a runtime-failure ledger cites the two matching
+  failures, the selected slice, the fallback path that failed to prevent them,
+  and why a validator/eval/skill wording change is insufficient.
+- Before implementation closeout: hook-enabled proof shows the guard fires for
+  the missing-proof case, and hook-disabled proof shows the fallback
+  `he-eval-report` or release-eval path still blocks closure.
+- Any hardcoded absolute path, hook-only closure authority, or missing fallback
+  blocks the hook recommendation.
+```
+
+I would also update the surrounding spec references like this:
+
+```md
+- Add `Plugins/harness-engineering/references/plugin-hook-capability-contract.md`
+  to `required_contracts`.
+- Change the parent acceptance mapping from `SA-001 ... SA-008` to
+  `SA-001 ... SA-009`.
+- In planning constraints, mark SA-009 as `Deferred unless repeated runtime
+  failure is proven`.
+- In candidate validation commands, add:
+  `rg -n "plugin_hook_capability_check|SA-009|hooks/hooks.json|plugin_hooks" .harness/specs/2026-05-09-agent-skills-he-trust-defect-repair-spec.md Plugins/harness-engineering/references/plugin-hook-capability-contract.md`
+- In `Done`, make the spec plan-ready for SA-001 through SA-009, while keeping
+  SA-009 explicitly deferred.
+```
+
+The important product decision is: this does **not** recommend a hook today. It specs the hook as a gated candidate and makes the proof threshold concrete. That keeps HE from growing runtime machinery just because hooks are available, while still giving you a crisp path if repeated runtime failure proves lifecycle timing is genuinely the smallest safe mechanism.

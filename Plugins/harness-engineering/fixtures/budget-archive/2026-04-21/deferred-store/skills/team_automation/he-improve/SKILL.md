@@ -56,7 +56,7 @@ This entrypoint stays concise and keeps full operational context in archived ref
 - Do not broaden scope beyond bounded optimization goals.
 - Do not mutate the measurement harness or declared immutable surfaces inside experiment edits.
 - Do not summarize optimization results before they have been durably logged.
-- Do not remove important context for budget trimming; move it to references and index it in `../../../references/deferred-context-index.md`.
+- Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## Anti-patterns
 

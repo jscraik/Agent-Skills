@@ -1,0 +1,38 @@
+I’m blocked from inspecting the live repo in this session: even read-only commands like `git status --short`, `git diff --stat`, and `sed` are failing with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I can’t honestly classify the finished slice from repo evidence yet. Based on the slice being “finished” and using the taxonomy you named, here’s the classification format I’d use once I can see the diff:
+
+| Drift Axis | Classification | What I’d Look For |
+|---|---:|---|
+| Architecture drift | `none / low / medium / high` | New abstractions, ownership boundary changes, canonical-vs-runtime edits, cross-package coupling, changes outside the intended slice. |
+| Routing drift | `none / low / medium / high` | Whether commands, skills, docs, or workflows route through the expected canonical entrypoints, especially `./bin/ask`, skill handles, and repo wrappers. |
+| Context drift | `none / low / medium / high` | Whether instructions, terminology, docs, or runtime-facing guidance diverge from `UBIQUITOUS_LANGUAGE.md` and the agent docs map. |
+| Governance drift | `none / low / medium / high` | Whether the slice bypasses validation policy, ownership boundaries, closeout evidence, line-budget rules, or canonical source rules. |
+| Agent-native drift | `none / low / medium / high` | Whether a human can do the workflow but an agent cannot, usually due to hidden state, UI-only paths, missing robot/json mode, ambiguous outputs, or no deterministic validation. |
+| Moat drift | `none / low / medium / high` | Whether the change weakens the repo’s core advantage: canonical skill governance, discoverability, sync discipline, validation, and portable agent workflows. |
+
+My provisional classification, without diff access, is:
+
+| Drift Axis | Classification |
+|---|---:|
+| Architecture | `unclassified` |
+| Routing | `unclassified` |
+| Context | `unclassified` |
+| Governance | `unclassified` |
+| Agent-native | `unclassified` |
+| Moat | `unclassified` |
+
+The blocker is environmental, not analytical: I need at least `git status --short`, `git diff --stat`, and the relevant changed-file diff to classify this properly. Once shell reads work again, I’d run:
+
+```bash
+git status --short
+git diff --stat
+git diff -- .
+./bin/ask repo closeout --changed --json --robot
+```
+
+Then I’d return the classification with exact file references and pass/fail evidence.

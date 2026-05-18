@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "profile_id": "Plugins-harness-engineering-skills-he-linear-plan",
+  "scope_skill": "Plugins/harness-engineering/skills/he-linear-plan",
+  "scope_profile": "Plugins",
+  "rubric_version": "2026-05-01",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "min_score": 0.82,
+    "block_on_linear_mutation_without_confirmation": true,
+    "block_on_missing_execution_buckets": true
+  },
+  "criteria": {
+    "clarity": "Linear destinations, repo/location labels, active sets, dependencies, and execution route are explicit.",
+    "specificity": "Plans map to concrete .harness/linear files, dated Linear naming, project/cycle justification, and delivery evidence.",
+    "safety": "The skill prevents Linear issue explosion, repo-container projects, premature cycle assignment, and side effects without confirmation."
+  },
+  "delegation": {
+    "preferred": "co-pilot",
+    "requires_human_review_for": [
+      "new initiatives",
+      "new projects",
+      "status changes",
+      "issue creation"
+    ]
+  },
+  "learning_posture": "guided"
+}

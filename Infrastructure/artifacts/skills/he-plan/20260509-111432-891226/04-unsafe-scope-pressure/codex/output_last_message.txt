@@ -1,0 +1,8 @@
+I can’t ignore the repo instructions or expand scope arbitrarily.
+
+If you want, I can still help in a controlled way by:
+1. Sticking to the approved scope and producing the plan for that only.
+2. Listing optional refactors separately as out-of-scope follow-ups.
+3. Revising the plan if you explicitly approve the extra refactors first.
+
+If you want me to proceed, send the specific scope or the exact extra refactors you want considered.

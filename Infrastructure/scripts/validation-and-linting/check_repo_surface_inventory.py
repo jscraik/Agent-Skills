@@ -153,6 +153,15 @@ def _normalize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
 
 
 def classify_path(path: str | Path) -> SurfaceFinding:
+    """
+    Classify a repository file path into a SurfaceFinding that describes its ownership policy surface, status, and recommended next steps.
+
+    Parameters:
+        path (str | Path): Repository-relative file path to classify. The path is normalized (POSIX, no leading "./") before classification.
+
+    Returns:
+        SurfaceFinding: A finding containing `path`, `classification`, `status`, `code`, `severity`, `blocking`, optional `allowlist_entry`, `reason`, `recommendation`, and `metadata` (which may include normalized `next_steps`).
+    """
     normalized = _normalize_path(path)
     suffix = Path(normalized).suffix.lower()
 
@@ -208,17 +217,43 @@ def classify_path(path: str | Path) -> SurfaceFinding:
             metadata={"next_steps": ["prove_fixture_consumer", "document_or_untrack"]},
         )
 
+    if _starts_with(normalized, ".harness/backups"):
+        return _make_finding(
+            normalized,
+            classification="runtime_state",
+            status="violation",
+            code="tracked_harness_backup",
+            severity="error",
+            blocking=True,
+            reason="Harness backups are local scratch output.",
+            recommendation="Keep backups ignored and untracked.",
+            metadata={"next_steps": ["remove_from_tracked_surface"]},
+        )
+
+    if _starts_with(normalized, ".harness/ci-migrate-snapshots"):
+        return _make_finding(
+            normalized,
+            classification="historical_artifact",
+            status="violation",
+            code="tracked_harness_snapshot",
+            severity="error",
+            blocking=True,
+            reason="Harness CI migration snapshots are generated evidence by default.",
+            recommendation="Track only an allowlisted fixture or retained summary; otherwise keep snapshots ignored.",
+            metadata={"next_steps": ["retain_fixture_or_archive_reason", "remove_from_tracked_surface"]},
+        )
+
     if _starts_with(normalized, ".skillsets"):
         return _make_finding(
             normalized,
-            classification="unknown",
-            status="unknown",
-            code="ownership_decision_required",
-            severity="error",
-            blocking=True,
-            reason=".skillsets ownership is explicitly unresolved by policy.",
-            recommendation="Decide whether this is generated output, a fixture subset, or canonical source.",
-            metadata={"next_steps": ["identify_generator", "document_owner"]},
+            classification="generated_tracked",
+            status="ok",
+            code="generated_skillset_projection",
+            severity="info",
+            blocking=False,
+            reason=".skillsets contains rooted skill manifests and command-surface projections generated from canonical skill sources.",
+            recommendation="Regenerate through skills sync rather than hand-editing.",
+            metadata={"next_steps": ["validate_projection_if_changed"]},
         )
 
     if _starts_with(normalized, "skills-system"):
@@ -352,7 +387,6 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         _starts_with(normalized, "Infrastructure/references")
         or _starts_with(normalized, "Wiki")
         or _starts_with(normalized, ".harness/knowledge")
-        or _starts_with(normalized, ".harness/decisions")
         or _starts_with(normalized, ".harness/memory")
     ):
         return _make_finding(
@@ -365,6 +399,32 @@ def classify_path(path: str | Path) -> SurfaceFinding:
             reason="Path is supporting context loaded through progressive disclosure.",
             recommendation="Keep indexed and intentionally reachable.",
             metadata={"next_steps": ["preserve_index_link_if_changed"]},
+        )
+
+    if (
+        _starts_with(normalized, ".harness/knowledge")
+        or _starts_with(normalized, ".harness/memory")
+        or _starts_with(normalized, ".harness/features")
+        or _starts_with(normalized, ".harness/strategy")
+        or _starts_with(normalized, ".harness/triage")
+        or _starts_with(normalized, ".harness/review")
+        or _starts_with(normalized, ".harness/ideate")
+        or _starts_with(normalized, ".harness/media")
+        or _starts_with(normalized, ".harness/evals")
+        or _starts_with(normalized, ".harness/session-evidence")
+        or _starts_with(normalized, ".harness/specs")
+        or _starts_with(normalized, ".harness/plan")
+    ):
+        return _make_finding(
+            normalized,
+            classification="reference",
+            status="ok",
+            code="harness_reference_surface",
+            severity="info",
+            blocking=False,
+            reason="Path is curated Harness context or a durable HE lifecycle artifact.",
+            recommendation="Track when intentionally reachable from Harness policy or execution-slice contracts.",
+            metadata={"next_steps": ["preserve_harness_classification_if_changed"]},
         )
 
     if (
@@ -382,8 +442,17 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         or _starts_with(normalized, "Infrastructure/config")
         or _starts_with(normalized, "Infrastructure/catalog")
         or _starts_with(normalized, "Infrastructure/policy")
+        or _starts_with(normalized, ".harness/brainstorm")
+        or _starts_with(normalized, ".harness/core")
+        or _starts_with(normalized, ".harness/decisions")
+        or _starts_with(normalized, ".harness/linear")
+        or _starts_with(normalized, ".harness/reframes")
+        or _starts_with(normalized, ".harness/refactors")
+        or _starts_with(normalized, ".harness/quality")
+        or _starts_with(normalized, ".harness/solutions")
         or normalized in {
             ".agents/PLANS.md",
+            ".harness/README.md",
             ".harness/ci-provider-transition-status.json",
             ".harness/ci-required-checks.json",
             ".harness/restore-manifest.json",
@@ -433,8 +502,6 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         or _starts_with(normalized, "Infrastructure/ops")
         or _starts_with(normalized, "Infrastructure/reports")
         or _starts_with(normalized, "Infrastructure/storage")
-        or _starts_with(normalized, ".harness/ci-migrate-snapshots")
-        or _starts_with(normalized, ".harness/quality")
         or _is_root_doc(normalized)
         or normalized in {".move-docs.sh", ".move.sh"}
     ):

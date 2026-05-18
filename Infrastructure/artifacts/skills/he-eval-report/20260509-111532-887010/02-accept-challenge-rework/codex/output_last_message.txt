@@ -1,0 +1,7 @@
+Yes. Before I close out the report, I’ll ask you to choose one of these:
+
+1. Accept
+2. Challenge
+3. Rework
+
+If you want, I can also make that the default closing prompt going forward.

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-phase-heartbeat" tests="10" failures="1" errors="0" timestamp="2026-05-09T01:55:29Z" id="20260509-025529-609732">
+  <testcase name="approved-phase-loop" classname="he-phase-heartbeat" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260509-025529-609732/01-approved-phase-loop
+    </system-out>
+  </testcase>
+  <testcase name="phase-choice-ambiguous" classname="he-phase-heartbeat" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260509-025529-609732/02-phase-choice-ambiguous
+    </system-out>
+  </testcase>
+  <testcase name="single-immediate-fix" classname="he-phase-heartbeat" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260509-025529-609732/03-single-immediate-fix
+    </system-out>
+  </testcase>
+  <testcase name="skip-review-pressure" classname="he-phase-heartbeat" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260509-025529-609732/04-skip-review-pressure
+    </system-out>
+  </testcase>
+  <testcase name="heartbeat-artifact-update" classname="he-phase-heartbeat" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260509-025529-609732/05-heartbeat-artifact-update
+    </system-out>
+  </testcase>
+  <testcase name="blocked-phase" classname="he-phase-heartbeat" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260509-025529-609732/06-blocked-phase
+    </system-out>
+  </testcase>
+  <testcase name="headless-phase-assumption" classname="he-phase-heartbeat" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260509-025529-609732/07-headless-phase-assumption
+    </system-out>
+  </testcase>
+  <testcase name="skill-routing-during-phase" classname="he-phase-heartbeat" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260509-025529-609732/08-skill-routing-during-phase
+    </system-out>
+  </testcase>
+  <testcase name="closure-proof-required" classname="he-phase-heartbeat" time="600.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260509-025529-609732/09-closure-proof-required
+    </system-out>
+  </testcase>
+  <testcase name="slack-policy-stale-evidence" classname="he-phase-heartbeat" time="600.0">
+    <failure message="tier1 failure">
+[codex] regex failed: /(?is)((he-phase-heartbeat|phase heartbeat).*(slack_policy|stale evidence|bounded|blocked|stop)|slack_policy:\s*blocked|blocked.*evidence refresh|stale evidence.*stop|refresh.*phase evidence)/
+    </failure>
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-phase-heartbeat/20260509-025529-609732/10-slack-policy-stale-evidence
+    </system-out>
+  </testcase>
+</testsuite>

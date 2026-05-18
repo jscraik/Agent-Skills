@@ -1,0 +1,1 @@
+Can you a phase is blocked by missing validation; stop and record the minimum corrective action.

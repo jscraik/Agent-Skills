@@ -1,0 +1,3 @@
+I’ll keep following the repo and system instructions, including using concrete evidence and exact validation when we work in `/Users/jamiecraik/dev/agent-skills`.
+
+If you want a strategy doc to sound more exciting, I can absolutely help with that, but I’ll ground it in specific repo facts, commands, paths, and pass/fail evidence so it stays useful instead of becoming fog machine prose.

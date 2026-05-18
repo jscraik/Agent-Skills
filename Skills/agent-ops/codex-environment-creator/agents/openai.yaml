@@ -1,0 +1,10 @@
+name: codex-environment-creator
+description: Create, triage, and update repo-local Codex environment TOML files with canonical path and validation evidence.
+interfaces:
+  default_prompt: "Create or repair .codex/environments/environment.toml using repo-owned setup commands, safe actions, and exact validation evidence."
+  display_name: "Codex Environment Creator"
+  tags:
+    - codex
+    - environments
+    - toml
+    - setup

@@ -79,15 +79,15 @@ Non-triggers:
 - optional user emphasis on specific weak sections or exhaustive coverage
 
 If the spec path is missing, ask one direct question:
-- Which spec should I deepen? You can give me a path from `Docs/specs/` or `docs/ui-specs/`.
+- Which spec should I deepen? You can give me a path under `.harness/specs/`.
 
 Do not proceed until you have a valid spec file path.
 
 ## Examples
-- User says: "Deepen `Docs/specs/2026-03-20-feat-issue-runner-spec.md`; cancellation, retry caps, and workspace cleanup are still underspecified."
-- User says: "Stress-test `docs/ui-specs/2026-03-22-checkout-ui-spec.md`; VAC coverage for keyboard, loading, and empty states is thin."
+- User says: "Deepen `.harness/specs/2026-03-20-feat-issue-runner-spec.md`; cancellation, retry caps, and workspace cleanup are still underspecified."
+- User says: "Stress-test `.harness/specs/2026-03-22-checkout-ui-spec.md`; VAC coverage for keyboard, loading, and empty states is thin."
 - User says: "Before handing this auth session spec to `he-plan`, tighten safety and observability and ground permission assumptions in current docs."
-- User says: "Run max-coverage on `Docs/specs/2026-04-04-billing-reconciliation-spec.md` and include directly relevant learnings from `docs/solutions/`."
+- User says: "Run max-coverage on `.harness/specs/2026-04-04-billing-reconciliation-spec.md` and include directly relevant learnings from `docs/solutions/`."
 
 ## Deliverables
 - a deepening-mode decision: `targeted-confidence | max-coverage`
@@ -353,4 +353,4 @@ Apply the framework flexibly. Adapt depth, focus areas, and evidence sources to 
 
 ## Deferred Context Preservation
 
-Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.
+Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

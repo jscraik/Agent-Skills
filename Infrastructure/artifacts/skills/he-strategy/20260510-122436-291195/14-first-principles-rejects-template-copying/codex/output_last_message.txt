@@ -1,0 +1,17 @@
+Classification: **reject / no-go as strategy work**.
+
+From the first-principles HE contract, this request is an **analogy-driven structure import**, not an evidence-driven strategy need. The premise is “a competitor plugin has a heavyweight strategy stage, so HE should too,” while explicitly saying there is **no repeated HE failure evidence**. That fails the bar for adding a new HE stage because strategy structure should be justified by observed HE breakdowns, recurring coordination failures, decision quality issues, or lifecycle gaps inside HE itself.
+
+The right classification is likely:
+
+- **Type:** competitive parity / cargo-cult risk
+- **HE posture:** preserve current HE shape
+- **Decision:** do not add the heavyweight strategy stage
+- **Reason:** no repeated HE failure evidence, no demonstrated missing decision point, no validated user or agent pain
+- **Possible next step:** record as a watch item or hypothesis, then look for concrete HE failure cases before changing the workflow
+
+A tighter implementation-safe wording would be:
+
+> Do not add a heavyweight strategy stage to HE based solely on competitor structure. Strategy modules should be introduced only when repeated HE evidence shows failures in planning, prioritization, decomposition, or decision quality that the existing router and lifecycle cannot absorb.
+
+So: **classify as “do not implement; insufficient evidence; competitor-parity request.”**

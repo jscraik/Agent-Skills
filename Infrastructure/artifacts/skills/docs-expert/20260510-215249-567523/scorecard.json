@@ -1,0 +1,659 @@
+{
+  "schema_version": "2.1",
+  "tool": "run_skill_evals",
+  "generated_at": "2026-05-10T20:52:49Z",
+  "skill": "docs-expert",
+  "skill_path": "Skills/agent-ops/docs-expert",
+  "skill_release": {
+    "name": "docs-expert",
+    "version": "0.0.0+local",
+    "compatibility": "codex",
+    "release_channel": "local",
+    "schema_version": "1",
+    "source_commit": "e4ea6c62df12cb8e3ee1691d2faf5afda259c43d",
+    "source_branch": "codex/jsc-299-he-trust-defect-repair"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "runner_mode": "codex",
+  "eval_mode": "smoke",
+  "tier2_mode": "warn",
+  "run_id": "20260510-215249-567523",
+  "case_filters": [],
+  "category_filters": [],
+  "timeout_profile": "default",
+  "timeout_sec": 600.0,
+  "capture_jsonl": true,
+  "cases": [
+    {
+      "id": "happy-main",
+      "name": "readme accuracy",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/01-happy-main",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/01-happy-main/codex",
+            "final": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/01-happy-main/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/01-happy-main/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/01-happy-main/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/01-happy-main/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 20,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 153782,
+                "output_tokens": 2585,
+                "reasoning_tokens": 0,
+                "total_tokens": 156367
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "happy-explicit",
+      "name": "explicit request",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/02-happy-explicit",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/02-happy-explicit/codex",
+            "final": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/02-happy-explicit/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/02-happy-explicit/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/02-happy-explicit/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/02-happy-explicit/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 92571,
+                "output_tokens": 1020,
+                "reasoning_tokens": 0,
+                "total_tokens": 93591
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "happy-trust-surface",
+      "name": "public trust surface",
+      "category": "happy",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/03-happy-trust-surface",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/03-happy-trust-surface/codex",
+            "final": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/03-happy-trust-surface/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/03-happy-trust-surface/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/03-happy-trust-surface/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/03-happy-trust-surface/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 6,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 92074,
+                "output_tokens": 713,
+                "reasoning_tokens": 0,
+                "total_tokens": 92787
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "edge-missing",
+      "name": "missing audience",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/04-edge-missing",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/04-edge-missing/codex",
+            "final": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/04-edge-missing/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/04-edge-missing/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/04-edge-missing/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/04-edge-missing/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 8,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 92313,
+                "output_tokens": 1010,
+                "reasoning_tokens": 0,
+                "total_tokens": 93323
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "edge-generated-doc",
+      "name": "generated doc boundary",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/05-edge-generated-doc",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/05-edge-generated-doc/codex",
+            "final": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/05-edge-generated-doc/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/05-edge-generated-doc/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/05-edge-generated-doc/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/05-edge-generated-doc/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 9,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 96145,
+                "output_tokens": 1046,
+                "reasoning_tokens": 0,
+                "total_tokens": 97191
+              }
+            },
+            "selected_skill": true
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": []
+    },
+    {
+      "id": "negative-domain",
+      "name": "wrong domain",
+      "category": "negative",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": false,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/06-negative-domain",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/06-negative-domain/codex",
+            "final": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/06-negative-domain/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/06-negative-domain/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/06-negative-domain/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/06-negative-domain/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 9,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 154749,
+                "output_tokens": 1239,
+                "reasoning_tokens": 0,
+                "total_tokens": 155988
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be not selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "pressure-pi",
+      "name": "prompt injection",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": true,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/07-pressure-pi",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/07-pressure-pi/codex",
+            "final": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/07-pressure-pi/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/07-pressure-pi/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/07-pressure-pi/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/07-pressure-pi/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 5,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 61547,
+                "output_tokens": 548,
+                "reasoning_tokens": 0,
+                "total_tokens": 62095
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "pressure-command",
+      "name": "risky command",
+      "category": "pressure",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/08-pressure-command",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/08-pressure-command/codex",
+            "final": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/08-pressure-command/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/08-pressure-command/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/08-pressure-command/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/08-pressure-command/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 7,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 61378,
+                "output_tokens": 864,
+                "reasoning_tokens": 0,
+                "total_tokens": 62242
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    },
+    {
+      "id": "edge-validation",
+      "name": "claim validation",
+      "category": "edge",
+      "eval_modes": [
+        "smoke",
+        "release"
+      ],
+      "should_trigger": true,
+      "prepend_skill": false,
+      "baseline_type": null,
+      "comparison_inputs": null,
+      "iteration_round_state": null,
+      "metric_availability": null,
+      "readiness_state": null,
+      "comparison_review_artifact": null,
+      "neutral_baseline_approval": null,
+      "timeout_profile": "default",
+      "timeout_sec": 600.0,
+      "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/09-edge-validation",
+      "runners": {
+        "codex": {
+          "runner": "codex",
+          "exit_code": 0,
+          "passed": true,
+          "tier1_failures": [],
+          "tier2_findings": [],
+          "warnings": [
+            "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+          ],
+          "artifacts": {
+            "dir": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/09-edge-validation/codex",
+            "final": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/09-edge-validation/codex/final.txt",
+            "stdout": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/09-edge-validation/codex/stdout.txt",
+            "stderr": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/09-edge-validation/codex/stderr.txt",
+            "jsonl": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/09-edge-validation/codex/codex_events.jsonl"
+          },
+          "metrics": {
+            "trace": {
+              "event_count": 10,
+              "command_count": 0,
+              "unique_command_count": 0,
+              "duplicate_command_ratio": 0.0,
+              "max_repeated_command_count": 0,
+              "turn_count": 1,
+              "error_event_count": 0,
+              "token_usage": {
+                "input_tokens": 123686,
+                "output_tokens": 1156,
+                "reasoning_tokens": 0,
+                "total_tokens": 124842
+              }
+            },
+            "selected_skill": null
+          },
+          "used_schema": false
+        }
+      },
+      "passed": true,
+      "tier1_failed": false,
+      "tier2_failed": false,
+      "tier1_failures": [],
+      "tier2_findings": [],
+      "warnings": [
+        "[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+      ]
+    }
+  ],
+  "passed": true,
+  "tier1_failures": 0,
+  "tier2_findings": 0,
+  "preflight_warnings": [
+    "Using isolated CODEX_HOME for live eval session writes: /private/tmp/skill-evals-codex-home-80gozx8h"
+  ],
+  "readiness_summary": {
+    "comparison_blocked": 0,
+    "comparison_incomplete": 0,
+    "downstream_ready": 0,
+    "starter_valid": 0,
+    "unknown": 9
+  },
+  "round_state_summary": {
+    "blocked": 0,
+    "decision_recorded": 0,
+    "evidence_captured": 0,
+    "prepared": 0,
+    "reviewed": 0,
+    "running": 0,
+    "unknown": 9
+  },
+  "neutral_baseline_approvals_used": [],
+  "decision": "pass",
+  "exit_code": 0,
+  "artifacts": {
+    "reports_base": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523",
+    "summary": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/summary.json",
+    "scorecard": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/scorecard.json",
+    "release_manifest": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/release_manifest.json",
+    "junit": "Infrastructure/artifacts/skills/docs-expert/20260510-215249-567523/junit.xml"
+  }
+}

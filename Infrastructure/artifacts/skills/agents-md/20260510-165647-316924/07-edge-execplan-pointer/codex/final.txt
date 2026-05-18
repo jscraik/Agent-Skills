@@ -1,0 +1,15 @@
+I’m blocked by the current sandbox: even read-only shell commands fail with `sandbox_apply: Operation not permitted`, and `apply_patch` is rejected because writes are blocked under the read-only sandbox with approval set to `never`.
+
+Here’s the exact root `AGENTS.md` edit to apply under **Root Essentials**, after the existing “Path Ownership Boundaries” bullet:
+
+```diff
+ - Edit canonical sources, not runtime projections. See
+   [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
++- For long-running Harness Engineering refactors in `repo/harness`, point only
++  to `@harness-engineering` / `he-plan`; detailed plan artifacts must follow
++  the HE plan contract.
+
+ ## Common Commands
+```
+
+That keeps the root guidance intentionally thin: it routes agents to `@harness-engineering` / `he-plan`, and leaves the detailed artifact requirements to the HE plan contract where they belong.

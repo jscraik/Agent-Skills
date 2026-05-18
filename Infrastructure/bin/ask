@@ -22,26 +22,7 @@ from ask.command_metadata import (
     VALID_ACTIONS,
     VALID_TOPICS,
 )
-from ask.commands.skills import (
-    list_skills,
-    skills_budget,
-    skills_handles,
-    skills_resolve,
-    skills_parse,
-    skills_proof,
-    skills_prove,
-    explain_skill,
-    reviewers_resolve,
-    route_skills,
-    goal_skills,
-    improve_skills,
-    sync_skills,
-    audit_skill,
-    install_skill,
-    fold_skills,
-    init_skill,
-    extract_family_fail_lines,
-)
+import ask.commands.skills as skills_commands
 from ask.commands.runtime import add_runtime_parser, dispatch_runtime
 from ask.commands.repo import (
     check_hub_stability,
@@ -603,13 +584,18 @@ def main():
     skills_sync_parser = skills_subparsers.add_parser("sync", help="Synchronize skill symlinks", parents=[global_parser])
     skills_sync_parser.add_argument("--scope", choices=["user", "workspace"], default="workspace", help="Tier to sync")
     skills_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes")
-    skills_sync_parser.add_argument(
-        "--projection",
-        help="Runtime projection mode: flat, rooted, or skill-tree alias for rooted",
-    )
+    skills_sync_parser.add_argument("--projection", help="Runtime projection mode: flat, rooted, or skill-tree alias for rooted")
+    skills_sync_parser.add_argument("--plugin-cache-refresh", choices=["auto", "skip", "only"], default="auto", help="Plugin runtime cache refresh mode")
     skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
     skills_audit_parser.add_argument("path", help="Path to the skill directory")
     skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
+    skills_gate_parser = skills_subparsers.add_parser("validate-skill-gate", help="Run the canonical skill gate", parents=[global_parser])
+    skills_gate_parser.add_argument("path", help="Path to the skill directory")
+    skills_openai_parser = skills_subparsers.add_parser("validate-openai-format", help="Run the canonical OpenAI skill format validator", parents=[global_parser])
+    skills_openai_parser.add_argument("path", help="Path to the skill directory")
+    skills_openai_parser.add_argument("--mode", choices=["warn", "strict"], default="strict", help="Validation mode")
+    skills_boundaries_parser = skills_subparsers.add_parser("validate-boundaries", help="Show canonical-versus-projection ownership for a skill handle", parents=[global_parser])
+    skills_boundaries_parser.add_argument("handle", help="Skill handle to validate, with or without leading $")
     
     skills_install_parser = skills_subparsers.add_parser("install", help="Install a skill from GitHub", parents=[global_parser])
     skills_install_parser.add_argument("url", help="GitHub URL of the skill")
@@ -957,7 +943,7 @@ def main():
 
     elif args.topic == "skills":
         if args.action == "list":
-            result = list_skills(
+            result = skills_commands.list_skills(
                 repo_root,
                 category=args.category,
                 starter=args.starter,
@@ -966,9 +952,9 @@ def main():
                 advanced=args.advanced,
             )
         elif args.action == "budget":
-            result = skills_budget(repo_root, default_max=args.default_max)
+            result = skills_commands.skills_budget(repo_root, default_max=args.default_max)
         elif args.action == "handles":
-            result = skills_handles(
+            result = skills_commands.skills_handles(
                 repo_root,
                 check=args.check,
                 include_handles=not args.no_handles,
@@ -978,38 +964,38 @@ def main():
                 dry_run=args.dry_run,
             )
         elif args.action == "resolve":
-            result = skills_resolve(repo_root, handle=args.handle)
+            result = skills_commands.skills_resolve(repo_root, handle=args.handle)
         elif args.action == "parse":
-            result = skills_parse(repo_root, request_text=" ".join(args.request))
+            result = skills_commands.skills_parse(repo_root, request_text=" ".join(args.request))
         elif args.action == "proof":
-            result = skills_proof(repo_root, handle=args.handle)
+            result = skills_commands.skills_proof(repo_root, handle=args.handle)
         elif args.action == "prove":
-            result = skills_prove(repo_root, handle=" ".join(args.handle))
+            result = skills_commands.skills_prove(repo_root, handle=" ".join(args.handle))
         elif args.action == "explain":
-            result = explain_skill(repo_root, handle=args.handle)
+            result = skills_commands.explain_skill(repo_root, handle=args.handle)
         elif args.action == "route":
-            result = route_skills(
+            result = skills_commands.route_skills(
                 repo_root,
                 request=" ".join(args.request),
                 top_k=args.top_k,
                 considered_limit=args.considered_limit,
             )
         elif args.action == "goal":
-            result = goal_skills(
+            result = skills_commands.goal_skills(
                 repo_root,
                 intent_text=" ".join(args.intent),
                 top_k=args.top_k,
                 considered_limit=args.considered_limit,
             )
         elif args.action == "improve":
-            result = improve_skills(
+            result = skills_commands.improve_skills(
                 repo_root,
                 goal_text=" ".join(args.goal),
                 top_k=args.top_k,
                 considered_limit=args.considered_limit,
             )
         elif args.action == "starter":
-            result = list_skills(
+            result = skills_commands.list_skills(
                 repo_root,
                 category=None,
                 starter=True,
@@ -1017,23 +1003,29 @@ def main():
                 limit=args.limit,
             )
         elif args.action == "sync":
-            result = sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run, projection=args.projection)
+            result = skills_commands.sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run, projection=args.projection, plugin_cache_refresh=args.plugin_cache_refresh)
         elif args.action == "audit":
-            result = audit_skill(repo_root, skill_path=args.path, level=args.level)
+            result = skills_commands.audit_skill(repo_root, skill_path=args.path, level=args.level)
+        elif args.action == "validate-skill-gate":
+            result = skills_commands.validate_skill_gate(repo_root, skill_path=args.path)
+        elif args.action == "validate-openai-format":
+            result = skills_commands.validate_openai_skill_format(repo_root, skill_path=args.path, mode=args.mode)
+        elif args.action == "validate-boundaries":
+            result = skills_commands.validate_skill_boundaries(repo_root, handle=args.handle)
         elif args.action == "install":
-            result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=args.dest, dry_run=args.dry_run)
+            result = skills_commands.install_skill(repo_root, url=args.url, remediate=args.remediate, dest=args.dest, dry_run=args.dry_run)
         elif args.action == "fold":
-            result = fold_skills(repo_root, source=args.source, target=args.target, sensitivity=args.sensitivity)
+            result = skills_commands.fold_skills(repo_root, source=args.source, target=args.target, sensitivity=args.sensitivity)
         elif args.action == "init":
-            result = init_skill(repo_root, name=args.name, category=args.category, description=args.description)
+            result = skills_commands.init_skill(repo_root, name=args.name, category=args.category, description=args.description)
         else:
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=f"{action_msg} for topic 'skills'", fix_suggestion="Valid actions: list, budget, handles, resolve, parse, proof, prove, explain, route, goal, improve, starter, sync, audit, install, fold, init"))
+            result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=f"{action_msg} for topic 'skills'", fix_suggestion="Valid actions: list, budget, handles, resolve, parse, proof, prove, explain, route, goal, improve, starter, sync, audit, validate-skill-gate, validate-openai-format, validate-boundaries, install, fold, init"))
 
     elif args.topic == "reviewers":
         if args.action == "resolve":
-            result = reviewers_resolve(repo_root, handle=args.handle)
+            result = skills_commands.reviewers_resolve(repo_root, handle=args.handle)
         else:
             result.status = "error"
             action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
@@ -1783,7 +1775,7 @@ def main():
                 if args.action == "audit":
                     family_data = result.data.get("family_benchmarks")
                     if isinstance(family_data, dict) and int(family_data.get("exit_code", 0) or 0) != 0:
-                        fail_lines = extract_family_fail_lines(str(family_data.get("stdout", "")))
+                        fail_lines = skills_commands.extract_family_fail_lines(str(family_data.get("stdout", "")))
                         if fail_lines:
                             print("\n🔎 Family benchmark failures (first 3):")
                             for fail in fail_lines[:3]:

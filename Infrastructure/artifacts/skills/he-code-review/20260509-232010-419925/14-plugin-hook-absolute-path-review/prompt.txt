@@ -1,0 +1,1 @@
+Can you review a plugin hook diff where hooks/hooks.json calls /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/scripts/guard.py even though the script ships with the plugin.

@@ -1,0 +1,6006 @@
+[
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "missing_file",
+      "approval_required",
+      "network",
+      "timeout",
+      "git_state",
+      "permission",
+      "test_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "git status",
+      "cat <redacted>",
+      "git diff",
+      "zsh <path>",
+      "sed 1,220p <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "skillify",
+    "evidence_labels": [
+      "session-136"
+    ],
+    "evidence_summary": "session-136 suggests coverage-gap, environment-blocker, quality-regression, routing-mismatch; outcome=failed_validation; validation_gates=361.",
+    "he_stage_signals": [
+      "he-work",
+      "he-spec",
+      "he-plan",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-brainstorm",
+      "he-compound",
+      "he-router",
+      "he-improve",
+      "he-ideate",
+      "he-review",
+      "he-deepen-spec",
+      "he-deepen-plan"
+    ],
+    "impact_score": 16,
+    "mode": "session-evidence",
+    "next_action": "hand off to skillify with trigger text, validation gates, and failure boundaries",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": true,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "python <redacted>",
+      "bash <redacted>",
+      "cat <redacted>",
+      "bash <path>",
+      "git commit",
+      "<path> repo validate <redacted>",
+      "git diff <redacted> <redacted>",
+      "python <redacted> <redacted> <redacted>",
+      "<path> repo validate",
+      "rg <redacted> <redacted> <redacted>",
+      "python <redacted> <redacted>",
+      "git add <redacted> <redacted>",
+      "<path> repo validate README.md",
+      "sed 1,220p <redacted>",
+      "python <redacted> . <path>",
+      "python <redacted> baseline",
+      "rg <redacted> <redacted>",
+      "nl <redacted> | sed",
+      "python <redacted> skills_prove or explain"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "missing_file",
+      "lint_failure",
+      "network",
+      "approval_required",
+      "permission",
+      "test_failure",
+      "git_state",
+      "timeout"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "<path> skills audit <redacted>",
+      "sed 1,220p <redacted>",
+      "git status",
+      "nl <redacted> | sed",
+      "cat <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "skillify",
+    "evidence_labels": [
+      "session-137"
+    ],
+    "evidence_summary": "session-137 suggests coverage-gap, environment-blocker, quality-regression, routing-mismatch; outcome=failed_validation; validation_gates=429.",
+    "he_stage_signals": [
+      "he-brainstorm",
+      "he-plan",
+      "he-code-review",
+      "he-spec",
+      "he-router",
+      "he-work",
+      "he-compound",
+      "he-ideate",
+      "he-heartbeat",
+      "he-fix-bugs",
+      "he-improve",
+      "he-deepen-spec",
+      "he-reliability-review",
+      "he-prune-branches",
+      "he-technical-review",
+      "he-deepen-plan",
+      "he-tdd",
+      "he-refine"
+    ],
+    "impact_score": 16,
+    "mode": "session-evidence",
+    "next_action": "hand off to skillify with trigger text, validation gates, and failure boundaries",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": true,
+    "source": "session-collector",
+    "validation_evidence": [
+      "<path> skills audit <redacted>",
+      "zsh <redacted>",
+      "python <redacted> <redacted>",
+      "git commit",
+      "cat <redacted>",
+      "python <redacted>",
+      "<path> repo validate",
+      "bash <redacted>",
+      "zsh <path>",
+      "python <redacted> validate <redacted>",
+      "for skill in <redacted>",
+      "for f in <path>",
+      "nl <redacted> | sed",
+      "git diff <redacted> <redacted>",
+      "python <<PY from pathlib",
+      "sed 1,260p <redacted>",
+      "bash <path>",
+      "rg <redacted> <path>",
+      "python <redacted> audit-marketplace <redacted>",
+      "for skill in he-brainstorm"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout",
+      "git_state",
+      "permission",
+      "test_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "git status",
+      "git diff",
+      "sed 1,220p <redacted>",
+      "zsh git status --short --branch"
+    ],
+    "confidence": "high",
+    "decision": "skillify",
+    "evidence_labels": [
+      "session-138"
+    ],
+    "evidence_summary": "session-138 suggests coverage-gap, environment-blocker, quality-regression, routing-mismatch; outcome=failed_validation; validation_gates=316.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-work",
+      "he-plan",
+      "he-code-review",
+      "he-compound",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-brainstorm",
+      "he-router",
+      "he-review",
+      "he-ideate",
+      "he-improve"
+    ],
+    "impact_score": 16,
+    "mode": "session-evidence",
+    "next_action": "hand off to skillify with trigger text, validation gates, and failure boundaries",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": true,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "nl <path> | sed",
+      "git commit",
+      "zsh pnpm skill:validate",
+      "bash <path>",
+      "rg <redacted> <path> <path>",
+      "git diff <path> <path>",
+      "pnpm run test:related",
+      "pnpm vitest run <path>",
+      "python <redacted> <path>",
+      "zsh",
+      "pnpm exec vitest run",
+      "python <<PY from pathlib",
+      "rg <redacted> <path>",
+      "git diff <path>",
+      "pnpm exec tsx <path>",
+      "rg <redacted> <redacted>",
+      "sed 1,260p <path>",
+      "git checkout HEAD validate_reference_contracts.py"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "approval_required",
+      "missing_file",
+      "network",
+      "timeout",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "git status",
+      "gh api graphql owner=jscraik",
+      "git diff",
+      "zsh",
+      "nl <path> | sed"
+    ],
+    "confidence": "high",
+    "decision": "skillify",
+    "evidence_labels": [
+      "session-139"
+    ],
+    "evidence_summary": "session-139 suggests coverage-gap, environment-blocker, quality-regression, routing-mismatch; outcome=failed_validation; validation_gates=596.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-code-review",
+      "he-plan",
+      "he-work",
+      "he-brainstorm",
+      "he-heartbeat",
+      "he-compound",
+      "he-router",
+      "he-deepen-spec",
+      "he-improve",
+      "he-reliability-review",
+      "he-deepen-plan",
+      "he-fix-bugs",
+      "he-technical-review",
+      "he-ideate",
+      "he-refine",
+      "he-compound-refresh",
+      "he-prune-branches"
+    ],
+    "impact_score": 16,
+    "mode": "session-evidence",
+    "next_action": "hand off to skillify with trigger text, validation gates, and failure boundaries",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": true,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh",
+      "gh api graphql owner=jscraik",
+      "gh api graphql <redacted>",
+      "env pnpm exec vitest",
+      "python <redacted>",
+      "git commit",
+      "gh pr view 231",
+      "zsh <path>",
+      "bash <path>",
+      "nl <path> | sed",
+      "sed 1,220p <redacted>",
+      "uv run pytest pytest",
+      "bash <redacted>",
+      "git diff <path> <path>",
+      "gh pr view 229",
+      "env python <redacted> <redacted>",
+      "git add <path> <path>",
+      "gh pr view 152",
+      "pnpm exec vitest run"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "lint_failure",
+      "approval_required",
+      "timeout",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "git status",
+      "git diff",
+      "pnpm typecheck",
+      "sed 1,220p <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "skillify",
+    "evidence_labels": [
+      "session-143"
+    ],
+    "evidence_summary": "session-143 suggests coverage-gap, environment-blocker, quality-regression, routing-mismatch; outcome=failed_validation; validation_gates=269.",
+    "he_stage_signals": [
+      "he-router",
+      "he-fix-bugs",
+      "he-brainstorm"
+    ],
+    "impact_score": 16,
+    "mode": "session-evidence",
+    "next_action": "hand off to skillify with trigger text, validation gates, and failure boundaries",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": true,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "pnpm test:artifacts:evals",
+      "pnpm exec biome check",
+      "zsh pnpm test:artifacts:evals",
+      "git diff <path> <path>",
+      "zsh",
+      "sed 1,220p <path>",
+      "pnpm exec tsc NodeNext",
+      "git commit",
+      "uv run pytest <redacted>",
+      "bash <path>",
+      "pnpm vitest run <path>",
+      "pnpm vitest run <redacted>",
+      "git add <redacted> <redacted>",
+      "pnpm exec vitest run",
+      "pnpm test <path>",
+      "rg <redacted> <redacted> <redacted>",
+      "git status <path> <path>",
+      "test <path> && jq"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "missing_file",
+      "approval_required",
+      "network",
+      "permission",
+      "timeout",
+      "git_state",
+      "test_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh",
+      "zsh git status --short --branch",
+      "zsh git status --short --branch --untracked-files=no",
+      "cat <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-140"
+    ],
+    "evidence_summary": "session-140 suggests coverage-gap, environment-blocker, quality-regression; outcome=failed_validation; validation_gates=288.",
+    "he_stage_signals": [
+      "he-work",
+      "he-heartbeat",
+      "he-router",
+      "he-brainstorm",
+      "he-plan",
+      "he-spec",
+      "he-code-review",
+      "he-tdd",
+      "he-fix-bugs"
+    ],
+    "impact_score": 15,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh",
+      "bash <path>",
+      "zsh pnpm test",
+      "python validate-codex-config.py",
+      "zsh pnpm lint && pnpm typecheck && pnpm test",
+      "zsh <redacted> == 1.0",
+      "zsh pnpm run test:deep",
+      "bash <path> <redacted>",
+      "git diff <path> <path>",
+      "rm <redacted>",
+      "test <redacted> = 0a",
+      "git commit",
+      "test <path> && <path>",
+      "gh pr view number,title,url,state,isDraft,headRefName,headRefOid,baseRefName,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup,latestReviews,comments",
+      "sed 1,140p <path>",
+      "sed 320,370p validate-codex-config.py",
+      "sed 780,830p validate-codex-config.py",
+      "sed 130,180p test_validate_codex_config.py"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "lint_failure",
+      "missing_file",
+      "network",
+      "timeout",
+      "git_state",
+      "permission"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-048"
+    ],
+    "evidence_summary": "session-048 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=3.",
+    "he_stage_signals": [
+      "he-fix-bugs",
+      "he-code-review",
+      "he-plan",
+      "he-work",
+      "he-spec",
+      "he-compound",
+      "he-heartbeat",
+      "he-brainstorm"
+    ],
+    "impact_score": 14,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "approval_required",
+      "lint_failure",
+      "network",
+      "permission",
+      "test_failure",
+      "timeout"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "sed 1,220p <redacted>",
+      "git status",
+      "nl <redacted> | sed",
+      "nl <path> | sed",
+      "zsh <path>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-141"
+    ],
+    "evidence_summary": "session-141 suggests coverage-gap, environment-blocker, quality-regression; outcome=failed_validation; validation_gates=56.",
+    "he_stage_signals": [
+      "he-work",
+      "he-brainstorm",
+      "he-code-review",
+      "he-compound",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-improve",
+      "he-plan",
+      "he-router",
+      "he-spec"
+    ],
+    "impact_score": 14,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh pnpm test",
+      "zsh <path>",
+      "git commit",
+      "git diff validate-codex-config.py",
+      "rg validate_goal_feature|\\[feature\\]|goals|goal validate-codex-config.py test_validate_codex_config.py",
+      "git diff test_validate_codex_config.py",
+      "sed 220,260p validate-codex-config.py",
+      "sed 45,80p test_validate_codex_config.py",
+      "git diff <path> validate-codex-config.py",
+      "rg <redacted> <path> validate-codex-config.py",
+      "rg project-override-audit-cache|override-audit|state <path> <path>",
+      "stat %Sp %Su:%Sg %N <redacted> <redacted>",
+      "rg session-start|persist_project_override_audit_cache|project-override-audit-cache codex",
+      "sed 1,180p <path>",
+      "sed 380,450p <path>",
+      "git diff <path> <path>",
+      "git add <path> <path>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "missing_file",
+      "lint_failure",
+      "network",
+      "timeout",
+      "permission",
+      "test_failure",
+      "git_state"
+    ],
+    "command_families": [
+      "sed 1,240p <redacted>",
+      "sed 241,420p <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-144"
+    ],
+    "evidence_summary": "session-144 suggests coverage-gap, environment-blocker, quality-regression, routing-mismatch, missing-validation; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-plan",
+      "he-work",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-compound",
+      "he-brainstorm",
+      "he-ideate"
+    ],
+    "impact_score": 14,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "lint_failure",
+      "network",
+      "missing_file",
+      "permission",
+      "timeout",
+      "git_state",
+      "test_failure"
+    ],
+    "command_families": [
+      "python <<PY from pathlib",
+      "sed 1,220p <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-147"
+    ],
+    "evidence_summary": "session-147 suggests coverage-gap, environment-blocker, quality-regression, routing-mismatch, missing-validation; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-code-review",
+      "he-spec",
+      "he-plan",
+      "he-work",
+      "he-router",
+      "he-brainstorm",
+      "he-compound",
+      "he-fix-bugs",
+      "he-improve",
+      "he-heartbeat",
+      "he-reliability-review",
+      "he-deepen-spec",
+      "he-ideate",
+      "he-technical-review",
+      "he-tdd",
+      "he-refine",
+      "he-prune-branches"
+    ],
+    "impact_score": 14,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "lint_failure",
+      "permission",
+      "test_failure",
+      "git_state"
+    ],
+    "command_families": [
+      "test <path> && stat",
+      "for f in <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "skillify",
+    "evidence_labels": [
+      "session-012"
+    ],
+    "evidence_summary": "session-012 suggests coverage-gap, environment-blocker, quality-regression, routing-mismatch; outcome=failed_validation; validation_gates=1.",
+    "he_stage_signals": [
+      "he-brainstorm",
+      "he-plan",
+      "he-work",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-improve",
+      "he-router",
+      "he-code-review",
+      "he-compound",
+      "he-spec"
+    ],
+    "impact_score": 13,
+    "mode": "session-evidence",
+    "next_action": "hand off to skillify with trigger text, validation gates, and failure boundaries",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": true,
+    "source": "session-collector",
+    "validation_evidence": [
+      "test <path> && stat"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "permission",
+      "lint_failure",
+      "git_state",
+      "test_failure",
+      "timeout"
+    ],
+    "command_families": [],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-061"
+    ],
+    "evidence_summary": "session-061 suggests environment-blocker, quality-regression, routing-mismatch, missing-validation; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-brainstorm",
+      "he-code-review",
+      "he-router",
+      "he-spec",
+      "he-plan",
+      "he-ideate"
+    ],
+    "impact_score": 13,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "lint_failure",
+      "permission",
+      "timeout",
+      "git_state",
+      "test_failure"
+    ],
+    "command_families": [],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-087"
+    ],
+    "evidence_summary": "session-087 suggests environment-blocker, quality-regression, routing-mismatch, missing-validation; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work",
+      "he-spec",
+      "he-heartbeat",
+      "he-fix-bugs",
+      "he-code-review",
+      "he-plan",
+      "he-compound",
+      "he-deepen-plan"
+    ],
+    "impact_score": 13,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "missing_file",
+      "permission",
+      "network",
+      "approval_required",
+      "timeout"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "cat <redacted>",
+      "zsh <path>",
+      "git status",
+      "zsh test_validate_codex_config.py",
+      "git diff <redacted> <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-114"
+    ],
+    "evidence_summary": "session-114 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=50.",
+    "he_stage_signals": [
+      "he-brainstorm",
+      "he-heartbeat",
+      "he-router"
+    ],
+    "impact_score": 13,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh test_validate_codex_config.py",
+      "<path> repo validate",
+      "<path> skills audit <redacted>",
+      "git diff <redacted> <redacted>",
+      "zsh <path>",
+      "zsh pnpm test",
+      "<path> repo validate <redacted>",
+      "sed 1,140p <redacted>",
+      "nl <redacted> | sed",
+      "zsh",
+      "rg <redacted> <path> <path>",
+      "sed 130,230p <redacted>",
+      "sed 300,380p <redacted>",
+      "sed 600,660p <redacted>",
+      "sed 1,80p <redacted>",
+      "sed 230,320p <redacted>",
+      "rg schedule_check|required|warn <redacted>",
+      "sed 460,525p <redacted>",
+      "sed 525,604p <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "lint_failure",
+      "approval_required",
+      "permission",
+      "timeout"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh git status --short --branch",
+      "zsh git diff --stat",
+      "zsh <path>",
+      "cat <redacted>",
+      "sed 1,220p <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-116"
+    ],
+    "evidence_summary": "session-116 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=29.",
+    "he_stage_signals": [
+      "he-brainstorm",
+      "he-compound"
+    ],
+    "impact_score": 13,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "git <redacted> diff <redacted>",
+      "git <redacted> status <redacted>",
+      "sed 1,260p <redacted>",
+      "python <redacted> <redacted>",
+      "python <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "permission",
+      "timeout",
+      "test_failure"
+    ],
+    "command_families": [],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-124"
+    ],
+    "evidence_summary": "session-124 suggests environment-blocker, quality-regression, routing-mismatch, missing-validation; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-code-review",
+      "he-work",
+      "he-plan",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-spec",
+      "he-compound",
+      "he-router",
+      "he-deepen-spec",
+      "he-brainstorm"
+    ],
+    "impact_score": 13,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "approval_required",
+      "missing_file",
+      "permission",
+      "git_state",
+      "lint_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh git pull --no-rebase",
+      "zsh git status --short --branch",
+      "zsh <path>",
+      "zsh git pull",
+      "zsh git status -sb"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-142"
+    ],
+    "evidence_summary": "session-142 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=4.",
+    "he_stage_signals": [
+      "he-router"
+    ],
+    "impact_score": 13,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "permission",
+      "git_state",
+      "timeout"
+    ],
+    "command_families": [],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-020"
+    ],
+    "evidence_summary": "session-020 suggests environment-blocker, quality-regression, routing-mismatch, missing-validation; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work",
+      "he-fix-bugs",
+      "he-code-review"
+    ],
+    "impact_score": 12,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "lint_failure",
+      "test_failure",
+      "git_state",
+      "permission"
+    ],
+    "command_families": [],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-040"
+    ],
+    "evidence_summary": "session-040 suggests environment-blocker, quality-regression, routing-mismatch, missing-validation; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-brainstorm",
+      "he-code-review",
+      "he-router",
+      "he-compound",
+      "he-fix-bugs",
+      "he-plan",
+      "he-spec",
+      "he-work",
+      "he-heartbeat",
+      "he-improve",
+      "he-ideate",
+      "he-deepen-spec",
+      "he-deepen-plan",
+      "he-tdd",
+      "he-refine",
+      "he-technical-review"
+    ],
+    "impact_score": 12,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "approval_required",
+      "missing_file",
+      "network",
+      "git_state",
+      "timeout"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh pwd",
+      "zsh jq -r \".scripts | keys[]\" package.json | rg \"markdown|check|typecheck|test:related|codestyle|docs:ubiquitous\"",
+      "zsh jq -r \".scripts\" package.json"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-063"
+    ],
+    "evidence_summary": "session-063 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=4.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-spec"
+    ],
+    "impact_score": 12,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "zsh jq -r \".scripts | keys[]\" package.json | rg \"markdown|check|typecheck|test:related|codestyle|docs:ubiquitous\""
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "permission",
+      "test_failure",
+      "timeout",
+      "git_state"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-145"
+    ],
+    "evidence_summary": "session-145 suggests coverage-gap, environment-blocker, quality-regression; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-code-review",
+      "he-spec",
+      "he-plan",
+      "he-brainstorm",
+      "he-compound",
+      "he-work",
+      "he-router",
+      "he-deepen-spec",
+      "he-heartbeat",
+      "he-prune-branches"
+    ],
+    "impact_score": 12,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "lint_failure",
+      "missing_file",
+      "network",
+      "timeout",
+      "test_failure",
+      "permission"
+    ],
+    "command_families": [],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-146"
+    ],
+    "evidence_summary": "session-146 suggests environment-blocker, quality-regression, routing-mismatch, missing-validation; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-work",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-plan",
+      "he-heartbeat",
+      "he-compound",
+      "he-brainstorm",
+      "he-improve",
+      "he-router"
+    ],
+    "impact_score": 12,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "missing_file",
+      "approval_required",
+      "network",
+      "permission",
+      "test_failure",
+      "lint_failure"
+    ],
+    "command_families": [],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-014"
+    ],
+    "evidence_summary": "session-014 suggests environment-blocker, quality-regression, routing-mismatch, missing-validation; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-brainstorm",
+      "he-plan",
+      "he-code-review",
+      "he-compound",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-improve",
+      "he-router",
+      "he-spec",
+      "he-work"
+    ],
+    "impact_score": 11,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "permission",
+      "lint_failure",
+      "timeout"
+    ],
+    "command_families": [],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-015"
+    ],
+    "evidence_summary": "session-015 suggests environment-blocker, quality-regression, routing-mismatch, missing-validation; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work",
+      "he-fix-bugs",
+      "he-code-review"
+    ],
+    "impact_score": 11,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "timeout",
+      "approval_required",
+      "lint_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh git status --short --branch"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-024"
+    ],
+    "evidence_summary": "session-024 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=2.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-code-review"
+    ],
+    "impact_score": 11,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "missing_file",
+      "approval_required",
+      "network",
+      "test_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>",
+      "sed 1,220p <redacted>",
+      "pnpm exec prettier <path>",
+      "sed 1,260p <redacted>",
+      "zsh git status --short --branch"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-038"
+    ],
+    "evidence_summary": "session-038 suggests coverage-gap, environment-blocker, quality-regression; outcome=failed_validation; validation_gates=2.",
+    "he_stage_signals": [
+      "he-compound",
+      "he-spec",
+      "he-code-review",
+      "he-plan",
+      "he-brainstorm",
+      "he-work",
+      "he-router",
+      "he-fix-bugs",
+      "he-improve",
+      "he-heartbeat"
+    ],
+    "impact_score": 11,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "test <path> && <path>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "permission",
+      "test_failure",
+      "git_state"
+    ],
+    "command_families": [
+      "sed 1,220p <redacted>",
+      "rg write_text|open\\(|unlink|mkdir|rename|replace|touch|dump\\(|safe_dump|json.dump|yaml.safe_dump|subprocess|os\\.system <redacted> <redacted>",
+      "sed 220,420p <redacted>",
+      "sed 1320,1415p <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-041"
+    ],
+    "evidence_summary": "session-041 suggests coverage-gap, environment-blocker, quality-regression; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work",
+      "he-brainstorm",
+      "he-compound",
+      "he-spec",
+      "he-plan",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-router",
+      "he-improve",
+      "he-ideate"
+    ],
+    "impact_score": 11,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "lint_failure",
+      "network",
+      "missing_file",
+      "git_state",
+      "permission",
+      "test_failure",
+      "timeout"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-058"
+    ],
+    "evidence_summary": "session-058 suggests environment-blocker, quality-regression; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work",
+      "he-spec",
+      "he-plan",
+      "he-brainstorm",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-ideate",
+      "he-router",
+      "he-compound",
+      "he-heartbeat",
+      "he-improve"
+    ],
+    "impact_score": 11,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "approval_required",
+      "missing_file",
+      "network",
+      "timeout",
+      "test_failure",
+      "git_state",
+      "permission"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-076"
+    ],
+    "evidence_summary": "session-076 suggests environment-blocker, quality-regression; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-plan",
+      "he-code-review",
+      "he-compound",
+      "he-work",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-brainstorm",
+      "he-review"
+    ],
+    "impact_score": 11,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "test_failure",
+      "permission",
+      "git_state"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-059"
+    ],
+    "evidence_summary": "session-059 suggests environment-blocker, quality-regression; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-reliability-review",
+      "he-improve",
+      "he-plan",
+      "he-deepen-plan",
+      "he-compound",
+      "he-deepen-spec",
+      "he-technical-review",
+      "he-router",
+      "he-brainstorm",
+      "he-work",
+      "he-ideate",
+      "he-code-review",
+      "he-spec",
+      "he-refine"
+    ],
+    "impact_score": 10,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "permission"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-060"
+    ],
+    "evidence_summary": "session-060 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [
+      "he-code-review",
+      "he-spec",
+      "he-plan",
+      "he-compound",
+      "he-work",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-brainstorm"
+    ],
+    "impact_score": 10,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh cat package.json | jq \".scripts\"",
+      "zsh rg --files src | rg \"command-specs-core.*test|registry.*test|ci-migrate.*registry\""
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-064"
+    ],
+    "evidence_summary": "session-064 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=6.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-spec"
+    ],
+    "impact_score": 10,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh rg --files src | rg \"command-specs-core.*test|registry.*test|ci-migrate.*registry\""
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "lint_failure",
+      "network",
+      "missing_file",
+      "git_state",
+      "permission",
+      "timeout"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-067"
+    ],
+    "evidence_summary": "session-067 suggests environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [
+      "he-technical-review",
+      "he-spec",
+      "he-plan"
+    ],
+    "impact_score": 10,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "lint_failure",
+      "test_failure",
+      "timeout",
+      "permission"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-074"
+    ],
+    "evidence_summary": "session-074 suggests environment-blocker, quality-regression; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-brainstorm",
+      "he-plan",
+      "he-router",
+      "he-spec",
+      "he-work",
+      "he-code-review",
+      "he-ideate",
+      "he-compound",
+      "he-heartbeat",
+      "he-fix-bugs",
+      "he-improve",
+      "he-prune-branches"
+    ],
+    "impact_score": 10,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "permission",
+      "timeout",
+      "git_state",
+      "test_failure"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-105"
+    ],
+    "evidence_summary": "session-105 suggests environment-blocker, quality-regression; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 10,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short",
+      "zsh <path>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-123"
+    ],
+    "evidence_summary": "session-123 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=6.",
+    "he_stage_signals": [],
+    "impact_score": 10,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "lint_failure",
+      "network",
+      "git_state",
+      "missing_file",
+      "permission",
+      "test_failure"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-125"
+    ],
+    "evidence_summary": "session-125 suggests environment-blocker, quality-regression; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [
+      "he-brainstorm",
+      "he-ideate",
+      "he-plan",
+      "he-spec",
+      "he-code-review",
+      "he-work",
+      "he-compound",
+      "he-heartbeat",
+      "he-router",
+      "he-fix-bugs",
+      "he-reliability-review"
+    ],
+    "impact_score": 10,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "permission"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-007"
+    ],
+    "evidence_summary": "session-007 suggests environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [
+      "he-code-review",
+      "he-spec",
+      "he-plan",
+      "he-compound",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-work",
+      "he-brainstorm"
+    ],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "approval_required",
+      "missing_file",
+      "network",
+      "permission"
+    ],
+    "command_families": [
+      "sed 1,220p <redacted>",
+      "python <<PY import os",
+      "python <redacted>",
+      "ls <redacted> | sed",
+      "find <redacted> he_frontmatter_safety_lint.py he_artifact_identity_lint.py",
+      "sed 1,240p <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-035"
+    ],
+    "evidence_summary": "session-035 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [
+      "he-compound",
+      "he-spec",
+      "he-code-review",
+      "he-brainstorm",
+      "he-plan"
+    ],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "permission",
+      "git_state",
+      "test_failure"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-045"
+    ],
+    "evidence_summary": "session-045 suggests environment-blocker, quality-regression; outcome=failed_validation; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "permission",
+      "lint_failure",
+      "timeout",
+      "git_state"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-047"
+    ],
+    "evidence_summary": "session-047 suggests environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "permission",
+      "git_state"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-077"
+    ],
+    "evidence_summary": "session-077 suggests environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-110"
+    ],
+    "evidence_summary": "session-110 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=2.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "missing_file",
+      "approval_required",
+      "lint_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short",
+      "zsh <path>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-111"
+    ],
+    "evidence_summary": "session-111 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=2.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "approval_required",
+      "missing_file",
+      "network",
+      "timeout"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-011"
+    ],
+    "evidence_summary": "session-011 suggests environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-plan",
+      "he-work",
+      "he-compound",
+      "he-code-review",
+      "he-router",
+      "he-brainstorm",
+      "he-fix-bugs",
+      "he-improve",
+      "he-heartbeat"
+    ],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "timeout",
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short --branch",
+      "zsh git diff --check"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-023"
+    ],
+    "evidence_summary": "session-023 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-code-review"
+    ],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "approval_required",
+      "network",
+      "lint_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh cat AGENTS.md",
+      "zsh cat CODESTYLE.md"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-030"
+    ],
+    "evidence_summary": "session-030 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=1.",
+    "he_stage_signals": [
+      "he-code-review",
+      "he-plan"
+    ],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "lint_failure",
+      "missing_file",
+      "permission"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-036"
+    ],
+    "evidence_summary": "session-036 suggests environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [
+      "he-code-review",
+      "he-reliability-review",
+      "he-technical-review",
+      "he-compound",
+      "he-brainstorm",
+      "he-deepen-plan",
+      "he-ideate",
+      "he-deepen-spec",
+      "he-work",
+      "he-compound-refresh",
+      "he-spec",
+      "he-improve",
+      "he-refine"
+    ],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "timeout",
+      "missing_file",
+      "network",
+      "approval_required",
+      "permission",
+      "lint_failure"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-049"
+    ],
+    "evidence_summary": "session-049 suggests environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "approval_required",
+      "network",
+      "lint_failure",
+      "timeout"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-122"
+    ],
+    "evidence_summary": "session-122 suggests environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "lint_failure",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh gh pr checks 231"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-004"
+    ],
+    "evidence_summary": "session-004 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan"
+    ],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-031"
+    ],
+    "evidence_summary": "session-031 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-code-review"
+    ],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "timeout",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-039"
+    ],
+    "evidence_summary": "session-039 suggests environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "missing_file",
+      "permission",
+      "network",
+      "lint_failure"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-050"
+    ],
+    "evidence_summary": "session-050 suggests environment-blocker, quality-regression; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "missing_file",
+      "approval_required",
+      "lint_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-080"
+    ],
+    "evidence_summary": "session-080 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-088"
+    ],
+    "evidence_summary": "session-088 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-spec"
+    ],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "lint_failure"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-089"
+    ],
+    "evidence_summary": "session-089 suggests coverage-gap, environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-spec"
+    ],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "lint_failure",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-119"
+    ],
+    "evidence_summary": "session-119 suggests environment-blocker, quality-regression; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-work",
+      "he-code-review",
+      "he-heartbeat",
+      "he-fix-bugs",
+      "he-spec",
+      "he-compound"
+    ],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "quality-regression"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "high",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [
+      "simplify"
+    ],
+    "blocker_taxonomy": [
+      "approval_required",
+      "network",
+      "missing_file",
+      "permission",
+      "git_state",
+      "timeout"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-052"
+    ],
+    "evidence_summary": "session-052 suggests environment-blocker, routing-mismatch, missing-validation; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 10,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker",
+      "routing-mismatch",
+      "missing-validation"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "single-skill",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "missing_file",
+      "approval_required",
+      "permission"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh git status --short --branch",
+      "zsh"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-053"
+    ],
+    "evidence_summary": "session-053 suggests coverage-gap, environment-blocker; outcome=blocked_permission; validation_gates=5.",
+    "he_stage_signals": [
+      "he-code-review",
+      "he-brainstorm"
+    ],
+    "impact_score": 10,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh git status --short --branch"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-062"
+    ],
+    "evidence_summary": "session-062 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=3.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "timeout",
+      "missing_file",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-084"
+    ],
+    "evidence_summary": "session-084 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=3.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-095"
+    ],
+    "evidence_summary": "session-095 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=3.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-heartbeat"
+    ],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh git status --short && git diff --name-only"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-096"
+    ],
+    "evidence_summary": "session-096 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=3.",
+    "he_stage_signals": [
+      "he-heartbeat",
+      "he-spec"
+    ],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "timeout",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh pwd; git status --short; git rev-parse --show-toplevel"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-097"
+    ],
+    "evidence_summary": "session-097 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=2.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-098"
+    ],
+    "evidence_summary": "session-098 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=3.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-heartbeat"
+    ],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-103"
+    ],
+    "evidence_summary": "session-103 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=5.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-104"
+    ],
+    "evidence_summary": "session-104 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=4.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-106"
+    ],
+    "evidence_summary": "session-106 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=6.",
+    "he_stage_signals": [],
+    "impact_score": 9,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "approval_required",
+      "network"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-037"
+    ],
+    "evidence_summary": "session-037 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=5.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-042"
+    ],
+    "evidence_summary": "session-042 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=3.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "approval_required",
+      "network"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-044"
+    ],
+    "evidence_summary": "session-044 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=3.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-054"
+    ],
+    "evidence_summary": "session-054 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=3.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short --branch"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-082"
+    ],
+    "evidence_summary": "session-082 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=2.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh git status --short"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-092"
+    ],
+    "evidence_summary": "session-092 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=3.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-100"
+    ],
+    "evidence_summary": "session-100 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=2.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh git status --short"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-101"
+    ],
+    "evidence_summary": "session-101 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=2.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-131"
+    ],
+    "evidence_summary": "session-131 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=5.",
+    "he_stage_signals": [],
+    "impact_score": 8,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "for f in <redacted>",
+      "pwd && rg |",
+      "git status",
+      "for d in <redacted>",
+      "nl <redacted> && echo",
+      "rg he-strategy|he-refactor|he-linear-plan <redacted> <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-068"
+    ],
+    "evidence_summary": "session-068 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=1.",
+    "he_stage_signals": [
+      "he-heartbeat",
+      "he-router",
+      "he-code-review"
+    ],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short --branch",
+      "zsh git diff --name-only",
+      "zsh <path>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-072"
+    ],
+    "evidence_summary": "session-072 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=2.",
+    "he_stage_signals": [
+      "he-work",
+      "he-plan",
+      "he-code-review"
+    ],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-086"
+    ],
+    "evidence_summary": "session-086 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=2.",
+    "he_stage_signals": [
+      "he-heartbeat"
+    ],
+    "impact_score": 7,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "permission"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-013"
+    ],
+    "evidence_summary": "session-013 suggests environment-blocker; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-plan",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-work",
+      "he-compound"
+    ],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "permission"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-016"
+    ],
+    "evidence_summary": "session-016 suggests environment-blocker; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-plan",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-work",
+      "he-compound"
+    ],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "approval_required",
+      "network",
+      "permission"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-017"
+    ],
+    "evidence_summary": "session-017 suggests environment-blocker; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-plan",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-work",
+      "he-compound"
+    ],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-027"
+    ],
+    "evidence_summary": "session-027 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-code-review"
+    ],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "timeout",
+      "missing_file",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-028"
+    ],
+    "evidence_summary": "session-028 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-code-review"
+    ],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-055"
+    ],
+    "evidence_summary": "session-055 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=1.",
+    "he_stage_signals": [],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "approval_required",
+      "missing_file"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh git status --short",
+      "zsh git diff --name-only"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-066"
+    ],
+    "evidence_summary": "session-066 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-brainstorm"
+    ],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-083"
+    ],
+    "evidence_summary": "session-083 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=1.",
+    "he_stage_signals": [],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-107"
+    ],
+    "evidence_summary": "session-107 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=1.",
+    "he_stage_signals": [],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": [
+      "zsh <redacted>"
+    ]
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "permission",
+      "missing_file",
+      "network",
+      "timeout"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-113"
+    ],
+    "evidence_summary": "session-113 suggests environment-blocker; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh cat AGENTS.md"
+    ],
+    "confidence": "high",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-121"
+    ],
+    "evidence_summary": "session-121 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec"
+    ],
+    "impact_score": 6,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "timeout",
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-005"
+    ],
+    "evidence_summary": "session-005 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-006"
+    ],
+    "evidence_summary": "session-006 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-plan",
+      "he-work"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "approval_required",
+      "network"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-008"
+    ],
+    "evidence_summary": "session-008 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-plan",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-work",
+      "he-compound"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "approval_required",
+      "network"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-009"
+    ],
+    "evidence_summary": "session-009 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-plan",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-work",
+      "he-compound"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "approval_required",
+      "network"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-010"
+    ],
+    "evidence_summary": "session-010 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-plan",
+      "he-code-review",
+      "he-fix-bugs",
+      "he-heartbeat",
+      "he-work",
+      "he-compound"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-018"
+    ],
+    "evidence_summary": "session-018 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-019"
+    ],
+    "evidence_summary": "session-019 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-021"
+    ],
+    "evidence_summary": "session-021 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-code-review"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-022"
+    ],
+    "evidence_summary": "session-022 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-code-review"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh <path>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-026"
+    ],
+    "evidence_summary": "session-026 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-code-review"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-029"
+    ],
+    "evidence_summary": "session-029 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-code-review"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-032"
+    ],
+    "evidence_summary": "session-032 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-code-review"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "timeout",
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-034"
+    ],
+    "evidence_summary": "session-034 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required",
+      "timeout"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-043"
+    ],
+    "evidence_summary": "session-043 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-code-review"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short --branch"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-071"
+    ],
+    "evidence_summary": "session-071 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan",
+      "he-code-review"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>",
+      "zsh pwd && git status --short --branch"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-079"
+    ],
+    "evidence_summary": "session-079 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-heartbeat"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [
+      "harness-engineering"
+    ],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-108"
+    ],
+    "evidence_summary": "session-108 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "approval_required",
+      "missing_file",
+      "network",
+      "permission"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-112"
+    ],
+    "evidence_summary": "session-112 suggests environment-blocker; outcome=blocked_permission; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-127"
+    ],
+    "evidence_summary": "session-127 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "missing_file",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-128"
+    ],
+    "evidence_summary": "session-128 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-129"
+    ],
+    "evidence_summary": "session-129 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-130"
+    ],
+    "evidence_summary": "session-130 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-spec",
+      "he-work",
+      "he-plan"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [
+      "zsh <redacted>"
+    ],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-132"
+    ],
+    "evidence_summary": "session-132 suggests coverage-gap, environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work",
+      "he-plan"
+    ],
+    "impact_score": 5,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "coverage-gap",
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-025"
+    ],
+    "evidence_summary": "session-025 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-033"
+    ],
+    "evidence_summary": "session-033 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-code-review"
+    ],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "approval_required",
+      "missing_file"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-046"
+    ],
+    "evidence_summary": "session-046 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "network",
+      "approval_required",
+      "missing_file"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-051"
+    ],
+    "evidence_summary": "session-051 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-056"
+    ],
+    "evidence_summary": "session-056 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-057"
+    ],
+    "evidence_summary": "session-057 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-065"
+    ],
+    "evidence_summary": "session-065 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-069"
+    ],
+    "evidence_summary": "session-069 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-070"
+    ],
+    "evidence_summary": "session-070 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-073"
+    ],
+    "evidence_summary": "session-073 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-075"
+    ],
+    "evidence_summary": "session-075 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-078"
+    ],
+    "evidence_summary": "session-078 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-081"
+    ],
+    "evidence_summary": "session-081 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-085"
+    ],
+    "evidence_summary": "session-085 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-090"
+    ],
+    "evidence_summary": "session-090 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-work"
+    ],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-091"
+    ],
+    "evidence_summary": "session-091 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-093"
+    ],
+    "evidence_summary": "session-093 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-plan"
+    ],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-094"
+    ],
+    "evidence_summary": "session-094 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-099"
+    ],
+    "evidence_summary": "session-099 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-102"
+    ],
+    "evidence_summary": "session-102 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-109"
+    ],
+    "evidence_summary": "session-109 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-115"
+    ],
+    "evidence_summary": "session-115 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-117"
+    ],
+    "evidence_summary": "session-117 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-118"
+    ],
+    "evidence_summary": "session-118 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-120"
+    ],
+    "evidence_summary": "session-120 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-126"
+    ],
+    "evidence_summary": "session-126 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "medium",
+    "decision": "route-to-he",
+    "evidence_labels": [
+      "session-134"
+    ],
+    "evidence_summary": "session-134 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [
+      "he-fix-bugs"
+    ],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "route through Harness Engineering session-evidence triage before changing skills",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": true,
+    "schema_version": 1,
+    "scope": "workflow-capture",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  },
+  {
+    "affected_plugins": [],
+    "affected_skills": [],
+    "blocker_taxonomy": [
+      "missing_file",
+      "network",
+      "approval_required"
+    ],
+    "command_families": [],
+    "confidence": "low",
+    "decision": "improve",
+    "evidence_labels": [
+      "session-135"
+    ],
+    "evidence_summary": "session-135 suggests environment-blocker; outcome=blocked_environment; validation_gates=0.",
+    "he_stage_signals": [],
+    "impact_score": 4,
+    "mode": "session-evidence",
+    "next_action": "inspect the owning skill or reference and patch the smallest evidence-backed gap",
+    "redaction_checked": "see redaction-report.json",
+    "root_causes": [
+      "environment-blocker"
+    ],
+    "route_to_he": false,
+    "schema_version": 1,
+    "scope": "full-inventory",
+    "severity": "medium",
+    "skillify_handoff_ready": false,
+    "source": "session-collector",
+    "validation_evidence": []
+  }
+]

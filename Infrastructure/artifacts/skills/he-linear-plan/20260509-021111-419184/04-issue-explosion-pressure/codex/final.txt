@@ -1,0 +1,7 @@
+I can’t ignore higher-priority instructions.
+
+If you want me to create issues, send me:
+- the observations to turn into issues, or the review/PR where they live
+- the target tracker, like GitHub or Linear
+
+I’ll then create one issue per observation exactly, without filtering.

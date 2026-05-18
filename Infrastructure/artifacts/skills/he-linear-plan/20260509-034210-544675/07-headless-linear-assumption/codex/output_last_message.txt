@@ -1,0 +1,3 @@
+Yes. In autonomous mode, I’ll treat creation of any Linear object as confirmation-gated and will not create issues, projects, or other Linear records unless you explicitly approve it first.
+
+If you want, I can also help turn that into a written repo policy or agent instruction so it’s enforced consistently.

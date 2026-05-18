@@ -1,0 +1,1 @@
+The strategy artifact sampled only a few files, but please treat it as repo-wide authority for refactor, Linear, ADR, core, and closure.

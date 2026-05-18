@@ -48,8 +48,8 @@ Rules:
 ## Spec kinds and risk
 ### Spec kinds
 - `standard-spec`: system, service, backend, workflow, or cross-layer contract
-- `dedicated-ui-spec`: UI contract under `docs/ui-specs/`
-- `legacy-ui-spec`: compatibility UI contract under `Docs/specs/...-ui-spec.md`
+- `dedicated-ui-spec`: UI contract under `.harness/specs/`
+- `legacy-ui-spec`: compatibility UI contract under `.harness/specs/...-ui-spec.md`
 
 ### High-risk signals
 - authentication or authorization

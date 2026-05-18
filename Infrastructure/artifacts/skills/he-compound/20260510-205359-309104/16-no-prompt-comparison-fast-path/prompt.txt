@@ -1,0 +1,1 @@
+In `/Users/jamiecraik/dev/agent-skills`, refresh the HE lifecycle state from `.harness/specs/JSC-246.md`, `.harness/plan/JSC-246-plan.md`, `.harness/validation/JSC-246.md`, and Linear JSC-246. No original prompt comparison is needed.

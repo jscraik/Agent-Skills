@@ -1,0 +1,22 @@
+Yes.
+
+If the only approved change is docs wording, the request should be routed to the docs/content slice only, even if the text contains words like `domain`, `security`, and `refactor`.
+
+Why `mixed` does not load everything:
+
+- Skill selection is intent-based, not keyword-based.
+- The instructions say to use the minimal skill set that covers the request.
+- They also say to keep context small and load only the specific files needed, not bulk-load unrelated modules.
+- So “domain”, “security”, and “refactor” are just tokens in the request unless the user is actually asking for a domain review, security analysis, or code refactor.
+
+A correct routing proof looks like this:
+
+- User intent: “change docs wording only”
+- Approved slice: docs/content
+- Needed capability: wording edit or docs rewrite
+- Not needed: security review, architectural refactor, domain analysis
+- Result: load only the docs-oriented slice, keep the others latent
+
+In other words, `mixed` is a superset label for overlapping intent signals, but it does not mean “activate every matching specialist.” It means “pick the smallest set that fully covers the actual task.”
+
+If you want, I can also turn this into a short routing rule you can paste into a skill or AGENTS doc.

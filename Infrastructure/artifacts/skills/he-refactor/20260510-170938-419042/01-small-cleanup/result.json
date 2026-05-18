@@ -1,0 +1,67 @@
+{
+  "id": "small-cleanup",
+  "name": "Small cleanup",
+  "category": "negative",
+  "eval_modes": [
+    "smoke",
+    "release"
+  ],
+  "should_trigger": false,
+  "prepend_skill": false,
+  "baseline_type": null,
+  "comparison_inputs": null,
+  "iteration_round_state": null,
+  "metric_availability": null,
+  "readiness_state": null,
+  "comparison_review_artifact": null,
+  "neutral_baseline_approval": null,
+  "timeout_profile": "default",
+  "timeout_sec": 60.0,
+  "dir": "Infrastructure/artifacts/skills/he-refactor/20260510-170938-419042/01-small-cleanup",
+  "runners": {
+    "codex": {
+      "runner": "codex",
+      "exit_code": 0,
+      "passed": false,
+      "tier1_failures": [
+        "should_trigger failed: expected False, detected True"
+      ],
+      "tier2_findings": [],
+      "warnings": [],
+      "artifacts": {
+        "dir": "Infrastructure/artifacts/skills/he-refactor/20260510-170938-419042/01-small-cleanup/codex",
+        "final": "Infrastructure/artifacts/skills/he-refactor/20260510-170938-419042/01-small-cleanup/codex/final.txt",
+        "stdout": "Infrastructure/artifacts/skills/he-refactor/20260510-170938-419042/01-small-cleanup/codex/stdout.txt",
+        "stderr": "Infrastructure/artifacts/skills/he-refactor/20260510-170938-419042/01-small-cleanup/codex/stderr.txt",
+        "jsonl": "Infrastructure/artifacts/skills/he-refactor/20260510-170938-419042/01-small-cleanup/codex/codex_events.jsonl"
+      },
+      "metrics": {
+        "trace": {
+          "event_count": 14,
+          "command_count": 4,
+          "unique_command_count": 4,
+          "duplicate_command_ratio": 0.0,
+          "max_repeated_command_count": 1,
+          "turn_count": 1,
+          "error_event_count": 0,
+          "token_usage": {
+            "input_tokens": 124826,
+            "output_tokens": 829,
+            "reasoning_tokens": 0,
+            "total_tokens": 125655
+          }
+        },
+        "selected_skill": true
+      },
+      "used_schema": false
+    }
+  },
+  "passed": false,
+  "tier1_failed": true,
+  "tier2_failed": false,
+  "tier1_failures": [
+    "[codex] should_trigger failed: expected False, detected True"
+  ],
+  "tier2_findings": [],
+  "warnings": []
+}

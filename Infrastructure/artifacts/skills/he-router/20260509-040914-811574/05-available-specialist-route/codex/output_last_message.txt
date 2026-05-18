@@ -1,0 +1,5 @@
+I’d route this to `build-web-apps:supabase-postgres-best-practices` first, because it’s the most database-specific specialist available and is the best fit when the harness plan needs Postgres/schema/query guidance.
+
+If the plan turns out to be broader than database design, the fallback would be `backend-platform`, but for “needs database expertise” I’d start with the Postgres skill.
+
+If you want, send me the harness plan file or the specific section, and I’ll apply that specialist lens to it.

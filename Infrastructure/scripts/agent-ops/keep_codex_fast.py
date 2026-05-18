@@ -41,6 +41,7 @@ BACKUP_NAMES = (
     "automations",
 )
 IGNORED_BACKUP_DIRS = ("node_modules", ".git", ".next", "dist", "build", ".venv", "__pycache__", ".pytest_cache")
+REPORT_BUFFER: list[str] | None = None
 
 
 @dataclass(frozen=True)
@@ -59,8 +60,42 @@ class SessionCandidate:
     relative: Path
 
 
+@dataclass
+class WalkLimit:
+    started: float
+    max_seconds: float
+    max_files: int
+    files_seen: int = 0
+    limited: bool = False
+
+    def allow_file(self) -> bool:
+        if self.files_seen >= self.max_files or time.monotonic() - self.started > self.max_seconds:
+            self.limited = True
+            return False
+        self.files_seen += 1
+        return True
+
+
 def report(line: str) -> None:
-    print(line)
+    if REPORT_BUFFER is None:
+        print(line)
+    else:
+        REPORT_BUFFER.append(line)
+
+
+def finish_report(code: int) -> int:
+    global REPORT_BUFFER
+    if REPORT_BUFFER is not None:
+        status = "pass" if code == 0 else "blocked"
+        payload = {
+            "schema_version": "keep-codex-fast.report-lines.v1",
+            "status": status,
+            "exit_code": code,
+            "lines": REPORT_BUFFER,
+        }
+        REPORT_BUFFER = None
+        print(json.dumps(payload, indent=2))
+    return code
 
 
 def canonical_path(path: Path) -> Path:
@@ -89,14 +124,18 @@ def format_size(size: int, unit: str) -> str:
     return f"{size / divisor:.{precision}f}"
 
 
-def size_bytes(path: Path) -> int:
+def size_bytes(path: Path, limit: WalkLimit | None = None) -> int:
     if not path.exists():
         return 0
     if path.is_file():
+        if limit and not limit.allow_file():
+            return 0
         return path.stat().st_size
     total = 0
     for item in path.rglob("*"):
         if item.is_file():
+            if limit and not limit.allow_file():
+                break
             try:
                 total += item.stat().st_size
             except OSError:
@@ -104,10 +143,48 @@ def size_bytes(path: Path) -> int:
     return total
 
 
+def new_walk_limit(args: argparse.Namespace) -> WalkLimit:
+    return WalkLimit(time.monotonic(), args.max_seconds_per_target, args.max_files_per_target)
+
+
 def sqlite_connect(path: Path, readonly: bool) -> sqlite3.Connection:
     if readonly:
         return sqlite3.connect(f"{canonical_path(path).as_uri()}?mode=ro", uri=True)
     return sqlite3.connect(path)
+
+
+def unique_existing(paths: list[Path]) -> list[Path]:
+    seen: set[Path] = set()
+    result: list[Path] = []
+    for path in paths:
+        if not path.exists():
+            continue
+        key = canonical_path(path)
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(path)
+    return result
+
+
+def state_db_path(codex_home: Path) -> Path:
+    candidates = unique_existing([codex_home / "sqlite" / "state_5.sqlite", codex_home / "state_5.sqlite"])
+    return candidates[0] if candidates else codex_home / "state_5.sqlite"
+
+
+def log_db_files(codex_home: Path) -> list[Path]:
+    files: list[Path] = []
+    for base in unique_existing([codex_home / "sqlite" / "logs_2.sqlite", codex_home / "logs_2.sqlite"]):
+        files.append(base)
+        files.extend(path for path in (Path(f"{base}-wal"), Path(f"{base}-shm")) if path.exists())
+    return files
+
+
+def relative_archive_path(codex_home: Path, path: Path) -> Path:
+    try:
+        return path.relative_to(codex_home)
+    except ValueError:
+        return Path(path.name)
 
 
 def codex_processes_running() -> ProcessCheck:
@@ -165,15 +242,18 @@ def backup_metadata(codex_home: Path, backup_root: Path) -> None:
     backup_root.mkdir(parents=True, exist_ok=True)
     for name in BACKUP_NAMES:
         copy_if_exists(codex_home / name, backup_root / name)
-    state_db = codex_home / "state_5.sqlite"
+    state_db = state_db_path(codex_home)
     if state_db.exists():
         source = sqlite_connect(state_db, readonly=True)
-        target = sqlite3.connect(backup_root / "state_5.sqlite")
+        backup_state_db = backup_root / relative_archive_path(codex_home, state_db)
+        backup_state_db.parent.mkdir(parents=True, exist_ok=True)
+        target = sqlite3.connect(backup_state_db)
         try:
             source.backup(target)
         finally:
             target.close()
             source.close()
+        report(f"backed_up {relative_archive_path(codex_home, state_db)}")
 
 
 def normalize_extended_path(value: str) -> str:
@@ -288,10 +368,12 @@ def archive_sessions(
     stamp: str,
     apply: bool,
     details: bool,
+    top_n: int,
+    state_db: Path,
 ) -> None:
     report(f"old_session_candidates {len(candidates)}")
     report(f"old_session_candidate_gb {format_size(sum(item.size for item in candidates), 'gb')}")
-    for index, item in enumerate(candidates[:10], start=1):
+    for index, item in enumerate(candidates[:top_n], start=1):
         suffix = f" thread_id={item.thread_id} title={item.title[:70]}" if details else ""
         report(f"large_session_mb {format_size(item.size, 'mb')} session_{index:03d}{suffix}")
     if not apply or not candidates:
@@ -320,7 +402,7 @@ def archive_sessions(
                 "update threads set rollout_path=?, archived=1, archived_at=? where id=?",
                 (str(dest), now, item.thread_id),
             )
-    write_restore_script(manifest, codex_home / "state_5.sqlite", backup_root)
+    write_restore_script(manifest, state_db, backup_root)
     report(f"archived_sessions_root {archive_root}")
     report(f"archived_sessions_manifest {manifest}")
 
@@ -342,14 +424,25 @@ def report_config_prune_candidates(codex_home: Path, details: bool) -> list[str]
     return candidates
 
 
-def archive_old_dirs(root: Path, archive_root: Path, manifest: Path, days: int, apply: bool, label: str) -> None:
+def archive_old_dirs(
+    root: Path,
+    archive_root: Path,
+    manifest: Path,
+    days: int,
+    apply: bool,
+    label: str,
+    args: argparse.Namespace,
+) -> None:
     if not root.exists():
         report(f"{label}_candidates 0")
         return
     cutoff = time.time() - days * 24 * 60 * 60
     candidates = [path for path in root.iterdir() if path.is_dir() and path.stat().st_mtime < cutoff]
     report(f"{label}_candidates {len(candidates)}")
-    report(f"{label}_candidate_gb {format_size(sum(size_bytes(path) for path in candidates), 'gb')}")
+    limit = None if apply else new_walk_limit(args)
+    report(f"{label}_candidate_gb {format_size(sum(size_bytes(path, limit) for path in candidates), 'gb')}")
+    if limit and limit.limited:
+        report(f"{label}_candidate_scan_limited true")
     if not apply or not candidates:
         return
     archive_root.mkdir(parents=True, exist_ok=True)
@@ -364,24 +457,33 @@ def archive_old_dirs(root: Path, archive_root: Path, manifest: Path, days: int, 
 
 
 def rotate_logs(codex_home: Path, threshold_mb: int, stamp: str, apply: bool) -> None:
-    files = [path for path in codex_home.glob("logs_2.sqlite*") if path.is_file()]
+    files = log_db_files(codex_home)
     total = sum(path.stat().st_size for path in files)
     report(f"logs_mb {format_size(total, 'mb')}")
+    for index, path in enumerate(files, start=1):
+        report(
+            "log_file_"
+            f"{index:03d}_mb {format_size(path.stat().st_size, 'mb')} {relative_archive_path(codex_home, path)}"
+        )
     if total < threshold_mb * 1024 * 1024:
         report("logs_rotate skipped_below_threshold")
     elif apply and files:
         archive_root = codex_home / "archived_logs" / f"keep-codex-fast-{stamp}"
-        archive_root.mkdir(parents=True, exist_ok=True)
         for path in files:
-            shutil.move(str(path), str(archive_root / path.name))
+            dest = archive_root / relative_archive_path(codex_home, path)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(path), str(dest))
         report(f"logs_archive_root {archive_root}")
 
 
-def report_sizes(codex_home: Path) -> None:
+def report_sizes(codex_home: Path, args: argparse.Namespace) -> None:
     for rel in ("sessions", "archived_sessions", "worktrees", "archived_worktrees", "archived_logs"):
         path = codex_home / rel
         if path.exists():
-            report(f"size_{rel}_gb {format_size(size_bytes(path), 'gb')}")
+            limit = new_walk_limit(args)
+            report(f"size_{rel}_gb {format_size(size_bytes(path, limit), 'gb')}")
+            if limit.limited:
+                report(f"size_{rel}_scan_limited true")
 
 
 def report_codex_processes(details: bool) -> None:
@@ -392,6 +494,54 @@ def report_codex_processes(details: bool) -> None:
     elif details:
         for index, proc in enumerate(check.processes[:10], start=1):
             report(f"codex_process_{index:03d} {proc}")
+
+
+def app_server_pids() -> list[str]:
+    check = codex_processes_running()
+    if not check.available:
+        return []
+    pids: list[str] = []
+    for proc in check.processes:
+        if "app-server" not in proc:
+            continue
+        parts = proc.split()
+        if parts and parts[0].isdigit():
+            pids.append(parts[0])
+    return pids
+
+
+def report_open_codex_handles(codex_home: Path, details: bool, top_n: int) -> None:
+    pids = app_server_pids()
+    if not pids:
+        report("open_handle_scan skipped_no_app_server")
+        return
+    try:
+        output = subprocess.check_output(["lsof", *("-p", ",".join(pids))], text=True, stderr=subprocess.DEVNULL)
+    except Exception as exc:
+        report(f"open_handle_scan_skipped {exc}")
+        return
+    log_hits: list[str] = []
+    rollout_hits: list[str] = []
+    for line in output.splitlines():
+        if "logs_2.sqlite" in line:
+            log_hits.append(line)
+        elif "rollout-" in line and ".jsonl" in line:
+            rollout_hits.append(line)
+    report(f"open_log_db_handles {len(log_hits)}")
+    report(f"open_rollout_write_handles {len(rollout_hits)}")
+    if not details:
+        return
+    for index, line in enumerate(log_hits[:top_n], start=1):
+        path_text = line.split()[-1]
+        report(f"open_log_db_handle_{index:03d} {path_text}")
+    for index, line in enumerate(rollout_hits[:top_n], start=1):
+        path_text = line.split()[-1]
+        path = Path(path_text)
+        try:
+            display = path.relative_to(canonical_path(codex_home / "sessions"))
+        except ValueError:
+            display = Path(path.name)
+        report(f"open_rollout_handle_{index:03d} {display}")
 
 
 def validate_apply_safety(args: argparse.Namespace, codex_home: Path) -> int:
@@ -416,10 +566,11 @@ def validate_apply_safety(args: argparse.Namespace, codex_home: Path) -> int:
 
 
 def maintain_state(args: argparse.Namespace, codex_home: Path, backup_root: Path, stamp: str, apply: bool) -> None:
-    state_db = codex_home / "state_5.sqlite"
+    state_db = state_db_path(codex_home)
     if not state_db.exists():
         report("state_db_missing")
         return
+    report(f"state_db {relative_archive_path(codex_home, state_db)}")
     conn = sqlite_connect(state_db, readonly=not apply)
     try:
         conn.execute("pragma busy_timeout=10000")
@@ -432,6 +583,8 @@ def maintain_state(args: argparse.Namespace, codex_home: Path, backup_root: Path
             stamp,
             apply,
             args.details,
+            args.top_n,
+            state_db,
         )
         if apply:
             conn.commit()
@@ -445,16 +598,18 @@ def maintain_state(args: argparse.Namespace, codex_home: Path, backup_root: Path
 
 
 def run(args: argparse.Namespace) -> int:
+    global REPORT_BUFFER
+    REPORT_BUFFER = [] if args.json else None
     codex_home = codex_home_from_args(args.codex_home)
     if not codex_home.exists():
         report(f"codex_home_missing {codex_home}")
-        return 2
+        return finish_report(2)
     apply = args.mode == "apply"
     backup = args.mode in {"backup", "apply"}
     if apply:
         safety = validate_apply_safety(args, codex_home)
         if safety != 0:
-            return safety
+            return finish_report(safety)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     backup_root = (
         canonical_path(Path(args.backup_root))
@@ -478,12 +633,14 @@ def run(args: argparse.Namespace) -> int:
         args.worktree_older_than_days,
         apply,
         "worktree",
+        args,
     )
     rotate_logs(codex_home, args.rotate_logs_above_mb, stamp, apply)
-    report_sizes(codex_home)
+    report_sizes(codex_home, args)
     report_codex_processes(args.details)
+    report_open_codex_handles(codex_home, args.details, args.top_n)
     report("done")
-    return 0
+    return finish_report(0)
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -502,6 +659,20 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--archive-older-than-days", type=int, default=10)
     parser.add_argument("--worktree-older-than-days", type=int, default=7)
     parser.add_argument("--rotate-logs-above-mb", type=int, default=64)
+    parser.add_argument("--json", action="store_true", help="Emit report lines as structured JSON.")
+    parser.add_argument("--top-n", type=int, default=10, help="Maximum detailed entries per report section.")
+    parser.add_argument(
+        "--max-seconds-per-target",
+        type=float,
+        default=5.0,
+        help="Accepted for bounded-report compatibility; archive/apply actions still use exact accounting.",
+    )
+    parser.add_argument(
+        "--max-files-per-target",
+        type=int,
+        default=100000,
+        help="Accepted for bounded-report compatibility; archive/apply actions still use exact accounting.",
+    )
     return parser.parse_args(argv)
 
 

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "skill": "he-strategy",
+  "created_at": "2026-05-10",
+  "media_directory": ".harness/media/",
+  "prompt_file": ".harness/media/he-strategy-codex-harness-infographic.prompt.txt",
+  "direct_image_tool": "image_gen.imagegen",
+  "direct_tool_invocation_required": true,
+  "local_bitmap_storage_supported_by_active_tool": false,
+  "local_bitmap_storage_note": "The active image generation tool accepts a prompt but exposes no local output path parameter in this session.",
+  "review_media_package_boundary": "Review media artifacts are stored outside the skill package to avoid package bloat and Plugin Eval deferred-context cost.",
+  "generated_bitmap_saved_locally": false
+}

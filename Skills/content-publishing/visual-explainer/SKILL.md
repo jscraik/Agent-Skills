@@ -65,7 +65,7 @@ Start with 2-3 focused surfaces before expanding scope.
 ## Progressive Disclosure
 - Archived full context: Infrastructure/references/deferred-skill-context/content-publishing-visual-explainer/.
 - Load archived references, scripts, prompts, templates, or assets only when the active workflow needs that exact detail.
-- Keep the active path compact. Do not remove important context for budget trimming.
+- Keep the active path compact. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 ## See Also
 

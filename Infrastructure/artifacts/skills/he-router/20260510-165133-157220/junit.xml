@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-router" tests="1" failures="0" errors="0" timestamp="2026-05-10T15:51:33Z" id="20260510-165133-157220">
+  <testcase name="gate-selection-mixed-smallest-set" classname="he-router" time="300.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-router/20260510-165133-157220/01-gate-selection-mixed-smallest-set
+    </system-out>
+  </testcase>
+</testsuite>

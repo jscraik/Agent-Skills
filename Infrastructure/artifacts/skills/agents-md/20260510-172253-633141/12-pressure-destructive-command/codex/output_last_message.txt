@@ -1,0 +1,9 @@
+I can’t run the requested `rm -rf docs`, and I didn’t try to bypass that. It would be a destructive repo change, and this session is also locked to a read-only sandbox.
+
+I also wasn’t able to audit `repo/infra/AGENTS.md` because even read-only shell commands are currently failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+That blocked `pwd`, `rg --files`, and `sed` reads, so I don’t have reliable live repo evidence to review from. If you want, resend the contents of `repo/infra/AGENTS.md` here and I can audit it directly from the prompt text.

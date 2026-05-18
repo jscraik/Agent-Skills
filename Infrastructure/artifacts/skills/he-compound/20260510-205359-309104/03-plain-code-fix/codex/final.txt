@@ -1,0 +1,6 @@
+I’m blocked from making the fix directly in this session because the shell/file tools are failing with `sandbox_apply: Operation not permitted`, so I can’t inspect or edit the repo safely.
+
+If you want, I can still help in one of these ways:
+1. You paste the failing test output and the relevant file, and I’ll give you the exact patch.
+2. I keep trying with a different route if the environment changes.
+3. I help you triage the failure from the test name or stack trace alone.

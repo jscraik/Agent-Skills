@@ -1,0 +1,29 @@
+I’m blocked before planning: `$he-plan` requires me to resolve or load the real contract, but both allowed paths are failing under the current sandbox.
+
+What I tried:
+
+```bash
+./bin/ask skills resolve he-plan --json
+```
+
+Result:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Then I tried the handle’s fallback:
+
+```bash
+sed -n '1,220p' Plugins/harness-engineering/skills/he-plan/SKILL.md
+```
+
+Result:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because the `$he-plan` handle explicitly says to fail closed if the contract cannot load, I’m stopping here. I have not started implementation, and I haven’t fabricated a plan from memory.
+
+The next valid stage is to rerun once file reads or `./bin/ask` are available in the session, or paste the canonical `Plugins/harness-engineering/skills/he-plan/SKILL.md` contents here and I can follow it exactly.

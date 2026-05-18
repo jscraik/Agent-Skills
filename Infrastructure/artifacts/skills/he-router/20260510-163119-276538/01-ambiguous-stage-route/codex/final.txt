@@ -1,0 +1,9 @@
+Yes. I can handle it, but I want to route it the right way.
+
+Which of these is your harness request?
+
+1. Brainstorm
+2. Spec
+3. Plan
+
+If you want, you can also paste the prompt and I’ll classify it for you.

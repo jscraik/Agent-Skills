@@ -1,0 +1,3 @@
+$he-linear-plan
+
+Without inspecting files, handle this self-contained HE Linear headless case: in autonomous mode, preserve the assumption that no Linear objects are created without confirmation and include the literal interactive steering markers.

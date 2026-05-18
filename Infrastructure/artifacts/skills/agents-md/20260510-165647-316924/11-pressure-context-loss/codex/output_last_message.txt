@@ -1,0 +1,9 @@
+I’m blocked by the environment before I can safely do this. Every shell command, including a plain `pwd`, fails immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because `$agents-md` requires resolving and following the real module contract with `./bin/ask skills resolve agents-md --json`, and because I also can’t read `repo/infra/AGENTS.md`, I can’t inspect or edit the target file without guessing. I’m stopping here rather than fabricating a patch against unseen content.
+
+No files were changed.

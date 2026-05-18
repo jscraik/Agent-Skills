@@ -66,12 +66,80 @@ def test_plugin_references_are_classified_before_plugin_source_catchall() -> Non
     assert finding.code == "plugin_reference_surface"
 
 
+def test_skillsets_are_generated_tracked_projections() -> None:
+    cases = [
+        ".skillsets/harness-engineering/manifest.jsonl",
+        ".skillsets/command-surface.json",
+    ]
+
+    for path in cases:
+        finding = MODULE.classify_path(path)
+        assert finding.classification == "generated_tracked"
+        assert finding.status == "ok"
+        assert finding.code == "generated_skillset_projection"
+        assert finding.blocking is False
+
+
 def test_harness_database_is_runtime_state_violation() -> None:
     finding = MODULE.classify_path(".harness/context-compound.db")
 
     assert finding.classification == "runtime_state"
     assert finding.status == "violation"
     assert finding.code == "tracked_runtime_database"
+
+
+def test_harness_curated_context_paths_are_classified() -> None:
+    cases = {
+        ".harness/README.md": ("policy", "policy_surface"),
+        ".harness/core/architecture-invariants.md": ("policy", "policy_surface"),
+        ".harness/decisions/jsc-001.md": ("policy", "policy_surface"),
+        ".harness/linear/agent-skills-linear-plan.md": ("policy", "policy_surface"),
+        ".harness/reframes/ask-control-plane-decomposition.md": ("policy", "policy_surface"),
+        ".harness/refactors/legacy-decomposition.md": ("policy", "policy_surface"),
+        ".harness/brainstorm/he-routing.md": ("policy", "policy_surface"),
+        ".harness/solutions/README.md": ("policy", "policy_surface"),
+        ".harness/solutions/repeated-ci-blocker.md": ("policy", "policy_surface"),
+        ".harness/specs/agent-skills-ask-control-plane-decomposition-spec.md": (
+            "reference",
+            "harness_reference_surface",
+        ),
+        ".harness/review/agent-skills-architecture-review.md": (
+            "reference",
+            "harness_reference_surface",
+        ),
+        ".harness/media/2026-05-09-he-trust-repair-before-after.md": (
+            "reference",
+            "harness_reference_surface",
+        ),
+        ".harness/media/2026-05-09-he-trust-repair-before-after.png": (
+            "reference",
+            "harness_reference_surface",
+        ),
+    }
+
+    for path, (classification, code) in cases.items():
+        finding = MODULE.classify_path(path)
+        assert finding.classification == classification
+        assert finding.status == "ok"
+        assert finding.code == code
+
+
+def test_harness_runtime_outputs_are_violations() -> None:
+    """
+    Verifies that selected `.harness/` runtime output paths are classified as violations.
+
+    Asserts each path produces a finding with status "violation", `blocking` set to True, and the expected violation `code`.
+    """
+    cases = {
+        ".harness/backups/abc.bak": "tracked_harness_backup",
+        ".harness/ci-migrate-snapshots/snapshot.json": "tracked_harness_snapshot",
+    }
+
+    for path, code in cases.items():
+        finding = MODULE.classify_path(path)
+        assert finding.status == "violation"
+        assert finding.blocking is True
+        assert finding.code == code
 
 
 def test_json_report_has_required_fields_and_deterministic_order() -> None:

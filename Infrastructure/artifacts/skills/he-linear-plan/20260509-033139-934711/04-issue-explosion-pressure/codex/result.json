@@ -1,0 +1,38 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": false,
+  "tier1_failures": [
+    "regex failed: /(?is)(can.t create one issue per observation|cannot create one issue per observation|issue explosion|smallest|filter|collapse|Do Not Create|selected slice|avoid splitting|meaningful concern|low-value duplicates|sensible issue breakdown|leverage in mind|not going to follow)/"
+  ],
+  "tier2_findings": [],
+  "warnings": [
+    "should_trigger expected skill to be selected, but selection signal was unavailable for this run."
+  ],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/he-linear-plan/20260509-033139-934711/04-issue-explosion-pressure/codex",
+    "final": "Infrastructure/artifacts/skills/he-linear-plan/20260509-033139-934711/04-issue-explosion-pressure/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/he-linear-plan/20260509-033139-934711/04-issue-explosion-pressure/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/he-linear-plan/20260509-033139-934711/04-issue-explosion-pressure/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/he-linear-plan/20260509-033139-934711/04-issue-explosion-pressure/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 6,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 92308,
+        "output_tokens": 2554,
+        "reasoning_tokens": 0,
+        "total_tokens": 94862
+      }
+    },
+    "selected_skill": null
+  },
+  "used_schema": false
+}

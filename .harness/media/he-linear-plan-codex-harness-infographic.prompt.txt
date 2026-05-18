@@ -1,0 +1,41 @@
+Create a production-grade technical infographic background titled conceptually
+"From Prompt Skill -> Codex Harness Skill", but do not render final overlay text
+in the image. Design a dark, professional systems-engineering visual with clean
+OpenAI-style geometry, strong negative space, and clear zones where deterministic
+overlay text can be added later.
+
+Composition: the left side shows a fragile prompt-only skill with loose cards,
+unchecked assumptions, bloated text blocks, and weak links to work tracking. The
+right side shows a governed Codex harness skill package: compact SKILL.md,
+routed references, contract.yaml, evals.yaml, validation gates, command
+boundaries, evidence artifacts, rollback paths, and live Linear mutation
+approval gates connected into a composable system. The center shows a
+transformation corridor from assumptions to evidence, with structured lines
+passing through deterministic gates.
+
+Include visual metaphors for AGENTS.md as a top governance layer, rules and
+command boundaries as guarded rails, hooks and validation gates as checkpoint
+nodes, Skill Factory strict audit as a formal inspection gate, OpenClaw as
+security/readiness scanning, openai_skill.py as frontmatter/schema validation,
+Plugin Eval as score and invoke-cost budget, smoke eval and release eval as
+staged test pulses, human approval gates as deliberate stop markers, evidence
+artifacts as signed trace cards, rollback paths as reversible arrows,
+deterministic checks as precise tick marks, and composable skills as modular
+blocks snapping into a larger harness. Include .harness/media/ as the review
+media storage lane outside the skill package.
+
+Also show package-level surfaces as abstract components: references, agents,
+contracts, evals, schemas, task profiles, and validator configs. Show
+stale/runtime projection files being filtered away from canonical source edits.
+Show AI-generated slop being reduced through markdown lint, spelling/prose lint,
+link checks, and anti-slop review.
+
+Style requirements: dark harness-proof engineering aesthetic, matte black and
+charcoal base with restrained teal, white, and amber accents; no fake dashboards,
+no fake logos, no invented metrics, no sci-fi nonsense, no decorative orbs, no
+clutter. Use crisp vector-like shapes, subtle depth, clean typography zones left
+blank for later overlay, high contrast, 16:9 layout suitable for X/Twitter
+technical content. Communicate movement from vague prompting to governed
+execution, hidden behavior to observable systems, fragile workflows to validated
+orchestration, bloated prompt blob to compact progressive-disclosure skill, and
+isolated skill file to complete validated Codex skill package.

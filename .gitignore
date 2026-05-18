@@ -68,12 +68,20 @@ Plugins/plugin-factory/skills/**/__pycache__/
 sync-symlink/
 **/.codex-repo-plugin-source
 
+# Runtime-generated command implementation artifacts from runtime split tooling
+# (limit to generated/runtime artifact surfaces only)
+Infrastructure/artifacts/**/*_impl.*
+Infrastructure/reports/**/*_impl.*
+
+# Keep source implementation scripts trackable
+!Infrastructure/scripts/**/*_impl.sh
 # Generated artifacts
 .diagram/*
 !.diagram/context/
 .diagram/context/refresh.log
 !.diagram/manifest.json
 semgrep.sarif
+Plugins/*.zip
 Infrastructure/artifacts/diagrams/
 Infrastructure/artifacts/dist/
 Infrastructure/artifacts/build/dist/
@@ -87,6 +95,8 @@ Infrastructure/artifacts/skill-graphs/drills/
 Infrastructure/artifacts/skills/**/structure-gate.json
 Infrastructure/artifacts/skills/**/structure-gate.sarif
 Infrastructure/artifacts/skills/autoresearch/
+# Ignore timestamped eval run artifacts (e.g., coding-harness/YYYYMMDD-HHMMSS-*/...)
+Infrastructure/artifacts/skills/*/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]-*/
 Infrastructure/reports/20*.md
 Infrastructure/reports/data/pattern-registry.json
 Infrastructure/reports/data/candidates.json
@@ -98,6 +108,46 @@ Infrastructure/reports/data/candidates.json
 /Infrastructure/artifacts/skill-graphs/runs/**/iter-*-improved.txt
 /Infrastructure/artifacts/skill-graphs/runs/**/summary.md
 /Infrastructure/artifacts/skill-graphs/runs/**/events.jsonl
+
+# Harness runtime/scratch outputs
+.harness/
+.harness/backups/
+.harness/*.db
+.harness/ci-migrate-snapshots/
+
+# Harness curated control-plane docs and contract JSON stay trackable.
+!.harness/
+!.harness/core/
+!.harness/core/**
+!.harness/decisions/
+!.harness/decisions/**
+!.harness/linear/
+!.harness/linear/**
+!.harness/refactors/
+!.harness/refactors/**
+!.harness/reframes/
+!.harness/reframes/**
+!.harness/features/
+!.harness/features/**
+!.harness/strategy/
+!.harness/strategy/**
+!.harness/triage/
+!.harness/triage/**
+!.harness/review/
+!.harness/review/**
+!.harness/ideate/
+!.harness/ideate/**
+!.harness/brainstorm/
+!.harness/brainstorm/**
+!.harness/specs/
+!.harness/specs/**
+!.harness/plan/
+!.harness/plan/**
+!.harness/memory/
+!.harness/memory/**
+!.harness/quality/
+!.harness/quality/**
+!.harness/*.json
 
 # Local backups/patch leftovers
 *.bak
@@ -150,3 +200,16 @@ Plugins/cache/
 .agents/workflows/*
 !.agents/workflows/**
 .codex/config.toml
+
+# Ignore timestamped generated skill artifact runs under Infrastructure/artifacts
+Infrastructure/artifacts/skills/**/[0-9][0-9][0-9][0-9]*
+
+# Re-ignore generated timestamped .harness outputs after curated-doc exceptions.
+.harness/media/20*/*.md
+.harness/media/20*
+.harness/refactors/20*/*.md
+.harness/refactors/20*
+.harness/reframes/20*/*.md
+.harness/reframes/20*
+.harness/linear/20*/**
+.harness/linear/20*.md

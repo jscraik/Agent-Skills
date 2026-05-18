@@ -1,0 +1,15 @@
+Yes. We should frame it as **closure proof for the completed scope**, not as **release confidence**.
+
+Suggested wording:
+
+> Closure proof: static checks passed. Lifecycle release evaluations timed out, so this evidence supports scoped completion only. Do not interpret this as release confidence.
+
+If you want, I can also turn that into a stricter template for your repo, for example:
+
+- `scope_status: complete`
+- `static_checks: passed`
+- `lifecycle_release_evals: timed_out`
+- `confidence: scoped_only`
+- `release_confidence: not_claimed`
+
+If you meant this as a doc or policy change in the repo, I can draft the exact language for the relevant AGENTS/validation doc next.

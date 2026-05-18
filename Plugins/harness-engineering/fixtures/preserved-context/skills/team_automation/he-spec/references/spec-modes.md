@@ -43,11 +43,11 @@ then set `ui_required: true`.
 If `ui_required: true` is set and no explicit UI contract exists yet, recommend a companion dedicated UI spec before planning begins.
 
 ## Artifact paths
-- standard specs: `Docs/specs/YYYY-MM-DD-<type>-<descriptive-name>-spec.md`
-- dedicated UI specs: `docs/ui-specs/YYYY-MM-DD-<descriptive-name>-ui-spec.md`
+- standard specs: `.harness/specs/YYYY-MM-DD-<type>-<descriptive-name>-spec.md`
+- dedicated UI specs: `.harness/specs/YYYY-MM-DD-<descriptive-name>-ui-spec.md`
 
 ## Compatibility notes
-Prefer `docs/ui-specs/` for dedicated UI specs.
+Prefer `.harness/specs/` for dedicated UI specs.
 
 Support the older `Docs/specs/YYYY-MM-DD-<topic>-ui-spec.md` form only when:
 - the repo already uses that convention

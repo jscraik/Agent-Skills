@@ -1,0 +1,3 @@
+Blocked: the phase cannot proceed because the required validation is missing.
+
+Minimum corrective action: add the missing validation, then rerun the phase.

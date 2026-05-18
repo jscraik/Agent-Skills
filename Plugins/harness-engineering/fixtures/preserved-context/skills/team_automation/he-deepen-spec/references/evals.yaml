@@ -138,7 +138,7 @@ cases:
       - type: regex
         value: "(?i)(he-deepen-spec)"
       - type: regex
-        value: "(?i)(Which spec should I deepen\\?|Docs/specs/|docs/ui-specs/)"
+        value: "(?i)(Which spec should I deepen\\?|\\.harness/specs/)"
 
   - id: first-spec-request
     name: first spec request

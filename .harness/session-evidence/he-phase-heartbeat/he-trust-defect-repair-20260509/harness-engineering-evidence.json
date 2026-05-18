@@ -1,0 +1,1716 @@
+[
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-011"
+    ],
+    "recurring_signals": [
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-work"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-019"
+    ],
+    "recurring_signals": [
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-021"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-022"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-023"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-code-review"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-024"
+    ],
+    "recurring_signals": [
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-025"
+    ],
+    "recurring_signals": [
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-026"
+    ],
+    "recurring_signals": [
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-027"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-028"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-029"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-030"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "missing_file",
+      "lint_failure",
+      "test_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-032"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "lint_failure",
+      "test_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-033"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-034"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-035"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-036"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-037"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-038"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-040"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-compound"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-041"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-043"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-044"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-compound"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-045"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-compound"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-046"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-compound"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-047"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-compound"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-048"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-049"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-050"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-brainstorm"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-051"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-code-review"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-052"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-055"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-058"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-059"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-060"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-063"
+    ],
+    "recurring_signals": [
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-064"
+    ],
+    "recurring_signals": [
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-065"
+    ],
+    "recurring_signals": [
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-066"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-067"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-070"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-compound"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-071"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-072"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-073"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-074"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-075"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-077"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-079"
+    ],
+    "recurring_signals": [
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-080"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-084"
+    ],
+    "recurring_signals": [
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-085"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-router"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-086"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-router"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file",
+      "test_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-087"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file",
+      "test_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-router"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-089"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-090"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-091"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-brainstorm"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "network"
+    ],
+    "evidence_sources": [
+      "session-092"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "network"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-093"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-work"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-094"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-095"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-compound"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-096"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-097"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-098"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-099"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "missing_file",
+      "lint_failure",
+      "test_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-100"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "lint_failure",
+      "test_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-brainstorm"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-101"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "test_failure",
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-102"
+    ],
+    "recurring_signals": [
+      "test_failure",
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-brainstorm"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-103"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-work"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-104"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-105"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-108"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-work"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-109"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-110"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-111"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-112"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-114"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-115"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-116"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-117"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-118"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-code-review"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-119"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-code-review"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-120"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-code-review"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-121"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-code-review"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "evidence_sources": [
+      "session-123"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-compound"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-124"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-code-review"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-126"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-compound"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-127"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "test_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-128"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "test_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-brainstorm"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file",
+      "test_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-129"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file",
+      "test_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-work"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [],
+    "evidence_sources": [
+      "session-131"
+    ],
+    "recurring_signals": [],
+    "schema_version": 1,
+    "selected_he_stage": "he-code-review"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-133"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-135"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "lint_failure",
+      "git_state"
+    ],
+    "evidence_sources": [
+      "session-136"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "git_state"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "reproduce failing command",
+      "patch root cause",
+      "rerun validation"
+    ],
+    "blocked": [
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-137"
+    ],
+    "recurring_signals": [
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-fix-bugs"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "missing_file",
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-138"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "lint_failure",
+      "git_state",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-plan"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-139"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-140"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-spec"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-141"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-work"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "missing_file",
+      "git_state",
+      "lint_failure"
+    ],
+    "evidence_sources": [
+      "session-142"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "git_state",
+      "lint_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-router"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "missing_file",
+      "lint_failure",
+      "network",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-143"
+    ],
+    "recurring_signals": [
+      "missing_file",
+      "lint_failure",
+      "network",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-work"
+  },
+  {
+    "actions": [
+      "use collector evidence to choose the next Harness Engineering step"
+    ],
+    "blocked": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ],
+    "evidence_sources": [
+      "session-144"
+    ],
+    "recurring_signals": [
+      "lint_failure",
+      "missing_file",
+      "network",
+      "git_state",
+      "test_failure"
+    ],
+    "schema_version": 1,
+    "selected_he_stage": "he-work"
+  }
+]

@@ -16,7 +16,7 @@ keep waking up until there is a real stop condition.
 Do not use this for a one-off check. Route one-off implementation, review, or
 debugging requests to the matching HE stage directly.
 
-Do not remove important context for budget trimming; move long-form heartbeat
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 examples, prompt variants, and implementation notes into deferred references.
 
 ## Philosophy

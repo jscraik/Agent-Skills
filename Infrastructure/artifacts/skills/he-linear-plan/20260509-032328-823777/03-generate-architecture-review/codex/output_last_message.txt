@@ -1,0 +1,8 @@
+Yes. If you want, I can turn the Linear execution plan into a full architecture review document instead.
+
+I just need one of these to proceed:
+1. The path to the existing plan in the repo
+2. The plan text pasted here
+3. A link or identifier for the Linear issue/plan you want converted
+
+Once I have that, I’ll rewrite it as an architecture review with sections like context, goals, current state, proposed design, tradeoffs, risks, migration plan, and open questions.

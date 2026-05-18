@@ -37,7 +37,7 @@ These are valid and common, but they are not part of the minimal runtime contrac
 - `Infrastructure/references/operational-spec.md`
 - `Infrastructure/references/package-guide.md`
 - `Infrastructure/references/deconflict-report.md`
-- `hooks.json`
+- `hooks/hooks.json`
 - `agents/`
 - `assets/`
 - `.mcp.json`
@@ -48,15 +48,44 @@ This builder still scaffolds several of those files by default because they are 
 ## Capability-driven optional surfaces
 - `.mcp.json` should exist only when the plugin contributes real MCP wiring that the manifest exposes through `mcpServers`.
 - `.app.json` should exist only when the plugin contributes a real app integration surface that the manifest exposes through `apps`.
+- `hooks/hooks.json` should exist only when the plugin contributes real Codex lifecycle behavior and the manifest either declares `hooks` or relies deliberately on Codex's default `hooks/hooks.json` discovery convention.
 - Recommended external MCPs that are not packaged runtime wiring belong in `README.md` or `Infrastructure/references/package-guide.md`, not in `.mcp.json`.
 - `assets/` is optional package storage; do not declare `interface.composerIcon`, `interface.logo`, or `interface.screenshots` until the referenced files exist.
 - When image assets are required, use `imagegen` or another deterministic asset workflow to create the actual files before wiring them into the manifest.
+
+## Bundled hook contract
+
+Plugin-bundled hooks are an executable runtime surface, not ordinary docs.
+Validate them before install, release, or marketplace claims.
+
+Runtime-compatible declaration shapes:
+- `hooks` as a path string, for example `"./hooks/hooks.json"`;
+- `hooks` as a path string array;
+- `hooks` as an inline hooks object;
+- `hooks` as an array of inline hooks objects.
+
+Factory-generated packages should prefer `./hooks/hooks.json`. If the manifest
+omits `hooks`, Codex discovers `hooks/hooks.json` by default. Manifest paths
+replace the default discovery set, so every non-default hook file must be
+declared explicitly.
+
+Validation expectations:
+- hook paths start with `./`, stay inside the plugin root, and resolve to
+  existing files;
+- hook config parses as JSON with a top-level `hooks` object;
+- generated packages use command hooks only until prompt and agent hooks are
+  supported;
+- hook commands are non-empty, synchronous, and avoid local absolute paths;
+- plugin-owned scripts and data are referenced through `${PLUGIN_ROOT}` and
+  `${PLUGIN_DATA}` or their `CLAUDE_*` compatibility aliases;
+- package docs state that runtime execution requires `plugins`, `hooks`, and
+  `plugin_hooks` feature gates while `plugin_hooks` is default-off.
 
 ## Helper ownership in this repo
 - `skill-builder` owns plugin-owned skill bundles under `skills/<skill-name>/`.
 - `codex-agent-builder` owns plugin-owned root agent configs under `agents/<agent-name>.toml`.
 - `docs-expert` owns the shared templates for `README.md`, `LICENSE`, and `Infrastructure/references/package-guide.md`.
-- `plugin-builder` should orchestrate those helpers, then add plugin-specific runtime files such as `.codex-plugin/plugin.json`, `hooks.json`, and, when truly needed, `.mcp.json`, `.app.json`, plus operational/deconflict docs.
+- `plugin-builder` should orchestrate those helpers, then add plugin-specific runtime files such as `.codex-plugin/plugin.json`, `hooks/hooks.json`, and, when truly needed, `.mcp.json`, `.app.json`, plus operational/deconflict docs.
 
 ## Archetype-driven curated defaults
 - Use archetypes to make new plugin manifests and marketplace entries look more like real curated packages without changing the minimal runtime contract.
@@ -139,7 +168,7 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
   "license": "MIT",
   "keywords": ["plugin", "example"],
   "skills": "./skills/",
-  "hooks": "./hooks.json",
+  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "apps": "./.app.json",
   "interface": {
@@ -158,7 +187,7 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 - `mcpServers` (`string`): optional relative path. Current curated examples use `./.mcp.json`. Use it only for real MCP wiring.
 - `apps` (`string`): optional relative path. Current curated examples use `./.app.json`. Use it only for real app integrations.
 - `interface` (`object`): optional UI metadata block.
-- `hooks` (`string`): optional curated metadata path. Curated examples use `./hooks.json`.
+- `hooks` (`string`, string array, object, or object array): optional plugin-bundled lifecycle hooks. Prefer `./hooks/hooks.json` for generated packages.
 - `version`, `author`, `homepage`, `repository`, `license`, `keywords`: optional curated metadata fields. They are common in `openai/plugins` but are not required by the current runtime manifest loader.
 
 ### `interface` fields
@@ -174,7 +203,7 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 - If a manifest declares `skills`, `hooks`, `mcpServers`, or `apps`, the referenced path should exist.
 - Current curated examples and this builder both prefer:
   - `./skills/`
-  - `./hooks.json`
+  - `./hooks/hooks.json`
   - `./.mcp.json`
   - `./.app.json`
 

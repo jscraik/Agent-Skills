@@ -1,0 +1,5 @@
+I can, but I need one missing piece: are you asking me to apply that instruction to this repo’s agent guidance, or just to follow it for the current task?
+
+For the current run, I’ll record the headless assumption unless you want interactive handling:
+
+`Assumption: target project state is unknown; operating headlessly from the live workspace and repo instructions, with no interactive project-state prompt.`

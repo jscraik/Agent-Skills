@@ -1,0 +1,1 @@
+Can you define validation gates and rollback conditions before planning implementation.

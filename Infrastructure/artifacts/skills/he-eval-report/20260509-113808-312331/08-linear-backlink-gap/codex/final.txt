@@ -1,0 +1,11 @@
+The thing that must be repaired before completion is the report’s traceability, not the evidence itself.
+
+If the report already has evidence but no Linear backlink, then completion is still blocked until you:
+
+- add the Linear issue reference or URL to the report metadata/footer
+- make sure the backlink is actually populated in the final artifact, not just implied in prose
+- verify the link points back to the originating Linear issue so the report can be audited later
+
+So the report is not complete yet. The missing repair is the Linear backlink attachment, and that needs to be fixed before the report can be marked done.
+
+If you want, I can help you pinpoint the exact field or file that should carry that backlink once I can inspect the repo contents directly.

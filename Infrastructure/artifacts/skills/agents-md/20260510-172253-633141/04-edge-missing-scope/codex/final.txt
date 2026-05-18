@@ -1,0 +1,22 @@
+I can clean it up, but I need you to pick the scope first because “AGENTS setup” could mean three different things with different blast radii:
+
+1. `~/.codex/AGENTS.md`
+   Global personal guidance for your Codex sessions. This affects many checkouts.
+
+2. Repo root: `/Users/jamiecraik/dev/agent-skills/AGENTS.md`
+   Project-wide guidance for this repository. This affects everything under `agent-skills`.
+
+3. A nested package or subdirectory
+   More targeted guidance that overrides the repo root only within that subtree.
+
+I tried to inspect the local `AGENTS.md` landscape and run the repo bootstrap command, but this session’s filesystem sandbox is currently failing shell execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I’m blocked from reading or editing files directly in this turn.
+
+My recommendation: start with the repo root `AGENTS.md` unless your pain is coming from all Codex sessions globally. Root cleanup is usually the best first pass because it keeps project-specific conventions in the project and avoids surprising other checkouts.
+
+Tell me which target you mean, and once shell access is working I’ll do the cleanup against the live files, preserving nested overrides and validating with the repo’s `./bin/ask` closeout flow where available.

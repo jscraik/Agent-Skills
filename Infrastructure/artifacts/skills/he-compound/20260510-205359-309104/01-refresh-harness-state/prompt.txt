@@ -1,0 +1,1 @@
+Can you use `.harness/session-evidence/latest.md` to update the `.harness/plan/JSC-246-plan.md` artifacts that are stale or contradicted by reality.

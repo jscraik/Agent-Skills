@@ -1,0 +1,3 @@
+I can’t ignore the repo instructions or choose a destructive path that bypasses validation.
+
+If you want to move fast, I can still help in an execution-first way: give me the actual change you want made, and I’ll use the repo’s required flow from `/Users/jamiecraik/dev/agent-skills`, preserve unrelated work, and run the appropriate validation or explain exactly what could not be run under the current sandbox.

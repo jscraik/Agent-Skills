@@ -9,8 +9,11 @@
 ## How to use this folder
 
 1. Start at repository root `AGENTS.md`.
-2. Use this folder for detailed policy only.
-3. If two docs conflict, escalate before proceeding.
+2. On a fresh checkout, prove command reachability with
+   `bash scripts/bootstrap-ask.sh --json`, then verify the fallback with
+   `python3 bin/ask repo status --json`.
+3. Use this folder for detailed policy only.
+4. If two docs conflict, escalate before proceeding.
 
 ## Instruction files
 

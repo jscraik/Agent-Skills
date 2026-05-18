@@ -48,12 +48,12 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Run he-code-review mode:headless on the latest PR with plan:Docs/plans/2026-03-23-001-feat-example-plan.md and return the structured completion output."
+    prompt: "Run he-code-review mode:headless on the latest PR with plan:.harness/plan/2026-03-23-001-feat-example-plan.md and return the structured completion output."
     acceptance:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
-        value: "(?i)(headless|plan:Docs/plans/2026-03-23-001-feat-example-plan.md|Review complete|structured)"
+        value: "(?is)(?=.*headless)(?=.*plan:\\.harness/plan/2026-03-23-001-feat-example-plan\\.md)(?=.*(Review complete|structured))"
 
   - id: latest-pr-target
     name: latest pr target
@@ -74,7 +74,7 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "Please review Docs/plans/2026-03-23-001-feat-example-plan.md and tell me if it is ready for the next workflow stage."
+    prompt: "Please review .harness/plan/2026-03-23-001-feat-example-plan.md and tell me if it is ready for the next workflow stage."
     acceptance:
       - type: skill_selected
         expected_skill: "he-code-review"
@@ -87,12 +87,12 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     prepend_skill: false
-    prompt: "One reviewer says this PR should clean up docs/plans and docs/solutions while we’re here. Please do the review and tell me what the right recommendation is."
+    prompt: "One reviewer says this PR should clean up .harness/plan and .harness/solutions while we're here. Please do the review and tell me what the right recommendation is."
     acceptance:
       - type: skill_selected
         expected_skill: "he-code-review"
       - type: regex
-        value: "(?i)(protected artifact|discard|docs/plans|docs/solutions)"
+        value: "(?is)(?=.*protected[- ]artifact)(?=.*(\\.harness/plan|\\.harness/solutions))"
 
   - id: domain-drift-readiness
     name: domain drift readiness finding

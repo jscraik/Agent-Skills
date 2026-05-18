@@ -1,0 +1,27 @@
+I’m blocked from inspecting the live tree because every local read command is failing before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I can’t honestly identify the exact report path from the filesystem in this turn.
+
+Based on the request wording and the repo guidance you provided, the completion blocker is this:
+
+The report already has evidence, but it is missing the required Linear backlink. Before completion, repair the report or lifecycle record so the evidence is tied back to the relevant Linear issue. In practical terms, the completion record must include a backlink to the Linear ticket, usually the `JSC-...` issue URL or equivalent Linear reference, alongside the validation evidence.
+
+What must be repaired before completion:
+
+1. Add the missing Linear backlink to the report that currently contains evidence.
+2. Ensure the backlink points to the correct Linear issue for the work, not just a plain issue key if the workflow requires a URL.
+3. Re-run the repo closeout/validation flow once shell access works, likely:
+
+```bash
+./bin/ask repo closeout --changed --json --robot
+```
+
+4. Treat completion as blocked until that closeout sees both:
+   - evidence present
+   - Linear backlink present
+
+So the repair is not “add more evidence”; it is “link the existing evidence-bearing report back to Linear.”

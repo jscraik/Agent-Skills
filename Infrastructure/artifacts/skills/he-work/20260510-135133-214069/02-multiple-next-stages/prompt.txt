@@ -1,0 +1,3 @@
+$he-work
+
+Without inspecting files, handle this self-contained HE work steering case: the plan is complete but work and refactor are both valid next stages; ask before proceeding and include the literal interactive steering markers.

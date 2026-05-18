@@ -1,0 +1,1 @@
+Add one root AGENTS bullet for long-running Harness Engineering refactors in `repo/harness`: it should only point to `@harness-engineering` / `he-plan`, and the detailed plan artifact should follow the HE plan contract.

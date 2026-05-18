@@ -1,56 +1,44 @@
 schema_version: 1
 
 purpose: >
-  Coordinate the Harness Engineering lifecycle from the correct stage, or
-  capture a verified solved problem into a durable `docs/solutions/` artifact
-  with explicit evidence, prevention guidance, overlap-aware duplicate
-  avoidance, and narrow refresh follow-up when warranted.
+  Route deprecated he-compound requests to he-reconcile or he-reinforce so
+  older prompts keep their intent without reviving compound as an owning stage.
 
 triggers:
-  - the user wants the Harness Engineering workflow routed or resumed from the correct stage
-  - the user wants the final compound stage run after implementation
-  - the user wants a recently solved issue documented while the context is fresh
-  - the user wants a durable `docs/solutions/` artifact instead of ephemeral chat guidance
+  - explicit he-compound invocation from older prompts or generated handles
+  - lifecycle state refresh request using deprecated compound wording
+  - solved-problem capture or learning refresh request using deprecated compound wording
 
 inputs:
-  - a problem statement, workflow state, artifact path, or solved-problem context
-  - current Harness Engineering artifact paths when they exist
-  - constraints such as risk, compliance, accessibility, or rollout sensitivity
-  - for learning capture, evidence that the fix is solved and verified
+  - user request text
+  - optional current lifecycle stage
+  - optional lifecycle state or artifact paths
+  - optional solved-problem summary
 
 outputs:
-  - "a mode decision: full-lifecycle, resume-from-stage, or learning-capture"
-  - "for lifecycle mode, the current stage, completed stages, blockers, and exact next Harness Engineering command"
-  - "for coding-harness-managed repos, command-level bridge evidence for Linear state, Harness transition, Project Brain status, and north-star evidence status"
-  - "for learning capture, a single created or updated docs/solutions/[category]/[filename].md artifact"
-  - "optional narrow he-compound-refresh guidance when older solution docs appear stale"
-  - "XP operating artifact: blackboard_delta summarizing durable state changes across stages"
-  - "lifecycle exit status with tracker, artifact, traceability, validation, exit, next stage, missing input, and evidence fields"
-  - "structured status output with schema_version: 1 when requested, including exact Harness command/path evidence for every blocked lifecycle field"
+  - "schema_version: he-compound.compatibility-route.v1"
+  - selected_replacement
+  - matched_intent
+  - authority_limit
+  - missing_input
+  - recommended_next_step
 
 non_goals:
-  - direct product-code implementation inside the compound orchestrator
-  - skipping upstream Harness Engineering gates without evidence
-  - documenting unsolved or unverified problems as durable learnings
-  - broad stale-doc sweeps without evidence
-  - deleting or ignoring Harness Engineering artifact directories
+  - implementing code
+  - creating compound artifacts
+  - mutating Linear, GitHub, branches, memories, or project files
+  - claiming lifecycle reconciliation or learning capture has completed
 
 risks:
-  - routing to the wrong stage; mitigate with artifact-first stage validation and explicit mode selection
-  - coding-harness lifecycle drift; mitigate with Harness command bridge state before choosing the next stage
-  - losing the strong legacy solved-problem flow; mitigate with explicit learning-capture mode and dedicated reference rules
-  - creating duplicate solution docs for the same solved problem; mitigate with overlap scoring and refresh-in-place on high-overlap matches
-  - over-broad refresh recommendations; mitigate with narrow scope hints and evidence thresholds
-  - compact-safe overlap blind spots; mitigate by treating compact-safe as an explicit tradeoff and only recommending narrow follow-up refreshes when obvious
-  - stale or contradictory supplementary notes; mitigate by treating auto memory as secondary evidence and labeling it when used
-  - helper-role drift during learning capture; mitigate with the one-file-write rule and orchestrator-owned final assembly
+  - routing deprecated compound requests to the wrong replacement stage
+  - treating compatibility routing as artifact completion
+  - leaking sensitive session, tracker, or repository context during handoff
+  - preserving stale compound terminology instead of moving to he-reconcile or he-reinforce
 
 observability: >
-  Record selected mode, earliest incomplete stage, artifact paths checked,
-  tracker state, validation or solved evidence, duplicate-search outcome,
-  lifecycle exit status, and the exact next Harness Engineering command.
+  Track selected replacement, matched intent, ambiguous deprecated requests,
+  redaction decisions, blocked replacement handoffs, and validation outcomes.
 
 rollback_procedure: >
-  For lifecycle routing, withdraw the stale recommendation and rerun stage
-  detection against current artifacts. For learning capture, revert only the
-  created or updated solution artifact and keep the evidence gap in the handoff.
+  Restore the previous he-compound compatibility files from git, then rerun the
+  strict skill audit for he-compound and the selected replacement skill.

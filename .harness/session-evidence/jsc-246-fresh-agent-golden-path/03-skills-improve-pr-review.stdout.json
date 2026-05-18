@@ -1,0 +1,210 @@
+{
+  "status": "success",
+  "trace_id": "1ee0b439-1ecc-494f-8ca5-32a80f21ae72",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills improve make agents better at fixing PR review comments --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "improvement": {
+      "schema_version": "skill-improvement-recommendation.v1",
+      "goal": "make agents better at fixing PR review comments",
+      "status": "resolved_with_fallback",
+      "route_state": "resolved_with_fallback",
+      "route_state_reason": "fallback command-handle description match selected one reachable capability",
+      "agent_summary": "Recommended $autofix for this goal.",
+      "recommended_capability": {
+        "handle": "autofix",
+        "name": "autofix",
+        "path": ".agents/skills/autofix/SKILL.md",
+        "candidate_id": "skill:autofix::.agents/skills/autofix/SKILL.md",
+        "candidate_type": "skill",
+        "confidence": 0.65
+      },
+      "why": [
+        "fallback command-handle description match",
+        "matched terms=pr,review"
+      ],
+      "reachability": {
+        "status": "pass",
+        "proof_status": "pass",
+        "required_gates_passed": true,
+        "user_runtime_ready": true
+      },
+      "proof": {
+        "schema_version": "command-handle-proof.v1",
+        "handle": "autofix",
+        "status": "pass",
+        "gates": {
+          "resolver": true,
+          "generated_command_handle_check": true,
+          "workspace_command_handle_exists": true,
+          "codex_user_link": false,
+          "agents_user_link": true,
+          "codex_user_command_handle_exists": false,
+          "agents_user_command_handle_exists": true
+        },
+        "gate_policy": {
+          "required": [
+            "resolver",
+            "generated_command_handle_check",
+            "workspace_command_handle_exists"
+          ],
+          "user_runtime_any_of": [
+            "codex_user_link",
+            "agents_user_link"
+          ]
+        },
+        "resolution": {
+          "status": "ok",
+          "handle": "autofix",
+          "kind": "skill",
+          "command_visibility": "target",
+          "runtime_visibility": "latent",
+          "source_path": "Skills/agent-ops/autofix/SKILL.md",
+          "command_handle_path": ".agents/skills/autofix/SKILL.md",
+          "owner": "agent-ops",
+          "description": "Review, validate, and fix every current unresolved CodeRabbit thread and Codex P1-P3 finding. Use when PR review feedback needs approved fixes with safety checks and validation evidence.",
+          "invoke_via": "agent-ops",
+          "level": "molecule",
+          "provenance": {
+            "generator": "context-budgeted-skillsets.v1",
+            "projection_mode": "rooted",
+            "policy_identity": "8c69fbfa81b89658",
+            "source_revision": "3c3e7f92c",
+            "source_sha256": "33ad974cdcb27577162f4afc911c9a6c64a09e8ceac51c7b2641fa40c3a1ebfd"
+          }
+        },
+        "command_handle_check": {
+          "schema_version": "command-handle-check.v1",
+          "status": "pass",
+          "command_handle_count": 98,
+          "checked_count": 196
+        },
+        "workspace_runtime": {
+          "path": "/Users/jamiecraik/dev/agent-skills/.agents/skills",
+          "command_handle_path": "/Users/jamiecraik/dev/agent-skills/.agents/skills/autofix/SKILL.md",
+          "command_handle_exists": true
+        },
+        "user_runtime_links": {
+          "codex_skills": {
+            "path": "/Users/jamiecraik/.codex/skills",
+            "exists": true,
+            "is_symlink": true,
+            "target": "/Users/jamiecraik/dev/configs/.codex/skills",
+            "points_to_workspace_runtime": false
+          },
+          "agents_skills": {
+            "path": "/Users/jamiecraik/.agents/skills",
+            "exists": true,
+            "is_symlink": true,
+            "target": "/Users/jamiecraik/dev/agent-skills/.agents/skills",
+            "points_to_workspace_runtime": true
+          }
+        },
+        "user_runtime_command_handles": {
+          "codex_handle": "/Users/jamiecraik/.codex/skills/autofix/SKILL.md",
+          "codex_handle_exists": false,
+          "agents_handle": "/Users/jamiecraik/.agents/skills/autofix/SKILL.md",
+          "agents_handle_exists": true
+        },
+        "live_codex_invocation": {
+          "status": "manual_session_gate",
+          "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle."
+        }
+      },
+      "alternatives": [
+        {
+          "candidate_id": "skill:1password::.agents/skills/1password",
+          "candidate_type": "skill",
+          "name": "1password",
+          "path": ".agents/skills/1password",
+          "confidence": null,
+          "rationale": [],
+          "scope_rank": 2
+        },
+        {
+          "candidate_id": "skill:agent-ops::.agents/skills/agent-ops",
+          "candidate_type": "skill",
+          "name": "agent-ops",
+          "path": ".agents/skills/agent-ops",
+          "confidence": null,
+          "rationale": [],
+          "scope_rank": 2
+        }
+      ],
+      "next_command": "./bin/ask skills proof autofix --json --robot",
+      "goal_decision_status": "intent_unresolved",
+      "goal_decision": {
+        "schema_version": "goal-decision.v1",
+        "policy_identity": "8c69fbfa81b89658",
+        "decision_status": "intent_unresolved",
+        "failure_class": "INTENT_UNRESOLVED",
+        "operator_action": "Narrow the request or mention an exact skill path to resolve ambiguity.",
+        "recommended_candidate": null,
+        "alternative_candidates": [
+          {
+            "candidate_id": "skill:1password::.agents/skills/1password",
+            "candidate_type": "skill",
+            "name": "1password",
+            "path": ".agents/skills/1password",
+            "confidence": null,
+            "rationale": [],
+            "scope_rank": 2
+          },
+          {
+            "candidate_id": "skill:agent-ops::.agents/skills/agent-ops",
+            "candidate_type": "skill",
+            "name": "agent-ops",
+            "path": ".agents/skills/agent-ops",
+            "confidence": null,
+            "rationale": [],
+            "scope_rank": 2
+          }
+        ],
+        "disambiguation_prompts": [
+          "Do you want better-icons, fixing-accessibility?",
+          "Add a concrete goal, repo path, or stack so routing can resolve deterministically."
+        ]
+      }
+    },
+    "goal_decision": {
+      "schema_version": "goal-decision.v1",
+      "policy_identity": "8c69fbfa81b89658",
+      "decision_status": "intent_unresolved",
+      "failure_class": "INTENT_UNRESOLVED",
+      "operator_action": "Narrow the request or mention an exact skill path to resolve ambiguity.",
+      "recommended_candidate": null,
+      "alternative_candidates": [
+        {
+          "candidate_id": "skill:1password::.agents/skills/1password",
+          "candidate_type": "skill",
+          "name": "1password",
+          "path": ".agents/skills/1password",
+          "confidence": null,
+          "rationale": [],
+          "scope_rank": 2
+        },
+        {
+          "candidate_id": "skill:agent-ops::.agents/skills/agent-ops",
+          "candidate_type": "skill",
+          "name": "agent-ops",
+          "path": ".agents/skills/agent-ops",
+          "confidence": null,
+          "rationale": [],
+          "scope_rank": 2
+        }
+      ],
+      "disambiguation_prompts": [
+        "Do you want better-icons, fixing-accessibility?",
+        "Add a concrete goal, repo path, or stack so routing can resolve deterministically."
+      ]
+    }
+  },
+  "telemetry": {
+    "latency_ms": 369
+  },
+  "errors": []
+}

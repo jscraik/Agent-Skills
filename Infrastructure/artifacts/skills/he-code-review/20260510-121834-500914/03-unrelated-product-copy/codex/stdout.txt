@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e119d-253c-7a11-934a-8986160edece"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Absolutely. Send me the current headline and I’ll give you a few more playful versions, ideally ranging from “lightly more fun” to “full sparkle cannon,” so you can pick the right energy."}}
+{"type":"turn.completed","usage":{"input_tokens":45933,"cached_input_tokens":45440,"output_tokens":66,"reasoning_output_tokens":19}}

@@ -1,0 +1,8 @@
+Yes. Send me the proposed work items, ideally as a bullet list, issue list, or pasted notes, and I’ll classify each into:
+
+- `Now`: clearly valuable, unblocked, aligned with current goals, and worth doing immediately.
+- `Next`: valuable but dependent on a prerequisite, needs a little sharpening, or should follow the current batch.
+- `Later`: plausible but lower-leverage, speculative, or only useful after more adoption/evidence.
+- `Do Not Create`: duplicate, misaligned, too vague, already covered elsewhere, or likely to add noise/maintenance cost.
+
+If you want, paste them raw and messy. I can normalize the wording, merge duplicates, and return a table with `Classification`, `Reason`, and `Suggested Rewrite / Next Action`.

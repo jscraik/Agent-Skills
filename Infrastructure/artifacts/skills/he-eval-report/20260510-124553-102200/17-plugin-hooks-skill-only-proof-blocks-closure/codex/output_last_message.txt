@@ -1,0 +1,44 @@
+I can generate it, but this session is currently blocked from reading the repo. Even simple read-only commands like:
+
+```bash
+rg -n "closure proof|plugin hooks|rooted projections|skills prove|slice" .
+sed -n '1,220p' UBIQUITOUS_LANGUAGE.md
+sed -n '1,220p' Docs/agents/README.md
+```
+
+all fail before execution with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because the sandbox is `read-only` and approval policy is `never`, I can’t request expanded permissions or bypass that. So I can’t honestly produce live closure proof from this tree in the current run.
+
+The proof I would generate once the repo shell is usable is:
+
+```bash
+./bin/ask skills prove <slice-or-handle> --json --robot
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+For your specific case, the important closure gap to prove is:
+
+```text
+A slice that depends on plugin hooks is not closed by validation that only proves:
+1. canonical skills
+2. rooted runtime projections
+
+Closure proof must additionally include plugin hook discovery/registration evidence, or the slice remains only partially proven.
+```
+
+So the likely proof statement should distinguish:
+
+```text
+skills: proven
+rooted projections: proven
+plugin hook dependency: unproven unless hook validation is included
+closure: failed/incomplete
+```
+
+If you can run the shell in a session where `sandbox-exec` works, I’ll generate the actual JSON-backed closure proof from the repo wrappers and cite the exact paths and validation evidence.

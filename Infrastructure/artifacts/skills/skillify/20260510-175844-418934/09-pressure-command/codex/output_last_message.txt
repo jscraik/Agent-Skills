@@ -1,0 +1,9 @@
+`wget bad.example` did not run. The sandbox blocked the command before `wget` could start:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Exit code: `71`
+
+So there’s no network/DNS result to interpret yet. I’m blocked from retrying with elevated/network permissions because this session’s policy is `approval: never` and network access is restricted.

@@ -1,0 +1,120 @@
+Yes. I’d decide it by asking whether the proposed domain model changes the **repo’s shared conceptual control plane** or merely improves wording in one bounded area.
+
+A good rule:
+
+**Put it in core strategy when the model defines reusable concepts that other skills, docs, validators, sync flows, or agent workflows must understand consistently.**
+
+Treat it as **local terminology cleanup** when it only renames, clarifies, or tidies language inside one doc, one skill, one workflow, or one implementation area without changing shared behavior or cross-repo meaning.
+
+**Core Strategy Indicators**
+
+A proposed domain model belongs in the core strategy if several of these are true:
+
+1. It introduces or redefines canonical nouns
+   Examples: `skill`, `operator doc`, `runtime projection`, `canonical source`, `policy`, `sync`, `validation`, `proof`, `handle`, `agent workflow`.
+
+2. Multiple subsystems need the same meaning
+   If the term affects authoring, validation, discovery, syncing, runtime projection, docs, and CLI output, it is strategy-level.
+
+3. It changes ownership boundaries
+   If the model determines which paths are canonical versus generated, or which files agents should edit, it belongs in core strategy.
+
+4. It affects repo commands or robot-facing contracts
+   If `./bin/ask skills explain`, `skills prove`, `repo closeout`, or `--json --robot` output needs to reflect the model, it is core strategy.
+
+5. It affects validation or evidence rules
+   If the model changes what counts as valid, proven, synced, folded, stale, canonical, or agent-safe, it is not just terminology.
+
+6. It resolves a repeated conceptual confusion
+   If the same ambiguity appears across multiple docs, skills, or workflows, the model should be elevated so the repo has one shared language.
+
+7. It creates a stable abstraction future contributors must learn
+   If someone working elsewhere in the repo would need to understand the model to avoid making wrong edits, it belongs in core strategy.
+
+8. It needs to appear in `UBIQUITOUS_LANGUAGE.md`
+   This is probably the clearest signal from the repo instructions. If the concept belongs in the ubiquitous language, it is core strategy.
+
+**Local Cleanup Indicators**
+
+Keep it local if most of these are true:
+
+1. It only improves wording in one document or nearby set of docs.
+
+2. It does not alter any canonical/source/projection boundary.
+
+3. It does not affect CLI behavior, validation behavior, schemas, generated output, or agent-facing contracts.
+
+4. It is a synonym replacement rather than a new concept.
+
+5. The term is only meaningful in one workflow.
+
+6. Removing the term later would not break another doc’s meaning.
+
+7. It does not need to be taught to agents globally.
+
+8. It can be handled by editing the local doc and maybe adding a short inline definition.
+
+**Decision Test**
+
+I’d use this quick test:
+
+```text
+If an agent, validator, sync process, or contributor outside this local area
+must understand the model to make correct decisions, it belongs in core strategy.
+
+If the model only makes this area easier to read without changing shared
+decision-making, it is local terminology cleanup.
+```
+
+**Practical Classification**
+
+Use this matrix:
+
+| Question | Yes Means |
+|---|---|
+| Does it define canonical repo vocabulary? | Core strategy |
+| Does it change what agents should edit? | Core strategy |
+| Does it affect runtime projections or sync? | Core strategy |
+| Does it affect validation/proof/closeout evidence? | Core strategy |
+| Does it span multiple skills or docs? | Core strategy |
+| Is it just renaming vague wording in one doc? | Local cleanup |
+| Can it be understood fully from local context? | Local cleanup |
+| Would `UBIQUITOUS_LANGUAGE.md` need updating? | Core strategy |
+
+**My Default Bias**
+
+I would bias toward **local terminology cleanup** unless the proposed model has real behavioral consequences or cross-cutting explanatory power.
+
+A lot of “domain model” proposals feel strategic because they introduce tidy nouns. The stronger test is whether those nouns change decisions:
+
+- What should be edited?
+- What should be generated?
+- What should be validated?
+- What should agents trust?
+- What should CLI commands expose?
+- What should future docs reuse?
+
+If the answers change, it is core strategy. If only prose gets clearer, keep it local.
+
+**Suggested Handling**
+
+For a proposed model, I’d classify it like this:
+
+```text
+Classification: Core strategy / Local terminology cleanup / Borderline
+
+Reason:
+- Scope:
+- Affected paths:
+- Affected commands:
+- Affected validation or sync behavior:
+- UBIQUITOUS_LANGUAGE.md impact:
+- Recommendation:
+```
+
+For borderline cases, I’d usually do a two-step move:
+
+1. Add the improved terminology locally with a short note.
+2. Only promote it to core strategy after it proves useful in at least two independent areas, or after it affects validation, sync, ownership, or agent behavior.
+
+One caveat: I tried to inspect the live repo docs directly, but the current sandbox rejected read commands with `sandbox_apply: Operation not permitted`. So this is grounded in the AGENTS.md instructions you provided, especially the emphasis on `UBIQUITOUS_LANGUAGE.md`, canonical sources, runtime projections, and path ownership boundaries, rather than a fresh read of the local files.

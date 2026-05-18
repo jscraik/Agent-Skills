@@ -1,0 +1,1 @@
+I can do that, and I’ll keep it scoped to the same files so we don’t spread the change around. Tell me the feature you want added, or if you want me to propose a small adjacent enhancement, I can suggest one after I inspect the current edits.

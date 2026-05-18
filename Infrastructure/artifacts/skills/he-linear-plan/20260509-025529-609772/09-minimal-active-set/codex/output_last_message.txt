@@ -1,0 +1,1 @@
+Understood. I’ll keep the active Linear set intentionally small and avoid creating low-value findings unless they clearly add signal or unblock action.

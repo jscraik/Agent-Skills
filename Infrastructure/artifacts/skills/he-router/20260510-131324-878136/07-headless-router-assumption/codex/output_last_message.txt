@@ -1,0 +1,15 @@
+Yes. I’ll operate in that mode.
+
+Chosen route assumption: **autonomous, reversible-by-default execution**.
+
+What that means in practice:
+
+- I’ll proceed without asking for every small decision when the next step is reasonably clear.
+- I’ll state the assumption I’m following before taking meaningful action.
+- I’ll avoid irreversible or hard-to-recover actions unless you explicitly approve them.
+- I will not run destructive commands like `git reset --hard`, `git clean`, force pushes, data deletion, production mutations, migrations with write effects, or publish/merge/release actions unless you directly ask.
+- If a command can be run as a dry run, preview, read-only inspection, or validation first, I’ll choose that route.
+- If I need to modify files, I’ll keep the edits scoped and preserve unrelated user work.
+- If I hit a fork where the safer reversible path is materially worse or incomplete, I’ll pause and name the tradeoff.
+
+For this repo specifically, I’ll also honor the AGENTS guidance: use `./bin/ask` for repo operations, read `UBIQUITOUS_LANGUAGE.md` before changing skills or agent-facing docs, and edit canonical sources rather than runtime projections.

@@ -1,0 +1,1 @@
+2026-05-09T01:22:24.210999Z ERROR codex_core::tools::router: error=resources/list failed: resources/list failed for `local-memory`: Mcp error: -32601: Method not found: resources/list

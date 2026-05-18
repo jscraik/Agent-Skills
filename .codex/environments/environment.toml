@@ -6,17 +6,19 @@ name = "harness local environment"
 script = '''
 set -euo pipefail
 
-if command -v git >/dev/null 2>&1 && repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
-  # shellcheck source=.codex/environments/detach-head-helper.sh
-  source "$repo_root/.codex/environments/detach-head-helper.sh"
-  codex_attach_detached_head
-  # shellcheck source=Infrastructure/scripts/codex-preflight/codex_env_common.sh
-  source "$repo_root/Infrastructure/scripts/codex-preflight/codex_env_common.sh"
-  codex_apply_env
+source "$(git rev-parse --show-toplevel)/.codex/scripts/normalize-path.sh"
+normalize_path_candidates
+
+if command -v mise >/dev/null 2>&1; then
+  mise trust --yes .mise.toml || true
+  mise install
 fi
-mise trust --yes .mise.toml
-mise install
-npm install
+if [[ -f scripts/prepare-worktree.sh ]]; then
+  bash scripts/prepare-worktree.sh
+else
+  echo "[codex] scripts/prepare-worktree.sh is required for this repo; root package-manager install is intentionally unsupported."
+  exit 1
+fi
 '''
 
 [[actions]]
@@ -25,17 +27,19 @@ icon = "tool"
 command = '''
 set -euo pipefail
 
-if command -v git >/dev/null 2>&1 && repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
-  # shellcheck source=.codex/environments/detach-head-helper.sh
-  source "$repo_root/.codex/environments/detach-head-helper.sh"
-  codex_attach_detached_head
-  # shellcheck source=Infrastructure/scripts/codex-preflight/codex_env_common.sh
-  source "$repo_root/Infrastructure/scripts/codex-preflight/codex_env_common.sh"
-  codex_apply_env
+source "$(git rev-parse --show-toplevel)/.codex/scripts/normalize-path.sh"
+normalize_path_candidates
+
+if command -v mise >/dev/null 2>&1; then
+  mise trust --yes .mise.toml || true
+  mise install
 fi
-mise trust --yes .mise.toml
-mise install
-npm install
+if [[ -f scripts/prepare-worktree.sh ]]; then
+  bash scripts/prepare-worktree.sh
+else
+  echo "[codex] scripts/prepare-worktree.sh is required for this repo; root package-manager install is intentionally unsupported."
+  exit 1
+fi
 '''
 
 [[actions]]
@@ -79,6 +83,58 @@ prek --version
 '''
 
 [[actions]]
+name = "Release Finalize"
+icon = "tool"
+command = '''
+set -euo pipefail
+
+release_branch="${1:-}"
+if [ -z "$release_branch" ]; then
+  echo "Usage: Release Finalize <release-branch>"
+  echo "Example: Release Finalize codex/release-0.12.1-coherence"
+  exit 2
+fi
+
+case "$release_branch" in
+  codex/release-*|release-*) ;;
+  *)
+    echo "Expected a release branch matching codex/release-* or release-*"
+    exit 2
+    ;;
+esac
+
+git fetch --prune origin main "$release_branch"
+git checkout main
+local_main_ahead_count="$(git rev-list --count origin/main..HEAD)"
+if [ "$local_main_ahead_count" -ne 0 ]; then
+  echo "Local main is ahead of origin/main; aborting."
+  echo "Reconcile local commits before running Release Finalize."
+  exit 2
+fi
+
+git pull --ff-only origin main
+pull_status=$?
+if [ "$pull_status" -ne 0 ]; then
+  local_main_ahead_count="$(git rev-list --count origin/main..HEAD 2>/dev/null || echo 0)"
+  if [ "$local_main_ahead_count" -ne 0 ]; then
+    echo "Local main is ahead of origin/main; aborting."
+    echo "Reconcile local commits before running Release Finalize."
+    exit 2
+  fi
+  exit "$pull_status"
+fi
+
+git merge --ff-only "origin/$release_branch"
+git push origin main
+
+echo "Merged $release_branch into main and pushed origin/main."
+echo "Optional PR follow-up:"
+echo "  gh pr list --state open --head \"$release_branch\" --json number,url"
+echo "  gh pr comment <number> --body \"Published to npm and merged into main.\""
+echo "  gh pr close <number> --delete-branch=false"
+'''
+
+[[actions]]
 name = "Diagram"
 icon = "tool"
 command = '''
@@ -99,21 +155,55 @@ ralph --help
 '''
 
 [[actions]]
+name = "Pylint"
+icon = "debug"
+command = '''
+set -euo pipefail
+
+command -v pylint >/dev/null 2>&1
+pylint --version
+'''
+
+[[actions]]
 name = "Mise"
 icon = "tool"
 command = '''
 set -euo pipefail
 
+for candidate in "$HOME/.local/share/mise/shims" "$HOME/.local/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" "/usr/local/bin" "/usr/sbin" "/sbin"; do
+  if [[ -d "$candidate" && ":$PATH:" != *":$candidate:"* ]]; then
+    PATH="$candidate:$PATH"
+  fi
+done
+export PATH
+
 command -v mise >/dev/null 2>&1
-if command -v git >/dev/null 2>&1 && repo_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
-  # shellcheck source=.codex/environments/detach-head-helper.sh
-  source "$repo_root/.codex/environments/detach-head-helper.sh"
-  codex_attach_detached_head
-  # shellcheck source=Infrastructure/scripts/codex-preflight/codex_env_common.sh
-  source "$repo_root/Infrastructure/scripts/codex-preflight/codex_env_common.sh"
-  codex_apply_env
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  current_branch="$(git symbolic-ref --short -q HEAD || true)"
+  if [ -z "$current_branch" ]; then
+    repo_slug="$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')"
+    if [ -z "$repo_slug" ]; then
+      repo_slug="worktree"
+    fi
+    short_sha="$(git rev-parse --short HEAD)"
+    branch_base="jscraik/feature/$repo_slug-worktree-$short_sha"
+    branch_name="$branch_base"
+    suffix=1
+    while git show-ref --verify --quiet "refs/heads/$branch_name"; do
+      branch_name="$branch_base-$suffix"
+      suffix=$((suffix + 1))
+    done
+    echo "[codex] detached HEAD detected; creating branch $branch_name"
+    git switch -c "$branch_name"
+    if git show-ref --verify --quiet "refs/remotes/origin/main"; then
+      git branch --set-upstream-to=origin/main "$branch_name" >/dev/null 2>&1 || true
+      echo "[codex] tracking origin/main for $branch_name"
+      echo "[codex] fast-forwarding $branch_name with origin/main"
+      git pull --ff-only origin main
+    fi
+  fi
 fi
-mise trust --yes .mise.toml
+mise trust --yes .mise.toml || true
 mise install
 '''
 
@@ -175,16 +265,6 @@ set -euo pipefail
 
 command -v ruff >/dev/null 2>&1
 ruff --version
-'''
-
-[[actions]]
-name = "Pylint"
-icon = "debug"
-command = '''
-set -euo pipefail
-
-command -v pylint >/dev/null 2>&1
-pylint --version
 '''
 
 [[actions]]

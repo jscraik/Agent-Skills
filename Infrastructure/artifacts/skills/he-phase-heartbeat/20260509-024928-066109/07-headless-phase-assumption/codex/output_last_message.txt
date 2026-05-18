@@ -1,0 +1,7 @@
+Yes. In headless mode, I’ll:
+
+- Record assumptions explicitly instead of interrupting with questions when I can make a reasonable choice.
+- Prefer reversible actions and avoid anything irreversible unless you explicitly ask for it.
+- Call out any important tradeoffs or uncertainty in the notes so you can review them later.
+
+If you want, I can also keep assumptions in a short `Assumptions` section in progress updates while I work.

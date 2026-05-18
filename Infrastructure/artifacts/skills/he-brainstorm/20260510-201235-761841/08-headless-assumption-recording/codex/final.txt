@@ -1,0 +1,14 @@
+I couldn’t read `Plugins/harness-engineering/skills/he-brainstorm/references/discovery-interview.md` directly because the sandbox is refusing filesystem reads in this session, so I’m recording provisional assumptions instead of stalling:
+
+- The doc is a discovery-phase reference, so it likely exists to help extract requirements, constraints, and unknowns from a conversation rather than to define implementation details.
+- “Autonomous mode” probably means we should prefer forward progress, capture uncertainties as assumptions, and avoid asking clarifying questions unless a decision would be irreversible or high-risk.
+- The intended output is likely a structured assumption log, with each assumption explicit, testable, and tagged by confidence or impact.
+- If the interview is about a skill or workflow, the doc likely expects us to separate:
+  - observed facts
+  - inferred assumptions
+  - open questions
+  - next actions
+- The brainstorm flow probably favors lightweight note-taking over strict completeness, so assumptions should be enough to unblock the next draft rather than fully resolve every ambiguity.
+- If there’s a missing detail in the reference, the safest default is to preserve user intent, keep scope narrow, and annotate the gap instead of inventing specifics.
+
+If you want, I can take the next step once the file is accessible and turn these into a tighter, doc-specific assumption set.

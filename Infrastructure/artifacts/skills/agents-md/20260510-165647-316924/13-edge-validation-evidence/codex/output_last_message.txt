@@ -1,0 +1,16 @@
+I wasn’t able to refactor `repo/api/AGENTS.md` in this turn because the execution environment is currently blocking even read-only shell commands with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+Because I could not read the file or inspect the working tree, I did not make any file edits.
+
+Exact commands I ran:
+
+| Command | Directory | Result |
+|---|---:|---|
+| `pwd && rg --files -g 'AGENTS.md' -g 'repo/api/AGENTS.md' -g 'UBIQUITOUS_LANGUAGE.md' -g 'Docs/agents/README.md'` | `/Users/jamiecraik/dev/agent-skills` | Blocked |
+| `git status --short` | `/Users/jamiecraik/dev/agent-skills` | Blocked |
+
+Both were blocked by the sandbox before they could run, so there are no pass/fail validation results beyond that environment failure.

@@ -75,7 +75,7 @@ Non-triggers:
 - optional user emphasis on which sections feel weak or whether exhaustive coverage is desired
 
 If the plan path is missing, ask one direct question:
-- Which plan should I deepen? You can give me the path directly from `Docs/plans/`.
+- Which plan should I deepen? You can give me the path directly from `.harness/plan/`.
 
 Do not proceed until you have a valid plan file path.
 
@@ -335,7 +335,7 @@ IMPORTANT: Outputs should vary based on plan depth, topic risk, and the selected
 - No two deepening passes should read the same unless the plans, gaps, and evidence sources are effectively identical.
 
 ## Examples
-- User says: "Please deepen `Docs/plans/2026-04-07-checkout-retry-rollout-plan.md`; rollout, rollback, and verification still feel weak."
+- User says: "Please deepen `.harness/plan/2026-04-07-checkout-retry-rollout-plan.md`; rollout, rollback, and verification still feel weak."
 - User says: "Stress-test this migration plan before implementation and focus only on the genuinely weak sections."
 - User says: "Before we start `he-work`, tighten sequencing and risk treatment in this plan without rewriting the whole document."
 
@@ -359,4 +359,4 @@ IMPORTANT: Outputs should vary based on plan depth, topic risk, and the selected
 
 ## Deferred Context Preservation
 
-Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.
+Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

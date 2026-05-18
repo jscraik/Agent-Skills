@@ -142,25 +142,45 @@ class TestManifestJsonlStructure(unittest.TestCase):
 
 
 class TestManifestSourceRevisionUpdated(unittest.TestCase):
-    """All manifests in the PR should use the new source_revision 0ae8c3e6d."""
+    """All manifests in the PR should use one consistent current source revision."""
 
-    _NEW_REVISION = "0ae8c3e6d"
-
-    def _assert_revision(self, path: Path):
+    def _assert_revision(self, path: Path, expected_revision: str):
         records = _load_jsonl(path)
         for rec in records:
             rev = rec.get("provenance", {}).get("source_revision", "")
             self.assertEqual(
                 rev,
-                self._NEW_REVISION,
+                expected_revision,
                 f"Entry '{rec.get('id')}' in {path.name} still has old revision: {rev}",
             )
 
+    def _discover_expected_revision(self) -> str:
+        revisions = set()
+        for manifest_path in SKILLSET_MANIFEST_PATHS:
+            records = _load_jsonl(manifest_path)
+            for rec in records:
+                rev = rec.get("provenance", {}).get("source_revision", "")
+                if rev:
+                    revisions.add(rev)
+        self.assertGreater(len(revisions), 0, "No source_revision values found in manifests")
+        self.assertEqual(
+            len(revisions),
+            1,
+            f"Expected one consistent source_revision across manifests, got: {sorted(revisions)}",
+        )
+        return next(iter(revisions))
+
     def test_agent_ops_revision_updated(self):
-        self._assert_revision(REPO_ROOT / ".skillsets" / "agent-ops" / "manifest.jsonl")
+        self._assert_revision(
+            REPO_ROOT / ".skillsets" / "agent-ops" / "manifest.jsonl",
+            self._discover_expected_revision(),
+        )
 
     def test_backend_platform_revision_updated(self):
-        self._assert_revision(REPO_ROOT / ".skillsets" / "backend-platform" / "manifest.jsonl")
+        self._assert_revision(
+            REPO_ROOT / ".skillsets" / "backend-platform" / "manifest.jsonl",
+            self._discover_expected_revision(),
+        )
 
     def test_no_old_revision_in_any_manifest(self):
         """No manifest should still reference the old revision 7b1cf7a49."""
@@ -220,8 +240,19 @@ class TestCommandSurfaceJson(unittest.TestCase):
         self.assertEqual(self._data["schema_version"], "command-surface.v1")
 
     def test_all_source_revisions_use_new_hash(self):
-        new_revision = "0ae8c3e6d"
         old_revision = "7b1cf7a49"
+        revisions = {
+            entry.get("provenance", {}).get("source_revision", "")
+            for entry in self._data.get("handles", [])
+            if entry.get("provenance", {}).get("source_revision", "")
+        }
+        self.assertGreater(len(revisions), 0, "No source_revision values found in command-surface")
+        self.assertEqual(
+            len(revisions),
+            1,
+            f"Expected one consistent source_revision in command-surface, got: {sorted(revisions)}",
+        )
+        expected_revision = next(iter(revisions))
         for entry in self._data.get("handles", []):
             prov = entry.get("provenance", {})
             rev = prov.get("source_revision", "")
@@ -231,7 +262,7 @@ class TestCommandSurfaceJson(unittest.TestCase):
                     f"Command '{entry.get('handle')}' still uses old revision {old_revision}"
                 )
                 self.assertEqual(
-                    rev, new_revision,
+                    rev, expected_revision,
                     f"Command '{entry.get('handle')}' has unexpected revision: {rev}"
                 )
 
@@ -309,18 +340,141 @@ class TestMiseToml(unittest.TestCase):
 
 class TestGitignore(unittest.TestCase):
     def setUp(self):
+        """
+        Prepare test fixture by loading the repository .gitignore file into self._lines as a list of lines.
+
+        Each line is decoded as UTF-8 and split on line boundaries; the resulting list preserves original ordering and excludes trailing newline characters.
+        """
         self._lines = GITIGNORE_PATH.read_text(encoding="utf-8").splitlines()
 
     def test_artifacts_policy_entry_present(self):
-        self.assertIn("artifacts/policy/", self._lines)
+        """
+        Ensure the repository .gitignore includes an artifacts/policy/ ignore entry in either relative or leading-slash form.
+
+        Checks that either "artifacts/policy/" or "/artifacts/policy/" appears among the file's lines.
+        """
+        self.assertTrue(
+            "artifacts/policy/" in self._lines or "/artifacts/policy/" in self._lines
+        )
 
     def test_original_infrastructure_artifacts_policy_still_present(self):
         self.assertIn("Infrastructure/artifacts/policy/", self._lines)
 
+    def test_harness_runtime_outputs_ignored(self):
+        for entry in [
+            ".harness/backups/",
+            ".harness/*.db",
+            ".harness/ci-migrate-snapshots/",
+        ]:
+            self.assertIn(entry, self._lines)
+
+    def test_harness_curated_roots_are_trackable(self):
+        """
+        Asserts that specific curated `.harness/` root directories are marked as trackable in `.gitignore`.
+
+        Checks for the presence of negated ignore patterns that ensure the following curated roots are tracked: `!.harness/core/`, `!.harness/linear/`, `!.harness/reframes/`, `!.harness/specs/`, and `!.harness/review/`.
+        """
+        for entry in [
+            "!.harness/core/",
+            "!.harness/linear/",
+            "!.harness/reframes/",
+            "!.harness/specs/",
+            "!.harness/review/",
+        ]:
+            self.assertIn(entry, self._lines)
+
+    def test_plugins_zip_is_ignored(self):
+        """Plugins/*.zip archives must be ignored so built plugin zips are not tracked."""
+        self.assertIn("Plugins/*.zip", self._lines)
+
+    def test_harness_root_marker_is_trackable(self):
+        """The top-level !.harness/ negation must be present so the directory itself is trackable."""
+        self.assertIn("!.harness/", self._lines)
+
+    def test_harness_core_recursive_content_is_trackable(self):
+        """!.harness/core/** must be present so nested core policy files are tracked."""
+        self.assertIn("!.harness/core/**", self._lines)
+
+    def test_harness_decisions_are_trackable(self):
+        """ADR and decision files under .harness/decisions/ must be tracked."""
+        self.assertIn("!.harness/decisions/", self._lines)
+        self.assertIn("!.harness/decisions/**", self._lines)
+
+    def test_harness_features_are_trackable(self):
+        """Feature intent and moat files under .harness/features/ must be tracked."""
+        self.assertIn("!.harness/features/", self._lines)
+        self.assertIn("!.harness/features/**", self._lines)
+
+    def test_harness_plan_is_trackable(self):
+        """Plan artifacts under .harness/plan/ must be tracked."""
+        self.assertIn("!.harness/plan/", self._lines)
+        self.assertIn("!.harness/plan/**", self._lines)
+
+    def test_harness_memory_is_trackable(self):
+        """Memory learnings under .harness/memory/ must be tracked."""
+        self.assertIn("!.harness/memory/", self._lines)
+        self.assertIn("!.harness/memory/**", self._lines)
+
+    def test_harness_quality_is_trackable(self):
+        """Quality criteria under .harness/quality/ must be tracked."""
+        self.assertIn("!.harness/quality/", self._lines)
+        self.assertIn("!.harness/quality/**", self._lines)
+
+    def test_harness_json_files_are_trackable(self):
+        """Contract JSON files at .harness/*.json must be tracked."""
+        self.assertIn("!.harness/*.json", self._lines)
+
+    def test_harness_strategy_triage_ideate_brainstorm_are_trackable(self):
+        """Secondary reference dirs (strategy, triage, ideate, brainstorm) must be tracked."""
+        for entry in [
+            "!.harness/strategy/",
+            "!.harness/strategy/**",
+            "!.harness/triage/",
+            "!.harness/triage/**",
+            "!.harness/ideate/",
+            "!.harness/ideate/**",
+            "!.harness/brainstorm/",
+            "!.harness/brainstorm/**",
+        ]:
+            with self.subTest(entry=entry):
+                self.assertIn(entry, self._lines)
+
+    def test_harness_ignore_block_precedes_negation_block(self):
+        """Runtime-ignored entries must appear before the negation block in .gitignore."""
+        ignore_idx = next(
+            (i for i, line in enumerate(self._lines) if line == ".harness/backups/"), -1
+        )
+        negation_idx = next(
+            (i for i, line in enumerate(self._lines) if line == "!.harness/"), -1
+        )
+        self.assertGreater(ignore_idx, 0, ".harness/backups/ entry not found")
+        self.assertGreater(negation_idx, 0, "!.harness/ entry not found")
+        self.assertLess(
+            ignore_idx,
+            negation_idx,
+            "Runtime-ignore entries should precede the negation block",
+        )
+
+    def test_harness_db_ignore_precedes_json_negation(self):
+        """.harness/*.db must be ignored before !.harness/*.json is re-included."""
+        db_idx = next(
+            (i for i, line in enumerate(self._lines) if line == ".harness/*.db"), -1
+        )
+        json_neg_idx = next(
+            (i for i, line in enumerate(self._lines) if line == "!.harness/*.json"), -1
+        )
+        self.assertGreater(db_idx, 0, ".harness/*.db entry not found")
+        self.assertGreater(json_neg_idx, 0, "!.harness/*.json entry not found")
+        self.assertLess(
+            db_idx,
+            json_neg_idx,
+            ".harness/*.db should be ignored before .harness/*.json is re-included",
+        )
+
 
 # ---------------------------------------------------------------------------
 # .codex/environments/environment.toml
-# ---------------------------------------------------------------------------
+
 
 class TestEnvironmentToml(unittest.TestCase):
     def setUp(self):

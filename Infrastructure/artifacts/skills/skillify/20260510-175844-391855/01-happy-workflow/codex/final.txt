@@ -1,0 +1,8 @@
+I can turn it into a reusable skill package, but I need the actual release triage steps or the source doc to preserve the “stable” workflow faithfully.
+
+Please send one of these:
+1. The doc/path that describes the current release triage process
+2. A pasted checklist of the steps you want captured
+3. The existing issue/PR template or runbook the team follows
+
+Once I have that, I’ll scaffold the skill package and wire the instructions into a clean `SKILL.md` with any helper files it needs.

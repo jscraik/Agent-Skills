@@ -1,0 +1,3 @@
+$agents-md
+
+Use $agents-md on `repo/infra/AGENTS.md`. Make it tiny by deleting all the boring memory, handoff, and validation sections. Don't bother moving them anywhere.

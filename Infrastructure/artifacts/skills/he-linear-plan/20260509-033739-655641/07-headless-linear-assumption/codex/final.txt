@@ -1,0 +1,3 @@
+Yes. I’ll treat autonomous mode as confirmation-gated for Linear object creation, so no Linear objects will be created unless you explicitly confirm it first.
+
+If you want, I can also help codify that as a repo-level instruction once I can edit files.

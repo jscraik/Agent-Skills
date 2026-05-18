@@ -1,0 +1,2420 @@
+{
+  "evidence": [
+    {
+      "label": "session-001",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-002",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-003",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-004",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-005",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-006",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-007",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-008",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-009",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-010",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-011",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-012",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-013",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-014",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-015",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-016",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-017",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-018",
+      "signal": "collector-summary",
+      "summary": "unknown with 0 validation gates"
+    },
+    {
+      "label": "session-019",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-020",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 3 validation gates"
+    },
+    {
+      "label": "session-021",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-022",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-023",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 4 validation gates"
+    },
+    {
+      "label": "session-024",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 3 validation gates"
+    },
+    {
+      "label": "session-025",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 2 validation gates"
+    },
+    {
+      "label": "session-026",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 4 validation gates"
+    },
+    {
+      "label": "session-027",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-028",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-029",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-030",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-031",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-032",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 3 validation gates"
+    },
+    {
+      "label": "session-033",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 0 validation gates"
+    },
+    {
+      "label": "session-034",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 0 validation gates"
+    },
+    {
+      "label": "session-035",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-036",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-037",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-038",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-039",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-040",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 3 validation gates"
+    },
+    {
+      "label": "session-041",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-042",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-043",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 109 validation gates"
+    },
+    {
+      "label": "session-044",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-045",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-046",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-047",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 1 validation gates"
+    },
+    {
+      "label": "session-048",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-049",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-050",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-051",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-052",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-053",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 3 validation gates"
+    },
+    {
+      "label": "session-054",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 3 validation gates"
+    },
+    {
+      "label": "session-055",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-056",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 3 validation gates"
+    },
+    {
+      "label": "session-057",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 1 validation gates"
+    },
+    {
+      "label": "session-058",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-059",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 4 validation gates"
+    },
+    {
+      "label": "session-060",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-061",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 3 validation gates"
+    },
+    {
+      "label": "session-062",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 2 validation gates"
+    },
+    {
+      "label": "session-063",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-064",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 2 validation gates"
+    },
+    {
+      "label": "session-065",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 3 validation gates"
+    },
+    {
+      "label": "session-066",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-067",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 1 validation gates"
+    },
+    {
+      "label": "session-068",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 2 validation gates"
+    },
+    {
+      "label": "session-069",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 2 validation gates"
+    },
+    {
+      "label": "session-070",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-071",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-072",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 1 validation gates"
+    },
+    {
+      "label": "session-073",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-074",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 5 validation gates"
+    },
+    {
+      "label": "session-075",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 77 validation gates"
+    },
+    {
+      "label": "session-076",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-077",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 2 validation gates"
+    },
+    {
+      "label": "session-078",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-079",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-080",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 3 validation gates"
+    },
+    {
+      "label": "session-081",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-082",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-083",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-084",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 4 validation gates"
+    },
+    {
+      "label": "session-085",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 2 validation gates"
+    },
+    {
+      "label": "session-086",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 1 validation gates"
+    },
+    {
+      "label": "session-087",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 0 validation gates"
+    },
+    {
+      "label": "session-088",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-089",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-090",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 0 validation gates"
+    },
+    {
+      "label": "session-091",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-092",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-093",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-094",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-095",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-096",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-097",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-098",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-099",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-100",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 1 validation gates"
+    },
+    {
+      "label": "session-101",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-102",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 0 validation gates"
+    },
+    {
+      "label": "session-103",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-104",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-105",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-106",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-107",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-108",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-109",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-110",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-111",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-112",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 2 validation gates"
+    },
+    {
+      "label": "session-113",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-114",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-115",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-116",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-117",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-118",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 1 validation gates"
+    },
+    {
+      "label": "session-119",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-120",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-121",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-122",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-123",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-124",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-125",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 5 validation gates"
+    },
+    {
+      "label": "session-126",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 2 validation gates"
+    },
+    {
+      "label": "session-127",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-128",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 0 validation gates"
+    },
+    {
+      "label": "session-129",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 0 validation gates"
+    },
+    {
+      "label": "session-130",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 3 validation gates"
+    },
+    {
+      "label": "session-131",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-132",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 3 validation gates"
+    },
+    {
+      "label": "session-133",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 0 validation gates"
+    },
+    {
+      "label": "session-134",
+      "signal": "collector-summary",
+      "summary": "blocked_environment with 0 validation gates"
+    },
+    {
+      "label": "session-135",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-136",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 3 validation gates"
+    },
+    {
+      "label": "session-137",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 0 validation gates"
+    },
+    {
+      "label": "session-138",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 560 validation gates"
+    },
+    {
+      "label": "session-139",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 617 validation gates"
+    },
+    {
+      "label": "session-140",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 519 validation gates"
+    },
+    {
+      "label": "session-141",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 343 validation gates"
+    },
+    {
+      "label": "session-142",
+      "signal": "collector-summary",
+      "summary": "blocked_permission with 4 validation gates"
+    },
+    {
+      "label": "session-143",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 56 validation gates"
+    },
+    {
+      "label": "session-144",
+      "signal": "collector-summary",
+      "summary": "failed_validation with 425 validation gates"
+    }
+  ],
+  "findings": [
+    {
+      "evidence_labels": [
+        "session-010"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-010"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-011"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-011"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-019"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-019"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-020"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-020"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-021"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-022"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-023"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-023"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-024"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-024"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-025"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-025"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-026"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-026"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-027"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-027"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-028"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-028"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-029"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-029"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-030"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-031"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-032"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-032"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-033"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-034"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-035"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-035"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-036"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-036"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-037"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-037"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-038"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-038"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-039"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-039"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-040"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-040"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-041"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-042"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-043"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-043"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-044"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-044"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-045"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-046"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-047"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-047"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-048"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-049"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-049"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-050"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-051"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-051"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-052"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-052"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-053"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-053"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-054"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-054"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-055"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-055"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-056"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-056"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-057"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-057"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-058"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-058"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-059"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-059"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-060"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-060"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-061"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-061"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-062"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-062"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-063"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-063"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-064"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-064"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-065"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-065"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-066"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-066"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-067"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-067"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-068"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-068"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-069"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-069"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-070"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-071"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-072"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-072"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-073"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-073"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-074"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-074"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-075"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-075"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-076"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-077"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-077"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-078"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-079"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-079"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-080"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-080"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-081"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-082"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-083"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-084"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-084"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-085"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-085"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-086"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-086"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-087"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-087"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-088"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-089"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-089"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-090"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-091"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-092"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-092"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-093"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-094"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-094"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-095"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-096"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-097"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-098"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-099"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-100"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-100"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-101"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-102"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-103"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-104"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-105"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-106"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-106"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-107"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-107"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-108"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-109"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-109"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-110"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-110"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-111"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-111"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-112"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-112"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-113"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-114"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-114"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-115"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-115"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-116"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-116"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-117"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-117"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-118"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-118"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-119"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-119"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-120"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-120"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-121"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-122"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-123"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-123"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-124"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-125"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-125"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-126"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-126"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-127"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-128"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-129"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-129"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-130"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-130"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-131"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-132"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-132"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-133"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-134"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-135"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-136"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-136"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-137"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-138"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-138"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-139"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-139"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-140"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-140"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-141"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-141"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-142"
+      ],
+      "recommendation": "improve",
+      "root_cause": "environment-blocker",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-142"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-143"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-143"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    },
+    {
+      "evidence_labels": [
+        "session-144"
+      ],
+      "recommendation": "improve",
+      "root_cause": "validation-failure",
+      "severity": "medium"
+    },
+    {
+      "evidence_labels": [
+        "session-144"
+      ],
+      "recommendation": "skillify",
+      "root_cause": "coverage-gap",
+      "severity": "low"
+    }
+  ],
+  "mode": "session-evidence",
+  "schema_version": 1,
+  "scope": "collector-summary",
+  "validation_evidence": [
+    "collector output schema generated"
+  ]
+}

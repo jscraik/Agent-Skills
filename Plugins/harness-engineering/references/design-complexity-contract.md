@@ -10,6 +10,8 @@ Each HE stage should be a deep module: a small caller-facing contract with enoug
 
 Prefer changing shared contracts, evals, or references when the same rule would otherwise need to be copied across multiple stage entrypoints.
 
+Use `references/stage-context-contract.md` when the repeated rule is lifecycle state resolution. Stage entrypoints should name the context contract and keep only stage-specific decisions in their procedures.
+
 ## Complexity Red Flags
 
 Classify at least one red flag before changing HE skill behavior:
@@ -33,7 +35,7 @@ When a stage returns structured output or hands off to another HE stage, include
 
 ```yaml
 schema_version: 1
-he_stage: "<he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat>"
+he_stage: "<he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat>"
 status: pass|blocked|needs_route|needs_user
 owned_artifact: "<path or not_applicable>"
 evidence_freshness: fresh|stale|blocked|not_applicable
@@ -51,7 +53,7 @@ context_map:
   conflict_status: none|blocked|resolved|not_applicable
   conflict_rule: stop|refresh|prefer_source|record_blocker|not_applicable
 blocker: "<smallest recovery step or null>"
-next_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-compound|he-heartbeat|done
+next_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat|done
 validation:
   status: pass|fail|blocked|not_run_with_reason|not_applicable
   commands: []

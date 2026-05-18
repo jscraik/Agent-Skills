@@ -1,0 +1,34 @@
+{
+  "runner": "codex",
+  "exit_code": 0,
+  "passed": true,
+  "tier1_failures": [],
+  "tier2_findings": [],
+  "warnings": [],
+  "artifacts": {
+    "dir": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/04-headless-plan-assumption/codex",
+    "final": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/04-headless-plan-assumption/codex/final.txt",
+    "stdout": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/04-headless-plan-assumption/codex/stdout.txt",
+    "stderr": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/04-headless-plan-assumption/codex/stderr.txt",
+    "jsonl": "Infrastructure/artifacts/skills/he-plan/20260510-120327-688525/04-headless-plan-assumption/codex/codex_events.jsonl"
+  },
+  "metrics": {
+    "trace": {
+      "event_count": 8,
+      "command_count": 0,
+      "unique_command_count": 0,
+      "duplicate_command_ratio": 0.0,
+      "max_repeated_command_count": 0,
+      "turn_count": 1,
+      "error_event_count": 0,
+      "token_usage": {
+        "input_tokens": 185881,
+        "output_tokens": 605,
+        "reasoning_tokens": 0,
+        "total_tokens": 186486
+      }
+    },
+    "selected_skill": true
+  },
+  "used_schema": false
+}

@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a90-4cac-7d93-9908-c56c504dd88a"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Should I treat this as an interactive session, or should I record a headless assumption and continue non-interactively?"}}
+{"type":"turn.completed","usage":{"input_tokens":30246,"cached_input_tokens":30080,"output_tokens":220,"reasoning_output_tokens":191}}

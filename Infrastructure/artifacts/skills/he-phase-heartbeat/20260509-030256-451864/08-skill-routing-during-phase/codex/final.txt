@@ -1,0 +1,1 @@
+Yes. When a phase calls for specialist knowledge, I’ll pick the most relevant available skill, use it explicitly, and briefly explain why it’s the best fit for that phase. If more than one skill could apply, I’ll choose the smallest set that covers the work and note the order I’m using them in.

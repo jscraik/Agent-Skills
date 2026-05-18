@@ -1,0 +1,5 @@
+Absolutely. I’ll treat the approved domain model as a hard boundary while implementing.
+
+For work in `/Users/jamiecraik/dev/agent-skills`, that means I’ll read `UBIQUITOUS_LANGUAGE.md` before changing skills, policy, runtime projections, or agent-facing docs, then keep code/docs aligned to those terms. If I hit naming drift such as a class, command, folder, field, or concept that appears to contradict the approved domain language, I’ll stop, point to the exact paths/terms involved, explain the mismatch, and ask how you want to resolve it before coding further.
+
+I’ll also keep following the repo rules you provided: use `./bin/ask` for repo operations, edit canonical sources rather than runtime projections, and validate with the repo wrappers where possible.

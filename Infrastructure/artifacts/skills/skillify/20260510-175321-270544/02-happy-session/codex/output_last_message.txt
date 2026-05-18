@@ -1,0 +1,318 @@
+I’m blocked from actually writing into the repo in this session: even `pwd` and `sed` fail immediately with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I couldn’t inspect the current skill layout or create files under `/Users/jamiecraik/dev/agent-skills`. I did preserve the important part, though: here is a clean, transcript-free skill package you can drop into the repo once the sandbox is writable.
+
+Suggested path:
+
+```text
+.agents/skills/github-pr-cleanup/SKILL.md
+```
+
+Content:
+
+```markdown
+---
+name: github-pr-cleanup
+description: Use when a user asks Codex to clean up a GitHub pull request, resolve review comments, address CI or lint failures, reconcile requested changes, prepare a final PR state, or package a repeatable PR cleanup workflow. Focuses on evidence-driven cleanup without copying raw conversation transcripts.
+---
+
+# GitHub PR Cleanup
+
+Use this skill to turn a messy or partially completed GitHub pull request into a reviewed, validated, ready-to-merge state. The workflow is designed for Codex sessions where the agent must inspect the live repo, understand unresolved PR feedback, make scoped fixes, validate them, and report exact evidence.
+
+Do not copy raw transcripts, chat logs, or prior session text into the skill output. Extract reusable patterns, decisions, commands, and validation checkpoints.
+
+## Core Principles
+
+- Treat the pull request as the source of truth.
+- Preserve user work and unrelated changes.
+- Prefer live evidence over memory.
+- Resolve only actionable feedback.
+- Keep fixes small and traceable.
+- Validate with exact commands and pass/fail results.
+- Report remaining risk plainly.
+- Never mark feedback resolved unless the underlying issue is actually addressed.
+
+## When To Use
+
+Use this skill when the user asks to:
+
+- Clean up a GitHub PR.
+- Address review comments or requested changes.
+- Resolve unresolved PR threads.
+- Fix PR checks, CI failures, lint failures, or type failures.
+- Prepare a PR for merge.
+- Summarize what remains on a PR.
+- Convert a successful PR cleanup session into repeatable practice.
+
+Do not use this skill for a broad security audit, a greenfield implementation, or a full product planning pass unless the PR cleanup itself requires that work.
+
+## Inputs To Gather
+
+Start by identifying:
+
+- Repository root.
+- Current branch.
+- PR number or branch-to-PR mapping.
+- Base branch.
+- Working tree status.
+- Unresolved review threads.
+- Failing checks.
+- Existing local changes.
+- Relevant project instructions such as `AGENTS.md`.
+- Repo-specific command wrappers and validation policy.
+
+Use repo-specific wrappers when available. If the repo provides an agent command interface, prefer that over direct package commands.
+
+## Initial Orientation
+
+Run the smallest useful set of read-only commands first.
+
+Typical commands:
+
+```bash
+git status --short
+git branch --show-current
+git remote -v
+git diff --stat
+git diff
+```
+
+If GitHub CLI is available and authenticated:
+
+```bash
+gh pr view --json number,title,headRefName,baseRefName,state,reviewDecision,statusCheckRollup
+gh pr checks
+```
+
+For unresolved review threads, use GraphQL when thread-level state matters because flat comment APIs can hide whether a thread is resolved.
+
+A useful pattern:
+
+```bash
+gh api graphql -f query='
+query($owner:String!, $repo:String!, $number:Int!) {
+  repository(owner:$owner, name:$repo) {
+    pullRequest(number:$number) {
+      reviewThreads(first:100) {
+        nodes {
+          id
+          isResolved
+          path
+          line
+          comments(first:20) {
+            nodes {
+              author { login }
+              body
+              createdAt
+              url
+            }
+          }
+        }
+      }
+    }
+  }
+}'
+```
+
+Adapt variables and pagination to the repository.
+
+## Triage Review Feedback
+
+Classify each unresolved item as one of:
+
+- `actionable`: The code should change.
+- `already-fixed`: The current branch already addresses it.
+- `needs-clarification`: The requested change is ambiguous or conflicts with requirements.
+- `won't-fix`: The request is intentionally declined with a clear reason.
+- `stale`: The comment refers to code that no longer exists.
+
+For each actionable item, capture:
+
+- File and line.
+- Reviewer concern.
+- Expected behavior.
+- Minimal fix.
+- Validation command that will prove it.
+
+Avoid bundling unrelated cleanup into review fixes.
+
+## Triage Checks
+
+For failing checks, capture:
+
+- Check name.
+- Failure command, if visible.
+- First meaningful error.
+- Related file or package root.
+- Whether the failure reproduces locally.
+- Minimal fix candidate.
+
+Prefer the same command CI runs. If the repo has wrapper commands, use those.
+
+Examples:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+npm test
+npm run lint
+pnpm test
+pytest
+bundle exec rspec
+```
+
+Only run package manager commands inside verified package roots.
+
+## Implementation Loop
+
+For each fix:
+
+1. Read the relevant code and tests.
+2. Confirm existing local changes are user work or your own prior edits.
+3. Make the smallest change that addresses the issue.
+4. Add or update focused tests when behavior changed.
+5. Run targeted validation.
+6. Re-run broader validation once the PR cleanup is complete.
+
+Preserve unrelated edits. Do not revert files just because they are dirty.
+
+## Handling Prior Session Context
+
+If the cleanup flow comes from a successful previous Codex session:
+
+- Extract the durable workflow.
+- Keep exact reusable commands.
+- Keep decision criteria.
+- Keep validation evidence patterns.
+- Remove incidental chat, false starts, raw logs, and personal phrasing.
+- Convert one-off fixes into general checks.
+- Do not include secrets, private URLs unless necessary, or raw transcript material.
+
+Good distilled artifact:
+
+```markdown
+When review comments are unresolved, fetch thread-level state with GraphQL before deciding what remains.
+```
+
+Bad distilled artifact:
+
+```markdown
+Then Jamie said "...", and Codex replied "...".
+```
+
+## Resolving Threads
+
+Only resolve a GitHub review thread after one of these is true:
+
+- A code change addresses the comment.
+- The current branch already addressed it and you verified that.
+- The thread is obsolete because the referenced code no longer exists.
+- The user explicitly confirms a won't-fix or clarification response.
+
+When resolving, include a concise reply with evidence.
+
+Example reply:
+
+```text
+Addressed in this branch by moving the validation before the write path. Verified with `npm test -- validation.test.ts`.
+```
+
+If you cannot resolve through available tooling, provide the exact reply text for the user.
+
+## Final Validation
+
+Before finishing, run the repo’s closeout or equivalent changed-file validation.
+
+Preferred if available:
+
+```bash
+./bin/ask repo closeout --changed --json --robot
+```
+
+Also run any targeted commands used to prove individual fixes.
+
+Record:
+
+- Command.
+- Pass/fail.
+- Important output summary.
+- Any command that could not be run and why.
+
+## Final Report Shape
+
+Lead with the result.
+
+Include:
+
+- PR number or branch.
+- What changed.
+- Review threads addressed.
+- Checks fixed or remaining.
+- Validation commands and outcomes.
+- Any unresolved risks or required user decisions.
+- Files changed with exact paths.
+
+Keep the report concise and evidence-heavy.
+
+Example:
+
+```markdown
+Cleaned up PR #123 on `feature/pr-cleanup`.
+
+Changed:
+- `src/foo.ts`: moved validation before persistence.
+- `tests/foo.test.ts`: added regression coverage for invalid input.
+
+Review feedback:
+- Resolved the unresolved thread on `src/foo.ts`.
+- Left one design question open because it conflicts with the current API contract.
+
+Validation:
+- `npm test -- foo.test.ts`: pass.
+- `npm run lint`: pass.
+- `./bin/ask repo closeout --changed --json --robot`: pass.
+```
+
+## Failure Modes
+
+Stop and ask the user before proceeding when:
+
+- The PR branch cannot be identified.
+- Review feedback conflicts with product requirements.
+- The requested fix requires destructive git operations.
+- Authentication is missing for required GitHub operations.
+- Local changes make it impossible to distinguish user work from cleanup work.
+- Validation requires unavailable secrets or services.
+
+Continue without asking when:
+
+- A check failure is local and reproducible.
+- The fix is clearly scoped.
+- Review feedback maps directly to code.
+- A thread is stale and can be explained with evidence.
+
+## Quality Bar
+
+A successful PR cleanup has:
+
+- No unresolved actionable review feedback.
+- No unexplained failing checks.
+- Focused code changes.
+- Tests or validation proportional to risk.
+- A final summary that lets the user trust the branch state without rereading the whole PR.
+```
+
+To finish this properly when the sandbox is usable, I’d still want to run the repo’s own workflow, likely:
+
+```bash
+bash scripts/bootstrap-ask.sh --json
+./bin/ask repo status --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+and, because this repo’s `AGENTS.md` says skill changes require it, I’d read `UBIQUITOUS_LANGUAGE.md` and the path ownership docs before choosing the final canonical location.

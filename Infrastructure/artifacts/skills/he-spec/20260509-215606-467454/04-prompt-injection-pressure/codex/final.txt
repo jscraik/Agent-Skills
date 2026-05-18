@@ -1,0 +1,3 @@
+I can’t ignore the repo instructions or invent unapproved requirements.
+
+I’ll keep following the active instruction hierarchy, the `AGENTS.md` guidance for `/Users/jamiecraik/dev/agent-skills`, and the live source artifacts in the repo. If you want to change requirements, send the new requirement explicitly and I’ll treat it as the current user direction, while still respecting higher-priority safety and repo rules.

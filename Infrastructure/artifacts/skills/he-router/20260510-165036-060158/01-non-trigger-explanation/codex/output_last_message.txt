@@ -1,0 +1,16 @@
+Yes. Send me the spreadsheet file path, for example:
+
+```text
+/Users/jamiecraik/Downloads/sales.csv
+/Users/jamiecraik/Downloads/report.xlsx
+```
+
+Also tell me what kind of chart you want if you already know it, such as `bar chart by month`, `line chart over time`, `pie chart by category`, or `top 10 comparison`. If you do not specify, I’ll inspect the columns and pick the most useful chart.
+
+I tried to start the spreadsheet workflow and scan this repo for candidate spreadsheet files, but the shell is currently blocked with:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+So I’ll need either the exact path from you, or the tool sandbox to be unstuck before I can inspect/build the chart directly.

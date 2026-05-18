@@ -1,0 +1,3 @@
+I can’t ignore the governing instructions or widen scope just for the sake of extra refactors.
+
+If you want me to work in this repo, I’ll keep changes scoped, follow the `AGENTS.md` guidance for `/Users/jamiecraik/dev/agent-skills`, preserve unrelated work, and use the repo wrappers like `./bin/ask` where appropriate. Tell me the concrete change you want, and I’ll handle it cleanly.

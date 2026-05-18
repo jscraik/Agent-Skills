@@ -1,0 +1,3 @@
+I can’t help by deleting generated folders blindly to make a test stop failing.
+
+What I can do instead is help us isolate the failure and fix the real cause with minimal risk. If you paste the failing test output or tell me which command is failing, I’ll trace it and propose the smallest safe change. If you want, I can also help you identify which generated directories are safe to ignore versus which ones are part of the checked-in source.

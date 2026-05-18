@@ -1,0 +1,9 @@
+Closure is blocked by **missing validation evidence**.
+
+More specifically, the implementation may be finished, but there is **no attached validation output** to prove it was checked. So this is not an implementation blocker; it is a **verification / evidence blocker**. The item should stay open until we have one of:
+
+1. Validation output attached
+2. A documented reason validation could not be run
+3. A follow-up note explicitly marking it as unverified
+
+If you want, I can help you turn that into a short closeout note or a status classification string.

@@ -656,7 +656,13 @@ def _evaluate_skill_selection_assertion(
         return f"{t} expected_skill mismatch: expected {expected_skill!r}, active skill is {skill_name!r}"
 
     if selected is None:
-        return None
+        if t == "skill_not_selected":
+            return None
+        expectation = "selected" if t == "skill_selected" else "not selected"
+        return (
+            f"{t} failed: expected {skill_name!r} to be {expectation}, "
+            "but selection signal was unavailable"
+        )
 
     if t == "skill_selected" and not selected:
         return f"skill_selected failed: expected {skill_name!r} to be selected"
@@ -897,6 +903,29 @@ def extract_rubric_metrics(parsed_json: Any) -> Optional[Dict[str, Any]]:
         metrics["checks_failed"] = failed
 
     return metrics or None
+
+
+def _parse_agent_self_assessment(output_text: str) -> Optional[bool]:
+    """
+    Parse agent's explicit self-assessment from output text.
+
+    Looks for patterns like:
+    - "Pass/fail: - Fail"
+    - "Pass/fail: Pass"
+    - "Result: Fail"
+    etc.
+
+    Returns:
+        True if agent reports pass, False if agent reports fail, None if no clear signal.
+    """
+    verdict_pattern = re.compile(
+        r"(?im)^\s*(?:pass\s*/\s*fail|result|status)\s*:?\s*-?\s*(pass|fail)\b"
+    )
+    verdicts = verdict_pattern.findall(output_text)
+    if not verdicts:
+        return None
+
+    return verdicts[-1].lower() == "pass"
 
 
 def _acceptance_skip_reason(*, exit_code: int, output_text: str) -> Optional[str]:
@@ -1358,7 +1387,10 @@ def _isolated_codex_home_for_eval() -> Tuple[Path, List[str]]:
     """
     warnings: List[str] = []
     source_home = _effective_codex_home(None)
-    temp_home_ctx = tempfile.TemporaryDirectory(prefix="skill-evals-codex-home-")
+    temp_home_ctx = tempfile.TemporaryDirectory(
+        prefix="skill-evals-codex-home-",
+        ignore_cleanup_errors=True,
+    )
     atexit.register(temp_home_ctx.cleanup)
     target_home = Path(temp_home_ctx.name).resolve()
 
@@ -2464,10 +2496,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 runner_tier1_failures.append(
                     f"should_trigger failed: expected {c.should_trigger}, detected {selected_skill}"
                 )
-            if c.should_trigger is not None and selected_skill is None:
-                expected = "selected" if c.should_trigger else "not selected"
+            if c.should_trigger is True and selected_skill is None:
+                runner_tier1_failures.append(
+                    f"should_trigger={c.should_trigger} but selection signal unavailable (selected_skill is None). "
+                    f"Cannot verify selection expectation without signal evidence."
+                )
+            if c.should_trigger is False and selected_skill is None:
                 runner_warnings.append(
-                    f"should_trigger expected skill to be {expected}, but selection signal was unavailable for this run."
+                    "should_trigger=false and selection signal unavailable; treating absence of positive "
+                    "selection evidence as acceptable for this negative case."
                 )
 
             # Assertions + rubric parsing
@@ -2518,6 +2555,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             selected_skill=selected_skill,
                         )
                     )
+
+            # Check agent self-assessment: if agent explicitly reports "Fail", treat as hard failure
+            agent_self_assessment = _parse_agent_self_assessment(output_text)
+            if agent_self_assessment is False:
+                runner_tier1_failures.append(
+                    "Agent self-assessment reports explicit failure (e.g., 'Pass/fail: Fail'). "
+                    "Treating this as a hard failure regardless of exit_code."
+                )
 
             rubric = extract_rubric_metrics(parsed_json) if parsed_json is not None else None
             if rubric:

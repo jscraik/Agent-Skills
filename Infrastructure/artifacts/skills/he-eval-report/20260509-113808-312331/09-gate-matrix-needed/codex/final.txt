@@ -1,0 +1,14 @@
+I can build it, but I’m blocked from reading the repo in this session because every shell probe is failing at the sandbox boundary, so I don’t have the actual evidence needed to make the matrix trustworthy.
+
+If you want, send me one of these and I’ll turn it into a proper pass / fail / partial / not-run gate matrix:
+
+1. The eval report or logs you want summarized.
+2. The path to the specific markdown or JSON artifact, plus the relevant contents pasted here.
+3. A screenshot or export of the eval results table.
+
+Once I have the evidence, I’ll produce a matrix with:
+- each gate name
+- status
+- evidence cited verbatim or paraphrased from the source
+- a short rationale for why it landed in that status
+- anything left as `not-run` explicitly called out

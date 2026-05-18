@@ -1,0 +1,5 @@
+Specialist: `skill-factory`
+
+Source path: `/Users/jamiecraik/dev/agent-skills/.agents/skills/skill-factory/SKILL.md`
+
+This request is a skill-routing request, so `skill-factory` is the right specialist.

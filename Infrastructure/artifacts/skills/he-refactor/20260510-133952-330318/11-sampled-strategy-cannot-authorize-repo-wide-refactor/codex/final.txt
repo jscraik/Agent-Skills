@@ -1,0 +1,220 @@
+I’m blocked from writing or even reading the live tree in this session: every shell read failed with `sandbox_apply: Operation not permitted`, and approval policy is `never`, so I can’t request broader filesystem access. I can still give you the repo-wide refactor program as the canonical artifact content to land once the sandbox is writable.
+
+Recommended canonical target, based on the AGENTS guidance you provided: `Docs/agents/refactor-program.md` or, if this repo already has a strategy/planning area, the nearest canonical `Docs/agents/*` source rather than any runtime projection.
+
+```markdown
+# Repo-Wide Refactor Program
+
+## Objective
+
+Create a focused, evidence-driven refactor program for `agent-skills` that reduces instruction drift, clarifies canonical ownership, and makes skill/runtime behavior easier to validate without expanding scope into broad rewrites.
+
+This program treats the upstream strategy sample as weak input, not authority. Priority is set by repo-wide leverage: changes that reduce future agent error, prevent projection/source confusion, and improve validation confidence come first.
+
+## Priority 1: Canonical Source and Projection Boundaries
+
+### Problem
+
+The repo contains canonical skill/operator/docs sources and runtime projections. Agents can accidentally edit generated or projected files when the intended change belongs in the canonical source.
+
+### Goal
+
+Make ownership boundaries mechanically obvious and easy to validate.
+
+### Work
+
+- Audit all paths mentioned in `AGENTS.md`, `UBIQUITOUS_LANGUAGE.md`, and `Docs/agents/14-path-ownership-boundaries.md`.
+- Produce a single canonical ownership map for:
+  - skill source files
+  - runtime projections
+  - operator docs
+  - sync policy
+  - generated artifacts
+- Add or tighten validation that flags edits to runtime projections when the matching canonical source should have changed.
+- Ensure `./bin/ask repo closeout --changed --json --robot` reports ownership-boundary violations clearly.
+
+### Acceptance Criteria
+
+- A changed projected/runtime file can be traced to its canonical owner.
+- Repo closeout identifies wrong-side edits in robot-readable output.
+- Docs use the same terms as `UBIQUITOUS_LANGUAGE.md`.
+
+## Priority 2: Instruction Map Normalization
+
+### Problem
+
+Agent-facing guidance is spread across multiple docs. Some instructions are likely stale, duplicated, or contradictory, which raises execution risk for repo-wide work.
+
+### Goal
+
+Make the instruction map smaller, sharper, and internally consistent.
+
+### Work
+
+- Start from `Docs/agents/README.md` and classify every linked agent doc as:
+  - required operating contract
+  - policy reference
+  - validation reference
+  - cleanup candidate
+- Use `Docs/agents/05-contradictions-and-cleanup.md` as the backlog for stale or contradictory guidance.
+- Fold duplicated guidance into the most canonical document.
+- Keep `AGENTS.md` as a short routing layer, not a full policy body.
+
+### Acceptance Criteria
+
+- Every major instruction has exactly one canonical home.
+- `AGENTS.md` links to policy rather than duplicating long policy.
+- Contradiction cleanup items are either resolved or converted into explicit follow-up tasks.
+
+## Priority 3: Skill Lifecycle Validation
+
+### Problem
+
+Skill authoring, improvement, proof, install, audit, fold, and projection appear to be first-class workflows. The highest-risk failures are silent drift between intended skill behavior and repo/runtime outputs.
+
+### Goal
+
+Make skill lifecycle commands prove the right things in the right order.
+
+### Work
+
+- Review these command paths:
+  - `./bin/ask skills improve "<goal>" --json --robot`
+  - `./bin/ask skills explain <handle> --json --robot`
+  - `./bin/ask skills prove <handle> --json --robot`
+- Define the minimum evidence each command must emit in robot mode.
+- Ensure validation distinguishes:
+  - source syntax/shape errors
+  - policy violations
+  - projection drift
+  - proof failures
+  - missing evidence
+- Add focused fixtures for one representative skill lifecycle path.
+
+### Acceptance Criteria
+
+- A skill change has an explainable path from source edit to proof evidence.
+- Robot output is stable enough for agents to consume without prose scraping.
+- Missing proof evidence fails loudly.
+
+## Priority 4: Repo Doctor and Closeout Reliability
+
+### Problem
+
+The repo depends on wrapper commands for agent-safe operations. If `repo doctor` or `repo closeout` is noisy, incomplete, or ambiguous, agents will make poor decisions.
+
+### Goal
+
+Make the repo wrappers the trusted final authority for readiness and changed-file validation.
+
+### Work
+
+- Audit:
+  - `./bin/ask repo doctor --json --robot`
+  - `./bin/ask repo closeout --changed --json --robot`
+- Ensure each command emits:
+  - stable status
+  - failing check IDs
+  - actionable paths
+  - clear remediation hints
+  - distinction between warnings and blockers
+- Remove or downgrade checks that are advisory but currently look blocking.
+- Promote high-confidence ownership and validation failures to blockers.
+
+### Acceptance Criteria
+
+- Agents can decide pass/fail from JSON without interpreting prose.
+- Changed-file closeout catches the common classes of invalid repo edits.
+- Doctor output is concise enough to include in implementation evidence.
+
+## Priority 5: Terminology and Handle Consistency
+
+### Problem
+
+Skill handles, repo vocabulary, runtime naming, and docs language can diverge. That makes automated routing and human review harder.
+
+### Goal
+
+Use `UBIQUITOUS_LANGUAGE.md` as the terminology source of truth across agent docs and command outputs.
+
+### Work
+
+- Extract all important terms from command help, docs, and validation messages.
+- Compare them against `UBIQUITOUS_LANGUAGE.md`.
+- Rename ambiguous or overloaded terms where practical.
+- Add a lightweight terminology check if the repo already has doc linting infrastructure.
+
+### Acceptance Criteria
+
+- Docs and command output use the same terms for the same concepts.
+- Skill handles and runtime/projection terms are consistently described.
+- New terminology additions are made in `UBIQUITOUS_LANGUAGE.md` first.
+
+## Priority 6: Refactor Safety Rails
+
+### Problem
+
+Repo-wide refactors can become formatting churn or broad rewrites without enough behavioral proof.
+
+### Goal
+
+Constrain future refactors to small, reviewable programs with explicit validation.
+
+### Work
+
+- Add a refactor checklist to the agent docs:
+  - canonical files identified
+  - ownership boundaries checked
+  - commands run through `./bin/ask`
+  - changed-file closeout captured
+  - unrelated churn avoided
+- Require each repo-wide refactor to name:
+  - target behavior
+  - files allowed to change
+  - validation commands
+  - rollback considerations
+- Prefer staged PRs over one large cross-cutting change.
+
+### Acceptance Criteria
+
+- Future refactors can be reviewed by intent, not just diff volume.
+- Each refactor has explicit validation evidence.
+- Unrelated projection, formatting, or generated churn is easy to reject.
+
+## Initial Execution Plan
+
+1. Run repo orientation:
+   - `./bin/ask repo doctor --json --robot`
+   - `./bin/ask repo closeout --changed --json --robot`
+
+2. Read required policy:
+   - `UBIQUITOUS_LANGUAGE.md`
+   - `Docs/agents/README.md`
+   - `Docs/agents/14-path-ownership-boundaries.md`
+   - `Docs/agents/16-agent-operating-contract.md`
+   - `Docs/agents/04-validation.md`
+   - `Docs/agents/17-skill-management.md`
+   - `Docs/agents/05-contradictions-and-cleanup.md`
+
+3. Build the ownership and validation inventory.
+
+4. Implement Priority 1 and Priority 2 first.
+
+5. Validate with:
+   - `./bin/ask repo doctor --json --robot`
+   - `./bin/ask repo closeout --changed --json --robot`
+
+## Non-Goals
+
+- Do not rewrite skills wholesale unless proof evidence demands it.
+- Do not edit runtime projections directly.
+- Do not introduce a new package manager workflow at the repo root.
+- Do not replace existing `./bin/ask` flows with ad hoc scripts.
+- Do not broaden this into a general documentation cleanup without validation impact.
+
+## Success Measure
+
+The program succeeds when an agent can make a skill or agent-doc change by following canonical sources, receive precise robot-mode validation, and close out with clear evidence that no projection, ownership, terminology, or proof contract was violated.
+```
+
+I’d land this as a repo planning artifact, then immediately start Priority 1 by inventorying ownership boundaries and checking whether `repo closeout --changed` already catches wrong-side edits. Right now the only blocker is the session filesystem sandbox, not the plan itself.

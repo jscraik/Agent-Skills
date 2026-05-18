@@ -1,0 +1,7 @@
+The canonical validation entrypoint in this repo appears to be:
+
+`./bin/ask repo doctor --json --robot`
+
+That’s the first command called out in the root guide, and the broader validation order is referenced under `Docs/agents/04-validation.md`.
+
+If you meant “which validation command should I run for a specific change type,” send me the change area and I’ll map it to the repo’s canonical path once.

@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0ee9-324f-7ba3-9c6d-a127c78d62bb"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Absolutely. I’ll keep Linear creation deliberately selective: only high-signal, actionable findings that are worth tracking will become issues. Low-value, speculative, duplicate, or “nice to have someday” findings will stay out of Linear unless you explicitly ask me to capture them.\n\nWhen I do create or suggest Linear items, I’ll bias toward a small active set with clear owner/action/value, and I’ll summarize anything discarded rather than turning it into ticket clutter."}}
+{"type":"turn.completed","usage":{"input_tokens":46023,"cached_input_tokens":39296,"output_tokens":131,"reasoning_output_tokens":34}}

@@ -1,0 +1,1 @@
+Yep. Which typo should I patch? Send me the file/path and the before → after text, or just paste the line and I’ll make the smallest possible edit.

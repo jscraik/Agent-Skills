@@ -1,0 +1,6 @@
+usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
+              [-o ORGANIZATION] [-t {openai,azure}]
+              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
+              [--azure-ad-token AZURE_AD_TOKEN] [-V]
+              {api,tools,migrate,grit} ...
+openai: error: argument {api,tools,migrate,grit}: invalid choice: '$he-linear-plan\n\nCan you create the missing live Linear bug issue for this approved HE defect, but the destination project and mutation approval are not explicit.\n' (choose from api, tools, migrate, grit)

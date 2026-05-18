@@ -1,0 +1,19 @@
+Yes. I can turn it into a full architecture review document.
+
+I just need one of these to anchor it:
+1. The Linear execution plan text
+2. The file path or doc name where that plan lives
+3. The target system or feature it covers, if you want me to draft from scratch
+
+If you want, I can also produce the architecture review in a standard structure:
+- Context and goals
+- Current state
+- Proposed architecture
+- Alternatives considered
+- Tradeoffs and risks
+- Security and reliability considerations
+- Migration / rollout plan
+- Open questions
+- Recommendation
+
+Send me the plan or point me at the file, and I’ll write the document directly.

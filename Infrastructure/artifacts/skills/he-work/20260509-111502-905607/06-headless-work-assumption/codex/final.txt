@@ -1,0 +1,3 @@
+Yes. I’ll proceed unattended by default, make reasonable assumptions when they don’t block correctness, and record them clearly in my updates or final notes instead of stopping to ask non-blocking questions.
+
+If I hit a decision with real behavioral, safety, or architectural consequences, I’ll still pause and ask before committing.

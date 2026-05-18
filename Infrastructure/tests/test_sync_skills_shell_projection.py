@@ -26,7 +26,8 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
             script = script_file.read()
 
         self.assertIn("ask_sync_args=(skills sync", script)
-        self.assertIn('[[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" ]]', script)
+        self.assertIn('[[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" || "$plugin_cache_refresh" != "auto" ]]', script)
+        self.assertIn('ask_sync_args+=(--plugin-cache-refresh "$plugin_cache_refresh")', script)
         self.assertIn("start_watchdog", script)
         self.assertIn("exit 124", script)
 
@@ -67,6 +68,19 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("user", result.stdout.lower())
+
+    def test_plugin_cache_only_delegates_to_ask_engine(self) -> None:
+        result = _run_sync_script(["--workspace", "--plugin-cache-refresh", "only", "--dry-run"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("plugin runtime cache refresh only", result.stdout)
+        self.assertIn(".agents/plugins-runtime/cache", result.stdout)
+
+    def test_invalid_plugin_cache_refresh_mode_fails(self) -> None:
+        result = _run_sync_script(["--workspace", "--plugin-cache-refresh", "sometimes", "--dry-run"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("Invalid --plugin-cache-refresh value: sometimes", result.stderr)
 
 
 if __name__ == "__main__":

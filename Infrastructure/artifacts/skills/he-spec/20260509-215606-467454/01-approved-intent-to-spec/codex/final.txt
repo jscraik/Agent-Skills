@@ -1,0 +1,65 @@
+I can, but I need the approved intent text or a pointer to it first.
+
+I tried to ground this in the repo, but the local shell is currently blocked before read-only commands can run:
+
+```text
+sandbox-exec: sandbox_apply: Operation not permitted
+```
+
+I also started a Linear search in case the approved intent lives there, but that tool call was cancelled. So I don’t have the actual intent source yet, and I don’t want to invent a spec without evidence.
+
+Send me one of these and I’ll turn it into a tight implementation spec with acceptance criteria:
+
+1. The approved intent text pasted here.
+2. A Linear issue/project/document ID or URL.
+3. A repo path to the intent doc, once local reads are available.
+4. A brief summary plus any approval notes, if the source is elsewhere.
+
+The output I’ll produce will be structured roughly like this:
+
+```markdown
+# Implementation Spec: <Title>
+
+## Approved Intent
+- Source:
+- Decision:
+- Problem:
+- Intended outcome:
+
+## Evidence
+- <Source/path/comment/date>: <fact>
+- <Source/path/comment/date>: <constraint>
+- <Source/path/comment/date>: <user or system expectation>
+
+## Scope
+### In Scope
+- ...
+
+### Out of Scope
+- ...
+
+## Proposed Implementation
+- ...
+
+## Behavioral Requirements
+- ...
+
+## Data / Interface Changes
+- ...
+
+## Validation Plan
+- ...
+
+## Acceptance Criteria
+- Given ...
+- When ...
+- Then ...
+
+## Non-Goals
+- ...
+
+## Risks and Open Questions
+- ...
+```
+
+Once you give me the intent source, I’ll make it evidence-backed rather than generic.

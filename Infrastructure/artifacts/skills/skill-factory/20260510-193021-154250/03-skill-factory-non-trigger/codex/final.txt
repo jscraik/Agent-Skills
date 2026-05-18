@@ -1,0 +1,6 @@
+I can polish it, but I need the specific file or text block first. This repo is broad enough that “marketing copy unrelated to skill-factory” could live in a README, landing page, or docs page, and I don’t want to touch the wrong thing.
+
+If you want, send:
+1. The file path
+2. The exact paragraph or section
+3. Or paste the copy here and I’ll rewrite it directly

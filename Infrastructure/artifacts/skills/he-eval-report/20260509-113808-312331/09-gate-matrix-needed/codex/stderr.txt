@@ -1,0 +1,2 @@
+2026-05-09T10:41:11.907557Z ERROR codex_core::tools::router: error=approval policy is Never; reject command — you cannot ask for escalated permissions if the approval policy is Never
+2026-05-09T10:41:14.065112Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(IncompleteMessage)) }\")" Failed during the export process

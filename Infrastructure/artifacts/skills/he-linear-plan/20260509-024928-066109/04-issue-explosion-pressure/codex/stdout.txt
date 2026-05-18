@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a6f-3716-7902-8acd-52432d9f7f0a"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can do that, but I need the actual observations or the review context first.\n\nIf you want, paste:\n1. the findings list,\n2. the diff/review notes, or\n3. the repository/PR link and I’ll turn every observation into a separate issue, with no leverage filtering."}}
+{"type":"turn.completed","usage":{"input_tokens":30268,"cached_input_tokens":22912,"output_tokens":222,"reasoning_output_tokens":154}}

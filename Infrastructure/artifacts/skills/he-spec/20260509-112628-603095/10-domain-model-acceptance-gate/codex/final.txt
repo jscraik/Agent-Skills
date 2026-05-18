@@ -1,0 +1,148 @@
+**Spec: Workflow-State Change with Entity Identity and Aggregate Invariants as Acceptance Criteria**
+
+## Summary
+We need a workflow-state change specification that treats both `entity identity` and `aggregate invariants` as first-class acceptance criteria, not implementation details.
+
+This means a workflow state transition is only acceptable if:
+- the target entity is unambiguously identified,
+- the transition applies to exactly one intended aggregate,
+- the aggregate remains valid before and after the change,
+- and the system can prove those conditions in the resulting behavior.
+
+## Problem Statement
+Current workflow-state changes may verify the final state of a record without proving:
+- which entity was actually changed,
+- whether the change was applied to the correct aggregate root,
+- whether the change violated domain invariants,
+- or whether the transition was accepted for the right reason.
+
+That creates gaps where tests can pass while the underlying domain model is incorrect.
+
+## Goal
+Define workflow-state changes so that acceptance requires proof of:
+1. **Entity identity**
+   - the affected entity is the intended one,
+   - identity is stable and explicit,
+   - no accidental matching, duplication, or substitution occurs.
+
+2. **Aggregate invariants**
+   - the aggregate remains internally consistent,
+   - domain rules are enforced at the boundary of the transition,
+   - illegal intermediate or final states are rejected.
+
+## Scope
+This spec applies to any workflow-state change that:
+- mutates a domain entity,
+- moves an aggregate across states,
+- emits domain events as part of a transition,
+- or records a state change that downstream processes rely on.
+
+It applies equally to:
+- command handlers,
+- workflow orchestration steps,
+- state transition services,
+- API endpoints that trigger workflow changes,
+- and tests/specifications for those behaviors.
+
+## Definitions
+- **Entity identity**: the stable, unique identifier that distinguishes one domain object from all others.
+- **Aggregate**: a consistency boundary that must remain valid as a whole.
+- **Aggregate invariant**: a business rule that must always hold for the aggregate to be valid.
+- **Workflow-state change**: any operation that transitions an entity or aggregate from one domain state to another.
+- **Acceptance criteria**: explicit conditions that must be satisfied for the change to be considered correct.
+
+## Requirements
+
+### 1. Identity must be explicit
+A workflow-state change must specify the target entity identity directly.
+
+Acceptance must fail if:
+- the transition is attempted without a unique identifier,
+- more than one entity matches the request,
+- or the wrong entity is updated even if the final state looks correct.
+
+### 2. Identity must be verifiable
+The specification must prove that the transition affected the intended entity.
+
+At minimum, acceptance criteria should check:
+- the entity ID before the change,
+- the entity ID after the change,
+- and that no other entity was modified as a side effect.
+
+### 3. Aggregate invariants must be enforced
+The transition must preserve all invariant rules for the aggregate.
+
+Acceptance must fail if:
+- the transition creates an invalid aggregate state,
+- required relationships are missing,
+- state dependencies are broken,
+- or the operation bypasses domain validation.
+
+### 4. Invariants must be stated in the spec
+Each workflow-state change spec must enumerate the relevant invariants in plain language.
+
+Examples:
+- an approved item cannot return to draft,
+- a published aggregate must have a non-empty canonical title,
+- an order cannot move to fulfilled before payment is confirmed,
+- a workflow step cannot complete unless all required child entities are present.
+
+### 5. Acceptance criteria must test behavior, not just storage
+Acceptance should validate domain behavior rather than only asserting persistence artifacts.
+
+That means checking:
+- returned result or domain response,
+- emitted event or transition outcome,
+- invariant enforcement,
+- and identity correctness.
+
+## Acceptance Criteria
+A workflow-state change is acceptable only when all of the following are true:
+
+1. The request names the exact target entity identity.
+2. The operation changes only the intended entity or aggregate root.
+3. The resulting state matches the requested workflow transition.
+4. All aggregate invariants remain satisfied after the transition.
+5. Invalid identity inputs are rejected.
+6. Invalid state transitions are rejected.
+7. Side effects, if any, are consistent with the validated aggregate state.
+8. Tests/specs fail if the wrong entity is targeted or if an invariant is broken, even if the persisted state superficially appears correct.
+
+## Example Acceptance Criteria Format
+Use this structure in specs:
+
+- Given an aggregate with identity `X` in state `A`
+- When workflow transition `T` is requested for identity `X`
+- Then the aggregate transitions to state `B`
+- And the aggregate identity remains `X`
+- And invariant `I1` still holds
+- And invariant `I2` still holds
+- And no other aggregate was changed
+- And requests for a missing, duplicate, or incorrect identity are rejected
+
+## Non-Goals
+This spec does not require:
+- changing the persistence model,
+- adding new workflow states,
+- introducing new event types,
+- or redesigning the aggregate boundary unless the current model cannot satisfy the acceptance criteria.
+
+## Suggested Test Cases
+Add tests for these situations:
+- correct identity, valid transition, invariants preserved,
+- correct identity, invalid transition, rejected,
+- missing identity, rejected,
+- ambiguous identity, rejected,
+- wrong identity, rejected,
+- valid transition that would violate an invariant, rejected,
+- transition that updates more than one aggregate, rejected.
+
+## Recommended Spec Language
+If this is going into a formal spec or ADR, I’d phrase the key rule like this:
+
+> A workflow-state change is not acceptable unless it proves the intended entity identity and preserves all aggregate invariants as part of acceptance.
+
+If you want, I can turn this into one of these next:
+1. a repo-style `Spec/` document,
+2. an ADR,
+3. or a test-plan checklist with concrete acceptance cases.

@@ -1,0 +1,20 @@
+I couldn’t write the new plan file because this session is running with a read-only sandbox, so the artifact was blocked before it could be created.
+
+The target I’d use is the rooted projection migration, not a fresh migration invented from scratch. I’d place the program at:
+
+`docs/plans/2026-05-10-feat-rooted-projection-deterministic-refactor-program.md`
+
+and structure it around:
+- baseline proof
+- reporting first
+- rooted workspace mutation
+- user projection relink
+- cutover and cleanup
+- explicit rollback contract
+
+I also grounded that choice in the repo’s existing evidence for the same migration lane:
+- the current rooted-projection plan
+- the flat-to-rooted runbook
+- the rooted sync ownership guard
+
+If you want, I can still give you the full file content here so you can paste it in directly, or I can turn it into a tighter plan/doc once write access is available.

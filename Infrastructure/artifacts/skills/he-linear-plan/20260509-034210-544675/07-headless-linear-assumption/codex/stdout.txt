@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0a9f-ab02-7911-a684-bb190bb8976c"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. In autonomous mode, I’ll treat creation of any Linear object as confirmation-gated and will not create issues, projects, or other Linear records unless you explicitly approve it first.\n\nIf you want, I can also help turn that into a written repo policy or agent instruction so it’s enforced consistently."}}
+{"type":"turn.completed","usage":{"input_tokens":30268,"cached_input_tokens":2432,"output_tokens":244,"reasoning_output_tokens":177}}

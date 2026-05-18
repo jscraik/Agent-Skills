@@ -1,0 +1,1 @@
+Can you spec a trivial skill wording cleanup and explicitly keep domain model gates not applicable.

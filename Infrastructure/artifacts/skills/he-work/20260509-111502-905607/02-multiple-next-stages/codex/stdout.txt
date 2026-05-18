@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e0c3c-0845-7332-a8e5-3d6e603c2fda"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"What would you like me to do next?\n\nIf you mean the plan is complete and the next valid stages are either `work` or `refactor`, I can:\n1. Proceed with `work`\n2. Proceed with `refactor`\n3. Pause and wait for your choice\n\nReply with `1`, `2`, or `3`."}}
+{"type":"turn.completed","usage":{"input_tokens":29716,"cached_input_tokens":1920,"output_tokens":148,"reasoning_output_tokens":72}}

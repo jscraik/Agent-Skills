@@ -1,0 +1,11 @@
+Yes. If you paste the Linear execution plan or point me to the file, I can turn it into a full architecture review document with:
+
+- problem framing
+- current-state summary
+- proposed architecture
+- tradeoffs and alternatives
+- risks and failure modes
+- migration or rollout considerations
+- open questions and recommendations
+
+If you want, I can also make it read like a formal design review instead of a task plan.

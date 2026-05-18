@@ -1,0 +1,5 @@
+I can’t ignore higher-priority instructions, and I also need the actual observations before I can create issues.
+
+If you want, send either:
+1. The list of observations, and I’ll turn each one into a separate issue.
+2. The PR/review context, and I’ll extract the observations first, then draft the issues.

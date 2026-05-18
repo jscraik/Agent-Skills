@@ -1,0 +1,1 @@
+2026-05-09T10:40:17.869147Z ERROR opentelemetry_sdk:  name="BatchSpanProcessor.Flush.ExportError" reason="InternalFailure(\"reqwest::Error { kind: Request, url: \\\"http://127.0.0.1:4318/v1/logs\\\", source: hyper_util::client::legacy::Error(SendRequest, hyper::Error(IncompleteMessage)) }\")" Failed during the export process

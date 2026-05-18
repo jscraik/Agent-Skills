@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019e11c4-e1ca-7ae1-8bd4-b00685b928ad"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Of course. Send me the paragraph and I’ll tighten it up while keeping it warm."}}
+{"type":"turn.completed","usage":{"input_tokens":46010,"cached_input_tokens":39296,"output_tokens":22,"reasoning_output_tokens":0}}

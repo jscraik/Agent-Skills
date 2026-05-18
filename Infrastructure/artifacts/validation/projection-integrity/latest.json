@@ -1,6 +1,6 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-05-05T18:31:36.678515+00:00",
+  "generated_at": "2026-05-12T23:21:04.712792+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
@@ -47,9 +47,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 23,
-      "source_manifest_sha256": "2f7e82662df40c3a394e3c2beaf2b7cbd2cc6e77d27aeb2c52f37fb1c09dc303",
-      "projection_manifest_sha256": "2f7e82662df40c3a394e3c2beaf2b7cbd2cc6e77d27aeb2c52f37fb1c09dc303",
+      "checked_files": 65,
+      "source_manifest_sha256": "52f91a5c42554ef6252d6272fe40df83475221659105f9d87099926a7057ae11",
+      "projection_manifest_sha256": "52f91a5c42554ef6252d6272fe40df83475221659105f9d87099926a7057ae11",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -63,9 +63,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 6,
-      "source_manifest_sha256": "3289daf932a38cfe111635c6afbf5c3fd0ab69aae5757f48e0f20b76e34e7fb7",
-      "projection_manifest_sha256": "3289daf932a38cfe111635c6afbf5c3fd0ab69aae5757f48e0f20b76e34e7fb7",
+      "checked_files": 8,
+      "source_manifest_sha256": "5977c7527f433a766304612d50ee0b6bc0f5293b885df05ddd8f78255b8eed10",
+      "projection_manifest_sha256": "5977c7527f433a766304612d50ee0b6bc0f5293b885df05ddd8f78255b8eed10",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -79,9 +79,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 11,
-      "source_manifest_sha256": "4b276465452f38199ecb84b24a687f8b721f3556cb587c1a78dcfd7f1f5dfddf",
-      "projection_manifest_sha256": "4b276465452f38199ecb84b24a687f8b721f3556cb587c1a78dcfd7f1f5dfddf",
+      "checked_files": 14,
+      "source_manifest_sha256": "82ccbc2269e444d3b9a4c19e53195f82ab13dd13c63659f7c75adbd2aa6bface",
+      "projection_manifest_sha256": "82ccbc2269e444d3b9a4c19e53195f82ab13dd13c63659f7c75adbd2aa6bface",
       "manifest_mismatch": false,
       "status": "pass"
     }

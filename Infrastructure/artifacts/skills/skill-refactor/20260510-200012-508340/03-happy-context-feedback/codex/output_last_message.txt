@@ -1,0 +1,15 @@
+The context package likely does need to adapt.
+
+What I could confirm from the repo knowledge base is:
+
+- There is already a standing note that the repo’s instruction surface is too duplicated, and `AGENTS.md` was identified as the highest-yield dedupe target.
+- There is also a specific learning that HE skills can look “complete” while only partially replacing the older long-form prompt pipeline.
+- That combination usually means reviewers keep flagging the same thing because the skill text and the context package are both carrying overlapping guidance, but the canonical source of truth is not centralized enough.
+
+So my read is:
+
+- The repeated feedback is probably not just a wording issue in the skill.
+- The context package should probably absorb or point to the canonical repo guidance more cleanly.
+- The skill itself should stay thinner, with less duplicated operational advice.
+
+If you want, I can do the next pass as a concrete audit and tell you exactly which package file(s) should change and what to move or delete.

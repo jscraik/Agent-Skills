@@ -1,0 +1,14 @@
+I’m blocked on the actual audit because the workspace shell wrapper is failing before I can read the repo files.
+
+What I tried:
+- `./bin/ask skills resolve docs-expert --json`
+- direct file reads of the skill source and repo search commands
+
+What happened:
+- each command failed immediately with `sandbox-exec: sandbox_apply: Operation not permitted`
+
+What I need to continue:
+- either the release runbook path, or
+- the runbook content pasted here, plus the list of scripts it references
+
+Once I can see the runbook text, I’ll compare every named command against the referenced scripts and flag any missing or stale commands precisely.

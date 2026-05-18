@@ -1,0 +1,3 @@
+Yes. For database-heavy harness planning, the best fit is `build-web-apps:supabase-postgres-best-practices` if the work touches Postgres schema, indexes, query design, RLS, or connection management.
+
+If you want, paste the harness plan here and I’ll review it through that database-expert lens. If the plan is broader backend/platform work rather than Postgres-specific, I’d route it instead through `backend-platform` and then pull in the Postgres skill only where needed.

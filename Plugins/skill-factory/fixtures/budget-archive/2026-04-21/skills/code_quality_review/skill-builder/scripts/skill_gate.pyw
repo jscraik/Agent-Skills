@@ -119,6 +119,19 @@ def _read_yaml_mapping(path: Path) -> Dict[str, Any]:
     return obj
 
 
+# Space and colon variants support case-insensitive `contains foo` and `contains: foo` shorthand matching.
+_ACCEPTANCE_STRING_PREFIXES = ("contains ", "not_contains ", "regex ", "not_regex ", "contains:", "not_contains:", "regex:", "not_regex:")
+
+
+def _is_bare_acceptance_string(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    text = value.strip()
+    if not text:
+        return False
+    return not text.lower().startswith(_ACCEPTANCE_STRING_PREFIXES)
+
+
 def _extract_h2_blocks(body: str) -> List[Tuple[str, str]]:
     matches = list(re.finditer(r"(?m)^##\s+(.+?)\s*$", body))
     blocks: List[Tuple[str, str]] = []
@@ -633,12 +646,33 @@ def check_required_sections(doc: SkillDoc, *, require_philosophy: bool) -> List[
 
     required: Dict[str, List[str]] = {
         "when_to_use": ["when to use", "usage", "triggers", "invocation"],
-        "inputs": ["inputs", "assumptions", "requirements"],
-        "outputs": ["outputs", "deliverables", "result"],
+        "inputs": ["inputs", "preconditions", "assumptions", "requirements"],
+        "outputs": ["outputs", "output format", "deliverables", "result"],
         "procedure": ["workflow", "procedure", "steps", "process"],
         "validation": ["validation", "checks", "verify", "acceptance", "gates"],
-        "antipatterns": ["anti-pattern", "anti patterns", "what to avoid", "pitfalls"],
-        "constraints": ["constraints", "safety"],
+        "antipatterns": ["anti-pattern", "anti patterns", "anti-trigger", "when not to use", "what to avoid", "pitfalls"],
+        "constraints": ["constraints", "safety", "safety boundaries", "approval boundaries"],
+        "execution_boundaries": [
+            "execution boundaries",
+            "safety boundaries",
+            "boundary map",
+            "ownership boundaries",
+            "codex harness placement",
+            "command boundaries",
+            "human approval",
+        ],
+        "failure_mode": [
+            "failure mode",
+            "failure modes",
+            "failure handling",
+            "failure behavior",
+            "repair behavior",
+            "repair loop",
+            "stopping conditions",
+            "rollback path",
+            "handoff rules",
+        ],
+        "gotchas": ["gotchas", "operational traps", "known traps", "known failure modes", "false confidence risks"],
     }
 
     if require_philosophy:
@@ -657,6 +691,30 @@ def check_required_sections(doc: SkillDoc, *, require_philosophy: bool) -> List[
                 Level.FAIL,
                 f"SEC_{key.upper()}_MISSING",
                 f"Missing required section: {key.replace('_', ' ')} (add a ## heading).",
+            ))
+
+    critical_content: Dict[str, List[str]] = {
+        "execution_boundaries": required["execution_boundaries"],
+        "failure_mode": required["failure_mode"],
+        "gotchas": required["gotchas"],
+    }
+    placeholder_pattern = re.compile(r"^(?:n/?a|none|tbd|todo|coming soon|placeholder)\.?\s*$", re.IGNORECASE)
+    for key, aliases in critical_content.items():
+        text = _find_section_text(doc.body, aliases).strip()
+        if not text:
+            # The missing-section finding above is already clearer when the heading is absent.
+            if present(aliases):
+                out.append(Finding(
+                    Level.FAIL,
+                    f"SEC_{key.upper()}_EMPTY",
+                    f"Required section has no content: {key.replace('_', ' ')}.",
+                ))
+            continue
+        if len(text) < 20 or placeholder_pattern.fullmatch(text):
+            out.append(Finding(
+                Level.FAIL,
+                f"SEC_{key.upper()}_THIN",
+                f"Required section is too thin to be operational: {key.replace('_', ' ')}.",
             ))
 
     for key, aliases in should.items():
@@ -1248,13 +1306,62 @@ def check_research_eval_prompt_realism(doc: SkillDoc) -> List[Finding]:
     if not trigger_cases:
         return out
 
+    natural_request_tokens = ("please", "can you", "help me", "github", "convert", "validate", "build", "inspect")
+    placeholder_tokens = ("todo", "tbd", "lorem ipsum", "example prompt", "test prompt", "placeholder")
+    action_tokens = (
+        "audit",
+        "build",
+        "check",
+        "compare",
+        "convert",
+        "debug",
+        "diagnose",
+        "fix",
+        "generate",
+        "inspect",
+        "migrate",
+        "plan",
+        "review",
+        "route",
+        "summarize",
+        "validate",
+    )
+
+    def prompt_has_concrete_context(prompt: str) -> bool:
+        words = re.findall(r"[a-z0-9][a-z0-9_-]*", prompt.lower())
+        if len(words) < 6:
+            return False
+        if any(token in prompt.lower() for token in placeholder_tokens):
+            return False
+        return any(token in words for token in action_tokens)
+
     leaky = 0
     realistic = 0
+    realism_denominator = 0
+    weak_declared: List[str] = []
+    missing_realistic = 0
+    invalid_realistic: List[str] = []
     for case in trigger_cases:
         prompt = str(case.get("prompt", "")).strip().lower()
         if skill_name and skill_name in prompt:
             leaky += 1
-        if any(token in prompt for token in ("please", "can you", "help me", "github", "convert", "validate", "build", "inspect")):
+        declared_realistic = case.get("realistic")
+        case_id = str(case.get("id") or case.get("name") or "<unnamed>")
+        if isinstance(declared_realistic, bool):
+            if declared_realistic is False:
+                continue
+            realism_denominator += 1
+            if prompt_has_concrete_context(prompt):
+                realistic += 1
+            else:
+                weak_declared.append(case_id)
+            continue
+        if "realistic" in case:
+            invalid_realistic.append(case_id)
+        else:
+            missing_realistic += 1
+        realism_denominator += 1
+        if prompt_has_concrete_context(prompt) or any(token in prompt for token in natural_request_tokens):
             realistic += 1
 
     if leaky / len(trigger_cases) > 0.5:
@@ -1265,12 +1372,36 @@ def check_research_eval_prompt_realism(doc: SkillDoc) -> List[Finding]:
             evidence=f"leaky={leaky}/{len(trigger_cases)}",
         ))
 
-    if realistic / len(trigger_cases) < 0.34:
+    if invalid_realistic:
+        out.append(Finding(
+            Level.WARN,
+            "RESEARCH_EVALS_REALISTIC_FIELD_INVALID",
+            "`realistic` fields in eval cases must be boolean true/false when present.",
+            evidence=", ".join(invalid_realistic[:5]),
+        ))
+
+    if missing_realistic:
+        out.append(Finding(
+            Level.WARN,
+            "RESEARCH_EVALS_REALISTIC_FIELD_MISSING",
+            "Some trigger eval cases omit `realistic: true|false`; explicit declarations prevent style-word heuristics from becoming the source of truth.",
+            evidence=f"missing={missing_realistic}/{len(trigger_cases)}",
+        ))
+
+    if weak_declared:
+        out.append(Finding(
+            Level.WARN,
+            "RESEARCH_EVALS_DECLARED_REALISTIC_WEAK",
+            "Some eval cases declare `realistic: true` but lack concrete task context; natural request wording is only supporting evidence.",
+            evidence=", ".join(weak_declared[:5]),
+        ))
+
+    if realism_denominator and realistic / realism_denominator < 0.34:
         out.append(Finding(
             Level.WARN,
             "RESEARCH_EVALS_UNREALISTIC",
-            "Positive eval prompts look synthetic. Rewrite more prompts as realistic user utterances.",
-            evidence=f"realistic={realistic}/{len(trigger_cases)}",
+            "Positive eval prompts look synthetic. Honor explicit `realistic: true|false`; use natural request wording only as supporting evidence.",
+            evidence=f"realistic={realistic}/{realism_denominator}",
         ))
 
     return out
@@ -1328,6 +1459,18 @@ def check_contract_and_evals(skill_dir: Path, *, require_contract: bool, require
                                 out.append(Finding(Level.FAIL, "EVALS_CASE_KEYS", f"Case #{i} missing `{k}`."))
                         if "acceptance" in c and not isinstance(c["acceptance"], list):
                             out.append(Finding(Level.FAIL, "EVALS_ACCEPTANCE_SHAPE", f"Case #{i} `acceptance` must be a list."))
+                        elif isinstance(c.get("acceptance"), list):
+                            for j, assertion in enumerate(c["acceptance"], 1):
+                                if _is_bare_acceptance_string(assertion):
+                                    out.append(Finding(
+                                        Level.FAIL,
+                                        "EVALS_ACCEPTANCE_BARE_STRING",
+                                        (
+                                            f"Case #{i} acceptance #{j} is a bare string, which the live runner treats as an exact contains assertion. "
+                                            "Use a typed assertion such as `{type: regex, value: ...}` or explicit `contains:` shorthand."
+                                        ),
+                                        evidence=str(assertion)[:120],
+                                    ))
 
                         # v2 optional fields (backward compatible)
                         if "id" in c and not isinstance(c["id"], str):
@@ -1627,5 +1770,5 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     return 2 if failed else 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and os.environ.get("SKILL_GATE_DISABLE_CLI") != "1":
     raise SystemExit(main())

@@ -1,0 +1,1 @@
+Failed to write last message file "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/he-refactor/20260509-221610-013433/09-moat-preservation/codex/output_last_message.txt": No such file or directory (os error 2)

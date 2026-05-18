@@ -1,0 +1,10 @@
+I can’t invent validation results or recommend closing a milestone without evidence. That would make the repo state less trustworthy, and it would be unfair to whoever relies on the closeout.
+
+What I can do is gather real evidence from the workspace and give you a clean pass/fail summary. In this repo, the likely starting points are:
+
+```bash
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
+```
+
+Because this session is read-only, I can inspect files and run non-mutating commands, but I won’t claim tests passed unless they actually ran and passed.

@@ -34,17 +34,52 @@ REQUIRED_HEADINGS = (
 )
 HEADING_ALIASES = {
     "When to use": {"when to use", "when to use?", "use"},
-    "Required inputs": {"required inputs", "inputs", "full context"},
-    "Deliverables": {"deliverables", "outputs", "required output contract", "full context"},
-    "Failure mode": {"failure mode", "anti-patterns", "anti-patterns to avoid", "do not use", "notes"},
-    "Gotchas": {"gotchas", "constraints", "notes", "anti-patterns", "anti-patterns to avoid"},
+    "Required inputs": {"required inputs", "inputs", "preconditions", "full context"},
+    "Deliverables": {
+        "deliverables",
+        "outputs",
+        "output format",
+        "required output contract",
+        "full context",
+    },
+    "Failure mode": {
+        "failure mode",
+        "failure modes",
+        "failure handling",
+        "failure handling and repair",
+        "repair loop",
+        "repair workflow",
+        "stopping conditions",
+        "when not to use",
+        "anti-triggers",
+        "anti triggers",
+        "anti-patterns",
+        "anti-patterns to avoid",
+        "do not use",
+        "notes",
+    },
+    "Gotchas": {
+        "gotchas",
+        "operational traps",
+        "known traps",
+        "known failure modes",
+        "false confidence risks",
+        "constraints",
+        "notes",
+        "anti-patterns",
+        "anti-patterns to avoid",
+    },
 }
 AGENT_NATIVE_CONTRACTS = (
     (
         "execution boundaries",
         {
             "execution boundaries",
+            "safety boundaries",
+            "codex harness placement",
             "boundary map",
+            "command boundaries",
+            "human approval gates",
             "constraints",
             "constraints and safety",
             "safety",
@@ -62,6 +97,8 @@ AGENT_NATIVE_CONTRACTS = (
             "expected artifacts",
             "deliverables",
             "outputs",
+            "output format",
+            "evidence requirements",
             "output contract",
             "required output contract",
             "acceptance criteria",
@@ -72,7 +109,13 @@ AGENT_NATIVE_CONTRACTS = (
         {
             "repair loop",
             "repair workflow",
+            "failure handling",
+            "failure handling and repair",
             "failure mode",
+            "stopping conditions",
+            "rollback path",
+            "rollback paths",
+            "handoff rules",
             "validation",
             "gotchas",
             "safety",
@@ -84,6 +127,9 @@ AGENT_NATIVE_CONTRACTS = (
         "validation or acceptance criteria",
         {
             "validation",
+            "validation gates",
+            "evidence requirements",
+            "confidence reporting",
             "acceptance criteria",
             "deliverables",
             "outputs",
@@ -106,6 +152,9 @@ CONTEXT_POLICY_PATTERNS = (
     re.compile(r"never drop required context", re.IGNORECASE),
     re.compile(r"required operational context is never removed", re.IGNORECASE),
     re.compile(r"preserve .*context.*relocat", re.IGNORECASE),
+    re.compile(r"apply the context-disposition policy", re.IGNORECASE),
+    re.compile(r"important,? still-valid context", re.IGNORECASE),
+    re.compile(r"stale, duplicated, unsafe, superseded, or low-signal", re.IGNORECASE),
 )
 READ_WHEN_PATTERN = re.compile(r"read when\s*:", re.IGNORECASE)
 REFERENCE_LINK_PATTERN = re.compile(r"\]\([^)]*references/[^)]*\)", re.IGNORECASE)
@@ -240,7 +289,7 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
     - Presence of an Infrastructure/scripts/ directory when many code fences are present.
     - Presence of recommended level-2 headings from REQUIRED_HEADINGS (missing headings are errors in "strict" mode, warnings otherwise).
     - Presence of the agent-native execution contract across all skills: execution boundaries, expected artifacts, repair/failure behavior, and validation or acceptance criteria (missing contract dimensions are errors in "strict" mode, warnings otherwise).
-    - For relocation-guard skills (a predefined set of relative paths), additional checks for context-preservation policy language, a `Read when:` progressive-disclosure signpost, a markdown link into `references/`, and at least one relocation target document in the `references/` directory (severity follows mode).
+    - For relocation-guard skills (a predefined set of relative paths), additional checks for context-disposition policy language, a `Read when:` progressive-disclosure signpost, a markdown link into `references/`, and at least one relocation target document in the `references/` directory (severity follows mode).
     
     The function prints per-file error/warning messages and a final summary to stdout.
     
@@ -305,7 +354,7 @@ def cmd_lint_progressive_disclosure(mode: str) -> int:
                 emit(
                     severity,
                     skill.relative_path,
-                    "missing context-preservation policy; required context must be relocated to references, not trimmed",
+                    "missing context-disposition policy; important still-valid context must be relocated to references while stale, duplicated, unsafe, superseded, or low-signal text may be intentionally discarded",
                 )
             if READ_WHEN_PATTERN.search(body) is None:
                 emit(severity, skill.relative_path, "missing `Read when:` progressive-disclosure signpost")

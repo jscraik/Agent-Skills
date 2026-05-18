@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="he-router" tests="1" failures="0" errors="0" timestamp="2026-05-09T20:21:48Z" id="20260509-212148-385184">
+  <testcase name="ambiguous-stage-route" classname="he-router" time="60.0">
+    <system-out>
+warnings:
+[codex] should_trigger expected skill to be selected, but selection signal was unavailable for this run.
+
+artifacts_dir:
+Infrastructure/artifacts/skills/he-router/20260509-212148-385184/01-ambiguous-stage-route
+    </system-out>
+  </testcase>
+</testsuite>

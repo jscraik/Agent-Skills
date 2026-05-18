@@ -23,3 +23,13 @@ Live Codex Plan Mode separates discoverable facts from preference/tradeoff quest
 ## Agent Skills Kit Spec Pattern
 
 Strong local specs include schema/status/risk/depth/UI frontmatter, mode decision, baseline, Linear contract, boundary, domain model, lifecycle/interfaces, invariants, failure, observability, acceptance matrix, Linear traceability, first slice, and `he-plan` handoff.
+
+## Compression Recovery
+
+When the source evidence says a prior cockpit, golden-path, or agent-native plan
+left too much visible surface, write a recovery spec instead of another broad
+architecture spec. The recovery spec must promote compression from guidance to
+blocking acceptance: first-contact help budget, agent catalog budget, standalone
+command admission, docs deletion budget, fresh-agent eval, ablation proof, and
+evidence-backed north-star metrics. Do not let additive compatibility, metadata,
+or classification count as product compression.

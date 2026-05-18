@@ -33,7 +33,7 @@ hooks: ## Setup git hooks
 	node scripts/setup-git-hooks.js
 
 hooks-pre-commit: ## Run local pre-commit gates before creating a commit
-	bash Infrastructure/scripts/validate_all.sh --ephemeral
+	@bash -lc 'set -euo pipefail; changed_files_file="$$(mktemp)"; trap '"'"'rm -f "$$changed_files_file"'"'"' EXIT; git diff --cached --name-only --diff-filter=ACMR -- > "$$changed_files_file"; changed_file_count="$$(wc -l < "$$changed_files_file" | tr -d " ")"; if [[ "$$changed_file_count" -eq 0 ]]; then bash Infrastructure/scripts/validate_all.sh --ephemeral; elif [[ "$$changed_file_count" -gt 1000 ]]; then echo "Large staged change set ($$changed_file_count files); running full validation instead of argv-heavy changed-files mode"; bash Infrastructure/scripts/validate_all.sh --ephemeral; else bash Infrastructure/scripts/validate_all.sh --ephemeral --changed-files-from "$$changed_files_file"; fi'
 
 hooks-commit-msg: ## Validate commit message policy
 	@if [ -z "$(HOOK_COMMIT_MSG_FILE)" ]; then \
@@ -43,8 +43,8 @@ hooks-commit-msg: ## Validate commit message policy
 	node scripts/validate-commit-msg.js "$(HOOK_COMMIT_MSG_FILE)"
 
 hooks-pre-push: ## Run local pre-push governance gates before pushing
-	bash Infrastructure/scripts/validate_all.sh --ephemeral
-	python3 Infrastructure/scripts/diagnose_skill.py --all
+	@bash -lc 'set -euo pipefail; changed_files=(); if git rev-parse --verify HEAD^ >/dev/null 2>&1; then mapfile -t changed_files < <(git diff --name-only --diff-filter=ACMR HEAD^..HEAD --); fi; if (($${#changed_files[@]})); then bash Infrastructure/scripts/validate_all.sh --ephemeral --changed-files "$${changed_files[@]}"; else bash Infrastructure/scripts/validate_all.sh --ephemeral; fi'
+	@bash -lc 'set -euo pipefail; changed_files=(); if git rev-parse --verify HEAD^ >/dev/null 2>&1; then mapfile -t changed_files < <(git diff --name-only --diff-filter=ACMR HEAD^..HEAD --); fi; skill_changed=0; for changed_file in "$${changed_files[@]}"; do case "$$changed_file" in Skills/*|Plugins/*/skills/*|plugins/*/skills/*) skill_changed=1 ;; esac; done; if [[ "$$skill_changed" -eq 1 ]]; then python3 Infrastructure/scripts/diagnose_skill.py --all; else echo "Skipping skill diagnosis: pushed tip does not touch skill entrypoints"; fi'
 
 secrets-staged: ## Scan staged content for secrets before committing
 	pnpm run secrets:staged

@@ -4,9 +4,14 @@ Use this when `he-brainstorm`, `he-spec`, or `he-plan` handles non-trivial deliv
 
 ## Rule
 
-Linear is the tracker of record. HE brainstorms, specs, and plans support Linear; they do not replace it.
+Linear is the tracker of record. HE brainstorms, specs, and plans support Linear; they do not replace it. `.harness/linear/<repo-name>-linear-plan.md` is the approved execution snapshot for Harness Engineering stages; use `linear-delta-capture-gate.md` to capture live Linear changes before a tracked spec, plan, or work stage consumes that snapshot.
 
 Before handoff, resolve or create the Linear issue. If creation is blocked, stop with `linear_blocked`, exact missing fields, and a ready-to-create payload.
+
+Every issue must carry repo/location identity through labels, preferably
+`Repo › ...`. Projects are bounded deliverables, not repo containers; leave
+`project` empty unless the issue belongs to a concrete outcome with a clear
+completion state. Use `cycle` only for work actively being committed to now.
 
 When the target repo is coding-harness-managed, prefer the repo's Harness Linear gate or transition command when available, and record the result in the `coding_harness` lifecycle block. The Linear issue remains mandatory; Harness state does not replace it.
 
@@ -26,8 +31,19 @@ The gate does not apply to throwaway exploration, tiny local-only edits, private
 1. Search/list/get likely Linear issues before creating one.
 2. Reuse if found; link key/URL and why it is tracker of record.
 3. Create if missing and metadata is available.
-4. If metadata/tooling is missing, return `linear_status: linear_blocked`, exact missing fields/tool state, and a complete ready payload.
-5. Stop when `linear_status: linear_blocked` unless an explicit override decision is recorded with actor, reason, timestamp, and the blocked payload. Continue only after `linear_status: resolved|created|user_opted_out` or that recorded override.
+4. For existing tracked plans, run the Linear Delta Capture Gate before selecting the next HE execution slice.
+5. Verify required labels exist and are applied; create missing approved reusable labels when tooling and metadata allow it.
+6. For every non-triage issue, enforce one Type and one Roadmap label policy:
+   - Type and Roadmap labels are required exactly once each.
+   - Prefer existing labels first, then create reusable labels only with approval.
+7. Require a repo/location label. If the label is missing or unclear, return
+   `linear_status: linear_blocked` or `needs_human_triage` with a ready label
+   payload.
+8. Assign `project` only when bounded deliverable criteria are met; otherwise
+   leave it empty and rely on labels/views.
+9. Assign `cycle` only for current execution commitment.
+10. If metadata/tooling is missing, return `linear_status: linear_blocked`, exact missing fields/tool state, and a complete ready payload.
+11. Stop when `linear_status: linear_blocked` unless an explicit override decision is recorded with actor, reason, timestamp, and the blocked payload. Continue only after `linear_status: resolved|created|user_opted_out` or that recorded override.
 
 ## Minimum Issue Payload
 
@@ -38,9 +54,14 @@ linear_issue:
   url: "<issue URL when known>"
   team: "<team key or missing>"
   project: "<project or missing>"
+  project_assignment_reason: "<bounded deliverable reason or empty>"
+  cycle: "<cycle or empty>"
+  cycle_assignment_reason: "<current execution commitment reason or empty>"
   title: "<plain behavior title>"
   priority: "<priority or missing>"
   labels: ["<labels>"]
+  repo_location_label: "<Repo › ... or legacy repo label>"
+  label_status: "resolved|created|blocked|not_required"
   blocked_by: ["<issue keys or None - can start immediately>"]
   body_sections:
     - Problem / actual behavior

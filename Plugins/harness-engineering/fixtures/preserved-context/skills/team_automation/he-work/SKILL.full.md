@@ -130,7 +130,7 @@ Use:
 - `small-spec-direct` only when the spec or bare request is genuinely small, low-risk, and explicitly approved for direct execution
 
 Source rules:
-- prefer `Docs/plans/*.md` or `docs/ui-plans/*.md` when they exist
+- prefer `.harness/plan/*.md` or `docs/ui-plans/*.md` when they exist
 - if the input is a raw spec and the work is medium/high risk, multi-phase, migration-heavy, or cross-cutting, stop and route to `he-plan`
 - if the input is a bare request, classify it quickly: execute only when it is obviously tiny and low risk, otherwise route upstream before coding
 - if a linked plan, linked spec, linked UI spec, or origin brainstorm exists, read it before execution
@@ -303,7 +303,7 @@ Keep artifact path in handoff for traceability.
 See `references/he-anti-patterns.md`: raw spec without plan, parallel on overlapping files, no validation evidence, contract drift, **Doer as Checker**, **Shotgun Debugging**, **Horizontal Slicing**
 
 ## Examples
-- User says: "Please implement `Docs/plans/2026-04-01-auth-session-rotation-plan.md`, validate each phase, and keep checklist state synced with shipped code."
+- User says: "Please implement `.harness/plan/2026-04-01-auth-session-rotation-plan.md`, validate each phase, and keep checklist state synced with shipped code."
 - User says: "Inspect `todos/007-ready-p1-checkout-idempotency.md`, execute the ready items, and stop if contract drift appears."
 - User says: "Implement `docs/ui-plans/2026-04-02-billing-settings-ui-plan.md`, enforce the prototype gate, and capture screenshot evidence for review."
 - When the user asks for a tiny direct change: "Apply this copy-only settings tweak only if it remains low-risk and easy to validate; otherwise route to `he-plan`."
@@ -338,4 +338,4 @@ See `references/he-anti-patterns.md`: raw spec without plan, parallel on overlap
 
 ## Deferred Context Preservation
 
-Do not remove important context for budget trimming. See [deferred-context-index.md](../../../../references/deferred-context-index.md) for preserved Harness Engineering context.
+Apply the context-disposition policy: move important still-valid context to references and index it when meaningful; intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

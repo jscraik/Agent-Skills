@@ -108,40 +108,62 @@ class TestSkillScopePrecedence(unittest.TestCase):
             {violation["code"] for violation in report["violations"]},
         )
 
-    def test_runtime_budget_allows_same_cache_skill_name_across_plugin_namespaces(self) -> None:
+    def test_runtime_budget_baselines_curated_agents_sdk_collision(self) -> None:
+        self.assertEqual(
+            verify_runtime_budget._scope_collision_baseline_path(
+                "Plugins/cache/openai-curated/cloudflare/rotating-version/skills/agents-sdk"
+            ),
+            "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk",
+        )
+        self.assertEqual(
+            verify_runtime_budget._scope_collision_baseline_path(
+                "Plugins/cache/openai-curated/openai-developers/another-version/extra/skills/agents-sdk"
+            ),
+            "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk",
+        )
         self._write_skill(
-            "Plugins/cache/openai-curated/cloudflare/v1/skills/agents-sdk",
+            "Plugins/cache/openai-curated/cloudflare/rotating-version/skills/agents-sdk",
             "Cloudflare Agents SDK skill.",
         )
         self._write_skill(
-            "Plugins/cache/openai-curated/openai-developers/v1/skills/agents-sdk",
-            "OpenAI Developers Agents SDK skill.",
+            "Plugins/cache/openai-curated/openai-developers/another-version/skills/agents-sdk",
+            "OpenAI Agents SDK skill.",
         )
 
         with self._patched_repo(default_visible=set()):
             report = verify_runtime_budget.build_report()
 
-        self.assertNotIn(
-            "UNRESOLVED_SCOPE_COLLISIONS",
-            {violation["code"] for violation in report["violations"]},
-        )
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["unresolved_scope_collisions"], [])
+        self.assertEqual(len(report["baselined_scope_collisions"]), 1)
+        self.assertEqual(report["baselined_scope_collisions"][0]["name"], "agents-sdk")
 
-    def test_runtime_budget_fails_same_cache_skill_name_within_plugin_namespace(self) -> None:
+    def test_runtime_budget_baselines_curated_chatgpt_apps_collisions(self) -> None:
         self._write_skill(
-            "Plugins/cache/openai-curated/cloudflare/v1/skills/agents-sdk",
-            "Cloudflare Agents SDK skill.",
+            "Plugins/cache/openai-curated/chatgpt-apps/rotating-version/skills/build-chatgpt-app",
+            "ChatGPT Apps build skill.",
         )
         self._write_skill(
-            "Plugins/cache/openai-curated/cloudflare/v2/skills/agents-sdk",
-            "Second Cloudflare Agents SDK skill.",
+            "Plugins/cache/openai-curated/openai-developers/another-version/skills/build-chatgpt-app",
+            "OpenAI Developers ChatGPT Apps build skill.",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-curated/chatgpt-apps/rotating-version/skills/chatgpt-app-submission",
+            "ChatGPT Apps submission skill.",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-curated/openai-developers/another-version/skills/chatgpt-app-submission",
+            "OpenAI Developers ChatGPT Apps submission skill.",
         )
 
         with self._patched_repo(default_visible=set()):
             report = verify_runtime_budget.build_report()
 
-        self.assertIn(
-            "UNRESOLVED_SCOPE_COLLISIONS",
-            {violation["code"] for violation in report["violations"]},
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["unresolved_scope_collisions"], [])
+        self.assertEqual(
+            {collision["name"] for collision in report["baselined_scope_collisions"]},
+            {"build-chatgpt-app", "chatgpt-app-submission"},
         )
 
     def test_rooted_runtime_allows_primary_runtime_lane(self) -> None:
@@ -158,14 +180,14 @@ class TestSkillScopePrecedence(unittest.TestCase):
             {violation["code"] for violation in report["violations"]},
         )
 
-    def test_partial_rooted_runtime_does_not_switch_projection_modes(self) -> None:
+    def test_partial_rooted_runtime_reports_mixed_projection_mode(self) -> None:
         partial_root = next(iter(verify_runtime_budget.ROOT_SKILL_SETS))
         self._write_skill(f".agents/skills/{partial_root}", f"{partial_root} root skill set.")
 
         with self._patched_repo(default_visible=set()):
             report = verify_runtime_budget.build_report()
 
-        self.assertEqual(report["projection_mode"], "flat")
+        self.assertEqual(report["projection_mode"], "mixed")
 
 
 if __name__ == "__main__":
