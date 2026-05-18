@@ -161,10 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">77%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">75%</strong></div>
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Replace jargon-heavy terms like &#x27;noisy metric policy&#x27; and &#x27;protected regression guards&#x27; with more natural language that users would actually use, such as &#x27;automated experiments&#x27;, &#x27;metric tracking&#x27;, or &#x27;safe rollback&#x27;.</li><li>Add more concrete action verbs describing outputs, e.g., &#x27;Runs automated experiment iterations, compares metrics against baselines, and decides whether to keep or discard changes&#x27; instead of the abstract &#x27;Analyze bounded autonomous experiment loops&#x27;.</li><li>Add a concrete ledger template or example showing the expected format for hypotheses, scores, and keep/discard decisions to improve actionability.</li><li>Include at least one fully worked mini-example showing exact commands, their output, and the resulting ledger entry to make the workflow copy-paste actionable.</li><li>Consolidate the Execution Boundaries and Constraints sections to reduce overlap and improve token efficiency.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
       
       <section>
         <div class="section-head">
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>Internal security gate evidence is recorded in the paired external-review artifact; review that artifact before treating this dashboard as a pass.</li></ul></div>
       <div class="panel plugin-posture">
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
         <a href="Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.json</span></a>

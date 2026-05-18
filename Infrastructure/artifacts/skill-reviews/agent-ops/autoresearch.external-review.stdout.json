@@ -18,7 +18,7 @@
       "primary_gate": "local_eval_ask_audit",
       "external_quality_judge": "tessl_review",
       "plugin_eval_role": "budget_and_ergonomics_guardrail",
-      "plugin_eval_min_acceptable_grade": "B",
+      "plugin_eval_min_acceptable_grade": "B+",
       "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
       "snyk_role": "optional_external_security_advisory",
       "snyk_default": "disabled_until_requested",

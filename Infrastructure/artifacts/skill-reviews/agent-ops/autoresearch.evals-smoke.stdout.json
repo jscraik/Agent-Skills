@@ -42,7 +42,8 @@
           "runner": "discovery-smoke"
         },
         "outcome": {
-          "status": "fail",
+          "status": "blocked",
+          "eval_blocked": true,
           "blocker_classes": [],
           "warning_classes": []
         }
@@ -62,7 +63,8 @@
         "runner": "discovery-smoke"
       },
       "outcome": {
-        "status": "fail",
+        "status": "blocked",
+        "eval_blocked": true,
         "blocker_classes": [],
         "warning_classes": []
       }

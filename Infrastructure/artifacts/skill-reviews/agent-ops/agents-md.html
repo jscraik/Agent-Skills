@@ -161,10 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">74%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">75%</strong></div>
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Add more natural language trigger terms such as &#x27;agent instructions&#x27;, &#x27;agent config file&#x27;, or &#x27;agent routing rules&#x27; to improve discoverability for users who may not use the exact jargon.</li><li>Clarify the concrete outputs or transformations (e.g., &#x27;produces cleaned, deduplicated AGENTS.md files with clear routing rules&#x27;) to improve specificity beyond listing abstract operations.</li><li>Consolidate overlapping sections: merge &#x27;Avoid&#x27; into &#x27;Anti-Patterns&#x27;, and deduplicate preservation-contract rules that appear in Workflow step 5, Constraints, and Failure Mode into a single authoritative location with back-references.</li><li>Add at least one concrete input/output example showing a before/after AGENTS.md edit with the context ledger, Context Pointer map, and labeled output format, rather than only describing scenarios in prose.</li><li>Include a minimal schema or template for the &#x27;schema_version&#x27; output mentioned in Outputs, so Claude knows the exact structure expected.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
       
       <section>
         <div class="section-head">
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
       <div class="panel plugin-posture">
@@ -227,12 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="Infrastructure/artifacts/skill-reviews/agent-ops/agents-md.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/agents-md.json</span></a>
-        <a href="Infrastructure/artifacts/skills/agents-md/20260513-112710-602326/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/agents-md/20260513-112710-602326/scorecard.json</span></a>
-        <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B; Snyk: disabled_until_requested</span></div>
+        <a href="./agents-md.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/agents-md.json</span></a>
+        <a href="../../skills/agents-md/20260513-112710-602326/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/agents-md/20260513-112710-602326/scorecard.json</span></a>
+        <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
     </section>

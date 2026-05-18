@@ -21,7 +21,7 @@ Hard boundaries:
 Primary command shape:
 
 ```bash
-python3 Infrastructure/bin/ask skills external-review <skill-path> --audit-level compat --json
+./bin/ask skills external-review <skill-path> --audit-level compat --json
 ```
 
 The command runs repo-native ask audit, plugin-eval, Tessl local lint, and Tessl local skill review. Tessl lint validates a temporary tile package; Tessl review evaluates a temporary copied SKILL.md folder.
@@ -33,7 +33,7 @@ This artifact preserves the interpreted baseline from the sweep. The original ra
 Recommended future report path pattern:
 
 ```bash
-python3 Infrastructure/bin/ask skills external-review <skill-path> \
+./bin/ask skills external-review <skill-path> \
   --audit-level compat \
   --report-path Infrastructure/artifacts/skill-quality-heartbeat/<date>/<skill-name>.json \
   --json
