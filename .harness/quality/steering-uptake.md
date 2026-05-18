@@ -1338,3 +1338,81 @@ checks, then rerun the normal hook-enforced push path.
 Repeat prevention: Do not widen sandbox permissions for this known `prek.log`
 failure first. Repair hook readiness with the repo installer, then use the normal
 hook-enforced git path.
+
+## Uptake Record: 2026-05-18 environment readiness blockers must close
+
+Operating failure: A failing readiness command was reported as a residual risk
+after the adjacent delivery mechanism had been fixed.
+
+Feedback type: validation_gap
+
+Intent radius: repository
+
+Blocker: `bash scripts/check-environment.sh` failed because the validator read
+Codex environment actions from the wrong TOML key and the environment setup
+referenced a missing path-normalization helper.
+
+Generalized rule: If a changed delivery or readiness surface exposes a concrete
+validator failure, fix it in the same lane before closeout instead of labeling it
+nonblocking.
+
+Similar-case disposition: Environment action parsing, environment setup, Tools
+action setup, focused environment tests, command-surface projection, and closeout
+are fixed now.
+
+Pattern sweep: Checked the Codex environment TOML, environment validator,
+environment contract tests, prepare-worktree governance tests, command-surface
+projection, and closeout.
+
+Sweep scope: Workspace readiness and delivery validation surfaces.
+
+Search terms: check-environment, Codex environment action, Tools, actions,
+environments, normalize-path, normalize_path_candidates.
+
+Matches considered: `.codex/environments/environment.toml`,
+`Infrastructure/scripts/check-environment_impl.sh`,
+`Infrastructure/scripts/testing/test_codex_environment_toml.py`,
+`Infrastructure/scripts/testing/test_prepare_worktree_path_rename.py`,
+`.skillsets/command-surface.json`, and repo closeout output.
+
+Exclusions: Existing repo-surface ownership diagnostic debt and the
+PyYAML/tomllib mismatch in `Infrastructure/tests/test_pr_changes_validation.py`
+because they do not share the Codex environment action schema or readiness root
+cause.
+
+Disposition: fixed now by making the validator read top-level `[[actions]]`,
+making setup and Tools self-contained for PATH normalization, regenerating the
+command-surface projection, and proving closeout passes.
+
+Horizontal OODA: The failure affects every workspace relying on Codex
+environment readiness, setup bootstrap, or the Tools action contract.
+
+Vertical OODA: The rule carries from generated environment config to readiness
+validation, focused contract tests, command-surface projection, closeout,
+commit, push, and future-agent inheritance.
+
+Durable surface: `Infrastructure/scripts/check-environment_impl.sh`,
+`.codex/environments/environment.toml`, `.skillsets/command-surface.json`,
+and this ledger.
+
+Environment refinement: Environment readiness now checks the schema actually
+used by Codex environment files and no longer depends on an untracked
+`.codex/scripts/normalize-path.sh` helper.
+
+Mechanism: `bash scripts/check-environment.sh` is the proof command; a failure
+there is a fix-now signal for the current delivery lane.
+
+Proof: `bash scripts/check-environment.sh`, environment TOML contract tests,
+prepare-worktree path governance tests, command-surface projection check, and
+repo closeout all pass.
+
+Validation: Run `bash scripts/check-environment.sh`,
+`python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`,
+`python3 -m pytest Infrastructure/scripts/testing/test_validate_steering_uptake.py -q`,
+`python3 -m pytest Infrastructure/scripts/testing/test_codex_environment_toml.py -q`,
+`python3 -m pytest Infrastructure/scripts/testing/test_prepare_worktree_path_rename.py -q`,
+`./bin/ask skills handles --check --json --robot`, and
+`./bin/ask repo closeout --changed --json --robot`.
+
+Repeat prevention: Do not leave a concrete readiness command failure in the
+final answer as a residual risk when the files in scope can be fixed safely.

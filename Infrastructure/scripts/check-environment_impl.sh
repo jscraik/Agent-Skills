@@ -147,8 +147,8 @@ required_name = sys.argv[2]
 required_icon = sys.argv[3]
 
 data = tomllib.loads(env_path.read_text(encoding="utf-8"))
-for env in data.get("environments", []):
-    if env.get("name") == required_name and env.get("icon") == required_icon:
+for action in data.get("actions", []):
+    if action.get("name") == required_name and action.get("icon") == required_icon:
         sys.exit(0)
 sys.exit(1)
 PY
