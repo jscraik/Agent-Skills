@@ -81,9 +81,13 @@ All commands in this document must use the standard `ask` JSON envelope:
         "skills_synced": true
       },
       "runtime_budget": {
-        "status": "pass",
-        "advanced_visible_count": 173,
-        "advisories": []
+        "state": "pass",
+        "severity": "info",
+        "details": {
+          "status": "pass",
+          "advanced_visible_count": 173,
+          "advisories": []
+        }
       },
       "blockers": [],
       "next_command": "./bin/ask repo surface --json"

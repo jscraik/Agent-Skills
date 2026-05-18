@@ -1399,7 +1399,7 @@
     {
       "command_handle_path": ".agents/skills/plugin-installer/SKILL.md",
       "command_visibility": "target",
-      "description": "Install validated plugins with provenance and rollback safety",
+      "description": "Install validated Codex plugins with provenance, lockfile updates, rollback safety, and local cache projection checks. Use when adding plugin bundles, refreshing installed plugins, or repairing plugin install drift.",
       "handle": "plugin-installer",
       "invoke_via": "plugin-factory",
       "kind": "skill",

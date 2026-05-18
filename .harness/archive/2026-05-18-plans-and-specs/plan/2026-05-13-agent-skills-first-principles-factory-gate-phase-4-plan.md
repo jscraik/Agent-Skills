@@ -98,6 +98,9 @@ Do not add unsupported schema fields to eval YAML until a validator proves they
 are accepted. Encode proof expectations through existing acceptance checks such
 as regex checks for decision labels and gate evidence terms.
 
+Pre-verify any new eval YAML acceptance-check shape against the eval runner
+schema before adding it to the Phase 4 artifact.
+
 Create a Phase 4 eval artifact that records what changed, what validation ran,
 and whether the broader program can be closed. Update the aggregate eval only
 if the Phase 4 eval is present and validation passes.
@@ -290,8 +293,8 @@ Validation:
 - python3 -m pytest Infrastructure/tests/test_context_budgeted_skillsets.py -q
 - python3 -m pytest Infrastructure/scripts/testing/test_validate_first_principles_gate.py -q
 - python3 -m pytest Infrastructure/tests/test_plugin_bundled_hooks_contract.py -q
-- bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh --changed-files <exact Phase 4 changed files>
-- git diff --check -- <exact Phase 4 changed files>
+- bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh --changed-files $(git diff --name-only origin/main...HEAD -- Skills/ Plugins/ Infrastructure/ .harness/)
+- git diff --check -- $(git diff --name-only origin/main...HEAD -- Skills/ Plugins/ Infrastructure/ .harness/)
 - eval artifact lint commands for any .harness eval artifact changed.
 
 Stop condition:

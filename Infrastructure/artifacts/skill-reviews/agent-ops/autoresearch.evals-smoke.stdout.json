@@ -1,5 +1,5 @@
 {
-  "status": "error",
+  "status": "blocked",
   "trace_id": "d607f1e5-4f7d-409a-8624-93ecea63c8d4",
   "metadata": {
     "version": "0.1.0",
@@ -91,8 +91,8 @@
   },
   "errors": [
     {
-      "code": "ERR_VALIDATION",
-      "message": "Evaluation run failed."
+      "code": "ERR_RUNNER_FILTER_MISS",
+      "message": "Evaluation run blocked because the discovery-smoke runner found no eval cases with smoke_mode for the selected filters."
     }
   ]
 }
