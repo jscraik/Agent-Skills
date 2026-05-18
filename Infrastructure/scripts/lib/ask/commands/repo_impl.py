@@ -980,6 +980,7 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
             capture_output=True,
             text=True,
             timeout=SCRIPT_TIMEOUT_SECONDS,
+            check=False,
         )
     except subprocess.TimeoutExpired as exc:
         result.status = "error"
