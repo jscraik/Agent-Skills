@@ -289,11 +289,14 @@ Disposition:
   and package checks live in `references/skills/he-linear-plan/**`,
   `references/closure-mutation-contract.md`, and
   `references/subagent-call-contract.md`.
+  Relocation evidence: Use when approved `.harness` cognition needs Linear routing: target project,
 - `he-plan` moved-to-reference: plan artifact shape, planning depth,
   post-plan handoff, source evidence, validation, rollback, enforcement
   contracts, and generated-artifact checks live in
   `references/skills/he-plan/**` and the shared lifecycle contracts.
+  Relocation evidence: Plans are execution contracts, not chat checklists. They preserve source
 - `he-strategy` moved-to-reference: strategy output shape, first-principles
   framing, domain context, migration phase selection, rollback posture, and
   next-stage routing live in `references/skills/he-strategy/**` and the
   shared source-prompt and lifecycle contracts.
+  Relocation evidence: Strategy artifacts are cognition compression, not ceremony. Turn verified repo
