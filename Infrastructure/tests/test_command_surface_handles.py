@@ -220,6 +220,12 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         self.assertIn("COMMAND_HANDLE_PARENT_SYMLINK", {violation["code"] for violation in payload["violations"]})
         self.assertEqual(source.read_text(encoding="utf-8"), original_source)
 
+        # Assert no generated sidecar files were written into the source tree
+        source_parent_files = list(source.parent.iterdir())
+        self.assertEqual(len(source_parent_files), 1, "Expected only SKILL.md in source directory")
+        self.assertEqual(source_parent_files[0].name, "SKILL.md", "Only SKILL.md should exist in source directory")
+        self.assertFalse((source.parent / "agents").exists(), "agents/ directory should not be created in source tree")
+
     def test_command_handle_write_does_not_prune_when_validation_fails(self) -> None:
         stale = self.temp_dir / ".agents" / "skills" / "old-handle"
         stale.mkdir(parents=True)

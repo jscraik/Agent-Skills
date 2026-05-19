@@ -204,10 +204,17 @@ class TestAskCLI(unittest.TestCase):
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-heartbeat"]
         result = _run_cli(cmd)
 
-        self.assertIn(result.returncode, {0, 2}, result.stderr)
-        self.assertRegex(result.stdout, r"(Skill handle proof: \$he-heartbeat|Command handle proof failed for 'he-heartbeat')")
-        if "live invocation:" in result.stdout:
-            self.assertIn("live invocation: manual_session_gate", result.stdout)
+        if result.returncode == 0:
+            # Success path: assert proper success message and conditional live invocation output
+            self.assertRegex(result.stdout, r"Skill handle proof: \$he-heartbeat")
+            if "live invocation:" in result.stdout:
+                self.assertIn("live invocation: manual_session_gate", result.stdout)
+        elif result.returncode == 2:
+            # Failure path: environment-dependent codex_user_link may cause proof to fail
+            # when user runtime is not linked properly
+            self.assertRegex(result.stdout, r"Command handle proof failed for 'he-heartbeat'")
+        else:
+            self.fail(f"Unexpected return code {result.returncode}, stderr: {result.stderr}")
 
     def test_skills_prove_json_contract(self):
         """Verify ask skills prove separates reachability, quality, analytics, and outcome proof."""
