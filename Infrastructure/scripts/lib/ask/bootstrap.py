@@ -288,6 +288,10 @@ def run_bootstrap_checks(
         manual_remediation.append("inspect_bin_ask")
     if fallback["status"] == "fail":
         manual_remediation.append("use_python_fallback")
+    if path_discovery["status"] == "warn":
+        manual_remediation.append("add_repo_bin_to_path")
+    elif shim["status"] == "fail":
+        manual_remediation.append("fix_ask_path_shim_identity")
 
     status = "success"
     if entrypoint["status"] == "fail" or fallback["status"] == "fail":

@@ -18,6 +18,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
@@ -32,6 +33,20 @@ except ModuleNotFoundError as exc:  # pragma: no cover
     if not already_reexec and __name__ == "__main__":
         env = dict(os.environ)
         env["SKILL_FAMILY_PYYAML_REEXEC"] = "1"
+        preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+        if preferred.exists() and os.access(preferred, os.X_OK):
+            try:
+                health = subprocess.run(
+                    [str(preferred), "-c", "import yaml, jsonschema"],
+                    env=env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
+                if health.returncode == 0:
+                    os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
+            except OSError:
+                pass
         uv_bin = shutil.which("uv")
         if uv_bin:
             os.execvpe(
@@ -51,9 +66,6 @@ except ModuleNotFoundError as exc:  # pragma: no cover
                 ],
                 env,
             )
-        preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
-        if preferred.exists():
-            os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
     raise SystemExit(
         "PyYAML is required for validate_skill_authoring_family_benchmarks.py. "
         "Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`."
@@ -81,8 +93,8 @@ _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
     "Plugins/skill-factory/skills/code_quality_review/skill-builder",
-    "Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
-    "Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
+    "skills-system/skill-creator",
+    "skills-system/skill-installer",
     "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
 )
 
@@ -134,8 +146,6 @@ _RECOMMENDED_CONTRACT_KEYS = {"rollback_procedure", "observability"}
 # Family members that must apply context disposition via progressive disclosure.
 _RELOCATION_GUARD_SKILLS = {
     "plugins/skill-factory/skills/code_quality_review/skill-builder",
-    "plugins/skill-factory/skills/scaffolding_templates/skill-creator",
-    "plugins/skill-factory/skills/infrastructure_ops/skill-installer",
 }
 
 _CONTEXT_POLICY_PATTERNS = (

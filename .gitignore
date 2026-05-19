@@ -32,6 +32,7 @@ node_modules/
 .venv/
 .venv-skillpack/
 .venv-skill-builder/
+/tmp/
 .tmp/
 .temp/
 defusedxml/

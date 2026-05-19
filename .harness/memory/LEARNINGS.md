@@ -194,14 +194,32 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-05-10 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:4203147734)
 
-**2026-05-11 [Codex]:** Bash command 'cat' failed with exit code 1 while reading an unavailable local path -> File read failed; verify the target path exists and is readable, check permissions, confirm the working directory is correct, then use an alternative read method or correct the path before retrying. argv/cwd/target-path not captured in runtime log; no artifact at .harness/memory/command-failure-3040072751.log. Recommended diagnostic: run `ls -la` on the suspected target directory to confirm file presence and permissions before retrying. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:3040072751)
+- **2026-05-11 [Codex]:** Bash command 'cat' failed with exit code 1 while reading an unavailable local path -> File read failed; verify the target path exists and is readable, check permissions, confirm the working directory is correct, then use an alternative read method or correct the path before retrying. Repeat-learning marker: this is a duplicate of prior cat exit-code-1 entries. Recommended diagnostic: run 'ls -la' on the target parent directory to confirm file presence and permissions. (auto-key:3040072751)
 
-**2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-2293629618.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:2293629618)
+- **2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2293629618)
 
-**2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-3406616513.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:3406616513)
+- **2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3406616513)
 
-**2026-05-13 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-1318967753.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:1318967753)
+- **2026-05-13 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1318967753)
 
-**2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-3199628742.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:3199628742)
+- **2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3199628742)
 
-**2026-05-14 [Codex]:** Bash command 'python3' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-2135778639.log. Verify target path exists, check cwd, and use Read tool instead of shell python3 for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:2135778639)
+- **2026-05-14 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2135778639)
+
+- **2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:703433997)
+
+- **2026-05-15 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3377052620)
+
+- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:872490936)
+
+- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1758991561)
+
+- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:106538740)
+
+- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:876251262)
+
+- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2515931723)
+
+- **2026-05-16 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:999518231)
+
+- **2026-05-18 [Claude]:** Supersedes/clarifies earlier cat/python3/jq exit-code-2 entries (see auto-key:3040072751, auto-key:872490936, auto-key:1758991561, auto-key:106538740, auto-key:876251262, auto-key:2515931723, auto-key:999518231) — when bash commands fail with exit code 2 and the auto-capture entry omits argv/cwd/input path, the root cause is almost always a missing interpreter dependency, wrong working directory, or missing file rather than a skill regression; run `which python3`, `pwd`, and `ls` diagnostics first, then rerun with full command logging (explicit paths, cwd, and input) before changing skill logic or assuming tool failure.

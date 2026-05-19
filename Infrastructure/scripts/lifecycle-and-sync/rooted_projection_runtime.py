@@ -8,7 +8,7 @@ from pathlib import Path
 
 from runtime_surface_policy import PROJECTION_MIXED, runtime_surface_report
 from selection_policy import ROOT_SKILL_SET_NAMES
-from command_surface import build_skill_handles, check_command_handles
+from command_surface import build_command_surface_handles, check_command_handles
 
 
 ROOT_SKILL_SET_NAMES_SET = set(ROOT_SKILL_SET_NAMES)
@@ -78,7 +78,7 @@ def validate_workspace_runtime(skills_dir: Path, *, repo_root_path: Path | None 
 
     command_handle_names = {
         handle.handle
-        for handle in build_skill_handles(repo_root_path=repo_root_path)
+        for handle in build_command_surface_handles(repo_root_path=repo_root_path)
         if handle.command_handle_path and handle.handle not in ROOT_SKILL_SET_NAMES_SET
     }
     first_level = sorted(

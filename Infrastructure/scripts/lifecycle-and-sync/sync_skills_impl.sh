@@ -666,6 +666,14 @@ if [ "$skills_dir_writable" = "1" ]; then
     skill_dir_abs="$repo_root/$skill_dir"
     discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
     if is_plugin_owned_skill_path "$skill_path"; then
+      if [ -e "$skills_dir/$skill_name" ] || [ -L "$skills_dir/$skill_name" ]; then
+        if rm -rf -- "${skills_dir:?}/${skill_name:?}"; then
+          echo "Removed stale plugin-owned flat skill: $skill_name"
+        else
+          echo "[WARN] Could not remove stale plugin-owned skill $skill_name at $skills_dir (continuing anyway)."
+          continue
+        fi
+      fi
       if ! is_plugin_visible_router_skill_name "$skill_name"; then
         echo "Skipping plugin-owned skill from flat projection: $skill_name"
         continue
@@ -1444,9 +1452,9 @@ resolve_marketplace_source_dir() {
 # and symlinked skill files inside copied plugin skills/ trees, then removes
 # fixtures and duplicate category lanes.
 # normalize_plugin_copy materializes symlinked skills and nested symlinks inside a plugin copy, removes fixtures and duplicate category lanes, and prunes command-handle duplicate entries so the plugin copy becomes a self-contained, real directory tree.
-# 
+#
 # It replaces first-level skill symlinks under <plugin_dir>/skills with copied directories when the symlink target resolves inside the plugin copy, recursively materializes nested directory and file symlinks within those copies, materializes stray symlinks elsewhere in the plugin before pruning fixtures, removes configured duplicate category lanes, and removes duplicate command-handle skill entries according to the repository command-surface index.
-# 
+#
 # plugin_dir - path to the plugin copy root to normalize.
 # label - optional short context string used in log messages (default: "runtime").
 normalize_plugin_copy() {
@@ -2176,7 +2184,7 @@ sync_repo_cache_snapshots_to_runtime_cache() {
 }
 
 # materialize_plugin_cache_roots ensures each plugin directory under `cache_root` contains a top-level `.codex-plugin` root by locating a nested candidate (preferentially `local/`) and promoting it into the plugin directory, removing other nested `.codex-plugin` roots.
-# 
+#
 # Arguments:
 #   cache_root - path to the runtime cache root containing marketplace/plugin subdirectories.
 materialize_plugin_cache_roots() {

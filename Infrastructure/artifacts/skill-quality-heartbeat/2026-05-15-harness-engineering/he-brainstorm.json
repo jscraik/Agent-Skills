@@ -1,0 +1,163 @@
+{
+  "data": {
+    "ask_audit": {
+      "data": {
+        "diagnostics": {
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "\n\ud83d\udccb Diagnostic report: Plugins/harness-engineering/skills/he-brainstorm\n--------------------------------------------------\n  \u001b[32m\u2713\u001b[0m skill directory: Found at Plugins/harness-engineering/skills/he-brainstorm\n  \u001b[32m\u2713\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m\u2713\u001b[0m nested .git: No nested .git directory\n  \u001b[90m\u25cb\u001b[0m symlink (codex): Plugin-owned skill is not expected as a default user-runtime symlink: he-brainstorm\n  \u001b[90m\u25cb\u001b[0m symlink (agents): Plugin-owned skill is not expected as a default user-runtime symlink: he-brainstorm\n  \u001b[90m\u25cb\u001b[0m skill index: Plugin-owned skill is not expected in the root default visible skill index: he-brainstorm\n  \u001b[90m\u25cb\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m\u2713\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n\u2705 All checks passed\n"
+        },
+        "family_benchmarks": {
+          "exit_code": 1,
+          "stderr": "PyYAML is required for validate_skill_authoring_family_benchmarks.py. Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`.\n",
+          "stdout": ""
+        },
+        "security_gate": {
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "Skill: he-brainstorm\nPath:  Plugins/harness-engineering/skills/he-brainstorm/SKILL.md\n\n\nRESULT: PASS\n"
+        }
+      },
+      "errors": [
+        {
+          "code": "ERR_VALIDATION",
+          "fix_suggestion": "Inspect data.family_benchmarks for full output, or run: mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill Plugins/harness-engineering/skills/he-brainstorm --format text",
+          "help_url": null,
+          "message": "Family benchmarks validation failed. First failures: PyYAML is required for validate_skill_authoring_family_benchmarks.py. Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`."
+        }
+      ],
+      "status": "error"
+    },
+    "plugin_eval": {
+      "command": [
+        "plugin-eval",
+        "analyze",
+        "Plugins/harness-engineering/skills/he-brainstorm",
+        "--format",
+        "markdown"
+      ],
+      "exit_code": 0,
+      "status": "success",
+      "stderr": "",
+      "stdout": "# Plugin Eval Report: he-brainstorm\n\n## At a Glance\n- Score: 95/100\n- Grade: A\n- Risk: medium\n- Checks: 0 fail, 1 warn, 2 info\n- Active budget: 1678 tokens (moderate)\n- Observed usage: not supplied\n\n## Why It Matters\n- 1 warning signal still need cleanup before this feels polished.\n- budget is the largest source of score loss at -4.5 points.\n- Budget pressure is not the dominant issue right now.\n- No observed usage is attached yet, so budget conclusions are still based on static estimates.\n\n## Fix First\n- [warn/warning] deferred_cost_tokens is heavy relative to the current Codex baseline. Why: Budget pressure matters because always-loaded or frequently-loaded text can make the workflow feel expensive fast. Fix: Reduce repeated instruction text and move detail into deferred supporting files.\n\n## Recommended Next Step\n- Fix the top findings and rerun the report\n- Why: A short pass on the highest-value findings will improve trust, readability, and the signal quality of future benchmarks.\n- Chat request: \"What should I fix first?\"\n- Local command: `plugin-eval start Plugins/harness-engineering/skills/he-brainstorm --request 'What should I fix first?' --format markdown`\n\n## Details\n<details>\n<summary>Watch next</summary>\n\n- No secondary findings queued.\n</details>\n<details>\n<summary>Improvement brief</summary>\n\n- Raise the evaluation from grade A (95/100) with a focus on the highest-signal structural and budget issues first.\n- Goal: Reduce repeated instruction text and move detail into deferred supporting files.\n- Measure: token-usage-observer\n- Measure: task-outcome-scorecard\n- Suggested prompt: Use the skill-creator guidance to improve he-brainstorm. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard. Address deferred_cost_tokens-budget-high: deferred_cost_tokens is heavy relative to the current Codex baseline.\n</details>\n<details>\n<summary>Budgets and observed usage</summary>\n\n- trigger_cost_tokens: 73 (moderate)\n- invoke_cost_tokens: 1605 (moderate)\n- deferred_cost_tokens: 8161 (heavy)\n- total_tokens: 9839 (heavy)\n\n- No observed usage supplied.\n</details>\n<details>\n<summary>Measurement plan</summary>\n\nCombine cost, outcome, and trust signals so you can tell whether the skill or plugin is genuinely helping instead of only looking well-structured on paper.\n\n- Token Usage Observer [high] Measure how many tokens the skill or plugin actually burns in representative runs. Signals: observed_usage_sample_count, observed_input_tokens_avg, observed_total_tokens_avg, estimate_vs_observed_input_ratio. Evidence: Responses API usage logs, Codex-like session exports, JSONL traces captured from local benchmarking harnesses.\n- Task Outcome Scorecard [high] Measure whether the skill helps users finish the intended job with fewer retries and less cleanup. Signals: task_success_rate, first_pass_success_rate, retry_rate, human_override_rate. Evidence: Task run logs, Structured user acceptance checklist, Before/after comparison runs on the same prompts.\n- Tool Call Audit [medium] Check whether the agent uses the right tools, arguments, and sequencing when the skill is active. Signals: tool_call_success_rate, invalid_tool_argument_rate, recoverable_tool_failure_rate. Evidence: Tool invocation traces, Recorded sessions, Golden-path scenario replays.\n- Latency And Efficiency [medium] Track whether the skill speeds users up enough to justify its cost. Signals: p50_time_to_first_acceptable_answer_seconds, p95_time_to_task_completion_seconds, tokens_per_successful_run. Evidence: Benchmark harness timings, Manual stopwatch runs on canonical tasks, Responses API timestamps combined with usage logs.\n- Human Rubric Review [medium] Capture clarity, trust, and usefulness signals that automated checks will miss. Signals: clarity_score_avg, confidence_score_avg, follow_up_question_rate. Evidence: Reviewer scorecards, Team rubric sheets, Annotated transcripts.\n</details>\n<details>\n<summary>Use From Codex Chat</summary>\n\nStart with a natural chat request, then let plugin-eval show the exact local command sequence behind it.\n\nStart with this chat request: \"Evaluate this skill.\"\nWhy this path: Plugin Eval recommended Evaluate Skill from the current local state for this skill.\nQuick local entrypoint: plugin-eval start Plugins/harness-engineering/skills/he-brainstorm --request 'Evaluate this skill.' --format markdown\nPlugin Eval will run first: plugin-eval analyze Plugins/harness-engineering/skills/he-brainstorm --format markdown\n\nOther chat requests you can use:\n- Full Skill Analysis: say \"Give me a full analysis of this skill, including benchmark setup.\" -> plugin-eval analyze Plugins/harness-engineering/skills/he-brainstorm --format markdown\n- Evaluate Skill: say \"Evaluate this skill.\" -> plugin-eval analyze Plugins/harness-engineering/skills/he-brainstorm --format markdown\n- Explain Token Budget: say \"Explain the token budget for this skill.\" -> plugin-eval explain-budget Plugins/harness-engineering/skills/he-brainstorm --format markdown\n- Measure Real Token Usage: say \"Measure the real token usage of this skill.\" -> plugin-eval init-benchmark Plugins/harness-engineering/skills/he-brainstorm\n- Benchmark With Starter Scenarios: say \"Help me benchmark this skill.\" -> plugin-eval init-benchmark Plugins/harness-engineering/skills/he-brainstorm\n- Start Here: say \"What should I run next?\" -> plugin-eval analyze Plugins/harness-engineering/skills/he-brainstorm --format markdown\n</details>\n<details>\n<summary>Checks</summary>\n\n- [WARN] deferred_cost_tokens-budget-high: deferred_cost_tokens is heavy relative to the current Codex baseline. Evidence: Value: 8161 tokens Baseline samples: skills=8, plugins=119 Remediation: Reduce repeated instruction text and move detail into deferred supporting files.\n- [INFO] coverage-artifacts-unavailable: No coverage artifacts were found for this target. Evidence: Plugins/harness-engineering/skills/he-brainstorm Remediation: Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring.\n</details>\n<details>\n<summary>Metrics</summary>\n\n- skill_line_count: 119 lines (good)\n- description_length_chars: 273 chars (good)\n- relative_link_count: 10 links (good)\n- code_fence_count: 0 blocks (good)\n- support_file_count: 13 files (good)\n- trigger_cost_tokens: 73 tokens (moderate)\n- invoke_cost_tokens: 1605 tokens (moderate)\n- deferred_cost_tokens: 8161 tokens (heavy)\n- coverage_artifact_count: 0 files (info)\n</details>\n<details>\n<summary>Score details</summary>\n\n- Starting score: 100\n- Total deductions: -4.75\n- Final score: 95\n- Risk: Contains 1 warning signal that still need attention.\n\n- -4.5 points: deferred_cost_tokens-budget-high [warn/warning] deferred_cost_tokens is heavy relative to the current Codex baseline.\n- -0.25 points: coverage-artifacts-unavailable [info/info] No coverage artifacts were found for this target.\n\n- budget: -4.5 points across 1 check\n- coverage: -0.25 points across 1 check\n</details>\n"
+    },
+    "policy": {
+      "external_quality_judge": "tessl_local_review",
+      "mode": "local_internal_only",
+      "no_publish": true,
+      "no_registry_upload": true,
+      "plugin_eval_min_acceptable_grade": "B+",
+      "plugin_eval_role": "budget_and_ergonomics_guardrail",
+      "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
+      "primary_gate": "local_eval_ask_audit",
+      "publish_policy": "never publish, register, upload, or invoke npx from this lane",
+      "snyk_default": "disabled_until_requested",
+      "snyk_privacy_basis": "Snyk CLI security analysis may contact Snyk services. It is never run by default in this local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted.",
+      "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
+      "snyk_role": "opt_in_local_dependency_security_screening",
+      "snyk_when_not_to_use": [
+        "pure SKILL.md-first instruction-only candidates with no supported dependency manifest, unless the user explicitly asks",
+        "routine local iteration where external networked security analysis is not needed"
+      ],
+      "snyk_when_to_use": [
+        "when a skill or plugin candidate has dependency manifests such as package.json, pyproject.toml, requirements.txt, Gemfile, go.mod, or lockfiles",
+        "when claiming release readiness for a manifest-backed skill or plugin package",
+        "when dependency files, installer scripts, generated package surfaces, or plugin runtime dependencies changed",
+        "when matching the CircleCI/Snyk security screening lane locally before or after CI",
+        "when the user explicitly asks for Snyk, dependency vulnerability screening, or external security advisory evidence"
+      ],
+      "tessl_lint_role": "temporary_tile_packaging_shape_check",
+      "tessl_lint_shape": "Tessl lint expects a Tessl tile.json package. Canonical repo skills are SKILL.md-first, so this command builds a disposable local tile wrapper before linting.",
+      "tessl_review_default": "enabled_local_cli",
+      "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+      "tessl_review_role": "local_best_practice_content_review",
+      "uses_npx": false
+    },
+    "review_mode_details": {
+      "local_evals": {
+        "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
+        "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates"
+      },
+      "plugin_eval": {
+        "command": "plugin-eval analyze <path> --format markdown",
+        "role": "static budget, ergonomics, and reviewability guardrail; not a substitute for local evals"
+      },
+      "snyk": {
+        "command": "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>",
+        "default": "disabled_until_requested",
+        "release_required": "manifest-backed candidates",
+        "role": "opt-in local dependency security screening; release-required for manifest-backed candidates",
+        "use_when": [
+          "candidate has supported dependency manifests",
+          "release-readiness is claimed for a manifest-backed package",
+          "dependency/runtime package surfaces changed",
+          "local evidence must match CircleCI/Snyk screening",
+          "user explicitly requests Snyk or dependency vulnerability evidence"
+        ]
+      },
+      "tessl_lint": {
+        "canonical_source_shape": "SKILL.md-first",
+        "command": "tessl skill lint <temporary-tile.json>",
+        "role": "disposable tile.json package-shape check, not a direct content finding"
+      },
+      "tessl_review": {
+        "command": "tessl skill review <temporary-skill-directory>",
+        "publishes": false,
+        "role": "local best-practice/content review for private or work-in-progress skills"
+      }
+    },
+    "snyk": {
+      "reason": "Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.",
+      "status": "skipped"
+    },
+    "target": "Plugins/harness-engineering/skills/he-brainstorm",
+    "tessl_lint": {
+      "command": [
+        "tessl",
+        "skill",
+        "lint",
+        "<tmp>/tile.json"
+      ],
+      "exit_code": 1,
+      "status": "error",
+      "stderr": "\u2718 Missing tile content:\n- File not found: skills/he-brainstorm/references/brainstorm-workflow-details.md (referenced from skills/he-brainstorm/SKILL.md)\n- File not found: skills/he-brainstorm/references/ideation-mode.md (referenced from skills/he-brainstorm/SKILL.md)\n- File not found: skills/he-brainstorm/references/requirements-artifact-guide.md (referenced from skills/he-brainstorm/SKILL.md)\n- File not found: skills/he-brainstorm/references/discovery-interview.md (referenced from skills/he-brainstorm/SKILL.md)\n- File not found: skills/he-brainstorm/references/document-review-pass.md (referenced from skills/he-brainstorm/SKILL.md)\n- File not found: skills/he-brainstorm/references/visual-communication.md (referenced from skills/he-brainstorm/SKILL.md)\n- File not found: skills/he-brainstorm/references/hot-path-folded-context.md (referenced from skills/he-brainstorm/SKILL.md)\n- File not found: skills/he-brainstorm/references/contract.yaml (referenced from skills/he-brainstorm/SKILL.md)\n- File not found: skills/he-brainstorm/references/evals.yaml (referenced from skills/he-brainstorm/SKILL.md)\n- File not found: skills/he-brainstorm/references/task-profile.json (referenced from skills/he-brainstorm/SKILL.md)\n",
+      "stdout": "By using Tessl, you agree to our Terms: https://tessl.io/policies/terms\n\n"
+    },
+    "tessl_review": {
+      "command": [
+        "tessl",
+        "skill",
+        "review",
+        "<tmp>/skills/he-brainstorm"
+      ],
+      "exit_code": 0,
+      "status": "success",
+      "stderr": "- Reviewing skill...\n",
+      "stdout": "\nValidation Checks\n\n  \u2714 skill_md_line_count - SKILL.md line count is 119 (<= 500)\n  \u2714 frontmatter_valid - YAML frontmatter is valid\n  \u2714 name_field - 'name' field is valid: 'he-brainstorm'\n  \u2714 description_field - 'description' field is valid (273 chars)\n  \u2714 compatibility_field - 'compatibility' field not present (optional)\n  \u2714 allowed_tools_field - 'allowed-tools' field not present (optional)\n  \u2714 metadata_version - 'metadata.version' is present: 1.0.0\n  \u2714 metadata_field - 'metadata' contains 2 entries\n  \u2714 license_field - 'license' field not present (optional)\n  \u2714 frontmatter_unknown_keys - No unknown frontmatter keys found\n  \u2714 body_present - SKILL.md body is present\n\nOverall: PASSED (0 errors, 0 warnings)\n\nJudge Evaluation\n\n  Description: 82%\n    specificity: 2/3 - Names several actions (brainstorm, compare approaches, choose direction, recover constraints, route to stages) and mentions evidence-labeled survivor options and risks, but the phrase 'Analyze Harness Engineering ambiguity' is jargon-heavy and the concrete outputs (survivor options, risks, stage routing) are somewhat domain-specific without full clarity on what they entail.\n    trigger_term_quality: 3/3 - Includes strong natural trigger terms users would actually say: 'brainstorm', 'compare approaches', 'choose a direction', 'decide', plus specific stage names like 'spec', 'plan', 'Linear', 'implementation'. These cover a good range of decision-making and routing scenarios a user might express.\n    completeness: 3/3 - Clearly answers both 'what' (analyze ambiguity into evidence-labeled survivor options, risks, and stage routing) and 'when' (explicit 'Use when' clause listing brainstorm, compare approaches, choose direction, recover constraints, or decide stage routing). Both halves are present and explicit.\n    distinctiveness_conflict_risk: 2/3 - The terms 'brainstorm' and 'compare approaches' are fairly generic and could overlap with general planning or ideation skills. However, the specific mention of 'Harness Engineering', 'evidence-labeled survivor options', and stage routing (spec, plan, Linear, implementation) provides some distinctiveness. The risk of conflict with a general brainstorming or decision-making skill remains moderate.\n\n    Assessment: The description does a solid job of specifying when to use the skill with a clear 'Use when' clause containing natural trigger terms. The 'what' portion is somewhat obscured by domain-specific jargon ('Harness Engineering ambiguity', 'evidence-labeled survivor options') that may not be immediately clear without context. Distinctiveness is moderate due to overlap potential with general decision-making or brainstorming skills.\n\n    Suggestions:\n      - Clarify domain-specific jargon: briefly explain what 'evidence-labeled survivor options' and 'Harness Engineering ambiguity' mean in plain language to improve specificity for skill selection.\n      - Add a distinguishing qualifier to generic triggers like 'brainstorm' and 'compare approaches' (e.g., 'brainstorm engineering approaches' or 'compare technical options') to reduce conflict risk with general-purpose skills.\n\n  Content: 70%\n    conciseness: 2/3 - The skill is reasonably efficient for its complexity but includes some redundancy across sections (e.g., guardrails, execution boundaries, and constraints overlap in intent). Some sections like 'Philosophy' and 'When Not To Use' could be tighter. However, it generally avoids explaining concepts Claude already knows.\n    actionability: 2/3 - The procedure provides a numbered sequence and the output format lists specific fields, but there is no executable code example, no concrete schema/template to copy, and the 'Example output' is inline prose rather than a structured, copy-paste-ready artifact. The validation script call is concrete but conditional ('run or block'), reducing certainty.\n    workflow_clarity: 3/3 - The 7-step procedure is clearly sequenced with explicit validation checkpoints (step 6 Linear/tracker gate, step 7 artifact validation), a dedicated Validation section with fail-fast criteria and pass/fail/blocked states, and Failure Handling that specifies stopping with blockers and recovery steps. Handoff rules provide clear routing with preconditions preventing premature advancement.\n    progressive_disclosure: 3/3 - The skill body is a well-structured overview with clearly signaled one-level-deep references to 10+ supporting files covering workflow details, ideation mode, discovery interviews, contracts, evals, and shared policies. Content is appropriately split between the main skill and references, and navigation is straightforward with descriptive link text.\n\n    Assessment: This is a well-structured process-oriented skill with strong workflow clarity and excellent progressive disclosure through numerous clearly-referenced supporting files. Its main weaknesses are moderate verbosity from overlapping guardrail/constraint/boundary sections and a lack of fully concrete, copy-paste-ready output templates or executable examples. The skill effectively handles a complex domain (ambiguity resolution and stage routing) but could benefit from a tighter structure and a concrete output schema.\n\n    Suggestions:\n      - Replace the prose-style 'Example output' with a complete, copy-paste-ready YAML or JSON block showing the full schema with all fields populated, so Claude can directly produce conformant output.\n      - Consolidate 'Guardrails', 'Execution Boundaries', and 'Constraints' into a single 'Boundaries & Constraints' section to reduce redundancy and save tokens.\n\nReview Score: 80%\nOnly SKILL.md was reviewed. Log in with tessl login to include all supporting files in the review.\n\n\u2714 Skill evaluation completed successfully!\n"
+    },
+    "tessl_tile": {
+      "mode": "temporary_wrapper",
+      "reason": "Tessl lint validates tile.json packages. Canonical repo skills remain SKILL.md-first, so this is a disposable packaging-shape wrapper.",
+      "review_path": "/tmp/agent-skills-tessl-krix3zus/skills/he-brainstorm",
+      "skill_key": "he-brainstorm",
+      "source_skill": "Plugins/harness-engineering/skills/he-brainstorm",
+      "tessl_home": "/tmp/agent-skills-tessl-krix3zus/home",
+      "tile_path": "/tmp/agent-skills-tessl-krix3zus/tile.json"
+    }
+  },
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "fix_suggestion": "Inspect data.ask_audit for the exact failing gate.",
+      "help_url": null,
+      "message": "Internal ask skill audit failed during external-review lane."
+    },
+    {
+      "code": "ERR_VALIDATION",
+      "fix_suggestion": "Inspect data.tessl_lint for Tessl's validation output.",
+      "help_url": null,
+      "message": "Tessl skill lint failed during local-only external review."
+    }
+  ],
+  "status": "error"
+}

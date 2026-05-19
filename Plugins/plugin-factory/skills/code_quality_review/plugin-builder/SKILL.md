@@ -38,7 +38,6 @@ Route elsewhere:
 - Delegate first-draft shells to `[[plugin-creator]]`; delegate install, projection, and runtime visibility checks to `[[plugin-installer]]`.
 - Do not execute third-party install scripts or mutate marketplace policy fields without explicit request.
 - Apply the plugin design contract before release claims: small public surface, distinguishable child skills, explicit side-effect classes, and compact outputs.
-- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 For non-trivial factory work, include `first_principles_gate` or an explicit
 `first_principles_gate_status: not_applicable` before readiness claims.
@@ -81,14 +80,18 @@ untrusted until the validation command and package-specific checks pass.
 Use the detailed procedure and command matrix in `references/workflow.md` when
 the compact sequence above is not enough.
 
+Apply the context-disposition policy: move important still-valid context to
+references, and intentionally discard stale, duplicated, unsafe, superseded, or
+low-signal text.
+
 Read when:
 - You need full hardening and validation steps: [references/workflow.md](./references/workflow.md).
 - You need current Codex plugin manifest, MCP, hook, and extraction behavior:
-  [current Codex plugin runtime contract](../../plugin-factory-router/references/current-codex-plugin-runtime.md).
+  [current Codex plugin runtime contract](./references/current-codex-plugin-runtime.md).
 - You need side-effect, context-minimization, output-shape, or user-control checks:
-  `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`.
+  `Infrastructure/references/openai-style-plugin-design-contract.md`.
 - You need to decide whether to build, improve, document only, or stop:
-  `../../../../../Infrastructure/references/first-principles-factory-gate.md`.
+  `Infrastructure/references/first-principles-factory-gate.md`.
 
 ## Validation
 
@@ -157,10 +160,12 @@ blocked_by: null
 ## References
 
 - `references/workflow.md`
-- `../../plugin-factory-router/references/current-codex-plugin-runtime.md`
+- `references/current-codex-plugin-runtime.md`
 - `references/contract.yaml`
 - `references/evals.yaml`
 - `references/task-profile.json`
 - `references/plugin-contract.md`
-- `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
+- `Infrastructure/references/openai-style-plugin-design-contract.md`
+- `Infrastructure/references/software-literature-expert-lens-pack.md`
+- `Infrastructure/references/software-literature-skill-expertise-map.md`
 - `assets/`

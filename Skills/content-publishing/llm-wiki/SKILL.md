@@ -45,6 +45,17 @@ Knowledge should compound: raw sources stay stable, wiki pages evolve with citat
 - Do not write confidential media into shared wiki pages without approval.
 - Fail fast at the first unresolved privacy or provenance blocker.
 
+## Execution Boundaries
+- Write only the requested wiki pages, indexes, logs, or governance files inside the approved corpus workspace.
+- Do not ingest private attachments, publish pages, create vector infrastructure, or reorganize the corpus broadly without explicit approval.
+
+## Failure Mode
+- If source provenance, sensitivity, citation policy, or lint ownership is unclear, stop with the missing evidence and the smallest safe next action.
+
+## Gotchas
+- Raw source capture, editable wiki pages, and governance schema are separate layers.
+- Bulk import without privacy classification can turn a useful wiki into an unsafe artifact.
+
 ## Validation
 - Run Plugin Eval and strict skill audit after editing this skill.
 - Report exact validation commands and pass/fail outcomes.
@@ -61,6 +72,7 @@ Knowledge should compound: raw sources stay stable, wiki pages evolve with citat
 
 ## Progressive Disclosure
 - Archived full context: `Infrastructure/references/deferred-skill-context/content-publishing-llm-wiki/`.
+- Use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md` for knowledge-boundary and source-of-truth lenses.
 - Load archived references only when the active workflow needs that exact detail.
 - Keep the active path compact; do not remove important context for budget trimming.
 

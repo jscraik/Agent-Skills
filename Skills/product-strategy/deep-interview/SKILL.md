@@ -51,6 +51,13 @@ Analyze, deepen, and validate an existing doc or topic through a structured inte
 - Do not print, store, or transform secret values unless the user explicitly asks and the destination is safe.
 - Do not run destructive commands or broad rewrites unless explicitly approved.
 
+## Execution Boundaries
+- Keep work to questions, gap analysis, and bounded edits to the requested draft or artifact.
+- Do not create implementation plans, tracker payloads, or broad rewrites unless the user explicitly asks for that next stage.
+
+## Failure Mode
+- If the source draft, target outcome, or approval posture is unclear, stop with the next blocking question instead of filling gaps from assumptions.
+
 ## Validation
 - Run the narrowest real validator or command path available for the requested work.
 - Fail fast: stop at the first failed gate; do not proceed until it is fixed and rerun.
@@ -72,5 +79,6 @@ Analyze, deepen, and validate an existing doc or topic through a structured inte
 
 ## Progressive Disclosure
 - Start with this active contract.
+- Use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md` for user-story, use-case, and domain-language lenses.
 - Archived source, scripts, assets, and long-form references live under `Infrastructure/references/deferred-skill-context/product-strategy-deep-interview/`.
 - Load only the specific archived file needed for the current task.

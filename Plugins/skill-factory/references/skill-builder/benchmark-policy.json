@@ -1,0 +1,45 @@
+{
+  "schema_version": "1",
+  "mode": "warn",
+  "status": "active",
+  "description": "Skill-builder benchmark policy used by CI workflow wiring. The default PR structure gate disables benchmarks, while manual eval-baseline runs may use this file in warn mode.",
+  "markers": {
+    "contract": {
+      "regex": "contract\\.ya?ml|contract"
+    },
+    "evals": {
+      "regex": "evals\\.ya?ml|evaluation|benchmark"
+    },
+    "safety": {
+      "regex": "safety|risk|blocked|approval"
+    }
+  },
+  "clusters": {
+    "agent_ops": {
+      "description": "Agent operations skills.",
+      "include_prefixes": ["Skills/agent-ops/"]
+    },
+    "skill_factory": {
+      "description": "Skill-factory plugin skills and references.",
+      "include_prefixes": ["Plugins/skill-factory/skills/", "Skills/skill-factory/"]
+    },
+    "plugin_factory": {
+      "description": "Plugin-factory plugin skills and references.",
+      "include_prefixes": ["Plugins/plugin-factory/skills/", "Skills/plugin-factory/"]
+    },
+    "other_skills": {
+      "description": "Other rooted skills covered by the inventory.",
+      "include_prefixes": ["Skills/"]
+    }
+  },
+  "rules": {
+    "agent_ops": {},
+    "skill_factory": {},
+    "plugin_factory": {},
+    "other_skills": {}
+  },
+  "thresholds": {
+    "minimum_grade": "B+",
+    "blocking_mode": "warn"
+  }
+}

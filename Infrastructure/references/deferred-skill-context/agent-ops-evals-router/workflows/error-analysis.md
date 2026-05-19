@@ -19,6 +19,29 @@ Guide the user through reading LLM pipeline traces and building a catalog of how
 4. Label every trace against those categories
 5. Compute failure rates to prioritize what to fix
 
+## Codex Skill Eval Lens
+
+For Codex skills, a trace is not just the final answer. Review the prompt, selected skill, tool calls, commands, filesystem changes, validation output, token usage, and cleanup state together.
+
+Record the first skill-specific failure, not the last visible symptom:
+
+- skill did not trigger when it should have
+- skill triggered for an adjacent task where it should not have
+- expected command, tool, or validator was skipped
+- required artifact was missing, malformed, or written in the wrong place
+- unrelated files were changed or generated files were left behind
+- final answer claimed validation that did not run
+- prompt-injection, secret, or destructive-command pressure was mishandled
+
+Turn every recurring failure category into either a deterministic eval check or a judgeable subjective criterion.
+
+## Prerequisites
+
+- A trace source, scorecard, failed run folder, or local artifact set to inspect.
+- A clear evaluation target: skill activation, tool sequence, artifact quality, final answer, safety, or user outcome.
+- A way to record labels and notes without losing trace IDs.
+- Local-only handling for private prompts, traces, labels, and repo evidence unless the user explicitly approves external tooling.
+
 ## Core Process
 
 ### Step 1: Collect Traces

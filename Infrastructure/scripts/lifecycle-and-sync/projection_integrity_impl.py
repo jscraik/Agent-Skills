@@ -45,18 +45,6 @@ class MirrorProjection:
 
 SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
     SymlinkProjection(
-        name="skill-factory-skill-creator-alias",
-        alias_path="skills-system/skill-creator",
-        canonical_path="Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
-        tags=("skill-factory",),
-    ),
-    SymlinkProjection(
-        name="skill-factory-skill-installer-alias",
-        alias_path="skills-system/skill-installer",
-        canonical_path="Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
-        tags=("skill-factory",),
-    ),
-    SymlinkProjection(
         name="plugin-factory-plugin-creator-alias",
         alias_path="skills-system/plugin-creator",
         canonical_path="Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
@@ -128,9 +116,9 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
 def parse_args() -> argparse.Namespace:
     """
     Parse command-line arguments for the projection integrity CLI.
-    
+
     Recognises positional `mode` (`sync` or `verify`) and options to select `--scope`, override `--repo-root`, write a JSON `--manifest-out`, and choose output `--format` (`text` or `json`).
-    
+
     Returns:
         argparse.Namespace: Parsed arguments with attributes `mode`, `scope`, `repo_root`, `manifest_out`, and `format`.
     """
@@ -204,10 +192,10 @@ def normalize_excluded_dir_names(excluded_dir_names: Iterable[str]) -> tuple[str
 def is_ignored(path: Path, excluded_dir_names: Iterable[str] = ()) -> bool:
     """
     Decides whether a filesystem path should be skipped by the projection scanner.
-    
+
     Parameters:
         path (Path): Path to test; may be a file or directory path.
-    
+
     Returns:
         True if the path's name is in IGNORED_FILE_NAMES, its suffix is in IGNORED_SUFFIXES,
         or any path component is in IGNORED_DIR_NAMES; `False` otherwise.
@@ -232,10 +220,10 @@ def iter_files(
 ) -> Iterable[Path]:
     """
     Iterate regular file paths under `root`, yielding their paths relative to `root` in sorted order.
-    
+
     Parameters:
         root (Path): Directory to scan.
-    
+
     Returns:
         Iterable[Path]: Relative paths (Path objects) for every non-directory file found beneath `root`, excluding entries matched by `is_ignored`, yielded in sorted order.
     """
@@ -265,10 +253,10 @@ def iter_files(
 def hash_bytes(content: bytes) -> str:
     """
     Compute the SHA-256 hexadecimal digest of the given bytes.
-    
+
     Parameters:
         content (bytes): Input data to hash.
-    
+
     Returns:
         str: Hexadecimal SHA-256 digest of `content`.
     """
@@ -278,12 +266,12 @@ def hash_bytes(content: bytes) -> str:
 def hash_text(content: str) -> str:
     """
     Compute the SHA-256 hex digest of a text string.
-    
+
     Parameters:
-    	content (str): Text to hash; encoded as UTF-8 before hashing.
-    
+        content (str): Text to hash; encoded as UTF-8 before hashing.
+
     Returns:
-    	hex_digest (str): Lowercase hexadecimal SHA-256 digest of the UTF-8 encoding of `content`.
+        hex_digest (str): Lowercase hexadecimal SHA-256 digest of the UTF-8 encoding of `content`.
     """
     return hash_bytes(content.encode("utf-8"))
 
@@ -291,12 +279,12 @@ def hash_text(content: str) -> str:
 def manifest_digest(entries: dict[str, str]) -> str:
     """
     Compute a deterministic SHA-256 digest for a manifest mapping of file paths to digests.
-    
+
     The entries are sorted by path and each pair is serialized as "{path}\t{digest}\n" concatenated into one byte string before hashing.
-    
+
     Parameters:
         entries (dict[str, str]): Mapping from relative file path to its hex digest.
-    
+
     Returns:
         manifest_digest (str): Hex-encoded SHA-256 digest of the serialized manifest.
     """
@@ -307,11 +295,11 @@ def manifest_digest(entries: dict[str, str]) -> str:
 def projection_header_for(rel_source_path: str, suffix: str) -> str:
     """
     Create the canonical projection header line for a file copied from a source path.
-    
+
     Parameters:
         rel_source_path (str): Relative source path to embed in the header (as shown in the header's `source=` field).
         suffix (str): File suffix (e.g. ".md", ".py") which determines header comment style.
-    
+
     Returns:
         str: A single-line header string containing the `HEADER_TOKEN` and `source=<rel_source_path>` formatted as an HTML comment for `.md` files or as a `#` comment for other suffixes.
     """
@@ -323,11 +311,11 @@ def projection_header_for(rel_source_path: str, suffix: str) -> str:
 def strip_projection_header(text: str, suffix: str) -> tuple[str, bool]:
     """
     Remove a previously inserted projection header from the given file content and report whether a header was removed.
-    
+
     Parameters:
         text (str): File contents to normalise.
         suffix (str): File suffix (e.g. '.md', '.py') used to select the header form.
-    
+
     Returns:
         tuple[str, bool]: A pair of (normalized_text, removed) where `normalized_text` is the content with a generated projection header removed if present, and `removed` is `True` when a header was found and removed, `False` otherwise.
     """
@@ -338,12 +326,12 @@ def strip_projection_header(text: str, suffix: str) -> tuple[str, bool]:
     def remove_at(index: int) -> tuple[str, bool]:
         """
         Attempt to remove a projection header line at the given line index and return the resulting text and a flag indicating whether a removal occurred.
-        
+
         Parameters:
-        	index (int): Zero-based line index of the candidate header line.
-        
+            index (int): Zero-based line index of the candidate header line.
+
         Returns:
-        	tuple[str, bool]: A pair where the first element is the resulting text and the second is `True` if a header line containing the projection header token was removed; otherwise the original text and `False`. If a header line is removed and the following line is blank, that blank line is also removed.
+            tuple[str, bool]: A pair where the first element is the resulting text and the second is `True` if a header line containing the projection header token was removed; otherwise the original text and `False`. If a header line is removed and the following line is blank, that blank line is also removed.
         """
         if index < 0 or index >= len(lines):
             return text, False
@@ -410,14 +398,14 @@ def detect_projection_header(text: str, suffix: str) -> str | None:
 def apply_projection_header(text: str, rel_source_path: str, suffix: str) -> str:
     """
     Insert or replace the generated projection header for a given source path into the provided file text.
-    
+
     Ensures the returned text contains exactly one up-to-date projection header (based on `rel_source_path`) positioned according to the file `suffix` conventions: for Markdown, the header is placed after YAML front-matter if present; for files starting with a shebang, the header follows the shebang; otherwise the header is prepended separated by a blank line.
-    
+
     Parameters:
         text (str): Original file content.
         rel_source_path (str): Path to the canonical source, expressed relative to the repository root; used to build the header's `source=...` value.
         suffix (str): File extension (e.g. ".md", ".py") that selects the header placement rules.
-    
+
     Returns:
         str: File content with a single, canonical projection header applied.
     """
@@ -446,7 +434,7 @@ def apply_projection_header(text: str, rel_source_path: str, suffix: str) -> str
 def read_text(path: Path) -> str:
     """
     Read a file and return its contents decoded as UTF-8 text.
-    
+
     Returns:
         The file contents as a UTF-8 decoded string.
     """
@@ -456,7 +444,7 @@ def read_text(path: Path) -> str:
 def write_text(path: Path, content: str) -> None:
     """
     Write text to a file using UTF-8 encoding, preserving existing mode bits.
-    
+
     Parameters:
         path (Path): Destination file path to write.
         content (str): Text content to write to the file.
@@ -478,13 +466,13 @@ def write_text(path: Path, content: str) -> None:
 def ensure_symlink(repo_root: Path, spec: SymlinkProjection) -> dict[str, object]:
     """
     Ensure the alias path under `repo_root` is a symlink pointing to the spec's canonical directory.
-    
+
     If the canonical directory does not exist the function returns an error. If the alias already exists as a symlink that resolves to the canonical directory the result indicates no change. If the alias exists as a symlink pointing elsewhere, as a regular file, or as a non-managed directory it is removed and replaced by a symlink. If the alias exists as a real directory and the alias path does not start with "skills-system/", the function returns an error requiring manual migration; managed "skills-system/" directories are removed and replaced.
-    
+
     Parameters:
         repo_root (Path): Repository root used to resolve the spec paths.
         spec (SymlinkProjection): Projection spec containing `name`, `alias_path`, and `canonical_path`.
-    
+
     Returns:
         dict[str, object]: Result containing:
           - `name` (str): spec name.
@@ -564,11 +552,11 @@ def ensure_symlink(repo_root: Path, spec: SymlinkProjection) -> dict[str, object
 def verify_symlink(repo_root: Path, spec: SymlinkProjection) -> dict[str, object]:
     """
     Verify that a symlink alias exists and resolves to the configured canonical directory.
-    
+
     Parameters:
         repo_root (Path): Repository root used to resolve relative paths in `spec`.
         spec (SymlinkProjection): Projection spec containing `name`, `alias_path` and `canonical_path`.
-    
+
     Returns:
         result (dict[str, object]): A result mapping with at least `name`, `type` ("symlink"), `status`, `alias` and `canonical`.
         - `status` is `"pass"` when the alias is a symlink that resolves to the canonical directory.
@@ -633,23 +621,23 @@ def verify_symlink(repo_root: Path, spec: SymlinkProjection) -> dict[str, object
 def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     """
     Synchronises a source directory into its projection directory and applies generated projection headers to stampable files.
-    
+
     Parameters:
-    	repo_root (Path): Repository root path used to resolve spec paths.
-    	spec (MirrorProjection): Mirror projection specification containing `name`, `source_path`, `projection_path` and `tags`.
-    
+        repo_root (Path): Repository root path used to resolve spec paths.
+        spec (MirrorProjection): Mirror projection specification containing `name`, `source_path`, `projection_path` and `tags`.
+
     Returns:
-    	result (dict[str, object]): Operation result including:
-    		- `name`: projection name from the spec.
-    		- `type`: the literal `"mirror"`.
-    		- `status`: `"synced"` on success or `"error"` when the source is missing.
-    		- `reason`: present when `status` is `"error"` (e.g. `"source_missing"`).
-    		- `source`: the spec's source_path.
-    		- `projection`: the spec's projection_path.
-    		- `sync_engine`: `"rsync"` when rsync was used, otherwise `"python"`.
-    		- `changed_files`: number of files created/updated (or `-1` when rsync was used and precise count is not computed).
-    		- `deleted_files`: number of files removed from the projection because they were absent from the source.
-    		- `stamped_files`: number of stampable files inspected (and rewritten when their projection header changed).
+        result (dict[str, object]): Operation result including:
+            - `name`: projection name from the spec.
+            - `type`: the literal `"mirror"`.
+            - `status`: `"synced"` on success or `"error"` when the source is missing.
+            - `reason`: present when `status` is `"error"` (e.g. `"source_missing"`).
+            - `source`: the spec's source_path.
+            - `projection`: the spec's projection_path.
+            - `sync_engine`: `"rsync"` when rsync was used, otherwise `"python"`.
+            - `changed_files`: number of files created/updated (or `-1` when rsync was used and precise count is not computed).
+            - `deleted_files`: number of files removed from the projection because they were absent from the source.
+            - `stamped_files`: number of stampable files inspected (and rewritten when their projection header changed).
     """
     source_abs = repo_root / spec.source_path
     projection_abs = repo_root / spec.projection_path
@@ -789,15 +777,15 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
 def normalize_stamped_content(content: bytes, path: Path) -> bytes:
     """
     Normalise content of stampable files by removing a generated projection header.
-    
+
     If the file's suffix is listed in STAMPABLE_SUFFIXES and the bytes decode as UTF‑8,
     the returned bytes are the UTF‑8 encoding of the text with any projection header removed.
     If the suffix is not stampable or UTF‑8 decoding fails, the original bytes are returned.
-    
+
     Parameters:
         content (bytes): File content to normalise.
         path (Path): File path used to determine the file suffix for stampable detection.
-    
+
     Returns:
         bytes: Normalised bytes with the projection header removed for stampable UTF‑8 text files,
                or the original bytes otherwise.
@@ -821,13 +809,13 @@ def _sync_mirror_python(
 ) -> tuple[int, int]:
     """
     Synchronise a projection directory to match a source directory using pure-Python file operations.
-    
+
     Performs file-by-file sync: deletes projection files that are absent from source, copies regular files, replicates symlinks, treats files with stampable suffixes as equal when their contents match after stripping a generated projection header, preserves permission bits on a best-effort basis, and removes now-empty directories in the projection.
-    
+
     Parameters:
         source_abs (Path): Absolute path to the source directory to mirror.
         projection_abs (Path): Absolute path to the projection directory to update.
-    
+
     Returns:
         tuple[int, int]: A pair `(changed_files, deleted_files)` where `changed_files` is the number of files created or updated in the projection and `deleted_files` is the number of projection files removed because they no longer exist in the source.
     """
@@ -853,11 +841,11 @@ def _sync_mirror_python(
     def _normalize_stamped_text(content: bytes, path: Path) -> str | None:
         """
         Return UTF-8 decoded text with any projection header removed for stampable files.
-        
+
         Parameters:
             content (bytes): Raw file bytes to decode and normalise.
             path (Path): File path used to determine stampable suffix.
-        
+
         Returns:
             str | None: The decoded text with a projection header stripped when the file
             suffix is in STAMPABLE_SUFFIXES and decoding succeeds; `None` otherwise.
@@ -942,10 +930,10 @@ def _sync_mirror_python(
 def _is_rsync_permission_failure(error: subprocess.CalledProcessError) -> bool:
     """
     Detect whether an rsync CalledProcessError indicates a permission-style failure appropriate for falling back to a Python sync.
-    
+
     Parameters:
         error (subprocess.CalledProcessError): The exception raised by a failed rsync invocation; its stdout/stderr will be inspected.
-    
+
     Returns:
         bool: `True` if the combined stdout/stderr contains permission-related messages such as "operation not permitted" or "permission denied", `False` otherwise.
     """
@@ -963,13 +951,13 @@ def _is_rsync_permission_failure(error: subprocess.CalledProcessError) -> bool:
 def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     """
     Verify that a projection directory mirrors its source directory and report any drift.
-    
+
     Performs a path-by-path comparison between `spec.source_path` and `spec.projection_path` (relative to `repo_root`), normalising stampable text files by removing the generated projection header before comparison, and computes manifest digests for both sides.
-    
+
     Parameters:
         repo_root (Path): Repository root used to resolve the spec's paths.
         spec (MirrorProjection): Mirror projection specification with `source_path` and `projection_path`.
-    
+
     Returns:
         dict: A result payload containing at least the keys:
           - `name` (str): projection name from the spec.
@@ -1200,12 +1188,12 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
 def select_symlinks(scope: str) -> tuple[SymlinkProjection, ...]:
     """
     Select symlink projection specifications matching the given scope.
-    
+
     Parameters:
-    	scope (str): Scope name used to filter projections; use "all" to select every configured symlink projection.
-    
+        scope (str): Scope name used to filter projections; use "all" to select every configured symlink projection.
+
     Returns:
-    	selected (tuple[SymlinkProjection, ...]): Tuple of symlink projection specifications whose `tags` contain the provided scope (or all projections when `scope` is "all").
+        selected (tuple[SymlinkProjection, ...]): Tuple of symlink projection specifications whose `tags` contain the provided scope (or all projections when `scope` is "all").
     """
     if scope == "all":
         return SYMLINK_PROJECTIONS
@@ -1215,13 +1203,13 @@ def select_symlinks(scope: str) -> tuple[SymlinkProjection, ...]:
 def select_mirrors(scope: str) -> tuple[MirrorProjection, ...]:
     """
     Select mirror projection specs matching the given scope.
-    
+
     If `scope` is "all" returns all defined mirror projections; otherwise returns only
     those projections whose `tags` contain the provided scope string.
-    
+
     Parameters:
         scope (str): Scope tag to filter by, or `"all"` to select every mirror projection.
-    
+
     Returns:
         tuple[MirrorProjection, ...]: MirrorProjection specs matching the scope.
     """
@@ -1233,10 +1221,10 @@ def select_mirrors(scope: str) -> tuple[MirrorProjection, ...]:
 def write_manifest(path: Path, payload: dict[str, object]) -> None:
     """
     Write a JSON manifest file to the given path, creating parent directories as required.
-    
+
     Parameters:
-    	path (Path): Destination filesystem path for the manifest; parent directories will be created if missing.
-    	payload (dict[str, object]): JSON-serialisable mapping to be written; formatted with an indent of 2 and a trailing newline.
+        path (Path): Destination filesystem path for the manifest; parent directories will be created if missing.
+        payload (dict[str, object]): JSON-serialisable mapping to be written; formatted with an indent of 2 and a trailing newline.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -1245,14 +1233,14 @@ def write_manifest(path: Path, payload: dict[str, object]) -> None:
 def render_text(payload: dict[str, object]) -> str:
     """
     Render a human-readable summary report from a verification/sync payload.
-    
+
     Produces a multi-line text report containing top-level metadata (schema_version, mode, scope, status) and a concise per-result listing with name, type and status. For entries whose status is "drift" or "error" the report includes an optional reason, a manifest mismatch marker, and counts of any listed discrepancies (`missing_in_projection`, `extra_in_projection`, `unstamped_files`, `mismatched_files`).
-    
+
     Parameters:
         payload (dict[str, object]): Report payload produced by run_sync/run_verify containing keys
             like `schema_version`, `mode`, `scope`, `status` and an optional `results` list of
             per-item result dictionaries.
-    
+
     Returns:
         str: The rendered multi-line text report.
     """
@@ -1286,19 +1274,19 @@ def render_text(payload: dict[str, object]) -> str:
 def run_sync(repo_root: Path, scope: str) -> dict[str, object]:
     """
     Run synchronization for all configured symlink and mirror projections filtered by scope.
-    
+
     Parameters:
-    	repo_root (Path): Filesystem root used to resolve projection canonical/source and alias/projection paths.
-    	scope (str): Projection scope to process; e.g. "all", "skill-factory", "plugin-factory", "plugin-caches".
-    
+        repo_root (Path): Filesystem root used to resolve projection canonical/source and alias/projection paths.
+        scope (str): Projection scope to process; e.g. "all", "skill-factory", "plugin-factory", "plugin-caches".
+
     Returns:
-    	payload (dict): Report payload containing:
-    		- `schema_version` (str): schema identifier.
-    		- `generated_at` (str): ISO 8601 UTC timestamp of report generation.
-    		- `mode` (str): the string "sync".
-    		- `scope` (str): the scope passed to the function.
-    		- `status` (str): overall outcome, `"pass"` when no entry had `status == "error"`, otherwise `"fail"`.
-    		- `results` (list[dict]): per-projection result dictionaries produced by `ensure_symlink` and `sync_mirror`.
+        payload (dict): Report payload containing:
+            - `schema_version` (str): schema identifier.
+            - `generated_at` (str): ISO 8601 UTC timestamp of report generation.
+            - `mode` (str): the string "sync".
+            - `scope` (str): the scope passed to the function.
+            - `status` (str): overall outcome, `"pass"` when no entry had `status == "error"`, otherwise `"fail"`.
+            - `results` (list[dict]): per-projection result dictionaries produced by `ensure_symlink` and `sync_mirror`.
     """
     results: list[dict[str, object]] = []
     for spec in select_symlinks(scope):
@@ -1322,11 +1310,11 @@ def run_sync(repo_root: Path, scope: str) -> dict[str, object]:
 def run_verify(repo_root: Path, scope: str) -> dict[str, object]:
     """
     Run verification across selected symlink and mirror projections and assemble a report payload.
-    
+
     Parameters:
         repo_root (Path): Repository root used to resolve projection paths.
         scope (str): Scope selector for projections; `"all"` runs all projections, otherwise only projections whose tags include this value.
-    
+
     Returns:
         dict[str, object]: Report payload containing:
             - `schema_version` (str): fixed schema identifier.
@@ -1358,9 +1346,9 @@ def run_verify(repo_root: Path, scope: str) -> dict[str, object]:
 def main() -> int:
     """
     Run the projection integrity CLI workflow and return an appropriate process exit code.
-    
+
     Performs the selected mode (`sync` or `verify`) against the repository root, optionally writes a JSON manifest, emits the report in JSON or human-readable text, and returns an exit code reflecting overall success.
-    
+
     Returns:
         exit_code (int): `1` when the generated payload has `status == "fail"`, `0` otherwise.
     """
