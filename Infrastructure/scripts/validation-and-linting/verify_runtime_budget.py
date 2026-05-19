@@ -343,10 +343,11 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
     bridge_exposed = sorted((first_level & BRIDGE_SKILLS) - command_handle_names)
     policy_default = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
-    # Bridge skills are intentionally not expected in default first-level discovery.
-    # They can exist in policy metadata while remaining routed through the hidden
-    # `.system` lane and are validated separately via BRIDGE_SKILLS_EXPOSED_FIRST_LEVEL.
-    expected_default = (ROOT_SKILL_SETS if rooted_mode else policy_default) - BRIDGE_SKILLS
+    # Hidden bridge skills are intentionally not expected in default first-level discovery.
+    # Bridge skills that are explicitly default-visible policy entries, such as
+    # imagegen, remain part of the effective default surface.
+    hidden_bridge_names = BRIDGE_SKILLS - policy_default
+    expected_default = (ROOT_SKILL_SETS if rooted_mode else policy_default) - hidden_bridge_names
     default_names = {entry.name for entry in default_entries}
     catalog_names = {entry.name for entry in catalog_entries}
     extra_default = sorted(default_names - expected_default)

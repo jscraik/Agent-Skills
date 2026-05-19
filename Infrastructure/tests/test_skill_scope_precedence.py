@@ -108,6 +108,36 @@ class TestSkillScopePrecedence(unittest.TestCase):
         self.assertEqual(by_name["shared-skill"], repo_skill.resolve())
         self.assertEqual(by_name["imagegen"], system_dir.resolve())
 
+    def test_runtime_budget_allows_default_visible_system_skill(self) -> None:
+        imagegen_dir = self._write_skill("skills-system/imagegen", "Default visible system skill.")
+        hidden_bridge_dir = self._write_skill("skills-system/skill-creator", "Hidden bridge skill.")
+
+        with (
+            self._patched_repo(default_visible={"imagegen"}),
+            mock.patch.object(verify_runtime_budget, "BRIDGE_SKILLS", {"imagegen", "skill-creator"}),
+        ):
+            report = verify_runtime_budget.build_report()
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["default_visible_skill_names"], ["imagegen"])
+        self.assertEqual(report["effective_default_policy_skill_names"], ["imagegen"])
+        self.assertIn(
+            {
+                "category": "skills-system",
+                "name": "skill-creator",
+                "path": hidden_bridge_dir.relative_to(self.repo_root).as_posix(),
+            },
+            report["hidden_system_entries"],
+        )
+        self.assertIn(
+            {
+                "category": "skills-system",
+                "name": "imagegen",
+                "path": imagegen_dir.relative_to(self.repo_root).as_posix(),
+            },
+            report["hidden_system_entries"],
+        )
+
     def test_runtime_budget_fails_unresolved_same_scope_collision(self) -> None:
         self._write_skill("Plugins/alpha/skills/shared-skill", "Alpha local plugin.")
         self._write_skill("Plugins/beta/skills/shared-skill", "Beta local plugin.")
