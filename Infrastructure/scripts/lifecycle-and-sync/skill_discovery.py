@@ -278,10 +278,13 @@ def _iter_system_lane_skill_dirs() -> List[Path]:
     Returns:
         List[Path]: Paths to .system skill directories containing SKILL.md.
     """
-    if not SYSTEM_LANE_DIR.is_dir():
+    system_lane_dir = SYSTEM_LANE_DIR
+    if not system_lane_dir.is_dir():
+        system_lane_dir = REPO_ROOT / "skills-system"
+    if not system_lane_dir.is_dir():
         return []
     dirs: List[Path] = []
-    for item in sorted(SYSTEM_LANE_DIR.iterdir()):
+    for item in sorted(system_lane_dir.iterdir()):
         if not item.is_dir():
             continue
         if (item / "SKILL.md").exists():

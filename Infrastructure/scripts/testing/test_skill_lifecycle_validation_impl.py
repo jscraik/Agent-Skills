@@ -984,6 +984,38 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             ["autofix", "diagram-cli"],
         )
 
+    def test_repo_discovery_uses_tracked_system_skills_without_runtime_bridge(self) -> None:
+        """
+        Ensure clean CI checkouts keep tracked system skills in repo discovery.
+
+        Local worktrees often have .agents/skills/.system populated, but GitHub
+        Actions checks out only tracked sources. Repo-mode discovery must not
+        drop system skills when that runtime bridge is absent.
+        """
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            write_text(
+                repo_root / "skills-system" / "imagegen" / "SKILL.md",
+                """
+                ---
+                name: imagegen
+                description: "Generate or edit raster images for project assets."
+                ---
+
+                # Imagegen
+                """,
+            )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", repo_root / ".agents" / "skills"),
+                mock.patch.object(skill_discovery, "SYSTEM_LANE_DIR", repo_root / ".agents" / "skills" / ".system"),
+            ):
+                entries = skill_discovery.discover_catalog_entries(source="repo")
+
+        self.assertEqual([entry.name for entry in entries], ["imagegen"])
+
     def test_sync_script_consumes_selection_policy_exports(self) -> None:
         """
         Ensure the sync script references the selection policy and its exported constants required for skill syncing.
