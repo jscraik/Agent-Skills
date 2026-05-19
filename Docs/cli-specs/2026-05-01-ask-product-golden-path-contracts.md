@@ -332,14 +332,19 @@ Required data fields:
         "./bin/ask skills audit Plugins/harness-engineering/skills/code_quality_review/he-code-review --json --robot"
       ]
     },
-    "status": "pass",
+    "status": "warning",
     "blockers": [],
-    "warnings": [],
-    "readiness_taxonomy": {"blockers": {}, "warnings": {}},
+    "warnings": [
+      {
+        "class": "outcome_proof_not_run",
+        "message": "Outcome proof is available but has not been run."
+      }
+    ],
+    "readiness_taxonomy": {"blockers": {}, "warnings": {"outcome_proof_not_run": 1}},
     "lifecycle_event": {
       "schema_version": "capability-lifecycle-event.v1",
       "event_type": "skill_doctor_completed",
-      "outcome": {"status": "pass", "blocker_classes": [], "warning_classes": []}
+      "outcome": {"status": "warning", "blocker_classes": [], "warning_classes": ["outcome_proof_not_run"]}
     },
     "checks": {
       "resolver": {"status": "pass"},
@@ -415,7 +420,7 @@ Required data fields:
       },
       "outcome_proof": {"status": "available_not_run"}
     },
-    "agent_summary": "$he-code-review passed capability doctor checks.",
+    "agent_summary": "$he-code-review passed capability doctor checks with outcome proof still available to run.",
     "next_command": "./bin/ask skills prove he-code-review --json --robot"
   }
 }
