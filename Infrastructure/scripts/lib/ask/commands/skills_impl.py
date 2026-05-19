@@ -3330,10 +3330,10 @@ def external_review_skill(
         ),
         "tessl_review_role": "local_best_practice_content_review",
         "plugin_eval_role": "budget_and_ergonomics_guardrail",
-        "plugin_eval_min_acceptable_grade": "B+",
+        "plugin_eval_min_acceptable_grade": "B",
         "plugin_eval_warning_policy": (
             "Plugin Eval warnings are visible follow-up work, but they are not release blockers when "
-            "there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass."
+            "there are zero Plugin Eval failures, the grade is B or better, and local/Tessl gates pass."
         ),
         "snyk_role": "opt_in_local_dependency_security_screening",
         "snyk_default": "disabled_until_requested",

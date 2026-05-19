@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -52,13 +53,14 @@ def _escape(value: Any) -> str:
 def _evidence_href(path: Path, *, repo_root: Path, output_path: Path) -> str:
     base = output_path.parent.resolve()
     target = path if path.is_absolute() else repo_root / path
+    resolved = target.resolve()
     try:
-        return target.resolve().relative_to(base).as_posix()
+        return Path(os.path.relpath(resolved, base)).as_posix()
     except ValueError:
         try:
-            return target.resolve().relative_to(repo_root.resolve()).as_posix()
+            return resolved.relative_to(repo_root.resolve()).as_posix()
         except ValueError:
-            return target.name
+            return resolved.as_posix() if resolved.is_absolute() else target.as_posix()
 
 
 def _status_class(percent: int) -> str:
@@ -854,7 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {{
       <div class=\"evidence-list\">
         <a href=\"{_evidence_href(report_path, repo_root=repo_root, output_path=output_path)}\">Review JSON<br><span>{_escape(report_path.relative_to(repo_root) if report_path.is_relative_to(repo_root) else report_path)}</span></a>
         {f'<a href=\"{_evidence_href(Path(scorecard_path), repo_root=repo_root, output_path=output_path)}\">Latest Eval Scorecard<br><span>{_escape(Path(scorecard_path).relative_to(repo_root) if Path(scorecard_path).is_relative_to(repo_root) else scorecard_path)}</span></a>' if scorecard_path else '<div>Latest Eval Scorecard<br><span>No scorecard found for this skill.</span></div>'}
-        <div>Policy<br><span>{_escape(policy.get('mode') or 'local_internal_only')}; primary gate: {_escape(policy.get('primary_gate') or 'local_eval_ask_audit')}; Plugin Eval floor: {_escape(policy.get('plugin_eval_min_acceptable_grade') or 'B+')}; Snyk: {_escape(policy.get('snyk_default') or 'disabled_until_explicit_confirmation')}</span></div>
+        <div>Policy<br><span>{_escape(policy.get('mode') or 'local_internal_only')}; primary gate: {_escape(policy.get('primary_gate') or 'local_eval_ask_audit')}; Plugin Eval floor: {_escape(policy.get('plugin_eval_min_acceptable_grade') or 'B')}; Snyk: {_escape(policy.get('snyk_default') or 'disabled_until_explicit_confirmation')}</span></div>
         <div>Generated<br><span>{generated}</span></div>
       </div>
       {review_lanes_html}

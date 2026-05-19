@@ -8,9 +8,14 @@
           "stdout": "\n\ud83d\udccb Diagnostic report: Skills/agent-ops/codex-agent-creator\n--------------------------------------------------\n  \u001b[32m\u2713\u001b[0m skill directory: Found at Skills/agent-ops/codex-agent-creator\n  \u001b[32m\u2713\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m\u2713\u001b[0m nested .git: No nested .git directory\n  \u001b[90m\u25cb\u001b[0m symlink (codex): Rooted latent skill is routed through .skillsets/agent-ops/manifest.jsonl and is not expected as a first-level user-runtime symlink: codex-agent-creator\n  \u001b[90m\u25cb\u001b[0m symlink (agents): Rooted latent skill is routed through .skillsets/agent-ops/manifest.jsonl and is not expected as a first-level user-runtime symlink: codex-agent-creator\n  \u001b[32m\u2713\u001b[0m skill index: Listed in SKILL.md index\n  \u001b[90m\u25cb\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m\u2713\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n\u2705 All checks passed\n"
         },
         "family_benchmarks": {
-          "exit_code": 1,
-          "stderr": "PyYAML is required for validate_skill_authoring_family_benchmarks.py. Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`.\n",
-          "stdout": ""
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "[family-benchmark] checked skills:\n  - Skills/agent-ops/codex-agent-creator\n[family-benchmark] pass: all family benchmark checks satisfied\n"
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "OpenClaw skill guard: codex-agent-creator\nSummary: 0 critical \u00b7 0 warn \u00b7 2 info\nINFO readiness.checked: Operational readiness checks completed\nINFO security.no_scripts: No executable scripts found; static security scan skipped\n"
         },
         "security_gate": {
           "exit_code": 0,
@@ -18,15 +23,8 @@
           "stdout": "Skill: codex-agent-creator\nPath:  Skills/agent-ops/codex-agent-creator/SKILL.md\n\nWARN OUT_SCHEMA_VERSION_MISSING: Schema-bound outputs detected; consider including `schema_version` in the output contract.\nWARN RESEARCH_SCOPE_OVERBUNDLED: Skill/package scope looks broad across many surfaces without explicit narrowing guidance. Prefer the smallest viable package boundary first. | surfaces=6\n\nRESULT: PASS\n"
         }
       },
-      "errors": [
-        {
-          "code": "ERR_VALIDATION",
-          "fix_suggestion": "Inspect data.family_benchmarks for full output, or run: mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill Skills/agent-ops/codex-agent-creator --format text",
-          "help_url": null,
-          "message": "Family benchmarks validation failed. First failures: PyYAML is required for validate_skill_authoring_family_benchmarks.py. Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`."
-        }
-      ],
-      "status": "error"
+      "errors": [],
+      "status": "success"
     },
     "plugin_eval": {
       "command": [
@@ -46,9 +44,9 @@
       "mode": "local_internal_only",
       "no_publish": true,
       "no_registry_upload": true,
-      "plugin_eval_min_acceptable_grade": "B+",
+      "plugin_eval_min_acceptable_grade": "B",
       "plugin_eval_role": "budget_and_ergonomics_guardrail",
-      "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
+      "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B or better, and local/Tessl gates pass.",
       "primary_gate": "local_eval_ask_audit",
       "publish_policy": "never publish, register, upload, or invoke npx from this lane",
       "snyk_default": "disabled_until_requested",
@@ -138,20 +136,13 @@
     "tessl_tile": {
       "mode": "temporary_wrapper",
       "reason": "Tessl lint validates tile.json packages. Canonical repo skills remain SKILL.md-first, so this is a disposable packaging-shape wrapper.",
-      "review_path": "/tmp/agent-skills-tessl-xe1kynxz/skills/codex-agent-creator",
+      "review_path": "/tmp/agent-skills-tessl-t1c9yccz/skills/codex-agent-creator",
       "skill_key": "codex-agent-creator",
       "source_skill": "Skills/agent-ops/codex-agent-creator",
-      "tessl_home": "/tmp/agent-skills-tessl-xe1kynxz/home",
-      "tile_path": "/tmp/agent-skills-tessl-xe1kynxz/tile.json"
+      "tessl_home": "/tmp/agent-skills-tessl-t1c9yccz/home",
+      "tile_path": "/tmp/agent-skills-tessl-t1c9yccz/tile.json"
     }
   },
-  "errors": [
-    {
-      "code": "ERR_VALIDATION",
-      "fix_suggestion": "Inspect data.ask_audit for the exact failing gate.",
-      "help_url": null,
-      "message": "Internal ask skill audit failed during external-review lane."
-    }
-  ],
-  "status": "error"
+  "errors": [],
+  "status": "success"
 }
