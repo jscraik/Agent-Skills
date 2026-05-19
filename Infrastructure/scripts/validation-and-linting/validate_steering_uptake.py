@@ -51,7 +51,7 @@ def _relative(path: Path) -> str:
 
 def _read(path: Path) -> str:
     """
-    Read and return the text contents of the given file path using UTF-8 encoding.
+    Read text from the given file path using UTF-8 encoding.
     
     Returns:
         The file contents as a string.
