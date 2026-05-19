@@ -1,4 +1,11 @@
 {
+  "acknowledged_exceptions": [
+    {
+      "name": "plugin_package_root_parity",
+      "reason": "Catalog resolution paths differ from legacy plugin marketplace paths (Infrastructure/catalog/Plugins/* vs ./Plugins/*); non-blocking during catalog migration",
+      "non_blocking": true
+    }
+  ],
   "issues": [],
   "schema_version": "runtime-separation-current.v1",
   "status": "healthy",

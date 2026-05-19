@@ -62,16 +62,36 @@ def _read(path: Path) -> str:
 def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
     """
     Extracts the header and data rows from the first Markdown-style table found in the input text.
-    
+
     Parameters:
         markdown (str): Text that may contain one or more Markdown tables.
-    
+
     Returns:
-        tuple[list[str], list[list[str]]]: 
+        tuple[list[str], list[list[str]]]:
             `headers`: list of header column names (trimmed of surrounding whitespace and outer pipes).
             `rows`: list of data rows; each row is a list of trimmed cell strings. Returns ([], []) if no complete Markdown table (header and divider) is found.
     """
-    table_lines = [line.strip() for line in markdown.splitlines() if line.strip().startswith("|")]
+    lines = markdown.splitlines()
+    table_lines = []
+
+    # Find the first line starting with "|"
+    start_index = None
+    for i, line in enumerate(lines):
+        if line.strip().startswith("|"):
+            start_index = i
+            break
+
+    if start_index is None:
+        return [], []
+
+    # Collect consecutive lines starting with "|"
+    for i in range(start_index, len(lines)):
+        line = lines[i].strip()
+        if line.startswith("|"):
+            table_lines.append(line)
+        else:
+            break
+
     if len(table_lines) < 3:
         return [], []
 
