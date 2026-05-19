@@ -423,7 +423,7 @@ def _latest_scorecard(repo_root: Path, target_identifier: str) -> tuple[dict[str
     return payload, scorecards
 
 
-def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[str, Any]:
+def _eval_model(repo_root: Path, target: str) -> dict[str, Any]:
     target_identifier = _canonical_target_identifier(target, repo_root)
     scorecard, scorecards = _latest_scorecard(repo_root, target_identifier)
     if not scorecard:
@@ -655,7 +655,7 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
     quality_model = _quality_model(report)
     tessl = quality_model["tessl"]
     plugin = quality_model["plugin"]
-    evals = _eval_model(repo_root, report, target)
+    evals = _eval_model(repo_root, target)
     security = _audit_security_summary(_as_dict(data.get("ask_audit")))
     snyk = _parse_snyk_security(_as_dict(data.get("snyk")))
     base_security_score = 100 if security["critical_count"] == 0 and security["warning_count"] == 0 else 70

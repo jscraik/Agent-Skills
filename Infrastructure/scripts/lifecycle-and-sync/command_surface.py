@@ -730,9 +730,21 @@ def check_command_surface_projection(*, repo_root_path: Path | None = None) -> d
 
     def _without_volatile_source_revision(value: dict[str, Any]) -> dict[str, Any]:
         clone = json.loads(json.dumps(value))
-        provenance = clone.get("provenance")
-        if isinstance(provenance, dict):
-            provenance.pop("source_revision", None)
+
+        def _remove_source_revision_recursive(obj: Any) -> None:
+            if isinstance(obj, dict):
+                # Remove source_revision from provenance dicts
+                if "provenance" in obj and isinstance(obj["provenance"], dict):
+                    obj["provenance"].pop("source_revision", None)
+                # Recurse into all dict values
+                for val in obj.values():
+                    _remove_source_revision_recursive(val)
+            elif isinstance(obj, list):
+                # Recurse into all list items
+                for item in obj:
+                    _remove_source_revision_recursive(item)
+
+        _remove_source_revision_recursive(clone)
         return clone
 
     if (
