@@ -34,6 +34,15 @@ class Finding:
 
 
 def _relative(path: Path) -> str:
+    """
+    Produce the path string relative to the repository root when the given path is inside it.
+    
+    Parameters:
+        path (Path): The filesystem path to convert.
+    
+    Returns:
+        str: The path as a string relative to `ROOT` if `path` is inside `ROOT`, otherwise the original path as a string.
+    """
     try:
         return str(path.relative_to(ROOT))
     except ValueError:
@@ -41,10 +50,25 @@ def _relative(path: Path) -> str:
 
 
 def _read(path: Path) -> str:
+    """
+    Read and return the text contents of the given file path using UTF-8 encoding.
+    
+    Returns:
+        The file contents as a string.
+    """
     return path.read_text(encoding="utf-8")
 
 
 def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
+    """
+    Extract the header and data rows from the first Markdown-style table found in the given text.
+    
+    Parameters:
+        markdown (str): Text that may contain one or more Markdown tables.
+    
+    Returns:
+        tuple[list[str], list[list[str]]]: A pair where the first element is the list of header column names (trimmed of surrounding whitespace and outer pipes) and the second element is a list of data rows; each data row is a list of cell strings (trimmed). If no complete table (header, divider, and optional rows) is found, returns ([], []).
+    """
     table_lines = [line.strip() for line in markdown.splitlines() if line.strip().startswith("|")]
     if len(table_lines) < 3:
         return [], []
@@ -59,6 +83,20 @@ def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
 
 
 def validate(root: Path = ROOT) -> list[Finding]:
+    """
+    Validate the steering feedback documentation, ledger, and agent docs index under the given repository root.
+    
+    Performs these checks:
+    - Ensures the main steering feedback doc exists and contains required phrases.
+    - Ensures the steering uptake ledger exists, has the expected table headers, at least one row, correct column counts, non-empty required fields, valid `Status` values, and that rows marked `validated` include validator evidence.
+    - Ensures the agent docs index README exists and references the steering feedback doc.
+    
+    Parameters:
+        root (Path): Repository root used to resolve the expected documentation paths.
+    
+    Returns:
+        list[Finding]: A list of findings describing missing files or content issues; empty if all checks pass.
+    """
     findings: list[Finding] = []
     doc_path = root / _relative(DOC_PATH)
     ledger_path = root / _relative(LEDGER_PATH)
@@ -103,6 +141,17 @@ def validate(root: Path = ROOT) -> list[Finding]:
 
 
 def main(argv: Iterable[str] | None = None) -> int:
+    """
+    Run the steering uptake validator and print its results to stdout.
+    
+    Parses optional CLI arguments (currently `--json`) from `argv` if provided; otherwise uses system arguments. Executes `validate()` and emits a payload describing the checked files and any findings. When `--json` is set, prints the full payload as pretty JSON; otherwise prints a one-line status ("pass" or "fail") followed by one line per finding in the format "<code>: <path>: <message>".
+    
+    Parameters:
+        argv (Iterable[str] | None): Optional list of command-line arguments to parse. If `None`, the process's command-line arguments are used.
+    
+    Returns:
+        int: Exit code — `0` when no findings were produced, `1` when one or more findings exist.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="Emit machine-readable output.")
     args = parser.parse_args(list(argv) if argv is not None else None)
