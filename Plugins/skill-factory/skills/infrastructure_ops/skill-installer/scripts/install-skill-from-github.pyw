@@ -30,7 +30,7 @@ for _name, _value in vars(_MODULE).items():
     if _name not in {"__name__", "__file__", "__package__", "__loader__", "__spec__", "main"}:
         globals()[_name] = _value
 
-_PINNED_REF = re.compile(r"^[0-9a-f]{40}$")
+_PINNED_REF = re.compile(r"^[0-9a-fA-F]{40}$")
 _TRUSTED_REPOS = {"openai/skills"}
 
 
@@ -68,18 +68,18 @@ def _extract_commit_signer_identity(commit_payload: dict[str, object]) -> dict[s
     verification_obj = verification if isinstance(verification, dict) else {}
     payload = str(verification_obj.get("payload") or "")
 
-    attested_emails = sorted(set(re.findall(r"<([^<>@\s]+@[^<>\s]+)>", payload)))
+    attested_emails = sorted({email.lower() for email in re.findall(r"<([^<>@\s]+@[^<>\s]+)>", payload)})
     metadata_emails = set()
     for key in ("author", "committer"):
         nested = commit_obj.get(key)
         if isinstance(nested, dict) and nested.get("email"):
-            metadata_emails.add(str(nested["email"]))
+            metadata_emails.add(str(nested["email"]).lower())
 
     metadata_logins = set()
     for key in ("author", "committer"):
         nested = commit_payload.get(key)
         if isinstance(nested, dict) and nested.get("login"):
-            metadata_logins.add(str(nested["login"]))
+            metadata_logins.add(str(nested["login"]).lower())
 
     return {
         "attested_emails": attested_emails,
@@ -92,22 +92,25 @@ def _extract_commit_signer_identity(commit_payload: dict[str, object]) -> dict[s
 
 
 def _resolve_commit_provenance(owner: str, repo: str, ref: str) -> tuple[str, dict[str, object], dict[str, list[str]]]:
-    return ref, {"verified": False, "reason": "not checked by compatibility wrapper"}, {
-        "attested_emails": [],
-        "attested_logins": [],
-        "metadata_emails": [],
-        "metadata_logins": [],
-        "emails": [],
-        "logins": [],
-    }
+    return _MODULE._resolve_commit_provenance(owner, repo, ref)
+
+
+def _normalized_values(values: list[str] | None) -> set[str]:
+    if not values:
+        return set()
+    return {value.strip().lower() for value in values if isinstance(value, str) and value.strip()}
 
 
 def _signer_allowed(identity: dict[str, list[str]], args: argparse.Namespace) -> bool:
-    emails = set(identity.get("emails", [])) | set(identity.get("attested_emails", [])) | set(identity.get("metadata_emails", []))
-    logins = set(identity.get("logins", [])) | set(identity.get("attested_logins", [])) | set(identity.get("metadata_logins", []))
-    allowed_emails = set(args.allowed_signer_email or [])
-    allowed_logins = set(args.allowed_signer_login or [])
-    allowed_domains = {domain.lower().lstrip("@") for domain in (args.allowed_signer_domain or [])}
+    emails = _normalized_values(
+        list(identity.get("emails", [])) + list(identity.get("attested_emails", [])) + list(identity.get("metadata_emails", []))
+    )
+    logins = _normalized_values(
+        list(identity.get("logins", [])) + list(identity.get("attested_logins", [])) + list(identity.get("metadata_logins", []))
+    )
+    allowed_emails = _normalized_values(args.allowed_signer_email)
+    allowed_logins = _normalized_values(args.allowed_signer_login)
+    allowed_domains = {domain.strip().lower().lstrip("@") for domain in (args.allowed_signer_domain or []) if domain.strip()}
     if allowed_emails and emails.isdisjoint(allowed_emails):
         return False
     if allowed_logins and logins.isdisjoint(allowed_logins):
@@ -142,13 +145,14 @@ def main(argv: list[str]) -> int:
         trusted_repos = _TRUSTED_REPOS | set(args.trusted_repo or [])
         if repo_key not in trusted_repos and not args.allow_untrusted_source:
             raise InstallError("Untrusted source repo. Pass --trusted-repo owner/repo or --allow-untrusted-source with explicit approval.")
-        if not _PINNED_REF.match(source.ref) and not args.allow_untrusted_source:
+        if not _PINNED_REF.fullmatch(source.ref) and not args.allow_untrusted_source:
             raise InstallError("Skill installs require a pinned 40-character commit ref.")
-        _, verification, identity = _resolve_commit_provenance(source.owner, source.repo, source.ref)
+        resolved_commit, verification, identity = _resolve_commit_provenance(source.owner, source.repo, source.ref)
         if verification.get("verified") is False and not args.allow_untrusted_source:
             raise InstallError("Commit provenance is not verified.")
         if not _signer_allowed(identity, args):
             raise InstallError("Commit signer does not match the allowed signer policy.")
+        source.ref = resolved_commit
         for path in source.paths:
             _validate_relative_path(path)
         dest_root = _resolve_dest_root(args.dest)
