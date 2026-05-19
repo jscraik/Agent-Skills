@@ -712,20 +712,20 @@ JSON output example:
     "lifecycle_events": [
       {
         "schema_version": "capability-lifecycle-event.v1",
-        "event": "eval_started",
+        "event_type": "eval_started",
         "status": "running",
         "message": "Eval runner started."
       },
       {
         "schema_version": "capability-lifecycle-event.v1",
-        "event": "eval_blocked",
+        "event_type": "eval_blocked",
         "status": "blocked",
         "message": "Runner setup failed before skill behavior was reached."
       }
     ],
     "lifecycle_event": {
       "schema_version": "capability-lifecycle-event.v1",
-      "event": "eval_blocked",
+      "event_type": "eval_blocked",
       "status": "blocked",
       "message": "Runner setup failed before skill behavior was reached."
     },
