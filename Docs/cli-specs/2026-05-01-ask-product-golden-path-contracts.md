@@ -346,6 +346,15 @@ Required data fields:
       "event_type": "skill_doctor_completed",
       "outcome": {"status": "warning", "blocker_classes": [], "warning_classes": ["outcome_proof_not_run"]}
     },
+    "lifecycle_events": [
+      {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_resolved"},
+      {"schema_version": "capability-lifecycle-event.v1", "event_type": "audit_completed"},
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "skill_doctor_completed",
+        "outcome": {"status": "warning", "blocker_classes": [], "warning_classes": ["outcome_proof_not_run"]}
+      }
+    ],
     "checks": {
       "resolver": {"status": "pass"},
       "runtime_reachability": {"status": "pass"},
@@ -528,7 +537,19 @@ Required data fields:
         "message": "Package readiness metadata is incomplete."
       }
     ],
-    "lifecycle_event": {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_loaded"},
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "package_readiness_checked",
+      "details": {
+        "gate_summary": {
+          "install_ready": false,
+          "checkout_test_status": "not_run",
+          "promotion_status": "blocked_validation",
+          "promotion_ready": false,
+          "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"]
+        }
+      }
+    },
     "lifecycle_events": [
       {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_loaded"},
       {
