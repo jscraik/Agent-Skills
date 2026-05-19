@@ -619,6 +619,13 @@ def test_table_rows_ignores_non_table_lines() -> None:
     assert rows == [["1", "2"]]
 
 
+def test_table_rows_skips_pipe_prose_before_valid_table() -> None:
+    text = "# Heading\n\nrun cmd1 | cmd2 before editing\n\nA | B\n--- | ---\n1 | 2\n"
+    headers, rows = validate_steering_uptake._table_rows(text)
+    assert headers == ["A", "B"]
+    assert rows == [["1", "2"]]
+
+
 def test_validate_allows_escaped_inline_pipe_in_ledger_cell(tmp_path: Path) -> None:
     _make_valid_root(tmp_path)
     write(

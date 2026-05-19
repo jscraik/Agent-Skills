@@ -70,6 +70,32 @@ def _is_table_row(line: str) -> bool:
     return "|" in line.strip()
 
 
+def _collect_table_lines(lines: list[str], start_index: int) -> list[str]:
+    table_lines: list[str] = []
+    for line in lines[start_index:]:
+        stripped = line.strip()
+        if not _is_table_row(stripped):
+            break
+        table_lines.append(stripped)
+    return table_lines
+
+
+def _find_table_lines(markdown: str) -> list[str]:
+    lines = markdown.splitlines()
+    malformed_candidate: list[str] = []
+    for index, line in enumerate(lines):
+        if not _is_table_row(line):
+            continue
+        candidate = _collect_table_lines(lines, index)
+        if len(candidate) < 2:
+            continue
+        if _is_table_separator(candidate[1]):
+            return candidate
+        if not malformed_candidate:
+            malformed_candidate = candidate
+    return malformed_candidate
+
+
 def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
     """
     Extracts the header and data rows from the first Markdown-style table found in the input text.
@@ -82,27 +108,7 @@ def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
             `headers`: list of header column names (trimmed of surrounding whitespace and outer pipes).
             `rows`: list of data rows; each row is a list of trimmed cell strings. Returns ([], []) if no complete Markdown table (header and divider) is found.
     """
-    lines = markdown.splitlines()
-    table_lines = []
-
-    # Find the first row in a candidate Markdown table. GitHub-flavored
-    # Markdown allows tables with or without leading/trailing edge pipes.
-    start_index = None
-    for i, line in enumerate(lines):
-        if _is_table_row(line):
-            start_index = i
-            break
-
-    if start_index is None:
-        return [], []
-
-    # Collect consecutive rows from the candidate table.
-    for i in range(start_index, len(lines)):
-        line = lines[i].strip()
-        if _is_table_row(line):
-            table_lines.append(line)
-        else:
-            break
+    table_lines = _find_table_lines(markdown)
 
     if len(table_lines) < 3:
         if len(table_lines) >= 2:
@@ -169,15 +175,7 @@ def _is_table_separator(line: str) -> bool:
 
 
 def _has_malformed_table_separator(markdown: str) -> bool:
-    lines = [line.strip() for line in markdown.splitlines()]
-    table_lines: list[str] = []
-    collecting = False
-    for line in lines:
-        if _is_table_row(line):
-            table_lines.append(line)
-            collecting = True
-        elif collecting:
-            break
+    table_lines = _find_table_lines(markdown)
     return len(table_lines) >= 2 and not _is_table_separator(table_lines[1])
 
 
@@ -228,7 +226,7 @@ def validate(root: Path = ROOT) -> list[Finding]:
             if len(row) != len(REQUIRED_HEADERS):
                 findings.append(Finding("STEERING_LEDGER_ROW_WIDTH", f"Row {index} has {len(row)} cells, expected {len(REQUIRED_HEADERS)}.", _relative(ledger_path, root)))
                 continue
-            record = dict(zip(REQUIRED_HEADERS, row))
+            record = dict(zip(REQUIRED_HEADERS, row, strict=True))
             for field in REQUIRED_HEADERS:
                 if not record[field] or record[field].lower() in {"none", "n/a", "todo"}:
                     findings.append(Finding("STEERING_LEDGER_FIELD_EMPTY", f"Row {index} has weak value for {field}.", _relative(ledger_path, root)))
