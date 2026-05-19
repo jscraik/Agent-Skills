@@ -1089,7 +1089,7 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     agents_runtime_ready = (
         gates["agents_user_link"] and gates["agents_user_command_handle_exists"]
     )
-    user_runtime_ready = codex_runtime_ready or agents_runtime_ready
+    user_runtime_ready = codex_runtime_ready
     gates["codex_user_runtime_ready"] = codex_runtime_ready
     gates["agents_user_runtime_ready"] = agents_runtime_ready
     gates["user_runtime_ready"] = user_runtime_ready
@@ -1106,6 +1106,8 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
                 "resolver",
                 "generated_command_handle_check",
                 "workspace_command_handle_exists",
+                "codex_user_link",
+                "codex_user_command_handle_exists",
                 "user_runtime_ready",
             ],
             "supporting_runtime_diagnostics": [

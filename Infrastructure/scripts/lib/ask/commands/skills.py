@@ -35,10 +35,13 @@ _PATCHABLE_IMPL_NAMES = (
     "audit_skill",
     "improve_skills",
     "resolve_skill_handle",
+    "sync_skills",
     "skill_invocation_analytics",
     "skills_proof",
     "_skill_sections",
     "_skill_workout_candidates",
+    "refresh_workspace_plugin_caches",
+    "prune_unowned_skillset_files",
 )
 _ORIGINAL_IMPL_VALUES = {
     name: getattr(_impl, name)
@@ -89,6 +92,10 @@ def explain_skill(*args, **kwargs):
 
 def improve_skills(*args, **kwargs):
     return _call_impl("improve_skills", *args, **kwargs)
+
+
+def sync_skills(*args, **kwargs):
+    return _call_impl("sync_skills", *args, **kwargs)
 
 
 _skill_sections = _impl._skill_sections
