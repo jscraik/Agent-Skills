@@ -36,7 +36,7 @@ FACTORY_GATE_REFERENCE = (
     REPO_ROOT / "Infrastructure" / "references" / "first-principles-factory-gate.md"
 )
 FACTORY_GATE_LANE_RELS = (
-    "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
+    "skills-system/skill-creator/references/skill-factory/foundations.md",
     "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
     "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md",
     "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md",

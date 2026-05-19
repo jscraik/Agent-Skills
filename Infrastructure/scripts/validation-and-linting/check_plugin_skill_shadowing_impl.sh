@@ -140,14 +140,16 @@ for handle in payload.get("handles", []):
 PY
 fi
 
-plugins_root="Plugins"
-if [ ! -d "$plugins_root" ] && [ -d "plugins" ]; then
-  plugins_root="plugins"
-fi
-
-find -L "$plugins_root" -type f -path '*/skills/*/SKILL.md' 2>/dev/null \
-  | awk -F/ '{print $(NF-1)}' \
-  | sort -u > "$plugin_names_file"
+: > "$plugin_names_file"
+for plugins_root in Plugins plugins; do
+  [ -d "$plugins_root" ] || continue
+  while IFS= read -r plugin_skills_root; do
+    [ -d "$plugin_skills_root" ] || continue
+    find -L "$plugin_skills_root" -mindepth 2 -maxdepth 3 -type f -name 'SKILL.md' 2>/dev/null \
+      | awk -F/ '{print $(NF-1)}' >> "$plugin_names_file"
+  done < <(find -L "$plugins_root" -mindepth 2 -maxdepth 2 -type d -name skills 2>/dev/null | sort)
+done
+sort -u "$plugin_names_file" -o "$plugin_names_file"
 
 if [ -d .agents/skills ]; then
   find -L .agents/skills -mindepth 2 -maxdepth 2 -type f -name 'SKILL.md' 2>/dev/null \

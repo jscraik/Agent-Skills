@@ -5,6 +5,12 @@ from typing import Optional
 
 
 SYNC_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh"
+SYNC_IMPL_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/sync_skills_impl.sh"
+
+
+def _read_sync_impl() -> str:
+    with open(SYNC_IMPL_SCRIPT, encoding="utf-8") as script_file:
+        return script_file.read()
 
 
 def _run_sync_script(args: list[str], *, env: Optional[dict[str, str]] = None) -> subprocess.CompletedProcess[str]:
@@ -22,8 +28,7 @@ def _run_sync_script(args: list[str], *, env: Optional[dict[str, str]] = None) -
 
 class TestSyncSkillsShellProjection(unittest.TestCase):
     def test_shell_entrypoint_delegates_runtime_mutation_to_ask_engine(self) -> None:
-        with open(SYNC_SCRIPT, encoding="utf-8") as script_file:
-            script = script_file.read()
+        script = _read_sync_impl()
 
         self.assertIn("ask_sync_args=(skills sync", script)
         self.assertIn('[[ "$dry_run" == "1" || "${SYNC_SKILLS_RESOLVED_PROJECTION_MODE:-flat}" != "flat" || "$plugin_cache_refresh" != "auto" ]]', script)
@@ -32,12 +37,21 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         self.assertIn("exit 124", script)
 
     def test_shell_entrypoint_keeps_flat_legacy_path_reachable(self) -> None:
-        with open(SYNC_SCRIPT, encoding="utf-8") as script_file:
-            script = script_file.read()
+        script = _read_sync_impl()
 
         delegated_block = script.split("ask_sync_args=(skills sync", 1)[0]
         self.assertNotIn('"$sync_scope" == "user"', delegated_block)
         self.assertNotIn('"$sync_scope" == "workspace"', delegated_block)
+
+    def test_flat_sync_prunes_stale_plugin_owned_entries(self) -> None:
+        script = _read_sync_impl()
+
+        self.assertIn("Removed stale plugin-owned flat skill", script)
+        self.assertIn('rm -rf -- "${skills_dir:?}/${skill_name:?}"', script)
+        self.assertLess(
+            script.index("Removed stale plugin-owned flat skill"),
+            script.index("Skipping plugin-owned skill from flat projection"),
+        )
 
     def test_rooted_projection_delegates_to_ask_engine_in_dry_run(self) -> None:
         result = _run_sync_script(["--workspace", "--projection", "rooted", "--dry-run"])

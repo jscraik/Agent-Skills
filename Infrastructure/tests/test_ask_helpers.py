@@ -397,6 +397,18 @@ class TestExampleCommands(unittest.TestCase):
         result = _example_commands("skills", "list", limit=0)
         self.assertEqual(result, [])
 
+    def test_skills_doctor_returns_command_specific_examples(self):
+        result = _example_commands("skills", "doctor", limit=2)
+
+        self.assertEqual(result[0], "ask skills doctor he-heartbeat --json")
+        self.assertIn("Skills/agent-ops/autofix", result[1])
+
+    def test_skills_events_returns_command_specific_examples(self):
+        result = _example_commands("skills", "events", limit=2)
+
+        self.assertEqual(result[0], "ask skills events --json")
+        self.assertEqual(result[1], "ask skills events eval_blocked --json")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -33,13 +33,13 @@ CANONICAL_SKILL_PREFIXES = (
 def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     """
     Collect basic repository metadata and whether agent skills appear to be synced.
-    
+
     The returned CallResult's `data` includes:
     - `repo_root` (str): contract-preserving repository root marker (`"."`).
     - `repo_root_resolved` (str): absolute resolved repository root path.
     - `is_git` (bool): `True` if a `.git` directory exists at `repo_root`, `False` otherwise.
     - `skills_synced` (bool): `True` if `.agents/skills` exists and contains at least one entry, `False` otherwise.
-    
+
     Returns:
         CallResult: A CallResult with `status` set to `"success"` and the metadata above stored in `data`.
     """
@@ -47,12 +47,12 @@ def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     result.data["repo_root"] = "."
     result.data["repo_root_resolved"] = str(repo_root.resolve())
     result.data["is_git"] = (repo_root / ".git").exists()
-    
+
     # Check if .agents/skills is synced
     skills_dir = repo_root / ".agents" / "skills"
     is_synced = skills_dir.is_dir() and any(skills_dir.iterdir())
     result.data["skills_synced"] = is_synced
-    
+
     result.status = "success"
     return result
 
@@ -65,16 +65,16 @@ def repo_validate(
 ) -> CallResult:
     """
     Run the repository validation script and collect a structured result.
-    
+
     Executes the repository's Infrastructure/scripts/validate_all.sh with either `--ephemeral` or `--persistent`, optional fail-fast behavior, and optional changed-file scoping. Parses the script summary from stdout and records the raw output and summary counts in the returned result. If the script fails to emit the expected summary lines or exits with a non-zero code, the result is marked as an error and includes an `ErrorObject` describing the validation failure.
-    
+
     Parameters:
         repo_root (Path): Path to the repository root where the script will be executed.
         ephemeral (bool): When True run validation with `--ephemeral`; otherwise use `--persistent`.
         fail_fast (bool): When True stop after the first required failure.
         scope (str): Named validation subset to run.
         changed_files (List[str] | None): Optional repo-relative changed files to scope validations.
-    
+
     Returns:
         CallResult: Contains `data` with keys:
             - `required_failures` (int): Number of required failures reported by the validator.
@@ -84,7 +84,7 @@ def repo_validate(
           On error the result may include one or more `ErrorObject` entries with `code="ERR_VALIDATION"` and a `fix_suggestion`.
     """
     result = CallResult()
-    
+
     cmd = ["bash", "Infrastructure/scripts/validate_all.sh"]
     if ephemeral:
         cmd.append("--ephemeral")
@@ -97,7 +97,7 @@ def repo_validate(
     if changed_files:
         cmd.append("--changed-files")
         cmd.extend(changed_files)
-        
+
     VALIDATE_TIMEOUT = 300  # 5 minutes
     try:
         completed = subprocess.run(
@@ -154,7 +154,7 @@ def repo_validate(
             required_failures = int(line.split(":")[-1].strip())
         elif "- warn_only_issues:" in line:
             warn_only_issues = int(line.split(":")[-1].strip())
-            
+
     result.data["required_failures"] = required_failures
     result.data["warn_only_issues"] = warn_only_issues
     result.data["raw_output"] = stdout
@@ -162,7 +162,7 @@ def repo_validate(
     result.data["fail_fast"] = fail_fast
     result.data["scope"] = scope
     result.data["changed_files"] = changed_files or []
-    
+
     if completed.returncode == 0:
         result.status = "success"
     else:
@@ -179,13 +179,13 @@ def repo_validate(
 def doctor_catalog(repo_root: Path, strict: bool = False) -> CallResult:
     """
     Run catalog parity diagnostics and record the findings in a CallResult.
-    
+
     Performs parity checks for the catalog at `repo_root` (optionally using stricter rules when `strict` is True), stores the full parity report under `result.data["catalog_parity"]` and exposes `decision_status` and `policy_identity` in `result.data`. If no drift is detected the returned CallResult has `status` set to `"success"`. If drift is detected the CallResult has `status` set to `"error"` and includes an `ErrorObject` (code `"ERR_VALIDATION"`) whose message contains the detected drift class and whose `fix_suggestion` is taken from the report's `operator_action` or a default instruction.
-    
+
     Parameters:
         repo_root (Path): Root path of the repository to analyse.
         strict (bool): Apply stricter parity rules when True.
-    
+
     Returns:
         CallResult: Result object containing:
             - data["catalog_parity"]: full parity report object
@@ -316,6 +316,8 @@ def _ask_bootstrap_signal(repo_root: Path) -> dict[str, Any]:
         "resolved_path": path_discovery.get("resolved_path"),
         "shim_status": shim.get("status"),
         "shim_repo_identity_status": shim.get("repo_identity_status"),
+        "manual_remediation": proof.get("remediation", {}).get("manual", []),
+        "applied_remediation": proof.get("remediation", {}).get("applied", []),
     }
     if entrypoint.get("status") == "fail" or fallback.get("status") == "fail":
         return {
@@ -951,11 +953,11 @@ def provider_audit(repo_root: Path) -> CallResult:
 def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
     """
     Produce a surface-inventory report for the repository.
-    
+
     Parameters:
         repo_root (Path): Path to the repository root where the inventory check will run.
         strict (bool): When true, require strict inventory validation.
-    
+
     Returns:
         CallResult: Result containing:
             - data["repo_surface"]: parsed inventory report dictionary (or a fallback error report on parse failure).
@@ -1073,15 +1075,15 @@ def repo_surface(repo_root: Path, strict: bool = False) -> CallResult:
 def check_hub_stability(repo_root: Path, changed_files: List[str] | None = None) -> CallResult:
     """
     Validate stability-related changes to SKILL.md files and enforce rules for skills marked `stability: stable`.
-    
+
     Checks the repository for SKILL.md frontmatter that declares a skill as stable and, when a list of changed files is provided, verifies that:
     - stable SKILL.md files include `name:` and `description:` fields in their frontmatter, and
     - deletion of a stable skill is not performed without an existing deprecation notice.
-    
+
     Parameters:
         repo_root (Path): Repository root directory against which paths and SKILL.md files are resolved.
         changed_files (List[str], optional): Iterable of file paths (typically relative to `repo_root`) to inspect; if omitted, only a global scan is performed.
-    
+
     Returns:
         CallResult: Contains:
           - `status`: `"success"` if no stability violations were found, `"error"` otherwise.

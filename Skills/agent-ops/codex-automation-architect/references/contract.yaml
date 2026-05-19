@@ -23,7 +23,7 @@ runtime_contract:
   tools:
     - "codex_app.automation_update"
     - "codex_app.automation_list"
-    - "tool_search"
+    - "tool_search when dynamic tools are deferred"
   kinds: [cron, heartbeat]
   execution_environments: [local, worktree]
   update_rule: "Prefer updating an existing automation over creating a duplicate; preserve fields unless the user asks to change them."

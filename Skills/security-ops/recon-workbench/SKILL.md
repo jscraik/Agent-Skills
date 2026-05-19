@@ -62,6 +62,17 @@ metadata:
 - Redact secrets and sensitive data by default.
 - Avoid destructive commands unless explicitly requested and rollback is clear.
 
+## Execution Boundaries
+- Stay within the authorized target, manifest, probe plan, and artifact workspace.
+- Do not run invasive scans, attempt access-control circumvention, mutate targets, or publish findings without explicit authorization.
+
+## Failure Mode
+- If authorization, scope, artifact path, or validation command is unclear, stop with a blocked result instead of probing.
+
+## Gotchas
+- Recon artifacts can contain sensitive URLs, headers, screenshots, and logs; redact before sharing or persisting them broadly.
+- Hypotheses are not findings until they are tied to deterministic artifacts.
+
 ## Validation
 - Run the smallest command or test that exercises the changed behavior.
 - Use strict skill audit and Plugin Eval when changing this skill.
@@ -81,6 +92,7 @@ metadata:
 
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
+- Use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md` for dependency, integration, and operational-security lenses.
 - Use references/contract.yaml for the machine-readable contract.
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.

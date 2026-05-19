@@ -1,0 +1,22 @@
+schema_version: 1
+skill: skill-factory-router
+purpose: Route skill lifecycle requests to exactly one skill-factory lane before execution.
+triggers: [skill_creation, skill_hardening, skill_installation, skill_refactor, skillify]
+non_goals: [ordinary_product_work, plugin_packaging, broad_repo_maintenance]
+inputs: [user_request, optional_repo_path, optional_skill_path, optional_evidence]
+outputs: [selected_lane, rationale, next_invocation, blocked_missing_input]
+risks: [overbroad_skill_surface, ambiguous_triggers, unsafe_mutation, hidden_context_load]
+safety: {untrusted_inputs: true, redact_secrets: true, route_before_execution: true}
+design_contract:
+  reference: Infrastructure/references/openai-style-plugin-design-contract.md
+  required_checks:
+    - one_primary_user_intent
+    - precise_trigger_description
+    - explicit_inputs_outputs
+    - side_effect_class
+    - progressive_disclosure_boundary
+    - validation_or_eval_evidence
+    - interactive_or_headless_behavior
+validation: [strict_skill_audit, skill_eval_or_targeted_fixture]
+observability: "Report selected lane, evidence, missing input, side-effect class, and validation outcome."
+rollback_procedure: "Restore router SKILL.md and references from git, then rerun strict audit and focused skill evals."

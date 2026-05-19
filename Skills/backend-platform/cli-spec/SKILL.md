@@ -58,6 +58,17 @@ metadata:
 - Keep writes inside the repo-owned source path unless the user explicitly approves another target.
 - Avoid destructive commands unless explicitly requested and rollback is clear.
 
+## Execution Boundaries
+- Keep changes to the requested CLI spec, schema, examples, or validation notes.
+- Do not implement the CLI, change package commands, install dependencies, or mutate release configuration unless the user explicitly asks.
+
+## Failure Mode
+- If command ownership, side effects, output schema, or validation cannot be established, return the missing contract fields instead of inventing behavior.
+
+## Gotchas
+- A human-readable command plan is not agent-ready until JSON output, exit codes, dry-run behavior, and errors are specified.
+- CLI specs that hide side effects make later validation and rollback unsafe.
+
 ## Validation
 - Run the smallest command or test that exercises the changed behavior.
 - Use strict skill audit and Plugin Eval when changing this skill.
@@ -77,6 +88,7 @@ metadata:
 
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
+- Use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md` for use-case and CLI contract lenses.
 - Use references/contract.yaml for the machine-readable contract.
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.

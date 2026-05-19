@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  snyk: snyk/snyk@2.3.0
+
 jobs:
   pr-pipeline:
     docker:
@@ -15,6 +18,24 @@ jobs:
             else
               echo "✅ GH_TOKEN present"
             fi
+      - run:
+          name: Ensure SNYK_TOKEN available
+          command: |
+            if [ -z "${SNYK_TOKEN:-}" ]; then
+              echo "❌ SNYK_TOKEN not set — add a Snyk API token as a CircleCI project environment variable"
+              exit 1
+            fi
+            echo "✅ SNYK_TOKEN present"
+      - snyk/scan:
+          command: test
+          fail-on-issues: true
+          monitor-on-build: false
+          severity-threshold: high
+          token-variable: SNYK_TOKEN
+          additional-test-arguments: >-
+            --all-projects
+            --detection-depth=6
+            --exclude=node_modules,cache,artifacts,tmp
       - run:
           name: Validate Repository
           command: |

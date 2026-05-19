@@ -12,6 +12,27 @@ description: >
 
 Design a binary Pass/Fail LLM-as-Judge evaluator for one specific failure mode. Each judge checks exactly one thing.
 
+## Codex Skill Eval Lens
+
+Use judges for Codex skill evals only after deterministic checks are exhausted. Do not ask a judge whether a skill is generally good. Ask one subjective question that cannot be proven from JSONL, files, commands, schemas, or git state.
+
+Good judge targets:
+
+- final response gives a useful, evidence-grounded explanation
+- review finding is actionable and severity-calibrated
+- generated plan follows the repo's operating style
+- output avoids vague claims when exact command or file evidence exists
+
+Bad judge targets:
+
+- whether a file exists
+- whether a command ran
+- whether a skill was selected
+- whether JSON matches a schema
+- whether forbidden commands were used
+
+For skill evals, require the judge output to be schema-bound with `pass`, `reason`, and `evidence_refs` so the harness can compare results across runs.
+
 ## Prerequisites
 
 - Error analysis is complete. The failure mode is identified.

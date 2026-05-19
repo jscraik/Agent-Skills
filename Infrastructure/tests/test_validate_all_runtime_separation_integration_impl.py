@@ -50,10 +50,10 @@ NEW_PYTHON_SCRIPTS = [
 def _make_executable(path: str) -> None:
     """
     Set the file at `path` to be executable by user, group and others.
-    
+
     Parameters:
         path (str): Filesystem path of the file whose mode will be modified.
-    
+
     Notes:
         The existing permission bits are preserved; this function adds execute bits for user, group and others.
     """
@@ -63,11 +63,11 @@ def _make_executable(path: str) -> None:
 def _write_executable(path: str, content: str) -> None:
     """
     Create a file at `path` with `content`, ensure its parent directories exist, and make it executable.
-    
+
     Parameters:
         path (str): Filesystem path to write.
         content (str): File content to write.
-    
+
     """
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w") as fh:
@@ -209,7 +209,7 @@ class TestRuntimeConsumerScanCommand(unittest.TestCase):
     def test_ephemeral_mode_omits_emit_digests(self):
         """
         Ensure the consumer scan command does not include --emit-digests for ephemeral output mode.
-        
+
         Asserts that when output_mode is 'ephemeral' the constructed runtime_consumer_scan_cmd omits the `--emit-digests` flag.
         """
         cmd = self._build_cmd("ephemeral")
@@ -265,9 +265,9 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def _create_python_stub(cls, stub_path: str, args_log_dir: str) -> None:
         """
         Write an executable Python stub to stub out Python scripts during integration tests.
-        
+
         The generated launcher records its invocation arguments (excluding the launcher itself) as JSON into a per-script file named "<script_basename>.args.json" under `args_log_dir`, and exits with status 0.
-        
+
         Parameters:
             stub_path (str): Filesystem path where the executable stub is written.
             args_log_dir (str): Directory where per-invocation JSON argument logs are created; the directory is created if it does not exist.
@@ -295,10 +295,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def _create_bash_stub(cls, stub_path: str, args_log_dir: str) -> None:
         """
         Create an executable bash stub that records its invocation arguments to a log file and exits successfully.
-        
+
         The created script ensures the log directory exists and writes its CLI arguments, one per line, to
         <args_log_dir>/<script_name>.args where <script_name> is the basename of the invoked script.
-        
+
         Parameters:
             stub_path (str): Filesystem path where the stub script will be written.
             args_log_dir (str): Directory where the stub will create per-invocation argument logs.
@@ -315,10 +315,10 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def _setup_tmpdir(self, tmpdir: str) -> dict:
         """
         Prepare a minimal fake repository in tmpdir for integration tests of validate_all.sh.
-        
+
         Parameters:
             tmpdir (str): Path to a temporary directory to be populated with the minimal repo layout.
-        
+
         Returns:
             dict: Paths created for the test environment:
                 - python_stub (str): Path to the executable Python stub that records argv.
@@ -368,12 +368,12 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def _run_validate_all(self, tmpdir: str, python_stub: str, mode: str) -> subprocess.CompletedProcess:
         """
         Run the repository's validate_all.sh inside tmpdir using the supplied Python stub.
-        
+
         Parameters:
             tmpdir (str): Filesystem path used as the working directory for the run.
             python_stub (str): Path to an executable Python stub to set in the `PYTHON_BIN` environment variable.
             mode (str): Validation mode to pass to the script (e.g. "ephemeral" or "persistent").
-        
+
         Returns:
             result (subprocess.CompletedProcess): Completed process containing `returncode`, `stdout` and `stderr`.
         """
@@ -418,9 +418,9 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def _get_tsv_from_stdout(self, stdout: str, tmpdir: str, _mode: str) -> list[tuple[str, str, str]]:
         """
         Locate the "Validation logs" run directory from stdout, read its check-results.tsv, and return each row as a (slug, check_mode, outcome) tuple.
-        
+
         The function looks for a line in stdout containing "Validation logs: <path>", resolves a relative path against tmpdir, and parses check-results.tsv if present. Lines with at least three tab-separated fields are returned as tuples (first three fields); missing file or missing marker yields an empty list.
-        
+
         Returns:
             list[tuple[str, str, str]]: Parsed TSV entries as (slug, check_mode, outcome).
         """
@@ -498,7 +498,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def test_all_new_checks_are_required_mode(self):
         """
         Assert that each of the eight runtime-separation checks is registered with mode "required".
-        
+
         Runs validate_all in ephemeral mode against a temporary stubbed repository, reads the produced check-results.tsv, and verifies every expected runtime-separation slug (if present) has check mode equal to "required".
         """
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
@@ -525,7 +525,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def test_new_checks_ordering_in_tsv(self):
         """
         Verify the eight new runtime-separation check slugs appear in the same relative order in check-results.tsv as defined by RUNTIME_SEPARATION_SLUGS.
-        
+
         Runs validate_all.sh in a temporary minimal repository with stubbed scripts (ephemeral mode), extracts the TSV entries from the reported run directory, filters to the runtime-separation slugs present, and asserts their relative ordering matches the expected sequence.
         """
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
@@ -571,7 +571,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def test_python_stub_receives_build_current_output_flag_ephemeral(self):
         """
         Assert that build_runtime_separation_current.py is invoked with an --output path under the run directory when running in ephemeral mode.
-        
+
         Reads the run directory from the validate_all.sh stdout, loads the python stub's recorded argv, and verifies:
         - the `--output` flag is present,
         - the output value contains `runtime-separation-current.json`,
@@ -645,7 +645,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def test_consumer_scan_receives_emit_digests_in_persistent_mode(self):
         """
         Assert that scan_runtime_separation_consumers.py is invoked with --emit-digests when validate_all runs in persistent mode.
-        
+
         Runs validate_all.sh in a temporary fake repository with a python stub that records argv and verifies the recorded arguments include '--emit-digests'.
         """
         import json
@@ -676,7 +676,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def test_consumer_scan_omits_emit_digests_in_ephemeral_mode(self):
         """
         Verify that scan_runtime_separation_consumers.py is not passed `--emit-digests` when output mode is "ephemeral".
-        
+
         If the stub invocation log for the script is missing, the test is skipped.
         """
         import json
@@ -878,7 +878,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def test_wrapper_fixtures_check_receives_runtime_separation_flag(self):
         """
         Assert the wrapper fixtures verification script is invoked with the `--runtime-separation` flag.
-        
+
         Runs validate_all.sh in an ephemeral test repository and checks the stub's recorded arguments for `--runtime-separation`; skips the test if the stub log file is not present.
         """
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
@@ -904,7 +904,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def test_writer_mutations_check_receives_strict_flag(self):
         """
         Assert the writer-mutations runtime-separation check is invoked with the --strict flag.
-        
+
         Runs validate_all in a temporary fake repository and inspects the stub's recorded arguments; the test is skipped if the stub log is not present.
         """
         with tempfile.TemporaryDirectory(prefix="validate-all-test-") as tmpdir:
@@ -930,7 +930,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
         """
         Assert the profile-home check stub is invoked with an output path that contains
         the runtime-separation profile filename.
-        
+
         Runs validate_all in ephemeral mode with stubs and checks the stub's args log
         for 'runtime-separation-profile-home.json', skipping the test if the log is missing.
         """
@@ -956,7 +956,7 @@ class TestRuntimeSeparationIntegration(unittest.TestCase):
     def test_profile_home_check_receives_repo_current_flag(self):
         """
         Assert that the profile-home validation check is invoked with a `--repo-current` argument that references the runtime-separation current file.
-        
+
         This test runs `validate_all.sh` in an ephemeral mode against a stubbed repository, reads the stubbed invocation log for
         `validate_runtime_separation_profile_home.sh`, and verifies the presence of the `--repo-current` flag and the string
         `runtime-separation-current.json`. If the stub log is not present the test is skipped.

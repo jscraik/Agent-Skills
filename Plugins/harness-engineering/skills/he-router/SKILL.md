@@ -2,6 +2,7 @@
 name: he-router
 description: "Selects one Harness Engineering stage for mixed requests. Use when a request could mean brainstorm, spec, plan, work, review, eval, Linear planning, reconcile, reinforce, heartbeat, branch hygiene, or specialist steering."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
 ---
 
@@ -21,15 +22,14 @@ Keep routing evidence-led, reversible, and bounded to one handoff.
   `he-prune-branches`.
 - The request mentions HE artifacts, tracker lifecycle state, prior sessions,
   waits, closure proof, specialist steering, or gate selection before a stage is
-  chosen.
+- See references/hot-path-folded-context.md for folded when to use detail.
 
 ## When Not to Use
 - A valid non-router HE stage is explicitly requested and no correctness
   question is being asked.
 - The task is outside HE routing, such as pure image generation, spreadsheets,
   generic repo edits, or external tracker work.
-- A selected stage already has authority for implementation, review repair,
-  tracker mutation, or cleanup.
+- See references/hot-path-folded-context.md for folded when not to use detail.
 
 ## Inputs
 Required: request text and repo/workspace root. Optional: artifact paths,
@@ -52,9 +52,7 @@ Structured output, when requested: `route_preview_version`, `selected_stage` or
   generated handle.
 - Rules/hooks: router work is read-only; validators prove structure, not runtime
   outcome quality.
-- MCP/tools: use local evidence first; external tools require selected-stage
-  need and permission.
-- Human approval: ask once before consequential ambiguity or risky action.
+- See references/hot-path-folded-context.md for folded codex harness placement detail.
 
 ## Procedure
 1. Inspect 2-3 routing-critical surfaces first; expand only when blocked.
@@ -88,9 +86,7 @@ Fail fast: stop at the first failed gate, fix source, and rerun that gate.
   completion claims.
 - Redact secrets, credentials, tokens, private transcripts, and sensitive
   personal data by default.
-- Approval required for destructive cleanup, broad edits, external writes,
-  credential access, expensive network work, or irreversible recommendations.
-- Safe fallback: return a blocked route with the smallest recovery step.
+- See references/hot-path-folded-context.md for folded safety boundaries detail.
 
 ## Execution Boundaries
 Own route classification and handoff only. Edit canonical source under this
@@ -108,6 +104,13 @@ Hand off only after `selected_stage`, evidence source, and next invocation are
 clear. Use `../../references/subagent-call-contract.md` before helper
 delegation. Use goal continuity only for explicit durable continuation.
 
+## Examples
+- When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,
+  start from the canonical Harness Engineering evidence and route the next action
+  with validation status.
+- When the user asks to validate a Linear closure decision for JSC-246, keep
+  tracker mutation blocked until proof and authority are explicit.
+
 ## Gotchas
 - Folded aliases are modes, not missing skills.
 - Review, PR, failing-test, go/no-go, and closure-proof language is not generic
@@ -115,29 +118,12 @@ delegation. Use goal continuity only for explicit durable continuation.
 - Strict audit and Plugin Eval score do not prove runtime visibility, release
   eval success, or real routing accuracy.
 
-## Examples
-- Request: "JSC-244 has a draft spec, a Linear plan note, and an open PR; choose
-  whether the next HE step is plan, work, review, or eval, and name the missing
-  proof." Expected: one route plus `missing_input`, not implementation.
-- Request: "PR 153 merged but Linear is still In Review; route the closure-proof
-  step without closing Linear or inventing validation." Expected: eval/closure
-  proof handoff with external mutation blocked.
-
-## Accessibility Requirements
-Use plain text, stable field names, one recovery action for blockers, and no
-color-only status.
-
 ## Context Routes
 - Read when: deterministic stage choice is needed ->
   `Plugins/harness-engineering/references/routing-map.json`
 - Read when: route priority or folded aliases are unclear ->
   `Plugins/harness-engineering/references/deterministic-stage-routing.md`
-- Read when: broad gates could over-route ->
-  `Plugins/harness-engineering/references/gate-selection-contract.md`
-- Read when: preserved router rules are needed ->
-  `references/context-preservation.md`
-- Read when: role names are involved -> `references/role-resolution-fallback.md`
-- Read when: recurring waits appear -> `references/heartbeat-routing-preservation.md`
+- See references/hot-path-folded-context.md for folded context routes detail.
 
 ## Output Format
 Emit one compact YAML or JSON object when structured output is requested.
@@ -146,14 +132,7 @@ implementation plan unless the selected stage owns planning. Use
 `route_preview_version: 1` and `schema_version: he-router.route-preview.v1`
 for new structured handoffs.
 
-## Confidence Reporting
-Use `high` for deterministic rule plus required evidence, `medium` for
-reversible inference, and `blocked` for missing input, conflict, unavailable
-resolver, or unsafe authority gap.
-
-Deferred context index: `../../references/deferred-context-index.md`.
-Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
-references with a clear route.
-Apply the context-disposition policy by moving important still-valid context to
-references and intentionally discarding stale, duplicated, unsafe, superseded,
-or low-signal text.
+## References
+- ../../references/deferred-context-index.md for folded/discarded context.
+- ../../references/closure-mutation-contract.md for closure proof vs live mutation boundaries.
+- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

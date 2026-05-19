@@ -2,7 +2,7 @@
 title: Skill Authoring Family — Gold Standard Scorecard
 type: reference
 status: active
-date: 2026-04-05
+date: 2026-05-15
 next_review: 2026-07-05
 plan: Docs/plans/2026-04-05-feat-skill-authoring-family-gold-standard-upgrade-plan.md
 ---
@@ -15,6 +15,7 @@ plan: Docs/plans/2026-04-05-feat-skill-authoring-family-gold-standard-upgrade-pl
 - [Metric Scorecard](#metric-scorecard)
 - [Official-Doc Alignment](#official-doc-alignment)
 - [Blocker Routing](#blocker-routing)
+- [May 2026 Audit Freshness](#may-2026-audit-freshness)
 - [Recent Changes](#recent-changes)
 
 ## Readiness Summary
@@ -93,12 +94,40 @@ Findings (2026-04-05): No breaking changes observed in official guidance versus 
 
 Next review due: **2026-07-05**
 
+## May 2026 Audit Freshness
+
+Checked: **2026-05-15**
+
+The stricter local audit flags are still intentional, but they are local gold
+requirements rather than Tessl registry requirements:
+
+- `references/contract.yaml` and `references/evals.yaml` remain required for a
+  gold claim. Tessl reviews, local review dashboards, and run artifacts are
+  evidence outputs; they do not replace the per-skill source contract and eval
+  definitions.
+- A short description can still be flagged even if Tessl validation passes.
+  The local gate keeps a stricter activation bar because discovery quality is
+  driven by concrete WHAT + WHEN wording and trigger terms.
+- Safety, execution-boundary, failure-mode, gotcha, validation, and anti-pattern
+  headings remain required for local gold because this repo uses skills as
+  executable operating contracts, not only registry-readable documentation.
+- `references/evals.yaml` may now include local signal-grading fields used by
+  the May 2026 runner calibration: `expected_signals.required_terms`,
+  `expected_signals.required_output_fields`,
+  `expected_signals.required_source_reads`, `expected_signals.forbidden_terms`,
+  `expected_signals.forbidden_actions`, `expected_signals.flow_steps`, and
+  `budgets.min_expected_signal_score`.
+
+The May 2026 audit language should therefore refer to skill-local `references/`
+and `scripts/` directories. Historical `Infrastructure/references/` examples in
+old evidence remain historical only and must not be used as the current contract.
+
 ### How to Perform Alignment Check
 
 1. Review each official source for guidance updates (new conventions, deprecated patterns, new risk categories).
 2. Compare against:
    - family SKILL.md routing and eval contracts
-   - `Skills/skill-builder/Infrastructure/references/evals.yaml` adversarial case set
+   - skill-local `references/evals.yaml` adversarial case set
    - `Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py` benchmark contract
 3. Record findings and update this scorecard.
 4. If changes are required, open a spec update issue before modifying contracts.

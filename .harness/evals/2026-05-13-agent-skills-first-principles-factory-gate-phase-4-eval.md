@@ -147,11 +147,13 @@ Blocks Closure: no for Phase 4 complete-with-follow-up; yes for any stronger uni
 Summary: Focused validation passed after using the repo-recognized PyYAML interpreter for YAML parsing.
 
 Command or Method:
-`/Users/jamiecraik/.venvs/pyyaml/bin/python - <<'PY' ... yaml.safe_load(...) ... PY`
+`python3 - <<'PY' ... yaml.safe_load(...) ... PY`
 
-Result: pass.
+Result: fail (environment failure).
 
-Evidence: parsed all three edited eval files and reported 10 skillify cases, 10 skill-refactor cases, and 11 plugin-factory-router cases with the expected new IDs present.
+Evidence: ModuleNotFoundError: No module named 'yaml' from system python3.
+
+Rerun: Used repo-recognized PyYAML interpreter and passed. Parsed all three edited eval files and reported 10 skillify cases, 10 skill-refactor cases, and 11 plugin-factory-router cases with the expected new IDs present.
 
 Confidence: high.
 
@@ -215,9 +217,9 @@ Blocks Closure: no.
 Command or Method:
 `python3 - <<'PY' ... import yaml ... PY`
 
-Result: environment failure, rerun with repo-recognized PyYAML interpreter passed.
+Result: redundant with first attempt (already captured above).
 
-Evidence: ModuleNotFoundError: No module named 'yaml' from system python3.
+Evidence: This entry duplicates the environment failure already documented in the first YAML parse attempt.
 
 Confidence: high that this was an interpreter dependency gap rather than a YAML syntax failure.
 

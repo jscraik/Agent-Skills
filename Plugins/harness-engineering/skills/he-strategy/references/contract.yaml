@@ -16,7 +16,7 @@ triggers:
 inputs:
   - repository source, configs, scripts, tests, CI, docs, prompts, skills, and workflows
   - user-supplied reference material for review lenses, including books, notes, excerpts, or PDFs
-  - references/architecture-lens-canon.md when no fresh reference attachments are supplied
+  - ../../references/skills/he-strategy/architecture-lens-canon.md when no fresh reference attachments are supplied
   - .harness/features/*.md
   - .harness/review/*.md
   - .harness/triage/*.md
@@ -89,7 +89,7 @@ overlays:
 
 observability: "Record source artifacts read, inspection method or command, affected systems or modules, confidence level, operational impact, drift or moat impact when relevant, fact/interpretation/assumption separation, clarification_status as asked/not_needed/assumed, ambiguity_impact, assumption_risk, visual reference status, dated output path or Do Not Create classification, source prompt family coverage when applicable, evidence and traceability matrix, and validation outcomes recorded as pass, fail, or blocked."
 
-reference_material_policy: "When the user supplies architecture or refactoring reference material, use it as an evaluative lens, not as repository evidence and not as material to summarize. When no fresh attachments are supplied, use references/architecture-lens-canon.md as the internal default lens set and record availability as internal-canon. Record which references were inspected, sampled, unavailable, not needed, or internal-canon. Do not claim attachment-specific coverage unless the material was actually inspected. Repository conclusions still require repo evidence."
+reference_material_policy: "When the user supplies architecture or refactoring reference material, use it as an evaluative lens, not as repository evidence and not as material to summarize. When no fresh attachments are supplied, use ../../references/skills/he-strategy/architecture-lens-canon.md as the internal default lens set and record availability as internal-canon. Record which references were inspected, sampled, unavailable, not needed, or internal-canon. Do not claim attachment-specific coverage unless the material was actually inspected. Repository conclusions still require repo evidence."
 
 rollback_procedure: "If an artifact is wrong, identify unsupported conclusions, move them to Unknown or remove them, replace low-value governance with Do Not Create, and never delete existing .harness artifacts without explicit user approval."
 
@@ -101,3 +101,50 @@ safety:
   redact_by_default: true
   fail_fast: true
   command_policy_ref: "Use repository approval policy and plugin safety gates; this skill does not run network, destructive filesystem, git write, or Linear mutation commands without explicit authorization."
+
+operator_contract:
+  description_contract: "Harness Engineering stage: verbs, artifacts, lifecycle boundary, and authority constraints."
+  immediate_operator_path:
+    first_action: "Read the strategy source evidence and decision context before drafting strategic direction."
+    proceed_rule: "Infer harmless missing details conservatively; ask only when stage ownership, destructive behavior, tracker mutation, publication, external writes, or closure proof would change."
+  source_order:
+    - "local AGENTS.md and canonical repo or .harness artifacts"
+    - "current live tracker, PR, branch, runtime, or validation state before mutation or closure"
+    - "HE references, routing map, source docs, dependency source, and project contracts"
+    - "user confirmation for irreversible, external, destructive, credential, or broad-scope action"
+  tool_resolution:
+    preferred: "repo wrapper or HE script documented for this stage"
+    fallback: "read-only local inspection with the missing tool or permission reported"
+    doctor_or_status: "run the smallest status, resolve, audit, or validation command when tool state affects the result"
+  freshness_rule:
+    discovery: "Cached, indexed, or deferred references may locate candidates and background context."
+    action_state: "Use live targeted reads before writes, tracker updates, closure decisions, or status changes."
+    readback: "After writes or mutations, verify only the changed surface unless package, release, or lifecycle scope requires more."
+  scope_defaults:
+    default: "smallest HE stage, artifact, issue, phase, or approved slice implied by the request"
+    broaden_when:
+      - "shared lifecycle contract or routing behavior changes"
+      - "tracker, PR, package, release, or projection behavior changes"
+      - "validation proves adjacent artifacts must move together"
+  boundaries:
+    forbidden_without_explicit_request:
+      - "tracker mutation or external publication"
+      - "destructive file, branch, data, or workspace operation"
+      - "credential, secret, permission, or auth-scope expansion"
+      - "completion or closure claim without proof"
+    no_drift:
+      - "do not turn HE stages into generic productivity or implementation prompts"
+      - "do not put long gotcha lists, rubrics, examples, or validation matrices in the hot path"
+      - "do not use archive, deferred, or cache paths as active stage authority"
+  retry_and_stop:
+    retry: "Retry transient tool, network, UI, or validation discovery failures once when safe and cheap."
+    stop: "Stop after bounded retry with exact blocker, attempted fallback, and the next safe HE action."
+  validation_tiers:
+    fast: "touched-file format, schema, route, or stage-specific lint/check"
+    standard: "stage audit, routing proof, smoke eval, or repository wrapper for changed behavior"
+    deep: "release eval, projection, security, marketplace, tracker, or cross-stage checks only for package-impacting changes"
+  concise_output:
+    default_fields: ["changed_artifacts", "important_decisions", "validation", "residual_risks", "next_stage_or_blocker"]
+    full_ledger_when: ["closure proof", "release", "tracker mutation", "multi-stage migration", "explicit user request"]
+  references:
+    - "Plugins/harness-engineering/references/operator-shape.md"

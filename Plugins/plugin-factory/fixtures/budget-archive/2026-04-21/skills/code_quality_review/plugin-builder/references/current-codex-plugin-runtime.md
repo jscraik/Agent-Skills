@@ -1,22 +1,21 @@
 # Current Codex Plugin Runtime Contract
 
-This reference captures Codex plugin facts from a local `~/dev/codex` checkout.
-Source anchors below are illustrative local paths that operators should adapt to
-their own checkout root. Use it to harden plugin packages without confusing
-package validity with runtime availability.
+This reference captures Codex plugin facts from the current `~/dev/codex`
+runtime. Use it to harden plugin packages without confusing package validity
+with runtime availability.
 
 ## Source Anchors
 
 - Plugin manifest parsing:
-  `$CODEX_DEV_ROOT/codex-rs/core-plugins/src/manifest.rs`
+  `/Users/jamiecraik/dev/codex/codex-rs/core-plugins/src/manifest.rs`
 - Plugin loading and extraction:
-  `$CODEX_DEV_ROOT/codex-rs/core-plugins/src/loader.rs`
+  `/Users/jamiecraik/dev/codex/codex-rs/core-plugins/src/loader.rs`
 - Startup sync and cache behavior:
-  `$CODEX_DEV_ROOT/codex-rs/core-plugins/src/startup_sync.rs`
+  `/Users/jamiecraik/dev/codex/codex-rs/core-plugins/src/startup_sync.rs`
 - MCP tool discovery:
-  `$CODEX_DEV_ROOT/codex-rs/tools/src/tool_discovery.rs`
+  `/Users/jamiecraik/dev/codex/codex-rs/tools/src/tool_discovery.rs`
 - MCP tool execution:
-  `$CODEX_DEV_ROOT/codex-rs/tools/src/mcp_tool.rs`
+  `/Users/jamiecraik/dev/codex/codex-rs/tools/src/mcp_tool.rs`
 
 ## Manifest Paths
 

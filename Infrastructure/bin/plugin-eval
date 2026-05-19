@@ -14,10 +14,43 @@ script_dir="$(cd -- "$(dirname -- "${script_path}")" && pwd -P)"
 repo_root="$(cd -- "${script_dir}/../.." && pwd -P)"
 plugin_root="${repo_root}/Plugins/cache/openai-curated/plugin-eval"
 
-cli_path="$(find "${plugin_root}" -type f -path '*/scripts/plugin-eval.js' | sort | tail -n 1 || true)"
-if [[ -z "${cli_path}" ]]; then
-  echo "plugin-eval CLI not found under ${plugin_root}" >&2
+if [[ ! -d "${plugin_root}" ]]; then
+  echo "plugin-eval cache root not found: ${plugin_root}" >&2
+  echo "Expected OpenAI-curated Plugin Eval under Plugins/cache/openai-curated/plugin-eval/<version>." >&2
   exit 1
+fi
+
+if [[ -n "${PLUGIN_EVAL_CACHE_VERSION:-}" ]]; then
+  cli_path="${plugin_root}/${PLUGIN_EVAL_CACHE_VERSION}/scripts/plugin-eval.js"
+  if [[ ! -f "${cli_path}" ]]; then
+    echo "plugin-eval CLI not found for PLUGIN_EVAL_CACHE_VERSION=${PLUGIN_EVAL_CACHE_VERSION}" >&2
+    echo "Expected: ${cli_path}" >&2
+    exit 1
+  fi
+else
+  candidates=()
+  for candidate in "${plugin_root}"/*/scripts/plugin-eval.js; do
+    [[ -f "${candidate}" ]] || continue
+    candidates+=("${candidate}")
+  done
+
+  if (( ${#candidates[@]} == 0 )); then
+    echo "plugin-eval CLI not found under ${plugin_root}" >&2
+    echo "Expected exactly one OpenAI-curated Plugin Eval cache entry with scripts/plugin-eval.js." >&2
+    exit 1
+  fi
+
+  if (( ${#candidates[@]} > 1 )); then
+    echo "multiple plugin-eval CLI candidates found under ${plugin_root}" >&2
+    echo "Set PLUGIN_EVAL_CACHE_VERSION to the desired cache directory name." >&2
+    for candidate in "${candidates[@]}"; do
+      version_dir="$(basename -- "$(dirname -- "$(dirname -- "${candidate}")")")"
+      echo "- ${version_dir}: ${candidate}" >&2
+    done
+    exit 1
+  fi
+
+  cli_path="${candidates[0]}"
 fi
 
 exec node "${cli_path}" "$@"

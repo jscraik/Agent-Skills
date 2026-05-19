@@ -7,7 +7,7 @@ runtime handle cost.
 
 - Run `Infrastructure/bin/plugin-eval analyze Plugins/harness-engineering --format markdown`.
 - Run `Infrastructure/bin/plugin-eval explain-budget Plugins/harness-engineering --format markdown` when the grade is below `B`.
-- Run `./bin/ask skills handles --check-command-handles --json` after projection changes.
+- Run `./bin/ask skills handles --check --check-command-handles --json` after projection changes.
 - Run a sliced live smoke lane before claiming changed-skill confidence for a
   narrow lifecycle fix, for example:
   `Plugins/harness-engineering/scripts/run_lifecycle_release_evals.py --mode smoke --eval-runner codex --model gpt-5.4-mini --per-skill-timeout-sec 180 --skill he-router --case ambiguous-stage-route --json`.

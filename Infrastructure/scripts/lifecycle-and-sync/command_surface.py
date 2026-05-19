@@ -31,6 +31,7 @@ RESERVED_SKILL_HANDLES = {
     "evals",
     "graph",
     "mcp",
+    "memory",
     "wiki",
     "workouts",
     "skill",
@@ -376,7 +377,7 @@ def _write_generated_text(path: Path, content: str) -> None:
 
 
 def build_skill_handles(*, repo_root_path: Path | None = None) -> list[CommandHandle]:
-    """Build command-visible skill handles from the canonical rooted manifest report."""
+    """Build canonical skill handles from the rooted manifest report."""
     root = repo_root_path or repo_root()
     report = build_manifest_report(root / ".skillsets")
     handles: list[CommandHandle] = []
@@ -386,6 +387,13 @@ def build_skill_handles(*, repo_root_path: Path | None = None) -> list[CommandHa
             if handle.command_visibility != "none":
                 handles.append(handle)
     return sorted(handles, key=lambda item: (item.handle, item.owner, item.source_path or ""))
+
+
+def build_command_surface_handles(*, repo_root_path: Path | None = None) -> list[CommandHandle]:
+    """Build Codex-visible skill command handles, including folded compatibility aliases."""
+    handles = build_skill_handles(repo_root_path=repo_root_path)
+    surfaced_handles = _with_folded_alias_handles(handles)
+    return sorted(surfaced_handles, key=lambda item: (item.handle, item.owner, item.source_path or ""))
 
 
 def _load_reviewer_roles(manifest_path: Path = REVIEWER_MANIFEST) -> tuple[list[dict[str, Any]], str | None]:
@@ -625,10 +633,9 @@ def parse_command_handles(text: str, *, repo_root_path: Path | None = None) -> d
 
 
 def handles_report(*, repo_root_path: Path | None = None, include_handles: bool = True) -> dict[str, Any]:
-    handles = build_skill_handles(repo_root_path=repo_root_path)
-    surfaced_handles = _with_folded_alias_handles(handles)
+    surfaced_handles = build_command_surface_handles(repo_root_path=repo_root_path)
     violations = validate_skill_handles(surfaced_handles, repo_root_path=repo_root_path)
-    command_handle_rows = _command_handle_write_rows(handles)
+    command_handle_rows = _command_handle_write_rows(surfaced_handles)
     command_handle_violations = [
         violation
         for row in command_handle_rows
@@ -653,7 +660,7 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
             "The command-surface manifest is a generated projection, not a source of truth.",
             "Generated command handles are runtime pointers for $ invocation; they are not canonical skill sources.",
             "Generated command handles are written only for handles absent from rooted runtime projection.",
-            "Reviewer handles are intentionally kept outside the skill command surface.",
+            "Reviewer handles for @ invocation stay outside this skill command surface; skill-command handles such as codex-review may still appear for $ invocation.",
         ],
     }
 
@@ -684,10 +691,57 @@ def write_command_surface_projection(*, repo_root_path: Path | None = None, dry_
     }
 
 
+def check_command_surface_projection(*, repo_root_path: Path | None = None) -> dict[str, Any]:
+    """Verify the committed command-surface projection matches rooted manifests."""
+    root = repo_root_path or repo_root()
+    payload = command_surface_projection(repo_root_path=root, include_handles=True)
+    destination = root / COMMAND_SURFACE_PATH
+    violations = list(payload.get("violations", []))
+
+    actual_payload: dict[str, Any] | None = None
+    if not destination.exists():
+        violations.append({
+            "code": "COMMAND_SURFACE_PROJECTION_MISSING",
+            "path": COMMAND_SURFACE_PATH.as_posix(),
+        })
+    else:
+        try:
+            actual_payload = json.loads(destination.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            violations.append({
+                "code": "COMMAND_SURFACE_PROJECTION_INVALID_JSON",
+                "path": COMMAND_SURFACE_PATH.as_posix(),
+                "error": str(exc),
+            })
+        except OSError as exc:
+            violations.append({
+                "code": "COMMAND_SURFACE_PROJECTION_UNREADABLE",
+                "path": COMMAND_SURFACE_PATH.as_posix(),
+                "error": str(exc),
+            })
+
+    if actual_payload is not None and actual_payload != payload:
+        violations.append({
+            "code": "COMMAND_SURFACE_PROJECTION_DRIFT",
+            "path": COMMAND_SURFACE_PATH.as_posix(),
+            "expected_handle_count": payload.get("handle_count"),
+            "actual_handle_count": actual_payload.get("handle_count"),
+        })
+
+    return {
+        "schema_version": "command-surface-check.v1",
+        "status": "pass" if not violations else "fail",
+        "path": COMMAND_SURFACE_PATH.as_posix(),
+        "handle_count": payload.get("handle_count"),
+        "generated_command_handle_count": payload.get("generated_command_handle_count"),
+        "violations": violations,
+    }
+
+
 def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool = False) -> dict[str, Any]:
     """Write or preview generated runtime command handles for non-root handles."""
     root = repo_root_path or repo_root()
-    handles = build_skill_handles(repo_root_path=root)
+    handles = build_command_surface_handles(repo_root_path=root)
     rows = _command_handle_write_rows(handles)
     violations = validate_skill_handles(handles, repo_root_path=root)
     violations.extend([
@@ -724,7 +778,7 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
 def check_command_handles(*, repo_root_path: Path | None = None) -> dict[str, Any]:
     """Verify generated runtime command handles exist and match the rooted projection."""
     root = repo_root_path or repo_root()
-    rows = _command_handle_write_rows(build_skill_handles(repo_root_path=root))
+    rows = _command_handle_write_rows(build_command_surface_handles(repo_root_path=root))
     violations: list[dict[str, Any]] = []
     expected_dirs = {
         root / ".agents" / "skills" / row["handle"]

@@ -62,6 +62,19 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
                 self.assertEqual(payload["requested_handle"], alias)
                 self.assertEqual(payload["alias_resolution"], canonical)
 
+    def test_command_surface_builders_separate_canonical_and_visible_aliases(self) -> None:
+        canonical_handles = {row.handle for row in command_surface.build_skill_handles(repo_root_path=REPO_ROOT)}
+        visible_handles = {row.handle for row in command_surface.build_command_surface_handles(repo_root_path=REPO_ROOT)}
+
+        self.assertNotIn("he-ideate", canonical_handles)
+        self.assertNotIn("he-refactor", canonical_handles)
+        self.assertIn("he-ideate", visible_handles)
+        self.assertIn("he-refactor", visible_handles)
+        self.assertIn("he-refine", visible_handles)
+        self.assertIn("he-reliability-review", visible_handles)
+        self.assertIn("he-technical-review", visible_handles)
+        self.assertNotIn("he-phase-heartbeat", visible_handles)
+
     def test_command_surface_projection_is_generated_from_rooted_manifests(self) -> None:
         payload = command_surface.command_surface_projection(repo_root_path=REPO_ROOT)
 
@@ -298,8 +311,8 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
 
-    def test_skills_proof_passes_with_linked_user_runtime(self) -> None:
-        """skills_proof must pass when workspace handle exists and user runtime is symlinked."""
+    def test_skills_proof_fails_when_only_agents_runtime_is_linked(self) -> None:
+        """Codex Desktop uses ~/.codex/skills, so ~/.agents/skills alone is diagnostic only."""
         repo_root = self.temp_dir / "repo"
         command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
@@ -313,15 +326,66 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
             result = skills_proof(repo_root, "he-heartbeat")
 
         proof = result.data["proof"]
+        self.assertEqual(proof["status"], "fail")
+        self.assertTrue(proof["gates"]["resolver"])
+        self.assertTrue(proof["gates"]["generated_command_handle_check"])
+        self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
+        self.assertFalse(proof["gates"]["codex_user_link"])
+        self.assertFalse(proof["gates"]["codex_user_command_handle_exists"])
+        self.assertTrue(proof["gates"]["agents_user_link"])
+        self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
+        self.assertIn("codex_user_link", proof["gate_policy"]["required"])
+        self.assertIn("agents_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
+
+    def test_skills_proof_passes_with_linked_codex_runtime(self) -> None:
+        """skills_proof must pass when the Codex Desktop runtime link reaches the workspace."""
+        repo_root = self.temp_dir / "repo"
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
+        skills_dir = repo_root / ".agents" / "skills"
+
+        home = self.temp_dir / "home"
+        codex_skills = home / ".codex" / "skills"
+        codex_skills.parent.mkdir(parents=True)
+        codex_skills.symlink_to(skills_dir)
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat")
+
+        proof = result.data["proof"]
         self.assertEqual(proof["status"], "pass")
         self.assertTrue(proof["gates"]["resolver"])
         self.assertTrue(proof["gates"]["generated_command_handle_check"])
         self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
-        self.assertTrue(proof["gates"]["agents_user_link"])
-        self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
+        self.assertTrue(proof["gates"]["codex_user_link"])
+        self.assertTrue(proof["gates"]["codex_user_command_handle_exists"])
 
 
-class TestCommittedCommandSurface(unittest.TestCase):
+class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):
+    def test_committed_command_surface_matches_rooted_manifests(self) -> None:
+        """Committed command-surface projection must match the rooted manifests exactly."""
+        surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+        if not surface_path.exists():
+            self.skipTest("command-surface.json not present in repo")
+
+        payload = command_surface.check_command_surface_projection(repo_root_path=REPO_ROOT)
+
+        self.assertEqual(payload["status"], "pass", payload.get("violations"))
+        self.assertEqual(payload["violations"], [])
+
+    def test_command_surface_projection_check_reports_drift(self) -> None:
+        """Projection check must fail when the committed command surface is stale."""
+        repo_root = self.temp_dir / "repo"
+        shutil.copytree(REPO_ROOT / ".skillsets", repo_root / ".skillsets")
+        (repo_root / ".skillsets" / "command-surface.json").write_text("{}\n", encoding="utf-8")
+
+        payload = command_surface.check_command_surface_projection(repo_root_path=repo_root)
+
+        self.assertEqual(payload["status"], "fail")
+        self.assertIn(
+            "COMMAND_SURFACE_PROJECTION_DRIFT",
+            {violation.get("code") for violation in payload["violations"]},
+        )
+
     def test_committed_command_surface_json_has_valid_structure(self) -> None:
         """The committed .skillsets/command-surface.json must be valid JSON with expected top-level keys."""
         surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
