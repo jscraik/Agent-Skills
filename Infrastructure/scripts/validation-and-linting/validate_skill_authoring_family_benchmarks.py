@@ -18,6 +18,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
@@ -33,8 +34,19 @@ except ModuleNotFoundError as exc:  # pragma: no cover
         env = dict(os.environ)
         env["SKILL_FAMILY_PYYAML_REEXEC"] = "1"
         preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
-        if preferred.exists():
-            os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
+        if preferred.exists() and os.access(preferred, os.X_OK):
+            try:
+                health = subprocess.run(
+                    [str(preferred), "-c", "import yaml, jsonschema"],
+                    env=env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
+                if health.returncode == 0:
+                    os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
+            except OSError:
+                pass
         uv_bin = shutil.which("uv")
         if uv_bin:
             os.execvpe(
