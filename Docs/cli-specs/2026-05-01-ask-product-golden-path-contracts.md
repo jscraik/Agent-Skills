@@ -686,7 +686,56 @@ Required behavior:
 Purpose: run smoke or release evidence while classifying runner blockers
 separately from skill behavior failures.
 
-Required data fields for JSON output:
+Inputs:
+
+- eval path or workout name;
+- `--json`;
+- `--robot`; and
+- `--timeout`, optional runner timeout.
+
+JSON output example:
+
+```json
+{
+  "eval_run": {
+    "schema_version": "eval-run-result.v1",
+    "query": "skill-factory/release",
+    "eval_status": "blocked_runtime",
+    "blocker_class": "blocked_runtime",
+    "blocker_taxonomy": {
+      "blocked_runtime": "Local sandbox, context-window, model-capacity, or runner setup failure that prevents the eval from reaching skill behavior.",
+      "blocked_auth": "Authentication, token, or login failure.",
+      "blocked_user_input": "The runner requested user input that automation cannot provide.",
+      "timeout_no_output": "The runner timed out before producing usable output.",
+      "timeout_partial_output": "The runner timed out after producing partial evidence."
+    },
+    "lifecycle_events": [
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event": "eval_started",
+        "status": "running",
+        "message": "Eval runner started."
+      },
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event": "eval_blocked",
+        "status": "blocked",
+        "message": "Runner setup failed before skill behavior was reached."
+      }
+    ],
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event": "eval_blocked",
+      "status": "blocked",
+      "message": "Runner setup failed before skill behavior was reached."
+    },
+    "raw_output": "",
+    "raw_error": "sandbox denied runner setup path"
+  }
+}
+```
+
+Required behavior:
 
 - `eval_status`: one of `pass`, `fail`, `blocked_user_input`, `blocked_auth`,
   `blocked_runtime`, `timeout_no_output`, or `timeout_partial_output`.
@@ -698,8 +747,7 @@ Required data fields for JSON output:
 - `lifecycle_event`: the latest lifecycle event for consumers that only need
   the final eval outcome.
 - `raw_output` and `raw_error`: captured runner output for exact evidence.
-
-Required behavior:
+- See the example above for the complete `eval_run` JSON envelope.
 
 - Emit `eval_started` before invoking the runner, then emit `eval_completed`
   for pass/fail outcomes or `eval_blocked` for classified blocker outcomes.
