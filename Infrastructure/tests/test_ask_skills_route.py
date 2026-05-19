@@ -65,7 +65,7 @@ class TestAskSkillsRoute(unittest.TestCase):
 
         with patch(
             "ask.commands.skills_impl.discover_catalog_entries",
-            side_effect=lambda advanced=False: entries,
+            side_effect=lambda advanced=False, source="auto": entries,
         ) as mocked_discover:
             with patch("ask.commands.skills_impl._load_builder_module", return_value=_RouterStub(ranked, [])):
                 with patch("ask.commands.skills_impl.compute_catalog_parity", return_value={"drift_detected": False}):
@@ -124,7 +124,7 @@ class TestAskSkillsRoute(unittest.TestCase):
         ]
         with patch(
             "ask.commands.skills_impl.discover_catalog_entries",
-            side_effect=lambda advanced=False: entries,
+            side_effect=lambda advanced=False, source="auto": entries,
         ) as mocked_discover:
             with patch(
                 "ask.commands.skills_impl._load_builder_module",
@@ -183,7 +183,7 @@ class TestAskSkillsRoute(unittest.TestCase):
 
         with patch(
             "ask.commands.skills_impl.discover_catalog_entries",
-            side_effect=lambda advanced=False: entries,
+            side_effect=lambda advanced=False, source="auto": entries,
         ) as mocked_discover:
             with patch("ask.commands.skills_impl._load_builder_module") as mocked_router_load:
                 with patch("ask.commands.skills_impl.compute_catalog_parity", return_value={"drift_detected": False}):
@@ -191,7 +191,7 @@ class TestAskSkillsRoute(unittest.TestCase):
 
         self.assertEqual(
             mocked_discover.call_args_list,
-            [call(), call(advanced=True)],
+            [call(), call(advanced=True), call(advanced=True, source="repo")],
         )
         mocked_router_load.assert_not_called()
         self.assertEqual(result.status, "success")
