@@ -37,8 +37,9 @@ jobs:
             fi
 
             npm exec --yes snyk@1.1304.2 auth "$SNYK_TOKEN" || {
-              echo "⚠ Snyk auth failed; treating as CI credential/runtime issue and skipping vulnerability gate"
-              exit 0
+              AUTH_EXIT=$?
+              echo "❌ Snyk auth failed; token is configured but the scan cannot start"
+              exit "$AUTH_EXIT"
             }
 
             set +e
