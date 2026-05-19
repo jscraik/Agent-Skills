@@ -24,6 +24,7 @@ RUNTIME_SURFACE_POLICY_SCRIPT = (
     REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "runtime_surface_policy.py"
 )
 SYNC_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills.sh"
+SKILLS_IMPL_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "commands" / "skills_impl.py"
 
 # macOS ships bash 3.2 which lacks features (mapfile, declare -A) used by
 # shell scripts in this repo. Prefer a known bash 4+ path when available.
@@ -109,6 +110,24 @@ def load_runtime_surface_policy_module():
     spec = importlib.util.spec_from_file_location("runtime_surface_policy", RUNTIME_SURFACE_POLICY_SCRIPT)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load runtime surface policy module from {RUNTIME_SURFACE_POLICY_SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_skills_impl_module():
+    for path in (
+        REPO_ROOT / "Infrastructure" / "scripts" / "lib",
+        REPO_ROOT / "Infrastructure" / "scripts",
+        REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync",
+    ):
+        script_dir = str(path)
+        if script_dir not in sys.path:
+            sys.path.insert(0, script_dir)
+    spec = importlib.util.spec_from_file_location("skills_impl", SKILLS_IMPL_SCRIPT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Failed to load skills impl module from {SKILLS_IMPL_SCRIPT}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -1144,6 +1163,46 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             "(.marketplace // $source.marketplace // $default_market | tostring | trim) as $market",
             content,
         )
+
+    def test_exact_handle_sort_prefers_canonical_source_over_runtime_bridge(self) -> None:
+        skills_impl = load_skills_impl_module()
+        candidate = skills_impl.EligibleCandidate
+        bridge_copy = candidate(
+            name="plugin-creator",
+            path=".agents/skills/plugin-creator",
+            description="runtime bridge",
+            scope_rank=2,
+        )
+        plugin_source = candidate(
+            name="plugin-creator",
+            path="Plugins/plugin-factory/skills/plugin-creator",
+            description="canonical plugin source",
+            scope_rank=2,
+        )
+        project_source = candidate(
+            name="plugin-creator",
+            path="Skills/plugin-creator",
+            description="canonical project source",
+            scope_rank=1,
+        )
+
+        self.assertIs(
+            min([bridge_copy, plugin_source], key=skills_impl._exact_handle_sort_key),
+            plugin_source,
+        )
+        self.assertIs(
+            min([bridge_copy, plugin_source, project_source], key=skills_impl._exact_handle_sort_key),
+            project_source,
+        )
+
+    def test_route_exact_handle_prefers_canonical_plugin_source(self) -> None:
+        skills_impl = load_skills_impl_module()
+
+        result = skills_impl.route_skills(REPO_ROOT, "plugin-creator")
+
+        self.assertEqual(result.status, "success")
+        selected = result.data["decision"]["selected_candidates"][0]
+        self.assertEqual(selected["path"], "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator")
 
 
 if __name__ == "__main__":

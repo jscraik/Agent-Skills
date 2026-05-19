@@ -4105,6 +4105,19 @@ def _scope_rank_for_path(skill_path: str) -> int:
     return len(REPO_SCAN_ROOTS) + 1
 
 
+def _exact_handle_sort_key(candidate: EligibleCandidate) -> tuple[int, str]:
+    path = candidate.path.removeprefix("./")
+    if path.startswith("Skills/"):
+        source_rank = 0
+    elif path.startswith("Plugins/"):
+        source_rank = 1
+    elif path.startswith(".agents/"):
+        source_rank = 3
+    else:
+        source_rank = 2
+    return source_rank, canonical_sort_key(candidate)
+
+
 def route_skills(
     repo_root: Path,
     request: str,
@@ -4184,14 +4197,31 @@ def route_skills(
         all_candidate_ids.add(cid)
 
     normalized_handle_query = query.removeprefix("$").strip().lower()
-    exact_candidate = next(
-        (
-            candidate
-            for candidate in all_candidates
-            if candidate.name.lower() == normalized_handle_query
-        ),
-        None,
-    )
+    if normalized_handle_query and " " not in normalized_handle_query:
+        for entry in discover_catalog_entries(advanced=True, source="repo"):
+            if entry.name.lower() != normalized_handle_query:
+                continue
+            if not entry.source_dir.is_relative_to(repo_root):
+                continue
+            rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+            candidate = EligibleCandidate(
+                name=entry.name,
+                path=rel_path,
+                description=entry.description,
+                scope_rank=_scope_rank_for_path(rel_path),
+            )
+            cid = candidate_id(candidate)
+            if cid in all_candidate_ids:
+                continue
+            all_candidates.append(candidate)
+            all_candidate_ids.add(cid)
+
+    exact_candidates = [
+        candidate
+        for candidate in all_candidates
+        if candidate.name.lower() == normalized_handle_query
+    ]
+    exact_candidate = min(exact_candidates, key=_exact_handle_sort_key) if exact_candidates else None
     if exact_candidate is not None and normalized_handle_query and " " not in normalized_handle_query:
         ranked_payload = [
             {
