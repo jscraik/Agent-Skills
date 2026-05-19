@@ -159,8 +159,8 @@ def _alias_handle_from_target(alias: str, target: CommandHandle) -> CommandHandl
         invoke_via=target.invoke_via,
         level=target.level,
         alias_of=target.handle,
-        alias_kind="folded_compatibility",
-        deprecation_state="deprecated",
+        alias_kind=ALIAS_KIND_FOLDED_COMPATIBILITY,
+        deprecation_state=DEPRECATION_STATE_DEPRECATED,
         provenance=target.provenance,
     )
 
