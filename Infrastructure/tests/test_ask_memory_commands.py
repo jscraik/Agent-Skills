@@ -56,6 +56,20 @@ def test_memory_read_blocks_unknown_identifier() -> None:
     assert "memory id not found" in result.errors[0].message
 
 
+def test_memory_list_skips_symlinked_memory_files(tmp_path: Path) -> None:
+    repo_root = tmp_path
+    memory_root = repo_root / ".harness" / "memory"
+    memory_root.mkdir(parents=True)
+    external = tmp_path / "external-secret.md"
+    external.write_text("# secret\n", encoding="utf-8")
+    (memory_root / "leak.md").symlink_to(external)
+
+    result = memory_list(repo_root)
+
+    assert result.status == "success"
+    assert result.data["memory"]["entries"] == []
+
+
 def test_memory_search_returns_results_shape() -> None:
     repo_root = Path(__file__).resolve().parents[2]
 

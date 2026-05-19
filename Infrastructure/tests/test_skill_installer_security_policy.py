@@ -120,6 +120,67 @@ class SkillInstallerSecurityPolicyTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertTrue((dest_root / "sample" / "SKILL.md").is_file())
 
+    def test_rejects_symlinked_files_before_copy(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="skill-installer-policy-") as tmpdir:
+            repo_root = Path(tmpdir) / "repo"
+            skill_dir = repo_root / "skills" / "sample"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("# Sample\n", encoding="utf-8")
+            outside = Path(tmpdir) / "outside.txt"
+            outside.write_text("secret\n", encoding="utf-8")
+            (skill_dir / "leak.txt").symlink_to(outside)
+
+            dest_root = Path(tmpdir) / "dest"
+            dest_root.mkdir(parents=True)
+
+            with patch.object(installer, "_resolve_dest_root", return_value=str(dest_root)):
+                with patch.object(
+                    installer,
+                    "_resolve_commit_provenance",
+                    return_value=("a" * 40, {"verified": True, "reason": "valid"}, {"emails": ["dev@example.com"], "logins": ["dev"]}),
+                ):
+                    with patch.object(installer, "_prepare_repo", return_value=(str(repo_root), "zipball")):
+                        code = installer.main(
+                            [
+                                "--repo",
+                                "openai/skills",
+                                "--path",
+                                "skills/sample",
+                                "--ref",
+                                "a" * 40,
+                            ]
+                        )
+
+            self.assertEqual(code, 1)
+            self.assertFalse((dest_root / "sample").exists())
+
+    def test_legacy_url_installs_without_repo_path_flags(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="skill-installer-policy-") as tmpdir:
+            repo_root = Path(tmpdir) / "repo"
+            skill_dir = repo_root / "skills" / "sample"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("# Sample\n", encoding="utf-8")
+
+            dest_root = Path(tmpdir) / "dest"
+            dest_root.mkdir(parents=True)
+
+            with patch.object(installer, "_resolve_dest_root", return_value=str(dest_root)):
+                with patch.object(
+                    installer,
+                    "_resolve_commit_provenance",
+                    return_value=("a" * 40, {"verified": True, "reason": "valid"}, {"emails": ["dev@example.com"], "logins": ["dev"]}),
+                ):
+                    with patch.object(installer, "_prepare_repo", return_value=(str(repo_root), "zipball")):
+                        code = installer.main(
+                            [
+                                "--url",
+                                f"https://github.com/openai/skills/tree/{'a' * 40}/skills/sample",
+                            ]
+                        )
+
+            self.assertEqual(code, 0)
+            self.assertTrue((dest_root / "sample" / "SKILL.md").is_file())
+
     def test_rejects_signer_allowlist_mismatch(self) -> None:
         with tempfile.TemporaryDirectory(prefix="skill-installer-policy-") as tmpdir:
             repo_root = Path(tmpdir) / "repo"

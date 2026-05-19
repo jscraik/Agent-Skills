@@ -91,6 +91,16 @@ def _snippet(text: str, query: str | None = None, *, max_len: int = 240) -> str:
     return compact[start : start + max_len]
 
 
+def _is_safe_memory_file(path: Path, source_root: Path) -> bool:
+    if path.is_symlink() or not path.is_file():
+        return False
+    try:
+        path.resolve().relative_to(source_root.resolve())
+    except ValueError:
+        return False
+    return True
+
+
 def _iter_entries(repo_root: Path) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     for source in MEMORY_SOURCES:
@@ -99,7 +109,7 @@ def _iter_entries(repo_root: Path) -> list[dict[str, Any]]:
             continue
         for pattern in source.patterns:
             for path in sorted(source_root.rglob(pattern)):
-                if not path.is_file():
+                if not _is_safe_memory_file(path, source_root):
                     continue
                 text = path.read_text(encoding="utf-8", errors="replace")
                 relative_path = str(path.relative_to(repo_root))

@@ -119,8 +119,9 @@ def _signer_allowed(identity: dict[str, list[str]], args: argparse.Namespace) ->
 
 def _parse_compat_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Install a skill from GitHub.")
-    parser.add_argument("--repo", required=True)
-    parser.add_argument("--path", nargs="+", required=True)
+    parser.add_argument("--repo")
+    parser.add_argument("--url")
+    parser.add_argument("--path", nargs="+")
     parser.add_argument("--ref", default=DEFAULT_REF)
     parser.add_argument("--dest")
     parser.add_argument("--name")
@@ -136,7 +137,7 @@ def _parse_compat_args(argv: list[str]) -> argparse.Namespace:
 def main(argv: list[str]) -> int:
     args = _parse_compat_args(argv)
     try:
-        source = _resolve_source(Args(repo=args.repo, path=args.path, ref=args.ref, method=args.method))
+        source = _resolve_source(Args(url=args.url, repo=args.repo, path=args.path, ref=args.ref, method=args.method))
         repo_key = f"{source.owner}/{source.repo}"
         trusted_repos = _TRUSTED_REPOS | set(args.trusted_repo or [])
         if repo_key not in trusted_repos and not args.allow_untrusted_source:

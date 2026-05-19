@@ -438,6 +438,11 @@ Required behavior:
   evidence for the invocation environment.
 - Return `blocked` with machine-readable blocker classes when the capability
   cannot be used safely.
+- Apply deterministic status precedence: `blocked` > `warning` > `pass`;
+  the highest-severity signal wins for `target_summary`,
+  `operation_context`, and `capability-lifecycle-event.v1` outcomes.
+- Always emit `next_command` for `blocked`, `warning`, and `pass`; use
+  `null` only when no safe next command exists.
 - Treat missing outcome proof as a warning, not as a structural failure.
 - Emit stable readiness taxonomy classes for runtime, auth, user-input,
   timeout, artifact, source, and validation blockers.

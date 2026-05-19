@@ -167,12 +167,23 @@ def _validate_skill(path: str) -> None:
     skill_md = os.path.join(path, "SKILL.md")
     if not os.path.isfile(skill_md):
         raise InstallError("SKILL.md not found in selected skill directory.")
+    _validate_no_symlinks(path)
+
+
+def _validate_no_symlinks(path: str) -> None:
+    for root, dirnames, filenames in os.walk(path, followlinks=False):
+        if os.path.islink(root):
+            raise InstallError("Skill directory contains symlinks.")
+        for name in [*dirnames, *filenames]:
+            if os.path.islink(os.path.join(root, name)):
+                raise InstallError("Skill directory contains symlinks.")
 
 
 def _copy_skill(src: str, dest_dir: str) -> None:
     os.makedirs(os.path.dirname(dest_dir), exist_ok=True)
     if os.path.exists(dest_dir):
         raise InstallError(f"Destination already exists: {dest_dir}")
+    _validate_no_symlinks(src)
     shutil.copytree(src, dest_dir)
 
 
