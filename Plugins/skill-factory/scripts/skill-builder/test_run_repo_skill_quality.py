@@ -26,11 +26,10 @@ class RunRepoSkillQualityTests(unittest.TestCase):
         expected = {
             "Skills/agent-ops/bootstrap",
             "Skills/agent-ops/fix-mise",
-            "Skills/agent-ops/gh-workflow",
-            "Skills/agent-ops/test-driven-development",
             "Skills/content-publishing/beautiful-mermaid",
-            "Skills/content-publishing/slides",
             "Skills/content-publishing/visual-explainer",
+            "skills-system/skill-creator",
+            "skills-system/skill-installer",
         }
 
         self.assertTrue(expected.issubset(skills), msg=f"missing inventory skills: {sorted(expected - skills)}")

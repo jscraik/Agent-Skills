@@ -34,6 +34,8 @@
     "Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
     "Plugins/skill-factory/skills/scaffolding_templates/skillify",
     "Plugins/skill-factory/skills/skill-factory-router",
+    "skills-system/skill-creator",
+    "skills-system/skill-installer",
     "Skills/agent-ops/agents-md",
     "Skills/agent-ops/alignment-checkpoint",
     "Skills/agent-ops/autofix",
@@ -122,7 +124,8 @@
   ],
   "include_prefixes": [
     "Plugins/",
-    "Skills/"
+    "Skills/",
+    "skills-system/"
   ],
   "exclude_prefixes": [
     "Plugins/cache/"
