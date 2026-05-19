@@ -125,7 +125,7 @@ def _parse_plugin_eval(stdout: str) -> dict[str, Any]:
 
 def _audit_security_summary(audit_data: dict[str, Any]) -> dict[str, Any]:
     data = _as_dict(_as_dict(audit_data).get("data"))
-    openclaw = _as_dict(data.get("openclaw"))
+    openclaw = _as_dict(data.get("openclaw_guard") or data.get("openclaw"))
     stdout = str(openclaw.get("stdout") or "")
     warn_count = 0
     critical_count = 0

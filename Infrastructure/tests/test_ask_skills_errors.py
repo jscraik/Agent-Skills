@@ -320,9 +320,43 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertIn("Static evidence snapshot", html_text)
         self.assertIn('role="tablist"', html_text)
         self.assertIn('role="tabpanel"', html_text)
+        self.assertIn("panel.toggleAttribute('hidden', !selected)", html_text)
         self.assertIn("Quality", html_text)
         self.assertIn("Evals Not Run Yet", html_text)
         self.assertIn("local_internal_only", html_text)
+
+    def test_review_dashboard_reads_openclaw_guard_security_output(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            report_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.json"
+            report_path.parent.mkdir(parents=True)
+            report_path.write_text(
+                json.dumps({
+                    "status": "success",
+                    "data": {
+                        "target": "Plugins/skill-factory/skills/code_quality_review/example-skill",
+                        "ask_audit": {
+                            "data": {
+                                "openclaw_guard": {
+                                    "status": "warning",
+                                    "stdout": "Summary: 0 critical · 2 warn\nwarning: capability boundary drift",
+                                }
+                            }
+                        },
+                        "plugin_eval": {"stdout": "Score: 88/100\nGrade: B"},
+                        "tessl_review": {"stdout": "Review Score: 90%\nDescription: 100%\nContent: 80%"},
+                    },
+                    "errors": [],
+                }),
+                encoding="utf-8",
+            )
+
+            html_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.html"
+            render_skill_review_dashboard(report_path=report_path, output_path=html_path, repo_root=repo_root)
+            html_text = html_path.read_text(encoding="utf-8")
+
+        self.assertIn("warning: capability boundary drift", html_text)
+        self.assertIn(">70%</span>", html_text)
 
     def test_review_dashboard_renders_latest_eval_scorecard(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -357,6 +391,7 @@ class TestAskSkillsErrors(unittest.TestCase):
   "run_id": "20260515-180000-000000",
   "eval_mode": "smoke",
   "runner_mode": "codex",
+  "skill_path": "Plugins/skill-factory/skills/code_quality_review/example-skill",
   "cases": [
     {"id": "happy-path", "name": "Happy Path", "category": "happy", "passed": true, "tier1_failures": [], "warnings": []},
     {"id": "edge-case", "name": "Edge Case", "category": "edge", "passed": false, "tier1_failures": ["missing required output"], "warnings": []}
