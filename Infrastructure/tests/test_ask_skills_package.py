@@ -48,7 +48,7 @@ class TestAskSkillsPackage(unittest.TestCase):
             package["lifecycle_events"][1]["details"]["gate_summary"],
             package["gate_summary"],
         )
-        self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
+        self.assertIn("package_readiness_checked", [event["event_type"] for event in package["lifecycle_events"]])
 
     def test_package_strict_accepts_complete_package_metadata(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
@@ -62,7 +62,7 @@ class TestAskSkillsPackage(unittest.TestCase):
         package = result.data["skill_package"]
         self.assertEqual(package["status"], "pass")
         self.assertEqual(package["blockers"], [])
-        self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
+        self.assertIn("package_readiness_checked", [event["event_type"] for event in package["lifecycle_events"]])
         self.assertEqual(package["gate_summary"]["promotion_status"], "ready_pending_checkout")
         self.assertEqual(package["package_contract"]["required_fields"]["missing"], [])
         self.assertEqual(result.errors, [])
@@ -296,6 +296,40 @@ metadata:
         self.assertIn("package_metadata_complete:true", checkout["evidence"])
         self.assertEqual(package["gate_summary"]["promotion_status"], "ready")
         self.assertTrue(package["gate_summary"]["promotion_ready"])
+
+    def test_package_checkout_test_blocks_incomplete_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "packaged-skill"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                """---
+version: "2.0.0"
+metadata:
+  compatible_roles:
+    - worker
+  runtime_needs:
+    - filesystem
+  maturity: beta
+  provenance: internal
+  share_readiness: ready
+---
+
+# Packaged Skill
+""",
+                encoding="utf-8",
+            )
+
+            result = skills_package(repo_root, "Skills/agent-ops/packaged-skill", strict=True, checkout_test=True)
+
+        self.assertEqual(result.status, "error")
+        package = result.data["skill_package"]
+        contract = package["package_contract"]
+        self.assertEqual(contract["readiness_level"], "incomplete_identity")
+        self.assertEqual(contract["install_gate"]["checkout_test"]["status"], "blocked_validation")
+        self.assertIn("identity_incomplete", contract["promotion_gate"]["blocked_reasons"])
+        self.assertFalse(contract["promotion_gate"]["promotion_ready"])
+        self.assertFalse(package["gate_summary"]["promotion_ready"])
 
     def test_package_checkout_test_blocks_non_ready_share_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

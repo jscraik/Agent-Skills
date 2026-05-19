@@ -2574,8 +2574,13 @@ def _skill_package_readiness(frontmatter: dict[str, Any]) -> dict[str, Any]:
     share_readiness = str(values.get("share_readiness") or "").strip().lower()
     share_readiness_ready = share_readiness == "ready"
     share_ready = False
+    missing_identity_fields = [
+        field
+        for field in ("name", "description")
+        if not str(frontmatter.get(field) or "").strip()
+    ]
 
-    if not frontmatter.get("name") or not frontmatter.get("description"):
+    if missing_identity_fields:
         readiness_level = "incomplete_identity"
     elif not values.get("version"):
         readiness_level = "legacy_capability"
@@ -2588,6 +2593,8 @@ def _skill_package_readiness(frontmatter: dict[str, Any]) -> dict[str, Any]:
         share_ready = True
 
     blocked_reasons = list(missing)
+    if missing_identity_fields:
+        blocked_reasons.append("identity_incomplete")
     if not missing and not share_readiness_ready:
         blocked_reasons.append("share_readiness_not_ready")
     recommended_next_fields = [
@@ -2599,6 +2606,7 @@ def _skill_package_readiness(frontmatter: dict[str, Any]) -> dict[str, Any]:
         recommended_next_fields.append("share_readiness")
     if "version" in missing:
         recommended_next_fields.insert(0, "version")
+    recommended_next_fields = [*missing_identity_fields, *recommended_next_fields]
     promotion_status = "ready_pending_checkout" if share_ready else "blocked_validation"
 
     return {
@@ -2648,6 +2656,10 @@ def _refresh_package_promotion_gate(package_contract: dict[str, Any]) -> None:
         promotion_gate["promotion_ready"] = False
         return
     if promotion_gate["blocked_reasons"]:
+        promotion_gate["status"] = "blocked_validation"
+        promotion_gate["promotion_ready"] = False
+        return
+    if not promotion_gate["share_ready"]:
         promotion_gate["status"] = "blocked_validation"
         promotion_gate["promotion_ready"] = False
         return
@@ -3004,7 +3016,6 @@ def skills_package(
         "warnings": warnings,
         "lifecycle_event": readiness_event,
         "lifecycle_events": lifecycle_events,
-        "lifecycle_event_types": [event["event_type"] for event in lifecycle_events],
         "agent_summary": (
             f"{query} is blocked: {blockers[0]['message']}"
             if blockers

@@ -1711,7 +1711,7 @@ class TestAskCLI(unittest.TestCase):
             package["lifecycle_events"][1]["observer_command"],
             "./bin/ask skills events package_readiness_checked --json --robot",
         )
-        self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
+        self.assertIn("package_readiness_checked", [event["event_type"] for event in package["lifecycle_events"]])
 
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""
@@ -1770,7 +1770,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package["blockers"], [])
         self.assertEqual(package["package_contract"]["required_fields"]["missing"], [])
         self.assertEqual(package["package_contract"]["install_gate"]["blocked_reasons"], [])
-        self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
+        self.assertIn("package_readiness_checked", [event["event_type"] for event in package["lifecycle_events"]])
 
     def test_skills_doctor_command_exposes_lifecycle_and_readiness(self):
         """Verify ask skills doctor exposes lifecycle and readiness contracts."""

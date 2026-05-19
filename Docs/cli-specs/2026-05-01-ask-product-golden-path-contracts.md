@@ -566,7 +566,6 @@ Required data fields:
         }
       }
     ],
-    "lifecycle_event_types": ["skill_loaded", "package_readiness_checked"],
     "agent_summary": "skill-builder has package gate blockers: compatible_roles, provenance, runtime_needs, share_readiness.",
     "next_command": "./bin/ask skills doctor skill-builder --strict --json --robot"
   }
@@ -594,6 +593,8 @@ Required behavior:
 - Emit both `skill_loaded` and `package_readiness_checked` lifecycle events so
   automation can distinguish source resolution from package gate evaluation.
   The `package_readiness_checked` event must include `details.gate_summary`.
+- Derive event types from `lifecycle_events[].event_type`; do not require a
+  duplicate event-type list in package payloads.
 - Keep promotion, install, share, and marketplace mutation out of this command.
 
 ## `ask skills profiles`
