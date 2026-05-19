@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import sys
 from pathlib import Path
 
@@ -13,34 +14,41 @@ sys.modules[SPEC.name] = validate_steering_uptake
 SPEC.loader.exec_module(validate_steering_uptake)
 
 
+_VALID_DOC = (
+    "# High-Signal Steering Feedback\n\n"
+    "## Stop Rule\n\n"
+    "## Uptake Loop\n\n"
+    "## Required Evidence\n\n"
+    "validate_steering_uptake.py\n"
+)
+_VALID_LEDGER = (
+    "# Steering Uptake Ledger\n\n"
+    "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+    "| --- | --- | --- | --- | --- | --- | --- |\n"
+    "| 2026-05-19 | steering trigger | repeated behavior | missing guard | Docs/agents/19.md | python3 validate_steering_uptake.py --json | validated |\n"
+)
+_VALID_README = "[19-high-signal-steering-feedback](/Docs/agents/19-high-signal-steering-feedback.md)\n"
+
+
 def write(path: Path, text: str) -> None:
-    """
-    Write the given text to the specified file, creating any missing parent directories.
-    
-    Parameters:
-        path (Path): Destination file path to write to. Parent directories will be created if they do not exist.
-        text (str): Text content to write to the file (written using UTF-8 encoding).
-    """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
 
 
+def _make_valid_root(tmp_path: Path) -> Path:
+    """Create a fully valid tmp directory with all required surfaces."""
+    write(tmp_path / "Docs/agents/19-high-signal-steering-feedback.md", _VALID_DOC)
+    write(tmp_path / ".harness/quality/steering-uptake.md", _VALID_LEDGER)
+    write(tmp_path / "Docs/agents/README.md", _VALID_README)
+    return tmp_path
+
+
 def test_validate_current_repo_surfaces() -> None:
-    """
-    Ensure the steering uptake validator reports no findings for the current repository.
-    
-    Asserts that calling validate_steering_uptake.validate() returns an empty findings list.
-    """
     findings = validate_steering_uptake.validate()
     assert findings == []
 
 
 def test_rejects_missing_ledger_row(tmp_path: Path) -> None:
-    """
-    Verifies that validation reports a missing ledger row when the steering uptake ledger contains only the header.
-    
-    Creates a minimal repository under `tmp_path`: an agent feedback document referencing `validate_steering_uptake.py`, a steering uptake ledger file containing only the header row, and an agents README entry. Runs `validate_steering_uptake.validate(tmp_path)` and asserts that at least one finding has `code == "STEERING_LEDGER_EMPTY"`.
-    """
     write(
         tmp_path / "Docs/agents/19-high-signal-steering-feedback.md",
         "# High-Signal Steering Feedback\n\n## Stop Rule\n\n## Uptake Loop\n\n## Required Evidence\n\nvalidate_steering_uptake.py\n",
@@ -60,14 +68,6 @@ def test_rejects_missing_ledger_row(tmp_path: Path) -> None:
 
 
 def test_rejects_validated_row_without_validator_evidence(tmp_path: Path) -> None:
-    """
-    Verifies that a ledger row marked "validated" but lacking validator evidence triggers a weak-validation finding.
-    
-    Creates a minimal repository under `tmp_path` with an agent feedback document that references `validate_steering_uptake.py`, a steering uptake ledger containing a single data row whose `Validation` column is "not run" while `Status` is "validated", and a README linking the agent document; then runs `validate_steering_uptake.validate()` and asserts that at least one finding has `code == "STEERING_LEDGER_VALIDATION_WEAK"`.
-    
-    Parameters:
-        tmp_path (Path): Temporary filesystem path used as the root of the test repository.
-    """
     write(
         tmp_path / "Docs/agents/19-high-signal-steering-feedback.md",
         "# High-Signal Steering Feedback\n\n## Stop Rule\n\n## Uptake Loop\n\n## Required Evidence\n\nvalidate_steering_uptake.py\n",
@@ -87,3 +87,458 @@ def test_rejects_validated_row_without_validator_evidence(tmp_path: Path) -> Non
     findings = validate_steering_uptake.validate(tmp_path)
 
     assert any(finding.code == "STEERING_LEDGER_VALIDATION_WEAK" for finding in findings)
+
+
+# ---------------------------------------------------------------------------
+# Missing file tests
+# ---------------------------------------------------------------------------
+
+
+def test_rejects_missing_steering_doc(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    (tmp_path / "Docs/agents/19-high-signal-steering-feedback.md").unlink()
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_DOC_MISSING" in codes
+
+
+def test_rejects_missing_ledger(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    (tmp_path / ".harness/quality/steering-uptake.md").unlink()
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_LEDGER_MISSING" in codes
+
+
+def test_rejects_missing_readme(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    (tmp_path / "Docs/agents/README.md").unlink()
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "AGENT_DOC_INDEX_MISSING" in codes
+
+
+# ---------------------------------------------------------------------------
+# Steering doc content tests
+# ---------------------------------------------------------------------------
+
+
+def test_rejects_doc_missing_stop_rule(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / "Docs/agents/19-high-signal-steering-feedback.md",
+        "## Uptake Loop\n\n## Required Evidence\n\nvalidate_steering_uptake.py\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    incomplete = [f for f in findings if f.code == "STEERING_DOC_INCOMPLETE"]
+    assert any("Stop Rule" in f.message for f in incomplete)
+
+
+def test_rejects_doc_missing_uptake_loop(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / "Docs/agents/19-high-signal-steering-feedback.md",
+        "## Stop Rule\n\n## Required Evidence\n\nvalidate_steering_uptake.py\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    incomplete = [f for f in findings if f.code == "STEERING_DOC_INCOMPLETE"]
+    assert any("Uptake Loop" in f.message for f in incomplete)
+
+
+def test_rejects_doc_missing_required_evidence(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / "Docs/agents/19-high-signal-steering-feedback.md",
+        "## Stop Rule\n\n## Uptake Loop\n\nvalidate_steering_uptake.py\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    incomplete = [f for f in findings if f.code == "STEERING_DOC_INCOMPLETE"]
+    assert any("Required Evidence" in f.message for f in incomplete)
+
+
+def test_rejects_doc_missing_validator_script_reference(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / "Docs/agents/19-high-signal-steering-feedback.md",
+        "## Stop Rule\n\n## Uptake Loop\n\n## Required Evidence\n\nsome other tool\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    incomplete = [f for f in findings if f.code == "STEERING_DOC_INCOMPLETE"]
+    assert any("validate_steering_uptake.py" in f.message for f in incomplete)
+
+
+# ---------------------------------------------------------------------------
+# Ledger structure tests
+# ---------------------------------------------------------------------------
+
+
+def test_rejects_wrong_ledger_headers(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Ledger\n\n"
+        "| Date | Note | Status |\n"
+        "| --- | --- | --- |\n"
+        "| 2026-05-19 | test | open |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_LEDGER_HEADERS" in codes
+
+
+def test_rejects_row_with_too_few_cells(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_LEDGER_ROW_WIDTH" in codes
+
+
+def test_rejects_row_with_too_many_cells(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | t | p | m | g | v | open | extra-cell |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_LEDGER_ROW_WIDTH" in codes
+
+
+def test_rejects_row_with_empty_field(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger |  | mechanism | guardrail | python3 validate_steering_uptake.py --json | validated |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    field_empty = [f for f in findings if f.code == "STEERING_LEDGER_FIELD_EMPTY"]
+    assert any("Failure pattern" in f.message for f in field_empty)
+
+
+def test_rejects_row_with_none_value(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | none | guardrail | python3 validate_steering_uptake.py --json | validated |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    field_empty = [f for f in findings if f.code == "STEERING_LEDGER_FIELD_EMPTY"]
+    assert any("Mechanism" in f.message for f in field_empty)
+
+
+def test_rejects_row_with_na_value(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism | n/a | python3 validate_steering_uptake.py --json | validated |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    field_empty = [f for f in findings if f.code == "STEERING_LEDGER_FIELD_EMPTY"]
+    assert any("Durable guardrail" in f.message for f in field_empty)
+
+
+def test_rejects_row_with_todo_value(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism | guardrail | TODO | validated |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    field_empty = [f for f in findings if f.code == "STEERING_LEDGER_FIELD_EMPTY"]
+    assert any("Validation" in f.message for f in field_empty)
+
+
+def test_rejects_row_with_invalid_status(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism | guardrail | python3 validate_steering_uptake.py --json | done |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_LEDGER_STATUS" in codes
+
+
+def test_rejects_readme_without_steering_doc_link(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(tmp_path / "Docs/agents/README.md", "# Agent Docs\n\nNo link here.\n")
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_DOC_NOT_INDEXED" in codes
+
+
+# ---------------------------------------------------------------------------
+# Valid status variants
+# ---------------------------------------------------------------------------
+
+
+def test_accepts_open_status_row(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism | guardrail | command to run | open |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    status_findings = [f for f in findings if f.code in {"STEERING_LEDGER_STATUS", "STEERING_LEDGER_VALIDATION_WEAK"}]
+    assert status_findings == []
+
+
+def test_accepts_blocked_status_row(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism | guardrail | blocked: reason | blocked |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    status_findings = [f for f in findings if f.code in {"STEERING_LEDGER_STATUS", "STEERING_LEDGER_VALIDATION_WEAK"}]
+    assert status_findings == []
+
+
+def test_accepts_validated_row_with_validator_evidence(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    # _make_valid_root already has a validated row with validate_steering_uptake.py in Validation
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    assert findings == []
+
+
+# ---------------------------------------------------------------------------
+# main() function tests
+# ---------------------------------------------------------------------------
+
+
+def test_main_returns_zero_on_pass(capsys) -> None:
+    # Real repo surfaces are valid; main() with no args should pass.
+    exit_code = validate_steering_uptake.main([])
+    assert exit_code == 0
+
+
+def test_main_returns_one_on_failure(monkeypatch) -> None:
+    # Stub validate() to return a synthetic finding so main() sees a failure.
+    stub_finding = validate_steering_uptake.Finding(
+        code="STEERING_DOC_MISSING",
+        message="Test finding",
+        path="Docs/agents/19-high-signal-steering-feedback.md",
+    )
+    monkeypatch.setattr(validate_steering_uptake, "validate", lambda: [stub_finding])
+
+    exit_code = validate_steering_uptake.main([])
+    assert exit_code == 1
+
+
+def test_main_json_output_structure(capsys) -> None:
+    # Real repo; verify the JSON envelope shape on a passing run.
+    validate_steering_uptake.main(["--json"])
+
+    captured = capsys.readouterr()
+    import json
+    payload = json.loads(captured.out)
+    assert payload["status"] == "pass"
+    assert "findings" in payload
+    assert "checked" in payload
+    assert payload["findings"] == []
+
+
+def test_main_json_output_on_failure(monkeypatch, capsys) -> None:
+    stub_finding = validate_steering_uptake.Finding(
+        code="STEERING_DOC_MISSING",
+        message="Test finding",
+        path="Docs/agents/19-high-signal-steering-feedback.md",
+    )
+    monkeypatch.setattr(validate_steering_uptake, "validate", lambda: [stub_finding])
+
+    validate_steering_uptake.main(["--json"])
+
+    captured = capsys.readouterr()
+    import json
+    payload = json.loads(captured.out)
+    assert payload["status"] == "fail"
+    assert len(payload["findings"]) == 1
+    finding = payload["findings"][0]
+    assert finding["code"] == "STEERING_DOC_MISSING"
+    assert "message" in finding
+    assert "path" in finding
+
+
+def test_main_plain_output_pass(capsys) -> None:
+    validate_steering_uptake.main([])
+
+    captured = capsys.readouterr()
+    assert captured.out.strip() == "pass"
+
+
+def test_main_plain_output_fail_includes_finding_code(monkeypatch, capsys) -> None:
+    stub_finding = validate_steering_uptake.Finding(
+        code="STEERING_LEDGER_MISSING",
+        message="Missing ledger",
+        path=".harness/quality/steering-uptake.md",
+    )
+    monkeypatch.setattr(validate_steering_uptake, "validate", lambda: [stub_finding])
+
+    validate_steering_uptake.main([])
+
+    captured = capsys.readouterr()
+    assert "fail" in captured.out
+    assert "STEERING_LEDGER_MISSING" in captured.out
+
+
+# ---------------------------------------------------------------------------
+# _table_rows edge cases
+# ---------------------------------------------------------------------------
+
+
+def test_table_rows_empty_content() -> None:
+    headers, rows = validate_steering_uptake._table_rows("")
+    assert headers == []
+    assert rows == []
+
+
+def test_table_rows_only_header_and_separator() -> None:
+    # _table_rows requires at least 3 table lines; header+separator only = 2 lines → empty
+    text = "| A | B | C |\n| --- | --- | --- |\n"
+    headers, rows = validate_steering_uptake._table_rows(text)
+    assert headers == []
+    assert rows == []
+
+
+def test_table_rows_with_data_row() -> None:
+    text = "| A | B | C |\n| --- | --- | --- |\n| 1 | 2 | 3 |\n"
+    headers, rows = validate_steering_uptake._table_rows(text)
+    assert headers == ["A", "B", "C"]
+    assert rows == [["1", "2", "3"]]
+
+
+def test_table_rows_fewer_than_3_lines() -> None:
+    text = "| A | B |\n"
+    headers, rows = validate_steering_uptake._table_rows(text)
+    assert headers == []
+    assert rows == []
+
+
+def test_table_rows_ignores_non_table_lines() -> None:
+    text = "# Heading\n\nsome prose\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n"
+    headers, rows = validate_steering_uptake._table_rows(text)
+    assert headers == ["A", "B"]
+    assert rows == [["1", "2"]]
+
+
+# ---------------------------------------------------------------------------
+# Regression / boundary tests
+# ---------------------------------------------------------------------------
+
+
+def test_multiple_rows_partial_failures_all_reported(tmp_path: Path) -> None:
+    """All invalid rows are reported, not just the first."""
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism | guardrail | python3 validate_steering_uptake.py --json | validated |\n"
+        "| 2026-05-20 | trigger2 | pattern2 | mechanism2 | guardrail2 | not run | validated |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    weak_findings = [f for f in findings if f.code == "STEERING_LEDGER_VALIDATION_WEAK"]
+    assert len(weak_findings) == 1
+    assert "Row 2" in weak_findings[0].message
+
+
+def test_finding_path_is_relative(tmp_path: Path) -> None:
+    """Finding paths should be relative strings, not absolute."""
+    write(tmp_path / "Docs/agents/README.md", _VALID_README)
+    monkeypatch_root = tmp_path
+
+    import unittest.mock as mock
+    with mock.patch.object(validate_steering_uptake, "ROOT", monkeypatch_root):
+        findings = validate_steering_uptake.validate(monkeypatch_root)
+
+    for finding in findings:
+        assert not finding.path.startswith("/"), f"Path should be relative, got: {finding.path}"
+
+
+def test_case_insensitive_weak_field_detection(tmp_path: Path) -> None:
+    """Weak value detection is case-insensitive for 'none', 'n/a', 'todo'."""
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | NONE | guardrail | python3 validate_steering_uptake.py --json | validated |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    field_empty = [f for f in findings if f.code == "STEERING_LEDGER_FIELD_EMPTY"]
+    assert any("Mechanism" in f.message for f in field_empty)
