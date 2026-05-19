@@ -1075,7 +1075,7 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     )
     gates["user_runtime_ready"] = codex_runtime_ready or agents_runtime_ready
     proof = {
-        "schema_version": "command-handle-proof.v1",
+        "schema_version": "command-handle-proof.v2",
         "handle": normalized,
         "status": "pass" if all(core_gates) and gates["user_runtime_ready"] else "fail",
         "gates": gates,
@@ -1086,6 +1086,7 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
                 "workspace_command_handle_exists",
                 "user_runtime_ready",
             ],
+            "required_semantics": "user_runtime_ready accepts either supported user runtime link.",
             "supporting_runtime_diagnostics": [
                 "codex_user_link",
                 "codex_user_command_handle_exists",

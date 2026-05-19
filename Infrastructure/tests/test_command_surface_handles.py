@@ -365,7 +365,9 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_command_handle_exists"])
         self.assertTrue(proof["gates"]["agents_user_link"])
         self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
+        self.assertEqual(proof["schema_version"], "command-handle-proof.v2")
         self.assertIn("user_runtime_ready", proof["gate_policy"]["required"])
+        self.assertIn("either supported user runtime link", proof["gate_policy"]["required_semantics"])
         self.assertIn("agents_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
 
     def test_skills_proof_passes_with_linked_codex_runtime(self) -> None:
