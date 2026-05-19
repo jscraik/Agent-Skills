@@ -44,7 +44,7 @@ jobs:
             fi
 
             set +e
-            npm exec --yes snyk@1.1304.2 test \
+            npm exec --yes -- snyk@1.1304.2 test \
               --severity-threshold=high \
               --all-projects \
               --detection-depth=6 \
