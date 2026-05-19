@@ -50,7 +50,7 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--benchmark-config",
-        default="Skills/skill-builder/Infrastructure/references/benchmark-policy.json",
+        default="Plugins/skill-factory/references/skill-builder/benchmark-policy.json",
         help="Portfolio benchmark policy JSON path.",
     )
     p.add_argument(
@@ -232,7 +232,7 @@ def main() -> int:
         )
         return 1
     root = Path(args.root).expanduser().resolve()
-    scripts = root / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder" / "scripts"
+    scripts = root / "Plugins" / "skill-factory" / "scripts" / "skill-builder"
 
     skill_gate_py = scripts / "skill_gate.py"
     run_evals_py = scripts / "run_skill_evals.py"

@@ -9,7 +9,7 @@ DATA SOURCE NOTES:
 - ~/.codex/history.jsonl — User message text fallback
 - ~/.agents/otel-collector/ — Tool spans (requires CODEX_OTEL_ENABLED=1)
 
-Codex runs tools server-side for security, so detailed tool logs aren't stored 
+Codex runs tools server-side for security, so detailed tool logs aren't stored
 locally like Codex's ~/.codex/projects/ format. This report focuses on
 session patterns, message analysis, timing, and Codex-generated insights.
 """
@@ -141,17 +141,17 @@ OUTCOME_ORDER = [
 def parse_args():
     """
     Parse and validate CLI arguments for generating the Codex insights report.
-    
+
     Recognized options include lookback window (--days), output and input file paths (--evidence-out, --prompt-out, --insights-out, --insights-in),
     mode flags (--prepare-only, --render-only, --no-open), verbosity (-v/--verbose), and limits for sessions and evidence (--max-sessions, --max-evidence-sessions).
     The function enforces that --prepare-only and --render-only are mutually exclusive.
-    
+
     Returns:
         argparse.Namespace: Parsed arguments with attributes:
             days (int), no_open (bool), verbose (bool), prepare_only (bool), render_only (bool),
             max_sessions (int), max_evidence_sessions (int),
             evidence_out (str), prompt_out (str), insights_out (str), insights_in (str).
-    
+
     Raises:
         SystemExit: If argument parsing fails or the mutually exclusive flags are both provided.
     """
@@ -176,10 +176,10 @@ def parse_args():
 def find_session_files(days):
     """
     Locate recent rollout session JSONL files under the sessions directory within the specified lookback window.
-    
+
     Parameters:
         days (int): Number of days to look back from the current UTC date (midnight) to include session files.
-    
+
     Returns:
         List[Path]: Paths to matching rollout-*.jsonl files modified within the lookback window, sorted by modification time (newest first). Returns an empty list if the sessions directory does not exist or no files match.
     """
@@ -189,7 +189,7 @@ def find_session_files(days):
     cutoff = datetime.now(tz=timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days)
     cutoff_timestamp = cutoff.timestamp()
     files_with_mtime = []
-    
+
     for year_dir in SESSIONS_DIR.iterdir():
         if not year_dir.is_dir() or not year_dir.name.isdigit():
             continue
@@ -215,7 +215,7 @@ def find_session_files(days):
                             files_with_mtime.append((f, file_timestamp))
                     except OSError:
                         continue
-    
+
     # Sort by modification time (newest first) so max_sessions limit keeps recent sessions
     files_with_mtime.sort(key=lambda item: item[1], reverse=True)
     return [path for path, mtime in files_with_mtime]
@@ -224,12 +224,12 @@ def find_session_files(days):
 def is_meta_session(events):
     """
     Detect whether a session is an internal "insights" meta call that should be excluded from analysis.
-    
+
     Scans the initial events for a user message containing the specific instruction used by internal insights requests.
-    
+
     Parameters:
         events (list): Sequence of event dictionaries from a session log.
-    
+
     Returns:
         bool: `True` if the session appears to be an internal insights/meta call, `False` otherwise.
     """
@@ -246,18 +246,18 @@ def is_meta_session(events):
 def count_lines_in_diff(old, new):
     """
     Compute the number of lines added and removed between two text versions.
-    
+
     Parameters:
         old (str): Original text content.
         new (str): Updated text content.
-    
+
     Returns:
         tuple: (added, removed) where `added` is the count of lines present in `new` but not in `old`, and `removed` is the count of lines present in `old` but not in `new`.
     """
     old_lines = old.split('\n')
     new_lines = new.split('\n')
     diff = list(difflib.unified_diff(old_lines, new_lines, lineterm=''))
-    
+
     added = 0
     removed = 0
     for line in diff[2:]:
@@ -271,15 +271,15 @@ def count_lines_in_diff(old, new):
 def extract_message_text(content):
     """
     Extract visible text from a Codex message content structure.
-    
+
     If `content` is a string, it is returned unchanged. If `content` is a list of block
     dictionaries, any string value under the `text` key in those blocks is concatenated
     with newline separators. For any other input, an empty string is returned.
-    
+
     Parameters:
         content (str | list): Message content which may be a plain string or a list of
             block dictionaries containing `text` fields.
-    
+
     Returns:
         str: The extracted visible text.
     """
@@ -301,10 +301,10 @@ def extract_message_text(content):
 def parse_session_file(file_path):
     """
     Parse a single Codex session JSONL file and extract session-level metrics and a short transcript excerpt.
-    
+
     Parameters:
         file_path (str | pathlib.Path): Path to a rollout-*.jsonl session file.
-    
+
     Returns:
         dict: A mapping containing parsed session metadata and aggregated metrics:
             - parser_version: parser cache/version marker
@@ -321,7 +321,7 @@ def parse_session_file(file_path):
             - user_message_timestamps (list[str])
             - user_response_times (list[float]): seconds between assistant response and subsequent user message (filtered)
             - transcript (str): up to 20 alternating user/assistant excerpt lines
-    
+
         None: If the file cannot be read/decoded, the session lacks required session metadata, or the session is identified as a meta/internal session (and should be excluded).
     """
     events = []
@@ -340,7 +340,7 @@ def parse_session_file(file_path):
     user_message_timestamps = []
     last_assistant_timestamp = None
     user_response_times = []
-    
+
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             for line in f:
@@ -350,29 +350,29 @@ def parse_session_file(file_path):
                 try:
                     event = json.loads(line)
                     events.append(event)
-                    
+
                     if event.get('type') == 'session_meta':
                         session_meta = event.get('payload', {})
-                    
+
                     elif event.get('type') == 'event_msg':
                         payload = event.get('payload', {})
                         msg_type = payload.get('type')
                         msg_timestamp = payload.get('timestamp') or event.get('timestamp')
-                        
+
                         if msg_type == 'user_message':
                             content = payload.get('message', '') or payload.get('content', '')
                             # Handle block arrays - convert to string for analysis
                             if isinstance(content, list):
                                 content = json.dumps(content)
                             is_human = bool(content and isinstance(content, str) and content.strip())
-                            
+
                             if is_human:
                                 message_key = (msg_timestamp, content.strip())
                                 if message_key in seen_user_messages:
                                     continue
                                 seen_user_messages.add(message_key)
                                 user_messages.append((msg_timestamp, content))
-                                
+
                                 if msg_timestamp:
                                     try:
                                         msg_date = datetime.fromisoformat(msg_timestamp.replace('Z', '+00:00'))
@@ -380,7 +380,7 @@ def parse_session_file(file_path):
                                         user_message_timestamps.append(msg_timestamp)
                                     except (TypeError, ValueError):
                                         continue
-                                
+
                                 if last_assistant_timestamp and msg_timestamp:
                                     try:
                                         assistant_time = datetime.fromisoformat(last_assistant_timestamp.replace('Z', '+00:00'))
@@ -390,10 +390,10 @@ def parse_session_file(file_path):
                                             user_response_times.append(response_time)
                                     except (TypeError, ValueError):
                                         continue
-                            
+
                             if isinstance(content, str) and '[Request interrupted by user' in content:
                                 errors += 1
-                        
+
                         elif msg_type == 'agent_message':
                             content = payload.get('content', '')
                             if content:
@@ -403,11 +403,11 @@ def parse_session_file(file_path):
                                     agent_messages.append((msg_timestamp, content))
                             if msg_timestamp:
                                 last_assistant_timestamp = msg_timestamp
-                        
+
                         elif msg_type == 'task_complete':
                             if payload.get('outcome') == 'error':
                                 errors += 1
-                        
+
                         if msg_type == 'user_message' and isinstance(payload.get('content'), list):
                             for block in payload['content']:
                                 if block.get('type') == 'tool_result':
@@ -416,7 +416,7 @@ def parse_session_file(file_path):
                                         result_content = block.get('content', '')
                                         category = categorize_tool_error(result_content)
                                         tool_error_categories[category] += 1
-                    
+
                     elif event.get('type') == 'response_item':
                         payload = event.get('payload', {})
                         payload_type = payload.get('type')
@@ -500,19 +500,19 @@ def parse_session_file(file_path):
                     continue
     except (OSError, UnicodeError):
         return None
-    
+
     if not session_meta:
         return None
-    
+
     if is_meta_session(events):
         return None
-    
+
     transcript_lines = []
     for i, (ts, msg) in enumerate(user_messages[:20]):
         transcript_lines.append(f"User: {msg[:300]}")
         if i < len(agent_messages):
             transcript_lines.append(f"Assistant: {agent_messages[i][1][:300]}")
-    
+
     start_time = session_meta.get('timestamp', '')
     duration_minutes = 0
     if user_messages and start_time:
@@ -530,7 +530,7 @@ def parse_session_file(file_path):
                 duration_minutes = (last_msg_time - start).total_seconds() / 60
         except (TypeError, ValueError):
             duration_minutes = 0
-    
+
     return {
         'parser_version': PARSER_VERSION,
         'session_id': session_meta.get('id', 'unknown'),
@@ -562,10 +562,10 @@ def parse_session_file(file_path):
 def categorize_tool_error(content):
     """
     Map a tool error message to a standardized error category.
-    
+
     Parameters:
         content (str): Error message or output text produced by a tool; non-string values are treated as unknown.
-    
+
     Returns:
         str: One of the following category labels:
             - "Command Failed" for messages containing "exit code"
@@ -578,7 +578,7 @@ def categorize_tool_error(content):
     """
     if not isinstance(content, str):
         return "Other"
-    
+
     lower = content.lower()
     if 'exit code' in lower:
         return "Command Failed"
@@ -598,10 +598,10 @@ def categorize_tool_error(content):
 def is_substantive_session(session):
     """
     Determine whether a session contains enough user activity and duration to be considered substantive.
-    
+
     Parameters:
         session (dict): Session summary containing at least `user_messages` (int) and optionally `duration_minutes` (number).
-    
+
     Returns:
         bool: `true` if `session['user_messages']` is 2 or more and `duration_minutes` is at least 1, `false` otherwise.
     """
@@ -618,10 +618,10 @@ def is_substantive_session(session):
 def detect_parallel_codex_sessions(sessions):
     """
     Detects likely parallel Codex usage by finding user messages from different sessions that occur within a 30-minute window.
-    
+
     Parameters:
         sessions (list): Sequence of session dictionaries. Each session should include a 'session_id' string and a 'user_message_timestamps' iterable of ISO-8601 timestamp strings.
-    
+
     Returns:
         dict: Summary counts with keys:
             - 'overlap_events' (int): number of detected overlapping session pair events.
@@ -629,7 +629,7 @@ def detect_parallel_codex_sessions(sessions):
             - 'user_messages_during' (int): count of unique user-message entries recorded as part of overlap events.
     """
     OVERLAP_WINDOW_MS = 30 * 60000
-    
+
     all_messages = []
     for session in sessions:
         for ts in session.get('user_message_timestamps', []):
@@ -640,22 +640,22 @@ def detect_parallel_codex_sessions(sessions):
                 })
             except (TypeError, ValueError):
                 continue
-    
+
     all_messages.sort(key=lambda x: x['ts'])
-    
+
     parallel_codex_pairs = []
     messages_during = set()
-    
+
     window_start = 0
     session_last_index = {}
-    
+
     for i, msg in enumerate(all_messages):
         while window_start < i and msg['ts'] - all_messages[window_start]['ts'] > OVERLAP_WINDOW_MS:
             expiring = all_messages[window_start]
             if session_last_index.get(expiring['session_id']) == window_start:
                 del session_last_index[expiring['session_id']]
             window_start += 1
-        
+
         prev_index = session_last_index.get(msg['session_id'])
         if prev_index is not None:
             for j in range(prev_index + 1, i):
@@ -667,14 +667,14 @@ def detect_parallel_codex_sessions(sessions):
                     messages_during.add(f"{between['ts']}:{between['session_id']}")
                     messages_during.add(f"{msg['ts']}:{msg['session_id']}")
                     break
-        
+
         session_last_index[msg['session_id']] = i
-    
+
     sessions_with_overlaps = set()
     for pair in parallel_codex_pairs:
         sessions_with_overlaps.add(pair[0])
         sessions_with_overlaps.add(pair[1])
-    
+
     return {
         'overlap_events': len(parallel_codex_pairs),
         'sessions_involved': len(sessions_with_overlaps),
@@ -685,7 +685,7 @@ def detect_parallel_codex_sessions(sessions):
 def deduplicate_sessions(sessions):
     """Deduplicate session branches - keep the one with most user messages per session_id."""
     best_by_session = {}
-    
+
     for session in sessions:
         session_id = session['session_id']
         existing = best_by_session.get(session_id)
@@ -695,19 +695,19 @@ def deduplicate_sessions(sessions):
             best_by_session[session_id] = session
         elif session['user_messages'] == existing['user_messages'] and session['duration_minutes'] > existing['duration_minutes']:
             best_by_session[session_id] = session
-    
+
     return list(best_by_session.values())
 
 
 def extract_json_object(text):
     """
     Parse and return the first JSON object found in a string.
-    
+
     Tries to parse the entire input as JSON; if that fails, searches for the first substring enclosed in `{...}` and attempts to parse that. This returns the parsed value when successful or `None` when no valid JSON object can be extracted.
-    
+
     Parameters:
         text (str): Input text that may contain a JSON object.
-    
+
     Returns:
         The parsed JSON value (typically a dict) if parsing succeeds, or `None` if no valid JSON object is found.
     """
@@ -729,12 +729,12 @@ def extract_json_object(text):
 def write_json(path, value):
     """
     Write a JSON-serializable value to a file, creating parent directories and making the file private.
-    
+
     The file is created/truncated with permissions 0o600, written as UTF-8 JSON with two-space indentation and without ASCII-escaping non-ASCII characters.
-    
+
     Parameters:
-    	path (str | pathlib.Path): Destination file path.
-    	value: JSON-serializable object to write.
+        path (str | pathlib.Path): Destination file path.
+        value: JSON-serializable object to write.
     """
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -749,13 +749,13 @@ def write_json(path, value):
 def read_json(path):
     """
     Read a JSON file and return its top-level object as a dict.
-    
+
     Parameters:
         path (str | os.PathLike): Path to the JSON file to read.
-    
+
     Returns:
         dict: Parsed top-level JSON object.
-    
+
     Raises:
         TypeError: If the top-level JSON value is not an object (dict).
     """
@@ -797,9 +797,9 @@ def load_session_collector_extension():
 def load_cached_session_meta(session_id):
     """
     Retrieve cached session metadata if it matches the current parser version.
-    
+
     Looks for a JSON file at USAGE_DIR/session-meta/{session_id}.json, parses it, and returns the loaded dictionary only when its "parser_version" equals PARSER_VERSION. Returns None if the file is missing, the version does not match, or an I/O/JSON decoding error occurs.
-    
+
     Returns:
         dict: Cached session metadata when valid.
         None: When no valid cache is available.
@@ -819,9 +819,9 @@ def load_cached_session_meta(session_id):
 def save_session_meta(session_id, meta):
     """
     Save session metadata to a per-user cache file with owner-only permissions.
-    
+
     Writes `meta` as JSON to USAGE_DIR/session-meta/{session_id}.json using file mode 0o600. If creating the cache directory or writing the file fails due to an OSError, the function returns silently (no exception is propagated).
-    
+
     Parameters:
         session_id (str): Identifier used to name the cache file (without extension).
         meta (dict): JSON-serializable metadata to persist.
@@ -843,7 +843,7 @@ def save_session_meta(session_id, meta):
 def build_evidence_bundle(data, sessions, args):
     """
     Builds a structured evidence bundle used as input to the Codex writer.
-    
+
     Creates a JSON-serializable dict containing:
     - a fixed `schema_version` ("codex-insight-evidence.v1"),
     - a UTC `generated_at` timestamp (ISO 8601, no microseconds),
@@ -851,16 +851,16 @@ def build_evidence_bundle(data, sessions, args):
     - the full aggregated `data` object,
     - a compact `metrics` view extracted from `data`,
     - `session_samples`: up to `args.max_evidence_sessions` session summaries.
-    
+
     Parameters:
         data (dict): Aggregated metrics and metadata produced by collect_session_data().
         sessions (list[dict]): Ordered session summaries; each entry supplies fields used for sampling.
         args (argparse.Namespace): CLI arguments; `max_evidence_sessions` controls how many sessions are sampled.
-    
+
     Notes on session_samples:
     - Each sample includes truncated identifiers and fields: `session_id` (first 12 chars), `project_path`, `start_time`, `duration_minutes`, `user_messages`, `assistant_messages`, `tool_calls`, `errors`, `first_prompt`, and `transcript_excerpt`.
     - `transcript_excerpt` is truncated to 3500 characters to bound prompt size.
-    
+
     Returns:
         dict: The evidence bundle ready to be serialized and written to disk.
     """
@@ -1052,10 +1052,10 @@ def build_codex_writer_payload(evidence):
 def build_codex_prompt(evidence):
     """
     Builds the full textual prompt sent to the Codex writer, embedding the provided evidence and the required writer instructions/schema.
-    
+
     Parameters:
         evidence (Any): A JSON-serializable evidence bundle to include in the prompt (will be serialized and inlined).
-    
+
     Returns:
         str: The complete prompt text that must be sent to the Codex CLI.
     """
@@ -1246,10 +1246,10 @@ def normalize_insights(insights):
 def validate_insights(insights):
     """
     Validate a Codex writer insights object against the expected schema, required fields, list shapes, evidence entries, and second-person phrasing rules.
-    
+
     Parameters:
         insights (dict): Parsed insights JSON object to validate.
-    
+
     Returns:
         errors (list[str]): A list of validation error messages; empty if the insights object conforms to the contract.
     """
@@ -1313,10 +1313,10 @@ def validate_insights(insights):
     def section_payload(name: str) -> dict:
         """
         Retrieve a named insights section as a dictionary.
-        
+
         Parameters:
             name (str): The key of the insights section to fetch.
-        
+
         Returns:
             dict: The section value if present and a dict, otherwise an empty dict.
         """
@@ -1383,12 +1383,12 @@ def validate_insights(insights):
 def codex_command() -> list[str]:
     """
     Resolve the command used to invoke the Codex CLI.
-    
+
     Checks the INSIGHTS_CODEX_COMMAND environment variable (split with shell semantics) and falls back to locating a `codex` binary on PATH.
-    
+
     Returns:
         list[str]: The command and its arguments as a list suitable for subprocess execution.
-    
+
     Raises:
         RuntimeError: If no command is configured and `codex` is not found on PATH.
     """
@@ -1404,13 +1404,13 @@ def codex_command() -> list[str]:
 def run_codex_writer(prompt):
     """
     Send the prepared prompt to the Codex CLI writer and return the validated insights object.
-    
+
     Parameters:
         prompt (str): The full prompt text to send to the Codex CLI (written to the process's stdin).
-    
+
     Returns:
         dict: The parsed insights JSON object produced by Codex, validated against the expected insights contract.
-    
+
     Raises:
         RuntimeError: If the Codex CLI exits with a non-zero code, fails to produce a JSON object, or the returned JSON fails validation.
     """
@@ -1440,7 +1440,7 @@ def run_codex_writer(prompt):
 def generate_html_report(data, insights):
     """
     Render a complete single-page HTML report from aggregated session metrics and validated Codex insights.
-    
+
     Parameters:
         data (dict): Aggregated metrics and metadata produced by collect_session_data(). Expected keys used by the template include:
             - 'period' (dict with 'start' and 'end' ISO timestamps)
@@ -1452,50 +1452,50 @@ def generate_html_report(data, insights):
             - 'parallel_codex' (dict with overlap stats)
             - optional chart/category fields such as 'goal_categories', 'success', 'outcomes', 'friction', 'satisfaction', and 'tool_error_categories'.
         insights (dict): Validated Codex-written insights matching the expected schema (e.g., keys like 'at_a_glance', 'project_areas', 'interaction_style', 'what_works', 'friction_analysis', 'prompting_help', 'suggestions', 'on_the_horizon', 'actionable_fixes', 'fun_ending'). Contents are rendered into narrative sections and callouts when present.
-    
+
     Returns:
         html (str): Complete HTML document (UTF-8) as a string containing styles, inline scripts, charts, and the rendered report content.
     """
-    
+
     def escape_html(text):
         """
         Escape special HTML characters in `text` to their corresponding HTML entities.
-        
+
         Parameters:
             text: Value to escape; if falsy, treated as an empty string. The value will be converted to `str` before escaping.
-        
+
         Returns:
             Escaped string where `&`, `<`, `>`, and `"` are replaced with `&amp;`, `&lt;`, `&gt;`, and `&quot;` respectively.
         """
         text = str(text) if text else ""
         return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
-    
+
     def escape_html_with_bold(text):
         """
         Escape HTML in the input and convert Markdown-style double-asterisk bold spans to <strong> tags.
-        
+
         Parameters:
-        	text (str): Input string that may contain HTML characters and `**bold**` markers.
-        
+            text (str): Input string that may contain HTML characters and `**bold**` markers.
+
         Returns:
-        	escaped (str): The input with HTML special characters escaped and any `**...**` sequences replaced by `<strong>...</strong>`.
+            escaped (str): The input with HTML special characters escaped and any `**...**` sequences replaced by `<strong>...</strong>`.
         """
         escaped = escape_html(text)
         return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', escaped)
-    
+
     def generate_bar_chart(data_dict, color, max_items=6, fixed_order=None, not_available_text="No data"):
         """
         Render HTML for a horizontal bar chart from a mapping of labels to counts.
-        
+
         Displays up to `max_items` highest-count entries (unless `fixed_order` is provided, in which case entries appear in that order and only labels present with count > 0 are shown). Labels are cleaned by replacing underscores with spaces and title-casing. Each bar row contains a label, a proportional fill (width relative to the largest count), and the raw count. If there are no entries to show or all counts are zero, returns a paragraph element containing `not_available_text`.
-        
+
         Parameters:
             data_dict (dict): Mapping of label -> numeric count.
             color (str): CSS color used for the bar fill.
             max_items (int): Maximum number of bars to show when `fixed_order` is not used.
             fixed_order (Optional[Iterable[str]]): If provided, determines the display order; only keys present in `data_dict` with value > 0 are included.
             not_available_text (str): Text used when there is no data to display.
-        
+
         Returns:
             str: HTML fragment containing the bar chart rows or a paragraph with `not_available_text` when no data is available.
         """
@@ -1503,36 +1503,36 @@ def generate_html_report(data, insights):
             entries = [(k, data_dict.get(k, 0)) for k in fixed_order if k in data_dict and data_dict.get(k, 0) > 0]
         else:
             entries = sorted(data_dict.items(), key=lambda x: x[1], reverse=True)[:max_items]
-        
+
         if not entries:
             return f'<p class="empty">{not_available_text}</p>'
-        
+
         max_val = max(e[1] for e in entries)
         if max_val == 0:
             return '<p class="empty">No data</p>'
-        
+
         html = ""
         for label, count in entries:
             pct = (count / max_val) * 100
             clean_label = LABEL_MAP.get(label, label.replace('_', ' ').title())
             html += f'<div class="bar-row"><div class="bar-label">{escape_html(clean_label)}</div><div class="bar-track"><div class="bar-fill" style="width:{pct}%;background:{color}"></div></div><div class="bar-value">{count}</div></div>'
         return html
-    
+
     def generate_response_time_histogram(times):
         """
         Render an HTML fragment showing a histogram of response-time buckets for the given response times.
-        
+
         The histogram groups times (in seconds) into these buckets: 2–10s, 10–30s, 30s–1m, 1–2m, 2–5m, 5–15m, and >15m; each row shows the bucket label, a proportional bar, and the count. If no meaningful data is present, returns a small "No response time data" HTML paragraph.
-        
+
         Parameters:
             times (Iterable[float] | list[float]): Sequence of response times in seconds.
-        
+
         Returns:
             str: HTML string containing the histogram rows or '<p class="empty">No response time data</p>' when there is no data to display.
         """
         if not times:
             return '<p class="empty">No response time data</p>'
-        
+
         buckets = {'2-10s': 0, '10-30s': 0, '30s-1m': 0, '1-2m': 0, '2-5m': 0, '5-15m': 0, '>15m': 0}
         for t in times:
             if t < 10:
@@ -1549,24 +1549,24 @@ def generate_html_report(data, insights):
                 buckets['5-15m'] += 1
             else:
                 buckets['>15m'] += 1
-        
+
         max_val = max(buckets.values())
         if max_val == 0:
             return '<p class="empty">No response time data</p>'
-        
+
         html = ""
         for label, count in buckets.items():
             pct = (count / max_val) * 100
             html += f'<div class="bar-row"><div class="bar-label">{label}</div><div class="bar-track"><div class="bar-fill" style="width:{pct}%;background:#6366f1"></div></div><div class="bar-value">{count}</div></div>'
         return html
-    
+
     def generate_time_of_day_chart(hours):
         """
         Render a simple HTML bar-chart grouping hour-of-day samples into four labeled periods.
-        
+
         Parameters:
             hours (list[int]): Iterable of hour values (0–23) representing when events occurred.
-        
+
         Returns:
             str: HTML fragment containing either a paragraph indicating no data or a div with four horizontal bars
             for "Morning (6-12)", "Afternoon (12-18)", "Evening (18-24)", and "Night (0-6)". Each bar shows the count
@@ -1574,32 +1574,32 @@ def generate_html_report(data, insights):
         """
         if not hours:
             return '<p class="empty">No time data</p>'
-        
+
         hour_counts = {}
         for h in hours:
             hour_counts[h] = hour_counts.get(h, 0) + 1
-        
+
         periods = [
             ('Morning (6-12)', [6, 7, 8, 9, 10, 11]),
             ('Afternoon (12-18)', [12, 13, 14, 15, 16, 17]),
             ('Evening (18-24)', [18, 19, 20, 21, 22, 23]),
             ('Night (0-6)', [0, 1, 2, 3, 4, 5]),
         ]
-        
+
         period_counts = []
         for label, range_hours in periods:
             count = sum(hour_counts.get(h, 0) for h in range_hours)
             period_counts.append((label, count))
-        
+
         max_val = max(c for _, c in period_counts) if period_counts else 1
-        
+
         html = '<div id="hour-histogram">'
         for label, count in period_counts:
             pct = (count / max_val) * 100 if max_val > 0 else 0
             html += f'<div class="bar-row"><div class="bar-label">{label}</div><div class="bar-track"><div class="bar-fill" style="width:{pct}%;background:#8b5cf6"></div></div><div class="bar-value">{count}</div></div>'
         html += '</div>'
         return html
-    
+
     # Build sections
     at_a_glance = insights.get('at_a_glance', {})
     at_a_glance_html = ""
@@ -1613,16 +1613,16 @@ def generate_html_report(data, insights):
             sections.append(f'<div class="glance-section"><strong>Quick wins to try:</strong> {escape_html_with_bold(at_a_glance["quick_wins"])} <a href="#section-features" class="see-more">Features to Try →</a></div>')
         if at_a_glance.get('ambitious_workflows'):
             sections.append(f'<div class="glance-section"><strong>Ambitious workflows:</strong> {escape_html_with_bold(at_a_glance["ambitious_workflows"])} <a href="#section-horizon" class="see-more">On the Horizon →</a></div>')
-        
+
         at_a_glance_html = f'<div class="at-a-glance"><div class="glance-title">At a Glance</div><div class="glance-sections">{ "".join(sections) }</div></div>'
-    
+
     # Project areas
     project_areas = insights.get('project_areas', {}).get('areas', [])
     project_areas_html = ""
     if project_areas:
         areas_html = "".join([f'<div class="project-area"><div class="area-header"><span class="area-name">{escape_html(a.get("name", ""))}</span><span class="area-count">~{a.get("session_count", 0)} sessions</span></div><div class="area-desc">{escape_html(a.get("description", ""))}</div></div>' for a in project_areas])
         project_areas_html = f'<h2 id="section-work">What You Work On</h2><div class="project-areas">{areas_html}</div>'
-    
+
     # Other sections
     interaction = insights.get('interaction_style', {})
     interaction_html = ""
@@ -1633,14 +1633,14 @@ def generate_html_report(data, insights):
                 narrative += f'<p>{escape_html_with_bold(para)}</p>'
         key_pattern = f'<div class="key-insight"><strong>Key pattern:</strong> {escape_html(interaction.get("key_pattern", ""))}</div>' if interaction.get('key_pattern') else ""
         interaction_html = f'<h2 id="section-usage">How You Use Codex</h2><div class="narrative">{narrative}{key_pattern}</div>'
-    
+
     what_works = insights.get('what_works', {})
     what_works_html = ""
     if what_works and what_works.get('impressive_workflows'):
         workflows_html = "".join([f'<div class="big-win"><div class="big-win-title">{escape_html(w.get("title", ""))}</div><div class="big-win-desc">{escape_html(w.get("description", ""))}</div></div>' for w in what_works['impressive_workflows']])
         intro = f'<p class="section-intro">{escape_html(what_works.get("intro", ""))}</p>' if what_works.get('intro') else ""
         what_works_html = f'<h2 id="section-wins">Impressive Things You Did</h2>{intro}<div class="big-wins">{workflows_html}</div>'
-    
+
     friction = insights.get('friction_analysis', {})
     friction_html = ""
     if friction and friction.get('categories'):
@@ -1684,7 +1684,7 @@ def generate_html_report(data, insights):
                 f'<div class="patterns-section">{"".join(pattern_parts)}</div>'
                 f'<div class="features-section">{"".join(term_parts)}</div>'
             )
-    
+
     suggestions = insights.get('suggestions', {})
     suggestions_html = ""
     if suggestions:
@@ -1692,7 +1692,7 @@ def generate_html_report(data, insights):
         if additions:
             adds_html = "".join([f'<div class="agents-md-item"><input type="checkbox" id="cmd-{i}" class="cmd-checkbox" checked data-text="{escape_html(a.get("where", "Add to AGENTS.md") + chr(10) + chr(10) + a.get("addition", ""))}"><label for="cmd-{i}"><code class="cmd-code">{escape_html(a.get("addition", ""))}</code><button class="copy-btn" onclick="copyCmdItem({i})">Copy</button></label><div class="cmd-why">{escape_html(a.get("why", ""))}</div></div>' for i, a in enumerate(additions[:3])])
             suggestions_html += f'<h2 id="section-features">Suggested AGENTS.md Additions</h2><div class="agents-md-section">{adds_html}</div>'
-        
+
         features = suggestions.get('features_to_try', [])
         if features:
             feats_parts = []
@@ -1704,7 +1704,7 @@ def generate_html_report(data, insights):
                 feats_parts.append(feat_html)
             feats_html = "".join(feats_parts)
             suggestions_html += f'<h2 id="section-features-list">Features to Try</h2><div class="features-section">{feats_html}</div>'
-        
+
         patterns = suggestions.get('usage_patterns', [])
         if patterns:
             pat_parts = []
@@ -1718,7 +1718,7 @@ def generate_html_report(data, insights):
                 pat_parts.append(pat_html)
             pat_html = "".join(pat_parts)
             suggestions_html += f'<h2 id="section-patterns">New Ways to Use Codex</h2><div class="patterns-section">{pat_html}</div>'
-    
+
     horizon = insights.get('on_the_horizon', {})
     horizon_html = ""
     if horizon and horizon.get('opportunities'):
@@ -1734,7 +1734,7 @@ def generate_html_report(data, insights):
         opp_html = "".join(opp_parts)
         intro = f'<p class="section-intro">{escape_html(horizon.get("intro", ""))}</p>' if horizon.get('intro') else ""
         horizon_html = f'<h2 id="section-horizon">On the Horizon</h2>{intro}<div class="horizon-section">{opp_html}</div>'
-    
+
     # V3 Actionable Fixes Section
     actionable = insights.get('actionable_fixes', {})
     actionable_html = ""
@@ -1752,7 +1752,7 @@ def generate_html_report(data, insights):
             if exec_summary.get('priority'):
                 summary_html += f'<div style="font-size: 13px; color: #7f1d1d;"><strong>Priority:</strong> {escape_html(exec_summary["priority"])}</div>'
             summary_html += '</div>'
-        
+
         # Priority Fixes
         fixes_html = ""
         for fix in actionable.get('priority_fixes', []):
@@ -1772,7 +1772,7 @@ def generate_html_report(data, insights):
                 fix_card += f'<div style="font-size: 12px; color: #166534; background: #f0fdf4; padding: 8px; border-radius: 4px;"><strong>✅ Verify:</strong> {escape_html(fix["verify"])}</div>'
             fix_card += '</div>'
             fixes_html += fix_card
-        
+
         # Autofix Queue
         autofix_html = ""
         if actionable.get('autofix_queue'):
@@ -1780,7 +1780,7 @@ def generate_html_report(data, insights):
             for cmd in actionable['autofix_queue']:
                 autofix_html += f'<div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;"><code style="font-family: monospace; font-size: 12px; flex: 1;">{escape_html(cmd)}</code><button class="copy-btn" onclick="copyText(this)">Copy</button></div>'
             autofix_html += '</div>'
-        
+
         # Stop Doing
         stop_html = ""
         if actionable.get('stop_doing'):
@@ -1788,7 +1788,7 @@ def generate_html_report(data, insights):
             for item in actionable['stop_doing']:
                 stop_html += f'<li style="font-size: 13px; color: #7f1d1d; margin-bottom: 4px;">{escape_html(item)}</li>'
             stop_html += '</ul></div>'
-        
+
         # Execution Order
         order_html = ""
         if actionable.get('execution_order'):
@@ -1796,9 +1796,9 @@ def generate_html_report(data, insights):
             for step in actionable['execution_order']:
                 order_html += f'<li style="font-size: 13px; color: #0c4a6e; margin-bottom: 4px;">{escape_html(step)}</li>'
             order_html += '</ol></div>'
-        
+
         actionable_html = f'<h2 id="section-actionable" style="color: #dc2626;">🚨 Priority Fixes</h2>{summary_html}{fixes_html}{autofix_html}{stop_html}{order_html}'
-    
+
     fun_ending = insights.get('fun_ending', {})
     fun_html = ""
     if fun_ending and fun_ending.get('headline'):
@@ -1806,7 +1806,7 @@ def generate_html_report(data, insights):
         if fun_ending.get("detail"):
             fun_html += f'<div class="fun-detail">{escape_html(fun_ending.get("detail", ""))}</div>'
         fun_html += '</div>'
-    
+
     multi = data.get('parallel_codex', {})
     if multi.get('overlap_events', 0) == 0:
         multi_html = '<p style="font-size: 14px; color: #64748b; padding: 8px 0;">No parallel session usage detected. You typically work with one Codex session at a time.</p>'
@@ -1814,14 +1814,14 @@ def generate_html_report(data, insights):
         total_msgs = data['metrics'].get('total_user_messages', 0)
         pct = round(100 * multi.get('user_messages_during', 0) / total_msgs) if total_msgs else 0
         multi_html = f'<div style="display: flex; gap: 24px; margin: 12px 0;"><div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: #7c3aed;">{multi["overlap_events"]}</div><div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Overlap Events</div></div><div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: #7c3aed;">{multi["sessions_involved"]}</div><div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Sessions Involved</div></div><div style="text-align: center;"><div style="font-size: 24px; font-weight: 700; color: #7c3aed;">{pct}%</div><div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Of Messages</div></div></div><p style="font-size: 13px; color: #475569; margin-top: 12px;">You run multiple Codex sessions simultaneously. Parallel Codex usage is detected when sessions overlap in time.</p>'
-    
+
     tool_errors = data.get('tool_error_categories', {})
     tool_errors_html = generate_bar_chart(tool_errors, '#dc2626') if tool_errors else '<p class="empty">No tool errors</p>'
-    
+
     response_times = data.get('user_response_times', [])
     median_rt = sorted(response_times)[len(response_times)//2] if response_times else 0
     avg_rt = sum(response_times)/len(response_times) if response_times else 0
-    
+
     css = """
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f8fafc; color: #334155; line-height: 1.65; padding: 48px 24px; }
@@ -1905,7 +1905,7 @@ def generate_html_report(data, insights):
     .fun-detail { font-size: 14px; color: #92400e; }
     @media (max-width: 640px) { .charts-row { grid-template-columns: 1fr; } .stats-row { justify-content: center; } }
     """
-    
+
     js = """
     function copyText(btn) {
       const code = btn.previousElementSibling;
@@ -1924,7 +1924,7 @@ def generate_html_report(data, insights):
       }
     }
     """
-    
+
     html = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -2037,22 +2037,22 @@ def generate_html_report(data, insights):
   <script>{js}</script>
 </body>
 </html>"""
-    
+
     return html
 
 
 def collect_session_data(args):
     """
     Aggregate recent Codex session files into a single analysis-ready data dictionary.
-    
+
     Finds recent session JSONL files, loads cached session metadata when available, parses new files, deduplicates session branches, filters out low-signal sessions, and aggregates metrics (tool usage, errors, message counts, edit line estimates, timestamps, and response-time samples). Also detects overlapping (parallel) Codex sessions and attaches the list of sessions selected for evidence sampling.
-    
+
     Parameters:
         args (argparse.Namespace): Runtime options with at least the attributes:
             - days (int): lookback window in days for session files.
             - max_sessions (int): maximum number of session files to process.
             - verbose (bool): enable progress logging.
-    
+
     Returns:
         dict: Aggregated data with keys including:
             - period: {start, end, days} ISO timestamps and lookback.
@@ -2068,18 +2068,18 @@ def collect_session_data(args):
     """
     print("Codex Insights Report")
     print("=" * 40)
-    
+
     session_files = find_session_files(args.days)
     if args.verbose:
         print(f"Found {len(session_files)} session files")
-    
+
     if not session_files:
         print("No session data found in ~/.codex/sessions/")
         return _generate_no_data_response(args.days)
 
     sessions = []
     to_parse = []
-    
+
     for file_path in session_files[:args.max_sessions]:
         # Use full stem as session_id to avoid collisions from truncated tokens
         session_id = file_path.stem
@@ -2088,7 +2088,7 @@ def collect_session_data(args):
             sessions.append(cached)
         else:
             to_parse.append((file_path, session_id))
-    
+
     for file_path, session_id in to_parse:
         if args.verbose:
             print(f"  Parsing {session_id[:8]}...")
@@ -2096,22 +2096,22 @@ def collect_session_data(args):
         if session:
             save_session_meta(session_id, session)
             sessions.append(session)
-    
+
     if args.verbose:
         print(f"Loaded {len(sessions)} sessions")
-    
+
     sessions = deduplicate_sessions(sessions)
     if args.verbose:
         print(f"After deduplication: {len(sessions)} sessions")
-    
+
     sessions = [s for s in sessions if is_substantive_session(s)]
     if args.verbose:
         print(f"After substantive filter: {len(sessions)} sessions")
-    
+
     if not sessions:
         print("No substantive sessions found (need 2+ user messages and 1+ minute duration)")
         return _generate_no_data_response(args.days)
-    
+
     all_tool_counts = defaultdict(int)
     total_errors = 0
     total_user_msgs = 0
@@ -2137,7 +2137,7 @@ def collect_session_data(args):
         all_message_hours.extend(session['message_hours'])
         all_response_times.extend(session['user_response_times'])
     parallel_codex = detect_parallel_codex_sessions(sessions)
-    
+
     data = {
         "period": {
             "start": (datetime.now(tz=timezone.utc) - timedelta(days=args.days)).isoformat(),
@@ -2178,10 +2178,10 @@ def collect_session_data(args):
 def _generate_no_data_response(days):
     """
     Generate a standardized data dictionary representing an empty/no-data reporting period.
-    
+
     Parameters:
         days (int): Number of days in the lookback window used to compute the period start.
-    
+
     Returns:
         dict: A complete data structure with zeroed metrics and metadata:
             - period: start/end ISO timestamps and the provided `days`.
@@ -2204,13 +2204,13 @@ def _generate_no_data_response(days):
 def main():
     """
     CLI entry point that collects and aggregates Codex session data, optionally invokes the Codex writer to produce insights, and writes the HTML report along with evidence, prompt, and insights JSON files.
-    
+
     When run in --render-only mode, reads existing evidence and insights JSON and renders the report. When run normally, it:
     - collects session metrics,
     - builds and writes an evidence bundle and prompt (written with secure file permissions),
     - optionally calls the Codex CLI to generate and persist insights unless --prepare-only is set,
     - renders and writes the final HTML report.
-    
+
     Returns:
         int: Exit code 0 on success.
     """
@@ -2257,10 +2257,10 @@ def main():
     html = generate_html_report(data, data.get("insights", {}))
     REPORT_HTML.write_text(html, encoding="utf-8")
     report_url = f"file://{REPORT_HTML}"
-    
+
     print(f"\n✓ Report ready: {report_url}")
     print(f"REPORT_URL={report_url}")
-    
+
     if data.get("data_quality") == "real":
         sessions = data["sessions"]
         metrics = data.get("metrics", {})
@@ -2268,7 +2268,7 @@ def main():
         print(f"  Analyzed {sessions['total']} sessions, {metrics.get('total_user_messages', 0)} messages {codex_status}")
     else:
         print("  No session data found.")
-    
+
     return 0
 
 

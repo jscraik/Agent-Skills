@@ -127,6 +127,8 @@ If repeatability, ownership, or validation cannot be proven, stop and return a b
 - Local contract, evals, and task profile: `references/`
 - Context development lifecycle: `Plugins/skill-factory/references/context-development-lifecycle.md`
 - First-principles factory gate: `Infrastructure/references/first-principles-factory-gate.md`
+- Cookbook-derived skill improvement, documentation interface, and eval flywheel lenses: `Infrastructure/references/openai-cookbook-expert-lens-pack.md`, `Infrastructure/references/openai-cookbook-skill-expertise-map.md`
+- Software-literature skill scaffolding lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
 
 ## Validation
 

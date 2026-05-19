@@ -30,7 +30,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--root", default=".", help="Repository root")
     p.add_argument(
         "--config",
-        default="Skills/skill-builder/Infrastructure/references/benchmark-policy.json",
+        default="Plugins/skill-factory/references/skill-builder/benchmark-policy.json",
         help="Benchmark policy JSON path (relative to root or absolute)",
     )
     p.add_argument("--mode", choices=["off", "warn", "fail"], default="warn")

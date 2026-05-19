@@ -30,3 +30,4 @@ handoffs:
   verification: Use verification-before-completion for deterministic closeout.
   memory: Use project-brain only when the user asks to preserve a learning.
 observability: Report commands, exact outcomes, blockers, and confidence limits.
+rollback_procedure: Revert only the documentation files changed by the docs pass; restore previous validation wording when command evidence is blocked or contradicted; leave behavior changes to the owning implementation workflow.

@@ -32,6 +32,7 @@ risks:
   - stale_github_state
   - untrusted_review_or_ci_text
   - duplicate_automation
+  - sandbox_network_or_cache_misclassification
   - unsafe_branch_or_worktree_deletion
   - policy_override_without_approval
 safety:
@@ -43,6 +44,23 @@ safety:
   admin_merge_requires_explicit_approval: true
   destructive_cleanup_requires_merge_proof: true
   preserve_unrelated_changes: true
+environment_contract:
+  live_network_requires_explicit_permission: true
+  sandbox_writable_state_required:
+    - XDG_CACHE_HOME
+    - XDG_STATE_HOME
+    - MISE_CACHE_DIR
+    - UV_CACHE_DIR
+  applies_to:
+    - gh
+    - mise
+    - uv
+    - github
+    - coderabbit
+    - circleci
+    - snyk
+    - package_registry
+  repeated_failure_refinement: "After two repeated live-state, sandbox, approval, or user-correction failures, stop rotation, encode the learned fix in the closest durable contract, validate it, and only then resume."
 delegation:
   github: "Open PR discovery, mergeability, branch protection, review state, and final merge truth."
   git_project_triage: "Bounded rotation and PR risk triage."

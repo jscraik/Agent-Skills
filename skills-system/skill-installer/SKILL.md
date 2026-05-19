@@ -20,10 +20,12 @@ When running inside the Agent Skills Kit repository and `./bin/ask` exists, keep
 - Before installing, inventory existing skills with `./bin/ask skills list --advanced --json` and targeted searches across `Skills/**`, `Plugins/**/skills/**`, and `skills-system/**`.
 - Compare the candidate with likely local matches and choose one outcome: `install_new`, `blend_into_existing`, `keep_separate`, `reject_duplicate`, or `needs_human_choice`.
 - Install only after the overlap decision is explicit. Blend into an existing canonical skill when the external package mostly adds a missing procedure, helper, example, or stop rule.
+- Treat external skills as **External Skill Intake** source proposals, not installable packages. The repo command must return an **Intake Decision** at `data.intake_decision` before writing and must stop on `reject_duplicate` or `needs_human_choice`.
 - Default canonical destination: `Skills/github/<skill-name>` under the git source tree.
 - Use `--dest <Skills/category>` only for an explicit repo-owned category.
 - Do not write directly to `$CODEX_HOME/skills` unless the user explicitly asks for a runtime-only Codex install.
 - After canonical install, add or remediate local contract/eval/reference material before promotion, then run the relevant audit/sync/proof commands before claiming runtime visibility.
+- Run full release evals before adding a command handle, routing as canonical, blending into an existing skill, or making a **Release-Readiness Claim**. If the candidate is a **Manifest-Backed Candidate**, include Snyk dependency screening; pure `SKILL.md`-first candidates without supported manifests are `not_applicable` for Snyk.
 - Create a thin command handle only when direct invocation is justified; keep heavy references, contracts, and evals behind progressive disclosure.
 - Read `references/skill-factory/install-flows.md` when you need the local install flow, output wording, or destination rules.
 

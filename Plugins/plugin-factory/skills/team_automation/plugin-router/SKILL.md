@@ -105,3 +105,5 @@ Fail fast: stop at first failed gate and report blocker text.
 - `references/evals.yaml`
 - `references/task-profile.json`
 - `../../../../../Infrastructure/references/openai-style-plugin-design-contract.md`
+- `../../../../../Infrastructure/references/software-literature-expert-lens-pack.md`
+- `../../../../../Infrastructure/references/software-literature-skill-expertise-map.md`

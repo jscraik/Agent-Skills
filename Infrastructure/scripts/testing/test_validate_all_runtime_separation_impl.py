@@ -43,12 +43,12 @@ RUNTIME_SEPARATION_SLUGS = [
 def _run(*cmd: str, cwd: Path, env: dict | None = None) -> subprocess.CompletedProcess[str]:
     """
     Run a command as a subprocess, capturing stdout and stderr without raising on non-zero exit.
-    
+
     Parameters:
         *cmd (str): Command and arguments to execute.
         cwd (Path): Working directory to run the command in.
         env (dict | None): Optional environment variables to use for the subprocess.
-    
+
     Returns:
         subprocess.CompletedProcess[str]: Completed process with `stdout`, `stderr` and `returncode` populated.
     """
@@ -65,7 +65,7 @@ def _run(*cmd: str, cwd: Path, env: dict | None = None) -> subprocess.CompletedP
 def _make_executable(path: Path) -> None:
     """
     Make the file at `path` executable by adding user, group and others execute bits.
-    
+
     Parameters:
         path (Path): Path to the file whose permission bits will be updated.
     """
@@ -75,7 +75,7 @@ def _make_executable(path: Path) -> None:
 def _write(path: Path, content: str) -> None:
     """
     Ensure parent directories exist and write `content` to `path` after dedenting using UTF-8 encoding.
-    
+
     Parameters:
         path (Path): Filesystem path to write.
         content (str): Multiline string to dedent and write to the file.
@@ -112,9 +112,9 @@ def _make_python_stub(path: Path, *, exit_code: int = 0) -> None:
 def _make_bash_stub(path: Path, *, exit_code: int = 0) -> None:
     """
     Create an executable bash stub script that records its invocation arguments and exits with a controllable code.
-    
+
     The created stub, when run, writes its argv (one per line) to a file named "<stub basename without .sh>.recorded_args.txt" adjacent to the stub. If a companion "<stub basename without .sh>.exit_code" file exists, the stub exits with the integer contained in that file; otherwise it exits with the provided `exit_code`.
-    
+
     Parameters:
         path (Path): Filesystem path where the bash stub will be written (typically ends with `.sh`).
         exit_code (int): Default exit code the stub will use when no companion `.exit_code` file is present.
@@ -137,9 +137,9 @@ def _make_bash_stub(path: Path, *, exit_code: int = 0) -> None:
 def _make_recording_python_dispatcher(path: Path) -> None:
     """
     Create an executable Python dispatcher at the given path that records invoked script arguments.
-    
+
     When invoked as PYTHON_BIN Infrastructure/scripts/foo.py <args> the dispatcher writes the full argv list to Infrastructure/scripts/foo.py.recorded_args.json and, if Infrastructure/scripts/foo.py.exit_code exists, exits with the integer value read from that file; otherwise it exits with code 0.
-    
+
     Parameters:
         path (Path): Filesystem path where the dispatcher script will be written and made executable.
     """
@@ -168,7 +168,7 @@ def _make_recording_python_dispatcher(path: Path) -> None:
 def _extract_run_dir(stdout: str) -> Path | None:
     """
     Extract the run directory path reported by validate_all.sh from its stdout.
-    
+
     Returns:
         Path: The captured run directory path if a line like "Validation logs: <path>" is present, `None` otherwise.
     """
@@ -182,12 +182,12 @@ def _extract_run_dir(stdout: str) -> Path | None:
 def _parse_check_results_tsv(tsv_path: Path) -> list[dict[str, str]]:
     """
     Parse a TSV file of validation check results into structured rows.
-    
+
     Only lines with exactly four tab-separated fields are converted; each produced dict contains the keys:
     `slug`, `mode`, `outcome`, and `log_file`.
-    
+
     Returns:
-    	list[dict[str, str]]: Parsed rows where each dict maps `slug`, `mode`, `outcome` and `log_file` to their string values.
+        list[dict[str, str]]: Parsed rows where each dict maps `slug`, `mode`, `outcome` and `log_file` to their string values.
     """
     rows = []
     for line in tsv_path.read_text(encoding="utf-8").splitlines():
@@ -249,9 +249,9 @@ class FakeRepo:
     def __init__(self, root: Path) -> None:
         """
         Initialise the FakeRepo at the given filesystem root.
-        
+
         Prepare the instance by recording the repository root, setting the path for the Python dispatcher, clearing any previous run directory metadata and building the fake repository layout (including recording stubs and required governance files).
-        
+
         Parameters:
             root (Path): Filesystem path that will serve as the fake repository root.
         """
@@ -312,13 +312,13 @@ class FakeRepo:
     def run(self, *extra_args: str) -> subprocess.CompletedProcess[str]:
         """
         Run the repository's Infrastructure/scripts/validate_all.sh inside the fake repo and record its run directory.
-        
+
         Parameters:
             *extra_args (str): Additional command-line arguments forwarded to validate_all.sh.
-        
+
         Returns:
             proc (subprocess.CompletedProcess[str]): The completed subprocess result for the validate_all.sh invocation.
-        
+
         Side effects:
             Updates self._last_run_dir with the path reported by validate_all.sh (if present in stdout).
         """
@@ -334,10 +334,10 @@ class FakeRepo:
     def set_script_exit_code(self, script_rel: str, code: int) -> None:
         """
         Create a companion `.exit_code` file so the next invocation of the stub for `script_rel` exits with `code`.
-        
+
         Parameters:
-        	script_rel (str): Path to the stub relative to the fake repo root (e.g. `Infrastructure/scripts/foo.py` or `Infrastructure/scripts/foo.sh`). The function writes the `.exit_code` file using the stub's convention so the next run of that stub will exit with the given code.
-        	code (int): Exit code to write into the companion `.exit_code` file.
+            script_rel (str): Path to the stub relative to the fake repo root (e.g. `Infrastructure/scripts/foo.py` or `Infrastructure/scripts/foo.sh`). The function writes the `.exit_code` file using the stub's convention so the next run of that stub will exit with the given code.
+            code (int): Exit code to write into the companion `.exit_code` file.
         """
         p = self.root / script_rel
         if script_rel.endswith(".sh"):
@@ -353,9 +353,9 @@ class FakeRepo:
     def check_results(self) -> list[dict[str, str]]:
         """
         Provide parsed rows from the most recent check-results.tsv.
-        
+
         Prefers the file located in the stored last run directory; if that file is absent it searches the repository tree for the first matching `check-results.tsv`. Returns an empty list when no TSV is found.
-        
+
         Returns:
             list[dict[str, str]]: A list of parsed TSV rows. Each dict contains the keys `slug`, `mode`, `outcome`, and `log_file`.
         """
@@ -369,7 +369,7 @@ class FakeRepo:
     def recorded_args_for(self, script_name: str) -> list[str] | None:
         """
         Retrieve the argv list that the Python stub recorded for the given script.
-        
+
         Returns:
             list[str]: Recorded argv entries if a recording exists for `script_name`.
             None: If no recording file is present.
@@ -383,10 +383,10 @@ class FakeRepo:
     def recorded_bash_args_for(self, script_name: str) -> list[str] | None:
         """
         Retrieve the recorded argv lines for a bash stub in the fake repository.
-        
+
         Parameters:
             script_name (str): Path to the bash stub relative to the fake repo root.
-        
+
         Returns:
             list[str] | None: List of recorded argument lines from `<script>.recorded_args.txt`, or `None` if the recording file is absent.
         """
@@ -430,7 +430,7 @@ class RuntimeSeparationCurrentPathTests(unittest.TestCase):
     def test_ephemeral_mode_uses_run_dir_path(self) -> None:
         """
         Verify that in ephemeral mode the runtime-separation current output is written inside the temporary run directory rather than the GOVERNANCE path.
-        
+
         Checks that build_runtime_separation_current.py was invoked and that its `--output` argument ends with `runtime-separation-current.json` and does not contain `GOVERNANCE`.
         """
         with TemporaryDirectory() as tmpdir:
@@ -469,7 +469,7 @@ class RuntimeSeparationCurrentPathTests(unittest.TestCase):
     def test_ephemeral_and_persistent_current_paths_differ(self) -> None:
         """
         Assert that runtime-separation current output paths differ between ephemeral and persistent modes.
-        
+
         Creates two isolated FakeRepo instances, runs the validation in `--ephemeral` and `--persistent` modes, and compares the `--output` argument passed to `Infrastructure/scripts/runtime-separation/build_runtime_separation_current.py`, expecting the paths to be different.
         """
         with TemporaryDirectory() as tmp1, TemporaryDirectory() as tmp2:
@@ -566,10 +566,10 @@ class RuntimeSeparationCheckResultsTests(unittest.TestCase):
     def _run_persistent(self, tmpdir: str) -> tuple[FakeRepo, list[dict[str, str]]]:
         """
         Create a FakeRepo rooted at tmpdir, run validate_all.sh in persistent mode, and return the fake repository and parsed check-results rows.
-        
+
         Parameters:
             tmpdir (str): Path to a temporary directory used as the fake repository root.
-        
+
         Returns:
             tuple[FakeRepo, list[dict[str, str]]]: The constructed FakeRepo and the list of parsed rows from its check-results.tsv.
         """
@@ -634,7 +634,7 @@ class RuntimeSeparationCheckResultsTests(unittest.TestCase):
     def test_runtime_separation_checks_precede_selection_gate_severity(self) -> None:
         """
         Assert that every runtime-separation check appears before `selection-gate-severity` in the parsed `check-results.tsv`.
-        
+
         Runs a persistent validation, parses the TSV rows, and verifies the ordering of the runtime-separation slugs relative to `selection-gate-severity`.
         """
         with TemporaryDirectory() as tmpdir:
@@ -681,7 +681,7 @@ class RuntimeSeparationFailurePropagationTests(unittest.TestCase):
     def test_manifest_failure_causes_exit_1(self) -> None:
         """
         Ensure validate_all.sh exits with code 1 when the runtime-separation-manifest check fails.
-        
+
         Creates a FakeRepo, configures the manifest check stub to exit 1, runs validate_all.sh in ephemeral mode and asserts the overall process return code equals 1.
         """
         with TemporaryDirectory() as tmpdir:
@@ -697,7 +697,7 @@ class RuntimeSeparationFailurePropagationTests(unittest.TestCase):
     def test_consumers_failure_causes_exit_1(self) -> None:
         """
         Verify that a non-zero exit from the runtime-separation consumers check causes validate_all.sh to exit with code 1.
-        
+
         Sets the consumers stub to exit 1, runs validate_all.sh in ephemeral mode, and asserts the overall process exit code is 1.
         """
         with TemporaryDirectory() as tmpdir:
@@ -709,7 +709,7 @@ class RuntimeSeparationFailurePropagationTests(unittest.TestCase):
     def test_reader_compat_failure_causes_exit_1(self) -> None:
         """
         Ensure validate_all.sh exits with code 1 when the runtime-separation reader-compat check fails.
-        
+
         Sets the reader-compat stub to exit with code 1 and asserts the overall validation run returns exit code 1.
         """
         with TemporaryDirectory() as tmpdir:
@@ -800,7 +800,7 @@ class RuntimeSeparationSpecificArgTests(unittest.TestCase):
     def test_reader_compat_receives_schema_prev_arg(self) -> None:
         """
         Ensure verify_runtime_separation_reader_compat.py is invoked with --schema-prev referencing schema-prev.yaml.
-        
+
         Runs validate_all.sh in ephemeral mode and asserts the recorded argv for the reader-compat script contains the `--schema-prev` flag and that its following value includes 'schema-prev.yaml'.
         """
         with TemporaryDirectory() as tmpdir:
@@ -874,7 +874,7 @@ class RuntimeSeparationSpecificArgTests(unittest.TestCase):
     def test_baseline_compare_receives_current_arg(self) -> None:
         """
         Verify compare_runtime_separation_baseline.py is invoked with --current pointing to a runtime-separation-current.json path.
-        
+
         Runs validate_all.sh in ephemeral mode and asserts the recorded argv for
         Infrastructure/scripts/runtime-separation/compare_runtime_separation_baseline.py contains `--current` followed by
         a value that ends with `runtime-separation-current.json`.
@@ -904,7 +904,7 @@ class RuntimeSeparationSpecificArgTests(unittest.TestCase):
     def test_baseline_compare_current_path_matches_build_output_path(self) -> None:
         """
         Assert that compare_runtime_separation_baseline's `--current` argument equals build_runtime_separation_current's `--output`.
-        
+
         Runs validate_all.sh in an ephemeral fake repository and compares the paths forwarded to the two scripts to ensure they reference the same runtime-separation current artefact.
         """
         with TemporaryDirectory() as tmpdir:
@@ -966,7 +966,7 @@ class RuntimeSeparationProfileHomePathTests(unittest.TestCase):
     def test_profile_home_output_in_run_dir_ephemeral(self) -> None:
         """
         Ensure the profile-home output file is placed in the ephemeral run directory.
-        
+
         Runs validate_all.sh with --ephemeral and asserts that the --output argument passed to
         Infrastructure/scripts/runtime-separation/validate_runtime_separation_profile_home.sh ends with "runtime-separation-profile-home.json"
         and does not reference the repository's GOVERNANCE path.
@@ -1013,7 +1013,7 @@ class RuntimeSeparationOverallExitCodeTests(unittest.TestCase):
     def test_exit_0_when_all_runtime_separation_checks_pass(self) -> None:
         """
         Verify validate_all.sh exits with status 0 when every runtime-separation check succeeds.
-        
+
         Runs validate_all.sh in an isolated fake repository with all runtime-separation scripts replaced by passing stubs (ephemeral mode) and asserts the process return code is 0.
         """
         with TemporaryDirectory() as tmpdir:
@@ -1060,7 +1060,7 @@ class RuntimeSeparationOverallExitCodeTests(unittest.TestCase):
     def test_exit_1_when_build_current_fails(self) -> None:
         """
         Ensure validate_all.sh exits with code 1 when the runtime-separation current build step fails.
-        
+
         Sets the build_runtime_separation_current.py stub to exit with code 1, runs validate_all.sh in ephemeral mode, and asserts the process return code is 1.
         """
         with TemporaryDirectory() as tmpdir:

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Docs Expert"
+  short_description: "$docs-expert - Docs Expert entrypoint"
+  default_prompt: "$docs-expert "
+
+policy:
+  allow_implicit_invocation: false

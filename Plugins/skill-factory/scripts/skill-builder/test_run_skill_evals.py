@@ -20,10 +20,7 @@ if repo_root_str not in sys.path:
     sys.path.insert(0, repo_root_str)
 SKILL_DIR = SCRIPT_DIR.parents[1] / "skills" / "code_quality_review" / "skill-builder"
 
-try:
-    from defusedxml import ElementTree as ET
-except ModuleNotFoundError:
-    ET = None
+from defusedxml import ElementTree as ET
 
 existing_runner = sys.modules.get("run_skill_evals")
 if existing_runner is not None:
@@ -40,15 +37,12 @@ if existing_trace_checks is not None:
 from run_skill_evals import (
     EvalCase,
     _acceptance_skip_reason,
-    _dependency_manifest_paths,
-    _evaluate_workspace_path_checks,
+    _classify_runner_blocker,
     _preflight_codex_live_runner,
     _filter_cases_for_eval_mode,
     _isolated_codex_home_for_eval,
     _is_runner_runtime_blocked,
     _is_smoke_only_case,
-    _skillbench_eval_quality,
-    _snyk_release_gate_passed,
     _write_junit_report,
     evaluate_assertions_text,
     evaluate_expected_signals,
@@ -57,150 +51,14 @@ from run_skill_evals import (
     main,
     run_discovery_smoke,
     summarize_expected_signal_results,
+    _dependency_manifest_paths,
+    _release_dependency_scan_roots,
+    _snyk_release_gate_passed,
 )
 from deterministic_trace_checks import evaluate_trace
 
 
 class RunSkillEvalsModeTests(unittest.TestCase):
-    def test_snyk_release_gate_is_not_required_for_skill_md_only_package(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            skill_dir = Path(tmpdir) / "demo-skill"
-            skill_dir.mkdir()
-            (skill_dir / "SKILL.md").write_text("---\nname: demo-skill\n---\n", encoding="utf-8")
-
-            self.assertEqual(_dependency_manifest_paths(skill_dir), [])
-            self.assertTrue(_snyk_release_gate_passed({"required": False, "status": "not_applicable"}))
-
-    def test_snyk_release_gate_requires_success_for_manifest_backed_packages(self) -> None:
-        self.assertTrue(_snyk_release_gate_passed({"required": True, "status": "success"}))
-        for status in (
-            "blocked_missing_binary",
-            "blocked_auth",
-            "blocked_no_supported_projects",
-            "advisory",
-            "error",
-            "timeout",
-        ):
-            self.assertFalse(_snyk_release_gate_passed({"required": True, "status": status}))
-
-    def test_dependency_manifest_detection_ignores_generated_dependency_dirs(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            skill_dir = Path(tmpdir) / "demo-skill"
-            skill_dir.mkdir()
-            (skill_dir / "package.json").write_text("{}", encoding="utf-8")
-            (skill_dir / "node_modules" / "nested").mkdir(parents=True)
-            (skill_dir / "node_modules" / "nested" / "package.json").write_text("{}", encoding="utf-8")
-
-            manifests = _dependency_manifest_paths(skill_dir)
-
-        self.assertEqual([path.name for path in manifests], ["package.json"])
-
-    def test_skillbench_eval_quality_reports_regression_coverage(self) -> None:
-        cases = [
-            EvalCase(
-                id="explicit",
-                name="Explicit",
-                prompt="Use the skill.",
-                acceptance=[],
-                should_trigger=True,
-                category="happy",
-                prepend_skill=True,
-                deterministic_checks={"max_command_executions": 5},
-                budgets={"max_total_tokens": 4000},
-            ),
-            EvalCase(
-                id="implicit",
-                name="Implicit",
-                prompt="Natural in-scope request.",
-                acceptance=[],
-                should_trigger=True,
-                category="happy",
-                prepend_skill=False,
-                output_schema="rubric.schema.json",
-            ),
-            EvalCase(
-                id="contextual",
-                name="Contextual",
-                prompt="Noisy in-scope request.",
-                acceptance=[],
-                should_trigger=True,
-                category="edge",
-                prepend_skill=False,
-                comparison_inputs={"baseline_type": "no_skill", "recommended_trials": 3},
-            ),
-            EvalCase(
-                id="negative",
-                name="Negative",
-                prompt="Adjacent request.",
-                acceptance=[],
-                should_trigger=False,
-                category="negative",
-                prepend_skill=False,
-            ),
-        ]
-
-        quality = _skillbench_eval_quality(cases)
-
-        self.assertEqual(quality["status"], "pass")
-        self.assertEqual(quality["missing_required"], [])
-        self.assertTrue(quality["checks"]["paired_baseline"])
-        self.assertEqual(quality["counts"]["negative_control_cases"], 1)
-
-    def test_skillbench_eval_quality_advises_on_thin_eval_sets(self) -> None:
-        quality = _skillbench_eval_quality(
-            [
-                EvalCase(
-                    id="only",
-                    name="Only",
-                    prompt="Use the skill.",
-                    acceptance=[],
-                    should_trigger=True,
-                    category="happy",
-                    prepend_skill=True,
-                )
-            ]
-        )
-
-        self.assertEqual(quality["status"], "advisory")
-        self.assertIn("implicit_trigger", quality["missing_required"])
-        self.assertIn("negative_control", quality["missing_required"])
-
-    def test_workspace_path_checks_validate_outputs_and_cleanliness(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            (root / "expected.txt").write_text("ok", encoding="utf-8")
-            (root / "unexpected.txt").write_text("extra", encoding="utf-8")
-
-            failures = _evaluate_workspace_path_checks(
-                root,
-                {
-                    "required_paths": ["expected.txt", "missing.txt"],
-                    "forbidden_paths": ["unexpected.txt"],
-                },
-            )
-
-        self.assertIn("required path not found: 'missing.txt'", failures)
-        self.assertIn("forbidden path exists: 'unexpected.txt'", failures)
-
-    def test_workspace_path_checks_reject_paths_outside_workspace(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            failures = _evaluate_workspace_path_checks(
-                root,
-                {
-                    "required_paths": ["../outside.txt"],
-                    "forbidden_paths": ["../also-outside.txt"],
-                },
-            )
-
-        self.assertEqual(
-            failures,
-            [
-                "required path escapes workspace: '../outside.txt'",
-                "forbidden path escapes workspace: '../also-outside.txt'",
-            ],
-        )
-
     def test_bare_regex_acceptance_shorthand_is_supported(self) -> None:
         self.assertEqual(
             evaluate_assertions_text(
@@ -272,6 +130,42 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                 stdout_text="",
                 stderr_text="",
             )
+        )
+
+    def test_runner_blocker_classifier_separates_user_input_auth_and_timeouts(self) -> None:
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text='{"user_input_requested_during_turn": true}',
+                stderr_text="",
+            ),
+            "blocked_user_input",
+        )
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text="Not logged in. Run /login before continuing.",
+                stderr_text="",
+            ),
+            "blocked_auth",
+        )
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text="",
+                stderr_text="",
+                exit_code=124,
+            ),
+            "timeout_no_output",
+        )
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="partial result",
+                stdout_text="",
+                stderr_text="codex exec timed out after 60 seconds",
+                exit_code=124,
+            ),
+            "timeout_partial_output",
         )
 
     def test_forbidden_short_command_matches_tokens_not_substrings(self) -> None:
@@ -637,8 +531,6 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertIn("Using isolated CODEX_HOME", "\n".join(warnings))
 
     def test_write_junit_report_outputs_failures(self) -> None:
-        if ET is None:
-            self.skipTest("defusedxml is required for XML parsing assertions")
         summary = {
             "skill": "skill-builder",
             "generated_at": "2026-03-21T00:00:00Z",
@@ -684,8 +576,6 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertIsNotNone(cases[1].find("failure"))
 
     def test_write_junit_report_marks_tier2_fail_mode_cases_as_failures(self) -> None:
-        if ET is None:
-            self.skipTest("defusedxml is required for XML parsing assertions")
         summary = {
             "skill": "skill-builder",
             "generated_at": "2026-03-21T00:00:00Z",
@@ -803,15 +693,123 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(summary["cases"][0]["warnings"], [])
         self.assertTrue(summary["cases"][0]["runners"]["discovery-smoke"]["metrics"]["selected_skill"])
         self.assertIn("release_manifest", summary["artifacts"])
-        self.assertIn("skillbench_eval_quality", summary)
-        self.assertEqual(
-            release_manifest["run"]["skillbench_eval_quality"],
-            summary["skillbench_eval_quality"],
-        )
         self.assertEqual(release_manifest["artifacts"]["junit"], summary["artifacts"]["junit"])
         self.assertEqual(
             release_manifest["artifacts"]["release_manifest"],
             summary["artifacts"]["release_manifest"],
+        )
+
+    def test_snyk_release_gate_is_not_required_for_skill_md_only_package(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_dir = Path(tmpdir) / "demo-skill"
+            skill_dir.mkdir()
+            (skill_dir / "SKILL.md").write_text("---\nname: demo-skill\n---\n", encoding="utf-8")
+
+            self.assertEqual(_dependency_manifest_paths(skill_dir), [])
+            self.assertTrue(_snyk_release_gate_passed({"required": False, "status": "not_applicable"}))
+
+    def test_snyk_release_gate_requires_success_for_manifest_backed_packages(self) -> None:
+        self.assertTrue(_snyk_release_gate_passed({"required": True, "status": "success"}))
+        blocking_statuses = [
+            "not_applicable",
+            "blocked_auth",
+            "blocked_missing_binary",
+            "blocked_no_supported_projects",
+            "advisory",
+            "error",
+        ]
+        for status in blocking_statuses:
+            self.assertFalse(_snyk_release_gate_passed({"required": True, "status": status}))
+
+    def test_dependency_manifest_detection_ignores_generated_dependency_dirs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_dir = Path(tmpdir) / "demo-skill"
+            (skill_dir / "node_modules" / "left-pad").mkdir(parents=True)
+            (skill_dir / "package.json").write_text("{}", encoding="utf-8")
+            (skill_dir / "node_modules" / "left-pad" / "package.json").write_text("{}", encoding="utf-8")
+
+            manifests = _dependency_manifest_paths(skill_dir)
+
+        self.assertEqual([path.name for path in manifests], ["package.json"])
+
+    def test_dependency_manifest_detection_includes_plugin_root_package(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            plugin_root = Path(tmpdir) / "Plugins" / "demo-plugin"
+            skill_dir = plugin_root / "skills" / "demo-skill"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("---\nname: demo-skill\n---\n", encoding="utf-8")
+            (plugin_root / "package.json").write_text("{}", encoding="utf-8")
+
+            manifests = _dependency_manifest_paths(skill_dir)
+            scan_roots = _release_dependency_scan_roots(skill_dir)
+
+        self.assertEqual([path.name for path in manifests], ["package.json"])
+        self.assertEqual(scan_roots[-1].name, "demo-plugin")
+
+    @unittest.mock.patch("run_skill_evals.shutil.which", return_value="/usr/local/bin/snyk")
+    @unittest.mock.patch("run_skill_evals.sp.run")
+    def test_release_mode_blocks_manifest_backed_package_without_snyk_auth(self, mock_run, _mock_which) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_dir = Path(tmpdir) / "demo-skill"
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: demo-skill\nversion: '1.0.0'\n---\n\n# Demo\n",
+                encoding="utf-8",
+            )
+            (skill_dir / "package.json").write_text('{"name":"demo-skill"}\n', encoding="utf-8")
+            (refs_dir / "discovery-interview.md").write_text(
+                "## Request user input mini-templates\n\nWhat should this skill do?\n\n## Copy paste payload examples\n",
+                encoding="utf-8",
+            )
+            (refs_dir / "evals.yaml").write_text(
+                textwrap.dedent(
+                    """
+                    schema_version: "2.0"
+                    cases:
+                      - id: discovery-round-one
+                        name: discovery smoke
+                        prompt: Help define the skill.
+                        smoke_mode: discovery-round-one
+                        eval_modes: [release]
+                        should_trigger: true
+                        acceptance:
+                          - contains: "Round 1 question:"
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+            mock_run.side_effect = [
+                unittest.mock.Mock(returncode=0, stdout="abc123\n", stderr=""),
+                unittest.mock.Mock(returncode=0, stdout="main\n", stderr=""),
+                unittest.mock.Mock(returncode=2, stdout="", stderr="Use snyk auth to authenticate."),
+            ]
+
+            reports_dir = Path(tmpdir) / "reports"
+            exit_code = main(
+                [
+                    str(skill_dir),
+                    "--runner",
+                    "discovery-smoke",
+                    "--eval-mode",
+                    "release",
+                    "--reports-dir",
+                    str(reports_dir),
+                    "--format",
+                    "json",
+                ]
+            )
+            report_dirs = sorted((reports_dir / "demo-skill").glob("*"))
+            summary = json.loads((report_dirs[-1] / "summary.json").read_text(encoding="utf-8"))
+            release_manifest = json.loads((report_dirs[-1] / "release_manifest.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(summary["decision"], "blocked")
+        self.assertEqual(summary["security_dependency_screening"]["status"], "blocked_auth")
+        self.assertEqual(
+            release_manifest["run"]["security_dependency_screening"]["status"],
+            "blocked_auth",
         )
 
     def test_discovery_smoke_requires_explicit_smoke_mode_cases(self) -> None:

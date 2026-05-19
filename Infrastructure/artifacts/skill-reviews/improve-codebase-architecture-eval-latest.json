@@ -3,13 +3,12 @@
     "ask_audit": {
       "data": {
         "openclaw": {
-          "reason": "eval_only_mode_skips_openclaw",
           "status": "not_run",
-          "stdout": "OpenClaw scan not run in eval-only mode."
+          "stdout": "Summary: 0 critical \u00b7 0 warn"
         }
       }
     },
-    "generated_at": "2026-05-16T18:01:25Z",
+    "generated_at": "2026-05-15T23:36:28Z",
     "plugin_eval": {
       "stdout": "Score: 0/100\nGrade: not run\nRisk: not run\nChecks: not run"
     },
@@ -20,5 +19,5 @@
     }
   },
   "errors": [],
-  "status": "not_run"
+  "status": "success"
 }

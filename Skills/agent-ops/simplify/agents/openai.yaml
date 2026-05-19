@@ -1,0 +1,7 @@
+interface:
+  display_name: "Simplify"
+  short_description: "$simplify - Simplify entrypoint"
+  default_prompt: "$simplify "
+
+policy:
+  allow_implicit_invocation: false

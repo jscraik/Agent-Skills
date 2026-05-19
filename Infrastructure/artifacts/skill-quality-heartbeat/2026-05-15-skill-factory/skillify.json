@@ -13,7 +13,7 @@
     },
     "plugin_eval": {
       "command": [
-        "plugin-eval",
+        "/Users/jamiecraik/.local/bin/plugin-eval",
         "analyze",
         "Plugins/skill-factory/skills/scaffolding_templates/skillify",
         "--format",
@@ -35,7 +35,7 @@
     "target": "Plugins/skill-factory/skills/scaffolding_templates/skillify",
     "tessl_lint": {
       "command": [
-        "tessl",
+        "/Users/jamiecraik/.local/bin/tessl",
         "skill",
         "lint",
         "/tmp/agent-skills-tessl-5b3cmig_/tile.json"
@@ -47,7 +47,7 @@
     },
     "tessl_review": {
       "command": [
-        "tessl",
+        "/Users/jamiecraik/.local/bin/tessl",
         "skill",
         "review",
         "/tmp/agent-skills-tessl-5b3cmig_/skills/skillify"

@@ -17,6 +17,20 @@ description: >
 4. Evaluate generation separately: faithfulness (grounded in context?) and relevance (answers the query?).
 5. If retrieval is the bottleneck, optimize chunking via grid search before tuning generation.
 
+## Codex Skill Eval Lens
+
+Use this workflow for skills that depend on retrieved docs, memories, search indexes, or knowledge packs. Evaluate the retrieval layer separately from the final answer.
+
+For skill-backed RAG, check:
+
+- whether the router selected the right skill or reference bundle
+- whether the retrieved docs include the canonical source rather than a generated mirror or stale cache
+- whether the answer cites or follows the retrieved source faithfully
+- whether missing retrieval is reported as a blocker instead of hidden by model confidence
+- whether negative controls avoid retrieving an adjacent but wrong skill
+
+Prioritize Recall@k for canonical instruction retrieval: a model can ignore extra context, but it cannot follow a missing AGENTS, SKILL, contract, or workflow file.
+
 ## Prerequisites
 
 Complete error analysis on RAG pipeline traces before selecting metrics. Inspect what was retrieved vs. what the model needed. Determine whether the problem is retrieval, generation, or both. Fix retrieval first.
@@ -167,6 +181,17 @@ TwoHopRecall@k = (1/N) * sum(1 if {Chunk1, Chunk2} ⊆ top_k_results)
 ```
 
 Diagnose failures by classifying: hop 1 miss, hop 2 miss, or rank-out-of-top-k.
+
+## Report Format
+
+Return:
+
+- retrieval dataset source and sampling method
+- retrieval metrics by query class, including Recall@k or MRR where appropriate
+- generation metrics separated into faithfulness and answer relevance
+- concrete failure categories from trace review
+- recommended next experiment, with the smallest local validation command or artifact check
+- open gaps, including missing ground truth, synthetic-only coverage, or unvalidated judges
 
 ## Anti-Patterns
 

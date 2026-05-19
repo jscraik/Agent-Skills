@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import os
+import subprocess
 import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-SKILL_DIR = SCRIPT_DIR.parent
-FAMILY_SKILLS_DIR = SCRIPT_DIR.parents[1]
+PLUGIN_ROOT = SCRIPT_DIR.parents[1]
+FAMILY_SKILLS_DIR = PLUGIN_ROOT / "skills"
 if str(FAMILY_SKILLS_DIR) not in sys.path:
     sys.path.insert(0, str(FAMILY_SKILLS_DIR))
 
@@ -22,13 +24,27 @@ from _template_utils import (
     render_from_path,
     unified_diff_lines,
 )
-from render_reference_templates import (
-    TEMPLATE_TARGETS,
-    build_context,
-)
+REPO_ROOT = SCRIPT_DIR.parents[3]
+REPO_SCRIPTS_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"
+REF_DIR = PLUGIN_ROOT / "references" / "skill-builder"
+DEFAULT_CONTEXT: dict[str, str] = {
+    "SKILL_NAME": "SKILL_NAME",
+}
+TEMPLATE_TARGETS: dict[str, tuple[Path, Path]] = {
+    "contract": (REF_DIR / "contract.template.yaml.tmpl", REF_DIR / "contract.template.yaml"),
+    "evals": (REF_DIR / "evals.template.yaml.tmpl", REF_DIR / "evals.template.yaml"),
+}
 
-REPO_ROOT = SCRIPT_DIR.parents[4]
-REPO_SCRIPTS_DIR = REPO_ROOT / "scripts"
+
+def build_context(*, use_defaults: bool, json_context: dict[str, str], cli_context: dict[str, str]) -> dict[str, str]:
+    from _template_utils import build_context as build_context_with_defaults
+
+    return build_context_with_defaults(
+        default_context=DEFAULT_CONTEXT,
+        use_defaults=use_defaults,
+        json_context=json_context,
+        cli_context=cli_context,
+    )
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -99,19 +115,16 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if args.update:
-        if str(REPO_SCRIPTS_DIR) not in sys.path:
-            sys.path.insert(0, str(REPO_SCRIPTS_DIR))
-        try:
-            from validate_skill_authoring_family_benchmarks import (  # noqa: WPS433
-                main as validate_skill_authoring_family_benchmarks_main,
-            )
-        except ModuleNotFoundError as exc:
-            raise TemplateRenderError(
-                "Could not import validate_skill_authoring_family_benchmarks from "
-                f"{REPO_SCRIPTS_DIR}. Check REPO_ROOT path wiring."
-            ) from exc
-
-        benchmark_exit_code = validate_skill_authoring_family_benchmarks_main(["--format", "text"])
+        benchmark_script = REPO_SCRIPTS_DIR / "validate_skill_authoring_family_benchmarks.py"
+        env = dict(os.environ)
+        env.setdefault("UV_CACHE_DIR", "/private/tmp/agent-skills-uv-cache")
+        benchmark = subprocess.run(
+            [sys.executable, str(benchmark_script), "--format", "text"],
+            cwd=str(REPO_ROOT),
+            env=env,
+            text=True,
+        )
+        benchmark_exit_code = benchmark.returncode
         if benchmark_exit_code != 0:
             print(
                 "[ERROR] Updated baselines but family benchmark validation failed. "

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Project Brain"
+  short_description: "$project-brain - Project Brain entrypoint"
+  default_prompt: "$project-brain "
+
+policy:
+  allow_implicit_invocation: false

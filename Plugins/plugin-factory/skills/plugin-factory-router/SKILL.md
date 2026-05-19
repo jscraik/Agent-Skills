@@ -125,3 +125,6 @@ deterministically.
   `Infrastructure/references/agent-native-skill-contract.md`
 - Runtime route notes:
   `references/current-codex-plugin-runtime.md`
+- Software-literature plugin boundary lenses:
+  `Infrastructure/references/software-literature-expert-lens-pack.md`,
+  `Infrastructure/references/software-literature-skill-expertise-map.md`

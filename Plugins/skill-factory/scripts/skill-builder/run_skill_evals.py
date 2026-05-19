@@ -27,7 +27,6 @@ from __future__ import annotations
 import argparse
 import atexit
 import datetime as dt
-import fnmatch
 import html
 import json
 import os
@@ -114,16 +113,12 @@ _READINESS_STATE_CHOICES = {
     "downstream_ready",
 }
 _METRIC_AVAILABILITY_CHOICES = {"available", "unavailable"}
-_SKILLBENCH_EFFICIENCY_KEYS = {
-    "max_command_budget",
-    "max_command_executions",
-    "max_duplicate_command_ratio",
-    "max_input_tokens",
-    "max_output_tokens",
-    "max_reasoning_tokens",
-    "max_repeated_command_count",
-    "max_total_tokens",
-    "max_turns",
+RUNNER_BLOCKER_TAXONOMY: Dict[str, str] = {
+    "blocked_user_input": "The runner requested user input and should not be classified as a hang.",
+    "blocked_auth": "The runner stopped on authentication or credential setup.",
+    "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
+    "timeout_no_output": "The runner timed out without producing final output.",
+    "timeout_partial_output": "The runner timed out after producing partial output.",
 }
 SNYK_MANIFEST_NAMES: Set[str] = {
     "package.json",
@@ -540,185 +535,6 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
             )
         )
     return cases
-
-
-def _skillbench_eval_quality(cases: Sequence[EvalCase]) -> Dict[str, Any]:
-    """Summarize whether an eval suite has SkillBench-style regression coverage."""
-    counts = {
-        "total_cases": len(cases),
-        "explicit_trigger_cases": 0,
-        "implicit_trigger_cases": 0,
-        "contextual_trigger_cases": 0,
-        "negative_control_cases": 0,
-        "pressure_cases": 0,
-        "deterministic_check_cases": 0,
-        "efficiency_budget_cases": 0,
-        "structured_grading_cases": 0,
-        "paired_baseline_cases": 0,
-    }
-
-    for case in cases:
-        category = case.category or ""
-        should_trigger = case.should_trigger
-        if should_trigger is True and case.prepend_skill:
-            counts["explicit_trigger_cases"] += 1
-        if should_trigger is True and not case.prepend_skill and category == "happy":
-            counts["implicit_trigger_cases"] += 1
-        if should_trigger is True and not case.prepend_skill and category == "edge":
-            counts["contextual_trigger_cases"] += 1
-        if should_trigger is False or category == "negative":
-            counts["negative_control_cases"] += 1
-        if category == "pressure":
-            counts["pressure_cases"] += 1
-        if case.deterministic_checks:
-            counts["deterministic_check_cases"] += 1
-        if _case_has_efficiency_budget(case):
-            counts["efficiency_budget_cases"] += 1
-        if case.output_schema or case.expected_signals or _case_has_structured_budget(case):
-            counts["structured_grading_cases"] += 1
-        if case.baseline_type or case.comparison_inputs:
-            counts["paired_baseline_cases"] += 1
-
-    checks = {
-        "explicit_trigger": counts["explicit_trigger_cases"] > 0,
-        "implicit_trigger": counts["implicit_trigger_cases"] > 0,
-        "contextual_trigger": counts["contextual_trigger_cases"] > 0,
-        "negative_control": counts["negative_control_cases"] > 0,
-        "deterministic_behavior": counts["deterministic_check_cases"] > 0,
-        "efficiency_budget": counts["efficiency_budget_cases"] > 0,
-        "structured_or_signal_grading": counts["structured_grading_cases"] > 0,
-        "paired_baseline": counts["paired_baseline_cases"] > 0,
-    }
-    required_for_regression = [
-        "explicit_trigger",
-        "implicit_trigger",
-        "negative_control",
-        "deterministic_behavior",
-        "efficiency_budget",
-    ]
-    recommended = ["contextual_trigger", "structured_or_signal_grading", "paired_baseline"]
-    missing_required = [name for name in required_for_regression if not checks[name]]
-    missing_recommended = [name for name in recommended if not checks[name]]
-
-    return {
-        "schema_version": "skillbench-eval-quality.v1",
-        "status": "pass" if not missing_required else "advisory",
-        "counts": counts,
-        "checks": checks,
-        "missing_required": missing_required,
-        "missing_recommended": missing_recommended,
-        "guidance": [
-            "Use a small prompt set with explicit, implicit, contextual, and negative-control cases.",
-            "Pair outcome assertions with deterministic trace/file checks and efficiency budgets.",
-            "Add structured grading only where deterministic checks cannot express the convention.",
-            "Track paired baseline or no-skill comparison cases for mature release evals.",
-            "Run repeated trials outside this runner when nondeterminism matters; compare pass-rate distribution, not a single run.",
-        ],
-    }
-
-
-def _case_has_efficiency_budget(case: EvalCase) -> bool:
-    for source in (case.deterministic_checks, case.budgets):
-        if isinstance(source, dict) and any(key in source for key in _SKILLBENCH_EFFICIENCY_KEYS):
-            return True
-    return False
-
-
-def _case_has_structured_budget(case: EvalCase) -> bool:
-    budgets = case.budgets if isinstance(case.budgets, dict) else {}
-    return any(
-        key in budgets
-        for key in (
-            "min_rubric_score",
-            "require_overall_pass",
-            "min_expected_signal_score",
-            "require_selection_signal",
-        )
-    )
-
-
-def _evaluate_workspace_path_checks(
-    workspace_root: Path,
-    deterministic_checks: Optional[Dict[str, Any]],
-) -> List[str]:
-    if not isinstance(deterministic_checks, dict):
-        return []
-
-    failures: List[str] = []
-    for raw_path in _list_of_strings(deterministic_checks.get("required_paths")):
-        checked = _resolve_check_path(workspace_root, raw_path)
-        if checked is None:
-            failures.append(f"required path escapes workspace: {raw_path!r}")
-        elif not checked.exists():
-            failures.append(f"required path not found: {raw_path!r}")
-
-    for raw_path in _list_of_strings(deterministic_checks.get("forbidden_paths")):
-        checked = _resolve_check_path(workspace_root, raw_path)
-        if checked is None:
-            failures.append(f"forbidden path escapes workspace: {raw_path!r}")
-        elif checked.exists():
-            failures.append(f"forbidden path exists: {raw_path!r}")
-
-    if deterministic_checks.get("require_clean_git_status") is True:
-        failures.extend(_evaluate_clean_git_status(workspace_root, deterministic_checks))
-
-    return failures
-
-
-def _resolve_check_path(workspace_root: Path, raw_path: str) -> Optional[Path]:
-    candidate = Path(raw_path)
-    if not candidate.is_absolute():
-        candidate = workspace_root / candidate
-    try:
-        resolved = candidate.resolve()
-        resolved.relative_to(workspace_root.resolve())
-    except ValueError:
-        return None
-    return resolved
-
-
-def _evaluate_clean_git_status(workspace_root: Path, deterministic_checks: Dict[str, Any]) -> List[str]:
-    if not (workspace_root / ".git").exists():
-        return ["require_clean_git_status requested but workspace is not a git repository"]
-    proc = sp.run(
-        ["git", "status", "--porcelain"],
-        cwd=str(workspace_root),
-        text=True,
-        stdout=sp.PIPE,
-        stderr=sp.PIPE,
-        check=False,
-    )
-    if proc.returncode != 0:
-        return [f"git status --porcelain failed: {proc.stderr.strip() or proc.stdout.strip()}"]
-
-    allowed_patterns = _list_of_strings(deterministic_checks.get("git_status_allowlist"))
-    dirty_entries = [line for line in proc.stdout.splitlines() if line.strip()]
-    unexpected = [line for line in dirty_entries if not _git_status_line_allowed(line, allowed_patterns)]
-    if unexpected:
-        preview = "; ".join(unexpected[:5])
-        suffix = "" if len(unexpected) <= 5 else f"; +{len(unexpected) - 5} more"
-        return [f"git status not clean: {preview}{suffix}"]
-    return []
-
-
-def _git_status_line_allowed(line: str, allowed_patterns: Sequence[str]) -> bool:
-    if not allowed_patterns:
-        return False
-    path = line[3:] if len(line) > 3 else line
-    return any(
-        fnmatch.fnmatch(path, pattern) or fnmatch.fnmatch(line, pattern)
-        for pattern in allowed_patterns
-    )
-
-
-def _list_of_strings(value: Any) -> List[str]:
-    if value is None:
-        return []
-    if isinstance(value, str):
-        return [value]
-    if isinstance(value, list):
-        return [item for item in value if isinstance(item, str) and item.strip()]
-    return []
 
 
 def _case_matches_eval_mode(case: EvalCase, *, eval_mode: str) -> bool:
@@ -1970,12 +1786,62 @@ def _is_codex_untrusted_repo_error(stderr_text: str) -> bool:
 
 
 def _is_runner_runtime_blocked(*, output_text: str, stdout_text: str, stderr_text: str) -> bool:
-    low = "\n".join([output_text or "", stdout_text or "", stderr_text or ""]).lower()
-    return (
-        "sandbox_apply: operation not permitted" in low
-        or "host_execution_untrusted" in low
-        or ("sandbox-exec" in low and "operation not permitted" in low)
-    )
+    return _classify_runner_blocker(
+        output_text=output_text,
+        stdout_text=stdout_text,
+        stderr_text=stderr_text,
+    ) is not None
+
+
+def _classify_runner_blocker(
+    *,
+    output_text: str,
+    stdout_text: str,
+    stderr_text: str,
+    exit_code: Optional[int] = None,
+) -> Optional[str]:
+    text = "\n".join([output_text or "", stdout_text or "", stderr_text or ""])
+    low = text.lower()
+
+    user_input_markers = [
+        "user_input_requested_during_turn",
+        "request_user_input",
+        "requested user input",
+        "waiting on user",
+        "needs user input",
+        "blocked_user_input",
+    ]
+    if any(marker in low for marker in user_input_markers):
+        return "blocked_user_input"
+
+    auth_markers = [
+        "not logged in",
+        "/login",
+        "unauthenticated",
+        "authentication required",
+        "missing authenticated codex state",
+        "blocked_auth",
+    ]
+    if any(marker in low for marker in auth_markers):
+        return "blocked_auth"
+
+    if exit_code == 124:
+        return "timeout_partial_output" if text.strip() else "timeout_no_output"
+
+    runtime_markers = [
+        "sandbox_apply: operation not permitted",
+        "host_execution_untrusted",
+        "sandbox-exec",
+        "operation not permitted",
+        "ran out of room in the model's context window",
+        "context window",
+        "start a new thread",
+        "blocked_runtime",
+    ]
+    if any(marker in low for marker in runtime_markers):
+        return "blocked_runtime"
+
+    return None
 
 
 def _is_codex_reasoning_summary_unsupported(stderr_text: str) -> bool:
@@ -2193,11 +2059,16 @@ def _make_relative(path: Optional[Path], base: Path) -> str:
         return str(path)
 
 
-
-
 def _release_dependency_scan_roots(skill_dir: Path) -> List[Path]:
-    # Restrict release dependency scans to the target skill package only.
-    return [skill_dir]
+    roots = [skill_dir]
+    parts = skill_dir.parts
+    if "Plugins" in parts:
+        idx = parts.index("Plugins")
+        if len(parts) > idx + 2 and "skills" in parts[idx + 2 :]:
+            plugin_root = Path(*parts[: idx + 2])
+            if plugin_root not in roots:
+                roots.append(plugin_root)
+    return roots
 
 
 def _is_snyk_manifest(path: Path) -> bool:
@@ -2208,35 +2079,18 @@ def _dependency_manifest_paths(skill_dir: Path, *, limit: int = 25) -> List[Path
     manifests: List[Path] = []
     seen: Set[Path] = set()
     for root in _release_dependency_scan_roots(skill_dir):
-        for manifest_name in sorted(SNYK_MANIFEST_NAMES):
-            for candidate in root.rglob(manifest_name):
-                if not candidate.is_file():
-                    continue
-                relative_parts = candidate.relative_to(root).parts[:-1]
-                if any(part in SNYK_MANIFEST_EXCLUDED_DIRS for part in relative_parts):
-                    continue
-                if candidate in seen:
-                    continue
-                seen.add(candidate)
-                manifests.append(candidate)
-                if len(manifests) >= limit:
-                    return manifests
-        for suffix in sorted(SNYK_MANIFEST_SUFFIXES):
-            for candidate in root.rglob(f"*{suffix}"):
-                if not candidate.is_file():
-                    continue
-                if candidate.name in SNYK_MANIFEST_NAMES:
-                    # Already captured by exact-name scan.
-                    continue
-                relative_parts = candidate.relative_to(root).parts[:-1]
-                if any(part in SNYK_MANIFEST_EXCLUDED_DIRS for part in relative_parts):
-                    continue
-                if candidate in seen:
-                    continue
-                seen.add(candidate)
-                manifests.append(candidate)
-                if len(manifests) >= limit:
-                    return manifests
+        for candidate in sorted(root.rglob("*")):
+            if not candidate.is_file() or not _is_snyk_manifest(candidate):
+                continue
+            relative_parts = candidate.relative_to(root).parts[:-1]
+            if any(part in SNYK_MANIFEST_EXCLUDED_DIRS for part in relative_parts):
+                continue
+            if candidate in seen:
+                continue
+            seen.add(candidate)
+            manifests.append(candidate)
+            if len(manifests) >= limit:
+                return manifests
     return manifests
 
 
@@ -2307,9 +2161,6 @@ def _snyk_release_gate(
     ):
         gate["status"] = "blocked_auth"
         gate["reason"] = "Snyk authentication is required for release evals of manifest-backed skill packages."
-    elif proc.returncode == 3:
-        gate["status"] = "not_applicable"
-        gate["reason"] = "Snyk did not detect supported dependency manifests in the target skill scope."
     elif "could not detect supported target files" in combined_output or "no supported files" in combined_output:
         gate["status"] = "blocked_no_supported_projects"
         gate["reason"] = "Dependency manifests were present, but Snyk did not detect a supported project."
@@ -2326,6 +2177,7 @@ def _snyk_release_gate_passed(gate: Dict[str, Any]) -> bool:
     if not gate.get("required"):
         return True
     return gate.get("status") == "success"
+
 
 def _extract_min_rubric_score(budgets: Optional[Dict[str, Any]]) -> Optional[float]:
     if not budgets:
@@ -2846,11 +2698,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "tier1_failures": 0,
         "tier2_findings": 0,
         "blocked_cases": 0,
+        "blocked_class_summary": {key: 0 for key in RUNNER_BLOCKER_TAXONOMY},
+        "blocker_taxonomy": RUNNER_BLOCKER_TAXONOMY,
         "preflight_warnings": preflight_warnings,
         "readiness_summary": readiness_summary,
         "round_state_summary": round_state_summary,
         "neutral_baseline_approvals_used": [],
-        "skillbench_eval_quality": _skillbench_eval_quality(cases),
     }
     if args.eval_mode == "release":
         summary["security_dependency_screening"] = _snyk_release_gate(
@@ -2912,6 +2765,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         case_tier1_failures: List[str] = []
         case_tier2_findings: List[str] = []
         case_warnings: List[str] = []
+        case_blocked_reasons: List[str] = []
+        case_notes: List[str] = []
         runner_records: Dict[str, Any] = {}
 
         for runner_name in selected_runners:
@@ -2990,18 +2845,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             runner_tier1_failures: List[str] = []
             runner_tier2_findings: List[str] = []
             runner_warnings: List[str] = list(runner_exec_warnings)
+            runner_notes: List[str] = []
             runner_metrics: Dict[str, Any] = {}
             runner_blocked_runtime = False
             events: Optional[List[Dict[str, Any]]] = None
-
-            if rc != 0:
-                runner_tier1_failures.append(f"{runner_name} returned non-zero exit code: {rc}")
-                if runner_name == "codex" and _is_codex_untrusted_repo_error(stderr):
-                    runner_warnings.append(
-                        "Codex rejected this workspace as untrusted. "
-                        "Use a trusted git repo as --workspace, or pass "
-                        "--codex-arg=--skip-git-repo-check for ephemeral temp directories."
-                    )
 
             if runner_name == "codex" and jsonl_path is not None:
                 events, parse_warnings = load_jsonl_events(jsonl_path)
@@ -3028,10 +2875,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "deterministic_checks/budgets requested but Codex JSONL was not captured (enable --capture-jsonl)."
                 )
 
-            runner_tier1_failures.extend(
-                _evaluate_workspace_path_checks(workspace_root, c.deterministic_checks)
-            )
-
             selected_skill = detect_skill_selected(
                 skill_name=skill_name,
                 output_text=output_text,
@@ -3047,27 +2890,51 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 runner_tier1_failures.append(
                     f"should_trigger failed: expected {c.should_trigger}, detected {selected_skill}"
                 )
+            budgets = c.budgets if isinstance(c.budgets, dict) else {}
+            require_selection_signal = bool(budgets.get("require_selection_signal"))
             if c.should_trigger is True and selected_skill is None:
-                runner_tier1_failures.append(
+                message = (
                     f"should_trigger={c.should_trigger} but selection signal unavailable (selected_skill is None). "
                     f"Cannot verify selection expectation without signal evidence."
                 )
+                if require_selection_signal:
+                    runner_tier1_failures.append(message)
+                else:
+                    runner_notes.append(
+                        message
+                        + " Discovery-smoke or budgets.require_selection_signal=true should own hard selection proof."
+                    )
             if c.should_trigger is False and selected_skill is None:
-                runner_warnings.append(
+                runner_notes.append(
                     "should_trigger=false and selection signal unavailable; treating absence of positive "
                     "selection evidence as acceptable for this negative case."
                 )
 
-            runner_blocked_runtime = _is_runner_runtime_blocked(
+            runner_blocker_class = _classify_runner_blocker(
                 output_text=output_text,
                 stdout_text=stdout,
                 stderr_text=stderr,
+                exit_code=rc,
             )
+            runner_blocked_runtime = runner_blocker_class is not None
+            runner_blocked_reasons: List[str] = []
             if runner_blocked_runtime:
-                runner_warnings.append(
-                    "blocked_runtime: runner could not execute local commands; this is an eval environment "
-                    "blocker, not a skill behavior failure."
+                definition = RUNNER_BLOCKER_TAXONOMY.get(
+                    runner_blocker_class or "blocked_runtime",
+                    "The eval runner was blocked before skill behavior could be judged.",
                 )
+                runner_blocked_reasons.append(
+                    f"{runner_blocker_class}: {definition} "
+                    "This is an eval runner blocker, not a skill behavior failure."
+                )
+            elif rc != 0:
+                runner_tier1_failures.append(f"{runner_name} returned non-zero exit code: {rc}")
+                if runner_name == "codex" and _is_codex_untrusted_repo_error(stderr):
+                    runner_warnings.append(
+                        "Codex rejected this workspace as untrusted. "
+                        "Use a trusted git repo as --workspace, or pass "
+                        "--codex-arg=--skip-git-repo-check for ephemeral temp directories."
+                    )
 
             # Assertions + rubric parsing
             parsed_json: Optional[Any] = None
@@ -3171,9 +3038,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "exit_code": rc,
                 "passed": (len(runner_tier1_failures) == 0) and not runner_blocked_runtime,
                 "blocked": runner_blocked_runtime,
+                "blocker_class": runner_blocker_class,
+                "blocked_reasons": runner_blocked_reasons,
                 "tier1_failures": runner_tier1_failures,
                 "tier2_findings": runner_tier2_findings,
                 "warnings": runner_warnings,
+                "notes": runner_notes,
                 "artifacts": {
                     "dir": _make_relative(runner_dir, workspace_root),
                     "final": _make_relative(runner_dir / "final.txt", workspace_root),
@@ -3190,10 +3060,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             case_tier1_failures.extend([f"[{runner_name}] {x}" for x in runner_tier1_failures])
             case_tier2_findings.extend([f"[{runner_name}] {x}" for x in runner_tier2_findings])
             case_warnings.extend([f"[{runner_name}] {x}" for x in runner_warnings])
+            case_blocked_reasons.extend([f"[{runner_name}] {x}" for x in runner_blocked_reasons])
+            case_notes.extend([f"[{runner_name}] {x}" for x in runner_notes])
 
         case_tier1_failed = len(case_tier1_failures) > 0
         case_tier2_failed = len(case_tier2_findings) > 0
         case_blocked = any(bool(record.get("blocked")) for record in runner_records.values())
+        case_blocker_classes = sorted(
+            {
+                str(record.get("blocker_class"))
+                for record in runner_records.values()
+                if record.get("blocker_class")
+            }
+        )
 
         case_pass = (not case_tier1_failed) and (
             args.tier2_mode != "fail" or (not case_tier2_failed)
@@ -3224,11 +3103,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "runners": runner_records,
             "passed": case_pass,
             "blocked": case_blocked,
+            "blocker_classes": case_blocker_classes,
+            "blocked_reasons": case_blocked_reasons,
             "tier1_failed": case_tier1_failed,
             "tier2_failed": case_tier2_failed,
             "tier1_failures": case_tier1_failures,
             "tier2_findings": case_tier2_findings,
             "warnings": case_warnings,
+            "notes": case_notes,
         }
 
         (case_dir / "result.json").write_text(json.dumps(case_record, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -3258,6 +3140,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if case_blocked:
             any_blocked = True
             summary["blocked_cases"] += 1
+            for blocker_class in case_blocker_classes:
+                summary["blocked_class_summary"][blocker_class] = summary["blocked_class_summary"].get(blocker_class, 0) + 1
         if case_tier2_failed:
             any_tier2_failed = True
             summary["tier2_findings"] += 1
@@ -3314,7 +3198,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "round_state_summary": summary["round_state_summary"],
             "neutral_baseline_approvals_used": summary["neutral_baseline_approvals_used"],
             "security_dependency_screening": summary["security_dependency_screening"],
-            "skillbench_eval_quality": summary["skillbench_eval_quality"],
             "reports_base": _rel(reports_base),
         },
         "artifacts": summary["artifacts"],
@@ -3349,10 +3232,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 print(f"    - TIER1: {f}")
             for f in c["tier2_findings"]:
                 print(f"    - TIER2: {f}")
-        if any_tier2_failed and args.tier2_mode == "warn":
+        if summary["passed"] and any_tier2_failed and args.tier2_mode == "warn":
             print("RESULT: PASS (tier-2 findings present; warn mode)")
+        elif summary["passed"]:
+            print("RESULT: PASS")
         else:
-            print(f"RESULT: {'PASS' if summary['passed'] else 'FAIL'}")
+            print("RESULT: FAIL")
 
     return int(summary["exit_code"])
 

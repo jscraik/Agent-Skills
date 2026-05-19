@@ -19,6 +19,19 @@ Inspect an LLM eval pipeline and produce a prioritized list of problems with con
 2. Run diagnostic checks across six areas
 3. Produce a findings report ordered by impact, with each finding linking to a fix
 
+## Codex Skill Eval Lens
+
+When auditing Codex skill evals, inspect the skill like a small agentic product rather than a static prompt. Cover these surfaces before recommending rewrites:
+
+- **Trigger quality:** explicit invocation, implicit natural-language invocation, adjacent negative prompts, and over-trigger cases.
+- **Trace evidence:** `codex exec --json` events, selected skill evidence, command executions, tool failures, token usage, and final response shape.
+- **Artifact evidence:** required files created or changed, forbidden files absent, generated artifacts scoped to the run, and `git status` cleanliness or allowlisted dirt.
+- **Checker mix:** deterministic checks for file, command, schema, and security facts; LLM judges only for subjective quality dimensions.
+- **Judge proof:** human-labeled examples, train/dev/test split, TPR/TNR, and a clear rule for treating unvalidated judges as advisory.
+- **Operational safety:** prompt-injection handling, secret redaction, no destructive commands, and least-privilege execution.
+
+Flag an eval suite as incomplete when it only checks the final answer while ignoring selection, process, artifacts, or cleanup.
+
 ## Prerequisites
 
 Access to eval artifacts (traces, evaluator configs, judge prompts, labeled data) via an observability MCP server or local files. If none exist, skip to "No Eval Infrastructure."

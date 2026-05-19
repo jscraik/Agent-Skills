@@ -452,7 +452,7 @@ preflight_py() {
 }
 
 # preflight_rust runs the preflight profile for the Rust stack using sensible defaults for binaries, paths, and local-memory mode.
-# 
+#
 # Arguments:
 #   $1 - optional repository fragment to validate the workspace root contains (default: none).
 #   $2 - optional comma-separated list of required binaries (default: "git,bash,sed,rg,jq,curl,python3,cargo").

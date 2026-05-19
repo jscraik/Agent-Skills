@@ -25,15 +25,17 @@ After installing a skill, tell the user: `Restart Codex to pick up new skills.`
 
 ## Flow behavior and options
 
-- Treat install as an intake decision, not a copy operation.
+- Treat install as **External Skill Intake**, not a copy operation.
 - Before writing, inspect local candidates with `./bin/ask skills list --advanced --json` and targeted searches over `Skills/**`, `Plugins/**/skills/**`, and `skills-system/**`.
 - Compare intent, trigger wording, scripts/assets, safety boundaries, and closeout contract against the closest local candidates.
+- The repo-owned install command returns `data.intake_decision` in dry-run and real install paths. Review this **Intake Decision** before writing canonical source.
 - Report one intake outcome before writing:
   - `install_new`: no close match exists; create canonical source.
   - `blend_into_existing`: a local skill owns the behavior; copy only the useful external procedure, helper, eval, or reference into that owner.
   - `keep_separate`: overlap exists, but the external skill is a distinct primitive with its own trigger.
   - `reject_duplicate`: the external skill adds no durable capability.
   - `needs_human_choice`: ownership or visibility is ambiguous.
+- Stop before writing when the intake outcome is `reject_duplicate` or `needs_human_choice`; the operator must choose whether to blend, keep separate, reject, or install as a new primitive.
 - Defaults to direct download for public GitHub repos.
 - If download fails with auth/permission errors, falls back to git sparse checkout.
 - Aborts if the destination skill directory already exists.
@@ -51,7 +53,10 @@ Canonical installs must not stop at copied source. Before promoting a command ha
 - Ensure the frontmatter description says what the skill does and when to use it.
 - Add required local safety sections or references when strict audit requires them.
 - Add prompt-injection expected-context config only for deliberate security/eval fixtures, not to suppress real helper risks.
-- Run `./bin/ask skills audit <path> --level strict --json` and either fix failures or report the skill as installed but not gold-ready.
+- Run `./bin/ask skills audit <path> --level strict --json` and either fix failures or report the skill as installed but not release-ready.
+- Run `./bin/ask skills external-review <path> --json --robot` as the **Second-Review Lane** for Plugin Eval and Tessl local review before claiming quality.
+- Run smoke evals once representative eval cases exist, and run release evals before command-handle promotion, canonical routing, blending into an existing skill, or release-readiness claims.
+- Include Snyk in the release/security lane for manifest-backed candidates. Pure `SKILL.md`-first instruction-only candidates without supported dependency manifests should be reported as `not_applicable` for Snyk.
 - Run workspace sync/proof only after the canonical source decision and hardening state are clear.
 
 ## Boundary routing matrix

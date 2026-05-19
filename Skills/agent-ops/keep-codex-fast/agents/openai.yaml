@@ -1,0 +1,7 @@
+interface:
+  display_name: "Keep Codex Fast"
+  short_description: "$keep-codex-fast - Keep Codex Fast entrypoint"
+  default_prompt: "$keep-codex-fast "
+
+policy:
+  allow_implicit_invocation: false

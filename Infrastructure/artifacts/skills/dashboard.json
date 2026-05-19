@@ -7722,15 +7722,15 @@
     },
     "improve-codebase-architecture": {
       "latest": {
-        "run_id": "20260516-001419-497426",
+        "run_id": "20260516-010523-104369",
         "runner_mode": "codex",
         "tier2_mode": "warn",
-        "cases": 9,
-        "passed_cases": 2,
-        "tier1_failed_cases": 6,
+        "cases": 1,
+        "passed_cases": 0,
+        "tier1_failed_cases": 0,
         "tier2_cases": 0,
         "passed": false,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-001419-497426/scorecard.json",
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-010523-104369/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
@@ -7739,26 +7739,24 @@
         }
       },
       "previous": {
-        "run_id": "20260514-013055-588850",
+        "run_id": "20260516-010412-482221",
         "runner_mode": "codex",
         "tier2_mode": "warn",
         "cases": 1,
         "passed_cases": 0,
-        "tier1_failed_cases": 1,
+        "tier1_failed_cases": 0,
         "tier2_cases": 0,
         "passed": false,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260514-013055-588850/scorecard.json",
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-010412-482221/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
       "trend": {
-        "tier1_delta": 5,
+        "tier1_delta": 0,
         "tier2_delta": 0,
         "pass_delta": 0
       },
@@ -7944,6 +7942,202 @@
           "tier2_cases": 0,
           "passed": false,
           "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-001419-497426/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-003209-823103",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 9,
+          "passed_cases": 4,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 2,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-003209-823103/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 3,
+            "average": 61,
+            "minimum": 27,
+            "risky_cases": [
+              {
+                "case": "edge-missing",
+                "runner": "codex",
+                "score": 75,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "deep-design-options",
+                "runner": "codex",
+                "score": 27,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-tracer-proof",
+                "runner": "codex",
+                "score": 82,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "run_id": "20260516-004446-013799",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 9,
+          "passed_cases": 1,
+          "tier1_failed_cases": 2,
+          "tier2_cases": 2,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-004446-013799/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 3,
+            "average": 61,
+            "minimum": 50,
+            "risky_cases": [
+              {
+                "case": "pressure-command",
+                "runner": "codex",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-validation",
+                "runner": "codex",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-tracer-proof",
+                "runner": "codex",
+                "score": 82,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "run_id": "20260516-005421-197495",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 0,
+          "tier1_failed_cases": 2,
+          "tier2_cases": 2,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-005421-197495/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 2,
+            "average": 50,
+            "minimum": 50,
+            "risky_cases": [
+              {
+                "case": "pressure-command",
+                "runner": "codex",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-validation",
+                "runner": "codex",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "run_id": "20260516-005548-158414",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 0,
+          "tier1_failed_cases": 1,
+          "tier2_cases": 1,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-005548-158414/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 1,
+            "average": 50,
+            "minimum": 50,
+            "risky_cases": [
+              {
+                "case": "pressure-command",
+                "runner": "codex",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "run_id": "20260516-010129-396886",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-010129-396886/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-010412-482221",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-010412-482221/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-010523-104369",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-010523-104369/scorecard.json",
           "expected_signal_summary": {
             "runs": 0,
             "average": null,
@@ -9557,8 +9751,8 @@
   },
   "totals": {
     "skills": 29,
-    "runs": 433,
-    "latest_tier1_failed_skills": 18,
+    "runs": 440,
+    "latest_tier1_failed_skills": 17,
     "latest_tier2_skills": 0
   }
 }

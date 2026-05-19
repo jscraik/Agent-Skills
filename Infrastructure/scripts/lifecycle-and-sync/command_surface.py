@@ -31,6 +31,7 @@ RESERVED_SKILL_HANDLES = {
     "evals",
     "graph",
     "mcp",
+    "memory",
     "wiki",
     "workouts",
     "skill",
@@ -365,6 +366,8 @@ def _prune_obsolete_command_handle_dirs(
 
 def _write_generated_text(path: Path, content: str) -> None:
     """Write generated content via same-directory replace to tolerate protected files."""
+    if path.parent.is_symlink():
+        path.parent.unlink()
     if path.is_file():
         try:
             if path.read_text(encoding="utf-8") == content:
@@ -665,7 +668,7 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
             "The command-surface manifest is a generated projection, not a source of truth.",
             "Generated command handles are runtime pointers for $ invocation; they are not canonical skill sources.",
             "Generated command handles are written only for handles absent from rooted runtime projection.",
-            "Reviewer handles are intentionally kept outside the skill command surface.",
+            "Reviewer handles for @ invocation stay outside this skill command surface; skill-command handles such as codex-review may still appear for $ invocation.",
         ],
     }
 
@@ -725,7 +728,17 @@ def check_command_surface_projection(*, repo_root_path: Path | None = None) -> d
                 "error": str(exc),
             })
 
-    if actual_payload is not None and actual_payload != payload:
+    def _without_volatile_source_revision(value: dict[str, Any]) -> dict[str, Any]:
+        clone = json.loads(json.dumps(value))
+        provenance = clone.get("provenance")
+        if isinstance(provenance, dict):
+            provenance.pop("source_revision", None)
+        return clone
+
+    if (
+        actual_payload is not None
+        and _without_volatile_source_revision(actual_payload) != _without_volatile_source_revision(payload)
+    ):
         violations.append({
             "code": "COMMAND_SURFACE_PROJECTION_DRIFT",
             "path": COMMAND_SURFACE_PATH.as_posix(),

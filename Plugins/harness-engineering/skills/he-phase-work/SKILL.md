@@ -25,6 +25,10 @@ Approved plan path, target issue/PR, active phase, branch/dirty state, validatio
 Return phase status: active phase, gates, validation outcomes, heartbeat status, Linear update status, git staging status, blockers, and next safe action.
 
 ## Procedure
+Apply the context-disposition policy: move important still-valid context to
+references, and intentionally discard stale, duplicated, unsafe, superseded, or
+low-signal text.
+
 1. Check live state: `git status --short`, branch, plan path, active phase, latest validation, target issue/PR, and blockers.
 2. Verify the plan exists and names the current phase, validation gate, rollback, and stop condition.
 3. Ensure exactly one matching heartbeat exists or return the heartbeat prompt when automation authority is missing.
@@ -95,4 +99,3 @@ next_safe_action: "Report phase evidence; ask before Linear mutation."
 ## References
 - Phase gates: `references/phase-gate-contract.md`, `references/contract.yaml`, `references/evals.yaml`
 - Shared policy: `../../references/subagent-call-contract.md`, `../../references/deferred-context-index.md`
-- Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

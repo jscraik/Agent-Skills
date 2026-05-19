@@ -155,4 +155,3 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 ## Validation Notes
 
 - No invalid semantic type tags detected.
-

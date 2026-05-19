@@ -16,7 +16,7 @@ builder, installer, or runtime validation work from the router.
 ## Current Runtime Boundaries
 
 Current Codex plugin packages can expose skills, MCP servers, apps, and hooks.
-Manifest paths must be plugin-root-relative `./...` paths that do not escape the
+Manifest paths must be plugin-root relative `./...` paths that do not escape the
 plugin root. Bundled MCP may come from `.mcp.json`; bundled hooks may come from
 manifest hook paths, inline hook objects, or default `hooks/hooks.json`.
 

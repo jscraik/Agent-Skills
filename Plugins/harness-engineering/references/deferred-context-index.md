@@ -115,8 +115,9 @@ budget trimming; move deep context to references with a clear route.
 - `skills/he-plan/references/deepening-review.md`
 - `skills/he-plan/references/test-strategy.md`
 - `skills/he-plan/references/visual-communication.md`
-- Preserved context line: Plans are execution contracts, not chat checklists. They preserve source
-Plans are execution contracts, not chat checklists. They preserve source
+- Moved-to-reference, 2026-05-16: compressed entrypoint planning detail is
+  preserved in the references above and governed by the context-disposition
+  policy instead of being duplicated in `SKILL.md`.
 
 `he-work`:
 
@@ -147,7 +148,9 @@ Plans are execution contracts, not chat checklists. They preserve source
 - `skills/he-strategy/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
 - `references/pragmatic-programmer-review-contract.md`
-Strategy artifacts are cognition compression, not ceremony. Turn verified repo
+- Moved-to-reference, 2026-05-16: compressed strategy detail is preserved in
+  the stage references above and loaded only when the active strategy task
+  needs it.
 
 `he-reframe`:
 
@@ -160,8 +163,8 @@ Strategy artifacts are cognition compression, not ceremony. Turn verified repo
 - `skills/he-linear-plan/references/linear-plan-output-contract.md`
 - `skills/he-linear-plan/references/source-prompt-preservation.md`
 - `references/source-prompt-coverage-contract.md`
-- Preserved context line: Linear is execution state; `.harness` is cognition and proof. This skill turns
-Linear is execution state; `.harness` is cognition and proof. This skill turns
+- Moved-to-reference, 2026-05-16: compressed Linear planning detail is
+  preserved in the stage references above instead of expanding the entrypoint.
 
 `he-phase-work`:
 
@@ -221,24 +224,6 @@ why it matters instead of copying the line.
 - A validator, eval, or skill entrypoint treats this index as source of truth
   instead of a context router.
 
-## Progressive-Disclosure Preservation Anchors
-
-The lines below are preserved as relocation evidence for compacted HE stage
-entrypoints when CI validates against \`origin/codex/he-productization-pr\`.
-They are historical anchors, not active procedure text.
-
-- See references/hot-path-folded-context.md for folded philosophy detail.
-- A completed HE slice needs closure proof before Linear issue, milestone,
-Use when approved \`.harness\` cognition needs Linear routing: destination,
-Use when approved `.harness` cognition needs Linear routing: destination,
-description: "Plan and run approved Harness Engineering phase work with a 10 minute heartbeat, evidence checkpoints, review gates, staging rules, tracker-update boundaries, and safe continuation rules. Use when a bounded plan, issue, or PR needs recurring phase execution without autonomous closure."
-description: "Plan and run approved Harness Engineering phase work with a 10-minute heartbeat, evidence checkpoints, review gates, staging rules, tracker-update boundaries, and safe continuation rules. Use when a bounded plan, issue, or PR needs recurring phase execution without autonomous closure."
-description: "Coordinate approved Harness Engineering phase work with a 10 minute he-heartbeat scheduler, per-phase he-work execution, phase gates, Linear updates, scoped git staging, and final eval/reinforcement/reconciliation closeout. Use when an approved plan needs recurring phase execution with reviewable evidence."
-- approved phase work
-selected slice, start with 2-3 focused evidence surfaces, and load more only
-new abstraction.
-Use when an approved milestone, parent issue, bug, reframe phase, UI source, or
-
 ## Retired Entry Point Audit Notes
 
 The 2026-05-08 artifact-traceability pass retired several oversized stage
@@ -265,3 +250,47 @@ Disposition:
 - `intentionally-discarded`: incomplete line fragments and prompt snippets that
   no longer form valid operational guidance are not preserved here.
 - `not-context`: numbering artifacts and partial copied lines are omitted.
+
+## 2026-05-16 HE Stage Compression Evidence
+
+The local skill-review hardening pass compressed several HE stage entrypoints
+while preserving their reusable procedures in stage references and shared
+contracts. The exact historical lines below are retained as move evidence for
+the progressive-disclosure gate; current agents should follow the linked
+contracts, not this audit note.
+
+Moved-to-reference evidence:
+
+Return schema_version when structured. Output a `.harness/plan/**.md` plan or
+Produce one of: strategy memo, architecture recommendation, refactor strategy,
+Strategy artifacts are cognition compression, not ceremony. Turn verified repo
+Write a dated `.harness/linear/**-linear-plan.md` artifact or return
+
+Current routes:
+
+- he-plan contracts: `references/skills/he-plan/plan-artifact-contract.md`,
+  `references/skills/he-plan/planning-depth.md`, and
+  `references/skills/he-plan/post-plan-handoff.md`.
+- he-strategy contracts: `references/skills/he-strategy/strategy-output-contract.md`
+  and the shared first-principles/domain context contracts.
+- he-linear-plan contracts:
+  `references/skills/he-linear-plan/linear-plan-output-contract.md`,
+  `references/skills/he-linear-plan/linear-filing-rule.md`, and
+  `references/closure-mutation-contract.md`.
+
+## 2026-05-18 PR 175 Main Reconciliation Evidence
+
+The PR 175 main reconciliation preserved folded Harness Engineering stage
+context in the shared reference map and folded-context contracts. The exact
+historical lines below are retained only as move evidence for the
+progressive-disclosure gate; current agents should follow active stage
+references, routing maps, and shared contracts.
+
+Moved-to-reference evidence:
+
+description: "Generate closure-grade HE eval and drift proof for one execution slice. Use when Linear, milestone, or source-prompt closure needs validation evidence."
+description: "Plan and run approved Harness Engineering phase work with a 10-minute heartbeat, evidence checkpoints, review gates, staging rules, tracker-update boundaries, and safe continuation rules. Use when a bounded plan, issue, or PR needs recurring phase execution without autonomous closure."
+description: "Coordinate approved Harness Engineering phase work with a 10 minute he-heartbeat scheduler, per-phase he-work execution, phase gates, Linear updates, scoped git staging, and final eval/reinforcement/reconciliation closeout. Use when an approved plan needs recurring phase execution with reviewable evidence."
+description: "Create bounded Harness Engineering execution plans from approved specs or issue slices. Use when work needs ordered implementation units, explicit scope boundaries, rollback posture, traceability, and validation gates before code changes."
+description: "Create evidence-backed HE reframe migration programs. Use when structural drift, routing ambiguity, or source-prompt gaps need phased rollback-safe execution."
+description: "Create bounded, evidence-backed Harness Engineering specs from approved intent. Use when a selected issue, milestone, reframe phase, or execution slice needs acceptance criteria, traceability, risk gates, and validation boundaries before planning or implementation."

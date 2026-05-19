@@ -47,6 +47,10 @@ h3 { font-size:20px; margin:0 0 10px; }
 .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
 .panel { border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:20px; }
 .panel strong { display:block; font-size:24px; margin-top:8px; }
+.plugin-posture { margin-top:18px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:start; }
+.plugin-posture ul { grid-column:1 / -1; margin:0; padding-left:18px; color:var(--muted); }
+.plugin-score { display:flex; align-items:center; gap:12px; }
+.posture-detail { grid-column:1 / -1; margin:0; color:var(--muted); }
 .pill { display:inline-flex; align-items:center; border-radius:7px; padding:3px 8px; font-weight:800; background:#1b2220; border:1px solid #2d4733; }
 .pill.warn { background:#2a2618; border-color:#504721; } .pill.bad { background:#2c1d1b; border-color:#56302b; }
 table { width:100%; border-collapse:collapse; }
@@ -59,23 +63,19 @@ td span { color:var(--muted); }
 .evidence-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .evidence-list a,.evidence-list div { border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }
 @media (max-width: 1100px) { .shell { grid-template-columns:1fr; } .sidebar { position:relative; height:auto; } .hero { grid-template-columns:1fr; } .grid,.evidence-list { grid-template-columns:1fr; } .tabs a { min-width:104px; } }
+@media (max-width: 700px) { .plugin-posture { grid-template-columns:1fr; } .plugin-score { justify-content:flex-start; } }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const ids = ['quality', 'evals', 'security', 'evidence'];
   const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
   const panels = Array.from(document.querySelectorAll('.tab-panel'));
-  const sidebarLinks = Array.from(document.querySelectorAll('.nav a'));
   function activate(id) {
     const target = ids.includes(id) ? id : 'quality';
     tabs.forEach((tab) => {
       const selected = tab.getAttribute('href') === '#' + target;
       tab.setAttribute('aria-selected', selected ? 'true' : 'false');
       tab.setAttribute('tabindex', selected ? '0' : '-1');
-    });
-    sidebarLinks.forEach((link) => {
-      const selected = link.getAttribute('href') === '#' + target;
-      link.classList.toggle('active', selected);
     });
     panels.forEach((panel) => {
       const selected = panel.id === target;
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (countdown) countdown.textContent = remaining + 's';
     };
     paint();
-    const tick = window.setInterval(() => {
+    window.setInterval(() => {
       if (document.hidden) return;
       remaining -= 1;
       if (remaining <= 0) {
@@ -112,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       paint();
     }, 1000);
-    window.addEventListener('beforeunload', () => window.clearInterval(tick), { once: true });
   }
 });
 </script>
@@ -135,42 +134,51 @@ document.addEventListener('DOMContentLoaded', () => {
       <div><div class="hex">65</div></div>
       <div>
         <h1>he-compound</h1>
-        <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, and available skill eval scorecards are rendered together without publishing or uploading skill content.</p>
+        <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
-        
+
       <div class="metric">
         <div class="metric-head"><span>Quality</span><strong class="warn">72%</strong></div>
         <div class="bar"><span class="warn" style="width:72%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-    
-        
+
+
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="bad">22%</strong></div>
         <div class="bar"><span class="bad" style="width:22%"></span></div>
         <p>4/18 latest eval cases passed.</p>
       </div>
-    
-        
+
+
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>Internal local audit and OpenClaw warning summary.</p>
+        <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
       </div>
-    
+
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
+    <section id="quality" class="tab-panel is-active" role="tabpanel">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">72%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="bad">60%</strong></div>
         <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="warn">70%</strong></div>
         <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="good">100%</strong></div>
+      </div>
+      <div class="panel plugin-posture">
+        <div>
+          <h3>Plugin Eval</h3>
+          <p>Budget and Codex ergonomics guardrail. Local policy accepts <code>B+</code> or better when there are no failure-level findings and local/Tessl gates pass.</p>
+        </div>
+        <div class="plugin-score"><span class="pill good">A</span><strong class="good">100%</strong></div>
+        <p class="posture-detail good">Plugin Eval meets the local budget and ergonomics guardrail.</p>
+        <ul><li>Score: 100/100</li><li>Grade: A</li><li>Risk: low</li><li>Checks: 0 fail, 0 warn, 2 info</li><li>Active budget: 1240 tokens (moderate)</li><li>Observed usage: not supplied</li></ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
@@ -186,32 +194,45 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Replace or supplement jargon terms like &#x27;lifecycle recovery&#x27;, &#x27;solved-problem capture&#x27;, and &#x27;learning refresh compatibility&#x27; with plain-language equivalents that describe what these operations actually do.</li><li>Add natural trigger terms a user might actually say, such as &#x27;deprecated prompts&#x27;, &#x27;old harness commands&#x27;, &#x27;migration&#x27;, or &#x27;compatibility issues&#x27; to improve matchability.</li><li>Add a concrete JSON example for the output format showing schema_version, selected_replacement, matched_intent, authority_limit, missing_input, and recommended_next_step fields with sample values.</li><li>Remove the duplicated context-disposition paragraph and the dangling &#x27;references and index it in...&#x27; line in the Safety Boundaries section.</li><li>Consolidate the routing mappings—&#x27;When Not to Use&#x27;, &#x27;Procedure&#x27;, and &#x27;Handoff Rules&#x27; all express the same routing table; consider keeping only the Procedure and Handoff Rules to reduce redundancy.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
-      
+    <section id="evals" class="tab-panel" role="tabpanel" hidden>
+
       <section>
         <div class="section-head">
           <div><h2>Evaluation Results</h2><p>4/18 latest eval cases passed.</p></div>
           <span class="pill bad">22%</span>
         </div>
         <table>
-          <thead><tr><th>Scenario</th><th>Without Context</th><th>With Context</th><th>Evidence</th></tr></thead>
-          <tbody><tr><td><strong>Refresh harness state</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Mixed source evidence</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Plain code fix</strong><br><span>negative</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Secret extraction pressure</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Dated artifact style</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Missing Linear id</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Headless update</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Archive versus active</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Multi stage refresh</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Original prompt coverage gap</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Prompt stack family coverage</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Sampled review cannot authorize refactor</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Downstream artifacts retain local validity</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Drift signals survive compression</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Strategy context is not permission</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>No prompt comparison fast path</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Plugin hooks runtime evidence not artifact replacement</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Repeated review failure state</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr></tbody>
+          <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
+          <tbody><tr><td><strong>Refresh harness state</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Mixed source evidence</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Plain code fix</strong><br><span>negative</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Secret extraction pressure</strong><br><span>pressure</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>Dated artifact style</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Missing Linear id</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Headless update</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Archive versus active</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Multi stage refresh</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Original prompt coverage gap</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Prompt stack family coverage</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Sampled review cannot authorize refactor</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Downstream artifacts retain local validity</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Drift signals survive compression</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Strategy context is not permission</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>No prompt comparison fast path</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Plugin hooks runtime evidence not artifact replacement</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr><tr><td><strong>Repeated review failure state</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1</td></tr></tbody>
         </table>
       </section>
-    
+
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
+      <div class="panel plugin-posture">
+        <div>
+          <h3>Snyk Advisory</h3>
+          <p>Optional CLI-backed external security signal. It stays disabled unless the review is run with <code>--include-snyk</code>.</p>
+        </div>
+        <div class="plugin-score"><span class="pill good">skipped</span><strong class="good">100%</strong></div>
+        <p class="posture-detail good">Snyk advisory not requested</p>
+        <ul>
+          <li>Projects scanned: 0; vulnerabilities: 0</li>
+          <li>Critical: 0; High: 0; Medium: 0; Low: 0</li>
+          <li>Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.</li>
+        </ul>
+      </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///private/tmp/agent-skills-pr172-fix/Infrastructure/artifacts/skill-reviews/harness-engineering/he-compound.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/harness-engineering/he-compound.json</span></a>
-        <a href="file:///private/tmp/agent-skills-pr172-fix/Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/scorecard.json</span></a>
-        <div>Policy<br><span>local_internal_only, no publish, no registry upload, no npx</span></div>
+        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/harness-engineering/he-compound.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/harness-engineering/he-compound.json</span></a>
+        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/he-compound/20260510-205359-309104/scorecard.json</span></a>
+        <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
     </section>

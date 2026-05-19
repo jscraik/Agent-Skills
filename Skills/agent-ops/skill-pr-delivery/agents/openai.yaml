@@ -1,0 +1,7 @@
+interface:
+  display_name: "Skill Pr Delivery"
+  short_description: "$skill-pr-delivery - Skill Pr Delivery entrypoint"
+  default_prompt: "$skill-pr-delivery "
+
+policy:
+  allow_implicit_invocation: false

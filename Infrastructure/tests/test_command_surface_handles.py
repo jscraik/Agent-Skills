@@ -189,6 +189,38 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
             [{"path": ".agents/skills/old-handle", "reason": "obsolete_generated_command_handle"}],
         )
 
+    def test_command_handle_write_replaces_symlink_lane_without_clobbering_source(self) -> None:
+        source_path = "Skills/agent-ops/autofix/SKILL.md"
+        source = self.temp_dir / source_path
+        source.parent.mkdir(parents=True)
+        original_source = "---\nname: autofix\n---\n# Autofix\n"
+        source.write_text(original_source, encoding="utf-8")
+
+        runtime_handle = self.temp_dir / ".agents" / "skills" / "autofix"
+        runtime_handle.parent.mkdir(parents=True)
+        runtime_handle.symlink_to(source.parent)
+
+        handle = command_surface.CommandHandle(
+            handle="autofix",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path=source_path,
+            command_handle_path=".agents/skills/autofix/SKILL.md",
+            owner="agent-ops",
+            description="Autofix.",
+            invoke_via="agent-ops",
+        )
+
+        with mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]):
+            payload = command_surface.write_command_handles(repo_root_path=self.temp_dir, dry_run=False)
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertFalse(runtime_handle.is_symlink())
+        self.assertTrue(runtime_handle.is_dir())
+        self.assertIn("Internal activation entrypoint", (runtime_handle / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(source.read_text(encoding="utf-8"), original_source)
+
     def test_command_handle_write_does_not_prune_when_validation_fails(self) -> None:
         stale = self.temp_dir / ".agents" / "skills" / "old-handle"
         stale.mkdir(parents=True)
@@ -311,8 +343,8 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
 
-    def test_skills_proof_fails_when_only_agents_runtime_is_linked(self) -> None:
-        """Codex Desktop uses ~/.codex/skills, so ~/.agents/skills alone is diagnostic only."""
+    def test_skills_proof_passes_when_agents_runtime_is_linked(self) -> None:
+        """skills_proof accepts either supported user runtime link."""
         repo_root = self.temp_dir / "repo"
         command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
@@ -326,7 +358,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
             result = skills_proof(repo_root, "he-heartbeat")
 
         proof = result.data["proof"]
-        self.assertEqual(proof["status"], "fail")
+        self.assertEqual(proof["status"], "pass")
         self.assertTrue(proof["gates"]["resolver"])
         self.assertTrue(proof["gates"]["generated_command_handle_check"])
         self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
@@ -334,7 +366,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_command_handle_exists"])
         self.assertTrue(proof["gates"]["agents_user_link"])
         self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
-        self.assertIn("codex_user_link", proof["gate_policy"]["required"])
+        self.assertIn("user_runtime_ready", proof["gate_policy"]["required"])
         self.assertIn("agents_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
 
     def test_skills_proof_passes_with_linked_codex_runtime(self) -> None:

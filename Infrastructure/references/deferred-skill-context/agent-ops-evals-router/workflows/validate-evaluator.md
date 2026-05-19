@@ -19,6 +19,20 @@ Calibrate an LLM judge against human judgment.
 4. Run once on held-out test set for final TPR/TNR
 5. Apply bias correction formula to production data
 
+## Codex Skill Eval Lens
+
+For Codex skill judges, human labels should come from reviewed skill runs: prompts, JSONL traces, generated artifacts, diffs, validation output, and the final answer. Label against one failure mode at a time.
+
+Keep these rules:
+
+- Do not validate a judge using examples copied into its prompt.
+- Keep explicit skill-invocation cases separate from implicit natural-language trigger cases.
+- Balance pass/fail labels for calibration even if real failures are rare.
+- Report TPR, TNR, false positives, false negatives, and the exact examples that changed after prompt edits.
+- Treat judge output as advisory until held-out test performance clears the agreed threshold.
+
+If the judge grades security, safety, or release readiness, require a human spot-check on every failure before using it as a blocking signal.
+
 ## Prerequisites
 
 - A built LLM judge prompt (from write-judge-prompt)
@@ -201,6 +215,17 @@ print(f"95% CI: [{result.ci_lower:.2f}, {result.ci_upper:.2f}]")
 - Use ~100 labeled examples (50 Pass, 50 Fail). Below 60, confidence intervals become wide.
 - **One trusted domain expert** is the most efficient labeling path. If not feasible, have two annotators label 20-50 traces independently and resolve disagreements before proceeding.
 - **Improving TPR narrows the confidence interval more than improving TNR.** The correction formula divides by TPR, so low TPR amplifies estimation errors into wide CIs.
+
+## Report Format
+
+Return:
+
+- judge name, version, model, and exact prompt artifact
+- train/dev/test split counts, with confirmation that few-shot examples are excluded from dev and test
+- TPR and TNR on dev, then the one-time held-out test result
+- disagreement examples grouped by failure pattern
+- bias-corrected aggregate rate only when the judge clears the agreed threshold
+- confidence interval and whether the judge is blocking, advisory, or blocked pending more labels
 
 ## Anti-Patterns
 

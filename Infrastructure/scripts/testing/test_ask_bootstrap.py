@@ -79,6 +79,7 @@ def test_pathless_shell_preserves_python_but_omits_ask(tmp_path: Path) -> None:
     assert result["checks"]["fallback_command"]["command"][0] == sys.executable
     assert result["checks"]["fallback_command"]["canonical_command"][0] == "python3"
     assert result["checks"]["path_discovery"]["status"] == "warn"
+    assert "add_repo_bin_to_path" in result["remediation"]["manual"]
     assert result["status"] == "warning"
 
 
@@ -91,6 +92,7 @@ def test_empty_env_does_not_fall_back_to_process_path(tmp_path: Path) -> None:
     assert result["checks"]["path_discovery"]["status"] == "warn"
     assert result["checks"]["path_discovery"]["resolved_path"] is None
     assert result["checks"]["shim_smoke"]["status"] == "skipped"
+    assert result["remediation"]["manual"] == ["add_repo_bin_to_path"]
 
 
 def test_wrong_global_shim_fails_even_with_forged_repo_root(tmp_path: Path) -> None:
@@ -109,6 +111,7 @@ def test_wrong_global_shim_fails_even_with_forged_repo_root(tmp_path: Path) -> N
 
     assert result["checks"]["shim_smoke"]["status"] == "fail"
     assert result["checks"]["shim_smoke"]["repo_identity_status"] == "fail"
+    assert "fix_ask_path_shim_identity" in result["remediation"]["manual"]
 
 
 def test_unknown_fallback_failure_blocks_closure(tmp_path: Path) -> None:

@@ -49,6 +49,10 @@ The glossary should include canonical terms, aliases, relationships, prompt tran
 - Ask before finalizing a material policy or scope decision that cannot be inferred.
 - Mark low-confidence terminology choices.
 
+## Execution Boundaries
+
+Edit only the requested glossary, instruction pointer, or skill reference surface. Do not rewrite unrelated docs, generated projections, runtime mirrors, or policy files unless the user explicitly names them.
+
 ## Anti-Patterns
 
 - Turning the glossary into a generic programming dictionary.
@@ -74,6 +78,7 @@ If the scope, source glossary, or authority for a terminology change is unclear,
 Never drop required context for brevity; move it into references or deferred context and link it here.
 
 - Local contract, evals, and task profile: `references/`
+- Software-literature domain-language lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
 - Output template: `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/references/output-format.md`
 - Archived long-form workflow: `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/`
 
