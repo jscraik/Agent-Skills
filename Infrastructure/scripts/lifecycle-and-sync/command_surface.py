@@ -671,6 +671,19 @@ def command_surface_projection(*, repo_root_path: Path | None = None, include_ha
     return handles_report(repo_root_path=repo_root_path, include_handles=include_handles)
 
 
+def _without_volatile_source_revision(value: Any) -> Any:
+    """Return payload data with current-checkout revisions removed for drift checks."""
+    if isinstance(value, dict):
+        return {
+            key: _without_volatile_source_revision(item)
+            for key, item in value.items()
+            if key != "source_revision"
+        }
+    if isinstance(value, list):
+        return [_without_volatile_source_revision(item) for item in value]
+    return value
+
+
 def write_command_surface_projection(*, repo_root_path: Path | None = None, dry_run: bool = False) -> dict[str, Any]:
     """Write or preview the generated command-surface manifest."""
     root = repo_root_path or repo_root()
@@ -721,7 +734,10 @@ def check_command_surface_projection(*, repo_root_path: Path | None = None) -> d
                 "error": str(exc),
             })
 
-    if actual_payload is not None and actual_payload != payload:
+    if (
+        actual_payload is not None
+        and _without_volatile_source_revision(actual_payload) != _without_volatile_source_revision(payload)
+    ):
         violations.append({
             "code": "COMMAND_SURFACE_PROJECTION_DRIFT",
             "path": COMMAND_SURFACE_PATH.as_posix(),

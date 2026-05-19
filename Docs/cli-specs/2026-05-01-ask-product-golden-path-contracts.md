@@ -608,9 +608,9 @@ Required data fields:
 
 Required behavior:
 
-- Return all profiles when no profile name is provided.
-- Return one profile when a valid profile name is provided.
-- Return `blocked` with available profile names for unknown profiles.
+- When no profile name is provided, return all profiles.
+- For a valid profile name, return that single profile.
+- For unknown profiles, return `blocked` with available profile names.
 - Include workspace-root groups and per-profile effective roots so automation can
   show the repo, runtime projection, artifact, and memory boundaries without
   parsing profile prose.
