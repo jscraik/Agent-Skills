@@ -32,6 +32,9 @@ except ModuleNotFoundError as exc:  # pragma: no cover
     if not already_reexec and __name__ == "__main__":
         env = dict(os.environ)
         env["SKILL_FAMILY_PYYAML_REEXEC"] = "1"
+        preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+        if preferred.exists():
+            os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
         uv_bin = shutil.which("uv")
         if uv_bin:
             os.execvpe(
@@ -51,9 +54,6 @@ except ModuleNotFoundError as exc:  # pragma: no cover
                 ],
                 env,
             )
-        preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
-        if preferred.exists():
-            os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
     raise SystemExit(
         "PyYAML is required for validate_skill_authoring_family_benchmarks.py. "
         "Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`."

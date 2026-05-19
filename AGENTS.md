@@ -20,6 +20,22 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   docs, read [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md).
 - Edit canonical sources, not runtime projections. See
   [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
+- Treat every repeated user steering item or review correction from Jamie as a
+  high-signal operating defect until classified. If the same command failure,
+  tool-permission issue, approval blocker, or user correction appears twice in a
+  lane, stop the active task, name the pattern, refine the repo/environment
+  contract that allowed it, validate that refinement, and report the proof
+  before resuming the original lane.
+- For live GitHub, CodeRabbit, CircleCI, Snyk, package registry, or other
+  networked repo operations in Codex sandboxed runs, request explicit network
+  permission before diagnosing an outage or credential problem. When a command
+  may invoke `gh`, `mise`, or `uv`, keep tool caches and state inside
+  approved temp paths before treating cache warnings as the blocker. Set
+  `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, and
+  `UV_CACHE_DIR` as applicable for the command family.
+- Prefer fixing the mechanism that caused repeated feedback over fixing only
+  the immediate symptom. Durable mechanism fixes belong in the relevant skill,
+  agent guide, solution doc, validation command, or wrapper script.
 
 ## Common Commands
 
