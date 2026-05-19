@@ -599,15 +599,14 @@ def test_multiple_rows_partial_failures_all_reported(tmp_path: Path) -> None:
 
 def test_finding_path_is_relative(tmp_path: Path) -> None:
     """Finding paths should be relative strings, not absolute."""
-    write(tmp_path / "Docs/agents/README.md", _VALID_README)
-    monkeypatch_root = tmp_path
+    _make_valid_root(tmp_path)
+    (tmp_path / "Docs/agents/README.md").unlink()
 
-    import unittest.mock as mock
-    with mock.patch.object(validate_steering_uptake, "ROOT", monkeypatch_root):
-        findings = validate_steering_uptake.validate(monkeypatch_root)
+    findings = validate_steering_uptake.validate(tmp_path)
 
-    for finding in findings:
-        assert not finding.path.startswith("/"), f"Path should be relative, got: {finding.path}"
+    assert any(f.code == "AGENT_DOC_INDEX_MISSING" for f in findings)
+    assert all(not f.path.startswith("/") for f in findings)
+    assert any(f.path == "Docs/agents/README.md" for f in findings)
 
 
 def test_case_insensitive_weak_field_detection(tmp_path: Path) -> None:

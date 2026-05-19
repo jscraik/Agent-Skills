@@ -11,9 +11,12 @@ from typing import Iterable
 
 
 ROOT = Path(__file__).resolve().parents[3]
-DOC_PATH = ROOT / "Docs/agents/19-high-signal-steering-feedback.md"
-LEDGER_PATH = ROOT / ".harness/quality/steering-uptake.md"
-README_PATH = ROOT / "Docs/agents/README.md"
+DOC_REL_PATH = Path("Docs/agents/19-high-signal-steering-feedback.md")
+LEDGER_REL_PATH = Path(".harness/quality/steering-uptake.md")
+README_REL_PATH = Path("Docs/agents/README.md")
+DOC_PATH = ROOT / DOC_REL_PATH
+LEDGER_PATH = ROOT / LEDGER_REL_PATH
+README_PATH = ROOT / README_REL_PATH
 VALID_STATUSES = {"open", "validated", "blocked"}
 REQUIRED_HEADERS = [
     "Date",
@@ -33,7 +36,7 @@ class Finding:
     path: str
 
 
-def _relative(path: Path) -> str:
+def _relative(path: Path, root: Path = ROOT) -> str:
     """
     Produce the path string relative to the repository root when the given path is inside it.
     
@@ -41,10 +44,10 @@ def _relative(path: Path) -> str:
         path (Path): The filesystem path to convert.
     
     Returns:
-        str: The path as a string relative to `ROOT` if `path` is inside `ROOT`, otherwise the original path as a string.
+        str: The path as a string relative to `root` if `path` is inside `root`, otherwise the original path as a string.
     """
     try:
-        return str(path.relative_to(ROOT))
+        return str(path.relative_to(root))
     except ValueError:
         return str(path)
 
@@ -120,44 +123,44 @@ def validate(root: Path = ROOT) -> list[Finding]:
         list[Finding]: A list of findings describing missing files or content issues; empty if all checks pass.
     """
     findings: list[Finding] = []
-    doc_path = root / _relative(DOC_PATH)
-    ledger_path = root / _relative(LEDGER_PATH)
-    readme_path = root / _relative(README_PATH)
+    doc_path = root / DOC_REL_PATH
+    ledger_path = root / LEDGER_REL_PATH
+    readme_path = root / README_REL_PATH
 
     if not doc_path.exists():
-        findings.append(Finding("STEERING_DOC_MISSING", "High-signal steering feedback doc is missing.", _relative(doc_path)))
+        findings.append(Finding("STEERING_DOC_MISSING", "High-signal steering feedback doc is missing.", _relative(doc_path, root)))
     else:
         doc = _read(doc_path)
         for phrase in ["Stop Rule", "Uptake Loop", "Required Evidence", "validate_steering_uptake.py"]:
             if phrase not in doc:
-                findings.append(Finding("STEERING_DOC_INCOMPLETE", f"Missing required phrase: {phrase}", _relative(doc_path)))
+                findings.append(Finding("STEERING_DOC_INCOMPLETE", f"Missing required phrase: {phrase}", _relative(doc_path, root)))
 
     if not ledger_path.exists():
-        findings.append(Finding("STEERING_LEDGER_MISSING", "Steering uptake ledger is missing.", _relative(ledger_path)))
+        findings.append(Finding("STEERING_LEDGER_MISSING", "Steering uptake ledger is missing.", _relative(ledger_path, root)))
     else:
         ledger = _read(ledger_path)
         headers, rows = _table_rows(ledger)
         if headers != REQUIRED_HEADERS:
-            findings.append(Finding("STEERING_LEDGER_HEADERS", f"Expected headers {REQUIRED_HEADERS}, got {headers}", _relative(ledger_path)))
+            findings.append(Finding("STEERING_LEDGER_HEADERS", f"Expected headers {REQUIRED_HEADERS}, got {headers}", _relative(ledger_path, root)))
         if not rows:
-            findings.append(Finding("STEERING_LEDGER_EMPTY", "Ledger must contain at least one steering uptake row.", _relative(ledger_path)))
+            findings.append(Finding("STEERING_LEDGER_EMPTY", "Ledger must contain at least one steering uptake row.", _relative(ledger_path, root)))
         for index, row in enumerate(rows, start=1):
             if len(row) != len(REQUIRED_HEADERS):
-                findings.append(Finding("STEERING_LEDGER_ROW_WIDTH", f"Row {index} has {len(row)} cells, expected {len(REQUIRED_HEADERS)}.", _relative(ledger_path)))
+                findings.append(Finding("STEERING_LEDGER_ROW_WIDTH", f"Row {index} has {len(row)} cells, expected {len(REQUIRED_HEADERS)}.", _relative(ledger_path, root)))
                 continue
             record = dict(zip(REQUIRED_HEADERS, row))
             for field in REQUIRED_HEADERS:
                 if not record[field] or record[field].lower() in {"none", "n/a", "todo"}:
-                    findings.append(Finding("STEERING_LEDGER_FIELD_EMPTY", f"Row {index} has weak value for {field}.", _relative(ledger_path)))
+                    findings.append(Finding("STEERING_LEDGER_FIELD_EMPTY", f"Row {index} has weak value for {field}.", _relative(ledger_path, root)))
             if record["Status"] not in VALID_STATUSES:
-                findings.append(Finding("STEERING_LEDGER_STATUS", f"Row {index} has invalid status {record['Status']!r}.", _relative(ledger_path)))
+                findings.append(Finding("STEERING_LEDGER_STATUS", f"Row {index} has invalid status {record['Status']!r}.", _relative(ledger_path, root)))
             if record["Status"] == "validated" and "validate_steering_uptake.py" not in record["Validation"]:
-                findings.append(Finding("STEERING_LEDGER_VALIDATION_WEAK", f"Row {index} marked validated without steering validator evidence.", _relative(ledger_path)))
+                findings.append(Finding("STEERING_LEDGER_VALIDATION_WEAK", f"Row {index} marked validated without steering validator evidence.", _relative(ledger_path, root)))
 
     if not readme_path.exists():
-        findings.append(Finding("AGENT_DOC_INDEX_MISSING", "Agent docs index is missing.", _relative(readme_path)))
+        findings.append(Finding("AGENT_DOC_INDEX_MISSING", "Agent docs index is missing.", _relative(readme_path, root)))
     elif "19-high-signal-steering-feedback" not in _read(readme_path):
-        findings.append(Finding("STEERING_DOC_NOT_INDEXED", "Agent docs index must link the steering feedback doc.", _relative(readme_path)))
+        findings.append(Finding("STEERING_DOC_NOT_INDEXED", "Agent docs index must link the steering feedback doc.", _relative(readme_path, root)))
 
     return findings
 
