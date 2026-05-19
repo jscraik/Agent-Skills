@@ -393,8 +393,6 @@ def _latest_scorecard(repo_root: Path, target_identifier: str) -> tuple[dict[str
         return None, []
 
     matching: list[Path] = []
-    fallback: list[Path] = []
-    target_name = Path(target_identifier).name
     for path in root.glob("*/**/scorecard.json"):
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
@@ -405,10 +403,8 @@ def _latest_scorecard(repo_root: Path, target_identifier: str) -> tuple[dict[str
         skill_path = str(payload.get("skill_path") or "").strip()
         if skill_path and _canonical_target_identifier(skill_path, repo_root) == target_identifier:
             matching.append(path)
-        elif len(path.parts) >= 3 and path.parts[-3] == target_name:
-            fallback.append(path)
 
-    scorecards = sorted(matching or fallback, key=lambda item: item.stat().st_mtime)
+    scorecards = sorted(matching, key=lambda item: item.stat().st_mtime)
     if not scorecards:
         return None, []
 

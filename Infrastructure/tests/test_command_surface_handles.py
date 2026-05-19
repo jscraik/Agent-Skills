@@ -189,7 +189,7 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
             [{"path": ".agents/skills/old-handle", "reason": "obsolete_generated_command_handle"}],
         )
 
-    def test_command_handle_write_replaces_symlink_lane_without_clobbering_source(self) -> None:
+    def test_command_handle_write_rejects_symlink_lane_without_clobbering_source(self) -> None:
         source_path = "Skills/agent-ops/autofix/SKILL.md"
         source = self.temp_dir / source_path
         source.parent.mkdir(parents=True)
@@ -215,10 +215,9 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         with mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]):
             payload = command_surface.write_command_handles(repo_root_path=self.temp_dir, dry_run=False)
 
-        self.assertEqual(payload["status"], "pass")
-        self.assertFalse(runtime_handle.is_symlink())
-        self.assertTrue(runtime_handle.is_dir())
-        self.assertIn("Internal activation entrypoint", (runtime_handle / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(payload["status"], "fail")
+        self.assertTrue(runtime_handle.is_symlink())
+        self.assertIn("COMMAND_HANDLE_PARENT_SYMLINK", {violation["code"] for violation in payload["violations"]})
         self.assertEqual(source.read_text(encoding="utf-8"), original_source)
 
     def test_command_handle_write_does_not_prune_when_validation_fails(self) -> None:

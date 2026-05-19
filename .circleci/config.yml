@@ -19,21 +19,16 @@ jobs:
           name: Ensure SNYK_TOKEN available
           command: |
             if [ -z "${SNYK_TOKEN:-}" ]; then
-              echo "⚠ SNYK_TOKEN not set — skipping Snyk scan for this run"
-              echo "Add a Snyk API token as a CircleCI project environment variable to re-enable mandatory Snyk checks"
+              echo "❌ SNYK_TOKEN not set; mandatory Snyk scan cannot run"
+              echo "Add a Snyk API token as a CircleCI project environment variable"
+              exit 1
             fi
       - run:
           name: Run Snyk scan (token-aware)
           command: |
             if [ -z "${SNYK_TOKEN:-}" ]; then
-              echo "⚠ SNYK_TOKEN unavailable, skipping Snyk scan"
-              exit 0
-            fi
-
-            if [ -f package-lock.json ] && [ ! -f package.json ]; then
-              echo "⚠ Root package-lock.json has no matching package.json; skipping Snyk scan"
-              echo "Snyk treats orphan npm lockfiles as configuration errors, and this repo has no root package install step"
-              exit 0
+              echo "❌ SNYK_TOKEN unavailable; mandatory Snyk scan cannot run"
+              exit 1
             fi
 
             npm exec --yes snyk@1.1304.2 auth "$SNYK_TOKEN" || {
@@ -47,7 +42,7 @@ jobs:
               --severity-threshold=high \
               --all-projects \
               --detection-depth=6 \
-              --exclude=node_modules,cache,artifacts,tmp
+              --exclude=node_modules,cache,artifacts,tmp,package-lock.json
             SNYK_EXIT=$?
             set -e
 

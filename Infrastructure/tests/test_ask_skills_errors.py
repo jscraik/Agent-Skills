@@ -344,7 +344,7 @@ class TestAskSkillsErrors(unittest.TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["dashboard_path"], "Infrastructure/artifacts/skill-reviews/example-skill.html")
-        self.assertTrue(result.data["dashboard_url"].startswith("file://"))
+        self.assertEqual(result.data["dashboard_url"], "Infrastructure/artifacts/skill-reviews/example-skill.html")
         self.assertIn("ASK Local Review", html_text)
         self.assertIn('data-auto-refresh-seconds="0"', html_text)
         self.assertIn("Static evidence snapshot", html_text)
@@ -620,6 +620,7 @@ class TestAskSkillsErrors(unittest.TestCase):
             scorecard_path.parent.mkdir(parents=True)
             scorecard_path.write_text(
                 """{
+  "skill_path": "Plugins/skill-factory/skills/code_quality_review/example-skill",
   "run_id": "20260515-180000-000000",
   "eval_mode": "smoke",
   "runner_mode": "codex",
@@ -641,6 +642,39 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertIn("Edge Case", html_text)
         self.assertIn("Not run", html_text)
         self.assertIn("50%", html_text)
+
+    def test_review_dashboard_ignores_basename_only_scorecard_match(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            report_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.json"
+            report_path.parent.mkdir(parents=True)
+            report_path.write_text(
+                json.dumps({
+                    "status": "success",
+                    "data": {
+                        "target": "Skills/agent-ops/example-skill",
+                        "ask_audit": {"data": {}},
+                    },
+                    "errors": [],
+                }),
+                encoding="utf-8",
+            )
+            scorecard_path = repo_root / "Infrastructure/artifacts/skills/example-skill/20260515-180000-000000/scorecard.json"
+            scorecard_path.parent.mkdir(parents=True)
+            scorecard_path.write_text(
+                json.dumps({
+                    "run_id": "20260515-180000-000000",
+                    "cases": [{"id": "wrong-skill", "name": "Wrong Skill", "passed": True}],
+                }),
+                encoding="utf-8",
+            )
+
+            html_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.html"
+            render_skill_review_dashboard(report_path=report_path, output_path=html_path, repo_root=repo_root)
+            html_text = html_path.read_text(encoding="utf-8")
+
+        self.assertIn("Evals Not Run Yet", html_text)
+        self.assertNotIn("Wrong Skill", html_text)
 
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")

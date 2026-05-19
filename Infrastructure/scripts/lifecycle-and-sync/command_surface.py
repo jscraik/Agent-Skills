@@ -50,6 +50,8 @@ FOLDED_SKILL_HANDLE_ALIASES = {
 HIDDEN_COMPATIBILITY_COMMAND_HANDLES = {
     "he-phase-heartbeat",
 }
+ALIAS_KIND_FOLDED_COMPATIBILITY = "folded_compatibility"
+DEPRECATION_STATE_DEPRECATED = "deprecated"
 
 
 @dataclass(frozen=True)
@@ -366,8 +368,6 @@ def _prune_obsolete_command_handle_dirs(
 
 def _write_generated_text(path: Path, content: str) -> None:
     """Write generated content via same-directory replace to tolerate protected files."""
-    if path.parent.is_symlink():
-        path.parent.unlink()
     if path.is_file():
         try:
             if path.read_text(encoding="utf-8") == content:
@@ -779,6 +779,14 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
         for row in rows
         for violation in row.get("violations", [])
     ])
+    for row in rows:
+        path = root / row["path"]
+        if path.parent.is_symlink():
+            violations.append({
+                "code": "COMMAND_HANDLE_PARENT_SYMLINK",
+                "path": row["path"],
+                "parent": path.parent.relative_to(root).as_posix(),
+            })
     expected_dirs = {
         root / ".agents" / "skills" / row["handle"]
         for row in rows

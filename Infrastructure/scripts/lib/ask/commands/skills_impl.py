@@ -3695,8 +3695,9 @@ def external_review_skill(
                 fix_suggestion="Inspect the JSON report and rerun with --dashboard once the report shape is valid.",
             ))
         else:
-            result.data["dashboard_path"] = rendered_dashboard.relative_to(repo_root.resolve()).as_posix()
-            result.data["dashboard_url"] = rendered_dashboard.resolve().as_uri()
+            dashboard_rel_path = rendered_dashboard.relative_to(repo_root.resolve()).as_posix()
+            result.data["dashboard_path"] = dashboard_rel_path
+            result.data["dashboard_url"] = dashboard_rel_path
 
     return result
 
