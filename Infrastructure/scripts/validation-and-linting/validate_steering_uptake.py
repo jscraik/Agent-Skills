@@ -98,13 +98,45 @@ def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
     if len(table_lines) < 3:
         return [], []
 
-    headers = [cell.strip() for cell in table_lines[0].strip("|").split("|")]
+    headers = _table_cells(table_lines[0])
     rows: list[list[str]] = []
     for line in table_lines[2:]:
-        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        cells = _table_cells(line)
         if any(cells):
             rows.append(cells)
     return headers, rows
+
+
+def _table_cells(line: str) -> list[str]:
+    text = line.strip()
+    if text.startswith("|"):
+        text = text[1:]
+    if text.endswith("|"):
+        text = text[:-1]
+
+    cells: list[str] = []
+    current: list[str] = []
+    escaped = False
+    for char in text:
+        if escaped:
+            if char == "|":
+                current.append("|")
+            else:
+                current.extend(["\\", char])
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if char == "|":
+            cells.append("".join(current).strip())
+            current = []
+            continue
+        current.append(char)
+    if escaped:
+        current.append("\\")
+    cells.append("".join(current).strip())
+    return cells
 
 
 def validate(root: Path = ROOT) -> list[Finding]:

@@ -559,6 +559,17 @@ def test_table_rows_with_data_row() -> None:
     assert rows == [["1", "2", "3"]]
 
 
+def test_table_rows_allows_escaped_inline_pipe_in_cell() -> None:
+    text = (
+        "| A | B | C |\n"
+        "| --- | --- | --- |\n"
+        "| 1 | value \\| fallback | 3 |\n"
+    )
+    headers, rows = validate_steering_uptake._table_rows(text)
+    assert headers == ["A", "B", "C"]
+    assert rows == [["1", "value | fallback", "3"]]
+
+
 def test_table_rows_fewer_than_3_lines() -> None:
     text = "| A | B |\n"
     headers, rows = validate_steering_uptake._table_rows(text)
@@ -571,6 +582,21 @@ def test_table_rows_ignores_non_table_lines() -> None:
     headers, rows = validate_steering_uptake._table_rows(text)
     assert headers == ["A", "B"]
     assert rows == [["1", "2"]]
+
+
+def test_validate_allows_escaped_inline_pipe_in_ledger_cell(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | retry \\| fallback | repeated behavior | missing guard | Docs/agents/19.md | python3 validate_steering_uptake.py --json | validated |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    assert {finding.code for finding in findings} == set()
 
 
 # ---------------------------------------------------------------------------
