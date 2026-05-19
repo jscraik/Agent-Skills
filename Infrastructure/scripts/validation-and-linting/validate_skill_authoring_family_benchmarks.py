@@ -37,7 +37,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover
         if preferred.exists() and os.access(preferred, os.X_OK):
             try:
                 health = subprocess.run(
-                    [str(preferred), "-c", "import yaml, jsonschema"],
+                    [str(preferred), "-c", "import yaml"],
                     env=env,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
