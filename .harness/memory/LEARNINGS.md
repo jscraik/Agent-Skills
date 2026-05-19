@@ -204,8 +204,6 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3199628742)
 
-- **2026-05-14 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2135778639)
-
 - **2026-05-14 [Codex]:** Bash command 'python3' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-2135778639.log. Verify target path exists, check cwd, and use Read tool instead of shell python3 for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:2135778639)
 
 - **2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:703433997)
