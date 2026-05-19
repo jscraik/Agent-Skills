@@ -256,10 +256,10 @@ def _run_validation_command(
         env=_subprocess_env_with_uv_cache(),
     )
     result.data[data_key] = {
-        "command": command,
+        "command": _repo_relative_command(repo_root, command),
         "exit_code": proc.returncode,
-        "stdout": proc.stdout,
-        "stderr": proc.stderr,
+        "stdout": _repo_relative_text(repo_root, proc.stdout),
+        "stderr": _repo_relative_text(repo_root, proc.stderr),
     }
     if proc.returncode == 0:
         result.status = "success"
@@ -278,11 +278,12 @@ def _run_validation_command(
 
 def _completed_process_payload(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
     """Return stable JSON data for a validation subprocess result."""
+    repo_root = Path.cwd()
     return {
-        "command": list(proc.args) if isinstance(proc.args, list) else proc.args,
+        "command": _repo_relative_command(repo_root, list(proc.args) if isinstance(proc.args, list) else proc.args),
         "exit_code": proc.returncode,
-        "stdout": proc.stdout,
-        "stderr": proc.stderr,
+        "stdout": _repo_relative_text(repo_root, proc.stdout),
+        "stderr": _repo_relative_text(repo_root, proc.stderr),
     }
 
 
@@ -393,6 +394,14 @@ def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root
     tile_skill_dir = temp_root / "skills" / skill_key
     tile_skill_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source_skill, tile_skill_dir / "SKILL.md")
+    for item in source_skill_dir.iterdir():
+        if item.name == "SKILL.md":
+            continue
+        dest = tile_skill_dir / item.name
+        if item.is_dir():
+            shutil.copytree(item, dest, symlinks=True)
+        elif item.is_file():
+            shutil.copy2(item, dest)
 
     tile = {
         "name": f"local/{skill_key}",
@@ -1172,6 +1181,28 @@ def _repo_relative_path(repo_root: Path, path: Path) -> str | None:
         return path.resolve().relative_to(repo_root.resolve()).as_posix()
     except (OSError, ValueError):
         return None
+
+
+def _repo_relative_text(repo_root: Path, text: str) -> str:
+    if not text:
+        return text
+    root = str(repo_root.resolve())
+    text = text.replace(root + "/", "").replace(root, ".").replace(str(Path.home()) + "/", "~/")
+    return re.sub(r"/(?:private/)?tmp/agent-skills-[A-Za-z0-9._-]+", "<tmp>", text)
+
+
+def _repo_relative_command(repo_root: Path, command: Any) -> Any:
+    if isinstance(command, list):
+        sanitized: list[str] = []
+        for index, part in enumerate(command):
+            value = _repo_relative_text(repo_root, str(part))
+            if index == 0 and value.startswith(("~/", "/", "<tmp>")):
+                value = Path(str(part)).name
+            sanitized.append(value)
+        return sanitized
+    if isinstance(command, str):
+        return _repo_relative_text(repo_root, command)
+    return command
 
 
 def _status_from_bool(value: bool) -> str:
@@ -3071,7 +3102,11 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     audit_env = _subprocess_env_with_uv_cache()
 
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-    result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
+    result.data["diagnostics"] = {
+        "exit_code": diag_proc.returncode,
+        "stdout": _repo_relative_text(repo_root, diag_proc.stdout),
+        "stderr": _repo_relative_text(repo_root, diag_proc.stderr),
+    }
 
     is_skill_factory_system_overlay = audit_target_path in {
         "skills-system/skill-creator",
@@ -3081,7 +3116,11 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     if level == "strict" and is_skill_factory_system_overlay:
         overlay_cmd = python + ["Infrastructure/scripts/validation-and-linting/check_skill_factory_system_overlays.py"]
         overlay_proc = subprocess.run(overlay_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["system_overlay"] = {"exit_code": overlay_proc.returncode, "stdout": overlay_proc.stdout, "stderr": overlay_proc.stderr}
+        result.data["system_overlay"] = {
+            "exit_code": overlay_proc.returncode,
+            "stdout": _repo_relative_text(repo_root, overlay_proc.stdout),
+            "stderr": _repo_relative_text(repo_root, overlay_proc.stderr),
+        }
         if overlay_proc.returncode != 0:
             result.status = "error"
             result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Skill Factory system overlay validation failed."))
@@ -3089,7 +3128,11 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
 
         family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
+        result.data["family_benchmarks"] = {
+            "exit_code": family_proc.returncode,
+            "stdout": _repo_relative_text(repo_root, family_proc.stdout),
+            "stderr": _repo_relative_text(repo_root, family_proc.stderr),
+        }
         if family_proc.returncode != 0:
             summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
             message = "Family benchmarks validation failed."
@@ -3114,7 +3157,11 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         gate_script = _resolve_skill_builder_script(repo_root, "skill_gate")
         gate_cmd = python + [gate_script, audit_target_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
         gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["security_gate"] = {"exit_code": gate_proc.returncode, "stdout": gate_proc.stdout, "stderr": gate_proc.stderr}
+        result.data["security_gate"] = {
+            "exit_code": gate_proc.returncode,
+            "stdout": _repo_relative_text(repo_root, gate_proc.stdout),
+            "stderr": _repo_relative_text(repo_root, gate_proc.stderr),
+        }
         if gate_proc.returncode != 0:
             result.status = "error"
             result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Security gate failed."))
@@ -3123,7 +3170,11 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         # Family benchmarks validation
         family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
+        result.data["family_benchmarks"] = {
+            "exit_code": family_proc.returncode,
+            "stdout": _repo_relative_text(repo_root, family_proc.stdout),
+            "stderr": _repo_relative_text(repo_root, family_proc.stderr),
+        }
         if family_proc.returncode != 0:
             summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
             message = "Family benchmarks validation failed."
@@ -3146,7 +3197,11 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         openclaw_script = _resolve_skill_builder_script(repo_root, "openclaw_skill_guard")
         openclaw_cmd = python + [openclaw_script, audit_target_path, "--mode", "both", "--format", "text"]
         openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["openclaw_guard"] = {"exit_code": openclaw_proc.returncode, "stdout": openclaw_proc.stdout, "stderr": openclaw_proc.stderr}
+        result.data["openclaw_guard"] = {
+            "exit_code": openclaw_proc.returncode,
+            "stdout": _repo_relative_text(repo_root, openclaw_proc.stdout),
+            "stderr": _repo_relative_text(repo_root, openclaw_proc.stderr),
+        }
         if openclaw_proc.returncode != 0:
             result.status = "error"
             result.errors.append(ErrorObject(code="ERR_VALIDATION", message="OpenClaw guard validation failed."))
@@ -3611,7 +3666,7 @@ def external_review_skill(
             ))
         else:
             result.data["dashboard_path"] = rendered_dashboard.relative_to(repo_root.resolve()).as_posix()
-            result.data["dashboard_url"] = rendered_dashboard.resolve().as_uri()
+            result.data["dashboard_url"] = result.data["dashboard_path"]
 
     return result
 

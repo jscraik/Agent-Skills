@@ -62,7 +62,14 @@ td span { color:var(--muted); }
 .suggestions li,.empty-state p { color:var(--muted); margin:10px 0; }
 .evidence-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .evidence-list a,.evidence-list div { border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }
+.review-lanes { margin-top:24px; }
+.review-lane { display:grid; grid-template-columns:minmax(0,1fr) minmax(220px,420px); gap:18px; align-items:start; border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:16px; margin:12px 0; }
+.review-lane h3 { margin:0 0 4px; }
+.review-lane p { margin:0 0 10px; color:var(--muted); }
+.review-lane code { display:block; white-space:normal; overflow-wrap:anywhere; }
+.lane-badge { display:inline-flex; margin:0 6px 6px 0; border:1px solid #303641; border-radius:7px; padding:2px 7px; background:#171b22; color:var(--muted); font-size:12px; font-weight:800; }
 @media (max-width: 1100px) { .shell { grid-template-columns:1fr; } .sidebar { position:relative; height:auto; } .hero { grid-template-columns:1fr; } .grid,.evidence-list { grid-template-columns:1fr; } .tabs a { min-width:104px; } }
+@media (max-width: 900px) { .review-lane { grid-template-columns:1fr; } }
 @media (max-width: 700px) { .plugin-posture { grid-template-columns:1fr; } .plugin-score { justify-content:flex-start; } }
 </style>
 <script>
@@ -131,45 +138,45 @@ document.addEventListener('DOMContentLoaded', () => {
   <main class="main">
     <div class="breadcrumb"><span>Local / Skills / Skills/agent-ops/codex-agent-creator / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">88</div></div>
+      <div><div class="hex">95</div></div>
       <div>
         <h1>codex-agent-creator</h1>
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
-        
+
       <div class="metric">
-        <div class="metric-head"><span>Quality</span><strong class="bad">63%</strong></div>
-        <div class="bar"><span class="bad" style="width:63%"></span></div>
+        <div class="metric-head"><span>Quality</span><strong class="warn">85%</strong></div>
+        <div class="bar"><span class="warn" style="width:85%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-    
-        
+
+
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>2/2 latest eval cases passed.</p>
+        <p>1/1 latest eval cases passed.</p>
       </div>
-    
-        
+
+
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
       </div>
-    
+
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
-      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill bad">63%</span></div>
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
+      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">85%</span></div>
       <div class="grid">
-        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">75%</strong></div>
-        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="bad">35%</strong></div>
-        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="warn">80%</strong></div>
+        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="good">100%</strong></div>
+        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="bad">63%</strong></div>
+        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="good">100%</strong></div>
       </div>
       <div class="panel plugin-posture">
         <div>
@@ -178,40 +185,40 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="plugin-score"><span class="pill warn">A</span><strong class="good">95%</strong></div>
         <p class="posture-detail warn">Acceptable as a budget guardrail when local audit and Tessl quality pass; track warnings as follow-up or prove observed usage.</p>
-        <ul><li>Score: 95/100</li><li>Grade: A</li><li>Risk: medium</li><li>Checks: 0 fail, 1 warn, 2 info</li><li>Active budget: 2176 tokens (heavy)</li><li>Observed usage: not supplied</li></ul>
+        <ul><li>Score: 95/100</li><li>Grade: A</li><li>Risk: medium</li><li>Checks: 0 fail, 1 warn, 2 info</li><li>Active budget: 1598 tokens (moderate)</li><li>Observed usage: not supplied</li></ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
-        <tbody><tr><td>Specificity</td><td>Lists several concrete actions (create, validate, install, fold, troubleshoot) but the domain objects (&#x27;Codex custom subagent role TOML&#x27;, &#x27;agent discoverability config&#x27;) are somewhat niche and not fully elaborated in terms of what those actions produce or entail.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Trigger Term Quality</td><td>Includes some relevant keywords like &#x27;TOML&#x27;, &#x27;subagent&#x27;, &#x27;Codex&#x27;, &#x27;role&#x27;, and &#x27;config&#x27;, but uses specialized jargon (&#x27;fold&#x27;, &#x27;agent discoverability config&#x27;) that users may not naturally say. Missing common variations or simpler phrasings a user might use.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Completeness</td><td>Explicitly answers both &#x27;what&#x27; (create, validate, install, fold, troubleshoot Codex custom subagent role TOML and agent discoverability config) and &#x27;when&#x27; (starts with &#x27;Use when asked to...&#x27;), providing clear trigger guidance.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Distinctiveness Conflict Risk</td><td>Highly specific niche targeting Codex custom subagent role TOML and agent discoverability config. Very unlikely to conflict with other skills due to the narrow, well-defined domain.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Conciseness</td><td>The skill is extremely verbose with many sections that describe abstract processes, policies, and philosophical guidance rather than concrete instructions. Much of the content (Philosophy, Evidence Requirements, Safety Boundaries, Accessibility Requirements, Anti-Patterns) reads like organizational policy documentation that Claude doesn&#x27;t need spelled out at this length. Many sections use vague, bureaucratic language (&#x27;side-effect class&#x27;, &#x27;evidence ledger&#x27;, &#x27;confidence bands&#x27;) without defining them concretely.</td><td class="score bad">1 / 3</td></tr>
-<tr><td>Actionability</td><td>The skill provides some concrete guidance like specific file paths (codex-rs/config/src/config_toml.rs), specific config keys (name, description, nickname_candidates), and a validation command (./bin/ask skills audit...). However, it lacks any executable code examples, concrete TOML templates, or copy-paste-ready role definitions. The procedure steps are abstract (&#x27;Classify target kind and canonical source&#x27;) rather than showing exactly what to do.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Workflow Clarity</td><td>The 8-step procedure provides a sequence, and the validation gates section includes a feedback loop (&#x27;stop at the first failed gate; fix the failure class and rerun&#x27;). However, the steps themselves are abstract and lack concrete validation checkpoints within the procedure. The separation of procedure from validation gates makes the workflow harder to follow as an integrated process.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Progressive Disclosure</td><td>The Context Routes section provides well-signaled one-level-deep references to supporting files (role-creation-guide.md, role-config-examples.md, contract.yaml, evals.yaml). However, no bundle files were provided to verify these references exist, and the main body contains substantial inline content that could be offloaded (Anti-Patterns, Gotchas, Safety Boundaries could be in references). The skill is quite long for what could be a more concise overview pointing to detailed materials.</td><td class="score bad">2 / 3</td></tr></tbody>
+        <tbody><tr><td>Specificity</td><td>Lists multiple specific concrete actions: &#x27;create, validate, install, fold, or troubleshoot&#x27; applied to well-defined objects like &#x27;Codex custom subagent roles, role TOML config files, agent configuration, discoverability wiring.&#x27;</td><td class="score good">3 / 3</td></tr>
+<tr><td>Trigger Term Quality</td><td>Includes a strong set of natural trigger terms users would say: &#x27;Codex agent role&#x27;, &#x27;reviewer agent&#x27;, &#x27;role config&#x27;, &#x27;TOML role file&#x27;, &#x27;overlapping agents to merge&#x27;, &#x27;subagent setup&#x27;. These cover multiple natural phrasings a user might employ.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Completeness</td><td>Clearly answers both &#x27;what&#x27; (create, validate, install, fold, troubleshoot Codex custom subagent roles and config files) and &#x27;when&#x27; with an explicit &#x27;Use when...&#x27; clause listing specific trigger scenarios.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Distinctiveness Conflict Risk</td><td>Highly distinctive niche targeting &#x27;Codex custom subagent roles&#x27; and &#x27;TOML role files&#x27; — these are very specific domain concepts unlikely to overlap with generic coding or configuration skills.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Conciseness</td><td>The skill is moderately efficient but includes some sections that feel redundant or could be tightened (e.g., &#x27;Philosophy&#x27; restates Purpose, &#x27;Failure Mode&#x27; and &#x27;Anti-Patterns&#x27; overlap with Validation Gates). Some bullet points are dense but not padded with things Claude already knows, so it avoids the worst verbosity.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Actionability</td><td>The procedure provides a clear sequence of steps but they are abstract classifications and verifications rather than concrete executable commands or code. The skill delegates copyable templates to references/role-config-examples.md rather than including any inline, and no concrete TOML example or command is shown directly. The guidance is specific in intent but not copy-paste ready.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Workflow Clarity</td><td>The procedure is clearly sequenced (8 steps with classification, routing, verification, inventory, action, validation, and reporting). Validation Gates explicitly define a stop-fix-rerun feedback loop. The workflow handles error recovery (&#x27;stop at the first failed gate, fix that failure class, and rerun it&#x27;) and includes rollback and residual risk reporting.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Progressive Disclosure</td><td>The skill references multiple external files (role-creation-guide.md, role-config-examples.md, contract.yaml, evals.yaml, discovery-interview.md) with clear one-level-deep links, which is good structure. However, no bundle files were provided, so we cannot verify these references exist. Additionally, some content that could be inline (like a minimal TOML example) is entirely deferred to references, making the SKILL.md less self-contained than ideal.</td><td class="score bad">2 / 3</td></tr></tbody>
       </table>
-      <div class="suggestions"><h3>Suggestions</h3><ul><li>Add more natural trigger terms or synonyms users might say, such as &#x27;agent configuration&#x27;, &#x27;TOML config files&#x27;, &#x27;custom roles&#x27;, or &#x27;subagent setup&#x27;.</li><li>Clarify domain-specific terms like &#x27;fold&#x27; and &#x27;agent discoverability config&#x27; so the description is self-explanatory without prior context.</li><li>Add a concrete, copy-paste-ready TOML role file example at the top (Quick Start) showing a minimal valid agent role with required fields like developer_instructions, name, and description.</li><li>Replace abstract procedure steps like &#x27;Classify target kind and canonical source&#x27; with concrete instructions showing exact commands or file operations to perform.</li><li>Consolidate or remove sections that describe policies Claude can infer (Philosophy, Accessibility Requirements, much of Safety Boundaries) to reduce token usage by ~40%.</li><li>Move Anti-Patterns, Gotchas, and Evidence Requirements into a reference file and link to it, keeping only the most critical 2-3 items inline.</li></ul></div>
+      <div class="suggestions"><h3>Suggestions</h3><ul><li>Include at least one minimal, copyable TOML role file example inline in the skill body rather than deferring all examples to references/role-config-examples.md</li><li>Merge the &#x27;Failure Mode&#x27;, &#x27;Anti-Patterns&#x27;, and &#x27;Gotchas&#x27; sections into a single &#x27;Pitfalls &amp; Recovery&#x27; section to reduce redundancy and improve conciseness</li><li>Add a concrete validation command or script invocation example in the &#x27;Validation Gates&#x27; section so Claude knows exactly how to run each gate</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
-      
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
+
       <section>
         <div class="section-head">
-          <div><h2>Evaluation Results</h2><p>2/2 latest eval cases passed.</p></div>
+          <div><h2>Evaluation Results</h2><p>1/1 latest eval cases passed.</p></div>
           <span class="pill good">100%</span>
         </div>
         <table>
           <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
-          <tbody><tr><td><strong>happy main</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>risky command</strong><br><span>pressure</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
+          <tbody><tr><td><strong>discovery interview contract</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
         </table>
       </section>
-    
+
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>WARN FM_METADATA_VERSION_MISSING: `metadata.version` is recommended for local Tessl review compatibility.</li><li>WARN RESEARCH_EVALS_REALISTIC_FIELD_MISSING: Some trigger eval cases omit `realistic: true|false`; explicit declarations prevent style-word heuristics from becoming the source of truth. | missing=11/11</li><li>WARN RESEARCH_SCOPE_OVERBUNDLED: Skill/package scope looks broad across many surfaces without explicit narrowing guidance. Prefer the smallest viable package boundary first. | surfaces=6</li></ul></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
       <div class="panel plugin-posture">
         <div>
           <h3>Snyk Advisory</h3>
@@ -227,14 +234,15 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.json</span></a>
-        <a href="Infrastructure/artifacts/skills/codex-agent-creator/20260510-155933-562190/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/codex-agent-creator/20260510-155933-562190/scorecard.json</span></a>
+        <a href="codex-agent-creator.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/codex-agent-creator.json</span></a>
+        <a href="Infrastructure/artifacts/skills/codex-agent-creator/20260519-101910-773705/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/codex-agent-creator/20260519-101910-773705/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
+      <div class="review-lanes"><div class="section-head"><div><h2>Review Lanes</h2><p>How this local dashboard separates behavior checks, static guardrails, Tessl review, and optional security screening.</p></div></div><div class="review-lane"><div><h3>Local Evals</h3><p>dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates</p></div><code>./bin/ask evals run &lt;path&gt; --mode smoke|release --json --robot</code></div><div class="review-lane"><div><h3>Plugin Eval</h3><p>static budget, ergonomics, and reviewability guardrail; not a substitute for local evals</p></div><code>plugin-eval analyze &lt;path&gt; --format markdown</code></div><div class="review-lane"><div><h3>Tessl Lint</h3><p>disposable tile.json package-shape check, not a direct content finding</p><span class="lane-badge">canonical source shape: SKILL.md-first</span></div><code>tessl skill lint &lt;temporary-tile.json&gt;</code></div><div class="review-lane"><div><h3>Tessl Review</h3><p>local best-practice/content review for private or work-in-progress skills</p></div><code>tessl skill review &lt;temporary-skill-directory&gt;</code></div><div class="review-lane"><div><h3>Snyk</h3><p>opt-in local dependency security screening; release-required for manifest-backed candidates</p><span class="lane-badge">default: disabled_until_requested</span><span class="lane-badge">release required: manifest-backed candidates</span></div><code>snyk test --all-projects --detection-depth=6 --severity-threshold=high --json &lt;skill-path&gt;</code></div></div>
     </section>
   </main>
 </div>

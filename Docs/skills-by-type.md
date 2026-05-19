@@ -20,7 +20,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `runbook`: 13
 - `infrastructure_ops`: 3
 - `invalid`: 0
-- `total_tagged`: 100
 - `total_tagged`: 101
 
 ## Semantic Types

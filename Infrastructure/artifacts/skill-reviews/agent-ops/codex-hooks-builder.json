@@ -8,27 +8,29 @@
           "stdout": "\n\ud83d\udccb Diagnostic report: Skills/agent-ops/codex-hooks-builder\n--------------------------------------------------\n  \u001b[32m\u2713\u001b[0m skill directory: Found at Skills/agent-ops/codex-hooks-builder\n  \u001b[32m\u2713\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m\u2713\u001b[0m nested .git: No nested .git directory\n  \u001b[90m\u25cb\u001b[0m symlink (codex): Rooted latent skill is routed through .skillsets/agent-ops/manifest.jsonl and is not expected as a first-level user-runtime symlink: codex-hooks-builder\n  \u001b[90m\u25cb\u001b[0m symlink (agents): Rooted latent skill is routed through .skillsets/agent-ops/manifest.jsonl and is not expected as a first-level user-runtime symlink: codex-hooks-builder\n  \u001b[32m\u2713\u001b[0m skill index: Listed in SKILL.md index\n  \u001b[90m\u25cb\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m\u2713\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n\u2705 All checks passed\n"
         },
         "family_benchmarks": {
-          "exit_code": 0,
-          "stderr": "",
-          "stdout": "[family-benchmark] checked skills:\n  - Skills/agent-ops/codex-hooks-builder\n[family-benchmark] pass: all family benchmark checks satisfied\n[family-benchmark] warnings:\n  - WARN EVALS_HAPPY_NO_SMOKE [Skills/agent-ops/codex-hooks-builder] 2 happy-path case(s) lack smoke eval_mode and won't catch regressions in quick runs: happy-main, happy-explicit\n"
-        },
-        "openclaw_guard": {
-          "exit_code": 0,
-          "stderr": "",
-          "stdout": "OpenClaw skill guard: codex-hooks-builder\nSummary: 0 critical \u00b7 0 warn \u00b7 2 info\nINFO readiness.checked: Operational readiness checks completed\nINFO security.no_scripts: No executable scripts found; static security scan skipped\n"
+          "exit_code": 1,
+          "stderr": "PyYAML is required for validate_skill_authoring_family_benchmarks.py. Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`.\n",
+          "stdout": ""
         },
         "security_gate": {
           "exit_code": 0,
           "stderr": "",
-          "stdout": "Skill: codex-hooks-builder\nPath:  /Users/jamiecraik/dev/agent-skills/Skills/agent-ops/codex-hooks-builder/SKILL.md\n\nWARN FM_METADATA_VERSION_MISSING: `metadata.version` is recommended for local Tessl review compatibility.\nWARN RESEARCH_EVALS_REALISTIC_FIELD_MISSING: Some trigger eval cases omit `realistic: true|false`; explicit declarations prevent style-word heuristics from becoming the source of truth. | missing=9/9\nWARN RESEARCH_EXAMPLES_SYNTHETIC: Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples\n\nRESULT: PASS\n"
+          "stdout": "Skill: codex-hooks-builder\nPath:  Skills/agent-ops/codex-hooks-builder/SKILL.md\n\n\nRESULT: PASS\n"
         }
       },
-      "errors": [],
-      "status": "success"
+      "errors": [
+        {
+          "code": "ERR_VALIDATION",
+          "fix_suggestion": "Inspect data.family_benchmarks for full output, or run: mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill Skills/agent-ops/codex-hooks-builder --format text",
+          "help_url": null,
+          "message": "Family benchmarks validation failed. First failures: PyYAML is required for validate_skill_authoring_family_benchmarks.py. Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`."
+        }
+      ],
+      "status": "error"
     },
     "plugin_eval": {
       "command": [
-        "/Users/jamiecraik/.local/bin/plugin-eval",
+        "plugin-eval",
         "analyze",
         "Skills/agent-ops/codex-hooks-builder",
         "--format",
@@ -37,10 +39,10 @@
       "exit_code": 0,
       "status": "success",
       "stderr": "",
-      "stdout": "# Plugin Eval Report: codex-hooks-builder\n\n## At a Glance\n- Score: 95/100\n- Grade: A\n- Risk: medium\n- Checks: 0 fail, 1 warn, 2 info\n- Active budget: 1960 tokens (heavy)\n- Observed usage: not supplied\n\n## Why It Matters\n- 1 warning signal still need cleanup before this feels polished.\n- budget is the largest source of score loss at -4.5 points.\n- Active budget pressure is high enough that token cost may dominate the user experience.\n- No observed usage is attached yet, so budget conclusions are still based on static estimates.\n\n## Fix First\n- [warn/warning] invoke_cost_tokens is heavy relative to the current Codex baseline. Why: Budget pressure matters because always-loaded or frequently-loaded text can make the workflow feel expensive fast. Fix: Reduce repeated instruction text and move detail into deferred supporting files.\n\n## Recommended Next Step\n- Measure real token usage next\n- Why: The static budget looks heavy, so live usage is the fastest way to confirm whether the cost is acceptable.\n- Chat request: \"Measure the real token usage of this skill.\"\n- Local command: `plugin-eval start ~/dev/agent-skills/Skills/agent-ops/codex-hooks-builder --request 'Measure the real token usage of this skill.' --format markdown`\n\n## Details\n<details>\n<summary>Watch next</summary>\n\n- No secondary findings queued.\n</details>\n<details>\n<summary>Improvement brief</summary>\n\n- Raise the evaluation from grade A (95/100) with a focus on the highest-signal structural and budget issues first.\n- Goal: Reduce repeated instruction text and move detail into deferred supporting files.\n- Measure: token-usage-observer\n- Measure: task-outcome-scorecard\n- Measure: latency-efficiency\n- Suggested prompt: Use the skill-creator guidance to improve codex-hooks-builder. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard, latency-efficiency. Address invoke_cost_tokens-budget-high: invoke_cost_tokens is heavy relative to the current Codex baseline.\n</details>\n<details>\n<summary>Budgets and observed usage</summary>\n\n- trigger_cost_tokens: 43 (good)\n- invoke_cost_tokens: 1917 (heavy)\n- deferred_cost_tokens: 2757 (moderate)\n- total_tokens: 4717 (heavy)\n\n- No observed usage supplied.\n</details>\n<details>\n<summary>Measurement plan</summary>\n\nCombine cost, outcome, and trust signals so you can tell whether the skill or plugin is genuinely helping instead of only looking well-structured on paper.\n\n- Token Usage Observer [high] Measure how many tokens the skill or plugin actually burns in representative runs. Signals: observed_usage_sample_count, observed_input_tokens_avg, observed_total_tokens_avg, estimate_vs_observed_input_ratio. Evidence: Responses API usage logs, Codex-like session exports, JSONL traces captured from local benchmarking harnesses.\n- Task Outcome Scorecard [high] Measure whether the skill helps users finish the intended job with fewer retries and less cleanup. Signals: task_success_rate, first_pass_success_rate, retry_rate, human_override_rate. Evidence: Task run logs, Structured user acceptance checklist, Before/after comparison runs on the same prompts.\n- Tool Call Audit [medium] Check whether the agent uses the right tools, arguments, and sequencing when the skill is active. Signals: tool_call_success_rate, invalid_tool_argument_rate, recoverable_tool_failure_rate. Evidence: Tool invocation traces, Recorded sessions, Golden-path scenario replays.\n- Latency And Efficiency [high] Track whether the skill speeds users up enough to justify its cost. Signals: p50_time_to_first_acceptable_answer_seconds, p95_time_to_task_completion_seconds, tokens_per_successful_run. Evidence: Benchmark harness timings, Manual stopwatch runs on canonical tasks, Responses API timestamps combined with usage logs.\n- Human Rubric Review [medium] Capture clarity, trust, and usefulness signals that automated checks will miss. Signals: clarity_score_avg, confidence_score_avg, follow_up_question_rate. Evidence: Reviewer scorecards, Team rubric sheets, Annotated transcripts.\n</details>\n<details>\n<summary>Use From Codex Chat</summary>\n\nStart with a natural chat request, then let plugin-eval show the exact local command sequence behind it.\n\nStart with this chat request: \"Evaluate this skill.\"\nWhy this path: Plugin Eval recommended Evaluate Skill from the current local state for this skill.\nQuick local entrypoint: plugin-eval start ~/dev/agent-skills/Skills/agent-ops/codex-hooks-builder --request 'Evaluate this skill.' --format markdown\nPlugin Eval will run first: plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/codex-hooks-builder --format markdown\n\nOther chat requests you can use:\n- Full Skill Analysis: say \"Give me a full analysis of this skill, including benchmark setup.\" -> plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/codex-hooks-builder --format markdown\n- Evaluate Skill: say \"Evaluate this skill.\" -> plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/codex-hooks-builder --format markdown\n- Explain Token Budget: say \"Explain the token budget for this skill.\" -> plugin-eval explain-budget ~/dev/agent-skills/Skills/agent-ops/codex-hooks-builder --format markdown\n- Measure Real Token Usage: say \"Measure the real token usage of this skill.\" -> plugin-eval init-benchmark ~/dev/agent-skills/Skills/agent-ops/codex-hooks-builder\n- Benchmark With Starter Scenarios: say \"Help me benchmark this skill.\" -> plugin-eval init-benchmark ~/dev/agent-skills/Skills/agent-ops/codex-hooks-builder\n- Start Here: say \"What should I run next?\" -> plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/codex-hooks-builder --format markdown\n</details>\n<details>\n<summary>Checks</summary>\n\n- [WARN] invoke_cost_tokens-budget-high: invoke_cost_tokens is heavy relative to the current Codex baseline. Evidence: Value: 1917 tokens Baseline samples: skills=8, plugins=118 Remediation: Reduce repeated instruction text and move detail into deferred supporting files.\n- [INFO] coverage-artifacts-unavailable: No coverage artifacts were found for this target. Evidence: Skills/agent-ops/codex-hooks-builder Remediation: Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring.\n</details>\n<details>\n<summary>Metrics</summary>\n\n- skill_line_count: 130 lines (good)\n- description_length_chars: 150 chars (good)\n- relative_link_count: 0 links (good)\n- code_fence_count: 0 blocks (good)\n- support_file_count: 4 files (good)\n- trigger_cost_tokens: 43 tokens (good)\n- invoke_cost_tokens: 1917 tokens (heavy)\n- deferred_cost_tokens: 2757 tokens (moderate)\n- coverage_artifact_count: 0 files (info)\n</details>\n<details>\n<summary>Score details</summary>\n\n- Starting score: 100\n- Total deductions: -4.75\n- Final score: 95\n- Risk: Contains 1 warning signal that still need attention.\n\n- -4.5 points: invoke_cost_tokens-budget-high [warn/warning] invoke_cost_tokens is heavy relative to the current Codex baseline.\n- -0.25 points: coverage-artifacts-unavailable [info/info] No coverage artifacts were found for this target.\n\n- budget: -4.5 points across 1 check\n- coverage: -0.25 points across 1 check\n</details>\n"
+      "stdout": "# Plugin Eval Report: codex-hooks-builder\n\n## At a Glance\n- Score: 100/100\n- Grade: A\n- Risk: low\n- Checks: 0 fail, 0 warn, 2 info\n- Active budget: 1789 tokens (moderate)\n- Observed usage: not supplied\n\n## Why It Matters\n- coverage is the largest source of score loss at -0.25 points.\n- Budget pressure is not the dominant issue right now.\n- No observed usage is attached yet, so budget conclusions are still based on static estimates.\n\n## Fix First\n- No urgent fixes were identified.\n\n## Recommended Next Step\n- Choose the next workflow from chat\n- Why: The report is clean enough that the best next step depends on whether you want budgets, benchmarks, or comparisons.\n- Chat request: \"What should I run next?\"\n- Local command: `plugin-eval start Skills/agent-ops/codex-hooks-builder --request 'What should I run next?' --format markdown`\n\n## Details\n<details>\n<summary>Watch next</summary>\n\n- No secondary findings queued.\n</details>\n<details>\n<summary>Improvement brief</summary>\n\n- Raise the evaluation from grade A (100/100) with a focus on the highest-signal structural and budget issues first.\n- Measure: token-usage-observer\n- Measure: task-outcome-scorecard\n- Suggested prompt: Use the skill-creator guidance to improve codex-hooks-builder. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard.\n</details>\n<details>\n<summary>Budgets and observed usage</summary>\n\n- trigger_cost_tokens: 92 (moderate)\n- invoke_cost_tokens: 1697 (moderate)\n- deferred_cost_tokens: 3677 (moderate)\n- total_tokens: 5466 (moderate)\n\n- No observed usage supplied.\n</details>\n<details>\n<summary>Measurement plan</summary>\n\nCombine cost, outcome, and trust signals so you can tell whether the skill or plugin is genuinely helping instead of only looking well-structured on paper.\n\n- Token Usage Observer [high] Measure how many tokens the skill or plugin actually burns in representative runs. Signals: observed_usage_sample_count, observed_input_tokens_avg, observed_total_tokens_avg, estimate_vs_observed_input_ratio. Evidence: Responses API usage logs, Codex-like session exports, JSONL traces captured from local benchmarking harnesses.\n- Task Outcome Scorecard [high] Measure whether the skill helps users finish the intended job with fewer retries and less cleanup. Signals: task_success_rate, first_pass_success_rate, retry_rate, human_override_rate. Evidence: Task run logs, Structured user acceptance checklist, Before/after comparison runs on the same prompts.\n- Tool Call Audit [medium] Check whether the agent uses the right tools, arguments, and sequencing when the skill is active. Signals: tool_call_success_rate, invalid_tool_argument_rate, recoverable_tool_failure_rate. Evidence: Tool invocation traces, Recorded sessions, Golden-path scenario replays.\n- Latency And Efficiency [medium] Track whether the skill speeds users up enough to justify its cost. Signals: p50_time_to_first_acceptable_answer_seconds, p95_time_to_task_completion_seconds, tokens_per_successful_run. Evidence: Benchmark harness timings, Manual stopwatch runs on canonical tasks, Responses API timestamps combined with usage logs.\n- Human Rubric Review [medium] Capture clarity, trust, and usefulness signals that automated checks will miss. Signals: clarity_score_avg, confidence_score_avg, follow_up_question_rate. Evidence: Reviewer scorecards, Team rubric sheets, Annotated transcripts.\n</details>\n<details>\n<summary>Use From Codex Chat</summary>\n\nStart with a natural chat request, then let plugin-eval show the exact local command sequence behind it.\n\nStart with this chat request: \"Evaluate this skill.\"\nWhy this path: Plugin Eval recommended Evaluate Skill from the current local state for this skill.\nQuick local entrypoint: plugin-eval start Skills/agent-ops/codex-hooks-builder --request 'Evaluate this skill.' --format markdown\nPlugin Eval will run first: plugin-eval analyze Skills/agent-ops/codex-hooks-builder --format markdown\n\nOther chat requests you can use:\n- Full Skill Analysis: say \"Give me a full analysis of this skill, including benchmark setup.\" -> plugin-eval analyze Skills/agent-ops/codex-hooks-builder --format markdown\n- Evaluate Skill: say \"Evaluate this skill.\" -> plugin-eval analyze Skills/agent-ops/codex-hooks-builder --format markdown\n- Explain Token Budget: say \"Explain the token budget for this skill.\" -> plugin-eval explain-budget Skills/agent-ops/codex-hooks-builder --format markdown\n- Measure Real Token Usage: say \"Measure the real token usage of this skill.\" -> plugin-eval init-benchmark Skills/agent-ops/codex-hooks-builder\n- Benchmark With Starter Scenarios: say \"Help me benchmark this skill.\" -> plugin-eval init-benchmark Skills/agent-ops/codex-hooks-builder\n- Start Here: say \"What should I run next?\" -> plugin-eval analyze Skills/agent-ops/codex-hooks-builder --format markdown\n</details>\n<details>\n<summary>Checks</summary>\n\n- [INFO] coverage-artifacts-unavailable: No coverage artifacts were found for this target. Evidence: Skills/agent-ops/codex-hooks-builder Remediation: Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring.\n</details>\n<details>\n<summary>Metrics</summary>\n\n- skill_line_count: 125 lines (good)\n- description_length_chars: 346 chars (good)\n- relative_link_count: 1 links (good)\n- code_fence_count: 1 blocks (good)\n- support_file_count: 5 files (good)\n- trigger_cost_tokens: 92 tokens (moderate)\n- invoke_cost_tokens: 1697 tokens (moderate)\n- deferred_cost_tokens: 3677 tokens (moderate)\n- coverage_artifact_count: 0 files (info)\n</details>\n<details>\n<summary>Score details</summary>\n\n- Starting score: 100\n- Total deductions: -0.25\n- Final score: 100\n- Risk: No failing or warning checks were found; remaining items are informational only.\n\n- -0.25 points: coverage-artifacts-unavailable [info/info] No coverage artifacts were found for this target.\n\n- coverage: -0.25 points across 1 check\n</details>\n"
     },
     "policy": {
-      "external_quality_judge": "tessl_review",
+      "external_quality_judge": "tessl_local_review",
       "mode": "local_internal_only",
       "no_publish": true,
       "no_registry_upload": true,
@@ -48,12 +50,61 @@
       "plugin_eval_role": "budget_and_ergonomics_guardrail",
       "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
       "primary_gate": "local_eval_ask_audit",
+      "publish_policy": "never publish, register, upload, or invoke npx from this lane",
       "snyk_default": "disabled_until_requested",
       "snyk_privacy_basis": "Snyk CLI security analysis may contact Snyk services. It is never run by default in this local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted.",
-      "snyk_role": "optional_external_security_advisory",
+      "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
+      "snyk_role": "opt_in_local_dependency_security_screening",
+      "snyk_when_not_to_use": [
+        "pure SKILL.md-first instruction-only candidates with no supported dependency manifest, unless the user explicitly asks",
+        "routine local iteration where external networked security analysis is not needed"
+      ],
+      "snyk_when_to_use": [
+        "when a skill or plugin candidate has dependency manifests such as package.json, pyproject.toml, requirements.txt, Gemfile, go.mod, or lockfiles",
+        "when claiming release readiness for a manifest-backed skill or plugin package",
+        "when dependency files, installer scripts, generated package surfaces, or plugin runtime dependencies changed",
+        "when matching the CircleCI/Snyk security screening lane locally before or after CI",
+        "when the user explicitly asks for Snyk, dependency vulnerability screening, or external security advisory evidence"
+      ],
+      "tessl_lint_role": "temporary_tile_packaging_shape_check",
+      "tessl_lint_shape": "Tessl lint expects a Tessl tile.json package. Canonical repo skills are SKILL.md-first, so this command builds a disposable local tile wrapper before linting.",
       "tessl_review_default": "enabled_local_cli",
       "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+      "tessl_review_role": "local_best_practice_content_review",
       "uses_npx": false
+    },
+    "review_mode_details": {
+      "local_evals": {
+        "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
+        "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates"
+      },
+      "plugin_eval": {
+        "command": "plugin-eval analyze <path> --format markdown",
+        "role": "static budget, ergonomics, and reviewability guardrail; not a substitute for local evals"
+      },
+      "snyk": {
+        "command": "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>",
+        "default": "disabled_until_requested",
+        "release_required": "manifest-backed candidates",
+        "role": "opt-in local dependency security screening; release-required for manifest-backed candidates",
+        "use_when": [
+          "candidate has supported dependency manifests",
+          "release-readiness is claimed for a manifest-backed package",
+          "dependency/runtime package surfaces changed",
+          "local evidence must match CircleCI/Snyk screening",
+          "user explicitly requests Snyk or dependency vulnerability evidence"
+        ]
+      },
+      "tessl_lint": {
+        "canonical_source_shape": "SKILL.md-first",
+        "command": "tessl skill lint <temporary-tile.json>",
+        "role": "disposable tile.json package-shape check, not a direct content finding"
+      },
+      "tessl_review": {
+        "command": "tessl skill review <temporary-skill-directory>",
+        "publishes": false,
+        "role": "local best-practice/content review for private or work-in-progress skills"
+      }
     },
     "snyk": {
       "reason": "Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.",
@@ -62,38 +113,51 @@
     "target": "Skills/agent-ops/codex-hooks-builder",
     "tessl_lint": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "lint",
-        "/tmp/agent-skills-tessl-76hsmldq/tile.json"
+        "<tmp>/tile.json"
       ],
-      "exit_code": 0,
-      "status": "success",
-      "stderr": "",
-      "stdout": "By using Tessl, you agree to our Terms: https://tessl.io/policies/terms\n\n\nContext Cost\n\nSkills\n  - codex-hooks-builder: 43 front-loaded, 1.9k on-demand tokens\n\nTotal: 43 front-loaded, 1.9k on-demand tokens\n\n\u2714 Tile local/codex-hooks-builder@0.0.0-local is valid\n"
+      "exit_code": 1,
+      "status": "error",
+      "stderr": "\u2718 Missing tile content: File not found: skills/codex-hooks-builder/references/hook-examples.md (referenced from skills/codex-hooks-builder/SKILL.md)\n",
+      "stdout": "By using Tessl, you agree to our Terms: https://tessl.io/policies/terms\n\n"
     },
     "tessl_review": {
       "command": [
-        "/Users/jamiecraik/.local/bin/tessl",
+        "tessl",
         "skill",
         "review",
-        "/tmp/agent-skills-tessl-76hsmldq/skills/codex-hooks-builder"
+        "<tmp>/skills/codex-hooks-builder"
       ],
       "exit_code": 0,
       "status": "success",
-      "stderr": "- Reviewing skill...\n\u26a0 Skill is valid but could be improved.\n",
-      "stdout": "\nValidation Checks\n\n  \u2714 skill_md_line_count - SKILL.md line count is 130 (<= 500)\n  \u2714 frontmatter_valid - YAML frontmatter is valid\n  \u2714 name_field - 'name' field is valid: 'codex-hooks-builder'\n  \u2714 description_field - 'description' field is valid (150 chars)\n  \u2714 compatibility_field - 'compatibility' field not present (optional)\n  \u2714 allowed_tools_field - 'allowed-tools' field not present (optional)\n  \u26a0 metadata_version - 'metadata.version' is missing\n  \u2714 metadata_field - 'metadata' contains 7 entries\n  \u2714 license_field - 'license' field not present (optional)\n  \u2714 frontmatter_unknown_keys - No unknown frontmatter keys found\n  \u2714 body_present - SKILL.md body is present\n\nOverall: PASSED (0 errors, 1 warnings)\n\nJudge Evaluation\n\n  Description: 72%\n    specificity: 2/3 - The description names the domain (Codex hook packs) and lists several actions (creating, auditing, upgrading, validating), but these actions are somewhat generic verbs applied to the domain rather than concrete, detailed capabilities like 'parse hooks.json schema', 'generate hook scripts', or 'migrate v1 to v2 format'.\n    trigger_term_quality: 3/3 - Includes strong natural trigger terms that users would actually say: 'hook packs', 'hooks.json', 'hook scripts', 'repo-local', 'user-level', '.codex', 'hook installs'. These cover multiple variations of how a user might refer to this domain.\n    completeness: 2/3 - The description is structured as a 'Use when...' clause, which addresses the 'when' clearly, but the 'what does this do' part is weak \u2014 it only lists high-level verbs (creating, auditing, upgrading, validating) without explaining what concrete outputs or capabilities the skill provides.\n    distinctiveness_conflict_risk: 3/3 - The description targets a very specific niche \u2014 Codex hook packs and related configuration files. This is unlikely to conflict with other skills due to the highly specific domain terminology like 'hooks.json', '.codex hook installs', and 'hook packs'.\n\n    Assessment: The description excels at trigger term coverage and distinctiveness, making it easy for Claude to identify when this skill should be selected. However, it lacks specificity about what concrete actions the skill enables beyond generic verbs, and the 'what does this do' component is underdeveloped \u2014 it reads more as a trigger clause than a complete description.\n\n    Suggestions:\n      - Add a 'what' clause before the 'Use when' that describes concrete capabilities, e.g., 'Generates hook pack scaffolding, validates hooks.json schema, migrates hook configurations between versions, and troubleshoots hook execution errors.'\n      - Expand the action verbs into more specific outcomes \u2014 instead of 'creating' say 'scaffolding new hook packs with proper directory structure'; instead of 'validating' say 'checking hooks.json against the expected schema and verifying script permissions'.\n\n  Content: 20%\n    conciseness: 1/3 - The skill is extremely verbose with many bullet points that describe internal runtime details Claude doesn't need explained at this length. Sections like the lengthy workflow bullets about compact lifecycle hooks, plugin substitutions, and managed-only mode read like internal documentation rather than lean instructions. Much of this could be condensed significantly.\n    actionability: 1/3 - Despite its length, the skill contains zero executable code, no concrete commands, no JSON schema examples, and no copy-paste-ready hook configurations. The examples section lists three vague one-liners ('Create a repo-local Codex hook pack for this validation flow') with no corresponding input/output demonstrations. Everything is abstract description rather than concrete instruction.\n    workflow_clarity: 2/3 - The Workflow section provides a reasonable sequence of steps (confirm ownership, inspect config, check docs, model events, validate), and the Failure Mode section adds some error recovery guidance. However, there are no explicit validation checkpoints with concrete commands, and the steps are described abstractly rather than as a clear numbered sequence with gates.\n    progressive_disclosure: 2/3 - The Progressive Disclosure section references several supporting files (contract.yaml, hook-examples.md, evals.yaml, task-profile.json, deferred context directory), which is good structure. However, no bundle files were provided, so these references are unverifiable. The main body itself is monolithic and contains extensive inline detail that should arguably live in those referenced files instead.\n\n    Assessment: This skill is heavily descriptive and policy-oriented but lacks the concrete, executable guidance that would make it actionable. It reads more like an internal design document or specification than a skill that teaches Claude how to perform specific tasks. The extensive runtime details and edge cases bloat the content without providing copy-paste-ready examples, commands, or JSON schemas that Claude could directly use.\n\n    Suggestions:\n      - Add concrete, executable examples: include a complete hooks.json file, a sample hook script, and the exact commands to validate and install them.\n      - Drastically reduce the Workflow section by removing internal runtime implementation details (plugin substitutions, compact stdout behavior, managed-only mode nuances) and moving them to a referenced file.\n      - Replace the vague Examples section with 1-2 full input/output demonstrations showing a hook pack creation from start to finish with actual file contents.\n      - Consolidate the Gotchas, Anti-Patterns, Constraints, and Execution Boundaries sections\u2014they overlap significantly and could be a single concise 'Rules' section.\n\nReview Score: 56%\nOnly SKILL.md was reviewed. Log in with tessl login to include all supporting files in the review.\n\n"
+      "stderr": "- Reviewing skill...\n",
+      "stdout": "\nValidation Checks\n\n  \u2714 skill_md_line_count - SKILL.md line count is 125 (<= 500)\n  \u2714 frontmatter_valid - YAML frontmatter is valid\n  \u2714 name_field - 'name' field is valid: 'codex-hooks-builder'\n  \u2714 description_field - 'description' field is valid (346 chars)\n  \u2714 compatibility_field - 'compatibility' field not present (optional)\n  \u2714 allowed_tools_field - 'allowed-tools' field not present (optional)\n  \u2714 metadata_version - 'metadata.version' is present: 0.1.0\n  \u2714 metadata_field - 'metadata' contains 8 entries\n  \u2714 license_field - 'license' field not present (optional)\n  \u2714 frontmatter_unknown_keys - No unknown frontmatter keys found\n  \u2714 body_present - SKILL.md body is present\n\nOverall: PASSED (0 errors, 0 warnings)\n\nJudge Evaluation\n\n  Description: 100%\n    specificity: 3/3 - Lists multiple specific concrete actions: scaffold hook packs, validate hooks.json schema, verify hook script permissions, migrate hook configuration, and troubleshoot Codex hook execution errors.\n    trigger_term_quality: 3/3 - Excellent coverage of natural terms a user would say: 'hooks.json', 'hook packs', 'hook scripts', 'PreToolUse', 'PostToolUse', 'PreCompact', 'repo-local', 'user-level', '.codex', 'hook installs', 'Codex hook'. These are the exact terms someone working with Codex hooks would use.\n    completeness: 3/3 - Clearly answers both 'what' (scaffold, validate, verify, migrate, troubleshoot hook-related tasks) and 'when' with an explicit 'Use when...' clause covering creating, auditing, upgrading, or validating various hook-related artifacts.\n    distinctiveness_conflict_risk: 3/3 - Highly distinctive niche focused specifically on Codex hook packs and hooks.json. The domain-specific terminology (PreToolUse, PostToolUse, PreCompact, .codex) makes it very unlikely to conflict with other skills.\n\n    Assessment: This is an excellent skill description that clearly defines a specific niche (Codex hook management), lists concrete actions, and provides explicit trigger guidance. It uses appropriate third-person voice throughout and includes rich, domain-specific terminology that would naturally match user queries about Codex hooks.\n\n  Content: 77%\n    conciseness: 2/3 - The skill is reasonably efficient but includes some sections that could be tightened\u2014'Philosophy', 'Anti-Patterns', and 'Gotchas' contain guidance that overlaps or could be consolidated. Some bullet points (e.g., 'Expanding scope because adjacent work is interesting') are soft advice rather than actionable instructions. However, it largely avoids explaining concepts Claude already knows.\n    actionability: 3/3 - The skill provides concrete, executable commands throughout: specific `rg`, `find`, `jq` commands for discovery and validation, exact JSON examples for hook configuration, and named validation commands with tool flags. The workflow steps are specific enough to be directly followed.\n    workflow_clarity: 3/3 - The workflow is clearly sequenced (discover \u2192 confirm ownership \u2192 inspect \u2192 check evidence \u2192 model events \u2192 edit \u2192 validate) with explicit validation gates and a fail-fast policy. The validation section includes specific commands and the instruction to stop at the first failed gate before proceeding, providing a proper feedback loop for error recovery.\n    progressive_disclosure: 2/3 - The skill references multiple external files (references/contract.yaml, references/hook-examples.md, references/evals.yaml, etc.) with clear navigation, which is good structure. However, no bundle files were provided to verify these references exist, and some content that could be in references (like the runtime rules paragraph and gotchas) is inline, making the main file slightly heavier than necessary.\n\n    Assessment: This is a well-structured, actionable skill with clear workflows, concrete commands, and proper validation checkpoints. Its main weakness is moderate verbosity\u2014some sections like Anti-Patterns, Gotchas, and inline runtime rules could be trimmed or moved to references. The progressive disclosure structure is well-designed in principle but cannot be fully verified without bundle files.\n\n    Suggestions:\n      - Move the inline 'Runtime rules' paragraph and 'Gotchas' section to a reference file to reduce the main skill's token footprint.\n      - Consolidate 'Anti-Patterns' and 'Constraints' sections, which overlap in intent (e.g., both address scope creep and safety).\n\nReview Score: 90%\nOnly SKILL.md was reviewed. Log in with tessl login to include all supporting files in the review.\n\n\u2714 Skill evaluation completed successfully!\n"
     },
     "tessl_tile": {
       "mode": "temporary_wrapper",
-      "reason": "Tessl validates tile.json packages; canonical repo skills remain SKILL.md-first.",
-      "review_path": "/tmp/agent-skills-tessl-76hsmldq/skills/codex-hooks-builder",
+      "reason": "Tessl lint validates tile.json packages. Canonical repo skills remain SKILL.md-first, so this is a disposable packaging-shape wrapper.",
+      "review_path": "/tmp/agent-skills-tessl-yffgcgny/skills/codex-hooks-builder",
       "skill_key": "codex-hooks-builder",
       "source_skill": "Skills/agent-ops/codex-hooks-builder",
-      "tessl_home": "/tmp/agent-skills-tessl-76hsmldq/home",
-      "tile_path": "/tmp/agent-skills-tessl-76hsmldq/tile.json"
+      "tessl_home": "/tmp/agent-skills-tessl-yffgcgny/home",
+      "tile_path": "/tmp/agent-skills-tessl-yffgcgny/tile.json"
     }
   },
-  "errors": [],
-  "status": "success"
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "fix_suggestion": "Inspect data.ask_audit for the exact failing gate.",
+      "help_url": null,
+      "message": "Internal ask skill audit failed during external-review lane."
+    },
+    {
+      "code": "ERR_VALIDATION",
+      "fix_suggestion": "Inspect data.tessl_lint for Tessl's validation output.",
+      "help_url": null,
+      "message": "Tessl skill lint failed during local-only external review."
+    }
+  ],
+  "status": "error"
 }

@@ -49,8 +49,16 @@ def _escape(value: Any) -> str:
     return html.escape("" if value is None else str(value), quote=True)
 
 
-def _file_url(path: Path) -> str:
-    return path.resolve().as_uri()
+def _evidence_href(path: Path, *, repo_root: Path, output_path: Path) -> str:
+    base = output_path.parent.resolve()
+    target = path if path.is_absolute() else repo_root / path
+    try:
+        return target.resolve().relative_to(base).as_posix()
+    except ValueError:
+        try:
+            return target.resolve().relative_to(repo_root.resolve()).as_posix()
+        except ValueError:
+            return target.name
 
 
 def _status_class(percent: int) -> str:
@@ -793,10 +801,10 @@ document.addEventListener('DOMContentLoaded', () => {{
       </div>
     </header>
     <nav class=\"tabs\" role=\"tablist\" aria-label=\"Review result sections\">
-      <a role=\"tab\" aria-selected=\"true\" aria-controls=\"quality\" tabindex=\"0\" href=\"#quality\">Quality</a><a role=\"tab\" aria-selected=\"false\" aria-controls=\"evals\" tabindex=\"-1\" href=\"#evals\">Evals</a><a role=\"tab\" aria-selected=\"false\" aria-controls=\"security\" tabindex=\"-1\" href=\"#security\">Security</a><a role=\"tab\" aria-selected=\"false\" aria-controls=\"evidence\" tabindex=\"-1\" href=\"#evidence\">Evidence</a>
+      <a id=\"tab-quality\" role=\"tab\" aria-selected=\"true\" aria-controls=\"quality\" tabindex=\"0\" href=\"#quality\">Quality</a><a id=\"tab-evals\" role=\"tab\" aria-selected=\"false\" aria-controls=\"evals\" tabindex=\"-1\" href=\"#evals\">Evals</a><a id=\"tab-security\" role=\"tab\" aria-selected=\"false\" aria-controls=\"security\" tabindex=\"-1\" href=\"#security\">Security</a><a id=\"tab-evidence\" role=\"tab\" aria-selected=\"false\" aria-controls=\"evidence\" tabindex=\"-1\" href=\"#evidence\">Evidence</a>
     </nav>
 
-    <section id=\"quality\" class=\"tab-panel is-active\" role=\"tabpanel\">
+    <section id=\"quality\" class=\"tab-panel is-active\" role=\"tabpanel\" aria-labelledby=\"tab-quality\">
       <div class=\"section-head\"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class=\"pill {_status_class(quality_score)}\">{quality_score}%</span></div>
       <div class=\"grid\">
         <div class=\"panel\"><h3>Discovery</h3><p>Description activation quality</p><strong class=\"{_status_class(tessl['description_score'])}\">{tessl['description_score']}%</strong></div>
@@ -819,11 +827,11 @@ document.addEventListener('DOMContentLoaded', () => {{
       <div class=\"suggestions\"><h3>Suggestions</h3><ul>{suggestion_html}</ul></div>
     </section>
 
-    <section id=\"evals\" class=\"tab-panel\" role=\"tabpanel\" hidden>
+    <section id=\"evals\" class=\"tab-panel\" role=\"tabpanel\" aria-labelledby=\"tab-evals\" hidden>
       {_render_eval_cases(evals)}
     </section>
 
-    <section id=\"security\" class=\"tab-panel\" role=\"tabpanel\" hidden>
+    <section id=\"security\" class=\"tab-panel\" role=\"tabpanel\" aria-labelledby=\"tab-security\" hidden>
       <div class=\"section-head\"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class=\"pill {_status_class(security_score)}\">{security_score}%</span></div>
       <div class=\"suggestions\"><h3>Findings</h3><ul>{security_html}</ul></div>
       <div class=\"panel plugin-posture\">
@@ -841,11 +849,11 @@ document.addEventListener('DOMContentLoaded', () => {{
       </div>
     </section>
 
-    <section id=\"evidence\" class=\"tab-panel\" role=\"tabpanel\" hidden>
+    <section id=\"evidence\" class=\"tab-panel\" role=\"tabpanel\" aria-labelledby=\"tab-evidence\" hidden>
       <div class=\"section-head\"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class=\"evidence-list\">
-        <a href=\"{_file_url(report_path)}\">Review JSON<br><span>{_escape(report_path.relative_to(repo_root) if report_path.is_relative_to(repo_root) else report_path)}</span></a>
-        {f'<a href=\"{_file_url(Path(scorecard_path))}\">Latest Eval Scorecard<br><span>{_escape(Path(scorecard_path).relative_to(repo_root) if Path(scorecard_path).is_relative_to(repo_root) else scorecard_path)}</span></a>' if scorecard_path else '<div>Latest Eval Scorecard<br><span>No scorecard found for this skill.</span></div>'}
+        <a href=\"{_evidence_href(report_path, repo_root=repo_root, output_path=output_path)}\">Review JSON<br><span>{_escape(report_path.relative_to(repo_root) if report_path.is_relative_to(repo_root) else report_path)}</span></a>
+        {f'<a href=\"{_evidence_href(Path(scorecard_path), repo_root=repo_root, output_path=output_path)}\">Latest Eval Scorecard<br><span>{_escape(Path(scorecard_path).relative_to(repo_root) if Path(scorecard_path).is_relative_to(repo_root) else scorecard_path)}</span></a>' if scorecard_path else '<div>Latest Eval Scorecard<br><span>No scorecard found for this skill.</span></div>'}
         <div>Policy<br><span>{_escape(policy.get('mode') or 'local_internal_only')}; primary gate: {_escape(policy.get('primary_gate') or 'local_eval_ask_audit')}; Plugin Eval floor: {_escape(policy.get('plugin_eval_min_acceptable_grade') or 'B+')}; Snyk: {_escape(policy.get('snyk_default') or 'disabled_until_explicit_confirmation')}</span></div>
         <div>Generated<br><span>{generated}</span></div>
       </div>
@@ -858,5 +866,6 @@ document.addEventListener('DOMContentLoaded', () => {{
 """
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    document = "\n".join(line.rstrip() for line in document.splitlines()) + "\n"
     output_path.write_text(document, encoding="utf-8")
     return output_path

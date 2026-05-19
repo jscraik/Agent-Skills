@@ -337,6 +337,61 @@ def test_run_evals_classifies_user_input_blocker_without_scorecard(tmp_path: Pat
     assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == ["blocked_user_input"]
 
 
+def test_run_evals_classifies_discovery_smoke_filter_blocker(tmp_path: Path) -> None:
+    completed = mock.Mock(
+        returncode=1,
+        stdout="",
+        stderr=(
+            "ERROR: discovery-smoke runner requires eval cases with `smoke_mode`; "
+            "none matched the selected filters. Use a live runner such as `codex` "
+            "for behavior evals, or add discovery-specific smoke_mode cases.\n"
+        ),
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/agent-ops/autoresearch",
+            mode="smoke",
+            runner="discovery-smoke",
+            dashboard=False,
+        )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["blocker_class"] == "blocked_validation"
+    assert [event["event_type"] for event in result.data["lifecycle_events"]] == [
+        "eval_started",
+        "eval_blocked",
+    ]
+    assert result.data["lifecycle_event"]["outcome"]["status"] == "blocked_validation"
+
+
+def test_run_evals_stores_repo_relative_raw_output(tmp_path: Path) -> None:
+    skill = tmp_path / "Skills" / "agent-ops" / "autoresearch"
+    skill.mkdir(parents=True)
+    absolute_report = tmp_path / "Infrastructure" / "artifacts" / "skills" / "scorecard.json"
+    completed = mock.Mock(
+        returncode=0,
+        stdout=f"Scorecard: {absolute_report}\n",
+        stderr=f"checked {skill}\n",
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/agent-ops/autoresearch",
+            mode="smoke",
+            runner="discovery-smoke",
+            dashboard=False,
+        )
+
+    assert result.status == "success"
+    assert str(tmp_path) not in result.data["raw_output"]
+    assert str(tmp_path) not in result.data["raw_error"]
+    assert "Infrastructure/artifacts/skills/scorecard.json" in result.data["raw_output"]
+
+
 def test_run_evals_classifies_timeout_without_output(tmp_path: Path) -> None:
     timeout = subprocess.TimeoutExpired(
         cmd=["run_skill_evals.py"],

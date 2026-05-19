@@ -62,7 +62,14 @@ td span { color:var(--muted); }
 .suggestions li,.empty-state p { color:var(--muted); margin:10px 0; }
 .evidence-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .evidence-list a,.evidence-list div { border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }
+.review-lanes { margin-top:24px; }
+.review-lane { display:grid; grid-template-columns:minmax(0,1fr) minmax(220px,420px); gap:18px; align-items:start; border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:16px; margin:12px 0; }
+.review-lane h3 { margin:0 0 4px; }
+.review-lane p { margin:0 0 10px; color:var(--muted); }
+.review-lane code { display:block; white-space:normal; overflow-wrap:anywhere; }
+.lane-badge { display:inline-flex; margin:0 6px 6px 0; border:1px solid #303641; border-radius:7px; padding:2px 7px; background:#171b22; color:var(--muted); font-size:12px; font-weight:800; }
 @media (max-width: 1100px) { .shell { grid-template-columns:1fr; } .sidebar { position:relative; height:auto; } .hero { grid-template-columns:1fr; } .grid,.evidence-list { grid-template-columns:1fr; } .tabs a { min-width:104px; } }
+@media (max-width: 900px) { .review-lane { grid-template-columns:1fr; } }
 @media (max-width: 700px) { .plugin-posture { grid-template-columns:1fr; } .plugin-score { justify-content:flex-start; } }
 </style>
 <script>
@@ -131,45 +138,45 @@ document.addEventListener('DOMContentLoaded', () => {
   <main class="main">
     <div class="breadcrumb"><span>Local / Skills / Skills/agent-ops/unslopify / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">80</div></div>
+      <div><div class="hex">95</div></div>
       <div>
         <h1>unslopify</h1>
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
-        
+
       <div class="metric">
-        <div class="metric-head"><span>Quality</span><strong class="warn">70%</strong></div>
-        <div class="bar"><span class="warn" style="width:70%"></span></div>
+        <div class="metric-head"><span>Quality</span><strong class="warn">85%</strong></div>
+        <div class="bar"><span class="warn" style="width:85%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-    
-        
+
+
       <div class="metric">
-        <div class="metric-head"><span>Impact</span><strong class="bad">0%</strong></div>
-        <div class="bar"><span class="bad" style="width:0%"></span></div>
-        <p>No scenario eval scorecard found yet.</p>
+        <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
+        <div class="bar"><span class="good" style="width:100%"></span></div>
+        <p>1/1 latest eval cases passed.</p>
       </div>
-    
-        
+
+
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
       </div>
-    
+
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
-      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">70%</span></div>
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
+      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">85%</span></div>
       <div class="grid">
-        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="bad">67%</strong></div>
+        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="good">100%</strong></div>
         <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="bad">63%</strong></div>
-        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="warn">80%</strong></div>
+        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="good">100%</strong></div>
       </div>
       <div class="panel plugin-posture">
         <div>
@@ -178,33 +185,38 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="plugin-score"><span class="pill good">A</span><strong class="good">100%</strong></div>
         <p class="posture-detail good">Plugin Eval meets the local budget and ergonomics guardrail.</p>
-        <ul><li>Score: 100/100</li><li>Grade: A</li><li>Risk: low</li><li>Checks: 0 fail, 0 warn, 2 info</li><li>Active budget: 1461 tokens (good)</li><li>Observed usage: not supplied</li></ul>
+        <ul><li>Score: 100/100</li><li>Grade: A</li><li>Risk: low</li><li>Checks: 0 fail, 0 warn, 2 info</li><li>Active budget: 1628 tokens (moderate)</li><li>Observed usage: not supplied</li></ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
-        <tbody><tr><td>Specificity</td><td>Names the domain (cleanup audits, removal planning) and some actions (stale-code checks, dead exports), but the actions are somewhat abstract rather than listing multiple concrete operations like &#x27;identify unused functions, remove dead imports, flag unreferenced exports&#x27;.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Trigger Term Quality</td><td>Includes some relevant terms like &#x27;stale-code&#x27;, &#x27;dead exports&#x27;, &#x27;cleanup&#x27;, but misses common natural variations users might say such as &#x27;unused code&#x27;, &#x27;dead code&#x27;, &#x27;remove unused imports&#x27;, &#x27;tech debt&#x27;, or &#x27;refactor&#x27;. The terms lean slightly technical/jargon-heavy.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Completeness</td><td>Explicitly answers both &#x27;what&#x27; (run focused cleanup audits and safe removal planning) and &#x27;when&#x27; (stale-code checks, dead exports, quality-risk reduction, scoped cleanup evidence) with a clear &#x27;WHEN:&#x27; clause containing trigger scenarios.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Distinctiveness Conflict Risk</td><td>The cleanup/audit niche is somewhat specific, but terms like &#x27;quality-risk reduction&#x27; and &#x27;cleanup&#x27; could overlap with general code review, linting, or refactoring skills. The focus on &#x27;dead exports&#x27; and &#x27;stale-code&#x27; helps but doesn&#x27;t fully distinguish it.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Conciseness</td><td>The skill is reasonably efficient but includes some redundancy—safety concerns are repeated across &#x27;Execution Boundaries&#x27;, &#x27;Safety&#x27;, and &#x27;Anti-Patterns&#x27; sections with overlapping content. The &#x27;Philosophy&#x27; section and some framing could be tightened. However, it mostly avoids explaining things Claude already knows.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Actionability</td><td>The skill provides specific gate commands (e.g., `./bin/ask skills resolve unslopify --json`) and a clear workflow sequence, but lacks executable code examples or concrete output schemas. The deliverables mention &#x27;schema_version: 1&#x27; but don&#x27;t show the actual schema. The example prompts are illustrative but don&#x27;t show expected outputs.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Workflow Clarity</td><td>The workflow is clearly sequenced with six numbered steps, includes explicit validation checkpoints (baseline validation, rerun after each batch), has a feedback loop (small reversible batches with validation), and specifies failure modes with &#x27;stop if any gate fails&#x27; and &#x27;fail fast&#x27; directives. The required gates section provides clear pre-conditions.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Progressive Disclosure</td><td>The skill references external paths (`references/` and `Infrastructure/references/deferred-skill-context/agent-ops-unslopify/`) for deeper context, which is good structure. However, no bundle files are provided to verify these references exist, and the main document itself contains some content that could be consolidated (overlapping safety/boundaries/anti-patterns sections) rather than kept inline.</td><td class="score bad">2 / 3</td></tr></tbody>
+        <tbody><tr><td>Specificity</td><td>Lists multiple specific concrete actions: &#x27;audit unused functions, dead exports, orphaned modules, stale imports, unreachable code, and tech-debt cleanup candidates with evidence-backed removal guidance.&#x27; These are all distinct, concrete capabilities.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Trigger Term Quality</td><td>Includes strong natural keywords users would say: &#x27;unused code&#x27;, &#x27;dead code&#x27;, &#x27;remove unused imports&#x27;, &#x27;stale-code checks&#x27;, &#x27;cleanup&#x27;. These cover common variations of how developers describe this need. Also includes specific terms like &#x27;orphaned modules&#x27;, &#x27;dead exports&#x27;, and &#x27;unreachable code&#x27;.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Completeness</td><td>Clearly answers both &#x27;what&#x27; (audit unused functions, dead exports, orphaned modules, stale imports, unreachable code, tech-debt cleanup candidates with evidence-backed removal guidance) and &#x27;when&#x27; (explicit &#x27;Use when...&#x27; clause with specific trigger scenarios).</td><td class="score good">3 / 3</td></tr>
+<tr><td>Distinctiveness Conflict Risk</td><td>Occupies a clear niche focused specifically on dead/unused code auditing and cleanup. The specific terms like &#x27;dead exports&#x27;, &#x27;orphaned modules&#x27;, &#x27;stale imports&#x27;, and &#x27;evidence-backed removal guidance&#x27; make it highly distinguishable from general code review or refactoring skills.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Conciseness</td><td>The skill is reasonably efficient but includes some sections that feel redundant (e.g., Safety and Execution Boundaries overlap significantly, Anti-Patterns partially restates Safety). The &#x27;Required Gates&#x27; section references tooling commands without explaining what they verify, which is noise without context. Some philosophical framing (&#x27;Make cleanup boring, scoped, and reversible&#x27;) is unnecessary for Claude.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Actionability</td><td>The workflow provides a clear sequence of steps and the examples give good natural-language prompts, but there are no executable code snippets, no concrete commands beyond opaque `./bin/ask` invocations, and no example output schema despite mentioning &#x27;schema_version: 1&#x27; in deliverables. The guidance is specific in intent but lacks copy-paste-ready implementation details.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Workflow Clarity</td><td>The workflow is well-sequenced with explicit validation checkpoints: read-only orientation → evidence gathering → baseline validation → ledger building → small reversible batches with validation after each → finalization with pass/fail status. It includes feedback loops (rerun validation after each batch), error recovery (stop at first failed gate), and rollback notes. The gate system provides clear go/no-go checkpoints.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Progressive Disclosure</td><td>The skill references multiple external files (references/discovery-interview.md, Infrastructure/references/ paths, deferred context directories) which is good structure, but no bundle files were provided to verify these exist. The main document itself is moderately long with some content that could be split out (e.g., Execution Boundaries could be a reference). The references are clearly signaled and one-level deep, but without bundle verification this is uncertain.</td><td class="score bad">2 / 3</td></tr></tbody>
       </table>
-      <div class="suggestions"><h3>Suggestions</h3><ul><li>Add more concrete actions to improve specificity, e.g., &#x27;identify unused functions, flag unreferenced exports, detect orphaned modules, plan safe deletion of dead code&#x27;.</li><li>Expand trigger terms with natural user language variations such as &#x27;unused code&#x27;, &#x27;dead code&#x27;, &#x27;tech debt cleanup&#x27;, &#x27;remove unused imports&#x27;, &#x27;unreachable code&#x27;.</li><li>Add a concrete example of the cleanup ledger output format with schema_version: 1, showing the expected JSON or markdown structure for deliverables.</li><li>Consolidate overlapping content between &#x27;Execution Boundaries&#x27;, &#x27;Safety&#x27;, and &#x27;Anti-Patterns&#x27; sections to reduce redundancy—e.g., merge safety constraints into a single authoritative section.</li><li>Provide a sample validation output or pass/fail report to make the deliverables section fully actionable.</li></ul></div>
+      <div class="suggestions"><h3>Suggestions</h3><ul><li>Add a concrete example of the cleanup ledger output format with schema_version: 1, showing actual entries for &#x27;implement now&#x27;, &#x27;needs human review&#x27;, etc., to make the deliverables actionable.</li><li>Consolidate the overlapping Safety, Execution Boundaries, and Anti-Patterns sections into a single &#x27;Constraints&#x27; section to reduce redundancy and improve conciseness.</li><li>Provide at least one end-to-end worked example showing discovery output → ledger → validation → result, rather than only natural-language prompt examples.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
-      
-        <section class="empty-state">
-          <h2>Evals Not Run Yet</h2>
-          <p>No skill eval scorecard found for this skill yet.</p>
-          <p>Run <code>./bin/ask evals run &lt;skill-path&gt; --mode smoke</code>, then rerun the dashboard to see scenario-level behavior.</p>
-        </section>
-        
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
+
+      <section>
+        <div class="section-head">
+          <div><h2>Evaluation Results</h2><p>1/1 latest eval cases passed.</p></div>
+          <span class="pill good">100%</span>
+        </div>
+        <table>
+          <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
+          <tbody><tr><td><strong>discovery interview contract</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
+        </table>
+      </section>
+
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
       <div class="panel plugin-posture">
@@ -222,14 +234,15 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/unslopify.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/unslopify.json</span></a>
-        <div>Latest Eval Scorecard<br><span>No scorecard found for this skill.</span></div>
+        <a href="unslopify.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/unslopify.json</span></a>
+        <a href="Infrastructure/artifacts/skills/unslopify/20260519-101911-455626/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/unslopify/20260519-101911-455626/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
+      <div class="review-lanes"><div class="section-head"><div><h2>Review Lanes</h2><p>How this local dashboard separates behavior checks, static guardrails, Tessl review, and optional security screening.</p></div></div><div class="review-lane"><div><h3>Local Evals</h3><p>dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates</p></div><code>./bin/ask evals run &lt;path&gt; --mode smoke|release --json --robot</code></div><div class="review-lane"><div><h3>Plugin Eval</h3><p>static budget, ergonomics, and reviewability guardrail; not a substitute for local evals</p></div><code>plugin-eval analyze &lt;path&gt; --format markdown</code></div><div class="review-lane"><div><h3>Tessl Lint</h3><p>disposable tile.json package-shape check, not a direct content finding</p><span class="lane-badge">canonical source shape: SKILL.md-first</span></div><code>tessl skill lint &lt;temporary-tile.json&gt;</code></div><div class="review-lane"><div><h3>Tessl Review</h3><p>local best-practice/content review for private or work-in-progress skills</p></div><code>tessl skill review &lt;temporary-skill-directory&gt;</code></div><div class="review-lane"><div><h3>Snyk</h3><p>opt-in local dependency security screening; release-required for manifest-backed candidates</p><span class="lane-badge">default: disabled_until_requested</span><span class="lane-badge">release required: manifest-backed candidates</span></div><code>snyk test --all-projects --detection-depth=6 --severity-threshold=high --json &lt;skill-path&gt;</code></div></div>
     </section>
   </main>
 </div>
