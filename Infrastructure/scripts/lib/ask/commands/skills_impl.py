@@ -4143,21 +4143,6 @@ def route_skills(
         )
         return result
 
-    router_mod = _load_builder_module(repo_root, "skill_router")
-    if not router_mod:
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_DEPENDENCY",
-                message="Skill router module is not available.",
-                fix_suggestion=(
-                    "Ensure Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/skill_router.py "
-                    "exists and rerun."
-                ),
-            )
-        )
-        return result
-
     default_candidates: list[EligibleCandidate] = []
     default_candidate_ids: set[str] = set()
     for entry in discover_catalog_entries():
@@ -4189,6 +4174,62 @@ def route_skills(
         advanced_only_candidates.append(candidate)
 
     ordered_default_candidates = sorted(default_candidates, key=canonical_sort_key)
+    all_candidates = list(ordered_default_candidates)
+    all_candidate_ids = {candidate_id(candidate) for candidate in all_candidates}
+    for candidate in sorted(advanced_only_candidates, key=canonical_sort_key):
+        cid = candidate_id(candidate)
+        if cid in all_candidate_ids:
+            continue
+        all_candidates.append(candidate)
+        all_candidate_ids.add(cid)
+
+    normalized_handle_query = query.removeprefix("$").strip().lower()
+    exact_candidate = next(
+        (
+            candidate
+            for candidate in all_candidates
+            if candidate.name.lower() == normalized_handle_query
+        ),
+        None,
+    )
+    if exact_candidate is not None and normalized_handle_query and " " not in normalized_handle_query:
+        ranked_payload = [
+            {
+                "skill_name": exact_candidate.name,
+                "skill_path": exact_candidate.path,
+                "confidence": 1.0,
+                "rationale": ["exact command handle match"],
+                "risk_tier": "low",
+            }
+        ]
+        catalog_parity = compute_catalog_parity(repo_root, strict=False)
+        decision = build_decision_payload(
+            request=query,
+            policy_identity=get_policy_identity(),
+            considered_limit=len(all_candidates),
+            top_k=1,
+            eligible_candidates=all_candidates,
+            ranked_candidates=ranked_payload,
+            uncertainty_reasons=[],
+            catalog_parity_ok=not bool(catalog_parity.get("drift_detected")),
+        )
+        result.data["decision"] = decision
+        result.data["catalog_parity"] = catalog_parity
+        result.data["policy_identity"] = decision["policy_identity"]
+        result.data["decision_status"] = decision["decision_status"]
+        if decision["decision_status"] == "resolved":
+            result.status = "success"
+        else:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=f"skills route returned {decision['decision_status']}",
+                    fix_suggestion=decision.get("operator_action"),
+                )
+            )
+        return result
+
     bounded_limit = max(1, int(considered_limit))
     considered_candidates = ordered_default_candidates[:bounded_limit]
     considered_candidate_ids = {candidate_id(candidate) for candidate in considered_candidates}
@@ -4198,6 +4239,21 @@ def route_skills(
             continue
         considered_candidates.append(candidate)
         considered_candidate_ids.add(cid)
+
+    router_mod = _load_builder_module(repo_root, "skill_router")
+    if not router_mod:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_DEPENDENCY",
+                message="Skill router module is not available.",
+                fix_suggestion=(
+                    "Ensure Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/skill_router.py "
+                    "exists and rerun."
+                ),
+            )
+        )
+        return result
     router_skills = [
         _RouterSkill(name=item.name, description=item.description, skill_path=item.path)
         for item in considered_candidates

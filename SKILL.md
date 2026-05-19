@@ -16,10 +16,10 @@ Do not hand-edit runtime projections.
 - [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 23
+- `total_skills`: 24
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: e2574136d9411e33
+- `policy_identity`: 2fb517d3ffc4d288
 
 ## Catalog
 
@@ -46,6 +46,7 @@ Do not hand-edit runtime projections.
 - `skill-pr-delivery` — Ship skill changes to PRs when Codex skills need source edits, rooted sync, strict audit, reviewer evidence, commit, push, and PR status.
 - `triage` — Review file-based todo findings into ready, skipped, customized, or blocked states. Use this skill when pending todo files need approval.
 - `ubiquitous-language` — Build shared project vocabulary, glossary terms, aliases, prompt translations, and agent instruction links when wording is fuzzy or overloaded.
+- `unslopify` — Audit unused functions, dead exports, orphaned modules, stale imports, unreachable code, and tech-debt cleanup candidates with evidence-backed removal guidance. Use when unused code, dead code, remove unused imports, stale-code checks, or scoped cleanup evidence are needed.
 - `verification-before-completion` — Review and validate completion claims. Use when you are about to say work is complete, fixed, passing, pushed, or ready for review.
 
 ## Skills System

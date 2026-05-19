@@ -64,11 +64,11 @@ class TestAskSkillsRoute(unittest.TestCase):
         ]
 
         with patch(
-            "ask.commands.skills.discover_catalog_entries",
+            "ask.commands.skills_impl.discover_catalog_entries",
             side_effect=lambda advanced=False: entries,
         ) as mocked_discover:
-            with patch("ask.commands.skills._load_builder_module", return_value=_RouterStub(ranked, [])):
-                with patch("ask.commands.skills.compute_catalog_parity", return_value={"drift_detected": False}):
+            with patch("ask.commands.skills_impl._load_builder_module", return_value=_RouterStub(ranked, [])):
+                with patch("ask.commands.skills_impl.compute_catalog_parity", return_value={"drift_detected": False}):
                     result = route_skills(REPO_ROOT, "review this change", top_k=1, considered_limit=2)
 
         self.assertEqual(
@@ -123,14 +123,14 @@ class TestAskSkillsRoute(unittest.TestCase):
             ),
         ]
         with patch(
-            "ask.commands.skills.discover_catalog_entries",
+            "ask.commands.skills_impl.discover_catalog_entries",
             side_effect=lambda advanced=False: entries,
         ) as mocked_discover:
             with patch(
-                "ask.commands.skills._load_builder_module",
+                "ask.commands.skills_impl._load_builder_module",
                 return_value=_RouterStub(ranked, ["top_candidates_close_score"]),
             ):
-                with patch("ask.commands.skills.compute_catalog_parity", return_value={"drift_detected": False}):
+                with patch("ask.commands.skills_impl.compute_catalog_parity", return_value={"drift_detected": False}):
                     result = route_skills(REPO_ROOT, "help me pick one", top_k=2, considered_limit=5)
 
         self.assertEqual(
@@ -155,11 +155,11 @@ class TestAskSkillsRoute(unittest.TestCase):
         ]
 
         with patch(
-            "ask.commands.skills.discover_catalog_entries",
+            "ask.commands.skills_impl.discover_catalog_entries",
             side_effect=lambda advanced=False: entries,
         ) as mocked_discover:
-            with patch("ask.commands.skills._load_builder_module", return_value=_RouterStub([], [])):
-                with patch("ask.commands.skills.compute_catalog_parity", return_value={"drift_detected": False}):
+            with patch("ask.commands.skills_impl._load_builder_module", return_value=_RouterStub([], [])):
+                with patch("ask.commands.skills_impl.compute_catalog_parity", return_value={"drift_detected": False}):
                     result = route_skills(REPO_ROOT, "no match expected", top_k=1, considered_limit=5)
 
         self.assertEqual(
@@ -170,6 +170,35 @@ class TestAskSkillsRoute(unittest.TestCase):
         decision = result.data["decision"]
         self.assertEqual(decision["decision_status"], "degraded_no_candidates")
         self.assertEqual(decision["failure_class"], "NO_ELIGIBLE_CANDIDATES")
+
+    def test_route_resolves_exact_command_handle_without_semantic_router(self):
+        entries = [
+            SimpleNamespace(
+                name="unslopify",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "unslopify",
+                category="Skills/agent-ops",
+                description="Audit dead code and stale cleanup candidates.",
+            )
+        ]
+
+        with patch(
+            "ask.commands.skills_impl.discover_catalog_entries",
+            side_effect=lambda advanced=False: entries,
+        ) as mocked_discover:
+            with patch("ask.commands.skills_impl._load_builder_module") as mocked_router_load:
+                with patch("ask.commands.skills_impl.compute_catalog_parity", return_value={"drift_detected": False}):
+                    result = route_skills(REPO_ROOT, "$unslopify", top_k=1, considered_limit=5)
+
+        self.assertEqual(
+            mocked_discover.call_args_list,
+            [call(), call(advanced=True)],
+        )
+        mocked_router_load.assert_not_called()
+        self.assertEqual(result.status, "success")
+        decision = result.data["decision"]
+        self.assertEqual(decision["decision_status"], "resolved")
+        self.assertEqual(decision["selected_candidates"][0]["name"], "unslopify")
+        self.assertEqual(decision["selected_candidates"][0]["confidence"], 1.0)
 
     def test_route_uses_advanced_catalog_surface_for_hidden_lane_skills(self):
         entries = [
@@ -191,11 +220,11 @@ class TestAskSkillsRoute(unittest.TestCase):
         ]
 
         with patch(
-            "ask.commands.skills.discover_catalog_entries",
+            "ask.commands.skills_impl.discover_catalog_entries",
             side_effect=lambda advanced=False: entries,
         ) as mocked_discover:
-            with patch("ask.commands.skills._load_builder_module", return_value=_RouterStub(ranked, [])):
-                with patch("ask.commands.skills.compute_catalog_parity", return_value={"drift_detected": False}):
+            with patch("ask.commands.skills_impl._load_builder_module", return_value=_RouterStub(ranked, [])):
+                with patch("ask.commands.skills_impl.compute_catalog_parity", return_value={"drift_detected": False}):
                     result = route_skills(REPO_ROOT, "run a code review", top_k=1, considered_limit=5)
 
         self.assertEqual(
@@ -288,10 +317,10 @@ class TestAskSkillsRoute(unittest.TestCase):
             """
             return advanced_entries if advanced else default_entries
 
-        with patch("ask.commands.skills.discover_catalog_entries", side_effect=_discover) as mocked_discover:
-            with patch("ask.commands.skills._load_builder_module", return_value=router_stub):
+        with patch("ask.commands.skills_impl.discover_catalog_entries", side_effect=_discover) as mocked_discover:
+            with patch("ask.commands.skills_impl._load_builder_module", return_value=router_stub):
                 with patch(
-                    "ask.commands.skills.compute_catalog_parity",
+                    "ask.commands.skills_impl.compute_catalog_parity",
                     return_value={"drift_detected": False},
                 ) as mocked_parity:
                     result = route_skills(REPO_ROOT, "audit the README", top_k=1, considered_limit=20)

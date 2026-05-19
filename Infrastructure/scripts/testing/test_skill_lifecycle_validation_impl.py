@@ -561,6 +561,23 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         )
         self.assertEqual(missing, [])
 
+    def test_unslopify_is_default_visible_for_formal_cleanup_routing(self) -> None:
+        """
+        Keep Unslopify available as a formal default skill, not only a manual fallback.
+
+        Other project sessions depend on this cleanup skill being present in the
+        generated registry so agents do not report it as unavailable and then
+        improvise the workflow manually.
+        """
+        selection_policy = load_selection_policy_module()
+        repo_root = Path(__file__).resolve().parents[3]
+        skill_path = repo_root / "Skills" / "agent-ops" / "unslopify" / "SKILL.md"
+        skill_text = skill_path.read_text(encoding="utf-8")
+
+        self.assertIn("unslopify", selection_policy.DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
+        self.assertTrue(skill_path.is_file())
+        self.assertIn("runtime_visibility: flat", skill_text)
+
     def test_catalog_default_surface_matches_default_discovery_surface(self) -> None:
         """
         Ensure catalog/default and discovery/default surfaces stay identical.
