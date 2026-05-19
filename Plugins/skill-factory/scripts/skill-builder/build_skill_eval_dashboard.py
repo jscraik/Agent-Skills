@@ -58,16 +58,26 @@ def load_scorecard(path: Path) -> Dict[str, Any]:
 
 def collect_scorecards(root: Path) -> Dict[str, List[Tuple[str, Dict[str, Any]]]]:
     by_skill: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {}
-    for scorecard_path in root.rglob("scorecard.json"):
-        # expected path: <root>/<skill>/<run_id>/scorecard.json
+    scorecard_paths = sorted({
+        *root.rglob("scorecard.json"),
+        *root.rglob("latest-scorecard.json"),
+    })
+    for scorecard_path in scorecard_paths:
+        # expected paths:
+        # - <root>/<skill>/<run_id>/scorecard.json
+        # - <root>/<skill>/latest-scorecard.json
         parts = scorecard_path.parts
         try:
             idx = parts.index("skills")
             skill = parts[idx + 1]
-            run_id = parts[idx + 2]
+            run_id = "latest" if scorecard_path.name == "latest-scorecard.json" else parts[idx + 2]
         except Exception:
-            skill = scorecard_path.parent.parent.name
-            run_id = scorecard_path.parent.name
+            if scorecard_path.name == "latest-scorecard.json":
+                skill = scorecard_path.parent.name
+                run_id = "latest"
+            else:
+                skill = scorecard_path.parent.parent.name
+                run_id = scorecard_path.parent.name
 
         obj = load_scorecard(scorecard_path)
         by_skill.setdefault(skill, []).append((run_id, obj))

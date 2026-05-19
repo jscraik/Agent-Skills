@@ -60,6 +60,13 @@ def _as_text(value, encoding="utf-8") -> str:
     return str(value)
 
 
+def _repo_relative_text(repo_root: Path, text: str) -> str:
+    if not text:
+        return text
+    root = str(repo_root.resolve())
+    return text.replace(root + "/", "").replace(root, ".")
+
+
 def _evals_run_validation_command(path: str, *, mode: str, runner: str, dashboard: bool) -> str:
     parts = ["./bin/ask", "evals", "run", path, "--mode", mode, "--runner", runner]
     if not dashboard:
@@ -243,6 +250,9 @@ def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool =
         "validation failed",
         "strict audit failed",
         "policy validation",
+        "requires eval cases",
+        "none matched the selected filters",
+        "add discovery-specific smoke_mode cases",
     ]
     if any(marker in low for marker in validation_markers):
         return "blocked_validation"
@@ -432,8 +442,8 @@ def run_evals(
 
     try:
         process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout)
-        result.data["raw_output"] = process.stdout
-        result.data["raw_error"] = process.stderr
+        result.data["raw_output"] = _repo_relative_text(repo_root, process.stdout)
+        result.data["raw_error"] = _repo_relative_text(repo_root, process.stderr)
         result.data["eval_status"] = "pass" if process.returncode == 0 else "fail"
         result.data["blocker_class"] = None
         result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY

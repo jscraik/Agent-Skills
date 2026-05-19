@@ -117,6 +117,21 @@ class BuildSkillEvalDashboardTests(unittest.TestCase):
         self.assertEqual(latest["expected_signal_summary"]["average"], 92)
         self.assertIn("| skill-builder | 1 | 0 | 0 | 92% |", markdown)
 
+    def test_collect_scorecards_includes_latest_scorecards(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir) / "Infrastructure" / "artifacts" / "skills"
+            scorecard_path = root / "skill-builder" / "latest-scorecard.json"
+            scorecard_path.parent.mkdir(parents=True)
+            scorecard_path.write_text(
+                json.dumps({"runner_mode": "discovery-smoke", "passed": True, "cases": []}),
+                encoding="utf-8",
+            )
+
+            scorecards = collect_scorecards(root)
+
+        self.assertIn("skill-builder", scorecards)
+        self.assertEqual(scorecards["skill-builder"][0][0], "latest")
+
 
 if __name__ == "__main__":
     unittest.main()

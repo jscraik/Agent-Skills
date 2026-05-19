@@ -151,6 +151,7 @@ def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
     assert result.data["dashboard_path"] == "Infrastructure/artifacts/skill-reviews/example-skill-dashboard-smoke.html"
     assert result.data["dashboard_tab"] == "evals"
     assert result.data["scorecard_path"] == "Infrastructure/artifacts/skills/example-skill/run-1/scorecard.json"
+    assert str(tmp_path) not in result.data["raw_output"]
     assert result.data["browser_instruction"] == "Open dashboard_url in the Codex in-app browser after evals complete."
     assert [event["event_type"] for event in result.data["lifecycle_events"]] == [
         "eval_started",
@@ -351,6 +352,36 @@ def test_run_evals_classifies_user_input_blocker_without_scorecard(tmp_path: Pat
     ]
     assert result.data["lifecycle_event"]["outcome"]["status"] == "blocked_user_input"
     assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == ["blocked_user_input"]
+
+
+def test_run_evals_classifies_discovery_smoke_filter_blocker(tmp_path: Path) -> None:
+    completed = mock.Mock(
+        returncode=1,
+        stdout="",
+        stderr=(
+            "ERROR: discovery-smoke runner requires eval cases with `smoke_mode`; "
+            "none matched the selected filters. Use a live runner such as `codex` "
+            "for behavior evals, or add discovery-specific smoke_mode cases.\n"
+        ),
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/agent-ops/autoresearch",
+            mode="smoke",
+            runner="discovery-smoke",
+            dashboard=False,
+        )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["blocker_class"] == "blocked_validation"
+    assert [event["event_type"] for event in result.data["lifecycle_events"]] == [
+        "eval_started",
+        "eval_blocked",
+    ]
+    assert result.data["lifecycle_event"]["outcome"]["status"] == "blocked_validation"
 
 
 def test_eval_blocker_taxonomy_matches_capability_readiness_classes() -> None:

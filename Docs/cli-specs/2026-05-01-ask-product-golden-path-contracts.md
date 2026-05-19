@@ -312,6 +312,26 @@ Required data fields:
     "handle": "he-code-review",
     "canonical_source_path": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md",
     "audit_target": "Plugins/harness-engineering/skills/code_quality_review/he-code-review",
+    "target_summary": {
+      "query": "he-code-review",
+      "target_kind": "command_handle",
+      "handle": "he-code-review",
+      "canonical_source_path": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md"
+    },
+    "contract_schemas": {
+      "doctor": {"version": "skill-doctor.v1", "owner": "Agent Skills Kit"},
+      "events": {"version": "skill-events.v1", "owner": "Agent Skills Kit"},
+      "profiles": "skill-operation-profiles.v1",
+      "package": "skill-package-readiness.v1"
+    },
+    "operation_context": {
+      "primary_profile": "authoring",
+      "next_profiles": ["package-review", "proof"],
+      "validation_commands": [
+        "./bin/ask skills doctor he-code-review --json --robot",
+        "./bin/ask skills audit Plugins/harness-engineering/skills/code_quality_review/he-code-review --json --robot"
+      ]
+    },
     "status": "pass",
     "blockers": [],
     "warnings": [],
@@ -405,6 +425,12 @@ Required behavior:
 
 - Compose resolver, command-handle proof, canonical-source, audit, metadata,
   and outcome-proof availability signals for one capability.
+- Emit `target_summary` with the resolved query, target kind, handle, and
+  canonical source path so callers can assert which capability was inspected.
+- Emit `contract_schemas` with the doctor, lifecycle events, operation profiles,
+  and package-readiness schema references used by the response.
+- Emit `operation_context` with deterministic profile and validation-command
+  evidence for the invocation environment.
 - Return `blocked` with machine-readable blocker classes when the capability
   cannot be used safely.
 - Treat missing outcome proof as a warning, not as a structural failure.
