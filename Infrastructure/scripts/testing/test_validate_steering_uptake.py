@@ -559,6 +559,13 @@ def test_table_rows_with_data_row() -> None:
     assert rows == [["1", "2", "3"]]
 
 
+def test_table_rows_rejects_missing_separator_before_data() -> None:
+    text = "| A | B | C |\n| 1 | 2 | 3 |\n| 4 | 5 | 6 |\n"
+    headers, rows = validate_steering_uptake._table_rows(text)
+    assert headers == ["A", "B", "C"]
+    assert rows == []
+
+
 def test_table_rows_allows_escaped_inline_pipe_in_cell() -> None:
     text = (
         "| A | B | C |\n"
@@ -597,6 +604,21 @@ def test_validate_allows_escaped_inline_pipe_in_ledger_cell(tmp_path: Path) -> N
     findings = validate_steering_uptake.validate(tmp_path)
 
     assert {finding.code for finding in findings} == set()
+
+
+def test_validate_rejects_missing_ledger_separator_row(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism | guardrail | python3 validate_steering_uptake.py --json | validated |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {finding.code for finding in findings}
+    assert "STEERING_LEDGER_SEPARATOR" in codes
 
 
 # ---------------------------------------------------------------------------

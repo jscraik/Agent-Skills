@@ -96,7 +96,12 @@ def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
             break
 
     if len(table_lines) < 3:
+        if len(table_lines) >= 2 and not _is_table_separator(table_lines[1]):
+            return _table_cells(table_lines[0]), []
         return [], []
+
+    if not _is_table_separator(table_lines[1]):
+        return _table_cells(table_lines[0]), []
 
     headers = _table_cells(table_lines[0])
     rows: list[list[str]] = []
@@ -139,6 +144,34 @@ def _table_cells(line: str) -> list[str]:
     return cells
 
 
+def _is_table_separator(line: str) -> bool:
+    cells = _table_cells(line)
+    if not cells:
+        return False
+    for cell in cells:
+        stripped = cell.strip()
+        if len(stripped) < 3:
+            return False
+        if not set(stripped) <= {"-", ":"}:
+            return False
+        if "-" not in stripped:
+            return False
+    return True
+
+
+def _has_malformed_table_separator(markdown: str) -> bool:
+    lines = [line.strip() for line in markdown.splitlines()]
+    table_lines: list[str] = []
+    collecting = False
+    for line in lines:
+        if line.startswith("|"):
+            table_lines.append(line)
+            collecting = True
+        elif collecting:
+            break
+    return len(table_lines) >= 2 and not _is_table_separator(table_lines[1])
+
+
 def validate(root: Path = ROOT) -> list[Finding]:
     """
     Validate the steering feedback documentation, ledger, and agent docs index under the given repository root.
@@ -174,6 +207,8 @@ def validate(root: Path = ROOT) -> list[Finding]:
         headers, rows = _table_rows(ledger)
         if headers != REQUIRED_HEADERS:
             findings.append(Finding("STEERING_LEDGER_HEADERS", f"Expected headers {REQUIRED_HEADERS}, got {headers}", _relative(ledger_path, root)))
+        if headers and not rows and _has_malformed_table_separator(ledger):
+            findings.append(Finding("STEERING_LEDGER_SEPARATOR", "Ledger table must include a Markdown separator row before data rows.", _relative(ledger_path, root)))
         if not rows:
             findings.append(Finding("STEERING_LEDGER_EMPTY", "Ledger must contain at least one steering uptake row.", _relative(ledger_path, root)))
         for index, row in enumerate(rows, start=1):
