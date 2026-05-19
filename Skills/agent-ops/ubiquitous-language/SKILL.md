@@ -57,6 +57,8 @@ The glossary should include canonical terms, aliases, relationships, prompt tran
 - Do not infer authority from private logs, screenshots, or transcripts without user approval.
 - Stop before broad documentation rewrites when a glossary entry or pointer is enough.
 
+Edit only the requested glossary, instruction pointer, or skill reference surface. Do not rewrite unrelated docs, generated projections, runtime mirrors, or policy files unless the user explicitly names them.
+
 ## Anti-Patterns
 
 - Turning the glossary into a generic programming dictionary.
@@ -83,6 +85,8 @@ Never drop required context for brevity; move it into references or deferred con
 
 - Local contract, evals, and task profile: `references/`
 - Read when: terminology work needs DDD-style bounded-context and source/projection language checks: `Infrastructure/references/software-literature-expert-lens-pack.md` and the Ubiquitous Language row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
+
+- Software-literature domain-language lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
 - Output template: `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/references/output-format.md`
 - Archived long-form workflow: `Infrastructure/references/deferred-skill-context/agent-ops-ubiquitous-language/`
 

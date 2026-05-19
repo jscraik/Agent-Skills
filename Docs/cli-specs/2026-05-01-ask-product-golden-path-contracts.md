@@ -355,6 +355,16 @@ Required data fields:
         "outcome": {"status": "warning", "blocker_classes": [], "warning_classes": ["outcome_proof_not_run"]}
       }
     ],
+
+    "status": "pass",
+    "blockers": [],
+    "warnings": [],
+    "readiness_taxonomy": {"blockers": {}, "warnings": {}},
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "skill_doctor_completed",
+      "outcome": {"status": "pass", "blocker_classes": [], "warning_classes": []}
+    },
     "checks": {
       "resolver": {"status": "pass"},
       "runtime_reachability": {"status": "pass"},
@@ -430,6 +440,8 @@ Required data fields:
       "outcome_proof": {"status": "available_not_run"}
     },
     "agent_summary": "$he-code-review passed capability doctor checks with outcome proof still available to run.",
+
+    "agent_summary": "$he-code-review passed capability doctor checks.",
     "next_command": "./bin/ask skills prove he-code-review --json --robot"
   }
 }
@@ -452,6 +464,9 @@ Required behavior:
   `operation_context`, and `capability-lifecycle-event.v1` outcomes.
 - Always emit `next_command` for `blocked`, `warning`, and `pass`; use
   `null` only when no safe next command exists.
+
+- Return `blocked` with machine-readable blocker classes when the capability
+  cannot be used safely.
 - Treat missing outcome proof as a warning, not as a structural failure.
 - Emit stable readiness taxonomy classes for runtime, auth, user-input,
   timeout, artifact, source, and validation blockers.
@@ -550,6 +565,8 @@ Required data fields:
         }
       }
     },
+
+    "lifecycle_event": {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_loaded"},
     "lifecycle_events": [
       {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_loaded"},
       {
@@ -566,6 +583,7 @@ Required data fields:
         }
       }
     ],
+    "lifecycle_event_types": ["skill_loaded", "package_readiness_checked"],
     "agent_summary": "skill-builder has package gate blockers: compatible_roles, provenance, runtime_needs, share_readiness.",
     "next_command": "./bin/ask skills doctor skill-builder --strict --json --robot"
   }
@@ -643,6 +661,10 @@ Required behavior:
 - When no profile name is provided, return all profiles.
 - For a valid profile name, return that single profile.
 - For unknown profiles, return `blocked` with available profile names.
+
+- Return all profiles when no profile name is provided.
+- Return one profile when a valid profile name is provided.
+- Return `blocked` with available profile names for unknown profiles.
 - Include workspace-root groups and per-profile effective roots so automation can
   show the repo, runtime projection, artifact, and memory boundaries without
   parsing profile prose.
@@ -737,6 +759,8 @@ JSON output example:
 
 Required behavior:
 
+Required data fields for JSON output:
+
 - `eval_status`: one of `pass`, `fail`, `blocked_user_input`, `blocked_auth`,
   `blocked_runtime`, `timeout_no_output`, or `timeout_partial_output`.
 - `blocker_class`: `null` for pass/fail, otherwise the matching blocked or
@@ -748,6 +772,8 @@ Required behavior:
   the final eval outcome.
 - `raw_output` and `raw_error`: captured runner output for exact evidence.
 - See the example above for the complete `eval_run` JSON envelope.
+
+Required behavior:
 
 - Emit `eval_started` before invoking the runner, then emit `eval_completed`
   for pass/fail outcomes or `eval_blocked` for classified blocker outcomes.

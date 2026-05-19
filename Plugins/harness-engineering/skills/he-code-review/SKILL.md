@@ -100,4 +100,9 @@ Reference `assets/` only for skill packaging and browseability; review evidence 
 - Provenance safety: `../../references/codex-provenance-contract.md`, `../../references/pr-safety-trace-contract.md`
 - Detailed doctrine: `../../../../Infrastructure/references/harness-engineering/he-code-review-doctrine.md`
 
+- Shared HE contracts: `../../references/deferred-context-index.md`, `../../references/subagent-call-contract.md`
+- Provenance safety: `../../references/codex-provenance-contract.md`, `../../references/pr-safety-trace-contract.md`
+- Detailed doctrine: `../../../../Infrastructure/references/harness-engineering/he-code-review-doctrine.md`
+- Software-literature review lenses: `../../../../Infrastructure/references/software-literature-expert-lens-pack.md`, `../../../../Infrastructure/references/software-literature-skill-expertise-map.md`
+
 Codex-compatible findings must be tight: exact file, line, impact, and remediation.

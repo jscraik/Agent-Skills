@@ -311,8 +311,8 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
 
-    def test_skills_proof_fails_when_only_agents_runtime_is_linked(self) -> None:
-        """Codex Desktop uses ~/.codex/skills, so ~/.agents/skills alone is diagnostic only."""
+    def test_skills_proof_passes_when_only_agents_runtime_is_linked(self) -> None:
+        """Either supported user runtime link can satisfy command-handle reachability."""
         repo_root = self.temp_dir / "repo"
         command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
@@ -326,7 +326,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
             result = skills_proof(repo_root, "he-heartbeat")
 
         proof = result.data["proof"]
-        self.assertEqual(proof["status"], "fail")
+        self.assertEqual(proof["status"], "pass")
         self.assertTrue(proof["gates"]["resolver"])
         self.assertTrue(proof["gates"]["generated_command_handle_check"])
         self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
@@ -334,7 +334,9 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_command_handle_exists"])
         self.assertTrue(proof["gates"]["agents_user_link"])
         self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
-        self.assertIn("codex_user_link", proof["gate_policy"]["required"])
+        self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
+        self.assertTrue(proof["gates"]["user_runtime_ready"])
+        self.assertIn("user_runtime_ready", proof["gate_policy"]["required"])
         self.assertIn("agents_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
 
     def test_skills_proof_passes_with_linked_codex_runtime(self) -> None:

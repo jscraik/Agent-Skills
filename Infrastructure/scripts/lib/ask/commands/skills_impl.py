@@ -1089,7 +1089,7 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     agents_runtime_ready = (
         gates["agents_user_link"] and gates["agents_user_command_handle_exists"]
     )
-    user_runtime_ready = codex_runtime_ready
+    user_runtime_ready = codex_runtime_ready or agents_runtime_ready
     gates["codex_user_runtime_ready"] = codex_runtime_ready
     gates["agents_user_runtime_ready"] = agents_runtime_ready
     gates["user_runtime_ready"] = user_runtime_ready
@@ -1106,8 +1106,6 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
                 "resolver",
                 "generated_command_handle_check",
                 "workspace_command_handle_exists",
-                "codex_user_link",
-                "codex_user_command_handle_exists",
                 "user_runtime_ready",
             ],
             "supporting_runtime_diagnostics": [
@@ -5208,9 +5206,7 @@ def improve_skills(
     gates = proof.get("gates", {}) if isinstance(proof, dict) else {}
     required = proof.get("gate_policy", {}).get("required", []) if isinstance(proof, dict) else []
     required_gates_passed = all(bool(gates.get(gate)) for gate in required)
-    user_runtime_ready = bool(
-        gates.get("codex_user_link") and gates.get("codex_user_command_handle_exists")
-    )
+    user_runtime_ready = bool(gates.get("user_runtime_ready"))
     rationale = recommended.get("rationale") or []
     capability = {
         "handle": handle,
@@ -5266,10 +5262,7 @@ def improve_skills(
                     else []
                 )
                 fallback_required_gates_passed = all(bool(fallback_gates.get(gate)) for gate in fallback_required)
-                fallback_user_runtime_ready = bool(
-                    fallback_gates.get("codex_user_link")
-                    and fallback_gates.get("codex_user_command_handle_exists")
-                )
+                fallback_user_runtime_ready = bool(fallback_gates.get("user_runtime_ready"))
                 improvement["status"] = "resolved_with_fallback"
                 improvement["route_state"] = "resolved_with_fallback"
                 improvement["route_state_reason"] = (

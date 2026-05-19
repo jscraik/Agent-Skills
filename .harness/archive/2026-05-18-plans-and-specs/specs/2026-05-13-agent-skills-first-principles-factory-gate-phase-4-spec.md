@@ -268,6 +268,13 @@ python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lin
 python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/archive/2026-05-18-plans-and-specs/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md --json
 python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/archive/2026-05-18-plans-and-specs/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md --kind spec --json
 git diff --check -- .harness/archive/2026-05-18-plans-and-specs/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md
+
+vale sync && vale .harness/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md
+python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md
+python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md
+python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md --json
+python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md --kind spec --json
+git diff --check -- .harness/specs/2026-05-13-agent-skills-first-principles-factory-gate-phase-4-spec.md
 ~~~
 
 Minimum implementation validation for the future Phase 4 plan:

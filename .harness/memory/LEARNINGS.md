@@ -206,6 +206,8 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-05-14 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2135778639)
 
+- **2026-05-14 [Codex]:** Bash command 'python3' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-2135778639.log. Verify target path exists, check cwd, and use Read tool instead of shell python3 for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:2135778639)
+
 - **2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:703433997)
 
 - **2026-05-15 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3377052620)
@@ -225,3 +227,7 @@ Repo-specific agent knowledge base. Append-only.
 - **2026-05-17 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:4191692106)
 
 - **2026-05-17 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1301257671)
+
+- **2026-05-18 [Claude]:** Supersedes/clarifies earlier cat/python3/jq exit-code-2 entries (see auto-key:3040072751, auto-key:872490936, auto-key:1758991561, auto-key:106538740, auto-key:876251262, auto-key:2515931723, auto-key:999518231) — when bash commands fail with exit code 2 and the auto-capture entry omits argv/cwd/input path, the root cause is almost always a missing interpreter dependency, wrong working directory, or missing file rather than a skill regression; run `which python3`, `pwd`, and `ls` diagnostics first, then rerun with full command logging (explicit paths, cwd, and input) before changing skill logic or assuming tool failure.
+
+- **2026-05-19 [Codex]:** PR green sweep repeated `gh` failures as if GitHub were down, but `gh api rate_limit` and `curl -I https://api.github.com` passed when the command was run with explicit Codex sandbox network permission. `gh run view --log-failed` also proved that run-log caches default to `~/.cache/gh` unless `XDG_CACHE_HOME` is set. -> For all PR/CircleCI/Snyk live-state commands in this repo, use explicit network permission first and set sandbox-approved writable `XDG_CACHE_HOME`, `MISE_CACHE_DIR`, `UV_CACHE_DIR`, and `XDG_STATE_HOME` paths when `gh`, `mise`, or `uv` may run; after two equivalent failures, stop and refine the environment contract before retrying.

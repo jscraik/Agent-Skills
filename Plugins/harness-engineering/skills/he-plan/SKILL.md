@@ -23,6 +23,8 @@ Source spec/issue/plan, selected slice, repo instructions, dirty state, validati
 ## Outputs
 Write a plan artifact or return `blocked`. Include mode, source slice, units, allowed files/boundaries, validation, rollback, risks, blockers, an enforcement contract, and handoff.
 
+Write a plan artifact or return `blocked`. Include mode, source slice, units, allowed files/boundaries, validation, rollback, risks, blockers, and handoff.
+
 ## Procedure
 1. Choose mode:
    - selected issue/spec -> `standard-plan`
@@ -36,6 +38,10 @@ Write a plan artifact or return `blocked`. Include mode, source slice, units, al
 6. Run the artifact gate. Fix once and re-run; if still failing, return blocked.
 7. Hand off to `he-work` only when the first unit is selected and validation is explicit.
 
+4. Add risk and stop conditions. Do not plan unapproved external mutation, destructive commands, or broad refactors.
+5. Run the artifact gate. Fix once and re-run; if still failing, return blocked.
+6. Hand off to `he-work` only when the first unit is selected and validation is explicit.
+
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed until fixed, waived by an authorized gate, or reported as blocked.
 
@@ -44,6 +50,9 @@ test -f <source-spec-or-plan>
 rg -n "AC-|acceptance|validation|rollback|scope|essential_decisions|fillable_gaps|guardrails|refusal_triggers|durable_memory|professional_output" <source-spec-or-plan>
 python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <plan-path> --json
 python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <plan-path> --kind plan --json
+
+rg -n "AC-|acceptance|validation|rollback|scope" <source-spec-or-plan>
+python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <plan-path> --json
 ~~~
 
 ## Failure Mode
@@ -104,4 +113,6 @@ Reference `assets/` only for skill packaging and browseability; plan evidence be
 - Handoff: `../../references/skills/he-plan/post-plan-handoff.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`
 - Deferred context index: `../../references/deferred-context-index.md`
+- Cookbook-derived execution-plan and evaluation flywheel lenses: `../../../../Infrastructure/references/openai-cookbook-expert-lens-pack.md`, `../../../../Infrastructure/references/openai-cookbook-skill-expertise-map.md`
+- Software-literature planning lenses: `../../../../Infrastructure/references/software-literature-expert-lens-pack.md`, `../../../../Infrastructure/references/software-literature-skill-expertise-map.md`
 - Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

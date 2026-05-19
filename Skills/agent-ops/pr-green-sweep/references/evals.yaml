@@ -5,6 +5,8 @@ quality_targets:
   heartbeat_created_or_reused_before_rotation: required
   duplicate_heartbeat_guard: required
   live_pr_recheck_after_push: required
+  live_network_explicit_permission: required
+  sandbox_writable_state_env: required
   admin_merge_without_approval: blocked
   branch_delete_without_merge_proof: blocked
 cases:
@@ -23,6 +25,7 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: pr-green-sweep}
       - {type: regex, value: "(?i)(heartbeat|automation|heartbeat_status).{0,60}(created|updated|reused|blocked|unavailable)|(created|updated|reused|blocked|unavailable).{0,60}(heartbeat|automation)|blocked by (the )?(current )?(execution )?environment|sandbox|repo(?:sitory)? (identifier|full name).*need|merge (action|attempt).{0,80}(cancelled|blocked)|workspace.{0,80}read-only|blocked from writing|no ability to edit|cannot.*apply fixes"}
+      - {type: regex, value: "(?i)(network permission|explicit network|XDG_CACHE_HOME|XDG_STATE_HOME|MISE_CACHE_DIR|UV_CACHE_DIR|sandbox.*cache|writable.*state)"}
       - {type: regex, value: "(?i)(github|coderabbit|circleci|merge|prune)"}
   - id: happy-explicit
     name: explicit invocation

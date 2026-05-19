@@ -95,3 +95,7 @@ future_agent_guidance:
 - Pragmatic review lens: `../../references/pragmatic-programmer-review-contract.md`
 - Source-prompt comparison: `../../references/skills/he-strategy/source-prompt-preservation.md`
 - Shared HE gates: `../../references/subagent-call-contract.md`, `../../references/deferred-context-index.md`
+
+- Source-prompt comparison: `../../references/skills/he-strategy/source-prompt-preservation.md`
+- Shared HE gates: `../../references/subagent-call-contract.md`, `../../references/deferred-context-index.md`
+- Software-literature strategy lenses: `../../../../Infrastructure/references/software-literature-expert-lens-pack.md`, `../../../../Infrastructure/references/software-literature-skill-expertise-map.md`

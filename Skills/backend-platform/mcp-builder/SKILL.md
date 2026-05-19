@@ -110,6 +110,8 @@ metadata:
 - Start here for routing, safety, workflow, and validation.
 - Read when: MCP work needs integration-pattern, data-reliability, schema, idempotency, or auth-boundary lenses: `Infrastructure/references/software-literature-expert-lens-pack.md` and the MCP Builder row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Read when: MCP work needs Cookbook-derived tool orchestration, structured-output, or secure-quality-gate checks: `Infrastructure/references/openai-cookbook-expert-lens-pack.md` and `Infrastructure/references/openai-cookbook-skill-expertise-map.md`.
+
+- Use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md` for integration-boundary and protocol contract lenses.
 - Use references/contract.yaml for the machine-readable contract.
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.

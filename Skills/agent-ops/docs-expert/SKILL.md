@@ -110,6 +110,8 @@ Replacing repo contracts with generic advice; hiding uncertainty; loading archiv
 - User request: "Update this skill doc after the eval contract changed." After editing `Skills/agent-ops/foo/SKILL.md`, run strict audit, Plugin Eval, and the relevant smoke eval before claiming quality improved.
 
 ## Progressive Disclosure
+- `Infrastructure/references/software-literature-expert-lens-pack.md`: docs-as-interface and domain-language lenses.
+- `Infrastructure/references/software-literature-skill-expertise-map.md`: skill-to-literature routing map.
 - `references/documentation-quality.md`: detailed prose, README, visual, and
   reader-testing criteria.
 - `references/contract.yaml`: machine-readable contract.

@@ -58,6 +58,16 @@ Analyze, review, or plan architecture alternatives through a structured intervie
 - Treat Linear, specs, plans, and repo docs as evidence surfaces to reconcile, not as automatic authority to mutate.
 - Keep the decision scope to the named architecture problem and its direct consequences.
 
+- Produce interview questions, tradeoff analysis, or decision notes only for the requested architecture choice.
+- Do not create ADRs, mutate Linear, implement code, or refactor architecture unless the user explicitly authorizes that follow-up.
+
+## Failure Mode
+- If the decision, candidate options, or dominant drivers are too vague to compare, ask the next blocking question instead of manufacturing a recommendation.
+
+## Gotchas
+- A preference is not an architecture decision until the sacrifice, reversibility, and validation criteria are named.
+- Broad discovery can hide the next useful question; keep the interview sequential.
+
 ## Validation
 - Run the narrowest available validator or inspection path that exercises the changed artifact.
 - Fail fast: stop at the first failed gate; do not proceed until it is fixed and rerun.
@@ -86,5 +96,7 @@ Analyze, review, or plan architecture alternatives through a structured intervie
 ## Progressive Disclosure
 - Start with this active contract, then load deferred context only when a task needs deeper implementation detail.
 - Read when: architecture interviews need code-literature lenses for tradeoffs, data/integration risk, bounded contexts, or complexity symptoms: `Infrastructure/references/software-literature-expert-lens-pack.md` and the Architecture Interview row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
+
+- Use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md` for architecture decision and tradeoff lenses.
 - Archived source, scripts, assets, and long-form references live under `Infrastructure/references/deferred-skill-context/product-strategy-architecture-interview/`.
 - Prefer the active `references/contract.yaml`, `references/evals.yaml`, and `references/task-profile.json` for routing, validation, and graph metadata.

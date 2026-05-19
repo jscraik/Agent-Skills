@@ -25,6 +25,8 @@ Do not write implementation plans, code, Linear payloads, strategy, or review fi
 ## Outputs
 Write a spec or replacement section, or return `blocked`. Include stable acceptance IDs, source evidence, validation command, pass/fail condition, observability, rollback/supersession, risks, owner evidence, an enforcement contract, and handoff.
 
+Write a spec or replacement section, or return `blocked`. Include stable acceptance IDs, source evidence, validation command, pass/fail condition, observability, rollback/supersession, risks, owner evidence, and handoff.
+
 ## Modes
 - `standard-spec`: create a new behavior contract from a selected issue, strategy slice, bug, or requirement.
 - `dedicated-ui-spec`: create UI/browser acceptance criteria from screenshots, browser feedback, visual references, or interaction evidence.
@@ -40,6 +42,10 @@ Write a spec or replacement section, or return `blocked`. Include stable accepta
 6. Run the artifact gate in `Validation`. Fix the missing field, broken structure, or absent source once and re-run; if the same gate still fails, return blocked with the exact command and output.
 7. Hand off to `he-plan` only after acceptance IDs, validation, and the enforcement contract are explicit.
 
+4. Keep implementation notes secondary. The main spec is behavior, not task sequence.
+5. Run the artifact gate in `Validation`. Fix the missing field, broken structure, or absent source once and re-run; if the same gate still fails, return blocked with the exact command and output.
+6. Hand off to `he-plan` only after acceptance IDs and validation are explicit.
+
 ## Validation
 Fail fast: stop at the first failed gate and do not proceed until fixed, waived by an authorized gate, or reported as blocked.
 
@@ -48,6 +54,9 @@ test -f <source-artifact>
 rg -n "AC-|acceptance|validation|rollback|observability|essential_decisions|fillable_gaps|guardrails|refusal_triggers|durable_memory|professional_output" <spec-path>
 python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <spec-path> --json
 python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <spec-path> --kind spec --json
+
+rg -n "AC-|acceptance|validation|rollback|observability" <spec-path>
+python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <spec-path> --json
 ~~~
 
 Pass/fail criteria:
@@ -55,6 +64,9 @@ Pass/fail criteria:
 - `rg` passes only when the spec includes acceptance IDs plus validation, rollback, observability, and enforcement-contract terms.
 - `check_bluf_structure.py` passes only when it exits 0 and returns JSON without structural errors.
 - `check_generated_artifact_shape.py` passes only when the durable spec shape, stable IDs, visual decision, conformance rules, and Enforcement Contract are present.
+
+- `rg` passes only when the spec includes acceptance IDs plus validation, rollback, and observability terms.
+- `check_bluf_structure.py` passes only when it exits 0 and returns JSON without structural errors.
 - If any required validation is impossible in the current environment, report `blocked_validation` with the missing permission, file, or tool.
 
 ## Failure Mode
@@ -145,4 +157,5 @@ Reference `assets/` only for skill packaging and browseability; spec evidence be
 - Reviewability: `../../references/bluf-review-contract.md`, `../../references/visual-reference-contract.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`
 - Deferred context index: `../../references/deferred-context-index.md`
+- Software-literature spec lenses: `../../../../Infrastructure/references/software-literature-expert-lens-pack.md`, `../../../../Infrastructure/references/software-literature-skill-expertise-map.md`
 - Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

@@ -95,6 +95,11 @@ and searches `.harness/memory`, wiki learnings, canonical learning docs, and
 skill lesson artifacts without replacing the canonical wiki or Project Brain
 mutation paths.
 
+and searches `.harness/memory`, `Wiki/wiki/learnings`, `Docs/solutions`, and
+skill lesson artifacts. These are the supported read roots; memory mutation
+continues through Project Brain and canonical wiki workflows instead of the
+read-only memory commands.
+
 The next command contracts are specified in
 [ask Product Golden Path Command Contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md):
 

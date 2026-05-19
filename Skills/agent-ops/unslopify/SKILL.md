@@ -130,6 +130,8 @@ Never drop required context for brevity; move it into references or deferred con
 
 - Local contract, evals, and task profile: `references/`
 - Read when: cleanup needs code-literature lenses for dead-code proof, small reversible batches, or slop removal: `Infrastructure/references/software-literature-expert-lens-pack.md` and the Unslopify row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
+
+- Software-literature cleanup lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
 - Archived full workflow: `Infrastructure/references/deferred-skill-context/agent-ops-unslopify/`
 
 ## Validation

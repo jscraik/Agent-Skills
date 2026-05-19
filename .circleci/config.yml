@@ -22,37 +22,20 @@ jobs:
           name: Ensure SNYK_TOKEN available
           command: |
             if [ -z "${SNYK_TOKEN:-}" ]; then
-              echo "⚠ SNYK_TOKEN not set — add a Snyk API token as a CircleCI project environment variable"
-              echo "export SKIP_SNYK=1" >> $BASH_ENV
-            else
-              echo "✅ SNYK_TOKEN present"
+              echo "❌ SNYK_TOKEN not set — add a Snyk API token as a CircleCI project environment variable"
+              exit 1
             fi
-      - run:
-          name: Install Snyk CLI
-          command: |
-            if [ "${SKIP_SNYK:-0}" = "1" ]; then
-              echo "⚠ Skipping Snyk CLI installation (SNYK_TOKEN not available)"
-              exit 0
-            fi
-            curl -fsSL --compressed --retry 6 --retry-all-errors \
-              https://static.snyk.io/cli/latest/snyk-linux -o /tmp/snyk-linux
-            curl -fsSL --compressed --retry 6 --retry-all-errors \
-              https://static.snyk.io/cli/latest/snyk-linux.sha256 -o /tmp/snyk.sha256
-            (cd /tmp && sha256sum -c snyk.sha256)
-            sudo install -m 0755 /tmp/snyk-linux /usr/local/bin/snyk
-            snyk config set disableSuggestions=true
-      - run:
-          name: Run Snyk
-          command: |
-            if [ "${SKIP_SNYK:-0}" = "1" ]; then
-              echo "⚠ Skipping Snyk scan (SNYK_TOKEN not available)"
-              exit 0
-            fi
-            snyk test \
-              --severity-threshold=high \
-              --all-projects \
-              --detection-depth=6 \
-              --exclude=node_modules,cache,artifacts,tmp
+            echo "✅ SNYK_TOKEN present"
+      - snyk/scan:
+          command: test
+          fail-on-issues: true
+          monitor-on-build: false
+          severity-threshold: high
+          token-variable: SNYK_TOKEN
+          additional-test-arguments: >-
+            --all-projects
+            --detection-depth=6
+            --exclude=node_modules,cache,artifacts,tmp
       - run:
           name: Validate Repository
           command: |
