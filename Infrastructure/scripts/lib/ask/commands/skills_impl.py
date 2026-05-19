@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, List, Optional
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = SCRIPTS_ROOT.parents[1]
 if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT))
 if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
@@ -36,7 +37,14 @@ from ask.services.plugin_sources import (  # noqa: E402
     load_local_marketplace as _load_local_marketplace,
     materialize_first_level_skill_aliases as _materialize_first_level_skill_aliases,
 )
-from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index  # noqa: E402
+from skill_discovery import (  # noqa: E402
+    USER_SKILL_SCOPE_PRECEDENCE,
+    classify_skill_scope,
+    discover_catalog_entries,
+    discover_skill_entries,
+    get_policy_identity,
+    render_index,
+)
 from selection_policy import REPO_SCAN_ROOTS, SYSTEM_BRIDGE_SKILL_NAMES  # noqa: E402
 from projection_engine import (  # noqa: E402
     ProjectionModeDecision,
@@ -4099,23 +4107,21 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
 
 
 def _scope_rank_for_path(skill_path: str) -> int:
+    scope = classify_skill_scope(REPO_ROOT / skill_path)
+    scope_precedence = USER_SKILL_SCOPE_PRECEDENCE.get(scope)
+    if scope_precedence is not None:
+        max_precedence = max(USER_SKILL_SCOPE_PRECEDENCE.values())
+        return max_precedence - scope_precedence + 1
     root = skill_path.split("/", 1)[0].strip()
     if root in REPO_SCAN_ROOTS:
         return REPO_SCAN_ROOTS.index(root) + 1
     return len(REPO_SCAN_ROOTS) + 1
 
 
-def _exact_handle_sort_key(candidate: EligibleCandidate) -> tuple[int, str]:
+def _exact_handle_sort_key(candidate: EligibleCandidate) -> tuple[int, int, str]:
     path = candidate.path.removeprefix("./")
-    if path.startswith("Skills/"):
-        source_rank = 0
-    elif path.startswith("Plugins/"):
-        source_rank = 1
-    elif path.startswith(".agents/"):
-        source_rank = 3
-    else:
-        source_rank = 2
-    return source_rank, canonical_sort_key(candidate)
+    bridge_rank = 1 if path.startswith(".agents/") else 0
+    return bridge_rank, candidate.scope_rank, canonical_sort_key(candidate)
 
 
 def route_skills(

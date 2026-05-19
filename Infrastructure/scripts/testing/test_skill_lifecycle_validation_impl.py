@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import importlib
 import importlib.util
 import sys
 from datetime import date, timedelta
@@ -125,13 +126,7 @@ def load_skills_impl_module():
         script_dir = str(path)
         if script_dir not in sys.path:
             sys.path.insert(0, script_dir)
-    spec = importlib.util.spec_from_file_location("skills_impl", SKILLS_IMPL_SCRIPT)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Failed to load skills impl module from {SKILLS_IMPL_SCRIPT}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+    return importlib.import_module("ask.commands.skills_impl")
 
 
 class SkillLifecycleValidationTests(unittest.TestCase):
@@ -1209,13 +1204,19 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             name="plugin-creator",
             path="Plugins/plugin-factory/skills/plugin-creator",
             description="canonical plugin source",
-            scope_rank=2,
+            scope_rank=skills_impl._scope_rank_for_path("Plugins/plugin-factory/skills/plugin-creator"),
+        )
+        global_source = candidate(
+            name="plugin-creator",
+            path="Skills/plugin-creator",
+            description="global skill source",
+            scope_rank=skills_impl._scope_rank_for_path("Skills/plugin-creator"),
         )
         project_source = candidate(
             name="plugin-creator",
-            path="Skills/plugin-creator",
+            path="Skills/project/plugin-creator",
             description="canonical project source",
-            scope_rank=1,
+            scope_rank=skills_impl._scope_rank_for_path("Skills/project/plugin-creator"),
         )
 
         self.assertIs(
@@ -1223,7 +1224,11 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             plugin_source,
         )
         self.assertIs(
-            min([bridge_copy, plugin_source, project_source], key=skills_impl._exact_handle_sort_key),
+            min([global_source, plugin_source], key=skills_impl._exact_handle_sort_key),
+            plugin_source,
+        )
+        self.assertIs(
+            min([bridge_copy, plugin_source, global_source, project_source], key=skills_impl._exact_handle_sort_key),
             project_source,
         )
 
