@@ -429,7 +429,7 @@ Required data fields:
       },
       "outcome_proof": {"status": "available_not_run"}
     },
-    "agent_summary": "$he-code-review passed capability doctor checks with outcome proof still available to run.",
+    "agent_summary": "the-code-review passed capability doctor checks with outcome proof still available to run.",
     "next_command": "./bin/ask skills prove he-code-review --json --robot"
   }
 }
@@ -452,9 +452,6 @@ Required behavior:
   `operation_context`, and `capability-lifecycle-event.v1` outcomes.
 - Always emit `next_command` for `blocked`, `warning`, and `pass`; use
   `null` only when no safe next command exists.
-
-- Return `blocked` with machine-readable blocker classes when the capability
-  cannot be used safely.
 - Treat missing outcome proof as a warning, not as a structural failure.
 - Emit stable readiness taxonomy classes for runtime, auth, user-input,
   timeout, artifact, source, and validation blockers.
