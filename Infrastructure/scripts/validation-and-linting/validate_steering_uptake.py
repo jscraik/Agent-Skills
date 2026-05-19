@@ -66,6 +66,10 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _is_table_row(line: str) -> bool:
+    return "|" in line.strip()
+
+
 def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
     """
     Extracts the header and data rows from the first Markdown-style table found in the input text.
@@ -81,20 +85,21 @@ def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
     lines = markdown.splitlines()
     table_lines = []
 
-    # Find the first line starting with "|"
+    # Find the first row in a candidate Markdown table. GitHub-flavored
+    # Markdown allows tables with or without leading/trailing edge pipes.
     start_index = None
     for i, line in enumerate(lines):
-        if line.strip().startswith("|"):
+        if _is_table_row(line):
             start_index = i
             break
 
     if start_index is None:
         return [], []
 
-    # Collect consecutive lines starting with "|"
+    # Collect consecutive rows from the candidate table.
     for i in range(start_index, len(lines)):
         line = lines[i].strip()
-        if line.startswith("|"):
+        if _is_table_row(line):
             table_lines.append(line)
         else:
             break
@@ -168,7 +173,7 @@ def _has_malformed_table_separator(markdown: str) -> bool:
     table_lines: list[str] = []
     collecting = False
     for line in lines:
-        if line.startswith("|"):
+        if _is_table_row(line):
             table_lines.append(line)
             collecting = True
         elif collecting:
