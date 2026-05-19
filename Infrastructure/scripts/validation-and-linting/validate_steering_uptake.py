@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
@@ -27,6 +28,9 @@ REQUIRED_HEADERS = [
     "Validation",
     "Status",
 ]
+STEERING_DOC_LINK_RE = re.compile(
+    r"\[[^\]]+\]\((?:/)?Docs/agents/19-high-signal-steering-feedback\.md\)"
+)
 
 
 @dataclass
@@ -96,7 +100,7 @@ def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
             break
 
     if len(table_lines) < 3:
-        if len(table_lines) >= 2 and not _is_table_separator(table_lines[1]):
+        if len(table_lines) >= 2:
             return _table_cells(table_lines[0]), []
         return [], []
 
@@ -172,6 +176,10 @@ def _has_malformed_table_separator(markdown: str) -> bool:
     return len(table_lines) >= 2 and not _is_table_separator(table_lines[1])
 
 
+def _contains_steering_doc_link(text: str) -> bool:
+    return bool(STEERING_DOC_LINK_RE.search(text))
+
+
 def validate(root: Path = ROOT) -> list[Finding]:
     """
     Validate the steering feedback documentation, ledger, and agent docs index under the given repository root.
@@ -226,7 +234,7 @@ def validate(root: Path = ROOT) -> list[Finding]:
 
     if not readme_path.exists():
         findings.append(Finding("AGENT_DOC_INDEX_MISSING", "Agent docs index is missing.", _relative(readme_path, root)))
-    elif "19-high-signal-steering-feedback" not in _read(readme_path):
+    elif not _contains_steering_doc_link(_read(readme_path)):
         findings.append(Finding("STEERING_DOC_NOT_INDEXED", "Agent docs index must link the steering feedback doc.", _relative(readme_path, root)))
 
     return findings

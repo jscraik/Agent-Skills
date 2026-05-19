@@ -381,6 +381,28 @@ def test_rejects_readme_without_steering_doc_link(tmp_path: Path) -> None:
     assert "STEERING_DOC_NOT_INDEXED" in codes
 
 
+def test_rejects_readme_plain_text_steering_doc_mention(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / "Docs/agents/README.md",
+        "# Agent Docs\n\nMention 19-high-signal-steering-feedback without a link.\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_DOC_NOT_INDEXED" in codes
+
+
+def test_accepts_markdown_steering_doc_link(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_DOC_NOT_INDEXED" not in codes
+
+
 # ---------------------------------------------------------------------------
 # Valid status variants
 # ---------------------------------------------------------------------------
@@ -545,10 +567,9 @@ def test_table_rows_empty_content() -> None:
 
 
 def test_table_rows_only_header_and_separator() -> None:
-    # _table_rows requires at least 3 table lines; header+separator only = 2 lines → empty
     text = "| A | B | C |\n| --- | --- | --- |\n"
     headers, rows = validate_steering_uptake._table_rows(text)
-    assert headers == []
+    assert headers == ["A", "B", "C"]
     assert rows == []
 
 
