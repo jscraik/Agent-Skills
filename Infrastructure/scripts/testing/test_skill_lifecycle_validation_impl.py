@@ -572,10 +572,10 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         selection_policy = load_selection_policy_module()
         repo_root = Path(__file__).resolve().parents[3]
         skill_path = repo_root / "Skills" / "agent-ops" / "unslopify" / "SKILL.md"
-        skill_text = skill_path.read_text(encoding="utf-8")
 
         self.assertIn("unslopify", selection_policy.DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
         self.assertTrue(skill_path.is_file())
+        skill_text = skill_path.read_text(encoding="utf-8")
         self.assertIn("runtime_visibility: flat", skill_text)
 
     def test_catalog_default_surface_matches_default_discovery_surface(self) -> None:
