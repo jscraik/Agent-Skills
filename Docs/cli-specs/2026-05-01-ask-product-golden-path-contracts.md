@@ -355,16 +355,6 @@ Required data fields:
         "outcome": {"status": "warning", "blocker_classes": [], "warning_classes": ["outcome_proof_not_run"]}
       }
     ],
-
-    "status": "pass",
-    "blockers": [],
-    "warnings": [],
-    "readiness_taxonomy": {"blockers": {}, "warnings": {}},
-    "lifecycle_event": {
-      "schema_version": "capability-lifecycle-event.v1",
-      "event_type": "skill_doctor_completed",
-      "outcome": {"status": "pass", "blocker_classes": [], "warning_classes": []}
-    },
     "checks": {
       "resolver": {"status": "pass"},
       "runtime_reachability": {"status": "pass"},
@@ -440,8 +430,6 @@ Required data fields:
       "outcome_proof": {"status": "available_not_run"}
     },
     "agent_summary": "$he-code-review passed capability doctor checks with outcome proof still available to run.",
-
-    "agent_summary": "$he-code-review passed capability doctor checks.",
     "next_command": "./bin/ask skills prove he-code-review --json --robot"
   }
 }
@@ -565,8 +553,6 @@ Required data fields:
         }
       }
     },
-
-    "lifecycle_event": {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_loaded"},
     "lifecycle_events": [
       {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_loaded"},
       {
@@ -583,7 +569,6 @@ Required data fields:
         }
       }
     ],
-    "lifecycle_event_types": ["skill_loaded", "package_readiness_checked"],
     "agent_summary": "skill-builder has package gate blockers: compatible_roles, provenance, runtime_needs, share_readiness.",
     "next_command": "./bin/ask skills doctor skill-builder --strict --json --robot"
   }
