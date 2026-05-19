@@ -493,7 +493,7 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
         raise ValueError(f"Unsupported visibility mode: {visibility}")
 
     if source == "catalog":
-        return discover_catalog_entries(advanced=visibility == "advanced")
+        return discover_catalog_entries(advanced=visibility == "advanced", source="repo")
 
     seen: set[str] = set()
     entries: List[SkillEntry] = []
