@@ -179,7 +179,7 @@ supporting references are unverified.
 
 ## References
 
-- Program shape and acceptance: `references/reframe-program-contract.md`
+- Program shape and acceptance: `../../references/skills/he-reframe/reframe-program-contract.md`
 - Strategy/reframe/ADR/core prompt family: `references/architecture-evolution-compression.md`
 - Local contract and evals: `references/contract.yaml`, `references/evals.yaml`
 - Original prompt behavior: `references/source-prompt-preservation.md`

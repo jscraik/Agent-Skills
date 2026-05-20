@@ -39,9 +39,9 @@ def _proof_result(handle: str, status: str = "pass") -> CallResult:
             "resolver": True,
             "generated_command_handle_check": True,
             "workspace_command_handle_exists": True,
-            "codex_user_link": False,
+            "codex_user_link": True,
             "agents_user_link": True,
-            "codex_user_command_handle_exists": False,
+            "codex_user_command_handle_exists": True,
             "agents_user_command_handle_exists": True,
         },
         "gate_policy": {
@@ -49,10 +49,12 @@ def _proof_result(handle: str, status: str = "pass") -> CallResult:
                 "resolver",
                 "generated_command_handle_check",
                 "workspace_command_handle_exists",
-            ],
-            "user_runtime_any_of": [
                 "codex_user_link",
+                "codex_user_command_handle_exists",
+            ],
+            "supporting_runtime_diagnostics": [
                 "agents_user_link",
+                "agents_user_command_handle_exists",
             ],
         },
     }
@@ -80,10 +82,12 @@ def _unreachable_catalog_proof(handle: str) -> CallResult:
                 "resolver",
                 "generated_command_handle_check",
                 "workspace_command_handle_exists",
-            ],
-            "user_runtime_any_of": [
                 "codex_user_link",
+                "codex_user_command_handle_exists",
+            ],
+            "supporting_runtime_diagnostics": [
                 "agents_user_link",
+                "agents_user_command_handle_exists",
             ],
         },
     }

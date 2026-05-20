@@ -10,12 +10,10 @@ coding agents.
 Teach your coding agents how your work actually works, then prove they
 remembered.
 
-This repository currently exposes **32 skills** in the default catalog: root
+This repository currently exposes **23 skills** in the default catalog: root
 routers plus policy-promoted command handles. The rooted command surface
-contains **108 generated `$` handles**, backed by first-party canonical skill
-source across 7 topic clusters (agent-ops: 44, backend-platform: 4,
-content-publishing: 6, frontend-ui: 10, mobile-native: 1, product-strategy: 3,
-security-ops: 5). Author a capability once, route it intelligently, validate
+contains **109 generated `$` handles**, backed by first-party canonical skill
+source across 7 topic clusters (agent-ops: 51, backend-platform: 4, content-publishing: 6, frontend-ui: 10, mobile-native: 1, product-strategy: 3, security-ops: 5). Author a capability once, route it intelligently, validate
 quality, project it safely into runtime, and keep the human and agent command
 surface small enough to use.
 
@@ -28,8 +26,18 @@ surface small enough to use.
   without loading every workflow body into the picker.
 - **Prevent drift** - Separate canonical source from generated manifests,
   runtime projections, plugin caches, and historical evidence.
+- **Diagnose readiness** - Check one capability at a time for source ownership,
+  handle resolution, runtime reachability, audit state, metadata gaps, and
+  outcome-proof availability.
+- **Declare operating modes** - Use profile contracts for authoring,
+  package review, plugin sharing, evals, and live mutation so agents know
+  allowed roots, evidence, and stop conditions before acting.
+- **Search durable memory** - Query Project Brain, wiki learnings, and canonical
+  skill-learning artifacts through a read-only provider with provenance and
+  freshness metadata.
 - **Prove quality** - Use `ask` for audits, runtime budget checks, repo surface
-  ownership, workout/eval evidence, and machine-readable closeout.
+  ownership, workout/eval evidence, Codex review closeout, and
+  machine-readable completion evidence.
 
 Start with the executable agent path below. The product framing and proof
 contract live in [Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md).
@@ -63,13 +71,19 @@ For AI coding agents, start with the product path:
 ./bin/ask repo doctor --json --robot
 ./bin/ask skills improve "<goal>" --json --robot
 ./bin/ask skills explain <handle> --json --robot
+./bin/ask skills doctor <handle> --json --robot
+./bin/ask skills package <handle> --json --robot
+./bin/ask skills profiles eval --json --robot
+./bin/ask skills memory search "<keyword>" --json --robot
 ./bin/ask skills prove <handle> --json --robot
 ./bin/ask repo closeout --changed --json --robot
 ```
 
 That sequence answers the important questions in order: can I work safely, what
-capability matches this job, how do I use it, what proof exists, and what must
-pass before I claim done.
+capability matches this job, how do I use it, is that capability healthy right
+now, whether it has version/role-aware package metadata, which runtime mode
+constrains the work, what durable learnings apply, what proof exists, and what
+must pass before I claim done.
 
 ```bash
 # Bash-first setup (recommended): open bash, then load repo environment
@@ -95,7 +109,7 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 # List the visible runtime surface
 ./bin/ask skills list
 
-# Check all generated command handles
+# Check the committed command-surface projection
 ./bin/ask skills handles --check --json
 
 # Resolve a command-visible skill handle
@@ -112,6 +126,10 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 
 # Find path between skills
 ./bin/ask graph chain skill-creator skill-installer
+
+# Search durable repo memory and skill learnings
+./bin/ask memory search timeout --json
+./bin/ask memory read .harness/memory/LEARNINGS.md --json
 ```
 
 ### Validate quality
@@ -122,6 +140,12 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 
 # Full security audit
 ./bin/ask skills audit backend/cli-spec --level strict
+
+# Local-only Second-Review Lane
+./bin/ask skills external-review backend/cli-spec --json
+
+# Include Snyk CLI dependency screening for manifest-backed skills
+./bin/ask skills external-review backend/cli-spec --include-snyk --json
 
 # Run evaluation suite
 ./bin/ask evals run backend/cli-spec --mode smoke
@@ -134,8 +158,61 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 ./bin/ask runtime budget --json
 
 # Verify generated command handles match rooted manifests
-./bin/ask skills handles --check --json
+./bin/ask skills handles --check --check-command-handles --json
+
+# Run Codex review closeout on dirty or branch work
+./bin/ask skills resolve codex-review --json
+bash Skills/agent-ops/codex-review/scripts/codex-review --help
 ```
+
+`ask skills external-review` is the local/internal **Second-Review Lane** for
+comparing repo-native skill checks with Plugin Eval, Tessl, and optional Snyk
+evidence. It runs the internal `ask skills audit` lane, `plugin-eval analyze`,
+installed Tessl CLI local lint, and Tessl local skill review when available.
+It never invokes `npx`, never publishes, and never uploads to a registry.
+Tessl documents this CLI path as reviewing locally from your machine for private
+repos and work-in-progress skills, with results only visible to you. Use
+`--skip-tessl-review` only when you need structural Tessl lint without the
+best-practice review output.
+
+Keep the lanes separate when reporting readiness:
+
+- `ask evals run` proves dynamic behavior: skill selection, commands, artifacts,
+  scorecards, and release gates.
+- Plugin Eval is a static budget and ergonomics guardrail; it does not prove
+  runtime behavior or security posture by itself.
+- Tessl lint checks a temporary tile package shape because Tessl lint expects a
+  Tessl `tile.json` package. Canonical skills in this repo stay `SKILL.md`-first.
+- Tessl review is the local best-practice/content review for the copied skill.
+- Snyk is dependency security screening. It is optional in local external-review
+  and required by release evals only for manifest-backed candidates.
+
+A direct `tessl skill lint <canonical-skill-dir>` failure about missing
+`tile.json` is a packaging-shape blocker, not a content finding. The repo
+wrapper creates a disposable local `tile.json` around the copied `SKILL.md` so
+Tessl lint can check package compatibility without changing canonical sources
+or publishing anything.
+
+Snyk screening is intentionally opt-in for local reviews because the CLI may
+contact Snyk services and requires local authentication. Run `snyk auth` once
+locally or provide `SNYK_TOKEN` in CI. Skills without dependency manifests are
+reported as `not_applicable`; their security review still comes from the
+internal strict audit, security evals, and OpenClaw guard. Local and CI Snyk
+checks use a high-severity threshold so dependency screening blocks on the
+security issues this lane is meant to gate. Release evals require this Snyk
+dependency-screening signal for manifest-backed skill and plugin packages;
+pure SKILL.md-first candidates remain `not_applicable`.
+
+Use Snyk when a candidate has dependency manifests, when dependency or
+installer/runtime package surfaces changed, when claiming release readiness for
+a manifest-backed skill or plugin package, when local evidence needs to match
+the CircleCI/Snyk lane, or when the user explicitly asks for Snyk or dependency
+vulnerability evidence. Do not run it by default for pure `SKILL.md`-first
+instruction-only candidates with no supported dependency manifest.
+
+Tessl failures about missing files or links outside the disposable tile are
+preserved as findings; they show where a skill depends on repo-local context
+that would not be self-contained in an external tile package.
 
 ### Agent-facing golden paths
 
@@ -149,11 +226,18 @@ source Infrastructure/scripts/codex-preflight/codex_env_common.sh && codex_apply
 # How do I use this capability?
 ./bin/ask skills explain <recommended_capability> --json --robot
 
+# Is this capability healthy right now?
+./bin/ask skills doctor <recommended_capability> --json --robot
+
 # What proof exists?
 ./bin/ask skills prove <recommended_capability> --json --robot
 
 # What must pass before I claim done?
 ./bin/ask repo closeout --changed --json --robot
+
+# When review evidence is required before shipping
+./bin/ask skills resolve codex-review --json --robot
+bash Skills/agent-ops/codex-review/scripts/codex-review --mode auto
 ```
 
 ### Manage lifecycle
@@ -244,8 +328,10 @@ This repo separates source, projection, and live runtime visibility:
 `ask skills list --json` reports the default catalog entries exposed to the
 runtime. `ask runtime surface --json` shows how those entries split between
 root routers, policy-promoted handles, plugin skills, and primary runtime
-skills. `ask skills handles --json --no-handles` validates the generated
-command surface and reports the current handle count and any violations.
+skills. `ask skills handles --check --json --no-handles` validates command
+metadata and verifies that `.skillsets/command-surface.json` matches rooted
+manifests. Add `--check-command-handles` when picker/runtime pointer files under
+`.agents/skills/**` must also be verified.
 
 A generated command handle, such as `.agents/skills/he-heartbeat/SKILL.md`, is a small pointer that makes `$he-heartbeat` mentionable. It is not the real workflow. The handle resolves to a canonical source path through:
 
@@ -280,7 +366,7 @@ This table is a human-oriented grouping for quick navigation and is not used for
 
 | Topic              | Skills | Examples                                              |
 | ------------------ | ------ | ----------------------------------------------------- |
-| agent-ops          | 44     | docs-expert, autofix, unslopify, simplify             |
+| agent-ops          | 49     | docs-expert, codex-review, autofix, simplify          |
 | frontend-ui        | 10     | baseline-ui, frontend-ui-design, ui-visual-regression |
 | backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer               |
 | product-strategy   | 3      | architecture-interview, deep-interview, interview-me  |
@@ -299,7 +385,7 @@ agent-skills/
 |-- .workouts/                # Canonical skill workout fixtures
 |
 |-- Skills/                   # All canonical skills organised by topic cluster
-|   |-- agent-ops/            # 44 skills: docs-expert, autofix, unslopify, simplify, ...
+|   |-- agent-ops/            # 49 skills: docs-expert, codex-review, autofix, simplify, ...
 |   |-- frontend-ui/          # 10 skills: baseline-ui, frontend-ui-design, ui-visual-regression, ...
 |   |-- backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, ...
 |   |-- product-strategy/     #  3 skills: architecture-interview, deep-interview, interview-me

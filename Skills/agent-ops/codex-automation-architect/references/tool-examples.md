@@ -1,6 +1,6 @@
 # Automation Tool Examples
 
-Use these shapes for codex_app.automation_update calls. Keep schedules in the
+Use these shapes for codex_app_automation_update calls. Keep schedules in the
 tool payload; do not print raw schedule strings in user-facing prose.
 
 ## Heartbeat Follow-Up

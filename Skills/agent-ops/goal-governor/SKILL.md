@@ -261,6 +261,7 @@ risks:
 - Read [references/goal-contract.md](./references/goal-contract.md) when creating or validating `goal.md`, `state.yaml`, or `receipts.jsonl`.
 - Read [references/creation-and-continuation.md](./references/creation-and-continuation.md) when choosing create, continue, repair, doctor, or import behavior.
 - Read [references/evals.yaml](./references/evals.yaml) when testing trigger and behavior checks.
+- For Cookbook-derived goal stewardship checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and the Goal Governor row in Infrastructure/references/openai-cookbook-skill-expertise-map.md.
 - For Harness Engineering blackboard, slack, or lifecycle deltas, read the relevant Harness Engineering references only when the goal delegates those roles.
 
 ## Validation

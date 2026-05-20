@@ -138,7 +138,6 @@ Return schema_version when structured. schema_version: 1, changed files, validat
 Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 references and index it in `../../references/deferred-context-index.md`.
 Redact secrets; do not create cron workarounds for short thread follow-up. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text. Keep scope tight: start with 2-3 focused surfaces and expand only when the next heartbeat needs more context.
-references with a clear route.
 
 ## Preserved He-Code-Review Productization Context
 
@@ -193,3 +192,25 @@ Disposition:
   artifact contract routing.
 - intentionally-discarded: sentence fragments and partial indentation that no
   longer carry unique operational meaning.
+
+## Discarded He-Router Productization Prompt Rot
+
+The 2026-05-15 HE productization refinement pass removed duplicated tail text
+from Plugins/harness-engineering/skills/he-router/SKILL.md. The valid
+context-disposition rule already exists above and in the active router; the
+closure-vs-mutation concern now routes to closure-mutation-contract.md.
+
+Removed duplicate/dangling router text:
+
+- references with a clear route.
+- Apply the context-disposition policy by moving important still-valid context to
+  references and intentionally discarding stale, duplicated, unsafe, superseded,
+  or low-signal text.
+
+Disposition:
+- moved-to-reference: closure and mutation separation now lives in
+  closure-mutation-contract.md.
+- superseded: context-disposition wording already exists in the folded-context
+  policy above.
+- intentionally-discarded: dangling sentence fragments and duplicated prompt
+  maintenance prose that increased hot-path cost without adding behavior.

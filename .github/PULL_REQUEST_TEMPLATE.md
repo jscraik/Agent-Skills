@@ -10,7 +10,7 @@
 
 - [ ] I did not push directly to `main`; this PR is from a dedicated branch.
 - [ ] Branch name follows policy (`codex/*` for agent-created branches).
-- [ ] Required local gates run: `bash scripts/validate-codestyle.sh`, `npm run check`, `test -f memory.json && jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json >/dev/null`.
+- [ ] Required local gates run: `bash scripts/validate-codestyle.sh`, `./bin/ask repo validate --json --robot`, `test -f memory.json && jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json >/dev/null`.
 - [ ] CodeRabbit review completed and findings handled (or explicitly waived).
 - [ ] CodeRabbit review was performed by an independent reviewer (not the coding agent).
 - [ ] Codex review completed and findings handled (or explicitly waived).
@@ -24,7 +24,7 @@
 - verification_outcomes: record pass/fail/blocked for each command here
 - blocked_steps_reason: none if all planned steps ran
 - Command: `bash scripts/validate-codestyle.sh` -> pass/fail
-- Command: `npm run check` -> pass/fail
+- Command: `./bin/ask repo validate --json --robot` -> pass/fail
 - Command: `test -f memory.json && jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json >/dev/null` -> pass/fail
 - Any other command(s):
 

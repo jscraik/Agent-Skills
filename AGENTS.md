@@ -32,11 +32,12 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   and record uptake in `.harness/quality/steering-uptake.md`; validate with
   `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
 - For networked repo operations in Codex sandboxed sessions, do not diagnose
-  `gh`, CircleCI, Snyk, or other API failures as service outages until the same
-  command has been retried with explicit network permission. When a command
-  invokes `mise`, set a writable cache path such as
-  `MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache` or request the narrow
-  cache write permission before treating cache warnings as tool failures.
+  `gh`, CircleCI, Snyk, package registry, or other API failures as service
+  outages until the same command has been retried with explicit network
+  permission. When a command invokes `gh`, `mise`, or `uv`, keep tool caches
+  and state inside approved temp paths before treating cache warnings as the
+  blocker. Set `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, and
+  `UV_CACHE_DIR` as applicable for the command family.
 - Systems-thinking posture: a fix is not complete when the named symptom is
   gone. Identify the mechanism that allowed the symptom, encode the smallest
   durable guardrail in docs, skills, scripts, or validation, and prove the

@@ -3,6 +3,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/he-code-review"
+SHARED_REVIEW_REFERENCES = ROOT / "Plugins/harness-engineering/references/skills/he-code-review"
 
 
 def read(path: Path) -> str:
@@ -55,7 +56,7 @@ def test_he_code_review_links_deferred_policy_references():
 
 def test_he_code_review_retains_core_traceability_and_review_rules():
     skill_text = read(SKILL_DIR / "SKILL.md")
-    index = read(SKILL_DIR / "references/review-policy-index.md")
+    index = read(SHARED_REVIEW_REFERENCES / "review-policy-index.md")
     doctrine = read(ROOT / "Infrastructure/references/harness-engineering/he-code-review-doctrine.md")
 
     assert "Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation" in skill_text

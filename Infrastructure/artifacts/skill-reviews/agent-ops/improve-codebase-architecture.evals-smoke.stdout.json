@@ -1,0 +1,92 @@
+{
+  "status": "success",
+  "trace_id": "1150879c-cf39-4419-8053-259af34a8836",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --runner discovery-smoke --no-dashboard --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "lifecycle_events": [
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_started",
+        "event_definition": "A workout, smoke eval, or proof run started for a capability.",
+        "occurred_at": "2026-05-19T09:19:11Z",
+        "subject": {
+          "query": "Skills/agent-ops/improve-codebase-architecture",
+          "target_kind": "skill_path",
+          "handle": "improve-codebase-architecture",
+          "canonical_source_path": "Skills/agent-ops/improve-codebase-architecture",
+          "eval_mode": "smoke",
+          "runner": "discovery-smoke"
+        },
+        "outcome": {
+          "status": "running",
+          "blocker_classes": [],
+          "warning_classes": []
+        }
+      },
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_completed",
+        "event_definition": "A workout, smoke eval, or proof run completed with pass or fail status.",
+        "occurred_at": "2026-05-19T09:19:11Z",
+        "subject": {
+          "query": "Skills/agent-ops/improve-codebase-architecture",
+          "target_kind": "skill_path",
+          "handle": "improve-codebase-architecture",
+          "canonical_source_path": "Skills/agent-ops/improve-codebase-architecture",
+          "eval_mode": "smoke",
+          "runner": "discovery-smoke"
+        },
+        "outcome": {
+          "status": "pass",
+          "blocker_classes": [],
+          "warning_classes": []
+        }
+      }
+    ],
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "eval_completed",
+      "event_definition": "A workout, smoke eval, or proof run completed with pass or fail status.",
+      "occurred_at": "2026-05-19T09:19:11Z",
+      "subject": {
+        "query": "Skills/agent-ops/improve-codebase-architecture",
+        "target_kind": "skill_path",
+        "handle": "improve-codebase-architecture",
+        "canonical_source_path": "Skills/agent-ops/improve-codebase-architecture",
+        "eval_mode": "smoke",
+        "runner": "discovery-smoke"
+      },
+      "outcome": {
+        "status": "pass",
+        "blocker_classes": [],
+        "warning_classes": []
+      }
+    },
+    "lifecycle_event_types": {
+      "eval_started": "A workout, smoke eval, or proof run started for a capability.",
+      "eval_blocked": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+      "eval_completed": "A workout, smoke eval, or proof run completed with pass or fail status."
+    },
+    "raw_output": "Skill evals: improve-codebase-architecture\nReports: Infrastructure/artifacts/skills/improve-codebase-architecture/20260519-101911-276529\nScorecard: Infrastructure/artifacts/skills/improve-codebase-architecture/20260519-101911-276529/scorecard.json\nRelease manifest: Infrastructure/artifacts/skills/improve-codebase-architecture/20260519-101911-276529/release_manifest.json\nJUnit: Infrastructure/artifacts/skills/improve-codebase-architecture/20260519-101911-276529/junit.xml\nRunner mode: discovery-smoke\nEval mode: smoke\nTimeout profile: default\nTimeout seconds: 60.0\nTier-2 mode: warn\n- PASS: smoke-discovery (discovery interview contract)\nRESULT: PASS\n",
+    "raw_error": "",
+    "eval_status": "pass",
+    "blocker_class": null,
+    "blocker_taxonomy": {
+      "blocked_user_input": "The runner requested user input and should not be treated as hung.",
+      "blocked_auth": "The runner stopped on authentication or credential setup.",
+      "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
+      "blocked_validation": "The runner stopped because the selected eval contract or fixture set is not runnable.",
+      "timeout_no_output": "The eval timed out without producing final output.",
+      "timeout_partial_output": "The eval timed out after producing partial output."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 77
+  },
+  "errors": []
+}

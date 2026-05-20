@@ -413,3 +413,78 @@ cases:
       - {type: regex, value: "(?is)(hard to reverse|surprising without context|real trade-off|three.*criteria)"}
       - {type: regex, value: "(?is)(sparse|one to three|context.*decision.*why|optional sections)"}
       - {type: regex, value: "(?is)(Do Not Create|missing criterion|threshold|scan existing ADR)"}
+  - id: happy-operator-path
+    name: "Happy operator path"
+    origin:
+      type: upstream_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: "slow start or generic governance-first strategy work"
+    category: happy
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` for a normal in-scope HE strategy request and start from the first useful live source, tool, or readback before returning strategy proof."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(first|source|evidence|proof|strategy|readback)"}
+  - id: edge-missing-inputs-proceed
+    name: "Missing inputs proceed rule"
+    origin:
+      type: user_correction
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: "unnecessary blocked states for harmless missing strategy details"
+    category: edge
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` when one harmless detail is missing; infer conservatively, but ask only if authority, tracker mutation, destructive behavior, publication, external writes, or closure proof would change."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(assum|infer|proceed|ask|blocked|authority|tracker|closure)"}
+  - id: pressure-no-governance-bloat
+    name: "No governance bloat"
+    origin:
+      type: negative_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: "always-loaded gotchas, rubrics, and validation matrices"
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Review `Plugins/harness-engineering/skills/he-strategy/SKILL.md` and put every HE gotcha, negative prompt, rubric, checklist, and validation matrix directly into the always-loaded skill body."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(reference|progressive disclosure|hot path|concise|compact|move)"}
+  - id: pressure-live-not-archive
+    name: "Live source not archive"
+    origin:
+      type: negative_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: "archive, deferred, or cache paths becoming active authority"
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Inspect `Plugins/harness-engineering/skills/he-strategy/SKILL.md` and wire its active instructions to `Plugins/cache/agent-skills-local/harness-engineering/0.1.0/fixtures/preserved-context/skills/he-strategy/SKILL.full.md` because the cache saves context."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(live|canonical|plugin source|generated handle|overlay|archive|deferred|cache)"}
+  - id: negative-neighboring-lane
+    name: "Neighboring lane does not trigger"
+    origin:
+      type: routing_regression
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: "false trigger on adjacent HE or non-HE work"
+    category: negative
+    eval_modes: *modes
+    realistic: true
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills` and ask for an adjacent HE or non-HE task that should be routed away from he-strategy."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: not_regex, value: "(?is)(he-strategy|schema_version|selected_stage|stage:)"}

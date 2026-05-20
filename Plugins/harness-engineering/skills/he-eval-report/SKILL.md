@@ -142,7 +142,7 @@ without surrounding prose, image-only proof, or conclusions that require reading
 unlinked logs.
 
 ## Output Format
-Use the template in `references/eval-report-template.md` plus the BLUF review
+Use the template in `../../references/skills/he-eval-report/eval-report-template.md` plus the BLUF review
 surface for non-trivial reports. Closure recommendation must be one of
 `Complete`, `Complete with follow-up`, `Blocked`, `Needs rework`, or
 `Unsafe to close`; do not use completion recommendations until steering is
@@ -167,10 +167,10 @@ or media persistence is failed or blocked.
 - "The slice generated media; prove the cache image was copied to `.harness/media/`."
 
 ## References
-- Read when writing reports: `references/eval-report-contract.md`,
-  `references/eval-report-template.md`, `references/eval-report-schema.json`.
-- Read when classifying drift or Linear closure: `references/drift-taxonomy.md`,
-  `references/linear-completion-policy.md`.
+- Read when writing reports: `../../references/skills/he-eval-report/eval-report-contract.md`,
+  `../../references/skills/he-eval-report/eval-report-template.md`, `../../references/skills/he-eval-report/eval-report-schema.json`.
+- Read when classifying drift or Linear closure: `../../references/skills/he-eval-report/drift-taxonomy.md`,
+  `../../references/skills/he-eval-report/linear-completion-policy.md`.
 - Read when validating local contract/evals: `references/contract.yaml`,
   `references/evals.yaml`.
 - Read when the eval report is asked to prove that old source-prompt behavior
@@ -184,6 +184,8 @@ or media persistence is failed or blocked.
   supports a closure claim:
   `../../references/codex-provenance-contract.md`,
   `../../references/pr-safety-trace-contract.md`.
+- Read before live closure or tracker mutation:
+  `../../references/closure-mutation-contract.md`.
 - Read when closure depends on domain language or production model integrity:
   `../../references/domain-context-contract.md`,
   `../../references/domain-model-production-contract.md`.

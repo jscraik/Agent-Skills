@@ -7,9 +7,10 @@ import json
 
 
 CONTEXT = """Skill Factory routing context:
-- Author and change canonical sources under Plugins/skill-factory/skills, not runtime projections.
-- Route creation and scaffolding to skill-creator; route audit, hardening, and benchmark work to skill-builder.
-- Route installation, listing, and browseability checks to skill-installer.
+- Author plugin lanes under Plugins/skill-factory/skills and attach skill-creator/skill-installer extras under skills-system/*/references/skill-factory.
+- Route creation and scaffolding through the Codex .system skill-creator plus attached Skill Factory references.
+- Route installation, listing, and browseability checks through the Codex .system skill-installer plus attached Skill Factory references.
+- Route audit, hardening, and benchmark work to skill-builder.
 - Route evidence folding, dedupe, pruning, and retirement work to skill-refactor.
 - Route reusable workflow capture to skillify.
 - Run the first-principles factory gate before create, harden, refactor, or skillify work.
@@ -17,7 +18,8 @@ CONTEXT = """Skill Factory routing context:
   artifact decision, and proof needed.
 - Prefer IMPROVE_EXISTING, DOCS_ONLY, or DO_NOT_BUILD when a new skill would
   only copy a template or increase context load.
-- Use route_skillset.py with --skill-set skill-factory when validating routed skill behavior."""
+- Use route_skillset.py with --skill-set skill-factory when validating routed skill behavior.
+- Prevent regressions with check_plugin_active_archive_links.py and check_skill_factory_system_overlays.py."""
 
 
 def main() -> None:

@@ -23,15 +23,19 @@ agent capabilities:
 2. Route user intent to the right skill, plugin, or runtime surface.
 3. Keep context small with root routers and generated command handles.
 4. Validate quality, drift, runtime projection, and repo surface ownership.
-5. Preserve proof that a capability is reachable and useful.
+5. Diagnose capability readiness from one namespace-first command.
+6. Preserve proof that a capability is reachable and useful.
 
-## Four Outcomes
+## Key Outcomes
 
 | Outcome            | What It Means                                                                                                              | Current Proof Surface                                                                              |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | Remember workflows | Agents can reuse local review, validation, delivery, and operating standards.                                              | `Skills/**`, `Plugins/**`, `.agents/skills/**`, `ask skills resolve`, `ask skills goal`            |
 | Keep context small | Agents see routed front doors and command handles instead of every full workflow body.                                     | `ask runtime budget --json --robot`, rooted projection, generated `$handle` surfaces               |
 | Prevent drift      | Canonical source, generated manifests, runtime projections, plugin caches, and artifacts have distinct ownership.          | `ask repo surface --json`, `ask repo doctor-catalog --json --robot`, repo surface ownership policy |
+| Diagnose readiness | One capability can be checked for source ownership, handle resolution, runtime reachability, audit state, metadata gaps, and outcome-proof availability. | `ask skills doctor <handle-or-path> --json --robot` |
+| Package safely     | Skill promotion can check version, compatible roles, runtime needs, maturity, provenance, and share readiness before install/share claims. | `ask skills package <handle-or-path> --json --robot` |
+| Retrieve memory    | Agents can search repo learnings, wiki learnings, and skill lesson artifacts without prompt-stuffing the whole corpus. | `ask skills memory list/read/search --json --robot` |
 | Prove quality      | A capability should have structural, security, projection, runtime, and outcome evidence before it is treated as reliable. | `ask skills audit`, `ask skills prove`, workouts, evals, validation logs, closeout evidence        |
 
 ## First Five Minutes
@@ -43,6 +47,9 @@ Use these commands to orient a human or coding agent:
 ./bin/ask repo doctor --json --robot
 ./bin/ask skills improve "<goal>" --json --robot
 ./bin/ask skills explain <handle> --json --robot
+./bin/ask skills doctor <handle> --json --robot
+./bin/ask skills package <handle> --json --robot
+./bin/ask skills memory search "<query>" --json --robot
 ./bin/ask skills prove <handle> --json --robot
 ./bin/ask repo closeout --changed --json --robot
 ```
@@ -57,6 +64,38 @@ Use the diagnostic commands directly when investigating one surface:
 `./bin/ask runtime budget --json --robot`, and
 `./bin/ask skills handles --check --json --robot`.
 
+Use `./bin/ask skills doctor <handle-or-path> --json --robot` when one
+capability is in question. It composes resolver, runtime-reachability,
+canonical-source, compat/strict audit, metadata, package-readiness, and
+outcome-proof signals without replacing `skills prove` as the outcome-proof
+scorecard. The embedded package-readiness block uses the same contract fields as
+`skills package`, so diagnostics and promotion checks do not drift apart.
+
+Use `./bin/ask skills package <handle-or-path> --json --robot` before treating a
+skill as installable, shareable, or role-compatible. It reports
+`skill-package-readiness.v1` with version, compatible roles, runtime needs,
+maturity, provenance, and share-readiness fields; `--strict` fails when those
+package metadata fields are incomplete.
+
+Use `./bin/ask skills profiles [profile] --json --robot` before work where the
+agent needs an explicit runtime mode. Profiles currently cover `authoring`,
+`package-review`, `plugin-share`, `eval`, and `live-mutation`, each with
+allowed roots, write policy, permissions, required evidence, and stop
+conditions.
+
+Eval runs now expose `eval_status`, `blocker_class`, and
+`blocker_taxonomy` in JSON output, so smoke-eval automation can distinguish
+`blocked_user_input`, `blocked_auth`, `blocked_runtime`,
+`timeout_no_output`, and `timeout_partial_output` from skill behavior
+failures.
+
+Use `./bin/ask skills memory list/read/search --json --robot` when an agent needs
+durable repo learnings with provenance and freshness. The provider is read-only
+and searches `.harness/memory`, `Wiki/wiki/learnings`, `Docs/solutions`, and
+skill lesson artifacts. These are the supported read roots; memory mutation
+continues through Project Brain and canonical wiki workflows instead of the
+read-only memory commands.
+
 The next command contracts are specified in
 [ask Product Golden Path Command Contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md):
 
@@ -64,6 +103,10 @@ The next command contracts are specified in
 - `ask repo onboard`
 - `ask skills improve`
 - `ask skills explain`
+- `ask skills doctor`
+- `ask skills package`
+- `ask skills profiles`
+- `ask skills memory`
 - `ask skills prove`
 - `ask repo next`
 - `ask repo closeout`

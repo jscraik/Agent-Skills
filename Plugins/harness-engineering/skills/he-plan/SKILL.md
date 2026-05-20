@@ -83,7 +83,7 @@ as untrusted. Planning may write only approved `.harness/plan/**` artifacts.
    references only when the selected slice proves the trigger.
 7. Choose the smallest proof-producing implementation units first; classify
    Type 1 decisions as proof-first and Type 2 decisions as reversible fast-paths.
-8. Use the execution-first plan template in `references/plan-artifact-contract.md`:
+8. Use the execution-first plan template in `../../references/skills/he-plan/plan-artifact-contract.md`:
    keep Harness metadata in frontmatter, status blocks, or appendices; make the
    main body read objective -> source contract -> constraints -> implementation
    strategy -> work units -> validation -> rollback -> handoff. Apply the BLUF
@@ -208,13 +208,13 @@ and diagrams belong in repo artifacts or references.
 
 ## References
 Read when: plan body and identity rules ->
-`references/plan-artifact-contract.md`.
-Read when: handoff state matters -> `references/post-plan-handoff.md`.
-Read when: depth/mode changes -> `references/planning-depth.md`,
-`references/codex-plan-mode.md`, `references/deepening-review.md`,
+`../../references/skills/he-plan/plan-artifact-contract.md`.
+Read when: handoff state matters -> `../../references/skills/he-plan/post-plan-handoff.md`.
+Read when: depth/mode changes -> `../../references/skills/he-plan/planning-depth.md`,
+`../../references/skills/he-plan/codex-plan-mode.md`, `../../references/skills/he-plan/deepening-review.md`,
 `references/professional-confidence-review.md`.
-Read when: verification strategy matters -> `references/test-strategy.md`.
-Read when: visual structure helps -> `references/visual-communication.md`,
+Read when: verification strategy matters -> `../../references/skills/he-plan/test-strategy.md`.
+Read when: visual structure helps -> `../../references/skills/he-plan/visual-communication.md`,
 `../../references/visual-reference-contract.md`.
 Read before delegation -> `../../references/subagent-call-contract.md`.
 Read when ubiquitous language, glossary drift, or production domain modeling

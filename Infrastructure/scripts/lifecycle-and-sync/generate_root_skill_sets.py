@@ -42,7 +42,7 @@ def render_template(skill_set_name: str, metadata: dict[str, Any]) -> str:
     rendered = template
     for token, value in replacements.items():
         rendered = rendered.replace(token, value)
-    return rendered
+    return rendered.rstrip() + "\n"
 
 
 def build_contract(skill_set_name: str, metadata: dict[str, Any]) -> str:

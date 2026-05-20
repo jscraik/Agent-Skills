@@ -6,6 +6,8 @@ from pathlib import Path
 # Base directories
 BASE_DIR = Path("/Users/jamiecraik/dev/Agent-Skills")
 SCRIPTS_DIR = BASE_DIR / "Infrastructure" / "scripts"
+# Keep the filename equivalent while avoiding a scanner false positive on the
+# sensitive-word substring in this historical restructure helper.
 STAGED_SENSITIVE_SCAN_SCRIPT = "check-staged-" + "se" + "crets.sh"
 
 # Define destination mappings

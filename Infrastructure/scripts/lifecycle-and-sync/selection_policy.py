@@ -68,6 +68,7 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "codex-agent-creator",
     "codex-automation-architect",
     "codex-hooks-builder",
+    "codex-review",
     "coding-harness",
     "context7",
     "imagegen",
@@ -94,9 +95,9 @@ PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
     "he-phase-heartbeat",
 )
 
-# Skills intentionally routed through the hidden `.system` lane while still
-# remaining plugin-owned in source. This keeps the bridge explicit and narrow.
-# imagegen and openai-docs are maintained OpenAI originals that live here.
+# Skills intentionally routed through the hidden `.system` lane. OpenAI-owned
+# skills stay as preserved system sources; local factory packages may attach
+# references/evals beside them, but must not fork their `SKILL.md` bodies.
 SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
     "imagegen",
     "openai-docs",

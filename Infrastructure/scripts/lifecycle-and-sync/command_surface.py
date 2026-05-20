@@ -349,7 +349,7 @@ def _command_handle_write_rows(handles: list[CommandHandle]) -> list[dict[str, A
 
 def generated_command_handle_names(*, repo_root_path: Path | None = None) -> set[str]:
     """Return all first-level generated command handle names, including aliases."""
-    rows = _command_handle_write_rows(build_skill_handles(repo_root_path=repo_root_path))
+    rows = _command_handle_write_rows(build_command_surface_handles(repo_root_path=repo_root_path))
     return {
         row["handle"]
         for row in rows
@@ -448,6 +448,13 @@ def _drop_shadowed_system_bridge_handles(handles: list[CommandHandle]) -> list[C
             and (handle.source_path or "").startswith("skills-system/")
         )
     ]
+
+
+def build_command_surface_handles(*, repo_root_path: Path | None = None) -> list[CommandHandle]:
+    """Build Codex-visible skill command handles, including folded compatibility aliases."""
+    handles = build_skill_handles(repo_root_path=repo_root_path)
+    surfaced_handles = _with_folded_alias_handles(handles)
+    return sorted(surfaced_handles, key=lambda item: (item.handle, item.owner, item.source_path or ""))
 
 
 def _load_reviewer_roles(manifest_path: Path = REVIEWER_MANIFEST) -> tuple[list[dict[str, Any]], str | None]:
@@ -743,6 +750,53 @@ def write_command_surface_projection(*, repo_root_path: Path | None = None, dry_
         "handle_count": payload["handle_count"],
         "generated_command_handle_count": payload["generated_command_handle_count"],
         "violations": payload["violations"],
+    }
+
+
+def check_command_surface_projection(*, repo_root_path: Path | None = None) -> dict[str, Any]:
+    """Verify the committed command-surface projection matches rooted manifests."""
+    root = repo_root_path or repo_root()
+    payload = command_surface_projection(repo_root_path=root, include_handles=True)
+    destination = root / COMMAND_SURFACE_PATH
+    violations = list(payload.get("violations", []))
+
+    actual_payload: dict[str, Any] | None = None
+    if not destination.exists():
+        violations.append({
+            "code": "COMMAND_SURFACE_PROJECTION_MISSING",
+            "path": COMMAND_SURFACE_PATH.as_posix(),
+        })
+    else:
+        try:
+            actual_payload = json.loads(destination.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            violations.append({
+                "code": "COMMAND_SURFACE_PROJECTION_INVALID_JSON",
+                "path": COMMAND_SURFACE_PATH.as_posix(),
+                "error": str(exc),
+            })
+        except OSError as exc:
+            violations.append({
+                "code": "COMMAND_SURFACE_PROJECTION_UNREADABLE",
+                "path": COMMAND_SURFACE_PATH.as_posix(),
+                "error": str(exc),
+            })
+
+    if actual_payload is not None and actual_payload != payload:
+        violations.append({
+            "code": "COMMAND_SURFACE_PROJECTION_DRIFT",
+            "path": COMMAND_SURFACE_PATH.as_posix(),
+            "expected_handle_count": payload.get("handle_count"),
+            "actual_handle_count": actual_payload.get("handle_count"),
+        })
+
+    return {
+        "schema_version": "command-surface-check.v1",
+        "status": "pass" if not violations else "fail",
+        "path": COMMAND_SURFACE_PATH.as_posix(),
+        "handle_count": payload.get("handle_count"),
+        "generated_command_handle_count": payload.get("generated_command_handle_count"),
+        "violations": violations,
     }
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Tuple
 
-VALID_TOPICS = ["repo", "skills", "reviewers", "runtime", "plugins", "evals", "graph", "mcp", "wiki", "workouts"]
+VALID_TOPICS = ["repo", "skills", "reviewers", "runtime", "plugins", "evals", "graph", "mcp", "memory", "wiki", "workouts"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability", "doctor", "closeout", "doctor-catalog", "provider-audit", "surface"],
     "skills": [
@@ -16,6 +16,11 @@ VALID_ACTIONS = {
         "proof",
         "prove",
         "explain",
+        "doctor",
+        "package",
+        "profiles",
+        "events",
+        "memory",
         "route",
         "goal",
         "improve",
@@ -23,6 +28,9 @@ VALID_ACTIONS = {
         "sync",
         "audit",
         "external-review",
+        "validate-skill-gate",
+        "validate-openai-format",
+        "validate-boundaries",
         "install",
         "fold",
         "init",
@@ -33,6 +41,7 @@ VALID_ACTIONS = {
     "evals": ["run", "benchmark", "dashboard"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
     "mcp": ["sync"],
+    "memory": ["list", "read", "search"],
     "wiki": ["lint", "ingest", "add", "query", "add-asset"],
     "workouts": ["list", "run", "score", "promote"],
 }
@@ -49,6 +58,12 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     "skills": [
         "ask skills improve \"fix PR review comments faster\" --json --robot",
         "ask skills explain he-heartbeat --json --robot",
+        "ask skills doctor he-heartbeat --json --robot",
+        "ask skills package he-heartbeat --json --robot",
+        "ask skills profiles --json --robot",
+        "ask skills profiles eval --json --robot",
+        "ask skills events --json --robot",
+        "ask skills memory search projection --json --robot",
         "ask skills prove he-heartbeat --json --robot",
         "ask skills list",
         "ask skills budget --json",
@@ -77,7 +92,6 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     ],
     "evals": [
         "ask evals run Skills/backend-platform/cli-spec --mode smoke",
-        "ask evals run Skills/backend-platform/cli-spec --mode release",
         "ask evals dashboard",
     ],
     "graph": [
@@ -87,6 +101,11 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     ],
     "mcp": [
         "ask mcp sync",
+    ],
+    "memory": [
+        "ask memory list --json --robot",
+        "ask memory search timeout --json --robot",
+        "ask memory read .harness/memory/LEARNINGS.md --json --robot",
     ],
     "wiki": [
         "ask wiki lint",
@@ -140,6 +159,29 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("skills", "explain"): [
         "ask skills explain autofix --json",
     ],
+    ("skills", "doctor"): [
+        "ask skills doctor he-heartbeat --json",
+        "ask skills doctor Skills/agent-ops/autofix --strict --json",
+    ],
+    ("skills", "profiles"): [
+        "ask skills profiles --json",
+        "ask skills profiles authoring --json",
+        "ask skills profiles eval --json",
+    ],
+    ("skills", "events"): [
+        "ask skills events --json",
+        "ask skills events eval_blocked --json",
+    ],
+    ("skills", "package"): [
+        "ask skills package he-heartbeat --json",
+        "ask skills package he-heartbeat --checkout-test --json",
+        "ask skills package Plugins/harness-engineering/skills/he-heartbeat --strict --json",
+    ],
+    ("skills", "memory"): [
+        "ask skills memory list --json",
+        "ask skills memory search projection --json",
+        "ask skills memory read .harness/memory/LEARNINGS --json",
+    ],
     ("reviewers", "resolve"): [
         "ask reviewers resolve skillinspector --json",
     ],
@@ -149,13 +191,24 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("runtime", "budget"): [
         "ask runtime budget",
     ],
+    ("memory", "list"): [
+        "ask memory list --json",
+        "ask memory list --source harness-memory --json",
+    ],
+    ("memory", "read"): [
+        "ask memory read .harness/memory/LEARNINGS.md --json",
+    ],
+    ("memory", "search"): [
+        "ask memory search timeout --json",
+    ],
     ("skills", "audit"): [
         "ask skills audit Skills/backend-platform/cli-spec --level compat",
     ],
     ("skills", "external-review"): [
         "ask skills external-review Skills/backend-platform/cli-spec --json",
-        "ask skills external-review Plugins/harness-engineering/skills/goal-governor --json",
-        "ask skills external-review Skills/backend-platform/cli-spec --skip-tessl-review --json",
+        "ask skills external-review Plugins/skill-factory/skills/code_quality_review/skill-builder --report-path artifacts/skill-reviews/skill-builder.json --json",
+        "ask skills external-review Plugins/skill-factory/skills/code_quality_review/skill-builder --dashboard --json",
+        "ask skills external-review Skills/backend-platform/cli-spec --include-snyk --dashboard --json",
     ],
     ("skills", "goal"): [
         "ask skills goal \"implement auth safely\"",
@@ -196,6 +249,8 @@ FUZZY_MATCHES = {
     "evaluation": "evals",
     "mcp": "mcp",
     "mc": "mcp",
+    "memory": "memory",
+    "mem": "memory",
     "wiki": "wiki",
     "wik": "wiki",
     "wili": "wiki",

@@ -12,14 +12,14 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 ## Summary
 
 - `library_api_reference`: 2
-- `product_verification`: 4
+- `product_verification`: 3
 - `data_fetch_analysis`: 3
-- `team_automation`: 36
-- `scaffolding_templates`: 17
-- `code_quality_review`: 22
+- `team_automation`: 37
+- `scaffolding_templates`: 16
+- `code_quality_review`: 23
 - `ci_cd_deployment`: 0
 - `runbook`: 13
-- `infrastructure_ops`: 4
+- `infrastructure_ops`: 3
 - `invalid`: 0
 - `total_tagged`: 101
 
@@ -34,7 +34,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 
 - `agentation` — `Skills/frontend-ui`
 - `design-system` — `Skills/frontend-ui`
-- `he-spec` — `Plugins/harness-engineering/skills`
 - `ui-visual-regression` — `Skills/frontend-ui`
 
 ### Data Fetch Analysis
@@ -66,6 +65,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `he-reframe` — `Plugins/harness-engineering/skills`
 - `he-reinforce` — `Plugins/harness-engineering/skills`
 - `he-router` — `Plugins/harness-engineering/skills`
+- `he-spec` — `Plugins/harness-engineering/skills`
 - `he-strategy` — `Plugins/harness-engineering/skills`
 - `he-work` — `Plugins/harness-engineering/skills`
 - `interview-me` — `Skills/product-strategy`
@@ -98,7 +98,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `mcp-builder` — `Skills/backend-platform`
 - `og-image-creator` — `Skills/frontend-ui`
 - `plugin-creator` — `Plugins/plugin-factory/skills/scaffolding_templates`
-- `skill-creator` — `Plugins/skill-factory/skills/scaffolding_templates`
 - `skillify` — `Plugins/skill-factory/skills/scaffolding_templates`
 - `ui-ux-creative-coding` — `Skills/frontend-ui`
 
@@ -108,6 +107,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `autofix` — `Skills/agent-ops`
 - `baseline-ui` — `Skills/frontend-ui`
 - `best-practices` — `Skills/security-ops`
+- `codex-review` — `Skills/agent-ops`
 - `docs-expert` — `Skills/agent-ops`
 - `elixir-pro` — `Skills/agent-ops`
 - `evals-router` — `Skills/agent-ops`
@@ -152,7 +152,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `1password` — `Skills/security-ops`
 - `fix-mise` — `Skills/agent-ops`
 - `plugin-installer` — `Plugins/plugin-factory/skills/infrastructure_ops`
-- `skill-installer` — `Plugins/skill-factory/skills/infrastructure_ops`
 
 ## Validation Notes
 

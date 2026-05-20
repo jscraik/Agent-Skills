@@ -51,6 +51,17 @@ Review and validate completion claims. Use when you are about to say work is com
 - Do not run destructive commands or broad rewrites unless explicitly approved.
 - Use repo-owned wrappers and documented command contracts where they exist.
 
+## Execution Boundaries
+- Inspect only the changed files, validation outputs, and live state needed to verify the claim.
+- Do not stage, commit, push, merge, deploy, close trackers, or mutate external systems while verifying unless separately authorized.
+
+## Failure Mode
+- If validation cannot run, latest state is unavailable, or evidence does not support the completion claim, report the blocker and use narrower final wording.
+
+## Gotchas
+- A previous pass does not prove the current head is green.
+- Summaries, PR comments, and CI badges can be stale; prefer fresh command or live-check evidence.
+
 ## Validation
 - Run the narrowest real validator or command path available for the requested work.
 - Fail fast: stop at the first failed gate; do not proceed until it is fixed and rerun.
@@ -67,5 +78,6 @@ Review and validate completion claims. Use when you are about to say work is com
 
 ## Progressive Disclosure
 - Start with this active contract.
+- For software-literature feedback-loop and verification lenses, use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Archived source, scripts, assets, and long-form references live under `Infrastructure/references/deferred-skill-context/agent-ops-verification-before-completion/`.
 - Load only the specific archived file needed for the current task.

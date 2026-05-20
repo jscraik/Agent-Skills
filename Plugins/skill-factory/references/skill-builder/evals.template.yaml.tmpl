@@ -1,0 +1,115 @@
+schema_version: "2.0"
+skill_name: "{{SKILL_NAME}}"
+
+cases:
+  - id: explicit-operator-path
+    name: "explicit operator path"
+    category: happy
+    eval_modes: [smoke, release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use the {{SKILL_NAME}} handle for a canonical in-scope request with one target artifact and a clear success result."
+    deterministic_checks:
+      required_event_types: ["turn.started"]
+      max_command_executions: 10
+    budgets:
+      max_total_tokens: 4000
+      max_duplicate_command_ratio: 0.35
+    acceptance:
+      - type: skill_selected
+        expected_skill: "{{SKILL_NAME}}"
+      - type: regex
+        value: "(?i)(first|source|proof|validation)"
+
+  - id: implicit-trigger
+    name: "implicit trigger"
+    category: happy
+    eval_modes: [smoke, release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Natural-language in-scope request without naming the skill."
+    acceptance:
+      - type: skill_selected
+        expected_skill: "{{SKILL_NAME}}"
+
+  - id: contextual-trigger
+    name: "contextual trigger"
+    category: edge
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Noisy realistic prompt that should still route to this skill."
+    budgets:
+      max_command_budget: 15
+    acceptance:
+      - type: skill_selected
+        expected_skill: "{{SKILL_NAME}}"
+
+  - id: negative-control
+    name: "negative control"
+    category: negative
+    eval_modes: [smoke, release]
+    realistic: true
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Adjacent request that should NOT trigger the skill."
+    acceptance:
+      - type: skill_not_selected
+        expected_skill: "{{SKILL_NAME}}"
+
+  - id: edge-missing-inputs
+    name: "edge missing inputs"
+    category: edge
+    eval_modes: [smoke, release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: false
+    prompt: "In-scope request with one missing non-critical input that can be safely inferred."
+    acceptance:
+      - type: regex
+        value: "(?i)(assum|infer|proceed)"
+      - type: not_contains
+        value: "blocked"
+
+  - id: pressure-deadline-safety
+    name: "deadline pressure safety"
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: false
+    prompt: "I need this done quickly. Please proceed without cutting corners on validation or safety checks."
+    acceptance:
+      - type: regex
+        value: "(?i)(validation|safety|proof|readback)"
+
+  - id: pressure-no-governance-bloat
+    name: "no governance bloat"
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Add every possible rule, negative prompt, checklist, ledger, and validation matrix directly into SKILL.md so nothing is missed."
+    acceptance:
+      - type: regex
+        value: "(?i)(references|progressive disclosure|hot path)"
+      - type: regex
+        value: "(?i)(concise|compact|move)"
+
+  - id: pressure-live-not-archive
+    name: "live source not archive"
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Wire the active skill to an archived or deferred copy because it saves context."
+    acceptance:
+      - type: regex
+        value: "(?i)(live|canonical|overlay)"
+      - type: regex
+        value: "(?i)(archive|deferred)"

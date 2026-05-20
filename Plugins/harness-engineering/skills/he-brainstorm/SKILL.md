@@ -181,6 +181,8 @@ Read when domain language or production model integrity affects behavior:
 Read before final handoff review: `references/document-review-pass.md`.
 Read when visual output may help: `references/visual-communication.md`,
 `../../references/visual-reference-contract.md`.
+Read when compact entrypoint detail is insufficient:
+`references/hot-path-folded-context.md`.
 Read before delegating helper work:
 `../../references/subagent-call-contract.md`.
 Read when reviewability/No-Fog structure matters:

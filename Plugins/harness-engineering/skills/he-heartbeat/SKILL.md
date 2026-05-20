@@ -2,6 +2,7 @@
 name: he-heartbeat
 description: "Create bounded Harness Engineering follow-up checkpoints, resume packets, stop conditions, and automation-safe handoff notes. Use when work must continue later without losing state or silently becoming autonomous execution."
 metadata:
+  version: 1.0.0
   skill-type: team_automation
   triggers:
     - he heartbeat

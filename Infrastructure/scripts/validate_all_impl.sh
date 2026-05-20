@@ -507,8 +507,9 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
 
     case "$changed_file" in
       Plugins/skill-factory/skills/code_quality_review/skill-builder/*|\
-      Plugins/skill-factory/skills/scaffolding_templates/skill-creator/*|\
-      Plugins/skill-factory/skills/infrastructure_ops/skill-installer/*|\
+      Plugins/skill-factory/scripts/skill-builder/*|Plugins/skill-factory/scripts/skill-builder/**|\
+      skills-system/skill-creator/*|\
+      skills-system/skill-installer/*|\
       Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/*|\
       Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh|\
       Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py|\

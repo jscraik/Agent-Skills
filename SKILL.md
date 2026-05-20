@@ -12,47 +12,43 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
-- [.Agents — Skills](#.agents-skills)
+- [.Agents — Skills — .System](#.agents-skills-.system)
+- [Skills — Agent Ops](#skills-agent-ops)
 
 ## Summary
-- `total_skills`: 32
+- `total_skills`: 23
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: 7daa4fc686e87098
+- `policy_identity`: 517eeb5fbc26e1b1
 
 ## Catalog
 
-## .Agents — Skills
+## .Agents — Skills — .System
 
-- `agent-ops` — Route agent operations, repo hygiene, validation, automation, and workflow support without loading individual operational skills by default.
-- `agents-md` — Internal entrypoint for Agents Md. Use only when named as $agents-md.
-- `autofix` — Internal entrypoint for Autofix. Use only when named as $autofix.
-- `autoresearch` — Internal entrypoint for Autoresearch. Use only when named as $autoresearch.
-- `backend-platform` — Route backend, data, API, platform, and infrastructure implementation work without exposing every backend module up front.
-- `bootstrap` — Internal entrypoint for Bootstrap. Use only when named as $bootstrap.
-- `codex-agent-creator` — Internal entrypoint for Codex Agent Creator. Use only when named as $codex-agent-creator.
-- `codex-automation-architect` — Internal entrypoint for Codex Automation Architect. Use only when named as $codex-automation-architect.
-- `codex-hooks-builder` — Internal entrypoint for Codex Hooks Builder. Use only when named as $codex-hooks-builder.
-- `coding-harness` — Internal entrypoint for Coding Harness. Use only when named as $coding-harness.
-- `content-publishing` — Route writing, publishing, editorial, docs, and content operations work while keeping detailed content modules latent.
-- `context7` — Internal entrypoint for Context7. Use only when named as $context7.
-- `docs-expert` — Internal entrypoint for Docs Expert. Use only when named as $docs-expert.
-- `fix-mise` — Internal entrypoint for Fix Mise. Use only when named as $fix-mise.
-- `frontend-ui` — Route frontend interface, design-system, browser, and user-experience work while keeping component-level skills latent until selected.
-- `harness-engineering` — Route Harness Engineering lifecycle and session-evidence requests when users need brainstorming, planning, implementation, review, fixes, heartbeats, or prior-run improvement.
-- `imagegen` — Internal entrypoint for Imagegen. Use only when named as $imagegen.
-- `improve-codebase-architecture` — Internal entrypoint for Improve Codebase Architecture. Use only when named as $improve-codebase-architecture.
-- `keep-codex-fast` — Internal entrypoint for Keep Codex Fast. Use only when named as $keep-codex-fast.
-- `mobile-native` — Route mobile-native app, platform, device, and app-store work without loading unrelated implementation skills.
-- `npm-release` — Internal entrypoint for Npm Release. Use only when named as $npm-release.
-- `plugin-factory` — Route plugin creation, plugin installation, scaffolding, packaging, and plugin lifecycle work through bounded modules.
-- `pnpm-manager` — Internal entrypoint for Pnpm Manager. Use only when named as $pnpm-manager.
-- `product-strategy` — Route product, planning, research synthesis, prioritization, and strategy work with latent specialist modules selected only as needed.
-- `project-brain` — Internal entrypoint for Project Brain. Use only when named as $project-brain.
-- `security-ops` — Review, route, and audit security work. Use when tasks involve threat modeling, secrets, policy, or operational security risk.
-- `simplify` — Internal entrypoint for Simplify. Use only when named as $simplify.
-- `skill-factory` — Use when creating, auditing, installing, refactoring, or governing Codex skills while preserving local plugin browseability.
-- `skill-pr-delivery` — Internal entrypoint for Skill Pr Delivery. Use only when named as $skill-pr-delivery.
-- `triage` — Internal entrypoint for Triage. Use only when named as $triage.
-- `ubiquitous-language` — Internal entrypoint for Ubiquitous Language. Use only when named as $ubiquitous-language.
-- `verification-before-completion` — Internal entrypoint for Verification Before Completion. Use only when named as $verification-before-completion.
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
+
+## Skills — Agent Ops
+
+- `agents-md` — Use when reviewing, creating, shrinking, or refactoring AGENTS.md agent instructions, agent config files, routing rules, or repository guidance that need scoped routing, dedupe, contradiction fixes, progressive disclosure, and cleaned instruction surfaces.
+- `autofix` — Apply approved fixes for unresolved CodeRabbit review comments, Codex P1-P3 findings, PR feedback, and code review issues with validation evidence. Use when asked to address review comments, fix review findings, clear unresolved comments, or autofix PR feedback.
+- `autoresearch` — Run bounded automated experiment iterations by recording baselines, applying hypothesis patches, comparing metrics, protecting regression guards, and deciding keep, discard, rollback, or block. Use when $autoresearch is named or a repo/skill needs evidence-backed research, metric tracking, or safe optimisation loops.
+- `bootstrap` — Create, diagnose, and validate a local dev bootstrap. Use when the user asks to clone a repo, install toolchains, install dependencies, and prove the project runs.
+- `codex-agent-creator` — Create, validate, install, fold, or troubleshoot Codex custom subagent roles, role TOML config files, agent configuration, custom roles, subagent setup, and discoverability wiring. Use when a user asks for a Codex agent role, reviewer agent, role config, TOML role file, or overlapping agents to merge.
+- `codex-automation-architect` — Use when designing, reviewing, or updating Codex app automations, cron jobs, scheduled tasks, recurring runs, or heartbeat follow-ups.
+- `codex-hooks-builder` — Scaffold hook packs, validate hooks.json schema, verify hook script permissions, migrate hook configuration, and troubleshoot Codex hook execution errors. Use when creating, auditing, upgrading, or validating Codex hook packs, hooks.json files, hook scripts, PreToolUse/PostToolUse/PreCompact hooks, or repo-local/user-level .codex hook installs.
+- `codex-review` — WHAT: Review local dirty changes, committed branches, and PR diffs with Codex CLI. Use when the user asks for Codex review, autoreview, independent model review, pre-ship validation, or merge-readiness evidence.
+- `coding-harness` — Use when users need to install, bootstrap, upgrade, audit, diagnose, or explain @brainwav/coding-harness in a repository, including harness init/upgrade, CI migration, governance gates, command discovery, and Codex environment action sync.
+- `context7` — Analyze current external library or API docs with Context7 when dependency behavior, version-sensitive references, or ctx7 CLI setup/install guidance is needed.
+- `docs-expert` — Audit, rewrite, and validate README, runbook, code-doc, config-doc, and public trust-surface documentation by checking stale instructions, command examples, dependency claims, file paths, configs, workflows, and code references against live repository evidence. Use when documentation needs proof-backed correction or reader-focused validation.
+- `fix-mise` — Diagnose, fix, and validate mise runtime failures. Use when commands fail from mise config, missing runtimes, stale pins, trust prompts, or shell activation drift.
+- `improve-codebase-architecture` — Use when reviewing or improving codebase architecture needs deeper module boundaries, clearer context language, better interfaces, stronger testability, or Linear-backed decisions.
+- `keep-codex-fast` — Diagnose Codex Desktop or CLI local-state bloat and safe recovery options. Use when sessions, archived history, logs, worktrees, or stale Codex config may be making Codex feel slow.
+- `npm-release` — Create, review, and validate npm release workflows. Use when preparing or publishing npm packages, release channels, dist-tags, provenance, or 2FA-protected publishes.
+- `pnpm-manager` — Run, plan, and validate pnpm workspace operations. Use when a user needs pnpm monorepo installs, tests, builds, filters, changed-package selection, or publish routing.
+- `project-brain` — Create, validate, and repair Project Brain .harness memory files when setting up Project Brain, saving repo learnings, recording decisions, or preserving quality rules.
+- `simplify` — Review changed code for behavior-preserving simplification by removing dead code, eliminating duplication, extracting shared helpers, improving names, and tightening tests. Use when a user asks for code review, refactor, clean up PR, simplify, tidy up code, review my changes, or maintainability cleanup before merge.
+- `skill-pr-delivery` — Ship skill changes to PRs when Codex skills need source edits, rooted sync, strict audit, reviewer evidence, commit, push, and PR status.
+- `triage` — Review file-based todo findings into ready, skipped, customized, or blocked states. Use this skill when pending todo files need approval.
+- `ubiquitous-language` — Build shared project vocabulary, glossary terms, aliases, prompt translations, and agent instruction links when wording is fuzzy or overloaded.
+- `verification-before-completion` — Review and validate completion claims. Use when you are about to say work is complete, fixed, passing, pushed, or ready for review.
+

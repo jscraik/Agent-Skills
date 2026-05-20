@@ -69,8 +69,8 @@ Reference `assets/` only for skill packaging and browseability; review evidence 
 ## References
 Read when:
 - mode selection, closure, execute, autonomous, plan-only, result-review, or security-review detail is needed: `Plugins/harness-engineering/skills/he-code-review/references/review-mode-contract.md`
-- review depth, confidence caps, repeated feedback, or output shape is needed: `Plugins/harness-engineering/skills/he-code-review/references/review-policy-index.md`
-- disputed behavior or proof-loop guidance is needed: `Plugins/harness-engineering/skills/he-code-review/references/review-loop-patterns.md`
+- review depth, confidence caps, repeated feedback, or output shape is needed: `../../references/skills/he-code-review/review-policy-index.md`
+- disputed behavior or proof-loop guidance is needed: `../../references/skills/he-code-review/review-loop-patterns.md`
 - broader HE contracts are triggered: `Plugins/harness-engineering/references/deferred-context-index.md`
 - delegation or subagent work is triggered: `Plugins/harness-engineering/references/subagent-call-contract.md`
 - artifact identity, BLUF output, or review visuals are required: `Plugins/harness-engineering/references/artifact-routing-contract.md`, `Plugins/harness-engineering/references/bluf-review-contract.md`, `Plugins/harness-engineering/references/visual-reference-contract.md`

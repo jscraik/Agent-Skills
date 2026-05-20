@@ -47,6 +47,18 @@ Start with 2-3 focused surfaces before expanding scope.
 - Keep writes scoped to the requested repo or artifact surface.
 - Fail fast: stop at the first failed gate, fix it, and rerun before continuing.
 
+## Execution Boundaries
+- Keep output inside the requested artifact path or repo-approved documentation surface.
+- Do not publish, upload, or embed private data, credentials, screenshots, or proprietary source without explicit approval.
+- Do not change product code when the request is only for an explainer artifact.
+- Use local browser or static checks when layout, readability, or responsive behavior matters.
+
+## Failure Mode
+- If the source material, audience, or artifact destination is unclear, ask for or report the missing input before rendering.
+- If the artifact clips, overflows, or hides critical evidence, revise the layout and rerun verification.
+- If the source contains sensitive text, redact or summarize before adding labels.
+- If visual assets cannot be verified, report the artifact as blocked or partially verified.
+
 ## Validation
 - Run Plugin Eval and strict skill audit after editing this skill.
 - Fail fast: stop at first failed gate; do not proceed until it is fixed and rerun.
@@ -58,11 +70,17 @@ Start with 2-3 focused surfaces before expanding scope.
 - Do not render secrets or sensitive data into labels or annotations.
 - Do not ship unreadable, overflowing, or generic dark-theme artifacts without checking fit.
 
+## Gotchas
+- The artifact should make the decision or relationship clearer, not merely decorate the source text.
+- A self-contained HTML file still needs responsive fit and readable labels.
+- Cookbook multimodal and documentation lenses can shape checks, but the final artifact needs local rendering evidence.
+
 ## Examples
 - "Turn this architecture diff into a browser-first explainer."
 - "Replace this status table with a responsive HTML matrix."
 
 ## Progressive Disclosure
+- For Cookbook-derived multimodal eval and documentation interface checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
 - Archived full context: Infrastructure/references/deferred-skill-context/content-publishing-visual-explainer/.
 - Load archived references, scripts, prompts, templates, or assets only when the active workflow needs that exact detail.
 - Keep the active path compact. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

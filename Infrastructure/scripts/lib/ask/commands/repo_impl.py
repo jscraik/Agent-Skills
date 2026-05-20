@@ -316,6 +316,8 @@ def _ask_bootstrap_signal(repo_root: Path) -> dict[str, Any]:
         "resolved_path": path_discovery.get("resolved_path"),
         "shim_status": shim.get("status"),
         "shim_repo_identity_status": shim.get("repo_identity_status"),
+        "manual_remediation": proof.get("remediation", {}).get("manual", []),
+        "applied_remediation": proof.get("remediation", {}).get("applied", []),
     }
     if entrypoint.get("status") == "fail" or fallback.get("status") == "fail":
         return {

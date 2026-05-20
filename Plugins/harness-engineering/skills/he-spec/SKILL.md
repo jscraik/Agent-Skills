@@ -78,7 +78,7 @@ handles, runtime projections, plugin caches, or mirrors unless canonical.
    Use the interactive steering contract and `request_user_input` when available
    only if source inspection leaves one consequential product-intent, selected
    slice, scope, or acceptance-authority choice unresolved.
-6. Use the reader-first spec template in `references/spec-artifact-contract.md`:
+6. Use the reader-first spec template in `../../references/skills/he-spec/spec-artifact-contract.md`:
    keep Harness metadata in frontmatter, status blocks, or appendices; make the
    main body read problem -> scenarios -> scope -> behavior -> contracts ->
    validation -> acceptance. Apply the BLUF review contract to non-trivial
@@ -165,12 +165,12 @@ for skill packaging and browseability; spec source material belongs in
 references, not generated images.
 
 ## References
-Read when: mode/artifact shape -> `references/spec-mode-rules.md`,
-`references/spec-artifact-contract.md`.
+`../../references/skills/he-spec/spec-mode-rules.md`,
+`../../references/skills/he-spec/spec-artifact-contract.md`.
 Read when: a blocking user clarification may be needed ->
 `../../references/interactive-steering-contract.md`.
 Read when: prior Codex/session evidence matters ->
-`references/codex-and-session-evidence.md`.
+`../../references/skills/he-spec/codex-and-session-evidence.md`.
 Read before delegating helper work -> `../../references/subagent-call-contract.md`.
 Read when ubiquitous language, glossary drift, or production domain modeling
 affects acceptance -> `../../references/domain-context-contract.md`,

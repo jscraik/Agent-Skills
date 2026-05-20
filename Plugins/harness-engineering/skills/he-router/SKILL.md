@@ -143,6 +143,8 @@ color-only status.
   `references/context-preservation.md`
 - Read when: role names are involved -> `references/role-resolution-fallback.md`
 - Read when: recurring waits appear -> `references/heartbeat-routing-preservation.md`
+- Read when: route choice may lead to live closure or tracker mutation ->
+  `../../references/closure-mutation-contract.md`
 
 ## Output Format
 Emit one compact YAML or JSON object when structured output is requested.
@@ -158,7 +160,7 @@ resolver, or unsafe authority gap.
 
 Deferred context index: `../../references/deferred-context-index.md`.
 Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
-references with a clear route.
+Move important still-valid context into linked references with a clear route.
 Apply the context-disposition policy by moving important still-valid context to
 references and intentionally discarding stale, duplicated, unsafe, superseded,
 or low-signal text.
