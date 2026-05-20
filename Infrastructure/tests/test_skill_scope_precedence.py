@@ -95,6 +95,60 @@ class TestSkillScopePrecedence(unittest.TestCase):
         self.assertEqual(len(selected), 1)
         self.assertEqual(selected[0].source_dir, flat_skill.resolve())
 
+    def test_catalog_source_uses_canonical_repo_discovery_not_flat_runtime(self) -> None:
+        repo_skill = self._write_skill("Skills/agent-ops/shared-skill", "Canonical repo skill.")
+        self._write_skill(".agents/skills/shared-skill", "Flat runtime skill.")
+        system_dir = self._write_skill(".agents/skills/.system/imagegen", "System bridge skill.")
+
+        with self._patched_repo(default_visible={"shared-skill", "imagegen"}):
+            entries = skill_discovery.discover_skill_entries(source="catalog", visibility="default")
+
+        by_name = {entry.name: entry.source_dir for entry in entries}
+        self.assertEqual(sorted(by_name), ["imagegen", "shared-skill"])
+        self.assertEqual(by_name["shared-skill"], repo_skill.resolve())
+        self.assertEqual(by_name["imagegen"], system_dir.resolve())
+
+    def test_flat_runtime_system_lane_prefers_runtime_projection(self) -> None:
+        runtime_system_dir = self._write_skill(".agents/skills/.system/imagegen", "Runtime system skill.")
+        self._write_skill("skills-system/imagegen", "Tracked system skill.")
+
+        with self._patched_repo(default_visible={"imagegen"}):
+            entries = skill_discovery.discover_skill_entries(source="flat", visibility="default")
+
+        selected = [entry for entry in entries if entry.name == "imagegen"]
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0].source_dir, runtime_system_dir.resolve())
+
+    def test_runtime_budget_allows_default_visible_system_skill(self) -> None:
+        imagegen_dir = self._write_skill("skills-system/imagegen", "Default visible system skill.")
+        hidden_bridge_dir = self._write_skill("skills-system/skill-creator", "Hidden bridge skill.")
+
+        with (
+            self._patched_repo(default_visible={"imagegen"}),
+            mock.patch.object(verify_runtime_budget, "BRIDGE_SKILLS", {"imagegen", "skill-creator"}),
+        ):
+            report = verify_runtime_budget.build_report()
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["default_visible_skill_names"], ["imagegen"])
+        self.assertEqual(report["effective_default_policy_skill_names"], ["imagegen"])
+        self.assertIn(
+            {
+                "category": "skills-system",
+                "name": "skill-creator",
+                "path": hidden_bridge_dir.relative_to(self.repo_root).as_posix(),
+            },
+            report["hidden_system_entries"],
+        )
+        self.assertIn(
+            {
+                "category": "skills-system",
+                "name": "imagegen",
+                "path": imagegen_dir.relative_to(self.repo_root).as_posix(),
+            },
+            report["hidden_system_entries"],
+        )
+
     def test_runtime_budget_fails_unresolved_same_scope_collision(self) -> None:
         self._write_skill("Plugins/alpha/skills/shared-skill", "Alpha local plugin.")
         self._write_skill("Plugins/beta/skills/shared-skill", "Beta local plugin.")
