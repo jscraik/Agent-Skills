@@ -143,6 +143,8 @@ def _parse_compat_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--name")
     parser.add_argument("--method", choices=["auto", "download", "git"], default="auto")
     parser.add_argument("--allow-untrusted-source", action="store_true")
+    parser.add_argument("--allow-unpinned-ref", action="store_true")
+    parser.add_argument("--allow-unsigned-provenance", action="store_true")
     parser.add_argument("--trusted-repo", action="append", default=[])
     parser.add_argument("--allowed-signer-email", action="append", default=[])
     parser.add_argument("--allowed-signer-domain", action="append", default=[])
@@ -158,11 +160,16 @@ def main(argv: list[str]) -> int:
         trusted_repos = _TRUSTED_REPOS | set(args.trusted_repo or [])
         if repo_key not in trusted_repos and not args.allow_untrusted_source:
             raise InstallError("Untrusted source repo. Pass --trusted-repo owner/repo or --allow-untrusted-source with explicit approval.")
-        if not _PINNED_REF.fullmatch(source.ref) and not args.allow_untrusted_source:
+        if not _PINNED_REF.fullmatch(source.ref) and not args.allow_unpinned_ref:
             raise InstallError("Skill installs require a pinned 40-character commit ref.")
         resolved_commit, verification, identity = _resolve_commit_provenance(source.owner, source.repo, source.ref)
-        if verification.get("verified") is False and not args.allow_untrusted_source:
-            raise InstallError("Commit provenance is not verified.")
+        verified = verification.get("verified") is True
+        reason = str(verification.get("reason") or "unknown").strip().lower()
+        if not args.allow_unsigned_provenance:
+            if not verified:
+                raise InstallError("Commit provenance is not verified.")
+            if reason != "valid":
+                raise InstallError("Commit provenance verification reason must be 'valid'.")
         if not _signer_allowed(identity, args):
             raise InstallError("Commit signer does not match the allowed signer policy.")
         source.ref = resolved_commit

@@ -206,6 +206,53 @@ class SkillInstallerSecurityPolicyTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertTrue((dest_root / "sample" / "SKILL.md").is_file())
 
+    def test_untrusted_override_does_not_bypass_pinned_ref_policy(self) -> None:
+        code = installer.main(
+            [
+                "--repo",
+                "unknown-owner/unknown-repo",
+                "--path",
+                "skills/sample",
+                "--ref",
+                "main",
+                "--allow-untrusted-source",
+            ]
+        )
+
+        self.assertEqual(code, 1)
+
+    def test_untrusted_override_does_not_bypass_provenance_policy(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="skill-installer-policy-") as tmpdir:
+            repo_root = Path(tmpdir) / "repo"
+            skill_dir = repo_root / "skills" / "sample"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("# Sample\n", encoding="utf-8")
+
+            dest_root = Path(tmpdir) / "dest"
+            dest_root.mkdir(parents=True)
+
+            with patch.object(installer, "_resolve_dest_root", return_value=str(dest_root)):
+                with patch.object(
+                    installer,
+                    "_resolve_commit_provenance",
+                    return_value=("a" * 40, {"verified": False, "reason": "unsigned"}, {"emails": ["dev@example.com"], "logins": ["dev"]}),
+                ):
+                    with patch.object(installer, "_prepare_repo", return_value=(str(repo_root), "zipball")):
+                        code = installer.main(
+                            [
+                                "--repo",
+                                "unknown-owner/unknown-repo",
+                                "--path",
+                                "skills/sample",
+                                "--ref",
+                                "a" * 40,
+                                "--allow-untrusted-source",
+                            ]
+                        )
+
+            self.assertEqual(code, 1)
+            self.assertFalse((dest_root / "sample").exists())
+
     def test_rejects_symlinked_files_before_copy(self) -> None:
         with tempfile.TemporaryDirectory(prefix="skill-installer-policy-") as tmpdir:
             repo_root = Path(tmpdir) / "repo"
