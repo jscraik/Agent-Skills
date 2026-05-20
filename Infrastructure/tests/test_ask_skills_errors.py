@@ -172,7 +172,7 @@ class TestAskSkillsErrors(unittest.TestCase):
     def test_install_skill_uses_validation_flag_when_supported(self, mock_run):
         """
         Verifies that when the installer advertises `--validation-level` in its usage output, install_skill enables and passes that flag.
-        
+
         Mocks subprocess output so the first call returns usage text containing `--validation-level` and the second simulates a successful install. Asserts the result is successful, `result.data["validation_level"] == "compat"`, and the actual install command includes `--validation-level`.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -204,7 +204,7 @@ class TestAskSkillsErrors(unittest.TestCase):
     def test_install_skill_remediate_requires_flag_support(self, mock_run):
         """
         Verifies that install_skill errors when remediation is requested but the installer does not support `--remediate`.
-        
+
         Sets up a temporary repo with a `github` dest and mocks the installer usage output to omit `--remediate`. Calls install_skill(..., remediate=True) and asserts that the result has status "error", contains an `ERR_VALIDATION` error whose message mentions "does not support --remediate", and that the installer was probed exactly once (no install attempt).
         """
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -344,7 +344,7 @@ class TestAskSkillsErrors(unittest.TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["dashboard_path"], "Infrastructure/artifacts/skill-reviews/example-skill.html")
-        self.assertTrue(result.data["dashboard_url"].startswith("file://"))
+        self.assertEqual(result.data["dashboard_url"], "Infrastructure/artifacts/skill-reviews/example-skill.html")
         self.assertIn("ASK Local Review", html_text)
         self.assertIn('data-auto-refresh-seconds="0"', html_text)
         self.assertIn("Static evidence snapshot", html_text)
@@ -355,6 +355,39 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertIn("Snyk Advisory", html_text)
         self.assertIn("local_internal_only", html_text)
         self.assertIn("disabled_until_requested", html_text)
+
+    def test_review_dashboard_reads_openclaw_guard_security_output(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            report_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.json"
+            report_path.parent.mkdir(parents=True)
+            report_path.write_text(
+                json.dumps({
+                    "status": "success",
+                    "data": {
+                        "target": "Plugins/skill-factory/skills/code_quality_review/example-skill",
+                        "ask_audit": {
+                            "data": {
+                                "openclaw_guard": {
+                                    "status": "warning",
+                                    "stdout": "Summary: 0 critical - 2 warn\nwarning: capability boundary drift",
+                                }
+                            }
+                        },
+                        "plugin_eval": {"stdout": "Score: 88/100\nGrade: B"},
+                        "tessl_review": {"stdout": "Review Score: 90%\nDescription: 100%\nContent: 80%"},
+                    },
+                    "errors": [],
+                }),
+                encoding="utf-8",
+            )
+
+            html_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.html"
+            render_skill_review_dashboard(report_path=report_path, output_path=html_path, repo_root=repo_root)
+            html_text = html_path.read_text(encoding="utf-8")
+
+        self.assertIn("warning: capability boundary drift", html_text)
+        self.assertIn(">70%</span>", html_text)
 
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")
@@ -587,6 +620,7 @@ class TestAskSkillsErrors(unittest.TestCase):
             scorecard_path.parent.mkdir(parents=True)
             scorecard_path.write_text(
                 """{
+  "skill_path": "Plugins/skill-factory/skills/code_quality_review/example-skill",
   "run_id": "20260515-180000-000000",
   "eval_mode": "smoke",
   "runner_mode": "codex",
@@ -608,6 +642,39 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertIn("Edge Case", html_text)
         self.assertIn("Not run", html_text)
         self.assertIn("50%", html_text)
+
+    def test_review_dashboard_ignores_basename_only_scorecard_match(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            report_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.json"
+            report_path.parent.mkdir(parents=True)
+            report_path.write_text(
+                json.dumps({
+                    "status": "success",
+                    "data": {
+                        "target": "Skills/agent-ops/example-skill",
+                        "ask_audit": {"data": {}},
+                    },
+                    "errors": [],
+                }),
+                encoding="utf-8",
+            )
+            scorecard_path = repo_root / "Infrastructure/artifacts/skills/example-skill/20260515-180000-000000/scorecard.json"
+            scorecard_path.parent.mkdir(parents=True)
+            scorecard_path.write_text(
+                json.dumps({
+                    "run_id": "20260515-180000-000000",
+                    "cases": [{"id": "wrong-skill", "name": "Wrong Skill", "passed": True}],
+                }),
+                encoding="utf-8",
+            )
+
+            html_path = repo_root / "Infrastructure/artifacts/skill-reviews/example-skill.html"
+            render_skill_review_dashboard(report_path=report_path, output_path=html_path, repo_root=repo_root)
+            html_text = html_path.read_text(encoding="utf-8")
+
+        self.assertIn("Evals Not Run Yet", html_text)
+        self.assertNotIn("Wrong Skill", html_text)
 
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")

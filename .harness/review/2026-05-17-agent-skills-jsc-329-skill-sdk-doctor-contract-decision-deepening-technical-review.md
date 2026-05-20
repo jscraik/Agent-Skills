@@ -141,4 +141,3 @@ The imagegen surface may not always use one environment variable or provider. Th
 - In PU-001, test production `data.skill_doctor` JSON for `sdk_layer` on known readiness classes.
 - In PU-005 and PU-006, treat missing waiver authority metadata as a blocked gate.
 - In closeout, report imagegen status separately as generated, blocked, or skipped.
-

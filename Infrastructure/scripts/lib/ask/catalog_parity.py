@@ -24,9 +24,9 @@ HISTORY_PATH = Path("Infrastructure/artifacts/selection-quality/history.jsonl")
 def _extract_readme_count(readme_path: Path) -> int | None:
     """
     Extract the bolded skills count from a README file.
-    
+
     Recognizes formats like **123 skills** or **123 canonical skills** and returns the parsed integer when present; if the file is missing or no matching pattern is found, returns None.
-    
+
     Returns:
         int | None: The parsed skills count if present, `None` otherwise.
     """
@@ -42,10 +42,10 @@ def _extract_readme_count(readme_path: Path) -> int | None:
 def _extract_root_skill_index_count(index_path: Path) -> int | None:
     """
     Extract the `total_skills` value declared in a root skill index file.
-    
+
     Parameters:
         index_path (Path): Path to the root SKILL.md index file to read.
-    
+
     Returns:
         int | None: The parsed `total_skills` integer if present in the file, otherwise `None`.
     """
@@ -61,10 +61,10 @@ def _extract_root_skill_index_count(index_path: Path) -> int | None:
 def _extract_root_skill_index_policy_identity(index_path: Path) -> str | None:
     """
     Extract the 16-hex-character policy identity from a root skill index file.
-    
+
     Parameters:
         index_path (Path): Path to the root skill index file (e.g. SKILL.md).
-    
+
     Returns:
         str | None: The matched 16-character lowercase hexadecimal policy identity if present, otherwise `None` (including when the file does not exist or the identity cannot be found).
     """
@@ -80,9 +80,9 @@ def _extract_root_skill_index_policy_identity(index_path: Path) -> str | None:
 def _latest_history_metrics(history_path: Path) -> tuple[dict[str, float] | None, str | None]:
     """
     Parse routing-quality history JSONL and determine the latest metrics and trend status.
-    
+
     Reads the provided history JSONL, validates records, computes median baselines from the previous seven entries, and detects routing-quality deterioration in the latest row.
-    
+
     Returns:
         A tuple of `(current_metrics, status)`:
         - `current_metrics` (`dict[str, float] | None`): the most recent record containing keys `unresolved_ambiguity_rate` and `no_candidate_rate`, or `None` when a usable current record cannot be produced.
@@ -142,13 +142,13 @@ def _latest_history_metrics(history_path: Path) -> tuple[dict[str, float] | None
     def deteriorated(current_value: float, baseline_value: float) -> bool:
         """
         Determine whether a metric has deteriorated relative to a baseline.
-        
+
         A deterioration is reported when the current value exceeds the baseline by more than 20% and the absolute increase is at least 0.01.
-        
+
         Parameters:
             current_value (float): The current metric value.
             baseline_value (float): The baseline metric value to compare against.
-        
+
         Returns:
             bool: `True` if the current value is greater than the baseline by more than 20% and by at least 0.01, `False` otherwise.
         """
@@ -170,13 +170,13 @@ def compute_catalog_parity(
 ) -> dict[str, Any]:
     """
     Produce a diagnostic report comparing the canonical catalog and active policy identity against observed counts and metadata across repository and runtime surfaces.
-    
+
     Parameters:
         repo_root (Path): Repository root used to read README.md, SKILL.md, and history artifacts.
         strict (bool): When True, require matching policy identity on stamped surfaces and enforce routing-quality history gates.
         skills_list_count (int | None): Optional override for the observed "ask skills list" total; when None the canonical count is used.
         route_considered_total (int | None): Optional override for the observed "route considered metadata" total; when None the canonical count is used.
-    
+
     Returns:
         report (dict[str, Any]): Diagnostic report with the following keys:
             - `schema_version`: report schema identifier.

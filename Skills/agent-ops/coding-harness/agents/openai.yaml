@@ -1,0 +1,7 @@
+interface:
+  display_name: "Coding Harness"
+  short_description: "$coding-harness - Coding Harness entrypoint"
+  default_prompt: "$coding-harness "
+
+policy:
+  allow_implicit_invocation: false

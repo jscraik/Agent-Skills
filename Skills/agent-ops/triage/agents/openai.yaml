@@ -1,0 +1,7 @@
+interface:
+  display_name: "Triage"
+  short_description: "$triage - Triage entrypoint"
+  default_prompt: "$triage "
+
+policy:
+  allow_implicit_invocation: false

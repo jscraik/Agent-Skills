@@ -51,6 +51,8 @@ HIDDEN_COMPATIBILITY_COMMAND_HANDLES = {
     "he-goal-governor-archive",
     "he-phase-heartbeat",
 }
+ALIAS_KIND_FOLDED_COMPATIBILITY = "folded_compatibility"
+DEPRECATION_STATE_DEPRECATED = "deprecated"
 
 
 @dataclass(frozen=True)
@@ -65,6 +67,9 @@ class CommandHandle:
     description: str
     invoke_via: str | None = None
     level: str | None = None
+    alias_of: str | None = None
+    alias_kind: str | None = None
+    deprecation_state: str | None = None
     provenance: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -156,6 +161,9 @@ def _alias_handle_from_target(alias: str, target: CommandHandle) -> CommandHandl
         description=target.description,
         invoke_via=target.invoke_via,
         level=target.level,
+        alias_of=target.handle,
+        alias_kind=ALIAS_KIND_FOLDED_COMPATIBILITY,
+        deprecation_state=DEPRECATION_STATE_DEPRECATED,
         provenance=target.provenance,
     )
 
@@ -782,7 +790,29 @@ def check_command_surface_projection(*, repo_root_path: Path | None = None) -> d
                 "error": str(exc),
             })
 
-    if actual_payload is not None and actual_payload != payload:
+    def _without_volatile_source_revision(value: dict[str, Any]) -> dict[str, Any]:
+        clone = json.loads(json.dumps(value))
+
+        def _remove_source_revision_recursive(obj: Any) -> None:
+            if isinstance(obj, dict):
+                # Remove source_revision from provenance dicts
+                if "provenance" in obj and isinstance(obj["provenance"], dict):
+                    obj["provenance"].pop("source_revision", None)
+                # Recurse into all dict values
+                for val in obj.values():
+                    _remove_source_revision_recursive(val)
+            elif isinstance(obj, list):
+                # Recurse into all list items
+                for item in obj:
+                    _remove_source_revision_recursive(item)
+
+        _remove_source_revision_recursive(clone)
+        return clone
+
+    if (
+        actual_payload is not None
+        and _without_volatile_source_revision(actual_payload) != _without_volatile_source_revision(payload)
+    ):
         violations.append({
             "code": "COMMAND_SURFACE_PROJECTION_DRIFT",
             "path": COMMAND_SURFACE_PATH.as_posix(),
@@ -811,6 +841,14 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
         for row in rows
         for violation in row.get("violations", [])
     ])
+    for row in rows:
+        path = root / row["path"]
+        if path.parent.is_symlink():
+            violations.append({
+                "code": "COMMAND_HANDLE_PARENT_SYMLINK",
+                "path": row["path"],
+                "parent": path.parent.relative_to(root).as_posix(),
+            })
     expected_dirs = {
         root / ".agents" / "skills" / row["handle"]
         for row in rows

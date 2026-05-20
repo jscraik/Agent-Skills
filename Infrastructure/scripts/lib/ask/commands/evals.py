@@ -46,6 +46,18 @@ def _safe_slug(value: str) -> str:
     return slug or "skill"
 
 
+def _canonical_skill_identifier(repo_root: Path, skill_path: str) -> str:
+    candidate = Path(skill_path)
+    if candidate.name == "SKILL.md":
+        candidate = candidate.parent
+    if candidate.is_absolute():
+        try:
+            candidate = candidate.resolve().relative_to(repo_root.resolve())
+        except ValueError:
+            return candidate.as_posix()
+    return candidate.as_posix()
+
+
 def _utc_now_iso() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -593,11 +605,13 @@ def _read_scorecard(path: Path | None) -> dict:
     return data if isinstance(data, dict) else {}
 
 
-def _latest_review_report(repo_root: Path, skill_name: str) -> Path | None:
+def _latest_review_report(repo_root: Path, skill_identifier: str) -> Path | None:
     review_root = repo_root / "Infrastructure" / "artifacts" / "skill-reviews"
     if not review_root.exists():
         return None
     candidates: list[Path] = []
+    fallback_candidates: list[Path] = []
+    skill_name = Path(skill_identifier).name
     for report_path in review_root.rglob("*.json"):
         if report_path.name.endswith("-eval-latest.json"):
             continue
@@ -608,9 +622,16 @@ def _latest_review_report(repo_root: Path, skill_name: str) -> Path | None:
         data = report.get("data") if isinstance(report, dict) else None
         if not isinstance(data, dict):
             continue
-        target_name = Path(str(data.get("target") or "")).name
-        if target_name == skill_name:
+        target = str(data.get("target") or "")
+        if not target:
+            continue
+        target_identifier = _canonical_skill_identifier(repo_root, target)
+        if target_identifier == skill_identifier:
             candidates.append(report_path)
+        elif Path(target_identifier).name == skill_name:
+            fallback_candidates.append(report_path)
+    if not candidates:
+        candidates = fallback_candidates
     if not candidates:
         return None
     return max(candidates, key=lambda path: path.stat().st_mtime)
@@ -692,9 +713,10 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
 def _render_eval_dashboard(repo_root: Path, skill_path: str, mode: str, raw_output: str) -> dict:
     scorecard_path = _scorecard_path_from_output(repo_root, raw_output)
     scorecard = _read_scorecard(scorecard_path)
-    skill_name = str(scorecard.get("skill") or Path(skill_path).name)
     source_skill_path = str(scorecard.get("skill_path") or skill_path)
-    report_path = _latest_review_report(repo_root, skill_name)
+    skill_identifier = _canonical_skill_identifier(repo_root, source_skill_path)
+    skill_name = str(scorecard.get("skill") or Path(skill_identifier).name)
+    report_path = _latest_review_report(repo_root, skill_identifier)
     if report_path is None:
         report_path = _write_eval_only_review_report(repo_root, skill_name, source_skill_path)
 

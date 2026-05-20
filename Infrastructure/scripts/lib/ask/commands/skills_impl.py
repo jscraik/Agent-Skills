@@ -79,6 +79,38 @@ from ask.skill_analytics import skill_invocation_analytics  # noqa: E402
 from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: E402
 
 
+__all__ = [
+    "audit_skill",
+    "explain_skill",
+    "extract_family_fail_lines",
+    "external_review_skill",
+    "fold_skills",
+    "goal_skills",
+    "improve_skills",
+    "init_skill",
+    "install_skill",
+    "list_skills",
+    "reviewers_resolve",
+    "route_skills",
+    "skills_budget",
+    "skills_doctor",
+    "skills_events",
+    "skills_explain_boundary",
+    "skills_handles",
+    "skills_memory",
+    "skills_package",
+    "skills_parse",
+    "skills_profiles",
+    "skills_proof",
+    "skills_prove",
+    "skills_resolve",
+    "sync_skills",
+    "validate_openai_skill_format",
+    "validate_skill_boundaries",
+    "validate_skill_gate",
+]
+
+
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
     """
     Constructs a platform-appropriate Python invocation command.
@@ -1134,7 +1166,7 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     gates["agents_user_runtime_ready"] = agents_runtime_ready
     gates["user_runtime_ready"] = user_runtime_ready
     proof = {
-        "schema_version": "command-handle-proof.v1",
+        "schema_version": "command-handle-proof.v2",
         "handle": normalized,
         "status": "pass" if all(core_gates) and user_runtime_ready else "fail",
         "validation_commands": [
@@ -1148,6 +1180,7 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
                 "workspace_command_handle_exists",
                 "user_runtime_ready",
             ],
+            "required_semantics": "user_runtime_ready accepts either supported user runtime link.",
             "supporting_runtime_diagnostics": [
                 "codex_user_link",
                 "codex_user_command_handle_exists",
@@ -1185,11 +1218,12 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
             "agents_handle": str(user_agents_handle),
             "agents_handle_exists": user_agents_handle.is_file(),
         },
-        "live_codex_invocation": {
+    }
+    if codex_runtime_ready:
+        proof["live_codex_invocation"] = {
             "status": "manual_session_gate",
             "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
-        },
-    }
+        }
     result.data["proof"] = proof
     if proof["status"] != "pass":
         result.status = "error"
@@ -4344,8 +4378,9 @@ def external_review_skill(
                 fix_suggestion="Inspect the JSON report and rerun with --dashboard once the report shape is valid.",
             ))
         else:
-            result.data["dashboard_path"] = rendered_dashboard.relative_to(repo_root.resolve()).as_posix()
-            result.data["dashboard_url"] = rendered_dashboard.resolve().as_uri()
+            dashboard_rel_path = rendered_dashboard.relative_to(repo_root.resolve()).as_posix()
+            result.data["dashboard_path"] = dashboard_rel_path
+            result.data["dashboard_url"] = dashboard_rel_path
 
     return result
 

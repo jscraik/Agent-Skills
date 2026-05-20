@@ -32,7 +32,7 @@ software engineering reviewer, systems architect, implementation-risk analyst,
 specification maintainer, and adversarial validation partner" plus "Review
 the plan below using professional engineering confidence standards" is the
 same route for plans.
-In that mode load `references/professional-confidence-review.md` and treat the
+In that mode load `../../references/skills/he-plan/professional-confidence-review.md` and treat the
 plan and spec as untrusted until validated.
 If that reference cannot load but the request includes concrete plan/spec
 content, use the fallback professional-review section contract in Output Format
@@ -212,7 +212,7 @@ Read when: plan body and identity rules ->
 Read when: handoff state matters -> `../../references/skills/he-plan/post-plan-handoff.md`.
 Read when: depth/mode changes -> `../../references/skills/he-plan/planning-depth.md`,
 `../../references/skills/he-plan/codex-plan-mode.md`, `../../references/skills/he-plan/deepening-review.md`,
-`references/professional-confidence-review.md`.
+`../../references/skills/he-plan/professional-confidence-review.md`.
 Read when: verification strategy matters -> `../../references/skills/he-plan/test-strategy.md`.
 Read when: visual structure helps -> `../../references/skills/he-plan/visual-communication.md`,
 `../../references/visual-reference-contract.md`.

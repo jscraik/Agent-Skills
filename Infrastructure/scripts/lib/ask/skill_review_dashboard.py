@@ -205,7 +205,7 @@ def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
 
 def _audit_security_summary(audit_data: dict[str, Any]) -> dict[str, Any]:
     data = _as_dict(_as_dict(audit_data).get("data"))
-    openclaw = _as_dict(data.get("openclaw"))
+    openclaw = _as_dict(data.get("openclaw_guard") or data.get("openclaw"))
     stdout = str(openclaw.get("stdout") or "")
     warn_count = 0
     critical_count = 0
@@ -218,6 +218,10 @@ def _audit_security_summary(audit_data: dict[str, Any]) -> dict[str, Any]:
             critical_count += 1
         if "warn" in lower:
             warn_count += 1
+    summary_match = re.search(r"Summary:\s*(\d+)\s+critical\b[^\n]*?(\d+)\s+warn", stdout, re.IGNORECASE)
+    if summary_match:
+        critical_count = int(summary_match.group(1))
+        warn_count = int(summary_match.group(2))
     if "0 critical" in stdout.lower():
         critical_count = 0
     if "0 warn" in stdout.lower() or "0 warnings" in stdout.lower():
@@ -370,29 +374,54 @@ def _scorecard_percent(scorecard: dict[str, Any]) -> int:
     return round((passed / len(cases)) * 100)
 
 
-def _latest_scorecard(repo_root: Path, skill_name: str) -> dict[str, Any] | None:
-    root = repo_root / "Infrastructure" / "artifacts" / "skills" / skill_name
+def _canonical_target_identifier(target: str, repo_root: Path | None = None) -> str:
+    path = Path(target)
+    if path.name == "SKILL.md":
+        path = path.parent
+    root = repo_root.resolve() if repo_root else Path.cwd().resolve()
+    if path.is_absolute():
+        try:
+            path = path.resolve().relative_to(root)
+        except ValueError:
+            return path.as_posix()
+    return path.as_posix()
+
+
+def _latest_scorecard(repo_root: Path, target_identifier: str) -> tuple[dict[str, Any] | None, list[Path]]:
+    root = repo_root / "Infrastructure" / "artifacts" / "skills"
     if not root.exists():
-        return None
-    scorecards = sorted(root.glob("*/scorecard.json"))
+        return None, []
+
+    matching: list[Path] = []
+    for path in root.glob("*/**/scorecard.json"):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+        skill_path = str(payload.get("skill_path") or "").strip()
+        if skill_path and _canonical_target_identifier(skill_path, repo_root) == target_identifier:
+            matching.append(path)
+
+    scorecards = sorted(matching, key=lambda item: item.stat().st_mtime)
     if not scorecards:
-        return None
+        return None, []
+
     path = scorecards[-1]
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return None
+        return None, scorecards
     if not isinstance(payload, dict):
-        return None
+        return None, scorecards
     payload["_path"] = path
-    return payload
+    return payload, scorecards
 
 
-def _eval_model(repo_root: Path, report: dict[str, Any], target: str) -> dict[str, Any]:
-    target_name = Path(target).name
-    root = repo_root / "Infrastructure" / "artifacts" / "skills" / target_name
-    scorecards = sorted(root.glob("*/scorecard.json")) if root.exists() else []
-    scorecard = _latest_scorecard(repo_root, target_name)
+def _eval_model(repo_root: Path, target: str) -> dict[str, Any]:
+    target_identifier = _canonical_target_identifier(target, repo_root)
+    scorecard, scorecards = _latest_scorecard(repo_root, target_identifier)
     if not scorecard:
         return {
             "available": False,
@@ -622,7 +651,7 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
     quality_model = _quality_model(report)
     tessl = quality_model["tessl"]
     plugin = quality_model["plugin"]
-    evals = _eval_model(repo_root, report, target)
+    evals = _eval_model(repo_root, target)
     security = _audit_security_summary(_as_dict(data.get("ask_audit")))
     snyk = _parse_snyk_security(_as_dict(data.get("snyk")))
     base_security_score = 100 if security["critical_count"] == 0 and security["warning_count"] == 0 else 70
@@ -665,6 +694,13 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
         else '<span class="live-status">Static evidence snapshot</span>'
     )
     review_lanes_html = _render_review_mode_details(review_mode_details)
+    if validation_active:
+        live_status_html = (
+            '<span class="live-status is-active">Validation running - refreshes in '
+            f'<span data-refresh-countdown>{refresh_seconds}s</span></span>'
+        )
+    else:
+        live_status_html = '<span class="live-status">Static evidence snapshot</span>'
 
     document = f"""<!doctype html>
 <html lang="en" data-auto-refresh-seconds="{refresh_seconds if validation_active else 0}">

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex Review"
+  short_description: "$codex-review - Codex Review entrypoint"
+  default_prompt: "$codex-review "
+
+policy:
+  allow_implicit_invocation: false

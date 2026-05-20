@@ -26,7 +26,7 @@ For repeated failures, classify the follow-up as `linear_required`, `reinforce_r
 6. Apply policy-index, specialist, `simplify`, coding-harness, gate-selection, first-principles, plugin-hook, and agent-native lenses only when the diff proves their trigger.
 7. Do not approve readiness from green CI alone when behavior proof, security review, live PR-thread state, or traceability evidence is missing.
 8. If the PR or artifact cites session collector, Codex provenance, transcript, rollout, thread ID, turn ID, or trace ID evidence, verify a public-safe HE trace and redaction status before approving readiness.
-9. For closure/execute/autonomous/merge/low-signal lanes, load `review-mode-contract.md` and emit one auditable non-mutating action per target.
+9. For closure/execute/autonomous/merge/low-signal lanes, load `../../references/skills/he-code-review/review-mode-contract.md` and emit one auditable non-mutating action per target.
 10. When writing `.harness/review/**`, apply artifact routing plus BLUF review contracts without hiding severity-ranked findings.
 11. Apply the visual reference contract only when a risk surface, attack path,
     causality chain, permission boundary, or review-thread state would be hidden
@@ -68,7 +68,7 @@ Redact secrets. Apply the context-disposition policy: move important still-valid
 Reference `assets/` only for skill packaging and browseability; review evidence belongs in findings, commands, and PR/thread links.
 ## References
 Read when:
-- mode selection, closure, execute, autonomous, plan-only, result-review, or security-review detail is needed: `Plugins/harness-engineering/skills/he-code-review/references/review-mode-contract.md`
+- mode selection, closure, execute, autonomous, plan-only, result-review, or security-review detail is needed: `../../references/skills/he-code-review/review-mode-contract.md`
 - review depth, confidence caps, repeated feedback, or output shape is needed: `../../references/skills/he-code-review/review-policy-index.md`
 - disputed behavior or proof-loop guidance is needed: `../../references/skills/he-code-review/review-loop-patterns.md`
 - broader HE contracts are triggered: `Plugins/harness-engineering/references/deferred-context-index.md`

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Npm Release"
+  short_description: "$npm-release - Npm Release entrypoint"
+  default_prompt: "$npm-release "
+
+policy:
+  allow_implicit_invocation: false

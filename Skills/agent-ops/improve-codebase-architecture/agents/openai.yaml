@@ -1,0 +1,7 @@
+interface:
+  display_name: "Improve Codebase Architecture"
+  short_description: "$improve-codebase-architecture - Improve Codebase Architecture entrypoint"
+  default_prompt: "$improve-codebase-architecture "
+
+policy:
+  allow_implicit_invocation: false

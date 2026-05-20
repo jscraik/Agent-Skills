@@ -201,7 +201,7 @@ For non-trivial generated Linear plans, run or block
 
 - Read when drafting output: `../../references/skills/he-linear-plan/linear-plan-output-contract.md`
 - Read when filing rules, project/cycle use, repo labels, PR linkage, delivery
-  evidence, or view-first organization matters: `references/linear-filing-rule.md`
+  evidence, or view-first organization matters: `../../references/skills/he-linear-plan/linear-filing-rule.md`
 - Read when validating package contract/evals: `references/contract.yaml`,
   `references/evals.yaml`, `references/task-profile.json`
 - Read when source-prompt or original-method evidence is involved:
@@ -209,7 +209,7 @@ For non-trivial generated Linear plans, run or block
   `../../references/source-prompt-coverage-contract.md`
 - Read when the plan depends on live JSC portfolio setup, repo control projects,
   ADR readiness, or duplicate-project prevention:
-  `references/linear-filing-rule.md`,
+  `../../references/skills/he-linear-plan/linear-filing-rule.md`,
   `../../references/skills/he-linear-plan/source-prompt-preservation.md`
 - Read before delegating helper work:
   `../../references/subagent-call-contract.md`

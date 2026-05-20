@@ -1,0 +1,7 @@
+interface:
+  display_name: "Pnpm Manager"
+  short_description: "$pnpm-manager - Pnpm Manager entrypoint"
+  default_prompt: "$pnpm-manager "
+
+policy:
+  allow_implicit_invocation: false
