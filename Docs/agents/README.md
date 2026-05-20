@@ -37,6 +37,10 @@
 - [17-skill-management](/Docs/agents/17-skill-management.md)
 - [18-browser-and-local-preview](/Docs/agents/18-browser-and-local-preview.md)
 - [19-high-signal-steering-feedback](/Docs/agents/19-high-signal-steering-feedback.md)
+- [20-misuse-resistant-interface-design](/Docs/agents/20-misuse-resistant-interface-design.md)
+- [21-zero-setup-agent-workspace](/Docs/agents/21-zero-setup-agent-workspace.md)
+- [22-systems-thinking-product-rule](/Docs/agents/22-systems-thinking-product-rule.md)
+- [23-ctf-workflow-evals](/Docs/agents/23-ctf-workflow-evals.md)
 - [ask product golden path command contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md)
 
 ## Quick picks
@@ -52,5 +56,9 @@
 | Repo command behavior and robot mode              | [/Docs/agents/16-agent-operating-contract.md](/Docs/agents/16-agent-operating-contract.md)                                         |
 | Skill install, audit, fold, and line budgets      | [/Docs/agents/17-skill-management.md](/Docs/agents/17-skill-management.md)                                                         |
 | Browser and local preview fallback                | [/Docs/agents/18-browser-and-local-preview.md](/Docs/agents/18-browser-and-local-preview.md)                                       |
-| Repeated or high-signal Jamie steering            | [/Docs/agents/19-high-signal-steering-feedback.md](/Docs/agents/19-high-signal-steering-feedback.md)                               |
+| Steering feedback and durable uptake              | [/Docs/agents/19-high-signal-steering-feedback.md](/Docs/agents/19-high-signal-steering-feedback.md)                               |
+| Misuse-resistant API and helper design            | [/Docs/agents/20-misuse-resistant-interface-design.md](/Docs/agents/20-misuse-resistant-interface-design.md)                       |
+| Zero-setup agent workspace product rule           | [/Docs/agents/21-zero-setup-agent-workspace.md](/Docs/agents/21-zero-setup-agent-workspace.md)                                     |
+| Systems thinking and blocker empowerment          | [/Docs/agents/22-systems-thinking-product-rule.md](/Docs/agents/22-systems-thinking-product-rule.md)                               |
+| CTF-style workflow evals and skill self-refinement | [/Docs/agents/23-ctf-workflow-evals.md](/Docs/agents/23-ctf-workflow-evals.md)                                                     |
 | Product command contracts                         | [/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md) |

@@ -41,7 +41,6 @@ Policy: local internal only; no publish, no registry upload, no npx. Tessl runs 
 - `./bin/ask skills audit <skill> --level strict --json --robot` for all four Skill Factory skills -> pass, 0 warnings
 - `python3 Infrastructure/bin/ask skills external-review <skill> --audit-level compat --report-path Infrastructure/artifacts/skill-quality-heartbeat/2026-05-15-skill-factory/<skill>.json --json` for all four Skill Factory skills -> pass; Tessl validation 0 errors, 0 warnings; Plugin Eval 0 fail, 0 warn
 - `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` -> pass for structural contract/security checks
-- `vale --output=JSON --config .vale ./**/*.md` -> pass, 0 warnings
 - `python3 -m compileall -q Infrastructure/scripts/lib/ask/commands/skills_impl.py Plugins/skill-factory/scripts/skill-builder Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts` -> pass
 - `python3 Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals.py` -> pass
 - `python3 Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/test_skill_gate.py` -> pass

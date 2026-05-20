@@ -1,9 +1,9 @@
 {
-  "status": "error",
-  "trace_id": "db2468fb-7ecc-4261-a84c-0813feafe7c4",
+  "status": "success",
+  "trace_id": "348401a5-6fc9-463c-bdf3-bb4b6adbe666",
   "metadata": {
     "version": "0.1.0",
-    "command": "skills external-review Skills/agent-ops/docs-expert --report-path Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json --dashboard --json --robot",
+    "command": "skills external-review Skills/agent-ops/docs-expert --audit-level strict --dashboard --report-path Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json --dashboard-path Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.html --json --robot",
     "next_steps": [],
     "correction_note": null
   },
@@ -13,69 +13,20 @@
       "no_publish": true,
       "no_registry_upload": true,
       "uses_npx": false,
-      "publish_policy": "never publish, register, upload, or invoke npx from this lane",
       "tessl_review_default": "enabled_local_cli",
       "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
       "primary_gate": "local_eval_ask_audit",
-      "external_quality_judge": "tessl_local_review",
-      "tessl_lint_role": "temporary_tile_packaging_shape_check",
-      "tessl_lint_shape": "Tessl lint expects a Tessl tile.json package. Canonical repo skills are SKILL.md-first, so this command builds a disposable local tile wrapper before linting.",
-      "tessl_review_role": "local_best_practice_content_review",
+      "external_quality_judge": "tessl_review",
       "plugin_eval_role": "budget_and_ergonomics_guardrail",
       "plugin_eval_min_acceptable_grade": "B+",
       "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
-      "snyk_role": "opt_in_local_dependency_security_screening",
+      "snyk_role": "optional_external_security_advisory",
       "snyk_default": "disabled_until_requested",
-      "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
-      "snyk_when_to_use": [
-        "when a skill or plugin candidate has dependency manifests such as package.json, pyproject.toml, requirements.txt, Gemfile, go.mod, or lockfiles",
-        "when claiming release readiness for a manifest-backed skill or plugin package",
-        "when dependency files, installer scripts, generated package surfaces, or plugin runtime dependencies changed",
-        "when matching the CircleCI/Snyk security screening lane locally before or after CI",
-        "when the user explicitly asks for Snyk, dependency vulnerability screening, or external security advisory evidence"
-      ],
-      "snyk_when_not_to_use": [
-        "pure SKILL.md-first instruction-only candidates with no supported dependency manifest, unless the user explicitly asks",
-        "routine local iteration where external networked security analysis is not needed"
-      ],
       "snyk_privacy_basis": "Snyk CLI security analysis may contact Snyk services. It is never run by default in this local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted."
-    },
-    "review_mode_details": {
-      "local_evals": {
-        "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
-        "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates"
-      },
-      "plugin_eval": {
-        "command": "plugin-eval analyze <path> --format markdown",
-        "role": "static budget, ergonomics, and reviewability guardrail; not a substitute for local evals"
-      },
-      "tessl_lint": {
-        "command": "tessl skill lint <temporary-tile.json>",
-        "role": "disposable tile.json package-shape check, not a direct content finding",
-        "canonical_source_shape": "SKILL.md-first"
-      },
-      "tessl_review": {
-        "command": "tessl skill review <temporary-skill-directory>",
-        "role": "local best-practice/content review for private or work-in-progress skills",
-        "publishes": false
-      },
-      "snyk": {
-        "command": "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>",
-        "role": "opt-in local dependency security screening; release-required for manifest-backed candidates",
-        "default": "disabled_until_requested",
-        "release_required": "manifest-backed candidates",
-        "use_when": [
-          "candidate has supported dependency manifests",
-          "release-readiness is claimed for a manifest-backed package",
-          "dependency/runtime package surfaces changed",
-          "local evidence must match CircleCI/Snyk screening",
-          "user explicitly requests Snyk or dependency vulnerability evidence"
-        ]
-      }
     },
     "target": "Skills/agent-ops/docs-expert",
     "ask_audit": {
-      "status": "error",
+      "status": "success",
       "data": {
         "diagnostics": {
           "exit_code": 0,
@@ -84,23 +35,21 @@
         },
         "security_gate": {
           "exit_code": 0,
-          "stdout": "Skill: docs-expert\nPath:  Skills/agent-ops/docs-expert/SKILL.md\n\nWARN RESEARCH_EXAMPLES_SYNTHETIC: Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples\n\nRESULT: PASS\n",
+          "stdout": "Skill: docs-expert\nPath:  Skills/agent-ops/docs-expert/SKILL.md\n\nWARN FM_METADATA_VERSION_MISSING: `metadata.version` is recommended for local Tessl review compatibility.\nWARN RESEARCH_EVALS_DECLARED_REALISTIC_WEAK: Some eval cases declare `realistic: true` but lack concrete task context; natural request wording is only supporting evidence. | prompt-injection\nWARN RESEARCH_EXAMPLES_SYNTHETIC: Examples look abstract or template-like. Prefer realistic user requests and concrete workflows. | ## Examples\n\nRESULT: PASS\n",
           "stderr": ""
         },
         "family_benchmarks": {
-          "exit_code": 1,
-          "stdout": "",
-          "stderr": "PyYAML is required for validate_skill_authoring_family_benchmarks.py. Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`.\n"
+          "exit_code": 0,
+          "stdout": "[family-benchmark] checked skills:\n  - Skills/agent-ops/docs-expert\n[family-benchmark] pass: all family benchmark checks satisfied\n[family-benchmark] warnings:\n  - WARN CONTRACT_RECOMMENDED_KEYS [Skills/agent-ops/docs-expert] contract.yaml missing recommended gold-standard keys: rollback_procedure (add rollback_procedure and observability for operational readiness)\n  - WARN EVALS_CASE_COUNT_MINIMAL [Skills/agent-ops/docs-expert] evals meet the minimum with only 7 cases; aim for ≥9 for meaningful coverage across all 4 required categories\n  - WARN EVALS_DET_CHECK_COVERAGE [Skills/agent-ops/docs-expert] only 2/7 cases (29%) have deterministic_checks; aim for ≥30% to reduce reliance on LLM-graded outputs alone\n",
+          "stderr": ""
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "stdout": "OpenClaw skill guard: docs-expert\nSummary: 0 critical · 0 warn · 2 info\nINFO readiness.checked: Operational readiness checks completed\nINFO security.no_scripts: No executable scripts found; static security scan skipped\n",
+          "stderr": ""
         }
       },
-      "errors": [
-        {
-          "code": "ERR_VALIDATION",
-          "message": "Family benchmarks validation failed. First failures: PyYAML is required for validate_skill_authoring_family_benchmarks.py. Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`.",
-          "fix_suggestion": "Inspect data.family_benchmarks for full output, or run: mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill Skills/agent-ops/docs-expert --format text",
-          "help_url": null
-        }
-      ]
+      "errors": []
     },
     "plugin_eval": {
       "command": [
@@ -111,28 +60,28 @@
         "markdown"
       ],
       "exit_code": 0,
-      "stdout": "# Plugin Eval Report: docs-expert\n\n## At a Glance\n- Score: 95/100\n- Grade: A\n- Risk: medium\n- Checks: 0 fail, 1 warn, 2 info\n- Active budget: 1843 tokens (heavy)\n- Observed usage: not supplied\n\n## Why It Matters\n- 1 warning signal still need cleanup before this feels polished.\n- budget is the largest source of score loss at -4.5 points.\n- Active budget pressure is high enough that token cost may dominate the user experience.\n- No observed usage is attached yet, so budget conclusions are still based on static estimates.\n\n## Fix First\n- [warn/warning] invoke_cost_tokens is heavy relative to the current Codex baseline. Why: Budget pressure matters because always-loaded or frequently-loaded text can make the workflow feel expensive fast. Fix: Reduce repeated instruction text and move detail into deferred supporting files.\n\n## Recommended Next Step\n- Measure real token usage next\n- Why: The static budget looks heavy, so live usage is the fastest way to confirm whether the cost is acceptable.\n- Chat request: \"Measure the real token usage of this skill.\"\n- Local command: `plugin-eval start Skills/agent-ops/docs-expert --request 'Measure the real token usage of this skill.' --format markdown`\n\n## Details\n<details>\n<summary>Watch next</summary>\n\n- No secondary findings queued.\n</details>\n<details>\n<summary>Improvement brief</summary>\n\n- Raise the evaluation from grade A (95/100) with a focus on the highest-signal structural and budget issues first.\n- Goal: Reduce repeated instruction text and move detail into deferred supporting files.\n- Measure: token-usage-observer\n- Measure: task-outcome-scorecard\n- Measure: latency-efficiency\n- Suggested prompt: Use the skill-creator guidance to improve docs-expert. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard, latency-efficiency. Address invoke_cost_tokens-budget-high: invoke_cost_tokens is heavy relative to the current Codex baseline.\n</details>\n<details>\n<summary>Budgets and observed usage</summary>\n\n- trigger_cost_tokens: 89 (moderate)\n- invoke_cost_tokens: 1754 (heavy)\n- deferred_cost_tokens: 4008 (moderate)\n- total_tokens: 5851 (heavy)\n\n- No observed usage supplied.\n</details>\n<details>\n<summary>Measurement plan</summary>\n\nCombine cost, outcome, and trust signals so you can tell whether the skill or plugin is genuinely helping instead of only looking well-structured on paper.\n\n- Token Usage Observer [high] Measure how many tokens the skill or plugin actually burns in representative runs. Signals: observed_usage_sample_count, observed_input_tokens_avg, observed_total_tokens_avg, estimate_vs_observed_input_ratio. Evidence: Responses API usage logs, Codex-like session exports, JSONL traces captured from local benchmarking harnesses.\n- Task Outcome Scorecard [high] Measure whether the skill helps users finish the intended job with fewer retries and less cleanup. Signals: task_success_rate, first_pass_success_rate, retry_rate, human_override_rate. Evidence: Task run logs, Structured user acceptance checklist, Before/after comparison runs on the same prompts.\n- Tool Call Audit [medium] Check whether the agent uses the right tools, arguments, and sequencing when the skill is active. Signals: tool_call_success_rate, invalid_tool_argument_rate, recoverable_tool_failure_rate. Evidence: Tool invocation traces, Recorded sessions, Golden-path scenario replays.\n- Latency And Efficiency [high] Track whether the skill speeds users up enough to justify its cost. Signals: p50_time_to_first_acceptable_answer_seconds, p95_time_to_task_completion_seconds, tokens_per_successful_run. Evidence: Benchmark harness timings, Manual stopwatch runs on canonical tasks, Responses API timestamps combined with usage logs.\n- Human Rubric Review [medium] Capture clarity, trust, and usefulness signals that automated checks will miss. Signals: clarity_score_avg, confidence_score_avg, follow_up_question_rate. Evidence: Reviewer scorecards, Team rubric sheets, Annotated transcripts.\n</details>\n<details>\n<summary>Use From Codex Chat</summary>\n\nStart with a natural chat request, then let plugin-eval show the exact local command sequence behind it.\n\nStart with this chat request: \"Evaluate this skill.\"\nWhy this path: Plugin Eval recommended Evaluate Skill from the current local state for this skill.\nQuick local entrypoint: plugin-eval start Skills/agent-ops/docs-expert --request 'Evaluate this skill.' --format markdown\nPlugin Eval will run first: plugin-eval analyze Skills/agent-ops/docs-expert --format markdown\n\nOther chat requests you can use:\n- Full Skill Analysis: say \"Give me a full analysis of this skill, including benchmark setup.\" -> plugin-eval analyze Skills/agent-ops/docs-expert --format markdown\n- Evaluate Skill: say \"Evaluate this skill.\" -> plugin-eval analyze Skills/agent-ops/docs-expert --format markdown\n- Explain Token Budget: say \"Explain the token budget for this skill.\" -> plugin-eval explain-budget Skills/agent-ops/docs-expert --format markdown\n- Measure Real Token Usage: say \"Measure the real token usage of this skill.\" -> plugin-eval init-benchmark Skills/agent-ops/docs-expert\n- Benchmark With Starter Scenarios: say \"Help me benchmark this skill.\" -> plugin-eval init-benchmark Skills/agent-ops/docs-expert\n- Start Here: say \"What should I run next?\" -> plugin-eval analyze Skills/agent-ops/docs-expert --format markdown\n</details>\n<details>\n<summary>Checks</summary>\n\n- [WARN] invoke_cost_tokens-budget-high: invoke_cost_tokens is heavy relative to the current Codex baseline. Evidence: Value: 1754 tokens Baseline samples: skills=8, plugins=119 Remediation: Reduce repeated instruction text and move detail into deferred supporting files.\n- [INFO] coverage-artifacts-unavailable: No coverage artifacts were found for this target. Evidence: Skills/agent-ops/docs-expert Remediation: Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring.\n</details>\n<details>\n<summary>Metrics</summary>\n\n- skill_line_count: 120 lines (good)\n- description_length_chars: 344 chars (good)\n- relative_link_count: 0 links (good)\n- code_fence_count: 0 blocks (good)\n- support_file_count: 5 files (good)\n- trigger_cost_tokens: 89 tokens (moderate)\n- invoke_cost_tokens: 1754 tokens (heavy)\n- deferred_cost_tokens: 4008 tokens (moderate)\n- coverage_artifact_count: 0 files (info)\n</details>\n<details>\n<summary>Score details</summary>\n\n- Starting score: 100\n- Total deductions: -4.75\n- Final score: 95\n- Risk: Contains 1 warning signal that still need attention.\n\n- -4.5 points: invoke_cost_tokens-budget-high [warn/warning] invoke_cost_tokens is heavy relative to the current Codex baseline.\n- -0.25 points: coverage-artifacts-unavailable [info/info] No coverage artifacts were found for this target.\n\n- budget: -4.5 points across 1 check\n- coverage: -0.25 points across 1 check\n</details>\n",
+      "stdout": "# Plugin Eval Report: docs-expert\n\n## At a Glance\n- Score: 100/100\n- Grade: A\n- Risk: low\n- Checks: 0 fail, 0 warn, 2 info\n- Active budget: 1475 tokens (moderate)\n- Observed usage: not supplied\n\n## Why It Matters\n- coverage is the largest source of score loss at -0.25 points.\n- Budget pressure is not the dominant issue right now.\n- No observed usage is attached yet, so budget conclusions are still based on static estimates.\n\n## Fix First\n- No urgent fixes were identified.\n\n## Recommended Next Step\n- Choose the next workflow from chat\n- Why: The report is clean enough that the best next step depends on whether you want budgets, benchmarks, or comparisons.\n- Chat request: \"What should I run next?\"\n- Local command: `plugin-eval start Skills/agent-ops/docs-expert --request 'What should I run next?' --format markdown`\n\n## Details\n<details>\n<summary>Watch next</summary>\n\n- No secondary findings queued.\n</details>\n<details>\n<summary>Improvement brief</summary>\n\n- Raise the evaluation from grade A (100/100) with a focus on the highest-signal structural and budget issues first.\n- Measure: token-usage-observer\n- Measure: task-outcome-scorecard\n- Suggested prompt: Use the skill-creator guidance to improve docs-expert. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard.\n</details>\n<details>\n<summary>Budgets and observed usage</summary>\n\n- trigger_cost_tokens: 43 (good)\n- invoke_cost_tokens: 1432 (moderate)\n- deferred_cost_tokens: 3013 (moderate)\n- total_tokens: 4488 (moderate)\n\n- No observed usage supplied.\n</details>\n<details>\n<summary>Measurement plan</summary>\n\nCombine cost, outcome, and trust signals so you can tell whether the skill or plugin is genuinely helping instead of only looking well-structured on paper.\n\n- Token Usage Observer [high] Measure how many tokens the skill or plugin actually burns in representative runs. Signals: observed_usage_sample_count, observed_input_tokens_avg, observed_total_tokens_avg, estimate_vs_observed_input_ratio. Evidence: Responses API usage logs, Codex-like session exports, JSONL traces captured from local benchmarking harnesses.\n- Task Outcome Scorecard [high] Measure whether the skill helps users finish the intended job with fewer retries and less cleanup. Signals: task_success_rate, first_pass_success_rate, retry_rate, human_override_rate. Evidence: Task run logs, Structured user acceptance checklist, Before/after comparison runs on the same prompts.\n- Tool Call Audit [medium] Check whether the agent uses the right tools, arguments, and sequencing when the skill is active. Signals: tool_call_success_rate, invalid_tool_argument_rate, recoverable_tool_failure_rate. Evidence: Tool invocation traces, Recorded sessions, Golden-path scenario replays.\n- Latency And Efficiency [medium] Track whether the skill speeds users up enough to justify its cost. Signals: p50_time_to_first_acceptable_answer_seconds, p95_time_to_task_completion_seconds, tokens_per_successful_run. Evidence: Benchmark harness timings, Manual stopwatch runs on canonical tasks, Responses API timestamps combined with usage logs.\n- Human Rubric Review [medium] Capture clarity, trust, and usefulness signals that automated checks will miss. Signals: clarity_score_avg, confidence_score_avg, follow_up_question_rate. Evidence: Reviewer scorecards, Team rubric sheets, Annotated transcripts.\n</details>\n<details>\n<summary>Use From Codex Chat</summary>\n\nStart with a natural chat request, then let plugin-eval show the exact local command sequence behind it.\n\nStart with this chat request: \"Evaluate this skill.\"\nWhy this path: Plugin Eval recommended Evaluate Skill from the current local state for this skill.\nQuick local entrypoint: plugin-eval start Skills/agent-ops/docs-expert --request 'Evaluate this skill.' --format markdown\nPlugin Eval will run first: plugin-eval analyze Skills/agent-ops/docs-expert --format markdown\n\nOther chat requests you can use:\n- Full Skill Analysis: say \"Give me a full analysis of this skill, including benchmark setup.\" -> plugin-eval analyze Skills/agent-ops/docs-expert --format markdown\n- Evaluate Skill: say \"Evaluate this skill.\" -> plugin-eval analyze Skills/agent-ops/docs-expert --format markdown\n- Explain Token Budget: say \"Explain the token budget for this skill.\" -> plugin-eval explain-budget Skills/agent-ops/docs-expert --format markdown\n- Measure Real Token Usage: say \"Measure the real token usage of this skill.\" -> plugin-eval init-benchmark Skills/agent-ops/docs-expert\n- Benchmark With Starter Scenarios: say \"Help me benchmark this skill.\" -> plugin-eval init-benchmark Skills/agent-ops/docs-expert\n- Start Here: say \"What should I run next?\" -> plugin-eval analyze Skills/agent-ops/docs-expert --format markdown\n</details>\n<details>\n<summary>Checks</summary>\n\n- [INFO] coverage-artifacts-unavailable: No coverage artifacts were found for this target. Evidence: Skills/agent-ops/docs-expert Remediation: Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring.\n</details>\n<details>\n<summary>Metrics</summary>\n\n- skill_line_count: 130 lines (good)\n- description_length_chars: 160 chars (good)\n- relative_link_count: 0 links (good)\n- code_fence_count: 0 blocks (good)\n- support_file_count: 4 files (good)\n- trigger_cost_tokens: 43 tokens (good)\n- invoke_cost_tokens: 1432 tokens (moderate)\n- deferred_cost_tokens: 3013 tokens (moderate)\n- coverage_artifact_count: 0 files (info)\n</details>\n<details>\n<summary>Score details</summary>\n\n- Starting score: 100\n- Total deductions: -0.25\n- Final score: 100\n- Risk: No failing or warning checks were found; remaining items are informational only.\n\n- -0.25 points: coverage-artifacts-unavailable [info/info] No coverage artifacts were found for this target.\n\n- coverage: -0.25 points across 1 check\n</details>\n",
       "stderr": "",
       "status": "success"
     },
     "tessl_tile": {
-      "tile_path": "/tmp/agent-skills-tessl-7s977g51/tile.json",
-      "review_path": "/tmp/agent-skills-tessl-7s977g51/skills/docs-expert",
+      "tile_path": "<tmp-tessl-workdir>.json",
+      "review_path": "<tmp-tessl-workdir>",
       "skill_key": "docs-expert",
       "source_skill": "Skills/agent-ops/docs-expert",
       "mode": "temporary_wrapper",
-      "reason": "Tessl lint validates tile.json packages. Canonical repo skills remain SKILL.md-first, so this is a disposable packaging-shape wrapper.",
-      "tessl_home": "/tmp/agent-skills-tessl-7s977g51/home"
+      "reason": "Tessl validates tile.json packages; canonical repo skills remain SKILL.md-first.",
+      "tessl_home": "<tmp-tessl-workdir>"
     },
     "tessl_lint": {
       "command": [
         "tessl",
         "skill",
         "lint",
-        "<tmp>/tile.json"
+        "<tmp-tessl-workdir>.json"
       ],
       "exit_code": 0,
-      "stdout": "By using Tessl, you agree to our Terms: https://tessl.io/policies/terms\n\n\nContext Cost\n\nSkills\n  - docs-expert: 89 front-loaded, 1.8k on-demand tokens\n\nTotal: 89 front-loaded, 1.8k on-demand tokens\n\n✔ Tile local/docs-expert@0.0.0-local is valid\n",
+      "stdout": "By using Tessl, you agree to our Terms: https://tessl.io/policies/terms\n\n\nContext Cost\n\nSkills\n  - docs-expert: 43 front-loaded, 1.4k on-demand tokens\n\nTotal: 43 front-loaded, 1.4k on-demand tokens\n\n✔ Tile local/docs-expert@0.0.0-local is valid\n",
       "stderr": "",
       "status": "success"
     },
@@ -141,11 +90,11 @@
         "tessl",
         "skill",
         "review",
-        "<tmp>/skills/docs-expert"
+        "<tmp-tessl-workdir>"
       ],
       "exit_code": 0,
-      "stdout": "\nValidation Checks\n\n  ✔ skill_md_line_count - SKILL.md line count is 120 (<= 500)\n  ✔ frontmatter_valid - YAML frontmatter is valid\n  ✔ name_field - 'name' field is valid: 'docs-expert'\n  ✔ description_field - 'description' field is valid (344 chars)\n  ✔ compatibility_field - 'compatibility' field not present (optional)\n  ✔ allowed_tools_field - 'allowed-tools' field not present (optional)\n  ✔ metadata_version - 'metadata.version' is present: 0.1.0\n  ✔ metadata_field - 'metadata' contains 8 entries\n  ✔ license_field - 'license' field not present (optional)\n  ✔ frontmatter_unknown_keys - No unknown frontmatter keys found\n  ✔ body_present - SKILL.md body is present\n\nOverall: PASSED (0 errors, 0 warnings)\n\nJudge Evaluation\n\n  Description: 100%\n    specificity: 3/3 - Lists multiple specific concrete actions: 'audit, rewrite, and validate' across specific document types (README, runbook, code-doc, config-doc, trust-surface documentation), and specifies what it checks (stale instructions, command examples, dependency claims, file paths, configs, workflows, code references) against live repository evidence.\n    trigger_term_quality: 3/3 - Includes strong natural keywords users would say: 'README', 'runbook', 'documentation', 'stale instructions', 'code references', 'file paths', 'configs', 'workflows', 'dependency claims', 'command examples'. These cover a wide range of terms a user might naturally use when requesting documentation validation.\n    completeness: 3/3 - Clearly answers both 'what' (audit, rewrite, validate documentation by checking various elements against live repo evidence) and 'when' ('Use when documentation needs proof-backed correction or reader-focused validation'). The 'Use when' clause is explicit.\n    distinctiveness_conflict_risk: 3/3 - Highly distinctive with a clear niche: documentation validation against live repository evidence. The focus on 'proof-backed correction' and checking against 'live repository evidence' distinguishes it from general documentation writing or code review skills. The specific document types (README, runbook, config-doc, trust-surface) further narrow the scope.\n\n    Assessment: This is a strong, well-crafted skill description that clearly articulates specific capabilities, includes rich trigger terms, explicitly states both what the skill does and when to use it, and occupies a distinct niche. The description is concise yet comprehensive, listing concrete document types and validation targets without being verbose or padded.\n\n  Content: 85%\n    conciseness: 2/3 - The skill is mostly efficient and avoids explaining concepts Claude already knows, but it includes some redundant sections (e.g., Philosophy, Anti-Patterns, Gotchas) that could be tightened. Several sections like 'When To Use' and 'Avoid' overlap conceptually with constraints and execution boundaries, adding token cost without proportional value.\n    actionability: 3/3 - The skill provides concrete, executable commands throughout — specific rg patterns for discovery, exact validation commands (./bin/ask skills audit, ./bin/ask evals run, plugin-eval analyze), file existence checks, and clear examples mapping user requests to specific actions. The procedure steps are copy-paste ready.\n    workflow_clarity: 3/3 - The procedure is clearly sequenced (classify → inspect → build claim map → rewrite → validate → score). Validation includes explicit feedback loops ('Stop at the first failed gate, fix it, and rerun') and failure classification (doc defect, stale repo state, unrelated blocker, blocked unknown). Handoff rules provide clear escalation paths when docs alone can't resolve issues.\n    progressive_disclosure: 3/3 - The skill has a dedicated Progressive Disclosure section with well-signaled, one-level-deep references to specific files (documentation-quality.md, contract.yaml, evals.yaml, task-profile.json, lens packs). References are loaded conditionally ('Load references/documentation-quality.md only when detailed prose, README, co-authoring, reader-test, or visual rules matter'), showing appropriate gating.\n\n    Assessment: This is a strong, well-structured skill that provides concrete validation commands, clear workflow sequencing with feedback loops, and appropriate progressive disclosure. Its main weakness is moderate verbosity — several sections (Philosophy, Gotchas, Anti-Patterns) could be consolidated or trimmed without losing actionable content. The actionability and workflow clarity are excellent, with specific commands and explicit error-handling patterns throughout.\n\n    Suggestions:\n      - Consolidate Philosophy, Gotchas, and Anti-Patterns into a single short 'Principles & Pitfalls' section to reduce token overhead without losing the key warnings.\n\nReview Score: 94%\nOnly SKILL.md was reviewed. Log in with tessl login to include all supporting files in the review.\n\n✔ Skill evaluation completed successfully!\n",
-      "stderr": "- Reviewing skill...\n",
+      "stdout": "\nValidation Checks\n\n  ✔ skill_md_line_count - SKILL.md line count is 130 (<= 500)\n  ✔ frontmatter_valid - YAML frontmatter is valid\n  ✔ name_field - 'name' field is valid: 'docs-expert'\n  ✔ description_field - 'description' field is valid (160 chars)\n  ✔ compatibility_field - 'compatibility' field not present (optional)\n  ✔ allowed_tools_field - 'allowed-tools' field not present (optional)\n  ⚠ metadata_version - 'metadata.version' is missing\n  ✔ metadata_field - 'metadata' contains 7 entries\n  ✔ license_field - 'license' field not present (optional)\n  ✔ frontmatter_unknown_keys - No unknown frontmatter keys found\n  ✔ body_present - SKILL.md body is present\n\nOverall: PASSED (0 errors, 1 warnings)\n\nJudge Evaluation\n\n  Description: 82%\n    specificity: 2/3 - The description names a domain (documentation) and some actions ('audited, rewritten, or validated against live repository evidence'), but doesn't list multiple concrete specific actions. 'Audited' and 'validated' are somewhat vague without specifying what checks are performed.\n    trigger_term_quality: 3/3 - Includes strong natural trigger terms users would say: 'README', 'runbook', 'code-doc', 'config-doc', 'public trust-surface documentation', 'audited', 'rewritten', 'validated'. These cover multiple common documentation types users would reference.\n    completeness: 3/3 - The description explicitly answers both 'what' (audit, rewrite, or validate documentation against live repository evidence) and 'when' (the entire description is framed as a 'Use when...' clause with explicit trigger conditions).\n    distinctiveness_conflict_risk: 2/3 - While the focus on auditing/validating documentation against live repository evidence is somewhat distinctive, terms like 'rewritten' could overlap with general writing or editing skills. The 'trust-surface' and 'live repository evidence' aspects help differentiate but the scope is still broad enough to potentially conflict with general documentation skills.\n\n    Assessment: This description has a well-structured 'Use when...' clause that clearly communicates trigger conditions and covers relevant documentation types. Its main weakness is that the specific capabilities (audit, rewrite, validate) could be more concretely described—what exactly does auditing or validation entail? The description is reasonably distinctive but could benefit from more concrete action details to fully differentiate from general documentation skills.\n\n    Suggestions:\n      - Add more specific concrete actions beyond 'audited, rewritten, validated'—e.g., 'checks for stale instructions, verifies code examples match actual source, flags outdated dependency references'\n      - Strengthen distinctiveness by clarifying what 'live repository evidence' means in practice, e.g., 'cross-references documentation claims against actual file structure, configs, and code'\n\n  Content: 35%\n    conciseness: 2/3 - The skill is reasonably structured but includes several sections that feel redundant or overly abstract for Claude (e.g., 'Philosophy', 'Anti-Patterns', 'Gotchas' sections contain general advice Claude already knows). Some sections like 'Confidence Reporting' and 'Failure Mode' could be tightened significantly.\n    actionability: 1/3 - The skill is almost entirely abstract guidance with no concrete code, commands, or executable examples. Phrases like 'Inspect 2-3 focused truth surfaces' and 'score first-run usefulness' are vague and not actionable. There are no copy-paste-ready commands, no specific file manipulation examples, and no concrete output templates despite describing a structured output format.\n    workflow_clarity: 2/3 - The Procedure section provides a numbered sequence (1-6) and the Validation section mentions 'fail fast: stop at the first failed gate, fix it, and rerun,' which is a feedback loop. However, the steps are abstract rather than concrete, validation checkpoints are described conceptually rather than with specific commands or checks, and the relationship between Procedure, Validation, and Execution Boundaries is not clearly sequenced.\n    progressive_disclosure: 2/3 - The skill references four external files in a Progressive Disclosure section (documentation-quality.md, contract.yaml, evals.yaml, task-profile.json), which is good structure. However, no bundle files were provided, so we cannot verify these references exist. The main body also contains content that could be offloaded (e.g., detailed safety boundaries, anti-patterns) to keep the overview leaner.\n\n    Assessment: This skill provides a comprehensive conceptual framework for documentation auditing but lacks the concrete, executable guidance that would make it truly actionable. It reads more like a policy document than a skill file—heavy on principles and constraints but light on specific commands, code examples, or concrete output templates. The workflow exists but is too abstract to reliably guide execution without significant interpretation.\n\n    Suggestions:\n      - Add concrete, executable examples: show a specific README audit with actual commands (e.g., `grep -rn 'npm install' README.md` to verify install instructions match package.json), sample input/output pairs, and a filled-in output format template.\n      - Make the Procedure steps actionable: replace abstract instructions like 'Inspect 2-3 focused truth surfaces' with specific guidance like 'Check that file paths mentioned in docs exist: `find . -name \"filename\"`, verify CLI commands run: `command --help`, confirm version numbers match package.json/pyproject.toml'.\n      - Provide a concrete output format example with actual JSON/markdown showing what a completed findings report looks like, rather than just listing field names.\n      - Trim redundant conceptual sections (Philosophy, Anti-Patterns, Gotchas) or merge them into tighter inline notes within the Procedure, as Claude already understands these documentation principles.\n\nReview Score: 66%\nOnly SKILL.md was reviewed. Log in with tessl login to include all supporting files in the review.\n\n",
+      "stderr": "- Reviewing skill...\n⚠ Skill is valid but could be improved.\n",
       "status": "success"
     },
     "snyk": {
@@ -157,13 +106,7 @@
     "dashboard_url": "Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.html"
   },
   "telemetry": {
-    "latency_ms": 2897
+    "latency_ms": 3060
   },
-  "errors": [
-    {
-      "code": "ERR_VALIDATION",
-      "message": "Internal ask skill audit failed during external-review lane.",
-      "fix_suggestion": "Inspect data.ask_audit for the exact failing gate."
-    }
-  ]
+  "errors": []
 }

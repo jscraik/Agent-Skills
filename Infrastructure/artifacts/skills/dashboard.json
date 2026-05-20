@@ -2,47 +2,43 @@
   "skills": {
     "agents-md": {
       "latest": {
-        "run_id": "20260513-112710-602326",
+        "run_id": "20260517-032028-408397",
         "runner_mode": "codex",
         "tier2_mode": "warn",
-        "cases": 5,
-        "passed_cases": 5,
-        "tier1_failed_cases": 0,
+        "cases": 20,
+        "passed_cases": 0,
+        "tier1_failed_cases": 1,
         "tier2_cases": 0,
-        "passed": true,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260513-112710-602326/scorecard.json",
+        "passed": false,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-032028-408397/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
       "previous": {
-        "run_id": "20260513-112627-823208",
-        "runner_mode": "codex",
+        "run_id": "20260517-032019-874954",
+        "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
-        "cases": 7,
-        "passed_cases": 7,
+        "cases": 1,
+        "passed_cases": 1,
         "tier1_failed_cases": 0,
         "tier2_cases": 0,
         "passed": true,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260513-112627-823208/scorecard.json",
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-032019-874954/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
       "trend": {
-        "tier1_delta": 0,
+        "tier1_delta": 1,
         "tier2_delta": 0,
-        "pass_delta": 0
+        "pass_delta": -1
       },
       "runs": [
         {
@@ -196,50 +192,565 @@
             "forbidden_signal_count": 0,
             "risky_cases": []
           }
+        },
+        {
+          "run_id": "20260516-145331-000463",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 7,
+          "passed_cases": 0,
+          "tier1_failed_cases": 7,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-145331-000463/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145640-552838",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 7,
+          "passed_cases": 0,
+          "tier1_failed_cases": 7,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-145640-552838/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145730-665455",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 7,
+          "passed_cases": 0,
+          "tier1_failed_cases": 7,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-145730-665455/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-150247-766692",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-150247-766692/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-151306-865992",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-151306-865992/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-152104-849562",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-152104-849562/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-153612-584939",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-153612-584939/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-153705-695564",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-153705-695564/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154908-599964",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-154908-599964/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-160102-792733",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-160102-792733/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-161401-360801",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-161401-360801/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260517-031354-782811",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 19,
+          "passed_cases": 0,
+          "tier1_failed_cases": 1,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-031354-782811/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260517-031429-942266",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 0,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-031429-942266/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260517-031435-239289",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 19,
+          "passed_cases": 0,
+          "tier1_failed_cases": 2,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-031435-239289/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260517-031607-245156",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 1,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-031607-245156/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260517-031835-746911",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-031835-746911/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260517-031909-090322",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 1,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-031909-090322/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260517-031941-618407",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-031941-618407/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260517-032019-874954",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-032019-874954/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260517-032028-408397",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 20,
+          "passed_cases": 0,
+          "tier1_failed_cases": 1,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-032028-408397/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        }
+      ]
+    },
+    "autofix": {
+      "latest": {
+        "run_id": "20260516-160056-822562",
+        "runner_mode": "discovery-smoke",
+        "tier2_mode": "warn",
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
+        "tier2_cases": 0,
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autofix/20260516-160056-822562/scorecard.json",
+        "expected_signal_summary": {
+          "runs": 0,
+          "average": null,
+          "minimum": null,
+          "risky_cases": []
+        }
+      },
+      "previous": {
+        "run_id": "20260516-154901-559465",
+        "runner_mode": "discovery-smoke",
+        "tier2_mode": "warn",
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
+        "tier2_cases": 0,
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autofix/20260516-154901-559465/scorecard.json",
+        "expected_signal_summary": {
+          "runs": 0,
+          "average": null,
+          "minimum": null,
+          "risky_cases": []
+        }
+      },
+      "trend": {
+        "tier1_delta": 0,
+        "tier2_delta": 0,
+        "pass_delta": 0
+      },
+      "runs": [
+        {
+          "run_id": "20260516-145327-139553",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 10,
+          "passed_cases": 0,
+          "tier1_failed_cases": 10,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autofix/20260516-145327-139553/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145639-906768",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 10,
+          "passed_cases": 0,
+          "tier1_failed_cases": 10,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autofix/20260516-145639-906768/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145729-912171",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 10,
+          "passed_cases": 0,
+          "tier1_failed_cases": 10,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autofix/20260516-145729-912171/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-150247-134944",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autofix/20260516-150247-134944/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-151303-481306",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autofix/20260516-151303-481306/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-152101-423802",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autofix/20260516-152101-423802/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154901-559465",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autofix/20260516-154901-559465/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-160056-822562",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autofix/20260516-160056-822562/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
         }
       ]
     },
     "autoresearch": {
       "latest": {
-        "run_id": "20260513-021557-265499",
-        "runner_mode": "codex",
+        "run_id": "20260516-160058-789503",
+        "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
-        "cases": 18,
-        "passed_cases": 17,
-        "tier1_failed_cases": 1,
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
         "tier2_cases": 0,
-        "passed": false,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260513-021557-265499/scorecard.json",
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-160058-789503/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
       "previous": {
-        "run_id": "20260513-021557-238594",
-        "runner_mode": "codex",
+        "run_id": "20260516-154903-891704",
+        "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
-        "cases": 18,
-        "passed_cases": 16,
-        "tier1_failed_cases": 2,
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
         "tier2_cases": 0,
-        "passed": false,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260513-021557-238594/scorecard.json",
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-154903-891704/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
       "trend": {
-        "tier1_delta": -1,
+        "tier1_delta": 0,
         "tier2_delta": 0,
         "pass_delta": 0
       },
@@ -338,45 +849,245 @@
             "forbidden_signal_count": 0,
             "risky_cases": []
           }
+        },
+        {
+          "run_id": "20260516-145328-396187",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 15,
+          "passed_cases": 0,
+          "tier1_failed_cases": 15,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-145328-396187/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145640-125381",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 15,
+          "passed_cases": 0,
+          "tier1_failed_cases": 15,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-145640-125381/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145730-165914",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 15,
+          "passed_cases": 0,
+          "tier1_failed_cases": 15,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-145730-165914/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-150247-335293",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-150247-335293/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-151304-616714",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-151304-616714/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-152102-678302",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-152102-678302/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154049-523785",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-154049-523785/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154155-693172",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-154155-693172/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154320-871976",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 1,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-154320-871976/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154426-839924",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-154426-839924/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154903-891704",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-154903-891704/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-160058-789503",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/autoresearch/20260516-160058-789503/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
         }
       ]
     },
     "codex-agent-creator": {
       "latest": {
-        "run_id": "20260510-155933-562190",
-        "runner_mode": "codex",
+        "run_id": "20260516-160107-104163",
+        "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
-        "cases": 2,
-        "passed_cases": 2,
+        "cases": 1,
+        "passed_cases": 1,
         "tier1_failed_cases": 0,
         "tier2_cases": 0,
         "passed": true,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260510-155933-562190/scorecard.json",
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-160107-104163/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
       "previous": {
-        "run_id": "20260510-155630-594975",
-        "runner_mode": "codex",
+        "run_id": "20260516-154913-057406",
+        "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
-        "cases": 2,
-        "passed_cases": 2,
+        "cases": 1,
+        "passed_cases": 1,
         "tier1_failed_cases": 0,
         "tier2_cases": 0,
         "passed": true,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260510-155630-594975/scorecard.json",
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-154913-057406/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
@@ -630,6 +1341,423 @@
             "minimum": null,
             "missing_signal_count": 0,
             "forbidden_signal_count": 0,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145333-646732",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 0,
+          "tier1_failed_cases": 2,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-145333-646732/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145640-956924",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 0,
+          "tier1_failed_cases": 2,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-145640-956924/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145731-159211",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 0,
+          "tier1_failed_cases": 2,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-145731-159211/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-150248-183584",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-150248-183584/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-151309-184959",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-151309-184959/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-152107-090935",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-152107-090935/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-152920-523509",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-152920-523509/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-153016-219099",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-153016-219099/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-153244-885034",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-153244-885034/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-153340-185705",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-153340-185705/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154913-057406",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-154913-057406/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-160107-104163",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-agent-creator/20260516-160107-104163/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        }
+      ]
+    },
+    "codex-hooks-builder": {
+      "latest": {
+        "run_id": "20260516-160109-182795",
+        "runner_mode": "discovery-smoke",
+        "tier2_mode": "warn",
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
+        "tier2_cases": 0,
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-160109-182795/scorecard.json",
+        "expected_signal_summary": {
+          "runs": 0,
+          "average": null,
+          "minimum": null,
+          "risky_cases": []
+        }
+      },
+      "previous": {
+        "run_id": "20260516-155236-836301",
+        "runner_mode": "discovery-smoke",
+        "tier2_mode": "warn",
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
+        "tier2_cases": 0,
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-155236-836301/scorecard.json",
+        "expected_signal_summary": {
+          "runs": 0,
+          "average": null,
+          "minimum": null,
+          "risky_cases": []
+        }
+      },
+      "trend": {
+        "tier1_delta": 0,
+        "tier2_delta": 0,
+        "pass_delta": 0
+      },
+      "runs": [
+        {
+          "run_id": "20260516-145334-928644",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 0,
+          "tier1_failed_cases": 2,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-145334-928644/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145641-162196",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 0,
+          "tier1_failed_cases": 2,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-145641-162196/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145731-386822",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 0,
+          "tier1_failed_cases": 2,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-145731-386822/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145926-900919",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 0,
+          "tier1_failed_cases": 2,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-145926-900919/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-150248-381828",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-150248-381828/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-151310-340391",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-151310-340391/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-152108-243208",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-152108-243208/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154915-239847",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-154915-239847/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-155236-836301",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-155236-836301/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-160109-182795",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-160109-182795/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
             "risky_cases": []
           }
         }
@@ -950,40 +2078,36 @@
     },
     "docs-expert": {
       "latest": {
-        "run_id": "20260513-214711-044309",
-        "runner_mode": "codex",
+        "run_id": "20260516-160104-992487",
+        "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
-        "cases": 7,
-        "passed_cases": 7,
+        "cases": 1,
+        "passed_cases": 1,
         "tier1_failed_cases": 0,
         "tier2_cases": 0,
         "passed": true,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json",
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-160104-992487/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
       "previous": {
-        "run_id": "20260513-203854-267831",
-        "runner_mode": "codex",
+        "run_id": "20260516-155845-336493",
+        "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
-        "cases": 9,
-        "passed_cases": 9,
+        "cases": 1,
+        "passed_cases": 1,
         "tier1_failed_cases": 0,
         "tier2_cases": 0,
         "passed": true,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260513-203854-267831/scorecard.json",
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-155845-336493/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
@@ -1066,6 +2190,338 @@
             "minimum": null,
             "missing_signal_count": 0,
             "forbidden_signal_count": 0,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145332-338687",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 7,
+          "passed_cases": 0,
+          "tier1_failed_cases": 7,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-145332-338687/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145640-752711",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 7,
+          "passed_cases": 0,
+          "tier1_failed_cases": 7,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-145640-752711/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145730-913446",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 7,
+          "passed_cases": 0,
+          "tier1_failed_cases": 7,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-145730-913446/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-150247-981206",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-150247-981206/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-151308-041264",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-151308-041264/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-152105-969082",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-152105-969082/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154910-853334",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-154910-853334/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-155845-336493",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-155845-336493/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-160104-992487",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/docs-expert/20260516-160104-992487/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        }
+      ]
+    },
+    "evals-router": {
+      "latest": {
+        "run_id": "20260516-175343-240820",
+        "runner_mode": "discovery-smoke",
+        "tier2_mode": "warn",
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
+        "tier2_cases": 0,
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260516-175343-240820/scorecard.json",
+        "expected_signal_summary": {
+          "runs": 0,
+          "average": null,
+          "minimum": null,
+          "risky_cases": []
+        }
+      },
+      "previous": {
+        "run_id": "20260516-174132-504949",
+        "runner_mode": "discovery-smoke",
+        "tier2_mode": "warn",
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
+        "tier2_cases": 0,
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260516-174132-504949/scorecard.json",
+        "expected_signal_summary": {
+          "runs": 0,
+          "average": null,
+          "minimum": null,
+          "risky_cases": []
+        }
+      },
+      "trend": {
+        "tier1_delta": 0,
+        "tier2_delta": 0,
+        "pass_delta": 0
+      },
+      "runs": [
+        {
+          "run_id": "20260516-162603-687765",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 1,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260516-162603-687765/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-162737-192120",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260516-162737-192120/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-163013-584207",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260516-163013-584207/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-165506-901737",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260516-165506-901737/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-170000-741672",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260516-170000-741672/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-173751-861517",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260516-173751-861517/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-174132-504949",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260516-174132-504949/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-175343-240820",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260516-175343-240820/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
             "risky_cases": []
           }
         }
@@ -7722,15 +9178,15 @@
     },
     "improve-codebase-architecture": {
       "latest": {
-        "run_id": "20260516-010523-104369",
+        "run_id": "20260516-231158-327673",
         "runner_mode": "codex",
         "tier2_mode": "warn",
-        "cases": 1,
+        "cases": 9,
         "passed_cases": 0,
         "tier1_failed_cases": 0,
         "tier2_cases": 0,
         "passed": false,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-010523-104369/scorecard.json",
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-231158-327673/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
@@ -7739,15 +9195,15 @@
         }
       },
       "previous": {
-        "run_id": "20260516-010412-482221",
-        "runner_mode": "codex",
+        "run_id": "20260516-231143-954355",
+        "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
         "cases": 1,
-        "passed_cases": 0,
+        "passed_cases": 1,
         "tier1_failed_cases": 0,
         "tier2_cases": 0,
-        "passed": false,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-010412-482221/scorecard.json",
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-231143-954355/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
@@ -7758,7 +9214,7 @@
       "trend": {
         "tier1_delta": 0,
         "tier2_delta": 0,
-        "pass_delta": 0
+        "pass_delta": -1
       },
       "runs": [
         {
@@ -8144,6 +9600,553 @@
             "minimum": null,
             "risky_cases": []
           }
+        },
+        {
+          "run_id": "20260516-010715-172697",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 9,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-010715-172697/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 1,
+            "average": 100,
+            "minimum": 100,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145325-904615",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 9,
+          "passed_cases": 0,
+          "tier1_failed_cases": 9,
+          "tier2_cases": 8,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-145325-904615/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 8,
+            "average": 40,
+            "minimum": 0,
+            "risky_cases": [
+              {
+                "case": "happy-main",
+                "runner": "discovery-smoke",
+                "score": 51,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "happy-explicit",
+                "runner": "discovery-smoke",
+                "score": 0,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-missing",
+                "runner": "discovery-smoke",
+                "score": 75,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "pressure-pi",
+                "runner": "discovery-smoke",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "pressure-command",
+                "runner": "discovery-smoke",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-validation",
+                "runner": "discovery-smoke",
+                "score": 66,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "deep-design-options",
+                "runner": "discovery-smoke",
+                "score": 0,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-tracer-proof",
+                "runner": "discovery-smoke",
+                "score": 27,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "run_id": "20260516-145639-678158",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 9,
+          "passed_cases": 0,
+          "tier1_failed_cases": 9,
+          "tier2_cases": 8,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-145639-678158/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 8,
+            "average": 40,
+            "minimum": 0,
+            "risky_cases": [
+              {
+                "case": "happy-main",
+                "runner": "discovery-smoke",
+                "score": 51,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "happy-explicit",
+                "runner": "discovery-smoke",
+                "score": 0,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-missing",
+                "runner": "discovery-smoke",
+                "score": 75,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "pressure-pi",
+                "runner": "discovery-smoke",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "pressure-command",
+                "runner": "discovery-smoke",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-validation",
+                "runner": "discovery-smoke",
+                "score": 66,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "deep-design-options",
+                "runner": "discovery-smoke",
+                "score": 0,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-tracer-proof",
+                "runner": "discovery-smoke",
+                "score": 27,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "run_id": "20260516-145729-665589",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 9,
+          "passed_cases": 0,
+          "tier1_failed_cases": 9,
+          "tier2_cases": 8,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-145729-665589/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 8,
+            "average": 40,
+            "minimum": 0,
+            "risky_cases": [
+              {
+                "case": "happy-main",
+                "runner": "discovery-smoke",
+                "score": 51,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "happy-explicit",
+                "runner": "discovery-smoke",
+                "score": 0,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-missing",
+                "runner": "discovery-smoke",
+                "score": 75,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "pressure-pi",
+                "runner": "discovery-smoke",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "pressure-command",
+                "runner": "discovery-smoke",
+                "score": 50,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-validation",
+                "runner": "discovery-smoke",
+                "score": 66,
+                "risk_factors": [
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "deep-design-options",
+                "runner": "discovery-smoke",
+                "score": 0,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              },
+              {
+                "case": "edge-tracer-proof",
+                "runner": "discovery-smoke",
+                "score": 27,
+                "risk_factors": [
+                  "flow_steps out of order or incomplete",
+                  "expected signal score below 80"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "run_id": "20260516-150246-935772",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-150246-935772/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-151302-355911",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-151302-355911/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-152100-202791",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-152100-202791/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154827-167590",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-154827-167590/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154859-336988",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-154859-336988/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-160054-798339",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-160054-798339/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-161504-048893",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-161504-048893/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-224033-158513",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 1,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-224033-158513/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-224228-515645",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 1,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-224228-515645/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-224350-931074",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-224350-931074/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-224725-179700",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-224725-179700/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-224837-153910",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-224837-153910/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-225151-271703",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-225151-271703/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-225411-683906",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-225411-683906/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-231143-954355",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-231143-954355/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-231158-327673",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 9,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/improve-codebase-architecture/20260516-231158-327673/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
         }
       ]
     },
@@ -8452,40 +10455,36 @@
     },
     "simplify": {
       "latest": {
-        "run_id": "20260503-214905-089118",
-        "runner_mode": "codex",
+        "run_id": "20260516-224033-999408",
+        "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
-        "cases": 5,
-        "passed_cases": 0,
-        "tier1_failed_cases": 5,
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
         "tier2_cases": 0,
-        "passed": false,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260503-214905-089118/scorecard.json",
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-224033-999408/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
       "previous": {
-        "run_id": "20260503-214738-341757",
-        "runner_mode": "codex",
+        "run_id": "20260516-160052-794137",
+        "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
-        "cases": 5,
-        "passed_cases": 0,
-        "tier1_failed_cases": 5,
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
         "tier2_cases": 0,
-        "passed": false,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260503-214738-341757/scorecard.json",
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-160052-794137/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
           "minimum": null,
-          "missing_signal_count": 0,
-          "forbidden_signal_count": 0,
           "risky_cases": []
         }
       },
@@ -8551,20 +10550,207 @@
             "forbidden_signal_count": 0,
             "risky_cases": []
           }
+        },
+        {
+          "run_id": "20260516-145324-645488",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 5,
+          "passed_cases": 0,
+          "tier1_failed_cases": 5,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-145324-645488/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145639-471770",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 5,
+          "passed_cases": 0,
+          "tier1_failed_cases": 5,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-145639-471770/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145729-415789",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 5,
+          "passed_cases": 0,
+          "tier1_failed_cases": 5,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-145729-415789/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-150246-723456",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-150246-723456/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-150456-229817",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-150456-229817/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-151301-131271",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-151301-131271/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-152058-858331",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-152058-858331/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154856-782372",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-154856-782372/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-160026-687465",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-160026-687465/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-160052-794137",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-160052-794137/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-224033-999408",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/simplify/20260516-224033-999408/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
         }
       ]
     },
     "skill-builder": {
       "latest": {
-        "run_id": "20260515-235355-698833",
-        "runner_mode": "discovery-smoke",
+        "run_id": "20260516-234318-331847",
+        "runner_mode": "codex",
         "tier2_mode": "warn",
-        "cases": 2,
-        "passed_cases": 2,
+        "cases": 1,
+        "passed_cases": 0,
         "tier1_failed_cases": 0,
         "tier2_cases": 0,
-        "passed": true,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260515-235355-698833/scorecard.json",
+        "passed": false,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-234318-331847/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
@@ -8573,7 +10759,7 @@
         }
       },
       "previous": {
-        "run_id": "20260515-234841-683737",
+        "run_id": "20260516-234312-950783",
         "runner_mode": "discovery-smoke",
         "tier2_mode": "warn",
         "cases": 2,
@@ -8581,7 +10767,7 @@
         "tier1_failed_cases": 0,
         "tier2_cases": 0,
         "passed": true,
-        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260515-234841-683737/scorecard.json",
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-234312-950783/scorecard.json",
         "expected_signal_summary": {
           "runs": 0,
           "average": null,
@@ -8592,7 +10778,7 @@
       "trend": {
         "tier1_delta": 0,
         "tier2_delta": 0,
-        "pass_delta": 0
+        "pass_delta": -1
       },
       "runs": [
         {
@@ -9000,6 +11186,159 @@
           "tier2_cases": 0,
           "passed": true,
           "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260515-235355-698833/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-141652-631624",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-141652-631624/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-232210-396482",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 12,
+          "passed_cases": 1,
+          "tier1_failed_cases": 1,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-232210-396482/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-233449-393140",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 2,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-233449-393140/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-233503-595710",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-233503-595710/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-233605-084013",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-233605-084013/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-233925-340499",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 2,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-233925-340499/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-233934-283623",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-233934-283623/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-234312-950783",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 2,
+          "passed_cases": 2,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-234312-950783/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-234318-331847",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260516-234318-331847/scorecard.json",
           "expected_signal_summary": {
             "runs": 0,
             "average": null,
@@ -9747,12 +12086,248 @@
           }
         }
       ]
+    },
+    "unslopify": {
+      "latest": {
+        "run_id": "20260516-224033-568449",
+        "runner_mode": "discovery-smoke",
+        "tier2_mode": "warn",
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
+        "tier2_cases": 0,
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-224033-568449/scorecard.json",
+        "expected_signal_summary": {
+          "runs": 0,
+          "average": null,
+          "minimum": null,
+          "risky_cases": []
+        }
+      },
+      "previous": {
+        "run_id": "20260516-160100-846417",
+        "runner_mode": "discovery-smoke",
+        "tier2_mode": "warn",
+        "cases": 1,
+        "passed_cases": 1,
+        "tier1_failed_cases": 0,
+        "tier2_cases": 0,
+        "passed": true,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-160100-846417/scorecard.json",
+        "expected_signal_summary": {
+          "runs": 0,
+          "average": null,
+          "minimum": null,
+          "risky_cases": []
+        }
+      },
+      "trend": {
+        "tier1_delta": 0,
+        "tier2_delta": 0,
+        "pass_delta": 0
+      },
+      "runs": [
+        {
+          "run_id": "20260516-145329-634468",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 7,
+          "passed_cases": 0,
+          "tier1_failed_cases": 7,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-145329-634468/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145640-335446",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 7,
+          "passed_cases": 0,
+          "tier1_failed_cases": 7,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-145640-335446/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-145730-415803",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 7,
+          "passed_cases": 0,
+          "tier1_failed_cases": 7,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-145730-415803/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-150247-561198",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-150247-561198/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-151305-714519",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-151305-714519/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-152103-620735",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-152103-620735/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-154906-329944",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-154906-329944/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-160100-846417",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-160100-846417/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        },
+        {
+          "run_id": "20260516-224033-568449",
+          "runner_mode": "discovery-smoke",
+          "tier2_mode": "warn",
+          "cases": 1,
+          "passed_cases": 1,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": true,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/unslopify/20260516-224033-568449/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        }
+      ]
+    },
+    "vitest-expert": {
+      "latest": {
+        "run_id": "20260517-010204-599654",
+        "runner_mode": "codex",
+        "tier2_mode": "warn",
+        "cases": 9,
+        "passed_cases": 0,
+        "tier1_failed_cases": 0,
+        "tier2_cases": 0,
+        "passed": false,
+        "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/vitest-expert/20260517-010204-599654/scorecard.json",
+        "expected_signal_summary": {
+          "runs": 0,
+          "average": null,
+          "minimum": null,
+          "risky_cases": []
+        }
+      },
+      "previous": null,
+      "trend": null,
+      "runs": [
+        {
+          "run_id": "20260517-010204-599654",
+          "runner_mode": "codex",
+          "tier2_mode": "warn",
+          "cases": 9,
+          "passed_cases": 0,
+          "tier1_failed_cases": 0,
+          "tier2_cases": 0,
+          "passed": false,
+          "path": "/Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/vitest-expert/20260517-010204-599654/scorecard.json",
+          "expected_signal_summary": {
+            "runs": 0,
+            "average": null,
+            "minimum": null,
+            "risky_cases": []
+          }
+        }
+      ]
     }
   },
   "totals": {
-    "skills": 29,
-    "runs": 440,
-    "latest_tier1_failed_skills": 17,
+    "skills": 34,
+    "runs": 569,
+    "latest_tier1_failed_skills": 16,
     "latest_tier2_skills": 0
   }
 }

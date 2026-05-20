@@ -62,7 +62,14 @@ td span { color:var(--muted); }
 .suggestions li,.empty-state p { color:var(--muted); margin:10px 0; }
 .evidence-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .evidence-list a,.evidence-list div { border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }
+.review-lanes { margin-top:24px; }
+.review-lane { display:grid; grid-template-columns:minmax(0,1fr) minmax(220px,420px); gap:18px; align-items:start; border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:16px; margin:12px 0; }
+.review-lane h3 { margin:0 0 4px; }
+.review-lane p { margin:0 0 10px; color:var(--muted); }
+.review-lane code { display:block; white-space:normal; overflow-wrap:anywhere; }
+.lane-badge { display:inline-flex; margin:0 6px 6px 0; border:1px solid #303641; border-radius:7px; padding:2px 7px; background:#171b22; color:var(--muted); font-size:12px; font-weight:800; }
 @media (max-width: 1100px) { .shell { grid-template-columns:1fr; } .sidebar { position:relative; height:auto; } .hero { grid-template-columns:1fr; } .grid,.evidence-list { grid-template-columns:1fr; } .tabs a { min-width:104px; } }
+@media (max-width: 900px) { .review-lane { grid-template-columns:1fr; } }
 @media (max-width: 700px) { .plugin-posture { grid-template-columns:1fr; } .plugin-score { justify-content:flex-start; } }
 </style>
 <script>
@@ -131,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <main class="main">
     <div class="breadcrumb"><span>Local / Skills / Skills/agent-ops/agents-md / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">93</div></div>
+      <div><div class="hex">91</div></div>
       <div>
         <h1>agents-md</h1>
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
@@ -139,8 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="metrics">
 
       <div class="metric">
-        <div class="metric-head"><span>Quality</span><strong class="warn">79%</strong></div>
-        <div class="bar"><span class="warn" style="width:79%"></span></div>
+        <div class="metric-head"><span>Quality</span><strong class="warn">74%</strong></div>
+        <div class="bar"><span class="warn" style="width:74%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
 
@@ -165,11 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
     </nav>
 
     <section id="quality" class="tab-panel is-active" role="tabpanel">
-      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">79%</span></div>
+      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">74%</span></div>
       <div class="grid">
-        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">85%</strong></div>
+        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">75%</strong></div>
         <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="bad">63%</strong></div>
-        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="good">100%</strong></div>
+        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="warn">80%</strong></div>
       </div>
       <div class="panel plugin-posture">
         <div>
@@ -178,20 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="plugin-score"><span class="pill warn">B</span><strong class="good">91%</strong></div>
         <p class="posture-detail warn">Acceptable as a budget guardrail when local audit and Tessl quality pass; track warnings as follow-up or prove observed usage.</p>
-        <ul><li>Score: 91/100</li><li>Grade: B</li><li>Risk: medium</li><li>Checks: 0 fail, 2 warn, 2 info</li><li>Active budget: 2509 tokens (heavy)</li><li>Observed usage: not supplied</li></ul>
+        <ul><li>Score: 91/100</li><li>Grade: B</li><li>Risk: medium</li><li>Checks: 0 fail, 2 warn, 2 info</li><li>Active budget: 2392 tokens (heavy)</li><li>Observed usage: not supplied</li></ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
-        <tbody><tr><td>Specificity</td><td>Lists multiple specific concrete actions: reviewing, creating, shrinking, refactoring agent instructions, plus specific techniques like scoped routing, dedupe, contradiction fixes, progressive disclosure, and cleaned instruction surfaces.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Trigger Term Quality</td><td>Includes some good natural terms like &#x27;AGENTS.md&#x27;, &#x27;agent instructions&#x27;, &#x27;agent config files&#x27;, &#x27;routing rules&#x27;, and &#x27;refactoring&#x27;, but terms like &#x27;progressive disclosure&#x27;, &#x27;cleaned instruction surfaces&#x27;, and &#x27;dedupe&#x27; are more technical jargon than what users would naturally say. Missing common variations like &#x27;agent setup&#x27;, &#x27;agent prompts&#x27;, or &#x27;system instructions&#x27;.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Completeness</td><td>Explicitly starts with &#x27;Use when...&#x27; providing clear trigger guidance, and the rest of the description covers what it does (reviewing, creating, shrinking, refactoring with specific techniques). Both &#x27;what&#x27; and &#x27;when&#x27; are clearly addressed.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Distinctiveness Conflict Risk</td><td>Targets a very specific niche — AGENTS.md files, agent config, routing rules — with distinct domain-specific triggers like &#x27;scoped routing&#x27;, &#x27;contradiction fixes&#x27;, and &#x27;progressive disclosure&#x27; that are unlikely to conflict with other skills.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Conciseness</td><td>The skill is moderately efficient but contains significant repetition—anti-patterns restate constraints and avoid sections, the failure mode section re-explains preservation rules already covered in the workflow, and several concepts (like &#x27;do not auto-generate generic instruction files&#x27;) appear multiple times across sections. Some sections like Inputs and Outputs could be tightened.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Actionability</td><td>The skill provides structured guidance with specific labels, routing categories, and workflow steps, but lacks concrete executable examples. The examples section describes scenarios in prose rather than showing actual input/output pairs. No code snippets, command templates, or schema examples are provided despite mentioning schema_version and validation commands.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Workflow Clarity</td><td>The 10-step workflow is clearly sequenced with explicit validation checkpoints (step 4: stop and ask on contradictions, step 5: classify before deleting, step 10: validate). Failure modes include clear feedback loops (fix first failure, rerun gate). The &#x27;fail fast&#x27; principle is stated and reinforced. Destructive operations (shrinking/deleting) have explicit preservation gates.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Progressive Disclosure</td><td>The skill references several external files (references/agents-md-guidance.md, references/discovery-interview.md, Plugins/harness-engineering/skills/he-plan/SKILL.md) with clear conditions for when to load them. However, no bundle files were provided to verify these references exist, and the skill itself is quite long (~150 lines) with content that could be consolidated or moved to reference files (e.g., the anti-patterns and gotchas sections overlap with constraints and failure modes).</td><td class="score bad">2 / 3</td></tr></tbody>
+        <tbody><tr><td>Specificity</td><td>The description names several actions (reviewing, creating, shrinking, refactoring) and domain-specific concepts (scoped routing, dedupe, contradiction fixes, progressive disclosure), but these are somewhat jargon-heavy and don&#x27;t clearly explain what concrete outputs or transformations are produced.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Trigger Term Quality</td><td>It includes some relevant terms like &#x27;AGENTS.md&#x27;, &#x27;refactoring&#x27;, &#x27;dedupe&#x27;, and &#x27;contradiction fixes&#x27; that a knowledgeable user might say, but misses more natural/common variations a typical user would use (e.g., &#x27;agent instructions&#x27;, &#x27;agent config&#x27;, &#x27;instruction file&#x27;). The terms &#x27;scoped routing&#x27; and &#x27;progressive disclosure&#x27; are fairly technical jargon.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Completeness</td><td>The description explicitly addresses both &#x27;what&#x27; (reviewing, creating, shrinking, refactoring AGENTS.md instruction surfaces with scoped routing, dedupe, contradiction fixes, progressive disclosure) and &#x27;when&#x27; (opens with &#x27;Use when...&#x27; providing clear trigger conditions).</td><td class="score good">3 / 3</td></tr>
+<tr><td>Distinctiveness Conflict Risk</td><td>The description is highly specific to AGENTS.md files and their particular concerns (scoped routing, dedupe, contradiction fixes, progressive disclosure), making it very unlikely to conflict with other skills. This is a clear, distinct niche.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Conciseness</td><td>The skill is moderately efficient but contains significant repetition—anti-patterns restate constraints and avoid sections, failure modes repeat preservation rules multiple times, and several sections overlap (e.g., &#x27;Avoid&#x27; vs &#x27;Anti-Patterns&#x27;, &#x27;Constraints&#x27; vs &#x27;Failure Mode&#x27;). Some content could be consolidated without losing clarity.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Actionability</td><td>The skill provides structured guidance with specific labels (&#x27;Decision required:&#x27;, &#x27;Preservation rule:&#x27;) and concrete examples of contradiction scenarios, but lacks executable code/commands. The workflow steps are procedural but abstract—no actual command examples, no template snippets, no schema examples for schema_version outputs. The examples section describes scenarios rather than showing input/output pairs.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Workflow Clarity</td><td>The 10-step workflow is clearly sequenced with explicit validation checkpoints (step 4: stop on contradictions, step 5: classify before deleting, step 10: validate). Failure modes include feedback loops (fix first failure, rerun gate). The &#x27;fail fast&#x27; pattern is reinforced in both Constraints and Validation sections, and the skill handles error recovery paths well.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Progressive Disclosure</td><td>The skill references external files like &#x27;references/agents-md-guidance.md&#x27; and &#x27;Plugins/harness-engineering/skills/he-plan/SKILL.md&#x27; with clear conditions for when to load them, which is good. However, no bundle files were provided to verify these references exist, and the SKILL.md itself is quite long (~130 lines) with content that could be split—e.g., the anti-patterns, gotchas, and failure modes sections could be in a reference doc given their length and overlap with other sections.</td><td class="score bad">2 / 3</td></tr></tbody>
       </table>
-      <div class="suggestions"><h3>Suggestions</h3><ul><li>Add more natural-language trigger terms users might say, such as &#x27;agent setup&#x27;, &#x27;agent prompts&#x27;, &#x27;system instructions&#x27;, or &#x27;prompt engineering&#x27; alongside the technical terms.</li><li>Consider rephrasing some jargon like &#x27;cleaned instruction surfaces&#x27; into plainer language that users would more likely use in requests.</li><li>Add a concrete example showing an actual context ledger output format and a Context Pointer map, so Claude knows exactly what structure to produce rather than inferring from labels alone.</li><li>Consolidate the overlapping guidance in Avoid, Constraints, Anti-Patterns, and Failure Mode sections—several rules (e.g., &#x27;do not auto-generate generic instruction files&#x27;, preservation of contracts) are stated 2-3 times across these sections.</li><li>Include a minimal before/after example of an AGENTS.md edit showing the shrink workflow in action, with the context ledger and pointer map as concrete output artifacts.</li></ul></div>
+      <div class="suggestions"><h3>Suggestions</h3><ul><li>Add more natural language trigger terms such as &#x27;agent instructions&#x27;, &#x27;agent config file&#x27;, or &#x27;agent routing rules&#x27; to improve discoverability for users who may not use the exact jargon.</li><li>Clarify the concrete outputs or transformations (e.g., &#x27;produces cleaned, deduplicated AGENTS.md files with clear routing rules&#x27;) to improve specificity beyond listing abstract operations.</li><li>Consolidate overlapping sections: merge &#x27;Avoid&#x27; into &#x27;Anti-Patterns&#x27;, and deduplicate preservation-contract rules that appear in Workflow step 5, Constraints, and Failure Mode into a single authoritative location with back-references.</li><li>Add at least one concrete input/output example showing a before/after AGENTS.md edit with the context ledger, Context Pointer map, and labeled output format, rather than only describing scenarios in prose.</li><li>Include a minimal schema or template for the &#x27;schema_version&#x27; output mentioned in Outputs, so Claude knows the exact structure expected.</li></ul></div>
     </section>
 
     <section id="evals" class="tab-panel" role="tabpanel" hidden>
@@ -230,11 +237,12 @@ document.addEventListener('DOMContentLoaded', () => {
     <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/20260516T-pass14-external/agents-md.external-review.stdout.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/20260516T-pass14-external/agents-md.external-review.stdout.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260516-161401-360801/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/agents-md/20260516-161401-360801/scorecard.json</span></a>
+        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/agents-md.external-review.stdout.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/agents-md.external-review.stdout.json</span></a>
+        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/agents-md/20260517-032019-874954/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/agents-md/20260517-032019-874954/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
+
     </section>
   </main>
 </div>

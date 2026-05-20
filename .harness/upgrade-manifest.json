@@ -160,7 +160,7 @@
       "customized": false
     },
     {
-      "path": "Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh",
+      "path": "scripts/prepare-worktree.sh",
       "templateHash": "ccbfee0b37d65c43e4f0e991505babd5c865e5e7ccdb916d5afc381e7472e143",
       "version": "0.12.0",
       "customized": false

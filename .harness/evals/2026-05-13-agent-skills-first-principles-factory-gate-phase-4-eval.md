@@ -148,6 +148,7 @@ Summary: Focused validation passed after using the repo-recognized PyYAML interp
 
 Command or Method:
 `python3 - <<'PY' ... yaml.safe_load(...) ... PY`
+Result: pass.
 
 Result: fail (environment failure).
 

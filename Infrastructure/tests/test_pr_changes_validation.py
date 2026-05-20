@@ -480,13 +480,31 @@ class TestRuntimeSeparationCurrentJson(unittest.TestCase):
             "runtime-separation-current.v1",
         )
 
-    def test_status_is_healthy(self) -> None:
-        """The committed baseline must have a healthy status."""
-        self.assertEqual(self.data.get("status"), "healthy")
+    def test_status_matches_recorded_issues(self) -> None:
+        """The committed baseline status must honestly reflect recorded issues."""
+        expected = "healthy" if not self.data.get("issues") else "degraded"
+        self.assertEqual(self.data.get("status"), expected)
 
-    def test_issues_list_is_empty(self) -> None:
-        """A healthy baseline must report no open issues."""
-        self.assertEqual(self.data.get("issues"), [])
+    def test_plugin_package_root_parity_failures_are_issues(self) -> None:
+        """Failed plugin package root parity rows must be visible as issues."""
+        summary = self.data.get("summary", {})
+        parity_rows = summary.get("plugin_package_root_parity", [])
+        failed_plugins = {
+            row.get("plugin_id")
+            for row in parity_rows
+            if isinstance(row, dict) and row.get("parity_result") == "fail"
+        }
+        issue_checks = {
+            issue.get("check")
+            for issue in self.data.get("issues", [])
+            if isinstance(issue, dict)
+        }
+        missing = {
+            f"plugin_package_root_parity.{plugin_id}"
+            for plugin_id in failed_plugins
+            if plugin_id
+        } - issue_checks
+        self.assertFalse(missing, f"Missing parity issues: {sorted(missing)}")
 
     def test_required_top_level_fields_present(self) -> None:
         """All mandatory top-level fields must be present."""

@@ -50,7 +50,7 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--benchmark-config",
-        default="Plugins/skill-factory/references/skill-builder/benchmark-policy.json",
+        default="Skills/skill-builder/Infrastructure/references/benchmark-policy.json",
         help="Portfolio benchmark policy JSON path.",
     )
     p.add_argument(

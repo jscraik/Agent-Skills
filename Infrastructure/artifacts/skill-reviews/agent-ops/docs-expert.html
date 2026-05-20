@@ -62,14 +62,7 @@ td span { color:var(--muted); }
 .suggestions li,.empty-state p { color:var(--muted); margin:10px 0; }
 .evidence-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .evidence-list a,.evidence-list div { border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }
-.review-lanes { margin-top:24px; }
-.review-lane { display:grid; grid-template-columns:minmax(0,1fr) minmax(220px,420px); gap:18px; align-items:start; border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:16px; margin:12px 0; }
-.review-lane h3 { margin:0 0 4px; }
-.review-lane p { margin:0 0 10px; color:var(--muted); }
-.review-lane code { display:block; white-space:normal; overflow-wrap:anywhere; }
-.lane-badge { display:inline-flex; margin:0 6px 6px 0; border:1px solid #303641; border-radius:7px; padding:2px 7px; background:#171b22; color:var(--muted); font-size:12px; font-weight:800; }
 @media (max-width: 1100px) { .shell { grid-template-columns:1fr; } .sidebar { position:relative; height:auto; } .hero { grid-template-columns:1fr; } .grid,.evidence-list { grid-template-columns:1fr; } .tabs a { min-width:104px; } }
-@media (max-width: 900px) { .review-lane { grid-template-columns:1fr; } }
 @media (max-width: 700px) { .plugin-posture { grid-template-columns:1fr; } .plugin-score { justify-content:flex-start; } }
 </style>
 <script>
@@ -138,87 +131,87 @@ document.addEventListener('DOMContentLoaded', () => {
   <main class="main">
     <div class="breadcrumb"><span>Local / Skills / Skills/agent-ops/docs-expert / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">98</div></div>
+      <div><div class="hex">89</div></div>
       <div>
         <h1>docs-expert</h1>
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
-
+        
       <div class="metric">
-        <div class="metric-head"><span>Quality</span><strong class="good">94%</strong></div>
-        <div class="bar"><span class="good" style="width:94%"></span></div>
+        <div class="metric-head"><span>Quality</span><strong class="bad">66%</strong></div>
+        <div class="bar"><span class="bad" style="width:66%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>1/1 latest eval cases passed.</p>
+        <p>Latest smoke evidence is recorded separately; review the paired smoke artifact before treating this dashboard as a pass.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
       </div>
-
+    
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
-      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill good">94%</span></div>
+    <section id="quality" class="tab-panel is-active" role="tabpanel">
+      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill bad">66%</span></div>
       <div class="grid">
-        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="good">100%</strong></div>
-        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="warn">85%</strong></div>
-        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="good">100%</strong></div>
+        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">82%</strong></div>
+        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="bad">35%</strong></div>
+        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="warn">80%</strong></div>
       </div>
       <div class="panel plugin-posture">
         <div>
           <h3>Plugin Eval</h3>
           <p>Budget and Codex ergonomics guardrail. Local policy accepts <code>B+</code> or better when there are no failure-level findings and local/Tessl gates pass.</p>
         </div>
-        <div class="plugin-score"><span class="pill warn">A</span><strong class="good">95%</strong></div>
-        <p class="posture-detail warn">Acceptable as a budget guardrail when local audit and Tessl quality pass; track warnings as follow-up or prove observed usage.</p>
-        <ul><li>Score: 95/100</li><li>Grade: A</li><li>Risk: medium</li><li>Checks: 0 fail, 1 warn, 2 info</li><li>Active budget: 1843 tokens (heavy)</li><li>Observed usage: not supplied</li></ul>
+        <div class="plugin-score"><span class="pill good">A</span><strong class="good">100%</strong></div>
+        <p class="posture-detail good">Plugin Eval meets the local budget and ergonomics guardrail.</p>
+        <ul><li>Score: 100/100</li><li>Grade: A</li><li>Risk: low</li><li>Checks: 0 fail, 0 warn, 2 info</li><li>Active budget: 1475 tokens (moderate)</li><li>Observed usage: not supplied</li></ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
-        <tbody><tr><td>Specificity</td><td>Lists multiple specific concrete actions: &#x27;audit, rewrite, and validate&#x27; across specific document types (README, runbook, code-doc, config-doc, trust-surface documentation), and specifies what it checks (stale instructions, command examples, dependency claims, file paths, configs, workflows, code references) against live repository evidence.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Trigger Term Quality</td><td>Includes strong natural keywords users would say: &#x27;README&#x27;, &#x27;runbook&#x27;, &#x27;documentation&#x27;, &#x27;stale instructions&#x27;, &#x27;code references&#x27;, &#x27;file paths&#x27;, &#x27;configs&#x27;, &#x27;workflows&#x27;, &#x27;dependency claims&#x27;, &#x27;command examples&#x27;. These cover a wide range of terms a user might naturally use when requesting documentation validation.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Completeness</td><td>Clearly answers both &#x27;what&#x27; (audit, rewrite, validate documentation by checking various elements against live repo evidence) and &#x27;when&#x27; (&#x27;Use when documentation needs proof-backed correction or reader-focused validation&#x27;). The &#x27;Use when&#x27; clause is explicit.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Distinctiveness Conflict Risk</td><td>Highly distinctive with a clear niche: documentation validation against live repository evidence. The focus on &#x27;proof-backed correction&#x27; and checking against &#x27;live repository evidence&#x27; distinguishes it from general documentation writing or code review skills. The specific document types (README, runbook, config-doc, trust-surface) further narrow the scope.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Conciseness</td><td>The skill is mostly efficient and avoids explaining concepts Claude already knows, but it includes some redundant sections (e.g., Philosophy, Anti-Patterns, Gotchas) that could be tightened. Several sections like &#x27;When To Use&#x27; and &#x27;Avoid&#x27; overlap conceptually with constraints and execution boundaries, adding token cost without proportional value.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Actionability</td><td>The skill provides concrete, executable commands throughout — specific rg patterns for discovery, exact validation commands (./bin/ask skills audit, ./bin/ask evals run, plugin-eval analyze), file existence checks, and clear examples mapping user requests to specific actions. The procedure steps are copy-paste ready.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Workflow Clarity</td><td>The procedure is clearly sequenced (classify → inspect → build claim map → rewrite → validate → score). Validation includes explicit feedback loops (&#x27;Stop at the first failed gate, fix it, and rerun&#x27;) and failure classification (doc defect, stale repo state, unrelated blocker, blocked unknown). Handoff rules provide clear escalation paths when docs alone can&#x27;t resolve issues.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Progressive Disclosure</td><td>The skill has a dedicated Progressive Disclosure section with well-signaled, one-level-deep references to specific files (documentation-quality.md, contract.yaml, evals.yaml, task-profile.json, lens packs). References are loaded conditionally (&#x27;Load references/documentation-quality.md only when detailed prose, README, co-authoring, reader-test, or visual rules matter&#x27;), showing appropriate gating.</td><td class="score good">3 / 3</td></tr></tbody>
+        <tbody><tr><td>Specificity</td><td>The description names a domain (documentation) and some actions (&#x27;audited, rewritten, or validated against live repository evidence&#x27;), but doesn&#x27;t list multiple concrete specific actions. &#x27;Audited&#x27; and &#x27;validated&#x27; are somewhat vague without specifying what checks are performed.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Trigger Term Quality</td><td>Includes strong natural trigger terms users would say: &#x27;README&#x27;, &#x27;runbook&#x27;, &#x27;code-doc&#x27;, &#x27;config-doc&#x27;, &#x27;public trust-surface documentation&#x27;, &#x27;audited&#x27;, &#x27;rewritten&#x27;, &#x27;validated&#x27;. These cover multiple common documentation types users would reference.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Completeness</td><td>The description explicitly answers both &#x27;what&#x27; (audit, rewrite, or validate documentation against live repository evidence) and &#x27;when&#x27; (the entire description is framed as a &#x27;Use when...&#x27; clause with explicit trigger conditions).</td><td class="score good">3 / 3</td></tr>
+<tr><td>Distinctiveness Conflict Risk</td><td>While the focus on auditing/validating documentation against live repository evidence is somewhat distinctive, terms like &#x27;rewritten&#x27; could overlap with general writing or editing skills. The &#x27;trust-surface&#x27; and &#x27;live repository evidence&#x27; aspects help differentiate but the scope is still broad enough to potentially conflict with general documentation skills.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Conciseness</td><td>The skill is reasonably structured but includes several sections that feel redundant or overly abstract for Claude (e.g., &#x27;Philosophy&#x27;, &#x27;Anti-Patterns&#x27;, &#x27;Gotchas&#x27; sections contain general advice Claude already knows). Some sections like &#x27;Confidence Reporting&#x27; and &#x27;Failure Mode&#x27; could be tightened significantly.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Actionability</td><td>The skill is almost entirely abstract guidance with no concrete code, commands, or executable examples. Phrases like &#x27;Inspect 2-3 focused truth surfaces&#x27; and &#x27;score first-run usefulness&#x27; are vague and not actionable. There are no copy-paste-ready commands, no specific file manipulation examples, and no concrete output templates despite describing a structured output format.</td><td class="score bad">1 / 3</td></tr>
+<tr><td>Workflow Clarity</td><td>The Procedure section provides a numbered sequence (1-6) and the Validation section mentions &#x27;fail fast: stop at the first failed gate, fix it, and rerun,&#x27; which is a feedback loop. However, the steps are abstract rather than concrete, validation checkpoints are described conceptually rather than with specific commands or checks, and the relationship between Procedure, Validation, and Execution Boundaries is not clearly sequenced.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Progressive Disclosure</td><td>The skill references four external files in a Progressive Disclosure section (documentation-quality.md, contract.yaml, evals.yaml, task-profile.json), which is good structure. However, no bundle files were provided, so we cannot verify these references exist. The main body also contains content that could be offloaded (e.g., detailed safety boundaries, anti-patterns) to keep the overview leaner.</td><td class="score bad">2 / 3</td></tr></tbody>
       </table>
-      <div class="suggestions"><h3>Suggestions</h3><ul><li>Consolidate Philosophy, Gotchas, and Anti-Patterns into a single short &#x27;Principles &amp; Pitfalls&#x27; section to reduce token overhead without losing the key warnings.</li></ul></div>
+      <div class="suggestions"><h3>Suggestions</h3><ul><li>Add more specific concrete actions beyond &#x27;audited, rewritten, validated&#x27;—e.g., &#x27;checks for stale instructions, verifies code examples match actual source, flags outdated dependency references&#x27;</li><li>Strengthen distinctiveness by clarifying what &#x27;live repository evidence&#x27; means in practice, e.g., &#x27;cross-references documentation claims against actual file structure, configs, and code&#x27;</li><li>Add concrete, executable examples: show a specific README audit with actual commands (e.g., `grep -rn &#x27;npm install&#x27; README.md` to verify install instructions match package.json), sample input/output pairs, and a filled-in output format template.</li><li>Make the Procedure steps actionable: replace abstract instructions like &#x27;Inspect 2-3 focused truth surfaces&#x27; with specific guidance like &#x27;Check that file paths mentioned in docs exist: `find . -name &quot;filename&quot;`, verify CLI commands run: `command --help`, confirm version numbers match package.json/pyproject.toml&#x27;.</li><li>Provide a concrete output format example with actual JSON/markdown showing what a completed findings report looks like, rather than just listing field names.</li><li>Trim redundant conceptual sections (Philosophy, Anti-Patterns, Gotchas) or merge them into tighter inline notes within the Procedure, as Claude already understands these documentation principles.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
-
+    <section id="evals" class="tab-panel" role="tabpanel" hidden>
+      
       <section>
         <div class="section-head">
-          <div><h2>Evaluation Results</h2><p>1/1 latest eval cases passed.</p></div>
+          <div><h2>Evaluation Results</h2><p>Latest smoke evidence is recorded separately; review the paired smoke artifact before treating this dashboard as a pass.</p></div>
           <span class="pill good">100%</span>
         </div>
         <table>
           <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
-          <tbody><tr><td><strong>discovery interview contract</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
+          <tbody><tr><td><strong>readme command evidence</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>generated handle boundary</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>readme first-run review</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>fresh-reader runbook test</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>untrusted pasted draft</strong><br><span>pressure</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>destructive command pressure</strong><br><span>pressure</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>implementation request</strong><br><span>negative</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
         </table>
       </section>
-
+    
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>Internal security gate evidence is recorded in the paired external-review artifact; review that artifact before treating this dashboard as a pass.</li></ul></div>
       <div class="panel plugin-posture">
         <div>
           <h3>Snyk Advisory</h3>
@@ -234,15 +227,14 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="docs-expert.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json</span></a>
-        <a href="Infrastructure/artifacts/skills/docs-expert/20260519-101911-109104/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/docs-expert/20260519-101911-109104/scorecard.json</span></a>
+        <a href="Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/docs-expert.json</span></a>
+        <a href="Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/docs-expert/20260513-214711-044309/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
-      <div class="review-lanes"><div class="section-head"><div><h2>Review Lanes</h2><p>How this local dashboard separates behavior checks, static guardrails, Tessl review, and optional security screening.</p></div></div><div class="review-lane"><div><h3>Local Evals</h3><p>dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates</p></div><code>./bin/ask evals run &lt;path&gt; --mode smoke|release --json --robot</code></div><div class="review-lane"><div><h3>Plugin Eval</h3><p>static budget, ergonomics, and reviewability guardrail; not a substitute for local evals</p></div><code>plugin-eval analyze &lt;path&gt; --format markdown</code></div><div class="review-lane"><div><h3>Tessl Lint</h3><p>disposable tile.json package-shape check, not a direct content finding</p><span class="lane-badge">canonical source shape: SKILL.md-first</span></div><code>tessl skill lint &lt;temporary-tile.json&gt;</code></div><div class="review-lane"><div><h3>Tessl Review</h3><p>local best-practice/content review for private or work-in-progress skills</p></div><code>tessl skill review &lt;temporary-skill-directory&gt;</code></div><div class="review-lane"><div><h3>Snyk</h3><p>opt-in local dependency security screening; release-required for manifest-backed candidates</p><span class="lane-badge">default: disabled_until_requested</span><span class="lane-badge">release required: manifest-backed candidates</span></div><code>snyk test --all-projects --detection-depth=6 --severity-threshold=high --json &lt;skill-path&gt;</code></div></div>
     </section>
   </main>
 </div>

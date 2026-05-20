@@ -8,7 +8,7 @@ to
 
 Covers all files modified in the PR:
 - Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh  (usage() text)
-- Infrastructure/scripts/check-environment.sh  (required_support_files array)
+- Infrastructure/scripts/check-environment_impl.sh  (required_support_files array)
 - Makefile  (worktree-ready target)
 - .harness/restore-manifest.json  (path field)
 - .harness/upgrade-manifest.json  (path field)
@@ -31,7 +31,7 @@ OLD_PATH = "Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh"
 NEW_PATH = "scripts/prepare-worktree.sh"
 
 PREPARE_WORKTREE_SCRIPT = REPO_ROOT / "scripts" / "prepare-worktree.sh"
-CHECK_ENV_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "check-environment.sh"
+CHECK_ENV_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "check-environment_impl.sh"
 MAKEFILE = REPO_ROOT / "Makefile"
 RESTORE_MANIFEST = REPO_ROOT / ".harness" / "restore-manifest.json"
 UPGRADE_MANIFEST = REPO_ROOT / ".harness" / "upgrade-manifest.json"

@@ -12,20 +12,16 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
-- [.Agents — Skills — .System](#.agents-skills-.system)
 - [Skills — Agent Ops](#skills-agent-ops)
+- [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 24
+- `total_skills`: 27
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: f0ef47ecc95396f0
+- `policy_identity`: 53abbc2e5c384b95
 
 ## Catalog
-
-## .Agents — Skills — .System
-
-- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
 
 ## Skills — Agent Ops
 
@@ -36,7 +32,7 @@ Do not hand-edit runtime projections.
 - `codex-agent-creator` — Create, validate, install, fold, or troubleshoot Codex custom subagent roles, role TOML config files, agent configuration, custom roles, subagent setup, and discoverability wiring. Use when a user asks for a Codex agent role, reviewer agent, role config, TOML role file, or overlapping agents to merge.
 - `codex-automation-architect` — Use when designing, reviewing, or updating Codex app automations, cron jobs, scheduled tasks, recurring runs, or heartbeat follow-ups.
 - `codex-hooks-builder` — Scaffold hook packs, validate hooks.json schema, verify hook script permissions, migrate hook configuration, and troubleshoot Codex hook execution errors. Use when creating, auditing, upgrading, or validating Codex hook packs, hooks.json files, hook scripts, PreToolUse/PostToolUse/PreCompact hooks, or repo-local/user-level .codex hook installs.
-- `codex-review` — WHAT: Review local dirty changes, committed branches, and PR diffs with Codex CLI. Use when the user asks for Codex review, autoreview, independent model review, pre-ship validation, or merge-readiness evidence.
+- `codex-review` — Review local dirty changes, committed branches, and PR diffs with Codex CLI. Use when the user asks for Codex review, autoreview, independent model review, pre-ship validation, or merge-readiness evidence.
 - `coding-harness` — Use when users need to install, bootstrap, upgrade, audit, diagnose, or explain @brainwav/coding-harness in a repository, including harness init/upgrade, CI migration, governance gates, command discovery, and Codex environment action sync.
 - `context7` — Analyze current external library or API docs with Context7 when dependency behavior, version-sensitive references, or ctx7 CLI setup/install guidance is needed.
 - `docs-expert` — Audit, rewrite, and validate README, runbook, code-doc, config-doc, and public trust-surface documentation by checking stale instructions, command examples, dependency claims, file paths, configs, workflows, and code references against live repository evidence. Use when documentation needs proof-backed correction or reader-focused validation.
@@ -52,4 +48,11 @@ Do not hand-edit runtime projections.
 - `ubiquitous-language` — Build shared project vocabulary, glossary terms, aliases, prompt translations, and agent instruction links when wording is fuzzy or overloaded.
 - `unslopify` — Audit unused functions, dead exports, orphaned modules, stale imports, unreachable code, and tech-debt cleanup candidates with evidence-backed removal guidance. Use when unused code, dead code, remove unused imports, stale-code checks, or scoped cleanup evidence are needed.
 - `verification-before-completion` — Review and validate completion claims. Use when you are about to say work is complete, fixed, passing, pushed, or ready for review.
+
+## Skills System
+
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
+- `skill-creator` — Create or update a skill
+- `skill-installer` — Install curated skills from openai/skills or other repos
 

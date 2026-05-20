@@ -491,8 +491,16 @@ def main() -> int:
 
     plugin_package_root_parity: list[dict[str, Any]] = []
     for idx, plugin in enumerate(plugin_targets):
-        legacy_manifest = repo_root / "plugins" / plugin / ".codex-plugin" / "plugin.json"
-        catalog_manifest = repo_root / "catalog" / "plugins" / plugin / ".codex-plugin" / "plugin.json"
+        legacy_manifest = repo_root / "Plugins" / plugin / ".codex-plugin" / "plugin.json"
+        catalog_manifest = (
+            repo_root
+            / "Infrastructure"
+            / "catalog"
+            / "Plugins"
+            / plugin
+            / ".codex-plugin"
+            / "plugin.json"
+        )
         parity_result = "pass" if legacy_manifest.exists() and catalog_manifest.exists() else "fail"
         plugin_package_root_parity.append(
             {
@@ -573,6 +581,18 @@ def main() -> int:
     for plugin, check in plugins_status_checks.items():
         if not _command_check_passed_or_skipped(check):
             issues.append(_command_check_issue(f"plugins_status.{plugin}", check))
+    for parity in plugin_package_root_parity:
+        if parity.get("parity_result") == "fail":
+            plugin_id = parity.get("plugin_id")
+            issues.append(
+                {
+                    "check": f"plugin_package_root_parity.{plugin_id}",
+                    "returncode": 1,
+                    "drift_class": "plugin_package_root_parity_failed",
+                    "decision_status": "blocked",
+                    "blocker_id": f"{plugin_id}:plugin-package-root-parity",
+                }
+            )
 
     status = "healthy" if not issues else "degraded"
     payload = {

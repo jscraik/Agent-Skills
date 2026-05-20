@@ -26,11 +26,10 @@ class RunRepoSkillQualityTests(unittest.TestCase):
         expected = {
             "Skills/agent-ops/bootstrap",
             "Skills/agent-ops/fix-mise",
-            "Skills/agent-ops/gh-workflow",
-            "Skills/agent-ops/test-driven-development",
             "Skills/content-publishing/beautiful-mermaid",
-            "Skills/content-publishing/slides",
             "Skills/content-publishing/visual-explainer",
+            "skills-system/skill-creator",
+            "skills-system/skill-installer",
         }
 
         self.assertTrue(expected.issubset(skills), msg=f"missing inventory skills: {sorted(expected - skills)}")
@@ -51,7 +50,7 @@ class RunRepoSkillQualityTests(unittest.TestCase):
             self.assertEqual(len(merged["runs"]), 2)
             self.assertTrue(out.exists())
 
-    def test_baseline_archive_stub_loads_from_committed_baseline_path(self) -> None:
+    def test_baseline_archive_stub_loads_from_projected_path(self) -> None:
         baseline = (
             REPO_ROOT
             / "Plugins/skill-factory/references/skill-builder/skill-quality-baseline.json"

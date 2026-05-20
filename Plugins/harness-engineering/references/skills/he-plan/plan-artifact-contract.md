@@ -20,7 +20,7 @@ jsc-283-packaged-skill-behavior-assurance`, not the date.
 - Keep execution-time unknowns explicit. Do not pretend exact helper names, query shapes, or runtime discoveries are settled.
 - For tracked work, include a Linear/spec/plan/PR matrix with PR evidence left pending until delivery.
 - For tracked work, run `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <plan-path>` and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <plan-path>`.
-- For non-trivial generated plans, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <plan-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <plan-path> --kind plan --json` so the opening BLUF, execution-first body, plan units, source mapping, rollback, handoff, and visual-reference decision are validated before handoff.
+- For non-trivial generated plans, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <plan-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <plan-path> --kind plan --json` so the opening BLUF, execution-first body, Enforcement Contract, plan units, source mapping, rollback, handoff, and visual-reference decision are validated before handoff.
 
 ## Execution-First Plan Template
 
@@ -37,20 +37,21 @@ Use this default section order for standard durable plans:
 4. `Scope and Boundaries`
 5. `Current State / Evidence`
 6. `Implementation Strategy`
-7. `Work Units`
-8. `Dependencies and Sequencing`
-9. `Validation Gates`
-10. `Review Plan`
-11. `Rollback Plan`
-12. `Risk Register`
-13. `Observability and Evidence`
-14. `Visual References / Diagrams`
-15. `Accessibility and Operator Ergonomics`
-16. `Open Questions`
-17. `Final Decision`
-18. `Appendix A. Harness Metadata / Traceability`
-19. `Appendix B. Linear / Tracker Handoff`
-20. `Appendix C. Review Outcomes`
+7. `Enforcement Contract`
+8. `Work Units`
+9. `Dependencies and Sequencing`
+10. `Validation Gates`
+11. `Review Plan`
+12. `Rollback Plan`
+13. `Risk Register`
+14. `Observability and Evidence`
+15. `Visual References / Diagrams`
+16. `Accessibility and Operator Ergonomics`
+17. `Open Questions`
+18. `Final Decision`
+19. `Appendix A. Harness Metadata / Traceability`
+20. `Appendix B. Linear / Tracker Handoff`
+21. `Appendix C. Review Outcomes`
 
 For lightweight plans, keep the same reader path but collapse adjacent sections
 when that does not hide scope, validation, rollback, or handoff. For deep plans,
@@ -80,6 +81,26 @@ Plan unit contract:
   project it into `Validation Gates` and each affected `PU-*` as external
   behavior expectations, prior-art test families to inspect, exact commands when
   known, and stop conditions when confidence cannot be proven.
+
+Enforcement Contract requirements:
+
+- Every standard plan must include an `Enforcement Contract` section using the
+  Skills SDK apparatus lens:
+  `Infrastructure/references/skills-sdk-apparatus-lens.md`.
+- The plan must preserve the source spec's `essential_decisions`,
+  `fillable_gaps`, `guardrails`, `refusal_triggers`,
+  `durable_memory`, and `professional_output`, or state why a field is not
+  applicable for this slice.
+- Work units must inherit the contract instead of expanding scope from a vague
+  implementation idea. For SDK, public API, schema, CLI, package, or
+  agent-facing work, assign files only after the essential decisions and
+  refusal triggers are clear.
+- Guardrails must be actionable validation commands, schemas, tests, evals,
+  doctor/prove gates, structural audits, or manual gates with an owner and pass
+  condition.
+- Professional output must name the closeout evidence required before a done
+  claim: files changed, exact commands, pass/fail state, blockers, warnings,
+  next action, and rollback.
 
 Validation and proof requirements:
 

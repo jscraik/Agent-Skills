@@ -201,6 +201,7 @@ class TestAskSkillsRoute(unittest.TestCase):
         self.assertEqual(decision["decision_status"], "resolved")
         self.assertEqual(decision["selected_candidates"][0]["name"], "unslopify")
         self.assertEqual(decision["selected_candidates"][0]["confidence"], 1.0)
+        self.assertEqual(decision["validation_commands"], ["./bin/ask skills route '$unslopify' --json --robot"])
 
     def test_route_scope_ranking_uses_caller_repo_root_for_exact_handle(self):
         with tempfile.TemporaryDirectory() as temp_dir:

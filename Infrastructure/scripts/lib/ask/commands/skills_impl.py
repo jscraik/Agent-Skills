@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import json
 import shlex
@@ -102,6 +104,8 @@ def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
         venv = os.environ.get("VIRTUAL_ENV")
         if venv:
             candidates.append([os.path.join(venv, "bin", "python")])
+        pyyaml_venv_python = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+        candidates.append([str(pyyaml_venv_python)])
         # Include discovered python interpreters
         for name in ["python3", "python"]:
             python_path = shutil.which(name)
@@ -247,6 +251,17 @@ def _normalize_skill_target_path(skill_path: str) -> tuple[Path, str]:
     return audit_target, audit_target.as_posix()
 
 
+def _ask_validation_command(*args: str) -> str:
+    parts = ["./bin/ask"]
+    parts.extend(args)
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _skills_validation_command(action: str, *args: str) -> str:
+    return _ask_validation_command("skills", action, *args)
+
+
 def _run_validation_command(
     repo_root: Path,
     command: list[str],
@@ -264,10 +279,10 @@ def _run_validation_command(
         env=_subprocess_env_with_uv_cache(),
     )
     result.data[data_key] = {
-        "command": _repo_relative_command(repo_root, command),
+        "command": command,
         "exit_code": proc.returncode,
-        "stdout": _repo_relative_text(repo_root, proc.stdout),
-        "stderr": _repo_relative_text(repo_root, proc.stderr),
+        "stdout": proc.stdout,
+        "stderr": proc.stderr,
     }
     if proc.returncode == 0:
         result.status = "success"
@@ -286,12 +301,11 @@ def _run_validation_command(
 
 def _completed_process_payload(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
     """Return stable JSON data for a validation subprocess result."""
-    repo_root = Path.cwd()
     return {
-        "command": _repo_relative_command(repo_root, list(proc.args) if isinstance(proc.args, list) else proc.args),
+        "command": list(proc.args) if isinstance(proc.args, list) else proc.args,
         "exit_code": proc.returncode,
-        "stdout": _repo_relative_text(repo_root, proc.stdout),
-        "stderr": _repo_relative_text(repo_root, proc.stderr),
+        "stdout": proc.stdout,
+        "stderr": proc.stderr,
     }
 
 
@@ -402,14 +416,6 @@ def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root
     tile_skill_dir = temp_root / "skills" / skill_key
     tile_skill_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source_skill, tile_skill_dir / "SKILL.md")
-    for item in source_skill_dir.iterdir():
-        if item.name == "SKILL.md":
-            continue
-        dest = tile_skill_dir / item.name
-        if item.is_dir():
-            shutil.copytree(item, dest, symlinks=True)
-        elif item.is_file():
-            shutil.copy2(item, dest)
 
     tile = {
         "name": f"local/{skill_key}",
@@ -837,10 +843,19 @@ def list_skills(
     result.data["skills"] = skills_data
     result.data["policy_identity"] = get_policy_identity()
     result.data["advanced_mode"] = discovery_advanced
+    validation_action = "starter" if starter else "list"
+    validation_args: list[str] = []
+    if category:
+        validation_args.extend(["--category", category])
+    if advanced and not starter:
+        validation_args.append("--advanced")
     if starter:
+        validation_args.extend(["--archetype", archetype])
+        validation_args.extend(["--limit", str(max(1, int(limit)))])
         result.data["starter_mode"] = True
         result.data["starter_archetype"] = archetype if archetype in STARTER_ARCHETYPES else "general"
         result.data["starter_limit"] = max(1, int(limit))
+    result.data["validation_commands"] = [_skills_validation_command(validation_action, *validation_args)]
     result.status = "success"
     return result
 
@@ -922,6 +937,10 @@ def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
         }
     )
 
+    validation_args: list[str] = []
+    if default_max != 30:
+        validation_args.extend(["--default-max", str(default_max)])
+    report["validation_commands"] = [_skills_validation_command("budget", *validation_args)]
     result.data["runtime_budget"] = report
     result.status = "success" if process.returncode == 0 and report.get("status") == "pass" else "error"
     if result.status == "error":
@@ -949,6 +968,22 @@ def skills_handles(
     result = CallResult()
     result.metadata["command"] = "skills handles"
     report = handles_report(repo_root_path=repo_root, include_handles=include_handles)
+    validation_args: list[str] = []
+    if check:
+        validation_args.append("--check")
+    if not include_handles:
+        validation_args.append("--no-handles")
+    if write_projection:
+        validation_args.append("--write-projection")
+    if check_projection:
+        validation_args.append("--check-projection")
+    if write_command_handle_files:
+        validation_args.append("--write-command-handles")
+    if check_command_handle_files:
+        validation_args.append("--check-command-handles")
+    if dry_run:
+        validation_args.append("--dry-run")
+    report["validation_commands"] = [_skills_validation_command("handles", *validation_args)]
     result.data["command_surface"] = report
     result.data["handles"] = report["handles"]
     result.data["violations"] = report["violations"]
@@ -1002,6 +1037,10 @@ def skills_resolve(repo_root: Path, handle: str) -> CallResult:
     result = CallResult()
     result.metadata["command"] = "skills resolve"
     payload = resolve_skill_handle(handle, repo_root_path=repo_root)
+    normalized = str(payload.get("handle") or handle).lstrip("$")
+    payload["validation_commands"] = [
+        _skills_validation_command("resolve", normalized),
+    ]
     result.data["resolution"] = payload
     if payload.get("status") != "ok":
         result.status = "error"
@@ -1020,6 +1059,9 @@ def skills_parse(repo_root: Path, request_text: str) -> CallResult:
     result = CallResult()
     result.metadata["command"] = "skills parse"
     payload = parse_command_handles(request_text, repo_root_path=repo_root)
+    payload["validation_commands"] = [
+        _skills_validation_command("parse", request_text),
+    ]
     result.data["parse"] = payload
     if payload.get("status") != "pass":
         result.status = "error"
@@ -1084,24 +1126,44 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     codex_runtime_ready = (
         gates["codex_user_link"] and gates["codex_user_command_handle_exists"]
     )
+    agents_runtime_ready = (
+        gates["agents_user_link"] and gates["agents_user_command_handle_exists"]
+    )
+    user_runtime_ready = codex_runtime_ready or agents_runtime_ready
+    gates["codex_user_runtime_ready"] = codex_runtime_ready
+    gates["agents_user_runtime_ready"] = agents_runtime_ready
+    gates["user_runtime_ready"] = user_runtime_ready
     proof = {
         "schema_version": "command-handle-proof.v1",
         "handle": normalized,
-        "status": "pass" if all(core_gates) and codex_runtime_ready else "fail",
+        "status": "pass" if all(core_gates) and user_runtime_ready else "fail",
+        "validation_commands": [
+            _skills_validation_command("proof", str(normalized)),
+        ],
         "gates": gates,
         "gate_policy": {
             "required": [
                 "resolver",
                 "generated_command_handle_check",
                 "workspace_command_handle_exists",
-                "codex_user_link",
-                "codex_user_command_handle_exists",
+                "user_runtime_ready",
             ],
             "supporting_runtime_diagnostics": [
+                "codex_user_link",
+                "codex_user_command_handle_exists",
+                "codex_user_runtime_ready",
                 "agents_user_link",
                 "agents_user_command_handle_exists",
+                "agents_user_runtime_ready",
             ],
         },
+        "runtime_satisfied_by": (
+            "codex_user_runtime"
+            if codex_runtime_ready
+            else "agents_user_runtime"
+            if agents_runtime_ready
+            else None
+        ),
         "resolution": resolution,
         "command_handle_check": {
             key: value
@@ -1221,28 +1283,6 @@ def _repo_relative_path(repo_root: Path, path: Path) -> str | None:
         return None
 
 
-def _repo_relative_text(repo_root: Path, text: str) -> str:
-    if not text:
-        return text
-    root = str(repo_root.resolve())
-    text = text.replace(root + "/", "").replace(root, ".").replace(str(Path.home()) + "/", "~/")
-    return re.sub(r"/(?:private/)?tmp/agent-skills-[A-Za-z0-9._-]+", "<tmp>", text)
-
-
-def _repo_relative_command(repo_root: Path, command: Any) -> Any:
-    if isinstance(command, list):
-        sanitized: list[str] = []
-        for index, part in enumerate(command):
-            value = _repo_relative_text(repo_root, str(part))
-            if index == 0 and value.startswith(("~/", "/", "<tmp>")):
-                value = Path(str(part)).name
-            sanitized.append(value)
-        return sanitized
-    if isinstance(command, str):
-        return _repo_relative_text(repo_root, command)
-    return command
-
-
 def _status_from_bool(value: bool) -> str:
     return "pass" if value else "fail"
 
@@ -1270,9 +1310,66 @@ DOCTOR_WARNING_TAXONOMY: dict[str, str] = {
 }
 
 
+DOCTOR_SDK_LAYERS: tuple[str, ...] = (
+    "Contracts",
+    "Catalog",
+    "Authoring",
+    "Validation",
+    "Packaging",
+    "Runtime Adapters",
+    "Evidence",
+    "Memory",
+)
+
+
+DOCTOR_CHECK_SDK_LAYERS: dict[str, str] = {
+    "resolver": "Catalog",
+    "runtime_reachability": "Runtime Adapters",
+    "canonical_source": "Authoring",
+    "structural_audit": "Validation",
+    "capability_metadata": "Catalog",
+    "package_readiness": "Packaging",
+    "outcome_proof": "Evidence",
+}
+
+
+DOCTOR_BLOCKER_SDK_LAYERS: dict[str, str] = {
+    "blocked_resolution": "Catalog",
+    "blocked_runtime": "Runtime Adapters",
+    "blocked_missing_source": "Authoring",
+    "blocked_validation": "Validation",
+    "blocked_user_input": "Runtime Adapters",
+    "blocked_auth": "Runtime Adapters",
+    "timeout_no_output": "Runtime Adapters",
+    "timeout_partial_output": "Runtime Adapters",
+    "blocked_missing_tool": "Validation",
+    "blocked_missing_artifact": "Evidence",
+    "blocked_environment": "Runtime Adapters",
+}
+
+
+DOCTOR_WARNING_SDK_LAYERS: dict[str, str] = {
+    "metadata_incomplete": "Catalog",
+    "capability_contract_incomplete": "Packaging",
+    "outcome_proof_missing": "Evidence",
+    "strict_audit_not_run": "Validation",
+}
+
+
+DOCTOR_CONTRACT_SCHEMA_VERSIONS: dict[str, str] = {
+    "doctor": "skill-doctor.v1",
+    "events": "skill-events.v1",
+    "lifecycle_event": "capability-lifecycle-event.v1",
+    "profiles": "skill-operation-profiles.v1",
+    "package": "skill-package-readiness.v1",
+    "memory": "skill-memory-provider.v1",
+}
+
+
 EVAL_BLOCKER_CLASSES: list[str] = [
     "blocked_user_input",
     "blocked_auth",
+    "blocked_runtime",
     "timeout_no_output",
     "timeout_partial_output",
     "blocked_missing_tool",
@@ -1298,42 +1395,42 @@ CAPABILITY_LIFECYCLE_EVENT_CONSUMERS: dict[str, dict[str, Any]] = {
     "skill_loaded": {
         "profiles": ["authoring", "package-review", "eval"],
         "producer_commands": ["./bin/ask skills resolve <handle> --json --robot"],
-        "observer_commands": ["./bin/ask skills events skill_loaded --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "skill_loaded")],
     },
     "skill_doctor_completed": {
         "profiles": ["authoring", "package-review"],
         "producer_commands": ["./bin/ask skills doctor <handle-or-path> --json --robot"],
-        "observer_commands": ["./bin/ask skills events skill_doctor_completed --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "skill_doctor_completed")],
     },
     "package_readiness_checked": {
         "profiles": ["package-review", "plugin-share"],
         "producer_commands": ["./bin/ask skills package <handle-or-path> --json --robot"],
-        "observer_commands": ["./bin/ask skills events package_readiness_checked --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "package_readiness_checked")],
     },
     "eval_started": {
         "profiles": ["eval"],
         "producer_commands": ["./bin/ask skills prove <handle> --json --robot"],
-        "observer_commands": ["./bin/ask skills events eval_started --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "eval_started")],
     },
     "eval_blocked": {
         "profiles": ["eval"],
         "producer_commands": ["./bin/ask skills prove <handle> --json --robot"],
-        "observer_commands": ["./bin/ask skills events eval_blocked --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "eval_blocked")],
     },
     "eval_completed": {
         "profiles": ["eval"],
         "producer_commands": ["./bin/ask skills prove <handle> --json --robot"],
-        "observer_commands": ["./bin/ask skills events eval_completed --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "eval_completed")],
     },
     "projection_synced": {
         "profiles": ["authoring", "live-mutation"],
-        "producer_commands": ["./bin/ask skills sync --json --robot"],
-        "observer_commands": ["./bin/ask skills handles --check --json --robot"],
+        "producer_commands": [_skills_validation_command("sync")],
+        "observer_commands": [_skills_validation_command("handles", "--check")],
     },
     "manifest_changed": {
         "profiles": ["authoring", "plugin-share", "live-mutation"],
-        "producer_commands": ["./bin/ask skills handles --write-projection --json --robot"],
-        "observer_commands": ["./bin/ask skills handles --check --json --robot"],
+        "producer_commands": [_skills_validation_command("handles", "--write-projection")],
+        "observer_commands": [_skills_validation_command("handles", "--check")],
     },
 }
 
@@ -1369,7 +1466,7 @@ SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
         "write_policy": "artifact_write_only",
         "permissions": ["repo_read", "local_validation", "artifact_write"],
         "required_evidence": ["eval_started event", "eval_completed or eval_blocked event", "timeout classification"],
-        "stop_conditions": ["blocked_user_input", "blocked_auth", "timeout_no_output", "timeout_partial_output"],
+        "stop_conditions": list(EVAL_BLOCKER_CLASSES),
     },
     "live-mutation": {
         "intent": "Perform externally visible mutation such as tracker, PR, or runtime sync changes.",
@@ -1382,9 +1479,43 @@ SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
 }
 
 
+def _doctor_contract_schema_refs() -> dict[str, dict[str, str]]:
+    """Return consumer-usable schema references for doctor payload surfaces."""
+    missing_schema_reason = (
+        "Governed inline contract; concrete schema file is deferred until "
+        "external consumers require it."
+    )
+    return {
+        schema_name: {
+            "name": schema_name,
+            "version": version,
+            "owner": "Agent Skills Kit",
+            "stability": "experimental",
+            "missing_schema_reason": missing_schema_reason,
+        }
+        for schema_name, version in DOCTOR_CONTRACT_SCHEMA_VERSIONS.items()
+    }
+
+
+def _doctor_contract_schema_versions() -> dict[str, str]:
+    """Return legacy scalar schema versions for existing doctor consumers."""
+    return dict(DOCTOR_CONTRACT_SCHEMA_VERSIONS)
+
+
+def _doctor_sdk_layer_for(kind: str, name: str) -> str:
+    """Return the public Skills SDK layer for a doctor contract object."""
+    layer_maps = {
+        "check": DOCTOR_CHECK_SDK_LAYERS,
+        "blocker": DOCTOR_BLOCKER_SDK_LAYERS,
+        "warning": DOCTOR_WARNING_SDK_LAYERS,
+    }
+    return layer_maps.get(kind, {}).get(name, "Contracts")
+
+
 def _doctor_blocker(blocker_class: str, message: str) -> dict[str, str]:
     return {
         "class": blocker_class,
+        "sdk_layer": _doctor_sdk_layer_for("blocker", blocker_class),
         "message": message,
         "definition": DOCTOR_BLOCKER_TAXONOMY.get(blocker_class, "Unclassified doctor blocker."),
     }
@@ -1393,6 +1524,7 @@ def _doctor_blocker(blocker_class: str, message: str) -> dict[str, str]:
 def _doctor_warning(warning_class: str, message: str) -> dict[str, str]:
     return {
         "class": warning_class,
+        "sdk_layer": _doctor_sdk_layer_for("warning", warning_class),
         "message": message,
         "definition": DOCTOR_WARNING_TAXONOMY.get(warning_class, "Unclassified doctor warning."),
     }
@@ -1459,13 +1591,13 @@ def _skill_memory_operation_context() -> dict[str, Any]:
             "mutation_policy": "read_only",
         },
         "follow_up_commands": [
-            "./bin/ask skills memory list --json --robot",
+            _skills_validation_command("memory", "list"),
             "./bin/ask skills memory search <query> --json --robot",
             "./bin/ask skills memory read <entry-id-or-path> --json --robot",
         ],
         "validation_commands": [
-            "./bin/ask skills memory search projection --json --robot",
-            "./bin/ask memory search projection --json --robot",
+            _skills_validation_command("memory", "search", "projection"),
+            _ask_validation_command("memory", "search", "projection"),
         ],
     }
 
@@ -1481,13 +1613,28 @@ def _skill_memory_source_summary(roots: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _skill_memory_freshness_label(value: Any) -> str:
+    """Return a stable bucket label for memory freshness metadata."""
+    if isinstance(value, str) and value.strip():
+        return value
+    if isinstance(value, dict):
+        status = value.get("status")
+        if isinstance(status, str) and status.strip():
+            return status
+        if value.get("mtime") is not None:
+            return "has_mtime"
+        if value:
+            return "metadata_present"
+    return "unknown"
+
+
 def _skill_memory_entry_summary(entries: list[dict[str, Any]], total_count: int | None = None) -> dict[str, Any]:
     """Return compact memory result counts grouped by provider and freshness."""
     by_source: dict[str, int] = {}
     by_freshness: dict[str, int] = {}
     for entry in entries:
         source_id = str(entry.get("source_id") or "unknown")
-        freshness = str(entry.get("freshness") or "unknown")
+        freshness = _skill_memory_freshness_label(entry.get("freshness"))
         by_source[source_id] = by_source.get(source_id, 0) + 1
         by_freshness[freshness] = by_freshness.get(freshness, 0) + 1
     return {
@@ -1683,22 +1830,208 @@ def _capability_lifecycle_event(
     return event
 
 
-def _skill_event_summary(event_consumers: dict[str, dict[str, Any]]) -> dict[str, Any]:
+def _contract_status(has_items: bool, contract_gaps: list[str]) -> str:
+    """Return the stable readiness label for a summarized contract."""
+    if not has_items:
+        return "empty"
+    if contract_gaps:
+        return "has_gaps"
+    return "ready"
+
+
+def _contract_readiness(has_items: bool, contract_gaps: list[str]) -> dict[str, Any]:
+    """Return shared readiness fields for summarized contracts."""
+    return {
+        "contract_gap_count": len(contract_gaps),
+        "has_contract_gaps": bool(contract_gaps),
+        "contract_status": _contract_status(has_items, contract_gaps),
+        "contract_ready": has_items and not contract_gaps,
+    }
+
+
+def _contract_sections_overview(contract_sections: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Return shared readiness fields for named contract sections."""
+    gap_count = sum(int(section["gap_count"]) for section in contract_sections.values())
+    contract_ready = bool(contract_sections) and all(section["ready"] for section in contract_sections.values())
+    section_statuses = {str(section["status"]) for section in contract_sections.values()}
+    if contract_ready:
+        contract_status = "ready"
+    elif "has_gaps" in section_statuses or gap_count > 0:
+        contract_status = "has_gaps"
+    else:
+        contract_status = "empty"
+    return {
+        "contract_sections": contract_sections,
+        "contract_status_by_section": {
+            section_name: section["status"]
+            for section_name, section in contract_sections.items()
+        },
+        "contract_gap_count_by_section": {
+            section_name: section["gap_count"]
+            for section_name, section in contract_sections.items()
+        },
+        "contract_section_count": len(contract_sections),
+        "ready_contract_sections": sorted(
+            section_name
+            for section_name, section in contract_sections.items()
+            if section["ready"]
+        ),
+        "blocked_contract_sections": sorted(
+            section_name
+            for section_name, section in contract_sections.items()
+            if not section["ready"]
+        ),
+        "contract_gap_count": gap_count,
+        "has_contract_gaps": gap_count > 0,
+        "contract_ready": contract_ready,
+        "contract_status": contract_status,
+    }
+
+
+def _skill_event_summary(
+    event_consumers: dict[str, dict[str, Any]],
+    known_profiles: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
     """Return compact event coverage counts for automation consumers."""
     by_profile: dict[str, int] = {}
+    events_by_profile: dict[str, list[str]] = {}
+    profiles_by_event: dict[str, list[str]] = {}
     producer_count = 0
     observer_count = 0
-    for consumer in event_consumers.values():
-        producer_count += len(consumer.get("producer_commands", []))
-        observer_count += len(consumer.get("observer_commands", []))
-        for profile in consumer.get("profiles", []):
+    producer_command_count_by_event: dict[str, int] = {}
+    observer_command_count_by_event: dict[str, int] = {}
+    events_missing_producers: list[str] = []
+    events_missing_observers: list[str] = []
+    events_missing_profiles: list[str] = []
+    events_with_unknown_profiles: dict[str, list[str]] = {}
+    known_profile_names = set(known_profiles)
+    for event_name, consumer in event_consumers.items():
+        producer_commands = consumer.get("producer_commands", [])
+        observer_commands = consumer.get("observer_commands", [])
+        profiles = consumer.get("profiles", [])
+        profiles_by_event[event_name] = sorted(str(profile) for profile in profiles)
+        producer_command_count_by_event[event_name] = len(producer_commands)
+        observer_command_count_by_event[event_name] = len(observer_commands)
+        if not producer_commands:
+            events_missing_producers.append(event_name)
+        if not observer_commands:
+            events_missing_observers.append(event_name)
+        if not profiles:
+            events_missing_profiles.append(event_name)
+        producer_count += len(producer_commands)
+        observer_count += len(observer_commands)
+        for profile in profiles:
+            if profile not in known_profile_names:
+                events_with_unknown_profiles.setdefault(event_name, []).append(profile)
             by_profile[profile] = by_profile.get(profile, 0) + 1
+            events_by_profile.setdefault(profile, []).append(event_name)
+    events_with_contract_gaps = sorted(
+        set(
+            events_missing_producers
+            + events_missing_observers
+            + events_missing_profiles
+            + list(events_with_unknown_profiles)
+        )
+    )
+    missing_by_contract_dimension = {
+        "known_profiles": sorted(events_with_unknown_profiles),
+        "observer_commands": sorted(events_missing_observers),
+        "producer_commands": sorted(events_missing_producers),
+        "profiles": sorted(events_missing_profiles),
+    }
+    referenced_profile_names = set(by_profile)
+    known_profiles_without_events = sorted(known_profile_names - referenced_profile_names)
+    known_profiles_with_events = sorted(known_profile_names & referenced_profile_names)
+    known_events_by_profile = {
+        profile_name: sorted(events_by_profile.get(profile_name, []))
+        for profile_name in sorted(known_profiles)
+    }
+    unknown_profile_reference_count = sum(
+        len(profile_names) for profile_names in events_with_unknown_profiles.values()
+    )
     return {
         "event_count": len(event_consumers),
+        "contract_dimensions": sorted(missing_by_contract_dimension),
+        "contract_dimension_count": len(missing_by_contract_dimension),
+        "contract_dimension_status": {
+            dimension: _contract_status(bool(event_consumers), missing_events)
+            for dimension, missing_events in missing_by_contract_dimension.items()
+        },
+        "missing_events_by_contract_dimension": missing_by_contract_dimension,
+        "missing_event_count_by_contract_dimension": {
+            dimension: len(missing_events)
+            for dimension, missing_events in missing_by_contract_dimension.items()
+        },
         "producer_command_count": producer_count,
         "observer_command_count": observer_count,
+        "producer_command_count_by_event": dict(sorted(producer_command_count_by_event.items())),
+        "observer_command_count_by_event": dict(sorted(observer_command_count_by_event.items())),
+        "events_missing_producers": sorted(events_missing_producers),
+        "events_missing_observers": sorted(events_missing_observers),
+        "events_missing_profiles": sorted(events_missing_profiles),
+        "events_missing_profile_count": len(events_missing_profiles),
+        "has_missing_producers": bool(events_missing_producers),
+        "has_missing_observers": bool(events_missing_observers),
+        "has_missing_profiles": bool(events_missing_profiles),
+        "events_with_unknown_profile_count": len(events_with_unknown_profiles),
+        "unknown_profile_reference_count": unknown_profile_reference_count,
+        "events_with_unknown_profiles": {
+            event_name: sorted(profile_names)
+            for event_name, profile_names in sorted(events_with_unknown_profiles.items())
+        },
+        "profiles_unknown_to_registry": sorted(
+            {
+                profile_name
+                for profile_names in events_with_unknown_profiles.values()
+                for profile_name in profile_names
+            }
+        ),
+        "has_unknown_profiles": bool(events_with_unknown_profiles),
+        "known_profile_count": len(known_profiles),
+        "known_profile_names": sorted(known_profiles),
+        "referenced_profile_count": len(referenced_profile_names),
+        "referenced_profile_names": sorted(referenced_profile_names),
+        "known_profiles_with_events": known_profiles_with_events,
+        "known_profile_event_coverage_count": len(known_profiles_with_events),
+        "all_known_profiles_have_events": len(known_profiles_with_events) == len(known_profile_names),
+        "known_profiles_without_events": known_profiles_without_events,
+        "has_known_profiles_without_events": bool(known_profiles_without_events),
+        "known_events_by_profile": known_events_by_profile,
+        "known_event_count_by_profile": {
+            profile_name: len(event_names)
+            for profile_name, event_names in known_events_by_profile.items()
+        },
+        "events_with_contract_gaps": events_with_contract_gaps,
+        **_contract_readiness(bool(event_consumers), events_with_contract_gaps),
         "by_profile": by_profile,
+        "events_by_profile": {
+            profile_name: sorted(event_names)
+            for profile_name, event_names in sorted(events_by_profile.items())
+        },
+        "event_count_by_profile": {
+            profile_name: len(event_names)
+            for profile_name, event_names in sorted(events_by_profile.items())
+        },
+        "profiles_by_event": dict(sorted(profiles_by_event.items())),
+        "profile_count_by_event": {
+            event_name: len(profile_names)
+            for event_name, profile_names in sorted(profiles_by_event.items())
+        },
+        "profile_count": len(by_profile),
+        "profile_names": sorted(by_profile),
+        "has_profiles": bool(by_profile),
     }
+
+
+def _skill_events_readiness_overview(event_summary: dict[str, Any]) -> dict[str, Any]:
+    """Return a compact readiness summary for lifecycle event consumers."""
+    return _contract_sections_overview({
+        "lifecycle_event_contract": {
+            "status": event_summary["contract_status"],
+            "ready": event_summary["contract_ready"],
+            "gap_count": event_summary["contract_gap_count"],
+        }
+    })
 
 
 def skills_events(repo_root: Path, event_type: str | None = None) -> CallResult:
@@ -1729,6 +2062,7 @@ def skills_events(repo_root: Path, event_type: str | None = None) -> CallResult:
         if selected
         else CAPABILITY_LIFECYCLE_EVENT_CONSUMERS
     )
+    event_summary = _skill_event_summary(event_consumers, SKILL_OPERATION_PROFILES)
     result.data["skill_events"] = {
         "schema_version": "skill-events.v1",
         "status": "pass",
@@ -1747,11 +2081,12 @@ def skills_events(repo_root: Path, event_type: str | None = None) -> CallResult:
         },
         "event_types": event_types,
         "event_consumers": event_consumers,
-        "event_summary": _skill_event_summary(event_consumers),
+        "readiness_overview": _skill_events_readiness_overview(event_summary),
+        "event_summary": event_summary,
         "validation_commands": [
-            "./bin/ask skills events --json --robot",
+            _skills_validation_command("events"),
             "./bin/ask skills events <event-type> --json --robot",
-            "./bin/ask skills handles --check --json --robot --no-handles",
+            _skills_validation_command("handles", "--check", "--no-handles"),
         ],
         "eval_blocker_classes": {
             blocker_class: DOCTOR_BLOCKER_TAXONOMY[blocker_class]
@@ -1804,6 +2139,51 @@ def _profiles_with_effective_roots(profiles: dict[str, dict[str, Any]]) -> dict[
     return enriched
 
 
+def _skill_profile_event_coverage(
+    profiles: dict[str, dict[str, Any]],
+    event_consumers: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Return lifecycle event coverage grouped by operation profile."""
+    events_by_profile = {profile_name: [] for profile_name in profiles}
+    for event_name, consumer in event_consumers.items():
+        for profile_name in consumer.get("profiles", []):
+            if profile_name in events_by_profile:
+                events_by_profile[profile_name].append(event_name)
+    profiles_missing_events = sorted(
+        profile_name
+        for profile_name, event_names in events_by_profile.items()
+        if not event_names
+    )
+    profiles_with_events = sorted(
+        profile_name
+        for profile_name, event_names in events_by_profile.items()
+        if event_names
+    )
+    event_coverage_gaps = profiles_missing_events
+    return {
+        "profile_count": len(profiles),
+        "profile_names": sorted(profiles),
+        "events_by_profile": {
+            profile_name: sorted(event_names)
+            for profile_name, event_names in events_by_profile.items()
+        },
+        "event_count_by_profile": {
+            profile_name: len(event_names)
+            for profile_name, event_names in events_by_profile.items()
+        },
+        "event_reference_count": sum(len(event_names) for event_names in events_by_profile.values()),
+        "profiles_with_events": profiles_with_events,
+        "profiles_with_event_count": len(profiles_with_events),
+        "profiles_missing_events": profiles_missing_events,
+        "profiles_missing_event_count": len(profiles_missing_events),
+        "has_profiles_missing_events": bool(profiles_missing_events),
+        "all_profiles_have_events": bool(profiles) and not profiles_missing_events,
+        "profiles_with_event_gaps": event_coverage_gaps,
+        "profiles_with_event_gap_count": len(event_coverage_gaps),
+        **_contract_readiness(bool(profiles), event_coverage_gaps),
+    }
+
+
 def _skill_profiles_operation_context() -> dict[str, Any]:
     """Return command surfaces that consume operation profiles."""
     return {
@@ -1819,7 +2199,7 @@ def _skill_profiles_operation_context() -> dict[str, Any]:
         "consumer_commands": {
             "doctor": "./bin/ask skills doctor <handle-or-path> --json --robot",
             "package": "./bin/ask skills package <handle-or-path> --json --robot",
-            "events": "./bin/ask skills events --json --robot",
+            "events": _skills_validation_command("events"),
             "memory": "./bin/ask skills memory search <query> --json --robot",
         },
         "routing_contracts": {
@@ -1829,8 +2209,8 @@ def _skill_profiles_operation_context() -> dict[str, Any]:
             "events": ["authoring", "package-review", "plugin-share", "eval", "live-mutation"],
         },
         "validation_commands": [
-            "./bin/ask skills handles --check --json --robot --no-handles",
-            "./bin/ask skills events --json --robot",
+            _skills_validation_command("handles", "--check", "--no-handles"),
+            _skills_validation_command("events"),
         ],
     }
 
@@ -1841,25 +2221,179 @@ def _skill_profile_summary(profiles: dict[str, dict[str, Any]]) -> dict[str, Any
     by_permission: dict[str, int] = {}
     root_count = 0
     stop_condition_count = 0
-    for profile in profiles.values():
-        write_policy = str(profile.get("write_policy") or "unknown")
+    required_evidence_count = 0
+    profiles_missing_write_policy: list[str] = []
+    profiles_missing_allowed_roots: list[str] = []
+    profiles_missing_permissions: list[str] = []
+    profiles_missing_stop_conditions: list[str] = []
+    profiles_missing_required_evidence: list[str] = []
+    taxonomy_stop_conditions_by_profile: dict[str, list[str]] = {}
+    profiles_without_taxonomy_stop_conditions: list[str] = []
+    required_evidence_by_profile: dict[str, list[str]] = {}
+    permissions_by_profile: dict[str, list[str]] = {}
+    allowed_roots_by_profile: dict[str, list[str]] = {}
+    write_policy_by_profile: dict[str, str] = {}
+    stop_conditions_by_profile: dict[str, list[str]] = {}
+    for profile_name, profile in profiles.items():
+        write_policy_value = profile.get("write_policy")
+        write_policy = str(write_policy_value or "unknown")
+        if not write_policy_value:
+            profiles_missing_write_policy.append(profile_name)
+        write_policy_by_profile[profile_name] = write_policy
         by_write_policy[write_policy] = by_write_policy.get(write_policy, 0) + 1
         roots = profile.get("allowed_roots", [])
-        root_count += len(roots) if isinstance(roots, list) else 0
+        profile_root_count = len(roots) if isinstance(roots, list) else 0
+        root_count += profile_root_count
+        if profile_root_count == 0:
+            profiles_missing_allowed_roots.append(profile_name)
+        if isinstance(roots, list):
+            allowed_roots_by_profile[profile_name] = sorted(str(root) for root in roots)
         stop_conditions = profile.get("stop_conditions", [])
-        stop_condition_count += len(stop_conditions) if isinstance(stop_conditions, list) else 0
+        profile_stop_condition_count = len(stop_conditions) if isinstance(stop_conditions, list) else 0
+        stop_condition_count += profile_stop_condition_count
+        if profile_stop_condition_count == 0:
+            profiles_missing_stop_conditions.append(profile_name)
+        if isinstance(stop_conditions, list):
+            stop_conditions_by_profile[profile_name] = sorted(str(condition) for condition in stop_conditions)
+        taxonomy_stop_conditions = sorted(
+            str(condition)
+            for condition in stop_conditions
+            if isinstance(condition, str) and condition in DOCTOR_BLOCKER_TAXONOMY
+        )
+        if taxonomy_stop_conditions:
+            taxonomy_stop_conditions_by_profile[profile_name] = taxonomy_stop_conditions
+        else:
+            profiles_without_taxonomy_stop_conditions.append(profile_name)
+        required_evidence = profile.get("required_evidence", [])
+        profile_required_evidence_count = len(required_evidence) if isinstance(required_evidence, list) else 0
+        required_evidence_count += profile_required_evidence_count
+        if profile_required_evidence_count == 0:
+            profiles_missing_required_evidence.append(profile_name)
+        if isinstance(required_evidence, list):
+            required_evidence_by_profile[profile_name] = sorted(str(item) for item in required_evidence)
         permissions = profile.get("permissions", [])
+        profile_permission_count = len(permissions) if isinstance(permissions, list) else 0
+        if profile_permission_count == 0:
+            profiles_missing_permissions.append(profile_name)
         if isinstance(permissions, list):
+            permissions_by_profile[profile_name] = sorted(str(permission) for permission in permissions)
             for permission in permissions:
                 key = str(permission)
                 by_permission[key] = by_permission.get(key, 0) + 1
+    profiles_with_contract_gaps = sorted(
+        set(
+            profiles_missing_write_policy
+            + profiles_missing_allowed_roots
+            + profiles_missing_permissions
+            + profiles_missing_stop_conditions
+            + profiles_missing_required_evidence
+        )
+    )
+    missing_by_contract_dimension = {
+        "write_policy": sorted(profiles_missing_write_policy),
+        "permissions": sorted(profiles_missing_permissions),
+        "allowed_roots": sorted(profiles_missing_allowed_roots),
+        "stop_conditions": sorted(profiles_missing_stop_conditions),
+        "required_evidence": sorted(profiles_missing_required_evidence),
+    }
     return {
         "profile_count": len(profiles),
+        "profile_names": sorted(profiles),
+        "has_profiles": bool(profiles),
+        "contract_dimensions": sorted(missing_by_contract_dimension),
+        "contract_dimension_count": len(missing_by_contract_dimension),
+        "contract_dimension_status": {
+            dimension: _contract_status(bool(profiles), missing_profiles)
+            for dimension, missing_profiles in missing_by_contract_dimension.items()
+        },
+        "missing_profiles_by_contract_dimension": missing_by_contract_dimension,
+        "missing_profile_count_by_contract_dimension": {
+            dimension: len(missing_profiles)
+            for dimension, missing_profiles in missing_by_contract_dimension.items()
+        },
         "by_write_policy": by_write_policy,
+        "write_policy_count": len(by_write_policy),
+        "write_policy_by_profile": write_policy_by_profile,
+        "profiles_missing_write_policy": sorted(profiles_missing_write_policy),
+        "profiles_missing_write_policy_count": len(profiles_missing_write_policy),
+        "has_profiles_missing_write_policy": bool(profiles_missing_write_policy),
+        "all_profiles_have_write_policy": bool(profiles) and not profiles_missing_write_policy,
         "by_permission": by_permission,
+        "permission_count": len(by_permission),
+        "permissions_by_profile": permissions_by_profile,
+        "permission_count_by_profile": {
+            profile_name: len(permission_items)
+            for profile_name, permission_items in permissions_by_profile.items()
+        },
+        "profiles_missing_permissions": sorted(profiles_missing_permissions),
+        "profiles_missing_permission_count": len(profiles_missing_permissions),
+        "has_profiles_missing_permissions": bool(profiles_missing_permissions),
+        "all_profiles_have_permissions": bool(profiles) and not profiles_missing_permissions,
         "allowed_root_count": root_count,
+        "allowed_roots_by_profile": allowed_roots_by_profile,
+        "allowed_root_count_by_profile": {
+            profile_name: len(root_items)
+            for profile_name, root_items in allowed_roots_by_profile.items()
+        },
+        "profiles_missing_allowed_roots": sorted(profiles_missing_allowed_roots),
+        "profiles_missing_allowed_root_count": len(profiles_missing_allowed_roots),
+        "has_profiles_missing_allowed_roots": bool(profiles_missing_allowed_roots),
+        "all_profiles_have_allowed_roots": bool(profiles) and not profiles_missing_allowed_roots,
         "stop_condition_count": stop_condition_count,
+        "has_stop_conditions": stop_condition_count > 0,
+        "stop_conditions_by_profile": stop_conditions_by_profile,
+        "stop_condition_count_by_profile": {
+            profile_name: len(condition_items)
+            for profile_name, condition_items in stop_conditions_by_profile.items()
+        },
+        "profiles_missing_stop_conditions": sorted(profiles_missing_stop_conditions),
+        "profiles_missing_stop_condition_count": len(profiles_missing_stop_conditions),
+        "has_profiles_missing_stop_conditions": bool(profiles_missing_stop_conditions),
+        "all_profiles_have_stop_conditions": bool(profiles) and not profiles_missing_stop_conditions,
+        "taxonomy_stop_conditions_by_profile": taxonomy_stop_conditions_by_profile,
+        "taxonomy_stop_condition_count": sum(
+            len(conditions) for conditions in taxonomy_stop_conditions_by_profile.values()
+        ),
+        "profiles_with_taxonomy_stop_conditions": sorted(taxonomy_stop_conditions_by_profile),
+        "profiles_with_taxonomy_stop_condition_count": len(taxonomy_stop_conditions_by_profile),
+        "profiles_without_taxonomy_stop_conditions": sorted(profiles_without_taxonomy_stop_conditions),
+        "profiles_without_taxonomy_stop_condition_count": len(profiles_without_taxonomy_stop_conditions),
+        "has_profiles_without_taxonomy_stop_conditions": bool(profiles_without_taxonomy_stop_conditions),
+        "all_profiles_have_taxonomy_stop_conditions": bool(profiles) and not profiles_without_taxonomy_stop_conditions,
+        "has_taxonomy_stop_conditions": bool(taxonomy_stop_conditions_by_profile),
+        "required_evidence_count": required_evidence_count,
+        "has_required_evidence": required_evidence_count > 0,
+        "required_evidence_by_profile": required_evidence_by_profile,
+        "required_evidence_count_by_profile": {
+            profile_name: len(evidence_items)
+            for profile_name, evidence_items in required_evidence_by_profile.items()
+        },
+        "profiles_missing_required_evidence": sorted(profiles_missing_required_evidence),
+        "profiles_missing_required_evidence_count": len(profiles_missing_required_evidence),
+        "has_profiles_missing_required_evidence": bool(profiles_missing_required_evidence),
+        "all_profiles_have_required_evidence": bool(profiles) and not profiles_missing_required_evidence,
+        "profiles_with_contract_gaps": profiles_with_contract_gaps,
+        **_contract_readiness(bool(profiles), profiles_with_contract_gaps),
     }
+
+
+def _skill_profiles_readiness_overview(
+    profile_summary: dict[str, Any],
+    event_coverage: dict[str, Any],
+) -> dict[str, Any]:
+    """Return a compact cross-contract readiness summary for profile consumers."""
+    return _contract_sections_overview({
+        "profile_contracts": {
+            "status": profile_summary["contract_status"],
+            "ready": profile_summary["contract_ready"],
+            "gap_count": profile_summary["contract_gap_count"],
+        },
+        "lifecycle_event_coverage": {
+            "status": event_coverage["contract_status"],
+            "ready": event_coverage["contract_ready"],
+            "gap_count": event_coverage["contract_gap_count"],
+        },
+    })
 
 
 def skills_profiles(repo_root: Path, profile: str | None = None) -> CallResult:
@@ -1890,6 +2424,9 @@ def skills_profiles(repo_root: Path, profile: str | None = None) -> CallResult:
     else:
         selected_profiles = profiles
 
+    profile_summary = _skill_profile_summary(selected_profiles)
+    event_coverage = _skill_profile_event_coverage(selected_profiles, CAPABILITY_LIFECYCLE_EVENT_CONSUMERS)
+
     result.data["skill_profiles"] = {
         "schema_version": "skill-operation-profiles.v1",
         "status": "pass",
@@ -1900,7 +2437,15 @@ def skills_profiles(repo_root: Path, profile: str | None = None) -> CallResult:
         "selected_profile": profile_key,
         "profile_names": list(selected_profiles),
         "available_profiles": sorted(profiles),
-        "profile_summary": _skill_profile_summary(selected_profiles),
+        "readiness_overview": _skill_profiles_readiness_overview(profile_summary, event_coverage),
+        "profile_summary": profile_summary,
+        "event_coverage": event_coverage,
+        "eval_blocker_classes": {
+            blocker_class: DOCTOR_BLOCKER_TAXONOMY[blocker_class]
+            for blocker_class in EVAL_BLOCKER_CLASSES
+        },
+        "blocker_taxonomy": DOCTOR_BLOCKER_TAXONOMY,
+        "warning_taxonomy": DOCTOR_WARNING_TAXONOMY,
         "profiles": _profiles_with_effective_roots(selected_profiles),
         "profile_order": ["authoring", "package-review", "plugin-share", "eval", "live-mutation"],
         "agent_summary": (
@@ -1913,9 +2458,59 @@ def skills_profiles(repo_root: Path, profile: str | None = None) -> CallResult:
 
 
 def _doctor_check(status: str, **details: Any) -> dict[str, Any]:
-    payload = {"status": status}
+    check_name = str(details.pop("check_name", "") or "")
+    payload = {
+        "status": status,
+        "sdk_layer": _doctor_sdk_layer_for("check", check_name),
+    }
     payload.update(details)
     return payload
+
+
+def _skill_doctor_next_command(
+    *,
+    blockers: list[dict[str, str]],
+    warnings: list[dict[str, str]],
+    checks: dict[str, Any],
+    normalized_handle: Any,
+    query: str,
+    audit_target: str | None,
+    strict: bool,
+) -> str:
+    """Select the most actionable follow-up command from classified doctor evidence."""
+    blocker_classes = [blocker.get("class") for blocker in blockers]
+    if "blocked_validation" in blocker_classes:
+        command = checks.get("structural_audit", {}).get("command")
+        if command:
+            return str(command)
+        if audit_target:
+            return _skills_validation_command("audit", audit_target, "--level", "compat")
+    if "blocked_runtime" in blocker_classes:
+        command = checks.get("runtime_reachability", {}).get("command")
+        if command:
+            return str(command)
+    if "blocked_missing_source" in blocker_classes:
+        return _skills_validation_command("resolve", str(normalized_handle or query))
+    if "blocked_resolution" in blocker_classes:
+        return _skills_validation_command("resolve", str(normalized_handle or query))
+    if blockers:
+        return _skills_validation_command("doctor", str(normalized_handle or query))
+
+    warning_classes = {warning.get("class") for warning in warnings}
+    package_or_metadata_warning = bool(
+        {"metadata_incomplete", "capability_contract_incomplete"} & warning_classes
+    )
+    if package_or_metadata_warning and audit_target and not strict:
+        return _skills_validation_command("audit", audit_target, "--level", "strict")
+    if "capability_contract_incomplete" in warning_classes:
+        return _skills_validation_command("package", str(normalized_handle or query))
+    if "outcome_proof_missing" in warning_classes:
+        return _skills_validation_command("prove", str(normalized_handle or query))
+    if warnings and audit_target and not strict:
+        return _skills_validation_command("audit", audit_target, "--level", "strict")
+    if normalized_handle:
+        return _skills_validation_command("prove", str(normalized_handle))
+    return _skills_validation_command("audit", str(audit_target), "--level", "strict")
 
 
 def _capability_metadata_status(frontmatter: dict[str, Any]) -> dict[str, Any]:
@@ -2017,8 +2612,13 @@ def _skill_package_readiness(frontmatter: dict[str, Any]) -> dict[str, Any]:
     share_readiness = str(values.get("share_readiness") or "").strip().lower()
     share_readiness_ready = share_readiness == "ready"
     share_ready = False
+    missing_identity_fields = [
+        field
+        for field in ("name", "description")
+        if not str(frontmatter.get(field) or "").strip()
+    ]
 
-    if not frontmatter.get("name") or not frontmatter.get("description"):
+    if missing_identity_fields:
         readiness_level = "incomplete_identity"
     elif not values.get("version"):
         readiness_level = "legacy_capability"
@@ -2031,6 +2631,8 @@ def _skill_package_readiness(frontmatter: dict[str, Any]) -> dict[str, Any]:
         share_ready = True
 
     blocked_reasons = list(missing)
+    if missing_identity_fields:
+        blocked_reasons.append("identity_incomplete")
     if not missing and not share_readiness_ready:
         blocked_reasons.append("share_readiness_not_ready")
     recommended_next_fields = [
@@ -2042,6 +2644,7 @@ def _skill_package_readiness(frontmatter: dict[str, Any]) -> dict[str, Any]:
         recommended_next_fields.append("share_readiness")
     if "version" in missing:
         recommended_next_fields.insert(0, "version")
+    recommended_next_fields = [*missing_identity_fields, *recommended_next_fields]
     promotion_status = "ready_pending_checkout" if share_ready else "blocked_validation"
 
     return {
@@ -2091,6 +2694,10 @@ def _refresh_package_promotion_gate(package_contract: dict[str, Any]) -> None:
         promotion_gate["promotion_ready"] = False
         return
     if promotion_gate["blocked_reasons"]:
+        promotion_gate["status"] = "blocked_validation"
+        promotion_gate["promotion_ready"] = False
+        return
+    if not promotion_gate["share_ready"]:
         promotion_gate["status"] = "blocked_validation"
         promotion_gate["promotion_ready"] = False
         return
@@ -2155,7 +2762,7 @@ def _skill_package_operation_context() -> dict[str, Any]:
         },
         "validation_commands": [
             "./bin/ask skills package <handle-or-path> --json --robot",
-            "./bin/ask skills events package_readiness_checked --json --robot",
+            _skills_validation_command("events", "package_readiness_checked"),
         ],
     }
 
@@ -2182,12 +2789,12 @@ def _skill_doctor_operation_context() -> dict[str, Any]:
         "follow_up_commands": [
             "./bin/ask skills package <handle-or-path> --json --robot",
             "./bin/ask skills prove <handle> --json --robot",
-            "./bin/ask skills events --json --robot",
+            _skills_validation_command("events"),
         ],
         "validation_commands": [
             "./bin/ask skills doctor <handle-or-path> --json --robot",
             "./bin/ask skills audit <handle-or-path> --level strict --json --robot",
-            "./bin/ask skills events skill_doctor_completed --json --robot",
+            _skills_validation_command("events", "skill_doctor_completed"),
         ],
     }
 
@@ -2445,9 +3052,8 @@ def skills_package(
         "operation_context": _skill_package_operation_context(),
         "blockers": blockers,
         "warnings": warnings,
-        "lifecycle_event": lifecycle_event,
+        "lifecycle_event": readiness_event,
         "lifecycle_events": lifecycle_events,
-        "lifecycle_event_types": [event["event_type"] for event in lifecycle_events],
         "agent_summary": (
             f"{query} is blocked: {blockers[0]['message']}"
             if blockers
@@ -2462,9 +3068,9 @@ def skills_package(
             )
         ),
         "next_command": (
-            f"./bin/ask skills doctor {shlex.quote(query)} --json --robot"
+            _skills_validation_command("doctor", query)
             if blockers
-            else f"./bin/ask skills doctor {shlex.quote(query)} --strict --json --robot"
+            else _skills_validation_command("doctor", query, "--strict")
         ),
     }
     result.data["skill_package"] = payload
@@ -2502,6 +3108,7 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
         resolver_pass = isinstance(resolution, dict) and resolution.get("status") == "ok"
         checks["resolver"] = _doctor_check(
             _status_from_bool(resolver_pass),
+            check_name="resolver",
             handle=normalized_handle,
             error_code=(resolution or {}).get("error_code") if isinstance(resolution, dict) else None,
             operator_action=(resolution or {}).get("operator_action") if isinstance(resolution, dict) else None,
@@ -2516,11 +3123,12 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
 
         proof_result = skills_proof(repo_root, str(normalized_handle))
         proof = proof_result.data.get("proof", {})
-        checks["runtime_reachability"] = {
-            "status": proof.get("status", "fail") if isinstance(proof, dict) else "fail",
-            "command": f"./bin/ask skills proof {shlex.quote(str(normalized_handle))} --json --robot",
-            "gates": proof.get("gates", {}) if isinstance(proof, dict) else {},
-        }
+        checks["runtime_reachability"] = _doctor_check(
+            proof.get("status", "fail") if isinstance(proof, dict) else "fail",
+            check_name="runtime_reachability",
+            command=_skills_validation_command("proof", str(normalized_handle)),
+            gates=proof.get("gates", {}) if isinstance(proof, dict) else {},
+        )
         if proof_result.status != "success":
             blockers.append(
                 _doctor_blocker(
@@ -2531,12 +3139,14 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
     else:
         checks["resolver"] = _doctor_check(
             "skipped",
+            check_name="resolver",
             reason="Path targets are audited as canonical source; command-handle proof requires a handle.",
         )
 
     source_exists = bool(target_info.get("source_exists"))
     checks["canonical_source"] = _doctor_check(
         _status_from_bool(source_exists),
+        check_name="canonical_source",
         source_path=source_path_value,
     )
     if not source_exists:
@@ -2553,8 +3163,9 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
         diagnostics = audit_result.data.get("diagnostics", {})
         checks["structural_audit"] = _doctor_check(
             "pass" if audit_result.status == "success" else "fail",
+            check_name="structural_audit",
             level=audit_level,
-            command=f"./bin/ask skills audit {shlex.quote(audit_target)} --level {audit_level} --json --robot",
+            command=_skills_validation_command("audit", audit_target, "--level", audit_level),
             diagnostics_exit_code=diagnostics.get("exit_code"),
         )
         if audit_result.status != "success":
@@ -2567,6 +3178,7 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
     else:
         checks["structural_audit"] = _doctor_check(
             "skipped",
+            check_name="structural_audit",
             level=audit_level,
             reason="No canonical source target available.",
         )
@@ -2578,6 +3190,7 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
         except OSError:
             frontmatter = {}
     metadata_status = _capability_metadata_status(frontmatter)
+    metadata_status.setdefault("sdk_layer", _doctor_sdk_layer_for("check", "capability_metadata"))
     checks["capability_metadata"] = metadata_status
     if metadata_status["status"] == "warning":
         warnings.append(
@@ -2586,14 +3199,33 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
                 "Recommended frontmatter fields are incomplete.",
             )
         )
+    package_readiness = metadata_status.get("package_readiness", {})
+    package_status = "pass"
+    if isinstance(package_readiness, dict) and package_readiness.get("required_fields", {}).get("missing"):
+        package_status = "warning"
+        warnings.append(
+            _doctor_warning(
+                "capability_contract_incomplete",
+                "Package/share readiness metadata is incomplete.",
+            )
+        )
+    checks["package_readiness"] = _doctor_check(
+        package_status,
+        check_name="package_readiness",
+        package_readiness=package_readiness,
+        required_fields=package_readiness.get("required_fields", {}) if isinstance(package_readiness, dict) else {},
+        install_gate=package_readiness.get("install_gate", {}) if isinstance(package_readiness, dict) else {},
+        promotion_gate=package_readiness.get("promotion_gate", {}) if isinstance(package_readiness, dict) else {},
+    )
 
     workout_handle = str(normalized_handle or (Path(audit_target).name if audit_target else "")).strip()
     workouts = _skill_workout_candidates(repo_root, workout_handle) if workout_handle else []
-    checks["outcome_proof"] = {
-        "status": "available_not_run" if workouts else "missing",
-        "workout_candidates": workouts,
-        "evidence_class": "outcome_proof",
-    }
+    checks["outcome_proof"] = _doctor_check(
+        "available_not_run" if workouts else "missing",
+        check_name="outcome_proof",
+        workout_candidates=workouts,
+        evidence_class="outcome_proof",
+    )
     if not workouts:
         warnings.append(
             _doctor_warning(
@@ -2601,27 +3233,16 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
                 "No matching workout was found for this capability.",
             )
         )
-    if blockers:
-        doctor_status = "blocked"
-        next_command = (
-            checks.get("runtime_reachability", {}).get("command")
-            or checks.get("structural_audit", {}).get("command")
-            or f"./bin/ask skills resolve {shlex.quote(str(normalized_handle or query))} --json --robot"
-        )
-    elif warnings:
-        doctor_status = "warning"
-        next_command = (
-            f"./bin/ask skills audit {shlex.quote(audit_target)} --level strict --json --robot"
-            if audit_target and not strict
-            else f"./bin/ask skills prove {shlex.quote(str(normalized_handle or query))} --json --robot"
-        )
-    else:
-        doctor_status = "pass"
-        next_command = (
-            f"./bin/ask skills prove {shlex.quote(str(normalized_handle))} --json --robot"
-            if normalized_handle
-            else f"./bin/ask skills audit {shlex.quote(str(audit_target))} --level strict --json --robot"
-        )
+    doctor_status = "blocked" if blockers else ("warning" if warnings else "pass")
+    next_command = _skill_doctor_next_command(
+        blockers=blockers,
+        warnings=warnings,
+        checks=checks,
+        normalized_handle=normalized_handle,
+        query=query,
+        audit_target=audit_target,
+        strict=strict,
+    )
 
     handle_label = "$" + str(normalized_handle) if normalized_handle else query
     lifecycle_event = _capability_lifecycle_event(
@@ -2656,14 +3277,9 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
             "blockers": DOCTOR_BLOCKER_TAXONOMY,
             "warnings": DOCTOR_WARNING_TAXONOMY,
         },
-        "contract_schemas": {
-            "doctor": "skill-doctor.v1",
-            "events": "skill-events.v1",
-            "lifecycle_event": "capability-lifecycle-event.v1",
-            "profiles": "skill-operation-profiles.v1",
-            "package": "skill-package-readiness.v1",
-            "memory": "skill-memory-provider.v1",
-        },
+        "sdk_layers": list(DOCTOR_SDK_LAYERS),
+        "contract_schemas": _doctor_contract_schema_refs(),
+        "contract_schema_versions": _doctor_contract_schema_versions(),
         "operation_context": _skill_doctor_operation_context(),
         "lifecycle_event": lifecycle_event,
         "lifecycle_event_types": CAPABILITY_LIFECYCLE_EVENT_TYPES,
@@ -2725,8 +3341,12 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
                 },
                 "outcome_proof": {"status": "not_checked", "workout_candidates": [], "evidence_class": "outcome_proof"},
                 "goal_resolution": goal_resolution,
-                "next_command": (goal_resolution or {}).get("next_command") or f"./bin/ask skills improve {shlex.quote(query)} --json --robot",
+                "next_command": (goal_resolution or {}).get("next_command")
+                or _skills_validation_command("improve", query),
             }
+            result.data["skill_proof"]["validation_commands"] = [
+                result.data["skill_proof"]["next_command"],
+            ]
             result.errors.extend(improvement_result.errors)
             if not result.errors:
                 result.errors.append(
@@ -2755,15 +3375,15 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
         structural_detail = {
             "status": "pass" if audit_result.status == "success" else "fail",
             "audit_level": "compat",
-            "audit_command": f"./bin/ask skills audit {shlex.quote(audit_target)} --level compat --json --robot",
-            "strict_audit_command": f"./bin/ask skills audit {shlex.quote(audit_target)} --level strict --json --robot",
+            "audit_command": _skills_validation_command("audit", audit_target, "--level", "compat"),
+            "strict_audit_command": _skills_validation_command("audit", audit_target, "--level", "strict"),
             "diagnostics_exit_code": audit_result.data.get("diagnostics", {}).get("exit_code"),
         }
 
     analytics = skill_invocation_analytics(repo_root, normalized)
     workouts = _skill_workout_candidates(repo_root, normalized)
     outcome_status = "missing"
-    next_command = f"./bin/ask skills proof {shlex.quote(normalized)} --json --robot"
+    next_command = _skills_validation_command("proof", normalized)
     if reachability_status != "pass":
         proof_status = "blocked_reachability"
     elif structural_detail["status"] != "pass":
@@ -2772,7 +3392,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     elif workouts:
         proof_status = "reachable_without_outcome_proof"
         outcome_status = "available_not_run"
-        next_command = f"./bin/ask workouts run {shlex.quote(workouts[0])} --json --robot"
+        next_command = _ask_validation_command("workouts", "run", workouts[0])
     else:
         proof_status = "reachable_without_outcome_proof"
         next_command = structural_detail.get("strict_audit_command") or next_command
@@ -2790,7 +3410,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
         "reachability": {
             "status": reachability_status,
             "source": "command_handle_proof",
-            "command": f"./bin/ask skills proof {shlex.quote(normalized)} --json --robot",
+            "command": _skills_validation_command("proof", normalized),
         },
         "structural_quality": structural_detail,
         "analytics": analytics,
@@ -2800,6 +3420,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
             "evidence_class": "outcome_proof",
         },
         "next_command": next_command,
+        "validation_commands": [next_command],
     }
     if goal_resolution:
         scorecard["goal_resolution"] = goal_resolution
@@ -2877,7 +3498,7 @@ def _skill_validation_commands(source_path: Path, repo_root: Path) -> list[str]:
     except ValueError:
         return []
     audit_target = relative_source.parent if relative_source.name == "SKILL.md" else relative_source
-    return [f"./bin/ask skills audit {shlex.quote(str(audit_target))} --level strict --json --robot"]
+    return [_skills_validation_command("audit", str(audit_target), "--level", "strict")]
 
 
 def explain_skill(repo_root: Path, handle: str) -> CallResult:
@@ -2893,7 +3514,7 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
             "status": "blocked",
             "handle": normalized,
             "agent_summary": f"Could not resolve skill handle '{normalized}'.",
-            "next_command": f"./bin/ask skills resolve {shlex.quote(str(normalized))} --json --robot",
+            "next_command": _skills_validation_command("resolve", str(normalized)),
         }
         result.errors.append(
             ErrorObject(
@@ -3014,10 +3635,10 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         "ambiguity_notes": skills_explain["ambiguity_notes"],
         "reachability": {
             "status": proof.get("status") if isinstance(proof, dict) else "not_checked",
-            "proof_command": f"./bin/ask skills proof {shlex.quote(str(normalized))} --json --robot",
+            "proof_command": _skills_validation_command("proof", str(normalized)),
         },
         "resolution": resolution,
-        "next_command": f"./bin/ask skills proof {shlex.quote(str(normalized))} --json --robot",
+        "next_command": _skills_validation_command("proof", str(normalized)),
     }
     result.data["skills_explain"] = skills_explain
     result.data["explanation"] = explanation
@@ -3029,6 +3650,10 @@ def reviewers_resolve(repo_root: Path, handle: str) -> CallResult:
     result = CallResult()
     result.metadata["command"] = "reviewers resolve"
     payload = resolve_reviewer_handle(handle)
+    normalized = str(payload.get("canonical_handle") or payload.get("handle") or handle).lstrip("@")
+    payload["validation_commands"] = [
+        _ask_validation_command("reviewers", "resolve", normalized),
+    ]
     result.data["resolution"] = payload
     if payload.get("status") != "ok":
         result.status = "error"
@@ -3045,6 +3670,16 @@ def reviewers_resolve(repo_root: Path, handle: str) -> CallResult:
 def init_skill(repo_root: Path, name: str, category: str, description: str) -> CallResult:
     """Initializes a new skill scaffold using the repo template logic."""
     result = CallResult()
+    result.data["validation_commands"] = [
+        _skills_validation_command(
+            "init",
+            name,
+            "--category",
+            category,
+            "--description",
+            description,
+        )
+    ]
     category_token = (category or "").strip()
     if not category_token:
         result.status = "error"
@@ -3127,6 +3762,10 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         CallResult: Result with `status` set to `"success"` when diagnostics pass (and all strict checks pass if requested), or `"error"` with `errors` containing one or more `ErrorObject`s. Possible error codes include `ERR_PATH_TRAVERSAL` and `ERR_VALIDATION`.
     """
     result = CallResult()
+    validation_args = [skill_path]
+    if level != "compat":
+        validation_args.extend(["--level", level])
+    result.data["validation_commands"] = [_skills_validation_command("audit", *validation_args)]
 
     _, path_error = _validate_repo_relative_skill_path(repo_root, skill_path)
     if path_error:
@@ -3140,11 +3779,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     audit_env = _subprocess_env_with_uv_cache()
 
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-    result.data["diagnostics"] = {
-        "exit_code": diag_proc.returncode,
-        "stdout": _repo_relative_text(repo_root, diag_proc.stdout),
-        "stderr": _repo_relative_text(repo_root, diag_proc.stderr),
-    }
+    result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
 
     is_skill_factory_system_overlay = audit_target_path in {
         "skills-system/skill-creator",
@@ -3154,11 +3789,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     if level == "strict" and is_skill_factory_system_overlay:
         overlay_cmd = python + ["Infrastructure/scripts/validation-and-linting/check_skill_factory_system_overlays.py"]
         overlay_proc = subprocess.run(overlay_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["system_overlay"] = {
-            "exit_code": overlay_proc.returncode,
-            "stdout": _repo_relative_text(repo_root, overlay_proc.stdout),
-            "stderr": _repo_relative_text(repo_root, overlay_proc.stderr),
-        }
+        result.data["system_overlay"] = {"exit_code": overlay_proc.returncode, "stdout": overlay_proc.stdout, "stderr": overlay_proc.stderr}
         if overlay_proc.returncode != 0:
             result.status = "error"
             result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Skill Factory system overlay validation failed."))
@@ -3166,11 +3797,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
 
         family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["family_benchmarks"] = {
-            "exit_code": family_proc.returncode,
-            "stdout": _repo_relative_text(repo_root, family_proc.stdout),
-            "stderr": _repo_relative_text(repo_root, family_proc.stderr),
-        }
+        result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
             summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
             message = "Family benchmarks validation failed."
@@ -3195,11 +3822,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         gate_script = _resolve_skill_builder_script(repo_root, "skill_gate")
         gate_cmd = python + [gate_script, audit_target_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
         gate_proc = subprocess.run(gate_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["security_gate"] = {
-            "exit_code": gate_proc.returncode,
-            "stdout": _repo_relative_text(repo_root, gate_proc.stdout),
-            "stderr": _repo_relative_text(repo_root, gate_proc.stderr),
-        }
+        result.data["security_gate"] = {"exit_code": gate_proc.returncode, "stdout": gate_proc.stdout, "stderr": gate_proc.stderr}
         if gate_proc.returncode != 0:
             result.status = "error"
             result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Security gate failed."))
@@ -3208,11 +3831,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         # Family benchmarks validation
         family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
         family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["family_benchmarks"] = {
-            "exit_code": family_proc.returncode,
-            "stdout": _repo_relative_text(repo_root, family_proc.stdout),
-            "stderr": _repo_relative_text(repo_root, family_proc.stderr),
-        }
+        result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
         if family_proc.returncode != 0:
             summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
             message = "Family benchmarks validation failed."
@@ -3235,11 +3854,7 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         openclaw_script = _resolve_skill_builder_script(repo_root, "openclaw_skill_guard")
         openclaw_cmd = python + [openclaw_script, audit_target_path, "--mode", "both", "--format", "text"]
         openclaw_proc = subprocess.run(openclaw_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["openclaw_guard"] = {
-            "exit_code": openclaw_proc.returncode,
-            "stdout": _repo_relative_text(repo_root, openclaw_proc.stdout),
-            "stderr": _repo_relative_text(repo_root, openclaw_proc.stderr),
-        }
+        result.data["openclaw_guard"] = {"exit_code": openclaw_proc.returncode, "stdout": openclaw_proc.stdout, "stderr": openclaw_proc.stderr}
         if openclaw_proc.returncode != 0:
             result.status = "error"
             result.errors.append(ErrorObject(code="ERR_VALIDATION", message="OpenClaw guard validation failed."))
@@ -3274,7 +3889,7 @@ def validate_skill_gate(repo_root: Path, skill_path: str) -> CallResult:
         "--pi-high-fail",
         "--require-fail-fast",
     ]
-    return _run_validation_command(
+    result = _run_validation_command(
         repo_root,
         gate_cmd,
         "skill_gate",
@@ -3284,6 +3899,8 @@ def validate_skill_gate(repo_root: Path, skill_path: str) -> CallResult:
             f"against {shlex.quote(audit_target_path)}."
         ),
     )
+    result.data["validation_commands"] = [_skills_validation_command("validate-skill-gate", skill_path)]
+    return result
 
 
 def validate_openai_skill_format(repo_root: Path, skill_path: str, mode: str = "strict") -> CallResult:
@@ -3300,7 +3917,7 @@ def validate_openai_skill_format(repo_root: Path, skill_path: str, mode: str = "
         mode,
         audit_target_path,
     ]
-    return _run_validation_command(
+    result = _run_validation_command(
         repo_root,
         command,
         "openai_skill_format",
@@ -3310,6 +3927,10 @@ def validate_openai_skill_format(repo_root: Path, skill_path: str, mode: str = "
             f"against {shlex.quote(audit_target_path)}."
         ),
     )
+    result.data["validation_commands"] = [
+        _skills_validation_command("validate-openai-format", skill_path, "--mode", mode)
+    ]
+    return result
 
 
 def external_review_skill(
@@ -3368,10 +3989,10 @@ def external_review_skill(
         ),
         "tessl_review_role": "local_best_practice_content_review",
         "plugin_eval_role": "budget_and_ergonomics_guardrail",
-        "plugin_eval_min_acceptable_grade": "B",
+        "plugin_eval_min_acceptable_grade": "B+",
         "plugin_eval_warning_policy": (
             "Plugin Eval warnings are visible follow-up work, but they are not release blockers when "
-            "there are zero Plugin Eval failures, the grade is B or better, and local/Tessl gates pass."
+            "there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass."
         ),
         "snyk_role": "opt_in_local_dependency_security_screening",
         "snyk_default": "disabled_until_requested",
@@ -3426,6 +4047,26 @@ def external_review_skill(
         },
     }
     result.data["target"] = audit_target_path
+    validation_args = [skill_path]
+    if audit_level != "strict":
+        validation_args.extend(["--audit-level", audit_level])
+    if skip_plugin_eval:
+        validation_args.append("--skip-plugin-eval")
+    if skip_tessl:
+        validation_args.append("--skip-tessl")
+    if skip_tessl_review:
+        validation_args.append("--skip-tessl-review")
+    if include_snyk:
+        validation_args.append("--include-snyk")
+    if timeout_seconds != 180:
+        validation_args.extend(["--timeout-seconds", str(timeout_seconds)])
+    if report_path:
+        validation_args.extend(["--report-path", report_path])
+    if dashboard:
+        validation_args.append("--dashboard")
+    if dashboard_path:
+        validation_args.extend(["--dashboard-path", dashboard_path])
+    result.data["validation_commands"] = [_skills_validation_command("external-review", *validation_args)]
 
     audit_result = audit_skill(repo_root, audit_target_path, level=audit_level)
     result.data["ask_audit"] = {
@@ -3704,7 +4345,7 @@ def external_review_skill(
             ))
         else:
             result.data["dashboard_path"] = rendered_dashboard.relative_to(repo_root.resolve()).as_posix()
-            result.data["dashboard_url"] = result.data["dashboard_path"]
+            result.data["dashboard_url"] = rendered_dashboard.resolve().as_uri()
 
     return result
 
@@ -3714,6 +4355,9 @@ def validate_skill_boundaries(repo_root: Path, handle: str) -> CallResult:
     resolved = skills_explain_boundary(repo_root, handle)
     if resolved.status != "success":
         return resolved
+    resolved.data["validation_commands"] = [
+        _skills_validation_command("validate-boundaries", handle)
+    ]
     return resolved
 
 
@@ -3925,6 +4569,11 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
             "external_skill_install_is_intake_not_copy": True,
             "promotion_rule": intake_decision["promotion_rule"],
         }
+        validation_args = [url, "--dest", dest_rel]
+        if remediate:
+            validation_args.append("--remediate")
+        validation_args.append("--dry-run")
+        result.data["validation_commands"] = [_skills_validation_command("install", *validation_args)]
         result.metadata["next_steps"] = [
             "Review data.intake_decision.outcome before writing canonical source.",
             f"ask skills install {url} --dest {dest_rel}" + (" --remediate" if remediate else ""),
@@ -4089,13 +4738,25 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
             - `data["rationale"]`, when present, contains the router's textual rationale for the match.
     """
     result = CallResult()
+    validation_args = [source, target]
+    if sensitivity != 0.2:
+        validation_args.extend(["--sensitivity", str(sensitivity)])
+    result.data["validation_commands"] = [_skills_validation_command("fold", *validation_args)]
 
     builder_catalog = _load_builder_module(repo_root, "skill_catalog")
     router_mod = _load_builder_module(repo_root, "skill_router")
 
     if not builder_catalog or not router_mod:
         result.status = "error"
-        result.errors.append(ErrorObject(code="ERR_DEPENDENCY", message="Skill router or builder catalog not available."))
+        result.data["dependency_status"] = {
+            "skill_catalog": "available" if builder_catalog else "missing",
+            "skill_router": "available" if router_mod else "missing",
+        }
+        result.errors.append(ErrorObject(
+            code="ERR_DEPENDENCY",
+            message="Skill router or builder catalog not available.",
+            fix_suggestion="Restore the skill-builder catalog/router scripts or use skills route for current routing checks.",
+        ))
         return result
 
     catalog = builder_catalog.load_catalog(repo_root)
@@ -4285,6 +4946,7 @@ def route_skills(
         result.data["catalog_parity"] = catalog_parity
         result.data["policy_identity"] = decision["policy_identity"]
         result.data["decision_status"] = decision["decision_status"]
+        decision["validation_commands"] = [_skills_validation_command("route", query)]
         if decision["decision_status"] == "resolved":
             result.status = "success"
         else:
@@ -4354,6 +5016,7 @@ def route_skills(
         uncertainty_reasons=list(uncertainty_reasons),
         catalog_parity_ok=not bool(catalog_parity.get("drift_detected")),
     )
+    decision["validation_commands"] = [_skills_validation_command("route", query)]
 
     decision_status = decision["decision_status"]
     result.data["decision"] = decision
@@ -4428,6 +5091,7 @@ def goal_skills(
         return result
 
     goal_decision = build_goal_decision(route_decision)
+    goal_decision["validation_commands"] = [_skills_validation_command("goal", intent_text)]
     result.data["goal_decision"] = goal_decision
     result.data["decision_status"] = goal_decision["decision_status"]
     result.data["policy_identity"] = goal_decision["policy_identity"]
@@ -4631,6 +5295,7 @@ def improve_skills(
         "proof": None,
         "alternatives": goal_decision.get("alternative_candidates", []),
         "next_command": None,
+        "validation_commands": [_skills_validation_command("goal", goal_text)],
         "goal_decision_status": goal_decision.get("decision_status"),
         "goal_decision": goal_decision,
     }
@@ -4646,9 +5311,8 @@ def improve_skills(
         summary = goal_decision.get("operator_action") or "Goal did not resolve to one capability."
         improvement["agent_summary"] = summary
         improvement["disambiguation_prompts"] = prompts
-        improvement["next_command"] = (
-            f"./bin/ask skills goal {shlex.quote(goal_text)} --json --robot"
-        )
+        improvement["next_command"] = _skills_validation_command("goal", goal_text)
+        improvement["validation_commands"] = [improvement["next_command"]]
         result.status = "error"
         result.data["improvement"] = improvement
         result.data["goal_decision"] = goal_decision
@@ -4669,9 +5333,7 @@ def improve_skills(
     gates = proof.get("gates", {}) if isinstance(proof, dict) else {}
     required = proof.get("gate_policy", {}).get("required", []) if isinstance(proof, dict) else []
     required_gates_passed = all(bool(gates.get(gate)) for gate in required)
-    user_runtime_ready = bool(
-        gates.get("codex_user_link") and gates.get("codex_user_command_handle_exists")
-    )
+    user_runtime_ready = bool(gates.get("user_runtime_ready"))
     rationale = recommended.get("rationale") or []
     capability = {
         "handle": handle,
@@ -4700,7 +5362,8 @@ def improve_skills(
         if proof_result.status == "success"
         else f"Recommended ${handle}, but reachability proof failed."
     )
-    improvement["next_command"] = f"./bin/ask skills proof {shlex.quote(handle)} --json --robot"
+    improvement["next_command"] = _skills_validation_command("proof", handle)
+    improvement["validation_commands"] = [improvement["next_command"]]
 
     result.data["improvement"] = improvement
     result.data["goal_decision"] = goal_decision
@@ -4726,10 +5389,7 @@ def improve_skills(
                     else []
                 )
                 fallback_required_gates_passed = all(bool(fallback_gates.get(gate)) for gate in fallback_required)
-                fallback_user_runtime_ready = bool(
-                    fallback_gates.get("codex_user_link")
-                    and fallback_gates.get("codex_user_command_handle_exists")
-                )
+                fallback_user_runtime_ready = bool(fallback_gates.get("user_runtime_ready"))
                 improvement["status"] = "resolved_with_fallback"
                 improvement["route_state"] = "resolved_with_fallback"
                 improvement["route_state_reason"] = (
@@ -4757,7 +5417,8 @@ def improve_skills(
                 improvement["agent_summary"] = (
                     f"Recommended ${fallback_handle} after routed ${handle} failed reachability."
                 )
-                improvement["next_command"] = f"./bin/ask skills proof {shlex.quote(fallback_handle)} --json --robot"
+                improvement["next_command"] = _skills_validation_command("proof", fallback_handle)
+                improvement["validation_commands"] = [improvement["next_command"]]
                 return result
 
     improvement["status"] = "blocked"
@@ -5029,6 +5690,7 @@ def _finalize_skill_sync_result(
     scope: str,
     dry_run: bool,
     status: str,
+    plugin_cache_refresh: str = "auto",
 ) -> CallResult:
     """Populate common sync result data after all mutations have been planned."""
     plan["mutation_counts"] = {
@@ -5046,6 +5708,16 @@ def _finalize_skill_sync_result(
         dry_run=dry_run,
         warnings=plan["warnings"],
     )
+    validation_args: list[str] = []
+    if scope != "workspace":
+        validation_args.extend(["--scope", scope])
+    if dry_run:
+        validation_args.append("--dry-run")
+    if projection_decision.mode_source in {"cli", "env"}:
+        validation_args.extend(["--projection", projection_decision.requested_mode])
+    if plugin_cache_refresh != "auto":
+        validation_args.extend(["--plugin-cache-refresh", plugin_cache_refresh])
+    result.data["validation_commands"] = [_skills_validation_command("sync", *validation_args)]
     result.status = status
     return result
 
@@ -5373,6 +6045,7 @@ def sync_skills(
                 scope=scope,
                 dry_run=dry_run,
                 status="error",
+                plugin_cache_refresh=plugin_cache_refresh,
             )
         plan["validation_status"] = "pass"
         return _finalize_skill_sync_result(
@@ -5383,6 +6056,7 @@ def sync_skills(
             scope=scope,
             dry_run=dry_run,
             status="success",
+            plugin_cache_refresh=plugin_cache_refresh,
         )
 
     if system_skills_dir.is_dir():
@@ -5420,6 +6094,7 @@ def sync_skills(
                 scope=scope,
                 dry_run=dry_run,
                 status="success",
+                plugin_cache_refresh=plugin_cache_refresh,
             )
         ok, errors = _sync_rooted_projection(
             repo_root,
@@ -5486,6 +6161,7 @@ def sync_skills(
                 scope=scope,
                 dry_run=dry_run,
                 status="error",
+                plugin_cache_refresh=plugin_cache_refresh,
             )
         return _finalize_skill_sync_result(
             result,
@@ -5495,6 +6171,7 @@ def sync_skills(
             scope=scope,
             dry_run=dry_run,
             status="success",
+            plugin_cache_refresh=plugin_cache_refresh,
         )
 
     entries = discover_skill_entries(source="repo")
@@ -5544,6 +6221,7 @@ def sync_skills(
                 scope=scope,
                 dry_run=dry_run,
                 status="error",
+                plugin_cache_refresh=plugin_cache_refresh,
             )
     elif scope == "user":
         _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
@@ -5556,4 +6234,5 @@ def sync_skills(
         scope=scope,
         dry_run=dry_run,
         status="success",
+        plugin_cache_refresh=plugin_cache_refresh,
     )

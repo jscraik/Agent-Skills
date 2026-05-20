@@ -7,9 +7,43 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
+sys.path.append(str(Path(__file__).resolve().parents[1] / "scripts" / "lib"))
+
+from ask.cli_errors import build_helpful_error, build_unknown_action_result
+from ask.command_metadata import VALID_ACTIONS
+
 
 def _run_cli(cmd: list[str], **kwargs):
     return subprocess.run(cmd, capture_output=True, text=True, timeout=30, **kwargs)
+
+
+def _assert_readiness_overview_ready(
+    testcase: unittest.TestCase,
+    overview: dict,
+    expected_sections: list[str],
+) -> None:
+    testcase.assertEqual(overview["contract_status"], "ready")
+    testcase.assertTrue(overview["contract_ready"])
+    testcase.assertEqual(overview["contract_gap_count"], 0)
+    testcase.assertFalse(overview["has_contract_gaps"])
+    testcase.assertEqual(overview["contract_section_count"], len(expected_sections))
+    testcase.assertEqual(
+        overview["contract_status_by_section"],
+        {section: "ready" for section in expected_sections},
+    )
+    testcase.assertEqual(
+        overview["contract_gap_count_by_section"],
+        {section: 0 for section in expected_sections},
+    )
+    testcase.assertEqual(overview["ready_contract_sections"], expected_sections)
+    testcase.assertEqual(overview["blocked_contract_sections"], [])
+
+
+def _assert_contract_ready(testcase: unittest.TestCase, payload: dict) -> None:
+    testcase.assertEqual(payload["contract_gap_count"], 0)
+    testcase.assertFalse(payload["has_contract_gaps"])
+    testcase.assertEqual(payload["contract_status"], "ready")
+    testcase.assertTrue(payload["contract_ready"])
 
 
 class TestAskCLI(unittest.TestCase):
@@ -35,7 +69,7 @@ class TestAskCLI(unittest.TestCase):
 
     def test_repo_status_discovery(self):
         """CA1: Verify ask repo status correctly identifies the repo root."""
-        cmd = ["python3", "Infrastructure/bin/ask", "repo", "status", "--json"]
+        cmd = ["python3", "Infrastructure/bin/ask", "repo", "status", "--json", "--robot"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0)
@@ -43,12 +77,46 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(output["status"], "success")
         self.assertIn("repo_root", output["data"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask repo status --json --robot"],
+        )
         # Verify it found the actual current directory or a parent
         # Handle redacted paths by substituting back the home directory
         repo_root = output["data"]["repo_root"]
         if "<USER_HOME>" in repo_root:
             repo_root = repo_root.replace("<USER_HOME>", os.path.expanduser("~"))
         self.assertTrue(os.path.isdir(repo_root), f"repo_root is not a directory: {repo_root}")
+
+    def test_repo_status_human_output_exposes_validation(self):
+        """Verify repo status human output names its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "repo", "status", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Success:", result.stdout)
+        self.assertIn("Validation: ./bin/ask repo status --json --robot", result.stdout)
+
+    def test_repo_missing_action_exposes_validation(self):
+        """Verify incomplete repo commands expose the read-only recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "repo", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"repo output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask repo status --json --robot"])
+
+    def test_repo_missing_action_human_output_exposes_validation(self):
+        """Verify incomplete repo commands render the read-only recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "repo", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"repo output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("missing action for topic 'repo'", result.stdout)
+        self.assertIn("Validation: ./bin/ask repo status --json --robot", result.stdout)
 
     def test_skills_list(self):
         """
@@ -69,10 +137,23 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "success")
         self.assertIn("skills", output["data"])
         self.assertIsInstance(output["data"]["skills"], list)
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills list --json --robot"],
+        )
         if len(output["data"]["skills"]) > 0:
             skill = output["data"]["skills"][0]
             self.assertIn("name", skill)
             self.assertIn("path", skill)
+
+    def test_skills_list_human_output_exposes_validation(self):
+        """Verify ask skills list renders its validation command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("Discovered", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills list --json --robot", result.stdout)
 
     def test_skills_list_advanced_flag(self):
         """CA1: Verify ask skills list --advanced toggles advanced_mode in JSON output."""
@@ -83,6 +164,33 @@ class TestAskCLI(unittest.TestCase):
         output = json.loads(result.stdout)
         self.assertEqual(output["status"], "success")
         self.assertTrue(output["data"].get("advanced_mode"))
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills list --advanced --json --robot"],
+        )
+
+    def test_skills_budget_json_contract(self):
+        """Verify ask skills budget exposes the runtime-budget validation command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "budget", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        budget = output["data"]["runtime_budget"]
+        self.assertEqual(budget["status"], "pass")
+        self.assertEqual(
+            budget["validation_commands"],
+            ["./bin/ask skills budget --json --robot"],
+        )
+
+    def test_skills_budget_human_output_exposes_validation(self):
+        """Verify ask skills budget renders its validation command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "budget", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Runtime budget:", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills budget --json --robot", result.stdout)
 
     def test_skills_route_json_contract(self):
         """CA1: Verify ask skills route exposes selection-decision fields."""
@@ -100,6 +208,27 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("policy_identity", decision)
         self.assertIn("considered_limit", decision)
         self.assertIn("selected_candidates", decision)
+        self.assertEqual(
+            decision.get("validation_commands"),
+            ["./bin/ask skills route create-auth --json --robot"],
+        )
+
+    def test_skills_route_human_output_exposes_validation(self):
+        """Verify ambiguous route output renders the route validation command."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "route",
+            "make skill diagnostics clearer",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("🧭 Route decision:", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills route", result.stdout)
+        self.assertIn("--json --robot", result.stdout)
 
     def test_skills_handles_json_contract(self):
         """Verify ask skills handles exposes the command-surface contract."""
@@ -113,6 +242,19 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(surface["schema_version"], "command-surface.v1")
         self.assertEqual(surface["status"], "pass")
         self.assertGreater(surface["handle_count"], 0)
+        self.assertEqual(
+            surface["validation_commands"],
+            ["./bin/ask skills handles --check --json --robot"],
+        )
+
+    def test_skills_handles_human_output_exposes_validation(self):
+        """Verify ask skills handles renders its validation command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "handles", "--check", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Skill handles:", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills handles --check --json --robot", result.stdout)
 
     def test_skills_handles_projection_dry_run_contract(self):
         """Verify ask can preview the generated command-surface projection."""
@@ -174,6 +316,59 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(resolution["handle"], "he-heartbeat")
         self.assertEqual(resolution["command_visibility"], "target")
         self.assertEqual(resolution["invoke_via"], "harness-engineering")
+        self.assertEqual(
+            resolution["validation_commands"],
+            ["./bin/ask skills resolve he-heartbeat --json --robot"],
+        )
+
+    def test_skills_resolve_human_output_exposes_validation(self):
+        """Verify ask skills resolve renders its validation command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "he-heartbeat", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Skill handle: $he-heartbeat", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills resolve he-heartbeat --json --robot", result.stdout)
+
+    def test_skills_parse_json_contract(self):
+        """Verify ask skills parse reports resolved mentions and its validation command."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "parse",
+            "use $simplify and $he-code-review",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        parsed = output["data"]["parse"]
+        self.assertEqual(parsed["status"], "pass")
+        self.assertEqual(parsed["mention_counts"]["skills"], 2)
+        self.assertEqual(
+            parsed["validation_commands"],
+            ["./bin/ask skills parse 'use $simplify and $he-code-review' --json --robot"],
+        )
+
+    def test_skills_parse_human_output_exposes_validation(self):
+        """Verify ask skills parse renders its validation command."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "parse",
+            "use $simplify and $he-code-review",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Parse succeeded: pass", result.stdout)
+        self.assertIn("Skill mentions: 2", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills parse", result.stdout)
+        self.assertIn("--json --robot", result.stdout)
 
     def test_skills_proof_json_contract(self):
         """Verify ask skills proof separates resolver, command handle, and runtime-link gates."""
@@ -189,9 +384,15 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("generated_command_handle_check", proof["gates"])
         self.assertIn("workspace_command_handle_exists", proof["gates"])
         self.assertIn("codex_user_link", proof["gates"])
-        self.assertIn("codex_user_link", proof["gate_policy"]["required"])
+        self.assertIn("user_runtime_ready", proof["gates"])
+        self.assertIn("user_runtime_ready", proof["gate_policy"]["required"])
+        self.assertIn("codex_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
         self.assertIn("agents_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
         self.assertEqual(proof["live_codex_invocation"]["status"], "manual_session_gate")
+        self.assertEqual(
+            proof["validation_commands"],
+            ["./bin/ask skills proof he-heartbeat --json --robot"],
+        )
 
     def test_skills_proof_human_output(self):
         """Verify ask skills proof has a useful non-JSON success render."""
@@ -200,7 +401,10 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Skill handle proof: $he-heartbeat", result.stdout)
+        self.assertIn("runtime satisfied by: agents_user_runtime", result.stdout)
+        self.assertIn("required gates: resolver, generated_command_handle_check, workspace_command_handle_exists, user_runtime_ready", result.stdout)
         self.assertIn("live invocation: manual_session_gate", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills proof he-heartbeat --json --robot", result.stdout)
 
     def test_skills_prove_json_contract(self):
         """Verify ask skills prove separates reachability, quality, analytics, and outcome proof."""
@@ -219,6 +423,19 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("outcome_proof", skill_proof)
         self.assertEqual(skill_proof["analytics"]["status"], "unavailable_or_legacy")
         self.assertIn("command_handle_proof", output["data"])
+
+    def test_skills_prove_human_output(self):
+        """Verify ask skills prove renders the scorecard in non-JSON mode."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Skill proof scorecard: $he-heartbeat", result.stdout)
+        self.assertIn("reachability: pass", result.stdout)
+        self.assertIn("structural_quality: pass", result.stdout)
+        self.assertIn("analytics: unavailable_or_legacy", result.stdout)
+        self.assertIn("outcome_proof: missing", result.stdout)
+        self.assertIn("Next:", result.stdout)
 
     def test_skills_prove_maps_golden_path_taxonomy_for_he_handle(self):
         """Verify prove exposes the stable proof taxonomy without adding schemas."""
@@ -397,6 +614,7 @@ class TestAskCLI(unittest.TestCase):
         )
         self.assertIn("goal_resolution", skill_proof)
         self.assertIn("recommended_capability", skill_proof["goal_resolution"])
+        self.assertEqual(skill_proof["validation_commands"], [skill_proof["next_command"]])
 
     def test_skills_prove_single_token_goal_uses_improve_fallback(self):
         """Verify one-word goals use the same improvement route as phrase goals."""
@@ -442,6 +660,41 @@ class TestAskCLI(unittest.TestCase):
         improve_mock.assert_called_once()
         self.assertEqual(result.data["skill_proof"]["handle"], "security-reviewer")
         self.assertIn("goal_resolution", result.data["skill_proof"])
+        self.assertEqual(
+            result.data["skill_proof"]["validation_commands"],
+            [result.data["skill_proof"]["next_command"]],
+        )
+
+    def test_skills_prove_goal_resolution_without_candidate_uses_improve_command(self):
+        """Verify unresolved goals point back to the improve command."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult
+
+            failed_reachability = CallResult(status="error")
+            goal_result = CallResult()
+            goal_result.data["improvement"] = {"recommended_capability": {}}
+
+            with mock.patch.object(
+                skills_commands,
+                "skills_proof",
+                return_value=failed_reachability,
+            ), mock.patch.object(
+                skills_commands,
+                "improve_skills",
+                return_value=goal_result,
+            ):
+                result = skills_commands.skills_prove(Path.cwd(), "unknown goal")
+        finally:
+            sys.path.remove(lib_path)
+
+        skill_proof = result.data["skill_proof"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(skill_proof["proof_status"], "blocked_goal_resolution")
+        self.assertEqual(skill_proof["next_command"], "./bin/ask skills improve 'unknown goal' --json --robot")
+        self.assertEqual(skill_proof["validation_commands"], [skill_proof["next_command"]])
 
     def test_skills_prove_resolved_handle_failure_does_not_use_goal_fallback(self):
         """Verify a resolved handle with broken reachability stays on the requested handle."""
@@ -489,6 +742,27 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(result.status, "error")
         self.assertEqual(result.data["skill_proof"]["handle"], "he-heartbeat")
         self.assertEqual(result.data["skill_proof"]["proof_status"], "blocked_reachability")
+        self.assertEqual(
+            result.data["skill_proof"]["validation_commands"],
+            [result.data["skill_proof"]["next_command"]],
+        )
+
+    def test_skills_prove_human_output_exposes_validation(self):
+        """Verify ask skills prove renders its scorecard validation command."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "prove",
+            "autofix",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills prove output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Skill proof scorecard: $autofix", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills audit", result.stdout)
+        self.assertIn("Next: ./bin/ask skills audit", result.stdout)
 
     def test_skills_prove_workout_candidates_require_explicit_metadata_match(self):
         """Verify workout outcome candidates are not inferred from directory names."""
@@ -523,6 +797,57 @@ class TestAskCLI(unittest.TestCase):
             sys.path.remove(lib_path)
 
         self.assertEqual(candidates, ["explicit-outcome", "target-module-outcome"])
+
+    def test_skills_prove_workout_next_command_uses_ask_helper(self):
+        """Verify workout proof replay commands use the shared ask command builder."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands import skills as skills_commands
+            from ask.envelope import CallResult
+
+            with tempfile.TemporaryDirectory() as temp_dir:
+                repo_root = Path(temp_dir)
+                skill_source = repo_root / "Skills" / "agent-ops" / "demo" / "SKILL.md"
+                skill_source.parent.mkdir(parents=True)
+                skill_source.write_text("---\nname: demo\n---\n", encoding="utf-8")
+
+                reachable_result = CallResult()
+                reachable_result.data["proof"] = {
+                    "status": "pass",
+                    "handle": "demo",
+                    "resolution": {
+                        "status": "ok",
+                        "handle": "demo",
+                        "source_path": skill_source.relative_to(repo_root).as_posix(),
+                    },
+                }
+
+                with mock.patch.object(
+                    skills_commands,
+                    "skills_proof",
+                    return_value=reachable_result,
+                ), mock.patch.object(
+                    skills_commands,
+                    "audit_skill",
+                    return_value=CallResult(),
+                ), mock.patch.object(
+                    skills_commands,
+                    "skill_invocation_analytics",
+                    return_value={"status": "unavailable_or_legacy"},
+                ), mock.patch.object(
+                    skills_commands,
+                    "_skill_workout_candidates",
+                    return_value=["outcome proof"],
+                ):
+                    result = skills_commands.skills_prove(repo_root, "demo")
+        finally:
+            sys.path.remove(lib_path)
+
+        skill_proof = result.data["skill_proof"]
+        self.assertEqual(skill_proof["proof_status"], "reachable_without_outcome_proof")
+        self.assertEqual(skill_proof["next_command"], "./bin/ask workouts run 'outcome proof' --json --robot")
+        self.assertEqual(skill_proof["validation_commands"], [skill_proof["next_command"]])
 
     def test_skill_invocation_analytics_resolves_relative_telemetry_dir_from_repo_root(self):
         """Verify relative SKILL_TELEMETRY_DIR overrides are repo-root relative."""
@@ -579,6 +904,20 @@ class TestAskCLI(unittest.TestCase):
         ):
             self.assertIn(field, explanation)
         self.assertIsInstance(explanation["reachability"], dict)
+
+    def test_skills_explain_human_output_exposes_validation(self):
+        """Verify ask skills explain renders its primary validation command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "skill-builder", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills explain output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("ℹ️  Skill: $skill-builder (resolved)", result.stdout)
+        self.assertIn("Source: Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask skills audit Plugins/skill-factory/skills/code_quality_review/skill-builder --level strict --json --robot",
+            result.stdout,
+        )
+        self.assertIn("Next: ./bin/ask skills proof skill-builder --json --robot", result.stdout)
 
     def test_skills_explain_golden_path_fields_for_he_and_non_he_handles(self):
         """Verify explain exposes source, runtime, validation, and proof handoff."""
@@ -732,6 +1071,10 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(resolution["kind"], "reviewer")
         self.assertEqual(resolution["command_visibility"], "reviewer")
         self.assertEqual(resolution["canonical_handle"], "skill-inspector")
+        self.assertEqual(
+            resolution["validation_commands"],
+            ["./bin/ask reviewers resolve skill-inspector --json --robot"],
+        )
 
     def test_reviewers_resolve_human_output(self):
         """Verify ask reviewers resolve has a useful non-JSON success render."""
@@ -741,6 +1084,37 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Reviewer handle: @skill-inspector", result.stdout)
         self.assertIn("codex/agents/skill-inspector/skill-inspector.toml", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask reviewers resolve skill-inspector --json --robot",
+            result.stdout,
+        )
+
+    def test_reviewers_missing_action_exposes_validation(self):
+        """Verify ask reviewers missing action returns a concrete recovery command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "reviewers", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask reviewers resolve skill-inspector --json --robot"],
+        )
+
+    def test_reviewers_missing_action_human_output_exposes_validation(self):
+        """Verify ask reviewers missing action prints the recovery command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "reviewers", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("missing action for topic 'reviewers'", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask reviewers resolve skill-inspector --json --robot",
+            result.stdout,
+        )
 
     def test_skills_invalid_action_mentions_proof(self):
         """Verify invalid skill-action guidance includes the public proof command."""
@@ -751,6 +1125,113 @@ class TestAskCLI(unittest.TestCase):
         output = json.loads(result.stdout)
         suggestion = output["errors"][0]["fix_suggestion"]
         self.assertIn("proof", suggestion)
+
+    def test_unknown_action_helpers_share_valid_actions_fix_suggestion(self):
+        """Verify unknown-action helpers format valid actions from one source."""
+        unknown_result = build_unknown_action_result("repo", "nonsense")
+        helpful_result = build_helpful_error("repo", "nonsense", ["repo", "nonsense"])
+
+        expected_suggestion = f"Valid actions: {', '.join(VALID_ACTIONS['repo'])}"
+        self.assertEqual(unknown_result.errors[0].fix_suggestion, expected_suggestion)
+        self.assertEqual(helpful_result.errors[0].fix_suggestion, expected_suggestion)
+        self.assertEqual(
+            unknown_result.data["validation_commands"],
+            ["./bin/ask repo status --json --robot"],
+        )
+        self.assertEqual(
+            unknown_result.data["candidate_commands"],
+            [
+                "ask repo doctor --json --robot",
+                "ask repo closeout --changed --json --robot",
+                "ask repo validate --ephemeral",
+            ],
+        )
+
+    def test_skills_unknown_action_exposes_parser_recovery_validation(self):
+        """Verify parser-level unknown skill actions expose the recovery command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "nonsense", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("Unknown action", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(
+            output["data"]["candidate_commands"],
+            [
+                'ask skills improve "fix PR review comments faster" --json --robot',
+                "ask skills explain he-heartbeat --json --robot",
+                "ask skills doctor he-heartbeat --json --robot",
+            ],
+        )
+
+    def test_skills_unknown_action_human_output_exposes_parser_recovery_validation(self):
+        """Verify parser-level unknown skill actions render the recovery command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "nonsense", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("Unknown action", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills list --json --robot", result.stdout)
+
+    def test_ambiguous_action_first_error_exposes_candidate_commands(self):
+        """Verify ambiguous action-first parser errors expose machine-readable candidates."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "list", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("ambiguous", output["errors"][0]["message"])
+        self.assertEqual(
+            output["data"]["candidate_commands"],
+            ["ask skills list", "ask plugins list", "ask graph list"],
+        )
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask skills list --json --robot",
+                "./bin/ask plugins list --json --robot",
+                "./bin/ask graph list --json --robot",
+            ],
+        )
+
+    def test_argument_error_exposes_candidate_commands(self):
+        """Verify intent-known parser errors expose machine-readable example commands."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("argument syntax is invalid", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(output["data"]["candidate_commands"], ["ask skills resolve he-heartbeat --json"])
+
+    def test_skills_missing_action_exposes_validation(self):
+        """Verify incomplete skills commands expose the read-only recovery command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
+
+    def test_skills_missing_action_human_output_exposes_validation(self):
+        """Verify incomplete skills commands render the read-only recovery command."""
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("missing action for topic 'skills'", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills list --json --robot", result.stdout)
 
     def test_skills_goal_json_contract(self):
         """
@@ -771,6 +1252,27 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("policy_identity", goal)
         self.assertIn("recommended_candidate", goal)
         self.assertIn("alternative_candidates", goal)
+        self.assertEqual(
+            goal.get("validation_commands"),
+            ["./bin/ask skills goal 'create auth integration' --json --robot"],
+        )
+
+    def test_skills_goal_human_output_exposes_validation(self):
+        """Verify ambiguous goal output renders the goal validation command."""
+        cmd = [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "goal",
+            "make skill diagnostics clearer",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("🎯 Goal decision:", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills goal", result.stdout)
+        self.assertIn("--json --robot", result.stdout)
 
     def test_skills_improve_json_contract(self):
         """Verify `ask skills improve` returns an agent-facing recommendation envelope."""
@@ -798,6 +1300,26 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("proof", improvement)
         self.assertIn("why", improvement)
         self.assertIn("next_command", improvement)
+        self.assertEqual(improvement["validation_commands"], [improvement["next_command"]])
+
+    def test_skills_improve_human_output_exposes_validation(self):
+        """Verify ask skills improve renders the recommendation validation command."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "improve",
+            "autofix",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills improve output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("🎯 Skill improvement:", result.stdout)
+        self.assertIn("Recommended:", result.stdout)
+        self.assertIn("Reachability: pass", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills proof", result.stdout)
+        self.assertIn("Next: ./bin/ask skills proof", result.stdout)
 
     def test_repo_doctor_catalog_json_contract(self):
         """
@@ -836,6 +1358,61 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("next_command", doctor)
         self.assertIn("signals", doctor)
         self.assertIn("diagnostic_debt", doctor)
+        capability = doctor["signals"].get("capability_readiness", {})
+        self.assertEqual(capability.get("state"), "pass")
+        self.assertEqual(capability.get("summary"), "Skill capability readiness contracts are ready.")
+        self.assertEqual(capability.get("source"), "skills_profiles+skills_events")
+        self.assertEqual(capability["details"]["profile_contract_status"], "ready")
+        self.assertEqual(capability["details"]["profile_contract_gap_count"], 0)
+        self.assertEqual(capability["details"]["event_contract_status"], "ready")
+        self.assertEqual(capability["details"]["event_contract_gap_count"], 0)
+        self.assertIn("blocked_runtime", capability["details"]["eval_blocker_classes"])
+        self.assertIn("blocked_user_input", capability["details"]["eval_blocker_classes"])
+        self.assertEqual(
+            capability["details"]["eval_blocker_class_count"],
+            len(capability["details"]["eval_blocker_classes"]),
+        )
+        memory = doctor["signals"].get("memory_readiness", {})
+        self.assertEqual(memory.get("state"), "pass")
+        self.assertEqual(memory.get("summary"), "Skill memory provider returned searchable readiness evidence.")
+        self.assertEqual(memory.get("source"), "skills_memory")
+        self.assertEqual(memory["details"]["schema_version"], "skill-memory-provider.v1")
+        self.assertEqual(memory["details"]["provider_model"], "extension-like-read-only")
+        self.assertGreaterEqual(memory["details"]["entry_count"], 1)
+        self.assertIn("has_mtime", memory["details"]["by_freshness"])
+        self.assertFalse(any("{" in key for key in memory["details"]["by_freshness"]))
+        self.assertIn("validation_command", memory["details"])
+        package = doctor["signals"].get("package_readiness", {})
+        self.assertEqual(package.get("state"), "pass")
+        self.assertEqual(package.get("source"), "skills_package")
+        self.assertEqual(package["details"]["schema_version"], "skill-package-readiness.v1")
+        self.assertEqual(package["details"]["target"], "skill-builder")
+        self.assertEqual(package["details"]["promotion_status"], "ready")
+        self.assertTrue(package["details"]["promotion_ready"])
+        self.assertTrue(package["details"]["install_ready"])
+        self.assertEqual(package["details"]["checkout_test_status"], "pass")
+        self.assertEqual(package["details"]["missing_fields"], [])
+        self.assertEqual(package["details"]["blocked_reasons"], [])
+        self.assertTrue(package["details"]["compatible_roles_declared"])
+        self.assertTrue(package["details"]["runtime_contract_declared"])
+        self.assertIn("--checkout-test", package["details"]["validation_command"])
+
+    def test_repo_doctor_human_output_includes_readiness_signals(self):
+        """Verify repo doctor --robot prints capability-readiness signals."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "doctor",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Repo doctor:", result.stdout)
+        self.assertIn("Capability readiness: pass (0 profile gaps, 0 event gaps)", result.stdout)
+        self.assertIn("Memory readiness: pass", result.stdout)
+        self.assertIn("extension-like-read-only", result.stdout)
+        self.assertIn("Package readiness: pass (skill-builder, 0 missing fields)", result.stdout)
 
     def test_repo_doctor_help_mentions_agent_health_entrypoint(self):
         """Verify `ask repo doctor --help` exposes the agent health wording."""
@@ -843,6 +1420,76 @@ class TestAskCLI(unittest.TestCase):
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Agent-facing repository health entrypoint", result.stdout)
+
+    def test_repo_provider_audit_json_contract_exposes_validation(self):
+        """Verify provider audit exposes its replay command."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "provider-audit",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"provider audit output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("provider_policy", output["data"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask repo provider-audit --json --robot"],
+        )
+
+    def test_repo_provider_audit_human_output_exposes_validation(self):
+        """Verify provider audit human output names its replay command."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "provider-audit",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"provider audit output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Provider policy:", result.stdout)
+        self.assertIn("Validation: ./bin/ask repo provider-audit --json --robot", result.stdout)
+
+    def test_repo_check_stability_json_contract_exposes_validation(self):
+        """Verify check-stability exposes its replay command."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "check-stability",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"check-stability output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("stable_skills", output["data"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask repo check-stability --json --robot"],
+        )
+
+    def test_repo_check_stability_human_output_exposes_validation(self):
+        """Verify check-stability human output names its replay command."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "check-stability",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"check-stability output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Stability check passed", result.stdout)
+        self.assertIn("Validation: ./bin/ask repo check-stability --json --robot", result.stdout)
 
     def test_repo_closeout_json_contract(self):
         """Verify `ask repo closeout --changed --json` exposes readiness fields."""
@@ -862,10 +1509,50 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("changed_files", closeout)
         self.assertIn("sync", closeout)
         self.assertIn("runtime_budget", closeout)
+        self.assertIn("capability_readiness", closeout)
+        self.assertIn("memory_readiness", closeout)
+        self.assertIn("package_readiness", closeout)
         self.assertIn("surface_policy", closeout)
         self.assertIn("focused_validation", closeout)
         self.assertIn("commit_readiness", closeout)
         self.assertIn("next_command", closeout)
+        capability = closeout["capability_readiness"]
+        self.assertEqual(capability["status"], "pass")
+        self.assertEqual(capability["profile_contract_status"], "ready")
+        self.assertEqual(capability["profile_contract_gap_count"], 0)
+        self.assertEqual(capability["event_contract_status"], "ready")
+        self.assertEqual(capability["event_contract_gap_count"], 0)
+        self.assertIn("blocked_runtime", capability["eval_blocker_classes"])
+        self.assertEqual(
+            capability["eval_blocker_class_count"],
+            len(capability["eval_blocker_classes"]),
+        )
+        self.assertEqual(capability["contract_gap_count"], 0)
+        memory = closeout["memory_readiness"]
+        self.assertEqual(memory["status"], "pass")
+        self.assertEqual(memory["provider_model"], "extension-like-read-only")
+        self.assertGreaterEqual(memory["entry_count"], 1)
+        self.assertIn("available_sources", memory)
+        self.assertIn("has_mtime", memory["by_freshness"])
+        self.assertFalse(any("{" in key for key in memory["by_freshness"]))
+        package = closeout["package_readiness"]
+        self.assertEqual(package["status"], "pass")
+        self.assertEqual(package["target"], "skill-builder")
+        self.assertEqual(package["promotion_status"], "ready")
+        self.assertTrue(package["promotion_ready"])
+        self.assertTrue(package["install_ready"])
+        self.assertEqual(package["checkout_test_status"], "pass")
+        self.assertEqual(package["missing_fields"], [])
+        self.assertEqual(package["blocked_reasons"], [])
+        validation_ids = [command["id"] for command in closeout["focused_validation"]]
+        self.assertIn("skill_profiles_readiness", validation_ids)
+        self.assertIn("skill_events_readiness", validation_ids)
+        self.assertIn("skill_memory_readiness", validation_ids)
+        self.assertIn("skill_package_readiness", validation_ids)
+        package_validation = next(
+            command for command in closeout["focused_validation"] if command["id"] == "skill_package_readiness"
+        )
+        self.assertIn("--checkout-test", package_validation["command"])
 
     def test_repo_closeout_help_mentions_completion_readiness(self):
         """Verify `ask repo closeout --help` exposes completion-readiness wording."""
@@ -873,6 +1560,31 @@ class TestAskCLI(unittest.TestCase):
         result = _run_cli(cmd)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("commit readiness", result.stdout)
+
+    def test_repo_closeout_human_output_mentions_capability_readiness(self):
+        """Verify non-JSON repo closeout output exposes readiness and validation cues."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "closeout",
+            "--changed",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"repo closeout output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Repo closeout: Ready: no closeout blockers detected.", result.stdout)
+        self.assertIn("Commit ready: True", result.stdout)
+        self.assertIn("Capability readiness: pass (0 gaps)", result.stdout)
+        self.assertIn("Memory readiness: pass", result.stdout)
+        self.assertIn("Package readiness: pass", result.stdout)
+        self.assertIn("Eval blocker classes: 9", result.stdout)
+        self.assertIn("blocked_runtime", result.stdout)
+        self.assertIn("skill_profiles_readiness", result.stdout)
+        self.assertIn("skill_events_readiness", result.stdout)
+        self.assertIn("skill_memory_readiness", result.stdout)
+        self.assertIn("skill_package_readiness", result.stdout)
 
     def test_goal_alias_normalization(self):
         """
@@ -916,6 +1628,31 @@ class TestAskCLI(unittest.TestCase):
         self.assertTrue(output["data"].get("starter_mode"))
         self.assertEqual(output["data"].get("starter_archetype"), "delivery")
         self.assertIsInstance(output["data"].get("skills"), list)
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills starter --archetype delivery --limit 5 --json --robot"],
+        )
+
+    def test_skills_starter_human_output_exposes_validation(self):
+        """Verify ask skills starter renders its validation command."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "skills",
+            "starter",
+            "--archetype",
+            "delivery",
+            "--limit",
+            "5",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Starter skills (5) [delivery]", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask skills starter --archetype delivery --limit 5 --json --robot",
+            result.stdout,
+        )
 
     def test_skills_package_command(self):
         """Verify ask skills package exposes package readiness metadata."""
@@ -936,12 +1673,15 @@ class TestAskCLI(unittest.TestCase):
             package["readiness_summary"]["missing_field_count"],
             len(package["package_contract"]["required_fields"]["missing"]),
         )
-        self.assertEqual(package["gate_summary"]["promotion_status"], "blocked_validation")
+        self.assertEqual(package["gate_summary"]["promotion_status"], "ready_pending_checkout")
         self.assertFalse(package["gate_summary"]["promotion_ready"])
-        self.assertFalse(package["package_contract"]["install_gate"]["install_ready"])
+        self.assertTrue(package["package_contract"]["install_gate"]["install_ready"])
         self.assertEqual(package["package_contract"]["install_gate"]["checkout_test"]["status"], "not_run")
-        self.assertEqual(package["package_contract"]["promotion_gate"]["status"], "blocked_validation")
+        self.assertEqual(package["package_contract"]["promotion_gate"]["status"], "ready_pending_checkout")
         self.assertFalse(package["package_contract"]["promotion_gate"]["promotion_ready"])
+        self.assertEqual(package["package_contract"]["required_fields"]["missing"], [])
+        self.assertEqual(package["package_contract"]["install_gate"]["blocked_reasons"], [])
+        self.assertEqual(package["package_contract"]["promotion_gate"]["blocked_reasons"], [])
         self.assertEqual(package["contract_schemas"]["package"], "skill-package-readiness.v1")
         self.assertEqual(package["contract_schemas"]["profiles"], "skill-operation-profiles.v1")
         self.assertEqual(package["operation_context"]["primary_profile"], "package-review")
@@ -956,6 +1696,7 @@ class TestAskCLI(unittest.TestCase):
             package["operation_context"]["validation_commands"],
         )
         self.assertEqual(package["lifecycle_events"][1]["details"]["gate_summary"], package["gate_summary"])
+        self.assertEqual(package["lifecycle_event"], package["lifecycle_events"][1])
         self.assertEqual(package["lifecycle_events"][1]["event_identity"]["event_type"], "package_readiness_checked")
         self.assertEqual(package["lifecycle_events"][1]["event_identity"]["subject_key"], "skill-builder")
         self.assertEqual(
@@ -970,7 +1711,7 @@ class TestAskCLI(unittest.TestCase):
             package["lifecycle_events"][1]["observer_command"],
             "./bin/ask skills events package_readiness_checked --json --robot",
         )
-        self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
+        self.assertIn("package_readiness_checked", [event["event_type"] for event in package["lifecycle_events"]])
 
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""
@@ -979,8 +1720,15 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, f"skills package output: {result.stdout}\nstderr: {result.stderr}")
         self.assertIn("Skill package: skill-builder", result.stdout)
+        self.assertIn("Event: package_readiness_checked", result.stdout)
+        self.assertIn("Readiness level: share_ready", result.stdout)
+        self.assertIn("Compatible roles: default, worker, skill-inspector", result.stdout)
+        self.assertIn("Runtime needs: 3 declared", result.stdout)
+        self.assertIn("Provenance: frontmatter:Agent Skills Team:2026-05-15:canonical-source", result.stdout)
         self.assertIn("Install ready:", result.stdout)
+        self.assertIn("Checkout test:", result.stdout)
         self.assertIn("Promotion:", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills package <handle-or-path> --json --robot", result.stdout)
         self.assertIn("Next:", result.stdout)
 
     def test_skills_package_checkout_test_command_records_evidence(self):
@@ -1001,27 +1749,28 @@ class TestAskCLI(unittest.TestCase):
         output = json.loads(result.stdout)
         package = output["data"]["skill_package"]
         checkout = package["package_contract"]["install_gate"]["checkout_test"]
-        self.assertEqual(checkout["status"], "blocked_validation")
-        self.assertEqual(package["gate_summary"]["checkout_test_status"], "blocked_validation")
-        self.assertEqual(package["gate_summary"]["promotion_status"], "blocked_validation")
+        self.assertEqual(checkout["status"], "pass")
+        self.assertEqual(package["gate_summary"]["checkout_test_status"], "pass")
+        self.assertEqual(package["gate_summary"]["promotion_status"], "ready")
+        self.assertTrue(package["gate_summary"]["promotion_ready"])
         self.assertIn("source_readable:true", checkout["evidence"])
-        self.assertTrue(any(item.startswith("missing_package_metadata:") for item in checkout["evidence"]))
+        self.assertIn("package_metadata_complete:true", checkout["evidence"])
 
-    def test_skills_package_strict_command_blocks_metadata_gaps(self):
-        """Verify ask skills package --strict fails closed in JSON and exit status."""
+    def test_skills_package_strict_command_accepts_complete_metadata(self):
+        """Verify ask skills package --strict accepts complete package metadata."""
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-builder", "--strict", "--json", "--robot"]
         result = _run_cli(cmd)
 
-        self.assertEqual(result.returncode, 2, f"skills package strict output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertEqual(result.returncode, 0, f"skills package strict output: {result.stdout}\nstderr: {result.stderr}")
         output = json.loads(result.stdout)
-        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["status"], "success")
         package = output["data"]["skill_package"]
         self.assertTrue(package["strict"])
-        self.assertEqual(package["status"], "blocked")
-        self.assertEqual(package["blockers"][0]["class"], "blocked_validation")
-        self.assertIn("compatible_roles", package["package_contract"]["required_fields"]["missing"])
-        self.assertIn("compatible_roles", package["package_contract"]["install_gate"]["blocked_reasons"])
-        self.assertIn("package_readiness_checked", package["lifecycle_event_types"])
+        self.assertEqual(package["status"], "pass")
+        self.assertEqual(package["blockers"], [])
+        self.assertEqual(package["package_contract"]["required_fields"]["missing"], [])
+        self.assertEqual(package["package_contract"]["install_gate"]["blocked_reasons"], [])
+        self.assertIn("package_readiness_checked", [event["event_type"] for event in package["lifecycle_events"]])
 
     def test_skills_doctor_command_exposes_lifecycle_and_readiness(self):
         """Verify ask skills doctor exposes lifecycle and readiness contracts."""
@@ -1053,8 +1802,15 @@ class TestAskCLI(unittest.TestCase):
             "./bin/ask skills events skill_doctor_completed --json --robot",
         )
         self.assertIn("blocked_user_input", doctor["readiness_taxonomy"]["blockers"])
-        self.assertEqual(doctor["contract_schemas"]["doctor"], "skill-doctor.v1")
-        self.assertEqual(doctor["contract_schemas"]["events"], "skill-events.v1")
+        self.assertEqual(doctor["contract_schemas"]["doctor"]["version"], "skill-doctor.v1")
+        self.assertEqual(doctor["contract_schemas"]["doctor"]["owner"], "Agent Skills Kit")
+        self.assertTrue(
+            doctor["contract_schemas"]["doctor"].get("path")
+            or doctor["contract_schemas"]["doctor"].get("missing_schema_reason")
+        )
+        self.assertEqual(doctor["contract_schemas"]["events"]["version"], "skill-events.v1")
+        self.assertEqual(doctor["contract_schema_versions"]["doctor"], "skill-doctor.v1")
+        self.assertEqual(doctor["contract_schema_versions"]["events"], "skill-events.v1")
         self.assertEqual(doctor["operation_context"]["primary_profile"], "authoring")
         self.assertIn("package-review", doctor["operation_context"]["next_profiles"])
         self.assertIn("skill audit", doctor["operation_context"]["profiles"]["authoring"]["required_evidence"])
@@ -1067,6 +1823,8 @@ class TestAskCLI(unittest.TestCase):
             doctor["operation_context"]["validation_commands"],
         )
         self.assertIn("eval_blocked", doctor["lifecycle_event_types"])
+        self.assertIn("Packaging", doctor["sdk_layers"])
+        self.assertEqual(doctor["checks"]["package_readiness"]["sdk_layer"], "Packaging")
         package_readiness = doctor["checks"]["capability_metadata"]["package_readiness"]
         self.assertIn("version", package_readiness["required_fields"]["present"])
         self.assertFalse(package_readiness["promotion_gate"]["share_ready"])
@@ -1075,6 +1833,27 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package_contract["runtime_contract"], package_readiness["runtime_contract"])
         self.assertEqual(package_contract["install_gate"], package_readiness["install_gate"])
         self.assertEqual(package_contract["promotion_gate"], package_readiness["promotion_gate"])
+
+    def test_skills_doctor_human_output_exposes_lifecycle_event(self):
+        """Verify ask skills doctor exposes the primary lifecycle event in human output."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "doctor",
+            "skill-builder",
+            "--strict",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills doctor output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Skill doctor: skill-builder", result.stdout)
+        self.assertIn("Event: skill_doctor_completed", result.stdout)
+        self.assertIn("Warning classes: outcome_proof_missing", result.stdout)
+        self.assertIn("Checks: missing=1, pass=6", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills doctor <handle-or-path> --json --robot", result.stdout)
+        self.assertIn("Next:", result.stdout)
 
     def test_skills_profiles_command_returns_selected_profile(self):
         """Verify ask skills profiles exposes one operation-mode contract."""
@@ -1090,26 +1869,359 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(profiles["profile_names"], ["eval"])
         self.assertIn("package-review", profiles["available_profiles"])
         self.assertEqual(profiles["profile_summary"]["profile_count"], 1)
+        self.assertEqual(profiles["profile_summary"]["profile_names"], ["eval"])
+        self.assertTrue(profiles["profile_summary"]["has_profiles"])
+        _assert_readiness_overview_ready(
+            self,
+            profiles["readiness_overview"],
+            ["lifecycle_event_coverage", "profile_contracts"],
+        )
+        self.assertEqual(
+            profiles["readiness_overview"]["contract_sections"],
+            {
+                "lifecycle_event_coverage": {"gap_count": 0, "ready": True, "status": "ready"},
+                "profile_contracts": {"gap_count": 0, "ready": True, "status": "ready"},
+            },
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["contract_dimensions"],
+            ["allowed_roots", "permissions", "required_evidence", "stop_conditions", "write_policy"],
+        )
+        self.assertEqual(profiles["profile_summary"]["contract_dimension_count"], 5)
+        self.assertEqual(
+            profiles["profile_summary"]["contract_dimension_status"],
+            {
+                "allowed_roots": "ready",
+                "permissions": "ready",
+                "required_evidence": "ready",
+                "stop_conditions": "ready",
+                "write_policy": "ready",
+            },
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["missing_profiles_by_contract_dimension"],
+            {
+                "allowed_roots": [],
+                "permissions": [],
+                "required_evidence": [],
+                "stop_conditions": [],
+                "write_policy": [],
+            },
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["missing_profile_count_by_contract_dimension"],
+            {
+                "allowed_roots": 0,
+                "permissions": 0,
+                "required_evidence": 0,
+                "stop_conditions": 0,
+                "write_policy": 0,
+            },
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["required_evidence_count"],
+            len(profiles["profiles"]["eval"]["required_evidence"]),
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["required_evidence_by_profile"]["eval"],
+            sorted(profiles["profiles"]["eval"]["required_evidence"]),
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["required_evidence_count_by_profile"]["eval"],
+            len(profiles["profiles"]["eval"]["required_evidence"]),
+        )
+        self.assertTrue(profiles["profile_summary"]["has_required_evidence"])
+        self.assertTrue(profiles["profile_summary"]["has_stop_conditions"])
+        self.assertEqual(
+            profiles["profile_summary"]["stop_conditions_by_profile"]["eval"],
+            sorted(profiles["profiles"]["eval"]["stop_conditions"]),
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["stop_condition_count_by_profile"]["eval"],
+            len(profiles["profiles"]["eval"]["stop_conditions"]),
+        )
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_allowed_roots"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_allowed_root_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_missing_allowed_roots"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_allowed_roots"])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_permissions"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_permission_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_missing_permissions"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_permissions"])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_required_evidence"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_required_evidence_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_missing_required_evidence"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_required_evidence"])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_stop_conditions"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_stop_condition_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_missing_stop_conditions"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_stop_conditions"])
+        self.assertEqual(profiles["profile_summary"]["profiles_without_taxonomy_stop_conditions"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_with_taxonomy_stop_conditions"], ["eval"])
+        self.assertEqual(profiles["profile_summary"]["profiles_with_taxonomy_stop_condition_count"], 1)
+        self.assertEqual(profiles["profile_summary"]["profiles_without_taxonomy_stop_condition_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_without_taxonomy_stop_conditions"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_taxonomy_stop_conditions"])
+        self.assertTrue(profiles["profile_summary"]["has_taxonomy_stop_conditions"])
+        self.assertIn("blocked_runtime", profiles["profile_summary"]["taxonomy_stop_conditions_by_profile"]["eval"])
+        self.assertIn("timeout_no_output", profiles["profile_summary"]["taxonomy_stop_conditions_by_profile"]["eval"])
+        self.assertEqual(
+            profiles["profile_summary"]["taxonomy_stop_condition_count"],
+            len(profiles["profile_summary"]["taxonomy_stop_conditions_by_profile"]["eval"]),
+        )
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_write_policy"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_write_policy_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_missing_write_policy"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_write_policy"])
+        self.assertEqual(profiles["profile_summary"]["profiles_with_contract_gaps"], [])
+        _assert_contract_ready(self, profiles["profile_summary"])
         self.assertIn("artifact_write_only", profiles["profile_summary"]["by_write_policy"])
+        self.assertEqual(profiles["profile_summary"]["write_policy_count"], 1)
+        self.assertEqual(
+            profiles["profile_summary"]["write_policy_by_profile"]["eval"],
+            profiles["profiles"]["eval"]["write_policy"],
+        )
         self.assertIn("repo_read", profiles["profile_summary"]["by_permission"])
+        self.assertEqual(
+            profiles["profile_summary"]["permission_count"],
+            len(profiles["profile_summary"]["by_permission"]),
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["permissions_by_profile"]["eval"],
+            sorted(profiles["profiles"]["eval"]["permissions"]),
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["permission_count_by_profile"]["eval"],
+            len(profiles["profiles"]["eval"]["permissions"]),
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["allowed_roots_by_profile"]["eval"],
+            sorted(profiles["profiles"]["eval"]["allowed_roots"]),
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["allowed_root_count_by_profile"]["eval"],
+            len(profiles["profiles"]["eval"]["allowed_roots"]),
+        )
         self.assertEqual(list(profiles["profiles"]), ["eval"])
         self.assertEqual(profiles["operation_context"]["profile_model"], "profile-v2-inspired")
         self.assertEqual(profiles["operation_context"]["contract_schemas"]["doctor"], "skill-doctor.v1")
         self.assertEqual(profiles["operation_context"]["contract_schemas"]["memory"], "skill-memory-provider.v1")
         self.assertIn("eval", profiles["operation_context"]["routing_contracts"]["events"])
+        self.assertEqual(profiles["event_coverage"]["profile_count"], 1)
+        self.assertEqual(profiles["event_coverage"]["profile_names"], ["eval"])
+        self.assertIn("eval_blocked", profiles["event_coverage"]["events_by_profile"]["eval"])
+        self.assertIn("eval_completed", profiles["event_coverage"]["events_by_profile"]["eval"])
+        self.assertEqual(
+            profiles["event_coverage"]["event_count_by_profile"]["eval"],
+            len(profiles["event_coverage"]["events_by_profile"]["eval"]),
+        )
+        self.assertEqual(
+            profiles["event_coverage"]["event_reference_count"],
+            profiles["event_coverage"]["event_count_by_profile"]["eval"],
+        )
+        self.assertEqual(profiles["event_coverage"]["profiles_with_events"], ["eval"])
+        self.assertEqual(profiles["event_coverage"]["profiles_with_event_count"], 1)
+        self.assertEqual(profiles["event_coverage"]["profiles_missing_events"], [])
+        self.assertEqual(profiles["event_coverage"]["profiles_missing_event_count"], 0)
+        self.assertFalse(profiles["event_coverage"]["has_profiles_missing_events"])
+        self.assertTrue(profiles["event_coverage"]["all_profiles_have_events"])
+        self.assertEqual(profiles["event_coverage"]["profiles_with_event_gaps"], [])
+        self.assertEqual(profiles["event_coverage"]["profiles_with_event_gap_count"], 0)
+        _assert_contract_ready(self, profiles["event_coverage"])
         self.assertEqual(
             profiles["operation_context"]["consumer_commands"]["events"],
             "./bin/ask skills events --json --robot",
         )
         self.assertIn("Skills", profiles["workspace_roots"]["canonical_skill_roots"])
         self.assertIn(".agents/skills", profiles["workspace_roots"]["runtime_projection_roots"])
+        self.assertIn("blocked_runtime", profiles["eval_blocker_classes"])
+        self.assertEqual(
+            profiles["blocker_taxonomy"]["blocked_runtime"],
+            profiles["eval_blocker_classes"]["blocked_runtime"],
+        )
+        self.assertIn("strict_audit_not_run", profiles["warning_taxonomy"])
+        self.assertIn("blocked_runtime", profiles["profiles"]["eval"]["stop_conditions"])
         self.assertIn("timeout_no_output", profiles["profiles"]["eval"]["stop_conditions"])
+        self.assertIn("blocked_runtime", profiles["profiles"]["eval"]["stop_condition_definitions"])
         self.assertIn("timeout_no_output", profiles["profiles"]["eval"]["stop_condition_definitions"])
         self.assertIn("blocked_user_input", profiles["profiles"]["eval"]["eval_blocker_classes"])
         self.assertEqual(
             profiles["profiles"]["eval"]["effective_roots"],
             ["Skills/**", "Infrastructure/workouts/**", "Infrastructure/artifacts/**"],
         )
+
+    def test_skills_profiles_command_returns_aggregate_contract_readiness(self):
+        """Verify ask skills profiles summarizes all operation-mode contracts."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "profiles", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills profiles failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        profiles = output["data"]["skill_profiles"]
+        self.assertEqual(profiles["selected_profile"], None)
+        _assert_readiness_overview_ready(
+            self,
+            profiles["readiness_overview"],
+            ["lifecycle_event_coverage", "profile_contracts"],
+        )
+        self.assertEqual(
+            profiles["readiness_overview"]["contract_sections"]["profile_contracts"]["status"],
+            profiles["profile_summary"]["contract_status"],
+        )
+        self.assertEqual(
+            profiles["readiness_overview"]["contract_sections"]["lifecycle_event_coverage"]["status"],
+            profiles["event_coverage"]["contract_status"],
+        )
+        self.assertEqual(profiles["profile_summary"]["profile_count"], len(profiles["profiles"]))
+        self.assertEqual(profiles["profile_summary"]["profile_names"], sorted(profiles["profiles"]))
+        self.assertEqual(
+            profiles["profile_summary"]["contract_dimensions"],
+            ["allowed_roots", "permissions", "required_evidence", "stop_conditions", "write_policy"],
+        )
+        self.assertEqual(profiles["profile_summary"]["contract_dimension_count"], 5)
+        self.assertEqual(
+            set(profiles["profile_summary"]["contract_dimension_status"]),
+            set(profiles["profile_summary"]["contract_dimensions"]),
+        )
+        self.assertTrue(
+            all(
+                status == "ready"
+                for status in profiles["profile_summary"]["contract_dimension_status"].values()
+            )
+        )
+        self.assertTrue(
+            all(
+                count == 0
+                for count in profiles["profile_summary"]["missing_profile_count_by_contract_dimension"].values()
+            )
+        )
+        self.assertEqual(
+            set(profiles["profile_summary"]["missing_profiles_by_contract_dimension"]),
+            set(profiles["profile_summary"]["contract_dimensions"]),
+        )
+        self.assertEqual(profiles["profile_summary"]["profiles_with_contract_gaps"], [])
+        _assert_contract_ready(self, profiles["profile_summary"])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_allowed_roots"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_allowed_root_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_missing_allowed_roots"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_allowed_roots"])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_permissions"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_permission_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_missing_permissions"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_permissions"])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_required_evidence"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_required_evidence_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_missing_required_evidence"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_required_evidence"])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_stop_conditions"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_stop_condition_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_missing_stop_conditions"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_stop_conditions"])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_write_policy"], [])
+        self.assertEqual(profiles["profile_summary"]["profiles_missing_write_policy_count"], 0)
+        self.assertFalse(profiles["profile_summary"]["has_profiles_missing_write_policy"])
+        self.assertTrue(profiles["profile_summary"]["all_profiles_have_write_policy"])
+        self.assertEqual(
+            profiles["profile_summary"]["required_evidence_count"],
+            sum(profiles["profile_summary"]["required_evidence_count_by_profile"].values()),
+        )
+        self.assertEqual(
+            sorted(profiles["profile_summary"]["write_policy_by_profile"]),
+            sorted(profiles["profiles"]),
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["write_policy_by_profile"]["live-mutation"],
+            "explicit_request_required",
+        )
+        self.assertEqual(
+            sorted(profiles["profile_summary"]["stop_conditions_by_profile"]),
+            sorted(profiles["profiles"]),
+        )
+        self.assertEqual(
+            sum(profiles["profile_summary"]["stop_condition_count_by_profile"].values()),
+            profiles["profile_summary"]["stop_condition_count"],
+        )
+        self.assertIn(
+            "unrelated dirty worktree",
+            profiles["profile_summary"]["stop_conditions_by_profile"]["live-mutation"],
+        )
+        self.assertEqual(
+            sorted(profiles["profile_summary"]["required_evidence_by_profile"]),
+            sorted(profiles["profiles"]),
+        )
+        self.assertIn(
+            "post-mutation validation",
+            profiles["profile_summary"]["required_evidence_by_profile"]["live-mutation"],
+        )
+        self.assertTrue(profiles["profile_summary"]["has_taxonomy_stop_conditions"])
+        self.assertIn("eval", profiles["profile_summary"]["profiles_with_taxonomy_stop_conditions"])
+        self.assertIn("package-review", profiles["profile_summary"]["profiles_with_taxonomy_stop_conditions"])
+        self.assertIn("authoring", profiles["profile_summary"]["profiles_without_taxonomy_stop_conditions"])
+        self.assertEqual(
+            profiles["profile_summary"]["profiles_with_taxonomy_stop_condition_count"],
+            len(profiles["profile_summary"]["profiles_with_taxonomy_stop_conditions"]),
+        )
+        self.assertEqual(
+            profiles["profile_summary"]["profiles_without_taxonomy_stop_condition_count"],
+            len(profiles["profile_summary"]["profiles_without_taxonomy_stop_conditions"]),
+        )
+        self.assertTrue(profiles["profile_summary"]["has_profiles_without_taxonomy_stop_conditions"])
+        self.assertFalse(profiles["profile_summary"]["all_profiles_have_taxonomy_stop_conditions"])
+        self.assertIn(
+            "blocked_user_input",
+            profiles["profile_summary"]["taxonomy_stop_conditions_by_profile"]["eval"],
+        )
+        self.assertIn("live-mutation", profiles["profile_names"])
+        self.assertIn("external_write_after_confirmation", profiles["profile_summary"]["by_permission"])
+        self.assertEqual(
+            sorted(profiles["profile_summary"]["permissions_by_profile"]),
+            sorted(profiles["profiles"]),
+        )
+        self.assertEqual(
+            sum(profiles["profile_summary"]["permission_count_by_profile"].values()),
+            sum(len(profile["permissions"]) for profile in profiles["profiles"].values()),
+        )
+        self.assertIn(
+            "external_write_after_confirmation",
+            profiles["profile_summary"]["permissions_by_profile"]["live-mutation"],
+        )
+        self.assertEqual(
+            sorted(profiles["profile_summary"]["allowed_roots_by_profile"]),
+            sorted(profiles["profiles"]),
+        )
+        self.assertEqual(
+            sum(profiles["profile_summary"]["allowed_root_count_by_profile"].values()),
+            profiles["profile_summary"]["allowed_root_count"],
+        )
+        self.assertIn(
+            "Infrastructure/artifacts/skill-reviews/**",
+            profiles["profile_summary"]["allowed_roots_by_profile"]["package-review"],
+        )
+        self.assertEqual(sorted(profiles["event_coverage"]["events_by_profile"]), sorted(profiles["profiles"]))
+        self.assertEqual(profiles["event_coverage"]["profile_count"], len(profiles["profiles"]))
+        self.assertEqual(profiles["event_coverage"]["profile_names"], sorted(profiles["profiles"]))
+        self.assertFalse(profiles["event_coverage"]["has_profiles_missing_events"])
+        self.assertEqual(profiles["event_coverage"]["profiles_missing_events"], [])
+        self.assertEqual(profiles["event_coverage"]["profiles_missing_event_count"], 0)
+        self.assertTrue(profiles["event_coverage"]["all_profiles_have_events"])
+        self.assertEqual(
+            profiles["event_coverage"]["event_reference_count"],
+            sum(profiles["event_coverage"]["event_count_by_profile"].values()),
+        )
+        self.assertEqual(
+            profiles["event_coverage"]["profiles_with_events"],
+            sorted(profiles["profiles"]),
+        )
+        self.assertEqual(
+            profiles["event_coverage"]["profiles_with_event_count"],
+            len(profiles["profiles"]),
+        )
+        self.assertGreaterEqual(profiles["event_coverage"]["event_count_by_profile"]["authoring"], 1)
+        self.assertIn("projection_synced", profiles["event_coverage"]["events_by_profile"]["live-mutation"])
+        self.assertEqual(profiles["event_coverage"]["profiles_with_event_gaps"], [])
+        self.assertEqual(profiles["event_coverage"]["profiles_with_event_gap_count"], 0)
+        _assert_contract_ready(self, profiles["event_coverage"])
 
     def test_skills_profiles_human_output(self):
         """Verify ask skills profiles has a useful non-JSON selected-profile render."""
@@ -1118,6 +2230,9 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, f"skills profiles output: {result.stdout}\nstderr: {result.stderr}")
         self.assertIn("Skill profiles: pass", result.stdout)
+        self.assertIn("Readiness: ready (0 gaps)", result.stdout)
+        self.assertIn("Ready sections: lifecycle_event_coverage, profile_contracts", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills handles --check --no-handles --json --robot", result.stdout)
         self.assertIn("Profile: package-review", result.stdout)
         self.assertIn("Intent: Check a skill or plugin package before promotion.", result.stdout)
         self.assertIn("Write policy: reports_only_unless_fix_requested", result.stdout)
@@ -1151,13 +2266,133 @@ class TestAskCLI(unittest.TestCase):
         self.assertGreaterEqual(events["event_count"], 8)
         self.assertIn("eval_blocked", events["event_names"])
         self.assertIn("skill_loaded", events["available_event_types"])
+        _assert_readiness_overview_ready(
+            self,
+            events["readiness_overview"],
+            ["lifecycle_event_contract"],
+        )
+        self.assertEqual(
+            events["readiness_overview"]["contract_sections"],
+            {"lifecycle_event_contract": {"gap_count": 0, "ready": True, "status": "ready"}},
+        )
         self.assertEqual(events["event_summary"]["event_count"], events["event_count"])
+        self.assertEqual(
+            events["event_summary"]["contract_dimensions"],
+            ["known_profiles", "observer_commands", "producer_commands", "profiles"],
+        )
+        self.assertEqual(events["event_summary"]["contract_dimension_count"], 4)
+        self.assertEqual(
+            events["event_summary"]["contract_dimension_status"],
+            {
+                "known_profiles": "ready",
+                "observer_commands": "ready",
+                "producer_commands": "ready",
+                "profiles": "ready",
+            },
+        )
+        self.assertEqual(
+            events["event_summary"]["missing_events_by_contract_dimension"],
+            {
+                "known_profiles": [],
+                "observer_commands": [],
+                "producer_commands": [],
+                "profiles": [],
+            },
+        )
+        self.assertEqual(
+            events["event_summary"]["missing_event_count_by_contract_dimension"],
+            {
+                "known_profiles": 0,
+                "observer_commands": 0,
+                "producer_commands": 0,
+                "profiles": 0,
+            },
+        )
+        self.assertGreaterEqual(events["event_summary"]["producer_command_count"], events["event_count"])
+        self.assertGreaterEqual(events["event_summary"]["observer_command_count"], events["event_count"])
+        self.assertEqual(
+            sorted(events["event_summary"]["producer_command_count_by_event"]),
+            sorted(events["event_consumers"]),
+        )
+        self.assertEqual(
+            events["event_summary"]["producer_command_count_by_event"]["eval_completed"],
+            len(events["event_consumers"]["eval_completed"]["producer_commands"]),
+        )
+        self.assertEqual(
+            events["event_summary"]["observer_command_count_by_event"]["projection_synced"],
+            len(events["event_consumers"]["projection_synced"]["observer_commands"]),
+        )
         self.assertGreaterEqual(events["event_summary"]["by_profile"]["eval"], 1)
+        self.assertIn("eval_blocked", events["event_summary"]["events_by_profile"]["eval"])
+        self.assertIn("projection_synced", events["event_summary"]["events_by_profile"]["live-mutation"])
+        self.assertEqual(
+            events["event_summary"]["event_count_by_profile"]["eval"],
+            len(events["event_summary"]["events_by_profile"]["eval"]),
+        )
+        self.assertEqual(
+            events["event_summary"]["profiles_by_event"]["eval_blocked"],
+            events["event_consumers"]["eval_blocked"]["profiles"],
+        )
+        self.assertEqual(
+            events["event_summary"]["profile_count_by_event"]["manifest_changed"],
+            len(events["event_consumers"]["manifest_changed"]["profiles"]),
+        )
+        self.assertEqual(events["event_summary"]["profile_count"], len(events["event_summary"]["by_profile"]))
+        self.assertEqual(events["event_summary"]["profile_names"], sorted(events["event_summary"]["by_profile"]))
+        self.assertIn("eval", events["event_summary"]["profile_names"])
+        self.assertTrue(events["event_summary"]["has_profiles"])
+        self.assertFalse(events["event_summary"]["has_missing_producers"])
+        self.assertFalse(events["event_summary"]["has_missing_observers"])
+        self.assertFalse(events["event_summary"]["has_missing_profiles"])
+        self.assertFalse(events["event_summary"]["has_unknown_profiles"])
+        self.assertEqual(events["event_summary"]["events_missing_producers"], [])
+        self.assertEqual(events["event_summary"]["events_missing_observers"], [])
+        self.assertEqual(events["event_summary"]["events_missing_profiles"], [])
+        self.assertEqual(events["event_summary"]["events_missing_profile_count"], 0)
+        self.assertEqual(events["event_summary"]["events_with_unknown_profile_count"], 0)
+        self.assertEqual(events["event_summary"]["unknown_profile_reference_count"], 0)
+        self.assertEqual(events["event_summary"]["events_with_unknown_profiles"], {})
+        self.assertEqual(events["event_summary"]["profiles_unknown_to_registry"], [])
+        self.assertEqual(events["event_summary"]["known_profile_count"], len(events["event_summary"]["known_profile_names"]))
+        self.assertEqual(events["event_summary"]["referenced_profile_count"], len(events["event_summary"]["referenced_profile_names"]))
+        self.assertEqual(
+            sorted(events["event_summary"]["known_events_by_profile"]),
+            events["event_summary"]["known_profile_names"],
+        )
+        self.assertEqual(
+            events["event_summary"]["known_event_count_by_profile"]["eval"],
+            len(events["event_summary"]["known_events_by_profile"]["eval"]),
+        )
+        self.assertEqual(events["event_summary"]["known_profiles_with_events"], events["event_summary"]["known_profile_names"])
+        self.assertEqual(
+            events["event_summary"]["known_profile_event_coverage_count"],
+            events["event_summary"]["known_profile_count"],
+        )
+        self.assertTrue(events["event_summary"]["all_known_profiles_have_events"])
+        self.assertEqual(events["event_summary"]["known_profiles_without_events"], [])
+        self.assertFalse(events["event_summary"]["has_known_profiles_without_events"])
+        self.assertIn("live-mutation", events["event_summary"]["known_profile_names"])
+        self.assertIn("live-mutation", events["event_summary"]["referenced_profile_names"])
+        self.assertEqual(events["event_summary"]["events_with_contract_gaps"], [])
+        _assert_contract_ready(self, events["event_summary"])
         self.assertIn("./bin/ask skills events --json --robot", events["validation_commands"])
         self.assertIn("eval_blocked", events["event_types"])
         self.assertIn("eval", events["event_consumers"]["eval_blocked"]["profiles"])
         self.assertIn("./bin/ask skills prove <handle> --json --robot", events["event_consumers"]["eval_completed"]["producer_commands"])
+        self.assertEqual(
+            events["event_consumers"]["projection_synced"]["producer_commands"],
+            ["./bin/ask skills sync --json --robot"],
+        )
+        self.assertEqual(
+            events["event_consumers"]["manifest_changed"]["producer_commands"],
+            ["./bin/ask skills handles --write-projection --json --robot"],
+        )
+        self.assertEqual(
+            events["event_consumers"]["projection_synced"]["observer_commands"],
+            ["./bin/ask skills handles --check --json --robot"],
+        )
         self.assertIn("blocked_user_input", events["eval_blocker_classes"])
+        self.assertIn("blocked_runtime", events["eval_blocker_classes"])
         self.assertIn("timeout_partial_output", events["eval_blocker_classes"])
         self.assertEqual(events["blocker_taxonomy"]["blocked_auth"], events["eval_blocker_classes"]["blocked_auth"])
         self.assertIn("strict_audit_not_run", events["warning_taxonomy"])
@@ -1175,13 +2410,241 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(events["selected_event_type"], "eval_blocked")
         self.assertEqual(events["event_names"], ["eval_blocked"])
         self.assertIn("eval_completed", events["available_event_types"])
+        _assert_readiness_overview_ready(
+            self,
+            events["readiness_overview"],
+            ["lifecycle_event_contract"],
+        )
+        self.assertEqual(
+            events["readiness_overview"]["contract_sections"]["lifecycle_event_contract"]["status"],
+            events["event_summary"]["contract_status"],
+        )
         self.assertEqual(events["event_summary"]["event_count"], 1)
+        self.assertEqual(
+            events["event_summary"]["contract_dimensions"],
+            ["known_profiles", "observer_commands", "producer_commands", "profiles"],
+        )
+        self.assertEqual(events["event_summary"]["contract_dimension_count"], 4)
+        self.assertEqual(
+            events["event_summary"]["contract_dimension_status"],
+            {
+                "known_profiles": "ready",
+                "observer_commands": "ready",
+                "producer_commands": "ready",
+                "profiles": "ready",
+            },
+        )
+        self.assertEqual(
+            events["event_summary"]["missing_events_by_contract_dimension"],
+            {
+                "known_profiles": [],
+                "observer_commands": [],
+                "producer_commands": [],
+                "profiles": [],
+            },
+        )
+        self.assertEqual(
+            events["event_summary"]["missing_event_count_by_contract_dimension"],
+            {
+                "known_profiles": 0,
+                "observer_commands": 0,
+                "producer_commands": 0,
+                "profiles": 0,
+            },
+        )
+        self.assertEqual(events["event_summary"]["producer_command_count"], 1)
+        self.assertEqual(events["event_summary"]["observer_command_count"], 1)
+        self.assertEqual(events["event_summary"]["producer_command_count_by_event"], {"eval_blocked": 1})
+        self.assertEqual(events["event_summary"]["observer_command_count_by_event"], {"eval_blocked": 1})
+        self.assertEqual(events["event_summary"]["profile_names"], ["eval"])
+        self.assertEqual(events["event_summary"]["profile_count"], 1)
+        self.assertEqual(events["event_summary"]["events_by_profile"], {"eval": ["eval_blocked"]})
+        self.assertEqual(events["event_summary"]["event_count_by_profile"], {"eval": 1})
+        self.assertEqual(events["event_summary"]["profiles_by_event"], {"eval_blocked": ["eval"]})
+        self.assertEqual(events["event_summary"]["profile_count_by_event"], {"eval_blocked": 1})
+        self.assertFalse(events["event_summary"]["has_missing_producers"])
+        self.assertFalse(events["event_summary"]["has_missing_observers"])
+        self.assertFalse(events["event_summary"]["has_missing_profiles"])
+        self.assertFalse(events["event_summary"]["has_unknown_profiles"])
+        self.assertEqual(events["event_summary"]["events_missing_profile_count"], 0)
+        self.assertEqual(events["event_summary"]["events_with_unknown_profile_count"], 0)
+        self.assertEqual(events["event_summary"]["unknown_profile_reference_count"], 0)
+        self.assertEqual(events["event_summary"]["events_with_unknown_profiles"], {})
+        self.assertEqual(events["event_summary"]["profiles_unknown_to_registry"], [])
+        self.assertEqual(events["event_summary"]["known_profile_count"], 5)
+        self.assertIn("live-mutation", events["event_summary"]["known_profile_names"])
+        self.assertEqual(events["event_summary"]["known_events_by_profile"]["eval"], ["eval_blocked"])
+        self.assertEqual(events["event_summary"]["known_events_by_profile"]["live-mutation"], [])
+        self.assertEqual(events["event_summary"]["known_event_count_by_profile"]["live-mutation"], 0)
+        self.assertEqual(events["event_summary"]["known_profiles_with_events"], ["eval"])
+        self.assertEqual(events["event_summary"]["known_profile_event_coverage_count"], 1)
+        self.assertFalse(events["event_summary"]["all_known_profiles_have_events"])
+        self.assertEqual(events["event_summary"]["referenced_profile_names"], ["eval"])
+        self.assertIn("live-mutation", events["event_summary"]["known_profiles_without_events"])
+        self.assertTrue(events["event_summary"]["has_known_profiles_without_events"])
+        self.assertEqual(events["event_summary"]["events_with_contract_gaps"], [])
+        _assert_contract_ready(self, events["event_summary"])
         self.assertEqual(list(events["event_types"]), ["eval_blocked"])
         self.assertEqual(list(events["event_consumers"]), ["eval_blocked"])
         self.assertEqual(events["contract_schemas"]["events"], "skill-events.v1")
         self.assertIn("blocker", events["event_types"]["eval_blocked"])
         self.assertIn("eval", events["event_consumers"]["eval_blocked"]["profiles"])
         self.assertIn("blocked_auth", events["eval_blocker_classes"])
+
+    def test_skills_events_summary_flags_unknown_profiles(self):
+        """Verify event summaries fail closed on undeclared profile references."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands.skills_impl import _skill_event_summary
+
+            summary = _skill_event_summary(
+                {
+                    "unsafe_event": {
+                        "profiles": ["ghost-profile"],
+                        "producer_commands": ["ask unsafe"],
+                        "observer_commands": ["ask events unsafe_event"],
+                    }
+                },
+                {"eval": {"intent": "Run evidence."}},
+            )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(summary["events_with_unknown_profiles"], {"unsafe_event": ["ghost-profile"]})
+        self.assertEqual(
+            summary["contract_dimensions"],
+            ["known_profiles", "observer_commands", "producer_commands", "profiles"],
+        )
+        self.assertEqual(summary["contract_dimension_count"], 4)
+        self.assertEqual(
+            summary["contract_dimension_status"],
+            {
+                "known_profiles": "has_gaps",
+                "observer_commands": "ready",
+                "producer_commands": "ready",
+                "profiles": "ready",
+            },
+        )
+        self.assertEqual(
+            summary["missing_events_by_contract_dimension"],
+            {
+                "known_profiles": ["unsafe_event"],
+                "observer_commands": [],
+                "producer_commands": [],
+                "profiles": [],
+            },
+        )
+        self.assertEqual(
+            summary["missing_event_count_by_contract_dimension"],
+            {
+                "known_profiles": 1,
+                "observer_commands": 0,
+                "producer_commands": 0,
+                "profiles": 0,
+            },
+        )
+        self.assertEqual(summary["profiles_unknown_to_registry"], ["ghost-profile"])
+        self.assertTrue(summary["has_unknown_profiles"])
+        self.assertEqual(summary["events_missing_profile_count"], 0)
+        self.assertEqual(summary["events_with_unknown_profile_count"], 1)
+        self.assertEqual(summary["unknown_profile_reference_count"], 1)
+        self.assertEqual(summary["known_profile_names"], ["eval"])
+        self.assertEqual(summary["referenced_profile_names"], ["ghost-profile"])
+        self.assertEqual(summary["known_events_by_profile"], {"eval": []})
+        self.assertEqual(summary["known_event_count_by_profile"], {"eval": 0})
+        self.assertEqual(summary["known_profiles_with_events"], [])
+        self.assertEqual(summary["known_profile_event_coverage_count"], 0)
+        self.assertFalse(summary["all_known_profiles_have_events"])
+        self.assertEqual(summary["producer_command_count_by_event"], {"unsafe_event": 1})
+        self.assertEqual(summary["observer_command_count_by_event"], {"unsafe_event": 1})
+        self.assertEqual(summary["events_by_profile"], {"ghost-profile": ["unsafe_event"]})
+        self.assertEqual(summary["event_count_by_profile"], {"ghost-profile": 1})
+        self.assertEqual(summary["profiles_by_event"], {"unsafe_event": ["ghost-profile"]})
+        self.assertEqual(summary["profile_count_by_event"], {"unsafe_event": 1})
+        self.assertEqual(summary["known_profiles_without_events"], ["eval"])
+        self.assertTrue(summary["has_known_profiles_without_events"])
+        self.assertEqual(summary["events_with_contract_gaps"], ["unsafe_event"])
+        self.assertEqual(summary["contract_gap_count"], 1)
+        self.assertTrue(summary["has_contract_gaps"])
+        self.assertEqual(summary["contract_status"], "has_gaps")
+        self.assertFalse(summary["contract_ready"])
+
+    def test_skills_readiness_overviews_flag_blocked_sections(self):
+        """Verify readiness overview helpers expose blocked sections directly."""
+        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        sys.path.insert(0, lib_path)
+        try:
+            from ask.commands.skills_impl import (
+                _skill_events_readiness_overview,
+                _skill_profiles_readiness_overview,
+            )
+
+            profile_overview = _skill_profiles_readiness_overview(
+                {
+                    "contract_status": "ready",
+                    "contract_ready": True,
+                    "contract_gap_count": 0,
+                },
+                {
+                    "contract_status": "has_gaps",
+                    "contract_ready": False,
+                    "contract_gap_count": 2,
+                },
+            )
+            event_overview = _skill_events_readiness_overview(
+                {
+                    "contract_status": "has_gaps",
+                    "contract_ready": False,
+                    "contract_gap_count": 1,
+                    "has_contract_gaps": True,
+                }
+            )
+            empty_event_overview = _skill_events_readiness_overview(
+                {
+                    "contract_status": "empty",
+                    "contract_ready": False,
+                    "contract_gap_count": 0,
+                    "has_contract_gaps": False,
+                }
+            )
+        finally:
+            sys.path.remove(lib_path)
+
+        self.assertEqual(profile_overview["contract_status"], "has_gaps")
+        self.assertFalse(profile_overview["contract_ready"])
+        self.assertTrue(profile_overview["has_contract_gaps"])
+        self.assertEqual(profile_overview["contract_gap_count"], 2)
+        self.assertEqual(profile_overview["ready_contract_sections"], ["profile_contracts"])
+        self.assertEqual(profile_overview["blocked_contract_sections"], ["lifecycle_event_coverage"])
+        self.assertEqual(
+            profile_overview["contract_status_by_section"],
+            {"lifecycle_event_coverage": "has_gaps", "profile_contracts": "ready"},
+        )
+        self.assertEqual(
+            profile_overview["contract_gap_count_by_section"],
+            {"lifecycle_event_coverage": 2, "profile_contracts": 0},
+        )
+        self.assertEqual(event_overview["contract_status"], "has_gaps")
+        self.assertFalse(event_overview["contract_ready"])
+        self.assertTrue(event_overview["has_contract_gaps"])
+        self.assertEqual(event_overview["contract_gap_count"], 1)
+        self.assertEqual(event_overview["ready_contract_sections"], [])
+        self.assertEqual(event_overview["blocked_contract_sections"], ["lifecycle_event_contract"])
+        self.assertEqual(
+            event_overview["contract_status_by_section"],
+            {"lifecycle_event_contract": "has_gaps"},
+        )
+        self.assertEqual(
+            event_overview["contract_gap_count_by_section"],
+            {"lifecycle_event_contract": 1},
+        )
+        self.assertEqual(empty_event_overview["contract_status"], "empty")
+        self.assertFalse(empty_event_overview["contract_ready"])
+        self.assertFalse(empty_event_overview["has_contract_gaps"])
+        self.assertEqual(empty_event_overview["contract_gap_count"], 0)
+        self.assertEqual(empty_event_overview["ready_contract_sections"], [])
+        self.assertEqual(empty_event_overview["blocked_contract_sections"], ["lifecycle_event_contract"])
 
     def test_skills_events_human_output(self):
         """Verify ask skills events has a useful non-JSON selected-event render."""
@@ -1190,6 +2653,9 @@ class TestAskCLI(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, f"skills events output: {result.stdout}\nstderr: {result.stderr}")
         self.assertIn("Skill events: pass", result.stdout)
+        self.assertIn("Readiness: ready (0 gaps)", result.stdout)
+        self.assertIn("Ready sections: lifecycle_event_contract", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills events --json --robot", result.stdout)
         self.assertIn("Event: eval_blocked", result.stdout)
         self.assertIn("Definition:", result.stdout)
 
@@ -1231,6 +2697,28 @@ class TestAskCLI(unittest.TestCase):
         self.assertGreaterEqual(memory["entry_summary"]["total_count"], memory["entry_count"])
         self.assertIn("provenance", memory["entries"][0])
         self.assertIn("freshness", memory["entries"][0])
+
+    def test_skills_memory_human_output_exposes_provider_contract(self):
+        """Verify ask skills memory human output names the provider model and sources."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "memory",
+            "search",
+            "projection",
+            "--limit",
+            "3",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"skills memory output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Skill memory: search (pass)", result.stdout)
+        self.assertIn("Provider: extension-like-read-only", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills memory search projection --json --robot", result.stdout)
+        self.assertIn("Sources:", result.stdout)
+        self.assertIn("docs-agent-guidance", result.stdout)
 
     def test_skills_memory_search_command_blocks_missing_query(self):
         """Verify ask skills memory search requires a query from the CLI path."""
@@ -1328,6 +2816,395 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(memory["mode"], "read")
         self.assertIn("requires an entry id", memory["agent_summary"])
 
+    def test_evals_missing_action_exposes_validation(self):
+        """Verify incomplete eval commands expose the read-only recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "evals", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"evals output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask evals dashboard --json --robot"])
+
+    def test_evals_missing_action_human_output_exposes_validation(self):
+        """Verify incomplete eval commands render the read-only recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "evals", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"evals output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("missing action for topic 'evals'", result.stdout)
+        self.assertIn("Validation: ./bin/ask evals dashboard --json --robot", result.stdout)
+
+    def test_mcp_sync_dry_run_json_contract_exposes_validation(self):
+        """Verify MCP sync dry-run exposes its replay command without writing config."""
+        cmd = ["python3", "Infrastructure/bin/ask", "mcp", "sync", "--dry-run", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"mcp sync output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertTrue(output["data"]["dry_run"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask mcp sync --dry-run --json --robot"],
+        )
+
+    def test_mcp_sync_dry_run_human_output_exposes_validation(self):
+        """Verify MCP sync dry-run human output names its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "mcp", "sync", "--dry-run", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"mcp sync output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Dry run - would sync", result.stdout)
+        self.assertIn("Validation: ./bin/ask mcp sync --dry-run --json --robot", result.stdout)
+
+    def test_mcp_missing_action_exposes_validation(self):
+        """Verify incomplete MCP commands expose the safe dry-run recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "mcp", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"mcp output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask mcp sync --dry-run --json --robot"],
+        )
+
+    def test_mcp_missing_action_human_output_exposes_validation(self):
+        """Verify incomplete MCP commands render the safe recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "mcp", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"mcp output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("missing action for topic 'mcp'", result.stdout)
+        self.assertIn("Validation: ./bin/ask mcp sync --dry-run --json --robot", result.stdout)
+
+    def test_wiki_lint_json_contract_exposes_validation(self):
+        """Verify wiki lint exposes its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "wiki", "lint", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"wiki lint output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask wiki lint --wiki-root Wiki/wiki --max-age-days 60 --json --robot"],
+        )
+
+    def test_wiki_lint_human_output_exposes_validation(self):
+        """Verify wiki lint human output names its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "wiki", "lint", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"wiki lint output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Wiki lint passed.", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask wiki lint --wiki-root Wiki/wiki --max-age-days 60 --json --robot",
+            result.stdout,
+        )
+
+    def test_wiki_query_json_contract_exposes_validation(self):
+        """Verify wiki query exposes its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "wiki", "query", "skill", "--limit", "1", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"wiki query output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["query"], "skill")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask wiki query skill --wiki-root Wiki/wiki --limit 1 --json --robot"],
+        )
+
+    def test_wiki_query_human_output_exposes_validation(self):
+        """Verify wiki query human output names its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "wiki", "query", "skill", "--limit", "1", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"wiki query output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Found 1 matching wiki page(s).", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask wiki query skill --wiki-root Wiki/wiki --limit 1 --json --robot",
+            result.stdout,
+        )
+
+    def test_wiki_ingest_dry_run_json_contract_exposes_validation(self):
+        """Verify wiki ingest dry-run exposes its replay command without writing."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "wiki",
+            "ingest",
+            "Capability Readiness Note",
+            "--source",
+            "heartbeat:test",
+            "--summary",
+            "Dry-run readiness evidence for wiki ingest.",
+            "--tag",
+            "readiness",
+            "--dry-run",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"wiki ingest output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertTrue(output["data"]["dry_run"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask wiki ingest 'Capability Readiness Note' --source heartbeat:test "
+                "--summary 'Dry-run readiness evidence for wiki ingest.' --tag readiness --dry-run --json --robot"
+            ],
+        )
+
+    def test_wiki_ingest_dry_run_human_output_exposes_validation(self):
+        """Verify wiki ingest dry-run human output names its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "wiki",
+            "ingest",
+            "Capability Readiness Note",
+            "--source",
+            "heartbeat:test",
+            "--summary",
+            "Dry-run readiness evidence for wiki ingest.",
+            "--tag",
+            "readiness",
+            "--dry-run",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"wiki ingest output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Dry run - would ingest:", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask wiki ingest 'Capability Readiness Note' --source heartbeat:test "
+            "--summary 'Dry-run readiness evidence for wiki ingest.' --tag readiness --dry-run --json --robot",
+            result.stdout,
+        )
+
+    def test_wiki_add_json_contract_exposes_validation(self):
+        """Verify wiki add exposes its replay command even when dependencies block."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "wiki",
+            "add",
+            "Capability Readiness Finding",
+            "--summary",
+            "Dry-run readiness evidence for wiki add.",
+            "--source",
+            "heartbeat:test",
+            "--intent",
+            "finding",
+            "--status",
+            "needs-verification",
+            "--destination",
+            "failures",
+            "--tag",
+            "readiness",
+            "--dry-run",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertIn(result.returncode, {0, 2}, f"wiki add output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask wiki add 'Capability Readiness Finding' "
+                "--summary 'Dry-run readiness evidence for wiki add.' --source heartbeat:test "
+                "--intent finding --status needs-verification --destination failures "
+                "--tag readiness --dry-run --json --robot"
+            ],
+        )
+
+    def test_wiki_add_human_output_exposes_validation(self):
+        """Verify wiki add human output names its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "wiki",
+            "add",
+            "Capability Readiness Finding",
+            "--summary",
+            "Dry-run readiness evidence for wiki add.",
+            "--source",
+            "heartbeat:test",
+            "--intent",
+            "finding",
+            "--status",
+            "needs-verification",
+            "--destination",
+            "failures",
+            "--tag",
+            "readiness",
+            "--dry-run",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertIn(result.returncode, {0, 2}, f"wiki add output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn(
+            "Validation: ./bin/ask wiki add 'Capability Readiness Finding' "
+            "--summary 'Dry-run readiness evidence for wiki add.' --source heartbeat:test "
+            "--intent finding --status needs-verification --destination failures "
+            "--tag readiness --dry-run --json --robot",
+            result.stdout,
+        )
+
+    def test_wiki_add_asset_json_contract_exposes_validation(self):
+        """Verify wiki add-asset exposes its replay command even when dependencies block."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "wiki",
+            "add-asset",
+            "Wiki/wiki/playbooks/code-scanning-remediation.md",
+            "--title",
+            "Capability Readiness Asset",
+            "--summary",
+            "Dry-run readiness evidence for wiki asset add.",
+            "--source",
+            "heartbeat:test",
+            "--status",
+            "verified",
+            "--destination",
+            "assets/ui",
+            "--tag",
+            "readiness",
+            "--dry-run",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertIn(result.returncode, {0, 2}, f"wiki add-asset output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask wiki add-asset Wiki/wiki/playbooks/code-scanning-remediation.md "
+                "--title 'Capability Readiness Asset' "
+                "--summary 'Dry-run readiness evidence for wiki asset add.' --source heartbeat:test "
+                "--status verified --destination assets/ui --tag readiness --dry-run --json --robot"
+            ],
+        )
+
+    def test_wiki_add_asset_human_output_exposes_validation(self):
+        """Verify wiki add-asset human output names its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "wiki",
+            "add-asset",
+            "Wiki/wiki/playbooks/code-scanning-remediation.md",
+            "--title",
+            "Capability Readiness Asset",
+            "--summary",
+            "Dry-run readiness evidence for wiki asset add.",
+            "--source",
+            "heartbeat:test",
+            "--status",
+            "verified",
+            "--destination",
+            "assets/ui",
+            "--tag",
+            "readiness",
+            "--dry-run",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertIn(result.returncode, {0, 2}, f"wiki add-asset output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn(
+            "Validation: ./bin/ask wiki add-asset Wiki/wiki/playbooks/code-scanning-remediation.md "
+            "--title 'Capability Readiness Asset' "
+            "--summary 'Dry-run readiness evidence for wiki asset add.' --source heartbeat:test "
+            "--status verified --destination assets/ui --tag readiness --dry-run --json --robot",
+            result.stdout,
+        )
+
+    def test_wiki_add_missing_fields_json_contract_exposes_validation(self):
+        """Verify wiki add missing-field errors expose their replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "wiki", "add", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"wiki add output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("Missing required fields for wiki add", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask wiki add --json --robot"])
+
+    def test_wiki_add_missing_fields_human_output_exposes_validation(self):
+        """Verify wiki add missing-field human output names its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "wiki", "add", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"wiki add output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Missing required fields for wiki add", result.stdout)
+        self.assertIn("Validation: ./bin/ask wiki add --json --robot", result.stdout)
+
+    def test_wiki_add_asset_missing_fields_json_contract_exposes_validation(self):
+        """Verify wiki add-asset missing-field errors expose their replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "wiki", "add-asset", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"wiki add-asset output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("Missing required fields for wiki add-asset", output["errors"][0]["message"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask wiki add-asset --status verified --destination assets/ui --json --robot"],
+        )
+
+    def test_wiki_add_asset_missing_fields_human_output_exposes_validation(self):
+        """Verify wiki add-asset missing-field human output names its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "wiki", "add-asset", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"wiki add-asset output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Missing required fields for wiki add-asset", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask wiki add-asset --status verified --destination assets/ui --json --robot",
+            result.stdout,
+        )
+
+    def test_wiki_missing_action_exposes_validation(self):
+        """Verify incomplete wiki commands expose the read-only recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "wiki", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"wiki output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask wiki lint --json --robot"])
+
+    def test_wiki_missing_action_human_output_exposes_validation(self):
+        """Verify incomplete wiki commands render the read-only recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "wiki", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"wiki output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("missing action for topic 'wiki'", result.stdout)
+        self.assertIn("Validation: ./bin/ask wiki lint --json --robot", result.stdout)
+
     def test_memory_search_command_returns_provider_entries(self):
         """Verify ask memory search exposes the same provenance-bearing provider entries."""
         cmd = ["python3", "Infrastructure/bin/ask", "memory", "search", "projection", "--limit", "1", "--json", "--robot"]
@@ -1342,6 +3219,10 @@ class TestAskCLI(unittest.TestCase):
         entry = memory["results"][0]
         self.assertEqual(entry["provenance"]["provider"], entry["source_id"])
         self.assertEqual(entry["provenance"]["repo_relative_path"], entry["path"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask memory search projection --limit 1 --json --robot"],
+        )
 
     def test_memory_search_human_output_lists_entry_paths(self):
         """Verify ask memory search has a useful non-JSON provider render."""
@@ -1352,6 +3233,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Found 1 memory entry.", result.stdout)
         self.assertIn("docs-agent-guidance:docs-agents-04-validation-md", result.stdout)
         self.assertIn("Docs/agents/04-validation.md", result.stdout)
+        self.assertIn("Validation: ./bin/ask memory search projection --limit 1 --json --robot", result.stdout)
 
     def test_memory_list_source_filter_limits_entries(self):
         """Verify ask memory list honors source filtering from the CLI path."""
@@ -1375,6 +3257,10 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(memory["count"], 2)
         self.assertGreaterEqual(memory["total_count"], 2)
         self.assertTrue(all(entry["source_id"] == "harness-solutions" for entry in memory["entries"]))
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask memory list --source harness-solutions --limit 2 --json --robot"],
+        )
 
     def test_memory_list_command_blocks_negative_limit(self):
         """Verify ask memory list rejects negative limits."""
@@ -1386,6 +3272,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("limit must be non-negative", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask memory list --limit -1 --json --robot"])
 
     def test_memory_read_command_returns_content_and_provenance(self):
         """Verify ask memory read exposes durable content with provenance."""
@@ -1407,6 +3294,10 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(entry["path"], ".harness/memory/LEARNINGS.md")
         self.assertEqual(entry["provenance"]["provider"], "harness-memory")
         self.assertIn("# Learnings", entry["content"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask memory read .harness/memory/LEARNINGS.md --json --robot"],
+        )
 
     def test_memory_read_command_blocks_missing_identifier(self):
         """Verify ask memory read parser reports the missing identifier clearly."""
@@ -1430,10 +3321,20 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask memory list --json --robot"])
+
+    def test_memory_missing_action_human_output_exposes_validation(self):
+        """Verify incomplete memory commands render the recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "memory", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"memory output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("missing action for topic 'memory'", result.stdout)
+        self.assertIn("Validation: ./bin/ask memory list --json --robot", result.stdout)
 
     def test_plugins_list_state(self):
         """CA1: Verify ask plugins list returns lifecycle state groups."""
-        cmd = ["python3", "Infrastructure/bin/ask", "plugins", "list", "--json"]
+        cmd = ["python3", "Infrastructure/bin/ask", "plugins", "list", "--json", "--robot"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, f"plugins list failed: {result.stderr}")
@@ -1442,6 +3343,296 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("installed_state", output["data"])
         self.assertIn("activation_state", output["data"])
         self.assertIn("health_state", output["data"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask plugins list --json --robot"])
+
+    def test_plugins_list_human_output_exposes_validation(self):
+        """Verify plugins list human output names its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "plugins", "list", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"plugins list failed: {result.stderr}")
+        self.assertIn("Plugins installed:", result.stdout)
+        self.assertIn("Validation: ./bin/ask plugins list --json --robot", result.stdout)
+
+    def test_plugins_missing_action_exposes_validation(self):
+        """Verify incomplete plugin commands expose the read-only recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "plugins", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"plugins output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask plugins list --json --robot"])
+
+    def test_plugins_missing_action_human_output_exposes_validation(self):
+        """Verify incomplete plugin commands render the read-only recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "plugins", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"plugins output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("missing action for topic 'plugins'", result.stdout)
+        self.assertIn("Validation: ./bin/ask plugins list --json --robot", result.stdout)
+
+    def test_plugins_status_json_contract_exposes_validation(self):
+        """Verify plugin status exposes its scoped replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "status",
+            "harness-engineering",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"plugins status failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask plugins status harness-engineering --json --robot"],
+        )
+
+    def test_plugins_doctor_json_contract_exposes_validation(self):
+        """Verify plugin doctor exposes its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "plugins", "doctor", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"plugins doctor failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask plugins doctor --json --robot"])
+
+    def test_plugins_sync_local_runtime_dry_run_exposes_validation(self):
+        """Verify plugin runtime sync dry-run exposes its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "sync-local-runtime",
+            "--dry-run",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"plugins sync-local-runtime failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertTrue(output["data"]["dry_run"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask plugins sync-local-runtime --dry-run --json --robot"],
+        )
+
+    def test_plugins_sync_local_runtime_human_output_exposes_validation(self):
+        """Verify plugin runtime sync dry-run human output names its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "sync-local-runtime",
+            "--dry-run",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"plugins sync-local-runtime failed: {result.stderr}")
+        self.assertIn("Dry run - would replace local-plugin runtime mirrors", result.stdout)
+        self.assertIn("Validation: ./bin/ask plugins sync-local-runtime --dry-run --json --robot", result.stdout)
+
+    def test_plugins_harden_success_human_output_exposes_validation(self):
+        """Verify plugin harden success output names its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "harden",
+            "Plugins/harness-engineering",
+            "--skip-compat",
+            "--skip-marketplace-audit",
+            "--no-require-marketplace",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"plugins harden failed: {result.stderr}")
+        self.assertIn("Hardened plugin 'harness-engineering'", result.stdout)
+        self.assertIn("Checks run:", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask plugins harden Plugins/harness-engineering --skip-compat "
+            "--skip-marketplace-audit --no-require-marketplace --json --robot",
+            result.stdout,
+        )
+
+    def test_plugins_install_dry_run_human_output_exposes_validation(self):
+        """Verify plugin install dry-run human output names its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "install",
+            "https://github.com/example/repo",
+            "--path",
+            "Plugins/demo-plugin",
+            "--name",
+            "demo-plugin",
+            "--dry-run",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"plugins install dry-run failed: {result.stderr}")
+        self.assertIn("Dry run - would install plugin", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask plugins install https://github.com/example/repo "
+            "--path Plugins/demo-plugin --name demo-plugin --dry-run --json --robot",
+            result.stdout,
+        )
+
+    def test_plugins_install_validation_error_exposes_validation(self):
+        """Verify plugin install validation errors expose a replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "install",
+            "https://github.com/example/repo",
+            "--path",
+            "Plugins/demo-plugin",
+            "--dest",
+            "/tmp/not-a-plugin-dest",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask plugins install https://github.com/example/repo "
+                "--path Plugins/demo-plugin --dest /tmp/not-a-plugin-dest --json --robot"
+            ],
+        )
+
+    def test_plugins_install_validation_error_human_output_exposes_validation(self):
+        """Verify plugin install validation errors render their replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "install",
+            "https://github.com/example/repo",
+            "--path",
+            "Plugins/demo-plugin",
+            "--dest",
+            "/tmp/not-a-plugin-dest",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Invalid plugin destination", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask plugins install https://github.com/example/repo "
+            "--path Plugins/demo-plugin --dest /tmp/not-a-plugin-dest --json --robot",
+            result.stdout,
+        )
+
+    def test_plugins_uninstall_dry_run_json_contract_exposes_validation(self):
+        """Verify plugin uninstall dry-run exposes its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "uninstall",
+            "harness-engineering",
+            "--dry-run",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"plugins uninstall dry-run failed: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertTrue(output["data"]["dry_run"])
+        self.assertEqual(output["data"]["plugin_name"], "harness-engineering")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask plugins uninstall harness-engineering --dry-run --json --robot"],
+        )
+
+    def test_plugins_uninstall_dry_run_human_output_exposes_validation(self):
+        """Verify plugin uninstall dry-run human output names its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "uninstall",
+            "harness-engineering",
+            "--dry-run",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"plugins uninstall dry-run failed: {result.stderr}")
+        self.assertIn("Dry run - would uninstall plugin", result.stdout)
+        self.assertIn("Name: harness-engineering", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask plugins uninstall harness-engineering --dry-run --json --robot",
+            result.stdout,
+        )
+
+    def test_plugins_uninstall_missing_plugin_exposes_validation(self):
+        """Verify plugin uninstall missing-plugin errors expose a replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "uninstall",
+            "not-a-real-plugin",
+            "--dry-run",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask plugins uninstall not-a-real-plugin --dry-run --json --robot"],
+        )
+
+    def test_plugins_uninstall_missing_plugin_human_output_exposes_validation(self):
+        """Verify plugin uninstall missing-plugin errors render their replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "uninstall",
+            "not-a-real-plugin",
+            "--dry-run",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Plugin 'not-a-real-plugin' not found under Plugins/.", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask plugins uninstall not-a-real-plugin --dry-run --json --robot",
+            result.stdout,
+        )
 
     def test_skills_sync_dry_run(self):
         """CA2: Verify ask skills sync --dry-run returns a plan without changes."""
@@ -1454,6 +3645,19 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "success")
         self.assertIn("plan", output["data"])
         self.assertIn("symlinks", output["data"]["plan"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills sync --dry-run --json --robot"],
+        )
+
+    def test_skills_sync_human_output_exposes_validation(self):
+        """Verify ask skills sync renders its validation command in dry-run mode."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "sync", "--dry-run", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Planned sync:", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills sync --dry-run --json --robot", result.stdout)
 
     def test_runtime_surface_json_contract(self):
         """Verify ask runtime surface exposes the runtime report under an obvious topic."""
@@ -1472,11 +3676,91 @@ class TestAskCLI(unittest.TestCase):
             self.assertIn("first_level_default_entries", report)
             self.assertIn("hidden_system_entries", report)
             self.assertIn("estimated_description_tokens", report)
+            self.assertEqual(
+                output["data"]["validation_commands"],
+                ["./bin/ask runtime surface --json --robot"],
+            )
         finally:
             if saved_projection_mode is None:
                 os.environ.pop("SYNC_SKILLS_PROJECTION_MODE", None)
             else:
                 os.environ["SYNC_SKILLS_PROJECTION_MODE"] = saved_projection_mode
+
+    def test_runtime_surface_human_output_exposes_validation(self):
+        """Verify ask runtime surface renders its runtime replay command."""
+        saved_projection_mode = os.environ.get("SYNC_SKILLS_PROJECTION_MODE")
+        try:
+            os.environ["SYNC_SKILLS_PROJECTION_MODE"] = "flat"
+            cmd = ["python3", "Infrastructure/bin/ask", "runtime", "surface", "--robot"]
+            result = _run_cli(cmd)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("Runtime surface:", result.stdout)
+            self.assertIn("Validation: ./bin/ask runtime surface --json --robot", result.stdout)
+        finally:
+            if saved_projection_mode is None:
+                os.environ.pop("SYNC_SKILLS_PROJECTION_MODE", None)
+            else:
+                os.environ["SYNC_SKILLS_PROJECTION_MODE"] = saved_projection_mode
+
+    def test_runtime_missing_action_human_output_exposes_validation(self):
+        """Verify incomplete runtime commands render the recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "runtime", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"runtime output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("missing action for topic 'runtime'", result.stdout)
+        self.assertIn("Validation: ./bin/ask runtime surface --json --robot", result.stdout)
+
+    def test_runtime_missing_action_json_contract_exposes_validation(self):
+        """Verify incomplete runtime commands expose the surface recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "runtime", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"runtime output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask runtime surface --json --robot"],
+        )
+
+    def test_repo_surface_json_contract_exposes_validation(self):
+        """Verify repo surface exposes its replay command."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "surface",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"repo surface output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertIn("repo_surface", output["data"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask repo surface --json --robot"],
+        )
+
+    def test_repo_surface_human_output_exposes_validation(self):
+        """Verify repo surface human output names its replay command."""
+        cmd = [
+            __import__("sys").executable,
+            "Infrastructure/bin/ask",
+            "repo",
+            "surface",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"repo surface output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Repo surface:", result.stdout)
+        self.assertIn("Validation: ./bin/ask repo surface --json --robot", result.stdout)
 
     def test_runtime_budget_json_contract(self):
         """Verify ask runtime budget remains a first-class budget gate command."""
@@ -1492,11 +3776,255 @@ class TestAskCLI(unittest.TestCase):
             self.assertEqual(output["status"], "success")
             self.assertEqual(output["data"]["runtime_budget"]["status"], "pass")
             self.assertEqual(output["data"]["runtime_surface"]["status"], "pass")
+            self.assertEqual(
+                output["data"]["validation_commands"],
+                ["./bin/ask runtime budget --json --robot"],
+            )
         finally:
             if saved_projection_mode is None:
                 os.environ.pop("SYNC_SKILLS_PROJECTION_MODE", None)
             else:
                 os.environ["SYNC_SKILLS_PROJECTION_MODE"] = saved_projection_mode
+
+    def test_runtime_budget_human_output_exposes_validation(self):
+        """Verify ask runtime budget renders its runtime replay command."""
+        saved_projection_mode = os.environ.get("SYNC_SKILLS_PROJECTION_MODE")
+        try:
+            os.environ["SYNC_SKILLS_PROJECTION_MODE"] = "flat"
+            cmd = ["python3", "Infrastructure/bin/ask", "runtime", "budget", "--robot"]
+            result = _run_cli(cmd)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("Runtime budget:", result.stdout)
+            self.assertIn("Validation: ./bin/ask runtime budget --json --robot", result.stdout)
+        finally:
+            if saved_projection_mode is None:
+                os.environ.pop("SYNC_SKILLS_PROJECTION_MODE", None)
+            else:
+                os.environ["SYNC_SKILLS_PROJECTION_MODE"] = saved_projection_mode
+
+    def test_graph_list_json_contract_exposes_validation(self):
+        """Verify graph list exposes its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "graph",
+            "list",
+            "--topic-filter",
+            "agent-ops",
+            "--tier",
+            "experimental",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph list output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask graph list --topic-filter agent-ops --tier experimental --json --robot"],
+        )
+
+    def test_graph_list_human_output_exposes_validation(self):
+        """Verify graph list human output names its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "graph",
+            "list",
+            "--topic-filter",
+            "agent-ops",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph list output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Skills [topic=agent-ops]", result.stdout)
+        self.assertIn("Validation: ./bin/ask graph list --topic-filter agent-ops --json --robot", result.stdout)
+
+    def test_graph_topics_json_contract_exposes_validation(self):
+        """Verify graph topics exposes its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "graph", "topics", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph topics output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask graph topics --json --robot"],
+        )
+
+    def test_graph_topics_human_output_exposes_validation(self):
+        """Verify graph topics human output names its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "graph", "topics", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph topics output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Topic Clusters", result.stdout)
+        self.assertIn("Validation: ./bin/ask graph topics --json --robot", result.stdout)
+
+    def test_graph_missing_action_exposes_validation(self):
+        """Verify incomplete graph commands expose the read-only recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "graph", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"graph output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(output["data"]["validation_commands"], ["./bin/ask graph list --json --robot"])
+
+    def test_graph_missing_action_human_output_exposes_validation(self):
+        """Verify incomplete graph commands render the read-only recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "graph", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"graph output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("missing action for topic 'graph'", result.stdout)
+        self.assertIn("Validation: ./bin/ask graph list --json --robot", result.stdout)
+
+    def test_graph_related_json_contract_exposes_validation(self):
+        """Verify graph related exposes its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "graph",
+            "related",
+            "agents-md",
+            "--depth",
+            "2",
+            "--reverse",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph related output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask graph related agents-md --depth 2 --reverse --json --robot"],
+        )
+
+    def test_graph_related_human_output_exposes_validation(self):
+        """Verify graph related human output names its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "graph",
+            "related",
+            "agents-md",
+            "--depth",
+            "2",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph related output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("agents-md [out-links, depth=2]", result.stdout)
+        self.assertIn("Validation: ./bin/ask graph related agents-md --depth 2 --json --robot", result.stdout)
+
+    def test_graph_find_json_contract_exposes_validation(self):
+        """Verify graph find exposes its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "graph",
+            "find",
+            "agent",
+            "--topic-filter",
+            "agent-ops",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph find output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask graph find agent --topic-filter agent-ops --json --robot"],
+        )
+
+    def test_graph_find_human_output_exposes_validation(self):
+        """Verify graph find human output names its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "graph", "find", "agent", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph find output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Search: 'agent'", result.stdout)
+        self.assertIn("Validation: ./bin/ask graph find agent --json --robot", result.stdout)
+
+    def test_graph_info_json_contract_exposes_validation(self):
+        """Verify graph info exposes its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "graph", "info", "agents-md", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph info output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask graph info agents-md --json --robot"],
+        )
+
+    def test_graph_info_human_output_exposes_validation(self):
+        """Verify graph info human output names its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "graph", "info", "agents-md", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph info output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("agents-md", result.stdout)
+        self.assertIn("Validation: ./bin/ask graph info agents-md --json --robot", result.stdout)
+
+    def test_graph_chain_json_contract_exposes_validation(self):
+        """Verify graph chain exposes its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "graph",
+            "chain",
+            "agents-md",
+            "verification-before-completion",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph chain output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertTrue(output["data"]["reachable"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask graph chain agents-md verification-before-completion --json --robot"],
+        )
+
+    def test_graph_chain_human_output_exposes_validation(self):
+        """Verify graph chain human output names its replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "graph",
+            "chain",
+            "agents-md",
+            "verification-before-completion",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"graph chain output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Chain (", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask graph chain agents-md verification-before-completion --json --robot",
+            result.stdout,
+        )
 
     def test_skills_sync_projection_reaches_engine(self):
         """Verify --projection is dispatched and cannot be silently ignored."""
@@ -1521,6 +4049,10 @@ class TestAskCLI(unittest.TestCase):
                 self.assertEqual(output["status"], "success")
                 self.assertEqual(output["data"]["projection_mode"], mode)
                 self.assertEqual(output["data"]["projection"]["engine"], "projection_engine.py")
+                self.assertEqual(
+                    output["data"]["validation_commands"],
+                    [f"./bin/ask skills sync --dry-run --projection {mode} --json --robot"],
+                )
 
     def test_skills_sync_rooted_alias_dry_run_reports_canonical_mode(self):
         """Rooted aliases must report the canonical projection mode in dry-run plans."""
@@ -1588,6 +4120,134 @@ class TestAskCLI(unittest.TestCase):
             readiness = output["data"].get("readiness_policy")
             self.assertTrue(readiness.get("full_evals_required_before_promotion"))
             self.assertTrue(readiness.get("external_skill_install_is_intake_not_copy"))
+            self.assertEqual(
+                output["data"]["validation_commands"],
+                [
+                    "./bin/ask skills install "
+                    "https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication "
+                    "--dest Skills/github --dry-run --json --robot"
+                ],
+            )
+
+    def test_skills_install_dry_run_human_output_exposes_validation(self):
+        """Verify ask skills install --dry-run renders its validation command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "install",
+            "https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication",
+            "--dry-run",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Dry run - would install:", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask skills install "
+            "https://github.com/google-openai/openai-cli/tree/main/.openai/skills/review-duplication "
+            "--dest Skills/github --dry-run --json --robot",
+            result.stdout,
+        )
+
+    def test_skills_external_review_skip_tools_json_contract(self):
+        """Verify ask skills external-review exposes a replayable local-only contract."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "external-review",
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "--skip-plugin-eval",
+            "--skip-tessl",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["ask_audit"]["status"], "success")
+        self.assertEqual(output["data"]["plugin_eval"]["status"], "skipped")
+        self.assertEqual(output["data"]["tessl_lint"]["status"], "skipped")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask skills external-review "
+                "Plugins/skill-factory/skills/code_quality_review/skill-builder "
+                "--skip-plugin-eval --skip-tessl --json --robot"
+            ],
+        )
+
+    def test_skills_external_review_skip_tools_human_output_exposes_validation(self):
+        """Verify ask skills external-review renders local-only status and validation."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "external-review",
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "--skip-plugin-eval",
+            "--skip-tessl",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("External review: success", result.stdout)
+        self.assertIn("Ask audit: success", result.stdout)
+        self.assertIn("plugin_eval: skipped", result.stdout)
+        self.assertIn("tessl_lint: skipped", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask skills external-review "
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder "
+            "--skip-plugin-eval --skip-tessl --json --robot",
+            result.stdout,
+        )
+
+    def test_skills_fold_dependency_error_exposes_validation(self):
+        """Verify ask skills fold dependency blockers remain replayable."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "fold",
+            "simplify",
+            "imagegen",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_DEPENDENCY")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills fold simplify imagegen --json --robot"],
+        )
+        self.assertEqual(output["data"]["dependency_status"]["skill_catalog"], "missing")
+
+    def test_skills_fold_dependency_error_human_output_exposes_validation(self):
+        """Verify ask skills fold dependency blockers render their replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "fold",
+            "simplify",
+            "imagegen",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Skill router or builder catalog not available.", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask skills fold simplify imagegen --json --robot",
+            result.stdout,
+        )
 
     def test_trace_id_from_env(self):
         """CA2: ASK_TRACE_ID environment variable propagates to output."""
@@ -1660,6 +4320,50 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Valid examples", message)
         self.assertIn("skills audit", message)
 
+    def test_skills_audit_json_contract(self):
+        """Verify ask skills audit exposes its validation command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "audit",
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["diagnostics"]["exit_code"], 0)
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask skills audit "
+                "Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot"
+            ],
+        )
+
+    def test_skills_audit_human_output_exposes_validation(self):
+        """Verify ask skills audit renders its validation command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "audit",
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Audit passed:", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask skills audit "
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot",
+            result.stdout,
+        )
+
     def test_skills_validate_openai_format_json_contract(self):
         """Verify ask exposes OpenAI skill format as a first-class validation surface."""
         cmd = [
@@ -1678,6 +4382,33 @@ class TestAskCLI(unittest.TestCase):
         gate = output["data"]["openai_skill_format"]
         self.assertEqual(gate["exit_code"], 0)
         self.assertIn("lint_openai_skill_format.sh", " ".join(gate["command"]))
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask skills validate-openai-format "
+                "Plugins/skill-factory/skills/code_quality_review/skill-builder --mode strict --json --robot"
+            ],
+        )
+
+    def test_skills_validate_openai_format_human_output_exposes_validation(self):
+        """Verify ask skills validate-openai-format renders its validation command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "validate-openai-format",
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("OpenAI skill format passed:", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask skills validate-openai-format "
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder --mode strict --json --robot",
+            result.stdout,
+        )
 
     def test_skills_validate_skill_gate_json_contract(self):
         """Verify ask exposes skill gate as a first-class validation surface."""
@@ -1697,6 +4428,33 @@ class TestAskCLI(unittest.TestCase):
         gate = output["data"]["skill_gate"]
         self.assertEqual(gate["exit_code"], 0)
         self.assertTrue(any("skill_gate.py" in part for part in gate["command"]))
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask skills validate-skill-gate "
+                "Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot"
+            ],
+        )
+
+    def test_skills_validate_skill_gate_human_output_exposes_validation(self):
+        """Verify ask skills validate-skill-gate renders its validation command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "validate-skill-gate",
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Skill gate passed:", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask skills validate-skill-gate "
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot",
+            result.stdout,
+        )
 
     def test_skills_validate_boundaries_json_contract(self):
         """Verify ask exposes canonical-versus-projection ownership as a first-class check."""
@@ -1718,6 +4476,280 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(boundary["handle"], "he-heartbeat")
         self.assertIn(".agents/skills/", boundary["command_handle_path"])
         self.assertTrue(boundary["canonical_skill_path"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills validate-boundaries he-heartbeat --json --robot"],
+        )
+
+    def test_skills_validate_boundaries_human_output_exposes_validation(self):
+        """Verify ask skills validate-boundaries renders its validation command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "validate-boundaries",
+            "he-heartbeat",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Skill boundaries passed: $he-heartbeat", result.stdout)
+        self.assertIn("Canonical source:", result.stdout)
+        self.assertIn("Command handle:", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask skills validate-boundaries he-heartbeat --json --robot",
+            result.stdout,
+        )
+
+    def test_skills_init_validation_error_exposes_validation(self):
+        """Verify ask skills init validation errors remain replayable without writing files."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "init",
+            "example-skill",
+            "--category",
+            "/tmp/not-repo-relative",
+            "--description",
+            "Example description",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask skills init example-skill --category /tmp/not-repo-relative "
+                "--description 'Example description' --json --robot"
+            ],
+        )
+
+    def test_skills_init_validation_error_human_output_exposes_validation(self):
+        """Verify ask skills init validation errors render their replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "init",
+            "example-skill",
+            "--category",
+            "/tmp/not-repo-relative",
+            "--description",
+            "Example description",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Skill category must be repo-relative.", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask skills init example-skill --category /tmp/not-repo-relative "
+            "--description 'Example description' --json --robot",
+            result.stdout,
+        )
+
+    def test_workouts_list_json_contract_exposes_validation(self):
+        """Verify ask workouts list exposes its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "workouts", "list", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertIn("workouts", output["data"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask workouts list --json --robot"],
+        )
+
+    def test_workouts_list_human_output_exposes_validation(self):
+        """Verify ask workouts list renders its replay command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "workouts", "list", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Workout list: success", result.stdout)
+        self.assertIn("Validation: ./bin/ask workouts list --json --robot", result.stdout)
+
+    def test_workouts_missing_action_exposes_validation(self):
+        """Verify incomplete workout commands expose the list recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "workouts", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"workouts output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("missing action", output["errors"][0]["message"])
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask workouts list --json --robot"],
+        )
+
+    def test_workouts_missing_action_human_output_exposes_validation(self):
+        """Verify incomplete workout commands render the list recovery command."""
+        cmd = ["python3", "Infrastructure/bin/ask", "workouts", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"workouts output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("missing action for topic 'workouts'", result.stdout)
+        self.assertIn("Validation: ./bin/ask workouts list --json --robot", result.stdout)
+
+    def test_workouts_score_error_json_contract_exposes_validation(self):
+        """Verify ask workouts score validation errors remain replayable."""
+        workout_id = "agent-ops/not-a-real-workout"
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "workouts",
+            "score",
+            workout_id,
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [f"./bin/ask workouts score {workout_id} --json --robot"],
+        )
+
+    def test_workouts_score_error_human_output_exposes_validation(self):
+        """Verify ask workouts score validation errors render their replay command."""
+        workout_id = "agent-ops/not-a-real-workout"
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "workouts",
+            "score",
+            workout_id,
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(f"No scorecard found for workout {workout_id}.", result.stdout)
+        self.assertIn(
+            f"Validation: ./bin/ask workouts score {workout_id} --json --robot",
+            result.stdout,
+        )
+
+    def test_plugins_init_validation_error_exposes_validation(self):
+        """Verify plugins init validation errors expose a replay command without writing."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "init",
+            "example-plugin",
+            "--category",
+            "/tmp/not-a-plugin-category",
+            "--with-marketplace",
+            "--with-scripts",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask plugins init example-plugin --category /tmp/not-a-plugin-category "
+                "--with-marketplace --with-scripts --json --robot"
+            ],
+        )
+
+    def test_plugins_init_validation_error_human_output_exposes_validation(self):
+        """Verify plugins init validation errors render their replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "init",
+            "example-plugin",
+            "--category",
+            "/tmp/not-a-plugin-category",
+            "--with-marketplace",
+            "--with-scripts",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Invalid plugin category", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask plugins init example-plugin --category /tmp/not-a-plugin-category "
+            "--with-marketplace --with-scripts --json --robot",
+            result.stdout,
+        )
+
+    def test_plugins_harden_validation_error_exposes_validation(self):
+        """Verify plugin harden validation errors expose a replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "harden",
+            "/tmp/not-a-plugin",
+            "--skip-compat",
+            "--skip-marketplace-audit",
+            "--no-require-marketplace",
+            "--strict-marketplace-path",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            [
+                "./bin/ask plugins harden /tmp/not-a-plugin --skip-compat "
+                "--skip-marketplace-audit --no-require-marketplace "
+                "--strict-marketplace-path --json --robot"
+            ],
+        )
+
+    def test_plugins_harden_validation_error_human_output_exposes_validation(self):
+        """Verify plugin harden validation errors render their replay command."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "plugins",
+            "harden",
+            "/tmp/not-a-plugin",
+            "--skip-compat",
+            "--skip-marketplace-audit",
+            "--no-require-marketplace",
+            "--strict-marketplace-path",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Plugin path", result.stdout)
+        self.assertIn(
+            "Validation: ./bin/ask plugins harden /tmp/not-a-plugin --skip-compat "
+            "--skip-marketplace-audit --no-require-marketplace "
+            "--strict-marketplace-path --json --robot",
+            result.stdout,
+        )
 
 if __name__ == "__main__":
     unittest.main()
