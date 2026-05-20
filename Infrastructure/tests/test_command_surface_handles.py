@@ -582,14 +582,14 @@ class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):
         payload = json.loads(surface_path.read_text(encoding="utf-8"))
         required_handle_count = sum(
             1
-            for handle in command_surface.build_skill_handles(repo_root_path=REPO_ROOT)
+            for handle in command_surface.build_command_surface_handles(repo_root_path=REPO_ROOT)
             if command_surface.requires_generated_command_handle(handle)
         )
 
         self.assertEqual(
             payload.get("generated_command_handle_count"),
             required_handle_count,
-            "generated_command_handle_count must equal canonical handles requiring generated command files",
+            "generated_command_handle_count must equal visible handles requiring generated command files",
         )
 
     def test_committed_command_surface_handles_have_required_fields(self) -> None:
