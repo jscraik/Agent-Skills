@@ -424,9 +424,15 @@ report_clean_review_or_fail() {
 report_review_blocker() {
   local status=$1
   local codex_home_dir=${CODEX_HOME:-$HOME/.codex}
-  local codex_skills_dir=${CODEX_REVIEW_RUNTIME_SKILLS_DIR:-$codex_home_dir/skills}
+  local codex_skills_dir
   local mise_share_dir=${XDG_DATA_HOME:-$HOME/.local/share}/mise
   local tmp_dir=${TMPDIR:-/tmp}
+
+  if [[ "${runtime_skills_dir_enabled:-false}" == true && -n "${runtime_skills_dir:-}" ]]; then
+    codex_skills_dir=$runtime_skills_dir
+  else
+    codex_skills_dir=${CODEX_REVIEW_RUNTIME_SKILLS_DIR:-$codex_home_dir/skills}
+  fi
 
   if review_output_has_findings; then
     return "$status"

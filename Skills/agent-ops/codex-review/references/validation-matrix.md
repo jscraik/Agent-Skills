@@ -24,7 +24,7 @@ For runtime-policy edits, first run the helper without permission expansion when
 
 For portability edits, add fixtures that prove:
 
-- an app-server initialization failure emits `codex-review blocked: blocked_runtime`, the filesystem-only retry profile, and the source-backed fallback instruction
+- an app-server initialization failure emits `codex-review blocked: blocked_runtime`, the filesystem-only retry profile, the active `--runtime-skills-dir` or `CODEX_REVIEW_RUNTIME_SKILLS_DIR` path when set, and the source-backed fallback instruction
 - a branch fetch failure emits `codex-review warning: degraded_existing_refs`, the exact fetch blocker text, and recovery guidance
 - `--fetch-required` turns a branch fetch failure into `codex-review blocked: blocked_fetch`
 
