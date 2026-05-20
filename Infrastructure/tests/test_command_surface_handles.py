@@ -75,6 +75,20 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
         self.assertIn("he-technical-review", visible_handles)
         self.assertNotIn("he-phase-heartbeat", visible_handles)
 
+    def test_system_bridge_copy_does_not_shadow_canonical_plugin_handle(self) -> None:
+        handles = [
+            row
+            for row in command_surface.build_skill_handles(repo_root_path=REPO_ROOT)
+            if row.handle == "plugin-creator"
+        ]
+
+        self.assertEqual(len(handles), 1)
+        self.assertEqual(handles[0].owner, "plugin-factory")
+        self.assertEqual(
+            handles[0].source_path,
+            "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
+        )
+
     def test_command_surface_projection_is_generated_from_rooted_manifests(self) -> None:
         payload = command_surface.command_surface_projection(repo_root_path=REPO_ROOT)
 

@@ -10,10 +10,10 @@ metadata:
   review_cadence: quarterly
   metadata_source: frontmatter
   risk: medium
-  projection: latent
+  projection: flat
   handles: "unslopify, $unslopify"
   canonical_handle: unslopify
-  runtime_visibility: latent
+  runtime_visibility: flat
   command_visibility: target
   category: maintenance
   scope: global

@@ -649,6 +649,21 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
     snyk_notes = _as_list(snyk.get("notes"))
     snyk_notes_html = "".join(f"<li>{_escape(item)}</li>" for item in snyk_notes) or "<li>No Snyk notes reported.</li>"
     scorecard_path = evals.get("scorecard_path")
+    if scorecard_path:
+        scorecard = Path(scorecard_path)
+        scorecard_label = scorecard.relative_to(repo_root) if scorecard.is_relative_to(repo_root) else scorecard_path
+        scorecard_evidence_html = (
+            f'<a href="{_evidence_href(scorecard, repo_root=repo_root, output_path=output_path)}">'
+            f"Latest Eval Scorecard<br><span>{_escape(scorecard_label)}</span></a>"
+        )
+    else:
+        scorecard_evidence_html = "<div>Latest Eval Scorecard<br><span>No scorecard found for this skill.</span></div>"
+    live_status_html = (
+        f'<span class="live-status is-active">Validation running - refreshes in '
+        f"<span data-refresh-countdown>{refresh_seconds}s</span></span>"
+        if validation_active
+        else '<span class="live-status">Static evidence snapshot</span>'
+    )
     review_lanes_html = _render_review_mode_details(review_mode_details)
 
     document = f"""<!doctype html>
@@ -789,7 +804,7 @@ document.addEventListener('DOMContentLoaded', () => {{
     </nav>
   </aside>
   <main class=\"main\">
-    <div class=\"breadcrumb\"><span>Local / Skills / {_escape(target)} / review</span>{'<span class=\"live-status is-active\">Validation running - refreshes in <span data-refresh-countdown>' + str(refresh_seconds) + 's</span></span>' if validation_active else '<span class=\"live-status\">Static evidence snapshot</span>'}</div>
+    <div class=\"breadcrumb\"><span>Local / Skills / {_escape(target)} / review</span>{live_status_html}</div>
     <header id=\"overview\" class=\"hero\">
       <div><div class=\"hex\">{overall}</div>{impact_badge}</div>
       <div>
@@ -855,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {{
       <div class=\"section-head\"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class=\"evidence-list\">
         <a href=\"{_evidence_href(report_path, repo_root=repo_root, output_path=output_path)}\">Review JSON<br><span>{_escape(report_path.relative_to(repo_root) if report_path.is_relative_to(repo_root) else report_path)}</span></a>
-        {f'<a href=\"{_evidence_href(Path(scorecard_path), repo_root=repo_root, output_path=output_path)}\">Latest Eval Scorecard<br><span>{_escape(Path(scorecard_path).relative_to(repo_root) if Path(scorecard_path).is_relative_to(repo_root) else scorecard_path)}</span></a>' if scorecard_path else '<div>Latest Eval Scorecard<br><span>No scorecard found for this skill.</span></div>'}
+        {scorecard_evidence_html}
         <div>Policy<br><span>{_escape(policy.get('mode') or 'local_internal_only')}; primary gate: {_escape(policy.get('primary_gate') or 'local_eval_ask_audit')}; Plugin Eval floor: {_escape(policy.get('plugin_eval_min_acceptable_grade') or 'B')}; Snyk: {_escape(policy.get('snyk_default') or 'disabled_until_explicit_confirmation')}</span></div>
         <div>Generated<br><span>{generated}</span></div>
       </div>

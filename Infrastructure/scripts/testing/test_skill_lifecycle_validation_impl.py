@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import importlib
 import importlib.util
 import sys
 from datetime import date, timedelta
@@ -24,6 +25,7 @@ RUNTIME_SURFACE_POLICY_SCRIPT = (
     REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "runtime_surface_policy.py"
 )
 SYNC_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills.sh"
+SKILLS_IMPL_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "commands" / "skills_impl.py"
 
 # macOS ships bash 3.2 which lacks features (mapfile, declare -A) used by
 # shell scripts in this repo. Prefer a known bash 4+ path when available.
@@ -113,6 +115,18 @@ def load_runtime_surface_policy_module():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def load_skills_impl_module():
+    for path in (
+        REPO_ROOT / "Infrastructure" / "scripts" / "lib",
+        REPO_ROOT / "Infrastructure" / "scripts",
+        REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync",
+    ):
+        script_dir = str(path)
+        if script_dir not in sys.path:
+            sys.path.insert(0, script_dir)
+    return importlib.import_module("ask.commands.skills_impl")
 
 
 class SkillLifecycleValidationTests(unittest.TestCase):
@@ -561,6 +575,23 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         )
         self.assertEqual(missing, [])
 
+    def test_unslopify_is_default_visible_for_formal_cleanup_routing(self) -> None:
+        """
+        Keep Unslopify available as a formal default skill, not only a manual fallback.
+
+        Other project sessions depend on this cleanup skill being present in the
+        generated registry so agents do not report it as unavailable and then
+        improvise the workflow manually.
+        """
+        selection_policy = load_selection_policy_module()
+        repo_root = Path(__file__).resolve().parents[3]
+        skill_path = repo_root / "Skills" / "agent-ops" / "unslopify" / "SKILL.md"
+
+        self.assertIn("unslopify", selection_policy.DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
+        self.assertTrue(skill_path.is_file())
+        skill_text = skill_path.read_text(encoding="utf-8")
+        self.assertIn("runtime_visibility: flat", skill_text)
+
     def test_catalog_default_surface_matches_default_discovery_surface(self) -> None:
         """
         Ensure catalog/default and discovery/default surfaces stay identical.
@@ -948,6 +979,38 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             ["autofix", "diagram-cli"],
         )
 
+    def test_repo_discovery_uses_tracked_system_skills_without_runtime_bridge(self) -> None:
+        """
+        Ensure clean CI checkouts keep tracked system skills in repo discovery.
+
+        Local worktrees often have .agents/skills/.system populated, but GitHub
+        Actions checks out only tracked sources. Repo-mode discovery must not
+        drop system skills when that runtime bridge is absent.
+        """
+        skill_discovery = load_skill_discovery_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir).resolve()
+            write_text(
+                repo_root / "skills-system" / "imagegen" / "SKILL.md",
+                """
+                ---
+                name: imagegen
+                description: "Generate or edit raster images for project assets."
+                ---
+
+                # Imagegen
+                """,
+            )
+
+            with (
+                mock.patch.object(skill_discovery, "REPO_ROOT", repo_root),
+                mock.patch.object(skill_discovery, "FLAT_SKILLS_DIR", repo_root / ".agents" / "skills"),
+                mock.patch.object(skill_discovery, "SYSTEM_LANE_DIR", repo_root / ".agents" / "skills" / ".system"),
+            ):
+                entries = skill_discovery.discover_catalog_entries(source="repo")
+
+        self.assertEqual([entry.name for entry in entries], ["imagegen"])
+
     def test_sync_script_consumes_selection_policy_exports(self) -> None:
         """
         Ensure the sync script references the selection policy and its exported constants required for skill syncing.
@@ -1127,6 +1190,70 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             "(.marketplace // $source.marketplace // $default_market | tostring | trim) as $market",
             content,
         )
+
+    def test_exact_handle_sort_prefers_canonical_source_over_runtime_bridge(self) -> None:
+        skills_impl = load_skills_impl_module()
+        candidate = skills_impl.EligibleCandidate
+        bridge_copy = candidate(
+            name="plugin-creator",
+            path=".agents/skills/plugin-creator",
+            description="runtime bridge",
+            scope_rank=2,
+        )
+        plugin_source = candidate(
+            name="plugin-creator",
+            path="Plugins/plugin-factory/skills/plugin-creator",
+            description="canonical plugin source",
+            scope_rank=skills_impl._scope_rank_for_path(REPO_ROOT, "Plugins/plugin-factory/skills/plugin-creator"),
+        )
+        global_source = candidate(
+            name="plugin-creator",
+            path="Skills/plugin-creator",
+            description="global skill source",
+            scope_rank=skills_impl._scope_rank_for_path(REPO_ROOT, "Skills/plugin-creator"),
+        )
+        system_source = candidate(
+            name="plugin-creator",
+            path="skills-system/plugin-creator",
+            description="system bridge",
+            scope_rank=skills_impl._scope_rank_for_path(REPO_ROOT, "skills-system/plugin-creator"),
+        )
+        project_source = candidate(
+            name="plugin-creator",
+            path="Skills/project/plugin-creator",
+            description="canonical project source",
+            scope_rank=skills_impl._scope_rank_for_path(REPO_ROOT, "Skills/project/plugin-creator"),
+        )
+
+        self.assertIs(
+            min([bridge_copy, plugin_source], key=skills_impl._exact_handle_sort_key),
+            plugin_source,
+        )
+        self.assertIs(
+            min([global_source, plugin_source], key=skills_impl._exact_handle_sort_key),
+            plugin_source,
+        )
+        self.assertIs(
+            min([system_source, plugin_source], key=skills_impl._exact_handle_sort_key),
+            plugin_source,
+        )
+        self.assertIs(
+            min([system_source, global_source], key=skills_impl._exact_handle_sort_key),
+            global_source,
+        )
+        self.assertIs(
+            min([bridge_copy, plugin_source, global_source, project_source], key=skills_impl._exact_handle_sort_key),
+            project_source,
+        )
+
+    def test_route_exact_handle_prefers_canonical_plugin_source(self) -> None:
+        skills_impl = load_skills_impl_module()
+
+        result = skills_impl.route_skills(REPO_ROOT, "plugin-creator")
+
+        self.assertEqual(result.status, "success")
+        selected = result.data["decision"]["selected_candidates"][0]
+        self.assertEqual(selected["path"], "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator")
 
 
 if __name__ == "__main__":
