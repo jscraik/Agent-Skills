@@ -17,10 +17,15 @@ Clean indicators include:
 
 Treat output as actionable when it includes:
 
-- `[P0]`, `[P1]`, `[P2]`, or `[P3]`
+- line-start `[P0]`, `[P1]`, `[P2]`, or `[P3]` findings
 - JSON fields named `findings` or `issues` with entries
-- heading-style `Findings:` or `Issues:` without a clear no-findings value
+- heading-style `Findings`, `Findings: one issue`, `Issues`, or similar output without a clear no-findings value
 - any new format that mentions issues/findings without an explicit clean statement
+
+Do not treat inline quoted examples or reviewed documentation text that merely mentions `[P2]` as a finding.
+If actionable severity lines and clean prose or clean headings both appear, severity lines win.
+A line-start severity line is actionable; inline severity-shaped examples inside otherwise clean prose are not.
+Markdown headings such as `## Findings` followed by `None` or equivalent clean values are clean.
 
 ## Triage
 

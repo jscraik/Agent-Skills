@@ -86,6 +86,35 @@ cases:
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
     acceptance:
       - {type: regex, value: "(?i)(--full-access|CODEX_REVIEW_YOLO=1|approval|sandbox|full-access)"}
+  - id: edge-policy-denied-fallback
+    name: runtime filesystem retry before denied fallback
+    category: edge
+    realistic: true
+    why_realistic: "Sandboxed Codex sessions may need Codex runtime filesystem access for nested review, while adding network permission can trigger tenant denial for local repo code."
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Codex review fails initializing the nested app server, then a network-permission retry is rejected for local repo disclosure. Explain the filesystem-only retry path, classify the blocker if it still fails, and continue with the safe local source-backed review fallback."
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
+    acceptance:
+      - {type: regex, value: "(?i)(filesystem-only|filesystem access|runtime filesystem)"}
+      - {type: regex, value: "(?i)(do not add|without|no extra).*network"}
+      - {type: regex, value: "(?i)blocked_runtime"}
+      - {type: regex, value: "(?i)source-backed local review"}
+  - id: edge-portable-fetch-permissions
+    name: portable branch fetch permission handling
+    category: edge
+    realistic: true
+    why_realistic: "Sandboxed cross-repo reviews can read a target repo but fail to write .git/FETCH_HEAD, so branch review must report degraded ref freshness or block when freshness is required."
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Run Codex review in branch mode in a sandbox where git fetch origin --quiet fails with cannot open .git/FETCH_HEAD: Operation not permitted. Explain how the helper should continue or block when fresh refs are required."
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
+    acceptance:
+      - {type: regex, value: "(?i)degraded_existing_refs|existing refs"}
+      - {type: regex, value: '(?i)\.git|FETCH_HEAD|write access'}
+      - {type: regex, value: "(?i)--fetch-required|CODEX_REVIEW_FETCH_REQUIRED|blocked_fetch"}
   - id: edge-untagged-findings-fail-closed
     name: untagged finding output fails closed
     category: edge

@@ -39,7 +39,15 @@ risks:
   - gitcrawl_portable_cache_corruption
   - security_audit_suppression_hiding_active_risk
   - false_clean_result_from_new_review_output_format
+  - false_findings_from_quoted_severity_examples
+  - false_clean_when_severity_and_clean_prose_coexist
+  - false_clean_from_untagged_finding_headings
+  - false_findings_from_clean_markdown_findings_heading
   - leaking sensitive local details in final reports
+  - networked_review_denied_by_tenant_policy
+  - false_blocked_runtime_from_reviewed_policy_text
+  - stale_branch_refs_after_fetch_permission_failure
+  - nested_review_system_skill_install_denied_without_runtime_skills_dir
 safety:
   untrusted_inputs: true
   redact_secrets: true
@@ -55,8 +63,17 @@ validation:
   - helper_dry_run_commit_mode
   - helper_no_yolo_dry_run
   - helper_untagged_finding_output_fails
+  - helper_quoted_severity_examples_stay_clean
+  - helper_severity_findings_override_clean_prose
+  - helper_untagged_finding_headings_fail_closed
+  - helper_clean_markdown_findings_heading_stays_clean
   - strict_skill_audit
   - focused_tests_rerun_after_review_triggered_fixes
   - codex_review_rerun_after_review_triggered_fixes
+  - filesystem_only_runtime_permission_retry
+  - blocked_runtime_fallback_classification
+  - degraded_existing_refs_fetch_warning
+  - fetch_required_blocks_on_fetch_failure
+  - nested_review_adds_runtime_skills_dir
 observability: Report target selection, command used, auto test selection when present, findings accepted or rejected, validation outcomes, and blockers.
 rollback_procedure: Revert codex-review skill files and rerun strict skill audit.

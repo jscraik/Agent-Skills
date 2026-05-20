@@ -16,7 +16,17 @@ CODEX_REVIEW_YOLO=0 bash Skills/agent-ops/codex-review/scripts/codex-review --mo
 bash Skills/agent-ops/codex-review/scripts/codex-review --mode commit --commit HEAD --no-yolo --dry-run
 ```
 
-For output-classification edits, use a fixture or direct helper path that proves untagged `Findings:` output does not get marked clean.
+The dry-run review command must include `--add-dir <runtime-skills-dir>` unless `--no-runtime-skills-dir` is set. Cross-repo runtime validation should prove the nested Codex header no longer logs `failed to install system skills` when the outer sandbox grants write access to `~/.codex/skills`.
+
+For output-classification edits, use a fixture or direct helper path that proves untagged `Findings`, `Findings: one issue`, or `Issues` output does not get marked clean, inline quoted `[P2]` examples are not treated as actionable, line-start severity findings override broad clean prose, and `## Findings` followed by `None` or `- None` stays clean.
+
+For runtime-policy edits, first run the helper without permission expansion when nested Codex review is expected to fail locally. Then rerun the helper from the active Codex session with scoped filesystem access to Codex runtime state only and no extra network permission. Pass condition: the filesystem-only run launches nested Codex review, while a still-blocked run emits `codex-review blocked: blocked_runtime` and a source-backed fallback instruction instead of silently failing.
+
+For portability edits, add fixtures that prove:
+
+- an app-server initialization failure emits `codex-review blocked: blocked_runtime`, the filesystem-only retry profile, and the source-backed fallback instruction
+- a branch fetch failure emits `codex-review warning: degraded_existing_refs`, the exact fetch blocker text, and recovery guidance
+- `--fetch-required` turns a branch fetch failure into `codex-review blocked: blocked_fetch`
 
 ## Skill Or Reference Edits
 
