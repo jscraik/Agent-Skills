@@ -16,7 +16,7 @@ CODEX_REVIEW_YOLO=0 bash Skills/agent-ops/codex-review/scripts/codex-review --mo
 bash Skills/agent-ops/codex-review/scripts/codex-review --mode commit --commit HEAD --no-yolo --dry-run
 ```
 
-The dry-run review command must include `--add-dir <runtime-skills-dir>` unless `--no-runtime-skills-dir` is set. Cross-repo runtime validation should prove the nested Codex header no longer logs `failed to install system skills` when the outer sandbox grants write access to `~/.codex/skills`.
+The default dry-run review command must not include `--add-dir` unless `--runtime-skills-dir DIR` or `CODEX_REVIEW_RUNTIME_SKILLS_DIR` opts in. Cross-repo runtime validation should prove explicit runtime-skill access fixes nested Codex system-skill refreshes only when the outer sandbox grants write access to `$HOME/.codex/skills`.
 
 For output-classification edits, use a fixture or direct helper path that proves untagged `Findings`, `Findings: one issue`, or `Issues` output does not get marked clean, inline quoted `[P2]` examples are not treated as actionable, line-start severity findings override broad clean prose, and `## Findings` followed by `None` or `- None` stays clean.
 

@@ -47,7 +47,7 @@ risks:
   - networked_review_denied_by_tenant_policy
   - false_blocked_runtime_from_reviewed_policy_text
   - stale_branch_refs_after_fetch_permission_failure
-  - nested_review_system_skill_install_denied_without_runtime_skills_dir
+  - nested_review_system_skill_install_requires_explicit_runtime_skills_dir
 safety:
   untrusted_inputs: true
   redact_secrets: true
@@ -74,6 +74,6 @@ validation:
   - blocked_runtime_fallback_classification
   - degraded_existing_refs_fetch_warning
   - fetch_required_blocks_on_fetch_failure
-  - nested_review_adds_runtime_skills_dir
+  - nested_review_adds_explicit_runtime_skills_dir
 observability: Report target selection, command used, auto test selection when present, findings accepted or rejected, validation outcomes, and blockers.
 rollback_procedure: Revert codex-review skill files and rerun strict skill audit.

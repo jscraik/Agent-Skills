@@ -12,7 +12,7 @@ Options:
   --commit REF               Commit ref for commit review. Default: HEAD.
   --codex-bin PATH           Codex binary. Default: codex.
   --runtime-skills-dir DIR   Add Codex runtime skills dir to the nested review sandbox.
-                              Default: CODEX_REVIEW_RUNTIME_SKILLS_DIR or $CODEX_HOME/skills or ~/.codex/skills.
+                              Default: disabled unless CODEX_REVIEW_RUNTIME_SKILLS_DIR is set.
   --no-runtime-skills-dir    Do not add a runtime skills dir to the nested review sandbox.
   --full-access              Run nested Codex review with stronger sandbox permissions after approval.
   --no-yolo                  Keep normal sandbox/approval prompts. Default.
@@ -40,8 +40,11 @@ codex_global_args=()
 codex_args=()
 yolo=${CODEX_REVIEW_YOLO:-0}
 fetch_required=${CODEX_REVIEW_FETCH_REQUIRED:-0}
-runtime_skills_dir=${CODEX_REVIEW_RUNTIME_SKILLS_DIR:-${CODEX_HOME:-$HOME/.codex}/skills}
-runtime_skills_dir_enabled=true
+runtime_skills_dir=${CODEX_REVIEW_RUNTIME_SKILLS_DIR:-}
+runtime_skills_dir_enabled=false
+if [[ -n "$runtime_skills_dir" ]]; then
+  runtime_skills_dir_enabled=true
+fi
 output=${CODEX_REVIEW_OUTPUT:-}
 parallel_tests=
 parallel_tests_auto=false
@@ -335,6 +338,7 @@ clean_phrases = (
 
 clean_value = re.compile(r'^(?:none|no(?:ne)?|0|n/a|not applicable|nothing)\b', re.IGNORECASE)
 severity_line = re.compile(r'^\s*(?:[-*]\s*)?\[P[0-3]\]')
+generic_issue_mention = re.compile(r'(?im)^\s*(?![>#`]).*\b(findings?|issues?)\b')
 heading_line = re.compile(
     r'^\s*(?:#+\s*)?(?:accepted/actionable\s+)?(?:actionable\s+)?(?:findings?|issues?)\s*(?::\s*(.*))?$',
     re.IGNORECASE,
@@ -379,6 +383,9 @@ for index, line in enumerate(lines):
 if has_clean_signal:
     sys.exit(1)
 
+if generic_issue_mention.search(text):
+    sys.exit(0)
+
 sys.exit(1)
 PY
 }
@@ -402,6 +409,10 @@ report_clean_review_or_fail() {
 
 report_review_blocker() {
   local status=$1
+  local codex_home_dir=${CODEX_HOME:-$HOME/.codex}
+  local codex_skills_dir=${CODEX_REVIEW_RUNTIME_SKILLS_DIR:-$codex_home_dir/skills}
+  local mise_share_dir=${XDG_DATA_HOME:-$HOME/.local/share}/mise
+  local tmp_dir=${TMPDIR:-/tmp}
 
   if review_output_has_findings; then
     return "$status"
@@ -411,8 +422,8 @@ report_review_blocker() {
     printf 'codex-review blocked: blocked_runtime\n'
     printf 'codex-review blocker: nested Codex review could not run in this sandbox or approval policy\n'
     printf 'codex-review retry: rerun once from the active Codex session with filesystem-only additional permissions\n'
-    printf 'codex-review retry fs.read: /Users/jamiecraik/.codex, /Users/jamiecraik/.local/share/mise\n'
-    printf 'codex-review retry fs.write: /Users/jamiecraik/.codex, /Users/jamiecraik/.local/share/mise, /private/tmp\n'
+    printf 'codex-review retry fs.read: %s, %s, %s\n' "$codex_home_dir" "$codex_skills_dir" "$mise_share_dir"
+    printf 'codex-review retry fs.write: %s, %s, %s, %s\n' "$codex_home_dir" "$codex_skills_dir" "$mise_share_dir" "$tmp_dir"
     printf 'codex-review retry network: do not request extra network permission in already-network-enabled workspaces\n'
     printf 'codex-review fallback: if the retry still fails, perform source-backed local review of the selected git diff and report blocked_runtime\n'
   fi

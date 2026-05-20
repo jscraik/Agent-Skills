@@ -56,7 +56,7 @@ Details: `references/target-selection.md`.
 Core behavior:
 
 - Auto mode prefers dirty work; branch mode uses PR base or `origin/main`; commit mode reviews `HEAD` by default.
-- Normal prompts are default; the helper adds the active Codex runtime skills dir to nested review via `--add-dir`; full access stays explicit; pnpm `scripts.check` may run in parallel when already installed.
+- Normal prompts are default; runtime skill `--add-dir` access is opt-in via `--runtime-skills-dir` or `CODEX_REVIEW_RUNTIME_SKILLS_DIR`; full access stays explicit; pnpm `scripts.check` may run in parallel when already installed.
 - Branch fetch failures are reported as `degraded_existing_refs` unless `--fetch-required` or `CODEX_REVIEW_FETCH_REQUIRED=1` is set.
 
 Details: `references/helper-behavior.md`.
