@@ -3,7 +3,6 @@ import json
 import re
 import subprocess
 import sys
-import ast
 import shutil
 import tempfile
 import hashlib
@@ -84,31 +83,111 @@ def _copy_if_present(source_root: Path, relative_path: str, target_root: Path) -
     return [relative_path]
 
 
+def _yaml_scalar(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    return value
+
+
+def _consume_yaml_block(lines: list[str], index: int, parent_indent: int, style: str) -> tuple[str, int]:
+    block_indent: int | None = None
+    block_lines: list[str] = []
+    while index < len(lines):
+        raw_line = lines[index]
+        if not raw_line.strip():
+            block_lines.append("")
+            index += 1
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        if indent <= parent_indent:
+            break
+        block_indent = indent if block_indent is None else min(block_indent, indent)
+        block_lines.append(raw_line[block_indent:])
+        index += 1
+
+    if style.startswith(">"):
+        folded: list[str] = []
+        paragraph: list[str] = []
+        for line in block_lines:
+            if line.strip():
+                paragraph.append(line.strip())
+                continue
+            if paragraph:
+                folded.append(" ".join(paragraph))
+                paragraph = []
+        if paragraph:
+            folded.append(" ".join(paragraph))
+        return "\n".join(folded), index
+    return "\n".join(block_lines), index
+
+
+def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
+    cases: list[dict[str, str]] = []
+    current: dict[str, str] | None = None
+    in_cases = False
+    lines = text.splitlines()
+    index = 0
+    while index < len(lines):
+        raw_line = lines[index]
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            index += 1
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        if stripped == "cases:":
+            in_cases = True
+            index += 1
+            continue
+        if not in_cases:
+            index += 1
+            continue
+        if stripped.startswith("- "):
+            if current and current.get("id") and current.get("prompt"):
+                cases.append(current)
+            current = {}
+            stripped = stripped[2:].strip()
+        if current is None or ":" not in stripped:
+            index += 1
+            continue
+        key, raw_value = stripped.split(":", 1)
+        key = key.strip()
+        raw_value = raw_value.strip()
+        if key not in {"id", "prompt"}:
+            index += 1
+            continue
+        if key == "prompt" and raw_value.startswith((">", "|")):
+            current[key], index = _consume_yaml_block(lines, index + 1, indent, raw_value)
+            continue
+        current[key] = _yaml_scalar(raw_value)
+        index += 1
+
+    if current and current.get("id") and current.get("prompt"):
+        cases.append(current)
+    return cases
+
+
 def _parse_tessl_eval_cases(evals_path: Path) -> list[dict[str, str]]:
     if not evals_path.exists():
         return []
 
+    text = evals_path.read_text(encoding="utf-8")
+    try:
+        import yaml  # type: ignore
+    except ImportError:
+        return _parse_tessl_eval_cases_compat(text)
+
+    loaded = yaml.safe_load(text) or {}
+    raw_cases = loaded.get("cases", []) if isinstance(loaded, dict) else []
     cases: list[dict[str, str]] = []
-    current: dict[str, str] | None = None
-    for raw_line in evals_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if line.startswith("- id:"):
-            if current and current.get("id") and current.get("prompt"):
-                cases.append(current)
-            current = {"id": line.split(":", 1)[1].strip().strip("'\"")}
+    for raw_case in raw_cases:
+        if not isinstance(raw_case, dict):
             continue
-        if current is None or not line.startswith("prompt:"):
+        case_id = raw_case.get("id")
+        prompt = raw_case.get("prompt")
+        if case_id is None or prompt is None:
             continue
-
-        prompt_value = line.split(":", 1)[1].strip()
-        try:
-            parsed_prompt = ast.literal_eval(prompt_value)
-        except (SyntaxError, ValueError):
-            parsed_prompt = prompt_value.strip("'\"")
-        current["prompt"] = str(parsed_prompt)
-
-    if current and current.get("id") and current.get("prompt"):
-        cases.append(current)
+        cases.append({"id": str(case_id), "prompt": str(prompt)})
     return cases
 
 

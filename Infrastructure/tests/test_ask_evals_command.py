@@ -246,6 +246,28 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
     assert result.data["tessl_eval"]["policy"]["project_save_default"] == "compatibility_flag_not_required"
 
 
+def test_evals_stage_folded_yaml_prompts_for_tessl(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: folded-prompt\n"
+            "    prompt: >-\n"
+            "      Investigate the target workflow\n"
+            "      and preserve the whole prompt.\n"
+        ),
+        encoding="utf-8",
+    )
+    staged_root = tmp_path / "staged"
+
+    copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
+
+    assert copied == ["scenarios/folded-prompt/task.md"]
+    assert (
+        staged_root / "scenarios" / "folded-prompt" / "task.md"
+    ).read_text(encoding="utf-8") == "Investigate the target workflow and preserve the whole prompt.\n"
+
+
 def test_evals_skip_tessl_escape_hatch(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
