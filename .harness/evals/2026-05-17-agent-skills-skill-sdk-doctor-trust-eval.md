@@ -38,11 +38,53 @@ Primary Artifacts:
 - `.harness/reframes/2026-05-17-agent-skills-skill-sdk-doctor-trust-reframe.md`
 - `.harness/linear/2026-05-17-agent-skills-skill-sdk-doctor-contract-linear-plan.md`
 - `.harness/README.md`
+- `Infrastructure/config/skills-sdk.json`
 - `Infrastructure/references/skills-sdk-apparatus-lens.md`
 - `Infrastructure/config/schemas/skill-doctor.v1.schema.json`
 - `Infrastructure/bin/ask`
 - `Infrastructure/scripts/lib/ask/commands/skills_impl.py`
 - `Infrastructure/scripts/lib/ask/command_metadata.py`
+
+## Deep Module Boundary Check
+
+Current agent-safe classification: risky.
+
+Reason: the planned public interface is clear, but the command is not
+registered and the seam tests have not run yet. RF-1 may only promote this
+boundary to agent-safe after the public doctor command, `skill-doctor.v1`
+schema snapshots, status-precedence tests, command-action parity, and
+second-skill fixture all pass.
+
+Caller contract: future agents and coding-harness should consume
+`data.skill_doctor`; they should not reconstruct readiness from skill source
+files, projections, package folders, audit output, and eval reports.
+
+## Observability Feedback Loop
+
+The RF-1 eval records the first version of the feedback loop: command evidence,
+schema fixture evidence, comparison output, changed-file validation, and a
+closeout decision. Later SDK slices can add logs, metrics, traces, hook events,
+tool lifecycle events, package events, projection events, and subagent start
+events. Those later signals should feed the same loop: observe, correlate,
+classify, patch the owner module, rerun, then promote or roll back with
+before/after evidence.
+
+Local evidence adapters available for later slices:
+
+- `/Users/jamiecraik/.agents/otel-collector`: local OTLP logs/traces/metrics,
+  `/health`, `/stats`, freshness, service contribution, skill invocation
+  health counters, and telemetry confidence.
+- `/Users/jamiecraik/.agents/session-collector`: privacy-safe session
+  summaries, skill invocation analytics, skill proof candidates, agent
+  knowledge, skillify candidates, and Harness Engineering evidence.
+
+RF-1 should reference collector evidence only when it is present and fresh;
+absence or staleness is an evidence warning, not a reason to block schema-valid
+doctor output.
+
+Extraction contract: `Infrastructure/config/skills-sdk.json` defines the fields
+to collect from doctor output, command surfaces, eval artifacts, Linear, and
+optional collector evidence.
 
 ## Live Command Evidence
 
@@ -50,7 +92,7 @@ Primary Artifacts:
 | --- | --- | --- |
 | `./bin/ask skills --help` | pass: lists `list, budget, handles, resolve, parse, proof, prove, explain, route, goal, improve, starter, sync, audit, validate-skill-gate, validate-openai-format, validate-boundaries, install, fold, init`; does not list `doctor`, `package`, `profiles`, or `events`. | RF-1 must include command registration proof before field-level readiness assertions. |
 | `./bin/ask skills doctor context7 --json --robot` | blocked: exits 2 with parser error `invalid choice: 'doctor'`. | The prior blocked-runtime baseline claim is false in this checkout. Preserve this as the pre-RF-1 snapshot. |
-| `./bin/ask skills package context7 --json --robot` | blocked: exits 2 with parser error `invalid choice: 'package'`. | Package-readiness comparison is RF-2+ unless RF-1 deliberately introduces an unavailable/package-not-implemented field. |
+| `./bin/ask skills package context7 --json --robot` | blocked: exits 2 with parser error `invalid choice: 'package'`. | Package-readiness comparison is RF-2+ unless RF-1 deliberately introduces a schema-valid `not_run` package-readiness check with unavailable command-surface evidence. |
 
 ## RF-1 Required Proof
 
@@ -63,7 +105,7 @@ RF-1 must prove these dimensions before broader SDK work starts:
 | Structured outcome | `data.skill_doctor` validates against `Infrastructure/config/schemas/skill-doctor.v1.schema.json` and contains `schema_version`, `status`, `target_summary`, `checks`, `blockers`, `warnings`, `operation_context`, `contract_schemas`, `agent_summary`, and `next_command`. | missing |
 | Status precedence | Focused test proves blockers outrank warnings, warnings outrank pass, and pass has no blockers or warnings. | missing |
 | Current command comparison | Doctor output preserves or explains the current `skills proof`/`skills prove` reachability and outcome-proof signals for `context7`. | missing |
-| Unavailable package seam | Doctor reports package readiness as `unavailable`, `not_implemented`, or a similarly explicit non-pass state until a real package command exists. | missing |
+| Unavailable package seam | Doctor reports package readiness as a `not_run` check with unavailable command-surface evidence until a real package command exists. | missing |
 | Representative coverage | One additional non-`context7` skill-class fixture validates against the same schema and status semantics. | missing |
 | Snapshot discipline | Eval stores the pre-RF-1 invalid-choice output and the post-RF-1 doctor output with tolerated dynamic fields. | missing |
 

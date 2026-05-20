@@ -147,6 +147,7 @@ Source Artifacts:
 - .harness/strategy/2026-05-17-agent-skills-sdk-north-star.md
 - .harness/reframes/2026-05-17-agent-skills-skill-sdk-doctor-trust-reframe.md
 - .harness/quality/steering-uptake.md
+- Infrastructure/config/skills-sdk.json
 - Infrastructure/references/skills-sdk-apparatus-lens.md
 - Infrastructure/config/schemas/skill-doctor.v1.schema.json
 
@@ -171,6 +172,68 @@ Scope:
 - Include at least one counterexample-style assertion so malformed fields, skipped/not-run critical evidence, or blocker-first next_command drift cannot produce pass.
 - Add an assertion-backed fixture for one additional non-`context7` skill class
   selected during implementation.
+
+Deep Module Conformance:
+
+- Public interface: `./bin/ask skills doctor <handle> --json --robot` plus the
+  `skill-doctor.v1` JSON payload.
+- Owner layer: `ask.commands.skills` owns the facade; the doctor service owns
+  readiness aggregation, status precedence, and safe-next-command selection.
+- Hidden implementation: source resolution, runtime projection checks,
+  structural audit, package-readiness availability, outcome proof, and eval
+  feedback classification are implementation details behind the doctor seam.
+- Caller rule: coding-harness, Linear closeout, and future agents consume the
+  doctor payload. They must not reconstruct readiness by reading skill internals
+  or by chaining `prove`, audit, package, projection, and eval commands.
+- Seam tests: parser/help/metadata/guided-error parity, schema snapshot tests,
+  status-precedence assertions, and the second-skill fixture are required before
+  the boundary may be called agent-safe.
+- Current classification: `risky` until `skills doctor` is registered and the
+  Phase A/B gates pass; target classification after RF-1 acceptance is `safe`.
+
+Layered Project Module Map:
+
+- Types: `Infrastructure/config/schemas/**`, command metadata, status
+  vocabulary, and compatibility policy.
+- Config: validation policy, permission profiles, runtime profiles, and repo
+  execution defaults.
+- Repo: canonical `Skills/**`, `Plugins/**`, `.harness/**`, and source
+  artifacts.
+- Providers: source, projection, package, audit, and eval readers that adapt
+  repo state into typed inputs.
+- Service: deep SDK modules such as doctor, package-doctor, profiles, events,
+  routing, and compatibility checks.
+- Runtime: `./bin/ask`, generated projections, plugin mirrors, and future
+  app-server/CI contexts.
+- UI: thin human-facing docs, visual maps, and summaries over the
+  machine-readable contract.
+- Utils: shared parsing, filesystem, JSON/schema, command, and formatting
+  helpers that do not own product rules.
+
+Observability Feedback Loop:
+
+- Capture command, package, projection, eval, hook, and subagent lifecycle
+  events as structured evidence.
+- Keep RF-1 limited to doctor output plus eval/closeout evidence; do not invent
+  the full event stack inside JSC-329.
+- RF-2+ should let Codex query and correlate logs, metrics, traces, and eval
+  results, then apply a bounded source change, rerun the workload, and record
+  promotion or rollback evidence.
+- Skills improve over time only when eval findings become classified deltas
+  with affected paths, rerun commands, before/after evidence, and a final
+  decision.
+- Existing local adapters are available for this loop:
+  `/Users/jamiecraik/.agents/otel-collector` for OTLP logs, traces, metrics,
+  health, stats, freshness, and telemetry confidence; and
+  `/Users/jamiecraik/.agents/session-collector` for privacy-safe session
+  summaries, skill invocation analytics, skill proof candidates, and Harness
+  Engineering evidence.
+- Treat those collectors as optional evidence providers behind the SDK seam,
+  not as mandatory RF-1 runtime dependencies.
+- `Infrastructure/config/skills-sdk.json` is the machine-readable extraction
+  contract for these sources. It defines which fields RF-1 and later slices
+  should collect from doctor output, command surfaces, eval artifacts, Linear,
+  and optional collector evidence.
 
 Out of Scope:
 
@@ -241,7 +304,7 @@ Acceptance criteria:
 - A second non-`context7` skill-class fixture asserts the same schema and status
   semantics.
 - Status precedence is covered by tests or helper-level assertions.
-- Runtime reachability, package readiness, and outcome proof remain separate in JSON output and agent summary, including an explicit unavailable/not-implemented state for package readiness if no package command exists yet.
+- Runtime reachability, package readiness, and outcome proof remain separate in JSON output and agent summary, including a schema-valid `not_run` package-readiness check with unavailable command-surface evidence if no package command exists yet.
 - next_command contract is asserted for the observed blocked baseline and any warning/pass fixture used.
 - Readiness claims cite command/test/audit/eval/probe/validation evidence rather than source presence, package presence, AI review, or prose alone.
 - Counterexample-style coverage exists for malformed fields, critical skipped/not-run state, blocker-first next_command behavior, or second-skill representativeness.

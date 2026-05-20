@@ -30,7 +30,7 @@ USER_STORY_RE = re.compile(
     r"\bAs an?\s+[^,\n]+,\s*I want\s+[^,\n]+,\s*so that\s+[^\n]+",
     re.IGNORECASE,
 )
-USER_STORIES_HEADING_RE = re.compile(r"(?im)^###\s+User Stories\b|\buser stories\b")
+USER_STORIES_HEADING_RE = re.compile(r"(?im)^###\s+User Stories\b")
 
 SPEC_SECTIONS = [
     "Command Summary",
@@ -165,7 +165,8 @@ def validate_spec(text: str) -> list[str]:
     proposed = section_body(text, "Proposed Behavior")
     if not proposed.strip():
         errors.append("Proposed Behavior must include the user-facing solution")
-    if re.search(r"(?im)^###\s+User-Facing Solution\b|\buser-facing solution\b", proposed) and "user" not in proposed.lower():
+    user_facing_solution_body = re.sub(r"(?im)^###\s+User-Facing Solution\b", "", proposed).strip()
+    if re.search(r"(?im)^###\s+User-Facing Solution\b", proposed) and "user" not in user_facing_solution_body.lower():
         errors.append("User-Facing Solution must stay grounded in user/operator value")
     if not has_visual_decision(text):
         errors.append("Visual References / Diagrams must contain Mermaid, table, image, or Not needed reason")

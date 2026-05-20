@@ -44,7 +44,18 @@
         "additionalProperties": false,
         "required": ["id", "status", "summary", "evidence"],
         "properties": {
-          "id": {"type": "string", "minLength": 1},
+          "id": {
+            "type": "string",
+            "enum": [
+              "source_resolution",
+              "runtime_reachability",
+              "structural_audit",
+              "package_readiness",
+              "outcome_proof",
+              "command_surface_parity",
+              "schema_contract"
+            ]
+          },
           "status": {
             "type": "string",
             "enum": ["pass", "warning", "blocked", "fail", "not_run"]

@@ -50,7 +50,7 @@ Offer or route to an ADR only when all three are true:
 - the result of a real trade-off.
 
 Skip the ADR when any criterion is missing. Capture only the glossary term in
-`UBIQUITOUS.md` when the decision is vocabulary-only.
+the owning ubiquitous-language artifact when the decision is vocabulary-only.
 
 For tracked work, a Linear issue comment may summarize the same settled domain
 decision when live tracker readers need it. Capture the note when all of these

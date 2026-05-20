@@ -71,9 +71,13 @@ class TestRootSkillsetProjection(ContextBudgetTempDirTestCase):
         for root in report["roots"]:
             with self.subTest(root=root["name"]):
                 content = root["content"]
-                self.assertIn(str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "route_skillset.py"), content)
-                self.assertIn(str(REPO_ROOT / ".skillsets"), content)
-                self.assertIn(f"{REPO_ROOT.as_posix()}/<source_path>", content)
+                self.assertIn(
+                    "<agent-skills-root>/Infrastructure/scripts/lifecycle-and-sync/route_skillset.py",
+                    content,
+                )
+                self.assertIn("<agent-skills-root>/.skillsets", content)
+                self.assertIn("<agent-skills-root>/<source_path>", content)
+                self.assertNotIn(str(REPO_ROOT), content)
 
     def test_root_skill_evals_use_typed_acceptance_checks(self) -> None:
         report = generate_root_skill_sets.build_roots(self.temp_dir / "skills")

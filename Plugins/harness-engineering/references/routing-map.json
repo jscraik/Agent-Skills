@@ -231,7 +231,9 @@
         "skill routing note",
         "repo-relative script path",
         "absolute router returned low_confidence",
+        "absolute router returned low confidence",
         "router returned low_confidence",
+        "router returned low confidence",
         "latent child module",
         "source path missing",
         "access skill from a different project"

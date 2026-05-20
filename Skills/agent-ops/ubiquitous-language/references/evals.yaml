@@ -30,7 +30,9 @@ cases:
     should_trigger: true
     prepend_skill: false
     prompt: "Migrate the vocabulary template so new repos get UBIQUITOUS.md with a Language section, avoid aliases, flagged ambiguities, and an example dialogue."
-    acceptance: [{type: skill_selected, expected_skill: ubiquitous-language}, {type: regex, value: "(?i)(UBIQUITOUS|Language|Avoid|ambiguities)"}]
+    acceptance:
+      - {type: skill_selected, expected_skill: ubiquitous-language}
+      - {type: regex, value: "(?is)(##\\s+Language).*(_Avoid_\\s*:).*(ambiguit)"}
   - id: edge-existing
     name: existing glossary preservation
     category: edge

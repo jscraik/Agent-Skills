@@ -16,22 +16,22 @@ Use: {{ scope }}.
 Avoid: {{ exclusions }}.
 
 ## Inputs
-Request, workspace root, and Agent Skills Kit root.
+Request, workspace root, ASK root.
 
 ## Outputs
-Return `schema_version`, module id, `source_path`, or blocker.
+Return `schema_version`, module id, `source_path`, blocker.
 
 ## Procedure
 1. Classify intent.
 2. Use local router if present; otherwise use canonical:
    `python3 {{ agent_skills_repo_root }}/Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set "{{ skill_set_name }}" --skillsets-dir {{ agent_skills_repo_root }}/.skillsets --task <request> --json`.
-   Use a task file for quotes, logs, or secrets.
+   For quotes/logs/secrets, use `--task-file <path>`.
 3. Load selected `source_path`; if absent locally, load `{{ agent_skills_repo_root }}/<source_path>`.
 4. Follow that module contract.
 5. Record only module id, gate status, and non-sensitive outcome.
 
 ## Validation
-Fail fast. Report `pass`, `fail`, or `blocked` with exact command or blocker.
+Fail fast. Report `pass`/`fail`/`blocked` with exact command/blocker.
 
 ## Execution Boundaries
 Only route. Do not edit, sync, install, write externally, or load children before `source_path` selection.

@@ -16,6 +16,12 @@ def test_changed_files_scope_miss_falls_back_to_required_baseline() -> None:
             "Changed-files scope classification missed all known buckets; falling back to baseline required validation"
             in proc.stdout
         )
+        rows = repo.check_results()
+        required_rows = [row for row in rows if row["mode"] == "required"]
+        assert required_rows, "expected required checks to be recorded"
+        assert any(
+            row["outcome"] == "pass" for row in required_rows
+        ), "expected at least one required check to execute instead of every check being blocked"
 
         rows = repo.check_results()
         required_rows = [row for row in rows if row["mode"] == "required"]

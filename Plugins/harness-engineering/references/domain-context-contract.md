@@ -21,7 +21,7 @@ domain_language:
   canonical_terms: []
   avoided_aliases: []
   unresolved_terms: []
-  language_file: UBIQUITOUS.md|UBIQUITOUS-MAP.md|legacy_CONTEXT.md|not_applicable
+  language_file: UBIQUITOUS.md|UBIQUITOUS-MAP.md|domain-context-contract.md|legacy_CONTEXT.md|not_applicable
 ```
 
 Stage guidance:

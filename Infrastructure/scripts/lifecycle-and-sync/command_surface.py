@@ -307,7 +307,7 @@ def _validate_command_handle_payload(handle: CommandHandle, skill_body: str) -> 
 def _validate_openai_metadata_payload(handle: CommandHandle, yaml_body: str) -> list[dict[str, Any]]:
     """Reject picker metadata that only describes projection plumbing."""
     violations: list[dict[str, Any]] = []
-    useless_description = f'  short_description: "$' + handle.handle + f' - {_display_name(handle)} entrypoint"'
+    useless_description = '  short_description: "$' + handle.handle + f' - {_display_name(handle)} entrypoint"'
     if useless_description in yaml_body:
         violations.append({
             "code": "COMMAND_HANDLE_USELESS_PICKER_DESCRIPTION",

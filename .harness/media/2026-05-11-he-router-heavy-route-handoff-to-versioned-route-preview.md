@@ -10,8 +10,8 @@ This sidecar records the review-media artifact for the `he-router` skill hardeni
 * `$imagegen` invoked: blocked
 * generated-image cache source path: blocked because the active image-generation tool does not expose a cache path that can be copied or verified in `.harness/media/`
 * repository `.harness/media/` PNG path: blocked because no verifiable PNG was produced
-* prompt metadata path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-router-heavy-route-handoff-to-versioned-route-preview-prompt.md`
-* sidecar path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-router-heavy-route-handoff-to-versioned-route-preview.md`
+* prompt metadata path: `.harness/media/2026-05-11-he-router-heavy-route-handoff-to-versioned-route-preview-prompt.md`
+* sidecar path: `.harness/media/2026-05-11-he-router-heavy-route-handoff-to-versioned-route-preview.md`
 * repository PNG existence verification: blocked
 * persistence method: blocked
 * final user-facing text after imagegen permitted: no
@@ -33,10 +33,10 @@ This sidecar records the review-media artifact for the `he-router` skill hardeni
 
 ## Prompt Summary
 
-See `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-router-heavy-route-handoff-to-versioned-route-preview-prompt.md` for the full fallback `$imagegen` prompt.
+See `.harness/media/2026-05-11-he-router-heavy-route-handoff-to-versioned-route-preview-prompt.md` for the full fallback `$imagegen` prompt.
 
 ## Linked Context
 
-Reviewed canonical package: `/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-router/SKILL.md`
+Reviewed canonical package: `Plugins/harness-engineering/skills/he-router/SKILL.md`
 
-Generated handle checked but not edited: `/Users/jamiecraik/dev/agent-skills/.agents/skills/he-router/SKILL.md`
+Generated handle checked but not edited: `.agents/skills/he-router/SKILL.md`

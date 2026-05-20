@@ -632,6 +632,74 @@
         </section>
 
         <section class="panel">
+          <h2>Layered Domain Architecture</h2>
+          <div class="module-map">
+            <aside class="lane">
+              <h3>Outside The Domain</h3>
+              <div class="stack">
+                <div class="module source">
+                  <strong>Utils</strong>
+                  <span>Shared parsing, filesystem, JSON/schema, command, and formatting helpers. Utils never own product rules.</span>
+                </div>
+                <div class="module runtime">
+                  <strong>Thin UI</strong>
+                  <span>Visual maps, Linear summaries, and human docs over executable SDK contracts.</span>
+                </div>
+              </div>
+            </aside>
+
+            <section class="deep-boundary">
+              <h3>Agent Skills SDK Domain</h3>
+              <p>
+                The SDK domain should feel like the example image: typed inputs
+                feed providers, providers feed deep services, services feed the
+                runtime, and proof gates surround every public seam.
+              </p>
+              <div class="service-grid">
+                <div class="module proof">
+                  <strong>Types</strong>
+                  <span>Skills SDK extraction contract, doctor schema, status vocabulary, command metadata, package metadata, compatibility policy.</span>
+                </div>
+                <div class="module command">
+                  <strong>Config</strong>
+                  <span>Validation policy, permission profiles, runtime profiles, execution defaults.</span>
+                </div>
+                <div class="module source">
+                  <strong>Repo</strong>
+                  <span>Canonical Skills, Plugins, harness artifacts, evals, and source docs.</span>
+                </div>
+                <div class="module source">
+                  <strong>Providers</strong>
+                  <span>Source, projection, package, audit, and eval readers that adapt repo state into typed inputs.</span>
+                </div>
+                <div class="module service">
+                  <strong>Service</strong>
+                  <span>Doctor first, then package-doctor, profiles, events, routing, and compatibility checks.</span>
+                </div>
+                <div class="module runtime">
+                  <strong>Runtime</strong>
+                  <span>ASK commands, generated projections, plugin mirrors, app-server, CI, and local execution.</span>
+                </div>
+              </div>
+            </section>
+
+            <aside class="lane">
+              <h3>Public Seams</h3>
+              <div class="stack">
+                <div class="module command">
+                  <strong>Command Facade</strong>
+                  <span><code>./bin/ask skills doctor &lt;handle&gt; --json --robot</code></span>
+                </div>
+                <div class="module proof">
+                  <strong>Boundary Tests</strong>
+                  <span>Action parity, schema snapshots, status precedence, second-skill fixture.</span>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="panel">
           <h2>SDK Factory Reference</h2>
           <div class="module-map">
             <aside class="lane">
@@ -768,6 +836,83 @@
                 explicitly removes capability.
               </p>
             </article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Observability Feedback Stack</h2>
+          <div class="module-map">
+            <aside class="lane">
+              <h3>App Signals</h3>
+              <div class="stack">
+                <div class="module command">
+                  <strong>ASK + Skills</strong>
+                  <span>Doctor runs, proof runs, audits, package checks, projections, evals, hooks, and subagent starts.</span>
+                </div>
+                <div class="module proof">
+                  <strong>Events</strong>
+                  <span>Logs, metrics, traces, lifecycle events, validation outcomes, and fixture diffs.</span>
+                </div>
+                <div class="module proof">
+                  <strong>session-collector</strong>
+                  <span>Privacy-safe session summaries, skill invocation analytics, proof candidates, and Harness Engineering evidence.</span>
+                </div>
+                <div class="module proof">
+                  <strong>otel-collector</strong>
+                  <span>Local OTLP logs, metrics, traces, health, stats, freshness, and telemetry confidence.</span>
+                </div>
+              </div>
+            </aside>
+
+            <section class="deep-boundary">
+              <h3>Local Evidence Services</h3>
+              <p>
+                Like the observability image, signals should fan out locally
+                into queryable evidence. Codex can then correlate failures,
+                patch the owner module, rerun the workload, and improve the
+                skill through eval feedback.
+              </p>
+              <div class="service-grid">
+                <div class="module proof">
+                  <strong>Logs</strong>
+                  <span>Command output, hook output, validation text, blocker strings.</span>
+                </div>
+                <div class="module proof">
+                  <strong>Metrics</strong>
+                  <span>Pass/fail counts, retry counts, duration, freshness, fixture drift.</span>
+                </div>
+                <div class="module proof">
+                  <strong>Traces</strong>
+                  <span>Command lifecycle, tool lifecycle, package lifecycle, projection lifecycle, subagent lifecycle.</span>
+                </div>
+                <div class="module service">
+                  <strong>Query + Correlate</strong>
+                  <span>Read collector outputs through an evidence-provider seam, find the failing boundary, classify ownership, and choose the smallest source change.</span>
+                </div>
+                <div class="module service">
+                  <strong>Patch + Rerun</strong>
+                  <span>Modify the owner module, rerun doctor/eval/workload, and compare before/after evidence.</span>
+                </div>
+                <div class="module runtime">
+                  <strong>Promote / Roll Back</strong>
+                  <span>Skill improvement lands only with rerun proof and a promotion or rollback decision.</span>
+                </div>
+              </div>
+            </section>
+
+            <aside class="lane">
+              <h3>Feedback Loop</h3>
+              <div class="stack">
+                <div class="module proof">
+                  <strong>Evals Teach</strong>
+                  <span>Findings become classified deltas, affected paths, rerun commands, and evidence.</span>
+                </div>
+                <div class="module command">
+                  <strong>Codex Acts</strong>
+                  <span>Codex uses the evidence to improve the SDK module without widening the public interface.</span>
+                </div>
+              </div>
+            </aside>
           </div>
         </section>
 
@@ -995,8 +1140,10 @@
               <article class="note">
                 <h3>Agent-safe result</h3>
                 <p>
-                  After RF-1, agents can rely on doctor as the first SDK
-                  readiness boundary before depending on a skill in real work.
+                  Before RF-1 passes, the doctor boundary is risky: the
+                  interface is planned but unregistered. After RF-1, agents can
+                  rely on doctor as the first SDK readiness boundary because
+                  the interface and seam tests both exist.
                 </p>
               </article>
             </div>
@@ -1015,7 +1162,7 @@
               </div>
               <div class="proof-item">
                 <strong>Focused fixture test</strong>
-                <code>python3 -m pytest &lt;new doctor contract test&gt; -q</code>
+                <code>python3 -m pytest Infrastructure/tests/test_ask_skills_doctor_contract.py::test_skill_doctor_snapshots_validate_schema -q</code>
               </div>
             </div>
           </div>
@@ -1025,6 +1172,7 @@
           <div>
             <h2>Files To Touch First</h2>
             <div class="file-list">
+              <code>Infrastructure/config/skills-sdk.json</code>
               <code>Infrastructure/scripts/lib/ask/commands/skills_impl.py</code>
               <code>Infrastructure/tests/test_ask_skills_doctor.py</code>
               <code>.harness/evals/2026-05-17-agent-skills-skill-sdk-doctor-trust-eval.md</code>

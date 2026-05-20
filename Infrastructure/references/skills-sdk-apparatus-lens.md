@@ -4,6 +4,7 @@ artifact_type: sdk_apparatus_lens
 status: implementation_ready
 date: 2026-05-20
 schema: Infrastructure/config/schemas/skill-doctor.v1.schema.json
+extraction_contract: Infrastructure/config/skills-sdk.json
 ---
 
 # Skill SDK Apparatus Lens
@@ -13,6 +14,28 @@ schema: Infrastructure/config/schemas/skill-doctor.v1.schema.json
 This lens defines what counts as proof for the first Skill SDK readiness seam.
 It keeps the SDK agent-native: schema, command output, fixtures, evals, and
 validation evidence outrank prose review.
+
+## Boundary Safety Rule
+
+`skills doctor` is agent-safe only after both halves of the deep module exist:
+a stable public interface and executable seam proof. Until
+`./bin/ask skills doctor <handle> --json --robot` dispatches and the RF-1
+schema/action/fixture tests pass, the boundary remains risky even if the docs
+and schema are coherent.
+
+## Observability And Eval Feedback Rule
+
+Skill improvement must be evidence-driven. A doctor/eval finding becomes a
+SDK improvement only when it records the observed behavior, affected source
+paths, rerun command, before/after evidence, and promotion or rollback
+decision. RF-1 proves this through doctor output, fixtures, and eval closeout;
+RF-2+ can add logs, metrics, traces, hook events, tool events, package events,
+projection events, and subagent lifecycle events as first-class evidence.
+The existing local `~/.agents/otel-collector` and `~/.agents/session-collector`
+projects can be adapted as evidence providers for those later slices, but RF-1
+must degrade cleanly when collector evidence is absent or stale.
+`Infrastructure/config/skills-sdk.json` is the extraction contract for those
+fields and provider surfaces.
 
 ## RF-1 Signoff Table
 
@@ -24,7 +47,7 @@ validation evidence outrank prose review.
 | Status is deterministic | Tests prove blocked outranks warning, warning outranks pass, and pass has no blockers or warnings. |
 | Existing consumers are protected | `skills prove` and `skills proof` keep their current public semantics; doctor maps from them without replacing them. |
 | Representative coverage exists | Fixtures cover `context7` and at least one additional non-`context7` skill class. |
-| Package readiness is honest | Until package commands exist, doctor emits an explicit unavailable/not_implemented package readiness check instead of pass. |
+| Package readiness is honest | Until package commands exist, doctor emits a schema-valid `not_run` package-readiness check with unavailable command-surface evidence instead of pass. |
 | Eval learning is bounded | Eval outcomes can create classified deltas only with affected paths, rerun commands, before/after evidence, and promotion or rollback decision. |
 | Rollback is safe | After RF-1 acceptance, ordinary rollback preserves the `skills doctor` command with degraded/blocking output; command removal requires an emergency waiver and reopens RF-1. |
 
@@ -36,8 +59,12 @@ validation evidence outrank prose review.
   `permission_gap`, `package_metadata_gap`, `runtime_projection_gap`,
   `outcome_proof_missing`, `telemetry_projection_unavailable`,
   `command_surface_gap`, `schema_contract_gap`.
-- Package readiness before package seams exist: `not_implemented` or
-  `unavailable`, never `pass`.
+- Stable RF-1 check ids: `source_resolution`, `runtime_reachability`,
+  `structural_audit`, `package_readiness`, `outcome_proof`,
+  `command_surface_parity`, `schema_contract`.
+- Package readiness before package seams exist: check id `package_readiness`
+  with status `not_run`, an unavailable command-surface explanation, and never
+  `pass`.
 
 ## Review Rule
 
