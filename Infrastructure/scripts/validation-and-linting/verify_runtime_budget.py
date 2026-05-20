@@ -255,7 +255,7 @@ def _iter_default_visibility_candidates() -> list[tuple[str, Path]]:
             continue
         if name in DISCOVERY_HIDDEN_FLAT_SKILL_NAMES:
             continue
-        if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES:
+        if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES and name not in BRIDGE_SKILLS:
             continue
         plugin_owned = is_plugin_owned_skill_dir(source_dir)
         if plugin_owned and name not in DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
@@ -343,11 +343,14 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
     bridge_exposed = sorted((first_level & BRIDGE_SKILLS) - command_handle_names)
     policy_default = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
-    # Hidden bridge skills are intentionally not expected in default first-level discovery.
-    # Bridge skills that are explicitly default-visible policy entries, such as
-    # imagegen, remain part of the effective default surface.
-    hidden_bridge_names = BRIDGE_SKILLS - policy_default
-    expected_default = (ROOT_SKILL_SETS if rooted_mode else policy_default) - hidden_bridge_names
+    system_default = {
+        entry["name"]
+        for entry in hidden_system_entries
+        if entry["name"] in BRIDGE_SKILLS and not is_plugin_owned_skill_dir(REPO_ROOT / entry["path"])
+    }
+    # Real system bridge sources stay discoverable in default repo catalogs even
+    # though plugin-backed bridge aliases remain hidden behind plugin routing.
+    expected_default = (ROOT_SKILL_SETS if rooted_mode else policy_default) | system_default
     default_names = {entry.name for entry in default_entries}
     catalog_names = {entry.name for entry in catalog_entries}
     extra_default = sorted(default_names - expected_default)

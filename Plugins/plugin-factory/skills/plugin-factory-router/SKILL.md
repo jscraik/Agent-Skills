@@ -1,6 +1,6 @@
 ---
 name: plugin-factory-router
-description: "WHAT: Route plugin-factory requests to the right lane. WHEN: Use when plugin creation, building, installation, review, or routing is broad, mixed, or under-specified."
+description: "Route plugin-factory requests to the right lane. Use when plugin creation, building, installation, review, or routing is broad, mixed, or under-specified."
 metadata:
   skill-type: team_automation
 ---

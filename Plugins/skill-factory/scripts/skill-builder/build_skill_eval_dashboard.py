@@ -58,9 +58,14 @@ def load_scorecard(path: Path) -> Dict[str, Any]:
 
 def collect_scorecards(root: Path) -> Dict[str, List[Tuple[str, Dict[str, Any]]]]:
     by_skill: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {}
-    for scorecard_path in sorted([*root.rglob("scorecard.json"), *root.rglob("latest-scorecard.json")]):
-        # expected path: <root>/<skill>/<run_id>/scorecard.json
-        # or <root>/<skill>/latest-scorecard.json from ask eval-baseline.
+    scorecard_paths = sorted({
+        *root.rglob("scorecard.json"),
+        *root.rglob("latest-scorecard.json"),
+    })
+    for scorecard_path in scorecard_paths:
+        # expected paths:
+        # - <root>/<skill>/<run_id>/scorecard.json
+        # - <root>/<skill>/latest-scorecard.json
         parts = scorecard_path.parts
         try:
             idx = parts.index("skills")

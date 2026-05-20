@@ -261,6 +261,10 @@ contracts. The exact historical lines below are retained as move evidence for
 the progressive-disclosure gate; current agents should follow the linked
 contracts, not this audit note.
 
+Moved-to-reference evidence is archived under `fixtures/budget-archive/**`
+and `fixtures/preserved-context/**`. This active router keeps only the current
+reference destinations below.
+
 Moved-to-reference evidence:
 
 Produce one of: strategy memo, architecture recommendation, refactor strategy,
@@ -278,6 +282,59 @@ Current routes:
   `references/skills/he-linear-plan/linear-plan-output-contract.md`,
   `references/skills/he-linear-plan/linear-filing-rule.md`, and
   `references/closure-mutation-contract.md`.
+
+## 2026-05-18 HE Entrypoint Follow-Up Disposition
+
+The PR #181 follow-up kept `he-linear-plan`, `he-plan`, and `he-strategy`
+entrypoints compact after branch stacking moved their detailed procedures into
+stage references. The removed hot-path lines are not discarded; they are routed
+through the contracts below so future agents can load deep context deliberately.
+
+`he-linear-plan` preserved context: Linear is execution state; `.harness`
+is cognition and proof. Convert approved HE cognition into the smallest useful
+Linear execution slice with destination proof, duplicate checks, project/cycle
+evidence, labels, priority, dependencies, eval gates, rollback gates, human and
+agent routes, and explicit `linear_mutation_status`. Ready-to-create payloads
+are not applied Linear changes. Mutate Linear only after explicit post-plan
+approval, known destination, and a small confirmed object set. If destination,
+duplicate state, decision evidence, ADR readiness, or live tooling is missing,
+return `needs_human_triage`, `Later`, `Do Not Create`, or
+`linear_mutation_status: blocked` instead of creating tracker volume. Refuse
+one-issue-per-observation requests and collapse observations into the smallest
+useful milestone, parent issue, bug issue, or sub-issue set. For non-trivial
+Linear plans, apply BLUF and visual-reference contracts, include
+`schema_version: 1`, `selected_stage: he-linear-plan`, evidence traceability,
+Target Linear Destination, Existing Project Match, Now/Next/Later/Do Not Create,
+`decision_artifact_status`, `required_confirmation`, `live_linear_blocker`,
+and git staging status when local artifacts are written. Bug work keeps
+`issue_type: bug`, repro, expected and actual behavior, affected surface,
+severity, and validation evidence. Do not create projects, labels, issue sets,
+dependencies, or status updates without explicit approval; connector or auth
+failure returns a blocked payload with exact object assumptions.
+Moved line evidence:
+Linear is execution state; `.harness` is cognition and proof. Turn approved HE
+
+Disposition:
+
+- `he-linear-plan` moved-to-reference: Linear output shape, filing rules,
+  source-prompt preservation, closure and mutation boundaries, subagent policy,
+  and package checks live in `references/skills/he-linear-plan/**`,
+  `references/closure-mutation-contract.md`, and
+  `references/subagent-call-contract.md`.
+  Relocation evidence:
+Use when approved `.harness` cognition needs Linear routing: target project,
+- `he-plan` moved-to-reference: plan artifact shape, planning depth,
+  post-plan handoff, source evidence, validation, rollback, enforcement
+  contracts, and generated-artifact checks live in
+  `references/skills/he-plan/**` and the shared lifecycle contracts.
+  Relocation evidence:
+Plans are execution contracts, not chat checklists. They preserve source
+- `he-strategy` moved-to-reference: strategy output shape, first-principles
+  framing, domain context, migration phase selection, rollback posture, and
+  next-stage routing live in `references/skills/he-strategy/**` and the
+  shared source-prompt and lifecycle contracts.
+  Relocation evidence:
+Strategy artifacts are cognition compression, not ceremony. Turn verified repo
 
 ## 2026-05-18 PR 175 Main Reconciliation Evidence
 

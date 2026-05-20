@@ -7,6 +7,16 @@ metadata:
   lifecycle_state: active
   maturity: canonical
   owner: Agent Skills Team
+  compatible_roles:
+    - default
+    - worker
+    - skill-inspector
+  runtime_needs:
+    - repo-owned skill source path
+    - ./bin/ask skills audit and eval wrappers
+    - Python 3 standard library validators
+  provenance: frontmatter:Agent Skills Team:2026-05-15:canonical-source
+  share_readiness: ready
   review_cadence: quarterly
   last_reviewed: "2026-05-15"
   metadata_source: frontmatter
@@ -142,6 +152,9 @@ Fail fast: stop at the first failed required gate, classify it, and do not proce
 - Local operating guide: `../../../references/skill-builder/operating-guide.md`
 - First-principles factory gate: `Infrastructure/references/first-principles-factory-gate.md`
 - Codex skill eval creation loop: `skills-system/skill-creator/references/skill-factory/codex-eval-creation-loop.md`
+- Code expert lenses for skill hardening: `Infrastructure/references/software-literature-expert-lens-pack.md` and the Skill Builder row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
+- Cookbook improvement loop lenses: `Infrastructure/references/openai-cookbook-expert-lens-pack.md` and the Skill Builder row in `Infrastructure/references/openai-cookbook-skill-expertise-map.md`.
+
 - Cookbook-derived skill improvement, documentation interface, and structured output lenses: `Infrastructure/references/openai-cookbook-expert-lens-pack.md`, `Infrastructure/references/openai-cookbook-skill-expertise-map.md`
 - Software-literature skill quality lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
 - Local contract and evals: `references/`

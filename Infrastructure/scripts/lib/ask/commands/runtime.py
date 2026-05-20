@@ -5,6 +5,13 @@ from ask.commands.skills import skills_budget
 from ask.envelope import CallResult, ErrorCode, ErrorObject
 
 
+def _runtime_validation_command(action: str, *, default_max: int = 30) -> str:
+    command = f"./bin/ask runtime {action}"
+    if default_max != 30:
+        command = f"{command} --default-max {default_max}"
+    return f"{command} --json --robot"
+
+
 def add_runtime_parser(subparsers: Any, global_parser: Any) -> None:
     runtime_parser = subparsers.add_parser("runtime", help="Runtime projection reports", parents=[global_parser])
     runtime_subparsers = runtime_parser.add_subparsers(dest="action")
@@ -19,6 +26,9 @@ def add_runtime_parser(subparsers: Any, global_parser: Any) -> None:
 def dispatch_runtime(repo_root: Path, args: Any) -> CallResult:
     if args.action in {"surface", "budget"}:
         result = skills_budget(repo_root, default_max=args.default_max)
+        result.data["validation_commands"] = [
+            _runtime_validation_command(args.action, default_max=args.default_max)
+        ]
         if "runtime_budget" in result.data:
             result.data["runtime_surface"] = dict(result.data["runtime_budget"])
         if args.action == "surface":
@@ -36,6 +46,7 @@ def dispatch_runtime(repo_root: Path, args: Any) -> CallResult:
     result = CallResult()
     action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
     result.status = "error"
+    result.data["validation_commands"] = [_runtime_validation_command("surface")]
     result.errors.append(
         ErrorObject(
             code=ErrorCode.ERR_VALIDATION,

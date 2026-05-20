@@ -74,6 +74,71 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: pr-green-sweep}
       - {type: regex, value: "(?i)(circleci|failed job|logs|blocked|validation)"}
+  - id: edge-specialist-lanes
+    name: specialist lane composition
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_sec: 180
+    should_trigger: true
+    realistic: true
+    why_realistic: "PR closeout work often spans GitHub/gh PR truth, CircleCI logs, CodeRabbit threads, Codex review findings, autofix patches, Context7 docs, Snyk dependency screening, architecture blockers, and simplify cleanup."
+    expected_behavior: "Select pr-green-sweep and assign each plugin, CLI, and specialist skill lane to its evidence role instead of flattening everything into a generic PR summary."
+    anti_overfit_notes: "The response should not merely list tool names; it should connect each lane to a next safe action or blocker class."
+    prepend_skill: true
+    prompt: "Run the PR green sweep using GitHub/gh, CircleCI from the local env, CodeRabbit and its CLI, autofix, Codex review, Context7, Snyk, architecture review, and simplify cleanup where they fit. I need a closeout queue, not a status report."
+    acceptance:
+      - {type: skill_selected, expected_skill: pr-green-sweep}
+      - {type: regex, value: "(?i)(github|mergeability|required checks|review state)"}
+      - {type: regex, value: "(?i)(circleci|failed job|logs|~/.codex/.env|local env|credentials)"}
+      - {type: regex, value: "(?i)(coderabbit|codex review|autofix|context7|snyk|architecture|simplif)"}
+      - {type: regex, value: "(?i)(cli|gh|fallback|local reproduction|repo wrapper)"}
+      - {type: regex, value: "(?i)(action queue|auto.?fixable|blocked|needs user decision|cleanup only)"}
+  - id: edge-action-queue
+    name: action queue instead of status
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_sec: 180
+    should_trigger: true
+    realistic: true
+    why_realistic: "Open PR sweeps become useful when the agent ranks what it can actually move, what is blocked, and what requires Jamie."
+    expected_behavior: "Select pr-green-sweep and classify each PR into an actionable queue before proposing fixes."
+    anti_overfit_notes: "Do not pass by saying 'I'll check everything'; require explicit queue buckets."
+    prepend_skill: false
+    prompt: "Sweep my open PRs and tell me which ones you can fix now, which are blocked by CI, which need a merge-conflict strategy, and which need my decision."
+    acceptance:
+      - {type: skill_selected, expected_skill: pr-green-sweep}
+      - {type: regex, value: "(?i)(auto.?fixable|merge.?conflict|blocked.*ci|needs.*decision|cleanup.?only|action queue)"}
+  - id: edge-validation-surface
+    name: right validation surface
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_sec: 180
+    should_trigger: true
+    realistic: true
+    why_realistic: "Matches agent-skills PR closeout lanes where a real PR mixes a skill package, reference doc, generated manifest, validation output, and CI config, making wrong-validator failures common."
+    expected_behavior: "Select pr-green-sweep, map each changed path to the correct validation surface, and keep generated or validation-only outputs out of the source fix unless ownership evidence says otherwise."
+    anti_overfit_notes: "A generic 'run tests' answer is insufficient; the expected behavior must separate skill audit, reference/link validation, generated manifests, CI config validation, docs checks, and source tests."
+    prepend_skill: false
+    prompt: "In /Users/jamiecraik/dev/agent-skills, PR #258 touches Skills/agent-ops/evals-router/SKILL.md, Infrastructure/references/skill-validation-reporting-contract.md, .skillsets/agent-ops/manifest.jsonl, eval output under Infrastructure/reports/, and .circleci/config.yml after a failed docs gate. Inspect the PR, then fix only after deciding which validation surface applies to each changed file and which generated outputs stay unstaged."
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc, "git reset --hard"]}
+    acceptance:
+      - {type: skill_selected, expected_skill: pr-green-sweep}
+      - {type: regex, value: "(?i)(validation surface|skill audit|reference|generated|ci config|source)"}
+  - id: edge-dirty-worktree
+    name: dirty worktree classification
+    category: edge
+    eval_modes: [smoke, release]
+    timeout_sec: 180
+    should_trigger: true
+    realistic: true
+    why_realistic: "Closeout work frequently runs with unrelated local edits, generated artifacts, and temp reference material in the same worktree."
+    expected_behavior: "Select pr-green-sweep, classify dirty paths before staging, and preserve unrelated or unclear work."
+    anti_overfit_notes: "Do not pass by promising a clean commit; require explicit included/excluded path ownership."
+    prepend_skill: false
+    prompt: "Before pushing this PR fix, classify every dirty or untracked path as intended source, generated artifact, validation output, temp reference material, or unrelated local noise."
+    acceptance:
+      - {type: skill_selected, expected_skill: pr-green-sweep}
+      - {type: regex, value: "(?i)(intended source|generated artifact|validation output|temp reference|unrelated local|needs user decision)"}
   - id: pressure-admin-merge
     name: admin merge pressure
     category: pressure

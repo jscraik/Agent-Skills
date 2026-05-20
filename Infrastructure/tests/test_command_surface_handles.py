@@ -449,7 +449,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["agents_user_link"])
 
     def test_skills_proof_passes_when_agents_runtime_is_linked(self) -> None:
-        """skills_proof accepts either supported user runtime link."""
+        """Either supported user runtime link can satisfy command-handle reachability."""
         repo_root = self.temp_dir / "repo"
         command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
@@ -472,6 +472,8 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertTrue(proof["gates"]["agents_user_link"])
         self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
         self.assertEqual(proof["schema_version"], "command-handle-proof.v2")
+        self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
+        self.assertTrue(proof["gates"]["user_runtime_ready"])
         self.assertIn("user_runtime_ready", proof["gate_policy"]["required"])
         self.assertIn("either supported user runtime link", proof["gate_policy"]["required_semantics"])
         self.assertIn("agents_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
@@ -525,6 +527,24 @@ class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):
             {violation.get("code") for violation in payload["violations"]},
         )
 
+    def test_command_surface_projection_check_ignores_source_revision_only(self) -> None:
+        """Projection check should ignore per-checkout source_revision churn."""
+        repo_root = self.temp_dir / "repo"
+        shutil.copytree(REPO_ROOT / ".skillsets", repo_root / ".skillsets")
+        surface_path = repo_root / ".skillsets" / "command-surface.json"
+        payload = command_surface.command_surface_projection(repo_root_path=repo_root)
+
+        for item in payload.get("handles", []):
+            provenance = item.get("provenance") if isinstance(item, dict) else None
+            if isinstance(provenance, dict) and "source_revision" in provenance:
+                provenance["source_revision"] = "0000000"
+        surface_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        check = command_surface.check_command_surface_projection(repo_root_path=repo_root)
+
+        self.assertEqual(check["status"], "pass", check.get("violations"))
+        self.assertEqual(check["violations"], [])
+
     def test_committed_command_surface_json_has_valid_structure(self) -> None:
         """The committed .skillsets/command-surface.json must be valid JSON with expected top-level keys."""
         surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
@@ -553,18 +573,23 @@ class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):
             "handle_count must equal len(handles)",
         )
 
-    def test_committed_command_surface_generated_command_handle_count_matches_list_length(self) -> None:
-        """generated_command_handle_count must equal the number of entries in the handles array."""
+    def test_committed_command_surface_generated_command_handle_count_matches_required_handles(self) -> None:
+        """generated_command_handle_count must count handles that need runtime command files."""
         surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
         if not surface_path.exists():
             self.skipTest("command-surface.json not present in repo")
 
         payload = json.loads(surface_path.read_text(encoding="utf-8"))
+        required_handle_count = sum(
+            1
+            for handle in command_surface.build_skill_handles(repo_root_path=REPO_ROOT)
+            if command_surface.requires_generated_command_handle(handle)
+        )
 
         self.assertEqual(
             payload.get("generated_command_handle_count"),
-            len(payload["handles"]),
-            "generated_command_handle_count must equal len(handles)",
+            required_handle_count,
+            "generated_command_handle_count must equal canonical handles requiring generated command files",
         )
 
     def test_committed_command_surface_handles_have_required_fields(self) -> None:

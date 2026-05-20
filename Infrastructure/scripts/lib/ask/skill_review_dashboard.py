@@ -703,10 +703,10 @@ def render_skill_review_dashboard(report_path: Path, output_path: Path, repo_roo
         live_status_html = '<span class="live-status">Static evidence snapshot</span>'
 
     document = f"""<!doctype html>
-<html lang=\"en\" data-auto-refresh-seconds=\"{refresh_seconds if validation_active else 0}\">
+<html lang="en" data-auto-refresh-seconds="{refresh_seconds if validation_active else 0}">
 <head>
-<meta charset=\"utf-8\">
-<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{_escape(skill_name)} local skill review</title>
 <style>
 :root {{ color-scheme: dark; --bg:#090a0c; --panel:#111317; --panel-2:#15181e; --text:#f4f5f7; --muted:#989da7; --line:#242831; --green:#69d47a; --cyan:#57c7e8; --yellow:#e5c84f; --red:#ee6a5f; }}
@@ -828,15 +828,15 @@ document.addEventListener('DOMContentLoaded', () => {{
 </script>
 </head>
 <body>
-<div class=\"shell\">
-  <aside class=\"sidebar\">
-    <div class=\"brand\">ASK Local Review</div>
-    <nav class=\"nav\">
-      <a class=\"active\" href=\"#overview\">Overview</a>
-      <a href=\"#quality\">Quality</a>
-      <a href=\"#evals\">Evals</a>
-      <a href=\"#security\">Security</a>
-      <a href=\"#evidence\">Evidence</a>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">ASK Local Review</div>
+    <nav class="nav">
+      <a class="active" href="#overview">Overview</a>
+      <a href="#quality">Quality</a>
+      <a href="#evals">Evals</a>
+      <a href="#security">Security</a>
+      <a href="#evidence">Evidence</a>
     </nav>
   </aside>
   <main class=\"main\">
@@ -847,53 +847,53 @@ document.addEventListener('DOMContentLoaded', () => {{
         <h1>{_escape(skill_name)}</h1>
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
-      <div class=\"metrics\">
+      <div class="metrics">
         {_render_bar('Quality', quality_score, 'Best-practice fit from Tessl plus internal review signals.')}
         {_render_bar('Impact', impact_score, evals.get('message') if evals.get('available') else 'No scenario eval scorecard found yet.')}
         {_render_bar('Security', security_score, 'Internal audit, OpenClaw, and optional Snyk CLI advisory summary.')}
       </div>
     </header>
-    <nav class=\"tabs\" role=\"tablist\" aria-label=\"Review result sections\">
-      <a id=\"tab-quality\" role=\"tab\" aria-selected=\"true\" aria-controls=\"quality\" tabindex=\"0\" href=\"#quality\">Quality</a><a id=\"tab-evals\" role=\"tab\" aria-selected=\"false\" aria-controls=\"evals\" tabindex=\"-1\" href=\"#evals\">Evals</a><a id=\"tab-security\" role=\"tab\" aria-selected=\"false\" aria-controls=\"security\" tabindex=\"-1\" href=\"#security\">Security</a><a id=\"tab-evidence\" role=\"tab\" aria-selected=\"false\" aria-controls=\"evidence\" tabindex=\"-1\" href=\"#evidence\">Evidence</a>
+    <nav class="tabs" role="tablist" aria-label="Review result sections">
+      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id=\"quality\" class=\"tab-panel is-active\" role=\"tabpanel\" aria-labelledby=\"tab-quality\">
-      <div class=\"section-head\"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class=\"pill {_status_class(quality_score)}\">{quality_score}%</span></div>
-      <div class=\"grid\">
-        <div class=\"panel\"><h3>Discovery</h3><p>Description activation quality</p><strong class=\"{_status_class(tessl['description_score'])}\">{tessl['description_score']}%</strong></div>
-        <div class=\"panel\"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class=\"{_status_class(tessl['content_score'])}\">{tessl['content_score']}%</strong></div>
-        <div class=\"panel\"><h3>Validation</h3><p>Format and structure checks</p><strong class=\"{_status_class(tessl['validation_score'])}\">{tessl['validation_score']}%</strong></div>
+    <section id="quality" class="tab-panel is-active" role="tabpanel">
+      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill {_status_class(quality_score)}">{quality_score}%</span></div>
+      <div class="grid">
+        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="{_status_class(tessl['description_score'])}">{tessl['description_score']}%</strong></div>
+        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="{_status_class(tessl['content_score'])}">{tessl['content_score']}%</strong></div>
+        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="{_status_class(tessl['validation_score'])}">{tessl['validation_score']}%</strong></div>
       </div>
-      <div class=\"panel plugin-posture\">
+      <div class="panel plugin-posture">
         <div>
           <h3>Plugin Eval</h3>
           <p>Budget and Codex ergonomics guardrail. Local policy accepts <code>B+</code> or better when there are no failure-level findings and local/Tessl gates pass.</p>
         </div>
-        <div class=\"plugin-score\"><span class=\"pill {plugin_posture_class}\">{_escape(plugin.get('grade') or 'Not reported')}</span><strong class=\"{_status_class(int(plugin.get('score') or 0))}\">{int(plugin.get('score') or 0)}%</strong></div>
-        <p class=\"posture-detail {_escape(plugin_posture_class)}\">{_escape(plugin.get('posture_detail'))}</p>
+        <div class="plugin-score"><span class="pill {plugin_posture_class}">{_escape(plugin.get('grade') or 'Not reported')}</span><strong class="{_status_class(int(plugin.get('score') or 0))}">{int(plugin.get('score') or 0)}%</strong></div>
+        <p class="posture-detail {_escape(plugin_posture_class)}">{_escape(plugin.get('posture_detail'))}</p>
         <ul>{plugin_findings_html}</ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
         <tbody>{_render_dimension_rows(tessl['dimensions'])}</tbody>
       </table>
-      <div class=\"suggestions\"><h3>Suggestions</h3><ul>{suggestion_html}</ul></div>
+      <div class="suggestions"><h3>Suggestions</h3><ul>{suggestion_html}</ul></div>
     </section>
 
-    <section id=\"evals\" class=\"tab-panel\" role=\"tabpanel\" aria-labelledby=\"tab-evals\" hidden>
+    <section id="evals" class="tab-panel" role="tabpanel" hidden>
       {_render_eval_cases(evals)}
     </section>
 
-    <section id=\"security\" class=\"tab-panel\" role=\"tabpanel\" aria-labelledby=\"tab-security\" hidden>
-      <div class=\"section-head\"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class=\"pill {_status_class(security_score)}\">{security_score}%</span></div>
-      <div class=\"suggestions\"><h3>Findings</h3><ul>{security_html}</ul></div>
-      <div class=\"panel plugin-posture\">
+    <section id="security" class="tab-panel" role="tabpanel" hidden>
+      <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill {_status_class(security_score)}">{security_score}%</span></div>
+      <div class="suggestions"><h3>Findings</h3><ul>{security_html}</ul></div>
+      <div class="panel plugin-posture">
         <div>
           <h3>Snyk Advisory</h3>
           <p>Optional CLI-backed external security signal. It stays disabled unless the review is run with <code>--include-snyk</code>.</p>
         </div>
-        <div class=\"plugin-score\"><span class=\"pill {snyk_class}\">{_escape(snyk.get('status'))}</span><strong class=\"{_status_class(snyk_score)}\">{snyk_score}%</strong></div>
-        <p class=\"posture-detail {_escape(snyk_class)}\">{_escape(snyk.get('headline'))}</p>
+        <div class="plugin-score"><span class="pill {snyk_class}">{_escape(snyk.get('status'))}</span><strong class="{_status_class(snyk_score)}">{snyk_score}%</strong></div>
+        <p class="posture-detail {_escape(snyk_class)}">{_escape(snyk.get('headline'))}</p>
         <ul>
           <li>Projects scanned: {_escape(snyk.get('project_count'))}; vulnerabilities: {_escape(snyk.get('vulnerability_count'))}</li>
           <li>Critical: {_escape(severity.get('critical', 0))}; High: {_escape(severity.get('high', 0))}; Medium: {_escape(severity.get('medium', 0))}; Low: {_escape(severity.get('low', 0))}</li>
@@ -919,6 +919,5 @@ document.addEventListener('DOMContentLoaded', () => {{
 """
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    document = "\n".join(line.rstrip() for line in document.splitlines()) + "\n"
     output_path.write_text(document, encoding="utf-8")
     return output_path

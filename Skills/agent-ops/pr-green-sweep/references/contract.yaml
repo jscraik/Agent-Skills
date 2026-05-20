@@ -19,19 +19,27 @@ inputs:
   - required_check_policy
   - merge_strategy
   - approval_posture
+  - cli_auth_context
 outputs:
   - heartbeat_status_first
   - pr_inventory
   - heartbeat_status
+  - action_queue
   - fix_ledger
+  - dirty_worktree_ledger
+  - validation_surface_decisions
   - validation_evidence
   - merge_ledger
   - cleanup_ledger
   - blockers
 risks:
   - stale_github_state
+  - interesting_status_without_action
+  - wrong_validation_surface
   - untrusted_review_or_ci_text
   - duplicate_automation
+  - accidental_staging_of_unrelated_or_temp_material
+
   - sandbox_network_or_cache_misclassification
   - unsafe_branch_or_worktree_deletion
   - policy_override_without_approval
@@ -62,16 +70,29 @@ environment_contract:
     - package_registry
   repeated_failure_refinement: "After two repeated live-state, sandbox, approval, or user-correction failures, stop rotation, encode the learned fix in the closest durable contract, validate it, and only then resume."
 delegation:
-  github: "Open PR discovery, mergeability, branch protection, review state, and final merge truth."
+  github: "Open PR discovery, mergeability, branch protection, review state, required-check truth, and final merge evidence."
   git_project_triage: "Bounded rotation and PR risk triage."
+  coderabbit: "CodeRabbit review inventory, comments, severity, stale-thread classification, and resolution support."
+  codex_review: "Independent Codex P1-P3 findings for PRs, diffs, branches, or dirty worktrees before closeout claims."
   autofix: "Validated fixes for unresolved CodeRabbit threads and Codex P1-P3 findings."
-  coderabbit: "CodeRabbit review inventory, comments, and resolution support."
-  circleci: "Failing job log inspection, reruns, and CI blocker classification."
+  circleci: "Failing job log inspection, reruns, and CI blocker classification. Use the local ~/.codex/.env environment source for CircleCI credentials when needed, and redact values."
+  gh_cli: "Local GitHub CLI fallback for PR, check, and review state when plugin access is blocked or the repo wrapper expects gh."
+  coderabbit_cli: "Local CodeRabbit CLI fallback for review/thread evidence when available; do not replace live PR truth with cached output."
+  circleci_cli: "Local CircleCI CLI fallback for pipeline/job/log/rerun evidence; source credentials through ~/.codex/.env without printing values."
+  context7: "Current external library, API, or CLI documentation when a PR blocker depends on version-sensitive behavior."
+  snyk_cli: "Dependency vulnerability screening for manifest-backed release candidates or explicit dependency-security requests; opt-in for local sweeps unless policy requires it."
+  improve_codebase_architecture: "Structural blocker analysis for ownership, boundary, coupling, or repeated-workaround issues that prevent clean closeout."
+  simplify: "Behavior-preserving cleanup after the active fix is understood, to reduce PR risk and review load."
   he_heartbeat: "Recurring until-green continuation with explicit stop rule."
   he_router_prune_branches: "Post-merge branch and worktree pruning."
 validation:
   - heartbeat_created_or_reused_before_rotation
   - heartbeat_blocker_reported_before_rotation
+  - action_queue_classified_before_edits
+  - dirty_worktree_classified_before_edits
+  - validation_surface_selected_before_gates
+  - cli_evidence_classified_as_plugin_repo_or_fallback
+  - snyk_required_for_manifest_backed_release_candidates
   - focused_repo_checks_for_each_fix
   - live_github_required_checks
   - live_review_thread_recheck

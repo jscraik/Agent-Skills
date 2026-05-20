@@ -105,6 +105,16 @@ def test_release_evals_do_not_force_smoke_model(tmp_path: Path) -> None:
     assert "--model" not in cmd
 
 
+def test_benchmark_portfolio_exposes_validation_command(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="Benchmark OK\n", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.benchmark_portfolio(tmp_path)
+
+    assert result.status == "success"
+    assert result.data["validation_commands"] == ["./bin/ask evals benchmark --json --robot"]
+
+
 def test_smoke_evals_can_use_discovery_smoke_without_codex_args(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 

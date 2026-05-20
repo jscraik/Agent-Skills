@@ -1,6 +1,6 @@
 ---
 name: insight-report
-description: "WHAT: Generate local Codex usage reports. WHEN: Use when users ask for usage analytics, weekly insights, session summaries, telemetry patterns, or prompting help."
+description: "Generate local Codex usage reports. Use when users ask for usage analytics, weekly insights, session summaries, telemetry patterns, or prompting help."
 metadata:
   skill-type: data_fetch_analysis
 ---

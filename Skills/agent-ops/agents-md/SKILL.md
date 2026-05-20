@@ -1,5 +1,7 @@
 ---
 name: agents-md
+description: Use when reviewing, creating, shrinking, or refactoring AGENTS.md, agent setup, agent prompts, system instructions, routing rules, or repo guidance that need scoped routing, dedupe, contradiction fixes, or progressive disclosure.
+
 description: Use when reviewing, creating, shrinking, or refactoring AGENTS.md agent instructions, agent config files, routing rules, or repository guidance that need scoped routing, dedupe, contradiction fixes, progressive disclosure, and cleaned instruction surfaces.
 metadata:
   version: 0.1.0
@@ -9,7 +11,7 @@ metadata:
 # Agents Md
 
 ## Philosophy
-Agent instructions should be short, scoped, evidence-verified, and routed through Context Pointers instead of always-loaded megadocs. Progressive disclosure relocates durable detail behind clear pointers; it does not delete required context for budget alone.
+Agent instructions should be short, scoped, evidence-verified, and routed through Context Pointers without deleting required context for budget alone.
 
 ## When To Use
 - The user asks to create, audit, or refactor AGENTS.md.
@@ -44,6 +46,13 @@ Start with 2-3 focused surfaces before expanding scope.
 2. Read existing AGENTS/instruction files before editing.
 3. Verify commands and paths with `rg --files`, `rg -n "<command|path|handle>" .`, or the repo wrapper.
 4. Find contradictions first. Stop and ask for a decision when two live instructions cannot both be true.
+5. Classify needed portable patterns: steering uptake, zero-setup setup, systems-thinking mechanisms, glossary routing, Project Brain/Local Memory, CTF workflow evals, and real-path validation.
+6. Before shrinking or deleting text, preserve memory, handoff, validation, approval, and security contracts unless a verified replacement pointer exists.
+7. Build a context ledger before deleting or moving text. Use the routing categories in `references/agents-md-guidance.md`.
+8. Move durable detail into linked docs only when it reduces always-loaded budget and leaves a discoverable Context Pointer from the owning instruction surface.
+9. Preserve Project Brain, Local Memory, handoff files, review-swarm contracts, CODESTYLE routes, glossary links, and steering-uptake mechanisms when repo evidence makes them binding.
+10. Validate formatting, links, contradictions, discovery behavior, and workflow claims.
+
 5. Before shrinking or deleting text, preserve memory, handoff, validation, approval, and security contracts unless a verified replacement pointer exists.
 6. Build a context ledger before deleting or moving text. Use the routing categories in `references/agents-md-guidance.md`.
 7. Move durable detail into linked docs only when it reduces always-loaded budget and leaves a discoverable Context Pointer from the owning instruction surface.
@@ -63,10 +72,20 @@ Start with 2-3 focused surfaces before expanding scope.
 - Report exact commands, pass/fail outcomes, and blockers.
 
 ## Failure Mode
-- If instruction scope is unclear, ask one direct question before broad edits.
-- If live instructions conflict and repo evidence cannot resolve precedence, stop with `Decision required:` and ask which rule wins.
-- If a Context Pointer cannot be verified, keep the rule in the owning AGENTS surface or mark it as unresolved instead of creating a dead pointer.
+- Ask one direct question when instruction scope is unclear.
+- Stop with `Decision required:` when live instructions conflict and evidence cannot resolve precedence.
+- Keep unresolved rules in the owning AGENTS surface when a Context Pointer cannot be verified.
 - If validation fails, fix the first failure class and rerun the same gate before broadening.
+- Refuse removals of memory, handoff, validation, approval, or security contracts without verified replacements.
+
+## Discovery Interview
+
+- Ask one round at a time.
+- Use a plain-language question.
+- Explain why this matters for the current skill decision.
+- avoid dumping the whole interview plan at once.
+- Read `references/discovery-interview.md` when the request is underspecified.
+
 - If file reads are blocked or a requested change would remove memory, handoff, validation, approval, or security contracts without a verified replacement, refuse that part and report the risk.
 
 ## Gotchas
@@ -74,18 +93,23 @@ Start with 2-3 focused surfaces before expanding scope.
 - Shorter AGENTS files can be worse when they hide mandatory auto-loaded rules.
 - Deeper AGENTS files override broader guidance only inside their subtree.
 - Runtime handles and generated projections are not canonical sources.
+- Repeated user steering is not just a local edit request when it exposes a reusable operating failure; route it to the narrowest durable surface and validator.
 
 ## Anti-Patterns
 - Burying operative rules only in linked docs when they must auto-load.
 - Treating shorter as better when shortening removes contracts, validation evidence, ownership boundaries, review-swarm contracts, or CODESTYLE routes.
 
 ## Examples
+- "Add Jamie's repeated-steering rule to `agent-skills/AGENTS.md`; require uptake evidence before ordinary work resumes and point long detail to `Docs/agents/19-high-signal-steering-feedback.md`."
+- "Shrink `coding-harness/AGENTS.md` without losing zero-setup setup, Project Brain/Local Memory, CODESTYLE, or exact-path validation."
+- "In `payments-api`, root `AGENTS.md` says `npm test`, docs say `pnpm test`, and CI runs `bun test`; ask which command policy wins before editing."
+
 - `payments-api`: root AGENTS says `npm test`, docs say `pnpm test`, CI runs `bun test`; identify active scope and ask which command policy wins.
 - `coding-harness/AGENTS.md`: shrink the file while preserving Local Memory, review-swarm artifacts, and handoff rules behind verified Context Pointers.
 - `field-app/apps/mobile/AGENTS.md`: compare mobile and root scopes, then classify what stays local, moves to docs, or has dead links.
 
 ## Output Format
-Use compact markdown with these labels when applicable: `Decision required:`, `Context ledger:`, `Context Pointer map:`, `Preservation rule:`, `Validation:`, and `Blocked:`. Report commands as `pass`, `fail`, or `blocked`.
+Use compact markdown labels when applicable: `Decision required:`, `Context ledger:`, `Context Pointer map:`, `Preservation rule:`, `Validation:`, and `Blocked:`. Report commands as `pass`, `fail`, or `blocked`.
 
 Example output shape:
 - Context ledger: keep validation command policy in AGENTS.md because it must
@@ -102,6 +126,9 @@ Rewrite example:
   `Review swarms: see Docs/agents/review-swarms.md when requested.`
 
 ## Progressive Disclosure
+- Read `references/agents-md-guidance.md` for AGENTS precedence, Context Pointer categories, and portable operating-system patterns from agent-skills and coding-harness.
+- Read `references/discovery-interview.md` when the request is underspecified.
+
 - Load archived references, scripts, prompts, templates, or assets only when the active workflow needs that exact detail.
 - Read `references/agents-md-guidance.md` for AGENTS precedence and Context Pointer categories.
 - Route Harness Engineering plan guidance through the harness-engineering skill instead of loading its files here.

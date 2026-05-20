@@ -156,10 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" id="tab-quality" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" id="tab-evals" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" id="tab-security" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" id="tab-evidence" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
+    <section id="quality" class="tab-panel is-active" role="tabpanel">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">80%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">82%</strong></div>
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Replace jargon like &#x27;evidence-labeled survivor options&#x27; and &#x27;stage routing&#x27; with plainer language, e.g., &#x27;label options with supporting evidence, identify risks, and route work to the appropriate stage (spec, plan, Linear ticket, or implementation)&#x27;.</li><li>Add narrowing qualifiers to broad triggers like &#x27;brainstorm&#x27; to reduce conflict risk, e.g., &#x27;brainstorm engineering approaches&#x27; or &#x27;brainstorm solutions to ambiguous requirements&#x27;.</li><li>Replace the inline Output Format description with a concrete YAML or JSON template showing all fields with placeholder values, making it copy-paste ready.</li><li>Consolidate Guardrails, Execution Boundaries, and Constraints into a single section to reduce redundancy and save tokens.</li><li>Provide at least one complete example showing full input context and the exact structured output (with all schema fields populated) rather than just describing the scenario.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
+    <section id="evals" class="tab-panel" role="tabpanel" hidden>
 
       <section>
         <div class="section-head">
@@ -195,16 +195,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="Infrastructure/artifacts/skill-quality-heartbeat/2026-05-15-harness-engineering/he-brainstorm.json">Review JSON<br><span>Infrastructure/artifacts/skill-quality-heartbeat/2026-05-15-harness-engineering/he-brainstorm.json</span></a>
-        <a href="Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/scorecard.json</span></a>
+        <a href="./he-brainstorm.json">Review JSON<br><span>Infrastructure/artifacts/skill-quality-heartbeat/2026-05-15-harness-engineering/he-brainstorm.json</span></a>
+        <a href="../../skills/he-brainstorm/20260510-201817-622845/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/he-brainstorm/20260510-201817-622845/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only, no publish, no registry upload, no npx</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>

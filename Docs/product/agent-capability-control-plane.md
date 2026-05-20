@@ -91,6 +91,10 @@ failures.
 
 Use `./bin/ask skills memory list/read/search --json --robot` when an agent needs
 durable repo learnings with provenance and freshness. The provider is read-only
+and searches `.harness/memory`, wiki learnings, canonical learning docs, and
+skill lesson artifacts without replacing the canonical wiki or Project Brain
+mutation paths.
+
 and searches `.harness/memory`, `Wiki/wiki/learnings`, `Docs/solutions`, and
 skill lesson artifacts. These are the supported read roots; memory mutation
 continues through Project Brain and canonical wiki workflows instead of the

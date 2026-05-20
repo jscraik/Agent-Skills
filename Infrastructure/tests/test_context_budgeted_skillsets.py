@@ -114,13 +114,13 @@ class TestRootSkillsetProjection(ContextBudgetTempDirTestCase):
         self.assertEqual(row["source_path"], "skills-system/openai-docs/SKILL.md")
         self.assertEqual(row["provenance"]["source_sha256"], skillset_model.file_hash(source_file))
 
-    def test_file_hash_uses_symlink_blob_for_provenance(self) -> None:
+    def test_file_hash_uses_resolved_file_bytes_for_provenance(self) -> None:
         target = self.temp_dir / "target.md"
         target.write_text("# Target\n", encoding="utf-8")
         link = self.temp_dir / "SKILL.md"
         link.symlink_to("target.md")
 
-        expected = hashlib.sha256(b"target.md").hexdigest()
+        expected = hashlib.sha256(b"# Target\n").hexdigest()
 
         self.assertEqual(skillset_model.file_hash(link), expected)
         self.assertEqual(check_context_budget.file_hash(link), expected)

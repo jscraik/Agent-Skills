@@ -259,7 +259,11 @@ def is_skill_visible(name: str, source_dir: Path, visibility: str) -> bool:
     plugin_owned = _is_plugin_owned_skill_dir(source_dir)
     if name in HIDDEN_FLAT_SKILL_NAMES:
         return False
-    if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES and name not in ROOT_SKILL_SET_NAMES:
+    if (
+        name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES
+        and name not in ROOT_SKILL_SET_NAMES
+        and name not in SYSTEM_BRIDGE_SKILL_NAMES
+    ):
         return False
     if plugin_owned and name not in PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
         return False

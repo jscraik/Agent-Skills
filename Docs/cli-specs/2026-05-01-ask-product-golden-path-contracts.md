@@ -81,9 +81,13 @@ All commands in this document must use the standard `ask` JSON envelope:
         "skills_synced": true
       },
       "runtime_budget": {
-        "status": "pass",
-        "advanced_visible_count": 173,
-        "advisories": []
+        "state": "pass",
+        "severity": "info",
+        "details": {
+          "status": "pass",
+          "advanced_visible_count": 173,
+          "advisories": []
+        }
       },
       "blockers": [],
       "next_command": "./bin/ask repo surface --json"
@@ -308,15 +312,49 @@ Required data fields:
     "handle": "he-code-review",
     "canonical_source_path": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md",
     "audit_target": "Plugins/harness-engineering/skills/code_quality_review/he-code-review",
-    "status": "pass",
+    "target_summary": {
+      "query": "he-code-review",
+      "target_kind": "command_handle",
+      "handle": "he-code-review",
+      "canonical_source_path": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md"
+    },
+    "contract_schemas": {
+      "doctor": {"version": "skill-doctor.v1", "owner": "Agent Skills Kit"},
+      "events": {"version": "capability-lifecycle-event.v1", "owner": "Agent Skills Kit"},
+      "profiles": "skill-operation-profiles.v1",
+      "package": "skill-package-readiness.v1"
+    },
+    "operation_context": {
+      "primary_profile": "authoring",
+      "next_profiles": ["package-review", "proof"],
+      "validation_commands": [
+        "./bin/ask skills doctor he-code-review --json --robot",
+        "./bin/ask skills audit Plugins/harness-engineering/skills/code_quality_review/he-code-review --json --robot"
+      ]
+    },
+    "status": "warning",
     "blockers": [],
-    "warnings": [],
-    "readiness_taxonomy": {"blockers": {}, "warnings": {}},
+    "warnings": [
+      {
+        "class": "outcome_proof_not_run",
+        "message": "Outcome proof is available but has not been run."
+      }
+    ],
+    "readiness_taxonomy": {"blockers": {}, "warnings": {"outcome_proof_not_run": 1}},
     "lifecycle_event": {
       "schema_version": "capability-lifecycle-event.v1",
       "event_type": "skill_doctor_completed",
-      "outcome": {"status": "pass", "blocker_classes": [], "warning_classes": []}
+      "outcome": {"status": "warning", "blocker_classes": [], "warning_classes": ["outcome_proof_not_run"]}
     },
+    "lifecycle_events": [
+      {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_resolved"},
+      {"schema_version": "capability-lifecycle-event.v1", "event_type": "audit_completed"},
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "skill_doctor_completed",
+        "outcome": {"status": "warning", "blocker_classes": [], "warning_classes": ["outcome_proof_not_run"]}
+      }
+    ],
     "checks": {
       "resolver": {"status": "pass"},
       "runtime_reachability": {"status": "pass"},
@@ -391,7 +429,7 @@ Required data fields:
       },
       "outcome_proof": {"status": "available_not_run"}
     },
-    "agent_summary": "$he-code-review passed capability doctor checks.",
+    "agent_summary": "the-code-review passed capability doctor checks with outcome proof still available to run.",
     "next_command": "./bin/ask skills prove he-code-review --json --robot"
   }
 }
@@ -401,8 +439,19 @@ Required behavior:
 
 - Compose resolver, command-handle proof, canonical-source, audit, metadata,
   and outcome-proof availability signals for one capability.
+- Emit `target_summary` with the resolved query, target kind, handle, and
+  canonical source path so callers can assert which capability was inspected.
+- Emit `contract_schemas` with the doctor, lifecycle events, operation profiles,
+  and package-readiness schema references used by the response.
+- Emit `operation_context` with deterministic profile and validation-command
+  evidence for the invocation environment.
 - Return `blocked` with machine-readable blocker classes when the capability
   cannot be used safely.
+- Apply deterministic status precedence: `blocked` > `warning` > `pass`;
+  the highest-severity signal wins for `target_summary`,
+  `operation_context`, and `capability-lifecycle-event.v1` outcomes.
+- Always emit `next_command` for `blocked`, `warning`, and `pass`; use
+  `null` only when no safe next command exists.
 - Treat missing outcome proof as a warning, not as a structural failure.
 - Emit stable readiness taxonomy classes for runtime, auth, user-input,
   timeout, artifact, source, and validation blockers.
@@ -488,7 +537,19 @@ Required data fields:
         "message": "Package readiness metadata is incomplete."
       }
     ],
-    "lifecycle_event": {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_loaded"},
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "package_readiness_checked",
+      "details": {
+        "gate_summary": {
+          "install_ready": false,
+          "checkout_test_status": "not_run",
+          "promotion_status": "blocked_validation",
+          "promotion_ready": false,
+          "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"]
+        }
+      }
+    },
     "lifecycle_events": [
       {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_loaded"},
       {
@@ -505,7 +566,6 @@ Required data fields:
         }
       }
     ],
-    "lifecycle_event_types": ["skill_loaded", "package_readiness_checked"],
     "agent_summary": "skill-builder has package gate blockers: compatible_roles, provenance, runtime_needs, share_readiness.",
     "next_command": "./bin/ask skills doctor skill-builder --strict --json --robot"
   }
@@ -533,6 +593,8 @@ Required behavior:
 - Emit both `skill_loaded` and `package_readiness_checked` lifecycle events so
   automation can distinguish source resolution from package gate evaluation.
   The `package_readiness_checked` event must include `details.gate_summary`.
+- Derive event types from `lifecycle_events[].event_type`; do not require a
+  duplicate event-type list in package payloads.
 - Keep promotion, install, share, and marketplace mutation out of this command.
 
 ## `ask skills profiles`
@@ -578,9 +640,9 @@ Required data fields:
 
 Required behavior:
 
-- Return all profiles when no profile name is provided.
-- Return one profile when a valid profile name is provided.
-- Return `blocked` with available profile names for unknown profiles.
+- When no profile name is provided, return all profiles.
+- For a valid profile name, return that single profile.
+- For unknown profiles, return `blocked` with available profile names.
 - Include workspace-root groups and per-profile effective roots so automation can
   show the repo, runtime projection, artifact, and memory boundaries without
   parsing profile prose.
@@ -624,6 +686,55 @@ Required behavior:
 Purpose: run smoke or release evidence while classifying runner blockers
 separately from skill behavior failures.
 
+Inputs:
+
+- eval path or workout name;
+- `--json`;
+- `--robot`; and
+- `--timeout`, optional runner timeout.
+
+JSON output example:
+
+```json
+{
+  "eval_run": {
+    "schema_version": "eval-run-result.v1",
+    "query": "skill-factory/release",
+    "eval_status": "blocked_runtime",
+    "blocker_class": "blocked_runtime",
+    "blocker_taxonomy": {
+      "blocked_runtime": "Local sandbox, context-window, model-capacity, or runner setup failure that prevents the eval from reaching skill behavior.",
+      "blocked_auth": "Authentication, token, or login failure.",
+      "blocked_user_input": "The runner requested user input that automation cannot provide.",
+      "timeout_no_output": "The runner timed out before producing usable output.",
+      "timeout_partial_output": "The runner timed out after producing partial evidence."
+    },
+    "lifecycle_events": [
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_started",
+        "status": "running",
+        "message": "Eval runner started."
+      },
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_blocked",
+        "status": "blocked",
+        "message": "Runner setup failed before skill behavior was reached."
+      }
+    ],
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "eval_blocked",
+      "status": "blocked",
+      "message": "Runner setup failed before skill behavior was reached."
+    },
+    "raw_output": "",
+    "raw_error": "sandbox denied runner setup path"
+  }
+}
+```
+
 Required data fields for JSON output:
 
 - `eval_status`: one of `pass`, `fail`, `blocked_user_input`, `blocked_auth`,
@@ -636,6 +747,7 @@ Required data fields for JSON output:
 - `lifecycle_event`: the latest lifecycle event for consumers that only need
   the final eval outcome.
 - `raw_output` and `raw_error`: captured runner output for exact evidence.
+- See the example above for the complete `eval_run` JSON envelope.
 
 Required behavior:
 

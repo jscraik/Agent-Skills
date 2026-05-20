@@ -3,6 +3,7 @@ name: architecture-interview
 description: "Analyze, review, and plan architecture alternatives through a structured interview. Use when the user needs tradeoffs surfaced before implementation or a Linear decision note instead of an ADR."
 metadata:
   skill-type: team_automation
+  version: "1.0.0"
 ---
 
 # Architecture Interview
@@ -52,6 +53,11 @@ Analyze, review, or plan architecture alternatives through a structured intervie
 - Do not run destructive commands or broad rewrites unless explicitly approved.
 
 ## Execution Boundaries
+- Produce interview questions, tradeoff analysis, decision notes, or validation criteria unless implementation is explicitly requested.
+- Do not create ADRs, tickets, or repo files when the requested output is only a decision conversation.
+- Treat Linear, specs, plans, and repo docs as evidence surfaces to reconcile, not as automatic authority to mutate.
+- Keep the decision scope to the named architecture problem and its direct consequences.
+
 - Produce interview questions, tradeoff analysis, or decision notes only for the requested architecture choice.
 - Do not create ADRs, mutate Linear, implement code, or refactor architecture unless the user explicitly authorizes that follow-up.
 
@@ -74,6 +80,14 @@ Analyze, review, or plan architecture alternatives through a structured intervie
 - Claiming validation, readiness, or quality without tool evidence.
 - Hiding uncertainty or dependency blockers behind polished prose.
 
+## Failure Mode
+- If the decision, candidate options, constraints, or target artifact are too vague to compare real alternatives, ask the single next highest-leverage question or report the missing input.
+
+## Gotchas
+- A reversible implementation choice rarely needs heavy architecture ceremony.
+- A Linear-ready decision note is not the same artifact as an ADR.
+- Tradeoff analysis must name the sacrifice, not only the preferred option.
+
 ## Examples
 - "Help choose between event-driven and synchronous integration for these contexts."
 - "Interview me to decide whether this should be a plugin or a core service."
@@ -81,6 +95,8 @@ Analyze, review, or plan architecture alternatives through a structured intervie
 
 ## Progressive Disclosure
 - Start with this active contract, then load deferred context only when a task needs deeper implementation detail.
+- Read when: architecture interviews need code-literature lenses for tradeoffs, data/integration risk, bounded contexts, or complexity symptoms: `Infrastructure/references/software-literature-expert-lens-pack.md` and the Architecture Interview row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
+
 - Use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md` for architecture decision and tradeoff lenses.
 - Archived source, scripts, assets, and long-form references live under `Infrastructure/references/deferred-skill-context/product-strategy-architecture-interview/`.
 - Prefer the active `references/contract.yaml`, `references/evals.yaml`, and `references/task-profile.json` for routing, validation, and graph metadata.

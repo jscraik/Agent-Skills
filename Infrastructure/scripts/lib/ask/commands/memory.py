@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import shlex
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -31,6 +32,21 @@ def _validation_error(message: str, fix: str) -> CallResult:
     result = CallResult(status="error")
     result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=message, fix_suggestion=fix))
     return result
+
+
+def _memory_validation_command(
+    action: str,
+    *args: str,
+    source_id: str | None = None,
+    limit: int | None = None,
+) -> str:
+    parts = ["./bin/ask", "memory", action, *args]
+    if source_id:
+        parts.extend(["--source", source_id])
+    if limit is not None:
+        parts.extend(["--limit", str(limit)])
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
 
 
 def _entry_id(source_id: str, relative_path: str) -> str:
@@ -75,6 +91,16 @@ def _snippet(text: str, query: str | None = None, *, max_len: int = 240) -> str:
     return compact[start : start + max_len]
 
 
+def _is_safe_memory_file(path: Path, source_root: Path) -> bool:
+    if path.is_symlink() or not path.is_file():
+        return False
+    try:
+        path.resolve().relative_to(source_root.resolve())
+    except ValueError:
+        return False
+    return True
+
+
 def _iter_entries(repo_root: Path) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     for source in MEMORY_SOURCES:
@@ -83,7 +109,7 @@ def _iter_entries(repo_root: Path) -> list[dict[str, Any]]:
             continue
         for pattern in source.patterns:
             for path in sorted(source_root.rglob(pattern)):
-                if not path.is_file():
+                if not _is_safe_memory_file(path, source_root):
                     continue
                 text = path.read_text(encoding="utf-8", errors="replace")
                 relative_path = str(path.relative_to(repo_root))
@@ -121,14 +147,20 @@ def _filter_source(entries: list[dict[str, Any]], source_id: str | None) -> list
 
 
 def memory_list(repo_root: Path, source_id: str | None = None, limit: int = 20) -> CallResult:
+    validation_command = _memory_validation_command("list", source_id=source_id, limit=limit)
     if limit < 0:
-        return _validation_error("memory list limit must be non-negative", "Pass --limit 0 or a positive integer.")
+        result = _validation_error("memory list limit must be non-negative", "Pass --limit 0 or a positive integer.")
+        result.data["validation_commands"] = [validation_command]
+        return result
     try:
         entries = _filter_source(_iter_entries(repo_root), source_id)
     except ValueError as exc:
-        return _validation_error(str(exc), "Pass a non-empty --source value or omit --source.")
+        result = _validation_error(str(exc), "Pass a non-empty --source value or omit --source.")
+        result.data["validation_commands"] = [validation_command]
+        return result
     public = [{k: v for k, v in entry.items() if k != "_content"} for entry in entries[:limit]]
     result = CallResult()
+    result.data["validation_commands"] = [validation_command]
     result.data["memory"] = {
         "schema_version": "memory-provider.v1",
         "agent_summary": f"Listed {len(public)} memory entr{'y' if len(public) == 1 else 'ies'}.",
@@ -140,8 +172,11 @@ def memory_list(repo_root: Path, source_id: str | None = None, limit: int = 20) 
 
 
 def memory_read(repo_root: Path, identifier: str) -> CallResult:
+    validation_command = _memory_validation_command("read", identifier)
     if not identifier.strip():
-        return _validation_error("memory id must not be blank", "Pass a memory id from memory list.")
+        result = _validation_error("memory id must not be blank", "Pass a memory id from memory list.")
+        result.data["validation_commands"] = [validation_command]
+        return result
     for entry in _iter_entries(repo_root):
         if entry["id"] == identifier or entry["path"] == identifier:
             public = {k: v for k, v in entry.items() if k != "_content"}
@@ -152,19 +187,29 @@ def memory_read(repo_root: Path, identifier: str) -> CallResult:
                 "agent_summary": f"Read memory entry {entry['id']}.",
                 "entry": public,
             }
+            result.data["validation_commands"] = [validation_command]
             return result
-    return _validation_error(f"memory id not found: {identifier}", "Run memory list and use an id from the result.")
+    result = _validation_error(f"memory id not found: {identifier}", "Run memory list and use an id from the result.")
+    result.data["validation_commands"] = [validation_command]
+    return result
 
 
 def memory_search(repo_root: Path, query: str, source_id: str | None = None, limit: int = 20) -> CallResult:
+    validation_command = _memory_validation_command("search", query, source_id=source_id, limit=limit)
     if not query.strip():
-        return _validation_error("memory search query must not be blank", "Pass a non-empty search query.")
+        result = _validation_error("memory search query must not be blank", "Pass a non-empty search query.")
+        result.data["validation_commands"] = [validation_command]
+        return result
     if limit < 0:
-        return _validation_error("memory search limit must be non-negative", "Pass --limit 0 or a positive integer.")
+        result = _validation_error("memory search limit must be non-negative", "Pass --limit 0 or a positive integer.")
+        result.data["validation_commands"] = [validation_command]
+        return result
     try:
         entries = _filter_source(_iter_entries(repo_root), source_id)
     except ValueError as exc:
-        return _validation_error(str(exc), "Pass a non-empty --source value or omit --source.")
+        result = _validation_error(str(exc), "Pass a non-empty --source value or omit --source.")
+        result.data["validation_commands"] = [validation_command]
+        return result
     needle = query.lower()
     matches: list[dict[str, Any]] = []
     for entry in entries:
@@ -175,6 +220,7 @@ def memory_search(repo_root: Path, query: str, source_id: str | None = None, lim
         public["snippet"] = _snippet(entry["_content"], query)
         matches.append(public)
     result = CallResult()
+    result.data["validation_commands"] = [validation_command]
     result.data["memory"] = {
         "schema_version": "memory-provider.v1",
         "agent_summary": f"Found {len(matches[:limit])} memory entr{'y' if len(matches[:limit]) == 1 else 'ies'}.",

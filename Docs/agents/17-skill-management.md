@@ -18,6 +18,17 @@ read [UBIQUITOUS_LANGUAGE.md](/UBIQUITOUS_LANGUAGE.md).
 Use `--remediate` to scaffold missing files during install recovery, then run a
 strict audit before treating the skill as ready.
 
+Skill setup must follow the [Zero-Setup Agent Workspace](/Docs/agents/21-zero-setup-agent-workspace.md)
+product rule. A skill is not professionally ready if it requires the customer
+to manually stitch together install, projection, runtime, and validation steps
+before an agent can discover and report readiness.
+
+High-level workflow skills whose truth lives in UI or app state need
+[CTF Workflow Evals](/Docs/agents/23-ctf-workflow-evals.md) before a
+release-readiness claim. Examples include login, upload-and-chat, access grants,
+and other workflows where capturing a planted flag is the practical proof of
+success.
+
 ## Folding Strategy
 
 If `./bin/ask skills fold source target --robot` returns confidence `>= 0.2`, fold

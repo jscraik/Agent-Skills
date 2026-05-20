@@ -70,7 +70,9 @@
     "Skills/security-ops/best-practices",
     "Skills/security-ops/create-auth",
     "Skills/security-ops/recon-workbench",
-    "Skills/security-ops/security-ownership-map"
+    "Skills/security-ops/security-ownership-map",
+    "skills-system/skill-creator",
+    "skills-system/skill-installer"
   ],
   "generated_by": "run_repo_skill_quality.py"
 }
