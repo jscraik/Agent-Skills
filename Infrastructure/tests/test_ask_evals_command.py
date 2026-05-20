@@ -164,14 +164,13 @@ def _write_example_skill(tmp_path: Path) -> Path:
     return skill_root
 
 
-def test_evals_can_block_tessl_project_save_when_policy_disables_automatic_run(tmp_path: Path) -> None:
+def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     _write_example_skill(tmp_path)
 
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
         mock.patch.object(evals.subprocess, "run", return_value=completed) as run,
-        mock.patch.dict(evals.os.environ, {"ASK_TESSL_PROJECT_SAVE_APPROVED": ""}, clear=False),
     ):
         result = evals.run_evals(
             tmp_path,
@@ -180,13 +179,10 @@ def test_evals_can_block_tessl_project_save_when_policy_disables_automatic_run(t
             allow_tessl_project_save=False,
         )
 
-    assert result.status == "error"
-    assert run.call_count == 1
+    assert result.status == "success"
+    assert run.call_count == 2
     tessl_eval = result.data["tessl_eval"]
-    assert tessl_eval["status"] == "blocked"
-    assert tessl_eval["approval"]["required"] is True
-    assert tessl_eval["approval"]["rerun_with"] == "--allow-tessl-project-save"
-    assert "compatibility approval gate" in tessl_eval["blocker"]
+    assert tessl_eval["status"] == "pass"
     assert "ask-tessl-evals" in tessl_eval["staged_source"]
     assert tessl_eval["policy"]["no_registry_upload"] is True
     assert tessl_eval["policy"]["network_permission_required_by_repo"] is False
@@ -220,7 +216,6 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
         mock.patch.object(evals.subprocess, "run", side_effect=fake_run) as run,
-        mock.patch.dict(evals.os.environ, {"ASK_TESSL_PROJECT_SAVE_APPROVED": ""}, clear=False),
     ):
         result = evals.run_evals(
             tmp_path,
@@ -248,7 +243,7 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
     assert result.data["tessl_eval"]["policy"]["no_registry_upload"] is True
     assert result.data["tessl_eval"]["policy"]["temp_staged_project_input_only"] is True
     assert result.data["tessl_eval"]["policy"]["network_permission_required_by_repo"] is False
-    assert result.data["tessl_eval"]["policy"]["project_save_default"] == "explicit_approval"
+    assert result.data["tessl_eval"]["policy"]["project_save_default"] == "compatibility_flag_not_required"
 
 
 def test_evals_skip_tessl_escape_hatch(tmp_path: Path) -> None:
@@ -285,8 +280,15 @@ def test_evals_classify_missing_tessl_project_link(tmp_path: Path) -> None:
     assert result.status == "error"
     tessl_eval = result.data["tessl_eval"]
     assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_validation"
     assert "project/workspace is linked" in tessl_eval["blocker"]
     assert "tessl.json" in tessl_eval["staged_files"]
+    assert [event["event_type"] for event in result.data["lifecycle_events"]] == [
+        "eval_started",
+        "eval_blocked",
+    ]
+    assert result.data["lifecycle_event"]["outcome"]["status"] == "blocked_validation"
+    assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == ["blocked_validation"]
 
 
 def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:

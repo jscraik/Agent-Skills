@@ -3,7 +3,6 @@ import json
 import re
 import subprocess
 import sys
-import os
 import ast
 import shutil
 import tempfile
@@ -71,7 +70,7 @@ def _tessl_policy() -> dict:
         "temp_staged_project_input_only": True,
         "network_permission_required_by_repo": False,
         "project_save_may_use_tessl_service": False,
-        "project_save_default": "explicit_approval",
+        "project_save_default": "compatibility_flag_not_required",
     }
 
 
@@ -176,13 +175,9 @@ def _stage_tessl_eval_source(repo_root: Path, path: str, temp_root: Path | None 
     return staged_root, copied
 
 
-def _tessl_project_save_approved(allow_project_save: bool) -> bool:
-    env_value = os.environ.get("ASK_TESSL_PROJECT_SAVE_APPROVED", "").strip().lower()
-    return allow_project_save or env_value in {"1", "true", "yes", "approved"}
-
-
 def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = False) -> dict:
     """Run the local Tessl eval lane without any registry publish/upload command."""
+    _ = allow_project_save  # Compatibility flag retained; temp-staged local runs are default-safe.
     tessl_path = shutil.which("tessl")
     command_display = "tessl eval run --json <staged-temp-source>"
     if not tessl_path:
@@ -196,26 +191,6 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
     try:
         staged_source, copied_files = _stage_tessl_eval_source(repo_root, path)
         command_display = f"tessl eval run --json {staged_source}"
-        if not _tessl_project_save_approved(allow_project_save):
-            return {
-                "status": "blocked",
-                "command": command_display,
-                "source_path": path,
-                "staged_source": str(staged_source),
-                "staged_files": copied_files,
-                "raw_output": "",
-                "raw_error": "",
-                "blocker": (
-                    "Tessl eval runs use the local CLI against a temp-staged project input. "
-                    "The compatibility approval gate is disabled for this invocation."
-                ),
-                "approval": {
-                    "required": True,
-                    "rerun_with": "--allow-tessl-project-save",
-                    "env": "ASK_TESSL_PROJECT_SAVE_APPROVED=1",
-                },
-                "policy": _tessl_policy(),
-            }
         cmd = [tessl_path, "eval", "run", "--json", str(staged_source)]
         try:
             process = subprocess.run(cmd, cwd=str(staged_source), capture_output=True, text=True, timeout=600)
@@ -229,6 +204,7 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
                 "raw_output": _as_text(e.stdout),
                 "raw_error": _as_text(e.stderr),
                 "blocker": "Tessl eval timed out after 600 seconds.",
+                "blocker_class": "blocked_runtime",
                 "policy": _tessl_policy(),
             }
         except OSError as e:
@@ -241,6 +217,7 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
                 "raw_output": "",
                 "raw_error": str(e),
                 "blocker": f"Failed to run Tessl eval: {e}",
+                "blocker_class": "blocked_runtime",
                 "policy": _tessl_policy(),
             }
 
@@ -250,18 +227,22 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
         if process.returncode != 0 and "authenticate with tessl" in auth_text:
             status = "blocked"
             blocker = "Tessl CLI is installed locally, but authentication is required before evals can run."
+            blocker_class = "blocked_auth"
         elif process.returncode != 0 and "no existing project safely matches this directory" in auth_text:
             status = "blocked"
             blocker = (
                 "Tessl CLI is authenticated, but no Tessl project/workspace is linked for the "
                 "temp-staged eval directory. Create or link a Tessl project/workspace before rerunning."
             )
+            blocker_class = "blocked_validation"
         elif process.returncode != 0 and "no tessl project found" in auth_text:
             status = "blocked"
             blocker = "Tessl CLI could not find a tessl.json project marker in the staged eval directory."
+            blocker_class = "blocked_validation"
         else:
             status = "pass" if process.returncode == 0 else "fail"
             blocker = None
+            blocker_class = None
 
         return {
             "status": status,
@@ -273,9 +254,11 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
             "raw_output": raw_output,
             "raw_error": raw_error,
             "blocker": blocker,
+            "blocker_class": blocker_class,
             "policy": _tessl_policy(),
         }
     except OSError as e:
+        blocker_class = "blocked_validation" if isinstance(e, FileNotFoundError) else "blocked_runtime"
         return {
             "status": "blocked",
             "command": command_display,
@@ -283,6 +266,7 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
             "raw_output": "",
             "raw_error": str(e),
             "blocker": f"Failed to stage Tessl eval source: {e}",
+            "blocker_class": blocker_class,
             "policy": _tessl_policy(),
         }
 
@@ -723,6 +707,22 @@ def run_evals(
         tessl_eval = _run_tessl_eval(repo_root, path, allow_project_save=allow_tessl_project_save)
         result.data["tessl_eval"] = tessl_eval
         if tessl_eval.get("status") != "pass":
+            tessl_status = str(tessl_eval.get("status") or "fail")
+            blocker_class = tessl_eval.get("blocker_class")
+            eval_status = blocker_class or tessl_status
+            result.data["eval_status"] = eval_status
+            result.data["blocker_class"] = blocker_class
+            lifecycle_events = result.data.setdefault("lifecycle_events", [])
+            if lifecycle_events and lifecycle_events[-1].get("event_type") in {"eval_completed", "eval_blocked"}:
+                lifecycle_events.pop()
+            _finish_eval_lifecycle(
+                result,
+                path=path,
+                mode=mode,
+                runner=runner,
+                eval_status=eval_status,
+                blocker_class=blocker_class,
+            )
             result.status = "error"
             result.errors.append(ErrorObject(
                 code="ERR_RUNTIME" if tessl_eval.get("status") == "blocked" else "ERR_VALIDATION",
