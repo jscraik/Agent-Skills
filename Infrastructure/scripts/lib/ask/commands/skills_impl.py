@@ -755,6 +755,19 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
                     count=1,
                     flags=re.DOTALL,
                 )
+                for name, count in cluster_counts.items():
+                    updated_readme = re.sub(
+                        rf"(\| {re.escape(name)}\s+\|)\s*\d+(\s+\|)",
+                        lambda match: f"{match.group(1)} {count}{match.group(2)}",
+                        updated_readme,
+                        count=1,
+                    )
+                    updated_readme = re.sub(
+                        rf"(\|\s+\|-- {re.escape(name)}/\s+#\s*)\d+(\s+skills?:)",
+                        lambda match: f"{match.group(1)}{count}{match.group(2)}",
+                        updated_readme,
+                        count=1,
+                    )
         updated_readme = re.sub(
             r"currently expects \*\*\d+\*\* skills",
             f"currently expects **{catalog_count}** skills",
