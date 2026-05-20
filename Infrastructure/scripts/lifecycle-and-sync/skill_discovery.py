@@ -269,7 +269,7 @@ def is_skill_visible(name: str, source_dir: Path, visibility: str) -> bool:
 
 def _iter_system_lane_skill_dirs() -> List[Path]:
     """
-    Discover skills from the .system lane (.agents/skills/.system/).
+    Discover skills from the canonical system lane.
 
     These are maintained originals (e.g. imagegen, openai-docs) and
     bridge skills (skill-creator, plugin-creator, etc.) that live outside
@@ -278,9 +278,8 @@ def _iter_system_lane_skill_dirs() -> List[Path]:
     Returns:
         List[Path]: Paths to .system skill directories containing SKILL.md.
     """
-    system_lane_dir = SYSTEM_LANE_DIR
-    if not system_lane_dir.is_dir():
-        system_lane_dir = REPO_ROOT / "skills-system"
+    tracked_system_lane_dir = REPO_ROOT / "skills-system"
+    system_lane_dir = tracked_system_lane_dir if tracked_system_lane_dir.is_dir() else SYSTEM_LANE_DIR
     if not system_lane_dir.is_dir():
         return []
     dirs: List[Path] = []
