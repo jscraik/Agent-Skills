@@ -13,7 +13,7 @@ What exact local diff, branch, PR, commit ref, or review artifact should Codex r
 
 Explain why this matters: wrong target selection can review an empty diff, stale patch, or the wrong commit.
 
-## Copy paste payload examples
+## Copy-paste payload examples
 
 Ambiguous target:
 

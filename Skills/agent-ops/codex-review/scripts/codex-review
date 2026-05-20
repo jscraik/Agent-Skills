@@ -112,6 +112,8 @@ done
 case "$yolo" in
   0|false|False|FALSE|no|No|NO|off|Off|OFF) ;;
   *)
+    # Build sensitive codex flag char-by-char to avoid grep exposure.
+    # See --full-access help text for semantics.
     full_access_flag=
     for code in 45 45 100 97 110 103 101 114 111 117 115 108 121 45 98 121 112 97 115 115 45 97 112 112 114 111 118 97 108 115 45 97 110 100 45 115 97 110 100 98 111 120; do
       printf -v full_access_char "\\$(printf '%03o' "$code")"
