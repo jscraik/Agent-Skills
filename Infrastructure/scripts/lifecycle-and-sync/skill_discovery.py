@@ -55,7 +55,7 @@ class SkillEntry:
     description: str
 
 
-def classify_skill_scope(source_dir: Path) -> str:
+def classify_skill_scope(source_dir: Path, repo_root: Path | None = None) -> str:
     """
     Classify a skill source directory into its ownership scope.
 
@@ -63,11 +63,12 @@ def classify_skill_scope(source_dir: Path) -> str:
     visible in reports and win deterministic name collisions without mutating
     lower-precedence global sources.
     """
+    root = (repo_root or REPO_ROOT).resolve()
     try:
-        rel_parts = tuple(part.lower() for part in source_dir.relative_to(REPO_ROOT).parts)
+        rel_parts = tuple(part.lower() for part in source_dir.relative_to(root).parts)
     except ValueError:
         try:
-            rel_parts = tuple(part.lower() for part in source_dir.resolve().relative_to(REPO_ROOT).parts)
+            rel_parts = tuple(part.lower() for part in source_dir.resolve().relative_to(root).parts)
         except ValueError:
             return "external"
 
@@ -269,7 +270,7 @@ def is_skill_visible(name: str, source_dir: Path, visibility: str) -> bool:
 
 def _iter_system_lane_skill_dirs() -> List[Path]:
     """
-    Discover skills from the .system lane (.agents/skills/.system/).
+    Discover skills from the canonical system lane.
 
     These are maintained originals (e.g. imagegen, openai-docs) and
     bridge skills (skill-creator, plugin-creator, etc.) that live outside
@@ -278,10 +279,12 @@ def _iter_system_lane_skill_dirs() -> List[Path]:
     Returns:
         List[Path]: Paths to .system skill directories containing SKILL.md.
     """
-    if not SYSTEM_LANE_DIR.is_dir():
+    tracked_system_lane_dir = REPO_ROOT / "skills-system"
+    system_lane_dir = SYSTEM_LANE_DIR if SYSTEM_LANE_DIR.is_dir() else tracked_system_lane_dir
+    if not system_lane_dir.is_dir():
         return []
     dirs: List[Path] = []
-    for item in sorted(SYSTEM_LANE_DIR.iterdir()):
+    for item in sorted(system_lane_dir.iterdir()):
         if not item.is_dir():
             continue
         if (item / "SKILL.md").exists():
@@ -493,7 +496,7 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
         raise ValueError(f"Unsupported visibility mode: {visibility}")
 
     if source == "catalog":
-        return discover_catalog_entries(advanced=visibility == "advanced")
+        return discover_catalog_entries(advanced=visibility == "advanced", source="repo")
 
     seen: set[str] = set()
     entries: List[SkillEntry] = []

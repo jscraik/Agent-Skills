@@ -332,6 +332,11 @@ run_check() {
     outcome="fail"
     if [[ "$mode" == "required" ]]; then
       echo "  ❌ Failed (see $log_file)"
+      if [[ -s "$log_file" ]]; then
+        echo "  -- ${slug} log tail --"
+        tail -80 "$log_file" | sed 's/^/  | /'
+        echo "  -- end ${slug} log tail --"
+      fi
     else
       echo "  ⚠️  Issues detected (see $log_file)"
     fi

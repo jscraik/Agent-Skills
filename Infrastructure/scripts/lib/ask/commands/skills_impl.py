@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, List, Optional
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = SCRIPTS_ROOT.parents[1]
 if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT))
 if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
@@ -36,7 +37,14 @@ from ask.services.plugin_sources import (  # noqa: E402
     load_local_marketplace as _load_local_marketplace,
     materialize_first_level_skill_aliases as _materialize_first_level_skill_aliases,
 )
-from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index  # noqa: E402
+from skill_discovery import (  # noqa: E402
+    USER_SKILL_SCOPE_PRECEDENCE,
+    classify_skill_scope,
+    discover_catalog_entries,
+    discover_skill_entries,
+    get_policy_identity,
+    render_index,
+)
 from selection_policy import REPO_SCAN_ROOTS, SYSTEM_BRIDGE_SKILL_NAMES  # noqa: E402
 from projection_engine import (  # noqa: E402
     ProjectionModeDecision,
@@ -4098,11 +4106,24 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
     return result
 
 
-def _scope_rank_for_path(skill_path: str) -> int:
+def _scope_rank_for_path(repo_root: Path, skill_path: str) -> int:
+    scope = classify_skill_scope(repo_root / skill_path, repo_root=repo_root)
+    max_precedence = max(USER_SKILL_SCOPE_PRECEDENCE.values())
+    scope_precedence = USER_SKILL_SCOPE_PRECEDENCE.get(scope)
+    if scope_precedence is not None:
+        return max_precedence - scope_precedence + 1
+    if scope == "system":
+        return max_precedence + 1
     root = skill_path.split("/", 1)[0].strip()
     if root in REPO_SCAN_ROOTS:
-        return REPO_SCAN_ROOTS.index(root) + 1
-    return len(REPO_SCAN_ROOTS) + 1
+        return max_precedence + REPO_SCAN_ROOTS.index(root) + 2
+    return max_precedence + len(REPO_SCAN_ROOTS) + 2
+
+
+def _exact_handle_sort_key(candidate: EligibleCandidate) -> tuple[int, int, str]:
+    path = candidate.path.removeprefix("./")
+    bridge_rank = 1 if path.startswith(".agents/") else 0
+    return bridge_rank, candidate.scope_rank, canonical_sort_key(candidate)
 
 
 def route_skills(
@@ -4143,6 +4164,120 @@ def route_skills(
         )
         return result
 
+    default_candidates: list[EligibleCandidate] = []
+    default_candidate_ids: set[str] = set()
+    for entry in discover_catalog_entries():
+        if not entry.source_dir.is_relative_to(repo_root):
+            continue
+        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+        candidate = EligibleCandidate(
+            name=entry.name,
+            path=rel_path,
+            description=entry.description,
+            scope_rank=_scope_rank_for_path(repo_root, rel_path),
+        )
+        default_candidates.append(candidate)
+        default_candidate_ids.add(candidate_id(candidate))
+
+    advanced_only_candidates: list[EligibleCandidate] = []
+    for entry in discover_catalog_entries(advanced=True):
+        if not entry.source_dir.is_relative_to(repo_root):
+            continue
+        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+        candidate = EligibleCandidate(
+            name=entry.name,
+            path=rel_path,
+            description=entry.description,
+            scope_rank=_scope_rank_for_path(repo_root, rel_path),
+        )
+        if candidate_id(candidate) in default_candidate_ids:
+            continue
+        advanced_only_candidates.append(candidate)
+
+    ordered_default_candidates = sorted(default_candidates, key=canonical_sort_key)
+    all_candidates = list(ordered_default_candidates)
+    all_candidate_ids = {candidate_id(candidate) for candidate in all_candidates}
+    for candidate in sorted(advanced_only_candidates, key=canonical_sort_key):
+        cid = candidate_id(candidate)
+        if cid in all_candidate_ids:
+            continue
+        all_candidates.append(candidate)
+        all_candidate_ids.add(cid)
+
+    normalized_handle_query = query.removeprefix("$").strip().lower()
+    if normalized_handle_query and " " not in normalized_handle_query:
+        for entry in discover_catalog_entries(advanced=True, source="repo"):
+            if entry.name.lower() != normalized_handle_query:
+                continue
+            if not entry.source_dir.is_relative_to(repo_root):
+                continue
+            rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+            candidate = EligibleCandidate(
+                name=entry.name,
+                path=rel_path,
+                description=entry.description,
+                scope_rank=_scope_rank_for_path(repo_root, rel_path),
+            )
+            cid = candidate_id(candidate)
+            if cid in all_candidate_ids:
+                continue
+            all_candidates.append(candidate)
+            all_candidate_ids.add(cid)
+
+    exact_candidates = [
+        candidate
+        for candidate in all_candidates
+        if candidate.name.lower() == normalized_handle_query
+    ]
+    exact_candidate = min(exact_candidates, key=_exact_handle_sort_key) if exact_candidates else None
+    if exact_candidate is not None and normalized_handle_query and " " not in normalized_handle_query:
+        ranked_payload = [
+            {
+                "skill_name": exact_candidate.name,
+                "skill_path": exact_candidate.path,
+                "confidence": 1.0,
+                "rationale": ["exact command handle match"],
+                "risk_tier": "low",
+            }
+        ]
+        catalog_parity = compute_catalog_parity(repo_root, strict=False)
+        decision = build_decision_payload(
+            request=query,
+            policy_identity=get_policy_identity(),
+            considered_limit=len(all_candidates),
+            top_k=1,
+            eligible_candidates=all_candidates,
+            ranked_candidates=ranked_payload,
+            uncertainty_reasons=[],
+            catalog_parity_ok=not bool(catalog_parity.get("drift_detected")),
+        )
+        result.data["decision"] = decision
+        result.data["catalog_parity"] = catalog_parity
+        result.data["policy_identity"] = decision["policy_identity"]
+        result.data["decision_status"] = decision["decision_status"]
+        if decision["decision_status"] == "resolved":
+            result.status = "success"
+        else:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=f"skills route returned {decision['decision_status']}",
+                    fix_suggestion=decision.get("operator_action"),
+                )
+            )
+        return result
+
+    bounded_limit = max(1, int(considered_limit))
+    considered_candidates = ordered_default_candidates[:bounded_limit]
+    considered_candidate_ids = {candidate_id(candidate) for candidate in considered_candidates}
+    for candidate in sorted(advanced_only_candidates, key=canonical_sort_key):
+        cid = candidate_id(candidate)
+        if cid in considered_candidate_ids:
+            continue
+        considered_candidates.append(candidate)
+        considered_candidate_ids.add(cid)
+
     router_mod = _load_builder_module(repo_root, "skill_router")
     if not router_mod:
         result.status = "error"
@@ -4157,47 +4292,6 @@ def route_skills(
             )
         )
         return result
-
-    default_candidates: list[EligibleCandidate] = []
-    default_candidate_ids: set[str] = set()
-    for entry in discover_catalog_entries():
-        if not entry.source_dir.is_relative_to(repo_root):
-            continue
-        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
-        candidate = EligibleCandidate(
-            name=entry.name,
-            path=rel_path,
-            description=entry.description,
-            scope_rank=_scope_rank_for_path(rel_path),
-        )
-        default_candidates.append(candidate)
-        default_candidate_ids.add(candidate_id(candidate))
-
-    advanced_only_candidates: list[EligibleCandidate] = []
-    for entry in discover_catalog_entries(advanced=True):
-        if not entry.source_dir.is_relative_to(repo_root):
-            continue
-        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
-        candidate = EligibleCandidate(
-            name=entry.name,
-            path=rel_path,
-            description=entry.description,
-            scope_rank=_scope_rank_for_path(rel_path),
-        )
-        if candidate_id(candidate) in default_candidate_ids:
-            continue
-        advanced_only_candidates.append(candidate)
-
-    ordered_default_candidates = sorted(default_candidates, key=canonical_sort_key)
-    bounded_limit = max(1, int(considered_limit))
-    considered_candidates = ordered_default_candidates[:bounded_limit]
-    considered_candidate_ids = {candidate_id(candidate) for candidate in considered_candidates}
-    for candidate in sorted(advanced_only_candidates, key=canonical_sort_key):
-        cid = candidate_id(candidate)
-        if cid in considered_candidate_ids:
-            continue
-        considered_candidates.append(candidate)
-        considered_candidate_ids.add(cid)
     router_skills = [
         _RouterSkill(name=item.name, description=item.description, skill_path=item.path)
         for item in considered_candidates
