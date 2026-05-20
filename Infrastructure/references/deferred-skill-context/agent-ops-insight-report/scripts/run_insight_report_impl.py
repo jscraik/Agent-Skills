@@ -367,7 +367,7 @@ def parse_session_file(file_path):
                             is_human = bool(content and isinstance(content, str) and content.strip())
 
                             if is_human:
-                                dedupe_ts = msg_timestamp if msg_timestamp else f"missing-ts-user-{len(user_messages)}"
+                                dedupe_ts = msg_timestamp if msg_timestamp else "missing-ts-user"
                                 message_key = (dedupe_ts, content.strip())
                                 if message_key in seen_user_messages:
                                     continue
@@ -427,7 +427,7 @@ def parse_session_file(file_path):
                             content = extract_message_text(payload.get('content'))
                             msg_timestamp = event.get('timestamp')
                             if role == 'user' and content.strip():
-                                dedupe_ts = msg_timestamp if msg_timestamp else f"missing-ts-user-{len(user_messages)}"
+                                dedupe_ts = msg_timestamp if msg_timestamp else "missing-ts-user"
                                 message_key = (dedupe_ts, content.strip())
                                 if message_key in seen_user_messages:
                                     continue
@@ -450,7 +450,7 @@ def parse_session_file(file_path):
                                     except (TypeError, ValueError):
                                         pass
                             elif role == 'assistant' and content.strip():
-                                dedupe_ts = msg_timestamp if msg_timestamp else f"missing-ts-assistant-{len(agent_messages)}"
+                                dedupe_ts = msg_timestamp if msg_timestamp else "missing-ts-assistant"
                                 message_key = (dedupe_ts, content.strip())
                                 if message_key in seen_agent_messages:
                                     continue
