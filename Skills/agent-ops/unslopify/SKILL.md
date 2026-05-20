@@ -1,7 +1,8 @@
 ---
 name: unslopify
-description: "WHAT: Run focused cleanup audits and safe removal planning. WHEN: Use when stale-code checks, dead exports, quality-risk reduction, or scoped cleanup evidence are needed."
+description: "Audit unused functions, dead exports, orphaned modules, stale imports, unreachable code, and tech-debt cleanup candidates with evidence-backed removal guidance. Use when unused code, dead code, remove unused imports, stale-code checks, or scoped cleanup evidence are needed."
 metadata:
+  version: 0.1.0
   skill-type: runbook
   lifecycle_state: active
   maturity: validated
@@ -9,12 +10,10 @@ metadata:
   review_cadence: quarterly
   metadata_source: frontmatter
   risk: medium
-  projection: latent
-  handles:
-    - unslopify
-    - $unslopify
+  projection: flat
+  handles: "unslopify, $unslopify"
   canonical_handle: unslopify
-  runtime_visibility: latent
+  runtime_visibility: flat
   command_visibility: target
   category: maintenance
   scope: global
@@ -39,19 +38,21 @@ Escalate architectural redesigns, API boundary changes, migrations, and cross-su
 
 ## Required Gates
 
-1. `./bin/ask skills resolve unslopify --json`
-2. `./bin/ask skills handles --check --json`
+1. `<agent-skills-root>/bin/ask skills resolve unslopify --json`
+2. `<agent-skills-root>/bin/ask skills handles --check --json`
 3. Strict skill audit for package changes.
 4. Plugin Eval when trigger wording, cost, package shape, or eval behavior changed.
 5. Workspace sync proof before runtime claims when projection changed.
 
 Stop if any gate fails.
 
-Runtime visibility checks such as `./bin/ask skills route unslopify --json` are
-required only before claiming route availability, invocation readiness, or
-projection health. If catalog parity drift blocks routing, report runtime
-visibility as blocked and continue only with already-loaded canonical skill
-review or package hardening that does not depend on route availability.
+Runtime visibility checks such as
+`<agent-skills-root>/bin/ask skills route unslopify --json` are required only
+before claiming route availability, invocation readiness, or projection health.
+Use `./bin/ask ...` only when the active workspace is the Agent Skills Kit root.
+If catalog parity drift blocks routing, report runtime visibility as blocked and
+continue only with already-loaded canonical skill review or package hardening
+that does not depend on route availability.
 
 ## Required inputs
 
@@ -62,6 +63,14 @@ review or package hardening that does not depend on route availability.
 ## Deliverables
 
 Return `schema_version: 1`, cleanup ledger, evidence for each action, changed files, validation outcomes, rollback notes, skipped work, and residual risk.
+
+## Discovery Interview
+
+- Ask one round at a time.
+- Use a plain-language question.
+- Explain why this matters for the current skill decision.
+- avoid dumping the whole interview plan at once.
+- Read `references/discovery-interview.md` when the request is underspecified.
 
 ## Workflow
 
@@ -122,6 +131,9 @@ If gates fail, cleanup scope is unclear, reference evidence is missing, or valid
 Never drop required context for brevity; move it into references or deferred context and link it here.
 
 - Local contract, evals, and task profile: `references/`
+- Read when: cleanup needs code-literature lenses for dead-code proof, small reversible batches, or slop removal: `Infrastructure/references/software-literature-expert-lens-pack.md` and the Unslopify row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
+
+- Software-literature cleanup lenses: `Infrastructure/references/software-literature-expert-lens-pack.md`, `Infrastructure/references/software-literature-skill-expertise-map.md`
 - Archived full workflow: `Infrastructure/references/deferred-skill-context/agent-ops-unslopify/`
 
 ## Validation

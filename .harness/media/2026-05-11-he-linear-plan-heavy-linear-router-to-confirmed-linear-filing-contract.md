@@ -10,8 +10,8 @@ This review artifact records the intended bespoke infographic for the he-linear-
 * `$imagegen` invoked: blocked
 * generated-image cache source path: blocked; no callable image-generation tool with verifiable bitmap output path was exposed in this session
 * repository `.harness/media/` PNG path: blocked; no generated PNG exists
-* prompt metadata path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-linear-plan-heavy-linear-router-to-confirmed-linear-filing-contract-prompt.md
-* sidecar path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-linear-plan-heavy-linear-router-to-confirmed-linear-filing-contract.md
+* prompt metadata path: .harness/media/2026-05-11-he-linear-plan-heavy-linear-router-to-confirmed-linear-filing-contract-prompt.md
+* sidecar path: .harness/media/2026-05-11-he-linear-plan-heavy-linear-router-to-confirmed-linear-filing-contract.md
 * repository PNG existence verification: blocked
 * persistence method: blocked
 * final user-facing text after imagegen permitted: yes
@@ -33,13 +33,13 @@ This review artifact records the intended bespoke infographic for the he-linear-
 
 ## Prompt Summary
 
-See /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-linear-plan-heavy-linear-router-to-confirmed-linear-filing-contract-prompt.md for the full fallback image prompt.
+See .harness/media/2026-05-11-he-linear-plan-heavy-linear-router-to-confirmed-linear-filing-contract-prompt.md for the full fallback image prompt.
 
 ## Linked Context
 
-Canonical skill package: /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-linear-plan
+Canonical skill package: Plugins/harness-engineering/skills/he-linear-plan
 
-Generated command handle intentionally not edited: /Users/jamiecraik/dev/agent-skills/.agents/skills/he-linear-plan/SKILL.md
+Generated command handle intentionally not edited: .agents/skills/he-linear-plan/SKILL.md
 
 ## Fallback `$imagegen` Prompt Output Contract
 

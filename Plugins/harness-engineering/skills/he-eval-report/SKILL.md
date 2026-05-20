@@ -41,7 +41,8 @@ otherwise. Include Artifact Identity frontmatter from
 `Plugins/harness-engineering/references/artifact-routing-contract.md` and return
 `schema_version`, evaluated slice, validation results, drift validation, proof
 artifacts, closure recommendation, follow-up work, blockers, git staging
-status, staged paths, Codex provenance status, PR safety trace status, next
+status, staged paths, `source_prompt_family_status` when source-prompt
+closure is in scope, Codex provenance status, PR safety trace status, next
 handoff, and confidence.
 Non-trivial reports also include the BLUF review surface so the closure
 recommendation, blocker consequence, and next action are visible before proof
@@ -141,7 +142,7 @@ without surrounding prose, image-only proof, or conclusions that require reading
 unlinked logs.
 
 ## Output Format
-Use the template in `references/eval-report-template.md` plus the BLUF review
+Use the template in `../../references/skills/he-eval-report/eval-report-template.md` plus the BLUF review
 surface for non-trivial reports. Closure recommendation must be one of
 `Complete`, `Complete with follow-up`, `Blocked`, `Needs rework`, or
 `Unsafe to close`; do not use completion recommendations until steering is
@@ -166,12 +167,14 @@ or media persistence is failed or blocked.
 - "The slice generated media; prove the cache image was copied to `.harness/media/`."
 
 ## References
-- Read when writing reports: `references/eval-report-contract.md`,
-  `references/eval-report-template.md`, `references/eval-report-schema.json`.
-- Read when classifying drift or Linear closure: `references/drift-taxonomy.md`,
-  `references/linear-completion-policy.md`.
+- Read when writing reports: `../../references/skills/he-eval-report/eval-report-contract.md`,
+  `../../references/skills/he-eval-report/eval-report-template.md`, `../../references/skills/he-eval-report/eval-report-schema.json`.
+- Read when classifying drift or Linear closure: `../../references/skills/he-eval-report/drift-taxonomy.md`,
+  `../../references/skills/he-eval-report/linear-completion-policy.md`.
 - Read when validating local contract/evals: `references/contract.yaml`,
   `references/evals.yaml`.
+- Read when the eval report is asked to prove that old source-prompt behavior
+  survived implementation: `references/source-prompt-preservation.md`.
 - Read when report scanability/No-Fog structure matters:
   `../../references/bluf-review-contract.md`.
 - Read when evidence chains, gate matrices, visual proof, screenshots, or
@@ -181,6 +184,11 @@ or media persistence is failed or blocked.
   supports a closure claim:
   `../../references/codex-provenance-contract.md`,
   `../../references/pr-safety-trace-contract.md`.
+- Read before live closure or tracker mutation:
+  `../../references/closure-mutation-contract.md`.
+- Read when closure depends on domain language or production model integrity:
+  `../../references/domain-context-contract.md`,
+  `../../references/domain-model-production-contract.md`.
 - Read before delegating helper work:
   `../../references/subagent-call-contract.md`.
 - Read shared HE contracts only when the selected slice needs them:

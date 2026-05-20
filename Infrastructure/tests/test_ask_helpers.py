@@ -1,7 +1,7 @@
 """
-Tests for pure helper functions in Infrastructure/bin/ask.
+Tests for pure helper functions in ask.cli_errors.
 
-Covers functions added or changed in the PR:
+Covers extracted CLI recovery helpers:
   - get_closest_match
   - format_correction
   - _normalize_token
@@ -10,53 +10,37 @@ Covers functions added or changed in the PR:
   - _merge_corrections
   - consume_global_prefix_flags
   - try_fuzzy_parse (key routing logic)
+  - build_unknown_action_result
   - build_helpful_error
   - build_argument_error
   - parse_args_with_capture
 """
 import argparse
-import importlib.util
-import sys
-import types
 import unittest
-from pathlib import Path
 
-# ---------------------------------------------------------------------------
-# Path setup — mirrors what Infrastructure/tests/test_ask_cli.py does
-# ---------------------------------------------------------------------------
-REPO_ROOT = Path(__file__).resolve().parents[2]
-ASK_LIB_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lib"
-SCRIPTS_DIR = REPO_ROOT / "Infrastructure" / "scripts"
-LIFECYCLE_DIR = SCRIPTS_DIR / "lifecycle-and-sync"
-UTILITIES_DIR = REPO_ROOT / "Infrastructure" / "utilities" / "skill-builder" / "scripts"
+from ask_test_paths import ensure_ask_support_paths
 
-for p in (str(ASK_LIB_DIR), str(SCRIPTS_DIR), str(LIFECYCLE_DIR), str(UTILITIES_DIR)):
-    if p not in sys.path:
-        sys.path.insert(0, p)
 
-# ---------------------------------------------------------------------------
-# Load Infrastructure/bin/ask as a module (it has no .py extension)
-# ---------------------------------------------------------------------------
-_BIN_ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
+ensure_ask_support_paths()
 
-from importlib.machinery import SourceFileLoader  # noqa: E402
-
-_loader = SourceFileLoader("ask_bin", str(_BIN_ASK_PATH))
-spec = importlib.util.spec_from_loader("ask_bin", _loader)
-ask_bin = importlib.util.module_from_spec(spec)
-_loader.exec_module(ask_bin)
-
-get_closest_match = ask_bin.get_closest_match
-format_correction = ask_bin.format_correction
-_normalize_token = ask_bin._normalize_token
-_extract_argparse_error = ask_bin._extract_argparse_error
-_example_commands = ask_bin._example_commands
-_merge_corrections = ask_bin._merge_corrections
-consume_global_prefix_flags = ask_bin.consume_global_prefix_flags
-try_fuzzy_parse = ask_bin.try_fuzzy_parse
-build_helpful_error = ask_bin.build_helpful_error
-build_argument_error = ask_bin.build_argument_error
-parse_args_with_capture = ask_bin.parse_args_with_capture
+from ask.cli_errors import (  # noqa: E402
+    _ambiguous_action_fix_suggestion,
+    _closest_action_fix_suggestion,
+    _closest_topic_fix_suggestion,
+    _example_commands,
+    _extract_argparse_error,
+    _fallback_topic_fix_suggestion,
+    _merge_corrections,
+    _normalize_token,
+    build_argument_error,
+    build_helpful_error,
+    build_unknown_action_result,
+    consume_global_prefix_flags,
+    format_correction,
+    get_closest_match,
+    parse_args_with_capture,
+    try_fuzzy_parse,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -199,6 +183,11 @@ class TestMergeCorrections(unittest.TestCase):
         result = _merge_corrections("existing note", "existing note")
         self.assertEqual(result, "existing note")
 
+    def test_substring_note_is_not_treated_as_duplicate(self):
+        result = _merge_corrections("existing note with detail", "existing note")
+
+        self.assertEqual(result, "existing note with detail\nexisting note")
+
     def test_distinct_notes_are_merged(self):
         result = _merge_corrections("note A", "note B")
         self.assertIn("note A", result)
@@ -243,6 +232,11 @@ class TestConsumeGlobalPrefixFlags(unittest.TestCase):
         prefix, rest = consume_global_prefix_flags(["--trace-id", "abc123", "skills", "list"])
         self.assertIn("--trace-id", prefix)
         self.assertIn("abc123", prefix)
+        self.assertEqual(rest, ["skills", "list"])
+
+    def test_trace_id_equals_form_extracted(self):
+        prefix, rest = consume_global_prefix_flags(["--trace-id=abc123", "skills", "list"])
+        self.assertEqual(prefix, ["--trace-id=abc123"])
         self.assertEqual(rest, ["skills", "list"])
 
     def test_unknown_flag_stops_extraction(self):
@@ -320,10 +314,196 @@ class TestTryFuzzyParse(unittest.TestCase):
         _, _, remaining, _ = try_fuzzy_parse(["--json", "skills", "list"])
         self.assertIn("--json", remaining)
 
+    def test_trace_id_equals_form_preserved_in_remaining(self):
+        topic, action, remaining, _ = try_fuzzy_parse(["--trace-id=abc123", "skills", "list"])
+
+        self.assertEqual(topic, "skills")
+        self.assertEqual(action, "list")
+        self.assertIn("--trace-id=abc123", remaining)
+
     def test_doctor_catalog_alias(self):
         topic, action, remaining, note = try_fuzzy_parse(["doctor", "catalog"])
         self.assertEqual(topic, "repo")
         self.assertEqual(action, "doctor-catalog")
+
+
+# ---------------------------------------------------------------------------
+# recovery result builders
+# ---------------------------------------------------------------------------
+
+class TestRecoveryResultBuilders(unittest.TestCase):
+    def assert_recovery_data(self, result, validation_commands, candidate_commands=None, fix_suggestion=None):
+        self.assertEqual(result.data["validation_commands"], validation_commands)
+        if candidate_commands is not None:
+            self.assertEqual(result.data["candidate_commands"], candidate_commands)
+        if fix_suggestion is not None:
+            self.assertEqual(result.errors[0].fix_suggestion, fix_suggestion)
+
+    def test_unknown_action_includes_recovery_and_candidates(self):
+        result = build_unknown_action_result("repo", "missing")
+
+        self.assert_recovery_data(
+            result,
+            ["./bin/ask repo status --json --robot"],
+            [
+                "ask repo doctor --json --robot",
+                "ask repo closeout --changed --json --robot",
+                "ask repo validate --ephemeral",
+            ],
+        )
+
+    def test_unknown_action_uses_closest_action_examples(self):
+        result = build_unknown_action_result("skills", "reslove")
+
+        self.assert_recovery_data(
+            result,
+            ["./bin/ask skills list --json --robot"],
+            ["ask skills resolve he-heartbeat --json"],
+            "Closest action guess: 'ask skills resolve'.",
+        )
+
+    def test_helpful_error_includes_recovery_and_candidates(self):
+        result = build_helpful_error("skills", "missing", ["skills", "missing"])
+
+        self.assertEqual(result.data["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(
+            result.data["candidate_commands"],
+            [
+                'ask skills improve "fix PR review comments faster" --json --robot',
+                "ask skills explain he-heartbeat --json --robot",
+                "ask skills doctor he-heartbeat --json --robot",
+            ],
+        )
+
+    def test_helpful_error_uses_inferred_topic_for_recovery(self):
+        result = build_helpful_error(None, None, ["prove"])
+
+        self.assertEqual(result.data["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(result.data["candidate_commands"], ["ask skills prove he-heartbeat --json"])
+
+    def test_helpful_error_uses_ambiguous_recovery_commands(self):
+        for args in ((None, None, ["list"]), ("list", None, ["list"])):
+            with self.subTest(args=args):
+                result = build_helpful_error(*args)
+
+                self.assert_recovery_data(
+                    result,
+                    [
+                        "./bin/ask skills list --json --robot",
+                        "./bin/ask plugins list --json --robot",
+                        "./bin/ask graph list --json --robot",
+                    ],
+                    [
+                        "ask skills list",
+                        "ask plugins list",
+                        "ask graph list",
+                    ],
+                    "Use an explicit topic: 'ask skills list', 'ask plugins list', 'ask graph list'.",
+                )
+    def test_ambiguous_fix_suggestion_uses_same_commands_as_candidates(self):
+        result = build_helpful_error(None, None, ["list"])
+        expected_topics = [command.split()[1] for command in result.data["candidate_commands"]]
+
+        self.assertEqual(
+            _ambiguous_action_fix_suggestion("list", expected_topics),
+            "Use an explicit topic: 'ask skills list', 'ask plugins list', 'ask graph list'.",
+        )
+
+    def test_helpful_error_uses_closest_topic_for_recovery(self):
+        result = build_helpful_error("skils", None, ["skils"])
+
+        self.assertEqual(result.data["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(
+            result.data["candidate_commands"],
+            [
+                'ask skills improve "fix PR review comments faster" --json --robot',
+                "ask skills explain he-heartbeat --json --robot",
+                "ask skills doctor he-heartbeat --json --robot",
+            ],
+        )
+        self.assertEqual(result.errors[0].fix_suggestion, "Closest topic guess: 'ask skills'.")
+
+    def test_helpful_error_uses_raw_closest_topic_for_recovery(self):
+        result = build_helpful_error(None, None, ["skils"])
+
+        self.assertEqual(result.data["validation_commands"], ["./bin/ask skills list --json --robot"])
+        self.assertEqual(
+            result.data["candidate_commands"],
+            [
+                'ask skills improve "fix PR review comments faster" --json --robot',
+                "ask skills explain he-heartbeat --json --robot",
+                "ask skills doctor he-heartbeat --json --robot",
+            ],
+        )
+        self.assertEqual(result.errors[0].fix_suggestion, "Closest topic guess: 'ask skills'.")
+
+    def test_closest_topic_fix_suggestion_matches_helpful_error(self):
+        result = build_helpful_error(None, None, ["skils"])
+
+        self.assertEqual(result.errors[0].fix_suggestion, _closest_topic_fix_suggestion("skills"))
+
+    def test_helpful_error_uses_fallback_recovery_for_unknown_topic(self):
+        for args, expected_candidates in (
+            (
+                ("zzz", None, ["zzz"]),
+                [
+                    'ask skills improve "fix PR review comments faster" --json --robot',
+                    "ask skills explain he-heartbeat --json --robot",
+                    "ask skills doctor he-heartbeat --json --robot",
+                ],
+            ),
+            ((None, None, ["zzz"]), None),
+        ):
+            with self.subTest(args=args):
+                result = build_helpful_error(*args)
+
+                self.assert_recovery_data(
+                    result,
+                    [
+                        "./bin/ask skills list --json --robot",
+                        "./bin/ask repo status --json --robot",
+                        "./bin/ask graph list --json --robot",
+                    ],
+                    expected_candidates,
+                    (
+                        "Run a valid topic recovery command: './bin/ask skills list --json --robot', "
+                        "'./bin/ask repo status --json --robot', './bin/ask graph list --json --robot'."
+                    ),
+                )
+
+    def test_fallback_fix_suggestion_uses_same_commands_as_fallback_recovery(self):
+        result = build_helpful_error(None, None, ["zzz"])
+
+        self.assertEqual(
+            _fallback_topic_fix_suggestion(),
+            result.errors[0].fix_suggestion,
+        )
+
+    def test_helpful_error_uses_closest_action_fix_suggestion(self):
+        result = build_helpful_error("skills", "reslove", ["skills", "reslove"])
+
+        self.assert_recovery_data(
+            result,
+            ["./bin/ask skills list --json --robot"],
+            ["ask skills resolve he-heartbeat --json"],
+            "Closest action guess: 'ask skills resolve'.",
+        )
+
+    def test_closest_action_fix_suggestion_matches_unknown_action_builders(self):
+        helpful = build_helpful_error("skills", "reslove", ["skills", "reslove"])
+        unknown = build_unknown_action_result("skills", "reslove")
+
+        self.assertEqual(helpful.errors[0].fix_suggestion, _closest_action_fix_suggestion("skills", "resolve"))
+        self.assertEqual(unknown.errors[0].fix_suggestion, _closest_action_fix_suggestion("skills", "resolve"))
+
+    def test_argument_error_includes_recovery_and_candidates(self):
+        result = build_argument_error("skills", "resolve", ["skills", "resolve"])
+
+        self.assert_recovery_data(
+            result,
+            ["./bin/ask skills list --json --robot"],
+            ["ask skills resolve he-heartbeat --json"],
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -381,10 +561,17 @@ class TestExampleCommands(unittest.TestCase):
         result = _example_commands("skills", "list", limit=2)
         self.assertLessEqual(len(result), 2)
 
-    def test_none_topic_returns_fallback_examples(self):
+    def test_none_topic_fallback_examples_start_with_recovery_topic_examples(self):
         result = _example_commands(None, None, limit=3)
-        self.assertIsInstance(result, list)
-        self.assertGreater(len(result), 0)
+
+        self.assertEqual(
+            result,
+            [
+                'ask skills improve "fix PR review comments faster" --json --robot',
+                "ask skills explain he-heartbeat --json --robot",
+                "ask skills doctor he-heartbeat --json --robot",
+            ],
+        )
 
     def test_known_topic_returns_examples(self):
         result = _example_commands("skills", None, limit=3)
@@ -396,6 +583,22 @@ class TestExampleCommands(unittest.TestCase):
     def test_zero_limit_returns_empty(self):
         result = _example_commands("skills", "list", limit=0)
         self.assertEqual(result, [])
+
+    def test_negative_limit_returns_empty(self):
+        result = _example_commands("skills", "list", limit=-1)
+        self.assertEqual(result, [])
+
+    def test_skills_doctor_returns_command_specific_examples(self):
+        result = _example_commands("skills", "doctor", limit=2)
+
+        self.assertEqual(result[0], "ask skills doctor he-heartbeat --json")
+        self.assertIn("Skills/agent-ops/autofix", result[1])
+
+    def test_skills_events_returns_command_specific_examples(self):
+        result = _example_commands("skills", "events", limit=2)
+
+        self.assertEqual(result[0], "ask skills events --json")
+        self.assertEqual(result[1], "ask skills events eval_blocked --json")
 
 
 if __name__ == "__main__":

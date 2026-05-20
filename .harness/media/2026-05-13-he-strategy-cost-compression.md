@@ -10,8 +10,8 @@ Review media sidecar for the `he-strategy` hardening pass. The image would expla
 * `$imagegen` invoked: blocked
 * generated-image cache source path: blocked because the active image tool does not expose a discoverable cache path suitable for repository persistence in this workflow
 * repository `.harness/media/` PNG path: blocked because no generated PNG path could be verified
-* prompt metadata path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-he-strategy-cost-compression-prompt.md`
-* sidecar path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-he-strategy-cost-compression.md`
+* prompt metadata path: `.harness/media/2026-05-13-he-strategy-cost-compression-prompt.md`
+* sidecar path: `.harness/media/2026-05-13-he-strategy-cost-compression.md`
 * repository PNG existence verification: blocked
 * persistence method: blocked
 * final user-facing text after imagegen permitted: no, active image tool contract forbids post-generation text
@@ -33,8 +33,8 @@ Review media sidecar for the `he-strategy` hardening pass. The image would expla
 
 ## Prompt Summary
 
-See prompt metadata at `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-he-strategy-cost-compression-prompt.md`.
+See prompt metadata at `.harness/media/2026-05-13-he-strategy-cost-compression-prompt.md`.
 
 ## Linked Context
 
-Canonical skill package: `/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-strategy/`
+Canonical skill package: `Plugins/harness-engineering/skills/he-strategy/`

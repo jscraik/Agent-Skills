@@ -26,6 +26,11 @@ NFR_RE = re.compile(r"\bNFR-\d{3,}\b")
 SA_RE = re.compile(r"\bSA-\d{3,}\b")
 PU_RE = re.compile(r"\bPU-\d{3,}\b")
 VAC_RE = re.compile(r"\bVAC-\d{3,}\b")
+USER_STORY_RE = re.compile(
+    r"\bAs an?\s+[^,\n]+,\s*I want\s+[^,\n]+,\s*so that\s+[^\n]+",
+    re.IGNORECASE,
+)
+USER_STORIES_HEADING_RE = re.compile(r"(?im)^###\s+User Stories\b")
 
 SPEC_SECTIONS = [
     "Command Summary",
@@ -39,6 +44,7 @@ SPEC_SECTIONS = [
     "Requirements",
     "Interfaces",
     "Data / Domain Contract",
+    "Enforcement Contract",
     "Security, Privacy, and Safety",
     "Failure and Recovery",
     "Validation Plan",
@@ -54,6 +60,7 @@ PLAN_SECTIONS = [
     "Scope and Boundaries",
     "Current State / Evidence",
     "Implementation Strategy",
+    "Enforcement Contract",
     "Work Units",
     "Validation Gates",
     "Review Plan",
@@ -78,6 +85,14 @@ CONFORMANCE_TERMS = (
     "versioning",
     "consumer behavior",
     "error handling",
+)
+ENFORCEMENT_TERMS = (
+    "essential_decisions",
+    "fillable_gaps",
+    "guardrails",
+    "refusal_triggers",
+    "durable_memory",
+    "professional_output",
 )
 
 
@@ -113,6 +128,18 @@ def has_visual_decision(text: str) -> bool:
     )
 
 
+def check_enforcement_contract(text: str) -> list[str]:
+    errors: list[str] = []
+    body = section_body(text, "Enforcement Contract")
+    if not body.strip():
+        return ["Enforcement Contract section is empty"]
+    lower = body.lower()
+    for term in ENFORCEMENT_TERMS:
+        if term not in lower:
+            errors.append(f"Enforcement Contract missing required field: {term}")
+    return errors
+
+
 def check_section_order(found: list[str], required: list[str]) -> list[str]:
     errors: list[str] = []
     cursor = -1
@@ -130,6 +157,7 @@ def check_section_order(found: list[str], required: list[str]) -> list[str]:
 
 def validate_spec(text: str) -> list[str]:
     errors = check_section_order(headings(text), SPEC_SECTIONS)
+    errors.extend(check_enforcement_contract(text))
 
     prefix = text.split("## Purpose", 1)[0]
     forbidden_prefix = ("Mode Decision", "Selection Evidence", "Blackboard Delta", "Validation Outcomes")
@@ -145,6 +173,25 @@ def validate_spec(text: str) -> list[str]:
         errors.append("Non-Functional Requirements section has no stable NFR-* IDs")
     if CONFORMANCE_TRIGGERS.search(text) and not any(term in text.lower() for term in CONFORMANCE_TERMS):
         errors.append("format/API/data contract content lacks conformance rules")
+    problem = section_body(text, "Problem Statement")
+    if not problem.strip():
+        errors.append("Problem Statement must describe the user/operator problem")
+    scenarios = section_body(text, "User / Operator Scenarios")
+    if not scenarios.strip():
+        errors.append("User / Operator Scenarios must describe testable journeys")
+    if USER_STORIES_HEADING_RE.search(scenarios):
+        story_count = len(USER_STORY_RE.findall(scenarios))
+        if story_count == 0:
+            errors.append("User Stories must use 'As a..., I want..., so that...' format")
+        elif story_count < 3:
+            errors.append("User Stories section must include at least three stories when requested")
+    proposed = section_body(text, "Proposed Behavior")
+    if not proposed.strip():
+        errors.append("Proposed Behavior must include the user-facing solution")
+    if re.search(r"(?im)^###\s+User-Facing Solution\b", proposed):
+        user_facing_solution_body = re.sub(r"(?im)^###\s+User-Facing Solution\b", "", proposed).strip()
+        if not re.search(r"\b(users?|operators?|customers?|admins?)\b", user_facing_solution_body, re.IGNORECASE):
+            errors.append("User-Facing Solution must stay grounded in user/operator value")
     if not has_visual_decision(text):
         errors.append("Visual References / Diagrams must contain Mermaid, table, image, or Not needed reason")
     return errors
@@ -152,6 +199,7 @@ def validate_spec(text: str) -> list[str]:
 
 def validate_plan(text: str) -> list[str]:
     errors = check_section_order(headings(text), PLAN_SECTIONS)
+    errors.extend(check_enforcement_contract(text))
     work_units = section_body(text, "Work Units")
     if not PU_RE.search(work_units):
         errors.append("Work Units section missing stable PU-* IDs")
@@ -167,6 +215,9 @@ def validate_plan(text: str) -> list[str]:
             errors.append(f"Work Units missing required execution field: {phrase}")
     if not (FR_RE.search(text) or NFR_RE.search(text) or SA_RE.search(text) or VAC_RE.search(text)):
         errors.append("plan lacks source requirement or acceptance ID mapping")
+    validation = section_body(text, "Validation Gates")
+    if validation and not re.search(r"(?is)(observable behavior|external behavior|expected outcome|proof|prior[- ]art|source requirement|acceptance ID)", validation):
+        errors.append("Validation Gates must tie testing decisions to observable behavior, source IDs, or proof")
     if not has_visual_decision(text):
         errors.append("Visual References / Diagrams must contain Mermaid, table, image, or Not needed reason")
     return errors

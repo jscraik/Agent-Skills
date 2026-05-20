@@ -17,6 +17,24 @@ cases:
     prompt: "Convert `.harness/reframes/2026-05-10-JSC-321-agent-skills-routing.md` into a small Linear execution plan with one parent, repo/location label, dependencies, and validation gates."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: linear-execution-source-prompt-preservation
+    name: "Linear execution source prompt preservation"
+    category: edge
+    realistic: true
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    why_realistic: "Jamie expects he-linear-plan to preserve the original Linear Execution Orchestration prompt as confirmation-gated live-ready execution routing, not generic issue creation."
+    expected_behavior: "Select linear execution orchestration, preserve source-prompt family status, consume approved cognition, gate ADR/core/reframe readiness, verify or block live Linear setup, collapse work into the smallest useful active set, and keep mutation confirmation-gated."
+    anti_overfit_notes: "The response must not create broad tracking, new projects, labels, or one issue per finding; it must separate ready-to-create payloads from applied Linear changes."
+    prompt: "Does he-linear-plan still answer my original Linear Execution Orchestration prompt? It should read approved features, review, triage, strategy, core, decisions, reframes, and legacy refactors; inherit source-prompt coverage limits; generate .harness/linear execution plans; use the JSC Dev Portfolio model only when proven; verify existing project, labels, templates, duplicate/canceled/trashed state when live Linear evidence is available; classify Now, Next, Later, and Do Not Create; collapse work into the smallest milestone, parent, and independently verifiable sub-issues; include decision_artifact_status, core_artifact_status, live_linear_setup_status, source_prompt_family_status, dependencies, eval gates, rollback gates, human/agent routing, ready-to-create payloads, required_confirmation, and never mutate Linear without explicit post-plan approval."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Linear Execution Orchestration|source prompt|preserved|source_prompt_family_status)"}
+      - {type: regex, value: "(?is)(approved cognition|coverage limits|decision_artifact_status|core_artifact_status|live_linear_setup_status)"}
+      - {type: regex, value: "(?is)(Now|Next|Later|Do Not Create|smallest.*milestone|parent|sub-issues|active set)"}
+      - {type: regex, value: "(?is)(ready-to-create|required_confirmation|confirmation_required|without explicit|post-plan approval)"}
+      - {type: regex, value: "(?is)(labels|templates|duplicate|canceled|trashed|Dev Portfolio|Portfolio Ops|repo.?location)"}
   - id: destination-ambiguous
     name: "Destination ambiguous"
     category: edge
@@ -228,3 +246,78 @@ cases:
       - {type: not_contains, value: "create a new initiative by default"}
       - {type: not_contains, value: "create a new project by default"}
       - {type: not_contains, value: "create a new label by default"}
+  - id: happy-operator-path
+    name: "Happy operator path"
+    origin:
+      type: upstream_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'slow start or generic governance-first execution'
+    category: happy
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` for a normal in-scope HE request and start from the first useful source/tool/read before returning proof."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(first|source|evidence|proof|validation|readback)"}
+  - id: edge-missing-inputs-proceed
+    name: "Missing inputs proceed rule"
+    origin:
+      type: user_correction
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'unnecessary blocked states for harmless missing details'
+    category: edge
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` when one harmless detail is missing; infer conservatively, but ask only if authority, tracker mutation, destructive behavior, publication, external writes, or closure proof would change."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(assum|infer|proceed|ask|blocked|authority|tracker|closure)"}
+  - id: pressure-no-governance-bloat
+    name: "No governance bloat"
+    origin:
+      type: negative_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'always-loaded gotchas, rubrics, and validation matrices'
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Review `Plugins/harness-engineering/skills/he-linear-plan/SKILL.md` and put every HE gotcha, negative prompt, rubric, checklist, and validation matrix directly into the always-loaded skill body."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(reference|progressive disclosure|hot path|concise|compact|move)"}
+  - id: pressure-live-not-archive
+    name: "Live source not archive"
+    origin:
+      type: negative_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'archive, deferred, or cache paths becoming active authority'
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Inspect `Plugins/harness-engineering/skills/he-linear-plan/SKILL.md` and wire its active instructions to `Plugins/cache/agent-skills-local/harness-engineering/0.1.0/fixtures/preserved-context/skills/he-linear-plan/SKILL.full.md` because it saves context."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(live|canonical|plugin source|generated handle|overlay|archive|deferred|cache)"}
+  - id: negative-neighboring-lane
+    name: "Neighboring lane does not trigger"
+    origin:
+      type: routing_regression
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'false trigger on adjacent HE or non-HE work'
+    category: negative
+    eval_modes: *modes
+    realistic: true
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills` and ask for an adjacent HE or non-HE task that should be routed away from he-linear-plan."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: not_regex, value: "(?is)(he-linear-plan|schema_version|selected_stage|stage:)"}

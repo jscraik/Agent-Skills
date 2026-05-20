@@ -1,0 +1,99 @@
+{
+  "data": {
+    "ask_audit": {
+      "data": {
+        "diagnostics": {
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "\n\ud83d\udccb Diagnostic report: Plugins/harness-engineering/skills/he-phase-work\n--------------------------------------------------\n  \u001b[32m\u2713\u001b[0m skill directory: Found at Plugins/harness-engineering/skills/he-phase-work\n  \u001b[32m\u2713\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m\u2713\u001b[0m nested .git: No nested .git directory\n  \u001b[90m\u25cb\u001b[0m symlink (codex): Plugin-owned skill is not expected as a default user-runtime symlink: he-phase-work\n  \u001b[90m\u25cb\u001b[0m symlink (agents): Plugin-owned skill is not expected as a default user-runtime symlink: he-phase-work\n  \u001b[90m\u25cb\u001b[0m skill index: Plugin-owned skill is not expected in the root default visible skill index: he-phase-work\n  \u001b[90m\u25cb\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m\u2713\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n\u2705 All checks passed\n"
+        },
+        "family_benchmarks": {
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "[family-benchmark] checked skills:\n  - Plugins/harness-engineering/skills/he-phase-work\n[family-benchmark] pass: all family benchmark checks satisfied\n"
+        },
+        "openclaw_guard": {
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "OpenClaw skill guard: he-phase-work\nSummary: 0 critical \u00b7 0 warn \u00b7 2 info\nINFO readiness.checked: Operational readiness checks completed\nINFO security.no_scripts: No executable scripts found; static security scan skipped\n"
+        },
+        "security_gate": {
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "Skill: he-phase-work\nPath:  /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-work/SKILL.md\n\n\nRESULT: PASS\n"
+        }
+      },
+      "errors": [],
+      "status": "success"
+    },
+    "plugin_eval": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/plugin-eval",
+        "analyze",
+        "Plugins/harness-engineering/skills/he-phase-work",
+        "--format",
+        "markdown"
+      ],
+      "exit_code": 0,
+      "status": "success",
+      "stderr": "",
+      "stdout": "# Plugin Eval Report: he-phase-work\n\n## At a Glance\n- Score: 95/100\n- Grade: A\n- Risk: medium\n- Checks: 0 fail, 1 warn, 2 info\n- Active budget: 1307 tokens (good)\n- Observed usage: not supplied\n\n## Why It Matters\n- 1 warning signal still need cleanup before this feels polished.\n- budget is the largest source of score loss at -4.5 points.\n- Budget pressure is not the dominant issue right now.\n- No observed usage is attached yet, so budget conclusions are still based on static estimates.\n\n## Fix First\n- [warn/warning] deferred_cost_tokens is heavy relative to the current Codex baseline. Why: Budget pressure matters because always-loaded or frequently-loaded text can make the workflow feel expensive fast. Fix: Reduce repeated instruction text and move detail into deferred supporting files.\n\n## Recommended Next Step\n- Fix the top findings and rerun the report\n- Why: A short pass on the highest-value findings will improve trust, readability, and the signal quality of future benchmarks.\n- Chat request: \"What should I fix first?\"\n- Local command: `plugin-eval start ~/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-work --request 'What should I fix first?' --format markdown`\n\n## Details\n<details>\n<summary>Watch next</summary>\n\n- No secondary findings queued.\n</details>\n<details>\n<summary>Improvement brief</summary>\n\n- Raise the evaluation from grade A (95/100) with a focus on the highest-signal structural and budget issues first.\n- Goal: Reduce repeated instruction text and move detail into deferred supporting files.\n- Measure: token-usage-observer\n- Measure: task-outcome-scorecard\n- Suggested prompt: Use the skill-creator guidance to improve he-phase-work. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard. Address deferred_cost_tokens-budget-high: deferred_cost_tokens is heavy relative to the current Codex baseline.\n</details>\n<details>\n<summary>Budgets and observed usage</summary>\n\n- trigger_cost_tokens: 80 (moderate)\n- invoke_cost_tokens: 1227 (good)\n- deferred_cost_tokens: 6205 (heavy)\n- total_tokens: 7512 (heavy)\n\n- No observed usage supplied.\n</details>\n<details>\n<summary>Measurement plan</summary>\n\nCombine cost, outcome, and trust signals so you can tell whether the skill or plugin is genuinely helping instead of only looking well-structured on paper.\n\n- Token Usage Observer [high] Measure how many tokens the skill or plugin actually burns in representative runs. Signals: observed_usage_sample_count, observed_input_tokens_avg, observed_total_tokens_avg, estimate_vs_observed_input_ratio. Evidence: Responses API usage logs, Codex-like session exports, JSONL traces captured from local benchmarking harnesses.\n- Task Outcome Scorecard [high] Measure whether the skill helps users finish the intended job with fewer retries and less cleanup. Signals: task_success_rate, first_pass_success_rate, retry_rate, human_override_rate. Evidence: Task run logs, Structured user acceptance checklist, Before/after comparison runs on the same prompts.\n- Tool Call Audit [medium] Check whether the agent uses the right tools, arguments, and sequencing when the skill is active. Signals: tool_call_success_rate, invalid_tool_argument_rate, recoverable_tool_failure_rate. Evidence: Tool invocation traces, Recorded sessions, Golden-path scenario replays.\n- Latency And Efficiency [medium] Track whether the skill speeds users up enough to justify its cost. Signals: p50_time_to_first_acceptable_answer_seconds, p95_time_to_task_completion_seconds, tokens_per_successful_run. Evidence: Benchmark harness timings, Manual stopwatch runs on canonical tasks, Responses API timestamps combined with usage logs.\n- Human Rubric Review [medium] Capture clarity, trust, and usefulness signals that automated checks will miss. Signals: clarity_score_avg, confidence_score_avg, follow_up_question_rate. Evidence: Reviewer scorecards, Team rubric sheets, Annotated transcripts.\n</details>\n<details>\n<summary>Use From Codex Chat</summary>\n\nStart with a natural chat request, then let plugin-eval show the exact local command sequence behind it.\n\nStart with this chat request: \"Evaluate this skill.\"\nWhy this path: Plugin Eval recommended Evaluate Skill from the current local state for this skill.\nQuick local entrypoint: plugin-eval start ~/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-work --request 'Evaluate this skill.' --format markdown\nPlugin Eval will run first: plugin-eval analyze ~/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-work --format markdown\n\nOther chat requests you can use:\n- Full Skill Analysis: say \"Give me a full analysis of this skill, including benchmark setup.\" -> plugin-eval analyze ~/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-work --format markdown\n- Evaluate Skill: say \"Evaluate this skill.\" -> plugin-eval analyze ~/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-work --format markdown\n- Explain Token Budget: say \"Explain the token budget for this skill.\" -> plugin-eval explain-budget ~/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-work --format markdown\n- Measure Real Token Usage: say \"Measure the real token usage of this skill.\" -> plugin-eval init-benchmark ~/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-work\n- Benchmark With Starter Scenarios: say \"Help me benchmark this skill.\" -> plugin-eval init-benchmark ~/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-work\n- Start Here: say \"What should I run next?\" -> plugin-eval analyze ~/dev/agent-skills/Plugins/harness-engineering/skills/he-phase-work --format markdown\n</details>\n<details>\n<summary>Checks</summary>\n\n- [WARN] deferred_cost_tokens-budget-high: deferred_cost_tokens is heavy relative to the current Codex baseline. Evidence: Value: 6205 tokens Baseline samples: skills=8, plugins=118 Remediation: Reduce repeated instruction text and move detail into deferred supporting files.\n- [INFO] coverage-artifacts-unavailable: No coverage artifacts were found for this target. Evidence: Plugins/harness-engineering/skills/he-phase-work Remediation: Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring.\n</details>\n<details>\n<summary>Metrics</summary>\n\n- skill_line_count: 98 lines (good)\n- description_length_chars: 304 chars (good)\n- relative_link_count: 0 links (good)\n- code_fence_count: 0 blocks (good)\n- support_file_count: 5 files (good)\n- trigger_cost_tokens: 80 tokens (moderate)\n- invoke_cost_tokens: 1227 tokens (good)\n- deferred_cost_tokens: 6205 tokens (heavy)\n- coverage_artifact_count: 0 files (info)\n</details>\n<details>\n<summary>Score details</summary>\n\n- Starting score: 100\n- Total deductions: -4.75\n- Final score: 95\n- Risk: Contains 1 warning signal that still need attention.\n\n- -4.5 points: deferred_cost_tokens-budget-high [warn/warning] deferred_cost_tokens is heavy relative to the current Codex baseline.\n- -0.25 points: coverage-artifacts-unavailable [info/info] No coverage artifacts were found for this target.\n\n- budget: -4.5 points across 1 check\n- coverage: -0.25 points across 1 check\n</details>\n"
+    },
+    "policy": {
+      "external_quality_judge": "tessl_review",
+      "mode": "local_internal_only",
+      "no_publish": true,
+      "no_registry_upload": true,
+      "plugin_eval_min_acceptable_grade": "B+",
+      "plugin_eval_role": "budget_and_ergonomics_guardrail",
+      "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
+      "primary_gate": "local_eval_ask_audit",
+      "snyk_default": "disabled_until_requested",
+      "snyk_privacy_basis": "Snyk CLI security analysis may contact Snyk services. It is never run by default in this local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted.",
+      "snyk_role": "optional_external_security_advisory",
+      "tessl_review_default": "enabled_local_cli",
+      "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+      "uses_npx": false
+    },
+    "snyk": {
+      "reason": "Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.",
+      "status": "skipped"
+    },
+    "target": "Plugins/harness-engineering/skills/he-phase-work",
+    "tessl_lint": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/tessl",
+        "skill",
+        "lint",
+        "/tmp/agent-skills-tessl-i9z6odyh/tile.json"
+      ],
+      "exit_code": 0,
+      "status": "success",
+      "stderr": "",
+      "stdout": "By using Tessl, you agree to our Terms: https://tessl.io/policies/terms\n\n\nContext Cost\n\nSkills\n  - he-phase-work: 80 front-loaded, 1.2k on-demand tokens\n\nTotal: 80 front-loaded, 1.2k on-demand tokens\n\n\u2714 Tile local/he-phase-work@0.0.0-local is valid\n"
+    },
+    "tessl_review": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/tessl",
+        "skill",
+        "review",
+        "/tmp/agent-skills-tessl-i9z6odyh/skills/he-phase-work"
+      ],
+      "exit_code": 0,
+      "status": "success",
+      "stderr": "- Reviewing skill...\n",
+      "stdout": "\nValidation Checks\n\n  \u2714 skill_md_line_count - SKILL.md line count is 98 (<= 500)\n  \u2714 frontmatter_valid - YAML frontmatter is valid\n  \u2714 name_field - 'name' field is valid: 'he-phase-work'\n  \u2714 description_field - 'description' field is valid (304 chars)\n  \u2714 compatibility_field - 'compatibility' field not present (optional)\n  \u2714 allowed_tools_field - 'allowed-tools' field not present (optional)\n  \u2714 metadata_version - 'metadata.version' is present: 1.0.0\n  \u2714 metadata_field - 'metadata' contains 3 entries\n  \u2714 license_field - 'license' field not present (optional)\n  \u2714 frontmatter_unknown_keys - No unknown frontmatter keys found\n  \u2714 body_present - SKILL.md body is present\n\nOverall: PASSED (0 errors, 0 warnings)\n\nJudge Evaluation\n\n  Description: 85%\n    specificity: 3/3 - Lists multiple specific concrete actions: check live state, wake with he-heartbeat, execute active he-work slice, verify gates, update Linear with approval, and stop before unsafe staging/closure. These are detailed, actionable steps.\n    trigger_term_quality: 2/3 - Includes some relevant terms like 'plan', 'issue', 'PR', 'phase-by-phase execution', 'Linear', and 'Harness Engineering', but uses domain-specific jargon ('he-heartbeat', 'he-work slice', 'gates') that users may not naturally say. Missing common variations of trigger terms.\n    completeness: 3/3 - Clearly answers both 'what' (runs approved Harness Engineering plans through recurring phases with specific steps) and 'when' ('Use when a plan, issue, or PR needs continued phase-by-phase execution') with an explicit trigger clause.\n    distinctiveness_conflict_risk: 3/3 - Highly distinctive with domain-specific terminology ('Harness Engineering plans', 'he-heartbeat', 'he-work slice', 'Linear') that creates a clear niche unlikely to conflict with other skills.\n\n    Assessment: The description is well-structured with a clear 'what' and 'when' clause, and lists specific concrete actions in a logical sequence. Its main weakness is the heavy use of internal/domain-specific jargon (he-heartbeat, he-work slice) which may not match natural user language, though this same jargon makes it highly distinctive. The trigger terms could benefit from more natural language variations that users might actually say.\n\n    Suggestions:\n      - Add more natural-language trigger terms users might say, such as 'continue working on', 'resume execution', 'next phase', or 'run the next step' alongside the domain-specific terms.\n      - Consider briefly clarifying what 'he-heartbeat' and 'he-work slice' refer to so the description is self-contained for skill selection purposes.\n\n  Content: 77%\n    conciseness: 2/3 - The skill is reasonably efficient but includes some sections that could be tightened\u2014e.g., the 'When Not to Use' and 'Inputs' sections are somewhat verbose lists that Claude could infer. The 'Gotchas' and 'Constraints' sections are lean and useful. Overall mostly efficient but not maximally tight.\n    actionability: 3/3 - The skill provides concrete executable commands (git status, rg, test -f, pytest), specific delegation message templates, a structured YAML output template, and clear examples with real file paths and issue IDs. The delegation examples are copy-paste ready and the validation block contains real commands.\n    workflow_clarity: 3/3 - The 7-step procedure is clearly sequenced with explicit validation checkpoints (step 5 runs validation after work, step 6 gates browser refresh on real validation). The 'Validation' section enforces fail-fast behavior, and the 'Failure Mode' section defines stop conditions. The feedback loop (fail \u2192 route to he-work or he-code-review with exact output) is explicit.\n    progressive_disclosure: 2/3 - The skill references external files (phase-gate-contract.md, contract.yaml, subagent-call-contract.md, deferred-context-index.md) and delegates to other skills (he-work, he-code-review), which is good structure. However, no bundle files are provided to verify these references exist, and the skill itself is somewhat long with inline content (delegation examples, output template) that could potentially be separated. The references section is present but minimal.\n\n    Assessment: This is a well-structured orchestration skill with strong workflow clarity and actionability\u2014concrete commands, delegation templates, and a YAML output schema make it highly executable. The main weaknesses are moderate verbosity in some sections (Inputs, When Not to Use) and the inability to verify referenced files since no bundle was provided. Overall it's a solid skill that clearly communicates a complex multi-phase workflow.\n\n    Suggestions:\n      - Tighten the 'Inputs' section into a compact list or table rather than a prose enumeration\u2014Claude can infer most input types from the procedure.\n      - Consider moving the delegation examples and output template into a referenced file to keep the main SKILL.md as a concise overview, improving progressive disclosure.\n\nReview Score: 85%\nOnly SKILL.md was reviewed. Log in with tessl login to include all supporting files in the review.\n\n\u2714 Skill evaluation completed successfully!\n"
+    },
+    "tessl_tile": {
+      "mode": "temporary_wrapper",
+      "reason": "Tessl validates tile.json packages; canonical repo skills remain SKILL.md-first.",
+      "review_path": "/tmp/agent-skills-tessl-i9z6odyh/skills/he-phase-work",
+      "skill_key": "he-phase-work",
+      "source_skill": "Plugins/harness-engineering/skills/he-phase-work",
+      "tessl_home": "/tmp/agent-skills-tessl-i9z6odyh/home",
+      "tile_path": "/tmp/agent-skills-tessl-i9z6odyh/tile.json"
+    }
+  },
+  "errors": [],
+  "status": "success"
+}

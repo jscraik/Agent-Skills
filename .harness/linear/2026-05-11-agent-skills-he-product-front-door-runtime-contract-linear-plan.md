@@ -58,7 +58,7 @@ No new Linear milestone. This is a small productization slice under the active
 ```yaml
 title: "Productize HE front door and runtime contract from compound-engineering lessons"
 team: "Jscraik"
-project: "agent-skills"
+project: "HE front door and runtime contract"
 state: "Todo"
 assignee: "me"
 priority: 2
@@ -78,7 +78,7 @@ Created as: `JSC-305`
 ```yaml
 title: "Add HE setup/status front door for readiness and projection drift"
 team: "Jscraik"
-project: "agent-skills"
+project: "HE front door and runtime contract"
 state: "Todo"
 assignee: "me"
 priority: 2
@@ -95,7 +95,7 @@ Created as: `JSC-306`
 ```yaml
 title: "Productize HE README and plugin default prompts around plain user intents"
 team: "Jscraik"
-project: "agent-skills"
+project: "HE front door and runtime contract"
 state: "Todo"
 assignee: "me"
 priority: 2
@@ -112,7 +112,7 @@ Created as: `JSC-307`
 ```yaml
 title: "Add HE runtime-authoring boundary and process-exhaust artifact policy"
 team: "Jscraik"
-project: "agent-skills"
+project: "HE front door and runtime contract"
 state: "Todo"
 assignee: "me"
 priority: 3
@@ -129,7 +129,7 @@ Created as: `JSC-308`
 ```yaml
 title: "Enforce HE route, naming, authority, and product-doc consistency"
 team: "Jscraik"
-project: "agent-skills"
+project: "HE front door and runtime contract"
 state: "Todo"
 assignee: "me"
 priority: 2
@@ -146,7 +146,7 @@ Created as: `JSC-309`
 ```yaml
 title: "Add HE observed usage pulse with truth-set-safe metric boundaries"
 team: "Jscraik"
-project: "agent-skills"
+project: "HE front door and runtime contract"
 state: "Todo"
 assignee: "me"
 priority: 3

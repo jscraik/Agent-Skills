@@ -1,0 +1,7 @@
+interface:
+  display_name: "Ubiquitous Language"
+  short_description: "$ubiquitous-language - Ubiquitous Language entrypoint"
+  default_prompt: "$ubiquitous-language "
+
+policy:
+  allow_implicit_invocation: false

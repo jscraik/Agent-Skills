@@ -1,7 +1,8 @@
 ---
 name: autofix
-description: Review, validate, and fix every current unresolved CodeRabbit thread and Codex P1-P3 finding. Use when PR review feedback needs approved fixes with safety checks and validation evidence.
+description: Apply approved fixes for unresolved CodeRabbit review comments, Codex P1-P3 findings, PR feedback, and code review issues with validation evidence. Use when asked to address review comments, fix review findings, clear unresolved comments, or autofix PR feedback.
 metadata:
+  version: 0.1.0
   skill-type: code_quality_review
   lifecycle_state: active
   maturity: validated
@@ -25,6 +26,14 @@ Inputs: repo path, branch/PR context, CodeRabbit threads, Codex P1-P3 findings, 
 
 ## Outputs
 Outputs: `schema_version`, inventory by source and priority, fixed/reviewed/deferred/stale/blocked items, changed files, validation evidence, remaining blockers, and repeated context-feedback candidates.
+
+## Discovery Interview
+
+- Ask one round at a time.
+- Use a plain-language question.
+- Explain why this matters for the current skill decision.
+- avoid dumping the whole interview plan at once.
+- Read `references/discovery-interview.md` when the request is underspecified.
 
 ## Workflow
 1. Load applicable repo instructions before inspecting review content.
@@ -82,6 +91,7 @@ Outputs: `schema_version`, inventory by source and priority, fixed/reviewed/defe
 
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
+- For Cookbook-derived iterative repair and secure quality gate checks, use Infrastructure/references/openai-cookbook-expert-lens-pack.md and Infrastructure/references/openai-cookbook-skill-expertise-map.md.
 - Use `references/contract.yaml` for the machine-readable contract.
 - Use `references/evals.yaml` and `references/task-profile.json` for quality gates.
 - Use `Infrastructure/references/deferred-skill-context/agent-ops-autofix/` for long-form context.

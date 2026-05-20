@@ -22,7 +22,7 @@ from selection_policy import (  # type: ignore  # noqa: E402
     SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
 )
-from command_surface import build_skill_handles, _with_folded_alias_handles  # type: ignore  # noqa: E402
+from command_surface import build_command_surface_handles  # type: ignore  # noqa: E402
 from skill_discovery import (  # type: ignore  # noqa: E402
     HIDDEN_FLAT_SKILL_NAMES as DISCOVERY_HIDDEN_FLAT_SKILL_NAMES,
     PLUGIN_HIDDEN_LANE_SKILL_NAMES as DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
@@ -255,7 +255,7 @@ def _iter_default_visibility_candidates() -> list[tuple[str, Path]]:
             continue
         if name in DISCOVERY_HIDDEN_FLAT_SKILL_NAMES:
             continue
-        if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES:
+        if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES and name not in BRIDGE_SKILLS:
             continue
         plugin_owned = is_plugin_owned_skill_dir(source_dir)
         if plugin_owned and name not in DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
@@ -287,7 +287,7 @@ def _generated_command_handle_names() -> set[str]:
     """Return command handles intentionally projected as first-level runtime entries."""
     return {
         handle.handle
-        for handle in _with_folded_alias_handles(build_skill_handles())
+        for handle in build_command_surface_handles()
         if handle.kind == "skill" and handle.command_handle_path and handle.handle not in ROOT_SKILL_SETS
     }
 
@@ -343,10 +343,14 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
     bridge_exposed = sorted((first_level & BRIDGE_SKILLS) - command_handle_names)
     policy_default = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
-    # Bridge skills are intentionally not expected in default first-level discovery.
-    # They can exist in policy metadata while remaining routed through the hidden
-    # `.system` lane and are validated separately via BRIDGE_SKILLS_EXPOSED_FIRST_LEVEL.
-    expected_default = (ROOT_SKILL_SETS if rooted_mode else policy_default) - BRIDGE_SKILLS
+    system_default = {
+        entry["name"]
+        for entry in hidden_system_entries
+        if entry["name"] in BRIDGE_SKILLS and not is_plugin_owned_skill_dir(REPO_ROOT / entry["path"])
+    }
+    # Real system bridge sources stay discoverable in default repo catalogs even
+    # though plugin-backed bridge aliases remain hidden behind plugin routing.
+    expected_default = (ROOT_SKILL_SETS if rooted_mode else policy_default) | system_default
     default_names = {entry.name for entry in default_entries}
     catalog_names = {entry.name for entry in catalog_entries}
     extra_default = sorted(default_names - expected_default)

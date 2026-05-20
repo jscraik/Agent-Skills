@@ -11,7 +11,7 @@ Keep HE routing compact without losing folded stage context. Folded names are co
 | `he-deepen-spec` | `he-spec` | deepen spec | `fixtures/preserved-context/skills/team_automation/he-deepen-spec/` |
 | `he-deepen-plan` | `he-plan` | deepen plan | `fixtures/preserved-context/skills/team_automation/he-deepen-plan/` |
 | `he-refine` | `he-improve` | refinement | `fixtures/preserved-context/skills/team_automation/he-refine/` |
-| `he-compound` | `he-reconcile` | reconcile lifecycle state | `fixtures/preserved-context/skills/team_automation/he-compound/` |
+| old `he-compound` learning | `he-reinforce` | solved-problem capture and Project Brain learning | `fixtures/preserved-context/skills/team_automation/he-compound/` |
 | `he-compound-refresh` | `he-reinforce` | refresh durable learning | `fixtures/preserved-context/skills/team_automation/he-compound-refresh/` |
 | `he-prune-branches` | `he-router` | `agent-ops` branch hygiene | `fixtures/preserved-context/skills/team_automation/he-prune-branches/` |
 | `he-tdd` | `he-work` | test-first | `fixtures/preserved-context/skills/team_automation/he-tdd/` |
@@ -38,8 +38,8 @@ Keep HE routing compact without losing folded stage context. Folded names are co
 - `he-work`: load `he-tdd` context when the user asks for RED/GREEN, failing-test-first, regression-first, or test-first execution.
 - `he-improve`: load `he-refine` context for browser-first or iterative artifact refinement.
 - `he-code-review`: load `he-technical-review` or `he-reliability-review` context for deeper-than-readiness review.
-- `he-reconcile`: load preserved `he-compound` context when resuming stale lifecycle state.
-- `he-reinforce`: load `he-compound-refresh` context when refreshing solution docs or Project Brain learning.
+- `he-reconcile`: own lifecycle-state recovery directly.
+- `he-reinforce`: load old `he-compound` and `he-compound-refresh` context when preserving solved-problem capture, solution docs, or Project Brain learning.
 
 ## Preserved Compact Entry Point Lines
 
@@ -138,7 +138,6 @@ Return schema_version when structured. schema_version: 1, changed files, validat
 Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 references and index it in `../../references/deferred-context-index.md`.
 Redact secrets; do not create cron workarounds for short thread follow-up. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text. Keep scope tight: start with 2-3 focused surfaces and expand only when the next heartbeat needs more context.
-references with a clear route.
 
 ## Preserved He-Code-Review Productization Context
 
@@ -193,3 +192,25 @@ Disposition:
   artifact contract routing.
 - intentionally-discarded: sentence fragments and partial indentation that no
   longer carry unique operational meaning.
+
+## Discarded He-Router Productization Prompt Rot
+
+The 2026-05-15 HE productization refinement pass removed duplicated tail text
+from Plugins/harness-engineering/skills/he-router/SKILL.md. The valid
+context-disposition rule already exists above and in the active router; the
+closure-vs-mutation concern now routes to closure-mutation-contract.md.
+
+Removed duplicate/dangling router text:
+
+- references with a clear route.
+- Apply the context-disposition policy by moving important still-valid context to
+  references and intentionally discarding stale, duplicated, unsafe, superseded,
+  or low-signal text.
+
+Disposition:
+- moved-to-reference: closure and mutation separation now lives in
+  closure-mutation-contract.md.
+- superseded: context-disposition wording already exists in the folded-context
+  policy above.
+- intentionally-discarded: dangling sentence fragments and duplicated prompt
+  maintenance prose that increased hot-path cost without adding behavior.

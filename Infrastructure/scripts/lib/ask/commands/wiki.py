@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import re
+import shlex
 import shutil
 import subprocess
 import os
@@ -35,9 +36,117 @@ def _slugify(value: str) -> str:
     return lowered or "note"
 
 
+def _wiki_readonly_validation_command(
+    action: str,
+    *args: str,
+    wiki_root: str | None = None,
+    max_age_days: int | None = None,
+    limit: int | None = None,
+) -> str:
+    parts = ["./bin/ask", "wiki", action, *args]
+    if wiki_root is not None:
+        parts.extend(["--wiki-root", wiki_root])
+    if max_age_days is not None:
+        parts.extend(["--max-age-days", str(max_age_days)])
+    if limit is not None:
+        parts.extend(["--limit", str(limit)])
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _wiki_ingest_validation_command(
+    *,
+    title: str,
+    sources: list[str],
+    summary: str,
+    tags: list[str],
+    dry_run: bool,
+) -> str:
+    parts = ["./bin/ask", "wiki", "ingest", title]
+    for source in sources:
+        parts.extend(["--source", source])
+    parts.extend(["--summary", summary])
+    for tag in tags:
+        parts.extend(["--tag", tag])
+    if dry_run:
+        parts.append("--dry-run")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _wiki_add_validation_command(
+    *,
+    title: str,
+    summary: str,
+    source: str,
+    intent: str,
+    status: str,
+    destination: str | None,
+    tags: list[str],
+    dry_run: bool,
+) -> str:
+    parts = [
+        "./bin/ask",
+        "wiki",
+        "add",
+        title,
+        "--summary",
+        summary,
+        "--source",
+        source,
+        "--intent",
+        intent,
+        "--status",
+        status,
+    ]
+    if destination:
+        parts.extend(["--destination", destination])
+    for tag in tags:
+        parts.extend(["--tag", tag])
+    if dry_run:
+        parts.append("--dry-run")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _wiki_add_asset_validation_command(
+    *,
+    asset_path: str,
+    title: str,
+    summary: str,
+    source: str,
+    status: str,
+    destination: str,
+    tags: list[str],
+    dry_run: bool,
+) -> str:
+    parts = [
+        "./bin/ask",
+        "wiki",
+        "add-asset",
+        asset_path,
+        "--title",
+        title,
+        "--summary",
+        summary,
+    ]
+    if source:
+        parts.extend(["--source", source])
+    parts.extend(["--status", status, "--destination", destination])
+    for tag in tags:
+        parts.extend(["--tag", tag])
+    if dry_run:
+        parts.append("--dry-run")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
 def wiki_lint(repo_root: Path, *, wiki_root: str, max_age_days: int) -> CallResult:
     """Run wiki lint checks and return structured output."""
     result = CallResult()
+    result.data["validation_commands"] = [
+        _wiki_readonly_validation_command("lint", wiki_root=wiki_root, max_age_days=max_age_days)
+    ]
 
     cmd = [
         "python3",
@@ -248,6 +357,19 @@ def wiki_add(
     cleaned_source = source.strip()
     cleaned_intent = intent.strip().lower()
     cleaned_status = status.strip().lower()
+    cleaned_tags = [t.strip() for t in (tags or []) if t and t.strip()]
+    result.data["validation_commands"] = [
+        _wiki_add_validation_command(
+            title=cleaned_title,
+            summary=cleaned_summary,
+            source=cleaned_source,
+            intent=cleaned_intent,
+            status=cleaned_status,
+            destination=destination,
+            tags=cleaned_tags,
+            dry_run=dry_run,
+        )
+    ]
 
     # Validate intent
     if destination is None and cleaned_intent not in INTENT_TO_DESTINATION:
@@ -275,8 +397,6 @@ def wiki_add(
         return result
 
     destination_rel = (destination or INTENT_TO_DESTINATION.get(cleaned_intent, "")).strip().strip("/")
-    cleaned_tags = [t.strip() for t in (tags or []) if t and t.strip()]
-
     if not wiki_root.exists():
         result.status = "error"
         result.errors.append(
@@ -508,6 +628,9 @@ def wiki_query(
 ) -> CallResult:
     """Search wiki pages by keyword relevance and return ranked results."""
     result = CallResult()
+    result.data["validation_commands"] = [
+        _wiki_readonly_validation_command("query", query, wiki_root=wiki_root, limit=limit)
+    ]
     cleaned_query = query.strip()
     if not cleaned_query:
         result.status = "error"
@@ -594,6 +717,18 @@ def wiki_add_asset(
     result = CallResult()
     wiki_root = repo_root / "Wiki"
     raw_assets_dir = wiki_root / "raw" / "assets"
+    cleaned_tags = [t.strip() for t in (tags or []) if t and t.strip()]
+    validation_command = _wiki_add_asset_validation_command(
+        asset_path=asset_path,
+        title=title,
+        summary=summary,
+        source=source.strip(),
+        status=status,
+        destination=destination,
+        tags=cleaned_tags,
+        dry_run=dry_run,
+    )
+    result.data["validation_commands"] = [validation_command]
 
     asset_input = Path(asset_path).expanduser()
     if not asset_input.is_absolute():
@@ -643,12 +778,13 @@ def wiki_add_asset(
         intent="design-asset",
         status=status,
         destination=destination,
-        tags=tags or [],
+        tags=cleaned_tags,
         asset_link=markdown_asset_link,
         dry_run=True,
     )
 
     if preflight_result.status == "error":
+        preflight_result.data["validation_commands"] = [validation_command]
         return preflight_result
 
     if not dry_run:
@@ -663,10 +799,11 @@ def wiki_add_asset(
         intent="design-asset",
         status=status,
         destination=destination,
-        tags=tags or [],
+        tags=cleaned_tags,
         asset_link=markdown_asset_link,
         dry_run=dry_run,
     )
+    note_result.data["validation_commands"] = [validation_command]
     note_result.data["asset_source"] = str(asset_input)
     note_result.data["asset_stored_path"] = stored_repo_rel
     note_result.data["asset_link"] = markdown_asset_link
@@ -689,6 +826,17 @@ def wiki_ingest(
 ) -> CallResult:
     """Capture a raw source ingest note and append a wiki log entry."""
     result = CallResult()
+    cleaned_sources = [s.strip() for s in sources if s and s.strip()]
+    cleaned_tags = [t.strip() for t in tags if t and t.strip()]
+    result.data["validation_commands"] = [
+        _wiki_ingest_validation_command(
+            title=title.strip(),
+            sources=cleaned_sources,
+            summary=summary.strip(),
+            tags=cleaned_tags,
+            dry_run=dry_run,
+        )
+    ]
 
     wiki_root = repo_root / "Wiki"
     raw_dir = wiki_root / "raw"
@@ -719,9 +867,6 @@ def wiki_ingest(
     raw_filename = f"{timestamp_compact}-{slug}.md"
     raw_filename = _with_collision_suffix(raw_dir, raw_filename, timestamp_compact)
     raw_path = raw_dir / raw_filename
-
-    cleaned_sources = [s.strip() for s in sources if s and s.strip()]
-    cleaned_tags = [t.strip() for t in tags if t and t.strip()]
 
     sources_block = "\n".join(f"- {src}" for src in cleaned_sources) if cleaned_sources else "- (none provided)"
     tags_line = ", ".join(cleaned_tags) if cleaned_tags else "none"

@@ -4,7 +4,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 Entries are grouped by declared semantic type; each path names the owning skill package root, including plugin-owned surfaces.
 
 ## Table of Contents
-
 - [Summary](#summary)
 - [Semantic Types](#semantic-types)
 - [Validation Notes](#validation-notes)
@@ -14,14 +13,14 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `library_api_reference`: 2
 - `product_verification`: 4
 - `data_fetch_analysis`: 3
-- `team_automation`: 36
-- `scaffolding_templates`: 17
-- `code_quality_review`: 22
+- `team_automation`: 35
+- `scaffolding_templates`: 16
+- `code_quality_review`: 24
 - `ci_cd_deployment`: 0
 - `runbook`: 13
-- `infrastructure_ops`: 4
+- `infrastructure_ops`: 3
 - `invalid`: 0
-- `total_tagged`: 101
+- `total_tagged`: 100
 
 ## Semantic Types
 
@@ -55,7 +54,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `deep-interview` — `Skills/product-strategy`
 - `goal-governor` — `Skills/agent-ops`
 - `he-brainstorm` — `Plugins/harness-engineering/skills`
-- `he-compound` — `Plugins/harness-engineering/skills`
 - `he-fix-bugs` — `Plugins/harness-engineering/skills`
 - `he-heartbeat` — `Plugins/harness-engineering/skills`
 - `he-improve` — `Plugins/harness-engineering/skills`
@@ -98,7 +96,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `mcp-builder` — `Skills/backend-platform`
 - `og-image-creator` — `Skills/frontend-ui`
 - `plugin-creator` — `Plugins/plugin-factory/skills/scaffolding_templates`
-- `skill-creator` — `Plugins/skill-factory/skills/scaffolding_templates`
 - `skillify` — `Plugins/skill-factory/skills/scaffolding_templates`
 - `ui-ux-creative-coding` — `Skills/frontend-ui`
 
@@ -108,6 +105,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `autofix` — `Skills/agent-ops`
 - `baseline-ui` — `Skills/frontend-ui`
 - `best-practices` — `Skills/security-ops`
+- `codex-review` — `Skills/agent-ops`
 - `docs-expert` — `Skills/agent-ops`
 - `elixir-pro` — `Skills/agent-ops`
 - `evals-router` — `Skills/agent-ops`
@@ -122,6 +120,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `rust-pro` — `Skills/agent-ops`
 - `simplify` — `Skills/agent-ops`
 - `skill-builder` — `Plugins/skill-factory/skills/code_quality_review`
+- `testing` — `Skills/agent-ops`
 - `toml` — `Skills/agent-ops`
 - `typescript` — `Skills/agent-ops`
 - `verification-before-completion` — `Skills/agent-ops`
@@ -152,8 +151,8 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `1password` — `Skills/security-ops`
 - `fix-mise` — `Skills/agent-ops`
 - `plugin-installer` — `Plugins/plugin-factory/skills/infrastructure_ops`
-- `skill-installer` — `Plugins/skill-factory/skills/infrastructure_ops`
 
 ## Validation Notes
 
 - No invalid semantic type tags detected.
+

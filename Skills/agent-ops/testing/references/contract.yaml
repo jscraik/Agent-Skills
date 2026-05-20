@@ -1,0 +1,36 @@
+schema_version: 1
+skill: testing
+purpose: "Select, run, repair, and report repo-native test and validation evidence without replacing exact behavior proof with broad or guessed checks."
+triggers:
+  - "Select, run, and report repo-native test and validation evidence."
+  - "Use when users ask what tests to run, ask to validate a change, fix failing tests, design test coverage, build eval proof, classify validation failures, or prove behavior before closeout."
+non_goals:
+  - "Do not own unrelated implementation domains after the correct test route is selected."
+  - "Do not mutate external trackers, publish artifacts, or mark lifecycle work complete without an explicit owner skill or user instruction."
+inputs:
+  - target repo and changed files
+  - behavior or artifact claim being tested
+  - repo instructions and command contracts
+  - existing test output or failure text
+  - credential, sandbox, network, or dirty-worktree constraints
+outputs:
+  - selected validation route
+  - active persona lens names when used for review-style test strategy
+  - exact pass/fail/blocked command evidence
+  - failure ownership classification
+  - coverage gaps and next minimal diagnostic
+risks:
+  - over_triggering
+  - validation_drift
+  - stale_artifact_confidence
+  - uncalibrated_judge_authority
+  - untrusted_input
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+validation:
+  - strict_skill_audit
+  - smoke_eval
+observability: "Report exact command outcomes as pass, fail, or blocked with blocker reasons."
+rollback_procedure: "Remove the testing skill package or restore its previous canonical source, then rerun strict audit for affected skills."

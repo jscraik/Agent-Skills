@@ -45,18 +45,6 @@ class MirrorProjection:
 
 SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
     SymlinkProjection(
-        name="skill-factory-skill-creator-alias",
-        alias_path="skills-system/skill-creator",
-        canonical_path="Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
-        tags=("skill-factory",),
-    ),
-    SymlinkProjection(
-        name="skill-factory-skill-installer-alias",
-        alias_path="skills-system/skill-installer",
-        canonical_path="Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
-        tags=("skill-factory",),
-    ),
-    SymlinkProjection(
         name="plugin-factory-plugin-creator-alias",
         alias_path="skills-system/plugin-creator",
         canonical_path="Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
@@ -790,16 +778,16 @@ def normalize_stamped_content(content: bytes, path: Path) -> bytes:
     """
     Normalise content of stampable files by removing a generated projection header.
 
-    If the file's suffix is listed in STAMPABLE_SUFFIXES and the bytes decode as UTF‑8,
-    the returned bytes are the UTF‑8 encoding of the text with any projection header removed.
-    If the suffix is not stampable or UTF‑8 decoding fails, the original bytes are returned.
+    If the file's suffix is listed in STAMPABLE_SUFFIXES and the bytes decode as UTF-8,
+    the returned bytes are the UTF-8 encoding of the text with any projection header removed.
+    If the suffix is not stampable or UTF-8 decoding fails, the original bytes are returned.
 
     Parameters:
         content (bytes): File content to normalise.
         path (Path): File path used to determine the file suffix for stampable detection.
 
     Returns:
-        bytes: Normalised bytes with the projection header removed for stampable UTF‑8 text files,
+        bytes: Normalised bytes with the projection header removed for stampable UTF-8 text files,
                or the original bytes otherwise.
     """
     if path.suffix not in STAMPABLE_SUFFIXES:

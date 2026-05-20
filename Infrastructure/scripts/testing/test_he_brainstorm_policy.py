@@ -60,19 +60,22 @@ def test_he_brainstorm_evals_cover_hardening_scenarios() -> None:
     evals = _read(REFERENCES / "evals.yaml")
 
     for case_id in [
-        "missing-subject-gate",
-        "synthesis-before-artifact",
-        "warranted-ideation",
-        "visual-communication-needed",
-        "deep-product-scope",
-        "direct-spec-request",
-        "direct-plan-request",
-        "direct-work-request",
-        "clear-qa-defect-request",
+        "domain-survivor-selection",
+        "direction-options-needed",
+        "survivor-selection-ambiguous",
+        "session-evidence-input",
+        "false-sophistication-filter",
+        "headless-assumption-recording",
+        "first-principles-brainstorm-survivor-selection",
+        "edge-missing-inputs-proceed",
+        "pressure-no-governance-bloat",
+        "pressure-live-not-archive",
     ]:
         assert case_id in evals
 
-    assert evals.count("should_trigger: false") >= 4
+    assert evals.count("should_trigger: false") >= 2
+    assert "realistic: true" in evals
+    assert "operator-shape.md" in evals
 
 
 def test_he_brainstorm_metadata_has_complete_routing_description() -> None:

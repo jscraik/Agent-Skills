@@ -10,8 +10,12 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
-from ask.commands.repo import _ask_bootstrap_signal, repo_closeout, repo_doctor  # noqa: E402
+from ask.commands import repo_impl as repo_module  # noqa: E402
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
+
+_ask_bootstrap_signal = repo_module._ask_bootstrap_signal
+repo_closeout = repo_module.repo_closeout
+repo_doctor = repo_module.repo_doctor
 
 
 def _result(status: str = "success", data: dict | None = None) -> CallResult:
@@ -84,6 +88,7 @@ def _handles_result(violations: int = 0) -> CallResult:
 
 
 def _surface_result(warning_count: int = 0) -> CallResult:
+    blocking_counts = {"tracked_historical_artifact": warning_count} if warning_count else {}
     return _result(
         data={
             "repo_surface": {
@@ -92,6 +97,10 @@ def _surface_result(warning_count: int = 0) -> CallResult:
                     "total_paths": 20,
                     "blocking_findings": warning_count,
                     "counts_by_code": {"tracked_historical_artifact": warning_count},
+                    "blocking_counts_by_code": blocking_counts,
+                    "blocking_counts_by_classification": (
+                        {"historical_artifact": warning_count} if warning_count else {}
+                    ),
                 },
             }
         },
@@ -103,6 +112,7 @@ def _bootstrap_proof(
     status: str = "success",
     path_status: str = "pass",
     shim_status: str = "pass",
+    manual_remediation: list[str] | None = None,
 ) -> dict:
     return {
         "status": status,
@@ -125,10 +135,15 @@ def _bootstrap_proof(
                 "repo_identity_status": "pass" if shim_status == "pass" else "skipped",
             },
         },
+        "remediation": {
+            "applied": [],
+            "manual": manual_remediation or [],
+        },
     }
 
 
 def _closeout_doctor_payload(warning_count: int = 0, diagnostic_debt: list[dict] | None = None) -> dict:
+    blocking_counts = {"tracked_historical_artifact": warning_count} if warning_count else {}
     return {
         "blocking": False,
         "diagnostic_debt": diagnostic_debt or [],
@@ -147,6 +162,18 @@ def _closeout_doctor_payload(warning_count: int = 0, diagnostic_debt: list[dict]
                     "blocking_findings": warning_count,
                     "total_paths": 20,
                     "counts_by_code": {"tracked_historical_artifact": warning_count},
+                    "blocking_counts_by_code": blocking_counts,
+                    "blocking_counts_by_classification": (
+                        {"historical_artifact": warning_count} if warning_count else {}
+                    ),
+                    "diagnostic_summary": {
+                        "diagnostic_class": "repo_surface_ownership_debt",
+                        "top_blocking_codes": [
+                            {"code": "tracked_historical_artifact", "count": warning_count}
+                        ] if warning_count else [],
+                        "next_action": "classify_allowlist_or_cleanup_tracked_surface",
+                        "operator_rule": "Do not flatten diagnostics.",
+                    },
                 }
             },
         },
@@ -155,18 +182,18 @@ def _closeout_doctor_payload(warning_count: int = 0, diagnostic_debt: list[dict]
 
 class TestAskRepoDoctor(unittest.TestCase):
     def setUp(self) -> None:
-        self.bootstrap_patch = patch("ask.commands.repo.run_bootstrap_checks", return_value=_bootstrap_proof())
+        self.bootstrap_patch = patch("ask.commands.repo_impl.run_bootstrap_checks", return_value=_bootstrap_proof())
         self.bootstrap_patch.start()
         self.addCleanup(self.bootstrap_patch.stop)
 
     def test_all_pass_returns_existing_inspection_next_command(self) -> None:
-        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
-        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
-            "ask.commands.repo.skills_handles",
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(),
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
@@ -181,7 +208,7 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_missing_path_shim_is_warning_not_false_pass(self) -> None:
         with patch(
-            "ask.commands.repo.run_bootstrap_checks",
+            "ask.commands.repo_impl.run_bootstrap_checks",
             return_value=_bootstrap_proof(status="warning", path_status="warn", shim_status="skipped"),
         ):
             signal = _ask_bootstrap_signal(REPO_ROOT)
@@ -189,15 +216,46 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(signal["state"], "warn")
         self.assertEqual(signal["severity"], "warning")
         self.assertEqual(signal["next_command"], "bash scripts/bootstrap-ask.sh --json")
+        self.assertEqual(signal["details"]["manual_remediation"], [])
+
+    def test_missing_path_shim_reports_manual_remediation(self) -> None:
+        with patch(
+            "ask.commands.repo_impl.run_bootstrap_checks",
+            return_value=_bootstrap_proof(
+                status="warning",
+                path_status="warn",
+                shim_status="skipped",
+                manual_remediation=["add_repo_bin_to_path"],
+            ),
+        ):
+            signal = _ask_bootstrap_signal(REPO_ROOT)
+
+        self.assertEqual(signal["state"], "warn")
+        self.assertEqual(signal["details"]["manual_remediation"], ["add_repo_bin_to_path"])
+
+    def test_wrong_path_shim_reports_identity_remediation(self) -> None:
+        with patch(
+            "ask.commands.repo_impl.run_bootstrap_checks",
+            return_value=_bootstrap_proof(
+                status="warning",
+                path_status="pass",
+                shim_status="fail",
+                manual_remediation=["fix_ask_path_shim_identity"],
+            ),
+        ):
+            signal = _ask_bootstrap_signal(REPO_ROOT)
+
+        self.assertEqual(signal["state"], "warn")
+        self.assertEqual(signal["details"]["manual_remediation"], ["fix_ask_path_shim_identity"])
 
     def test_repo_surface_warning_is_diagnostic_advisory_not_blocker(self) -> None:
-        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
-        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
-            "ask.commands.repo.skills_handles",
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(),
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result(7)):
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result(7)):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
@@ -205,6 +263,15 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertFalse(doctor["blocking"])
         self.assertEqual(doctor["blockers"], [])
         self.assertEqual(doctor["diagnostic_debt"][0]["id"], "repo_surface")
+        self.assertIn("tracked_historical_artifact=7", doctor["diagnostic_debt"][0]["summary"])
+        self.assertEqual(
+            doctor["signals"]["repo_surface"]["details"]["diagnostic_summary"]["diagnostic_class"],
+            "repo_surface_ownership_debt",
+        )
+        self.assertEqual(
+            doctor["signals"]["repo_surface"]["details"]["diagnostic_summary"]["top_blocking_codes"],
+            [{"code": "tracked_historical_artifact", "count": 7}],
+        )
         self.assertEqual(doctor["next_command"], "./bin/ask repo surface --json --robot")
         self.assertEqual(doctor["next_command_kind"], "diagnostic_advisory")
         self.assertFalse(doctor["next_command_blocks_task"])
@@ -213,13 +280,13 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(result.metadata["next_steps"], [])
 
     def test_repo_doctor_leaves_metadata_next_steps_empty_to_avoid_conflicts(self) -> None:
-        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(drift=True),
-        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
-            "ask.commands.repo.skills_handles",
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(),
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         self.assertEqual(
@@ -229,8 +296,8 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(result.metadata["next_steps"], [])
 
     def test_closeout_without_changes_reports_ready_existing_next_command(self) -> None:
-        with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=[]), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -243,8 +310,8 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_closeout_changed_skill_source_requires_sync_before_validation(self) -> None:
         changed_files = ["Skills/product-strategy/example/SKILL.md"]
-        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -261,8 +328,8 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_closeout_changed_plugin_reference_does_not_require_sync(self) -> None:
         changed_files = ["Plugins/harness-engineering/references/xp-operating-contract.md"]
-        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -278,8 +345,8 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_closeout_changed_plugin_skill_requires_sync(self) -> None:
         changed_files = ["Plugins/harness-engineering/skills/goal-governor/SKILL.md"]
-        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -297,8 +364,8 @@ class TestAskRepoDoctor(unittest.TestCase):
             ".skillsets/harness-engineering/manifest.jsonl",
             "Plugins/harness-engineering/skills/he-router/SKILL.md",
         ]
-        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -320,8 +387,8 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_closeout_generated_projection_only_requires_handle_validation(self) -> None:
         changed_files = [".skillsets/command-surface.json"]
-        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -349,8 +416,8 @@ class TestAskRepoDoctor(unittest.TestCase):
             ".skillsets/command-surface.json",
             "Docs/agents/04-validation.md",
         ]
-        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -364,13 +431,21 @@ class TestAskRepoDoctor(unittest.TestCase):
         )
         self.assertEqual(
             [command["id"] for command in closeout["focused_validation"]],
-            ["repo_doctor", "skill_handles", "changed_validation"],
+            [
+                "repo_doctor",
+                "skill_profiles_readiness",
+                "skill_events_readiness",
+                "skill_memory_readiness",
+                "skill_package_readiness",
+                "skill_handles",
+                "changed_validation",
+            ],
         )
 
     def test_closeout_skips_changed_file_detection_without_changed_flag(self) -> None:
         changed_files = ["Skills/product-strategy/example/SKILL.md"]
-        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files) as collect_mock, patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files) as collect_mock, patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=False)
@@ -383,8 +458,8 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(closeout["commit_readiness"]["ready"])
 
     def test_closeout_strict_diagnostic_debt_uses_doctor_next_command(self) -> None:
-        with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=[]), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(
                 data={
                     "doctor": {
@@ -405,10 +480,10 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_closeout_blocks_when_changed_file_detection_fails(self) -> None:
         with patch(
-            "ask.commands.repo.collect_changed_files",
+            "ask.commands.repo_impl.collect_changed_files",
             side_effect=RuntimeError("git command failed"),
         ), patch(
-            "ask.commands.repo.repo_doctor",
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -420,8 +495,8 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(closeout["next_command"], "./bin/ask repo status --json --robot")
 
     def test_closeout_normalizes_git_startup_failure(self) -> None:
-        with patch("ask.commands.repo.subprocess.run", side_effect=OSError("git missing")), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.subprocess.run", side_effect=OSError("git missing")), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -434,8 +509,8 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_closeout_changed_non_skill_file_recommends_scoped_validation(self) -> None:
         changed_files = ["Infrastructure/scripts/lib/ask/commands/repo.py"]
-        with patch("ask.commands.repo.collect_changed_files", return_value=changed_files), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": _closeout_doctor_payload(warning_count=7)}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -449,10 +524,21 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(closeout["sync"]["validation_commands"], [])
         self.assertEqual(
             [command["id"] for command in closeout["focused_validation"]],
-            ["repo_doctor", "changed_validation"],
+            [
+                "repo_doctor",
+                "skill_profiles_readiness",
+                "skill_events_readiness",
+                "skill_memory_readiness",
+                "skill_package_readiness",
+                "changed_validation",
+            ],
         )
         self.assertEqual(closeout["surface_policy"]["status"], "warning")
         self.assertEqual(closeout["surface_policy"]["blocking_findings"], 7)
+        self.assertEqual(
+            closeout["surface_policy"]["diagnostic_summary"]["top_blocking_codes"],
+            [{"code": "tracked_historical_artifact", "count": 7}],
+        )
         self.assertEqual(closeout["runtime_budget"]["status"], "pass")
         self.assertTrue(closeout["commit_readiness"]["ready"])
         self.assertEqual(closeout["commit_readiness"]["blockers"], [])
@@ -469,8 +555,8 @@ class TestAskRepoDoctor(unittest.TestCase):
             "diagnostic_debt": [],
             "signals": {},
         }
-        with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=[]), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(status="error", data={"doctor": doctor}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True)
@@ -492,8 +578,8 @@ class TestAskRepoDoctor(unittest.TestCase):
             ],
             "signals": {},
         }
-        with patch("ask.commands.repo.collect_changed_files", return_value=[]), patch(
-            "ask.commands.repo.repo_doctor",
+        with patch("ask.commands.repo_impl.collect_changed_files", return_value=[]), patch(
+            "ask.commands.repo_impl.repo_doctor",
             return_value=_result(data={"doctor": doctor}),
         ):
             result = repo_closeout(REPO_ROOT, changed=True, strict=True)
@@ -504,13 +590,13 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(closeout["next_command"], "./bin/ask repo surface --json --robot")
 
     def test_catalog_parity_drift_blocks_and_selects_catalog_doctor(self) -> None:
-        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(drift=True),
-        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
-            "ask.commands.repo.skills_handles",
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(),
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result(4515)):
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result(4515)):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
@@ -526,13 +612,13 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["diagnostic_debt"][0]["id"], "repo_surface")
 
     def test_runtime_budget_priority_beats_command_handle_blocker(self) -> None:
-        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
-        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result(violations=2)), patch(
-            "ask.commands.repo.skills_handles",
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result(violations=2)), patch(
+            "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(violations=3),
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
@@ -547,19 +633,19 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_non_git_root_prioritizes_repo_status_before_projection_sync(self) -> None:
         with patch(
-            "ask.commands.repo.repo_status",
+            "ask.commands.repo_impl.repo_status",
             return_value=_status_result(skills_synced=False, is_git=False),
         ), patch(
-            "ask.commands.repo.doctor_catalog",
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
         ) as catalog_mock, patch(
-            "ask.commands.repo.skills_budget",
+            "ask.commands.repo_impl.skills_budget",
             return_value=_budget_result(),
         ) as budget_mock, patch(
-            "ask.commands.repo.skills_handles",
+            "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(),
         ) as handles_mock, patch(
-            "ask.commands.repo.repo_surface",
+            "ask.commands.repo_impl.repo_surface",
             return_value=_surface_result(),
         ) as surface_mock:
             result = repo_doctor(REPO_ROOT)
@@ -581,19 +667,19 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_unsynced_projection_prioritizes_sync_before_downstream_checks(self) -> None:
         with patch(
-            "ask.commands.repo.repo_status",
+            "ask.commands.repo_impl.repo_status",
             return_value=_status_result(skills_synced=False, is_git=True),
         ), patch(
-            "ask.commands.repo.doctor_catalog",
+            "ask.commands.repo_impl.doctor_catalog",
             side_effect=AssertionError("doctor_catalog should be gated"),
         ) as catalog_mock, patch(
-            "ask.commands.repo.skills_budget",
+            "ask.commands.repo_impl.skills_budget",
             side_effect=AssertionError("skills_budget should be gated"),
         ) as budget_mock, patch(
-            "ask.commands.repo.skills_handles",
+            "ask.commands.repo_impl.skills_handles",
             side_effect=AssertionError("skills_handles should be gated"),
         ) as handles_mock, patch(
-            "ask.commands.repo.repo_surface",
+            "ask.commands.repo_impl.repo_surface",
             side_effect=AssertionError("repo_surface should be gated"),
         ) as surface_mock:
             result = repo_doctor(REPO_ROOT)
@@ -617,13 +703,13 @@ class TestAskRepoDoctor(unittest.TestCase):
 
     def test_runtime_budget_command_failure_blocks(self) -> None:
         failed_budget = _result(status="error", data={"runtime_budget": {"status": "fail"}})
-        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
-        ), patch("ask.commands.repo.skills_budget", return_value=failed_budget), patch(
-            "ask.commands.repo.skills_handles",
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=failed_budget), patch(
+            "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(),
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
@@ -632,13 +718,13 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["next_command"], "./bin/ask runtime budget --json --robot")
 
     def test_runtime_budget_policy_violations_keep_violation_summary(self) -> None:
-        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
-        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result(violations=2)), patch(
-            "ask.commands.repo.skills_handles",
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result(violations=2)), patch(
+            "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(),
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
@@ -654,13 +740,13 @@ class TestAskRepoDoctor(unittest.TestCase):
             status="error",
             data={"command_surface": {"status": "fail", "handle_count": 93, "violations": []}},
         )
-        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
-        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
-            "ask.commands.repo.skills_handles",
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
             return_value=failed_handles,
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
@@ -669,13 +755,13 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["next_command"], "./bin/ask skills handles --check --json --robot")
 
     def test_command_handle_violations_keep_violation_summary(self) -> None:
-        with patch("ask.commands.repo.repo_status", return_value=_status_result()), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
-        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
-            "ask.commands.repo.skills_handles",
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(violations=3),
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
@@ -686,17 +772,17 @@ class TestAskRepoDoctor(unittest.TestCase):
         )
 
     def test_non_git_repo_status_gates_downstream_checks(self) -> None:
-        with patch("ask.commands.repo.repo_status", return_value=_status_result(is_git=False)), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result(is_git=False)), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             side_effect=AssertionError("doctor_catalog should be gated"),
         ), patch(
-            "ask.commands.repo.skills_budget",
+            "ask.commands.repo_impl.skills_budget",
             side_effect=AssertionError("skills_budget should be gated"),
         ), patch(
-            "ask.commands.repo.skills_handles",
+            "ask.commands.repo_impl.skills_handles",
             side_effect=AssertionError("skills_handles should be gated"),
         ), patch(
-            "ask.commands.repo.repo_surface",
+            "ask.commands.repo_impl.repo_surface",
             side_effect=AssertionError("repo_surface should be gated"),
         ):
             result = repo_doctor(REPO_ROOT)
@@ -720,17 +806,17 @@ class TestAskRepoDoctor(unittest.TestCase):
                 fix_suggestion="Rerun repo status.",
             )
         )
-        with patch("ask.commands.repo.repo_status", return_value=failed_status), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", return_value=failed_status), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             side_effect=AssertionError("doctor_catalog should be gated"),
         ), patch(
-            "ask.commands.repo.skills_budget",
+            "ask.commands.repo_impl.skills_budget",
             side_effect=AssertionError("skills_budget should be gated"),
         ), patch(
-            "ask.commands.repo.skills_handles",
+            "ask.commands.repo_impl.skills_handles",
             side_effect=AssertionError("skills_handles should be gated"),
         ), patch(
-            "ask.commands.repo.repo_surface",
+            "ask.commands.repo_impl.repo_surface",
             side_effect=AssertionError("repo_surface should be gated"),
         ):
             result = repo_doctor(REPO_ROOT)
@@ -749,13 +835,13 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["signals"]["repo_surface"]["state"], "skipped")
 
     def test_unexpected_signal_exception_returns_doctor_blocker(self) -> None:
-        with patch("ask.commands.repo.repo_status", side_effect=RuntimeError("boom")), patch(
-            "ask.commands.repo.doctor_catalog",
+        with patch("ask.commands.repo_impl.repo_status", side_effect=RuntimeError("boom")), patch(
+            "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
-        ), patch("ask.commands.repo.skills_budget", return_value=_budget_result()), patch(
-            "ask.commands.repo.skills_handles",
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(),
-        ), patch("ask.commands.repo.repo_surface", return_value=_surface_result()):
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]

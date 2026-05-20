@@ -88,18 +88,18 @@ use_pyyaml_venv_python() {
 
 use_uv_python_launcher() {
   command -v uv >/dev/null 2>&1 || return 1
-  uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1 || return 1
-  python_cmd=(uv run --python 3.12 --with pyyaml --with jsonschema python)
-  python_cmd_display="uv run --python 3.12 --with pyyaml --with jsonschema python"
+  uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=(uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python)
+  python_cmd_display="uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python"
   return 0
 }
 
 use_mise_python_launcher() {
   command -v mise >/dev/null 2>&1 || return 1
   command -v uv >/dev/null 2>&1 || return 1
-  mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python -c "import yaml, jsonschema" >/dev/null 2>&1 || return 1
-  python_cmd=(mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python)
-  python_cmd_display="mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python"
+  mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=(mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python)
+  python_cmd_display="mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python"
   return 0
 }
 
@@ -156,10 +156,17 @@ echo "[family-gate] Harness Engineering subagent routing passed"
 
 skill_dirs=(
   "Plugins/skill-factory/skills/code_quality_review/skill-builder"
-  "Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
-  "Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
+  "skills-system/skill-creator"
+  "skills-system/skill-installer"
   "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
 )
+
+is_system_overlay_skill() {
+  case "$1" in
+    skills-system/skill-creator|skills-system/skill-installer) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 skill_builder_dir_candidates=(
   "Plugins/skill-factory/skills/code_quality_review/skill-builder"
   "Plugins/skill-factory/skills/skill-builder"
@@ -344,9 +351,33 @@ fi
 bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh "${he_progressive_args[@]}"
 echo "[family-gate] harness-engineering progressive-disclosure contract passed"
 
+echo "[family-gate] validating harness-engineering operator shape"
+"${python_cmd[@]}" Plugins/harness-engineering/scripts/check_operator_shape.py Plugins/harness-engineering
+echo "[family-gate] harness-engineering operator shape passed"
+
+echo "[family-gate] validating harness-engineering hot-path budget"
+"${python_cmd[@]}" Plugins/harness-engineering/scripts/check_hot_path_budget.py Plugins/harness-engineering
+echo "[family-gate] harness-engineering hot-path budget passed"
+
+echo "[family-gate] validating harness-engineering reference integrity"
+"${python_cmd[@]}" Plugins/harness-engineering/scripts/check_reference_integrity.py Plugins/harness-engineering
+echo "[family-gate] harness-engineering reference integrity passed"
+
+echo "[family-gate] validating harness-engineering closure/mutation contract"
+"${python_cmd[@]}" Plugins/harness-engineering/scripts/check_lifecycle_mutation_contract.py Plugins/harness-engineering
+echo "[family-gate] harness-engineering closure/mutation contract passed"
+
 echo "[family-gate] validating authoring context-preservation contract"
 bash Infrastructure/scripts/validation-and-linting/validate_authoring_context_preservation.sh
 echo "[family-gate] authoring context-preservation contract passed"
+
+echo "[family-gate] validating active plugin archive links"
+python3 Infrastructure/scripts/validation-and-linting/check_plugin_active_archive_links.py --plugin skill-factory
+echo "[family-gate] active plugin archive links passed"
+
+echo "[family-gate] validating skill-factory system overlays"
+python3 Infrastructure/scripts/validation-and-linting/check_skill_factory_system_overlays.py
+echo "[family-gate] skill-factory system overlays passed"
 
 echo "[family-gate] validating he-improve example spec yaml fixtures"
 "${python_cmd[@]}" - <<'PY'
@@ -465,8 +496,8 @@ fi
 
 if "${python_cmd[@]}" -m pytest --version >/dev/null 2>&1; then
   pytest_cmd=("${python_cmd[@]}" -m pytest)
-elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest --version >/dev/null 2>&1; then
-  pytest_cmd=("${uv_pytest_env[@]}" uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -m pytest)
+elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema pytest --version >/dev/null 2>&1; then
+  pytest_cmd=("${uv_pytest_env[@]}" uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema pytest)
   echo "[family-gate] using uv ephemeral pytest runner (UV_CACHE_DIR=$uv_pytest_cache_dir)"
 elif [[ ${#uv_pytest_env[@]} -gt 0 ]] && "${uv_pytest_env[@]}" uv run --python 3.12 pytest --version >/dev/null 2>&1; then
   pytest_cmd=("${uv_pytest_env[@]}" uv run --python 3.12 pytest)
@@ -489,12 +520,22 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   run_first_principles_gate_pytest=0
 
   if changed_files_match "Plugins/skill-factory/skills/code_quality_review/skill-builder/*" || \
-     changed_files_match "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/*" || \
-     changed_files_match "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/*" || \
+     changed_files_match "skills-system/skill-creator/*" || \
+     changed_files_match "skills-system/skill-installer/*" || \
+     changed_files_match "Plugins/harness-engineering/skills/*" || \
+     changed_files_match "Plugins/harness-engineering/references/operator-shape.md" || \
+     changed_files_match "Plugins/harness-engineering/references/closure-mutation-contract.md" || \
+     changed_files_match "Plugins/harness-engineering/scripts/check_operator_shape.py" || \
+     changed_files_match "Plugins/harness-engineering/scripts/check_hot_path_budget.py" || \
+     changed_files_match "Plugins/harness-engineering/scripts/check_reference_integrity.py" || \
+     changed_files_match "Plugins/harness-engineering/scripts/check_lifecycle_mutation_contract.py" || \
+     changed_files_match "Plugins/harness-engineering/scripts/report_legacy_migration.py" || \
      changed_files_match "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/*" || \
      changed_files_match "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/*" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py" || \
+     changed_files_match "Infrastructure/scripts/testing/test_he_operator_shape.py" || \
+     changed_files_match "Infrastructure/scripts/testing/test_he_refinement_checks.py" || \
      changed_files_match "Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py" || \
      changed_files_match "Infrastructure/tests/test_plugin_bundled_hooks_contract.py"; then
     run_skill_gate_unittest=1
@@ -520,6 +561,8 @@ fi
 selected_pytest_targets=()
 if [[ "$run_family_benchmark_pytest" -eq 1 ]]; then
   selected_pytest_targets+=(Infrastructure/scripts/testing/test_validate_skill_authoring_family_benchmarks.py)
+  selected_pytest_targets+=(Infrastructure/scripts/testing/test_he_operator_shape.py)
+  selected_pytest_targets+=(Infrastructure/scripts/testing/test_he_refinement_checks.py)
 fi
 if [[ "$run_projection_pytest" -eq 1 ]]; then
   selected_pytest_targets+=(Infrastructure/scripts/testing/test_projection_integrity.py)
@@ -768,6 +811,11 @@ else
   for skill_dir in "${skill_dirs[@]}"; do
     echo
     echo "[family-gate] === $skill_dir ==="
+    if is_system_overlay_skill "$skill_dir"; then
+      echo "[family-gate] system overlay structural suite skipped for preserved Codex .system skill body"
+      _set_outcome "$skill_dir" "passed"
+      continue
+    fi
     skill_slug="${skill_dir//\//-}"
     skill_log="$(mktemp "${TMPDIR:-/tmp}/skill-family-${skill_slug}.log.XXXXXX")"
 

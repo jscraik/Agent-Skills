@@ -29,9 +29,11 @@ node_modules/
 .ruff_cache/
 .mypy_cache/
 .coverage
+.cache/
 .venv/
 .venv-skillpack/
 .venv-skill-builder/
+/tmp/
 .tmp/
 .temp/
 defusedxml/
@@ -200,9 +202,6 @@ Plugins/cache/
 .agents/workflows/*
 !.agents/workflows/**
 .codex/config.toml
-
-# Ignore timestamped generated skill artifact runs under Infrastructure/artifacts
-Infrastructure/artifacts/skills/**/[0-9][0-9][0-9][0-9]*
 
 # Re-ignore generated timestamped .harness outputs after curated-doc exceptions.
 .harness/media/20*/*.md

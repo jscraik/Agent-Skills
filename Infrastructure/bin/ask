@@ -1,27 +1,33 @@
 #!/usr/bin/env python3
 import sys
-import os
 import argparse
 import time
-import difflib
 from pathlib import Path
-from typing import List, Optional, Tuple
-# Add Infrastructure/scripts/lib and scripts to path
+from typing import Optional
 repo_root_path = Path(__file__).resolve().parents[1]
 sys.path.append(str(repo_root_path / "scripts" / "lib"))
 sys.path.append(str(repo_root_path / "scripts"))
 sys.path.append(str(repo_root_path / "utilities" / "skill-builder" / "scripts"))
-
-from ask.envelope import CallResult, ErrorObject, ErrorCode, ExitCode
+from ask.envelope import CallResult, ErrorObject, ErrorCode
 from ask.context import find_repo_root
-from ask.command_metadata import (
-    ACTION_TO_TOPICS,
-    COMMAND_EXAMPLES,
-    FUZZY_MATCHES,
-    TOPIC_EXAMPLES,
-    VALID_ACTIONS,
-    VALID_TOPICS,
+from ask.command_metadata import VALID_ACTIONS, VALID_TOPICS
+from ask.cli_errors import (
+    _merge_corrections,
+    build_argument_error,
+    build_helpful_error,
+    build_unknown_action_result,
+    consume_global_prefix_flags,
+    parse_args_with_capture,
+    try_fuzzy_parse,
 )
+from ask.cli_args import build_global_parser, prepare_args
+from ask.cli_exit import exit_code_for_errors
+from ask.cli_output import (
+    print_first_validation_command,
+    print_readiness_overview,
+    replay_command,
+)
+from ask.cli_prompts import prompt_choice, prompt_nonempty, prompt_optional
 import ask.commands.skills as skills_commands
 from ask.commands.runtime import add_runtime_parser, dispatch_runtime
 from ask.commands.repo import (
@@ -48,440 +54,17 @@ from ask.commands.plugins import (
 from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 from ask.commands.mcp import sync_mcp
+from ask.commands.memory import memory_list, memory_read, memory_search
 from ask.commands.wiki import wiki_lint, wiki_ingest, wiki_add, wiki_query, wiki_add_asset
 from ask.commands.workouts import add_workouts_parser, dispatch_workouts, render_workouts_human
-# Error Code Mapping (per spec Error Registry)
-ERROR_MAP = {
-    ErrorCode.SUCCESS: ExitCode.SUCCESS,
-    ErrorCode.ERR_RUNTIME: ExitCode.ERR_RUNTIME,
-    ErrorCode.ERR_VALIDATION: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_PI_GUARD: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_PATH_TRAVERSAL: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_SCHEMA_INVALID: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_INVALID_HANDOFF: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_INVALID_STATE: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_INVALID_SCOPE: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_INVALID_PROJECTION_MODE: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_DEFERRED_PROJECTION_MODE: ExitCode.ERR_VALIDATION,
-    ErrorCode.ERR_DEPENDENCY: ExitCode.ERR_DEPENDENCY,
-    ErrorCode.ERR_CONFLICT: ExitCode.ERR_CONFLICT,
-    ErrorCode.ERR_REDUNDANCY: ExitCode.ERR_CONFLICT,
-    ErrorCode.ERR_AUTH: ExitCode.ERR_AUTH,
-}
-
-def get_closest_match(query: str, options: List[str], cutoff: float = 0.6) -> Optional[str]:
-    """Find closest match using difflib."""
-    matches = difflib.get_close_matches(query, options, n=1, cutoff=cutoff)
-    return matches[0] if matches else None
-
-
-def format_correction(original: str, corrected: str, robot_mode: bool = False) -> str:
-    """Format a command correction message."""
-    if robot_mode:
-        return f"🤖 Robot mode: Interpreting '{original}' as '{corrected}'\n   💡 Tip: Use '{corrected}' for exact matching next time."
-    return f"💡 Did you mean: '{corrected}'? (Use --robot to auto-correct)"
-
-
-def _normalize_token(token: str) -> str:
-    """Normalize a command token for robust fuzzy matching."""
-    return token.strip().lower().replace("_", "-")
-
-
-def _extract_argparse_error(stderr_text: Optional[str]) -> Optional[str]:
-    """Extract the actionable argparse error line."""
-    if not stderr_text:
-        return None
-    lines = [line.strip() for line in stderr_text.splitlines() if line.strip()]
-    for line in lines:
-        if line.startswith("ask: error:"):
-            return line.replace("ask: error:", "", 1).strip()
-    return lines[-1] if lines else None
-
-
-def _example_commands(topic: Optional[str], action: Optional[str], *, limit: int = 3) -> List[str]:
-    """Return contextual command examples, preferring command-specific examples."""
-    if topic and action and (topic, action) in COMMAND_EXAMPLES:
-        return COMMAND_EXAMPLES[(topic, action)][:limit]
-    if topic and topic in TOPIC_EXAMPLES:
-        return TOPIC_EXAMPLES[topic][:limit]
-    fallback = []
-    for fallback_topic in ("skills", "repo", "graph"):
-        fallback.extend(TOPIC_EXAMPLES.get(fallback_topic, []))
-    return fallback[:limit]
-
-
-def _merge_corrections(existing: Optional[str], new_note: Optional[str]) -> Optional[str]:
-    """Merge correction notes without duplicating text blocks."""
-    if not existing:
-        return new_note
-    if not new_note:
-        return existing
-    if new_note in existing:
-        return existing
-    return f"{existing}\n{new_note}"
-
-
-def consume_global_prefix_flags(raw_args: List[str]) -> Tuple[List[str], List[str]]:
-    """Split leading global flags from positional command tokens."""
-    global_flags = {"--json", "--trace-id", "--robot", "--agent-mode", "-r", "--help", "-h"}
-    prefix_flags: List[str] = []
-    idx = 0
-    while idx < len(raw_args) and raw_args[idx].startswith("-"):
-        flag = raw_args[idx]
-        if flag not in global_flags:
-            break
-        prefix_flags.append(flag)
-        idx += 1
-        if flag in {"--trace-id"} and idx < len(raw_args) and not raw_args[idx].startswith("-"):
-            prefix_flags.append(raw_args[idx])
-            idx += 1
-    return prefix_flags, raw_args[idx:]
-
-
-def build_helpful_error(
-    topic: Optional[str],
-    action: Optional[str],
-    raw_args: List[str],
-    *,
-    parser_error: Optional[str] = None,
-) -> CallResult:
-    """Build a detailed error message when command intent is unclear."""
-    result = CallResult()
-    result.status = "error"
-
-    entered = "ask " + " ".join(raw_args) if raw_args else "ask"
-    _, working_args = consume_global_prefix_flags(raw_args)
-    parsed_error = _extract_argparse_error(parser_error)
-    error_msg = "I couldn't reliably determine command intent."
-    suggestions: List[str] = []
-    examples = _example_commands(topic, action, limit=3)
-
-    # Try to figure out what they meant
-    if not topic:
-        error_msg = "Missing or unknown command topic."
-        suggestions.append(f"Start with a topic: {', '.join(VALID_TOPICS)}")
-        if working_args:
-            first = _normalize_token(working_args[0])
-            action_topics = ACTION_TO_TOPICS.get(first, [])
-            if len(action_topics) == 1:
-                guessed_topic = action_topics[0]
-                suggestions.append(f"'{first}' is an action under '{guessed_topic}'. Try 'ask {guessed_topic} {first}'.")
-                examples = _example_commands(guessed_topic, first, limit=3)
-            elif len(action_topics) > 1:
-                topics_text = ", ".join(action_topics)
-                suggestions.append(f"'{first}' is ambiguous and exists under topics: {topics_text}.")
-            else:
-                guess = get_closest_match(first, VALID_TOPICS)
-                if guess:
-                    suggestions.append(f"Closest topic guess: 'ask {guess}'.")
-    elif topic not in VALID_TOPICS:
-        normalized_topic = _normalize_token(topic)
-        action_topics = ACTION_TO_TOPICS.get(normalized_topic, [])
-        if len(action_topics) == 1:
-            inferred_topic = action_topics[0]
-            error_msg = f"Unknown topic: '{topic}'"
-            suggestions.append(
-                f"'{normalized_topic}' is an action under '{inferred_topic}'. Try 'ask {inferred_topic} {normalized_topic}'."
-            )
-            examples = _example_commands(inferred_topic, normalized_topic, limit=3)
-        elif len(action_topics) > 1:
-            error_msg = f"Unknown topic: '{topic}'"
-            options = ", ".join(action_topics)
-            suggestions.append(
-                f"'{normalized_topic}' is ambiguous and can belong to: {options}. Use an explicit topic."
-            )
-            examples = [f"ask {candidate_topic} {normalized_topic}" for candidate_topic in action_topics[:3]]
-            examples.extend(_example_commands(None, None, limit=max(0, 3 - len(examples))))
-        else:
-            guess = get_closest_match(normalized_topic, VALID_TOPICS)
-            if guess:
-                error_msg = f"Unknown topic: '{topic}'"
-                suggestions.append(f"Closest topic guess: 'ask {guess}'.")
-                examples = _example_commands(guess, None, limit=3)
-            else:
-                error_msg = f"Unknown topic: '{topic}'"
-                suggestions.append(f"Valid topics: {', '.join(VALID_TOPICS)}")
-    elif not action:
-        error_msg = f"Missing action for 'ask {topic}'"
-        valid_actions = VALID_ACTIONS.get(topic, [])
-        suggestions.append(f"Valid actions for '{topic}': {', '.join(valid_actions)}")
-        examples = _example_commands(topic, None, limit=3)
-    elif action not in VALID_ACTIONS.get(topic, []):
-        valid = VALID_ACTIONS.get(topic, [])
-        guess = get_closest_match(action, valid)
-        if guess:
-            error_msg = f"Unknown action: '{action}' for topic '{topic}'"
-            suggestions.append(f"Closest action guess: 'ask {topic} {guess}'.")
-            examples = _example_commands(topic, guess, limit=3)
-        else:
-            error_msg = f"Unknown action: '{action}' for topic '{topic}'"
-            suggestions.append(f"Valid actions for '{topic}': {', '.join(valid)}")
-            examples = _example_commands(topic, None, limit=3)
-
-    # Build the full error message
-    full_message = f"❌ {error_msg}\n\n   Entered: `{entered}`"
-    if parsed_error:
-        full_message += f"\n   Parser detail: {parsed_error}"
-    if suggestions:
-        full_message += "\n\n🧭 Guidance:\n"
-        full_message += "\n".join(f"   • {s}" for s in suggestions)
-    if examples:
-        full_message += "\n\n📚 Try one of these:\n"
-        full_message += "\n".join(f"   • {e}" for e in examples[:3])
-
-    fix_suggestion = "Use 'ask --help' for global usage or '<topic> <action> --help' for command details."
-    if topic in VALID_ACTIONS:
-        fix_suggestion = f"Valid actions: {', '.join(VALID_ACTIONS[topic])}"
-
-    result.errors.append(ErrorObject(
-        code=ErrorCode.ERR_VALIDATION,
-        message=full_message,
-        fix_suggestion=fix_suggestion,
-    ))
-
-    return result
-
-
-def build_argument_error(
-    topic: str,
-    action: str,
-    raw_args: List[str],
-    *,
-    parser_error: Optional[str] = None,
-) -> CallResult:
-    """Build a detailed error when command intent is clear but args are invalid."""
-    result = CallResult()
-    result.status = "error"
-    entered = "ask " + " ".join(raw_args) if raw_args else f"ask {topic} {action}"
-    parsed_error = _extract_argparse_error(parser_error) or "Argument syntax was invalid for this command."
-    examples = _example_commands(topic, action, limit=3)
-
-    message_lines = [
-        "❌ Command intent was understood, but argument syntax is invalid.",
-        "",
-        f"   Entered: `{entered}`",
-        f"   Parsed intent: `ask {topic} {action}`",
-        f"   Parser detail: {parsed_error}",
-        "",
-        "🧭 Guidance:",
-        f"   • Run `ask {topic} {action} --help` to see required/optional arguments.",
-    ]
-    if examples:
-        message_lines.append("   • Use one of the valid example forms below.")
-        message_lines.append("")
-        message_lines.append("📚 Valid examples:")
-        for example in examples:
-            message_lines.append(f"   • {example}")
-
-    result.errors.append(
-        ErrorObject(
-            code=ErrorCode.ERR_VALIDATION,
-            message="\n".join(message_lines),
-            fix_suggestion=f"Run 'ask {topic} {action} --help' and retry with the shown argument shape.",
-        )
-    )
-    return result
-
-
-def parse_args_with_capture(parser: argparse.ArgumentParser, argv: List[str]) -> Tuple[Optional[argparse.Namespace], Optional[int], str]:
-    """Parse CLI args while capturing argparse stderr for richer error reporting."""
-    import contextlib
-    import io
-
-    stderr_buffer = io.StringIO()
-    try:
-        with contextlib.redirect_stderr(stderr_buffer):
-            parsed = parser.parse_args(argv)
-        return parsed, None, stderr_buffer.getvalue()
-    except SystemExit as exc:
-        return None, int(exc.code), stderr_buffer.getvalue()
-
-
-def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Optional[str], Optional[str], List[str], Optional[str]]:
-    """
-    Try to parse args with fuzzy matching.
-    Returns: (topic, action, remaining_args, correction_note)
-    """
-    if not raw_args:
-        return None, None, [], None
-
-    # Skip leading global flags (--json, --trace-id, --robot, etc.)
-    prefix_flags, working_args = consume_global_prefix_flags(raw_args)
-    if not working_args:
-        return None, None, raw_args, None
-
-    correction_note: Optional[str] = None
-    first_token = _normalize_token(working_args[0])
-    second_token = _normalize_token(working_args[1]) if len(working_args) > 1 else None
-
-    # Alias normalization:
-    # - ask goal "<intent>" -> ask skills goal "<intent>"
-    # - ask doctor catalog -> ask repo doctor-catalog
-    if first_token == "goal":
-        topic = "skills"
-        action = "goal"
-        return topic, action, prefix_flags + working_args[1:], format_correction("goal", "skills goal", robot_mode)
-    if len(working_args) >= 2 and first_token == "doctor" and second_token == "catalog":
-        topic = "repo"
-        action = "doctor-catalog"
-        return topic, action, prefix_flags + working_args[2:], format_correction("doctor catalog", "repo doctor-catalog", robot_mode)
-
-    # Swapped ordering recovery: `ask list skills` -> `ask skills list`
-    if len(working_args) >= 2:
-        swapped_topic_candidate = second_token
-        swapped_action_candidate = first_token
-        if swapped_topic_candidate in VALID_TOPICS:
-            swapped_valid_actions = VALID_ACTIONS.get(swapped_topic_candidate, [])
-            resolved_swapped_action = None
-            if swapped_action_candidate in swapped_valid_actions:
-                resolved_swapped_action = swapped_action_candidate
-            else:
-                mapped_action = FUZZY_MATCHES.get(swapped_action_candidate)
-                if mapped_action in swapped_valid_actions:
-                    resolved_swapped_action = mapped_action
-                else:
-                    guess_action = get_closest_match(swapped_action_candidate, swapped_valid_actions)
-                    if guess_action:
-                        resolved_swapped_action = guess_action
-            if resolved_swapped_action:
-                correction_note = format_correction(
-                    f"{working_args[0]} {working_args[1]}",
-                    f"{swapped_topic_candidate} {resolved_swapped_action}",
-                    robot_mode,
-                )
-                return (
-                    swapped_topic_candidate,
-                    resolved_swapped_action,
-                    prefix_flags + working_args[2:],
-                    correction_note,
-                )
-
-    topic = first_token
-    remaining = working_args[1:]
-
-    # Topic recovery:
-    # 1) explicit typo maps
-    # 2) close match on known topics
-    # 3) infer topic from action when action is unique to one topic
-    if topic not in VALID_TOPICS:
-        if topic in FUZZY_MATCHES and FUZZY_MATCHES[topic] in VALID_TOPICS:
-            corrected = FUZZY_MATCHES[topic]
-            correction_note = format_correction(working_args[0], corrected, robot_mode)
-            topic = corrected
-        else:
-            guess = get_closest_match(topic, VALID_TOPICS)
-            if guess:
-                correction_note = format_correction(working_args[0], guess, robot_mode)
-                topic = guess
-            else:
-                unique_topics = ACTION_TO_TOPICS.get(topic, [])
-                if len(unique_topics) == 1:
-                    inferred_topic = unique_topics[0]
-                    correction_note = format_correction(working_args[0], f"{inferred_topic} {topic}", robot_mode)
-                    return inferred_topic, topic, prefix_flags + working_args[1:], correction_note
-
-    # Resolve action token; permit flags before action in robot mode.
-    action = None
-    action_index = None
-    for idx, token in enumerate(remaining):
-        if token.startswith("-"):
-            continue
-        action = _normalize_token(token)
-        action_index = idx
-        break
-
-    if action is not None:
-        valid_actions = VALID_ACTIONS.get(topic, [])
-        original_action = action
-        if action not in valid_actions:
-            mapped_action = FUZZY_MATCHES.get(action)
-            if mapped_action in valid_actions:
-                action = mapped_action
-            else:
-                guess = get_closest_match(action, valid_actions)
-                if guess:
-                    action = guess
-        if action != original_action:
-            correction_note = _merge_corrections(
-                correction_note,
-                format_correction(original_action, action, robot_mode),
-            )
-
-        # Remove just the action token; keep all other args/flags in order.
-        remaining = remaining[:action_index] + remaining[action_index + 1:]
-
-    # Combine prefix flags with remaining args for downstream processing
-    full_remaining = prefix_flags + remaining
-    return topic, action, full_remaining, correction_note
-
-
-def _safe_input(prompt: str) -> Optional[str]:
-    """Prompt with defensive handling of EOFError and KeyboardInterrupt."""
-    try:
-        return input(prompt)
-    except (EOFError, KeyboardInterrupt):
-        print("\n\nInteractive input cancelled by user.")
-        raise SystemExit(130)
-
-
-def _prompt_choice(prompt: str, options: List[str]) -> str:
-    """Prompt the operator for one option using 1-based indexing."""
-    print(prompt)
-    for idx, option in enumerate(options, start=1):
-        print(f"  {idx}. {option}")
-    while True:
-        raw = _safe_input("> ").strip()
-        if raw.isdigit():
-            choice = int(raw)
-            if 1 <= choice <= len(options):
-                return options[choice - 1]
-        if raw in options:
-            return raw
-        print(f"Please choose 1-{len(options)} or type an exact option value.")
-
-
-def _prompt_nonempty(prompt: str) -> str:
-    """Prompt until a non-empty string is entered."""
-    while True:
-        value = _safe_input(prompt).strip()
-        if value:
-            return value
-        print("This value cannot be empty.")
-
-
-def _prompt_optional(prompt: str) -> str:
-    """Prompt for an optional value (can be empty)."""
-    return _safe_input(prompt).strip()
-
 def main():
     start_time = time.time()
-
-    # Check for robot mode in raw args before parsing
-    raw_args = sys.argv[1:]
-    alias_correction_note = None
-    prefix_flags, positional_args = consume_global_prefix_flags(raw_args)
-    first_positional = _normalize_token(positional_args[0]) if positional_args else None
-    second_positional = _normalize_token(positional_args[1]) if len(positional_args) > 1 else None
-    if first_positional == "goal":
-        raw_args = [*prefix_flags, "skills", "goal", *positional_args[1:]]
-        alias_correction_note = "💡 Alias: 'ask goal' maps to 'ask skills goal'."
-    elif first_positional == "doctor" and second_positional == "catalog":
-        raw_args = [*prefix_flags, "repo", "doctor-catalog", *positional_args[2:]]
-        alias_correction_note = "💡 Alias: 'ask doctor catalog' maps to 'ask repo doctor-catalog'."
-
-    robot_mode = any(flag in raw_args for flag in ["--robot", "--agent-mode", "-r"])
-
-    # Keep raw_args intact for parse_args() so robot flags are properly handled
-    # Use filtered_args only for early help detection (before parser setup)
-    filtered_args = [a for a in raw_args if a not in ["--robot", "--agent-mode", "-r"]]
-
-    # Use a parent parser for global flags to share them with subcommands
-    global_parser = argparse.ArgumentParser(add_help=False)
-    global_parser.add_argument("--json", action="store_true", help="Output results in JSON format for programmatic use")
-    global_parser.add_argument("--trace-id", help="Trace ID for correlating logs", default=os.environ.get("ASK_TRACE_ID"))
-    global_parser.add_argument("--robot", "--agent-mode", "-r", dest="robot_mode", action="store_true",
-                               help="AI-agent mode: honors clear intent despite minor syntax issues, emits correction notes, and returns detailed guided errors on ambiguity")
-
+    prepared_args = prepare_args(sys.argv[1:])
+    raw_args = prepared_args.raw_args
+    filtered_args = prepared_args.filtered_args
+    alias_correction_note = prepared_args.alias_correction_note
+    robot_mode = prepared_args.robot_mode
+    global_parser = build_global_parser()
     parser = argparse.ArgumentParser(
         prog="ask",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -489,7 +72,6 @@ def main():
         parents=[global_parser],
     )
     subparsers = parser.add_subparsers(dest="topic", help="Command topics (use --robot for fuzzy matching)")
-    # --- repo ---
     repo_parser = subparsers.add_parser("repo", help="Repository management", parents=[global_parser])
     repo_subparsers = repo_parser.add_subparsers(dest="action")
     repo_status_parser = repo_subparsers.add_parser("status", help="Show repository status", parents=[global_parser])
@@ -528,8 +110,6 @@ def main():
     repo_subparsers.add_parser("provider-audit", help="Audit active paths for legacy provider drift", parents=[global_parser])
     repo_surface_parser = repo_subparsers.add_parser("surface", help="Inventory tracked repo surface ownership", parents=[global_parser])
     repo_surface_parser.add_argument("--strict", action="store_true", help="Exit non-zero when blocking surface findings exist")
-
-    # --- skills ---
     skills_parser = subparsers.add_parser("skills", help="Skill management", parents=[global_parser])
     skills_subparsers = skills_parser.add_subparsers(dest="action")
     skills_list_parser = skills_subparsers.add_parser("list", help="List discovered skills", parents=[global_parser])
@@ -544,6 +124,7 @@ def main():
     skills_handles_parser.add_argument("--check", action="store_true", help="Fail when command-handle validation finds drift")
     skills_handles_parser.add_argument("--no-handles", action="store_true", help="Omit the full handle list from JSON output")
     skills_handles_parser.add_argument("--write-projection", action="store_true", help="Write .skillsets/command-surface.json from rooted manifests")
+    skills_handles_parser.add_argument("--check-projection", action="store_true", help="Verify .skillsets/command-surface.json matches rooted manifests")
     skills_handles_parser.add_argument("--write-command-handles", action="store_true", help="Write generated runtime command handles for non-root handles")
     skills_handles_parser.add_argument("--check-command-handles", action="store_true", help="Verify generated runtime command handles exist and match rooted manifests")
     skills_handles_parser.add_argument("--dry-run", action="store_true", help="Preview generated projection or command-handle writes without changing files")
@@ -554,21 +135,31 @@ def main():
     skills_subparsers.add_parser("proof", help="Prove a command handle reaches workspace and user runtime surfaces", parents=[global_parser]).add_argument("handle", help="Skill handle to prove, with or without leading $")
     skills_subparsers.add_parser("prove", help="Show a skill proof scorecard", parents=[global_parser]).add_argument("handle", nargs="+", help="Skill handle or goal to prove")
     skills_subparsers.add_parser("explain", help="Explain when and how to use a skill handle", parents=[global_parser]).add_argument("handle", help="Skill handle to explain")
-
-    # --- reviewers ---
+    skills_doctor_parser = skills_subparsers.add_parser("doctor", help="Diagnose readiness for one skill handle or source path", parents=[global_parser])
+    skills_doctor_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
+    skills_doctor_parser.add_argument("--strict", action="store_true", help="Run strict audit instead of the default compat audit")
+    skills_package_parser = skills_subparsers.add_parser("package", help="Report version and role-aware package readiness for one skill", parents=[global_parser])
+    skills_package_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
+    skills_package_parser.add_argument("--strict", action="store_true", help="Fail when package readiness metadata is incomplete")
+    skills_package_parser.add_argument("--checkout-test", action="store_true", help="Run read-only local checkout evidence for the install gate")
+    skills_profiles_parser = skills_subparsers.add_parser("profiles", help="Show skill operation profiles and readiness contracts", parents=[global_parser])
+    skills_profiles_parser.add_argument("profile", nargs="?", help="Optional profile name")
+    skills_events_parser = skills_subparsers.add_parser("events", help="Show skill lifecycle event contracts", parents=[global_parser])
+    skills_events_parser.add_argument("event_type", nargs="?", help="Optional lifecycle event type")
+    skills_memory_parser = skills_subparsers.add_parser("memory", help="List, read, or search durable skill memory", parents=[global_parser])
+    skills_memory_parser.add_argument("mode", choices=["list", "read", "search"], help="Memory provider mode")
+    skills_memory_parser.add_argument("query", nargs="?", help="Entry id/path for read, or search query")
+    skills_memory_parser.add_argument("--source", dest="source_id", help="Filter by memory source id")
+    skills_memory_parser.add_argument("--limit", type=int, default=8, help="Maximum entries to return")
     reviewers_parser = subparsers.add_parser("reviewers", help="Reviewer/subagent handle management", parents=[global_parser])
     reviewers_subparsers = reviewers_parser.add_subparsers(dest="action")
     reviewers_resolve_parser = reviewers_subparsers.add_parser("resolve", help="Resolve a reviewer/subagent handle", parents=[global_parser])
     reviewers_resolve_parser.add_argument("handle", help="Reviewer handle to resolve, with or without leading @")
-
-    # --- runtime ---
     add_runtime_parser(subparsers, global_parser)
-
     skills_route_parser = skills_subparsers.add_parser("route", help="Route a request to matching skills", parents=[global_parser])
     skills_route_parser.add_argument("request", nargs="+", help="Request text to route")
     skills_route_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to return")
     skills_route_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
-
     skills_goal_parser = skills_subparsers.add_parser("goal", help="Resolve intent into one recommended skill", parents=[global_parser])
     skills_goal_parser.add_argument("intent", nargs="+", help="Intent text to route")
     skills_goal_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to consider")
@@ -577,7 +168,6 @@ def main():
     skills_improve_parser.add_argument("goal", nargs="+", help="Improvement goal text to route")
     skills_improve_parser.add_argument("--top-k", type=int, default=3, help="Max ranked candidates to consider")
     skills_improve_parser.add_argument("--considered-limit", type=int, default=20, help="Max eligible candidates considered before truncation")
-
     skills_starter_parser = skills_subparsers.add_parser("starter", help="List starter-mode curated skills", parents=[global_parser])
     skills_starter_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
     skills_starter_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
@@ -589,6 +179,11 @@ def main():
     skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
     skills_audit_parser.add_argument("path", help="Path to the skill directory")
     skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
+    skills_external_review_parser = skills_subparsers.add_parser("external-review", help="Run the local-only external-style skill review lane", parents=[global_parser]); skills_external_review_parser.add_argument("path", help="Path to the skill directory")
+    skills_external_review_parser.add_argument("--audit-level", choices=["compat", "strict"], default="strict", help="Internal ask audit depth"); skills_external_review_parser.add_argument("--skip-plugin-eval", action="store_true", help="Skip plugin-eval comparison")
+    skills_external_review_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl local lint and review"); skills_external_review_parser.add_argument("--skip-tessl-review", action="store_true", help="Skip Tessl local best-practice review")
+    skills_external_review_parser.add_argument("--include-snyk", action="store_true", help="Run optional Snyk CLI external security advisory")
+    skills_external_review_parser.add_argument("--timeout-seconds", type=int, default=180, help="Timeout for each local reviewer command"); skills_external_review_parser.add_argument("--report-path", help="Optional repo-relative JSON report path"); skills_external_review_parser.add_argument("--dashboard", action="store_true", help="Render a local HTML dashboard beside the review report"); skills_external_review_parser.add_argument("--dashboard-path", help="Optional repo-relative HTML dashboard path")
     skills_gate_parser = skills_subparsers.add_parser("validate-skill-gate", help="Run the canonical skill gate", parents=[global_parser])
     skills_gate_parser.add_argument("path", help="Path to the skill directory")
     skills_openai_parser = skills_subparsers.add_parser("validate-openai-format", help="Run the canonical OpenAI skill format validator", parents=[global_parser])
@@ -596,27 +191,21 @@ def main():
     skills_openai_parser.add_argument("--mode", choices=["warn", "strict"], default="strict", help="Validation mode")
     skills_boundaries_parser = skills_subparsers.add_parser("validate-boundaries", help="Show canonical-versus-projection ownership for a skill handle", parents=[global_parser])
     skills_boundaries_parser.add_argument("handle", help="Skill handle to validate, with or without leading $")
-    
     skills_install_parser = skills_subparsers.add_parser("install", help="Install a skill from GitHub", parents=[global_parser])
     skills_install_parser.add_argument("url", help="GitHub URL of the skill")
     skills_install_parser.add_argument("--dest", default="Skills/github", help="Repo-relative canonical category directory under Skills/ (default: Skills/github)")
     skills_install_parser.add_argument("--remediate", action="store_true", help="Scaffold missing contract/eval files")
     skills_install_parser.add_argument("--dry-run", action="store_true", help="Preview installation")
-    
     skills_fold_parser = skills_subparsers.add_parser("fold", help="Suggest folding source into target", parents=[global_parser])
     skills_fold_parser.add_argument("source", help="Skill to be folded")
     skills_fold_parser.add_argument("target", help="Skill to merge into")
     skills_fold_parser.add_argument("--sensitivity", type=float, default=0.2, help="Overlap threshold")
-    
     skills_init_parser = skills_subparsers.add_parser("init", help="Initialize a new skill scaffold", parents=[global_parser])
     skills_init_parser.add_argument("name", help="Name of the new skill")
     skills_init_parser.add_argument("--category", required=True, help="Category directory")
     skills_init_parser.add_argument("--description", required=True, help="Short routing description")
-
-    # --- plugins ---
     plugins_parser = subparsers.add_parser("plugins", help="Plugin management", parents=[global_parser])
     plugins_subparsers = plugins_parser.add_subparsers(dest="action")
-
     def _add_plugin_init_args(parser):
         parser.add_argument("name", help="Name of the new plugin")
         parser.add_argument("--category", default="third-party", help="Plugin category under Plugins/ (default: third-party)")
@@ -625,7 +214,6 @@ def main():
         parser.add_argument("--with-assets", action="store_true", help="Add assets directory")
         parser.add_argument("--with-references", action="store_true", help="Add references directory")
         parser.add_argument("--with-workflows", action="store_true", help="Add workflows directory")
-
     def _add_plugin_install_args(parser):
         parser.add_argument("url", help="GitHub URL of the plugin source")
         parser.add_argument("--path", required=True, help="Plugin directory path inside source repo")
@@ -636,37 +224,27 @@ def main():
         parser.add_argument("--allow-untrusted-source", action="store_true", help="Allow non-allowlisted source repos")
         parser.add_argument("--allow-unpinned-ref", action="store_true", help="Allow non-SHA refs (e.g. main)")
         parser.add_argument("--dry-run", action="store_true", help="Preview installation without writing")
-
     plugins_subparsers.add_parser("list", help="List plugin lifecycle state", parents=[global_parser])
-
     plugins_status_parser = plugins_subparsers.add_parser("status", help="Show state for one plugin", parents=[global_parser])
     plugins_status_parser.add_argument("name", help="Plugin name")
-
     plugins_subparsers.add_parser("doctor", help="Run read-only plugin diagnostics", parents=[global_parser])
-
     plugins_sync_runtime_parser = plugins_subparsers.add_parser(
         "sync-local-runtime",
         help="Replace copied local-plugin runtime mirrors from canonical Plugins/",
         parents=[global_parser],
     )
     plugins_sync_runtime_parser.add_argument("--dry-run", action="store_true", help="Preview runtime sync without writing")
-    
     plugins_init_parser = plugins_subparsers.add_parser("init", help="Initialize a new plugin scaffold", parents=[global_parser])
     _add_plugin_init_args(plugins_init_parser)
-
     plugins_create_parser = plugins_subparsers.add_parser("create", help="Alias for plugins init", parents=[global_parser])
     _add_plugin_init_args(plugins_create_parser)
-
     plugins_install_parser = plugins_subparsers.add_parser("install", help="Install a plugin from GitHub", parents=[global_parser])
     _add_plugin_install_args(plugins_install_parser)
-
     plugins_import_parser = plugins_subparsers.add_parser("import", help="Alias for plugins install", parents=[global_parser])
     _add_plugin_install_args(plugins_import_parser)
-    
     plugins_uninstall_parser = plugins_subparsers.add_parser("uninstall", help="Uninstall a plugin and sync config", parents=[global_parser])
     plugins_uninstall_parser.add_argument("name", help="Name of plugin to uninstall")
     plugins_uninstall_parser.add_argument("--dry-run", action="store_true", help="Preview uninstallation without making changes")
-
     plugins_harden_parser = plugins_subparsers.add_parser("harden", help="Run plugin-builder hardening checks", parents=[global_parser])
     plugins_harden_parser.add_argument("plugin_path", help="Plugin path to harden (for example: Plugins/my-plugin)")
     plugins_harden_parser.add_argument("--marketplace-path", default=".agents/Plugins/marketplace.json", help="Marketplace manifest path")
@@ -674,72 +252,67 @@ def main():
     plugins_harden_parser.add_argument("--skip-marketplace-audit", action="store_true", help="Skip audit-marketplace step")
     plugins_harden_parser.add_argument("--no-require-marketplace", action="store_true", help="Do not require a matching marketplace entry")
     plugins_harden_parser.add_argument("--strict-marketplace-path", action="store_true", help="Disallow legacy marketplace path override")
-    
-    # --- evals ---
     evals_parser = subparsers.add_parser("evals", help="Evaluation and Benchmarking", parents=[global_parser])
     evals_subparsers = evals_parser.add_subparsers(dest="action")
-    
     evals_run_parser = evals_subparsers.add_parser("run", help="Run evaluation cases for a skill", parents=[global_parser])
     evals_run_parser.add_argument("path", help="Path to the skill directory")
     evals_run_parser.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Evaluation mode")
-    
+    evals_run_parser.add_argument("--runner", choices=["codex", "discovery-smoke"], default="codex", help="Evaluation runner. Use discovery-smoke for local-only contract smoke scorecards that do not call a model.")
+    evals_run_parser.add_argument("--model", help="Override the smoke eval Codex model")
+    evals_run_parser.add_argument("--case", action="append", default=[], help="Run matching eval case ids/names")
+    evals_run_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl when policy or credentials block it")
+    evals_run_parser.add_argument("--allow-tessl-project-save", action="store_true", help="Compatibility no-op for Tessl evals")
+    evals_run_parser.add_argument("--no-dashboard", action="store_true", help="Skip rendering the local review dashboard after evals")
     evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
     evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
-
-    # --- workouts ---
     add_workouts_parser(subparsers, global_parser)
-
-    # --- graph ---
     graph_parser = subparsers.add_parser("graph", help="Skill graph navigation and discovery", parents=[global_parser])
     graph_subparsers = graph_parser.add_subparsers(dest="action")
-
     graph_related_parser = graph_subparsers.add_parser("related", help="Find related skills", parents=[global_parser])
     graph_related_parser.add_argument("skill", help="Skill name to find relations for")
     graph_related_parser.add_argument("--depth", type=int, default=1, help="BFS depth")
     graph_related_parser.add_argument("--reverse", action="store_true", help="Follow in-links instead of out-links")
     graph_related_parser.add_argument("--topic-filter", dest="topic_filter", help="Filter by topic")
     graph_related_parser.add_argument("--tier", choices=["stable", "growing", "experimental"], help="Filter by tier")
-
     graph_find_parser = graph_subparsers.add_parser("find", help="Search for skills", parents=[global_parser])
     graph_find_parser.add_argument("query", help="Search query")
     graph_find_parser.add_argument("--topic-filter", dest="topic_filter", help="Filter by topic")
     graph_find_parser.add_argument("--tier", choices=["stable", "growing", "experimental"], help="Filter by tier")
-
     graph_info_parser = graph_subparsers.add_parser("info", help="Show skill details", parents=[global_parser])
     graph_info_parser.add_argument("skill", help="Skill name")
-
     graph_chain_parser = graph_subparsers.add_parser("chain", help="Find path between skills", parents=[global_parser])
     graph_chain_parser.add_argument("from_skill", help="Starting skill")
     graph_chain_parser.add_argument("to_skill", help="Target skill")
-
     graph_list_parser = graph_subparsers.add_parser("list", help="List all skills in graph", parents=[global_parser])
     graph_list_parser.add_argument("--topic-filter", dest="topic_filter", help="Filter by topic")
     graph_list_parser.add_argument("--tier", choices=["stable", "growing", "experimental"], help="Filter by tier")
-
     graph_subparsers.add_parser("topics", help="List all topic clusters", parents=[global_parser])
-
-    # --- mcp ---
     mcp_parser = subparsers.add_parser("mcp", help="MCP configuration management", parents=[global_parser])
     mcp_subparsers = mcp_parser.add_subparsers(dest="action")
-
     mcp_sync_parser = mcp_subparsers.add_parser("sync", help="Sync MCP config from Codex to Codex JSON export", parents=[global_parser])
     mcp_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes without writing")
-
-    # --- wiki ---
+    memory_parser = subparsers.add_parser("memory", help="Read-only repo memory provider", parents=[global_parser])
+    memory_subparsers = memory_parser.add_subparsers(dest="action")
+    memory_list_parser = memory_subparsers.add_parser("list", help="List Project Brain and skill learning entries", parents=[global_parser])
+    memory_list_parser.add_argument("--source", dest="source_id", help="Filter by memory source id")
+    memory_list_parser.add_argument("--limit", type=int, default=50, help="Max entries to return")
+    memory_read_parser = memory_subparsers.add_parser("read", help="Read one memory entry by id or path", parents=[global_parser])
+    memory_read_parser.add_argument("identifier", help="Memory entry id or repo-relative path")
+    memory_search_parser = memory_subparsers.add_parser("search", help="Search Project Brain and skill learning entries", parents=[global_parser])
+    memory_search_parser.add_argument("query", help="Search query")
+    memory_search_parser.add_argument("--source", dest="source_id", help="Filter by memory source id")
+    memory_search_parser.add_argument("--limit", type=int, default=10, help="Max results to return")
     wiki_parser = subparsers.add_parser("wiki", help="Skill Ops Wiki operations", parents=[global_parser])
     wiki_subparsers = wiki_parser.add_subparsers(dest="action")
-
     wiki_lint_parser = wiki_subparsers.add_parser("lint", help="Lint wiki links and freshness", parents=[global_parser])
     wiki_lint_parser.add_argument("--wiki-root", default="Wiki/wiki", help="Wiki root path")
     wiki_lint_parser.add_argument("--max-age-days", type=int, default=60, help="Max last_reviewed age before warning")
-
     wiki_ingest_parser = wiki_subparsers.add_parser("ingest", help="Ingest raw source notes into wiki logs", parents=[global_parser])
     wiki_ingest_parser.add_argument("title", help="Ingest title")
     wiki_ingest_parser.add_argument("--source", action="append", default=[], help="Source reference (repeatable)")
     wiki_ingest_parser.add_argument("--summary", required=True, help="One-paragraph summary")
     wiki_ingest_parser.add_argument("--tag", action="append", default=[], help="Tag (repeatable)")
     wiki_ingest_parser.add_argument("--dry-run", action="store_true", help="Preview output without writing")
-
     wiki_add_parser = wiki_subparsers.add_parser("add", help="Triage and add a structured wiki note", parents=[global_parser])
     wiki_add_parser.add_argument("title", nargs="?", help="Note title")
     wiki_add_parser.add_argument("--summary", help="Summary text")
@@ -762,12 +335,10 @@ def main():
     wiki_add_parser.add_argument("--tag", action="append", default=[], help="Tag (repeatable)")
     wiki_add_parser.add_argument("--interactive", action="store_true", help="Prompt for missing triage fields")
     wiki_add_parser.add_argument("--dry-run", action="store_true", help="Preview output without writing")
-
     wiki_query_parser = wiki_subparsers.add_parser("query", help="Search wiki pages", parents=[global_parser])
     wiki_query_parser.add_argument("query", help="Search query")
     wiki_query_parser.add_argument("--limit", type=int, default=5, help="Max results to return")
     wiki_query_parser.add_argument("--wiki-root", default="Wiki/wiki", help="Wiki root path")
-
     wiki_asset_parser = wiki_subparsers.add_parser("add-asset", help="Add screenshot/asset to wiki and create linked note", parents=[global_parser])
     wiki_asset_parser.add_argument("asset_path", nargs="?", help="Path to local asset file")
     wiki_asset_parser.add_argument("--title", help="Asset note title")
@@ -778,17 +349,13 @@ def main():
     wiki_asset_parser.add_argument("--tag", action="append", default=[], help="Tag (repeatable)")
     wiki_asset_parser.add_argument("--interactive", action="store_true", help="Prompt for missing asset fields")
     wiki_asset_parser.add_argument("--dry-run", action="store_true", help="Preview output without writing")
-
-    # Pre-parse to check for help
     if not filtered_args or filtered_args[0] in ("-h", "--help"):
         parser.print_help()
         sys.exit(0)
-
     parsed_topic = None
     parsed_action = None
     correction_note = alias_correction_note
     args: Optional[argparse.Namespace] = None
-
     parsed_args, parse_exit_code, parser_stderr = parse_args_with_capture(parser, raw_args)
     if parsed_args is not None:
         args = parsed_args
@@ -797,13 +364,11 @@ def main():
     else:
         if parse_exit_code == 0:
             sys.exit(0)
-
         if robot_mode:
             fuzzy_topic, fuzzy_action, remaining_args, fuzzy_note = try_fuzzy_parse(raw_args, robot_mode=True)
             correction_note = _merge_corrections(correction_note, fuzzy_note)
             parsed_topic = fuzzy_topic
             parsed_action = fuzzy_action
-
             can_attempt_reparse = (
                 parsed_topic in VALID_TOPICS
                 and parsed_action in VALID_ACTIONS.get(parsed_topic, [])
@@ -831,6 +396,7 @@ def main():
                         if correction_note:
                             print(f"{correction_note}\n")
                         print(result.errors[0].message)
+                        print_first_validation_command(result.data)
                     sys.exit(2)
             else:
                 result = build_helpful_error(
@@ -848,6 +414,7 @@ def main():
                     if correction_note:
                         print(f"{correction_note}\n")
                     print(result.errors[0].message)
+                    print_first_validation_command(result.data)
                 sys.exit(2)
         else:
             potential_topic, potential_action, _, _ = try_fuzzy_parse(raw_args, robot_mode=False)
@@ -874,9 +441,8 @@ def main():
                 print(result.to_json())
             else:
                 print(result.errors[0].message)
+                print_first_validation_command(result.data)
             sys.exit(2)
-
-    # Guard: args must be initialized before use (catches robot-mode parse edge cases)
     if args is None:
         result = CallResult()
         result.status = "error"
@@ -890,8 +456,6 @@ def main():
         else:
             print("❌ Failed to parse command arguments.")
         sys.exit(2)
-
-    # Preserve leading global flags even when subparser defaults would overwrite them.
     prefix_flags, _ = consume_global_prefix_flags(raw_args)
     if "--json" in prefix_flags:
         args.json = True
@@ -899,16 +463,12 @@ def main():
         trace_idx = prefix_flags.index("--trace-id")
         if trace_idx + 1 < len(prefix_flags):
             args.trace_id = prefix_flags[trace_idx + 1]
-
     repo_root = find_repo_root()
     result = CallResult()
     if args.trace_id:
         result.trace_id = args.trace_id
-
-    # Print correction note if in human mode
     if correction_note and not args.json:
         print(f"{correction_note}\n")
-
     if args.topic == "repo":
         if args.action == "status":
             result = repo_status(repo_root, verbose=args.verbose)
@@ -933,14 +493,10 @@ def main():
         elif args.action == "surface":
             result = repo_surface(repo_root, strict=args.strict)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'repo'",
-                fix_suggestion="Valid actions: status, validate, check-stability, doctor, closeout, doctor-catalog, provider-audit, surface"
-            ))
-
+            result = build_unknown_action_result(
+                "repo",
+                args.action,
+            )
     elif args.topic == "skills":
         if args.action == "list":
             result = skills_commands.list_skills(
@@ -959,6 +515,7 @@ def main():
                 check=args.check,
                 include_handles=not args.no_handles,
                 write_projection=args.write_projection,
+                check_projection=args.check_projection,
                 write_command_handle_files=args.write_command_handles,
                 check_command_handle_files=args.check_command_handles,
                 dry_run=args.dry_run,
@@ -973,6 +530,27 @@ def main():
             result = skills_commands.skills_prove(repo_root, handle=" ".join(args.handle))
         elif args.action == "explain":
             result = skills_commands.explain_skill(repo_root, handle=args.handle)
+        elif args.action == "doctor":
+            result = skills_commands.skills_doctor(repo_root, target=args.target, strict=args.strict)
+        elif args.action == "package":
+            result = skills_commands.skills_package(
+                repo_root,
+                target=args.target,
+                strict=args.strict,
+                checkout_test=args.checkout_test,
+            )
+        elif args.action == "profiles":
+            result = skills_commands.skills_profiles(repo_root, profile=args.profile)
+        elif args.action == "events":
+            result = skills_commands.skills_events(repo_root, event_type=args.event_type)
+        elif args.action == "memory":
+            result = skills_commands.skills_memory(
+                repo_root,
+                mode=args.mode,
+                query=args.query,
+                limit=args.limit,
+                source_id=args.source_id,
+            )
         elif args.action == "route":
             result = skills_commands.route_skills(
                 repo_root,
@@ -1006,6 +584,8 @@ def main():
             result = skills_commands.sync_skills(repo_root, scope=args.scope, dry_run=args.dry_run, projection=args.projection, plugin_cache_refresh=args.plugin_cache_refresh)
         elif args.action == "audit":
             result = skills_commands.audit_skill(repo_root, skill_path=args.path, level=args.level)
+        elif args.action == "external-review":
+            result = skills_commands.external_review_skill(repo_root, skill_path=args.path, audit_level=args.audit_level, skip_plugin_eval=args.skip_plugin_eval, skip_tessl=args.skip_tessl, skip_tessl_review=args.skip_tessl_review, include_snyk=args.include_snyk, timeout_seconds=args.timeout_seconds, report_path=args.report_path, dashboard=args.dashboard, dashboard_path=args.dashboard_path)
         elif args.action == "validate-skill-gate":
             result = skills_commands.validate_skill_gate(repo_root, skill_path=args.path)
         elif args.action == "validate-openai-format":
@@ -1019,25 +599,20 @@ def main():
         elif args.action == "init":
             result = skills_commands.init_skill(repo_root, name=args.name, category=args.category, description=args.description)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(code=ErrorCode.ERR_VALIDATION, message=f"{action_msg} for topic 'skills'", fix_suggestion="Valid actions: list, budget, handles, resolve, parse, proof, prove, explain, route, goal, improve, starter, sync, audit, validate-skill-gate, validate-openai-format, validate-boundaries, install, fold, init"))
-
+            result = build_unknown_action_result(
+                "skills",
+                args.action,
+            )
     elif args.topic == "reviewers":
         if args.action == "resolve":
             result = skills_commands.reviewers_resolve(repo_root, handle=args.handle)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'reviewers'",
-                fix_suggestion="Valid actions: resolve"
-            ))
-
+            result = build_unknown_action_result(
+                "reviewers",
+                args.action,
+            )
     elif args.topic == "runtime":
         result = dispatch_runtime(repo_root, args)
-
     elif args.topic == "plugins":
         if args.action == "list":
             result = list_plugins_state(repo_root)
@@ -1064,6 +639,7 @@ def main():
                 category=args.category,
                 with_marketplace=args.with_marketplace,
                 companion_folders=companion,
+                action=args.action,
             )
         elif args.action in {"install", "import"}:
             result = install_plugin(
@@ -1077,6 +653,7 @@ def main():
                 allow_untrusted_source=args.allow_untrusted_source,
                 allow_unpinned_ref=args.allow_unpinned_ref,
                 dry_run=args.dry_run,
+                action=args.action,
             )
         elif args.action == "harden":
             result = harden_plugin(
@@ -1095,33 +672,34 @@ def main():
                 dry_run=args.dry_run,
             )
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'plugins'",
-                fix_suggestion="Valid actions: list, status, doctor, sync-local-runtime, init, create, install, import, harden, uninstall"
-            ))
-
+            result = build_unknown_action_result(
+                "plugins",
+                args.action,
+            )
     elif args.topic == "evals":
         if args.action == "run":
-            result = run_evals(repo_root, path=args.path, mode=args.mode)
+            result = run_evals(
+                repo_root,
+                path=args.path,
+                mode=args.mode,
+                dashboard=not args.no_dashboard,
+                runner=args.runner,
+                skip_tessl=args.skip_tessl,
+                allow_tessl_project_save=args.allow_tessl_project_save,
+                model=args.model,
+                cases=args.case,
+            )
         elif args.action == "benchmark":
             result = benchmark_portfolio(repo_root)
         elif args.action == "dashboard":
             result = dashboard_report(repo_root)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'evals'",
-                fix_suggestion="Valid actions: run, benchmark, dashboard"
-            ))
-
+            result = build_unknown_action_result(
+                "evals",
+                args.action,
+            )
     elif args.topic == "workouts":
         result = dispatch_workouts(repo_root, args)
-
     elif args.topic == "graph":
         if args.action == "related":
             result = graph_related(repo_root, skill=args.skill, depth=args.depth,
@@ -1137,26 +715,30 @@ def main():
         elif args.action == "topics":
             result = graph_topics(repo_root)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'graph'",
-                fix_suggestion="Valid actions: related, find, info, chain, list, topics"
-            ))
-
+            result = build_unknown_action_result(
+                "graph",
+                args.action,
+            )
     elif args.topic == "mcp":
         if args.action == "sync":
             result = sync_mcp(repo_root, dry_run=args.dry_run)
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'mcp'",
-                fix_suggestion="Valid actions: sync"
-            ))
-
+            result = build_unknown_action_result(
+                "mcp",
+                args.action,
+            )
+    elif args.topic == "memory":
+        if args.action == "list":
+            result = memory_list(repo_root, source_id=args.source_id, limit=args.limit)
+        elif args.action == "read":
+            result = memory_read(repo_root, identifier=args.identifier)
+        elif args.action == "search":
+            result = memory_search(repo_root, query=args.query, source_id=args.source_id, limit=args.limit)
+        else:
+            result = build_unknown_action_result(
+                "memory",
+                args.action,
+            )
     elif args.topic == "wiki":
         if args.action == "lint":
             result = wiki_lint(repo_root, wiki_root=args.wiki_root, max_age_days=args.max_age_days)
@@ -1177,7 +759,6 @@ def main():
             status = args.status
             destination = args.destination
             tags = args.tag or []
-
             if args.interactive:
                 if args.json:
                     result.status = "error"
@@ -1190,22 +771,21 @@ def main():
                     )
                 else:
                     print("🧭 Wiki triage questionnaire")
-                    title = title or _prompt_nonempty("Title: ")
-                    summary = summary or _prompt_nonempty("Summary: ")
-                    source = source or _prompt_nonempty("Source: ")
-                    intent = intent or _prompt_choice(
+                    title = title or prompt_nonempty("Title: ")
+                    summary = summary or prompt_nonempty("Summary: ")
+                    source = source or prompt_nonempty("Source: ")
+                    intent = intent or prompt_choice(
                         "Intent:",
                         ["finding", "playbook", "design-asset", "lesson-learned"],
                     )
-                    status = status or _prompt_choice(
+                    status = status or prompt_choice(
                         "Status:",
                         ["needs-verification", "verified", "fix-now"],
                     )
-                    destination = destination or _prompt_choice(
+                    destination = destination or prompt_choice(
                         "Destination:",
                         ["failures", "playbooks", "assets/ui", "learnings"],
                     )
-
             required_missing = []
             if not title:
                 required_missing.append("title")
@@ -1217,9 +797,27 @@ def main():
                 required_missing.append("intent")
             if not status:
                 required_missing.append("status")
-
             if result.status != "error" and required_missing:
                 result.status = "error"
+                validation_parts = ["./bin/ask", "wiki", "add"]
+                if title:
+                    validation_parts.append(title)
+                if summary:
+                    validation_parts.extend(["--summary", summary])
+                if source:
+                    validation_parts.extend(["--source", source])
+                if intent:
+                    validation_parts.extend(["--intent", intent])
+                if status:
+                    validation_parts.extend(["--status", status])
+                if destination:
+                    validation_parts.extend(["--destination", destination])
+                for tag in tags:
+                    validation_parts.extend(["--tag", tag])
+                if args.dry_run:
+                    validation_parts.append("--dry-run")
+                validation_parts.extend(["--json", "--robot"])
+                result.data["validation_commands"] = [replay_command(*validation_parts)]
                 result.errors.append(
                     ErrorObject(
                         code=ErrorCode.ERR_VALIDATION,
@@ -1254,7 +852,6 @@ def main():
             status = args.status
             destination = args.destination
             tags = args.tag or []
-
             if args.interactive:
                 if args.json:
                     result.status = "error"
@@ -1267,19 +864,18 @@ def main():
                     )
                 else:
                     print("🖼️ Wiki asset questionnaire")
-                    asset_path = asset_path or _prompt_nonempty("Asset path: ")
-                    title = title or _prompt_nonempty("Title: ")
-                    summary = summary or _prompt_nonempty("Summary: ")
-                    source = source or _prompt_optional("Source (optional): ")
-                    status = status or _prompt_choice(
+                    asset_path = asset_path or prompt_nonempty("Asset path: ")
+                    title = title or prompt_nonempty("Title: ")
+                    summary = summary or prompt_nonempty("Summary: ")
+                    source = source or prompt_optional("Source (optional): ")
+                    status = status or prompt_choice(
                         "Status:",
                         ["needs-verification", "verified", "fix-now"],
                     )
-                    destination = destination or _prompt_choice(
+                    destination = destination or prompt_choice(
                         "Destination:",
                         ["assets/ui", "learnings"],
                     )
-
             required_missing = []
             if not asset_path:
                 required_missing.append("asset_path")
@@ -1289,9 +885,27 @@ def main():
                 required_missing.append("summary")
             status = status or "verified"
             destination = destination or "assets/ui"
-
             if result.status != "error" and required_missing:
                 result.status = "error"
+                validation_parts = ["./bin/ask", "wiki", "add-asset"]
+                if asset_path:
+                    validation_parts.append(asset_path)
+                if title:
+                    validation_parts.extend(["--title", title])
+                if summary:
+                    validation_parts.extend(["--summary", summary])
+                if source:
+                    validation_parts.extend(["--source", source])
+                if status:
+                    validation_parts.extend(["--status", status])
+                if destination:
+                    validation_parts.extend(["--destination", destination])
+                for tag in tags:
+                    validation_parts.extend(["--tag", tag])
+                if args.dry_run:
+                    validation_parts.append("--dry-run")
+                validation_parts.extend(["--json", "--robot"])
+                result.data["validation_commands"] = [replay_command(*validation_parts)]
                 result.errors.append(
                     ErrorObject(
                         code=ErrorCode.ERR_VALIDATION,
@@ -1312,25 +926,16 @@ def main():
                     dry_run=args.dry_run,
                 )
         else:
-            result.status = "error"
-            action_msg = f"unknown action '{args.action}'" if args.action else "missing action"
-            result.errors.append(ErrorObject(
-                code=ErrorCode.ERR_VALIDATION,
-                message=f"{action_msg} for topic 'wiki'",
-                fix_suggestion="Valid actions: lint, ingest, add, query, add-asset"
-            ))
-
-    # Finalize Result Metadata (before output dispatch so both JSON and human modes see it)
+            result = build_unknown_action_result(
+                "wiki",
+                args.action,
+            )
     result.metadata["command"] = " ".join(sys.argv[1:])
     if correction_note:
         result.metadata["correction_note"] = correction_note.replace("\n", " ")
-
-    # Finalize Telemetry
     result.telemetry["latency_ms"] = int((time.time() - start_time) * 1000)
     if args.trace_id:
         result.trace_id = args.trace_id # Ensure it persists if command function replaced result
-
-    # Dispatch Output
     if args.json:
         print(result.to_json(repo_root=str(repo_root)))
     else:
@@ -1340,6 +945,7 @@ def main():
                     print(f"✅ Success: {result.metadata['command']}")
                     print(f"  Root: {result.data['repo_root']}")
                     print(f"  Synced: {result.data['skills_synced']}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "repo" and args.action == "validate":
                     print(f"✅ Validation passed! ({result.data['warn_only_issues']} warnings)")
                     if result.data.get("scope") and result.data.get("scope") != "all":
@@ -1350,6 +956,7 @@ def main():
                     print(f"✅ Stability check passed ({result.data['stable_count']} stable skills)")
                     if args.changed_files:
                         print(f"   Checked {result.data['checked_files']} changed file(s)")
+                    print_first_validation_command(result.data)
                 elif args.topic == "repo" and args.action == "doctor":
                     doctor = result.data.get("doctor", result.data)
                     for line in render_golden_path_summary(
@@ -1358,6 +965,66 @@ def main():
                         status_icon="✅",
                     ):
                         print(line)
+                    signals = doctor.get("signals", {})
+                    capability = signals.get("capability_readiness", {}).get("details", {})
+                    memory = signals.get("memory_readiness", {}).get("details", {})
+                    package = signals.get("package_readiness", {}).get("details", {})
+                    if capability:
+                        print(
+                            "  Capability readiness: "
+                            f"{signals.get('capability_readiness', {}).get('state')} "
+                            f"({capability.get('profile_contract_gap_count', 0)} profile gaps, "
+                            f"{capability.get('event_contract_gap_count', 0)} event gaps)"
+                        )
+                    if memory:
+                        print(
+                            "  Memory readiness: "
+                            f"{signals.get('memory_readiness', {}).get('state')} "
+                            f"({memory.get('entry_count', 0)} entries, "
+                            f"{memory.get('provider_model')})"
+                        )
+                    if package:
+                        print(
+                            "  Package readiness: "
+                            f"{signals.get('package_readiness', {}).get('state')} "
+                            f"({package.get('target')}, "
+                            f"{package.get('missing_field_count', 0)} missing fields)"
+                        )
+                elif args.topic == "repo" and args.action == "closeout":
+                    closeout = result.data.get("repo_closeout", {})
+                    readiness = closeout.get("commit_readiness", {})
+                    capability = closeout.get("capability_readiness", {})
+                    memory = closeout.get("memory_readiness", {})
+                    package = closeout.get("package_readiness", {})
+                    focused = closeout.get("focused_validation", [])
+                    print(f"Repo closeout: {closeout.get('agent_summary')}")
+                    print(f"  Commit ready: {readiness.get('ready')}")
+                    print(
+                        "  Capability readiness: "
+                        f"{capability.get('status')} "
+                        f"({capability.get('contract_gap_count', 0)} gaps)"
+                    )
+                    blocker_classes = capability.get("eval_blocker_classes") or []
+                    if blocker_classes:
+                        print(
+                            "  Eval blocker classes: "
+                            f"{capability.get('eval_blocker_class_count', len(blocker_classes))} "
+                            f"({', '.join(blocker_classes)})"
+                        )
+                    print(
+                        "  Memory readiness: "
+                        f"{memory.get('status')} "
+                        f"({memory.get('entry_count', 0)} entries)"
+                    )
+                    print(
+                        "  Package readiness: "
+                        f"{package.get('status')} "
+                        f"({package.get('missing_field_count', 0)} missing fields)"
+                    )
+                    if focused:
+                        ids = [item.get("id") for item in focused if item.get("id")]
+                        print(f"  Focused validation: {', '.join(ids)}")
+                    print(f"  Next: {closeout.get('next_command')}")
                 elif args.topic == "repo" and args.action == "doctor-catalog":
                     report = result.data.get("catalog_parity", {})
                     print(f"✅ Catalog parity: {report.get('decision_status', 'resolved')}")
@@ -1376,6 +1043,7 @@ def main():
                         "✅ Provider policy: "
                         f"{report.get('status')} ({report.get('violation_count', 0)} violation(s))"
                     )
+                    print_first_validation_command(result.data)
                 elif args.topic == "repo" and args.action == "surface":
                     report = result.data.get("repo_surface", {})
                     summary = report.get("summary", {})
@@ -1385,6 +1053,7 @@ def main():
                         f"{summary.get('blocking_findings', 0)} blocking finding(s), "
                         f"status={report.get('status')}"
                     )
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")
                     for skill in result.data["skills"]:
@@ -1398,6 +1067,7 @@ def main():
                             f"Starter mode: archetype={result.data.get('starter_archetype')} "
                             f"limit={result.data.get('starter_limit')}"
                         )
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "budget":
                     report = result.data.get("runtime_budget", {})
                     print(
@@ -1405,6 +1075,7 @@ def main():
                         f"{report.get('default_visible_count')}/{report.get('default_visible_max')} default skills, "
                         f"{report.get('advanced_visible_count')} advanced"
                     )
+                    print_first_validation_command(report)
                 elif args.topic == "skills" and args.action == "handles":
                     surface = result.data.get("command_surface", {})
                     print(
@@ -1413,6 +1084,7 @@ def main():
                     )
                     if result.data.get("policy_identity"):
                         print(f"  Policy identity: {result.data['policy_identity']}")
+                    print_first_validation_command(surface)
                     violations = result.data.get("violations", [])
                     if violations:
                         print(f"  Violations: {len(violations)}")
@@ -1423,21 +1095,132 @@ def main():
                     print(f"  Source: {resolution.get('source_path')}")
                     if resolution.get("invoke_via"):
                         print(f"  Invoke via: {resolution.get('invoke_via')}")
+                    print_first_validation_command(resolution)
                 elif args.topic == "skills" and args.action == "proof":
                     proof = result.data.get("proof", {})
                     print(f"✅ Skill handle proof: ${proof.get('handle')} ({proof.get('status')})")
+                    if proof.get("runtime_satisfied_by"):
+                        print(f"  runtime satisfied by: {proof.get('runtime_satisfied_by')}")
+                    gate_policy = proof.get("gate_policy") or {}
+                    required_gates = gate_policy.get("required") or []
+                    if required_gates:
+                        print(f"  required gates: {', '.join(required_gates)}")
                     for gate, passed in proof.get("gates", {}).items():
                         marker = "pass" if passed else "fail"
                         print(f"  {gate}: {marker}")
                     live = proof.get("live_codex_invocation", {})
                     if live.get("status"):
                         print(f"  live invocation: {live.get('status')}")
+                    print_first_validation_command(proof)
+                elif args.topic == "skills" and args.action == "prove":
+                    scorecard = result.data.get("skill_proof", {})
+                    print(f"Skill proof scorecard: ${scorecard.get('handle')}")
+                    for section in ("reachability", "structural_quality", "analytics", "outcome_proof"):
+                        section_payload = scorecard.get(section) or {}
+                        if section_payload.get("status"):
+                            print(f"  {section}: {section_payload.get('status')}")
+                    print_first_validation_command(scorecard)
+                    if scorecard.get("next_command"):
+                        print(f"Next: {scorecard.get('next_command')}")
                 elif args.topic == "skills" and args.action == "explain":
                     explanation = result.data.get("explanation", {})
                     print(f"ℹ️  Skill: ${explanation.get('handle')} ({explanation.get('status')})")
                     print(explanation.get("agent_summary", ""))
                     print(f"Source: {explanation.get('canonical_source_path')}")
+                    print_first_validation_command(explanation)
                     print(f"Next: {explanation.get('next_command')}")
+                elif args.topic == "skills" and args.action == "doctor":
+                    doctor = result.data.get("skill_doctor", {})
+                    print(f"Skill doctor: {doctor.get('query')} ({doctor.get('status')})")
+                    print(doctor.get("agent_summary", ""))
+                    print(f"Source: {doctor.get('canonical_source_path')}")
+                    event = doctor.get("lifecycle_event") or {}
+                    if event.get("event_type"):
+                        print(f"Event: {event.get('event_type')}")
+                    warning_classes = [warning.get("class") for warning in doctor.get("warnings", []) if warning.get("class")]
+                    if warning_classes:
+                        print(f"Warning classes: {', '.join(warning_classes)}")
+                    check_summary = doctor.get("check_summary") or {}
+                    if check_summary.get("status_counts"):
+                        counts = check_summary.get("status_counts") or {}
+                        rendered_counts = [f"{key}={counts[key]}" for key in sorted(counts)]
+                        print(f"Checks: {', '.join(rendered_counts)}")
+                    print_first_validation_command(doctor)
+                    print(f"Next: {doctor.get('next_command')}")
+                elif args.topic == "skills" and args.action == "package":
+                    package = result.data.get("skill_package", {})
+                    gate = package.get("gate_summary", {})
+                    contract = package.get("package_contract", {})
+                    values = contract.get("values", {})
+                    roles = (contract.get("role_compatibility") or {}).get("roles") or []
+                    runtime_needs = (contract.get("runtime_contract") or {}).get("needs") or []
+                    print(f"Skill package: {package.get('query')} ({package.get('status')})")
+                    print(package.get("agent_summary", ""))
+                    print(f"Source: {package.get('canonical_source_path')}")
+                    event = package.get("lifecycle_event") or {}
+                    if event.get("event_type"):
+                        print(f"Event: {event.get('event_type')}")
+                    if contract.get("readiness_level"):
+                        print(f"Readiness level: {contract.get('readiness_level')}")
+                    if roles:
+                        print(f"Compatible roles: {', '.join(roles)}")
+                    if runtime_needs:
+                        print(f"Runtime needs: {len(runtime_needs)} declared")
+                    if values.get("provenance"):
+                        print(f"Provenance: {values.get('provenance')}")
+                    print(f"Install ready: {gate.get('install_ready')}")
+                    if gate.get("checkout_test_status"):
+                        print(f"Checkout test: {gate.get('checkout_test_status')}")
+                    print(f"Promotion: {gate.get('promotion_status')}")
+                    blocked = gate.get("blocked_reasons") or []
+                    if blocked:
+                        print(f"Blocked reasons: {', '.join(blocked)}")
+                    print_first_validation_command(package)
+                    print(f"Next: {package.get('next_command')}")
+                elif args.topic == "skills" and args.action == "profiles":
+                    profiles = result.data.get("skill_profiles", {})
+                    print(f"Skill profiles: {profiles.get('status')}")
+                    print(profiles.get("agent_summary", ""))
+                    print_readiness_overview(profiles)
+                    print_first_validation_command(profiles)
+                    profile_map = profiles.get("profiles", {})
+                    selected = profiles.get("selected_profile")
+                    if selected and selected in profile_map:
+                        profile = profile_map[selected]
+                        print(f"Profile: {selected}")
+                        print(f"Intent: {profile.get('intent')}")
+                        print(f"Write policy: {profile.get('write_policy')}")
+                    else:
+                        profile_order = profiles.get("profile_order", [])
+                        if profile_order:
+                            print(f"Profiles: {', '.join(profile_order)}")
+                elif args.topic == "skills" and args.action == "events":
+                    events = result.data.get("skill_events", {})
+                    print(f"Skill events: {events.get('status')}")
+                    print(events.get("agent_summary", ""))
+                    print_readiness_overview(events)
+                    print_first_validation_command(events)
+                    selected = events.get("selected_event_type")
+                    event_types = events.get("event_types", {})
+                    if selected and selected in event_types:
+                        print(f"Event: {selected}")
+                        print(f"Definition: {event_types.get(selected)}")
+                    elif events.get("event_order"):
+                        print(f"Events: {', '.join(events.get('event_order', []))}")
+                elif args.topic == "skills" and args.action == "memory":
+                    memory = result.data.get("skill_memory", {})
+                    print(f"Skill memory: {memory.get('mode')} ({memory.get('status')})")
+                    print(memory.get("agent_summary", ""))
+                    if memory.get("provider_model"):
+                        print(f"Provider: {memory.get('provider_model')}")
+                    print_first_validation_command(memory)
+                    sources = (memory.get("source_summary") or {}).get("available_sources") or []
+                    if sources:
+                        print(f"Sources: {', '.join(sources)}")
+                    if memory.get("entry"):
+                        print(f"Entry: {memory['entry'].get('path')}")
+                    elif memory.get("entries") is not None:
+                        print(f"Entries: {len(memory.get('entries', []))}")
                 elif args.topic == "skills" and args.action == "parse":
                     parsed = result.data.get("parse", {})
                     print(f"✅ Parse succeeded: {parsed.get('status', 'ok')}")
@@ -1447,12 +1230,14 @@ def main():
                         print(f"  Skill mentions: {len(parsed['skill_mentions'])}")
                     if parsed.get("reviewer_mentions"):
                         print(f"  Reviewer mentions: {len(parsed['reviewer_mentions'])}")
+                    print_first_validation_command(parsed)
                 elif args.topic == "reviewers" and args.action == "resolve":
                     resolution = result.data.get("resolution", {})
                     handle = resolution.get("canonical_handle") or resolution.get("handle")
                     print(f"✅ Reviewer handle: @{handle}")
                     print(f"  Visibility: {resolution.get('command_visibility')}")
                     print(f"  Source: {resolution.get('source_path')}")
+                    print_first_validation_command(resolution)
                 elif args.topic == "runtime" and args.action in ("surface", "budget"):
                     report = result.data.get("runtime_surface") or result.data.get("runtime_budget", {})
                     label = "surface" if args.action == "surface" else "budget"
@@ -1462,6 +1247,7 @@ def main():
                         f"{report.get('default_visible_count')}/{report.get('default_visible_max')} default skills, "
                         f"{report.get('hidden_system_count')} system lane"
                     )
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "route":
                     decision = result.data["decision"]
                     print(f"🧭 Route decision: {decision['decision_status']}")
@@ -1492,6 +1278,7 @@ def main():
                                 f"  - {candidate.get('name')} ({candidate.get('path')}) "
                                 f"confidence={candidate.get('confidence', 0.0):.4f}"
                             )
+                    print_first_validation_command(decision)
                 elif args.topic == "skills" and args.action == "goal":
                     goal = result.data["goal_decision"]
                     print(f"🎯 Goal decision: {goal['decision_status']}")
@@ -1512,6 +1299,7 @@ def main():
                         print("Disambiguation prompts:")
                         for prompt in prompts:
                             print(f"  - {prompt}")
+                    print_first_validation_command(goal)
                 elif args.topic == "skills" and args.action == "improve":
                     improvement = result.data["improvement"]
                     print(f"🎯 Skill improvement: {improvement['status']}")
@@ -1521,6 +1309,7 @@ def main():
                         print(f"Recommended: ${recommended.get('handle')} ({recommended.get('path')})")
                     reachability = improvement.get("reachability", {})
                     print(f"Reachability: {reachability.get('status')}")
+                    print_first_validation_command(improvement)
                     if improvement.get("next_command"):
                         print(f"Next: {improvement['next_command']}")
                 elif args.topic == "skills" and args.action == "starter":
@@ -1530,6 +1319,7 @@ def main():
                     )
                     for skill in result.data["skills"]:
                         print(f"  - {skill['name']} [{skill['category']}]")
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "sync":
                     print(f"✅ Planned sync: {len(result.data['plan']['symlinks'])} symlinks.")
                     for log in result.data.get("logs", []):
@@ -1538,11 +1328,48 @@ def main():
                         print("  (Dry run - no changes made)")
                     if result.data.get("policy_identity"):
                         print(f"  Policy identity: {result.data['policy_identity']}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "workouts":
                     render_workouts_human(args, result)
                 elif args.topic == "skills" and args.action == "audit":
                     print(f"✅ Audit passed: {args.path}")
                     print(result.data["diagnostics"]["stdout"])
+                    print_first_validation_command(result.data)
+                elif args.topic == "skills" and args.action == "validate-skill-gate":
+                    gate = result.data.get("skill_gate", {})
+                    print(f"✅ Skill gate passed: {args.path}")
+                    if gate.get("stdout"):
+                        print(gate["stdout"])
+                    print_first_validation_command(result.data)
+                elif args.topic == "skills" and args.action == "validate-openai-format":
+                    report = result.data.get("openai_skill_format", {})
+                    print(f"✅ OpenAI skill format passed: {args.path}")
+                    if report.get("stdout"):
+                        print(report["stdout"])
+                    print_first_validation_command(result.data)
+                elif args.topic == "skills" and args.action == "validate-boundaries":
+                    boundary = result.data.get("boundary_check", {})
+                    handle = boundary.get("handle", args.handle)
+                    print("✅ Skill boundaries passed: $" + str(handle))
+                    if boundary.get("canonical_skill_path"):
+                        print(f"Canonical source: {boundary.get('canonical_skill_path')}")
+                    if boundary.get("command_handle_path"):
+                        print(f"Command handle: {boundary.get('command_handle_path')}")
+                    notes = boundary.get("notes") or []
+                    for note in notes:
+                        print(f"Note: {note}")
+                    print_first_validation_command(result.data)
+                elif args.topic == "skills" and args.action == "external-review":
+                    print(f"External review: {result.status}")
+                    print(f"Target: {result.data.get('target', args.path)}")
+                    ask_audit = result.data.get("ask_audit", {})
+                    if ask_audit.get("status"):
+                        print(f"Ask audit: {ask_audit.get('status')}")
+                    for key in ("plugin_eval", "tessl_lint", "tessl_review", "snyk"):
+                        payload = result.data.get(key) or {}
+                        if payload.get("status"):
+                            print(f"{key}: {payload.get('status')}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "install":
                     if result.data.get("dry_run"):
                         print("🔍 Dry run - would install:")
@@ -1551,17 +1378,21 @@ def main():
                         print(f"   Target: {result.data.get('target_path')}")
                         if result.data.get('remediate'):
                             print("   Remediate: Yes (scaffold missing files)")
+                        print_first_validation_command(result.data)
                         print("\n💡 To actually install, run:")
                         print(f"   {result.metadata.get('next_steps', ['ask skills install <url>'])[0]}")
                     else:
                         print(f"✅ Installed skill: {result.data.get('skill_name', args.url)}")
                         print(result.data.get("raw_output", ""))
+                        print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "fold":
                     print(f"✅ Result: {result.data['recommendation']}")
                     print(f"  Overlap Score: {result.data['overlap_score']}")
                     print(f"  Rationale: {result.data['rationale']}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "init":
                     print(f"✅ {result.data['message']}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action in {"init", "create"}:
                     print(f"✅ {result.data['message']}")
                     print(result.data.get("raw_output", ""))
@@ -1584,6 +1415,7 @@ def main():
                         print("Blockers:")
                         for blocker in blockers:
                             print(f"  - {blocker}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action == "sync-local-runtime":
                     if result.data.get("dry_run"):
                         print("🔍 Dry run - would replace local-plugin runtime mirrors:")
@@ -1596,6 +1428,7 @@ def main():
                         removed = report.get("removed_entries") or []
                         if removed:
                             print(f"    removed: {', '.join(removed)}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action in {"install", "import"}:
                     if result.data.get("dry_run"):
                         print("🔍 Dry run - would install plugin:")
@@ -1603,12 +1436,25 @@ def main():
                         print(f"   Source path: {result.data.get('plugin_path')}")
                         print(f"   Name: {result.data.get('plugin_name')}")
                         print(f"   Target: {result.data.get('target_path')}")
+                        print_first_validation_command(result.data)
                         print("\n💡 To actually install, run:")
                         print(f"   {result.metadata.get('next_steps', ['ask plugins install <url> --path <path>'])[0]}")
                     else:
                         print(f"✅ {result.data.get('message', 'Plugin installed.')}")
                         if result.data.get("raw_output"):
                             print(result.data["raw_output"])
+                        print_first_validation_command(result.data)
+                elif args.topic == "plugins" and args.action == "uninstall":
+                    if result.data.get("dry_run"):
+                        print("🔍 Dry run - would uninstall plugin:")
+                        print(f"   Name: {result.data.get('plugin_name', args.name)}")
+                        print(f"   Target: {result.data.get('target_path')}")
+                        print_first_validation_command(result.data)
+                        print("\n💡 To actually uninstall, run:")
+                        print(f"   {result.metadata.get('next_steps', ['ask plugins uninstall <name>'])[0]}")
+                    else:
+                        print(f"✅ {result.data.get('message', 'Plugin uninstalled.')}")
+                        print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action == "harden":
                     print(f"✅ {result.data.get('message', 'Plugin hardening checks passed.')}")
                     command_runs = result.data.get("command_runs", [])
@@ -1616,15 +1462,20 @@ def main():
                         print("Checks run:")
                         for run in command_runs:
                             print(f"  - {run.get('step')}: {run.get('command')}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "evals":
                     if args.action == "run":
                         print(f"✅ Evaluation complete for {args.path}")
                         print(result.data.get("raw_output", ""))
+                        if result.data.get("dashboard_url"): print(f"Dashboard: {result.data['dashboard_url']}#{result.data.get('dashboard_tab', 'evals')}")
+                        print_first_validation_command(result.data)
                     elif args.action == "benchmark":
                         print("✅ Benchmark suite complete.")
                         print(result.data.get("raw_output", ""))
+                        print_first_validation_command(result.data)
                     elif args.action == "dashboard":
                         print(f"✅ {result.data['message']}")
+                        print_first_validation_command(result.data)
                 elif args.topic == "mcp" and args.action == "sync":
                     if result.data.get("dry_run"):
                         print(f"🔍 Dry run - would sync {result.data['server_count']} MCP server(s):")
@@ -1634,6 +1485,21 @@ def main():
                     else:
                         print(f"✅ Synced {result.data['server_count']} MCP servers to {result.data['target_path']}")
                         print("   Re-run `codex mcp list` or restart Codex to pick up changes.")
+                    print_first_validation_command(result.data)
+                elif args.topic == "memory":
+                    memory = result.data.get("memory", {})
+                    print(f"✅ {memory.get('agent_summary', 'Memory provider complete.')}")
+                    entries = memory.get("entries") or memory.get("results") or []
+                    for entry in entries:
+                        print(f"   • {entry.get('id')} ({entry.get('path')})")
+                        if entry.get("snippet"):
+                            print(f"     {entry.get('snippet')}")
+                    if memory.get("entry"):
+                        entry = memory["entry"]
+                        print(f"   Entry: {entry.get('id')} ({entry.get('path')})")
+                        print(f"   Source: {entry.get('source', {}).get('label')}")
+                        print(entry.get("content", ""))
+                    print_first_validation_command(result.data)
                 elif args.topic == "wiki":
                     if args.action == "lint":
                         print(f"✅ {result.data.get('message', 'Wiki lint passed.')}")
@@ -1672,6 +1538,7 @@ def main():
                         print(f"   Asset source: {result.data.get('asset_source')}")
                         print(f"   Asset stored: {result.data.get('asset_stored_path')}")
                         print(f"   Note: {result.data.get('note_path')}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "graph":
                     if args.action == "related":
                         print(f"\n📊 {result.data['skill']} [{result.data['direction']}, depth={result.data['depth']}]")
@@ -1684,12 +1551,14 @@ def main():
                                 print(f"      {r['description'][:70]}")
                         if result.data['count'] > 15:
                             print(f"\n   ... and {result.data['count'] - 15} more")
+                        print_first_validation_command(result.data)
                         print()
                     elif args.action == "find":
                         print(f"\n🔍 Search: '{result.data['query']}' ({result.data['count']} match(es))\n")
                         for n in result.data['matches'][:20]:
                             tier_icon = "★" if n.get('tier') == 'stable' else ("◆" if n.get('tier') == 'growing' else "◇")
                             print(f"   {tier_icon} {n['id']} [{n.get('topic', '?')}] ↓{n.get('in_degree', 0)}")
+                        print_first_validation_command(result.data)
                         print()
                     elif args.action == "info":
                         n = result.data['node']
@@ -1706,6 +1575,7 @@ def main():
                             for e in out_edges[:10]:
                                 w = f" ×{e['weight']:.1f}" if e.get('weight', 1) > 1.2 else ""
                                 print(f"      → {e['to']}{w}")
+                        print_first_validation_command(result.data)
                         print()
                     elif args.action == "chain":
                         if result.data['reachable']:
@@ -1713,6 +1583,7 @@ def main():
                             print(f"\n🔗 Chain ({result.data['hops']} hops):\n   {path_str}\n")
                         else:
                             print(f"\n❌ No path found from {result.data['from']} to {result.data['to']}\n")
+                        print_first_validation_command(result.data)
                     elif args.action == "list":
                         filters = result.data['filters']
                         filter_str = f"topic={filters['topic']}" if filters['topic'] else "all"
@@ -1722,16 +1593,17 @@ def main():
                         for n in result.data['skills']:
                             tier_icon = "★" if n.get('tier') == 'stable' else ("◆" if n.get('tier') == 'growing' else "◇")
                             print(f"   {tier_icon} {n['id']:<35} [{n.get('topic', '?')}] ↓{n.get('in_degree', 0)}")
+                        print_first_validation_command(result.data)
                         print()
                     elif args.action == "topics":
                         print(f"\n🏷️  Topic Clusters ({result.data['count']} topics)\n")
                         for topic, count in result.data['topics'].items():
                             print(f"   {topic:<25} {count} skill(s)")
+                        print_first_validation_command(result.data)
                         print()
             else:
                 parser.print_help()
         else:
-            # Enhanced error output with examples
             error = result.errors[0] if result.errors else ErrorObject(code=ErrorCode.ERR_RUNTIME, message="Unknown error")
             if args.topic == "skills" and args.action == "route" and result.data.get("decision"):
                 decision = result.data["decision"]
@@ -1747,6 +1619,7 @@ def main():
                             f"  - {candidate.get('name')} ({candidate.get('path')}) "
                             f"confidence={candidate.get('confidence', 0.0):.4f}"
                         )
+                print_first_validation_command(decision)
                 print("")
             if args.topic == "skills" and args.action == "goal" and result.data.get("goal_decision"):
                 goal = result.data["goal_decision"]
@@ -1760,17 +1633,14 @@ def main():
                     print("Disambiguation prompts:")
                     for prompt in prompts:
                         print(f"  - {prompt}")
+                print_first_validation_command(goal)
                 print("")
             error_message = error.message
             if args.topic == "skills" and args.action == "audit" and " First failures:" in error_message:
                 error_message = error_message.split(" First failures:", 1)[0]
             print(f"❌ Error: {error_message}")
-
-                # Add fix suggestion if available
             if error.fix_suggestion:
                 print(f"\n💡 {error.fix_suggestion}")
-
-                # Add examples based on the current context
             if args.topic == "skills":
                 if args.action == "audit":
                     family_data = result.data.get("family_benchmarks")
@@ -1799,6 +1669,8 @@ def main():
                 elif args.action in ("install", "fold", "init"):
                     if "raw_output" in result.data: print(result.data["raw_output"])
                     if "raw_error" in result.data: print(result.data["raw_error"])
+                    if args.action in {"fold", "init"}:
+                        print_first_validation_command(result.data)
                     if args.action == "init":
                         print("\n📚 Init examples:")
                         print("   ask skills init my-skill --category frontend-ui --description 'Does X'")
@@ -1806,10 +1678,20 @@ def main():
                     elif args.action == "install":
                         print("\n📚 Install examples:")
                         print("   ask skills install https://github.com/user/repo --remediate")
-            elif args.topic == "plugins" and args.action in ("init", "create", "install", "import", "harden", "sync-local-runtime"):
+                elif args.topic == "skills":
+                    print_first_validation_command(result.data)
+            elif args.topic == "plugins" and args.action in (
+                "init",
+                "create",
+                "install",
+                "import",
+                "harden",
+                "sync-local-runtime",
+                "uninstall",
+            ):
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])
-                # Display command_runs for harden_plugin() failures
+                print_first_validation_command(result.data)
                 if "command_runs" in result.data:
                     print("\n🔧 Command execution details:")
                     for run in result.data["command_runs"]:
@@ -1831,19 +1713,26 @@ def main():
                 print("   ask plugins install https://github.com/<owner>/<repo> --path Plugins/<name>")
                 print("   ask plugins harden Plugins/my-plugin")
                 print("   ask plugins sync-local-runtime")
+            elif args.topic == "plugins":
+                print_first_validation_command(result.data)
+            elif args.topic == "reviewers":
+                print_first_validation_command(result.data)
             elif args.topic == "evals":
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])
+                print_first_validation_command(result.data)
                 print("\n📚 Eval examples:")
                 print("   ask evals run backend/cli-spec --mode smoke")
                 print("   ask evals run backend/cli-spec --mode release")
             elif args.topic == "graph":
+                print_first_validation_command(result.data)
                 print("\n📚 Graph examples:")
                 print("   ask graph find security")
                 print("   ask graph related skill-builder --depth 2")
                 print("   ask graph chain skill-creator skill-installer")
                 print("   ask graph info cli-spec")
             elif args.topic == "repo":
+                print_first_validation_command(result.data)
                 if args.action == "validate":
                     print(result.data.get("raw_output", ""))
                 if args.action == "check-stability" and "errors" in result.data:
@@ -1869,10 +1758,16 @@ def main():
                 print("   ask repo surface --json")
                 print("   ask repo check-stability --changed-files backend/cli-spec/SKILL.md")
             elif args.topic == "mcp":
+                print_first_validation_command(result.data)
                 print("\n📚 MCP examples:")
                 print("   ask mcp sync")
                 print("   ask mcp sync --dry-run")
+            elif args.topic == "memory":
+                print_first_validation_command(result.data)
+            elif args.topic == "runtime":
+                print_first_validation_command(result.data)
             elif args.topic == "wiki":
+                print_first_validation_command(result.data)
                 print("\n📚 Wiki examples:")
                 print("   ask wiki lint")
                 print("   ask wiki ingest 'Title' --summary 'Summary' --source '<source>'")
@@ -1880,13 +1775,16 @@ def main():
                 print("   ask wiki query 'prompt injection'")
                 print("   ask wiki add-asset ./tmp/screenshot.png --title 'UI reference' --summary 'Capture for reuse'")
                 print("   ask wiki add-asset --interactive")
-
-    # Semantic Exit Code
+            elif args.topic == "workouts":
+                print_first_validation_command(result.data)
+                print("\n📚 Workout examples:")
+                print("   ask workouts list")
+                print("   ask workouts run agent-ops/verification-before-completion --attempts 2")
+                print("   ask workouts score agent-ops/verification-before-completion")
+                print("   ask workouts promote agent-ops/verification-before-completion --dry-run")
     if result.status == "success":
         sys.exit(0)
     else:
-        error_code = result.errors[0].code if result.errors else "ERR_RUNTIME"
-        sys.exit(ERROR_MAP.get(error_code, 1))
-
+        sys.exit(exit_code_for_errors(result.errors))
 if __name__ == "__main__":
     main()

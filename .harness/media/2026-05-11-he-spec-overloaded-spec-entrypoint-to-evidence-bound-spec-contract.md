@@ -10,8 +10,8 @@ This review artifact records the intended image-generation framing for the he-sp
 * `$imagegen` invoked: blocked
 * generated-image cache source path: blocked because the active image-generation tool contract does not expose a discoverable local PNG/cache path and forbids post-generation text needed to report persistence evidence
 * repository `.harness/media/` PNG path: blocked because no verifiable generated PNG was available to copy
-* prompt metadata path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-spec-overloaded-spec-entrypoint-to-evidence-bound-spec-contract-prompt.md
-* sidecar path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-spec-overloaded-spec-entrypoint-to-evidence-bound-spec-contract.md
+* prompt metadata path: .harness/media/2026-05-11-he-spec-overloaded-spec-entrypoint-to-evidence-bound-spec-contract-prompt.md
+* sidecar path: .harness/media/2026-05-11-he-spec-overloaded-spec-entrypoint-to-evidence-bound-spec-contract.md
 * repository PNG existence verification: blocked
 * persistence method: blocked
 * final user-facing text after imagegen permitted: no
@@ -33,13 +33,13 @@ This review artifact records the intended image-generation framing for the he-sp
 
 ## Prompt Summary
 
-Prompt metadata is stored at `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-spec-overloaded-spec-entrypoint-to-evidence-bound-spec-contract-prompt.md`. It asks for a three-lane engineering poster showing the before state, patch lane, after state, and evidence strip for he-spec.
+Prompt metadata is stored at `.harness/media/2026-05-11-he-spec-overloaded-spec-entrypoint-to-evidence-bound-spec-contract-prompt.md`. It asks for a three-lane engineering poster showing the before state, patch lane, after state, and evidence strip for he-spec.
 
 ## Linked Context
 
-* canonical skill source: /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-spec/SKILL.md
-* eval metadata: /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-spec/references/evals.yaml
-* generated command handle, not edited: /Users/jamiecraik/dev/agent-skills/.agents/skills/he-spec/SKILL.md
+* canonical skill source: Plugins/harness-engineering/skills/he-spec/SKILL.md
+* eval metadata: Plugins/harness-engineering/skills/he-spec/references/evals.yaml
+* generated command handle, not edited: .agents/skills/he-spec/SKILL.md
 
 ## Fallback `$imagegen` Prompt Output Contract
 

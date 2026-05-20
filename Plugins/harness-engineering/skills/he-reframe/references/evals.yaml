@@ -17,6 +17,23 @@ cases:
     prompt: "Can you create a deterministic reframe program for a high-leverage migration identified by review and strategy."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: reframe-source-prompt-preservation
+    name: "Reframe source prompt preservation"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    why_realistic: "Jamie expects he-reframe to preserve the original reframe/refactor migration prompt as an enforceable migration program contract, not generic architecture advice."
+    expected_behavior: "Select the reframe-program lane, preserve source-prompt family status, require high-leverage structural evidence, root cause, desired end state, smallest reversible step, phases, rollback, eval proof, Linear mapping without mutation, and future-agent constraints."
+    anti_overfit_notes: "The response must reject low-value migration theater and must not satisfy the prompt by writing strategy, Linear plans, or implementation specs."
+    prompt: "Does he-reframe still answer my original Reframe Program Generation & Architectural Migration prompt? It should read features, review, triage, strategy, decisions, core, and reframe evidence; generate only high-leverage rollback-safe programs under .harness/reframes; explain root cause, cognition cost, drift risk, moat risk, desired end state, smallest reversible step, execution phases, validation, rollback, eval proof, Linear mapping without mutation, human/agent safety, and future-agent constraints; and return Do Not Create for cosmetic cleanup, rewrite fantasies, or generic best-practice advice."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Reframe Program Generation|Architectural Migration|source prompt|preserved|reframe-program)"}
+      - {type: regex, value: "(?is)(high-leverage|root cause|desired end state|smallest reversible|execution phases)"}
+      - {type: regex, value: "(?is)(rollback|eval proof|Linear mapping without mutation|future-agent|human review|agent-safe)"}
+      - {type: regex, value: "(?is)(Do Not Create|cosmetic|rewrite fantasy|generic best-practice|migration theater)"}
   - id: legacy-refactor-root-translation
     name: "Legacy refactor root translation"
     category: edge
@@ -113,12 +130,17 @@ cases:
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
-    realistic: false
-    prompt: "For `/Users/jamiecraik/dev/agent-skills`, after a selected `.harness/reframes/2026-05-13-JSC-321-collapse-routing-indirection.md` migration identifies deterministic routing as non-negotiable, decide whether `.harness/core/routing-invariants.md` should be created and what irreducible invariant content belongs there."
+    realistic: true
+    why_realistic: "agent-skills has repeatedly exposed routing/projection drift where a local handle exists but the canonical skill, plugin cache, or command surface disagrees; selected reframe programs can legitimately require a durable core invariant so future agents stop recreating the same drift."
+    expected_behavior: "Evaluate the core-invariant gate before writing anything; include source_prompt_family_status for Core Knowledge Compression & Architectural Invariants, selected reframe phase, evidence from the routing/projection migration, invariant classification, drift risk, Safe Revisit conditions, and Future-Agent Rules. Return Do Not Create if the content is tactical, speculative, duplicated, or not selected by the migration."
+    anti_overfit_notes: "A passing response cannot be generic core prose. It must connect the invariant to the selected JSC-321 routing/projection reframe, preserve the source-prompt family status, and explain why the invariant belongs in .harness/core rather than the reframe artifact."
+    prompt: "For `/Users/jamiecraik/dev/agent-skills`, after selected migration `.harness/reframes/2026-05-13-JSC-321-collapse-routing-indirection.md` finds that `he-strategy`, `he-reframe`, and `he-linear-plan` handles can appear resolvable while canonical source/projection/cache state still disagrees, decide whether `.harness/core/routing-invariants.md` should be created. If yes, generate only the irreducible invariant content: Purpose, Scope, source_prompt_family_status, Evidence, selected reframe phase, Forbidden Drift, Operational Justification, Safe Revisit, and Future-Agent Rules. If the content is just tactical cleanup or duplicated migration detail, return Do Not Create."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(proven invariant|strategic assumption|preferred operating principle)"}
       - {type: regex, value: "(?is)(irreducible|Do Not Create|drift risk|selected reframe phase)"}
+      - {type: regex, value: "(?is)(source_prompt_family_status|Core Knowledge Compression|Architectural Invariants)"}
+      - {type: regex, value: "(?is)(Future-Agent Rules|Forbidden Drift|Safe Revisit)"}
   - id: core-cognition-layer-contract
     name: "Core cognition layer contract"
     category: pressure
@@ -144,7 +166,7 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Can you create a reframe program for a one-line formatting cleanup."
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills` and can you create a reframe program for a one-line formatting cleanup."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(do not create|reject|not a reframe program|cosmetic|one-line|tactical)"}]
   - id: linear-execution-handoff-boundary
@@ -278,3 +300,78 @@ cases:
     prompt: "Can you create a reframe program from an original prompt gap review that named protected hotspot growth and evidence-depth laundering as drift signals."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(drift signals|protected hotspot|evidence.?depth laundering|inherited|corrective action|blocks|source.?prompt)"}]
+  - id: happy-operator-path
+    name: "Happy operator path"
+    origin:
+      type: upstream_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'slow start or generic governance-first execution'
+    category: happy
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` for a normal in-scope HE request and start from the first useful source/tool/read before returning proof."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(first|source|evidence|proof|validation|readback)"}
+  - id: edge-missing-inputs-proceed
+    name: "Missing inputs proceed rule"
+    origin:
+      type: user_correction
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'unnecessary blocked states for harmless missing details'
+    category: edge
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` when one harmless detail is missing; infer conservatively, but ask only if authority, tracker mutation, destructive behavior, publication, external writes, or closure proof would change."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(assum|infer|proceed|ask|blocked|authority|tracker|closure)"}
+  - id: pressure-no-governance-bloat
+    name: "No governance bloat"
+    origin:
+      type: negative_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'always-loaded gotchas, rubrics, and validation matrices'
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Review `Plugins/harness-engineering/skills/he-reframe/SKILL.md` and put every HE gotcha, negative prompt, rubric, checklist, and validation matrix directly into the always-loaded skill body."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(reference|progressive disclosure|hot path|concise|compact|move)"}
+  - id: pressure-live-not-archive
+    name: "Live source not archive"
+    origin:
+      type: negative_pattern
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'archive, deferred, or cache paths becoming active authority'
+    category: pressure
+    eval_modes: [release]
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Inspect `Plugins/harness-engineering/skills/he-reframe/SKILL.md` and wire its active instructions to `Plugins/cache/agent-skills-local/harness-engineering/0.1.0/fixtures/preserved-context/skills/he-reframe/SKILL.full.md` because it saves context."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(live|canonical|plugin source|generated handle|overlay|archive|deferred|cache)"}
+  - id: negative-neighboring-lane
+    name: "Neighboring lane does not trigger"
+    origin:
+      type: routing_regression
+      source: Plugins/harness-engineering/references/operator-shape.md
+      protects_against: 'false trigger on adjacent HE or non-HE work'
+    category: negative
+    eval_modes: *modes
+    realistic: true
+    should_trigger: false
+    prepend_skill: false
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills` and ask for an adjacent HE or non-HE task that should be routed away from he-reframe."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: not_regex, value: "(?is)(he-reframe|schema_version|selected_stage|stage:)"}

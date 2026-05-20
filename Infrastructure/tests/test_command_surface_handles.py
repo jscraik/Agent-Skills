@@ -62,6 +62,33 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
                 self.assertEqual(payload["requested_handle"], alias)
                 self.assertEqual(payload["alias_resolution"], canonical)
 
+    def test_command_surface_builders_separate_canonical_and_visible_aliases(self) -> None:
+        canonical_handles = {row.handle for row in command_surface.build_skill_handles(repo_root_path=REPO_ROOT)}
+        visible_handles = {row.handle for row in command_surface.build_command_surface_handles(repo_root_path=REPO_ROOT)}
+
+        self.assertNotIn("he-ideate", canonical_handles)
+        self.assertNotIn("he-refactor", canonical_handles)
+        self.assertIn("he-ideate", visible_handles)
+        self.assertIn("he-refactor", visible_handles)
+        self.assertIn("he-refine", visible_handles)
+        self.assertIn("he-reliability-review", visible_handles)
+        self.assertIn("he-technical-review", visible_handles)
+        self.assertNotIn("he-phase-heartbeat", visible_handles)
+
+    def test_system_bridge_copy_does_not_shadow_canonical_plugin_handle(self) -> None:
+        handles = [
+            row
+            for row in command_surface.build_skill_handles(repo_root_path=REPO_ROOT)
+            if row.handle == "plugin-creator"
+        ]
+
+        self.assertEqual(len(handles), 1)
+        self.assertEqual(handles[0].owner, "plugin-factory")
+        self.assertEqual(
+            handles[0].source_path,
+            "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
+        )
+
     def test_command_surface_projection_is_generated_from_rooted_manifests(self) -> None:
         payload = command_surface.command_surface_projection(repo_root_path=REPO_ROOT)
 
@@ -73,6 +100,7 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
 
         handles = {handle["handle"]: handle for handle in payload["handles"]}
         self.assertIn("he-phase-work", handles)
+        self.assertNotIn("he-compound", handles)
         self.assertNotIn("he-phase-heartbeat", handles)
 
     def test_command_surface_marks_skill_builder_as_orchestrator(self) -> None:
@@ -105,6 +133,37 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
         visibility = command_surface._command_visibility_for(row)
         self.assertEqual(visibility, "typoed-value")
 
+    def test_system_bridge_handles_do_not_shadow_plugin_canonical_handles(self) -> None:
+        handles = [
+            command_surface.CommandHandle(
+                handle="skill-creator",
+                kind="skill",
+                command_visibility="target",
+                runtime_visibility="latent",
+                source_path="skills-system/skill-creator/SKILL.md",
+                command_handle_path=".agents/skills/skill-creator/SKILL.md",
+                owner="agent-ops",
+                description="Create or update a skill.",
+                invoke_via="agent-ops",
+            ),
+            command_surface.CommandHandle(
+                handle="skill-creator",
+                kind="skill",
+                command_visibility="target",
+                runtime_visibility="latent",
+                source_path="Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
+                command_handle_path=".agents/skills/skill-creator/SKILL.md",
+                owner="skill-factory",
+                description="Guide skill creation.",
+                invoke_via="skill-factory",
+            ),
+        ]
+
+        deduped = command_surface._drop_shadowed_system_bridge_handles(handles)
+
+        self.assertEqual(len(deduped), 1)
+        self.assertEqual(deduped[0].owner, "skill-factory")
+
 
 class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
     def test_command_surface_renders_generated_command_handle(self) -> None:
@@ -126,19 +185,73 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         command_handle = command_surface.render_skill_command_handle(handle)
 
         self.assertIn("Internal activation entrypoint", command_handle)
-        self.assertIn("./bin/ask skills resolve he-heartbeat --json", command_handle)
-        self.assertIn("If this is the Agent Skills Kit repo and `./bin/ask` exists", command_handle)
+        self.assertIn("Load `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md` if present", command_handle)
+        self.assertIn(str(REPO_ROOT / "Plugins" / "harness-engineering" / "skills" / "he-heartbeat" / "SKILL.md"), command_handle)
+        self.assertIn(str(REPO_ROOT / "bin" / "ask") + " skills resolve he-heartbeat --json", command_handle)
+        self.assertIn("diagnostic fallback", command_handle)
+        self.assertIn("Preserve source checklists/preludes verbatim", command_handle)
         self.assertIn(
             "Source: `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md`.",
             command_handle,
         )
         self.assertIn(
-            "Otherwise, load `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md` directly.",
+            "Source: `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md`.",
             command_handle,
         )
-        self.assertIn("Keep handle, routing, and source mechanics out of user-facing replies", command_handle)
+        self.assertIn("Keep handle/routing/source mechanics out of user replies", command_handle)
         self.assertNotIn("## Procedure", command_handle)
         self.assertEqual(command_surface._validate_command_handle_payload(handle, command_handle), [])
+
+    def test_openai_metadata_uses_useful_picker_description(self) -> None:
+        handle = command_surface.CommandHandle(
+            handle="he-strategy",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path="Plugins/harness-engineering/skills/he-strategy/SKILL.md",
+            command_handle_path=".agents/skills/he-strategy/SKILL.md",
+            owner="harness-engineering",
+            description="Compress repo intent, architecture review, triage, strategy, ADR, and core invariant artifacts.",
+            invoke_via="harness-engineering",
+        )
+
+        metadata = command_surface.render_openai_yaml(handle)
+
+        self.assertIn('display_name: "HE Strategy"', metadata)
+        self.assertIn(
+            'short_description: "Compress repo intent, architecture review, triage, strategy, ADR, and core invariant artifacts."',
+            metadata,
+        )
+        self.assertIn('default_prompt: "$he-strategy "', metadata)
+        self.assertNotIn("HE Strategy entrypoint", metadata)
+
+    def test_openai_metadata_validation_rejects_useless_picker_description(self) -> None:
+        handle = command_surface.CommandHandle(
+            handle="autofix",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path="Skills/agent-ops/autofix/SKILL.md",
+            command_handle_path=".agents/skills/autofix/SKILL.md",
+            owner="agent-ops",
+            description="Review and fix PR feedback.",
+            invoke_via="agent-ops",
+        )
+        metadata = '\n'.join(
+            [
+                "interface:",
+                '  display_name: "Autofix"',
+                '  short_description: "$autofix - Autofix entrypoint"',
+                '  default_prompt: "$autofix "',
+            ]
+        )
+
+        violations = command_surface._validate_openai_metadata_payload(handle, metadata)
+
+        self.assertEqual(
+            violations,
+            [{"code": "COMMAND_HANDLE_USELESS_PICKER_DESCRIPTION", "handle": "autofix"}],
+        )
 
     def test_command_handle_dry_run_projects_he_heartbeat_without_writing(self) -> None:
         payload = command_surface.write_command_handles(repo_root_path=REPO_ROOT, dry_run=True)
@@ -175,6 +288,43 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
             payload["deletes"],
             [{"path": ".agents/skills/old-handle", "reason": "obsolete_generated_command_handle"}],
         )
+
+    def test_command_handle_write_rejects_symlink_lane_without_clobbering_source(self) -> None:
+        source_path = "Skills/agent-ops/autofix/SKILL.md"
+        source = self.temp_dir / source_path
+        source.parent.mkdir(parents=True)
+        original_source = "---\nname: autofix\n---\n# Autofix\n"
+        source.write_text(original_source, encoding="utf-8")
+
+        runtime_handle = self.temp_dir / ".agents" / "skills" / "autofix"
+        runtime_handle.parent.mkdir(parents=True)
+        runtime_handle.symlink_to(source.parent)
+
+        handle = command_surface.CommandHandle(
+            handle="autofix",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path=source_path,
+            command_handle_path=".agents/skills/autofix/SKILL.md",
+            owner="agent-ops",
+            description="Autofix.",
+            invoke_via="agent-ops",
+        )
+
+        with mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]):
+            payload = command_surface.write_command_handles(repo_root_path=self.temp_dir, dry_run=False)
+
+        self.assertEqual(payload["status"], "fail")
+        self.assertTrue(runtime_handle.is_symlink())
+        self.assertIn("COMMAND_HANDLE_PARENT_SYMLINK", {violation["code"] for violation in payload["violations"]})
+        self.assertEqual(source.read_text(encoding="utf-8"), original_source)
+
+        # Assert no generated sidecar files were written into the source tree
+        source_parent_files = list(source.parent.iterdir())
+        self.assertEqual(len(source_parent_files), 1, "Expected only SKILL.md in source directory")
+        self.assertEqual(source_parent_files[0].name, "SKILL.md", "Only SKILL.md should exist in source directory")
+        self.assertFalse((source.parent / "agents").exists(), "agents/ directory should not be created in source tree")
 
     def test_command_handle_write_does_not_prune_when_validation_fails(self) -> None:
         stale = self.temp_dir / ".agents" / "skills" / "old-handle"
@@ -298,8 +448,8 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
 
-    def test_skills_proof_passes_with_linked_user_runtime(self) -> None:
-        """skills_proof must pass when workspace handle exists and user runtime is symlinked."""
+    def test_skills_proof_passes_when_agents_runtime_is_linked(self) -> None:
+        """Either supported user runtime link can satisfy command-handle reachability."""
         repo_root = self.temp_dir / "repo"
         command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
@@ -314,14 +464,87 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
 
         proof = result.data["proof"]
         self.assertEqual(proof["status"], "pass")
+        self.assertEqual(proof["status"], "pass")
         self.assertTrue(proof["gates"]["resolver"])
         self.assertTrue(proof["gates"]["generated_command_handle_check"])
         self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
+        self.assertFalse(proof["gates"]["codex_user_link"])
+        self.assertFalse(proof["gates"]["codex_user_command_handle_exists"])
         self.assertTrue(proof["gates"]["agents_user_link"])
         self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
+        self.assertTrue(proof["gates"]["user_runtime_ready"])
+        self.assertEqual(proof["schema_version"], "command-handle-proof.v2")
+        self.assertIn("user_runtime_ready", proof["gate_policy"]["required"])
+        self.assertIn("either supported user runtime link", proof["gate_policy"]["required_semantics"])
+        self.assertIn("agents_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
+
+    def test_skills_proof_passes_with_linked_codex_runtime(self) -> None:
+        """skills_proof must pass when the Codex Desktop runtime link reaches the workspace."""
+        repo_root = self.temp_dir / "repo"
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
+        skills_dir = repo_root / ".agents" / "skills"
+
+        home = self.temp_dir / "home"
+        codex_skills = home / ".codex" / "skills"
+        codex_skills.parent.mkdir(parents=True)
+        codex_skills.symlink_to(skills_dir)
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat")
+
+        proof = result.data["proof"]
+        self.assertEqual(proof["status"], "pass")
+        self.assertTrue(proof["gates"]["resolver"])
+        self.assertTrue(proof["gates"]["generated_command_handle_check"])
+        self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
+        self.assertTrue(proof["gates"]["codex_user_link"])
+        self.assertTrue(proof["gates"]["codex_user_command_handle_exists"])
 
 
-class TestCommittedCommandSurface(unittest.TestCase):
+class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):
+    def test_committed_command_surface_matches_rooted_manifests(self) -> None:
+        """Committed command-surface projection must match the rooted manifests exactly."""
+        surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+        if not surface_path.exists():
+            self.skipTest("command-surface.json not present in repo")
+
+        payload = command_surface.check_command_surface_projection(repo_root_path=REPO_ROOT)
+
+        self.assertEqual(payload["status"], "pass", payload.get("violations"))
+        self.assertEqual(payload["violations"], [])
+
+    def test_command_surface_projection_check_reports_drift(self) -> None:
+        """Projection check must fail when the committed command surface is stale."""
+        repo_root = self.temp_dir / "repo"
+        shutil.copytree(REPO_ROOT / ".skillsets", repo_root / ".skillsets")
+        (repo_root / ".skillsets" / "command-surface.json").write_text("{}\n", encoding="utf-8")
+
+        payload = command_surface.check_command_surface_projection(repo_root_path=repo_root)
+
+        self.assertEqual(payload["status"], "fail")
+        self.assertIn(
+            "COMMAND_SURFACE_PROJECTION_DRIFT",
+            {violation.get("code") for violation in payload["violations"]},
+        )
+
+    def test_command_surface_projection_check_ignores_source_revision_only(self) -> None:
+        """Projection check should ignore per-checkout source_revision churn."""
+        repo_root = self.temp_dir / "repo"
+        shutil.copytree(REPO_ROOT / ".skillsets", repo_root / ".skillsets")
+        surface_path = repo_root / ".skillsets" / "command-surface.json"
+        payload = command_surface.command_surface_projection(repo_root_path=repo_root)
+
+        for item in payload.get("handles", []):
+            provenance = item.get("provenance") if isinstance(item, dict) else None
+            if isinstance(provenance, dict) and "source_revision" in provenance:
+                provenance["source_revision"] = "0000000"
+        surface_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        check = command_surface.check_command_surface_projection(repo_root_path=repo_root)
+
+        self.assertEqual(check["status"], "pass", check.get("violations"))
+        self.assertEqual(check["violations"], [])
+
     def test_committed_command_surface_json_has_valid_structure(self) -> None:
         """The committed .skillsets/command-surface.json must be valid JSON with expected top-level keys."""
         surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
@@ -350,18 +573,23 @@ class TestCommittedCommandSurface(unittest.TestCase):
             "handle_count must equal len(handles)",
         )
 
-    def test_committed_command_surface_generated_command_handle_count_matches_list_length(self) -> None:
-        """generated_command_handle_count must equal the number of entries in the handles array."""
+    def test_committed_command_surface_generated_command_handle_count_matches_required_handles(self) -> None:
+        """generated_command_handle_count must count handles that need runtime command files."""
         surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
         if not surface_path.exists():
             self.skipTest("command-surface.json not present in repo")
 
         payload = json.loads(surface_path.read_text(encoding="utf-8"))
+        required_handle_count = sum(
+            1
+            for handle in command_surface.build_command_surface_handles(repo_root_path=REPO_ROOT)
+            if command_surface.requires_generated_command_handle(handle)
+        )
 
         self.assertEqual(
             payload.get("generated_command_handle_count"),
-            len(payload["handles"]),
-            "generated_command_handle_count must equal len(handles)",
+            required_handle_count,
+            "generated_command_handle_count must equal visible handles requiring generated command files",
         )
 
     def test_committed_command_surface_handles_have_required_fields(self) -> None:

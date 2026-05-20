@@ -12,7 +12,7 @@ Subtitle:
 “A bespoke transformation map for docs-expert”
 
 Context:
-The docs-expert skill package was reviewed and patched inside /Users/jamiecraik/dev/agent-skills. The canonical source is Skills/agent-ops/docs-expert, not the generated .agents handle. The patch integrated documentation-quality guidance and a Claude-oriented co-authoring workflow as Codex-safe context, added reader-testing and safety/handoff semantics, aligned contract/evals, then compressed SKILL.md after Plugin Eval flagged active-token cost.
+The docs-expert skill package was reviewed and patched. The canonical source is `Skills/agent-ops/docs-expert`, not the generated `.agents` handle. The patch integrated documentation-quality guidance and a Claude-oriented co-authoring workflow as Codex-safe context, added reader-testing and safety/handoff semantics, aligned contract/evals, then compressed SKILL.md after Plugin Eval flagged active-token cost.
 
 Before state:
 * Accurate evidence-backed documentation auditor, but active entrypoint had grown too heavy

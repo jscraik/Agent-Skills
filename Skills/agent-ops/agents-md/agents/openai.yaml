@@ -1,0 +1,7 @@
+interface:
+  display_name: "Agents Md"
+  short_description: "$agents-md - Agents Md entrypoint"
+  default_prompt: "$agents-md "
+
+policy:
+  allow_implicit_invocation: false

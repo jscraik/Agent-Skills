@@ -10,8 +10,8 @@ This review artifact documents the he-refactor hardening pass that closed prompt
 * `$imagegen` invoked: no / blocked
 * generated-image cache source path: blocked because the active image-generation tool does not expose a discoverable generated bitmap path or repository-local copy mechanism compatible with the required persistence protocol in this text-first reporting workflow
 * repository `.harness/media/` PNG path: blocked; no generated PNG was claimed
-* prompt metadata path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-he-refactor-lane-contract-hardening-prompt.md
-* sidecar path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-he-refactor-lane-contract-hardening.md
+* prompt metadata path: .harness/media/2026-05-13-he-refactor-lane-contract-hardening-prompt.md
+* sidecar path: .harness/media/2026-05-13-he-refactor-lane-contract-hardening.md
 * repository PNG existence verification: blocked
 * persistence method: blocked
 * final user-facing text after imagegen permitted: no, active image generation tool contract forbids post-generation text
@@ -33,10 +33,10 @@ This review artifact documents the he-refactor hardening pass that closed prompt
 
 ## Prompt Summary
 
-See /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-he-refactor-lane-contract-hardening-prompt.md.
+See .harness/media/2026-05-13-he-refactor-lane-contract-hardening-prompt.md.
 
 ## Linked Context
 
-Canonical skill package: /Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-refactor
+Canonical skill package: Plugins/harness-engineering/skills/he-refactor
 
-Fallback SVG: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-he-refactor-lane-contract-hardening.svg
+Fallback SVG: .harness/media/2026-05-13-he-refactor-lane-contract-hardening.svg

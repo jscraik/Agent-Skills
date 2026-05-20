@@ -10,8 +10,8 @@ This sidecar records the review-media artifact status for the `autoresearch` ski
 * `$imagegen` invoked: no
 * generated-image cache source path: blocked because the available image-generation tool does not expose a repository-local bitmap path before invocation, and invoking it would prevent the required final textual report under the active tool contract
 * repository `.harness/media/` PNG path: blocked; no PNG exists and none is claimed
-* prompt metadata path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-autoresearch-bounded-continuation-prompt.md
-* sidecar path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-autoresearch-bounded-continuation.md
+* prompt metadata path: .harness/media/2026-05-13-autoresearch-bounded-continuation-prompt.md
+* sidecar path: .harness/media/2026-05-13-autoresearch-bounded-continuation.md
 * repository PNG existence verification: blocked
 * persistence method: blocked
 * final user-facing text after imagegen permitted: no under the active image tool contract
@@ -37,7 +37,7 @@ The prompt metadata file describes a technical infographic titled "From Unsafe A
 
 ## Linked Context
 
-* canonical source: /Users/jamiecraik/dev/agent-skills/Skills/agent-ops/autoresearch/SKILL.md
-* generated handle not edited: /Users/jamiecraik/dev/agent-skills/.agents/skills/autoresearch/SKILL.md
+* canonical source: Skills/agent-ops/autoresearch/SKILL.md
+* generated handle not edited: .agents/skills/autoresearch/SKILL.md
 * reviewed external package: /Users/jamiecraik/Downloads/autoresearch-master (1).zip
-* media prompt: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-autoresearch-bounded-continuation-prompt.md
+* media prompt: .harness/media/2026-05-13-autoresearch-bounded-continuation-prompt.md

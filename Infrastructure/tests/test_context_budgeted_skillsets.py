@@ -65,6 +65,20 @@ class TestRootSkillsetProjection(ContextBudgetTempDirTestCase):
                 self.assertIn("## Failure Mode", content)
                 self.assertIn("## Gotchas", content)
 
+    def test_root_skill_generation_supports_cross_repo_routing(self) -> None:
+        report = generate_root_skill_sets.build_roots(self.temp_dir / "skills")
+
+        for root in report["roots"]:
+            with self.subTest(root=root["name"]):
+                content = root["content"]
+                self.assertIn(
+                    "<agent-skills-root>/Infrastructure/scripts/lifecycle-and-sync/route_skillset.py",
+                    content,
+                )
+                self.assertIn("<agent-skills-root>/.skillsets", content)
+                self.assertIn("<agent-skills-root>/<source_path>", content)
+                self.assertNotIn(str(REPO_ROOT), content)
+
     def test_root_skill_evals_use_typed_acceptance_checks(self) -> None:
         report = generate_root_skill_sets.build_roots(self.temp_dir / "skills")
 
@@ -91,13 +105,22 @@ class TestRootSkillsetProjection(ContextBudgetTempDirTestCase):
         self.assertEqual(first_row["provenance"]["projection_mode"], "rooted")
         self.assertTrue(first_row["provenance"]["source_sha256"])
 
-    def test_file_hash_uses_symlink_blob_for_provenance(self) -> None:
+    def test_system_manifest_provenance_hashes_canonical_system_store(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        agent_ops = next(manifest for manifest in report["manifests"] if manifest["skill_set"] == "agent-ops")
+        row = next(row for row in agent_ops["rows"] if row["id"] == "openai-docs")
+        source_file = REPO_ROOT / row["source_path"]
+
+        self.assertEqual(row["source_path"], "skills-system/openai-docs/SKILL.md")
+        self.assertEqual(row["provenance"]["source_sha256"], skillset_model.file_hash(source_file))
+
+    def test_file_hash_uses_resolved_file_bytes_for_provenance(self) -> None:
         target = self.temp_dir / "target.md"
         target.write_text("# Target\n", encoding="utf-8")
         link = self.temp_dir / "SKILL.md"
         link.symlink_to("target.md")
 
-        expected = hashlib.sha256(b"target.md").hexdigest()
+        expected = hashlib.sha256(b"# Target\n").hexdigest()
 
         self.assertEqual(skillset_model.file_hash(link), expected)
         self.assertEqual(check_context_budget.file_hash(link), expected)
@@ -329,6 +352,20 @@ class TestSkillsetRouting(ContextBudgetTempDirTestCase):
         self.assertEqual(payload["status"], "selected")
         self.assertEqual(payload["selected"]["id"], "he-router")
         self.assertIn("named-stage-ambiguity", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_routes_cross_repo_skill_routing_defects_to_fix_bugs(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "harness-engineering",
+            "Skill routing note: I attempted the harness-engineering router. The repo-relative script path from the skill was missing, and the absolute router returned low_confidence, so I did not load a latent child module.",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "he-fix-bugs")
+        self.assertIn("skill-routing-runtime-defect", payload["candidates"][0]["reason"])
 
 
 class TestContextBudgetManifestValidation(ContextBudgetTempDirTestCase):

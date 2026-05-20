@@ -54,6 +54,7 @@ low-value, tactical, or process-theater findings.
 Return: `schema_version: 1`, selected candidate, output path or rejection
 reason, source artifacts, fact/interpretation/assumption split, blast radius,
 phases, rollback, Linear mapping, eval proof, future-agent guardrails,
+`source_prompt_family_status` when source-prompt preservation is in scope,
 `git_staging_status`, `staged_paths`, and shared subagent policy fields for
 `he-reframe`.
 
@@ -178,10 +179,10 @@ supporting references are unverified.
 
 ## References
 
-- Program shape and acceptance: `references/reframe-program-contract.md`
-- Strategy/reframe/ADR/core prompt family: `references/architecture-evolution-compression.md`
+- Program shape and acceptance: `../../references/skills/he-reframe/reframe-program-contract.md`
+- Strategy/reframe/ADR/core prompt family: `../../references/skills/he-reframe/architecture-evolution-compression.md`
 - Local contract and evals: `references/contract.yaml`, `references/evals.yaml`
-- Original prompt behavior: `references/source-prompt-preservation.md`
+- Original prompt behavior: `../../references/skills/he-reframe/source-prompt-preservation.md`
 - Shared subagent call policy: `../../references/subagent-call-contract.md`
 - BLUF review contract: `../../references/bluf-review-contract.md`
 - Visual reference contract: `../../references/visual-reference-contract.md`

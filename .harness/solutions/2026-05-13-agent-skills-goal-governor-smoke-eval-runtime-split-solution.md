@@ -99,8 +99,8 @@ A terse `.harness/memory/LEARNINGS.md` line would be too small for the interacti
 
 ## Related Artifacts
 
-- `docs/solutions/2026-04-04-codex-live-smoke-closeout-stabilization.md`
-- `docs/solutions/2026-04-25-rooted-projection-sync-ownership-guard.md`
+- `Docs/solutions/2026-04-04-codex-live-smoke-closeout-stabilization.md`
+- `Docs/solutions/2026-04-25-rooted-projection-sync-ownership-guard.md`
 - `Skills/agent-ops/goal-governor/references/evals.yaml`
 - `Infrastructure/artifacts/skills/goal-governor/20260513-225255-237497/scorecard.json`
 - `Infrastructure/artifacts/validation/20260513T215653Z`

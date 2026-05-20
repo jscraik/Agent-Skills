@@ -9,7 +9,6 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
     "harness-engineering": {
         "he-brainstorm",
         "he-code-review",
-        "he-compound",
         "he-eval-report",
         "he-fix-bugs",
         "he-heartbeat",
@@ -73,6 +72,37 @@ SYSTEM_BRIDGE_SKILL_NAMES = {
     "skill-creator",
     "skill-installer",
 }
+
+
+def _read_frontmatter_text(skill_md: Path) -> str:
+    raw = skill_md.read_text(encoding="utf-8")
+    if not raw.startswith("---\n"):
+        return ""
+    end = raw.find("\n---", 4)
+    if end == -1:
+        return ""
+    return raw[4:end]
+
+
+def _is_hidden_skill(skill_md: Path) -> bool:
+    frontmatter = _read_frontmatter_text(skill_md)
+    hidden_markers = (
+        "runtime-visibility: hidden",
+        "command-visibility: none",
+        "lifecycle: deprecated",
+        "lifecycle_state: archived",
+    )
+    return any(marker in frontmatter for marker in hidden_markers)
+
+
+def _direct_visible_skill_names(skills_root: Path) -> set[str]:
+    return {
+        child.name
+        for child in skills_root.iterdir()
+        if child.is_dir()
+        and (child / "SKILL.md").exists()
+        and not _is_hidden_skill(child / "SKILL.md")
+    }
 
 
 class LocalPluginPickerSurfaceTests(unittest.TestCase):
@@ -144,11 +174,7 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
         """
         for plugin_name, expected_skill_names in EXPECTED_SOURCE_PLUGIN_SKILLS.items():
             skills_root = REPO_ROOT / "Plugins" / plugin_name / "skills"
-            direct_skill_names = {
-                child.name
-                for child in skills_root.iterdir()
-                if child.is_dir() and (child / "SKILL.md").exists()
-            }
+            direct_skill_names = _direct_visible_skill_names(skills_root)
             self.assertEqual(
                 direct_skill_names,
                 expected_skill_names,

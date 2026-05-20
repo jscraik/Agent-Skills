@@ -26,8 +26,8 @@ decision cost.
 ```
 
 Admitted JSC-246 path: `repo doctor` -> `skills improve` -> `skills explain`
--> `skills prove` -> `repo closeout --changed`. `repo onboard` and `repo
-next` are deferred candidates.
+-> `skills doctor` -> `skills profiles` -> `skills prove` -> `repo closeout --changed`. `repo
+onboard` and `repo next` are deferred candidates.
 
 ## Baseline Friction Evidence
 
@@ -44,7 +44,10 @@ implemented in the live `ask` surface.
 | `./bin/ask runtime budget --json --robot`                                                                                  | Reports `advanced_visible_count: 173`, advisory threshold `60`, `default_visible_count: 10`, and `budget_status: pass`.          | Runtime surface health is available, but agents must know to call it separately and then interpret large JSON.                                               |
 | `./bin/ask repo surface --json --robot`                                                                                    | Reports tracked-surface classifications and diagnostic debt without deleting files.                                              | Surface ownership evidence exists, but it is low-level inventory output and must be summarized by doctor or closeout flows.                                  |
 | `./bin/ask repo --help`                                                                                                    | Exposes `status`, `validate`, `check-stability`, `doctor`, `closeout`, `doctor-catalog`, `provider-audit`, and `surface`.        | Repo health and closeout now have namespace-first routes; deeper surface policy still needs detailed follow-up output.                                       |
-| `./bin/ask skills --help`                                                                                                  | Exposes `goal`, `route`, `improve`, `explain`, `prove`, `handles`, and related primitives.                                       | The product path is now executable, but outcome proof still requires real workout/eval/transcript evidence.                                                  |
+| `./bin/ask skills --help`                                                                                                  | Exposes `goal`, `route`, `improve`, `explain`, `doctor`, `profiles`, `memory`, `prove`, `handles`, and related primitives.        | The product path is now executable, but outcome proof still requires real workout/eval/transcript evidence.                                                  |
+| `./bin/ask skills package <handle-or-path> --json --robot`                                                               | Reports version, role compatibility, runtime needs, maturity, provenance, and share/install readiness for one capability.         | The command is read-only; it does not publish, install, or mutate marketplace metadata.                                                                        |
+| `./bin/ask skills profiles --json --robot`                                                                                | Reports authoring, package-review, plugin-share, eval, and live-mutation profiles with roots, evidence, and stop conditions.     | Operation modes are now inspectable, but profile-specific enforcement remains a follow-up contract for validators and eval runners.                           |
+| `./bin/ask skills memory search "projection" --json --robot`                                                             | Searches durable skill memory surfaces with provenance and freshness metadata.                                                   | The provider is read-only and does not replace Project Brain indexing or wiki mutation commands.                                                              |
 | `./bin/ask repo doctor-catalog --json --robot`                                                                             | Returns `decision_status: resolved` after README, `SKILL.md`, `ask skills list`, and route metadata expose canonical count `32`. | Catalog parity is separately diagnosable, and doctor/closeout should continue surfacing this blocker when routing or delivery depends on it.                 |
 | `./bin/ask skills goal "continue implementing the Agent Skills Kit repo surface control-plane plan" --json --robot`        | Returns `intent_unresolved` with `route_decision_status: unresolved_ambiguity`.                                                  | Broad goals can remain too ambiguous even after catalog parity is healthy; product flows need sharper repair prompts and next-command guidance.              |
 | `./bin/ask skills goal "use he-work to implement P4 namespace-first product command contracts for JSC-246" --json --robot` | Resolves `he-work` with confidence `0.938`.                                                                                      | Goal routing works when the user names the workflow and phase, which supports a future `skills improve` contract that asks for narrower context when needed. |
@@ -78,9 +81,13 @@ All commands in this document must use the standard `ask` JSON envelope:
         "skills_synced": true
       },
       "runtime_budget": {
-        "status": "pass",
-        "advanced_visible_count": 173,
-        "advisories": []
+        "state": "pass",
+        "severity": "info",
+        "details": {
+          "status": "pass",
+          "advanced_visible_count": 173,
+          "advisories": []
+        }
       },
       "blockers": [],
       "next_command": "./bin/ask repo surface --json"
@@ -281,6 +288,479 @@ Required behavior:
 - Include overlap with OpenAI or local plugin skills when available.
 - Keep explanation output concise and link deeper references rather than loading
   full skill bodies by default.
+
+## `ask skills doctor`
+
+Purpose: diagnose whether one capability is ready to use right now without
+claiming full outcome proof.
+
+Inputs:
+
+- skill handle or repo-relative skill source path;
+- `--json`;
+- `--robot`;
+- `--strict`, optional; run strict audit instead of the default compat audit.
+
+Required data fields:
+
+```json
+{
+  "skill_doctor": {
+    "schema_version": "skill-doctor.v1",
+    "query": "he-code-review",
+    "target_kind": "command_handle",
+    "handle": "he-code-review",
+    "canonical_source_path": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md",
+    "audit_target": "Plugins/harness-engineering/skills/code_quality_review/he-code-review",
+    "target_summary": {
+      "query": "he-code-review",
+      "target_kind": "command_handle",
+      "handle": "he-code-review",
+      "canonical_source_path": "Plugins/harness-engineering/skills/code_quality_review/he-code-review/SKILL.md"
+    },
+    "contract_schemas": {
+      "doctor": {"version": "skill-doctor.v1", "owner": "Agent Skills Kit"},
+      "events": {"version": "capability-lifecycle-event.v1", "owner": "Agent Skills Kit"},
+      "profiles": "skill-operation-profiles.v1",
+      "package": "skill-package-readiness.v1"
+    },
+    "operation_context": {
+      "primary_profile": "authoring",
+      "next_profiles": ["package-review", "proof"],
+      "validation_commands": [
+        "./bin/ask skills doctor he-code-review --json --robot",
+        "./bin/ask skills audit Plugins/harness-engineering/skills/code_quality_review/he-code-review --json --robot"
+      ]
+    },
+    "status": "warning",
+    "blockers": [],
+    "warnings": [
+      {
+        "class": "outcome_proof_not_run",
+        "message": "Outcome proof is available but has not been run."
+      }
+    ],
+    "readiness_taxonomy": {"blockers": {}, "warnings": {"outcome_proof_not_run": 1}},
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "skill_doctor_completed",
+      "outcome": {"status": "warning", "blocker_classes": [], "warning_classes": ["outcome_proof_not_run"]}
+    },
+    "lifecycle_events": [
+      {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_resolved"},
+      {"schema_version": "capability-lifecycle-event.v1", "event_type": "audit_completed"},
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "skill_doctor_completed",
+        "outcome": {"status": "warning", "blocker_classes": [], "warning_classes": ["outcome_proof_not_run"]}
+      }
+    ],
+    "checks": {
+      "resolver": {"status": "pass"},
+      "runtime_reachability": {"status": "pass"},
+      "canonical_source": {"status": "pass"},
+      "structural_audit": {"status": "pass", "level": "compat"},
+      "capability_metadata": {
+        "status": "pass",
+        "readiness_level": "capability_declared",
+        "required_fields": {"present": ["description", "name"], "missing": []},
+        "capability_contract": {"present": [], "missing": []},
+        "package_contract": {
+          "present": ["maturity", "version"],
+          "missing": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"],
+          "values": {
+            "version": "1.0.0",
+            "compatible_roles": [],
+            "runtime_needs": [],
+            "maturity": "canonical",
+            "provenance": null,
+            "share_readiness": null
+          },
+          "role_compatibility": {"declared": false, "roles": []},
+          "runtime_contract": {"declared": false, "needs": []},
+          "install_gate": {
+            "install_ready": false,
+            "required_checks": ["version", "compatible_roles", "runtime_needs", "maturity", "provenance", "share_readiness"],
+            "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"],
+            "checkout_test": {"required": true, "status": "not_run", "evidence": []}
+          },
+          "promotion_gate": {
+            "status": "blocked_validation",
+            "promotion_ready": false,
+            "share_ready": false,
+            "share_readiness": null,
+            "checkout_test_status": "not_run",
+            "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"],
+            "recommended_next_fields": ["compatible_roles", "runtime_needs", "provenance", "share_readiness"]
+          }
+        },
+        "package_readiness": {
+          "readiness_level": "versioned_capability",
+          "required_fields": {
+            "present": ["maturity", "version"],
+            "missing": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"]
+          },
+          "values": {
+            "version": "1.0.0",
+            "compatible_roles": [],
+            "runtime_needs": [],
+            "maturity": "canonical",
+            "provenance": null,
+            "share_readiness": null
+          },
+          "role_compatibility": {"declared": false, "roles": []},
+          "runtime_contract": {"declared": false, "needs": []},
+          "install_gate": {
+            "install_ready": false,
+            "required_checks": ["version", "compatible_roles", "runtime_needs", "maturity", "provenance", "share_readiness"],
+            "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"],
+            "checkout_test": {"required": true, "status": "not_run", "evidence": []}
+          },
+          "promotion_gate": {
+            "status": "blocked_validation",
+            "promotion_ready": false,
+            "share_ready": false,
+            "share_readiness": null,
+            "checkout_test_status": "not_run",
+            "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"],
+            "recommended_next_fields": ["compatible_roles", "runtime_needs", "provenance", "share_readiness"]
+          }
+        }
+      },
+      "outcome_proof": {"status": "available_not_run"}
+    },
+    "agent_summary": "the-code-review passed capability doctor checks with outcome proof still available to run.",
+    "next_command": "./bin/ask skills prove he-code-review --json --robot"
+  }
+}
+```
+
+Required behavior:
+
+- Compose resolver, command-handle proof, canonical-source, audit, metadata,
+  and outcome-proof availability signals for one capability.
+- Emit `target_summary` with the resolved query, target kind, handle, and
+  canonical source path so callers can assert which capability was inspected.
+- Emit `contract_schemas` with the doctor, lifecycle events, operation profiles,
+  and package-readiness schema references used by the response.
+- Emit `operation_context` with deterministic profile and validation-command
+  evidence for the invocation environment.
+- Return `blocked` with machine-readable blocker classes when the capability
+  cannot be used safely.
+- Apply deterministic status precedence: `blocked` > `warning` > `pass`;
+  the highest-severity signal wins for `target_summary`,
+  `operation_context`, and `capability-lifecycle-event.v1` outcomes.
+- Always emit `next_command` for `blocked`, `warning`, and `pass`; use
+  `null` only when no safe next command exists.
+- Treat missing outcome proof as a warning, not as a structural failure.
+- Emit stable readiness taxonomy classes for runtime, auth, user-input,
+  timeout, artifact, source, and validation blockers.
+- Emit a `capability-lifecycle-event.v1` object so automation can consume
+  doctor outcomes without scraping prose.
+- Leave `ask skills prove` responsible for the outcome-proof scorecard.
+
+## `ask skills package`
+
+Purpose: report whether one skill package has version and role-aware metadata
+needed for promotion, sharing, install checks, or role compatibility claims.
+
+Inputs:
+
+- skill handle or repo-relative skill source path;
+- `--json`;
+- `--robot`; and
+- `--strict`, optional; fail when package readiness metadata is incomplete;
+- `--checkout-test`, optional; add read-only local checkout evidence to the
+  install gate without cloning, installing, publishing, or mutating runtime
+  projections.
+
+Required data fields:
+
+```json
+{
+  "skill_package": {
+    "schema_version": "skill-package-readiness.v1",
+    "query": "skill-builder",
+    "target_kind": "command_handle",
+    "handle": "skill-builder",
+    "canonical_source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+    "audit_target": "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "status": "warning",
+    "strict": false,
+    "package_contract": {
+      "readiness_level": "versioned_capability",
+      "required_fields": {
+        "present": ["maturity", "version"],
+        "missing": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"]
+      },
+      "values": {
+        "version": "1.0.0",
+        "compatible_roles": [],
+        "runtime_needs": [],
+        "maturity": "canonical",
+        "provenance": null,
+        "share_readiness": null
+      },
+      "role_compatibility": {"declared": false, "roles": []},
+      "runtime_contract": {"declared": false, "needs": []},
+      "install_gate": {
+        "install_ready": false,
+        "required_checks": ["version", "compatible_roles", "runtime_needs", "maturity", "provenance", "share_readiness"],
+        "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"],
+        "checkout_test": {
+          "required": true,
+          "status": "not_run",
+          "evidence": []
+        }
+      },
+      "promotion_gate": {
+        "status": "blocked_validation",
+        "promotion_ready": false,
+        "share_ready": false,
+        "share_readiness": null,
+        "checkout_test_status": "not_run",
+        "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"],
+        "recommended_next_fields": ["compatible_roles", "runtime_needs", "provenance", "share_readiness"]
+      }
+    },
+    "gate_summary": {
+      "install_ready": false,
+      "checkout_test_status": "not_run",
+      "promotion_status": "blocked_validation",
+      "promotion_ready": false,
+      "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"]
+    },
+    "blockers": [],
+    "warnings": [
+      {
+        "class": "capability_contract_incomplete",
+        "message": "Package readiness metadata is incomplete."
+      }
+    ],
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "package_readiness_checked",
+      "details": {
+        "gate_summary": {
+          "install_ready": false,
+          "checkout_test_status": "not_run",
+          "promotion_status": "blocked_validation",
+          "promotion_ready": false,
+          "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"]
+        }
+      }
+    },
+    "lifecycle_events": [
+      {"schema_version": "capability-lifecycle-event.v1", "event_type": "skill_loaded"},
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "package_readiness_checked",
+        "details": {
+          "gate_summary": {
+            "install_ready": false,
+            "checkout_test_status": "not_run",
+            "promotion_status": "blocked_validation",
+            "promotion_ready": false,
+            "blocked_reasons": ["compatible_roles", "provenance", "runtime_needs", "share_readiness"]
+          }
+        }
+      }
+    ],
+    "agent_summary": "skill-builder has package gate blockers: compatible_roles, provenance, runtime_needs, share_readiness.",
+    "next_command": "./bin/ask skills doctor skill-builder --strict --json --robot"
+  }
+}
+```
+
+Required behavior:
+
+- Resolve either a command handle or canonical source path without writing files.
+- Read package metadata from top-level frontmatter and nested `metadata`.
+- Treat missing canonical source as blocked.
+- Treat incomplete package metadata as warning by default; with `--strict`,
+  return non-zero and set payload status `blocked` with a `blocked_validation`
+  blocker.
+- Include a read-only `install_gate` that reports whether package metadata is
+  install-ready and whether follow-up checkout evidence still needs to run.
+- Include a read-only `promotion_gate` with a machine-readable `status`,
+  `promotion_ready`, `checkout_test_status`, and `blocked_reasons` so
+  share/promotion checks do not require prose scraping.
+- Include `gate_summary` as the automation-facing view of install, checkout,
+  promotion, and blocker state.
+- With `--checkout-test`, replace `checkout_test.status: "not_run"` with
+  `pass`, `blocked_missing_source`, or `blocked_validation`, plus evidence such
+  as source path, source readability, audit target, and missing metadata fields.
+- Emit both `skill_loaded` and `package_readiness_checked` lifecycle events so
+  automation can distinguish source resolution from package gate evaluation.
+  The `package_readiness_checked` event must include `details.gate_summary`.
+- Derive event types from `lifecycle_events[].event_type`; do not require a
+  duplicate event-type list in package payloads.
+- Keep promotion, install, share, and marketplace mutation out of this command.
+
+## `ask skills profiles`
+
+Purpose: expose profile-v2-style operation modes for skill lifecycle work.
+
+Inputs:
+
+- optional profile name: `authoring`, `package-review`, `plugin-share`,
+  `eval`, or `live-mutation`;
+- `--json`;
+- `--robot`.
+
+Required data fields:
+
+```json
+{
+  "skill_profiles": {
+    "schema_version": "skill-operation-profiles.v1",
+    "status": "pass",
+    "workspace_roots": {
+      "repo_root": ".",
+      "canonical_skill_roots": ["Skills", "Plugins"],
+      "runtime_projection_roots": [".agents/skills", ".skillsets"],
+      "artifact_roots": ["Infrastructure/artifacts", "Infrastructure/workouts"],
+      "memory_roots": [".harness/memory", "Wiki/wiki/learnings", "Docs/solutions"]
+    },
+    "profile_model": "profile-v2-inspired",
+    "profiles": {
+      "eval": {
+        "intent": "Run smoke, workout, or release evidence for one capability.",
+        "allowed_roots": ["Skills/**", "Infrastructure/workouts/**", "Infrastructure/artifacts/**"],
+        "effective_roots": ["Skills/**", "Infrastructure/workouts/**", "Infrastructure/artifacts/**"],
+        "write_policy": "artifact_write_only",
+        "permissions": ["repo_read", "local_validation", "artifact_write"],
+        "required_evidence": ["eval_started event", "eval_completed or eval_blocked event", "timeout classification"],
+        "stop_conditions": ["blocked_user_input", "blocked_auth", "timeout_no_output", "timeout_partial_output"]
+      }
+    }
+  }
+}
+```
+
+Required behavior:
+
+- When no profile name is provided, return all profiles.
+- For a valid profile name, return that single profile.
+- For unknown profiles, return `blocked` with available profile names.
+- Include workspace-root groups and per-profile effective roots so automation can
+  show the repo, runtime projection, artifact, and memory boundaries without
+  parsing profile prose.
+- Keep profile output read-only; profiles describe constraints and do not
+  perform sync, install, eval, or mutation work.
+
+## `ask skills memory`
+
+Purpose: expose durable skill learnings as an extension-like read-only provider
+instead of relying on agents to remember which markdown tree to search.
+
+Inputs:
+
+- mode: `list`, `read`, or `search`;
+- optional query: entry id/path for `read`, keyword text for `search`;
+- `--limit`, optional; cap returned entries;
+- `--json`; and
+- `--robot`.
+
+Required data fields:
+
+- `schema_version`: `skill-memory-provider.v1`.
+- `provider_model`: `extension-like-read-only`.
+- `roots`: provider root declarations with existence checks.
+- `entries`: memory entries for `list` and `search`.
+- `entry`: selected entry with full content for `read`.
+- `provenance`: source provider and repo-relative path for each entry.
+- `freshness`: modified timestamp and age in days for each entry.
+- `agent_summary`: concise machine-friendly outcome.
+
+Required behavior:
+
+- Search `.harness/memory`, `Wiki/wiki/learnings`, and `Docs/solutions`.
+- Return provenance and freshness for every listed or searched entry.
+- Return full content only for `read`; `list` and `search` stay summary-first.
+- Remain read-only. Mutations stay with `ask wiki add`, `ask wiki ingest`, or
+  the approved memory/decision workflow.
+
+## `ask evals run`
+
+Purpose: run smoke or release evidence while classifying runner blockers
+separately from skill behavior failures.
+
+Inputs:
+
+- eval path or workout name;
+- `--json`;
+- `--robot`; and
+- `--timeout`, optional runner timeout.
+
+JSON output example:
+
+```json
+{
+  "eval_run": {
+    "schema_version": "eval-run-result.v1",
+    "query": "skill-factory/release",
+    "eval_status": "blocked_runtime",
+    "blocker_class": "blocked_runtime",
+    "blocker_taxonomy": {
+      "blocked_runtime": "Local sandbox, context-window, model-capacity, or runner setup failure that prevents the eval from reaching skill behavior.",
+      "blocked_auth": "Authentication, token, or login failure.",
+      "blocked_user_input": "The runner requested user input that automation cannot provide.",
+      "timeout_no_output": "The runner timed out before producing usable output.",
+      "timeout_partial_output": "The runner timed out after producing partial evidence."
+    },
+    "lifecycle_events": [
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_started",
+        "status": "running",
+        "message": "Eval runner started."
+      },
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_blocked",
+        "status": "blocked",
+        "message": "Runner setup failed before skill behavior was reached."
+      }
+    ],
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "eval_blocked",
+      "status": "blocked",
+      "message": "Runner setup failed before skill behavior was reached."
+    },
+    "raw_output": "",
+    "raw_error": "sandbox denied runner setup path"
+  }
+}
+```
+
+Required data fields for JSON output:
+
+- `eval_status`: one of `pass`, `fail`, `blocked_user_input`, `blocked_auth`,
+  `blocked_runtime`, `timeout_no_output`, or `timeout_partial_output`.
+- `blocker_class`: `null` for pass/fail, otherwise the matching blocked or
+  timeout class.
+- `blocker_taxonomy`: stable class definitions for automation and dashboards.
+- `lifecycle_events`: ordered `capability-lifecycle-event.v1` records starting
+  with `eval_started` and ending with `eval_completed` or `eval_blocked`.
+- `lifecycle_event`: the latest lifecycle event for consumers that only need
+  the final eval outcome.
+- `raw_output` and `raw_error`: captured runner output for exact evidence.
+- See the example above for the complete `eval_run` JSON envelope.
+
+Required behavior:
+
+- Emit `eval_started` before invoking the runner, then emit `eval_completed`
+  for pass/fail outcomes or `eval_blocked` for classified blocker outcomes.
+- A timeout with no captured output is `timeout_no_output`.
+- A timeout after partial captured output is `timeout_partial_output`.
+- Authentication or login failures are `blocked_auth`.
+- User-input requests are `blocked_user_input`, not hangs.
+- Local sandbox, context-window, or model-capacity failures are
+  `blocked_runtime`.
+- Scorecards produced by `run_skill_evals.py` should carry the same blocker
+  class on runner and case records.
 
 ## `ask skills prove`
 

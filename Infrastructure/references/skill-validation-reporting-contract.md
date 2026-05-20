@@ -44,13 +44,37 @@ If only a wrapper ran, report the wrapper label instead of the internal file nam
 | `OpenAI skill format` | `./bin/ask skills validate-openai-format <path> --mode strict --json --robot` | first-class wrapper gate |
 | `OpenClaw` | strict audit output or dedicated local evidence | report only when explicit evidence exists |
 | `Plugin Eval` | `Infrastructure/bin/plugin-eval analyze <path> --format markdown` | first-class gate |
+| `Snyk dependency screening` | `./bin/ask skills external-review <path> --include-snyk --json --robot` or release eval `security_dependency_screening` artifact | first-class gate for manifest-backed release candidates |
 | `smoke evals` | `./bin/ask evals run <path> --mode smoke --json --robot` | first-class gate |
 | `release evals` | `./bin/ask evals run <path> --mode release --json --robot` or owned equivalent | first-class gate |
 | `package boundary checks` | `./bin/ask skills validate-boundaries <handle-or-path> --json --robot` or owned equivalent | first-class evidence check |
 | `sync/projection checks` | `./bin/ask skills prove <handle-or-path> --json --robot` or owned sync proof | first-class evidence check |
 | `docs/prose/spelling` | `vale <paths>` execution is the only accepted evidence; repo docs-quality wrappers may orchestrate but do not replace the Vale output requirement | first-class only when Vale (or equivalent canonical docs-quality command) has run and produced output |
 | `eval realism` | explicit eval schema fields such as `realistic: true\|false`, strict audit findings, or owned eval-realism validator output | first-class when schema or validator evidence exists |
+| `eval observability export` | `Infrastructure/references/eval-observability-otel-contract.md`, local eval artifacts, and explicit repo-owned OTel-style export evidence when configured | advisory by default; first-class only when an eval program explicitly requires observability export |
 | `media artifact persistence` | generated artifact path, prompt metadata path, sidecar, and existence check under `.harness/media/` or owned artifact location | first-class only for media/artifact asks |
+
+## Skill Eval Lane Taxonomy
+
+Keep the local skill eval and second-review lanes separate when reporting
+readiness. They answer different questions and one lane cannot silently stand in
+for another:
+
+| Lane | Canonical command | What it proves | What it does not prove |
+| --- | --- | --- | --- |
+| local evals | `./bin/ask evals run <path> --mode smoke\|release --json --robot` | dynamic skill behavior, run traces, command/artifact expectations, and release-mode gates | static readability or Tessl best-practice score |
+| Plugin Eval | `Infrastructure/bin/plugin-eval analyze <path> --format markdown` or `./bin/ask skills external-review <path> --json --robot` | budget, ergonomics, reviewability, and obvious packaging risks | runtime behavior, trigger realism, Snyk dependency posture, or Tessl quality |
+| Tessl lint | `./bin/ask skills external-review <path> --json --robot` | Tessl tile package-shape compatibility for a disposable local wrapper | direct content quality for the canonical `SKILL.md` source |
+| Tessl review | `./bin/ask skills external-review <path> --json --robot` | local best-practice/content review for a copied work-in-progress skill | publishing readiness or registry upload success |
+| Snyk dependency screening | `./bin/ask skills external-review <path> --include-snyk --json --robot` or release eval `security_dependency_screening` artifact | high-severity dependency vulnerability screening for supported manifests | prompt/security-policy correctness for pure instruction-only skills |
+| OTel-inspired observability | optional local eval observability artifacts or repo-owned export evidence | trace correlation, debugging, dataset creation, and scorer workflow support | skill correctness, deterministic pass/fail, local artifact existence, Braintrust integration, or release readiness unless explicitly required |
+
+`ask skills external-review` is local-first despite the name. It runs internal
+strict audit plus local second-review tools, never invokes `npx`, and never
+publishes or uploads a skill. Snyk is the only lane that may contact an external
+service, and it runs only when explicitly requested in local review or when the
+release-eval policy requires dependency screening for a manifest-backed
+candidate.
 
 ## Special Cases
 
@@ -94,6 +118,50 @@ If only a wrapper ran, report the wrapper label instead of the internal file nam
   claims.
 - Plugin Eval success does not override strict-audit or eval-realism failures.
 
+### `Snyk dependency screening`
+
+Use Snyk when any of these are true:
+
+- the candidate has supported dependency manifests, such as `package.json`,
+  `pyproject.toml`, `requirements.txt`, `Gemfile`, `go.mod`, or lockfiles
+- the report claims release readiness for a manifest-backed skill or plugin
+  package
+- dependency files, installer scripts, generated package surfaces, or plugin
+  runtime dependencies changed
+- local evidence must match the CircleCI/Snyk security-screening lane
+- the user explicitly asks for Snyk, dependency vulnerability screening, or
+  external security advisory evidence
+
+Do not run Snyk by default for pure `SKILL.md`-first instruction-only
+candidates with no supported dependency manifest. Report those as `not
+applicable` unless the user explicitly asks for the advisory lane.
+
+- Required for release-readiness claims on manifest-backed skill or plugin
+  packages.
+- Report `not applicable` only when no supported dependency manifest exists
+  under the candidate package.
+- For manifest-backed candidates, `not_applicable`,
+  `blocked_no_supported_projects`, `blocked_missing_binary`, `blocked_auth`,
+  `timeout`, `advisory`, or `error` prevents release readiness.
+- Use the high-severity threshold so local release evals and CI enforce the same
+  dependency-screening bar.
+
+### `Tessl lint` and `Tessl review`
+
+- Tessl lint expects a Tessl `tile.json` package. Canonical repo skills are
+  `SKILL.md`-first directories, so a direct `tessl skill lint <skill-dir>`
+  failure about missing `tile.json` is a packaging-shape blocker, not a content
+  finding.
+- The canonical repo command creates a disposable local `tile.json` wrapper
+  around a copied `SKILL.md` before running Tessl lint. Report this as `Tessl
+  lint` and describe it as a temporary tile package-shape check.
+- Tessl review is the local best-practice/content reviewer for the skill copy.
+  Report it separately from Tessl lint.
+- Do not use Tessl lint or review evidence to imply that a skill was published,
+  registered, uploaded, or accepted by a registry.
+- If Tessl reports missing files or links outside the temporary tile, preserve
+  those findings as package self-containment issues.
+
 ### `media artifact persistence`
 
 - Use only for requests that require generated media or concrete artifacts.
@@ -107,6 +175,29 @@ If only a wrapper ran, report the wrapper label instead of the internal file nam
   tool, approval, output-path, or policy reason.
 - If generation availability is `unknown`, report artifact persistence as
   `blocked`; do not treat an unchecked tool surface as a fallback success.
+
+### `eval observability export`
+
+- OTel-inspired local trace export is opt-in eval observability, not a default
+  readiness gate. Braintrust is an inspiration source for the local package
+  pattern, not an integration target in this contract.
+- Local eval artifacts remain the canonical evidence source:
+  `codex_events.jsonl`, `stdout.txt`, `stderr.txt`, `result.json`,
+  scorecards, summaries, and release manifests.
+- Report `not applicable` or omit the lane when the eval program did not
+  request observability export.
+- Report `blocked` when local export was requested but network, collector,
+  endpoint, package, or policy approval was missing. Do not require or mention
+  Braintrust credentials unless a separate Braintrust integration was explicitly
+  requested.
+- Report `pass` only when export completion is directly evidenced and the
+  exported data is redacted according to
+  `Infrastructure/references/eval-observability-otel-contract.md`.
+- Do not mark the underlying skill eval as failed only because local OTel-style
+  export failed. Classify exporter failure as `blocked_eval_observability`
+  unless the named test case is specifically testing exporter behavior.
+- Do not export raw prompts, completions, stdout, stderr, secrets, private URLs,
+  credentials, or full file contents by default.
 
 ### `package boundary checks`
 

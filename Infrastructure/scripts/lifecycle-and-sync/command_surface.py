@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from generate_skillset_manifests import build_manifest_report
-from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity
+from selection_policy import ROOT_SKILL_SET_NAMES, SYSTEM_BRIDGE_SKILL_NAMES, policy_identity
 from skillset_model import repo_root
 
 HANDLE_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
@@ -23,6 +23,7 @@ COMMAND_VISIBILITY = {"orchestrator", "direct", "target", "reviewer", "none"}
 COMMAND_SURFACE_PATH = Path(".skillsets") / "command-surface.json"
 MAX_COMMAND_HANDLE_DESCRIPTION_WORDS = 14
 MAX_COMMAND_HANDLE_BODY_WORDS = 120
+MAX_OPENAI_SHORT_DESCRIPTION_CHARS = 120
 REVIEWER_MANIFEST = Path(os.environ.get("CODEX_AGENTS_MANIFEST", Path.home() / ".codex" / "agents" / "manifest.json"))
 RESERVED_SKILL_HANDLES = {
     "repo",
@@ -47,8 +48,11 @@ FOLDED_SKILL_HANDLE_ALIASES = {
     "he-reliability-review": "he-code-review",
 }
 HIDDEN_COMPATIBILITY_COMMAND_HANDLES = {
+    "he-goal-governor-archive",
     "he-phase-heartbeat",
 }
+ALIAS_KIND_FOLDED_COMPATIBILITY = "folded_compatibility"
+DEPRECATION_STATE_DEPRECATED = "deprecated"
 
 
 @dataclass(frozen=True)
@@ -63,6 +67,9 @@ class CommandHandle:
     description: str
     invoke_via: str | None = None
     level: str | None = None
+    alias_of: str | None = None
+    alias_kind: str | None = None
+    deprecation_state: str | None = None
     provenance: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -154,6 +161,9 @@ def _alias_handle_from_target(alias: str, target: CommandHandle) -> CommandHandl
         description=target.description,
         invoke_via=target.invoke_via,
         level=target.level,
+        alias_of=target.handle,
+        alias_kind=ALIAS_KIND_FOLDED_COMPATIBILITY,
+        deprecation_state=DEPRECATION_STATE_DEPRECATED,
         provenance=target.provenance,
     )
 
@@ -181,6 +191,16 @@ def _display_name(handle: CommandHandle) -> str:
     return " ".join(part.upper() if part in {"he", "ci", "ui", "api"} else part.capitalize() for part in raw.split())
 
 
+def _openai_short_description(handle: CommandHandle) -> str:
+    """Return useful picker text without repeating the display name or handle."""
+    description = " ".join((handle.description or "").split())
+    if not description:
+        return "Load the routed skill workflow."
+    if len(description) <= MAX_OPENAI_SHORT_DESCRIPTION_CHARS:
+        return description
+    return f"{description[: MAX_OPENAI_SHORT_DESCRIPTION_CHARS - 3].rstrip()}..."
+
+
 def _word_count(text: str) -> int:
     return len(re.findall(r"[A-Za-z0-9$@./_-]+", text))
 
@@ -202,6 +222,12 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
         f"Use only when named as ${handle.handle}."
     )
     source_path = handle.source_path or "UNRESOLVED_SOURCE_PATH"
+    absolute_source_path = (
+        (repo_root() / source_path).as_posix()
+        if handle.source_path and not Path(source_path).is_absolute()
+        else source_path
+    )
+    absolute_resolve_cmd = (repo_root() / "bin" / "ask").as_posix()
     return "\n".join(
         [
             "---",
@@ -216,16 +242,19 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
             "",
             "Invoke:",
             (
-                "1. If this is the Agent Skills Kit repo and `./bin/ask` exists, run "
-                f"`./bin/ask skills resolve {handle.handle} --json`."
+                f"1. Load `{source_path}` if present; otherwise load `{absolute_source_path}`."
             ),
             (
-                "2. Keep handle, routing, and source mechanics out of user-facing replies on normal success."
+                "2. Keep handle/routing/source mechanics out of user replies."
             ),
-            f"3. Otherwise, load `{source_path}` directly.",
+            (
+                "3. If the source path is missing or unreadable, then run "
+                f"`{absolute_resolve_cmd} skills resolve {handle.handle} --json` as a diagnostic fallback."
+            ),
             "4. Follow the loaded module contract.",
-            "5. If missing, search only the owner skill tree for this exact handle.",
-            "6. If blocked or ambiguous, fail closed and report only the blocker or choice needed.",
+            "5. Preserve source checklists/preludes verbatim in final answers.",
+            "6. If missing, search only the owner skill tree for this exact handle.",
+            "7. If blocked or ambiguous, fail closed and report only the blocker or choice needed.",
             "",
             "As another skill's target, pass the resolved contract to the active orchestrator and wait.",
             "",
@@ -236,13 +265,13 @@ def render_skill_command_handle(handle: CommandHandle) -> str:
 def render_openai_yaml(handle: CommandHandle) -> str:
     """Render UI-facing metadata for a generated command handle."""
     display_name = _display_name(handle)
-    short_description = f"${handle.handle} - {display_name} entrypoint"
+    short_description = _openai_short_description(handle)
     return "\n".join(
         [
             "interface:",
-            f'  display_name: "{display_name}"',
-            f'  short_description: "{short_description}"',
-            f'  default_prompt: "${handle.handle} "',
+            f"  display_name: {json.dumps(display_name)}",
+            f"  short_description: {json.dumps(short_description)}",
+            f"  default_prompt: {json.dumps(f'${handle.handle} ')}",
             "",
             "policy:",
             "  allow_implicit_invocation: false",
@@ -283,6 +312,18 @@ def _validate_command_handle_payload(handle: CommandHandle, skill_body: str) -> 
     return violations
 
 
+def _validate_openai_metadata_payload(handle: CommandHandle, yaml_body: str) -> list[dict[str, Any]]:
+    """Reject picker metadata that only describes projection plumbing."""
+    violations: list[dict[str, Any]] = []
+    useless_description = '  short_description: "$' + handle.handle + f' - {_display_name(handle)} entrypoint"'
+    if useless_description in yaml_body:
+        violations.append({
+            "code": "COMMAND_HANDLE_USELESS_PICKER_DESCRIPTION",
+            "handle": handle.handle,
+        })
+    return violations
+
+
 def _command_handle_write_rows(handles: list[CommandHandle]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for handle in _with_folded_alias_handles(handles):
@@ -306,12 +347,22 @@ def _command_handle_write_rows(handles: list[CommandHandle]) -> list[dict[str, A
                     "kind": "openai_metadata",
                     "path": (base / "agents" / "openai.yaml").as_posix(),
                     "bytes": len(yaml_body.encode("utf-8")),
-                    "violations": [],
+                    "violations": _validate_openai_metadata_payload(handle, yaml_body),
                     "content": yaml_body,
                 },
             ]
         )
     return rows
+
+
+def generated_command_handle_names(*, repo_root_path: Path | None = None) -> set[str]:
+    """Return all first-level generated command handle names, including aliases."""
+    rows = _command_handle_write_rows(build_command_surface_handles(repo_root_path=repo_root_path))
+    return {
+        row["handle"]
+        for row in rows
+        if row["kind"] == "skill_command_handle"
+    }
 
 
 def _is_generated_command_handle_dir(path: Path) -> bool:
@@ -385,7 +436,33 @@ def build_skill_handles(*, repo_root_path: Path | None = None) -> list[CommandHa
             handle = _handle_from_manifest_row(row)
             if handle.command_visibility != "none":
                 handles.append(handle)
+    handles = _drop_shadowed_system_bridge_handles(handles)
     return sorted(handles, key=lambda item: (item.handle, item.owner, item.source_path or ""))
+
+
+def _drop_shadowed_system_bridge_handles(handles: list[CommandHandle]) -> list[CommandHandle]:
+    """Prefer canonical plugin handles over compatibility system bridge handles."""
+    canonical_handles = {
+        handle.handle
+        for handle in handles
+        if handle.handle in SYSTEM_BRIDGE_SKILL_NAMES
+        and not (handle.source_path or "").startswith("skills-system/")
+    }
+    return [
+        handle
+        for handle in handles
+        if not (
+            handle.handle in canonical_handles
+            and (handle.source_path or "").startswith("skills-system/")
+        )
+    ]
+
+
+def build_command_surface_handles(*, repo_root_path: Path | None = None) -> list[CommandHandle]:
+    """Build Codex-visible skill command handles, including folded compatibility aliases."""
+    handles = build_skill_handles(repo_root_path=repo_root_path)
+    surfaced_handles = _with_folded_alias_handles(handles)
+    return sorted(surfaced_handles, key=lambda item: (item.handle, item.owner, item.source_path or ""))
 
 
 def _load_reviewer_roles(manifest_path: Path = REVIEWER_MANIFEST) -> tuple[list[dict[str, Any]], str | None]:
@@ -684,6 +761,75 @@ def write_command_surface_projection(*, repo_root_path: Path | None = None, dry_
     }
 
 
+def check_command_surface_projection(*, repo_root_path: Path | None = None) -> dict[str, Any]:
+    """Verify the committed command-surface projection matches rooted manifests."""
+    root = repo_root_path or repo_root()
+    payload = command_surface_projection(repo_root_path=root, include_handles=True)
+    destination = root / COMMAND_SURFACE_PATH
+    violations = list(payload.get("violations", []))
+
+    actual_payload: dict[str, Any] | None = None
+    if not destination.exists():
+        violations.append({
+            "code": "COMMAND_SURFACE_PROJECTION_MISSING",
+            "path": COMMAND_SURFACE_PATH.as_posix(),
+        })
+    else:
+        try:
+            actual_payload = json.loads(destination.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            violations.append({
+                "code": "COMMAND_SURFACE_PROJECTION_INVALID_JSON",
+                "path": COMMAND_SURFACE_PATH.as_posix(),
+                "error": str(exc),
+            })
+        except OSError as exc:
+            violations.append({
+                "code": "COMMAND_SURFACE_PROJECTION_UNREADABLE",
+                "path": COMMAND_SURFACE_PATH.as_posix(),
+                "error": str(exc),
+            })
+
+    def _without_volatile_source_revision(value: dict[str, Any]) -> dict[str, Any]:
+        clone = json.loads(json.dumps(value))
+
+        def _remove_source_revision_recursive(obj: Any) -> None:
+            if isinstance(obj, dict):
+                # Remove source_revision from provenance dicts
+                if "provenance" in obj and isinstance(obj["provenance"], dict):
+                    obj["provenance"].pop("source_revision", None)
+                # Recurse into all dict values
+                for val in obj.values():
+                    _remove_source_revision_recursive(val)
+            elif isinstance(obj, list):
+                # Recurse into all list items
+                for item in obj:
+                    _remove_source_revision_recursive(item)
+
+        _remove_source_revision_recursive(clone)
+        return clone
+
+    if (
+        actual_payload is not None
+        and _without_volatile_source_revision(actual_payload) != _without_volatile_source_revision(payload)
+    ):
+        violations.append({
+            "code": "COMMAND_SURFACE_PROJECTION_DRIFT",
+            "path": COMMAND_SURFACE_PATH.as_posix(),
+            "expected_handle_count": payload.get("handle_count"),
+            "actual_handle_count": actual_payload.get("handle_count"),
+        })
+
+    return {
+        "schema_version": "command-surface-check.v1",
+        "status": "pass" if not violations else "fail",
+        "path": COMMAND_SURFACE_PATH.as_posix(),
+        "handle_count": payload.get("handle_count"),
+        "generated_command_handle_count": payload.get("generated_command_handle_count"),
+        "violations": violations,
+    }
+
+
 def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool = False) -> dict[str, Any]:
     """Write or preview generated runtime command handles for non-root handles."""
     root = repo_root_path or repo_root()
@@ -695,6 +841,14 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
         for row in rows
         for violation in row.get("violations", [])
     ])
+    for row in rows:
+        path = root / row["path"]
+        if path.parent.is_symlink():
+            violations.append({
+                "code": "COMMAND_HANDLE_PARENT_SYMLINK",
+                "path": row["path"],
+                "parent": path.parent.relative_to(root).as_posix(),
+            })
     expected_dirs = {
         root / ".agents" / "skills" / row["handle"]
         for row in rows

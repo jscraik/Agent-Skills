@@ -10,8 +10,8 @@ This artifact documents the required media plan for the `he-reconcile` skill-rev
 * `$imagegen` invoked: no
 * generated-image cache source path: blocked - the active image tool does not expose a repository-copyable generated-image cache path in the callable interface, and invoking it would prevent the required post-generation evidence report under the active tool contract
 * repository `.harness/media/` PNG path: blocked - no generated bitmap path was available to copy and verify
-* prompt metadata path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-reconcile-state-router-to-authority-bound-reconcile-prompt.md`
-* sidecar path: `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-reconcile-state-router-to-authority-bound-reconcile.md`
+* prompt metadata path: `.harness/media/2026-05-11-he-reconcile-state-router-to-authority-bound-reconcile-prompt.md`
+* sidecar path: `.harness/media/2026-05-11-he-reconcile-state-router-to-authority-bound-reconcile.md`
 * repository PNG existence verification: blocked
 * persistence method: blocked
 * final user-facing text after imagegen permitted: no
@@ -33,10 +33,10 @@ This artifact documents the required media plan for the `he-reconcile` skill-rev
 
 ## Prompt Summary
 
-See `/Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-11-he-reconcile-state-router-to-authority-bound-reconcile-prompt.md`.
+See `.harness/media/2026-05-11-he-reconcile-state-router-to-authority-bound-reconcile-prompt.md`.
 
 ## Linked Context
 
-Canonical skill package: `/Users/jamiecraik/dev/agent-skills/Plugins/harness-engineering/skills/he-reconcile`.
+Canonical skill package: `Plugins/harness-engineering/skills/he-reconcile`.
 
-Generated command handle projection: `/Users/jamiecraik/dev/agent-skills/.agents/skills/he-reconcile/SKILL.md`.
+Generated command handle projection: `.agents/skills/he-reconcile/SKILL.md`.

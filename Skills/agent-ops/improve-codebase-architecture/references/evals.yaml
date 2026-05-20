@@ -125,6 +125,43 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: improve-codebase-architecture}
       - {type: regex, value: "(?i)(patch_design|interface_design|complexity|reversib|first move)"}
+      - {type: regex, value: "(?i)(request_user_input|user decision|design decision|choose)"}
+
+  - id: collaboration-design-choice
+    name: "request_user_input before design selection"
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    realistic: true
+    why_realistic: "Architecture skill use must stop for a human choice before selecting a structural design path."
+    prompt: "Use $improve-codebase-architecture on this shallow module cluster. Compare the small patch with a deeper interface move, then choose the design direction we should implement."
+    deterministic_checks:
+      forbidden_commands: [curl, wget, "rm -rf", nc]
+    expected_behavior: "Compare patch_design and interface_design, then use request_user_input or explicitly block on that unavailable tool before selecting the path."
+    anti_overfit_notes: "The skill may recommend an option, but must not make the structural design choice silently."
+    acceptance:
+      - {type: skill_selected, expected_skill: improve-codebase-architecture}
+      - {type: regex, value: "(?i)(patch_design|interface_design)"}
+      - {type: regex, value: "(?i)(request_user_input|blocked.*user input|design decision.*together)"}
+
+  - id: edge-tool-unavailable
+    name: "request_user_input unavailable"
+    category: edge
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: true
+    realistic: true
+    why_realistic: "Some agents or eval runners cannot call the interactive tool but must still honor the collaboration contract."
+    prompt: "Use $improve-codebase-architecture, but assume request_user_input is unavailable. Decide whether to introduce a new adapter seam or keep a local patch."
+    deterministic_checks:
+      forbidden_commands: [curl, wget, "rm -rf", nc]
+    expected_behavior: "Mark request_user_input as blocked and name the decision that cannot be made autonomously."
+    anti_overfit_notes: "Do not satisfy this by asking a plain-text question after choosing a design."
+    acceptance:
+      - {type: skill_selected, expected_skill: improve-codebase-architecture}
+      - {type: regex, value: "(?i)(request_user_input.*blocked|blocked.*request_user_input|user input.*blocked)"}
+      - {type: regex, value: "(?i)(adapter|seam|patch_design|interface_design|design decision)"}
 
   - id: edge-tracer-proof
     name: "tracer proof required"
@@ -140,3 +177,61 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: improve-codebase-architecture}
       - {type: regex, value: "(?i)(tracer|proof|verifier|blocked|validation)"}
+
+  - id: deep-module-agent-boundary
+    name: "deep modules as agent work boundaries"
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    realistic: true
+    why_realistic: "Users need architecture review to decide whether agents can safely work inside a module without breaking callers."
+    prompt: "Use $improve-codebase-architecture to review this module boundary. Decide whether it is agent-safe: it has a public interface, hidden implementation, and some tests, but callers may depend on untested behavior."
+    deterministic_checks:
+      forbidden_commands: [curl, wget, "rm -rf", nc]
+    expected_behavior: "Classify the boundary as safe, risky, or blocked based on owner layer, public interface stability, caller contract, and seam/regression tests; do not call it safe if tests are weak."
+    anti_overfit_notes: "Must connect deep modules to safe agent work boundaries, not only mention clean architecture."
+    acceptance:
+      - {type: skill_selected, expected_skill: improve-codebase-architecture}
+      - {type: regex, value: "(?i)(agent_safe_boundary|agent-safe|safe|risky|blocked)"}
+      - {type: regex, value: "(?i)(public interface|seam|regression|boundary test|tests)"}
+      - {type: regex, value: "(?i)(owner layer|layer|hidden behavior|implementation|blast radius|callers)"}
+
+  - id: deepening-workflow-surfaces
+    name: "vocabulary harness reviewers and grilling"
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    realistic: true
+    why_realistic: "Architecture deepening should use repo vocabulary, durable decisions, reviewer search, and one-question-at-a-time design grilling."
+    prompt: "Use $improve-codebase-architecture to find deepening opportunities in this repo. Use our ubiquitous language file, respect .harness decisions, use the architecture reviewers if available, and grill me one question at a time before choosing an interface."
+    deterministic_checks:
+      forbidden_commands: [curl, wget, "rm -rf", nc]
+    expected_behavior: "Read UBIQUITOUS_LANGUAGE.md or equivalent, search .harness decisions/ADRs, report reviewer_coverage, present candidates before interfaces, and return grilling_loop with one request_user_input decision at a time."
+    anti_overfit_notes: "Must not invent CONTEXT.md/docs/adr paths when this repo uses UBIQUITOUS_LANGUAGE.md and .harness."
+    acceptance:
+      - {type: skill_selected, expected_skill: improve-codebase-architecture}
+      - {type: regex, value: '(?i)(UBIQUITOUS_LANGUAGE|ubiquitous language|UBIQUITOUS\.md)'}
+      - {type: regex, value: '(?i)(\.harness|ADR|decision)'}
+      - {type: regex, value: "(?i)(reviewer_coverage|agent-native-reviewer|api-contract-reviewer|architecture-strategist)"}
+      - {type: regex, value: "(?i)(grilling_loop|one question|request_user_input|candidate)"}
+
+  - id: grilling-loop-state
+    name: "one-question grilling state"
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    prepend_skill: true
+    realistic: true
+    why_realistic: "Design grilling needs explicit state so the agent cannot ask multiple questions or choose before user feedback."
+    prompt: "Use $improve-codebase-architecture on this candidate and grill me before selecting the interface. Ask only the next decision question, include your recommended answer, and wait for me before continuing."
+    deterministic_checks:
+      forbidden_commands: [curl, wget, "rm -rf", nc]
+    expected_behavior: "Return grilling_loop with status, current_question, recommended_answer, decision_dependency, answered_by_code_exploration, and next_question_blocked_until_user_feedback true; do not select the interface yet."
+    anti_overfit_notes: "Must expose waiting state, not just say it will ask questions."
+    acceptance:
+      - {type: skill_selected, expected_skill: improve-codebase-architecture}
+      - {type: regex, value: "(?i)(grilling_loop|current_question|recommended_answer)"}
+      - {type: regex, value: "(?i)(decision_dependency|answered_by_code_exploration|next_question_blocked_until_user_feedback)"}
+      - {type: regex, value: "(?i)(request_user_input|blocked|wait|feedback)"}

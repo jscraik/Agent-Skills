@@ -10,8 +10,8 @@ This sidecar records the media deliverable for the improve-codebase-architecture
 * $imagegen invoked: blocked
 * generated-image cache source path: blocked; no callable image-generation tool was exposed in the active tool inventory
 * repository .harness/media/ PNG path: blocked; no generated bitmap exists to copy
-* prompt metadata path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-14-improve-codebase-architecture-evidence-boundary-review-prompt.md
-* sidecar path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-14-improve-codebase-architecture-evidence-boundary-review.md
+* prompt metadata path: .harness/media/2026-05-14-improve-codebase-architecture-evidence-boundary-review-prompt.md
+* sidecar path: .harness/media/2026-05-14-improve-codebase-architecture-evidence-boundary-review.md
 * repository PNG existence verification: blocked
 * persistence method: blocked
 * final user-facing text after imagegen permitted: yes
@@ -37,4 +37,4 @@ The fallback prompt requests a technical infographic titled "From Broad Architec
 
 ## Linked Context
 
-Reviewed package: /Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture
+Reviewed package: Skills/agent-ops/improve-codebase-architecture

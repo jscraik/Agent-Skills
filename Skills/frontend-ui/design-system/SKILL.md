@@ -58,6 +58,17 @@ metadata:
 - Keep writes inside the repo-owned source path unless the user explicitly approves another target.
 - Avoid destructive commands unless explicitly requested and rollback is clear.
 
+## Execution Boundaries
+- Keep edits within the requested token, component, documentation, or design-system contract surface.
+- Do not regenerate broad assets, rewrite product UI, change brand foundations, or update consumers unless the request explicitly includes those surfaces.
+
+## Failure Mode
+- If ownership layer, downstream consumers, or validation commands are unclear, return the blocker before proposing or applying design-system changes.
+
+## Gotchas
+- A one-off visual fix may belong in a component, alias, mapped token, or brand layer; identify the layer before editing.
+- Passing screenshots alone does not prove shared design-system compatibility.
+
 ## Validation
 - Run the smallest command or test that exercises the changed behavior.
 - Use strict skill audit and Plugin Eval when changing this skill.
@@ -77,6 +88,7 @@ metadata:
 
 ## Progressive Disclosure
 - Start here for routing, safety, workflow, and validation.
+- Use `Infrastructure/references/software-literature-expert-lens-pack.md` and `Infrastructure/references/software-literature-skill-expertise-map.md` for design-system vocabulary, boundary, and user-flow lenses.
 - Use references/contract.yaml for the machine-readable contract.
 - Use references/evals.yaml for benchmark and quality gates.
 - Use references/task-profile.json for evaluator thresholds.

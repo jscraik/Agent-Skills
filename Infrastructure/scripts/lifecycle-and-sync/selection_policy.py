@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-25.v19"
+POLICY_VERSION = "2026-04-25.v20"
 
 PROJECTION_MODE_CHOICES: tuple[str, ...] = ("flat", "rooted", "hybrid")
 
@@ -68,9 +68,9 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "codex-agent-creator",
     "codex-automation-architect",
     "codex-hooks-builder",
+    "codex-review",
     "coding-harness",
     "context7",
-    "imagegen",
     "docs-expert",
     "fix-mise",
     "improve-codebase-architecture",
@@ -81,6 +81,7 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "skill-pr-delivery",
     "triage",
     "ubiquitous-language",
+    "unslopify",
     "verification-before-completion",
 )
 
@@ -90,12 +91,13 @@ PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
 
 # Plugin lane skills hidden from default flat discovery.
 PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
+    "he-goal-governor-archive",
     "he-phase-heartbeat",
 )
 
-# Skills intentionally routed through the hidden `.system` lane while still
-# remaining plugin-owned in source. This keeps the bridge explicit and narrow.
-# imagegen and openai-docs are maintained OpenAI originals that live here.
+# Skills intentionally routed through the hidden `.system` lane. OpenAI-owned
+# skills stay as preserved system sources; local factory packages may attach
+# references/evals beside them, but must not fork their `SKILL.md` bodies.
 SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
     "imagegen",
     "openai-docs",

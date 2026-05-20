@@ -151,10 +151,7 @@ def source_revision() -> str:
 
 def file_hash(path: Path) -> str:
     digest = hashlib.sha256()
-    if path.is_symlink():
-        digest.update(str(path.readlink()).encode("utf-8"))
-    else:
-        digest.update(path.read_bytes())
+    digest.update(path.read_bytes())
     return digest.hexdigest()
 
 
@@ -284,15 +281,31 @@ def iter_candidate_skill_dirs() -> list[Path]:
     Returns:
         list[Path]: Unique candidate skill directory paths sorted by repository-relative path.
     """
+    system_dirs = iter_system_lane_skill_dirs()
+    canonical_system_dir = REPO_ROOT / "skills-system"
+    if canonical_system_dir.is_dir():
+        system_dirs = sorted(
+            item
+            for item in canonical_system_dir.iterdir()
+            if item.is_dir() and (item / "SKILL.md").exists()
+        )
+    candidate_dirs = [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs(), *system_dirs]
+    canonical_names = {
+        skill_dir.name
+        for skill_dir in candidate_dirs
+        if classify_skill_scope(skill_dir) != "system"
+    }
     seen: set[tuple[int, int] | str] = set()
     dirs: list[Path] = []
-    for skill_dir in [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs(), *iter_system_lane_skill_dirs()]:
+    for skill_dir in candidate_dirs:
         skill_md = skill_dir / "SKILL.md"
         if not skill_md.exists():
             continue
         scope = classify_skill_scope(skill_dir)
         if scope == "system":
             if skill_dir.name not in SYSTEM_BRIDGE_SKILL_NAMES:
+                continue
+            if skill_dir.name in canonical_names:
                 continue
         elif scope in {"primary-runtime", "external", "unknown"}:
             continue
@@ -381,6 +394,8 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
             scope=scope,
             skill_set=skill_set,
         )
+        manifest_source = REPO_ROOT / source_path
+        source_for_hash = manifest_source if manifest_source.is_file() else skill_md
         metadata_status = "frontmatter" if frontmatter else "inferred"
         modules.append(
             SkillModule(
@@ -400,7 +415,7 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
                     "projection_mode": "rooted",
                     "policy_identity": current_policy_identity,
                     "source_revision": revision,
-                    "source_sha256": file_hash(skill_md),
+                    "source_sha256": file_hash(source_for_hash),
                 },
             )
         )

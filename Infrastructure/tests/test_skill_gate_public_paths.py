@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 from importlib.machinery import SourceFileLoader
+import os
 import sys
 import tempfile
 import unittest
@@ -16,11 +17,9 @@ SKILL_GATE = (
     REPO_ROOT
     / "Plugins"
     / "skill-factory"
-    / "skills"
-    / "code_quality_review"
-    / "skill-builder"
     / "scripts"
-    / "skill_gate.pyw"
+    / "skill-builder"
+    / "skill_gate.py"
 )
 
 
@@ -44,7 +43,15 @@ def load_skill_gate():
         raise RuntimeError(f"Failed to load skill_gate from {SKILL_GATE}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
+    previous = os.environ.get("SKILL_GATE_DISABLE_CLI")
+    os.environ["SKILL_GATE_DISABLE_CLI"] = "1"
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        if previous is None:
+            os.environ.pop("SKILL_GATE_DISABLE_CLI", None)
+        else:
+            os.environ["SKILL_GATE_DISABLE_CLI"] = previous
     return module
 
 
@@ -139,6 +146,57 @@ class SkillGatePublicPathTests(unittest.TestCase):
             codes = {finding.code for finding in self.module.check_path_safety(doc)}
 
             self.assertNotIn("PATH_TRAVERSAL", codes)
+
+    def test_metadata_mapping_without_version_warns_for_tessl_compatibility(self) -> None:
+        doc = self.module.SkillDoc(
+            path=SKILL_GATE,
+            raw=(
+                "---\n"
+                "name: sample\n"
+                "description: Analyze a sample skill. Use when checking local skill quality.\n"
+                "metadata:\n"
+                "  owner: local\n"
+                "---\n"
+                "Body\n"
+            ),
+            frontmatter={
+                "name": "sample",
+                "description": "Analyze a sample skill. Use when checking local skill quality.",
+                "metadata": {"owner": "local"},
+            },
+            body="Body\n",
+            fm_start_line=1,
+            fm_end_line=6,
+        )
+
+        codes = {finding.code for finding in self.module.check_codex_frontmatter(doc, min_desc_len=10)}
+
+        self.assertIn("FM_METADATA_VERSION_MISSING", codes)
+
+    def test_metadata_non_mapping_warns_for_tessl_compatibility(self) -> None:
+        doc = self.module.SkillDoc(
+            path=SKILL_GATE,
+            raw=(
+                "---\n"
+                "name: sample\n"
+                "description: Analyze a sample skill. Use when checking local skill quality.\n"
+                "metadata: local\n"
+                "---\n"
+                "Body\n"
+            ),
+            frontmatter={
+                "name": "sample",
+                "description": "Analyze a sample skill. Use when checking local skill quality.",
+                "metadata": "local",
+            },
+            body="Body\n",
+            fm_start_line=1,
+            fm_end_line=5,
+        )
+
+        codes = {finding.code for finding in self.module.check_codex_frontmatter(doc, min_desc_len=10)}
+
+        self.assertIn("FM_METADATA_NOT_MAPPING", codes)
 
 
 if __name__ == "__main__":

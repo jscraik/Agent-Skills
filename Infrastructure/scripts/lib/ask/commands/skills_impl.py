@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import json
 import shlex
@@ -6,17 +8,27 @@ import subprocess
 import re
 import sys
 import importlib.util
+import tempfile
+import difflib
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, List, Optional
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = SCRIPTS_ROOT.parents[1]
 if str(SCRIPTS_ROOT) not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT))
 if str(SCRIPTS_ROOT / "lifecycle-and-sync") not in sys.path:
     sys.path.append(str(SCRIPTS_ROOT / "lifecycle-and-sync"))
 
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
+from ask.commands.memory import (  # noqa: E402
+    MEMORY_SOURCES,
+    memory_list as _memory_provider_list,
+    memory_read as _memory_provider_read,
+    memory_search as _memory_provider_search,
+)
 from ask.services.plugin_cache import (  # noqa: E402
     PLUGIN_CACHE_PERMISSION_RERUN,
     plugin_cache_permission_declaration,
@@ -27,7 +39,14 @@ from ask.services.plugin_sources import (  # noqa: E402
     load_local_marketplace as _load_local_marketplace,
     materialize_first_level_skill_aliases as _materialize_first_level_skill_aliases,
 )
-from skill_discovery import discover_catalog_entries, discover_skill_entries, get_policy_identity, render_index  # noqa: E402
+from skill_discovery import (  # noqa: E402
+    USER_SKILL_SCOPE_PRECEDENCE,
+    classify_skill_scope,
+    discover_catalog_entries,
+    discover_skill_entries,
+    get_policy_identity,
+    render_index,
+)
 from selection_policy import REPO_SCAN_ROOTS, SYSTEM_BRIDGE_SKILL_NAMES  # noqa: E402
 from projection_engine import (  # noqa: E402
     ProjectionModeDecision,
@@ -37,6 +56,7 @@ from projection_engine import (  # noqa: E402
 )
 from command_surface import (  # noqa: E402
     check_command_handles,
+    check_command_surface_projection,
     handles_report,
     parse_command_handles,
     resolve_reviewer_handle,
@@ -56,6 +76,39 @@ from ask.selection_contract import (  # noqa: E402
     canonical_sort_key,
 )
 from ask.skill_analytics import skill_invocation_analytics  # noqa: E402
+from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: E402
+
+
+__all__ = [
+    "audit_skill",
+    "explain_skill",
+    "extract_family_fail_lines",
+    "external_review_skill",
+    "fold_skills",
+    "goal_skills",
+    "improve_skills",
+    "init_skill",
+    "install_skill",
+    "list_skills",
+    "reviewers_resolve",
+    "route_skills",
+    "skills_budget",
+    "skills_doctor",
+    "skills_events",
+    "skills_explain_boundary",
+    "skills_handles",
+    "skills_memory",
+    "skills_package",
+    "skills_parse",
+    "skills_profiles",
+    "skills_proof",
+    "skills_prove",
+    "skills_resolve",
+    "sync_skills",
+    "validate_openai_skill_format",
+    "validate_skill_boundaries",
+    "validate_skill_gate",
+]
 
 
 def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
@@ -83,6 +136,8 @@ def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
         venv = os.environ.get("VIRTUAL_ENV")
         if venv:
             candidates.append([os.path.join(venv, "bin", "python")])
+        pyyaml_venv_python = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+        candidates.append([str(pyyaml_venv_python)])
         # Include discovered python interpreters
         for name in ["python3", "python"]:
             python_path = shutil.which(name)
@@ -111,11 +166,13 @@ def _get_python_command(with_packages: Optional[List[str]] = None) -> List[str]:
 
 
 def _subprocess_env_with_uv_cache() -> dict[str, str]:
-    """Return subprocess environment with a sandbox-safe uv cache default."""
+    """Return subprocess environment with sandbox-safe validation defaults."""
     env = os.environ.copy()
     if not env.get("UV_CACHE_DIR"):
         tmp_root = env.get("TMPDIR") or "/tmp"
         env["UV_CACHE_DIR"] = str(Path(tmp_root) / "agent-skills-uv-cache")
+    env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
+    env.setdefault("TESSL_AUTO_UPDATE_INTERVAL_MINUTES", "0")
     return env
 
 
@@ -226,6 +283,17 @@ def _normalize_skill_target_path(skill_path: str) -> tuple[Path, str]:
     return audit_target, audit_target.as_posix()
 
 
+def _ask_validation_command(*args: str) -> str:
+    parts = ["./bin/ask"]
+    parts.extend(args)
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _skills_validation_command(action: str, *args: str) -> str:
+    return _ask_validation_command("skills", action, *args)
+
+
 def _run_validation_command(
     repo_root: Path,
     command: list[str],
@@ -263,6 +331,144 @@ def _run_validation_command(
     return result
 
 
+def _completed_process_payload(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
+    """Return stable JSON data for a validation subprocess result."""
+    return {
+        "command": list(proc.args) if isinstance(proc.args, list) else proc.args,
+        "exit_code": proc.returncode,
+        "stdout": proc.stdout,
+        "stderr": proc.stderr,
+    }
+
+
+def _run_captured_tool(
+    *,
+    repo_root: Path,
+    command: list[str],
+    timeout_seconds: int = 120,
+    env_overrides: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    """Run a local validation tool with bounded runtime and captured output."""
+    env = _subprocess_env_with_uv_cache()
+    if env_overrides:
+        env.update(env_overrides)
+    return subprocess.run(
+        command,
+        cwd=str(repo_root),
+        capture_output=True,
+        text=True,
+        env=env,
+        timeout=timeout_seconds,
+    )
+
+
+def _parse_frontmatter_scalar(value: str) -> Any:
+    """Parse a conservative subset of YAML frontmatter scalar values."""
+    cleaned = value.strip().strip("\"'")
+    if cleaned.startswith("[") and cleaned.endswith("]"):
+        return [
+            item.strip().strip("\"'")
+            for item in cleaned[1:-1].split(",")
+            if item.strip()
+        ]
+    if cleaned.lower() in {"true", "false"}:
+        return cleaned.lower() == "true"
+    return cleaned
+
+
+def _read_skill_frontmatter_fields(skill_md: Path) -> dict[str, Any]:
+    """Extract conservative scalar and one-level metadata fields from SKILL.md frontmatter."""
+    fields: dict[str, Any] = {}
+    text = skill_md.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return fields
+    current_map: str | None = None
+    current_list_key: str | None = None
+    for line in lines[1:]:
+        if line.strip() == "---":
+            break
+        stripped = line.strip()
+        if not stripped:
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        if stripped.startswith("- "):
+            item = _parse_frontmatter_scalar(stripped[2:])
+            if current_map == "metadata" and current_list_key:
+                nested = fields.setdefault(current_map, {})
+                if isinstance(nested, dict):
+                    values = nested.setdefault(current_list_key, [])
+                    if isinstance(values, list):
+                        values.append(item)
+                continue
+            if current_map and current_map != "metadata":
+                values = fields.setdefault(current_map, [])
+                if isinstance(values, list):
+                    values.append(item)
+                continue
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        key = key.strip()
+        value = value.strip()
+        if indent > 0 and current_map:
+            nested = fields.setdefault(current_map, {})
+            if isinstance(nested, dict):
+                if value:
+                    nested[key] = _parse_frontmatter_scalar(value)
+                    current_list_key = None
+                else:
+                    nested[key] = []
+                    current_list_key = key
+            continue
+        current_map = None
+        current_list_key = None
+        if not value:
+            fields[key] = [] if key in PACKAGE_CONTRACT_FIELDS else {}
+            current_map = key
+            continue
+        parsed_value = _parse_frontmatter_scalar(value)
+        if key in {"name", "description", "metadata", *PACKAGE_CONTRACT_FIELDS} and parsed_value:
+            fields[key] = parsed_value
+    return fields
+
+
+def _safe_tessl_skill_key(raw_name: str) -> str:
+    """Return a conservative tile skill key for a temporary Tessl wrapper."""
+    key = re.sub(r"[^a-z0-9-]+", "-", raw_name.lower()).strip("-")
+    return key or "skill"
+
+
+def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root: Path) -> tuple[Path, dict[str, str]]:
+    """Create a disposable Tessl tile package for a SKILL.md-first local skill."""
+    source_skill_dir = repo_root / audit_target_path
+    source_skill = source_skill_dir / "SKILL.md"
+    fields = _read_skill_frontmatter_fields(source_skill)
+    skill_key = _safe_tessl_skill_key(fields.get("name") or Path(audit_target_path).name)
+    tile_skill_dir = temp_root / "skills" / skill_key
+    tile_skill_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source_skill, tile_skill_dir / "SKILL.md")
+
+    tile = {
+        "name": f"local/{skill_key}",
+        "summary": fields.get("description") or f"Local validation wrapper for {skill_key}.",
+        "version": "0.0.0-local",
+        "skills": {
+            skill_key: {
+                "path": f"skills/{skill_key}/SKILL.md",
+            },
+        },
+    }
+    tile_path = temp_root / "tile.json"
+    tile_path.write_text(json.dumps(tile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return tile_path, {
+        "tile_path": str(tile_path),
+        "review_path": str(tile_skill_dir),
+        "skill_key": skill_key,
+        "source_skill": audit_target_path,
+    }
+
+
 @dataclass(frozen=True)
 class _RouterSkill:
     name: str
@@ -287,7 +493,7 @@ STARTER_ARCHETYPES = {
 
 
 _SKILL_INSTALLER_SCRIPT_CANDIDATES = (
-    "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/scripts/install-skill-from-github.py",
+    "skills-system/skill-installer/scripts/install-skill-from-github.py",
 )
 
 _SKILL_BUILDER_SCRIPT_DIR_CANDIDATES = (
@@ -457,7 +663,7 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
     """
     entries = [
         entry
-        for entry in discover_catalog_entries()
+        for entry in discover_catalog_entries(source="repo")
         if entry.source_dir.is_relative_to(repo_root)
     ]
     catalog_count = len(entries)
@@ -474,6 +680,45 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
     readme_path = repo_root / "README.md"
     if readme_path.exists():
         readme_content = readme_path.read_text(encoding="utf-8")
+        command_surface_path = repo_root / ".skillsets" / "command-surface.json"
+        command_handle_count: int | None = None
+        command_surface_owner_counts: dict[str, int] = {}
+        if command_surface_path.exists():
+            try:
+                command_surface = json.loads(command_surface_path.read_text(encoding="utf-8"))
+                handles = command_surface.get("handles")
+                if isinstance(handles, list):
+                    command_handle_count = len(handles)
+                    for handle in handles:
+                        if not isinstance(handle, dict):
+                            continue
+                        owner = handle.get("owner")
+                        source_path = handle.get("source_path")
+                        if (
+                            isinstance(owner, str)
+                            and isinstance(source_path, str)
+                            and source_path.startswith("Skills/")
+                        ):
+                            command_surface_owner_counts[owner] = (
+                                command_surface_owner_counts.get(owner, 0) + 1
+                            )
+            except (OSError, json.JSONDecodeError):
+                command_handle_count = None
+
+        manifest_counts: dict[str, int] = {}
+        skillsets_dir = repo_root / ".skillsets"
+        if skillsets_dir.exists():
+            for manifest_path in sorted(skillsets_dir.glob("*/manifest.jsonl")):
+                try:
+                    rows = [
+                        line
+                        for line in manifest_path.read_text(encoding="utf-8").splitlines()
+                        if line.strip()
+                    ]
+                except OSError:
+                    continue
+                manifest_counts[manifest_path.parent.name] = len(rows)
+
         updated_readme, replacements = re.subn(
             r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
             f"A governed repository of **{catalog_count} skills** for AI coding agents",
@@ -499,6 +744,68 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
             updated_readme,
             count=1,
         )
+        updated_readme = re.sub(
+            r"(?:A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\. Author skills once, validate quality, expose `\$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI\.\n\n)+(?=A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\.\nAuthor skills once)",
+            "",
+            updated_readme,
+        )
+        updated_readme = re.sub(
+            r"This repository currently exposes \*\*\d+ skills\*\* in the default catalog",
+            f"This repository currently exposes **{catalog_count} skills** in the default catalog",
+            updated_readme,
+            count=1,
+        )
+        if command_handle_count is not None:
+            updated_readme = re.sub(
+                r"contains \*\*\d+ generated `\$` handles\*\*",
+                f"contains **{command_handle_count} generated `$` handles**",
+                updated_readme,
+                count=1,
+            )
+        if manifest_counts:
+            preferred_order = (
+                "agent-ops",
+                "backend-platform",
+                "content-publishing",
+                "frontend-ui",
+                "mobile-native",
+                "product-strategy",
+                "security-ops",
+            )
+            source_counts = command_surface_owner_counts or manifest_counts
+            cluster_counts = {
+                name: count for name, count in source_counts.items() if name in preferred_order
+            }
+            if cluster_counts:
+                first_party_handle_count = sum(cluster_counts.values())
+                cluster_summary = ", ".join(
+                    f"{name}: {cluster_counts[name]}"
+                    for name in preferred_order
+                    if name in cluster_counts
+                )
+                updated_readme = re.sub(
+                    r"(?:including \*\*\d+ first-party handles\*\* backed by canonical skill source|backed by first-party canonical skill\s+source) across \d+ topic clusters \([^)]*\)",
+                    (
+                        f"including **{first_party_handle_count} first-party handles** backed by canonical "
+                        f"skill source across {len(cluster_counts)} topic clusters ({cluster_summary})"
+                    ),
+                    updated_readme,
+                    count=1,
+                    flags=re.DOTALL,
+                )
+                for name, count in cluster_counts.items():
+                    updated_readme = re.sub(
+                        rf"(\| {re.escape(name)}\s+\|)\s*\d+(\s+\|)",
+                        lambda match, count=count: f"{match.group(1)} {count}{match.group(2)}",
+                        updated_readme,
+                        count=1,
+                    )
+                    updated_readme = re.sub(
+                        rf"(\|\s+\|-- {re.escape(name)}/\s+#\s*)\d+(\s+skills?:)",
+                        lambda match, count=count: f"{match.group(1)}{count}{match.group(2)}",
+                        updated_readme,
+                        count=1,
+                    )
         updated_readme = re.sub(
             r"currently expects \*\*\d+\*\* skills",
             f"currently expects **{catalog_count}** skills",
@@ -568,10 +875,19 @@ def list_skills(
     result.data["skills"] = skills_data
     result.data["policy_identity"] = get_policy_identity()
     result.data["advanced_mode"] = discovery_advanced
+    validation_action = "starter" if starter else "list"
+    validation_args: list[str] = []
+    if category:
+        validation_args.extend(["--category", category])
+    if advanced and not starter:
+        validation_args.append("--advanced")
     if starter:
+        validation_args.extend(["--archetype", archetype])
+        validation_args.extend(["--limit", str(max(1, int(limit)))])
         result.data["starter_mode"] = True
         result.data["starter_archetype"] = archetype if archetype in STARTER_ARCHETYPES else "general"
         result.data["starter_limit"] = max(1, int(limit))
+    result.data["validation_commands"] = [_skills_validation_command(validation_action, *validation_args)]
     result.status = "success"
     return result
 
@@ -653,6 +969,10 @@ def skills_budget(repo_root: Path, default_max: int = 30) -> CallResult:
         }
     )
 
+    validation_args: list[str] = []
+    if default_max != 30:
+        validation_args.extend(["--default-max", str(default_max)])
+    report["validation_commands"] = [_skills_validation_command("budget", *validation_args)]
     result.data["runtime_budget"] = report
     result.status = "success" if process.returncode == 0 and report.get("status") == "pass" else "error"
     if result.status == "error":
@@ -672,6 +992,7 @@ def skills_handles(
     include_handles: bool = True,
     write_projection: bool = False,
     write_command_handle_files: bool = False,
+    check_projection: bool = False,
     check_command_handle_files: bool = False,
     dry_run: bool = False,
 ) -> CallResult:
@@ -679,6 +1000,22 @@ def skills_handles(
     result = CallResult()
     result.metadata["command"] = "skills handles"
     report = handles_report(repo_root_path=repo_root, include_handles=include_handles)
+    validation_args: list[str] = []
+    if check:
+        validation_args.append("--check")
+    if not include_handles:
+        validation_args.append("--no-handles")
+    if write_projection:
+        validation_args.append("--write-projection")
+    if check_projection:
+        validation_args.append("--check-projection")
+    if write_command_handle_files:
+        validation_args.append("--write-command-handles")
+    if check_command_handle_files:
+        validation_args.append("--check-command-handles")
+    if dry_run:
+        validation_args.append("--dry-run")
+    report["validation_commands"] = [_skills_validation_command("handles", *validation_args)]
     result.data["command_surface"] = report
     result.data["handles"] = report["handles"]
     result.data["violations"] = report["violations"]
@@ -687,6 +1024,10 @@ def skills_handles(
         result.data["command_surface_projection_write"] = write_command_surface_projection(
             repo_root_path=repo_root,
             dry_run=dry_run,
+        )
+    if check or check_projection:
+        result.data["command_surface_projection_check"] = check_command_surface_projection(
+            repo_root_path=repo_root,
         )
     if write_command_handle_files:
         result.data["command_handle_write"] = write_command_handles(
@@ -706,6 +1047,7 @@ def skills_handles(
         )
     for key, message in (
         ("command_surface_projection_write", "Command-surface projection write failed."),
+        ("command_surface_projection_check", "Command-surface projection check failed."),
         ("command_handle_write", "Command-handle generation failed."),
         ("command_handle_check", "Command-handle validation failed."),
     ):
@@ -727,6 +1069,10 @@ def skills_resolve(repo_root: Path, handle: str) -> CallResult:
     result = CallResult()
     result.metadata["command"] = "skills resolve"
     payload = resolve_skill_handle(handle, repo_root_path=repo_root)
+    normalized = str(payload.get("handle") or handle).lstrip("$")
+    payload["validation_commands"] = [
+        _skills_validation_command("resolve", normalized),
+    ]
     result.data["resolution"] = payload
     if payload.get("status") != "ok":
         result.status = "error"
@@ -745,6 +1091,9 @@ def skills_parse(repo_root: Path, request_text: str) -> CallResult:
     result = CallResult()
     result.metadata["command"] = "skills parse"
     payload = parse_command_handles(request_text, repo_root_path=repo_root)
+    payload["validation_commands"] = [
+        _skills_validation_command("parse", request_text),
+    ]
     result.data["parse"] = payload
     if payload.get("status") != "pass":
         result.status = "error"
@@ -806,26 +1155,48 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
         gates["generated_command_handle_check"],
         gates["workspace_command_handle_exists"],
     )
-    user_runtime_ready = (
-        (gates["codex_user_link"] and gates["codex_user_command_handle_exists"])
-        or (gates["agents_user_link"] and gates["agents_user_command_handle_exists"])
+    codex_runtime_ready = (
+        gates["codex_user_link"] and gates["codex_user_command_handle_exists"]
     )
+    agents_runtime_ready = (
+        gates["agents_user_link"] and gates["agents_user_command_handle_exists"]
+    )
+    user_runtime_ready = codex_runtime_ready or agents_runtime_ready
+    gates["codex_user_runtime_ready"] = codex_runtime_ready
+    gates["agents_user_runtime_ready"] = agents_runtime_ready
+    gates["user_runtime_ready"] = user_runtime_ready
     proof = {
-        "schema_version": "command-handle-proof.v1",
+        "schema_version": "command-handle-proof.v2",
         "handle": normalized,
         "status": "pass" if all(core_gates) and user_runtime_ready else "fail",
+        "validation_commands": [
+            _skills_validation_command("proof", str(normalized)),
+        ],
         "gates": gates,
         "gate_policy": {
             "required": [
                 "resolver",
                 "generated_command_handle_check",
                 "workspace_command_handle_exists",
+                "user_runtime_ready",
             ],
-            "user_runtime_any_of": [
+            "required_semantics": "user_runtime_ready accepts either supported user runtime link.",
+            "supporting_runtime_diagnostics": [
                 "codex_user_link",
+                "codex_user_command_handle_exists",
+                "codex_user_runtime_ready",
                 "agents_user_link",
+                "agents_user_command_handle_exists",
+                "agents_user_runtime_ready",
             ],
         },
+        "runtime_satisfied_by": (
+            "codex_user_runtime"
+            if codex_runtime_ready
+            else "agents_user_runtime"
+            if agents_runtime_ready
+            else None
+        ),
         "resolution": resolution,
         "command_handle_check": {
             key: value
@@ -847,11 +1218,12 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
             "agents_handle": str(user_agents_handle),
             "agents_handle_exists": user_agents_handle.is_file(),
         },
-        "live_codex_invocation": {
+    }
+    if codex_runtime_ready:
+        proof["live_codex_invocation"] = {
             "status": "manual_session_gate",
             "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
-        },
-    }
+        }
     result.data["proof"] = proof
     if proof["status"] != "pass":
         result.status = "error"
@@ -937,6 +1309,2039 @@ def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
     return candidates
 
 
+def _repo_relative_path(repo_root: Path, path: Path) -> str | None:
+    """Return a repo-relative POSIX path when *path* is inside *repo_root*."""
+    try:
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except (OSError, ValueError):
+        return None
+
+
+def _status_from_bool(value: bool) -> str:
+    return "pass" if value else "fail"
+
+
+DOCTOR_BLOCKER_TAXONOMY: dict[str, str] = {
+    "blocked_resolution": "The requested handle or path cannot be resolved to a repo-owned capability.",
+    "blocked_runtime": "The capability source exists, but the generated runtime handle is not reachable.",
+    "blocked_missing_source": "The resolved capability no longer has a canonical SKILL.md source file.",
+    "blocked_validation": "A structural or policy validation gate failed for the canonical capability source.",
+    "blocked_user_input": "The run requested user input and should not be classified as a hang.",
+    "blocked_auth": "A required credential, token, account, or OAuth grant is unavailable.",
+    "timeout_no_output": "A bounded run exceeded its timeout without producing usable output.",
+    "timeout_partial_output": "A bounded run exceeded its timeout after producing incomplete output.",
+    "blocked_missing_tool": "A required local command, runtime, package, or validator is unavailable.",
+    "blocked_missing_artifact": "An expected report, transcript, workout, or generated artifact is absent.",
+    "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
+}
+
+
+DOCTOR_WARNING_TAXONOMY: dict[str, str] = {
+    "metadata_incomplete": "Recommended capability metadata is absent or only partially declared.",
+    "capability_contract_incomplete": "The richer capability contract is not fully declared yet.",
+    "outcome_proof_missing": "No matching workout or proof artifact was found for outcome-level evidence.",
+    "strict_audit_not_run": "The doctor used compatibility audit mode; strict audit remains available.",
+}
+
+
+DOCTOR_SDK_LAYERS: tuple[str, ...] = (
+    "Contracts",
+    "Catalog",
+    "Authoring",
+    "Validation",
+    "Packaging",
+    "Runtime Adapters",
+    "Evidence",
+    "Memory",
+)
+
+
+DOCTOR_CHECK_SDK_LAYERS: dict[str, str] = {
+    "resolver": "Catalog",
+    "runtime_reachability": "Runtime Adapters",
+    "canonical_source": "Authoring",
+    "structural_audit": "Validation",
+    "capability_metadata": "Catalog",
+    "package_readiness": "Packaging",
+    "outcome_proof": "Evidence",
+}
+
+
+DOCTOR_BLOCKER_SDK_LAYERS: dict[str, str] = {
+    "blocked_resolution": "Catalog",
+    "blocked_runtime": "Runtime Adapters",
+    "blocked_missing_source": "Authoring",
+    "blocked_validation": "Validation",
+    "blocked_user_input": "Runtime Adapters",
+    "blocked_auth": "Runtime Adapters",
+    "timeout_no_output": "Runtime Adapters",
+    "timeout_partial_output": "Runtime Adapters",
+    "blocked_missing_tool": "Validation",
+    "blocked_missing_artifact": "Evidence",
+    "blocked_environment": "Runtime Adapters",
+}
+
+
+DOCTOR_WARNING_SDK_LAYERS: dict[str, str] = {
+    "metadata_incomplete": "Catalog",
+    "capability_contract_incomplete": "Packaging",
+    "outcome_proof_missing": "Evidence",
+    "strict_audit_not_run": "Validation",
+}
+
+
+DOCTOR_CONTRACT_SCHEMA_VERSIONS: dict[str, str] = {
+    "doctor": "skill-doctor.v1",
+    "events": "skill-events.v1",
+    "lifecycle_event": "capability-lifecycle-event.v1",
+    "profiles": "skill-operation-profiles.v1",
+    "package": "skill-package-readiness.v1",
+    "memory": "skill-memory-provider.v1",
+}
+
+
+EVAL_BLOCKER_CLASSES: list[str] = [
+    "blocked_user_input",
+    "blocked_auth",
+    "blocked_runtime",
+    "timeout_no_output",
+    "timeout_partial_output",
+    "blocked_missing_tool",
+    "blocked_missing_artifact",
+    "blocked_environment",
+    "blocked_validation",
+]
+
+
+CAPABILITY_LIFECYCLE_EVENT_TYPES: dict[str, str] = {
+    "skill_loaded": "A skill source or handle was loaded for inspection or execution.",
+    "skill_doctor_completed": "A capability doctor run completed with pass, warning, or blocked status.",
+    "package_readiness_checked": "A skill package readiness gate completed with pass, warning, or blocked status.",
+    "eval_started": "A workout, smoke eval, or proof run started for a capability.",
+    "eval_blocked": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+    "eval_completed": "A workout, smoke eval, or proof run completed with pass or fail status.",
+    "projection_synced": "A canonical skill source was projected into runtime handles or manifests.",
+    "manifest_changed": "A skill or skillset manifest changed and may need validation.",
+}
+
+
+CAPABILITY_LIFECYCLE_EVENT_CONSUMERS: dict[str, dict[str, Any]] = {
+    "skill_loaded": {
+        "profiles": ["authoring", "package-review", "eval"],
+        "producer_commands": ["./bin/ask skills resolve <handle> --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "skill_loaded")],
+    },
+    "skill_doctor_completed": {
+        "profiles": ["authoring", "package-review"],
+        "producer_commands": ["./bin/ask skills doctor <handle-or-path> --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "skill_doctor_completed")],
+    },
+    "package_readiness_checked": {
+        "profiles": ["package-review", "plugin-share"],
+        "producer_commands": ["./bin/ask skills package <handle-or-path> --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "package_readiness_checked")],
+    },
+    "eval_started": {
+        "profiles": ["eval"],
+        "producer_commands": ["./bin/ask skills prove <handle> --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "eval_started")],
+    },
+    "eval_blocked": {
+        "profiles": ["eval"],
+        "producer_commands": ["./bin/ask skills prove <handle> --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "eval_blocked")],
+    },
+    "eval_completed": {
+        "profiles": ["eval"],
+        "producer_commands": ["./bin/ask skills prove <handle> --json --robot"],
+        "observer_commands": [_skills_validation_command("events", "eval_completed")],
+    },
+    "projection_synced": {
+        "profiles": ["authoring", "live-mutation"],
+        "producer_commands": [_skills_validation_command("sync")],
+        "observer_commands": [_skills_validation_command("handles", "--check")],
+    },
+    "manifest_changed": {
+        "profiles": ["authoring", "plugin-share", "live-mutation"],
+        "producer_commands": [_skills_validation_command("handles", "--write-projection")],
+        "observer_commands": [_skills_validation_command("handles", "--check")],
+    },
+}
+
+
+SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
+    "authoring": {
+        "intent": "Create or revise canonical skill sources.",
+        "allowed_roots": ["Skills/**", "Plugins/*/skills/**", "Docs/**", "Infrastructure/tests/**"],
+        "write_policy": "canonical_source_only",
+        "permissions": ["repo_read", "repo_write_canonical_sources", "local_validation"],
+        "required_evidence": ["nearest AGENTS.md", "UBIQUITOUS_LANGUAGE.md", "skill audit", "focused tests"],
+        "stop_conditions": ["missing canonical owner", "strict audit failure", "runtime projection drift"],
+    },
+    "package-review": {
+        "intent": "Check a skill or plugin package before promotion.",
+        "allowed_roots": ["Skills/**", "Plugins/**", "Infrastructure/artifacts/skill-reviews/**"],
+        "write_policy": "reports_only_unless_fix_requested",
+        "permissions": ["repo_read", "local_validation", "artifact_write"],
+        "required_evidence": ["compat or strict audit", "external review report", "metadata contract"],
+        "stop_conditions": ["blocked_validation", "blocked_missing_artifact", "blocked_missing_tool"],
+    },
+    "plugin-share": {
+        "intent": "Prepare versioned skill/plugin sharing metadata and install readiness.",
+        "allowed_roots": ["Plugins/**", "Skills/**", ".agents/Plugins/marketplace.json", "Docs/**"],
+        "write_policy": "versioned_metadata_and_marketplace_only",
+        "permissions": ["repo_read", "repo_write_metadata", "local_validation"],
+        "required_evidence": ["version", "provenance", "compatible_roles", "runtime_needs", "share_readiness"],
+        "stop_conditions": ["missing provenance", "untrusted source", "unpinned external ref"],
+    },
+    "eval": {
+        "intent": "Run smoke, workout, or release evidence for one capability.",
+        "allowed_roots": ["Skills/**", "Infrastructure/workouts/**", "Infrastructure/artifacts/**"],
+        "write_policy": "artifact_write_only",
+        "permissions": ["repo_read", "local_validation", "artifact_write"],
+        "required_evidence": ["eval_started event", "eval_completed or eval_blocked event", "timeout classification"],
+        "stop_conditions": list(EVAL_BLOCKER_CLASSES),
+    },
+    "live-mutation": {
+        "intent": "Perform externally visible mutation such as tracker, PR, or runtime sync changes.",
+        "allowed_roots": ["Skills/**", "Plugins/**", ".agents/**", ".skillsets/**", "Docs/**"],
+        "write_policy": "explicit_request_required",
+        "permissions": ["repo_read", "repo_write", "external_write_after_confirmation"],
+        "required_evidence": ["operator request", "target identity", "rollback path", "post-mutation validation"],
+        "stop_conditions": ["unclear target", "auth mismatch", "unrelated dirty worktree", "rollback unavailable"],
+    },
+}
+
+
+def _doctor_contract_schema_refs() -> dict[str, dict[str, str]]:
+    """Return consumer-usable schema references for doctor payload surfaces."""
+    missing_schema_reason = (
+        "Governed inline contract; concrete schema file is deferred until "
+        "external consumers require it."
+    )
+    return {
+        schema_name: {
+            "name": schema_name,
+            "version": version,
+            "owner": "Agent Skills Kit",
+            "stability": "experimental",
+            "missing_schema_reason": missing_schema_reason,
+        }
+        for schema_name, version in DOCTOR_CONTRACT_SCHEMA_VERSIONS.items()
+    }
+
+
+def _doctor_contract_schema_versions() -> dict[str, str]:
+    """Return legacy scalar schema versions for existing doctor consumers."""
+    return dict(DOCTOR_CONTRACT_SCHEMA_VERSIONS)
+
+
+def _doctor_sdk_layer_for(kind: str, name: str) -> str:
+    """Return the public Skills SDK layer for a doctor contract object."""
+    layer_maps = {
+        "check": DOCTOR_CHECK_SDK_LAYERS,
+        "blocker": DOCTOR_BLOCKER_SDK_LAYERS,
+        "warning": DOCTOR_WARNING_SDK_LAYERS,
+    }
+    return layer_maps.get(kind, {}).get(name, "Contracts")
+
+
+def _doctor_blocker(blocker_class: str, message: str) -> dict[str, str]:
+    return {
+        "class": blocker_class,
+        "sdk_layer": _doctor_sdk_layer_for("blocker", blocker_class),
+        "message": message,
+        "definition": DOCTOR_BLOCKER_TAXONOMY.get(blocker_class, "Unclassified doctor blocker."),
+    }
+
+
+def _doctor_warning(warning_class: str, message: str) -> dict[str, str]:
+    return {
+        "class": warning_class,
+        "sdk_layer": _doctor_sdk_layer_for("warning", warning_class),
+        "message": message,
+        "definition": DOCTOR_WARNING_TAXONOMY.get(warning_class, "Unclassified doctor warning."),
+    }
+
+
+def _skill_target_summary(
+    *,
+    query: str,
+    target_kind: Any,
+    handle: Any,
+    source_path: Any,
+    audit_target: Any,
+) -> dict[str, Any]:
+    """Return compact target identity for readiness payload consumers."""
+    return {
+        "query": query,
+        "target_kind": target_kind,
+        "handle": handle,
+        "canonical_source_path": source_path,
+        "audit_target": audit_target,
+    }
+
+
+def _skill_doctor_check_summary(checks: dict[str, Any]) -> dict[str, Any]:
+    """Return compact doctor check counts for automation consumers."""
+    status_counts: dict[str, int] = {}
+    for check in checks.values():
+        status = str(check.get("status", "unknown")) if isinstance(check, dict) else "unknown"
+        status_counts[status] = status_counts.get(status, 0) + 1
+    return {
+        "check_names": list(checks),
+        "check_count": len(checks),
+        "status_counts": status_counts,
+        "failed_checks": [
+            name
+            for name, check in checks.items()
+            if isinstance(check, dict) and str(check.get("status")) in {"fail", "blocked"}
+        ],
+        "warning_checks": [
+            name
+            for name, check in checks.items()
+            if isinstance(check, dict) and str(check.get("status")) in {"warning", "available_not_run", "missing"}
+        ],
+    }
+
+
+def _skill_memory_operation_context() -> dict[str, Any]:
+    """Return profile and provenance context for the skill memory facade."""
+    return {
+        "primary_profile": "authoring",
+        "consumer_profiles": ["authoring", "package-review", "eval"],
+        "provider_model": "extension-like-read-only",
+        "profiles": {
+            profile_name: {
+                "intent": SKILL_OPERATION_PROFILES[profile_name]["intent"],
+                "write_policy": SKILL_OPERATION_PROFILES[profile_name]["write_policy"],
+                "required_evidence": SKILL_OPERATION_PROFILES[profile_name]["required_evidence"],
+            }
+            for profile_name in ("authoring", "package-review", "eval")
+        },
+        "provider_contract": {
+            "required_entry_fields": ["id", "source_id", "path", "title", "snippet", "provenance", "freshness"],
+            "read_modes": ["list", "read", "search"],
+            "mutation_policy": "read_only",
+        },
+        "follow_up_commands": [
+            _skills_validation_command("memory", "list"),
+            "./bin/ask skills memory search <query> --json --robot",
+            "./bin/ask skills memory read <entry-id-or-path> --json --robot",
+        ],
+        "validation_commands": [
+            _skills_validation_command("memory", "search", "projection"),
+            _ask_validation_command("memory", "search", "projection"),
+        ],
+    }
+
+
+def _skill_memory_source_summary(roots: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return compact source availability for the skill memory provider."""
+    available = [root["provider"] for root in roots if root["exists"]]
+    missing = [root["provider"] for root in roots if not root["exists"]]
+    return {
+        "source_count": len(roots),
+        "available_sources": available,
+        "missing_sources": missing,
+    }
+
+
+def _skill_memory_freshness_label(value: Any) -> str:
+    """Return a stable bucket label for memory freshness metadata."""
+    if isinstance(value, str) and value.strip():
+        return value
+    if isinstance(value, dict):
+        status = value.get("status")
+        if isinstance(status, str) and status.strip():
+            return status
+        if value.get("mtime") is not None:
+            return "has_mtime"
+        if value:
+            return "metadata_present"
+    return "unknown"
+
+
+def _skill_memory_entry_summary(entries: list[dict[str, Any]], total_count: int | None = None) -> dict[str, Any]:
+    """Return compact memory result counts grouped by provider and freshness."""
+    by_source: dict[str, int] = {}
+    by_freshness: dict[str, int] = {}
+    for entry in entries:
+        source_id = str(entry.get("source_id") or "unknown")
+        freshness = _skill_memory_freshness_label(entry.get("freshness"))
+        by_source[source_id] = by_source.get(source_id, 0) + 1
+        by_freshness[freshness] = by_freshness.get(freshness, 0) + 1
+    return {
+        "returned_count": len(entries),
+        "total_count": len(entries) if total_count is None else total_count,
+        "by_source": by_source,
+        "by_freshness": by_freshness,
+    }
+
+
+def skills_memory(
+    repo_root: Path,
+    mode: str,
+    query: str | None = None,
+    limit: int = 8,
+    source_id: str | None = None,
+) -> CallResult:
+    """List, read, or search durable skill memory surfaces as a read-only provider."""
+    result = CallResult()
+    result.metadata["command"] = f"skills memory {mode}"
+    provider_roots = [
+        {
+            "provider": source.source_id,
+            "root": str(source.root),
+            "description": source.label,
+            "type": source.source_type,
+            "exists": (repo_root / source.root).exists(),
+        }
+        for source in MEMORY_SOURCES
+    ]
+    mode_key = mode.strip().lower()
+    capped_limit = min(limit, 50)
+    payload: dict[str, Any] = {
+        "schema_version": "skill-memory-provider.v1",
+        "status": "pass",
+        "mode": mode_key,
+        "query": query,
+        "provider_model": "extension-like-read-only",
+        "contract_schemas": {
+            "memory": "skill-memory-provider.v1",
+            "provider": "memory-provider.v1",
+            "profiles": "skill-operation-profiles.v1",
+            "events": "skill-events.v1",
+        },
+        "operation_context": _skill_memory_operation_context(),
+        "roots": provider_roots,
+        "source_summary": _skill_memory_source_summary(provider_roots),
+        "memory_provider_schema": "memory-provider.v1",
+    }
+
+    if mode_key == "list":
+        provider_result = _memory_provider_list(repo_root, source_id=source_id, limit=capped_limit)
+        memory_payload = provider_result.data.get("memory", {})
+        if provider_result.status != "success":
+            result.status = "error"
+            payload["status"] = "blocked"
+            payload["agent_summary"] = memory_payload.get("agent_summary") or (
+                provider_result.errors[0].message if provider_result.errors else "Memory list failed."
+            )
+            result.errors.extend(provider_result.errors)
+            result.data["skill_memory"] = payload
+            return result
+        payload["entries"] = memory_payload.get("entries", [])
+        payload["entry_count"] = memory_payload.get("count", len(payload["entries"]))
+        payload["total_count"] = memory_payload.get("total_count", len(payload["entries"]))
+        payload["entry_summary"] = _skill_memory_entry_summary(payload["entries"], payload["total_count"])
+        payload["agent_summary"] = memory_payload.get("agent_summary", "Listed skill memory entries.")
+    elif mode_key == "read":
+        needle = (query or "").strip()
+        if not needle:
+            result.status = "error"
+            payload["status"] = "blocked"
+            payload["agent_summary"] = "Memory read requires an entry id or repo-relative path."
+            result.data["skill_memory"] = payload
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=payload["agent_summary"],
+                    fix_suggestion="Run ./bin/ask skills memory list --json --robot and pass an entry id.",
+                )
+            )
+            return result
+        provider_result = _memory_provider_read(repo_root, needle)
+        memory_payload = provider_result.data.get("memory", {})
+        if provider_result.status != "success":
+            result.status = "error"
+            payload["status"] = "blocked"
+            payload["requested"] = needle
+            payload["agent_summary"] = memory_payload.get("agent_summary") or f"No skill memory entry matched '{needle}'."
+            result.errors.extend(provider_result.errors)
+            result.data["skill_memory"] = payload
+            return result
+        payload["entry"] = memory_payload.get("entry")
+        payload["entry_summary"] = _skill_memory_entry_summary([payload["entry"]] if payload["entry"] else [], 1 if payload["entry"] else 0)
+        payload["agent_summary"] = memory_payload.get("agent_summary", f"Read skill memory entry {needle}.")
+    elif mode_key == "search":
+        if not (query or "").strip():
+            result.status = "error"
+            payload["status"] = "blocked"
+            payload["agent_summary"] = "Memory search requires a non-empty query."
+            result.data["skill_memory"] = payload
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=payload["agent_summary"],
+                    fix_suggestion="Run ./bin/ask skills memory search '<keyword>' --json --robot.",
+                )
+            )
+            return result
+        provider_result = _memory_provider_search(repo_root, query or "", source_id=source_id, limit=capped_limit)
+        memory_payload = provider_result.data.get("memory", {})
+        if provider_result.status != "success":
+            result.status = "error"
+            payload["status"] = "blocked"
+            payload["agent_summary"] = memory_payload.get("agent_summary") or (
+                provider_result.errors[0].message if provider_result.errors else "Memory search failed."
+            )
+            result.errors.extend(provider_result.errors)
+            result.data["skill_memory"] = payload
+            return result
+        payload["entries"] = memory_payload.get("results", [])
+        payload["entry_count"] = memory_payload.get("count", len(payload["entries"]))
+        payload["total_count"] = memory_payload.get("total_count", len(payload["entries"]))
+        payload["entry_summary"] = _skill_memory_entry_summary(payload["entries"], payload["total_count"])
+        payload["agent_summary"] = memory_payload.get("agent_summary", f"Found skill memory entries matching '{query}'.")
+    else:
+        result.status = "error"
+        payload["status"] = "blocked"
+        payload["agent_summary"] = f"Unknown skill memory mode '{mode}'."
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Use one of: list, read, search.",
+            )
+        )
+
+    result.data["skill_memory"] = payload
+    return result
+
+
+def _capability_lifecycle_event(
+    *,
+    event_type: str,
+    query: str,
+    target_kind: str,
+    handle: Any,
+    source_path: Any,
+    audit_target: Any,
+    status: str,
+    blockers: list[dict[str, str]],
+    warnings: list[dict[str, str]],
+    details: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return a structured lifecycle event for capability diagnostics."""
+    subject_key = str(handle or audit_target or source_path or query)
+    event_consumer = CAPABILITY_LIFECYCLE_EVENT_CONSUMERS.get(event_type, {})
+    producer_commands = event_consumer.get("producer_commands", [])
+    observer_commands = event_consumer.get("observer_commands", [])
+    event = {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": event_type,
+        "event_definition": CAPABILITY_LIFECYCLE_EVENT_TYPES.get(event_type),
+        "contract_schemas": {
+            "lifecycle_event": "capability-lifecycle-event.v1",
+            "events": "skill-events.v1",
+            "profiles": "skill-operation-profiles.v1",
+        },
+        "occurred_at": datetime.now(timezone.utc).isoformat(),
+        "event_identity": {
+            "event_type": event_type,
+            "subject_key": subject_key,
+            "target_kind": target_kind,
+            "status": status,
+        },
+        "producer_command": producer_commands[0] if producer_commands else None,
+        "observer_command": observer_commands[0] if observer_commands else None,
+        "subject": {
+            "query": query,
+            "target_kind": target_kind,
+            "handle": handle,
+            "canonical_source_path": source_path,
+            "audit_target": audit_target,
+        },
+        "outcome": {
+            "status": status,
+            "blocker_classes": [blocker["class"] for blocker in blockers],
+            "warning_classes": [warning["class"] for warning in warnings],
+        },
+    }
+    if details:
+        event["details"] = details
+    return event
+
+
+def _contract_status(has_items: bool, contract_gaps: list[str]) -> str:
+    """Return the stable readiness label for a summarized contract."""
+    if not has_items:
+        return "empty"
+    if contract_gaps:
+        return "has_gaps"
+    return "ready"
+
+
+def _contract_readiness(has_items: bool, contract_gaps: list[str]) -> dict[str, Any]:
+    """Return shared readiness fields for summarized contracts."""
+    return {
+        "contract_gap_count": len(contract_gaps),
+        "has_contract_gaps": bool(contract_gaps),
+        "contract_status": _contract_status(has_items, contract_gaps),
+        "contract_ready": has_items and not contract_gaps,
+    }
+
+
+def _contract_sections_overview(contract_sections: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Return shared readiness fields for named contract sections."""
+    gap_count = sum(int(section["gap_count"]) for section in contract_sections.values())
+    contract_ready = bool(contract_sections) and all(section["ready"] for section in contract_sections.values())
+    section_statuses = {str(section["status"]) for section in contract_sections.values()}
+    if contract_ready:
+        contract_status = "ready"
+    elif "has_gaps" in section_statuses or gap_count > 0:
+        contract_status = "has_gaps"
+    else:
+        contract_status = "empty"
+    return {
+        "contract_sections": contract_sections,
+        "contract_status_by_section": {
+            section_name: section["status"]
+            for section_name, section in contract_sections.items()
+        },
+        "contract_gap_count_by_section": {
+            section_name: section["gap_count"]
+            for section_name, section in contract_sections.items()
+        },
+        "contract_section_count": len(contract_sections),
+        "ready_contract_sections": sorted(
+            section_name
+            for section_name, section in contract_sections.items()
+            if section["ready"]
+        ),
+        "blocked_contract_sections": sorted(
+            section_name
+            for section_name, section in contract_sections.items()
+            if not section["ready"]
+        ),
+        "contract_gap_count": gap_count,
+        "has_contract_gaps": gap_count > 0,
+        "contract_ready": contract_ready,
+        "contract_status": contract_status,
+    }
+
+
+def _skill_event_summary(
+    event_consumers: dict[str, dict[str, Any]],
+    known_profiles: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Return compact event coverage counts for automation consumers."""
+    by_profile: dict[str, int] = {}
+    events_by_profile: dict[str, list[str]] = {}
+    profiles_by_event: dict[str, list[str]] = {}
+    producer_count = 0
+    observer_count = 0
+    producer_command_count_by_event: dict[str, int] = {}
+    observer_command_count_by_event: dict[str, int] = {}
+    events_missing_producers: list[str] = []
+    events_missing_observers: list[str] = []
+    events_missing_profiles: list[str] = []
+    events_with_unknown_profiles: dict[str, list[str]] = {}
+    known_profile_names = set(known_profiles)
+    for event_name, consumer in event_consumers.items():
+        producer_commands = consumer.get("producer_commands", [])
+        observer_commands = consumer.get("observer_commands", [])
+        profiles = consumer.get("profiles", [])
+        profiles_by_event[event_name] = sorted(str(profile) for profile in profiles)
+        producer_command_count_by_event[event_name] = len(producer_commands)
+        observer_command_count_by_event[event_name] = len(observer_commands)
+        if not producer_commands:
+            events_missing_producers.append(event_name)
+        if not observer_commands:
+            events_missing_observers.append(event_name)
+        if not profiles:
+            events_missing_profiles.append(event_name)
+        producer_count += len(producer_commands)
+        observer_count += len(observer_commands)
+        for profile in profiles:
+            if profile not in known_profile_names:
+                events_with_unknown_profiles.setdefault(event_name, []).append(profile)
+            by_profile[profile] = by_profile.get(profile, 0) + 1
+            events_by_profile.setdefault(profile, []).append(event_name)
+    events_with_contract_gaps = sorted(
+        set(
+            events_missing_producers
+            + events_missing_observers
+            + events_missing_profiles
+            + list(events_with_unknown_profiles)
+        )
+    )
+    missing_by_contract_dimension = {
+        "known_profiles": sorted(events_with_unknown_profiles),
+        "observer_commands": sorted(events_missing_observers),
+        "producer_commands": sorted(events_missing_producers),
+        "profiles": sorted(events_missing_profiles),
+    }
+    referenced_profile_names = set(by_profile)
+    known_profiles_without_events = sorted(known_profile_names - referenced_profile_names)
+    known_profiles_with_events = sorted(known_profile_names & referenced_profile_names)
+    known_events_by_profile = {
+        profile_name: sorted(events_by_profile.get(profile_name, []))
+        for profile_name in sorted(known_profiles)
+    }
+    unknown_profile_reference_count = sum(
+        len(profile_names) for profile_names in events_with_unknown_profiles.values()
+    )
+    return {
+        "event_count": len(event_consumers),
+        "contract_dimensions": sorted(missing_by_contract_dimension),
+        "contract_dimension_count": len(missing_by_contract_dimension),
+        "contract_dimension_status": {
+            dimension: _contract_status(bool(event_consumers), missing_events)
+            for dimension, missing_events in missing_by_contract_dimension.items()
+        },
+        "missing_events_by_contract_dimension": missing_by_contract_dimension,
+        "missing_event_count_by_contract_dimension": {
+            dimension: len(missing_events)
+            for dimension, missing_events in missing_by_contract_dimension.items()
+        },
+        "producer_command_count": producer_count,
+        "observer_command_count": observer_count,
+        "producer_command_count_by_event": dict(sorted(producer_command_count_by_event.items())),
+        "observer_command_count_by_event": dict(sorted(observer_command_count_by_event.items())),
+        "events_missing_producers": sorted(events_missing_producers),
+        "events_missing_observers": sorted(events_missing_observers),
+        "events_missing_profiles": sorted(events_missing_profiles),
+        "events_missing_profile_count": len(events_missing_profiles),
+        "has_missing_producers": bool(events_missing_producers),
+        "has_missing_observers": bool(events_missing_observers),
+        "has_missing_profiles": bool(events_missing_profiles),
+        "events_with_unknown_profile_count": len(events_with_unknown_profiles),
+        "unknown_profile_reference_count": unknown_profile_reference_count,
+        "events_with_unknown_profiles": {
+            event_name: sorted(profile_names)
+            for event_name, profile_names in sorted(events_with_unknown_profiles.items())
+        },
+        "profiles_unknown_to_registry": sorted(
+            {
+                profile_name
+                for profile_names in events_with_unknown_profiles.values()
+                for profile_name in profile_names
+            }
+        ),
+        "has_unknown_profiles": bool(events_with_unknown_profiles),
+        "known_profile_count": len(known_profiles),
+        "known_profile_names": sorted(known_profiles),
+        "referenced_profile_count": len(referenced_profile_names),
+        "referenced_profile_names": sorted(referenced_profile_names),
+        "known_profiles_with_events": known_profiles_with_events,
+        "known_profile_event_coverage_count": len(known_profiles_with_events),
+        "all_known_profiles_have_events": len(known_profiles_with_events) == len(known_profile_names),
+        "known_profiles_without_events": known_profiles_without_events,
+        "has_known_profiles_without_events": bool(known_profiles_without_events),
+        "known_events_by_profile": known_events_by_profile,
+        "known_event_count_by_profile": {
+            profile_name: len(event_names)
+            for profile_name, event_names in known_events_by_profile.items()
+        },
+        "events_with_contract_gaps": events_with_contract_gaps,
+        **_contract_readiness(bool(event_consumers), events_with_contract_gaps),
+        "by_profile": by_profile,
+        "events_by_profile": {
+            profile_name: sorted(event_names)
+            for profile_name, event_names in sorted(events_by_profile.items())
+        },
+        "event_count_by_profile": {
+            profile_name: len(event_names)
+            for profile_name, event_names in sorted(events_by_profile.items())
+        },
+        "profiles_by_event": dict(sorted(profiles_by_event.items())),
+        "profile_count_by_event": {
+            event_name: len(profile_names)
+            for event_name, profile_names in sorted(profiles_by_event.items())
+        },
+        "profile_count": len(by_profile),
+        "profile_names": sorted(by_profile),
+        "has_profiles": bool(by_profile),
+    }
+
+
+def _skill_events_readiness_overview(event_summary: dict[str, Any]) -> dict[str, Any]:
+    """Return a compact readiness summary for lifecycle event consumers."""
+    return _contract_sections_overview({
+        "lifecycle_event_contract": {
+            "status": event_summary["contract_status"],
+            "ready": event_summary["contract_ready"],
+            "gap_count": event_summary["contract_gap_count"],
+        }
+    })
+
+
+def skills_events(repo_root: Path, event_type: str | None = None) -> CallResult:
+    """Return the declared capability lifecycle event contract."""
+    result = CallResult()
+    result.metadata["command"] = "skills events"
+    selected = event_type.strip() if event_type else None
+    if selected and selected not in CAPABILITY_LIFECYCLE_EVENT_TYPES:
+        result.status = "error"
+        result.data["skill_events"] = {
+            "schema_version": "skill-events.v1",
+            "status": "blocked",
+            "requested_event_type": selected,
+            "available_event_types": sorted(CAPABILITY_LIFECYCLE_EVENT_TYPES),
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Unknown skill lifecycle event type '{selected}'.",
+                fix_suggestion=f"Use one of: {', '.join(sorted(CAPABILITY_LIFECYCLE_EVENT_TYPES))}",
+            )
+        )
+        return result
+
+    event_types = {selected: CAPABILITY_LIFECYCLE_EVENT_TYPES[selected]} if selected else CAPABILITY_LIFECYCLE_EVENT_TYPES
+    event_consumers = (
+        {selected: CAPABILITY_LIFECYCLE_EVENT_CONSUMERS[selected]}
+        if selected
+        else CAPABILITY_LIFECYCLE_EVENT_CONSUMERS
+    )
+    event_summary = _skill_event_summary(event_consumers, SKILL_OPERATION_PROFILES)
+    result.data["skill_events"] = {
+        "schema_version": "skill-events.v1",
+        "status": "pass",
+        "repo_root": str(repo_root),
+        "selected_event_type": selected,
+        "event_schema": "capability-lifecycle-event.v1",
+        "event_names": list(event_types),
+        "available_event_types": sorted(CAPABILITY_LIFECYCLE_EVENT_TYPES),
+        "contract_schemas": {
+            "events": "skill-events.v1",
+            "lifecycle_event": "capability-lifecycle-event.v1",
+            "profiles": "skill-operation-profiles.v1",
+            "doctor": "skill-doctor.v1",
+            "package": "skill-package-readiness.v1",
+            "memory": "skill-memory-provider.v1",
+        },
+        "event_types": event_types,
+        "event_consumers": event_consumers,
+        "readiness_overview": _skill_events_readiness_overview(event_summary),
+        "event_summary": event_summary,
+        "validation_commands": [
+            _skills_validation_command("events"),
+            "./bin/ask skills events <event-type> --json --robot",
+            _skills_validation_command("handles", "--check", "--no-handles"),
+        ],
+        "eval_blocker_classes": {
+            blocker_class: DOCTOR_BLOCKER_TAXONOMY[blocker_class]
+            for blocker_class in EVAL_BLOCKER_CLASSES
+        },
+        "blocker_taxonomy": DOCTOR_BLOCKER_TAXONOMY,
+        "warning_taxonomy": DOCTOR_WARNING_TAXONOMY,
+        "event_order": list(CAPABILITY_LIFECYCLE_EVENT_TYPES),
+        "event_count": len(event_types),
+        "agent_summary": (
+            f"Lifecycle event '{selected}' is declared."
+            if selected
+            else f"{len(CAPABILITY_LIFECYCLE_EVENT_TYPES)} capability lifecycle event types are declared."
+        ),
+    }
+    return result
+
+
+def _skill_profile_workspace_roots(repo_root: Path) -> dict[str, Any]:
+    return {
+        "repo_root": str(repo_root),
+        "canonical_skill_roots": ["Skills", "Plugins"],
+        "runtime_projection_roots": [".agents/skills", ".skillsets"],
+        "artifact_roots": ["Infrastructure/artifacts", "Infrastructure/workouts"],
+        "memory_roots": [".harness/memory", "Wiki/wiki/learnings", "Docs/solutions"],
+    }
+
+
+def _profiles_with_effective_roots(profiles: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    enriched: dict[str, dict[str, Any]] = {}
+    for name, profile in profiles.items():
+        stop_conditions = list(profile.get("stop_conditions", []))
+        enriched_profile = {
+            **profile,
+            "effective_roots": list(profile.get("allowed_roots", [])),
+        }
+        blocker_definitions = {
+            condition: DOCTOR_BLOCKER_TAXONOMY[condition]
+            for condition in stop_conditions
+            if condition in DOCTOR_BLOCKER_TAXONOMY
+        }
+        if blocker_definitions:
+            enriched_profile["stop_condition_definitions"] = blocker_definitions
+        if name == "eval":
+            enriched_profile["eval_blocker_classes"] = {
+                blocker_class: DOCTOR_BLOCKER_TAXONOMY[blocker_class]
+                for blocker_class in EVAL_BLOCKER_CLASSES
+            }
+        enriched[name] = enriched_profile
+    return enriched
+
+
+def _skill_profile_event_coverage(
+    profiles: dict[str, dict[str, Any]],
+    event_consumers: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Return lifecycle event coverage grouped by operation profile."""
+    events_by_profile = {profile_name: [] for profile_name in profiles}
+    for event_name, consumer in event_consumers.items():
+        for profile_name in consumer.get("profiles", []):
+            if profile_name in events_by_profile:
+                events_by_profile[profile_name].append(event_name)
+    profiles_missing_events = sorted(
+        profile_name
+        for profile_name, event_names in events_by_profile.items()
+        if not event_names
+    )
+    profiles_with_events = sorted(
+        profile_name
+        for profile_name, event_names in events_by_profile.items()
+        if event_names
+    )
+    event_coverage_gaps = profiles_missing_events
+    return {
+        "profile_count": len(profiles),
+        "profile_names": sorted(profiles),
+        "events_by_profile": {
+            profile_name: sorted(event_names)
+            for profile_name, event_names in events_by_profile.items()
+        },
+        "event_count_by_profile": {
+            profile_name: len(event_names)
+            for profile_name, event_names in events_by_profile.items()
+        },
+        "event_reference_count": sum(len(event_names) for event_names in events_by_profile.values()),
+        "profiles_with_events": profiles_with_events,
+        "profiles_with_event_count": len(profiles_with_events),
+        "profiles_missing_events": profiles_missing_events,
+        "profiles_missing_event_count": len(profiles_missing_events),
+        "has_profiles_missing_events": bool(profiles_missing_events),
+        "all_profiles_have_events": bool(profiles) and not profiles_missing_events,
+        "profiles_with_event_gaps": event_coverage_gaps,
+        "profiles_with_event_gap_count": len(event_coverage_gaps),
+        **_contract_readiness(bool(profiles), event_coverage_gaps),
+    }
+
+
+def _skill_profiles_operation_context() -> dict[str, Any]:
+    """Return command surfaces that consume operation profiles."""
+    return {
+        "profile_model": "profile-v2-inspired",
+        "contract_schemas": {
+            "profiles": "skill-operation-profiles.v1",
+            "events": "skill-events.v1",
+            "lifecycle_event": "capability-lifecycle-event.v1",
+            "doctor": "skill-doctor.v1",
+            "package": "skill-package-readiness.v1",
+            "memory": "skill-memory-provider.v1",
+        },
+        "consumer_commands": {
+            "doctor": "./bin/ask skills doctor <handle-or-path> --json --robot",
+            "package": "./bin/ask skills package <handle-or-path> --json --robot",
+            "events": _skills_validation_command("events"),
+            "memory": "./bin/ask skills memory search <query> --json --robot",
+        },
+        "routing_contracts": {
+            "doctor": ["authoring", "package-review", "eval"],
+            "package": ["package-review", "plugin-share"],
+            "memory": ["authoring", "package-review", "eval"],
+            "events": ["authoring", "package-review", "plugin-share", "eval", "live-mutation"],
+        },
+        "validation_commands": [
+            _skills_validation_command("handles", "--check", "--no-handles"),
+            _skills_validation_command("events"),
+        ],
+    }
+
+
+def _skill_profile_summary(profiles: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Return compact profile coverage counts for automation consumers."""
+    by_write_policy: dict[str, int] = {}
+    by_permission: dict[str, int] = {}
+    root_count = 0
+    stop_condition_count = 0
+    required_evidence_count = 0
+    profiles_missing_write_policy: list[str] = []
+    profiles_missing_allowed_roots: list[str] = []
+    profiles_missing_permissions: list[str] = []
+    profiles_missing_stop_conditions: list[str] = []
+    profiles_missing_required_evidence: list[str] = []
+    taxonomy_stop_conditions_by_profile: dict[str, list[str]] = {}
+    profiles_without_taxonomy_stop_conditions: list[str] = []
+    required_evidence_by_profile: dict[str, list[str]] = {}
+    permissions_by_profile: dict[str, list[str]] = {}
+    allowed_roots_by_profile: dict[str, list[str]] = {}
+    write_policy_by_profile: dict[str, str] = {}
+    stop_conditions_by_profile: dict[str, list[str]] = {}
+    for profile_name, profile in profiles.items():
+        write_policy_value = profile.get("write_policy")
+        write_policy = str(write_policy_value or "unknown")
+        if not write_policy_value:
+            profiles_missing_write_policy.append(profile_name)
+        write_policy_by_profile[profile_name] = write_policy
+        by_write_policy[write_policy] = by_write_policy.get(write_policy, 0) + 1
+        roots = profile.get("allowed_roots", [])
+        profile_root_count = len(roots) if isinstance(roots, list) else 0
+        root_count += profile_root_count
+        if profile_root_count == 0:
+            profiles_missing_allowed_roots.append(profile_name)
+        if isinstance(roots, list):
+            allowed_roots_by_profile[profile_name] = sorted(str(root) for root in roots)
+        stop_conditions = profile.get("stop_conditions", [])
+        profile_stop_condition_count = len(stop_conditions) if isinstance(stop_conditions, list) else 0
+        stop_condition_count += profile_stop_condition_count
+        if profile_stop_condition_count == 0:
+            profiles_missing_stop_conditions.append(profile_name)
+        if isinstance(stop_conditions, list):
+            stop_conditions_by_profile[profile_name] = sorted(str(condition) for condition in stop_conditions)
+        taxonomy_stop_conditions = sorted(
+            str(condition)
+            for condition in stop_conditions
+            if isinstance(condition, str) and condition in DOCTOR_BLOCKER_TAXONOMY
+        )
+        if taxonomy_stop_conditions:
+            taxonomy_stop_conditions_by_profile[profile_name] = taxonomy_stop_conditions
+        else:
+            profiles_without_taxonomy_stop_conditions.append(profile_name)
+        required_evidence = profile.get("required_evidence", [])
+        profile_required_evidence_count = len(required_evidence) if isinstance(required_evidence, list) else 0
+        required_evidence_count += profile_required_evidence_count
+        if profile_required_evidence_count == 0:
+            profiles_missing_required_evidence.append(profile_name)
+        if isinstance(required_evidence, list):
+            required_evidence_by_profile[profile_name] = sorted(str(item) for item in required_evidence)
+        permissions = profile.get("permissions", [])
+        profile_permission_count = len(permissions) if isinstance(permissions, list) else 0
+        if profile_permission_count == 0:
+            profiles_missing_permissions.append(profile_name)
+        if isinstance(permissions, list):
+            permissions_by_profile[profile_name] = sorted(str(permission) for permission in permissions)
+            for permission in permissions:
+                key = str(permission)
+                by_permission[key] = by_permission.get(key, 0) + 1
+    profiles_with_contract_gaps = sorted(
+        set(
+            profiles_missing_write_policy
+            + profiles_missing_allowed_roots
+            + profiles_missing_permissions
+            + profiles_missing_stop_conditions
+            + profiles_missing_required_evidence
+        )
+    )
+    missing_by_contract_dimension = {
+        "write_policy": sorted(profiles_missing_write_policy),
+        "permissions": sorted(profiles_missing_permissions),
+        "allowed_roots": sorted(profiles_missing_allowed_roots),
+        "stop_conditions": sorted(profiles_missing_stop_conditions),
+        "required_evidence": sorted(profiles_missing_required_evidence),
+    }
+    return {
+        "profile_count": len(profiles),
+        "profile_names": sorted(profiles),
+        "has_profiles": bool(profiles),
+        "contract_dimensions": sorted(missing_by_contract_dimension),
+        "contract_dimension_count": len(missing_by_contract_dimension),
+        "contract_dimension_status": {
+            dimension: _contract_status(bool(profiles), missing_profiles)
+            for dimension, missing_profiles in missing_by_contract_dimension.items()
+        },
+        "missing_profiles_by_contract_dimension": missing_by_contract_dimension,
+        "missing_profile_count_by_contract_dimension": {
+            dimension: len(missing_profiles)
+            for dimension, missing_profiles in missing_by_contract_dimension.items()
+        },
+        "by_write_policy": by_write_policy,
+        "write_policy_count": len(by_write_policy),
+        "write_policy_by_profile": write_policy_by_profile,
+        "profiles_missing_write_policy": sorted(profiles_missing_write_policy),
+        "profiles_missing_write_policy_count": len(profiles_missing_write_policy),
+        "has_profiles_missing_write_policy": bool(profiles_missing_write_policy),
+        "all_profiles_have_write_policy": bool(profiles) and not profiles_missing_write_policy,
+        "by_permission": by_permission,
+        "permission_count": len(by_permission),
+        "permissions_by_profile": permissions_by_profile,
+        "permission_count_by_profile": {
+            profile_name: len(permission_items)
+            for profile_name, permission_items in permissions_by_profile.items()
+        },
+        "profiles_missing_permissions": sorted(profiles_missing_permissions),
+        "profiles_missing_permission_count": len(profiles_missing_permissions),
+        "has_profiles_missing_permissions": bool(profiles_missing_permissions),
+        "all_profiles_have_permissions": bool(profiles) and not profiles_missing_permissions,
+        "allowed_root_count": root_count,
+        "allowed_roots_by_profile": allowed_roots_by_profile,
+        "allowed_root_count_by_profile": {
+            profile_name: len(root_items)
+            for profile_name, root_items in allowed_roots_by_profile.items()
+        },
+        "profiles_missing_allowed_roots": sorted(profiles_missing_allowed_roots),
+        "profiles_missing_allowed_root_count": len(profiles_missing_allowed_roots),
+        "has_profiles_missing_allowed_roots": bool(profiles_missing_allowed_roots),
+        "all_profiles_have_allowed_roots": bool(profiles) and not profiles_missing_allowed_roots,
+        "stop_condition_count": stop_condition_count,
+        "has_stop_conditions": stop_condition_count > 0,
+        "stop_conditions_by_profile": stop_conditions_by_profile,
+        "stop_condition_count_by_profile": {
+            profile_name: len(condition_items)
+            for profile_name, condition_items in stop_conditions_by_profile.items()
+        },
+        "profiles_missing_stop_conditions": sorted(profiles_missing_stop_conditions),
+        "profiles_missing_stop_condition_count": len(profiles_missing_stop_conditions),
+        "has_profiles_missing_stop_conditions": bool(profiles_missing_stop_conditions),
+        "all_profiles_have_stop_conditions": bool(profiles) and not profiles_missing_stop_conditions,
+        "taxonomy_stop_conditions_by_profile": taxonomy_stop_conditions_by_profile,
+        "taxonomy_stop_condition_count": sum(
+            len(conditions) for conditions in taxonomy_stop_conditions_by_profile.values()
+        ),
+        "profiles_with_taxonomy_stop_conditions": sorted(taxonomy_stop_conditions_by_profile),
+        "profiles_with_taxonomy_stop_condition_count": len(taxonomy_stop_conditions_by_profile),
+        "profiles_without_taxonomy_stop_conditions": sorted(profiles_without_taxonomy_stop_conditions),
+        "profiles_without_taxonomy_stop_condition_count": len(profiles_without_taxonomy_stop_conditions),
+        "has_profiles_without_taxonomy_stop_conditions": bool(profiles_without_taxonomy_stop_conditions),
+        "all_profiles_have_taxonomy_stop_conditions": bool(profiles) and not profiles_without_taxonomy_stop_conditions,
+        "has_taxonomy_stop_conditions": bool(taxonomy_stop_conditions_by_profile),
+        "required_evidence_count": required_evidence_count,
+        "has_required_evidence": required_evidence_count > 0,
+        "required_evidence_by_profile": required_evidence_by_profile,
+        "required_evidence_count_by_profile": {
+            profile_name: len(evidence_items)
+            for profile_name, evidence_items in required_evidence_by_profile.items()
+        },
+        "profiles_missing_required_evidence": sorted(profiles_missing_required_evidence),
+        "profiles_missing_required_evidence_count": len(profiles_missing_required_evidence),
+        "has_profiles_missing_required_evidence": bool(profiles_missing_required_evidence),
+        "all_profiles_have_required_evidence": bool(profiles) and not profiles_missing_required_evidence,
+        "profiles_with_contract_gaps": profiles_with_contract_gaps,
+        **_contract_readiness(bool(profiles), profiles_with_contract_gaps),
+    }
+
+
+def _skill_profiles_readiness_overview(
+    profile_summary: dict[str, Any],
+    event_coverage: dict[str, Any],
+) -> dict[str, Any]:
+    """Return a compact cross-contract readiness summary for profile consumers."""
+    return _contract_sections_overview({
+        "profile_contracts": {
+            "status": profile_summary["contract_status"],
+            "ready": profile_summary["contract_ready"],
+            "gap_count": profile_summary["contract_gap_count"],
+        },
+        "lifecycle_event_coverage": {
+            "status": event_coverage["contract_status"],
+            "ready": event_coverage["contract_ready"],
+            "gap_count": event_coverage["contract_gap_count"],
+        },
+    })
+
+
+def skills_profiles(repo_root: Path, profile: str | None = None) -> CallResult:
+    """Return profile-v2-style operation modes for skill lifecycle work."""
+    result = CallResult()
+    result.metadata["command"] = "skills profiles"
+    profile_key = profile.strip() if profile else None
+    profiles = SKILL_OPERATION_PROFILES
+    if profile_key:
+        if profile_key not in profiles:
+            result.status = "error"
+            result.data["skill_profiles"] = {
+                "schema_version": "skill-operation-profiles.v1",
+                "status": "blocked",
+                "selected_profile": None,
+                "requested_profile": profile_key,
+                "available_profiles": sorted(profiles),
+            }
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=f"Unknown skill operation profile '{profile_key}'.",
+                    fix_suggestion=f"Use one of: {', '.join(sorted(profiles))}",
+                )
+            )
+            return result
+        selected_profiles = {profile_key: profiles[profile_key]}
+    else:
+        selected_profiles = profiles
+
+    profile_summary = _skill_profile_summary(selected_profiles)
+    event_coverage = _skill_profile_event_coverage(selected_profiles, CAPABILITY_LIFECYCLE_EVENT_CONSUMERS)
+
+    result.data["skill_profiles"] = {
+        "schema_version": "skill-operation-profiles.v1",
+        "status": "pass",
+        "repo_root": str(repo_root),
+        "workspace_roots": _skill_profile_workspace_roots(repo_root),
+        "profile_model": "profile-v2-inspired",
+        "operation_context": _skill_profiles_operation_context(),
+        "selected_profile": profile_key,
+        "profile_names": list(selected_profiles),
+        "available_profiles": sorted(profiles),
+        "readiness_overview": _skill_profiles_readiness_overview(profile_summary, event_coverage),
+        "profile_summary": profile_summary,
+        "event_coverage": event_coverage,
+        "eval_blocker_classes": {
+            blocker_class: DOCTOR_BLOCKER_TAXONOMY[blocker_class]
+            for blocker_class in EVAL_BLOCKER_CLASSES
+        },
+        "blocker_taxonomy": DOCTOR_BLOCKER_TAXONOMY,
+        "warning_taxonomy": DOCTOR_WARNING_TAXONOMY,
+        "profiles": _profiles_with_effective_roots(selected_profiles),
+        "profile_order": ["authoring", "package-review", "plugin-share", "eval", "live-mutation"],
+        "agent_summary": (
+            f"Profile '{profile_key}' is declared."
+            if profile_key
+            else f"{len(profiles)} skill operation profiles are declared."
+        ),
+    }
+    return result
+
+
+def _doctor_check(status: str, **details: Any) -> dict[str, Any]:
+    check_name = str(details.pop("check_name", "") or "")
+    payload = {
+        "status": status,
+        "sdk_layer": _doctor_sdk_layer_for("check", check_name),
+    }
+    payload.update(details)
+    return payload
+
+
+def _skill_doctor_next_command(
+    *,
+    blockers: list[dict[str, str]],
+    warnings: list[dict[str, str]],
+    checks: dict[str, Any],
+    normalized_handle: Any,
+    query: str,
+    audit_target: str | None,
+    strict: bool,
+) -> str:
+    """Select the most actionable follow-up command from classified doctor evidence."""
+    blocker_classes = [blocker.get("class") for blocker in blockers]
+    if "blocked_validation" in blocker_classes:
+        command = checks.get("structural_audit", {}).get("command")
+        if command:
+            return str(command)
+        if audit_target:
+            return _skills_validation_command("audit", audit_target, "--level", "compat")
+    if "blocked_runtime" in blocker_classes:
+        command = checks.get("runtime_reachability", {}).get("command")
+        if command:
+            return str(command)
+    if "blocked_missing_source" in blocker_classes:
+        return _skills_validation_command("resolve", str(normalized_handle or query))
+    if "blocked_resolution" in blocker_classes:
+        return _skills_validation_command("resolve", str(normalized_handle or query))
+    if blockers:
+        return _skills_validation_command("doctor", str(normalized_handle or query))
+
+    warning_classes = {warning.get("class") for warning in warnings}
+    package_or_metadata_warning = bool(
+        {"metadata_incomplete", "capability_contract_incomplete"} & warning_classes
+    )
+    if package_or_metadata_warning and audit_target and not strict:
+        return _skills_validation_command("audit", audit_target, "--level", "strict")
+    if "capability_contract_incomplete" in warning_classes:
+        return _skills_validation_command("package", str(normalized_handle or query))
+    if "outcome_proof_missing" in warning_classes:
+        return _skills_validation_command("prove", str(normalized_handle or query))
+    if warnings and audit_target and not strict:
+        return _skills_validation_command("audit", audit_target, "--level", "strict")
+    if normalized_handle:
+        return _skills_validation_command("prove", str(normalized_handle))
+    return _skills_validation_command("audit", str(audit_target), "--level", "strict")
+
+
+def _capability_metadata_status(frontmatter: dict[str, Any]) -> dict[str, Any]:
+    """Return a non-blocking metadata readiness summary for one skill source."""
+    required_fields = ("name", "description")
+    capability_fields = (
+        "skill-type",
+        "lifecycle_state",
+        "maturity",
+        "owner",
+        "metadata_source",
+    )
+    metadata = frontmatter.get("metadata")
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    present_required = sorted(field for field in required_fields if frontmatter.get(field))
+    missing_required = sorted(field for field in required_fields if not frontmatter.get(field))
+    present_capability = sorted(field for field in capability_fields if metadata.get(field))
+    missing_capability = sorted(field for field in capability_fields if not metadata.get(field))
+
+    package_readiness = _skill_package_readiness(frontmatter)
+    package_fields = package_readiness["required_fields"]
+    missing_package = package_fields["missing"]
+
+    readiness_level = "package_ready" if not missing_package else "capability_declared"
+    if missing_capability:
+        readiness_level = "legacy_frontmatter"
+    if missing_required:
+        readiness_level = "incomplete"
+
+    return {
+        "status": "pass" if not missing_required else "warning",
+        "readiness_level": readiness_level,
+        "required_fields": {
+            "present": present_required,
+            "missing": missing_required,
+        },
+        "capability_contract": {
+            "present": present_capability,
+            "missing": missing_capability,
+            "values": {field: metadata.get(field) for field in present_capability},
+        },
+        "package_contract": _skill_package_contract_summary(package_readiness),
+        "package_readiness": package_readiness,
+        "note": "Package/share metadata gaps are reported as contract gaps, not current blockers.",
+    }
+
+
+PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
+    "version",
+    "compatible_roles",
+    "runtime_needs",
+    "maturity",
+    "provenance",
+    "share_readiness",
+)
+
+
+def _metadata_value(frontmatter: dict[str, Any], field: str) -> Any:
+    """Return a package field from top-level frontmatter or nested metadata."""
+    metadata = frontmatter.get("metadata")
+    if not isinstance(metadata, dict):
+        metadata = {}
+    if field == "version":
+        return frontmatter.get("version") or metadata.get("version")
+    return metadata.get(field) or frontmatter.get(field)
+
+
+def _normalized_list(value: Any) -> list[str]:
+    """Normalize package metadata values into a stable string list."""
+    if value is None or value == "":
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, (list, tuple, set)):
+        return [str(item) for item in value if str(item).strip()]
+    return [str(value)]
+
+
+def _package_field_values(frontmatter: dict[str, Any]) -> dict[str, Any]:
+    """Extract package readiness metadata from skill frontmatter."""
+    values = {field: _metadata_value(frontmatter, field) for field in PACKAGE_CONTRACT_FIELDS}
+    return {
+        "version": values.get("version"),
+        "compatible_roles": _normalized_list(values.get("compatible_roles")),
+        "runtime_needs": _normalized_list(values.get("runtime_needs")),
+        "maturity": values.get("maturity"),
+        "provenance": values.get("provenance"),
+        "share_readiness": values.get("share_readiness"),
+    }
+
+
+def _skill_package_readiness(frontmatter: dict[str, Any]) -> dict[str, Any]:
+    """Return version and role-aware package readiness for one skill."""
+    values = _package_field_values(frontmatter)
+    present = sorted(field for field, value in values.items() if bool(value))
+    missing = sorted(field for field in PACKAGE_CONTRACT_FIELDS if field not in present)
+    share_readiness = str(values.get("share_readiness") or "").strip().lower()
+    share_readiness_ready = share_readiness == "ready"
+    share_ready = False
+    missing_identity_fields = [
+        field
+        for field in ("name", "description")
+        if not str(frontmatter.get(field) or "").strip()
+    ]
+
+    if missing_identity_fields:
+        readiness_level = "incomplete_identity"
+    elif not values.get("version"):
+        readiness_level = "legacy_capability"
+    elif missing:
+        readiness_level = "versioned_capability"
+    elif not share_readiness_ready:
+        readiness_level = "share_readiness_blocked"
+    else:
+        readiness_level = "share_ready"
+        share_ready = True
+
+    blocked_reasons = list(missing)
+    if missing_identity_fields:
+        blocked_reasons.append("identity_incomplete")
+    if not missing and not share_readiness_ready:
+        blocked_reasons.append("share_readiness_not_ready")
+    recommended_next_fields = [
+        field
+        for field in ("compatible_roles", "runtime_needs", "provenance", "share_readiness")
+        if field in missing
+    ]
+    if not missing and not share_readiness_ready:
+        recommended_next_fields.append("share_readiness")
+    if "version" in missing:
+        recommended_next_fields.insert(0, "version")
+    recommended_next_fields = [*missing_identity_fields, *recommended_next_fields]
+    promotion_status = "ready_pending_checkout" if share_ready else "blocked_validation"
+
+    return {
+        "readiness_level": readiness_level,
+        "required_fields": {
+            "present": present,
+            "missing": missing,
+        },
+        "values": values,
+        "role_compatibility": {
+            "declared": bool(values["compatible_roles"]),
+            "roles": values["compatible_roles"],
+        },
+        "runtime_contract": {
+            "declared": bool(values["runtime_needs"]),
+            "needs": values["runtime_needs"],
+        },
+        "install_gate": {
+            "install_ready": share_ready,
+            "required_checks": list(PACKAGE_CONTRACT_FIELDS),
+            "blocked_reasons": blocked_reasons,
+            "checkout_test": {
+                "required": True,
+                "status": "not_run",
+                "evidence": [],
+            },
+        },
+        "promotion_gate": {
+            "status": promotion_status,
+            "promotion_ready": False,
+            "share_ready": share_ready,
+            "share_readiness": values["share_readiness"],
+            "checkout_test_status": "not_run",
+            "blocked_reasons": blocked_reasons,
+            "recommended_next_fields": recommended_next_fields,
+        },
+    }
+
+
+def _refresh_package_promotion_gate(package_contract: dict[str, Any]) -> None:
+    """Keep promotion readiness tied to metadata and checkout evidence."""
+    promotion_gate = package_contract["promotion_gate"]
+    checkout_status = package_contract["install_gate"]["checkout_test"]["status"]
+    promotion_gate["checkout_test_status"] = checkout_status
+
+    if promotion_gate["status"] == "blocked_missing_source":
+        promotion_gate["promotion_ready"] = False
+        return
+    if promotion_gate["blocked_reasons"]:
+        promotion_gate["status"] = "blocked_validation"
+        promotion_gate["promotion_ready"] = False
+        return
+    if not promotion_gate["share_ready"]:
+        promotion_gate["status"] = "blocked_validation"
+        promotion_gate["promotion_ready"] = False
+        return
+    if checkout_status == "pass":
+        promotion_gate["status"] = "ready"
+        promotion_gate["promotion_ready"] = True
+        return
+    if checkout_status == "not_run":
+        promotion_gate["status"] = "ready_pending_checkout"
+    else:
+        promotion_gate["status"] = checkout_status
+    promotion_gate["promotion_ready"] = False
+
+
+def _skill_package_gate_summary(package_contract: dict[str, Any]) -> dict[str, Any]:
+    """Return automation-facing package gate status without nested traversal."""
+    install_gate = package_contract["install_gate"]
+    promotion_gate = package_contract["promotion_gate"]
+    return {
+        "install_ready": install_gate["install_ready"],
+        "checkout_test_status": install_gate["checkout_test"]["status"],
+        "promotion_status": promotion_gate["status"],
+        "promotion_ready": promotion_gate["promotion_ready"],
+        "blocked_reasons": promotion_gate["blocked_reasons"],
+    }
+
+
+def _skill_package_readiness_summary(package_contract: dict[str, Any]) -> dict[str, Any]:
+    """Return a compact readiness summary for routing and dashboards."""
+    required_fields = package_contract["required_fields"]
+    present_fields = list(required_fields["present"])
+    missing_fields = list(required_fields["missing"])
+    return {
+        "readiness_level": package_contract["readiness_level"],
+        "present_fields": present_fields,
+        "missing_fields": missing_fields,
+        "present_field_count": len(present_fields),
+        "missing_field_count": len(missing_fields),
+        "role_compatible": package_contract["role_compatibility"]["declared"],
+        "runtime_contract_declared": package_contract["runtime_contract"]["declared"],
+        "share_ready": package_contract["promotion_gate"]["share_ready"],
+        "promotion_status": package_contract["promotion_gate"]["status"],
+        "recommended_next_fields": list(package_contract["promotion_gate"]["recommended_next_fields"]),
+    }
+
+
+def _skill_package_operation_context() -> dict[str, Any]:
+    """Return profile and event routing context for package readiness checks."""
+    return {
+        "primary_profile": "package-review",
+        "promotion_profile": "plugin-share",
+        "profiles": {
+            profile_name: {
+                "intent": SKILL_OPERATION_PROFILES[profile_name]["intent"],
+                "write_policy": SKILL_OPERATION_PROFILES[profile_name]["write_policy"],
+                "required_evidence": SKILL_OPERATION_PROFILES[profile_name]["required_evidence"],
+            }
+            for profile_name in ("package-review", "plugin-share")
+        },
+        "events": {
+            "package_readiness_checked": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["package_readiness_checked"],
+        },
+        "validation_commands": [
+            "./bin/ask skills package <handle-or-path> --json --robot",
+            _skills_validation_command("events", "package_readiness_checked"),
+        ],
+    }
+
+
+def _skill_doctor_operation_context() -> dict[str, Any]:
+    """Return profile and event routing context for capability doctor checks."""
+    return {
+        "primary_profile": "authoring",
+        "review_profile": "package-review",
+        "next_profiles": ["package-review", "eval"],
+        "profiles": {
+            profile_name: {
+                "intent": SKILL_OPERATION_PROFILES[profile_name]["intent"],
+                "write_policy": SKILL_OPERATION_PROFILES[profile_name]["write_policy"],
+                "required_evidence": SKILL_OPERATION_PROFILES[profile_name]["required_evidence"],
+            }
+            for profile_name in ("authoring", "package-review", "eval")
+        },
+        "events": {
+            "skill_doctor_completed": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["skill_doctor_completed"],
+            "eval_blocked": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["eval_blocked"],
+            "eval_completed": CAPABILITY_LIFECYCLE_EVENT_CONSUMERS["eval_completed"],
+        },
+        "follow_up_commands": [
+            "./bin/ask skills package <handle-or-path> --json --robot",
+            "./bin/ask skills prove <handle> --json --robot",
+            _skills_validation_command("events"),
+        ],
+        "validation_commands": [
+            "./bin/ask skills doctor <handle-or-path> --json --robot",
+            "./bin/ask skills audit <handle-or-path> --level strict --json --robot",
+            _skills_validation_command("events", "skill_doctor_completed"),
+        ],
+    }
+
+
+def _skill_package_contract_summary(package_readiness: dict[str, Any]) -> dict[str, Any]:
+    """Return the doctor-facing package contract view from package readiness."""
+    package_fields = package_readiness["required_fields"]
+    return {
+        "present": package_fields["present"],
+        "missing": package_fields["missing"],
+        "values": package_readiness["values"],
+        "role_compatibility": package_readiness["role_compatibility"],
+        "runtime_contract": package_readiness["runtime_contract"],
+        "install_gate": package_readiness["install_gate"],
+        "promotion_gate": package_readiness["promotion_gate"],
+    }
+
+
+def _skill_package_checkout_test(
+    repo_root: Path,
+    source_path: Path | None,
+    audit_target: str | None,
+    package_contract: dict[str, Any],
+) -> dict[str, Any]:
+    """Return read-only local checkout evidence for a package candidate."""
+    evidence: list[str] = []
+    if not source_path or not source_path.is_file():
+        return {
+            "required": True,
+            "status": "blocked_missing_source",
+            "evidence": evidence,
+        }
+
+    source_rel = _repo_relative_path(repo_root, source_path) or source_path.as_posix()
+    evidence.append(f"source_path:{source_rel}")
+    try:
+        source_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        evidence.append("source_readable:false")
+        evidence.append(f"source_read_error:{exc.__class__.__name__}")
+        return {
+            "required": True,
+            "status": "blocked_missing_source",
+            "evidence": evidence,
+        }
+    evidence.append("source_readable:true")
+    if audit_target:
+        evidence.append(f"audit_target:{audit_target}")
+
+    missing_fields = package_contract["required_fields"]["missing"]
+    blocked_reasons = package_contract["install_gate"]["blocked_reasons"]
+    if blocked_reasons:
+        if missing_fields:
+            evidence.append(f"missing_package_metadata:{','.join(missing_fields)}")
+        else:
+            evidence.append(f"promotion_gate_blocked:{','.join(blocked_reasons)}")
+        return {
+            "required": True,
+            "status": "blocked_validation",
+            "evidence": evidence,
+        }
+
+    evidence.append("package_metadata_complete:true")
+    return {
+        "required": True,
+        "status": "pass",
+        "evidence": evidence,
+    }
+
+
+def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any], str | None]:
+    """Resolve a doctor target as either a command handle or a repo-owned path."""
+    query = target.strip()
+    looks_like_path = "/" in query or query.endswith(".md") or query.startswith(".")
+    if looks_like_path:
+        resolved_path, path_error = _validate_repo_relative_skill_path(repo_root, query)
+        if path_error:
+            return {
+                "target_kind": "invalid_path",
+                "path_error": [error.__dict__ for error in path_error.errors],
+            }, None
+        assert resolved_path is not None
+        source = resolved_path if resolved_path.name == "SKILL.md" else resolved_path / "SKILL.md"
+        source_rel = _repo_relative_path(repo_root, source)
+        return {
+            "target_kind": "canonical_source_path",
+            "handle": None,
+            "source_path": source_rel,
+            "source_exists": source.is_file(),
+            "resolution": None,
+        }, Path(source_rel).parent.as_posix() if source_rel else None
+
+    resolution = resolve_skill_handle(query, repo_root_path=repo_root)
+    audit_target = _skill_audit_target(repo_root, resolution) if resolution.get("status") == "ok" else None
+    return {
+        "target_kind": "command_handle",
+        "handle": resolution.get("handle", query.lstrip("$")),
+        "source_path": resolution.get("source_path"),
+        "source_exists": bool(audit_target and (repo_root / audit_target / "SKILL.md").is_file()),
+        "resolution": resolution,
+    }, audit_target
+
+
+def skills_package(
+    repo_root: Path,
+    target: str,
+    strict: bool = False,
+    checkout_test: bool = False,
+) -> CallResult:
+    """Report version and role-aware package readiness for one skill."""
+    result = CallResult()
+    result.metadata["command"] = "skills package"
+    query = target.strip()
+    target_info, audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path")
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    blockers: list[dict[str, str]] = []
+    warnings: list[dict[str, str]] = []
+    if not source_path or not source_path.is_file():
+        blockers.append(
+            _doctor_blocker(
+                "blocked_missing_source",
+                f"Canonical source is missing for '{query}'.",
+            )
+        )
+        package_contract = {
+            "readiness_level": "blocked_missing_source",
+            "required_fields": {"present": [], "missing": list(PACKAGE_CONTRACT_FIELDS)},
+            "values": {},
+            "role_compatibility": {"declared": False, "roles": []},
+            "runtime_contract": {"declared": False, "needs": []},
+            "install_gate": {
+                "install_ready": False,
+                "required_checks": list(PACKAGE_CONTRACT_FIELDS),
+                "blocked_reasons": list(PACKAGE_CONTRACT_FIELDS),
+                "checkout_test": {
+                    "required": True,
+                    "status": "not_run",
+                    "evidence": [],
+                },
+            },
+            "promotion_gate": {
+                "status": "blocked_missing_source",
+                "promotion_ready": False,
+                "share_ready": False,
+                "share_readiness": None,
+                "checkout_test_status": "not_run",
+                "blocked_reasons": list(PACKAGE_CONTRACT_FIELDS),
+                "recommended_next_fields": list(PACKAGE_CONTRACT_FIELDS),
+            },
+        }
+    else:
+        try:
+            frontmatter = _read_skill_frontmatter_fields(source_path)
+        except OSError:
+            frontmatter = {}
+        package_contract = _skill_package_readiness(frontmatter)
+        missing_fields = package_contract["required_fields"]["missing"]
+        gate_blockers = package_contract["install_gate"]["blocked_reasons"]
+        if gate_blockers:
+            warning_message = (
+                "Package readiness metadata is incomplete."
+                if missing_fields
+                else "Package promotion gate is blocked."
+            )
+            warnings.append(
+                _doctor_warning(
+                    "capability_contract_incomplete",
+                    warning_message,
+                )
+            )
+            if strict:
+                blocker_message = (
+                    "Strict package readiness failed; missing package metadata: "
+                    f"{', '.join(missing_fields)}."
+                    if missing_fields
+                    else (
+                        "Strict package readiness failed; package gate blockers: "
+                        f"{', '.join(gate_blockers)}."
+                    )
+                )
+                blockers.append(
+                    _doctor_blocker(
+                        "blocked_validation",
+                        blocker_message,
+                    )
+                )
+
+    if checkout_test:
+        package_contract["install_gate"]["checkout_test"] = _skill_package_checkout_test(
+            repo_root,
+            source_path,
+            audit_target,
+            package_contract,
+        )
+    _refresh_package_promotion_gate(package_contract)
+    gate_summary = _skill_package_gate_summary(package_contract)
+    readiness_summary = _skill_package_readiness_summary(package_contract)
+
+    status = "blocked" if blockers else ("warning" if warnings else "pass")
+    lifecycle_event = _capability_lifecycle_event(
+        event_type="skill_loaded",
+        query=query,
+        target_kind=str(target_info.get("target_kind") or "unknown"),
+        handle=target_info.get("handle"),
+        source_path=source_path_value,
+        audit_target=audit_target,
+        status=status,
+        blockers=blockers,
+        warnings=warnings,
+    )
+    readiness_event = _capability_lifecycle_event(
+        event_type="package_readiness_checked",
+        query=query,
+        target_kind=str(target_info.get("target_kind") or "unknown"),
+        handle=target_info.get("handle"),
+        source_path=source_path_value,
+        audit_target=audit_target,
+        status=status,
+        blockers=blockers,
+        warnings=warnings,
+        details={"gate_summary": gate_summary},
+    )
+    lifecycle_events = [lifecycle_event, readiness_event]
+    payload = {
+        "schema_version": "skill-package-readiness.v1",
+        "query": query,
+        "target_kind": target_info.get("target_kind"),
+        "handle": target_info.get("handle"),
+        "canonical_source_path": source_path_value,
+        "audit_target": audit_target,
+        "target_summary": _skill_target_summary(
+            query=query,
+            target_kind=target_info.get("target_kind"),
+            handle=target_info.get("handle"),
+            source_path=source_path_value,
+            audit_target=audit_target,
+        ),
+        "status": status,
+        "strict": strict,
+        "package_contract": package_contract,
+        "gate_summary": gate_summary,
+        "readiness_summary": readiness_summary,
+        "contract_schemas": {
+            "package": "skill-package-readiness.v1",
+            "events": "skill-events.v1",
+            "lifecycle_event": "capability-lifecycle-event.v1",
+            "profiles": "skill-operation-profiles.v1",
+            "doctor": "skill-doctor.v1",
+            "memory": "skill-memory-provider.v1",
+        },
+        "operation_context": _skill_package_operation_context(),
+        "blockers": blockers,
+        "warnings": warnings,
+        "lifecycle_event": readiness_event,
+        "lifecycle_events": lifecycle_events,
+        "agent_summary": (
+            f"{query} is blocked: {blockers[0]['message']}"
+            if blockers
+            else (
+                f"{query} has package gate blockers: {', '.join(package_contract['install_gate']['blocked_reasons'])}."
+                if warnings
+                else (
+                    f"{query} is package/share ready; run --checkout-test before promotion."
+                    if package_contract["promotion_gate"]["status"] == "ready_pending_checkout"
+                    else f"{query} is package/share ready with checkout evidence."
+                )
+            )
+        ),
+        "next_command": (
+            _skills_validation_command("doctor", query)
+            if blockers
+            else _skills_validation_command("doctor", query, "--strict")
+        ),
+    }
+    result.data["skill_package"] = payload
+    if blockers or (strict and warnings):
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=payload["next_command"],
+            )
+        )
+    return result
+
+
+def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallResult:
+    """Run a compact per-capability diagnostic for a skill handle or source path."""
+    result = CallResult()
+    result.metadata["command"] = "skills doctor"
+    query = target.strip()
+    target_info, audit_target = _resolve_doctor_target(repo_root, query)
+    target_kind = str(target_info.get("target_kind") or "unknown")
+    normalized_handle = target_info.get("handle")
+    source_path_value = target_info.get("source_path")
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    checks: dict[str, Any] = {}
+    blockers: list[dict[str, str]] = []
+    warnings: list[dict[str, str]] = []
+
+    resolution = target_info.get("resolution")
+    if target_kind == "command_handle":
+        resolver_pass = isinstance(resolution, dict) and resolution.get("status") == "ok"
+        checks["resolver"] = _doctor_check(
+            _status_from_bool(resolver_pass),
+            check_name="resolver",
+            handle=normalized_handle,
+            error_code=(resolution or {}).get("error_code") if isinstance(resolution, dict) else None,
+            operator_action=(resolution or {}).get("operator_action") if isinstance(resolution, dict) else None,
+        )
+        if not resolver_pass:
+            blockers.append(
+                _doctor_blocker(
+                    "blocked_resolution",
+                    f"Could not resolve skill handle '{normalized_handle}'.",
+                )
+            )
+
+        proof_result = skills_proof(repo_root, str(normalized_handle))
+        proof = proof_result.data.get("proof", {})
+        checks["runtime_reachability"] = _doctor_check(
+            proof.get("status", "fail") if isinstance(proof, dict) else "fail",
+            check_name="runtime_reachability",
+            command=_skills_validation_command("proof", str(normalized_handle)),
+            gates=proof.get("gates", {}) if isinstance(proof, dict) else {},
+        )
+        if proof_result.status != "success":
+            blockers.append(
+                _doctor_blocker(
+                    "blocked_runtime",
+                    f"Runtime reachability proof failed for '{normalized_handle}'.",
+                )
+            )
+    else:
+        checks["resolver"] = _doctor_check(
+            "skipped",
+            check_name="resolver",
+            reason="Path targets are audited as canonical source; command-handle proof requires a handle.",
+        )
+
+    source_exists = bool(target_info.get("source_exists"))
+    checks["canonical_source"] = _doctor_check(
+        _status_from_bool(source_exists),
+        check_name="canonical_source",
+        source_path=source_path_value,
+    )
+    if not source_exists:
+        blockers.append(
+            _doctor_blocker(
+                "blocked_missing_source",
+                f"Canonical source is missing for '{query}'.",
+            )
+        )
+
+    audit_level = "strict" if strict else "compat"
+    if audit_target and source_exists:
+        audit_result = audit_skill(repo_root, audit_target, level=audit_level)
+        diagnostics = audit_result.data.get("diagnostics", {})
+        checks["structural_audit"] = _doctor_check(
+            "pass" if audit_result.status == "success" else "fail",
+            check_name="structural_audit",
+            level=audit_level,
+            command=_skills_validation_command("audit", audit_target, "--level", audit_level),
+            diagnostics_exit_code=diagnostics.get("exit_code"),
+        )
+        if audit_result.status != "success":
+            blockers.append(
+                _doctor_blocker(
+                    "blocked_validation",
+                    f"{audit_level} skill audit failed for '{audit_target}'.",
+                )
+            )
+    else:
+        checks["structural_audit"] = _doctor_check(
+            "skipped",
+            check_name="structural_audit",
+            level=audit_level,
+            reason="No canonical source target available.",
+        )
+
+    frontmatter: dict[str, Any] = {}
+    if source_path and source_path.is_file():
+        try:
+            frontmatter = _read_skill_frontmatter_fields(source_path)
+        except OSError:
+            frontmatter = {}
+    metadata_status = _capability_metadata_status(frontmatter)
+    metadata_status.setdefault("sdk_layer", _doctor_sdk_layer_for("check", "capability_metadata"))
+    checks["capability_metadata"] = metadata_status
+    if metadata_status["status"] == "warning":
+        warnings.append(
+            _doctor_warning(
+                "metadata_incomplete",
+                "Recommended frontmatter fields are incomplete.",
+            )
+        )
+    package_readiness = metadata_status.get("package_readiness", {})
+    package_status = "pass"
+    if isinstance(package_readiness, dict) and package_readiness.get("required_fields", {}).get("missing"):
+        package_status = "warning"
+        warnings.append(
+            _doctor_warning(
+                "capability_contract_incomplete",
+                "Package/share readiness metadata is incomplete.",
+            )
+        )
+    checks["package_readiness"] = _doctor_check(
+        package_status,
+        check_name="package_readiness",
+        package_readiness=package_readiness,
+        required_fields=package_readiness.get("required_fields", {}) if isinstance(package_readiness, dict) else {},
+        install_gate=package_readiness.get("install_gate", {}) if isinstance(package_readiness, dict) else {},
+        promotion_gate=package_readiness.get("promotion_gate", {}) if isinstance(package_readiness, dict) else {},
+    )
+
+    workout_handle = str(normalized_handle or (Path(audit_target).name if audit_target else "")).strip()
+    workouts = _skill_workout_candidates(repo_root, workout_handle) if workout_handle else []
+    checks["outcome_proof"] = _doctor_check(
+        "available_not_run" if workouts else "missing",
+        check_name="outcome_proof",
+        workout_candidates=workouts,
+        evidence_class="outcome_proof",
+    )
+    if not workouts:
+        warnings.append(
+            _doctor_warning(
+                "outcome_proof_missing",
+                "No matching workout was found for this capability.",
+            )
+        )
+    doctor_status = "blocked" if blockers else ("warning" if warnings else "pass")
+    next_command = _skill_doctor_next_command(
+        blockers=blockers,
+        warnings=warnings,
+        checks=checks,
+        normalized_handle=normalized_handle,
+        query=query,
+        audit_target=audit_target,
+        strict=strict,
+    )
+
+    handle_label = "$" + str(normalized_handle) if normalized_handle else query
+    lifecycle_event = _capability_lifecycle_event(
+        event_type="skill_doctor_completed",
+        query=query,
+        target_kind=target_kind,
+        handle=normalized_handle,
+        source_path=source_path_value,
+        audit_target=audit_target,
+        status=doctor_status,
+        blockers=blockers,
+        warnings=warnings,
+    )
+    result.data["skill_doctor"] = {
+        "schema_version": "skill-doctor.v1",
+        "query": query,
+        "target_kind": target_kind,
+        "handle": normalized_handle,
+        "canonical_source_path": source_path_value,
+        "audit_target": audit_target,
+        "target_summary": _skill_target_summary(
+            query=query,
+            target_kind=target_kind,
+            handle=normalized_handle,
+            source_path=source_path_value,
+            audit_target=audit_target,
+        ),
+        "status": doctor_status,
+        "blockers": blockers,
+        "warnings": warnings,
+        "readiness_taxonomy": {
+            "blockers": DOCTOR_BLOCKER_TAXONOMY,
+            "warnings": DOCTOR_WARNING_TAXONOMY,
+        },
+        "sdk_layers": list(DOCTOR_SDK_LAYERS),
+        "contract_schemas": _doctor_contract_schema_refs(),
+        "contract_schema_versions": _doctor_contract_schema_versions(),
+        "operation_context": _skill_doctor_operation_context(),
+        "lifecycle_event": lifecycle_event,
+        "lifecycle_event_types": CAPABILITY_LIFECYCLE_EVENT_TYPES,
+        "checks": checks,
+        "check_summary": _skill_doctor_check_summary(checks),
+        "agent_summary": (
+            f"{handle_label} is blocked: {blockers[0]['message']}"
+            if blockers
+            else (
+                f"{handle_label} is usable with {len(warnings)} readiness warning(s)."
+                if warnings
+                else f"{handle_label} passed capability doctor checks."
+            )
+        ),
+        "next_command": next_command,
+    }
+    if blockers:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=result.data["skill_doctor"]["agent_summary"],
+                fix_suggestion=next_command,
+            )
+        )
+    return result
+
+
 def skills_prove(repo_root: Path, handle: str) -> CallResult:
     """Compose an agent-facing proof scorecard for one skill handle."""
     result = CallResult()
@@ -970,8 +3375,12 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
                 },
                 "outcome_proof": {"status": "not_checked", "workout_candidates": [], "evidence_class": "outcome_proof"},
                 "goal_resolution": goal_resolution,
-                "next_command": (goal_resolution or {}).get("next_command") or f"./bin/ask skills improve {shlex.quote(query)} --json --robot",
+                "next_command": (goal_resolution or {}).get("next_command")
+                or _skills_validation_command("improve", query),
             }
+            result.data["skill_proof"]["validation_commands"] = [
+                result.data["skill_proof"]["next_command"],
+            ]
             result.errors.extend(improvement_result.errors)
             if not result.errors:
                 result.errors.append(
@@ -1000,15 +3409,15 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
         structural_detail = {
             "status": "pass" if audit_result.status == "success" else "fail",
             "audit_level": "compat",
-            "audit_command": f"./bin/ask skills audit {shlex.quote(audit_target)} --level compat --json --robot",
-            "strict_audit_command": f"./bin/ask skills audit {shlex.quote(audit_target)} --level strict --json --robot",
+            "audit_command": _skills_validation_command("audit", audit_target, "--level", "compat"),
+            "strict_audit_command": _skills_validation_command("audit", audit_target, "--level", "strict"),
             "diagnostics_exit_code": audit_result.data.get("diagnostics", {}).get("exit_code"),
         }
 
     analytics = skill_invocation_analytics(repo_root, normalized)
     workouts = _skill_workout_candidates(repo_root, normalized)
     outcome_status = "missing"
-    next_command = f"./bin/ask skills proof {shlex.quote(normalized)} --json --robot"
+    next_command = _skills_validation_command("proof", normalized)
     if reachability_status != "pass":
         proof_status = "blocked_reachability"
     elif structural_detail["status"] != "pass":
@@ -1017,7 +3426,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
     elif workouts:
         proof_status = "reachable_without_outcome_proof"
         outcome_status = "available_not_run"
-        next_command = f"./bin/ask workouts run {shlex.quote(workouts[0])} --json --robot"
+        next_command = _ask_validation_command("workouts", "run", workouts[0])
     else:
         proof_status = "reachable_without_outcome_proof"
         next_command = structural_detail.get("strict_audit_command") or next_command
@@ -1035,7 +3444,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
         "reachability": {
             "status": reachability_status,
             "source": "command_handle_proof",
-            "command": f"./bin/ask skills proof {shlex.quote(normalized)} --json --robot",
+            "command": _skills_validation_command("proof", normalized),
         },
         "structural_quality": structural_detail,
         "analytics": analytics,
@@ -1045,6 +3454,7 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
             "evidence_class": "outcome_proof",
         },
         "next_command": next_command,
+        "validation_commands": [next_command],
     }
     if goal_resolution:
         scorecard["goal_resolution"] = goal_resolution
@@ -1122,7 +3532,7 @@ def _skill_validation_commands(source_path: Path, repo_root: Path) -> list[str]:
     except ValueError:
         return []
     audit_target = relative_source.parent if relative_source.name == "SKILL.md" else relative_source
-    return [f"./bin/ask skills audit {shlex.quote(str(audit_target))} --level strict --json --robot"]
+    return [_skills_validation_command("audit", str(audit_target), "--level", "strict")]
 
 
 def explain_skill(repo_root: Path, handle: str) -> CallResult:
@@ -1138,7 +3548,7 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
             "status": "blocked",
             "handle": normalized,
             "agent_summary": f"Could not resolve skill handle '{normalized}'.",
-            "next_command": f"./bin/ask skills resolve {shlex.quote(str(normalized))} --json --robot",
+            "next_command": _skills_validation_command("resolve", str(normalized)),
         }
         result.errors.append(
             ErrorObject(
@@ -1259,10 +3669,10 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         "ambiguity_notes": skills_explain["ambiguity_notes"],
         "reachability": {
             "status": proof.get("status") if isinstance(proof, dict) else "not_checked",
-            "proof_command": f"./bin/ask skills proof {shlex.quote(str(normalized))} --json --robot",
+            "proof_command": _skills_validation_command("proof", str(normalized)),
         },
         "resolution": resolution,
-        "next_command": f"./bin/ask skills proof {shlex.quote(str(normalized))} --json --robot",
+        "next_command": _skills_validation_command("proof", str(normalized)),
     }
     result.data["skills_explain"] = skills_explain
     result.data["explanation"] = explanation
@@ -1274,6 +3684,10 @@ def reviewers_resolve(repo_root: Path, handle: str) -> CallResult:
     result = CallResult()
     result.metadata["command"] = "reviewers resolve"
     payload = resolve_reviewer_handle(handle)
+    normalized = str(payload.get("canonical_handle") or payload.get("handle") or handle).lstrip("@")
+    payload["validation_commands"] = [
+        _ask_validation_command("reviewers", "resolve", normalized),
+    ]
     result.data["resolution"] = payload
     if payload.get("status") != "ok":
         result.status = "error"
@@ -1290,6 +3704,16 @@ def reviewers_resolve(repo_root: Path, handle: str) -> CallResult:
 def init_skill(repo_root: Path, name: str, category: str, description: str) -> CallResult:
     """Initializes a new skill scaffold using the repo template logic."""
     result = CallResult()
+    result.data["validation_commands"] = [
+        _skills_validation_command(
+            "init",
+            name,
+            "--category",
+            category,
+            "--description",
+            description,
+        )
+    ]
     category_token = (category or "").strip()
     if not category_token:
         result.status = "error"
@@ -1372,6 +3796,10 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         CallResult: Result with `status` set to `"success"` when diagnostics pass (and all strict checks pass if requested), or `"error"` with `errors` containing one or more `ErrorObject`s. Possible error codes include `ERR_PATH_TRAVERSAL` and `ERR_VALIDATION`.
     """
     result = CallResult()
+    validation_args = [skill_path]
+    if level != "compat":
+        validation_args.extend(["--level", level])
+    result.data["validation_commands"] = [_skills_validation_command("audit", *validation_args)]
 
     _, path_error = _validate_repo_relative_skill_path(repo_root, skill_path)
     if path_error:
@@ -1387,7 +3815,43 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
     result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
 
-    if level == "strict":
+    is_skill_factory_system_overlay = audit_target_path in {
+        "skills-system/skill-creator",
+        "skills-system/skill-installer",
+    }
+
+    if level == "strict" and is_skill_factory_system_overlay:
+        overlay_cmd = python + ["Infrastructure/scripts/validation-and-linting/check_skill_factory_system_overlays.py"]
+        overlay_proc = subprocess.run(overlay_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
+        result.data["system_overlay"] = {"exit_code": overlay_proc.returncode, "stdout": overlay_proc.stdout, "stderr": overlay_proc.stderr}
+        if overlay_proc.returncode != 0:
+            result.status = "error"
+            result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Skill Factory system overlay validation failed."))
+            return result
+
+        family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
+        family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
+        result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
+        if family_proc.returncode != 0:
+            summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
+            message = "Family benchmarks validation failed."
+            if summary:
+                message = f"{message} First failures: {summary}"
+            result.status = "error"
+            result.errors.append(ErrorObject(code="ERR_VALIDATION", message=message))
+            return result
+
+        result.data["security_gate"] = {
+            "exit_code": 0,
+            "stdout": "skipped: preserved Codex .system SKILL.md body; local strict contract is enforced through attached Skill Factory references and system overlay validators\n",
+            "stderr": "",
+        }
+        result.data["openclaw_guard"] = {
+            "exit_code": 0,
+            "stdout": "skipped: preserved Codex .system SKILL.md body; run overlay/family validators for local Skill Factory additions\n",
+            "stderr": "",
+        }
+    elif level == "strict":
         # Security gate (skill_gate.py)
         gate_script = _resolve_skill_builder_script(repo_root, "skill_gate")
         gate_cmd = python + [gate_script, audit_target_path, "--require-security-evals", "--pi-high-fail", "--require-fail-fast"]
@@ -1459,7 +3923,7 @@ def validate_skill_gate(repo_root: Path, skill_path: str) -> CallResult:
         "--pi-high-fail",
         "--require-fail-fast",
     ]
-    return _run_validation_command(
+    result = _run_validation_command(
         repo_root,
         gate_cmd,
         "skill_gate",
@@ -1469,6 +3933,8 @@ def validate_skill_gate(repo_root: Path, skill_path: str) -> CallResult:
             f"against {shlex.quote(audit_target_path)}."
         ),
     )
+    result.data["validation_commands"] = [_skills_validation_command("validate-skill-gate", skill_path)]
+    return result
 
 
 def validate_openai_skill_format(repo_root: Path, skill_path: str, mode: str = "strict") -> CallResult:
@@ -1485,7 +3951,7 @@ def validate_openai_skill_format(repo_root: Path, skill_path: str, mode: str = "
         mode,
         audit_target_path,
     ]
-    return _run_validation_command(
+    result = _run_validation_command(
         repo_root,
         command,
         "openai_skill_format",
@@ -1495,6 +3961,428 @@ def validate_openai_skill_format(repo_root: Path, skill_path: str, mode: str = "
             f"against {shlex.quote(audit_target_path)}."
         ),
     )
+    result.data["validation_commands"] = [
+        _skills_validation_command("validate-openai-format", skill_path, "--mode", mode)
+    ]
+    return result
+
+
+def external_review_skill(
+    repo_root: Path,
+    skill_path: str,
+    *,
+    audit_level: str = "strict",
+    skip_plugin_eval: bool = False,
+    skip_tessl: bool = False,
+    skip_tessl_review: bool = False,
+    include_snyk: bool = False,
+    timeout_seconds: int = 180,
+    report_path: Optional[str] = None,
+    dashboard: bool = False,
+    dashboard_path: Optional[str] = None,
+) -> CallResult:
+    """Run the local-only second-review lane for one skill.
+
+    This command intentionally never publishes or registers a skill. Tessl is
+    used only as an installed local CLI, never through npx. Tessl describes
+    ``skill review`` as a local terminal review for private and work-in-progress
+    skills, so it is part of the default second-review lane.
+    """
+    result = CallResult()
+    result.status = "success"
+
+    _, path_error = _validate_repo_relative_skill_path(repo_root, skill_path)
+    if path_error:
+        return path_error
+
+    audit_target, audit_target_path = _normalize_skill_target_path(skill_path)
+    target_abs = (repo_root / audit_target).resolve()
+    if not target_abs.is_dir() or not (target_abs / "SKILL.md").is_file():
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="Skill path must resolve to a directory containing SKILL.md.",
+            fix_suggestion=f"Check the path and rerun against a canonical skill directory: {audit_target_path}",
+        ))
+        return result
+
+    result.data["policy"] = {
+        "mode": "local_internal_only",
+        "no_publish": True,
+        "no_registry_upload": True,
+        "uses_npx": False,
+        "publish_policy": "never publish, register, upload, or invoke npx from this lane",
+        "tessl_review_default": "enabled_local_cli",
+        "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+        "primary_gate": "local_eval_ask_audit",
+        "external_quality_judge": "tessl_local_review",
+        "tessl_lint_role": "temporary_tile_packaging_shape_check",
+        "tessl_lint_shape": (
+            "Tessl lint expects a Tessl tile.json package. Canonical repo skills are "
+            "SKILL.md-first, so this command builds a disposable local tile wrapper before linting."
+        ),
+        "tessl_review_role": "local_best_practice_content_review",
+        "plugin_eval_role": "budget_and_ergonomics_guardrail",
+        "plugin_eval_min_acceptable_grade": "B+",
+        "plugin_eval_warning_policy": (
+            "Plugin Eval warnings are visible follow-up work, but they are not release blockers when "
+            "there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass."
+        ),
+        "snyk_role": "opt_in_local_dependency_security_screening",
+        "snyk_default": "disabled_until_requested",
+        "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
+        "snyk_when_to_use": [
+            "when a skill or plugin candidate has dependency manifests such as package.json, pyproject.toml, requirements.txt, Gemfile, go.mod, or lockfiles",
+            "when claiming release readiness for a manifest-backed skill or plugin package",
+            "when dependency files, installer scripts, generated package surfaces, or plugin runtime dependencies changed",
+            "when matching the CircleCI/Snyk security screening lane locally before or after CI",
+            "when the user explicitly asks for Snyk, dependency vulnerability screening, or external security advisory evidence",
+        ],
+        "snyk_when_not_to_use": [
+            "pure SKILL.md-first instruction-only candidates with no supported dependency manifest, unless the user explicitly asks",
+            "routine local iteration where external networked security analysis is not needed",
+        ],
+        "snyk_privacy_basis": (
+            "Snyk CLI security analysis may contact Snyk services. It is never run by default in this "
+            "local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted."
+        ),
+    }
+    result.data["review_mode_details"] = {
+        "local_evals": {
+            "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
+            "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates",
+        },
+        "plugin_eval": {
+            "command": "plugin-eval analyze <path> --format markdown",
+            "role": "static budget, ergonomics, and reviewability guardrail; not a substitute for local evals",
+        },
+        "tessl_lint": {
+            "command": "tessl skill lint <temporary-tile.json>",
+            "role": "disposable tile.json package-shape check, not a direct content finding",
+            "canonical_source_shape": "SKILL.md-first",
+        },
+        "tessl_review": {
+            "command": "tessl skill review <temporary-skill-directory>",
+            "role": "local best-practice/content review for private or work-in-progress skills",
+            "publishes": False,
+        },
+        "snyk": {
+            "command": "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>",
+            "role": "opt-in local dependency security screening; release-required for manifest-backed candidates",
+            "default": "disabled_until_requested",
+            "release_required": "manifest-backed candidates",
+            "use_when": [
+                "candidate has supported dependency manifests",
+                "release-readiness is claimed for a manifest-backed package",
+                "dependency/runtime package surfaces changed",
+                "local evidence must match CircleCI/Snyk screening",
+                "user explicitly requests Snyk or dependency vulnerability evidence",
+            ],
+        },
+    }
+    result.data["target"] = audit_target_path
+    validation_args = [skill_path]
+    if audit_level != "strict":
+        validation_args.extend(["--audit-level", audit_level])
+    if skip_plugin_eval:
+        validation_args.append("--skip-plugin-eval")
+    if skip_tessl:
+        validation_args.append("--skip-tessl")
+    if skip_tessl_review:
+        validation_args.append("--skip-tessl-review")
+    if include_snyk:
+        validation_args.append("--include-snyk")
+    if timeout_seconds != 180:
+        validation_args.extend(["--timeout-seconds", str(timeout_seconds)])
+    if report_path:
+        validation_args.extend(["--report-path", report_path])
+    if dashboard:
+        validation_args.append("--dashboard")
+    if dashboard_path:
+        validation_args.extend(["--dashboard-path", dashboard_path])
+    result.data["validation_commands"] = [_skills_validation_command("external-review", *validation_args)]
+
+    audit_result = audit_skill(repo_root, audit_target_path, level=audit_level)
+    result.data["ask_audit"] = {
+        "status": audit_result.status,
+        "data": audit_result.data,
+        "errors": [getattr(error, "__dict__", error) for error in audit_result.errors],
+    }
+    if audit_result.status != "success":
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="Internal ask skill audit failed during external-review lane.",
+            fix_suggestion="Inspect data.ask_audit for the exact failing gate.",
+        ))
+
+    if not skip_plugin_eval:
+        plugin_eval_bin = shutil.which("plugin-eval")
+        if not plugin_eval_bin:
+            result.status = "error"
+            result.data["plugin_eval"] = {"status": "blocked_missing_binary", "command": "plugin-eval analyze"}
+            result.errors.append(ErrorObject(
+                code="ERR_DEPENDENCY",
+                message="plugin-eval is not installed or not on PATH.",
+                fix_suggestion="Install or expose plugin-eval, then rerun this local-only review lane.",
+            ))
+        else:
+            command = [plugin_eval_bin, "analyze", audit_target_path, "--format", "markdown"]
+            try:
+                proc = _run_captured_tool(repo_root=repo_root, command=command, timeout_seconds=timeout_seconds)
+                payload = _completed_process_payload(proc)
+                payload["status"] = "success" if proc.returncode == 0 else "error"
+                result.data["plugin_eval"] = payload
+                if proc.returncode != 0:
+                    result.status = "error"
+                    result.errors.append(ErrorObject(
+                        code="ERR_VALIDATION",
+                        message="plugin-eval analysis failed during external-review lane.",
+                        fix_suggestion="Inspect data.plugin_eval for full output.",
+                    ))
+            except subprocess.TimeoutExpired:
+                result.status = "error"
+                result.data["plugin_eval"] = {"status": "timeout", "command": command, "timeout_seconds": timeout_seconds}
+                result.errors.append(ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"plugin-eval timed out after {timeout_seconds} seconds.",
+                    fix_suggestion="Rerun with a higher --timeout-seconds value if the target is intentionally large.",
+                ))
+    else:
+        result.data["plugin_eval"] = {"status": "skipped"}
+
+    if not skip_tessl:
+        tessl_bin = shutil.which("tessl")
+        if not tessl_bin:
+            result.status = "error"
+            result.data["tessl_lint"] = {"status": "blocked_missing_binary", "command": "tessl skill lint"}
+            result.errors.append(ErrorObject(
+                code="ERR_DEPENDENCY",
+                message="Tessl CLI is not installed or not on PATH; Tessl local lint in the Second-Review Lane could not run.",
+                fix_suggestion="Install Tessl as a local machine tool and rerun. This command will not invoke npx or publish anything.",
+            ))
+        else:
+            with tempfile.TemporaryDirectory(prefix="agent-skills-tessl-") as tessl_tmp:
+                tessl_tmp_path = Path(tessl_tmp)
+                tile_path, tile_info = _write_tessl_tile_wrapper(repo_root, audit_target_path, tessl_tmp_path)
+                tessl_home = tessl_tmp_path / "home"
+                tessl_home.mkdir(parents=True, exist_ok=True)
+                tessl_env = {"HOME": str(tessl_home)}
+                result.data["tessl_tile"] = {
+                    **tile_info,
+                    "mode": "temporary_wrapper",
+                    "reason": (
+                        "Tessl lint validates tile.json packages. Canonical repo skills remain "
+                        "SKILL.md-first, so this is a disposable packaging-shape wrapper."
+                    ),
+                    "tessl_home": str(tessl_home),
+                }
+
+                lint_command = [tessl_bin, "skill", "lint", str(tile_path)]
+                try:
+                    lint_proc = _run_captured_tool(
+                        repo_root=repo_root,
+                        command=lint_command,
+                        timeout_seconds=timeout_seconds,
+                        env_overrides=tessl_env,
+                    )
+                    lint_payload = _completed_process_payload(lint_proc)
+                    lint_payload["status"] = "success" if lint_proc.returncode == 0 else "error"
+                    result.data["tessl_lint"] = lint_payload
+                    if lint_proc.returncode != 0:
+                        result.status = "error"
+                        result.errors.append(ErrorObject(
+                            code="ERR_VALIDATION",
+                            message="Tessl skill lint failed during local-only external review.",
+                            fix_suggestion="Inspect data.tessl_lint for Tessl's validation output.",
+                        ))
+                except subprocess.TimeoutExpired:
+                    result.status = "error"
+                    result.data["tessl_lint"] = {"status": "timeout", "command": lint_command, "timeout_seconds": timeout_seconds}
+                    result.errors.append(ErrorObject(
+                        code="ERR_RUNTIME",
+                        message=f"Tessl skill lint timed out after {timeout_seconds} seconds.",
+                        fix_suggestion="Check the local Tessl installation and rerun once it responds normally.",
+                    ))
+
+                if not skip_tessl_review:
+                    review_command = [tessl_bin, "skill", "review", tile_info["review_path"]]
+                    try:
+                        review_proc = _run_captured_tool(
+                            repo_root=repo_root,
+                            command=review_command,
+                            timeout_seconds=timeout_seconds,
+                            env_overrides=tessl_env,
+                        )
+                        review_payload = _completed_process_payload(review_proc)
+                        review_payload["status"] = "success" if review_proc.returncode == 0 else "error"
+                        result.data["tessl_review"] = review_payload
+                        if review_proc.returncode != 0:
+                            result.status = "error"
+                            result.errors.append(ErrorObject(
+                                code="ERR_VALIDATION",
+                                message="Tessl skill review failed during local-only external review.",
+                                fix_suggestion="Inspect data.tessl_review for full output.",
+                            ))
+                    except subprocess.TimeoutExpired:
+                        result.status = "error"
+                        result.data["tessl_review"] = {"status": "timeout", "command": review_command, "timeout_seconds": timeout_seconds}
+                        result.errors.append(ErrorObject(
+                            code="ERR_RUNTIME",
+                            message=f"Tessl skill review timed out after {timeout_seconds} seconds.",
+                            fix_suggestion="Check the local Tessl installation and rerun once it responds normally.",
+                        ))
+                else:
+                    result.data["tessl_review"] = {
+                        "status": "skipped",
+                        "reason": "Skipped by --skip-tessl-review.",
+                    }
+    else:
+        result.data["tessl_lint"] = {"status": "skipped"}
+        result.data["tessl_review"] = {"status": "skipped"}
+
+    if include_snyk:
+        snyk_bin = shutil.which("snyk")
+        if not snyk_bin:
+            result.status = "error"
+            result.data["snyk"] = {
+                "status": "blocked_missing_binary",
+                "command": "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>",
+            }
+            result.errors.append(ErrorObject(
+                code="ERR_DEPENDENCY",
+                message="Snyk CLI is not installed or not on PATH.",
+                fix_suggestion="Install or expose the Snyk CLI, authenticate it if required, then rerun with --include-snyk.",
+            ))
+        else:
+            snyk_command = [
+                snyk_bin,
+                "test",
+                "--all-projects",
+                "--detection-depth=6",
+                "--severity-threshold=high",
+                "--json",
+                audit_target_path,
+            ]
+            try:
+                snyk_proc = _run_captured_tool(
+                    repo_root=repo_root,
+                    command=snyk_command,
+                    timeout_seconds=timeout_seconds,
+                )
+                snyk_payload = _completed_process_payload(snyk_proc)
+                snyk_text = f"{snyk_proc.stdout}\n{snyk_proc.stderr}".lower()
+                if snyk_proc.returncode == 0:
+                    snyk_payload["status"] = "success"
+                elif "could not detect supported target files" in snyk_text or "no supported files" in snyk_text:
+                    snyk_payload["status"] = "not_applicable"
+                    snyk_payload["reason"] = (
+                        "Snyk found no supported dependency manifest under this skill. "
+                        "SKILL.md-first skills are still covered by the internal audit, "
+                        "security evals, and OpenClaw guard."
+                    )
+                elif (
+                    "use snyk auth" in snyk_text
+                    or "not authenticated" in snyk_text
+                    or "authentication required" in snyk_text
+                    or "snyk_token" in snyk_text
+                ):
+                    snyk_payload["status"] = "blocked_auth"
+                    snyk_payload["reason"] = (
+                        "Snyk CLI authentication is unavailable. Run snyk auth locally or provide "
+                        "SNYK_TOKEN in CI before rerunning --include-snyk."
+                    )
+                elif snyk_proc.returncode == 1:
+                    snyk_payload["status"] = "advisory"
+                else:
+                    snyk_payload["status"] = "error"
+                result.data["snyk"] = snyk_payload
+                if snyk_payload["status"] == "blocked_auth":
+                    result.status = "error"
+                    result.errors.append(ErrorObject(
+                        code="ERR_AUTH",
+                        message="Snyk authentication is required for the external security lane.",
+                        fix_suggestion="Run snyk auth locally or set SNYK_TOKEN in CI, then rerun with --include-snyk.",
+                    ))
+                elif snyk_payload["status"] in {"advisory", "error"}:
+                    result.status = "error"
+                    result.errors.append(ErrorObject(
+                        code="ERR_VALIDATION",
+                        message="Snyk reported an advisory or failed during the external security lane.",
+                        fix_suggestion="Inspect data.snyk for vulnerability details, unsupported-project output, or authentication errors.",
+                    ))
+            except subprocess.TimeoutExpired:
+                result.status = "error"
+                result.data["snyk"] = {
+                    "status": "timeout",
+                    "command": snyk_command,
+                    "timeout_seconds": timeout_seconds,
+                }
+                result.errors.append(ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"Snyk timed out after {timeout_seconds} seconds.",
+                    fix_suggestion="Check the local Snyk CLI/auth state and rerun with a higher --timeout-seconds value if needed.",
+                ))
+    else:
+        result.data["snyk"] = {
+            "status": "skipped",
+            "reason": "Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.",
+        }
+
+    report_target: Optional[Path] = None
+    if report_path:
+        report_target, report_error = _validate_repo_relative_skill_path(repo_root, report_path)
+        if report_error:
+            return report_error
+        assert report_target is not None
+        report_target.parent.mkdir(parents=True, exist_ok=True)
+        report_payload = {
+            "status": result.status,
+            "data": result.data,
+            "errors": [getattr(error, "__dict__", error) for error in result.errors],
+        }
+        report_target.write_text(json.dumps(report_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        result.data["report_path"] = report_target.relative_to(repo_root.resolve()).as_posix()
+
+    if dashboard:
+        if report_target is None:
+            default_report = Path("Infrastructure") / "artifacts" / "skill-reviews" / f"{target_abs.name}.json"
+            report_target = (repo_root / default_report).resolve()
+            report_target.parent.mkdir(parents=True, exist_ok=True)
+            report_payload = {
+                "status": result.status,
+                "data": result.data,
+                "errors": [getattr(error, "__dict__", error) for error in result.errors],
+            }
+            report_target.write_text(json.dumps(report_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            result.data["report_path"] = report_target.relative_to(repo_root.resolve()).as_posix()
+
+        if dashboard_path:
+            dashboard_target, dashboard_error = _validate_repo_relative_skill_path(repo_root, dashboard_path)
+            if dashboard_error:
+                return dashboard_error
+            assert dashboard_target is not None
+        else:
+            dashboard_target = report_target.with_suffix(".html")
+        try:
+            rendered_dashboard = render_skill_review_dashboard(
+                report_path=report_target,
+                output_path=dashboard_target,
+                repo_root=repo_root,
+            )
+        except Exception as exc:
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_RUNTIME",
+                message=f"Failed to render local skill review dashboard: {exc}",
+                fix_suggestion="Inspect the JSON report and rerun with --dashboard once the report shape is valid.",
+            ))
+        else:
+            dashboard_rel_path = rendered_dashboard.relative_to(repo_root.resolve()).as_posix()
+            result.data["dashboard_path"] = dashboard_rel_path
+            result.data["dashboard_url"] = dashboard_rel_path
+
+    return result
 
 
 def validate_skill_boundaries(repo_root: Path, handle: str) -> CallResult:
@@ -1502,6 +4390,9 @@ def validate_skill_boundaries(repo_root: Path, handle: str) -> CallResult:
     resolved = skills_explain_boundary(repo_root, handle)
     if resolved.status != "success":
         return resolved
+    resolved.data["validation_commands"] = [
+        _skills_validation_command("validate-boundaries", handle)
+    ]
     return resolved
 
 
@@ -1573,6 +4464,85 @@ def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, s
     return resolved_dest, rel_text
 
 
+def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path: Path) -> dict[str, Any]:
+    """Return the pre-install compatibility and overlap policy for an external skill."""
+    normalized_name = skill_name.lower().strip()
+    matches: list[dict[str, Any]] = []
+    for skill_md in sorted(repo_root.glob("Skills/**/SKILL.md")):
+        skill_dir = skill_md.parent
+        try:
+            frontmatter = _read_skill_frontmatter_fields(skill_md)
+        except OSError:
+            frontmatter = {}
+        local_name = str(frontmatter.get("name") or skill_dir.name)
+        local_description = str(frontmatter.get("description") or "")
+        name_ratio = difflib.SequenceMatcher(None, normalized_name, local_name.lower()).ratio()
+        path_ratio = difflib.SequenceMatcher(None, normalized_name, skill_dir.name.lower()).ratio()
+        score = max(name_ratio, path_ratio)
+        if normalized_name in {local_name.lower(), skill_dir.name.lower()} or score >= 0.72:
+            matches.append({
+                "name": local_name,
+                "path": skill_dir.relative_to(repo_root).as_posix(),
+                "description": local_description,
+                "similarity": round(score, 3),
+            })
+    matches.sort(key=lambda item: (-float(item["similarity"]), item["path"]))
+
+    target_exists = target_path.exists()
+    if target_exists:
+        outcome = "reject_duplicate"
+        reason = "target_path_exists"
+    elif matches and float(matches[0]["similarity"]) >= 0.86:
+        outcome = "needs_human_choice"
+        reason = "high_similarity_local_skill"
+    elif matches:
+        outcome = "keep_separate"
+        reason = "nearby_skill_exists_but_not_blocking"
+    else:
+        outcome = "install_new"
+        reason = "no_close_local_match"
+
+    return {
+        "schema_version": "skill-install-intake.v1",
+        "canonical_term": "External Skill Intake",
+        "candidate": skill_name,
+        "outcome": outcome,
+        "reason": reason,
+        "target_exists": target_exists,
+        "local_overlap_candidates": matches[:8],
+        "allowed_outcomes": [
+            "install_new",
+            "blend_into_existing",
+            "keep_separate",
+            "reject_duplicate",
+            "needs_human_choice",
+        ],
+        "pre_install_checks": [
+            "inventory existing skills with ./bin/ask skills list --advanced --json",
+            "search Skills/**, Plugins/**/skills/**, and skills-system/** for overlap",
+            "compare intent, trigger wording, scripts/assets, safety boundaries, and closeout contract",
+            "return an Intake Decision before writing canonical source",
+        ],
+        "compatibility_checks": [
+            "OpenAI skill format and SKILL.md frontmatter",
+            "progressive disclosure shape and required local safety sections",
+            "repo path, network, secret, package-manager, and external-tool assumptions",
+            "dependency manifest presence for Snyk applicability",
+        ],
+        "post_install_gates": [
+            "./bin/ask skills audit <skill-path> --level strict --json --robot",
+            "./bin/ask skills external-review <skill-path> --json --robot",
+            "./bin/ask evals run <skill-path> --mode smoke --json --robot once eval cases exist",
+            "./bin/ask evals run <skill-path> --mode release --json --robot before promotion or release-readiness claims",
+        ],
+        "snyk_policy": {
+            "required_when": "manifest-backed candidate is promoted or release readiness is claimed",
+            "not_applicable_when": "pure SKILL.md-first instruction-only candidate has no supported dependency manifest",
+        },
+        "promotion_rule": "Do not add a command handle, route as canonical, blend into an owner skill, or make a Release-Readiness Claim until required gates pass.",
+    }
+
+
 def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str = "Skills/github", dry_run: bool = False) -> CallResult:
     """
     Install a GitHub-hosted skill into the repository's canonical skill directory.
@@ -1611,6 +4581,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
     # Parse skill name from URL for preview
     skill_name = url.split("/")[-1].replace(".git", "") if "/" in url else url
     target_path = dest_path / skill_name
+    intake_decision = _skill_install_intake_decision(repo_root, skill_name, target_path)
 
     # Handle dry-run first (before any side-effect checks)
     if dry_run:
@@ -1627,13 +4598,25 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         result.data["url"] = url
         result.data["remediate"] = remediate
         result.data["canonical_dest"] = dest_rel
+        result.data["intake_decision"] = intake_decision
+        result.data["readiness_policy"] = {
+            "full_evals_required_before_promotion": True,
+            "external_skill_install_is_intake_not_copy": True,
+            "promotion_rule": intake_decision["promotion_rule"],
+        }
+        validation_args = [url, "--dest", dest_rel]
+        if remediate:
+            validation_args.append("--remediate")
+        validation_args.append("--dry-run")
+        result.data["validation_commands"] = [_skills_validation_command("install", *validation_args)]
         result.metadata["next_steps"] = [
-            f"ask skills install {url} --dest {dest_rel}" + (" --remediate" if remediate else "")
+            "Review data.intake_decision.outcome before writing canonical source.",
+            f"ask skills install {url} --dest {dest_rel}" + (" --remediate" if remediate else ""),
         ]
         return result
 
     # Check for existing skill conflict (only for actual installation)
-    if target_path.exists():
+    if intake_decision["outcome"] in {"reject_duplicate", "needs_human_choice"}:
         # Handle absolute paths gracefully - only relativize if within repo
         try:
             display_path = str(target_path.relative_to(repo_root))
@@ -1641,13 +4624,22 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
             display_path = str(target_path)
         result.status = "error"
         result.errors.append(ErrorObject(
-            code="ERR_CONFLICT",
-            message=f"Skill '{skill_name}' already exists at '{display_path}'.",
-            fix_suggestion="Remove the existing skill or choose a different destination with --dest."
+            code="ERR_CONFLICT" if intake_decision["outcome"] == "reject_duplicate" else "ERR_REQUIRES_HUMAN_CHOICE",
+            message=(
+                f"Skill '{skill_name}' already exists at '{display_path}'."
+                if intake_decision["outcome"] == "reject_duplicate"
+                else f"Skill '{skill_name}' is similar to existing local skills; choose install_new, blend_into_existing, keep_separate, or reject_duplicate before writing."
+            ),
+            fix_suggestion=(
+                "Remove the existing skill or choose a different destination with --dest."
+                if intake_decision["outcome"] == "reject_duplicate"
+                else "Inspect data.intake_decision.local_overlap_candidates and rerun only after the ownership decision is explicit."
+            )
         ))
         result.data["skill_name"] = skill_name
         result.data["canonical_dest"] = dest_rel
         result.data["existing_path"] = display_path
+        result.data["intake_decision"] = intake_decision
         return result
 
     python_cmd = _get_python_command(["pyyaml"])
@@ -1685,6 +4677,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
     result.data["raw_output"] = process.stdout
     result.data["raw_error"] = process.stderr
     result.data["canonical_dest"] = dest_rel
+    result.data["intake_decision"] = intake_decision
 
     if process.returncode == 0:
         result.status = "success"
@@ -1710,7 +4703,19 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
                 )
             )
             return result
-        result.metadata["next_steps"] = [f"ask skills audit {dest_rel}/{installed_name} --level strict"]
+        installed_path = f"{dest_rel}/{installed_name}"
+        result.data["readiness_policy"] = {
+            "full_evals_required_before_promotion": True,
+            "external_skill_install_is_intake_not_copy": True,
+            "promotion_rule": intake_decision["promotion_rule"],
+            "post_install_gates": [
+                f"ask skills audit {installed_path} --level strict --json --robot",
+                f"ask skills external-review {installed_path} --json --robot",
+                f"ask evals run {installed_path} --mode smoke --json --robot once eval cases exist",
+                f"ask evals run {installed_path} --mode release --json --robot before promotion or release-readiness claims",
+            ],
+        }
+        result.metadata["next_steps"] = result.data["readiness_policy"]["post_install_gates"]
     else:
         result.status = "error"
         result.errors.append(ErrorObject(code="ERR_RUNTIME", message=process.stderr.strip() or "Installation failed."))
@@ -1755,7 +4760,7 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
         repo_root (Path): Repository root used to load builder modules and the skill catalog.
         source (str): Name or trailing path segment identifying the source skill to evaluate.
         target (str): Name or trailing path segment identifying the target skill to compare against.
-        sensitivity (float): Confidence threshold in the range 0–1 above which overlap is considered high (default 0.2).
+        sensitivity (float): Confidence threshold in the range 0-1 above which overlap is considered high (default 0.2).
 
     Returns:
         CallResult: Result object containing:
@@ -1768,13 +4773,25 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
             - `data["rationale"]`, when present, contains the router's textual rationale for the match.
     """
     result = CallResult()
+    validation_args = [source, target]
+    if sensitivity != 0.2:
+        validation_args.extend(["--sensitivity", str(sensitivity)])
+    result.data["validation_commands"] = [_skills_validation_command("fold", *validation_args)]
 
     builder_catalog = _load_builder_module(repo_root, "skill_catalog")
     router_mod = _load_builder_module(repo_root, "skill_router")
 
     if not builder_catalog or not router_mod:
         result.status = "error"
-        result.errors.append(ErrorObject(code="ERR_DEPENDENCY", message="Skill router or builder catalog not available."))
+        result.data["dependency_status"] = {
+            "skill_catalog": "available" if builder_catalog else "missing",
+            "skill_router": "available" if router_mod else "missing",
+        }
+        result.errors.append(ErrorObject(
+            code="ERR_DEPENDENCY",
+            message="Skill router or builder catalog not available.",
+            fix_suggestion="Restore the skill-builder catalog/router scripts or use skills route for current routing checks.",
+        ))
         return result
 
     catalog = builder_catalog.load_catalog(repo_root)
@@ -1815,11 +4832,24 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
     return result
 
 
-def _scope_rank_for_path(skill_path: str) -> int:
+def _scope_rank_for_path(repo_root: Path, skill_path: str) -> int:
+    scope = classify_skill_scope(repo_root / skill_path, repo_root=repo_root)
+    max_precedence = max(USER_SKILL_SCOPE_PRECEDENCE.values())
+    scope_precedence = USER_SKILL_SCOPE_PRECEDENCE.get(scope)
+    if scope_precedence is not None:
+        return max_precedence - scope_precedence + 1
+    if scope == "system":
+        return max_precedence + 1
     root = skill_path.split("/", 1)[0].strip()
     if root in REPO_SCAN_ROOTS:
-        return REPO_SCAN_ROOTS.index(root) + 1
-    return len(REPO_SCAN_ROOTS) + 1
+        return max_precedence + REPO_SCAN_ROOTS.index(root) + 2
+    return max_precedence + len(REPO_SCAN_ROOTS) + 2
+
+
+def _exact_handle_sort_key(candidate: EligibleCandidate) -> tuple[int, int, str]:
+    path = candidate.path.removeprefix("./")
+    bridge_rank = 1 if path.startswith(".agents/") else 0
+    return bridge_rank, candidate.scope_rank, canonical_sort_key(candidate)
 
 
 def route_skills(
@@ -1860,6 +4890,121 @@ def route_skills(
         )
         return result
 
+    default_candidates: list[EligibleCandidate] = []
+    default_candidate_ids: set[str] = set()
+    for entry in discover_catalog_entries():
+        if not entry.source_dir.is_relative_to(repo_root):
+            continue
+        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+        candidate = EligibleCandidate(
+            name=entry.name,
+            path=rel_path,
+            description=entry.description,
+            scope_rank=_scope_rank_for_path(repo_root, rel_path),
+        )
+        default_candidates.append(candidate)
+        default_candidate_ids.add(candidate_id(candidate))
+
+    advanced_only_candidates: list[EligibleCandidate] = []
+    for entry in discover_catalog_entries(advanced=True):
+        if not entry.source_dir.is_relative_to(repo_root):
+            continue
+        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+        candidate = EligibleCandidate(
+            name=entry.name,
+            path=rel_path,
+            description=entry.description,
+            scope_rank=_scope_rank_for_path(repo_root, rel_path),
+        )
+        if candidate_id(candidate) in default_candidate_ids:
+            continue
+        advanced_only_candidates.append(candidate)
+
+    ordered_default_candidates = sorted(default_candidates, key=canonical_sort_key)
+    all_candidates = list(ordered_default_candidates)
+    all_candidate_ids = {candidate_id(candidate) for candidate in all_candidates}
+    for candidate in sorted(advanced_only_candidates, key=canonical_sort_key):
+        cid = candidate_id(candidate)
+        if cid in all_candidate_ids:
+            continue
+        all_candidates.append(candidate)
+        all_candidate_ids.add(cid)
+
+    normalized_handle_query = query.removeprefix("$").strip().lower()
+    if normalized_handle_query and " " not in normalized_handle_query:
+        for entry in discover_catalog_entries(advanced=True, source="repo"):
+            if entry.name.lower() != normalized_handle_query:
+                continue
+            if not entry.source_dir.is_relative_to(repo_root):
+                continue
+            rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+            candidate = EligibleCandidate(
+                name=entry.name,
+                path=rel_path,
+                description=entry.description,
+                scope_rank=_scope_rank_for_path(repo_root, rel_path),
+            )
+            cid = candidate_id(candidate)
+            if cid in all_candidate_ids:
+                continue
+            all_candidates.append(candidate)
+            all_candidate_ids.add(cid)
+
+    exact_candidates = [
+        candidate
+        for candidate in all_candidates
+        if candidate.name.lower() == normalized_handle_query
+    ]
+    exact_candidate = min(exact_candidates, key=_exact_handle_sort_key) if exact_candidates else None
+    if exact_candidate is not None and normalized_handle_query and " " not in normalized_handle_query:
+        ranked_payload = [
+            {
+                "skill_name": exact_candidate.name,
+                "skill_path": exact_candidate.path,
+                "confidence": 1.0,
+                "rationale": ["exact command handle match"],
+                "risk_tier": "low",
+            }
+        ]
+        catalog_parity = compute_catalog_parity(repo_root, strict=False)
+        decision = build_decision_payload(
+            request=query,
+            policy_identity=get_policy_identity(),
+            considered_limit=len(all_candidates),
+            top_k=1,
+            eligible_candidates=all_candidates,
+            ranked_candidates=ranked_payload,
+            uncertainty_reasons=[],
+            catalog_parity_ok=not bool(catalog_parity.get("drift_detected")),
+        )
+        result.data["decision"] = decision
+        result.data["catalog_parity"] = catalog_parity
+        result.data["policy_identity"] = decision["policy_identity"]
+        result.data["decision_status"] = decision["decision_status"]
+        decision["validation_commands"] = [_skills_validation_command("route", query)]
+        if decision["decision_status"] == "resolved":
+            result.status = "success"
+        else:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=f"skills route returned {decision['decision_status']}",
+                    fix_suggestion=decision.get("operator_action"),
+                )
+            )
+        return result
+
+    bounded_limit = max(1, int(considered_limit))
+    considered_candidates = ordered_default_candidates[:bounded_limit]
+    considered_candidate_ids = {candidate_id(candidate) for candidate in considered_candidates}
+    for candidate in sorted(advanced_only_candidates, key=canonical_sort_key):
+        cid = candidate_id(candidate)
+        if cid in considered_candidate_ids:
+            continue
+        considered_candidates.append(candidate)
+        considered_candidate_ids.add(cid)
+
     router_mod = _load_builder_module(repo_root, "skill_router")
     if not router_mod:
         result.status = "error"
@@ -1874,47 +5019,6 @@ def route_skills(
             )
         )
         return result
-
-    default_candidates: list[EligibleCandidate] = []
-    default_candidate_ids: set[str] = set()
-    for entry in discover_catalog_entries():
-        if not entry.source_dir.is_relative_to(repo_root):
-            continue
-        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
-        candidate = EligibleCandidate(
-            name=entry.name,
-            path=rel_path,
-            description=entry.description,
-            scope_rank=_scope_rank_for_path(rel_path),
-        )
-        default_candidates.append(candidate)
-        default_candidate_ids.add(candidate_id(candidate))
-
-    advanced_only_candidates: list[EligibleCandidate] = []
-    for entry in discover_catalog_entries(advanced=True):
-        if not entry.source_dir.is_relative_to(repo_root):
-            continue
-        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
-        candidate = EligibleCandidate(
-            name=entry.name,
-            path=rel_path,
-            description=entry.description,
-            scope_rank=_scope_rank_for_path(rel_path),
-        )
-        if candidate_id(candidate) in default_candidate_ids:
-            continue
-        advanced_only_candidates.append(candidate)
-
-    ordered_default_candidates = sorted(default_candidates, key=canonical_sort_key)
-    bounded_limit = max(1, int(considered_limit))
-    considered_candidates = ordered_default_candidates[:bounded_limit]
-    considered_candidate_ids = {candidate_id(candidate) for candidate in considered_candidates}
-    for candidate in sorted(advanced_only_candidates, key=canonical_sort_key):
-        cid = candidate_id(candidate)
-        if cid in considered_candidate_ids:
-            continue
-        considered_candidates.append(candidate)
-        considered_candidate_ids.add(cid)
     router_skills = [
         _RouterSkill(name=item.name, description=item.description, skill_path=item.path)
         for item in considered_candidates
@@ -1947,6 +5051,7 @@ def route_skills(
         uncertainty_reasons=list(uncertainty_reasons),
         catalog_parity_ok=not bool(catalog_parity.get("drift_detected")),
     )
+    decision["validation_commands"] = [_skills_validation_command("route", query)]
 
     decision_status = decision["decision_status"]
     result.data["decision"] = decision
@@ -2021,6 +5126,7 @@ def goal_skills(
         return result
 
     goal_decision = build_goal_decision(route_decision)
+    goal_decision["validation_commands"] = [_skills_validation_command("goal", intent_text)]
     result.data["goal_decision"] = goal_decision
     result.data["decision_status"] = goal_decision["decision_status"]
     result.data["policy_identity"] = goal_decision["policy_identity"]
@@ -2224,6 +5330,7 @@ def improve_skills(
         "proof": None,
         "alternatives": goal_decision.get("alternative_candidates", []),
         "next_command": None,
+        "validation_commands": [_skills_validation_command("goal", goal_text)],
         "goal_decision_status": goal_decision.get("decision_status"),
         "goal_decision": goal_decision,
     }
@@ -2239,9 +5346,8 @@ def improve_skills(
         summary = goal_decision.get("operator_action") or "Goal did not resolve to one capability."
         improvement["agent_summary"] = summary
         improvement["disambiguation_prompts"] = prompts
-        improvement["next_command"] = (
-            f"./bin/ask skills goal {shlex.quote(goal_text)} --json --robot"
-        )
+        improvement["next_command"] = _skills_validation_command("goal", goal_text)
+        improvement["validation_commands"] = [improvement["next_command"]]
         result.status = "error"
         result.data["improvement"] = improvement
         result.data["goal_decision"] = goal_decision
@@ -2262,10 +5368,7 @@ def improve_skills(
     gates = proof.get("gates", {}) if isinstance(proof, dict) else {}
     required = proof.get("gate_policy", {}).get("required", []) if isinstance(proof, dict) else []
     required_gates_passed = all(bool(gates.get(gate)) for gate in required)
-    user_runtime_ready = bool(
-        (gates.get("codex_user_link") and gates.get("codex_user_command_handle_exists"))
-        or (gates.get("agents_user_link") and gates.get("agents_user_command_handle_exists"))
-    )
+    user_runtime_ready = bool(gates.get("user_runtime_ready"))
     rationale = recommended.get("rationale") or []
     capability = {
         "handle": handle,
@@ -2294,7 +5397,8 @@ def improve_skills(
         if proof_result.status == "success"
         else f"Recommended ${handle}, but reachability proof failed."
     )
-    improvement["next_command"] = f"./bin/ask skills proof {shlex.quote(handle)} --json --robot"
+    improvement["next_command"] = _skills_validation_command("proof", handle)
+    improvement["validation_commands"] = [improvement["next_command"]]
 
     result.data["improvement"] = improvement
     result.data["goal_decision"] = goal_decision
@@ -2320,16 +5424,7 @@ def improve_skills(
                     else []
                 )
                 fallback_required_gates_passed = all(bool(fallback_gates.get(gate)) for gate in fallback_required)
-                fallback_user_runtime_ready = bool(
-                    (
-                        fallback_gates.get("codex_user_link")
-                        and fallback_gates.get("codex_user_command_handle_exists")
-                    )
-                    or (
-                        fallback_gates.get("agents_user_link")
-                        and fallback_gates.get("agents_user_command_handle_exists")
-                    )
-                )
+                fallback_user_runtime_ready = bool(fallback_gates.get("user_runtime_ready"))
                 improvement["status"] = "resolved_with_fallback"
                 improvement["route_state"] = "resolved_with_fallback"
                 improvement["route_state_reason"] = (
@@ -2357,7 +5452,8 @@ def improve_skills(
                 improvement["agent_summary"] = (
                     f"Recommended ${fallback_handle} after routed ${handle} failed reachability."
                 )
-                improvement["next_command"] = f"./bin/ask skills proof {shlex.quote(fallback_handle)} --json --robot"
+                improvement["next_command"] = _skills_validation_command("proof", fallback_handle)
+                improvement["validation_commands"] = [improvement["next_command"]]
                 return result
 
     improvement["status"] = "blocked"
@@ -2629,6 +5725,7 @@ def _finalize_skill_sync_result(
     scope: str,
     dry_run: bool,
     status: str,
+    plugin_cache_refresh: str = "auto",
 ) -> CallResult:
     """Populate common sync result data after all mutations have been planned."""
     plan["mutation_counts"] = {
@@ -2646,6 +5743,16 @@ def _finalize_skill_sync_result(
         dry_run=dry_run,
         warnings=plan["warnings"],
     )
+    validation_args: list[str] = []
+    if scope != "workspace":
+        validation_args.extend(["--scope", scope])
+    if dry_run:
+        validation_args.append("--dry-run")
+    if projection_decision.mode_source in {"cli", "env"}:
+        validation_args.extend(["--projection", projection_decision.requested_mode])
+    if plugin_cache_refresh != "auto":
+        validation_args.extend(["--plugin-cache-refresh", plugin_cache_refresh])
+    result.data["validation_commands"] = [_skills_validation_command("sync", *validation_args)]
     result.status = status
     return result
 
@@ -2973,6 +6080,7 @@ def sync_skills(
                 scope=scope,
                 dry_run=dry_run,
                 status="error",
+                plugin_cache_refresh=plugin_cache_refresh,
             )
         plan["validation_status"] = "pass"
         return _finalize_skill_sync_result(
@@ -2983,6 +6091,7 @@ def sync_skills(
             scope=scope,
             dry_run=dry_run,
             status="success",
+            plugin_cache_refresh=plugin_cache_refresh,
         )
 
     if system_skills_dir.is_dir():
@@ -3020,6 +6129,7 @@ def sync_skills(
                 scope=scope,
                 dry_run=dry_run,
                 status="success",
+                plugin_cache_refresh=plugin_cache_refresh,
             )
         ok, errors = _sync_rooted_projection(
             repo_root,
@@ -3086,6 +6196,7 @@ def sync_skills(
                 scope=scope,
                 dry_run=dry_run,
                 status="error",
+                plugin_cache_refresh=plugin_cache_refresh,
             )
         return _finalize_skill_sync_result(
             result,
@@ -3095,6 +6206,7 @@ def sync_skills(
             scope=scope,
             dry_run=dry_run,
             status="success",
+            plugin_cache_refresh=plugin_cache_refresh,
         )
 
     entries = discover_skill_entries(source="repo")
@@ -3144,6 +6256,7 @@ def sync_skills(
                 scope=scope,
                 dry_run=dry_run,
                 status="error",
+                plugin_cache_refresh=plugin_cache_refresh,
             )
     elif scope == "user":
         _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
@@ -3156,4 +6269,5 @@ def sync_skills(
         scope=scope,
         dry_run=dry_run,
         status="success",
+        plugin_cache_refresh=plugin_cache_refresh,
     )

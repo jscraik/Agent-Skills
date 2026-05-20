@@ -12,6 +12,7 @@ from pathlib import Path
 DOMAIN_REFERENCES = (
     "domain-context-contract.md",
     "domain-model-routing.md",
+    "ubiquitous-language-contract.md",
     "domain-model-production-contract.md",
 )
 REQUIRED_DOMAIN_SKILLS = {
@@ -27,15 +28,24 @@ REQUIRED_DOMAIN_SKILLS = {
 REQUIRED_REFERENCE_TERMS = {
     "references/domain-context-contract.md": (
         "domain-model-production-contract.md",
+        "UBIQUITOUS.md",
         "Production Model Integrity",
         "bounded context",
         "aggregate invariants",
     ),
     "references/domain-model-routing.md": (
+        "UBIQUITOUS.md",
+        ".harness/decisions/ADR-###-<slug>.md",
         "folded `he-deepen-spec` mode",
         "folded `he-technical-review` mode",
         "production-grade",
         "domain-model-production-contract.md",
+    ),
+    "references/ubiquitous-language-contract.md": (
+        "UBIQUITOUS.md",
+        "UBIQUITOUS-MAP.md",
+        "request_user_input",
+        ".harness/decisions/ADR-###-<slug>.md",
     ),
     "references/domain-model-production-contract.md": (
         "domain_model:",
@@ -50,18 +60,25 @@ REQUIRED_REFERENCE_TERMS = {
         "domain_model.status",
     ),
     "references/deferred-context-index.md": (
+        "references/ubiquitous-language-contract.md",
         "references/domain-model-production-contract.md",
     ),
 }
 REQUIRED_EVAL_TERMS = {
     "skills/he-router/references/evals.yaml": ("production-domain-inferred-route",),
-    "skills/he-brainstorm/references/evals.yaml": ("domain-survivor-selection",),
+    "skills/he-brainstorm/references/evals.yaml": (
+        "domain-survivor-selection",
+        "ubiquitous-domain-interview",
+    ),
     "skills/he-spec/references/evals.yaml": ("domain-model-acceptance-gate",),
     "skills/he-plan/references/evals.yaml": ("aggregate-boundary-plan",),
     "skills/he-work/references/evals.yaml": ("implementation-domain-drift-stop",),
     "skills/he-code-review/references/evals.yaml": ("model-code-test-language-mismatch",),
     "skills/he-eval-report/references/evals.yaml": ("domain-model-integrity-closure",),
-    "skills/he-strategy/references/evals.yaml": ("domain-vision-core",),
+    "skills/he-strategy/references/evals.yaml": (
+        "domain-vision-core",
+        "sparse-adr-three-part-threshold",
+    ),
 }
 REQUIRED_EVAL_REPORT_SURFACES = {
     "skills/he-eval-report/references/eval-report-contract.md": ("domain model integrity",),

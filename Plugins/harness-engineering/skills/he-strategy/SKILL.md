@@ -20,6 +20,13 @@ Use for one selected mode: repo intent, architecture review, triage, strategy
 compression, ADR/core compression, moat/drift analysis, source-prompt
 equivalence, or future-agent guidance.
 
+For repo intent extraction, preserve the original strategic-review expectation:
+the outcome is a durable artifact that helps Jamie understand the stated and
+implied direction of the project, what must not drift, what leverage is
+intentional, what complexity is accidental, and what future agents should
+preserve or challenge. Do not satisfy repo intent with generic architecture
+documentation.
+
 ## When Not to Use
 
 Do not use for implementation specs, execution plans, refactors, code review,
@@ -148,14 +155,19 @@ Use plain Markdown, short sections, descriptive links, and non-color-only tables
 Use the selected mode contract. Include `schema_version: 1`, source artifacts,
 facts, interpretations, assumptions, confidence, authority limits, relevant
 impact, future-agent guidance, validation outcomes, and evidence traceability.
+Selected outputs must also include the source prompt family status and all
+mode-specific required sections from
+`../../references/skills/he-strategy/strategy-output-contract.md`,
+including post-artifact review status where the mode contract requires it.
 
 ## References
 
-- Read when selecting mode output -> `references/strategy-output-contract.md`
+- Read when selecting mode output -> `../../references/skills/he-strategy/strategy-output-contract.md`
 - Read when architecture lenses or internal canon fallback applies ->
-  `references/architecture-lens-canon.md`,
-  `references/repo-cognition-pipeline.md`
-- Read when comparing old prompt workflows -> `references/source-prompt-preservation.md`
+  `../../references/skills/he-strategy/architecture-lens-canon.md`,
+  `../../references/skills/he-strategy/repo-cognition-pipeline.md`
+- Read when comparing old prompt workflows ->
+  `../../references/skills/he-strategy/source-prompt-preservation.md`
 - Read when validating contract or eval coverage -> `references/contract.yaml`,
   `references/evals.yaml`
 - Read when routing shared HE contracts -> `../../references/deferred-context-index.md`
@@ -164,6 +176,10 @@ impact, future-agent guidance, validation outcomes, and evidence traceability.
 - Read when applying first principles or XP ->
   `../../references/first-principles-contract.md`,
   `../../references/xp-operating-contract.md`
+- Read when applying pragmatic architecture review lenses ->
+  `../../references/pragmatic-programmer-review-contract.md`
+- Read when strategy depends on production domain modeling ->
+  `../../references/domain-model-production-contract.md`
 
-Do not remove important context for budget trimming; move deep context to
-references with a clear route.
+Do not remove important context for budget trimming; move deep context into
+reference files and link the relevant route.

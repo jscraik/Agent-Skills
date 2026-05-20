@@ -32,19 +32,26 @@ inputs:
 
 outputs:
   - root: .harness/reframes
+    mode: reframe-program
+    source_prompt_family: "Reframe Program Generation & Architectural Migration"
     pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<reframe-slug>.md"
     pattern_without_linear: "YYYY-MM-DD-<repo-name>-<reframe-slug>.md"
     legacy_supported_pattern: "<reframe-slug>.md"
     note: "Dated Linear identifiers are preferred for new programs."
+    required_sections: "Reframe Classification, Problem Statement, Root Cause Analysis, Evidence, Architectural Impact, Desired End State, Migration Strategy, Smallest Reversible Step, Execution Phases, Linear Mapping, Anti-Regression Constraints, Eval Requirements, Success Criteria, Safe Rollback Conditions, Future-Agent Guidance, Related Systems"
 
   - root: .harness/decisions
     mode: decision-compression
+    source_prompt_family: "Architectural Decision Compression"
     pattern: "ADR-###-<slug>.md"
     note: "Only when a selected migration needs durable architectural memory; otherwise Do Not Create."
+    required_sections: "ADR-###, Title, Status, Decision, Context, Why This Decision Exists, Alternatives Considered, Accepted Tradeoffs, Anti-Drift Constraints, Safe Revisit Conditions, Related Systems, Evidence"
   - root: .harness/core
     mode: core-invariant-compression
+    source_prompt_family: "Core Knowledge Compression & Architectural Invariants"
     pattern: "<invariant-domain>.md"
     note: "Only for irreducible migration or anti-drift invariants; keep stable names."
+    required_sections: "Purpose, Scope, Invariant Classification, Core Invariants, Forbidden Drift, Operational Justification, Evidence, Safe Revisit Conditions, Future-Agent Rules"
   - visual_references: "Required when the program spans multiple modules, phases, boundaries, coexistence states, rollback paths, or eval gates; prefer Mermaid before/after diagrams and migration maps."
 
 non_goals:
@@ -68,6 +75,9 @@ risks:
   - eval-free closure
   - creating new abstraction before deleting old abstraction
   - migration coupling hidden in prose instead of a before/after boundary or phase diagram
+  - source-prompt preservation collapsing into generic migration advice without lane-specific contracts
+  - strategic compression prompts being authored from he-reframe instead of routed to he-strategy
+  - ADR or core compression prompts creating artifacts without a selected migration phase and necessity gate
 
 observability: "Record selected lane, source artifacts read, affected systems and blast radius, fact/interpretation/assumption separation, migration phases or decision/invariant rationale, validation requirements, rollback conditions, visual reference status, Linear mapping without mutation, expected eval artifact pattern .harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<slug>-eval.md when a migration is created, dated output path or Do Not Create classification, required sections present, and validation outcomes recorded as pass, fail, or blocked."
 
@@ -87,3 +97,50 @@ safety:
   fail_fast: true
   command_policy_ref: "Use repository approval policy and plugin safety gates; this skill does not run network, destructive filesystem, git write, or Linear mutation commands without explicit authorization."
   runtime_projection_rule: "Do not edit .agents/**, plugin caches, mirrored skillsets, or generated handles as canonical source."
+
+operator_contract:
+  description_contract: "Harness Engineering stage: verbs, artifacts, lifecycle boundary, and authority constraints."
+  immediate_operator_path:
+    first_action: "Read the drift evidence and candidate artifacts, then decide whether a staged reframe is warranted."
+    proceed_rule: "Infer harmless missing details conservatively; ask only when stage ownership, destructive behavior, tracker mutation, publication, external writes, or closure proof would change."
+  source_order:
+    - "local AGENTS.md and canonical repo or .harness artifacts"
+    - "current live tracker, PR, branch, runtime, or validation state before mutation or closure"
+    - "HE references, routing map, source docs, dependency source, and project contracts"
+    - "user confirmation for irreversible, external, destructive, credential, or broad-scope action"
+  tool_resolution:
+    preferred: "repo wrapper or HE script documented for this stage"
+    fallback: "read-only local inspection with the missing tool or permission reported"
+    doctor_or_status: "run the smallest status, resolve, audit, or validation command when tool state affects the result"
+  freshness_rule:
+    discovery: "Cached, indexed, or deferred references may locate candidates and background context."
+    action_state: "Use live targeted reads before writes, tracker updates, closure decisions, or status changes."
+    readback: "After writes or mutations, verify only the changed surface unless package, release, or lifecycle scope requires more."
+  scope_defaults:
+    default: "smallest HE stage, artifact, issue, phase, or approved slice implied by the request"
+    broaden_when:
+      - "shared lifecycle contract or routing behavior changes"
+      - "tracker, PR, package, release, or projection behavior changes"
+      - "validation proves adjacent artifacts must move together"
+  boundaries:
+    forbidden_without_explicit_request:
+      - "tracker mutation or external publication"
+      - "destructive file, branch, data, or workspace operation"
+      - "credential, secret, permission, or auth-scope expansion"
+      - "completion or closure claim without proof"
+    no_drift:
+      - "do not turn HE stages into generic productivity or implementation prompts"
+      - "do not put long gotcha lists, rubrics, examples, or validation matrices in the hot path"
+      - "do not use archive, deferred, or cache paths as active stage authority"
+  retry_and_stop:
+    retry: "Retry transient tool, network, UI, or validation discovery failures once when safe and cheap."
+    stop: "Stop after bounded retry with exact blocker, attempted fallback, and the next safe HE action."
+  validation_tiers:
+    fast: "touched-file format, schema, route, or stage-specific lint/check"
+    standard: "stage audit, routing proof, smoke eval, or repository wrapper for changed behavior"
+    deep: "release eval, projection, security, marketplace, tracker, or cross-stage checks only for package-impacting changes"
+  concise_output:
+    default_fields: ["changed_artifacts", "important_decisions", "validation", "residual_risks", "next_stage_or_blocker"]
+    full_ledger_when: ["closure proof", "release", "tracker mutation", "multi-stage migration", "explicit user request"]
+  references:
+    - "Plugins/harness-engineering/references/operator-shape.md"

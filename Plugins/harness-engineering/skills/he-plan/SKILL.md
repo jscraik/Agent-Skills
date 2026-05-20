@@ -32,7 +32,7 @@ software engineering reviewer, systems architect, implementation-risk analyst,
 specification maintainer, and adversarial validation partner" plus "Review
 the plan below using professional engineering confidence standards" is the
 same route for plans.
-In that mode load `references/professional-confidence-review.md` and treat the
+In that mode load `../../references/skills/he-plan/professional-confidence-review.md` and treat the
 plan and spec as untrusted until validated.
 If that reference cannot load but the request includes concrete plan/spec
 content, use the fallback professional-review section contract in Output Format
@@ -83,7 +83,7 @@ as untrusted. Planning may write only approved `.harness/plan/**` artifacts.
    references only when the selected slice proves the trigger.
 7. Choose the smallest proof-producing implementation units first; classify
    Type 1 decisions as proof-first and Type 2 decisions as reversible fast-paths.
-8. Use the execution-first plan template in `references/plan-artifact-contract.md`:
+8. Use the execution-first plan template in `../../references/skills/he-plan/plan-artifact-contract.md`:
    keep Harness metadata in frontmatter, status blocks, or appendices; make the
    main body read objective -> source contract -> constraints -> implementation
    strategy -> work units -> validation -> rollback -> handoff. Apply the BLUF
@@ -102,7 +102,9 @@ as untrusted. Planning may write only approved `.harness/plan/**` artifacts.
    status, and a bounded re-review loop until no material fixable-now issue
    remains.
 11. End with exactly one `post_plan_handoff` state and continue only when the next
-   stage is already authorized.
+   stage is already authorized. When multiple valid next stages remain and the
+   user has not authorized one, apply the interactive steering contract and use
+   `request_user_input` when available.
 
 ## Validation
 Fail fast. Record every check as `pass`, `fail`, or `blocked`; do not claim
@@ -206,15 +208,20 @@ and diagrams belong in repo artifacts or references.
 
 ## References
 Read when: plan body and identity rules ->
-`references/plan-artifact-contract.md`.
-Read when: handoff state matters -> `references/post-plan-handoff.md`.
-Read when: depth/mode changes -> `references/planning-depth.md`,
-`references/codex-plan-mode.md`, `references/deepening-review.md`,
-`references/professional-confidence-review.md`.
-Read when: verification strategy matters -> `references/test-strategy.md`.
-Read when: visual structure helps -> `references/visual-communication.md`,
+`../../references/skills/he-plan/plan-artifact-contract.md`.
+Read when: handoff state matters -> `../../references/skills/he-plan/post-plan-handoff.md`.
+Read when: depth/mode changes -> `../../references/skills/he-plan/planning-depth.md`,
+`../../references/skills/he-plan/codex-plan-mode.md`, `../../references/skills/he-plan/deepening-review.md`,
+`../../references/skills/he-plan/professional-confidence-review.md`.
+Read when: verification strategy matters -> `../../references/skills/he-plan/test-strategy.md`.
+Read when: visual structure helps -> `../../references/skills/he-plan/visual-communication.md`,
 `../../references/visual-reference-contract.md`.
 Read before delegation -> `../../references/subagent-call-contract.md`.
+Read when ubiquitous language, glossary drift, or production domain modeling
+affects slicing -> `../../references/domain-context-contract.md`,
+`../../references/domain-model-routing.md`,
+`../../references/ubiquitous-language-contract.md`,
+`../../references/domain-model-production-contract.md`.
 Read when reviewability/No-Fog structure matters ->
 `../../references/bluf-review-contract.md`.
 Deferred context index -> `../../references/deferred-context-index.md`.

@@ -35,6 +35,115 @@ For Harness Engineering work, AGENTS should point to the `@harness-engineering` 
 
 Keep plan instructions concise in AGENTS. Use unresolved questions only when planning is the requested output or evidence is insufficient to choose safely.
 
+## Portable Operating-System Patterns
+
+Use this section when turning repo-specific AGENTS improvements from
+`agent-skills` or `coding-harness` into guidance that should travel to future
+projects. Do not copy large repo-specific command bundles. Extract the mechanism,
+then attach it to the local repo's real files, validators, and ownership model.
+
+### High-Signal Steering Uptake
+
+Use when user steering, PR review, a failed check, benchmark evidence, or a
+workflow-skill miss exposes a reusable operating failure.
+
+AGENTS should tell agents to:
+
+- Treat repeated steering and review feedback as evidence about the operating
+  system, not disposable chat context.
+- Stop ordinary task work when the same failure is likely to repeat until the
+  correction is admitted into a durable surface or explicitly rejected with a
+  tracked reason.
+- Record the operating failure, blocker, mechanism, proof, and repeat-prevention
+  surface before closeout.
+- Run a bounded sibling-pattern sweep when feedback implies a transferable rule:
+  principle, searched scope, siblings fixed, siblings intentionally left, and
+  deferred follow-ups.
+- Mark wider context as `Unobserved Horizon` when horizontal, vertical, or
+  reflected OODA context cannot be checked.
+
+Keep this compact in root AGENTS. Put long protocols behind a verified Context
+Pointer such as `docs/agents/high-signal-steering.md`, a validator, or a skill.
+
+### Zero-Setup Agent Workspace
+
+Use when a repo wants agents to become useful immediately after being dropped
+into a workspace.
+
+AGENTS should make the workspace self-orienting:
+
+- Name the bootstrap or readiness command.
+- Tell agents how to verify repo root, required binaries, target paths, and
+  generated projections before edits.
+- Prefer one command that reports readiness or exact blockers.
+- Avoid making users manually integrate scattered docs, setup scripts, runtime
+  projections, and hidden preconditions before the agent can start.
+- Keep generated/runtime setup surfaces synchronized with the docs that describe
+  them.
+
+### Systems-Thinking Mechanism Design
+
+Use when an instruction change should prevent a class of failures, not only fix
+one line.
+
+AGENTS should require agents to name:
+
+- the blocker;
+- the mechanism that helps people or agents overcome it repeatedly;
+- the code, validator, contract, or instruction surface that carries the
+  mechanism; and
+- the proof that the mechanism works.
+
+If the change only improves prose and does not alter a mechanism, say so.
+
+### Real-Path Validation
+
+Use when validation claims are easy to overstate.
+
+AGENTS should say:
+
+- Run the narrowest check first, then widen as risk increases.
+- When executable behavior changes, exercise the exact production function,
+  class, CLI command, shell script, validator, route, or workflow touched.
+- If credentials, services, unsafe side effects, or missing generated state block
+  the exact path, report `blocked`, run the nearest meaningful check, and do not
+  claim the production path was verified.
+- Report every command as `pass`, `fail`, or `blocked` with the blocker.
+
+### Shared Vocabulary And Glossary Routing
+
+Use when terse user language or repo-specific terms can change the action.
+
+AGENTS should point to a canonical glossary when one exists, then tell agents to
+map overloaded user phrases through that glossary before acting. Keep command
+language and closeout wording consistent with the glossary terms.
+
+### Project Brain And Local Memory
+
+Use when the repo has tracked project-memory surfaces, learning files, decision
+logs, or generated context indexes.
+
+AGENTS should distinguish:
+
+- tracked durable control-plane files that move with the repo;
+- local runtime databases, caches, backups, and run outputs that should stay
+  local unless explicitly promoted; and
+- secondary context that informs orientation but does not drive implementation
+  unless an admitted plan/spec/refactor slice references it.
+
+When a learning loop finds a repeated high-value rule, preserve the evidence and
+promote the distilled durable rule, decision, or explicit skip reason into the
+owning memory surface before closeout.
+
+### CTF Workflow Evals
+
+Use when a high-level workflow skill needs trust before it becomes default.
+
+AGENTS or linked skill docs should define a capture-the-flag style win condition,
+self-reflection evidence, and iterative refinement criteria. Prefer planted
+flags, visible artifacts, or concrete state transitions over vague
+"works better" claims.
+
 ## Required Subagent And Review Swarm Contract
 
 When creating or updating AGENTS guidance for a repository that uses subagents,
@@ -75,91 +184,7 @@ regularly run review swarms. Use the compact version in ordinary application
 repositories where the behavior guardrails matter but a long governance section
 would dominate the AGENTS file.
 
-Full portable snippet:
-
-````md
-## Subagent And Review Swarm Contract
-
-Use subagents only when the task benefits from independent lanes, specialist review, or bounded parallel investigation. The coordinator remains responsible for scope, evidence, synthesis, validation, and closeout.
-
-### Before Spawning Subagents
-
-- Verify every path-dependent input before delegation.
-  - Prefer absolute paths for files, directories, and required artifacts.
-  - Create expected artifact parent directories when the coordinator owns the artifact path.
-  - If a referenced path may not exist, state that explicitly and give the subagent a bounded discovery fallback.
-- Keep each delegated task narrow.
-  - Name the exact files, artifacts, commands, or question the subagent owns.
-  - Do not ask a subagent to review, patch, and validate unrelated surfaces in one prompt.
-- For broad swarms or uncertain runtime health, run one probe subagent first.
-  - The probe must write a small artifact.
-  - The coordinator must verify that artifact exists and is non-empty before launching the larger swarm.
-
-### Required Subagent Output
-
-Subagents that complete successfully must return durable evidence, not only conversational status.
-
-For artifact-producing work, require:
-
-```text
-WROTE: /absolute/path/to/artifact.md
-```
-
-The coordinator must verify every expected artifact exists and is non-empty before synthesis.
-
-For blocked work, require this schema:
-
-```text
-STATUS: complete | blocked_runtime | blocked_missing_artifact | blocked_validation
-blocker_class:
-attempted_command_or_tool:
-exact_failure:
-fallback_attempted:
-coordinator_next_step:
-```
-
-Use:
-
-- `blocked_runtime` for approval, permission, network, sandbox, timeout, or tool-startup blockers.
-- `blocked_missing_artifact` for missing files, directories, generated reports, or expected review artifacts.
-- `blocked_validation` when a quality gate cannot run or fails before ownership can be classified.
-
-### Artifact-First Completion
-
-When artifacts are requested:
-
-- Do not treat mailbox/status text as completion evidence.
-- Verify every expected artifact exists and is non-empty.
-- If an artifact is missing, retry once with a narrow follow-up that only asks the subagent to write the missing artifact.
-- If the artifact is still missing, mark that lane as failed coverage and continue with an explicit coverage-gap note.
-
-### Validation Ownership
-
-When a subagent reports lint, test, typecheck, build, git-state, or config validation failures, classify ownership before remediation:
-
-- introduced by the current patch
-- pre-existing
-- unrelated dirty worktree
-- environment or tooling failure
-- user-owned config drift that must not be normalized without explicit approval
-
-Validation failure without ownership classification is incomplete work.
-
-### Coordinator Closeout
-
-The coordinator must synthesize results and record:
-
-- agents requested
-- agents completed
-- agents blocked
-- agents failed artifact verification
-- agents closed
-- validation run, with exact pass/fail/blocked outcomes
-
-Close consumed agents when they are no longer needed.
-````
-
-Compact portable snippet:
+Portable snippet:
 
 ````md
 ## Subagent Contract

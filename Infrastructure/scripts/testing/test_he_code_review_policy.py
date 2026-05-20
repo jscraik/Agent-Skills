@@ -3,15 +3,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 SKILL_DIR = ROOT / "Plugins/harness-engineering/skills/he-code-review"
+SHARED_REVIEW_REFERENCES = ROOT / "Plugins/harness-engineering/references/skills/he-code-review"
 
 
 def read(path: Path) -> str:
     """
     Read and return the text contents of the file at the given filesystem path using UTF-8 decoding.
-    
+
     Parameters:
     	path (Path): Filesystem path of the file to read.
-    
+
     Returns:
     	The file's text decoded using UTF-8.
     """
@@ -21,7 +22,7 @@ def read(path: Path) -> str:
 def test_he_code_review_uses_harness_engineering_naming_only():
     """
     Verify that specific skill and doctrine markdown files do not contain disallowed legacy or competitor names.
-    
+
     Checks SKILL.md, every Markdown file under the skill's references directory, and the infrastructure doctrine file for any occurrence of a predefined set of forbidden terms; raises an AssertionError identifying the offending term and file path if a forbidden term is found.
     """
     checked = [
@@ -41,7 +42,7 @@ def test_he_code_review_uses_harness_engineering_naming_only():
 def test_he_code_review_links_deferred_policy_references():
     """
     Check that SKILL.md contains required deferred policy reference identifiers.
-    
+
     Asserts that "review-policy-index.md" and "he-code-review-doctrine.md" appear in the SKILL.md file within the he-code-review skill directory. Raises AssertionError if any required reference is missing.
     """
     text = read(SKILL_DIR / "SKILL.md")
@@ -55,7 +56,7 @@ def test_he_code_review_links_deferred_policy_references():
 
 def test_he_code_review_retains_core_traceability_and_review_rules():
     skill_text = read(SKILL_DIR / "SKILL.md")
-    index = read(SKILL_DIR / "references/review-policy-index.md")
+    index = read(SHARED_REVIEW_REFERENCES / "review-policy-index.md")
     doctrine = read(ROOT / "Infrastructure/references/harness-engineering/he-code-review-doctrine.md")
 
     assert "Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation" in skill_text

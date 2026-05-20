@@ -7,9 +7,9 @@ This keeps public behavior stable while moving implementation into
 
 from __future__ import annotations
 
-from pathlib import Path
 from types import ModuleType
 import importlib.util
+from pathlib import Path
 
 
 def _load_impl() -> ModuleType:
@@ -29,6 +29,119 @@ def _load_impl() -> ModuleType:
 
 
 _impl = _load_impl()
-globals().update({name: value for name, value in vars(_impl).items() if not name.startswith("_")})
+globals().update({name: value for name, value in vars(_impl).items() if not (name.startswith("__") and name.endswith("__"))})
+
+_PATCHABLE_IMPL_NAMES = (
+    "audit_skill",
+    "improve_skills",
+    "resolve_skill_handle",
+    "sync_skills",
+    "skill_invocation_analytics",
+    "skills_proof",
+    "_skill_sections",
+    "_skill_workout_candidates",
+    "refresh_workspace_plugin_caches",
+    "prune_unowned_skillset_files",
+)
+_ORIGINAL_IMPL_VALUES = {
+    name: getattr(_impl, name)
+    for name in _PATCHABLE_IMPL_NAMES
+    if hasattr(_impl, name)
+}
+
+
+def _sync_patchable_impl_names() -> None:
+    """Mirror wrapper-level patches into the implementation module."""
+    for name in _PATCHABLE_IMPL_NAMES:
+        if name in globals():
+            value = globals()[name]
+            if (
+                name in _ORIGINAL_IMPL_VALUES
+                and getattr(value, "__module__", None) == __name__
+                and getattr(value, "__name__", None) == name
+            ):
+                value = _ORIGINAL_IMPL_VALUES[name]
+            setattr(_impl, name, value)
+
+
+def _call_impl(name: str, *args, **kwargs):
+    original_values = {
+        impl_name: getattr(_impl, impl_name)
+        for impl_name in _PATCHABLE_IMPL_NAMES
+        if hasattr(_impl, impl_name)
+    }
+    try:
+        _sync_patchable_impl_names()
+        return getattr(_impl, name)(*args, **kwargs)
+    finally:
+        for impl_name, value in original_values.items():
+            setattr(_impl, impl_name, value)
+
+
+def skills_proof(*args, **kwargs):
+    return _call_impl("skills_proof", *args, **kwargs)
+
+
+def skills_prove(*args, **kwargs):
+    return _call_impl("skills_prove", *args, **kwargs)
+
+
+def explain_skill(*args, **kwargs):
+    return _call_impl("explain_skill", *args, **kwargs)
+
+
+def improve_skills(*args, **kwargs):
+    return _call_impl("improve_skills", *args, **kwargs)
+
+
+def sync_skills(*args, **kwargs):
+    return _call_impl("sync_skills", *args, **kwargs)
+
+
+_skill_sections = _impl._skill_sections
+_skill_workout_candidates = _impl._skill_workout_candidates
 
 __all__ = getattr(_impl, "__all__", [name for name in globals() if not name.startswith("_")])
+
+_IMPL_EXPLAIN_SKILL = _impl.explain_skill
+_IMPL_SKILLS_PROOF = _impl.skills_proof
+_IMPL_SKILLS_PROVE = _impl.skills_prove
+_FACADE_SKILLS_PROOF = None
+
+
+_PATCHABLE_IMPL_GLOBALS = (
+    "audit_skill",
+    "improve_skills",
+    "resolve_skill_handle",
+    "skills_proof",
+    "skill_invocation_analytics",
+    "_skill_sections",
+    "_skill_workout_candidates",
+)
+
+
+def _sync_patchable_impl_globals() -> None:
+    """Mirror facade monkeypatches into the implementation module before delegation."""
+    for name in _PATCHABLE_IMPL_GLOBALS:
+        if name in globals():
+            setattr(_impl, name, globals()[name])
+    if globals().get("skills_proof") is _FACADE_SKILLS_PROOF:
+        _impl.skills_proof = _IMPL_SKILLS_PROOF
+
+
+def explain_skill(repo_root: Path, handle: str):
+    _sync_patchable_impl_globals()
+    return _IMPL_EXPLAIN_SKILL(repo_root, handle)
+
+
+def skills_proof(repo_root: Path, handle: str):
+    _sync_patchable_impl_globals()
+    return _IMPL_SKILLS_PROOF(repo_root, handle)
+
+
+_FACADE_SKILLS_PROOF = skills_proof
+
+
+def skills_prove(repo_root: Path, handle: str):
+    _sync_patchable_impl_globals()
+    return _IMPL_SKILLS_PROVE(repo_root, handle)

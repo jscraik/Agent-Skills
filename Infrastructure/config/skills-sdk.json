@@ -1,0 +1,261 @@
+{
+  "schema_version": "skills-sdk.extraction.v1",
+  "status": "planning_contract",
+  "owner": "Agent Skills Kit",
+  "purpose": "Define the machine-readable information Agent Skills Kit should extract for SDK readiness, deep-module boundaries, eval feedback, and optional observability evidence.",
+  "current_slice": {
+    "linear_issue": "JSC-329",
+    "rf": "RF-1",
+    "public_interface": "./bin/ask skills doctor <handle> --json --robot",
+    "payload_schema": "Infrastructure/config/schemas/skill-doctor.v1.schema.json",
+    "agent_safe_boundary": "risky_until_registered_and_seam_tested"
+  },
+  "module_layers": [
+    {
+      "id": "types",
+      "owns": [
+        "schemas",
+        "status vocabulary",
+        "command metadata",
+        "package metadata",
+        "compatibility rules"
+      ]
+    },
+    {
+      "id": "config",
+      "owns": [
+        "validation policy",
+        "permission profiles",
+        "runtime profiles",
+        "execution defaults"
+      ]
+    },
+    {
+      "id": "repo",
+      "owns": [
+        "canonical skill sources",
+        "plugin sources",
+        "harness artifacts",
+        "eval artifacts",
+        "source documents"
+      ]
+    },
+    {
+      "id": "providers",
+      "owns": [
+        "source readers",
+        "projection readers",
+        "package readers",
+        "audit readers",
+        "eval readers",
+        "telemetry readers"
+      ]
+    },
+    {
+      "id": "service",
+      "owns": [
+        "doctor",
+        "package-doctor",
+        "profiles",
+        "events",
+        "routing",
+        "compatibility checks"
+      ]
+    },
+    {
+      "id": "runtime",
+      "owns": [
+        "ask commands",
+        "generated projections",
+        "plugin mirrors",
+        "app-server execution",
+        "CI execution",
+        "local execution"
+      ]
+    },
+    {
+      "id": "ui",
+      "owns": [
+        "thin human summaries",
+        "visual maps",
+        "Linear summaries"
+      ]
+    },
+    {
+      "id": "utils",
+      "owns": [
+        "shared parsing",
+        "filesystem helpers",
+        "JSON helpers",
+        "schema helpers",
+        "command helpers",
+        "formatting helpers"
+      ],
+      "constraint": "Utils must not own product rules."
+    }
+  ],
+  "public_boundaries": [
+    {
+      "id": "skills_doctor",
+      "interface": "./bin/ask skills doctor <handle> --json --robot",
+      "payload": "data.skill_doctor",
+      "schema": "skill-doctor.v1",
+      "owner_layer": "service",
+      "facade_layer": "runtime",
+      "hidden_implementation": [
+        "source resolution",
+        "runtime reachability",
+        "structural audit",
+        "package-readiness availability",
+        "outcome proof",
+        "status precedence",
+        "next_command selection"
+      ],
+      "caller_rule": "Consumers read the doctor payload and do not reconstruct readiness from skill internals.",
+      "safe_when": [
+        "command dispatches",
+        "parser/help/metadata/guided-error parity passes",
+        "schema snapshots validate",
+        "status precedence is tested",
+        "context7 fixture passes",
+        "second non-context7 fixture passes"
+      ],
+      "current_classification": "risky"
+    }
+  ],
+  "extraction_sources": [
+    {
+      "id": "doctor_output",
+      "kind": "command_json",
+      "required_for_rf1": true,
+      "command": "./bin/ask skills doctor <handle> --json --robot",
+      "extract": [
+        "schema_version",
+        "status",
+        "target_summary.handle",
+        "target_summary.resolved",
+        "target_summary.source_path",
+        "target_summary.projection_path",
+        "checks[].id",
+        "checks[].status",
+        "checks[].summary",
+        "checks[].evidence",
+        "checks[].next_command",
+        "blockers[].class",
+        "warnings[].class",
+        "operation_context.execution_context",
+        "operation_context.profile",
+        "contract_schemas.skill_doctor",
+        "agent_summary",
+        "next_command"
+      ]
+    },
+    {
+      "id": "command_surface",
+      "kind": "ask_cli",
+      "required_for_rf1": true,
+      "extract": [
+        "./bin/ask skills --help action list",
+        "parser registered actions",
+        "command metadata valid actions",
+        "unknown-action guided suggestions"
+      ]
+    },
+    {
+      "id": "eval_artifacts",
+      "kind": "harness_eval",
+      "required_for_rf1": true,
+      "paths": [
+        ".harness/evals/2026-05-17-agent-skills-skill-sdk-doctor-trust-eval.md",
+        "artifacts/skill-doctor/*.json"
+      ],
+      "extract": [
+        "observed command",
+        "outcome",
+        "blocker class",
+        "changed paths",
+        "rerun command",
+        "before evidence",
+        "after evidence",
+        "promotion or rollback decision"
+      ]
+    },
+    {
+      "id": "linear_sync",
+      "kind": "tracker",
+      "required_for_rf1": true,
+      "issue": "JSC-329",
+      "extract": [
+        "approved scope",
+        "current status",
+        "architecture sync comments",
+        "collector adaptation comments",
+        "closure blockers"
+      ]
+    }
+  ],
+  "optional_evidence_providers": [
+    {
+      "id": "otel_collector",
+      "path": "${HOME}/.agents/otel-collector",
+      "required_for_rf1": false,
+      "degrade_when_absent": "warn",
+      "extract": [
+        "local OTLP logs",
+        "local OTLP traces",
+        "local OTLP metrics",
+        "/health",
+        "/stats",
+        "last_ingest_at",
+        "last_ingest_by_kind",
+        "services_by_signal",
+        "skill_invocation_event_count",
+        "skill_invocation_last_seen_at",
+        "telemetry_confidence"
+      ]
+    },
+    {
+      "id": "session_collector",
+      "path": "${HOME}/.agents/session-collector",
+      "required_for_rf1": false,
+      "degrade_when_absent": "warn",
+      "extract": [
+        "privacy-safe session summaries",
+        "skill invocation analytics",
+        "skill proof candidates",
+        "agent knowledge",
+        "skillify candidates",
+        "skill refactor handoffs",
+        "Harness Engineering evidence"
+      ]
+    }
+  ],
+  "feedback_loop": {
+    "steps": [
+      "observe",
+      "correlate",
+      "classify",
+      "patch_owner_module",
+      "rerun_workload_or_eval",
+      "promote_or_roll_back"
+    ],
+    "required_record_fields": [
+      "observed_behavior",
+      "affected_paths",
+      "owner_layer",
+      "boundary_id",
+      "rerun_command",
+      "before_evidence",
+      "after_evidence",
+      "decision"
+    ]
+  },
+  "rf1_non_goals": [
+    "broad SDK metadata migration",
+    "mandatory collector dependency",
+    "manual runtime projection edits",
+    "coding-harness implementation",
+    "full logs metrics traces event stack",
+    "package publishing or installation"
+  ]
+}

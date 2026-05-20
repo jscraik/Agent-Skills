@@ -1,0 +1,115 @@
+{
+  "status": "error",
+  "trace_id": "987b3f4e-6eda-4bb0-a530-1dcb8eeeba78",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills external-review Skills/agent-ops/autoresearch --audit-level strict --dashboard --report-path Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.json --dashboard-path Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.html --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "policy": {
+      "mode": "local_internal_only",
+      "no_publish": true,
+      "no_registry_upload": true,
+      "uses_npx": false,
+      "tessl_review_default": "enabled_local_cli",
+      "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+      "primary_gate": "local_eval_ask_audit",
+      "external_quality_judge": "tessl_review",
+      "plugin_eval_role": "budget_and_ergonomics_guardrail",
+      "plugin_eval_min_acceptable_grade": "B+",
+      "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
+      "snyk_role": "optional_external_security_advisory",
+      "snyk_default": "disabled_until_requested",
+      "snyk_privacy_basis": "Snyk CLI security analysis may contact Snyk services. It is never run by default in this local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted."
+    },
+    "target": "Skills/agent-ops/autoresearch",
+    "ask_audit": {
+      "status": "error",
+      "data": {
+        "diagnostics": {
+          "exit_code": 0,
+          "stdout": "\n📋 Diagnostic report: Skills/agent-ops/autoresearch\n--------------------------------------------------\n  \u001b[32m✓\u001b[0m skill directory: Found at Skills/agent-ops/autoresearch\n  \u001b[32m✓\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m✓\u001b[0m nested .git: No nested .git directory\n  \u001b[90m○\u001b[0m symlink (codex): Rooted latent skill is routed through .skillsets/agent-ops/manifest.jsonl and is not expected as a first-level user-runtime symlink: autoresearch\n  \u001b[90m○\u001b[0m symlink (agents): Rooted latent skill is routed through .skillsets/agent-ops/manifest.jsonl and is not expected as a first-level user-runtime symlink: autoresearch\n  \u001b[32m✓\u001b[0m skill index: Listed in SKILL.md index\n  \u001b[90m○\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m✓\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n✅ All checks passed\n",
+          "stderr": ""
+        },
+        "security_gate": {
+          "exit_code": 2,
+          "stdout": "Skill: autoresearch\nPath:  Skills/agent-ops/autoresearch/SKILL.md\n\nFAIL SEC_GOTCHAS_MISSING: Missing required section: gotchas (add a ## heading).\nWARN FM_METADATA_VERSION_MISSING: `metadata.version` is recommended for local Tessl review compatibility.\nWARN RESEARCH_EVALS_REALISTIC_FIELD_MISSING: Some trigger eval cases omit `realistic: true|false`; explicit declarations prevent style-word heuristics from becoming the source of truth. | missing=14/14\n\nRESULT: FAIL\n",
+          "stderr": ""
+        }
+      },
+      "errors": [
+        {
+          "code": "ERR_VALIDATION",
+          "message": "Security gate failed.",
+          "fix_suggestion": null,
+          "help_url": null
+        }
+      ]
+    },
+    "plugin_eval": {
+      "command": [
+        "plugin-eval",
+        "analyze",
+        "Skills/agent-ops/autoresearch",
+        "--format",
+        "markdown"
+      ],
+      "exit_code": 0,
+      "stdout": "# Plugin Eval Report: autoresearch\n\n## At a Glance\n- Score: 91/100\n- Grade: B\n- Risk: medium\n- Checks: 0 fail, 2 warn, 2 info\n- Active budget: 1955 tokens (heavy)\n- Observed usage: not supplied\n\n## Why It Matters\n- 2 warning signals still need cleanup before this feels polished.\n- budget is the largest source of score loss at -9 points.\n- Active budget pressure is high enough that token cost may dominate the user experience.\n- No observed usage is attached yet, so budget conclusions are still based on static estimates.\n\n## Fix First\n- [warn/warning] deferred_cost_tokens is heavy relative to the current Codex baseline. Why: Budget pressure matters because always-loaded or frequently-loaded text can make the workflow feel expensive fast. Fix: Reduce repeated instruction text and move detail into deferred supporting files.\n- [warn/warning] invoke_cost_tokens is heavy relative to the current Codex baseline. Why: Budget pressure matters because always-loaded or frequently-loaded text can make the workflow feel expensive fast. Fix: Reduce repeated instruction text and move detail into deferred supporting files.\n\n## Recommended Next Step\n- Measure real token usage next\n- Why: The static budget looks heavy, so live usage is the fastest way to confirm whether the cost is acceptable.\n- Chat request: \"Measure the real token usage of this skill.\"\n- Local command: `plugin-eval start Skills/agent-ops/autoresearch --request 'Measure the real token usage of this skill.' --format markdown`\n\n## Details\n<details>\n<summary>Watch next</summary>\n\n- No secondary findings queued.\n</details>\n<details>\n<summary>Improvement brief</summary>\n\n- Raise the evaluation from grade B (91/100) with a focus on the highest-signal structural and budget issues first.\n- Goal: Reduce repeated instruction text and move detail into deferred supporting files.\n- Measure: token-usage-observer\n- Measure: task-outcome-scorecard\n- Measure: latency-efficiency\n- Suggested prompt: Use the skill-creator guidance to improve autoresearch. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard, latency-efficiency. Address invoke_cost_tokens-budget-high: invoke_cost_tokens is heavy relative to the current Codex baseline. Address deferred_cost_tokens-budget-high: deferred_cost_tokens is heavy relative to the current Codex baseline.\n</details>\n<details>\n<summary>Budgets and observed usage</summary>\n\n- trigger_cost_tokens: 73 (moderate)\n- invoke_cost_tokens: 1882 (heavy)\n- deferred_cost_tokens: 4096 (heavy)\n- total_tokens: 6051 (heavy)\n\n- No observed usage supplied.\n</details>\n<details>\n<summary>Measurement plan</summary>\n\nCombine cost, outcome, and trust signals so you can tell whether the skill or plugin is genuinely helping instead of only looking well-structured on paper.\n\n- Token Usage Observer [high] Measure how many tokens the skill or plugin actually burns in representative runs. Signals: observed_usage_sample_count, observed_input_tokens_avg, observed_total_tokens_avg, estimate_vs_observed_input_ratio. Evidence: Responses API usage logs, Codex-like session exports, JSONL traces captured from local benchmarking harnesses.\n- Task Outcome Scorecard [high] Measure whether the skill helps users finish the intended job with fewer retries and less cleanup. Signals: task_success_rate, first_pass_success_rate, retry_rate, human_override_rate. Evidence: Task run logs, Structured user acceptance checklist, Before/after comparison runs on the same prompts.\n- Tool Call Audit [medium] Check whether the agent uses the right tools, arguments, and sequencing when the skill is active. Signals: tool_call_success_rate, invalid_tool_argument_rate, recoverable_tool_failure_rate. Evidence: Tool invocation traces, Recorded sessions, Golden-path scenario replays.\n- Latency And Efficiency [high] Track whether the skill speeds users up enough to justify its cost. Signals: p50_time_to_first_acceptable_answer_seconds, p95_time_to_task_completion_seconds, tokens_per_successful_run. Evidence: Benchmark harness timings, Manual stopwatch runs on canonical tasks, Responses API timestamps combined with usage logs.\n- Human Rubric Review [medium] Capture clarity, trust, and usefulness signals that automated checks will miss. Signals: clarity_score_avg, confidence_score_avg, follow_up_question_rate. Evidence: Reviewer scorecards, Team rubric sheets, Annotated transcripts.\n</details>\n<details>\n<summary>Use From Codex Chat</summary>\n\nStart with a natural chat request, then let plugin-eval show the exact local command sequence behind it.\n\nStart with this chat request: \"Evaluate this skill.\"\nWhy this path: Plugin Eval recommended Evaluate Skill from the current local state for this skill.\nQuick local entrypoint: plugin-eval start Skills/agent-ops/autoresearch --request 'Evaluate this skill.' --format markdown\nPlugin Eval will run first: plugin-eval analyze Skills/agent-ops/autoresearch --format markdown\n\nOther chat requests you can use:\n- Full Skill Analysis: say \"Give me a full analysis of this skill, including benchmark setup.\" -> plugin-eval analyze Skills/agent-ops/autoresearch --format markdown\n- Evaluate Skill: say \"Evaluate this skill.\" -> plugin-eval analyze Skills/agent-ops/autoresearch --format markdown\n- Explain Token Budget: say \"Explain the token budget for this skill.\" -> plugin-eval explain-budget Skills/agent-ops/autoresearch --format markdown\n- Measure Real Token Usage: say \"Measure the real token usage of this skill.\" -> plugin-eval init-benchmark Skills/agent-ops/autoresearch\n- Benchmark With Starter Scenarios: say \"Help me benchmark this skill.\" -> plugin-eval init-benchmark Skills/agent-ops/autoresearch\n- Start Here: say \"What should I run next?\" -> plugin-eval analyze Skills/agent-ops/autoresearch --format markdown\n</details>\n<details>\n<summary>Checks</summary>\n\n- [WARN] invoke_cost_tokens-budget-high: invoke_cost_tokens is heavy relative to the current Codex baseline. Evidence: Value: 1882 tokens Baseline samples: skills=8, plugins=118 Remediation: Reduce repeated instruction text and move detail into deferred supporting files.\n- [WARN] deferred_cost_tokens-budget-high: deferred_cost_tokens is heavy relative to the current Codex baseline. Evidence: Value: 4096 tokens Baseline samples: skills=8, plugins=118 Remediation: Reduce repeated instruction text and move detail into deferred supporting files.\n- [INFO] coverage-artifacts-unavailable: No coverage artifacts were found for this target. Evidence: Skills/agent-ops/autoresearch Remediation: Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring.\n</details>\n<details>\n<summary>Metrics</summary>\n\n- skill_line_count: 105 lines (good)\n- description_length_chars: 279 chars (good)\n- relative_link_count: 0 links (good)\n- code_fence_count: 0 blocks (good)\n- support_file_count: 4 files (good)\n- trigger_cost_tokens: 73 tokens (moderate)\n- invoke_cost_tokens: 1882 tokens (heavy)\n- deferred_cost_tokens: 4096 tokens (heavy)\n- coverage_artifact_count: 0 files (info)\n</details>\n<details>\n<summary>Score details</summary>\n\n- Starting score: 100\n- Total deductions: -9.25\n- Final score: 91\n- Risk: Contains 2 warning signals that still need attention.\n\n- -4.5 points: deferred_cost_tokens-budget-high [warn/warning] deferred_cost_tokens is heavy relative to the current Codex baseline.\n- -4.5 points: invoke_cost_tokens-budget-high [warn/warning] invoke_cost_tokens is heavy relative to the current Codex baseline.\n- -0.25 points: coverage-artifacts-unavailable [info/info] No coverage artifacts were found for this target.\n\n- budget: -9 points across 2 checks\n- coverage: -0.25 points across 1 check\n</details>\n",
+      "stderr": "",
+      "status": "success"
+    },
+    "tessl_tile": {
+      "tile_path": "<tmp-tessl-workdir>.json",
+      "review_path": "<tmp-tessl-workdir>",
+      "skill_key": "autoresearch",
+      "source_skill": "Skills/agent-ops/autoresearch",
+      "mode": "temporary_wrapper",
+      "reason": "Tessl validates tile.json packages; canonical repo skills remain SKILL.md-first.",
+      "tessl_home": "<tmp-tessl-workdir>"
+    },
+    "tessl_lint": {
+      "command": [
+        "tessl",
+        "skill",
+        "lint",
+        "<tmp-tessl-workdir>.json"
+      ],
+      "exit_code": 0,
+      "stdout": "By using Tessl, you agree to our Terms: https://tessl.io/policies/terms\n\n\nContext Cost\n\nSkills\n  - autoresearch: 73 front-loaded, 1.9k on-demand tokens\n\nTotal: 73 front-loaded, 1.9k on-demand tokens\n\n✔ Tile local/autoresearch@0.0.0-local is valid\n",
+      "stderr": "",
+      "status": "success"
+    },
+    "tessl_review": {
+      "command": [
+        "tessl",
+        "skill",
+        "review",
+        "<tmp-tessl-workdir>"
+      ],
+      "exit_code": 0,
+      "stdout": "\nValidation Checks\n\n  ✔ skill_md_line_count - SKILL.md line count is 105 (<= 500)\n  ✔ frontmatter_valid - YAML frontmatter is valid\n  ✔ name_field - 'name' field is valid: 'autoresearch'\n  ✔ description_field - 'description' field is valid (279 chars)\n  ✔ compatibility_field - 'compatibility' field not present (optional)\n  ✔ allowed_tools_field - 'allowed-tools' field not present (optional)\n  ⚠ metadata_version - 'metadata.version' is missing\n  ✔ metadata_field - 'metadata' contains 7 entries\n  ✔ license_field - 'license' field not present (optional)\n  ✔ frontmatter_unknown_keys - No unknown frontmatter keys found\n  ✔ body_present - SKILL.md body is present\n\nOverall: PASSED (0 errors, 1 warnings)\n\nJudge Evaluation\n\n  Description: 75%\n    specificity: 2/3 - The description names several domain-specific concepts (baselines, hypothesis patches, noisy metric policy, regression guards, keep/discard/block decisions) but these read more like jargon-heavy feature lists than concrete user-facing actions. It says 'Analyze' but doesn't clearly describe what tangible outputs or operations are performed.\n    trigger_term_quality: 2/3 - It includes '$autoresearch' as a specific trigger term and mentions 'evidence-backed research iterations' and 'repo/skill', which are somewhat natural. However, many of the terms (noisy metric policy, protected regression guards, hypothesis patches) are highly specialized jargon that users are unlikely to naturally say. Missing common variations like 'experiment', 'A/B test', 'automated research'.\n    completeness: 3/3 - The description explicitly answers both 'what' (analyze bounded autonomous experiment loops with specific components) and 'when' ('Use when $autoresearch is named or a repo/skill needs evidence-backed research iterations'). The 'Use when...' clause is present and provides explicit trigger guidance.\n    distinctiveness_conflict_risk: 3/3 - The description carves out a very specific niche around autonomous experiment loops with a unique trigger term '$autoresearch'. The combination of bounded experiment loops, hypothesis patches, and keep/discard/block decisions is highly distinctive and unlikely to conflict with other skills.\n\n    Assessment: The description successfully establishes a clear niche and includes explicit 'Use when' triggers, making it complete and distinctive. However, it relies heavily on specialized jargon that may not match natural user language, and the specific actions/capabilities could be described more concretely in terms of what the skill actually produces or does for the user.\n\n    Suggestions:\n      - Replace jargon-heavy terms like 'noisy metric policy' and 'protected regression guards' with more natural language that users would actually use, such as 'automated experiments', 'metric tracking', or 'safe rollback'.\n      - Add more concrete action verbs describing outputs, e.g., 'Runs automated experiment iterations, compares metrics against baselines, and decides whether to keep or discard changes' instead of the abstract 'Analyze bounded autonomous experiment loops'.\n\n  Content: 70%\n    conciseness: 2/3 - The skill is fairly dense and covers a lot of ground, but some sections are somewhat verbose with enumerated constraints that could be tightened. Phrases like 'Research is a bounded evidence loop: baseline, hypothesize, patch, score, decide, record' are efficient, but sections like Constraints list many items that overlap with Execution Boundaries and could be consolidated.\n    actionability: 2/3 - The workflow steps are concrete and sequenced, and decision language is specific (e.g., 'blocked', 'regression-blocked', keep/discard). However, there are no executable code examples, no concrete command snippets beyond references to `uv run train.py`, and much of the guidance remains at the policy/process level rather than copy-paste ready.\n    workflow_clarity: 3/3 - The 8-step workflow is clearly sequenced with explicit validation checkpoints (baseline before any kept change, verify then guard, fail-fast at first failed gate, repair-and-rerun feedback loops). Decision criteria for keep/discard/block are well-defined, and regression gates are treated as absolute blockers.\n    progressive_disclosure: 3/3 - The skill has a dedicated Progressive Disclosure section with clearly signaled, one-level-deep references to specific files (references/autoresearch-project.md, references/contract.yaml, references/evals.yaml, etc.) with explicit conditions for when to read each. The main body serves as an effective overview and routing document.\n\n    Assessment: This is a well-structured process/policy skill with excellent workflow clarity and progressive disclosure. Its main weakness is limited actionability—it describes what to do at a high level but lacks concrete executable examples (commands, code snippets, ledger templates). Conciseness could be improved by consolidating overlapping constraint and boundary sections.\n\n    Suggestions:\n      - Add a concrete ledger template or example showing the expected format for hypotheses, scores, and keep/discard decisions to improve actionability.\n      - Include at least one fully worked mini-example showing exact commands, their output, and the resulting ledger entry to make the workflow copy-paste actionable.\n      - Consolidate the Execution Boundaries and Constraints sections to reduce overlap and improve token efficiency.\n\nReview Score: 77%\nOnly SKILL.md was reviewed. Log in with tessl login to include all supporting files in the review.\n\n",
+      "stderr": "- Reviewing skill...\n⚠ Skill is valid but could be improved.\n",
+      "status": "success"
+    },
+    "snyk": {
+      "status": "skipped",
+      "reason": "Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted."
+    },
+    "report_path": "Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.json",
+    "dashboard_path": "Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.html",
+    "dashboard_url": "Infrastructure/artifacts/skill-reviews/agent-ops/autoresearch.html"
+  },
+  "telemetry": {
+    "latency_ms": 2809
+  },
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "message": "Internal ask skill audit failed during external-review lane.",
+      "fix_suggestion": "Inspect data.ask_audit for the exact failing gate."
+    }
+  ]
+}

@@ -2,6 +2,30 @@
 
 set -euo pipefail
 
+if ! declare -F log_section >/dev/null; then
+	log_section() {
+		printf '== %s ==\n' "$*"
+	}
+fi
+
+if ! declare -F log_ok >/dev/null; then
+	log_ok() {
+		printf 'OK: %s\n' "$*"
+	}
+fi
+
+if ! declare -F log_warn >/dev/null; then
+	log_warn() {
+		printf 'WARN: %s\n' "$*"
+	}
+fi
+
+if ! declare -F log_err >/dev/null; then
+	log_err() {
+		printf 'ERROR: %s\n' "$*" >&2
+	}
+fi
+
 # extract_last_json_line prints the last input line that begins with `{`
 # (commonly the final JSON object line) to stdout. If no such line exists it
 # extract_last_json_line prints the last line that begins with `{` from the given raw string, or prints nothing if no such line exists.

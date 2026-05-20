@@ -10,8 +10,8 @@ This review artifact records the intended infographic for the goal-governor hard
 * $imagegen invoked: blocked
 * generated-image cache source path: blocked; no callable built-in image generation tool was exposed in this session
 * repository .harness/media/ PNG path: blocked; no PNG was generated
-* prompt metadata path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-goal-governor-runtime-board-contract-prompt.md
-* sidecar path: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-goal-governor-runtime-board-contract.md
+* prompt metadata path: .harness/media/2026-05-13-goal-governor-runtime-board-contract-prompt.md
+* sidecar path: .harness/media/2026-05-13-goal-governor-runtime-board-contract.md
 * repository PNG existence verification: blocked
 * persistence method: blocked
 * final user-facing text after imagegen permitted: yes
@@ -37,8 +37,8 @@ Use the prompt metadata file to generate a 2048x1152 technical infographic title
 
 ## Linked Context
 
-Reviewed package: /Users/jamiecraik/dev/agent-skills/Skills/agent-ops/goal-governor
+Reviewed package: Skills/agent-ops/goal-governor
 
-Generated handle, not edited: /Users/jamiecraik/dev/agent-skills/.agents/skills/goal-governor/SKILL.md
+Generated handle, not edited: .agents/skills/goal-governor/SKILL.md
 
-Fallback SVG: /Users/jamiecraik/dev/agent-skills/.harness/media/2026-05-13-goal-governor-runtime-board-contract.svg
+Fallback SVG: .harness/media/2026-05-13-goal-governor-runtime-board-contract.svg
