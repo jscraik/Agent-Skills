@@ -76,6 +76,9 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   lane, stop the active task, name the pattern, refine the repo/environment
   contract that allowed it, validate that refinement, and report the proof
   before resuming the original lane.
+  Use [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md)
+  and record uptake in `.harness/quality/steering-uptake.md`; validate with
+  `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
 - For live GitHub, CodeRabbit, CircleCI, Snyk, package registry, or other
   networked repo operations in Codex sandboxed runs, request explicit network
   permission before diagnosing an outage or credential problem. When a command

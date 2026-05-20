@@ -1,6 +1,6 @@
 schema_version: 2
 skill: improve-codebase-architecture
-purpose: "Recommend proof-backed architecture moves from fresh repo evidence."
+purpose: "Recommend proof-backed architecture moves from fresh repo evidence and shared user design decisions."
 triggers:
   - "Architecture, module-boundary, interface, design-quality, or testability review."
   - "Context-language, durable terminology, or Linear-backed design decision."
@@ -12,32 +12,77 @@ non_goals:
 inputs:
   - user_request
   - target_repo_or_area
+  - ubiquitous_language_surface
+  - harness_decision_surface
   - fresh_evidence
   - tracker_or_workpad
   - reference_texts
 outputs:
   - schema_version
+  - capability_surface
   - complexity_symptoms
   - fresh_evidence
   - missing_evidence
-  - design_options
+  - reviewer_coverage
+  - agent_safe_boundary
+  - patch_design
+  - interface_design
+  - grilling_loop
+  - request_user_input
+  - selected_design_decision
   - recommended_first_move
   - tracer_proof
   - decision_surface
   - validation
   - confidence
+agent_safe_boundary:
+  statuses: [safe, risky, blocked]
+  required_fields: [status, owner_layer, public_interface, seam_tests, caller_contract, blast_radius, blocker]
+  safe_requires: "Stable public interface, hidden implementation, caller-observable seam/regression proof, and an edit mostly inside one owner layer."
+  risky_when: "Tests are weak, callers depend on hidden behavior, imports route around the public surface, or the layer map is unclear."
+  blocked_when: "No public interface, no tracer path, unknown callers, missing test command, or unresolved ownership."
+decision_surface:
+  required_fields: [location, write_status, blocker]
+  location: "Concrete .harness path, Linear issue/comment, or repo-approved decision surface."
+  write_status: "written, blocked, or not_applicable with exact reason."
+capability_surface:
+  required_fields: [repo_read, repo_write, reviewer_agents, request_user_input, tracker_or_decision_write]
+reviewer_coverage:
+  expected_roles: [agent-native-reviewer, api-contract-reviewer, architecture-strategist]
+  unavailable_behavior: "Continue locally and mark the role blocked with the exact missing capability or runtime blocker."
+grilling_loop:
+  statuses: [active, complete, blocked]
+  required_fields: [status, current_question, recommended_answer, decision_dependency, answered_by_code_exploration, next_question_blocked_until_user_feedback]
+  one_question_rule: "Ask at most one grilling question per response and wait for feedback before continuing."
+  explore_first_rule: "If code, tests, docs, vocabulary, or .harness evidence can answer the question, explore instead of asking."
+  blocked_when: "request_user_input is unavailable, the decision dependency is unknown, or user feedback is required before the next branch."
 risks:
   - over_triggering
   - untrusted_input
   - validation_drift
   - premature_redesign
+  - autonomous_design_choice
+  - untested_deep_module
   - complexity_displacement
   - runtime_visibility_overclaim
+  - undiscoverable_decision
+  - vocabulary_drift
+  - adr_relitigation
+  - multi_question_grilling
+  - premature_interface_selection
 safety:
   untrusted_inputs: true
   redact_secrets: true
   destructive_commands: false
   generated_projection_edits_forbidden: true
+collaboration:
+  request_user_input_required: true
+  required_before:
+    - "selecting patch_design versus interface_design for structural work"
+    - "changing interfaces, seams, adapters, ownership, or dependency strategy"
+    - "changing durable terminology, ADRs, Linear decisions, or decision records"
+    - "choosing validation strategy, tracer proof, rollback, or implementation plan for a deepening move"
+  unavailable_behavior: "Return request_user_input as blocked with the exact design decision that requires user input; do not select the design path autonomously."
 validation:
   - strict_skill_audit
   - skill_gate
@@ -47,5 +92,12 @@ validation:
   - package_boundary_checks
   - plugin_eval
   - tracer_proof_or_blocker
+  - request_user_input_checkpoint_or_blocker
+  - agent_safe_boundary_classification
+  - reviewer_coverage_or_blocker
+  - decision_surface_location_or_blocker
+  - vocabulary_surface_or_blocker
+  - harness_decision_surface_or_blocker
+  - grilling_loop_state_or_blocker
 observability: "Report exact files inspected, commands run, pass/fail/blocked/not applicable outcomes, and blocked validators with concrete blocker text."
 rollback_procedure: "Revert scoped skill-package edits, then rerun strict audit, skill gate, OpenAI format, evals where available, boundary checks, and Plugin Eval."

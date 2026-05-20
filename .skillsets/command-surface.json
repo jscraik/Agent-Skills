@@ -1,7 +1,7 @@
 {
-  "generated_command_handle_count": 109,
+  "generated_command_handle_count": 105,
   "generated_from": "rooted_manifests",
-  "handle_count": 109,
+  "handle_count": 105,
   "handles": [
     {
       "command_handle_path": ".agents/skills/1password/SKILL.md",
@@ -15,7 +15,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "c6e9035f9e7490eae4c427fa44c5cc295f77f7a46defc649e357fbc5be011e5a"
       },
       "runtime_visibility": "latent",
@@ -34,7 +34,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "199b94d66240cee10cba5080b3ef740ff1f8e15f465281f8acd4b899d99313d8"
       },
       "runtime_visibility": "latent",
@@ -53,7 +53,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "1e1a0ce52bfe5fc1ed37ed2e6dd0977bf7e836861b294777bf973faf8def0469"
       },
       "runtime_visibility": "latent",
@@ -72,7 +72,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "45ad1e393171053f4b8720a65e4f0b9a26acc1f5bc7d70b580e1af3b130326f1"
       },
       "runtime_visibility": "latent",
@@ -91,7 +91,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "8729c59fc292fa6ad6801ef713e3dde5a15e6f8715d79ce00a2124b7eaf2900b"
       },
       "runtime_visibility": "latent",
@@ -110,7 +110,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "7e6727a1165549906a09105a1d8ef047a7fe48ee2e8ae8d1582f555244b7d029"
       },
       "runtime_visibility": "latent",
@@ -129,7 +129,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "9347ca2014f24d539744d3d38959514fd4a30fc0e391a06796115c082a0e3101"
       },
       "runtime_visibility": "latent",
@@ -148,7 +148,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "7dc3c8f926490058c740c1a3aaba4479aa0d0d8b20cf2f89b582eab01c29884b"
       },
       "runtime_visibility": "latent",
@@ -167,7 +167,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "67ba530c297e164e16e4f96b5f1ae36b8d0cbd9cf4d9567f2aa6ee58e26a4f55"
       },
       "runtime_visibility": "latent",
@@ -186,7 +186,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "f45033741643529e969a43392c687a33020babc4d2fd836e1076bba0f4bb7892"
       },
       "runtime_visibility": "latent",
@@ -205,7 +205,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "70e5db7d696d223a702c469355c8d06e4326aeb05593cdc76935c569aaadbfa2"
       },
       "runtime_visibility": "latent",
@@ -224,7 +224,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "7a8b0547dd60479c6ef9e08d5568de21d7ce45f1fdd471d63cfdcc6ab4d064e6"
       },
       "runtime_visibility": "latent",
@@ -243,7 +243,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "4cbe0edd590175156c9f64853e3bc8b35c89d1f9611b38c704c7820da8f787eb"
       },
       "runtime_visibility": "latent",
@@ -262,7 +262,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "b2f17b3e9228203d7cf69d15dd77f15e05238bcc3694c0b80cdd462ff35f0f22"
       },
       "runtime_visibility": "latent",
@@ -280,7 +280,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "16f562ca095daf7afdfe5dcdc20149859fc0dedb1253635ee663c2981e3d493b"
       },
       "runtime_visibility": "latent",
@@ -299,7 +299,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "17d3430c36faa0fd192695d100d5def8aca1f5f18406e2cf524e813d5c89593a"
       },
       "runtime_visibility": "latent",
@@ -318,7 +318,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "0f17d574224b5a6b3984f9581c403587ff6260bc7e67268998199012c0160e83"
       },
       "runtime_visibility": "latent",
@@ -337,7 +337,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "5e6fd26df33d247f18e16e22c27b90b3c9824108ceda1b365a8490c195ffad6f"
       },
       "runtime_visibility": "latent",
@@ -356,7 +356,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "9021c11ad1bb56f794687db7aec51b530d24020d81cd37069adea10fd2a25a72"
       },
       "runtime_visibility": "latent",
@@ -375,7 +375,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "e4f4572fff638333e684626157169ae57c7a42e8f38843a9b7a8b4e774fe8fc6"
       },
       "runtime_visibility": "latent",
@@ -394,7 +394,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "f87d3957046fc8391ee0565f8b1356d42732ae1928031ad7dc572960c2968dc4"
       },
       "runtime_visibility": "latent",
@@ -413,7 +413,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "f445322f46aaa201a0ee356b2f562e24e1e940d0fe80f5b0638d4f770023f6bc"
       },
       "runtime_visibility": "latent",
@@ -432,7 +432,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "66bd3a408e651ee5a74bf027733720ca0b628b24d21fb71e5aebe36b6861a37d"
       },
       "runtime_visibility": "latent",
@@ -451,7 +451,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "67d695a6592f5ac4f6b340a1091ffdc120f8fbe299a35eade68ba54c0dd6a3a3"
       },
       "runtime_visibility": "latent",
@@ -470,7 +470,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "f9aa4d76f1fd0f838905912bd26e0930f3c1390d960a2f25f5884b076bb5954b"
       },
       "runtime_visibility": "latent",
@@ -488,7 +488,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "f399e4786f69159c82957416a11d4496675b38f7ce6d516f8f6d40c0f8ae9055"
       },
       "runtime_visibility": "latent",
@@ -507,7 +507,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "d342ca64d73145dac9dfdff4a81bf1214f02f588a6e8165bef142d41ebfdc1c4"
       },
       "runtime_visibility": "latent",
@@ -526,7 +526,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "d76c2a79a005e35a3e6b16678822f3ab8760cab484c9a6a6a32cde0628d59fba"
       },
       "runtime_visibility": "latent",
@@ -545,7 +545,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "cb52758f3ee6be7e3e07279bf19c177a25068231b0dee4eedf346c437a2be3a6"
       },
       "runtime_visibility": "latent",
@@ -563,7 +563,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "5aa9481dd64e1b20356e895822c9cb62c0ec4492f833373c79fedc04c7123a6c"
       },
       "runtime_visibility": "latent",
@@ -582,7 +582,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "e2ac15365a682efcaa88010cc1b80b29ceb92fcb3e27e88141fbc2b773711a26"
       },
       "runtime_visibility": "latent",
@@ -600,7 +600,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "41686d222504716183650f6faea1e7d6075d83771c708d054264a9008087d47e"
       },
       "runtime_visibility": "latent",
@@ -619,7 +619,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "5ec06ded5b9033c15d7004b11d5804c0fcc70cf7eecc46365df78d9be1406b5d"
       },
       "runtime_visibility": "latent",
@@ -638,7 +638,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "80cf4787e2f3df0aa445b393544ffbf4a1a449fe4ffbd26e369d06b8481d6559"
       },
       "runtime_visibility": "latent",
@@ -657,7 +657,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "4221b81eac687519529e59820eb4855f32d1670451e366bd5ed2406d4d9d45b9"
       },
       "runtime_visibility": "latent",
@@ -676,7 +676,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "e06a3f3e03929b7c18521842d63cf7a604fdb34865df87f03490af09e20b1145"
       },
       "runtime_visibility": "latent",
@@ -695,7 +695,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "4f55d73c8d1c7480ee7d11afc086c3f1f33af3a3dd371708b8f6e28de497bb95"
       },
       "runtime_visibility": "latent",
@@ -714,7 +714,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "3670d35a3c56a5d23bf703ab0cc9fb11a46f517f3f8d1accf1f2e0e1ab7451dc"
       },
       "runtime_visibility": "latent",
@@ -732,7 +732,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "26ab53a9dfcdb5b9a20efc7f463499882fd4f6b23407a8673c0f46dfd08d72e3"
       },
       "runtime_visibility": "latent",
@@ -751,7 +751,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "0f1af8f43c09a2d2336bb3a1821b5939e616df020796eb968dcaa69508e8b200"
       },
       "runtime_visibility": "latent",
@@ -770,7 +770,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "54ad0698d33e81c75e2f7f8b41b860d531d6ae085b35418c3bfc0759a818f36d"
       },
       "runtime_visibility": "latent",
@@ -788,7 +788,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "345399bbca0b5081ea25dda2e2fc955ac7c1fba37beca07f8ca44145fddfda3b"
       },
       "runtime_visibility": "latent",
@@ -807,7 +807,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "5c1b5acef8f733a7a2798cf245f0ad740c1778e0f5278d300c0bc57394f1af41"
       },
       "runtime_visibility": "latent",
@@ -826,7 +826,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "35d65151a4bb3a5e92c4a719025cd0183124172ba504f800e2184687bdca7456"
       },
       "runtime_visibility": "latent",
@@ -845,7 +845,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "57a398035e75111973ed286e33715b2bc12938407372663c87154a892189311f"
       },
       "runtime_visibility": "latent",
@@ -864,7 +864,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "0f1af8f43c09a2d2336bb3a1821b5939e616df020796eb968dcaa69508e8b200"
       },
       "runtime_visibility": "latent",
@@ -883,7 +883,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "409719215409574be8d93a5855198ab9799660ac8e194d836626a8cbce0db728"
       },
       "runtime_visibility": "latent",
@@ -902,7 +902,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "1f41b075696a1117bf515bf049152d3fa2a4aad125b2b9ac8504c49bfdb1555a"
       },
       "runtime_visibility": "latent",
@@ -921,7 +921,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "d188a738ec339eaeb077d011a6e8ac84a2dbcca5564a60c239a290b64c05ac94"
       },
       "runtime_visibility": "latent",
@@ -940,7 +940,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "2556808955345b8e8d56e10541fad410ff0fe0ca3968b9af4388913fc83d7fba"
       },
       "runtime_visibility": "latent",
@@ -959,7 +959,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "c7866019187c5c5b400b3a9bbd4feb006fb0da474e3ef8d73a587df379665540"
       },
       "runtime_visibility": "latent",
@@ -978,7 +978,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "0fcc24a5db8fb02cc69624fa3eb97990005b462808be94ef8cd6f8177707f636"
       },
       "runtime_visibility": "latent",
@@ -997,7 +997,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "409719215409574be8d93a5855198ab9799660ac8e194d836626a8cbce0db728"
       },
       "runtime_visibility": "latent",
@@ -1016,7 +1016,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "0fcc24a5db8fb02cc69624fa3eb97990005b462808be94ef8cd6f8177707f636"
       },
       "runtime_visibility": "latent",
@@ -1035,7 +1035,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "15a11b454de5da11097dd872acb2606d398e1f5b994fa1c94213ca75b39139b2"
       },
       "runtime_visibility": "latent",
@@ -1054,7 +1054,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "54ad0698d33e81c75e2f7f8b41b860d531d6ae085b35418c3bfc0759a818f36d"
       },
       "runtime_visibility": "latent",
@@ -1072,7 +1072,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "1b7f8dd7aa50293fef86082eeace1ec3086db14b77f92ea2ab363b415f47c777"
       },
       "runtime_visibility": "latent",
@@ -1091,7 +1091,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "d497e8cb0b9db81ef8f09a473fbb1cd662b41b4bb8d56fbe4afc1614664f8696"
       },
       "runtime_visibility": "latent",
@@ -1110,7 +1110,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "65b1c0f472f75e77d28087935cb5f50b59302998683fef6ab4420eae13eac0c0"
       },
       "runtime_visibility": "latent",
@@ -1129,7 +1129,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "54ad0698d33e81c75e2f7f8b41b860d531d6ae085b35418c3bfc0759a818f36d"
       },
       "runtime_visibility": "latent",
@@ -1148,30 +1148,11 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "907ef516912a4a9f0b1a03353cae470557041bc8e205724d45da38558de169b7"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/harness-engineering/skills/he-work/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/imagegen/SKILL.md",
-      "command_visibility": "target",
-      "description": "Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.",
-      "handle": "imagegen",
-      "invoke_via": "agent-ops",
-      "kind": "skill",
-      "level": "reference",
-      "owner": "agent-ops",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "fabbe04d4ccdc50e",
-        "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
-        "source_sha256": "59981d23519222bcecf1be48bb37730bbc50539ceb0e35ad09fcef98a3df19d3"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "skills-system/imagegen/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/improve-codebase-architecture/SKILL.md",
@@ -1186,8 +1167,8 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
-        "source_sha256": "1d98da1cf358cd72d10b65a503395a0c633e7728277f93db3a9e19d6fdd6434a"
+        "source_revision": "ea70fb76a",
+        "source_sha256": "565a760ee9793f89feb727e32409d48046c760adc6c719f5b1cee78a3caa4626"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/improve-codebase-architecture/SKILL.md"
@@ -1205,7 +1186,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "ad71bacb061bcd03aaaa514da373175a778771d42d55d04bf517b7172a831b16"
       },
       "runtime_visibility": "latent",
@@ -1224,7 +1205,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "93ce2d2cebff874a8fef514afc7e8a2aedfb9eaa550d7a4eee2f948a432571a8"
       },
       "runtime_visibility": "latent",
@@ -1243,7 +1224,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "875bba0a46ee504e75ca92cb38fef3d2dcfa583c282f757c66b460d874378655"
       },
       "runtime_visibility": "latent",
@@ -1262,7 +1243,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "6e8794ead19ebb251dbfbe0426979a6075ac65504cae7794b3af03dfe493c7a6"
       },
       "runtime_visibility": "latent",
@@ -1280,7 +1261,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "585ed72c4c815716bd250519f1ecffc22a6646658f60098feec5a2158ba1dc27"
       },
       "runtime_visibility": "latent",
@@ -1299,7 +1280,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "315a5b4e135cc1d7cf3ef0e095e13a3bdfbe55c912b997babb7a532c177d0d51"
       },
       "runtime_visibility": "latent",
@@ -1317,7 +1298,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "b456eb131c07d70093444da1024482257e0098d7ee5d6cff88d7b934b0fa9920"
       },
       "runtime_visibility": "latent",
@@ -1336,7 +1317,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "9cd49fdc616c48b5b8ca1aca6327ab834bb205a4a498e2c7657c83396f35271d"
       },
       "runtime_visibility": "latent",
@@ -1354,30 +1335,11 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "1893bda07c801e0f701f669ee5b1474d172830c6e1028e7ac97b67d3028d09f6"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/frontend-ui/og-image-creator/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/openai-docs/SKILL.md",
-      "command_visibility": "target",
-      "description": "Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.",
-      "handle": "openai-docs",
-      "invoke_via": "agent-ops",
-      "kind": "skill",
-      "level": "reference",
-      "owner": "agent-ops",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "fabbe04d4ccdc50e",
-        "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
-        "source_sha256": "b93d0da4fbf0d472c9671237c452be359f675845f281aa2cac0a718264421068"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "skills-system/openai-docs/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/plugin-builder/SKILL.md",
@@ -1391,7 +1353,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "0c8e91c614b0ca3197623398d379cdfeaad5157b600df21937a59f1258679b2a"
       },
       "runtime_visibility": "latent",
@@ -1410,7 +1372,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "c7a7218e495db675154d621e3c40ab2996e17b3773b56e51627966fac9282678"
       },
       "runtime_visibility": "latent",
@@ -1428,7 +1390,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "74d60090e1076cf57813d5f5d585b46509a6222ec30a15ec09651d8a6d688ba8"
       },
       "runtime_visibility": "latent",
@@ -1447,7 +1409,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "745b8065408777001bb25f113df4e15f08ec47efd106a7f6d2030196962bb4fe"
       },
       "runtime_visibility": "latent",
@@ -1465,7 +1427,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "50df52d860494e6627dfddfb635c4199291242652df9d8d4624b54b7e3dc9474"
       },
       "runtime_visibility": "latent",
@@ -1484,7 +1446,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "cc97dbab77263a9c09487697ebcdf5acc5d7d95d31ab2ef257f1c5da1a9cf8a8"
       },
       "runtime_visibility": "latent",
@@ -1503,7 +1465,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "47f9949dad19eed42816db33493090da256a62a9681ca99fae992813e27e1bbd"
       },
       "runtime_visibility": "latent",
@@ -1522,7 +1484,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "8402a01d6e7dc1bba9f119422a6ae5d65b41c87aefe2f6f8eca2cca55cc20b96"
       },
       "runtime_visibility": "latent",
@@ -1541,7 +1503,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "5d539b14e50dfa342bad18b959ddd550f5b850953c0334ba53c7c062801d2720"
       },
       "runtime_visibility": "latent",
@@ -1560,7 +1522,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "840025fc7052bb39f924306b2dfb99a25ad97264626d5d38172b0b5a684e66b4"
       },
       "runtime_visibility": "latent",
@@ -1578,7 +1540,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "e89277ddcfbb425c0e85b5330da68a0597960ab60f458bd1dfc6dc153ef09684"
       },
       "runtime_visibility": "latent",
@@ -1597,7 +1559,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "8e0f5b39d2957fdb00f3e4c3258f3d9174e6dba033aa0a807b1d00cdfd66af3f"
       },
       "runtime_visibility": "latent",
@@ -1616,7 +1578,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "b63f8cf902c545d5d147ae2ef2a26c1cba5ed6889a99fd5179ed160e09efa7d4"
       },
       "runtime_visibility": "latent",
@@ -1635,7 +1597,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "c4734389f6930fdb1f925619328aa21ca742600ca2d99f5f2338c84d2f3964cf"
       },
       "runtime_visibility": "latent",
@@ -1654,7 +1616,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "49b6f6c9cce3a7ff966279316f942fc5691d6d6d047a39c517614f2cbcd3b7be"
       },
       "runtime_visibility": "latent",
@@ -1672,30 +1634,11 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "5694878e2ab9f26ca9b5c8f671172ac2f4ad7350f19cb0cca616ad621be06487"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/skill-creator/SKILL.md",
-      "command_visibility": "target",
-      "description": "Create or update a skill",
-      "handle": "skill-creator",
-      "invoke_via": "agent-ops",
-      "kind": "skill",
-      "level": "atom",
-      "owner": "agent-ops",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "fabbe04d4ccdc50e",
-        "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
-        "source_sha256": "1362fcdf1cd0747022e798b8b20f554b858b277c1ceeaefcfc54816edebe661d"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "skills-system/skill-creator/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/skill-factory-router/SKILL.md",
@@ -1709,30 +1652,11 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "94861e0e1c9105ddfc727e8602cdb4b11b85428d6e0ebbdc0fa0d5f6c3a22c0b"
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md"
-    },
-    {
-      "command_handle_path": ".agents/skills/skill-installer/SKILL.md",
-      "command_visibility": "target",
-      "description": "Install curated skills from openai/skills or other repos",
-      "handle": "skill-installer",
-      "invoke_via": "agent-ops",
-      "kind": "skill",
-      "level": "atom",
-      "owner": "agent-ops",
-      "provenance": {
-        "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "fabbe04d4ccdc50e",
-        "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
-        "source_sha256": "094464d701c412fe3aa9e856319ab990a989780ca428c4f94576b9b78f0e7f63"
-      },
-      "runtime_visibility": "latent",
-      "source_path": "skills-system/skill-installer/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/skill-pr-delivery/SKILL.md",
@@ -1747,7 +1671,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "1d703654582cb5a5543755e0c4544d6d10c246877b3ef4881cc57c31234a8fa1"
       },
       "runtime_visibility": "latent",
@@ -1765,7 +1689,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "ff519c8fa9edd2214caa8ad6804fadcfd09ba25808c7a938f5014d2227f6321d"
       },
       "runtime_visibility": "latent",
@@ -1783,7 +1707,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "495cd1eaa088f9e971cb5d3b786ff9f67c2b7c1e5d8ffdf5db48854b10af6490"
       },
       "runtime_visibility": "latent",
@@ -1802,7 +1726,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "d753276e3c327256fdd238fa8d3b54f56b71a446e981e5f178f1d6387217bef8"
       },
       "runtime_visibility": "latent",
@@ -1821,7 +1745,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "3e782c49a4c0507ea971ba32d7537d8a71d46a5466ccc101efb4167212a5097f"
       },
       "runtime_visibility": "latent",
@@ -1840,7 +1764,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "8d75fdb799f59b1761c5275a52e20ce6cb60072a0479147bda5a063c9d918b43"
       },
       "runtime_visibility": "latent",
@@ -1859,7 +1783,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "7845d71331d9418669370df6b38896a4420930e577bc070c60ea278a8b9998d4"
       },
       "runtime_visibility": "latent",
@@ -1878,7 +1802,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "8fd9ed5234fb832ab7910dcc233b8396b88aebe57dc253099e50635fd02b6088"
       },
       "runtime_visibility": "latent",
@@ -1897,7 +1821,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "ed0aae2dee45faa8439726122107c7f50f663af3c2de89429fb71901684de5a4"
       },
       "runtime_visibility": "latent",
@@ -1916,7 +1840,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "f86f6d21990e0d2b842684c170a64562f0e433aa3612dc83e8cfad6456e43e3b"
       },
       "runtime_visibility": "latent",
@@ -1934,7 +1858,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "489d6270b69982cfe2ca6baa4f6a2fe466107a8512ce392a4c5218ffbf66233a"
       },
       "runtime_visibility": "latent",
@@ -1952,7 +1876,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "18f5adbf5e9f8077a476c9655a5b769ea7be0af306c2d35b48cc21a87d9abd22"
       },
       "runtime_visibility": "latent",
@@ -1971,7 +1895,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "c951dd58d34c0a710e570e53c51ff0855ab04ace61e6de431688958b18287ffc"
       },
       "runtime_visibility": "latent",
@@ -1990,7 +1914,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "add11e1f4d87fd2d05b51b9d7f6b80ca4a4dd52d736d2c5af5512745ad646dc1"
       },
       "runtime_visibility": "latent",
@@ -2009,7 +1933,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "6a12371f63c97bfce834292c2913ed82754fce248daaf912c7c0852c28cd193a"
       },
       "runtime_visibility": "latent",
@@ -2027,7 +1951,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "7b8b26a81ab54515e160979937fc435e4b9c7ab92191ab8c04c10d969c5b00f7"
       },
       "runtime_visibility": "latent",
@@ -2046,7 +1970,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "fabbe04d4ccdc50e",
         "projection_mode": "rooted",
-        "source_revision": "0b7ae7da1",
+        "source_revision": "ea70fb76a",
         "source_sha256": "a700e631c02271abeceb9d171a6d09625a53674b2bcfe1ba230a718536fbaf16"
       },
       "runtime_visibility": "latent",
