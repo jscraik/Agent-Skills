@@ -279,7 +279,7 @@ def _iter_system_lane_skill_dirs() -> List[Path]:
         List[Path]: Paths to .system skill directories containing SKILL.md.
     """
     tracked_system_lane_dir = REPO_ROOT / "skills-system"
-    system_lane_dir = tracked_system_lane_dir if tracked_system_lane_dir.is_dir() else SYSTEM_LANE_DIR
+    system_lane_dir = SYSTEM_LANE_DIR if SYSTEM_LANE_DIR.is_dir() else tracked_system_lane_dir
     if not system_lane_dir.is_dir():
         return []
     dirs: List[Path] = []

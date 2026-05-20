@@ -1212,6 +1212,12 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             description="global skill source",
             scope_rank=skills_impl._scope_rank_for_path(REPO_ROOT, "Skills/plugin-creator"),
         )
+        system_source = candidate(
+            name="plugin-creator",
+            path="skills-system/plugin-creator",
+            description="system bridge",
+            scope_rank=skills_impl._scope_rank_for_path(REPO_ROOT, "skills-system/plugin-creator"),
+        )
         project_source = candidate(
             name="plugin-creator",
             path="Skills/project/plugin-creator",
@@ -1226,6 +1232,14 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIs(
             min([global_source, plugin_source], key=skills_impl._exact_handle_sort_key),
             plugin_source,
+        )
+        self.assertIs(
+            min([system_source, plugin_source], key=skills_impl._exact_handle_sort_key),
+            plugin_source,
+        )
+        self.assertIs(
+            min([system_source, global_source], key=skills_impl._exact_handle_sort_key),
+            global_source,
         )
         self.assertIs(
             min([bridge_copy, plugin_source, global_source, project_source], key=skills_impl._exact_handle_sort_key),

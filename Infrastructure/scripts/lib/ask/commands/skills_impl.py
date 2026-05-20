@@ -4108,14 +4108,16 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
 
 def _scope_rank_for_path(repo_root: Path, skill_path: str) -> int:
     scope = classify_skill_scope(repo_root / skill_path)
+    max_precedence = max(USER_SKILL_SCOPE_PRECEDENCE.values())
     scope_precedence = USER_SKILL_SCOPE_PRECEDENCE.get(scope)
     if scope_precedence is not None:
-        max_precedence = max(USER_SKILL_SCOPE_PRECEDENCE.values())
         return max_precedence - scope_precedence + 1
+    if scope == "system":
+        return max_precedence + 1
     root = skill_path.split("/", 1)[0].strip()
     if root in REPO_SCAN_ROOTS:
-        return REPO_SCAN_ROOTS.index(root) + 1
-    return len(REPO_SCAN_ROOTS) + 1
+        return max_precedence + REPO_SCAN_ROOTS.index(root) + 2
+    return max_precedence + len(REPO_SCAN_ROOTS) + 2
 
 
 def _exact_handle_sort_key(candidate: EligibleCandidate) -> tuple[int, int, str]:

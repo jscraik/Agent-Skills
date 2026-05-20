@@ -108,6 +108,17 @@ class TestSkillScopePrecedence(unittest.TestCase):
         self.assertEqual(by_name["shared-skill"], repo_skill.resolve())
         self.assertEqual(by_name["imagegen"], system_dir.resolve())
 
+    def test_flat_runtime_system_lane_prefers_runtime_projection(self) -> None:
+        runtime_system_dir = self._write_skill(".agents/skills/.system/imagegen", "Runtime system skill.")
+        self._write_skill("skills-system/imagegen", "Tracked system skill.")
+
+        with self._patched_repo(default_visible={"imagegen"}):
+            entries = skill_discovery.discover_skill_entries(source="flat", visibility="default")
+
+        selected = [entry for entry in entries if entry.name == "imagegen"]
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0].source_dir, runtime_system_dir.resolve())
+
     def test_runtime_budget_allows_default_visible_system_skill(self) -> None:
         imagegen_dir = self._write_skill("skills-system/imagegen", "Default visible system skill.")
         hidden_bridge_dir = self._write_skill("skills-system/skill-creator", "Hidden bridge skill.")
