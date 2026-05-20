@@ -325,14 +325,17 @@ normalized = re.sub(r"\s+", " ", text).lower()
 
 clean_phrases = (
     "no findings",
+    "no issue",
     "no issues",
     "no actionable findings",
+    "no actionable issue",
     "no accepted/actionable findings",
     "did not find a discrete actionable bug",
     "did not find any discrete actionable bug",
     "did not find an actionable bug",
     "did not find any actionable bug",
     "0 findings",
+    "0 issue",
     "0 issues",
 )
 
