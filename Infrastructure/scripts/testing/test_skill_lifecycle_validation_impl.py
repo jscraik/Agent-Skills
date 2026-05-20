@@ -1204,19 +1204,19 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             name="plugin-creator",
             path="Plugins/plugin-factory/skills/plugin-creator",
             description="canonical plugin source",
-            scope_rank=skills_impl._scope_rank_for_path("Plugins/plugin-factory/skills/plugin-creator"),
+            scope_rank=skills_impl._scope_rank_for_path(REPO_ROOT, "Plugins/plugin-factory/skills/plugin-creator"),
         )
         global_source = candidate(
             name="plugin-creator",
             path="Skills/plugin-creator",
             description="global skill source",
-            scope_rank=skills_impl._scope_rank_for_path("Skills/plugin-creator"),
+            scope_rank=skills_impl._scope_rank_for_path(REPO_ROOT, "Skills/plugin-creator"),
         )
         project_source = candidate(
             name="plugin-creator",
             path="Skills/project/plugin-creator",
             description="canonical project source",
-            scope_rank=skills_impl._scope_rank_for_path("Skills/project/plugin-creator"),
+            scope_rank=skills_impl._scope_rank_for_path(REPO_ROOT, "Skills/project/plugin-creator"),
         )
 
         self.assertIs(
