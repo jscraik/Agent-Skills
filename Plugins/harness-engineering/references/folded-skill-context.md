@@ -11,7 +11,7 @@ Keep HE routing compact without losing folded stage context. Folded names are co
 | `he-deepen-spec` | `he-spec` | deepen spec | `fixtures/preserved-context/skills/team_automation/he-deepen-spec/` |
 | `he-deepen-plan` | `he-plan` | deepen plan | `fixtures/preserved-context/skills/team_automation/he-deepen-plan/` |
 | `he-refine` | `he-improve` | refinement | `fixtures/preserved-context/skills/team_automation/he-refine/` |
-| `he-compound` | `he-reconcile` | reconcile lifecycle state | `fixtures/preserved-context/skills/team_automation/he-compound/` |
+| old `he-compound` learning | `he-reinforce` | solved-problem capture and Project Brain learning | `fixtures/preserved-context/skills/team_automation/he-compound/` |
 | `he-compound-refresh` | `he-reinforce` | refresh durable learning | `fixtures/preserved-context/skills/team_automation/he-compound-refresh/` |
 | `he-prune-branches` | `he-router` | `agent-ops` branch hygiene | `fixtures/preserved-context/skills/team_automation/he-prune-branches/` |
 | `he-tdd` | `he-work` | test-first | `fixtures/preserved-context/skills/team_automation/he-tdd/` |
@@ -38,8 +38,8 @@ Keep HE routing compact without losing folded stage context. Folded names are co
 - `he-work`: load `he-tdd` context when the user asks for RED/GREEN, failing-test-first, regression-first, or test-first execution.
 - `he-improve`: load `he-refine` context for browser-first or iterative artifact refinement.
 - `he-code-review`: load `he-technical-review` or `he-reliability-review` context for deeper-than-readiness review.
-- `he-reconcile`: load preserved `he-compound` context when resuming stale lifecycle state.
-- `he-reinforce`: load `he-compound-refresh` context when refreshing solution docs or Project Brain learning.
+- `he-reconcile`: own lifecycle-state recovery directly.
+- `he-reinforce`: load old `he-compound` and `he-compound-refresh` context when preserving solved-problem capture, solution docs, or Project Brain learning.
 
 ## Preserved Compact Entry Point Lines
 

@@ -21,7 +21,7 @@ def test_smoke_evals_use_codex_spark_without_reasoning_level(tmp_path: Path) -> 
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke")
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", skip_tessl=True)
 
     assert result.status == "success"
     cmd = run.call_args.args[0]
@@ -34,11 +34,71 @@ def test_smoke_evals_use_codex_spark_without_reasoning_level(tmp_path: Path) -> 
     assert cmd[cmd.index("--codex-arg") + 1] == "--ignore-user-config"
 
 
+def test_smoke_evals_accept_model_override_for_quota_recovery(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            skip_tessl=True,
+            model="gpt-5.4-mini",
+        )
+
+    assert result.status == "success"
+    cmd = run.call_args.args[0]
+    assert "--model" in cmd
+    assert cmd[cmd.index("--model") + 1] == "gpt-5.4-mini"
+
+
+def test_smoke_evals_pass_case_filters_to_skill_runner(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            skip_tessl=True,
+            cases=["doctor-runtime", "budget-limited"],
+        )
+
+    assert result.status == "success"
+    cmd = run.call_args.args[0]
+    assert cmd.count("--case") == 2
+    first = cmd.index("--case")
+    second = cmd.index("--case", first + 1)
+    assert cmd[first + 1] == "doctor-runtime"
+    assert cmd[second + 1] == "budget-limited"
+
+
+def test_smoke_evals_splits_comma_separated_case_filters(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            skip_tessl=True,
+            cases=["doctor-runtime,budget-limited"],
+        )
+
+    assert result.status == "success"
+    cmd = run.call_args.args[0]
+    assert cmd.count("--case") == 2
+    first = cmd.index("--case")
+    second = cmd.index("--case", first + 1)
+    assert cmd[first + 1] == "doctor-runtime"
+    assert cmd[second + 1] == "budget-limited"
+
+
 def test_release_evals_do_not_force_smoke_model(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="release")
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="release", skip_tessl=True)
 
     assert result.status == "success"
     cmd = run.call_args.args[0]
@@ -54,6 +114,7 @@ def test_smoke_evals_can_use_discovery_smoke_without_codex_args(tmp_path: Path) 
             "Plugins/example-skill",
             mode="smoke",
             runner="discovery-smoke",
+            skip_tessl=True,
         )
 
     assert result.status == "success"
@@ -80,12 +141,278 @@ def test_evals_resolve_runtime_projection_to_canonical_source(tmp_path: Path) ->
             mode="smoke",
             runner="discovery-smoke",
             dashboard=False,
+            skip_tessl=True,
         )
 
     assert result.status == "success"
     assert result.data["requested_path"] == ".agents/skills/evals-router"
     assert result.data["resolved_skill_path"] == "Skills/agent-ops/evals-router"
     assert run.call_args.args[0][2] == "Skills/agent-ops/evals-router"
+
+
+def _write_example_skill(tmp_path: Path) -> Path:
+    skill_root = tmp_path / "Skills" / "example-skill"
+    references = skill_root / "references"
+    references.mkdir(parents=True)
+    (skill_root / "SKILL.md").write_text("# Example Skill\n", encoding="utf-8")
+    (references / "evals.yaml").write_text(
+        'cases:\n  - id: smoke-example\n    prompt: "Do the example task."\n',
+        encoding="utf-8",
+    )
+    (references / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
+    (skill_root / "secret-not-staged.txt").write_text("do not copy\n", encoding="utf-8")
+    return skill_root
+
+
+def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    _write_example_skill(tmp_path)
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", return_value=completed) as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            allow_tessl_project_save=False,
+        )
+
+    assert result.status == "success"
+    assert run.call_count == 2
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "pass"
+    assert "ask-tessl-evals" in tessl_eval["staged_source"]
+    assert tessl_eval["policy"]["no_registry_upload"] is True
+    assert tessl_eval["policy"]["network_permission_required_by_repo"] is False
+
+
+def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    skill_root = _write_example_skill(tmp_path)
+
+    def fake_run(cmd: list[str], **kwargs: object) -> mock.Mock:
+        if cmd[1:4] != ["eval", "run", "--json"]:
+            return completed
+
+        staged_source = Path(cmd[4])
+        assert cmd[:4] == ["/usr/local/bin/tessl", "eval", "run", "--json"]
+        assert staged_source != skill_root
+        assert staged_source.exists()
+        assert "ask-tessl-evals" in str(staged_source)
+        assert staged_source.is_relative_to(Path(str(kwargs["cwd"])))
+        assert (staged_source / "SKILL.md").read_text(encoding="utf-8") == "# Example Skill\n"
+        assert (staged_source / "references" / "evals.yaml").exists()
+        assert (staged_source / "references" / "contract.yaml").exists()
+        assert (staged_source / "tessl.json").exists()
+        assert (staged_source / "scenarios" / "smoke-example" / "task.md").exists()
+        assert (
+            staged_source / "scenarios" / "smoke-example" / "task.md"
+        ).read_text(encoding="utf-8") == "Do the example task.\n"
+        assert not (staged_source / "secret-not-staged.txt").exists()
+        return completed
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", side_effect=fake_run) as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            allow_tessl_project_save=True,
+        )
+
+    assert result.status == "success"
+    assert run.call_count == 2
+    tessl_cmd = run.call_args_list[1].args[0]
+    assert tessl_cmd[:4] == ["/usr/local/bin/tessl", "eval", "run", "--json"]
+    assert tessl_cmd[4] != "Skills/example-skill"
+    assert "publish" not in tessl_cmd
+    assert "upload" not in tessl_cmd
+    assert "registry" not in tessl_cmd
+    assert result.data["tessl_eval"]["source_path"] == "Skills/example-skill"
+    assert result.data["tessl_eval"]["staged_files"] == [
+        "SKILL.md",
+        "references/evals.yaml",
+        "references/contract.yaml",
+        "scenarios/smoke-example/task.md",
+        "tessl.json",
+    ]
+    assert result.data["tessl_eval"]["policy"]["no_registry_upload"] is True
+    assert result.data["tessl_eval"]["policy"]["temp_staged_project_input_only"] is True
+    assert result.data["tessl_eval"]["policy"]["network_permission_required_by_repo"] is False
+    assert result.data["tessl_eval"]["policy"]["project_save_default"] == "compatibility_flag_not_required"
+
+
+def test_evals_stage_folded_yaml_prompts_for_tessl(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: folded-prompt\n"
+            "    prompt: >-\n"
+            "      Investigate the target workflow\n"
+            "      and preserve the whole prompt.\n"
+        ),
+        encoding="utf-8",
+    )
+    staged_root = tmp_path / "staged"
+
+    copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
+
+    assert copied == ["scenarios/folded-prompt/task.md"]
+    assert (
+        staged_root / "scenarios" / "folded-prompt" / "task.md"
+    ).read_text(encoding="utf-8") == "Investigate the target workflow and preserve the whole prompt.\n"
+
+
+def test_evals_fallback_parser_preserves_literal_block_relative_indent(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: literal-prompt\n"
+            "    prompt: |\n"
+            "        def example():\n"
+            "            return 1\n"
+            "      done\n"
+        ),
+        encoding="utf-8",
+    )
+    staged_root = tmp_path / "staged"
+
+    copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
+
+    assert copied == ["scenarios/literal-prompt/task.md"]
+    assert (
+        staged_root / "scenarios" / "literal-prompt" / "task.md"
+    ).read_text(encoding="utf-8") == "  def example():\n      return 1\ndone\n"
+
+
+def test_evals_classify_malformed_yaml_as_blocked_validation(tmp_path: Path) -> None:
+    class FakeYAMLError(Exception):
+        pass
+
+    class FakeYaml:
+        YAMLError = FakeYAMLError
+
+        @staticmethod
+        def safe_load(_text: str) -> object:
+            raise FakeYAMLError("bad yaml")
+
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    _write_example_skill(tmp_path)
+
+    with (
+        mock.patch.dict(sys.modules, {"yaml": FakeYaml}),
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", return_value=completed),
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            allow_tessl_project_save=True,
+        )
+
+    tessl_eval = result.data["tessl_eval"]
+    assert result.status == "error"
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_validation"
+    assert "Failed to parse Tessl eval cases" in tessl_eval["blocker"]
+
+
+def test_evals_skip_tessl_escape_hatch(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+        result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke", skip_tessl=True)
+
+    assert result.status == "success"
+    assert run.call_count == 1
+    assert result.data["tessl_eval"]["status"] == "skipped"
+
+
+def test_evals_classify_missing_tessl_cli_as_blocked_runtime(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    _write_example_skill(tmp_path)
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value=None),
+        mock.patch.object(evals.subprocess, "run", return_value=completed),
+    ):
+        result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke")
+
+    assert result.status == "error"
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_runtime"
+    assert result.data["eval_status"] == "blocked_runtime"
+    assert [event["event_type"] for event in result.data["lifecycle_events"]] == [
+        "eval_started",
+        "eval_blocked",
+    ]
+    assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == ["blocked_runtime"]
+
+
+def test_evals_preserve_primary_failure_when_tessl_also_fails(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=1, stdout="primary regression", stderr="assertion failed")
+    _write_example_skill(tmp_path)
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value=None),
+        mock.patch.object(evals.subprocess, "run", return_value=completed),
+    ):
+        result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke")
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "fail"
+    assert result.data["blocker_class"] is None
+    assert result.data["tessl_eval"]["status"] == "blocked"
+    assert result.data["tessl_eval_status"] == "blocked_runtime"
+    assert result.data["tessl_blocker_class"] == "blocked_runtime"
+    assert [event["event_type"] for event in result.data["lifecycle_events"]] == [
+        "eval_started",
+        "eval_completed",
+    ]
+    assert result.data["lifecycle_event"]["outcome"]["status"] == "fail"
+    assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == []
+
+
+def test_evals_classify_missing_tessl_project_link(tmp_path: Path) -> None:
+    completed_eval = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed_tessl = mock.Mock(
+        returncode=1,
+        stdout="",
+        stderr="No existing project safely matches this directory.",
+    )
+    _write_example_skill(tmp_path)
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", side_effect=[completed_eval, completed_tessl]),
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            allow_tessl_project_save=True,
+        )
+
+    assert result.status == "error"
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_validation"
+    assert "project/workspace is linked" in tessl_eval["blocker"]
+    assert "tessl.json" in tessl_eval["staged_files"]
+    assert [event["event_type"] for event in result.data["lifecycle_events"]] == [
+        "eval_started",
+        "eval_blocked",
+    ]
+    assert result.data["lifecycle_event"]["outcome"]["status"] == "blocked_validation"
+    assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == ["blocked_validation"]
 
 
 def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
@@ -129,7 +456,7 @@ def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
     )
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke")
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", skip_tessl=True)
 
     assert result.status == "success"
     assert result.data["dashboard_path"] == "Infrastructure/artifacts/skill-reviews/example-skill-dashboard-smoke.html"
@@ -185,7 +512,7 @@ def test_run_evals_renders_dashboard_for_failed_scorecard(tmp_path: Path) -> Non
     )
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke")
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", skip_tessl=True)
 
     assert result.status == "error"
     assert result.errors[0].code == "ERR_VALIDATION"
@@ -248,7 +575,11 @@ def test_run_evals_reuses_nested_review_report_for_dashboard(tmp_path: Path) -> 
     )
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
-        result = evals.run_evals(tmp_path, "Plugins/harness-engineering/skills/team_automation/he-brainstorm")
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/harness-engineering/skills/team_automation/he-brainstorm",
+            skip_tessl=True,
+        )
 
     assert result.status == "success"
     assert result.data["dashboard_source_report"] == (
@@ -288,7 +619,7 @@ def test_run_evals_dashboard_marks_blocked_runner_environment(tmp_path: Path) ->
     )
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke")
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", skip_tessl=True)
 
     assert result.status == "error"
     html_text = (tmp_path / result.data["dashboard_path"]).read_text(encoding="utf-8")
@@ -305,7 +636,13 @@ def test_run_evals_classifies_auth_blocker_without_scorecard(tmp_path: Path) -> 
     )
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False)
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            dashboard=False,
+            skip_tessl=True,
+        )
 
     assert result.status == "error"
     assert result.data["eval_status"] == "blocked_auth"
@@ -321,7 +658,13 @@ def test_run_evals_classifies_user_input_blocker_without_scorecard(tmp_path: Pat
     )
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False)
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            dashboard=False,
+            skip_tessl=True,
+        )
 
     assert result.status == "error"
     assert result.data["eval_status"] == "blocked_user_input"
@@ -355,6 +698,7 @@ def test_run_evals_classifies_discovery_smoke_filter_blocker(tmp_path: Path) -> 
             mode="smoke",
             runner="discovery-smoke",
             dashboard=False,
+            skip_tessl=True,
         )
 
     assert result.status == "error"
@@ -384,6 +728,7 @@ def test_run_evals_stores_repo_relative_raw_output(tmp_path: Path) -> None:
             mode="smoke",
             runner="discovery-smoke",
             dashboard=False,
+            skip_tessl=True,
         )
 
     assert result.status == "success"
@@ -401,7 +746,13 @@ def test_run_evals_classifies_timeout_without_output(tmp_path: Path) -> None:
     )
 
     with mock.patch.object(evals.subprocess, "run", side_effect=timeout):
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False)
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            dashboard=False,
+            skip_tessl=True,
+        )
 
     assert result.status == "error"
     assert result.data["eval_status"] == "timeout_no_output"
@@ -417,7 +768,13 @@ def test_run_evals_classifies_timeout_output_shape(tmp_path: Path) -> None:
     )
 
     with mock.patch.object(evals.subprocess, "run", side_effect=timeout):
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False)
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            dashboard=False,
+            skip_tessl=True,
+        )
 
     assert result.status == "error"
     assert result.data["eval_status"] == "timeout_partial_output"
@@ -428,7 +785,13 @@ def test_run_evals_can_skip_dashboard(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="Skill evals: example-skill\n", stderr="")
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
-        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", dashboard=False)
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            dashboard=False,
+            skip_tessl=True,
+        )
 
     assert result.status == "success"
     assert "dashboard_path" not in result.data

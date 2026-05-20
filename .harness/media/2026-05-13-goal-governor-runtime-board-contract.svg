@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="1152" viewBox="0 0 2048 1152" role="img" aria-labelledby="title desc">
+  <title id="title">From Goal Board Drift to Runtime-Reconciled Goal Governance</title>
+  <desc id="desc">Fallback technical infographic for the goal-governor review, showing drift risks, reconciliation, validation evidence, and residual blocked checks.</desc>
+  <rect width="2048" height="1152" fill="#f7f8f6"/>
+  <text x="96" y="108" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="#20262d">From Goal Board Drift -&gt; Runtime-Reconciled Goal Governance</text>
+  <text x="96" y="162" font-family="Arial, sans-serif" font-size="26" fill="#4a5561">goal-governor skill hardening review artifact</text>
+  <g font-family="Arial, sans-serif">
+    <rect x="96" y="240" width="520" height="600" rx="10" fill="#ffffff" stroke="#c8ced6"/>
+    <text x="132" y="300" font-size="34" font-weight="700" fill="#9a3412">Before: Drift Risks</text>
+    <text x="132" y="370" font-size="25" fill="#27313a">Native goal status</text>
+    <text x="132" y="418" font-size="25" fill="#27313a">Repo board state</text>
+    <text x="132" y="466" font-size="25" fill="#27313a">Receipts and verifier freshness</text>
+    <text x="132" y="548" font-size="23" fill="#5b6570">Risk: continuation can look valid</text>
+    <text x="132" y="584" font-size="23" fill="#5b6570">while runtime and board evidence</text>
+    <text x="132" y="620" font-size="23" fill="#5b6570">quietly diverge.</text>
+    <rect x="764" y="240" width="520" height="600" rx="10" fill="#ffffff" stroke="#c8ced6"/>
+    <text x="800" y="300" font-size="34" font-weight="700" fill="#0f766e">Governor Reconciliation</text>
+    <text x="800" y="370" font-size="25" fill="#27313a">goal_id + objective</text>
+    <text x="800" y="418" font-size="25" fill="#27313a">budget_limited status</text>
+    <text x="800" y="466" font-size="25" fill="#27313a">created_at / updated_at</text>
+    <text x="800" y="514" font-size="25" fill="#27313a">state.yaml + receipts.jsonl</text>
+    <text x="800" y="562" font-size="25" fill="#27313a">Judge or PM completion audit</text>
+    <rect x="1432" y="240" width="520" height="600" rx="10" fill="#ffffff" stroke="#c8ced6"/>
+    <text x="1468" y="300" font-size="34" font-weight="700" fill="#1d4ed8">After: Validated Package</text>
+    <text x="1468" y="370" font-size="25" fill="#27313a">strict audit: pass</text>
+    <text x="1468" y="418" font-size="25" fill="#27313a">skill gate: pass</text>
+    <text x="1468" y="466" font-size="25" fill="#27313a">OpenAI format: pass</text>
+    <text x="1468" y="514" font-size="25" fill="#27313a">boundary check: pass</text>
+    <text x="1468" y="562" font-size="25" fill="#27313a">deterministic tests: pass</text>
+  <text x="1468" y="610" font-size="25" fill="#9a3412">smoke eval: fail</text>
+    <text x="1468" y="658" font-size="25" fill="#9a3412">Plugin Eval: residual cost risk</text>
+  </g>
+  <rect x="96" y="916" width="1856" height="116" rx="10" fill="#20262d"/>
+  <text x="132" y="976" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">Evidence strip</text>
+  <text x="132" y="1018" font-family="Arial, sans-serif" font-size="24" fill="#d9f99d">pass: tests, strict audit, skill gate, OpenAI format, boundaries</text>
+  <text x="1020" y="1018" font-family="Arial, sans-serif" font-size="24" fill="#fed7aa">fail/residual: smoke eval, image generation, Plugin Eval cost</text>
+</svg>

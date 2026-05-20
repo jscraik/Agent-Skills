@@ -46,4 +46,3 @@ Why this matters: completion claims need pass, fail, or blocked evidence rather 
 Does this capture the target, boundary, and proof well enough for me to proceed?
 
 Anything to add or change before implementation?
-

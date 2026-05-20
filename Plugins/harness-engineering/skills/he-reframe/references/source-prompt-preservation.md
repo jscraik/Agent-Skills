@@ -25,6 +25,20 @@ these lane boundaries:
 | Architectural Decision Compression | Generate compact ADR candidates only when a selected migration needs durable architectural memory. Return `Do Not Create` for tactical, reversible, or low-impact decisions. |
 | Core Knowledge Compression & Architectural Invariants | Generate compact invariant candidates only when a selected migration needs durable future-agent operating rules. Exclude tactical detail, onboarding prose, and generic principles. |
 
+## Coverage Matrix
+
+| Source prompt family | Owned mode or boundary | Required enforcement surfaces |
+| --- | --- | --- |
+| Strategic Compression & Direction | Handoff boundary only | `architecture-evolution-compression.md` lane routing; `contract.yaml` forbidden strategy root; `strategic-direction-prompt-boundary` eval |
+| Reframe Program Generation & Architectural Migration | Primary owned lane | `reframe-program-contract.md`; `.harness/reframes` output contract in `contract.yaml`; `migration-program`, `phase-safety`, and `reframe-source-prompt-preservation` evals |
+| Architectural Decision Compression | Optional migration-owned ADR candidate lane | ADR gate and record contract in `architecture-evolution-compression.md`; `.harness/decisions` output contract in `contract.yaml`; `adr-compression-high-value-only` and `adr-compression-record-contract` evals |
+| Core Knowledge Compression & Architectural Invariants | Optional migration-owned core candidate lane | core invariant gate and record contract in `architecture-evolution-compression.md`; `.harness/core` output contract in `contract.yaml`; `core-invariant-compression` and `core-cognition-layer-contract` evals |
+| Linear Execution Orchestration | Handoff boundary only | Linear handoff contract in `architecture-evolution-compression.md`; `linear-execution-handoff-boundary` eval |
+
+If a prompt family is named here without a matching lane contract, output
+contract entry, and eval, classify `he-reframe` as underspecified before
+claiming source-prompt equivalence.
+
 ## Preserved Reframe Requirements
 
 - read `.harness/features`, `.harness/review`, `.harness/triage`,

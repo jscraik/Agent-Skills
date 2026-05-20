@@ -58,15 +58,16 @@ Examples:
 Prefer the live skill router and catalog over memory or guesses:
 
 ```text
-./bin/ask skills route --json --top-k 5 --considered-limit 20 "<domain-specific intent>"
-./bin/ask skills goal --json --top-k 5 --considered-limit 20 "<domain-specific intent>"
-./bin/ask skills resolve <candidate-handle> --json
-./bin/ask skills explain <candidate-handle> --json
+<agent-skills-root>/bin/ask skills route --json --top-k 5 --considered-limit 20 "<domain-specific intent>"
+<agent-skills-root>/bin/ask skills goal --json --top-k 5 --considered-limit 20 "<domain-specific intent>"
+<agent-skills-root>/bin/ask skills resolve <candidate-handle> --json
+<agent-skills-root>/bin/ask skills explain <candidate-handle> --json
 ```
 
 Use `route` or `goal` when the domain is known but the handle is unknown. Use
 `resolve` when a likely handle is known. Use `explain` or `resolve` to verify the
-final selected handle before loading the specialist.
+final selected handle before loading the specialist. Use `./bin/ask ...` only
+when the active workspace is the Agent Skills Kit root.
 
 Routing output is advisory evidence, not authority. The selected specialist must
 still match the proven domain, the stage need, and the approved scope. If routing
@@ -81,9 +82,10 @@ If router output contains low-confidence or unrelated candidates, discard them
 explicitly. Do not accept a candidate only because it appeared in
 `selected_candidates`.
 
-Use `./bin/ask skills list --json` only as a bounded inventory fallback when
-route/goal cannot identify a candidate; filter locally by a narrow domain word or
-category and do not dump the entire skill tree into context.
+Use `<agent-skills-root>/bin/ask skills list --json` only as a bounded
+inventory fallback when route/goal cannot identify a candidate; filter locally
+by a narrow domain word or category and do not dump the entire skill tree into
+context.
 
 Select at most:
 

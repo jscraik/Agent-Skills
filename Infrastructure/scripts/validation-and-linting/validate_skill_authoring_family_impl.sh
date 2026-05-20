@@ -50,8 +50,8 @@ changed_files_match() {
 
 # Run repo preflight before any path-sensitive operations
 preflight_mode="${SKILL_FAMILY_LOCAL_MEMORY_MODE:-optional}"
-if [[ "$preflight_mode" != "required" && "$preflight_mode" != "optional" ]]; then
-  echo "[family-gate] ERROR: SKILL_FAMILY_LOCAL_MEMORY_MODE must be 'required' or 'optional' (got '$preflight_mode')"
+if [[ "$preflight_mode" != "required" && "$preflight_mode" != "optional" && "$preflight_mode" != "off" ]]; then
+  echo "[family-gate] ERROR: SKILL_FAMILY_LOCAL_MEMORY_MODE must be 'required', 'optional', or 'off' (got '$preflight_mode')"
   exit 1
 fi
 

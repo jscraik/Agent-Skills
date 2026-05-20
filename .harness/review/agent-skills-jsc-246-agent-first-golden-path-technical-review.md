@@ -208,7 +208,7 @@ control plane must not claim.
 
 ### Finding 4: Artifact Naming Rule Prevents Duplicate Active Specs
 
-Severity: Medium  
+Severity: Medium
 Status: Fixed in spec
 
 The spec now explains why it keeps the existing stable path rather than creating

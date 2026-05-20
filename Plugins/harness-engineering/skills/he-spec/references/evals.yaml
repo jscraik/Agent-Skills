@@ -20,6 +20,27 @@ cases:
     prompt: "Validate JSC-246 against `.harness/brainstorm/account-settings.md` and the approved Linear parent, then build an evidence-backed implementation spec with `SA` acceptance criteria."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: product-framing-user-stories-decisions
+    name: "Product framing, user stories, and decisions"
+    category: happy
+    eval_modes: *modes
+    realistic: true
+    why_realistic: "Matches product-spec requests where Jamie supplies an explicit problem/solution/story/decision/testing shape and expects HE to preserve user-facing intent while keeping execution details out of the spec."
+    expected_behavior: "Produce or route a reader-first spec that keeps problem and solution in the user's perspective, preserves extensive user stories, separates stated and implied intent, records durable implementation decisions, and hands execution/test details to he-plan."
+    anti_overfit_notes: "Do not pass by mentioning the headings only; the response must preserve perspective, trace implied intent to evidence, and avoid binding unapproved assumptions."
+    should_trigger: true
+    prepend_skill: false
+    prompt: "For Linear JSC-312, inspect .harness/brainstorm/account-insights-requirements.md, .harness/review/account-insights-qa.md, and Docs/specs/2026-05-06-feat-agent-first-golden-path-product-compression-spec.md as prior-art shape, then turn the approved account-insights intent into a spec that preserves: Problem Statement from the customer's perspective, Solution from the customer's perspective, a long numbered User Stories list in 'As a <role>, I want <capability>, so that <outcome>' format, Implementation Decisions without brittle file paths or code snippets unless a prototype state shape is decision-rich, and Testing Decisions that prioritize external behavior over implementation details and cite prior-art test families."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)Problem Statement.*(customer|user|operator)"}
+      - {type: regex, value: "(?is)(User-Facing Solution|Proposed Behavior.*(customer|user|operator))"}
+      - {type: regex, value: "(?is)User Stories"}
+      - {type: regex, value: "(?is)As a[^\n]+I want[^\n]+so that"}
+      - {type: regex, value: "(?is)(stated intent|implied intent|inferred|assumption)"}
+      - {type: regex, value: "(?is)(Implementation Notes|Implementation Decisions).*(interface|schema|state|architecture|interaction|prototype)"}
+      - {type: regex, value: "(?is)(Testing Decisions|Validation Plan).*(external behavior|observable behavior|prior.?art|acceptance)"}
+      - {type: regex, value: "(?is)he-plan"}
   - id: unclear-user-intent
     name: "Unclear user intent"
     category: edge
@@ -30,6 +51,19 @@ cases:
     prompt: "Inspect JSC-246 account settings where the source says settings must be visible but not whether edit permissions are admin-only; ask one high-signal question and include the literal interactive steering markers."
     deterministic_checks: *safe
     acceptance: *steer
+  - id: inferred-intent-request-user-input
+    name: "Inferred intent uses request_user_input"
+    category: edge
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Build the JSC-312 account-insights spec after inspecting source evidence. The source implies but does not approve whether spending recommendations are read-only insights or automated account actions. If request_user_input is available, ask once before making implied intent binding; otherwise keep it as an assumption and block mutation."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(request_user_input|ask once|interactive_status)"}
+      - {type: regex, value: "(?is)(inferred|implied intent|assumption)"}
+      - {type: regex, value: "(?is)(binding requirement|FR-|SA-|blocked|not start implementation)"}
   - id: already-implementation
     name: "Already implementation"
     category: negative

@@ -746,8 +746,9 @@ Routers may be generated per skill set or implemented as one shared script:
 
 ```bash
 printf '%s\n' "verify this implementation is complete" | \
-  python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py \
+  python3 <agent-skills-root>/Infrastructure/scripts/lifecycle-and-sync/route_skillset.py \
   --skill-set agent-ops \
+  --skillsets-dir <agent-skills-root>/.skillsets \
   --task-stdin \
   --top-k 3 \
   --json

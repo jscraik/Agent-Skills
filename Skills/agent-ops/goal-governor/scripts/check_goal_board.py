@@ -19,9 +19,36 @@ ALLOWED_ROOT = {"goal.md", "state.yaml", "receipts.jsonl", "notes"}
 TASK_TYPES = {"scout", "judge", "worker", "pm"}
 ASSIGNEES = {"Scout", "Judge", "Worker", "PM"}
 STATUSES = {"queued", "active", "blocked", "done"}
-NATIVE_STATUSES = {"active", "paused", "budgetLimited", "budget_limited", "complete", None}
+NATIVE_STATUSES = {
+    "active",
+    "paused",
+    "blocked",
+    "usageLimited",
+    "usage_limited",
+    "budgetLimited",
+    "budget_limited",
+    "complete",
+    None,
+}
+CONTINUATION_NATIVE_STATUSES = {
+    "active",
+    "paused",
+    "budgetLimited",
+    "budget_limited",
+    "usageLimited",
+    "usage_limited",
+    "complete",
+    "unknown",
+    "blocked",
+}
+GATE_STATUS = {"pass", "blocked", "unknown"}
+QUEUE_STATUS = {"absent", "present", "unknown"}
+AUTO_CONTINUE_STATUS = {"yes", "no", "unknown"}
+CLAIM_ROUTES = {"reproduced", "approximate", "proxy", "blocked"}
+CLAIM_STATUSES = {"confirmed", "supported", "approximate", "blocked", "uncertain"}
 MAX_NATIVE_OBJECTIVE_CHARS = 4_000
 TASK_ID = re.compile(r"^T\d{3}$")
+CLAIM_ID = re.compile(r"^C\d{3}$")
 NATIVE_GOAL_ID = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
@@ -276,7 +303,10 @@ def validate_goal_section(state: dict[str, Any]) -> tuple[list[str], str | None]
 
     native_status = goal.get("native_status")
     if native_status not in NATIVE_STATUSES:
-        errors.append("goal.native_status must be active, paused, budgetLimited, budget_limited, or complete")
+        errors.append(
+            "goal.native_status must be active, paused, blocked, usageLimited, "
+            "usage_limited, budgetLimited, budget_limited, or complete"
+        )
 
     native_goal_id = goal.get("native_goal_id")
     if native_goal_id is not None:
@@ -298,6 +328,88 @@ def validate_goal_section(state: dict[str, Any]) -> tuple[list[str], str | None]
             errors.append(f"goal.{field} must be a non-empty string when present")
 
     return errors, str(goal_status) if isinstance(goal_status, str) else None
+
+
+def require_non_empty_string(mapping: dict[str, Any], field: str, label: str, errors: list[str]) -> None:
+    value = mapping.get(field)
+    if not isinstance(value, str) or not value.strip():
+        errors.append(f"{label}.{field} must be a non-empty string")
+
+
+def require_non_empty_string_list(mapping: dict[str, Any], field: str, label: str, errors: list[str]) -> None:
+    values = mapping.get(field)
+    if not isinstance(values, list) or not values or not all(isinstance(item, str) and item.strip() for item in values):
+        errors.append(f"{label}.{field} must be a non-empty list of strings")
+
+
+def validate_completion_contract(state: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    contract = state.get("completion_contract")
+    if not isinstance(contract, dict):
+        return ["completion_contract must be a mapping"]
+
+    require_non_empty_string(contract, "outcome", "completion_contract", errors)
+    require_non_empty_string_list(contract, "verification_surface", "completion_contract", errors)
+    require_non_empty_string_list(contract, "constraints", "completion_contract", errors)
+    require_non_empty_string_list(contract, "boundaries", "completion_contract", errors)
+    require_non_empty_string(contract, "iteration_policy", "completion_contract", errors)
+    require_non_empty_string(contract, "blocked_stop_condition", "completion_contract", errors)
+    return errors
+
+
+def validate_continuation_gate(state: dict[str, Any]) -> list[str]:
+    gate = state.get("continuation_gate")
+    if gate is None:
+        return []
+    if not isinstance(gate, dict):
+        return ["continuation_gate must be a mapping when present"]
+
+    errors: list[str] = []
+    if gate.get("native_status") not in CONTINUATION_NATIVE_STATUSES:
+        errors.append(
+            "continuation_gate.native_status must be active, paused, budgetLimited, "
+            "budget_limited, usageLimited, usage_limited, complete, unknown, or blocked"
+        )
+    for field in ("thread_idle", "goal_active"):
+        if gate.get(field) not in GATE_STATUS:
+            errors.append(f"continuation_gate.{field} must be pass, blocked, or unknown")
+    for field in ("queued_user_input", "pending_work"):
+        if gate.get(field) not in QUEUE_STATUS:
+            errors.append(f"continuation_gate.{field} must be absent, present, or unknown")
+    if gate.get("auto_continue_allowed") not in AUTO_CONTINUE_STATUS:
+        errors.append("continuation_gate.auto_continue_allowed must be yes, no, or unknown")
+    return errors
+
+
+def validate_claims(state: dict[str, Any]) -> list[str]:
+    claims = state.get("claims")
+    if claims is None:
+        return []
+    if not isinstance(claims, list):
+        return ["claims must be a list when present"]
+
+    errors: list[str] = []
+    seen_ids: set[str] = set()
+    for index, claim in enumerate(claims, start=1):
+        if not isinstance(claim, dict):
+            errors.append(f"claim {index} must be a mapping")
+            continue
+        claim_id = claim.get("id")
+        label = claim_id if isinstance(claim_id, str) else f"claim {index}"
+        if not isinstance(claim_id, str) or not CLAIM_ID.match(claim_id):
+            errors.append(f"claim {index} has invalid id")
+        elif claim_id in seen_ids:
+            errors.append(f"duplicate claim id {claim_id}")
+        else:
+            seen_ids.add(claim_id)
+        require_non_empty_string(claim, "claim", label, errors)
+        require_non_empty_string_list(claim, "evidence_surface", label, errors)
+        if claim.get("route") not in CLAIM_ROUTES:
+            errors.append(f"{label}.route must be reproduced, approximate, proxy, or blocked")
+        if claim.get("status") not in CLAIM_STATUSES:
+            errors.append(f"{label}.status must be confirmed, supported, approximate, blocked, or uncertain")
+        require_non_empty_string_list(claim, "remaining_uncertainty", label, errors)
+    return errors
 
 
 def validate_task(
@@ -402,6 +514,9 @@ def validate_board(goal_dir: Path) -> list[str]:
 
     goal_errors, goal_status = validate_goal_section(state)
     errors.extend(goal_errors)
+    errors.extend(validate_completion_contract(state))
+    errors.extend(validate_continuation_gate(state))
+    errors.extend(validate_claims(state))
 
     rules = state.get("rules")
     if not isinstance(rules, dict):

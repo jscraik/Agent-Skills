@@ -92,6 +92,7 @@ PLUGIN_VISIBLE_ROUTER_SKILL_NAMES: tuple[str, ...] = ()
 
 # Plugin lane skills hidden from default flat discovery.
 PLUGIN_HIDDEN_LANE_SKILL_NAMES: tuple[str, ...] = (
+    "he-goal-governor-archive",
     "he-phase-heartbeat",
 )
 

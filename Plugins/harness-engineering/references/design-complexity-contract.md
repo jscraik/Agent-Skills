@@ -45,7 +45,7 @@ domain_language:
   canonical_terms: []
   avoided_aliases: []
   unresolved_terms: []
-  context_file: CONTEXT.md|CONTEXT-MAP.md|domain-context-contract.md|not_applicable
+  language_file: UBIQUITOUS.md|UBIQUITOUS-MAP.md|legacy_CONTEXT.md|domain-context-contract.md|not_applicable
 context_map:
   source_of_truth: user_request|linear|spec|plan|worktree|pr|validation|project_brain|heartbeat|goal|session_evidence|not_applicable
   translated_from: []

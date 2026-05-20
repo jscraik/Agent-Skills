@@ -71,8 +71,31 @@ Normative language:
 
 Scenario and conformance requirements:
 
+- `Problem Statement` must describe the problem from the user, operator, or
+  affected stakeholder perspective. Avoid restating the implementation task as
+  the problem.
+- `Proposed Behavior` must include the user-facing solution before internal
+  mechanics. Use a `User-Facing Solution` subsection when the source material
+  provides a separate `Solution` statement.
 - `User / Operator Scenarios` must describe independently testable journeys,
   ordered by priority when there is more than one user-visible path.
+- When source material asks for user stories, preserve them as a numbered
+  `User Stories` subsection using `As a <role>, I want <capability>, so that
+  <outcome>`. Keep the list extensive enough to cover the feature surface, but
+  do not invent unapproved actors, capabilities, or outcomes. Map story groups
+  to `FR-*` and `SA-*` IDs rather than leaving the stories as untraceable
+  prose.
+- Treat `extensive` user stories as coverage, not volume theater. Cover the
+  relevant actor roles, happy paths, alternate paths, permissions, data states,
+  failure/recovery behavior, accessibility/operator ergonomics, and
+  observability/admin workflows when those dimensions apply. If source evidence
+  does not support one of those dimensions, mark it out of scope or as a needed
+  clarification instead of inventing it.
+- Preserve stated intent and implied intent separately. Stated intent comes from
+  the user's words, approved tracker text, or approved source artifact. Implied
+  intent may be included only when it follows from source evidence; label it as
+  inferred or assumption, tie it to the evidence that implies it, and keep it out
+  of binding `FR-*` or `SA-*` IDs until approved.
 - Data formats, ledgers, manifests, APIs, CLIs, protocols, or generated files
   must include a conformance contract: required fields, optional fields, enum
   values, unknown-field behavior, compatibility/versioning behavior, and error
@@ -103,6 +126,36 @@ Visual reference requirements:
   `Plugins/harness-engineering/references/visual-reference-contract.md`.
 
 Status metadata: every tracked spec output must expose `linear_mutation_status` as `not_needed`, `confirmation_required`, `blocked`, `created`, `updated`, or `deferred_to_he-linear-plan`. If live Linear tracking is missing, include `linear_action_required` with target project, issue type, proposed title, ready-to-create/update payload, required confirmation, and blocker. A local `.harness` artifact is not proof that live Linear state exists.
+
+## Decision Placement
+
+`Implementation Notes` is the spec home for durable implementation decisions
+that affect behavior, interfaces, schema, state, compatibility, architecture, or
+specific interactions. Do not put fragile file paths, task order, helper names,
+or code snippets here unless a prototype produced a compact decision artifact
+that is more precise than prose, such as a state machine, reducer shape, schema,
+or type shape. Trim prototype snippets to the decision-rich part and label them
+as prototype-derived.
+
+When the source provides an `Implementation Decisions` list, preserve the
+decision intent but normalize it into durable decision categories:
+modules/surfaces affected, interfaces/contracts, schema/domain changes,
+technical clarifications, architecture decisions, interaction rules, and
+prototype-derived decision snippets. Mark implementation-time discoveries as
+unknowns instead of making them binding spec facts.
+
+`Validation Plan` is the spec home for testing decisions that define confidence:
+external behavior to verify, acceptance evidence, module or surface categories,
+test quality rules, and relevant prior-art test families. Prefer statements like
+"test externally observable behavior, not implementation detail" over brittle
+assertions about private helpers. Concrete test file paths, exact command
+sequencing, and implementation-time prior-art lookups belong in `he-plan`.
+
+When the source provides a `Testing Decisions` list, preserve what makes a good
+test, which modules or surfaces need evidence, and prior-art test families to
+inspect. Keep assertions tied to external behavior and acceptance IDs. If
+coverage depends on implementation discovery, mark the exact discovery as a
+`he-plan` handoff.
 
 ## BLUF Review Surface
 

@@ -7,7 +7,7 @@ Use this reference when a user reports bugs, starts a QA session, wants conversa
 1. Listen to the report in the user's words.
 2. Ask at most 2-3 short clarifying questions focused only on expected behavior, actual behavior, reproduction steps, and whether the failure is consistent or intermittent.
 3. Explore the repo lightly for domain language and behavior boundaries. The goal is context for durable issue wording, not a fix.
-4. Read `CONTEXT-MAP.md` or `CONTEXT.md` when project terms shape the report, and prefer canonical terms in the Linear issue.
+4. Read `UBIQUITOUS-MAP.md` or `UBIQUITOUS.md` when project terms shape the report; read legacy `CONTEXT-MAP.md` or `CONTEXT.md` only as compatibility evidence, and prefer canonical terms in the Linear issue.
 5. Decide whether the report is one Linear issue or several thin issues.
 6. File Linear issue(s) in dependency order. If Linear creation is blocked, stop with `linear_status: linear_blocked`, exact missing fields, and the ready-to-create issue payload; do not treat the payload as equivalent to a filed issue.
 7. Ask: "Next issue, or are we done?"

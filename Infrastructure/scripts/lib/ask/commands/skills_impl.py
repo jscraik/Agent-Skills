@@ -644,12 +644,26 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
         readme_content = readme_path.read_text(encoding="utf-8")
         command_surface_path = repo_root / ".skillsets" / "command-surface.json"
         command_handle_count: int | None = None
+        command_surface_owner_counts: dict[str, int] = {}
         if command_surface_path.exists():
             try:
                 command_surface = json.loads(command_surface_path.read_text(encoding="utf-8"))
                 handles = command_surface.get("handles")
                 if isinstance(handles, list):
                     command_handle_count = len(handles)
+                    for handle in handles:
+                        if not isinstance(handle, dict):
+                            continue
+                        owner = handle.get("owner")
+                        source_path = handle.get("source_path")
+                        if (
+                            isinstance(owner, str)
+                            and isinstance(source_path, str)
+                            and source_path.startswith("Skills/")
+                        ):
+                            command_surface_owner_counts[owner] = (
+                                command_surface_owner_counts.get(owner, 0) + 1
+                            )
             except (OSError, json.JSONDecodeError):
                 command_handle_count = None
 
@@ -720,24 +734,40 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
                 "product-strategy",
                 "security-ops",
             )
+            source_counts = command_surface_owner_counts or manifest_counts
             cluster_counts = {
-                name: count
-                for name, count in manifest_counts.items()
-                if name in preferred_order
+                name: count for name, count in source_counts.items() if name in preferred_order
             }
             if cluster_counts:
+                first_party_handle_count = sum(cluster_counts.values())
                 cluster_summary = ", ".join(
                     f"{name}: {cluster_counts[name]}"
                     for name in preferred_order
                     if name in cluster_counts
                 )
                 updated_readme = re.sub(
-                    r"source across \d+ topic clusters \([^)]*\)",
-                    f"source across {len(cluster_counts)} topic clusters ({cluster_summary})",
+                    r"(?:including \*\*\d+ first-party handles\*\* backed by canonical skill source|backed by first-party canonical skill\s+source) across \d+ topic clusters \([^)]*\)",
+                    (
+                        f"including **{first_party_handle_count} first-party handles** backed by canonical "
+                        f"skill source across {len(cluster_counts)} topic clusters ({cluster_summary})"
+                    ),
                     updated_readme,
                     count=1,
                     flags=re.DOTALL,
                 )
+                for name, count in cluster_counts.items():
+                    updated_readme = re.sub(
+                        rf"(\| {re.escape(name)}\s+\|)\s*\d+(\s+\|)",
+                        lambda match, count=count: f"{match.group(1)} {count}{match.group(2)}",
+                        updated_readme,
+                        count=1,
+                    )
+                    updated_readme = re.sub(
+                        rf"(\|\s+\|-- {re.escape(name)}/\s+#\s*)\d+(\s+skills?:)",
+                        lambda match, count=count: f"{match.group(1)}{count}{match.group(2)}",
+                        updated_readme,
+                        count=1,
+                    )
         updated_readme = re.sub(
             r"currently expects \*\*\d+\*\* skills",
             f"currently expects **{catalog_count}** skills",
@@ -4046,7 +4076,7 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
         repo_root (Path): Repository root used to load builder modules and the skill catalog.
         source (str): Name or trailing path segment identifying the source skill to evaluate.
         target (str): Name or trailing path segment identifying the target skill to compare against.
-        sensitivity (float): Confidence threshold in the range 0–1 above which overlap is considered high (default 0.2).
+        sensitivity (float): Confidence threshold in the range 0-1 above which overlap is considered high (default 0.2).
 
     Returns:
         CallResult: Result object containing:

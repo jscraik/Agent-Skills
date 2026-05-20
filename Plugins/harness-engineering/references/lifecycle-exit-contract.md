@@ -16,8 +16,8 @@ Folded stages are modes, not the default route:
 - `he-tdd` -> `he-work`
 - `he-refine` -> `he-improve`
 - `he-technical-review`, `he-reliability-review` -> `he-code-review`
-- `he-compound` state refresh -> `he-reconcile`
-- `he-compound-refresh` or solved-problem compound -> `he-reinforce`
+- lifecycle state refresh -> `he-reconcile`
+- old compound-learning, `he-compound`, or `he-compound-refresh` solved-problem capture -> `he-reinforce`
 
 ## Durable Artifact Routing
 
@@ -63,7 +63,7 @@ domain_language:
   canonical_terms: []
   avoided_aliases: []
   unresolved_terms: []
-  context_file: CONTEXT.md|CONTEXT-MAP.md|domain-context-contract.md|not_applicable
+  language_file: UBIQUITOUS.md|UBIQUITOUS-MAP.md|legacy_CONTEXT.md|domain-context-contract.md|not_applicable
   context_map:
     source_of_truth: user_request|linear|spec|plan|worktree|pr|validation|project_brain|heartbeat|goal|session_evidence|not_applicable
   translated_from: []
