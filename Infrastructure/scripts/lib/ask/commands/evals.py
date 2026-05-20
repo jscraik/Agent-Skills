@@ -185,6 +185,7 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
             "status": "blocked",
             "command": command_display,
             "blocker": "Installed native tessl CLI was not found on PATH.",
+            "blocker_class": "blocked_runtime",
             "policy": _tessl_policy(),
         }
 
