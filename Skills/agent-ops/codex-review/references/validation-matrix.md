@@ -33,6 +33,7 @@ For portability edits, add fixtures that prove:
 Run:
 
 ```bash
+vale Skills/agent-ops/codex-review/SKILL.md Skills/agent-ops/codex-review/references/*.md
 ./bin/ask skills audit Skills/agent-ops/codex-review --level strict --json --robot
 ./bin/ask evals run Skills/agent-ops/codex-review --mode smoke --runner discovery-smoke --skip-tessl --json --robot --no-dashboard
 python3 Infrastructure/bin/ask skills external-review Skills/agent-ops/codex-review --audit-level compat --json

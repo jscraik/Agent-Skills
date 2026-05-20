@@ -109,9 +109,22 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-case "$yolo" in
-  0|false|False|FALSE|no|No|NO|off|Off|OFF) ;;
+trimmed_yolo="${yolo#"${yolo%%[![:space:]]*}"}"
+trimmed_yolo="${trimmed_yolo%"${trimmed_yolo##*[![:space:]]}"}"
+yolo_enabled=false
+case "$trimmed_yolo" in
+  ""|0|false|False|FALSE|no|No|NO|off|Off|OFF)
+    ;;
+  1|true|True|TRUE|yes|Yes|YES|on|On|ON)
+    yolo_enabled=true
+    ;;
   *)
+    echo "invalid CODEX_REVIEW_YOLO: $yolo (expected 1/0, true/false, yes/no, or on/off)" >&2
+    exit 2
+    ;;
+esac
+
+if [[ "$yolo_enabled" == true ]]; then
     # Build sensitive codex flag char-by-char to avoid grep exposure.
     # See --full-access help text for semantics.
     full_access_flag=
@@ -120,8 +133,7 @@ case "$yolo" in
       full_access_flag+="$full_access_char"
     done
     codex_args+=("$full_access_flag")
-    ;;
-esac
+fi
 
 if [[ "$runtime_skills_dir_enabled" == true && -n "$runtime_skills_dir" && -e "$runtime_skills_dir" ]]; then
   codex_global_args+=(--add-dir "$runtime_skills_dir")

@@ -10,7 +10,7 @@ cases:
     prepend_skill: true
     realistic: true
     why_realistic: "A user has named the architecture skill and asks Codex to inspect a concrete local source path before making structural changes, which is the normal first-turn discovery shape."
-    prompt: "Use $improve-codebase-architecture to inspect /Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture before changing interfaces; ask the smallest useful discovery question first."
+    prompt: "Use $improve-codebase-architecture to inspect Skills/agent-ops/improve-codebase-architecture before changing interfaces; ask the smallest useful discovery question first."
     acceptance:
       - {type: skill_selected, expected_skill: improve-codebase-architecture}
       - {type: regex, value: "(?i)(What should this skill help you do|Why this matters|Round 1 question|missing target|blocked)"}
@@ -53,7 +53,7 @@ cases:
     prepend_skill: false
     realistic: true
     why_realistic: "Users often ask for architecture improvement after seeing friction, but omit the exact owner path even when the repo has multiple plausible architecture surfaces."
-    prompt: "Diagnose /Users/jamiecraik/dev/agent-skills after the last workspace sync touched .agents/skills, SKILL.md, README.md, and Plugins/cache. The routing and projection architecture feels tangled, but I have not said whether the pressure is in Skills/, Plugins/, or Infrastructure/."
+    prompt: "Diagnose this repository after the last workspace sync touched .agents/skills, SKILL.md, README.md, and Plugins/cache. The routing and projection architecture feels tangled, but I have not said whether the pressure is in Skills/, Plugins/, or Infrastructure/."
     expected_behavior: "Select the skill and ask for the smallest missing target or state a bounded assumption if safe."
     anti_overfit_notes: "Do not fabricate a target path or architecture problem."
     acceptance:
