@@ -4106,8 +4106,8 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
     return result
 
 
-def _scope_rank_for_path(skill_path: str) -> int:
-    scope = classify_skill_scope(REPO_ROOT / skill_path)
+def _scope_rank_for_path(repo_root: Path, skill_path: str) -> int:
+    scope = classify_skill_scope(repo_root / skill_path)
     scope_precedence = USER_SKILL_SCOPE_PRECEDENCE.get(scope)
     if scope_precedence is not None:
         max_precedence = max(USER_SKILL_SCOPE_PRECEDENCE.values())
@@ -4172,7 +4172,7 @@ def route_skills(
             name=entry.name,
             path=rel_path,
             description=entry.description,
-            scope_rank=_scope_rank_for_path(rel_path),
+            scope_rank=_scope_rank_for_path(repo_root, rel_path),
         )
         default_candidates.append(candidate)
         default_candidate_ids.add(candidate_id(candidate))
@@ -4186,7 +4186,7 @@ def route_skills(
             name=entry.name,
             path=rel_path,
             description=entry.description,
-            scope_rank=_scope_rank_for_path(rel_path),
+            scope_rank=_scope_rank_for_path(repo_root, rel_path),
         )
         if candidate_id(candidate) in default_candidate_ids:
             continue
@@ -4214,7 +4214,7 @@ def route_skills(
                 name=entry.name,
                 path=rel_path,
                 description=entry.description,
-                scope_rank=_scope_rank_for_path(rel_path),
+                scope_rank=_scope_rank_for_path(repo_root, rel_path),
             )
             cid = candidate_id(candidate)
             if cid in all_candidate_ids:

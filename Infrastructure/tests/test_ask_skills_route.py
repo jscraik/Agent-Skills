@@ -1,4 +1,5 @@
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -199,6 +200,32 @@ class TestAskSkillsRoute(unittest.TestCase):
         self.assertEqual(decision["decision_status"], "resolved")
         self.assertEqual(decision["selected_candidates"][0]["name"], "unslopify")
         self.assertEqual(decision["selected_candidates"][0]["confidence"], 1.0)
+
+    def test_route_scope_ranking_uses_caller_repo_root_for_exact_handle(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            entry = SimpleNamespace(
+                name="unslopify",
+                source_dir=repo_root / ".agents" / "skills" / "unslopify",
+                category=".agents/skills",
+                description="Audit dead code and stale cleanup candidates.",
+            )
+
+            with patch(
+                "ask.commands.skills_impl.discover_catalog_entries",
+                side_effect=lambda advanced=False, source="auto": [entry],
+            ):
+                with patch("ask.commands.skills_impl._load_builder_module") as mocked_router_load:
+                    with patch("ask.commands.skills_impl.compute_catalog_parity", return_value={"drift_detected": False}):
+                        with patch("ask.commands.skills_impl.classify_skill_scope", return_value="project") as classify:
+                            result = route_skills(repo_root, "$unslopify", top_k=1, considered_limit=5)
+
+            mocked_router_load.assert_not_called()
+            self.assertEqual(result.status, "success")
+            classified_paths = [call_args.args[0] for call_args in classify.call_args_list]
+            self.assertTrue(classified_paths)
+            self.assertTrue(all(path.is_relative_to(repo_root) for path in classified_paths))
+            self.assertIn(repo_root / ".agents" / "skills" / "unslopify", classified_paths)
 
     def test_route_uses_advanced_catalog_surface_for_hidden_lane_skills(self):
         entries = [
