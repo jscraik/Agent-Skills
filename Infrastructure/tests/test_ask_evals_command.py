@@ -279,6 +279,30 @@ def test_evals_classify_missing_tessl_cli_as_blocked_runtime(tmp_path: Path) -> 
     assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == ["blocked_runtime"]
 
 
+def test_evals_preserve_primary_failure_when_tessl_also_fails(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=1, stdout="primary regression", stderr="assertion failed")
+    _write_example_skill(tmp_path)
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value=None),
+        mock.patch.object(evals.subprocess, "run", return_value=completed),
+    ):
+        result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke")
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "fail"
+    assert result.data["blocker_class"] is None
+    assert result.data["tessl_eval"]["status"] == "blocked"
+    assert result.data["tessl_eval_status"] == "blocked_runtime"
+    assert result.data["tessl_blocker_class"] == "blocked_runtime"
+    assert [event["event_type"] for event in result.data["lifecycle_events"]] == [
+        "eval_started",
+        "eval_completed",
+    ]
+    assert result.data["lifecycle_event"]["outcome"]["status"] == "fail"
+    assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == []
+
+
 def test_evals_classify_missing_tessl_project_link(tmp_path: Path) -> None:
     completed_eval = mock.Mock(returncode=0, stdout="{}", stderr="")
     completed_tessl = mock.Mock(

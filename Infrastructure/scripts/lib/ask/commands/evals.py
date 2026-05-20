@@ -711,19 +711,22 @@ def run_evals(
             tessl_status = str(tessl_eval.get("status") or "fail")
             blocker_class = tessl_eval.get("blocker_class")
             eval_status = blocker_class or tessl_status
-            result.data["eval_status"] = eval_status
-            result.data["blocker_class"] = blocker_class
-            lifecycle_events = result.data.setdefault("lifecycle_events", [])
-            if lifecycle_events and lifecycle_events[-1].get("event_type") in {"eval_completed", "eval_blocked"}:
-                lifecycle_events.pop()
-            _finish_eval_lifecycle(
-                result,
-                path=path,
-                mode=mode,
-                runner=runner,
-                eval_status=eval_status,
-                blocker_class=blocker_class,
-            )
+            result.data["tessl_eval_status"] = eval_status
+            result.data["tessl_blocker_class"] = blocker_class
+            if result.status != "error":
+                result.data["eval_status"] = eval_status
+                result.data["blocker_class"] = blocker_class
+                lifecycle_events = result.data.setdefault("lifecycle_events", [])
+                if lifecycle_events and lifecycle_events[-1].get("event_type") in {"eval_completed", "eval_blocked"}:
+                    lifecycle_events.pop()
+                _finish_eval_lifecycle(
+                    result,
+                    path=path,
+                    mode=mode,
+                    runner=runner,
+                    eval_status=eval_status,
+                    blocker_class=blocker_class,
+                )
             result.status = "error"
             result.errors.append(ErrorObject(
                 code="ERR_RUNTIME" if tessl_eval.get("status") == "blocked" else "ERR_VALIDATION",
