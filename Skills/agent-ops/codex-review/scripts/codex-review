@@ -348,8 +348,10 @@ json_finding_array = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 json_empty_array = re.compile(r'"(?:findings|issues)"\s*:\s*\[\s*\]', re.IGNORECASE | re.DOTALL)
+json_issue_key_line = re.compile(r'^\s*"?(?:findings|issues)"?\s*:', re.IGNORECASE)
 
 has_clean_signal = any(phrase in normalized for phrase in clean_phrases)
+has_json_empty_array = bool(json_empty_array.search(text))
 
 lines = text.splitlines()
 priority_seen = any(severity_line.search(line) for line in lines)
@@ -362,7 +364,7 @@ if priority_seen:
     sys.exit(0)
 
 if json_finding_array.search(text):
-   sys.exit(0)
+    sys.exit(0)
 
 for index, line in enumerate(lines):
     match = heading_line.match(line)
@@ -392,12 +394,14 @@ if has_clean_signal:
     sys.exit(1)
 
 for index, line in enumerate(lines):
-    if index in clean_marker_lines or json_empty_array.search(line):
+    if index in clean_marker_lines:
+        continue
+    if has_json_empty_array and json_issue_key_line.search(line):
         continue
     if generic_issue_mention.search(line):
         sys.exit(0)
 
-if json_empty_array.search(text) or clean_marker_lines:
+if has_json_empty_array or clean_marker_lines:
     sys.exit(1)
 
 sys.exit(1)

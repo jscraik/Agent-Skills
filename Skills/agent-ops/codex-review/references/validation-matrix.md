@@ -18,7 +18,12 @@ bash Skills/agent-ops/codex-review/scripts/codex-review --mode commit --commit H
 
 The default dry-run review command must not include `--add-dir` unless `--runtime-skills-dir DIR` or `CODEX_REVIEW_RUNTIME_SKILLS_DIR` opts in. Cross-repo runtime validation should prove explicit runtime-skill access fixes nested Codex system-skill refreshes only when the outer sandbox grants write access to `$HOME/.codex/skills`.
 
-For output-classification edits, use a fixture or direct helper path that proves untagged `Findings`, `Findings: one issue`, or `Issues` output does not get marked clean, inline quoted `[P2]` examples are not treated as actionable, numbered or line-start severity findings override broad clean prose, and empty structured results such as `{"findings": []}` plus `## Findings` followed by `None` or `- None` stay clean.
+For output-classification edits, use a fixture or direct helper path that proves:
+
+- Untagged `Findings`, `Findings: one issue`, or `Issues` output does not get marked clean
+- Inline quoted `[P2]` examples are not treated as actionable
+- Numbered or line-start severity findings override broad clean prose
+- Empty structured results such as `{"findings": []}`, pretty-printed empty arrays, and `## Findings` followed by `None` or `- None` stay clean
 
 For runtime-policy edits, first run the helper without permission expansion when nested Codex review is expected to fail locally. Then rerun the helper from the active Codex session with scoped filesystem access to Codex runtime state only and no extra network permission. Pass condition: the filesystem-only run launches nested Codex review, while a still-blocked run emits `codex-review blocked: blocked_runtime` and a source-backed fallback instruction instead of silently failing.
 
