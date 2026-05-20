@@ -32,6 +32,7 @@ def render_template(skill_set_name: str, metadata: dict[str, Any]) -> str:
     template = TEMPLATE.read_text(encoding="utf-8")
     replacements = {
         "{{ skill_set_name }}": skill_set_name,
+        "{{ agent_skills_repo_root }}": repo_root().as_posix(),
         "{{ short_mutually_exclusive_description }}": metadata["description"],
         "{{ title }}": title,
         "{{ scope }}": metadata["scope"],

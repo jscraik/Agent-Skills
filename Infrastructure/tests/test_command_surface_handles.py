@@ -73,6 +73,7 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
 
         handles = {handle["handle"]: handle for handle in payload["handles"]}
         self.assertIn("he-phase-work", handles)
+        self.assertNotIn("he-compound", handles)
         self.assertNotIn("he-phase-heartbeat", handles)
 
     def test_command_surface_marks_skill_builder_as_orchestrator(self) -> None:
@@ -105,6 +106,37 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
         visibility = command_surface._command_visibility_for(row)
         self.assertEqual(visibility, "typoed-value")
 
+    def test_system_bridge_handles_do_not_shadow_plugin_canonical_handles(self) -> None:
+        handles = [
+            command_surface.CommandHandle(
+                handle="skill-creator",
+                kind="skill",
+                command_visibility="target",
+                runtime_visibility="latent",
+                source_path="skills-system/skill-creator/SKILL.md",
+                command_handle_path=".agents/skills/skill-creator/SKILL.md",
+                owner="agent-ops",
+                description="Create or update a skill.",
+                invoke_via="agent-ops",
+            ),
+            command_surface.CommandHandle(
+                handle="skill-creator",
+                kind="skill",
+                command_visibility="target",
+                runtime_visibility="latent",
+                source_path="Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
+                command_handle_path=".agents/skills/skill-creator/SKILL.md",
+                owner="skill-factory",
+                description="Guide skill creation.",
+                invoke_via="skill-factory",
+            ),
+        ]
+
+        deduped = command_surface._drop_shadowed_system_bridge_handles(handles)
+
+        self.assertEqual(len(deduped), 1)
+        self.assertEqual(deduped[0].owner, "skill-factory")
+
 
 class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
     def test_command_surface_renders_generated_command_handle(self) -> None:
@@ -126,19 +158,73 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         command_handle = command_surface.render_skill_command_handle(handle)
 
         self.assertIn("Internal activation entrypoint", command_handle)
-        self.assertIn("./bin/ask skills resolve he-heartbeat --json", command_handle)
-        self.assertIn("If this is the Agent Skills Kit repo and `./bin/ask` exists", command_handle)
+        self.assertIn("Load `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md` if present", command_handle)
+        self.assertIn(str(REPO_ROOT / "Plugins" / "harness-engineering" / "skills" / "he-heartbeat" / "SKILL.md"), command_handle)
+        self.assertIn(str(REPO_ROOT / "bin" / "ask") + " skills resolve he-heartbeat --json", command_handle)
+        self.assertIn("diagnostic fallback", command_handle)
+        self.assertIn("Preserve source checklists/preludes verbatim", command_handle)
         self.assertIn(
             "Source: `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md`.",
             command_handle,
         )
         self.assertIn(
-            "Otherwise, load `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md` directly.",
+            "Source: `Plugins/harness-engineering/skills/he-heartbeat/SKILL.md`.",
             command_handle,
         )
-        self.assertIn("Keep handle, routing, and source mechanics out of user-facing replies", command_handle)
+        self.assertIn("Keep handle/routing/source mechanics out of user replies", command_handle)
         self.assertNotIn("## Procedure", command_handle)
         self.assertEqual(command_surface._validate_command_handle_payload(handle, command_handle), [])
+
+    def test_openai_metadata_uses_useful_picker_description(self) -> None:
+        handle = command_surface.CommandHandle(
+            handle="he-strategy",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path="Plugins/harness-engineering/skills/he-strategy/SKILL.md",
+            command_handle_path=".agents/skills/he-strategy/SKILL.md",
+            owner="harness-engineering",
+            description="Compress repo intent, architecture review, triage, strategy, ADR, and core invariant artifacts.",
+            invoke_via="harness-engineering",
+        )
+
+        metadata = command_surface.render_openai_yaml(handle)
+
+        self.assertIn('display_name: "HE Strategy"', metadata)
+        self.assertIn(
+            'short_description: "Compress repo intent, architecture review, triage, strategy, ADR, and core invariant artifacts."',
+            metadata,
+        )
+        self.assertIn('default_prompt: "$he-strategy "', metadata)
+        self.assertNotIn("HE Strategy entrypoint", metadata)
+
+    def test_openai_metadata_validation_rejects_useless_picker_description(self) -> None:
+        handle = command_surface.CommandHandle(
+            handle="autofix",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path="Skills/agent-ops/autofix/SKILL.md",
+            command_handle_path=".agents/skills/autofix/SKILL.md",
+            owner="agent-ops",
+            description="Review and fix PR feedback.",
+            invoke_via="agent-ops",
+        )
+        metadata = '\n'.join(
+            [
+                "interface:",
+                '  display_name: "Autofix"',
+                '  short_description: "$autofix - Autofix entrypoint"',
+                '  default_prompt: "$autofix "',
+            ]
+        )
+
+        violations = command_surface._validate_openai_metadata_payload(handle, metadata)
+
+        self.assertEqual(
+            violations,
+            [{"code": "COMMAND_HANDLE_USELESS_PICKER_DESCRIPTION", "handle": "autofix"}],
+        )
 
     def test_command_handle_dry_run_projects_he_heartbeat_without_writing(self) -> None:
         payload = command_surface.write_command_handles(repo_root_path=REPO_ROOT, dry_run=True)

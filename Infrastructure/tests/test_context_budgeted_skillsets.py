@@ -65,6 +65,16 @@ class TestRootSkillsetProjection(ContextBudgetTempDirTestCase):
                 self.assertIn("## Failure Mode", content)
                 self.assertIn("## Gotchas", content)
 
+    def test_root_skill_generation_supports_cross_repo_routing(self) -> None:
+        report = generate_root_skill_sets.build_roots(self.temp_dir / "skills")
+
+        for root in report["roots"]:
+            with self.subTest(root=root["name"]):
+                content = root["content"]
+                self.assertIn(str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "route_skillset.py"), content)
+                self.assertIn(str(REPO_ROOT / ".skillsets"), content)
+                self.assertIn(f"{REPO_ROOT.as_posix()}/<source_path>", content)
+
     def test_root_skill_evals_use_typed_acceptance_checks(self) -> None:
         report = generate_root_skill_sets.build_roots(self.temp_dir / "skills")
 
@@ -329,6 +339,20 @@ class TestSkillsetRouting(ContextBudgetTempDirTestCase):
         self.assertEqual(payload["status"], "selected")
         self.assertEqual(payload["selected"]["id"], "he-router")
         self.assertIn("named-stage-ambiguity", payload["candidates"][0]["reason"])
+
+    def test_harness_engineering_routes_cross_repo_skill_routing_defects_to_fix_bugs(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        generate_skillset_manifests.write_manifests(report, self.temp_dir / ".skillsets")
+
+        payload = route_skillset.route(
+            "harness-engineering",
+            "Skill routing note: I attempted the harness-engineering router. The repo-relative script path from the skill was missing, and the absolute router returned low_confidence, so I did not load a latent child module.",
+            skillsets_dir=self.temp_dir / ".skillsets",
+        )
+
+        self.assertEqual(payload["status"], "selected")
+        self.assertEqual(payload["selected"]["id"], "he-fix-bugs")
+        self.assertIn("skill-routing-runtime-defect", payload["candidates"][0]["reason"])
 
 
 class TestContextBudgetManifestValidation(ContextBudgetTempDirTestCase):

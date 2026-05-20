@@ -39,19 +39,21 @@ Escalate architectural redesigns, API boundary changes, migrations, and cross-su
 
 ## Required Gates
 
-1. `./bin/ask skills resolve unslopify --json`
-2. `./bin/ask skills handles --check --json`
+1. `<agent-skills-root>/bin/ask skills resolve unslopify --json`
+2. `<agent-skills-root>/bin/ask skills handles --check --json`
 3. Strict skill audit for package changes.
 4. Plugin Eval when trigger wording, cost, package shape, or eval behavior changed.
 5. Workspace sync proof before runtime claims when projection changed.
 
 Stop if any gate fails.
 
-Runtime visibility checks such as `./bin/ask skills route unslopify --json` are
-required only before claiming route availability, invocation readiness, or
-projection health. If catalog parity drift blocks routing, report runtime
-visibility as blocked and continue only with already-loaded canonical skill
-review or package hardening that does not depend on route availability.
+Runtime visibility checks such as
+`<agent-skills-root>/bin/ask skills route unslopify --json` are required only
+before claiming route availability, invocation readiness, or projection health.
+Use `./bin/ask ...` only when the active workspace is the Agent Skills Kit root.
+If catalog parity drift blocks routing, report runtime visibility as blocked and
+continue only with already-loaded canonical skill review or package hardening
+that does not depend on route availability.
 
 ## Required inputs
 

@@ -74,10 +74,10 @@ Runtime cache paths under `Plugins/cache/**` are projections and should not be e
 ```sh
 jq empty Plugins/skill-factory/.codex-plugin/plugin.json
 python3 Plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py validate Plugins/skill-factory --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
-python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set skill-factory --task "<request>" --json
+python3 <agent-skills-root>/Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set skill-factory --skillsets-dir <agent-skills-root>/.skillsets --task "<request>" --json
 Infrastructure/bin/plugin-eval analyze Plugins/skill-factory --format markdown
 Infrastructure/bin/plugin-eval analyze Plugins/skill-factory/skills/code_quality_review/skill-builder --format markdown
-PYTHON_BIN=/Users/jamiecraik/.venvs/pyyaml/bin/python ./bin/ask skills audit Plugins/skill-factory/skills/code_quality_review/skill-builder --level strict --json
+PYTHON_BIN=/Users/jamiecraik/.venvs/pyyaml/bin/python <agent-skills-root>/bin/ask skills audit Plugins/skill-factory/skills/code_quality_review/skill-builder --level strict --json
 bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict
 bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn
 ```
