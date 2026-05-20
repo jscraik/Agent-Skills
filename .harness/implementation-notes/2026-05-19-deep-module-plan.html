@@ -666,11 +666,11 @@
                 </div>
                 <div class="module source">
                   <strong>Repo</strong>
-                  <span>Canonical Skills, Plugins, harness artifacts, evals, and source docs.</span>
+                  <span>Canonical Skills, Plugins, manifest-declared project-local skill roots, harness artifacts, evals, and source docs.</span>
                 </div>
                 <div class="module source">
                   <strong>Providers</strong>
-                  <span>Source, projection, package, audit, and eval readers that adapt repo state into typed inputs.</span>
+                  <span>Project-root, source, projection, package, audit, and eval readers that adapt repo state into typed inputs.</span>
                 </div>
                 <div class="module service">
                   <strong>Service</strong>
@@ -696,6 +696,125 @@
                 </div>
               </div>
             </aside>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Project-Local Skill Roots</h2>
+          <div class="sdk-grid">
+            <article class="decision proof">
+              <strong>Agent Skills Standard</strong>
+              <p>
+                Standard compatibility means a skill directory has one
+                <code>SKILL.md</code> manifest plus optional
+                <code>scripts/</code>, <code>references/</code>,
+                <code>assets/</code>, and eval files. It does not mandate one
+                filesystem root.
+              </p>
+            </article>
+            <article class="decision source">
+              <strong>.agents/skills</strong>
+              <p>
+                Cross-client interoperable discovery root. In this repository it
+                is generated projection; in an owner repo it is editable source
+                only when <code>skills-sdk.json</code> declares
+                <code>canonical_project_source</code>.
+              </p>
+            </article>
+            <article class="decision command">
+              <strong>.codex/skills</strong>
+              <p>
+                Codex-native client root. Treat it as runtime/config surface
+                unless the owner repo manifest declares it canonical.
+              </p>
+            </article>
+            <article class="decision service">
+              <strong>Owner Repo Evals</strong>
+              <p>
+                Evaluate project-local skills in place and write evidence to
+                the owner repo, such as
+                <code>.harness/session-evidence/skills/&lt;skill&gt;/</code>.
+                Do not copy them into <code>agent-skills</code> to satisfy a
+                local check.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Project-Local Lifecycle</h2>
+          <div class="sdk-grid">
+            <article class="decision command">
+              <strong>Create</strong>
+              <p>
+                <code>skills create</code> writes new skill source to
+                <code>&lt;owner-repo&gt;/&lt;declared-root&gt;/&lt;skill-handle&gt;/</code>,
+                creates starter evals, runs the full gate, and records promote
+                or blocked evidence.
+              </p>
+            </article>
+            <article class="decision source">
+              <strong>Install</strong>
+              <p>
+                <code>skills install</code> writes into the owner repo's
+                declared root, then verifies provenance, namespace, manifest,
+                permissions, and smoke behavior before enabling.
+              </p>
+            </article>
+            <article class="decision runtime">
+              <strong>Update</strong>
+              <p>
+                <code>skills update</code> changes the owner repo source only
+                after regression evals compare the candidate against the
+                project baseline.
+              </p>
+            </article>
+            <article class="decision proof">
+              <strong>Evidence</strong>
+              <p>
+                Portable evals live with the skill at
+                <code>evals/evals.json</code>; SDK evidence and lifecycle
+                events live under the owner repo's <code>.harness/</code>
+                evidence paths.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Runtime Targets</h2>
+          <div class="sdk-grid">
+            <article class="decision command">
+              <strong>OpenAI Local Shell</strong>
+              <p>
+                Local skill descriptors use <code>name</code>,
+                <code>description</code>, and filesystem <code>path</code>.
+              </p>
+            </article>
+            <article class="decision runtime">
+              <strong>OpenAI Hosted Shell</strong>
+              <p>
+                Hosted execution uses uploaded, versioned
+                <code>skill_reference</code> bundles. Keep this separate from
+                local path discovery.
+              </p>
+            </article>
+            <article class="decision service">
+              <strong>Sandbox Agents</strong>
+              <p>
+                Use sandbox skill materialization when work needs files, shell,
+                artifacts, exposed ports, or resumable workspace state.
+              </p>
+            </article>
+            <article class="decision proof">
+              <strong>Portable Evals</strong>
+              <p>
+                Keep <code>evals/evals.json</code> compatible with Agent Skills:
+                prompts, expected outputs, optional files, assertions, and
+                baseline comparisons. Add trace, event, provenance, permission,
+                namespace, telemetry, and promotion fields as SDK extensions.
+              </p>
+            </article>
           </div>
         </section>
 
@@ -1047,7 +1166,7 @@
               <div class="stack">
                 <div class="module runtime">
                   <strong>.agents/**</strong>
-                  <span>Runtime projection. Generated only.</span>
+                  <span>Runtime projection in this repo. In owner repos, editable only when skills-sdk.json declares canonical_project_source.</span>
                 </div>
                 <div class="module runtime">
                   <strong>.skillsets/**</strong>

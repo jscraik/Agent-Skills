@@ -18,8 +18,10 @@ inputs:
   - git_status
   - review_mode
   - base_ref
+  - commit_ref
   - pr_metadata
   - optional_parallel_test_command
+  - auto_parallel_test_detection
   - approval_posture
 outputs:
   - selected_review_target
@@ -33,6 +35,10 @@ risks:
   - sandbox_or_permission_escalation
   - stale_review_after_tests_change_code
   - reviewing_empty_dirty_state_instead_of_branch_work
+  - losing already_committed_change coverage on clean main
+  - gitcrawl_portable_cache_corruption
+  - security_audit_suppression_hiding_active_risk
+  - false_clean_result_from_new_review_output_format
   - leaking sensitive local details in final reports
 safety:
   untrusted_inputs: true
@@ -40,10 +46,17 @@ safety:
   destructive_commands: false
   raw_reviewer_text_in_shell: false
   external_writes: false
+  full_access_default: false
+  ambiguous_finding_output_fails_closed: true
 validation:
   - helper_help_runs
+  - helper_default_dry_run_uses_normal_approval_mode
+  - helper_full_access_dry_run_is_explicit
+  - helper_dry_run_commit_mode
+  - helper_no_yolo_dry_run
+  - helper_untagged_finding_output_fails
   - strict_skill_audit
   - focused_tests_rerun_after_review_triggered_fixes
   - codex_review_rerun_after_review_triggered_fixes
-observability: Report target selection, command used, findings accepted or rejected, validation outcomes, and blockers.
+observability: Report target selection, command used, auto test selection when present, findings accepted or rejected, validation outcomes, and blockers.
 rollback_procedure: Revert codex-review skill files and rerun strict skill audit.
