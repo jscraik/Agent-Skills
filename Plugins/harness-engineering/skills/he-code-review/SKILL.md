@@ -76,4 +76,5 @@ Read when:
 - artifact identity, BLUF output, or review visuals are required: `Plugins/harness-engineering/references/artifact-routing-contract.md`, `Plugins/harness-engineering/references/bluf-review-contract.md`, `Plugins/harness-engineering/references/visual-reference-contract.md`
 - session collector, Codex provenance, trace IDs, or PR safety trace is cited: `Plugins/harness-engineering/references/codex-provenance-contract.md`, `Plugins/harness-engineering/references/pr-safety-trace-contract.md`
 - pragmatic review criteria are triggered: `Plugins/harness-engineering/references/pragmatic-programmer-review-contract.md`
+- domain language or production model integrity is in scope: `Plugins/harness-engineering/references/domain-context-contract.md`, `Plugins/harness-engineering/references/domain-model-production-contract.md`
 - detailed doctrine is necessary: `Infrastructure/references/harness-engineering/he-code-review-doctrine.md`

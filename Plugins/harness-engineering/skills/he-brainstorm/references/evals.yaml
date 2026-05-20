@@ -118,3 +118,19 @@ cases:
     prompt: "Can you compare three survivor ideas for `he-brainstorm`: one copies another plugin pattern, one prevents a repeated HE failure, and one adds governance without proof."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(first.?principles|verified failure|smallest|copied|Do Not Create|ask|survivor|evidence)"}]
+  - id: ubiquitous-domain-interview
+    name: "Ubiquitous language domain interview"
+    category: edge
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: false
+    why_realistic: "Jamie wants HE to interview one branch at a time, inspect repo language before asking, and update UBIQUITOUS.md inline only after terms are resolved."
+    expected_behavior: "Select he-brainstorm domain_interview mode, inspect UBIQUITOUS/legacy context/code/decision evidence before asking, use request_user_input for one bounded question at a time when available, recommend the first answer, update only glossary content inline, and keep implementation decisions out of UBIQUITOUS.md."
+    prompt: "Run a domain interview for account settings. Read UBIQUITOUS.md or UBIQUITOUS-MAP.md if present, check legacy CONTEXT.md and code names before asking, challenge whether Account means Customer or User, ask me relentlessly one branch at a time with request_user_input where available and a recommended answer first, then update UBIQUITOUS.md inline when the term is resolved. Do not put implementation decisions in the glossary."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(domain_interview|ubiquitous language|UBIQUITOUS.md|UBIQUITOUS-MAP.md)"}
+      - {type: regex, value: "(?is)(inspect|codebase|legacy CONTEXT|code names|before asking|evidence)"}
+      - {type: regex, value: "(?is)(request_user_input|one question|one branch|recommended|wait for feedback)"}
+      - {type: regex, value: "(?is)(glossary only|implementation decisions|do not.*implementation|resolved term)"}

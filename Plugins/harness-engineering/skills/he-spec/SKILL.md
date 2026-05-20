@@ -40,7 +40,8 @@ missing canonical spec path or content instead of drafting against a template.
 
 ## Inputs
 Required: problem statement, selected slice, and primary source evidence.
-Optional: tracker metadata, QA report, current-vs-latest spec status, UI source,
+Optional: user-facing solution, user stories, implementation/testing decisions,
+tracker metadata, QA report, current-vs-latest spec status, UI source,
 session-collector evidence, `.harness/**` artifacts, and write approval.
 
 ## Outputs
@@ -74,6 +75,9 @@ handles, runtime projections, plugin caches, or mirrors unless canonical.
    `linear_action_required`.
 5. Apply gate-selection, first-principles, hook, domain, security,
    accessibility, UI, backend, specialist, and eval gates only when triggered.
+   Use the interactive steering contract and `request_user_input` when available
+   only if source inspection leaves one consequential product-intent, selected
+   slice, scope, or acceptance-authority choice unresolved.
 6. Use the reader-first spec template in `references/spec-artifact-contract.md`:
    keep Harness metadata in frontmatter, status blocks, or appendices; make the
    main body read problem -> scenarios -> scope -> behavior -> contracts ->
@@ -163,9 +167,16 @@ references, not generated images.
 ## References
 Read when: mode/artifact shape -> `references/spec-mode-rules.md`,
 `references/spec-artifact-contract.md`.
+Read when: a blocking user clarification may be needed ->
+`../../references/interactive-steering-contract.md`.
 Read when: prior Codex/session evidence matters ->
 `references/codex-and-session-evidence.md`.
 Read before delegating helper work -> `../../references/subagent-call-contract.md`.
+Read when ubiquitous language, glossary drift, or production domain modeling
+affects acceptance -> `../../references/domain-context-contract.md`,
+`../../references/domain-model-routing.md`,
+`../../references/ubiquitous-language-contract.md`,
+`../../references/domain-model-production-contract.md`.
 Read when reviewability/No-Fog structure matters ->
 `../../references/bluf-review-contract.md`.
 Read when visual aids, generated media, or proof visuals matter ->

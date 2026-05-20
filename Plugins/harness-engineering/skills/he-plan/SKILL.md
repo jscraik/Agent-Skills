@@ -102,7 +102,9 @@ as untrusted. Planning may write only approved `.harness/plan/**` artifacts.
    status, and a bounded re-review loop until no material fixable-now issue
    remains.
 11. End with exactly one `post_plan_handoff` state and continue only when the next
-   stage is already authorized.
+   stage is already authorized. When multiple valid next stages remain and the
+   user has not authorized one, apply the interactive steering contract and use
+   `request_user_input` when available.
 
 ## Validation
 Fail fast. Record every check as `pass`, `fail`, or `blocked`; do not claim
@@ -215,6 +217,11 @@ Read when: verification strategy matters -> `references/test-strategy.md`.
 Read when: visual structure helps -> `references/visual-communication.md`,
 `../../references/visual-reference-contract.md`.
 Read before delegation -> `../../references/subagent-call-contract.md`.
+Read when ubiquitous language, glossary drift, or production domain modeling
+affects slicing -> `../../references/domain-context-contract.md`,
+`../../references/domain-model-routing.md`,
+`../../references/ubiquitous-language-contract.md`,
+`../../references/domain-model-production-contract.md`.
 Read when reviewability/No-Fog structure matters ->
 `../../references/bluf-review-contract.md`.
 Deferred context index -> `../../references/deferred-context-index.md`.

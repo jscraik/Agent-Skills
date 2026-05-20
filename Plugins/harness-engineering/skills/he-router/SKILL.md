@@ -17,7 +17,7 @@ Keep routing evidence-led, reversible, and bounded to one handoff.
 ## When to Use
 - Stage choice is unclear, mixed, or asks which HE stage to use.
 - A folded alias appears, such as `he-tdd`, `he-refine`,
-  `he-technical-review`, `he-compound`, `he-compound-refresh`, or
+  `he-technical-review`, old compound-learning wording, or
   `he-prune-branches`.
 - The request mentions HE artifacts, tracker lifecycle state, prior sessions,
   waits, closure proof, specialist steering, or gate selection before a stage is
@@ -134,6 +134,9 @@ color-only status.
   `Plugins/harness-engineering/references/deterministic-stage-routing.md`
 - Read when: broad gates could over-route ->
   `Plugins/harness-engineering/references/gate-selection-contract.md`
+- Read when: terminology, ubiquitous language, or production model integrity changes routing ->
+  `Plugins/harness-engineering/references/domain-model-routing.md`,
+  `Plugins/harness-engineering/references/domain-model-production-contract.md`
 - Read when: preserved router rules are needed ->
   `references/context-preservation.md`
 - Read when: role names are involved -> `references/role-resolution-fallback.md`

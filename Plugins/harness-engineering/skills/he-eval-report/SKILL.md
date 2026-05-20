@@ -41,7 +41,8 @@ otherwise. Include Artifact Identity frontmatter from
 `Plugins/harness-engineering/references/artifact-routing-contract.md` and return
 `schema_version`, evaluated slice, validation results, drift validation, proof
 artifacts, closure recommendation, follow-up work, blockers, git staging
-status, staged paths, Codex provenance status, PR safety trace status, next
+status, staged paths, `source_prompt_family_status` when source-prompt
+closure is in scope, Codex provenance status, PR safety trace status, next
 handoff, and confidence.
 Non-trivial reports also include the BLUF review surface so the closure
 recommendation, blocker consequence, and next action are visible before proof
@@ -172,6 +173,8 @@ or media persistence is failed or blocked.
   `references/linear-completion-policy.md`.
 - Read when validating local contract/evals: `references/contract.yaml`,
   `references/evals.yaml`.
+- Read when the eval report is asked to prove that old source-prompt behavior
+  survived implementation: `references/source-prompt-preservation.md`.
 - Read when report scanability/No-Fog structure matters:
   `../../references/bluf-review-contract.md`.
 - Read when evidence chains, gate matrices, visual proof, screenshots, or
@@ -181,6 +184,9 @@ or media persistence is failed or blocked.
   supports a closure claim:
   `../../references/codex-provenance-contract.md`,
   `../../references/pr-safety-trace-contract.md`.
+- Read when closure depends on domain language or production model integrity:
+  `../../references/domain-context-contract.md`,
+  `../../references/domain-model-production-contract.md`.
 - Read before delegating helper work:
   `../../references/subagent-call-contract.md`.
 - Read shared HE contracts only when the selected slice needs them:

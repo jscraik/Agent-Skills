@@ -7,12 +7,19 @@ authority, risk posture, or closure recommendation.
 
 ## Core Rule
 
-Explore first. Ask second. Ask once.
+Explore first. Ask second. Ask once per unresolved decision branch.
 
 When the platform blocking question tool is available, use it
 (`request_user_input`, `AskUserQuestion`, or `ask_user`). If no blocking
 question tool is available, ask one concise chat question and stop. Do not bury
 the choice in a long report.
+
+In Codex sessions, `request_user_input` is the preferred blocking question tool
+only when it is available in the current mode. Use it for one to three short
+questions, each with two or three mutually exclusive choices. Put the recommended
+choice first, label it `(Recommended)`, and use a short header. Do not emulate
+the tool with a long textual multiple-choice form when the tool is available; if
+the tool is unavailable, ask one concise plain-text question and stop.
 
 ## Ask When
 
@@ -21,6 +28,11 @@ the choice in a long report.
   selected stage.
 - `he-brainstorm`: multiple warranted survivors remain and selecting one would
   shape the downstream spec, plan, Linear work, or implementation slice.
+- `he-brainstorm` `domain_interview` mode: a repository language conflict,
+  fuzzy term, scenario boundary, context selection, or ADR threshold decision
+  remains after codebase exploration. This mode may ask multiple sequential
+  questions across the session, but each turn asks only one branch question and
+  waits for feedback before continuing.
 - `he-strategy`: the requested cognition mode or full-pipeline extent is unclear
   and the choice changes artifact output.
 - `he-reframe`: a finding is borderline between reframe program, Linear issue,
@@ -54,6 +66,27 @@ the choice in a long report.
 Ask one high-signal question with two or three mutually exclusive choices. Put
 the recommended choice first, state the operational impact of each choice, and
 allow a free-form correction when the UI supports it.
+
+For `domain_interview` mode, make the recommendation explicit in the first
+choice label and keep the question about a decision, not evidence lookup. Good
+questions choose the canonical term, distinguish two concepts, settle whether an
+edge scenario belongs in or out of the model, select the owning context, or
+confirm whether an ADR candidate meets the hard-to-reverse / surprising /
+real-trade-off threshold.
+
+For spec and plan work, use `request_user_input` only after source inspection has
+left one consequential decision open:
+
+- whether inferred intent should become binding requirements, stay assumptions,
+  or be excluded;
+- which selected slice should be specified or planned;
+- whether an ambiguous user-facing solution changes scope;
+- whether a complete plan should hand off to implementation, Linear update,
+  review, or stop.
+
+Do not ask the user to supply file paths, prior-art tests, tracker facts, or repo
+state that the agent can inspect. Do not ask optional preference questions before
+drafting; record low-risk assumptions instead.
 
 Good questions ask for a decision, not information archaeology. Prefer:
 

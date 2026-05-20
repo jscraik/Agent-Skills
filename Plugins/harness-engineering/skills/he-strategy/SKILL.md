@@ -20,6 +20,13 @@ Use for one selected mode: repo intent, architecture review, triage, strategy
 compression, ADR/core compression, moat/drift analysis, source-prompt
 equivalence, or future-agent guidance.
 
+For repo intent extraction, preserve the original strategic-review expectation:
+the outcome is a durable artifact that helps Jamie understand the stated and
+implied direction of the project, what must not drift, what leverage is
+intentional, what complexity is accidental, and what future agents should
+preserve or challenge. Do not satisfy repo intent with generic architecture
+documentation.
+
 ## When Not to Use
 
 Do not use for implementation specs, execution plans, refactors, code review,
@@ -148,6 +155,9 @@ Use plain Markdown, short sections, descriptive links, and non-color-only tables
 Use the selected mode contract. Include `schema_version: 1`, source artifacts,
 facts, interpretations, assumptions, confidence, authority limits, relevant
 impact, future-agent guidance, validation outcomes, and evidence traceability.
+Selected outputs must also include the source prompt family status and all
+mode-specific required sections from `references/strategy-output-contract.md`,
+including post-artifact review status where the mode contract requires it.
 
 ## References
 
@@ -164,6 +174,10 @@ impact, future-agent guidance, validation outcomes, and evidence traceability.
 - Read when applying first principles or XP ->
   `../../references/first-principles-contract.md`,
   `../../references/xp-operating-contract.md`
+- Read when applying pragmatic architecture review lenses ->
+  `../../references/pragmatic-programmer-review-contract.md`
+- Read when strategy depends on production domain modeling ->
+  `../../references/domain-model-production-contract.md`
 
 Do not remove important context for budget trimming; move deep context to
 references with a clear route.
