@@ -91,6 +91,15 @@ class TestRootSkillsetProjection(ContextBudgetTempDirTestCase):
         self.assertEqual(first_row["provenance"]["projection_mode"], "rooted")
         self.assertTrue(first_row["provenance"]["source_sha256"])
 
+    def test_system_manifest_provenance_hashes_canonical_system_store(self) -> None:
+        report = generate_skillset_manifests.build_manifest_report(self.temp_dir / ".skillsets")
+        agent_ops = next(manifest for manifest in report["manifests"] if manifest["skill_set"] == "agent-ops")
+        row = next(row for row in agent_ops["rows"] if row["id"] == "openai-docs")
+        source_file = REPO_ROOT / row["source_path"]
+
+        self.assertEqual(row["source_path"], "skills-system/openai-docs/SKILL.md")
+        self.assertEqual(row["provenance"]["source_sha256"], skillset_model.file_hash(source_file))
+
     def test_file_hash_uses_resolved_file_bytes_for_provenance(self) -> None:
         target = self.temp_dir / "target.md"
         target.write_text("# Target\n", encoding="utf-8")

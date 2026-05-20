@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-25.v19"
+POLICY_VERSION = "2026-04-25.v20"
 
 PROJECTION_MODE_CHOICES: tuple[str, ...] = ("flat", "rooted", "hybrid")
 
@@ -81,6 +81,7 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "skill-pr-delivery",
     "triage",
     "ubiquitous-language",
+    "unslopify",
     "verification-before-completion",
 )
 

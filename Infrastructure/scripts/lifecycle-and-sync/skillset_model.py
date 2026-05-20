@@ -281,15 +281,31 @@ def iter_candidate_skill_dirs() -> list[Path]:
     Returns:
         list[Path]: Unique candidate skill directory paths sorted by repository-relative path.
     """
+    system_dirs = iter_system_lane_skill_dirs()
+    canonical_system_dir = REPO_ROOT / "skills-system"
+    if canonical_system_dir.is_dir():
+        system_dirs = sorted(
+            item
+            for item in canonical_system_dir.iterdir()
+            if item.is_dir() and (item / "SKILL.md").exists()
+        )
+    candidate_dirs = [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs(), *system_dirs]
+    canonical_names = {
+        skill_dir.name
+        for skill_dir in candidate_dirs
+        if classify_skill_scope(skill_dir) != "system"
+    }
     seen: set[tuple[int, int] | str] = set()
     dirs: list[Path] = []
-    for skill_dir in [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs(), *iter_system_lane_skill_dirs()]:
+    for skill_dir in candidate_dirs:
         skill_md = skill_dir / "SKILL.md"
         if not skill_md.exists():
             continue
         scope = classify_skill_scope(skill_dir)
         if scope == "system":
             if skill_dir.name not in SYSTEM_BRIDGE_SKILL_NAMES:
+                continue
+            if skill_dir.name in canonical_names:
                 continue
         elif scope in {"primary-runtime", "external", "unknown"}:
             continue
