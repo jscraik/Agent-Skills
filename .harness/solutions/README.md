@@ -16,4 +16,3 @@ session and includes:
 
 Keep raw investigation logs, temporary task notes, and unresolved incidents out
 of this folder.
-

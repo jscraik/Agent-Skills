@@ -280,11 +280,15 @@ class FakeRepo:
         for rel in self._BASH_SCRIPTS:
             _make_bash_stub(self.root / rel)
 
-        # Copy the real validate_all.sh (read-only; we don't modify it)
+        # Copy the real validate_all entrypoint and implementation (read-only; we don't modify them)
         dst = self.root / "Infrastructure" / "scripts" / "validate_all.sh"
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_bytes(VALIDATE_ALL_SH.read_bytes())
         _make_executable(dst)
+        impl_src = VALIDATE_ALL_SH.with_name("validate_all_impl.sh")
+        impl_dst = dst.with_name("validate_all_impl.sh")
+        impl_dst.write_bytes(impl_src.read_bytes())
+        _make_executable(impl_dst)
 
         # Directories referenced by validate_all.sh
         (self.root / "GOVERNANCE" / "runtime-separation" / "fixtures").mkdir(

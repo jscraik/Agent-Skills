@@ -4,6 +4,16 @@ goal:
   status: active
   objective: "Validate a healthy goal board."
   native_objective: "/goal Follow docs/goals/valid/goal.md"
+completion_contract:
+  outcome: "Validate a healthy goal board."
+  verification_surface:
+    - "Goal board validator output."
+  constraints:
+    - "Preserve board safety rules."
+  boundaries:
+    - "Use only this fixture goal directory."
+  iteration_policy: "Fix the next validator-reported blocker and rerun the board check."
+  blocked_stop_condition: "Stop with the validator error when the fixture cannot be repaired safely."
 rules:
   one_active_task: true
   require_fresh_verification: true
@@ -14,6 +24,22 @@ checks:
     command: null
     outcome: unknown
     checked_at: null
+continuation_gate:
+  native_status: active
+  goal_active: pass
+  thread_idle: unknown
+  queued_user_input: unknown
+  pending_work: unknown
+  auto_continue_allowed: unknown
+claims:
+  - id: C001
+    claim: "The valid fixture represents a healthy active goal board."
+    evidence_surface:
+      - "check_goal_board.py fixture validation"
+    route: reproduced
+    status: confirmed
+    remaining_uncertainty:
+      - "Runtime native goal state is not available in the fixture."
 tasks:
   - id: T001
     type: scout

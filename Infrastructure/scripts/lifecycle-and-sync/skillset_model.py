@@ -397,6 +397,8 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
             scope=scope,
             skill_set=skill_set,
         )
+        manifest_source = REPO_ROOT / source_path
+        source_for_hash = manifest_source if manifest_source.is_file() else skill_md
         metadata_status = "frontmatter" if frontmatter else "inferred"
         modules.append(
             SkillModule(
@@ -416,7 +418,7 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
                     "projection_mode": "rooted",
                     "policy_identity": current_policy_identity,
                     "source_revision": revision,
-                    "source_sha256": file_hash(skill_md),
+                    "source_sha256": file_hash(source_for_hash),
                 },
             )
         )

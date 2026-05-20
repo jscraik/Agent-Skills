@@ -34,7 +34,7 @@ Repo path, focused module/workflow, vocabulary surface, .harness decisions/ADRs,
 
 ## Outputs
 
-Return schema_version, selected_skill, capability_surface, complexity_symptoms, fresh_evidence, missing_evidence, reviewer_coverage, agent_safe_boundary, patch_design, interface_design, grilling_loop, request_user_input, selected_design_decision, recommended_first_move, tracer_proof, decision_surface, validation, confidence, and open_questions.
+Return schema_version, selected_skill, capability_surface, symptoms, evidence, reviewer_coverage, agent_safe_boundary, patch_design, interface_design, grilling_loop, request_user_input, selected_design_decision, first_move, tracer_proof, decision_surface, validation, confidence, and open_questions.
 
 If blocked, name the smallest missing target, proof path, user decision, or assumption.
 

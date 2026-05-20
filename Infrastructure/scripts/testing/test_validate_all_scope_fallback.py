@@ -16,6 +16,12 @@ def test_changed_files_scope_miss_falls_back_to_required_baseline() -> None:
             "Changed-files scope classification missed all known buckets; falling back to baseline required validation"
             in proc.stdout
         )
+        rows = repo.check_results()
+        required_rows = [row for row in rows if row["mode"] == "required"]
+        assert required_rows, "expected required checks to be recorded"
+        assert any(
+            row["outcome"] == "pass" for row in required_rows
+        ), "expected at least one required check to execute instead of every check being blocked"
 
         rows = repo.check_results()
         required_rows = [row for row in rows if row["mode"] == "required"]
@@ -23,3 +29,18 @@ def test_changed_files_scope_miss_falls_back_to_required_baseline() -> None:
         assert any(
             row["outcome"] == "pass" for row in required_rows
         ), "expected at least one required check to execute instead of every check being blocked"
+
+
+def test_changed_files_from_scope_miss_falls_back_to_required_baseline() -> None:
+    with TemporaryDirectory() as tmpdir:
+        repo = FakeRepo(Path(tmpdir))
+        changed_files = repo.root / "changed-files.txt"
+        changed_files.write_text("Infrastructure/scripts/bootstrap-ask.sh\n", encoding="utf-8")
+
+        proc = repo.run("--persistent", "--changed-files-from", str(changed_files))
+
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert (
+            "Changed-files scope classification missed all known buckets; falling back to baseline required validation"
+            in proc.stdout
+        )

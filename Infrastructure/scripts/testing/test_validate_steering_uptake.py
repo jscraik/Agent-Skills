@@ -33,7 +33,7 @@ _VALID_README = "[19-high-signal-steering-feedback](/Docs/agents/19-high-signal-
 def write(path: Path, text: str) -> None:
     """
     Write UTF-8 text to the given file path, creating any missing parent directories.
-    
+
     Parameters:
         path (Path): Destination file path to write to. Parent directories will be created if they do not exist.
         text (str): Text content to write; existing file content will be overwritten.
@@ -45,15 +45,15 @@ def write(path: Path, text: str) -> None:
 def _make_valid_root(tmp_path: Path) -> Path:
     """
     Create and populate a temporary repository root containing the valid steering-uptake surfaces.
-    
+
     Writes three files into the given directory:
     - Docs/agents/19-high-signal-steering-feedback.md with predefined steering document content.
     - .harness/quality/steering-uptake.md with a valid ledger table.
     - Docs/agents/README.md with an index link to the steering document.
-    
+
     Parameters:
         tmp_path (Path): Directory path to populate.
-    
+
     Returns:
         Path: The same `tmp_path` that was populated.
     """
@@ -71,9 +71,9 @@ def test_validate_current_repo_surfaces() -> None:
 def test_rejects_missing_ledger_row(tmp_path: Path) -> None:
     """
     Verify that validation reports STEERING_LEDGER_EMPTY when the ledger contains only headers and no data rows.
-    
+
     Creates a minimal steering feedback document, a ledger file containing only the header and separator (no data rows), and a README linking the steering doc; runs validate_steering_uptake.validate(tmp_path) and asserts at least one finding has code "STEERING_LEDGER_EMPTY".
-    
+
     Parameters:
         tmp_path (Path): Temporary filesystem root used as the repository root for the test.
     """
@@ -160,9 +160,9 @@ def test_rejects_missing_readme(tmp_path: Path) -> None:
 def test_rejects_doc_missing_stop_rule(tmp_path: Path) -> None:
     """
     Verifies that a STEERING_DOC_INCOMPLETE finding is produced when the steering doc omits the "Stop Rule" section.
-    
+
     Sets up a valid repository surface, rewrites the steering document without the "Stop Rule" section, runs the validator, and asserts at least one finding with code `STEERING_DOC_INCOMPLETE` contains "Stop Rule" in its message.
-    
+
     Parameters:
         tmp_path (Path): pytest temporary directory used as the repository root.
     """
@@ -225,7 +225,7 @@ def test_rejects_doc_missing_validator_script_reference(tmp_path: Path) -> None:
 def test_rejects_wrong_ledger_headers(tmp_path: Path) -> None:
     """
     Verifies that a ledger file with incorrect table headers is flagged.
-    
+
     Writes a steering ledger containing the wrong header row and asserts that validation reports a finding with code `STEERING_LEDGER_HEADERS`.
     """
     _make_valid_root(tmp_path)
@@ -246,9 +246,9 @@ def test_rejects_wrong_ledger_headers(tmp_path: Path) -> None:
 def test_rejects_row_with_too_few_cells(tmp_path: Path) -> None:
     """
     Verifies that a ledger data row with too few table cells is reported as a row-width error.
-    
+
     Writes a steering ledger containing a data row with fewer columns than the required table header, runs the validator, and asserts that at least one finding has the code "STEERING_LEDGER_ROW_WIDTH".
-    
+
     Parameters:
         tmp_path (Path): Temporary filesystem path used as the repository root for the test.
     """
@@ -302,9 +302,9 @@ def test_rejects_row_with_empty_field(tmp_path: Path) -> None:
 def test_rejects_row_with_none_value(tmp_path: Path) -> None:
     """
     Verifies that a ledger row with the Mechanism value set to 'none' is reported as a missing/empty field.
-    
+
     Creates a steering ledger containing a row where the "Mechanism" cell is the literal `none` and asserts that validation produces at least one finding with code `STEERING_LEDGER_FIELD_EMPTY` whose message references "Mechanism".
-    
+
     Parameters:
         tmp_path (Path): Temporary filesystem path used as the repository root for the test.
     """
@@ -411,7 +411,7 @@ def test_accepts_markdown_steering_doc_link(tmp_path: Path) -> None:
 def test_accepts_open_status_row(tmp_path: Path) -> None:
     """
     Verify that a ledger row with Status 'open' produces no status-related findings.
-    
+
     Creates a valid repository root, writes a ledger with a single row whose `Status` is `open`,
     runs the validator, and asserts there are no findings with codes `STEERING_LEDGER_STATUS`
     or `STEERING_LEDGER_VALIDATION_WEAK`.
@@ -434,7 +434,7 @@ def test_accepts_open_status_row(tmp_path: Path) -> None:
 def test_accepts_blocked_status_row(tmp_path: Path) -> None:
     """
     Verifies that a ledger row with a 'blocked' status is treated as valid.
-    
+
     Creates a valid repository layout and overwrites the ledger with a single row where the
     Status cell is `blocked` (and the Validation cell contains a blocked reason), then
     asserts no findings are produced for status or weak validation (`STEERING_LEDGER_STATUS`,
@@ -479,7 +479,7 @@ def test_main_returns_one_on_failure(monkeypatch) -> None:
     # Stub validate() to return a synthetic finding so main() sees a failure.
     """
     Verify that main() signals failure when validation yields a finding.
-    
+
     Replaces the module's `validate()` with a stub that returns a single synthetic
     `Finding` and asserts that `main([])` returns exit code 1.
     """
@@ -498,7 +498,7 @@ def test_main_json_output_structure(capsys) -> None:
     # Real repo; verify the JSON envelope shape on a passing run.
     """
     Verify that running the CLI with `--json` on the real repository emits a JSON envelope indicating a passing run and containing the expected keys.
-    
+
     Parses stdout as JSON and asserts that `status` equals `"pass"`, that the keys `findings` and `checked` are present, and that `findings` is an empty list.
     """
     validate_steering_uptake.main(["--json"])

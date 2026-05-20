@@ -43,10 +43,10 @@ class Finding:
 def _relative(path: Path, root: Path = ROOT) -> str:
     """
     Produce the path string relative to the repository root when the given path is inside it.
-    
+
     Parameters:
         path (Path): The filesystem path to convert.
-    
+
     Returns:
         str: The path as a string relative to `root` if `path` is inside `root`, otherwise the original path as a string.
     """
@@ -59,7 +59,7 @@ def _relative(path: Path, root: Path = ROOT) -> str:
 def _read(path: Path) -> str:
     """
     Read text from the given file path using UTF-8 encoding.
-    
+
     Returns:
         The file contents as a string.
     """
@@ -186,15 +186,15 @@ def _contains_steering_doc_link(text: str) -> bool:
 def validate(root: Path = ROOT) -> list[Finding]:
     """
     Validate the steering feedback documentation, ledger, and agent docs index under the given repository root.
-    
+
     Performs these checks:
     - Ensures the main steering feedback doc exists and contains required phrases.
     - Ensures the steering uptake ledger exists, has the expected table headers, at least one row, correct column counts, non-empty required fields, valid `Status` values, and that rows marked `validated` include validator evidence.
     - Ensures the agent docs index README exists and references the steering feedback doc.
-    
+
     Parameters:
         root (Path): Repository root used to resolve the expected documentation paths.
-    
+
     Returns:
         list[Finding]: A list of findings describing missing files or content issues; empty if all checks pass.
     """
@@ -234,6 +234,12 @@ def validate(root: Path = ROOT) -> list[Finding]:
                 findings.append(Finding("STEERING_LEDGER_STATUS", f"Row {index} has invalid status {record['Status']!r}.", _relative(ledger_path, root)))
             if record["Status"] == "validated" and "validate_steering_uptake.py" not in record["Validation"]:
                 findings.append(Finding("STEERING_LEDGER_VALIDATION_WEAK", f"Row {index} marked validated without steering validator evidence.", _relative(ledger_path, root)))
+            mechanism = record["Mechanism"]
+            guardrail = record["Durable guardrail"]
+            if "Category:" not in mechanism:
+                findings.append(Finding("STEERING_LEDGER_CATEGORY_MISSING", f"Row {index} is missing a failure category in Mechanism.", _relative(ledger_path, root)))
+            if "Improvement type:" not in guardrail:
+                findings.append(Finding("STEERING_LEDGER_IMPROVEMENT_TYPE_MISSING", f"Row {index} is missing a durable improvement type in Durable guardrail.", _relative(ledger_path, root)))
 
     if not readme_path.exists():
         findings.append(Finding("AGENT_DOC_INDEX_MISSING", "Agent docs index is missing.", _relative(readme_path, root)))
@@ -246,12 +252,12 @@ def validate(root: Path = ROOT) -> list[Finding]:
 def main(argv: Iterable[str] | None = None) -> int:
     """
     Run the steering uptake validator and print its results to stdout.
-    
+
     Parses optional CLI arguments (currently `--json`) from `argv` if provided; otherwise uses system arguments. Executes `validate()` and emits a payload describing the checked files and any findings. When `--json` is set, prints the full payload as pretty JSON; otherwise prints a one-line status ("pass" or "fail") followed by one line per finding in the format "<code>: <path>: <message>".
-    
+
     Parameters:
         argv (Iterable[str] | None): Optional list of command-line arguments to parse. If `None`, the process's command-line arguments are used.
-    
+
     Returns:
         int: Exit code — `0` when no findings were produced, `1` when one or more findings exist.
     """

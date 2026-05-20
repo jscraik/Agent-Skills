@@ -25,6 +25,35 @@ If the exact production path cannot be run because it requires unavailable crede
 
 When modifying shell scripts or configuration files, always use non-interactive command patterns. Avoid commands that require user input (like `op read` from 1Password) - they hang in CI/CD and headless environments.
 
+## Repeated Steering and Environment Refinement
+
+Treat repeated user steering as operating evidence, not conversation history.
+When a user has to point out the same failure class twice, stop the current
+task lane and repair the mechanism that allowed the repeat before proceeding.
+
+Use this loop:
+
+1. Name the exact failure pattern and the command or behavior that exposed it.
+2. Separate symptom from mechanism. For example, `error connecting to
+api.github.com` may be a Codex sandbox network-permission issue even when it
+   looks like a GitHub outage.
+3. Apply the smallest durable refinement to the environment contract, docs,
+   skill instructions, scripts, or validation surface.
+4. Run the smallest proof that exercises the refined path.
+5. Report the proof before resuming the original implementation, PR, or
+   automation lane.
+
+For Codex sandboxed network operations, retry API commands with explicit
+network permission before classifying GitHub, CircleCI, Snyk, package registry,
+or other external services as down. For commands that invoke `mise`, either set
+`MISE_CACHE_DIR` to a writable temporary path such as
+`/private/tmp/agent-skills-mise-cache` or request narrow write permission for
+the cache directory. Cache write warnings are not API connectivity evidence.
+
+Do not keep retrying the same failing command. After two equivalent failures,
+change the environment, permission profile, command shape, or diagnostic path,
+then record what changed.
+
 ## Git Workflow
 
 When working with git branches, prefer to merge over rebase for complex histories (>50 commits). Always run `ask repo status` and resolve conflicts systematically before proceeding with changes.

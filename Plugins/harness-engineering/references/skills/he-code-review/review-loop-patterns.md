@@ -50,6 +50,8 @@ Before fixes or thread resolution, re-fetch live PR state and confirm head, unre
 
 For PR readiness, include:
 
+Core traceability chain: Linear issue -> spec/source acceptance IDs -> plan units -> PR evidence -> validation.
+
 - `security_review`: required for workflows, dependencies, secrets, permissions, downloads, generated code, vendored code, minified code, and public surfaces.
 - `real_behavior_proof`: required when tests alone do not demonstrate the user-visible or operational behavior.
 - `work_candidate`: separate the review verdict from whether a narrow repair/autofix path exists.

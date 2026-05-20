@@ -9,6 +9,19 @@ comparison, also load
 Linear plans must inherit upstream source-prompt coverage limits instead of
 turning partial cognition into broad execution authority.
 
+## Coverage Matrix
+
+| Source prompt family | `he-linear-plan` responsibility | Required enforcement surfaces |
+| --- | --- | --- |
+| Linear Execution Orchestration Prompt | Primary owned lane | `linear-plan-output-contract.md`; `.harness/linear` output contract in `contract.yaml`; `linear-routing-plan`, `jsc-dev-portfolio-execution-orchestration`, and `linear-execution-source-prompt-preservation` evals |
+| Architectural Decision Compression | Upstream readiness gate | ADR readiness guard here; `decision_artifact_status` in `linear-plan-output-contract.md` and `contract.yaml`; `adr-readiness-gate` eval |
+| Core Knowledge Compression & Architectural Invariants | Upstream readiness gate | core invariant readiness guard here; `core_artifact_status` in `linear-plan-output-contract.md` and `contract.yaml`; `core-cognition-upstream-gate` eval |
+| Reframe Program Generation & Architectural Migration | Execution input only | legacy/current reframe input rules here; `legacy_refactor_input_status` and `reframe` inputs in `contract.yaml`; `linear-routing-plan` and `jsc-dev-portfolio-execution-orchestration` evals |
+
+If a prompt family is named here without a matching output contract, readiness
+field, and eval, classify `he-linear-plan` as underspecified before claiming
+source-prompt equivalence.
+
 ## Preserved Requirements
 
 - read `.harness/features`, `.harness/review`, `.harness/triage`,

@@ -72,19 +72,12 @@ cases:
     expected_artifact_root: .harness/solutions
     proof: "solved evidence, validation, overlap status, Project Brain status, discoverability"
 
-  - id: tracer-compound-compatibility-reconcile
-    stage: he-compound
-    prompt: "An old he-compound request for lifecycle state recovery should route to he-reconcile."
-    expected_route: he-reconcile
-    expected_artifact_root: stage-map
-    proof: "selected replacement: he-reconcile, authority limit, recommended next step"
-
-  - id: tracer-compound-compatibility-reinforce
-    stage: he-compound
-    prompt: "An old he-compound request for solved-problem capture should route to he-reinforce."
+  - id: tracer-compound-learning-replaced-by-reinforce
+    stage: he-reinforce
+    prompt: "Old compound-learning behavior for solved-problem capture, overlap refresh, and Project Brain sync should route to he-reinforce because he-compound has been removed."
     expected_route: he-reinforce
     expected_artifact_root: .harness/solutions
-    proof: "selected replacement: he-reinforce, authority limit, recommended next step"
+    proof: "source_prompt_family_status, capture_depth, overlap_decision, Project Brain status, Local Memory indexing status"
 
   - id: tracer-eval-report
     stage: he-eval-report

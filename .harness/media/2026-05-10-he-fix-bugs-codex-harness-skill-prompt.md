@@ -39,4 +39,3 @@ compatibility aliases for legacy headings.
 Avoid fake dashboards, invented metrics, fake logos, sci-fi aesthetics, glowing
 orbs, and generic abstract blobs. Keep typography zones clean and suitable for a
 technical X/Twitter post. Prefer readable labels over tiny filler text.
-

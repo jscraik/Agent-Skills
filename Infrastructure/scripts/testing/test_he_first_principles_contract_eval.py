@@ -38,14 +38,14 @@ _safety_script = (
 def _load(name: str, script: Path) -> ModuleType:
     """
     Load a Python module from the given filesystem path and insert it into sys.modules.
-    
+
     Parameters:
         name (str): Module name to register in sys.modules.
         script (Path): Filesystem path to the Python source file to load.
-    
+
     Returns:
         ModuleType: The loaded module object.
-    
+
     Raises:
         AssertionError: If a module spec cannot be created for the given path or if the spec has no loader.
     """
@@ -129,7 +129,7 @@ def test_eval_yaml_parse_gate_uses_portable_python3_command() -> None:
 def test_eval_yaml_parse_gate_does_not_contain_hardcoded_user_path() -> None:
     """
     Ensure the "Gate: Eval YAML parse." evidence does not contain hardcoded user-specific paths.
-    
+
     This test asserts that the gate's Evidence section does not include substrings like "/Users/" which indicate a user-specific virtualenv path, ensuring the evidence uses a portable command form.
     """
     text = eval_file.read_text(encoding="utf-8")
@@ -167,7 +167,7 @@ def test_eval_yaml_parse_gate_does_not_contain_hardcoded_user_path() -> None:
 def test_eval_yaml_parse_gate_does_not_contain_venv_path() -> None:
     """
     Ensure the Eval YAML parse gate's Evidence section does not reference a `.venvs` virtualenv path.
-    
+
     Raises:
         AssertionError: If the file is missing the gate or Evidence section, or if the extracted Evidence contains the substring `.venvs`.
     """
@@ -343,7 +343,7 @@ def test_frontmatter_with_hardcoded_user_path_is_detectable() -> None:
 def test_eval_file_gate_section_contains_portability_marker() -> None:
     """
     Verify the "Gate: Eval YAML parse." section contains the portable "python3" marker and does not include hardcoded user paths.
-    
+
     Checks an 800-character window starting at the gate header for the substring "python3" and asserts that "/Users/" is not present.
     """
     text = eval_file.read_text(encoding="utf-8")

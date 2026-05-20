@@ -308,4 +308,3 @@ Expected portfolio impact:
 | Hooks should not enforce readiness | Strategy says hooks inject context while validators/evals enforce readiness | Fact | High | Eval and validation sub-issues required |
 | MCP/app work is premature | Refactor program says defer until schema proves useful | Interpretation | High | Classify as Later |
 | Linear should not be mutated here | `he-linear-plan` execution boundary forbids creating issues without post-plan approval | Fact | High | Ready-to-create payloads only |
-

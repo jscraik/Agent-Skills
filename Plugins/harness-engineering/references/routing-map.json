@@ -224,6 +224,22 @@
       ]
     },
     {
+      "priority": 44,
+      "rule": "skill-routing-runtime-defect",
+      "route": "he-fix-bugs",
+      "signals": [
+        "skill routing note",
+        "repo-relative script path",
+        "absolute router returned low_confidence",
+        "absolute router returned low confidence",
+        "router returned low_confidence",
+        "router returned low confidence",
+        "latent child module",
+        "source path missing",
+        "access skill from a different project"
+      ]
+    },
+    {
       "priority": 45,
       "rule": "diagnose-before-fix",
       "route": "he-fix-bugs",
@@ -346,8 +362,9 @@
       "priority": 85,
       "rule": "learning-reinforcement",
       "route": "he-reinforce",
-      "folded_from": "he-compound-refresh",
+      "folded_from": "he-compound",
       "signals": [
+        "he-compound",
         "he-compound-refresh",
         "compound solved problem",
         "capture solved problem",
@@ -360,12 +377,9 @@
       "priority": 86,
       "rule": "lifecycle-reconcile",
       "route": "he-reconcile",
-      "folded_from": "he-compound",
       "signals": [
-        "he-compound",
         "refresh harness state",
         "reconcile lifecycle state",
-        "resume compound run",
         "re-check blockers"
       ]
     },
@@ -391,7 +405,6 @@
     "he-heartbeat": "$harness-engineering:he-heartbeat <target-and-cadence>",
     "he-reconcile": "$harness-engineering:he-reconcile <state-or-resume-request>",
     "he-reinforce": "$harness-engineering:he-reinforce <solved-problem-or-learning-refresh>",
-    "he-compound": "$harness-engineering:he-compound <deprecated-compatibility-request>",
     "he-eval-report": "$harness-engineering:he-eval-report <completed-slice-or-pr>",
     "he-strategy": "$harness-engineering:he-strategy <strategy-or-review-request>",
     "he-reframe": "$harness-engineering:he-reframe <migration-candidate>",
@@ -563,11 +576,6 @@
         "git-history-analyzer",
         "project-standards-reviewer"
       ]
-    },
-    "he-compound": {
-      "policy": "manual-only",
-      "baseline_roles": [],
-      "conditional_roles": []
     },
     "he-brainstorm": {
       "policy": "conditional",

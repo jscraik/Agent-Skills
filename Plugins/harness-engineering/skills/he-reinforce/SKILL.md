@@ -39,7 +39,8 @@ context, repeated-failure trace, existing `.harness/solutions/**` or
 ## Outputs
 A capture, refresh, consolidation, continuity-snapshot, stale-note, or blocked
 status; exactly one primary learning artifact when writing; Project Brain sync
-status; overlap and freshness findings; validation evidence; and a handoff for
+status; `source_prompt_family_status` when source-prompt preservation is in
+scope; overlap and freshness findings; validation evidence; and a handoff for
 unresolved work.
 
 ## Preconditions
@@ -51,7 +52,9 @@ secrets, credentials, or unredacted sensitive data into learning artifacts.
 ## Procedure
 1. Select mode: `capture_solved_problem`, `refresh_learning`,
    `consolidate_overlap`, `project_brain_sync`, `continuity_snapshot`, or
-   `blocked`.
+   `blocked`. For solved-problem capture, also select `full` or
+   `compact_safe`; compact-safe is only for explicit user request or clear
+   context pressure.
 2. Prove eligibility. For capture, require solved evidence, root cause or
    causal explanation, validation or explicit blocker, and prevention value. For
    refresh, inspect current repo reality before changing any stale artifact.
@@ -96,8 +99,8 @@ Structured output: `schema_version`, `mode`, `selected_artifact`,
 `evidence_checked`, `solved_status`, `validation_status`, `overlap_status`,
 `refresh_decisions`, `project_brain_status`, `continuity_status`,
 `structure_status`, `size_budget_status`, `discoverability_status`,
-`redaction_status`, `writes`, `git_staging_status`, `staged_paths`,
-`blocked_reason`, and `handoff`.
+`source_prompt_family_status`, `redaction_status`, `writes`,
+`git_staging_status`, `staged_paths`, `blocked_reason`, and `handoff`.
 
 ## Examples
 - When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,
@@ -117,9 +120,15 @@ Structured output: `schema_version`, `mode`, `selected_artifact`,
 ## References
 - Use `assets/` only when this skill's local visual or template assets are explicitly needed.
 Read `references/contract.yaml` for the full reinforcement contract and
-`references/evals.yaml` for validation scenarios. Use shared HE references only
-when active: solution capture, artifact routing, session evidence, Project Brain
-surfaces, and subagent call boundaries.
+`references/evals.yaml` for validation scenarios. Read
+`references/source-prompt-preservation.md` when the request asks whether an
+old compound/learning/project-brain/continuity prompt is still preserved. Use
+`references/compound-learning-migration.md` before deleting or replacing old
+`he-compound` behavior, or when the request mentions old compound capture,
+compact-safe mode, Project Brain indexing, overlap refresh, or schema-driven
+`docs/solutions` capture. Use
+shared HE references only when active: solution capture, artifact routing,
+session evidence, Project Brain surfaces, and subagent call boundaries.
 Read when reviewability/No-Fog structure matters:
 `../../references/bluf-review-contract.md`.
 Read when a durable learning would be clearer as a causal or source-of-truth

@@ -4,7 +4,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [--fail-fast] [--scope <name>] [--changed-files <file>...]
+Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [--fail-fast] [--scope <name>] [--changed-files <file>...] [--changed-files-from <path>]
 
   --ephemeral   Write logs to a temporary directory and do not mutate repo
                 validation artifacts. Intended for git hook runs.
@@ -16,6 +16,9 @@ Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [-
                 consistency-health.
   --changed-files
                 Scope checks to files changed in this lane. When omitted, run full validation.
+  --changed-files-from
+                Read changed-file paths from a newline-delimited file. Prefer this for
+                large merge commits so hook invocations do not exceed argv limits.
 EOF
 }
 
@@ -60,6 +63,23 @@ while [[ $# -gt 0 ]]; do
         shift
       done
       continue
+      ;;
+    --changed-files-from)
+      shift
+      if [[ $# -eq 0 || "$1" == --* ]]; then
+        echo "Error: --changed-files-from requires a path" >&2
+        usage >&2
+        exit 2
+      fi
+      if [[ ! -f "$1" ]]; then
+        echo "Error: --changed-files-from path does not exist: $1" >&2
+        usage >&2
+        exit 2
+      fi
+      changed_files_mode=1
+      while IFS= read -r changed_file || [[ -n "$changed_file" ]]; do
+        changed_files+=("$changed_file")
+      done < "$1"
       ;;
     --help|-h)
       usage
