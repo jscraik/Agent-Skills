@@ -36,8 +36,8 @@ Folded names remain router aliases and modes, not first-class packaged skills:
 - `he-technical-review` / `he-reliability-review` -> `he-code-review`
 - `he-refine` -> `he-improve`
 - `he-refactor` -> `he-reframe`
-- `he-compound` lifecycle state refresh -> `he-reconcile`
-- `he-compound-refresh` / solved-problem compound -> `he-reinforce`
+- lifecycle state refresh -> `he-reconcile`
+- old compound-learning, `he-compound`, or `he-compound-refresh` solved-problem capture -> `he-reinforce`
 - `he-prune-branches` -> `he-router` branch-hygiene handoff
 - `he-phase-heartbeat` -> `he-phase-work`
 

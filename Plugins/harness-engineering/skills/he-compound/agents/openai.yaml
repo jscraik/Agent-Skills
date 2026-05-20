@@ -1,3 +1,0 @@
-interface:
-  display_name: "Harness Engineering Compound (Deprecated)"
-  short_description: "Compatibility handle that routes old he-compound requests to he-reconcile or he-reinforce."

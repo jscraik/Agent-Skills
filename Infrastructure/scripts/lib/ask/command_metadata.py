@@ -22,6 +22,7 @@ VALID_ACTIONS = {
         "starter",
         "sync",
         "audit",
+        "external-review",
         "install",
         "fold",
         "init",
@@ -60,6 +61,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask skills proof he-heartbeat --json",
         "ask skills route \"find the right security skill\"",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
+        "ask skills external-review Skills/backend-platform/cli-spec --json",
     ],
     "reviewers": [
         "ask reviewers resolve skillinspector --json",
@@ -75,6 +77,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     ],
     "evals": [
         "ask evals run Skills/backend-platform/cli-spec --mode smoke",
+        "ask evals run Skills/backend-platform/cli-spec --mode release",
         "ask evals dashboard",
     ],
     "graph": [
@@ -148,6 +151,11 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("skills", "audit"): [
         "ask skills audit Skills/backend-platform/cli-spec --level compat",
+    ],
+    ("skills", "external-review"): [
+        "ask skills external-review Skills/backend-platform/cli-spec --json",
+        "ask skills external-review Plugins/harness-engineering/skills/goal-governor --json",
+        "ask skills external-review Skills/backend-platform/cli-spec --skip-tessl-review --json",
     ],
     ("skills", "goal"): [
         "ask skills goal \"implement auth safely\"",

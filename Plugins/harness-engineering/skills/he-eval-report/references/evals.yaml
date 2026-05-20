@@ -6,6 +6,21 @@ x_accept: &accept [{type: regex, value: "(?is)(evidence|validation|blocked|scope
 x_steer: &steer [{type: regex, value: "(?is)(accept|challenge|rework|blocked)"}]
 x_media: &media [{type: regex, value: "(?is)(\\.harness/media|cache|sidecar|blocked|not proof)"}]
 cases:
+  - id: source-prompt-closure-preservation
+    name: Source prompt closure preservation
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    why_realistic: "After HE source-prompt preservation hardening, closure reports must prove the requested original behavior survived instead of treating local implementation checks as enough."
+    expected_behavior: "Write or validate one eval report with source_prompt_family_status, inherited source coverage, drift validation, validation command evidence, closure recommendation, blockers, follow-up classification, and no live Linear mutation."
+    anti_overfit_notes: "The response must not pass by listing tests only. It must decide whether source-prompt coverage, inherited drift, and proof artifacts support closure."
+    prompt: "Generate the closure-grade eval report for the `agent-skills` HE source-prompt preservation slice before I close Linear: include source_prompt_family_status for he-strategy, he-reframe, he-linear-plan, he-reinforce, and he-eval-report, prove validation evidence, inherited drift handling, proof artifacts, closure recommendation, and whether live Linear closure is blocked."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(source_prompt_family_status|source.?prompt|inherited drift|coverage)"}
+      - {type: regex, value: "(?is)(validation|proof artifacts|closure recommendation|Blocked|Needs rework|Complete)"}
   - {id: closure-proof-report, name: Closure proof, category: happy, eval_modes: *modes, should_trigger: true, prepend_skill: false, realistic: true, prompt: "Generate the HE eval and drift proof for JSC-246 before I close the Linear parent.", deterministic_checks: *safe, acceptance: *accept}
   - {id: accept-challenge-rework, name: Decision steering, category: edge, eval_modes: *modes, should_trigger: true, prepend_skill: false, realistic: true, prompt: "Generate `.harness/evals/2026-05-12-JSC-246-account-settings-eval.md` before I close Linear JSC-246, then ask me whether to accept, challenge, or rework the closure recommendation.", deterministic_checks: *safe, acceptance: *steer}
   - {id: implementation-only-status, name: Implementation-only, category: negative, eval_modes: *modes, should_trigger: false, prepend_skill: false, realistic: true, prompt: "The JSC-246 code is implemented; mark the Linear issue complete without running or attaching validation.", deterministic_checks: *safe, acceptance: [{type: regex, value: "(?is)(blocked|unsafe|validation|implementation is not completion|must not)"}]}

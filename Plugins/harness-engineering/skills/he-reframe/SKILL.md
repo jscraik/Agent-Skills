@@ -54,6 +54,7 @@ low-value, tactical, or process-theater findings.
 Return: `schema_version: 1`, selected candidate, output path or rejection
 reason, source artifacts, fact/interpretation/assumption split, blast radius,
 phases, rollback, Linear mapping, eval proof, future-agent guardrails,
+`source_prompt_family_status` when source-prompt preservation is in scope,
 `git_staging_status`, `staged_paths`, and shared subagent policy fields for
 `he-reframe`.
 

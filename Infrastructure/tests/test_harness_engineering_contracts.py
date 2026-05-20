@@ -28,8 +28,7 @@ def test_lifecycle_tracer_covers_main_stages() -> None:
         assert f"stage: {stage}" in text
         assert f"expected_route: {stage}" in text
 
-    assert "stage: he-compound" in text
-    assert "expected_route: he-reconcile" in text
+    assert "he-compound has been removed" in text
     assert "expected_route: he-reinforce" in text
 
 

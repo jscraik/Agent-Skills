@@ -5,6 +5,46 @@ x_modes: &modes [smoke, release]
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "git commit"]}
 x_accept: &accept [{type: regex, value: "(?is)(solved|evidence|validation|overlap|redact|Project Brain|discoverability|blocked|\\.harness/solutions)"}]
 cases:
+  - id: source-prompt-preservation-learning
+    name: "Source prompt preservation for learning capture"
+    category: edge
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: false
+    why_realistic: "Older he-compound prompts and Jamie steering ask for solved failures, Project Brain memory, and prevention guidance to survive as durable repo memory without reviving he-compound as an active stage."
+    expected_behavior: "Select the reinforcement mode, include source_prompt_family_status, require solved evidence and validation proof before capture, choose Project Brain or .harness/solutions routing deliberately, run overlap and redaction checks, and block if the request is unsolved or only a transcript dump."
+    anti_overfit_notes: "A passing response cannot merely say to remember the issue. It must preserve the learning-capture prompt family and distinguish solved-problem capture, Project Brain sync, stale refresh, and continuity snapshot responsibilities."
+    prompt: "Can you preserve the old compound-learning behavior for `/Users/jamiecraik/dev/agent-skills` now that `he-compound` is obsolete: generate durable memory only if the projection-picker fix is solved, include source_prompt_family_status, exact validation evidence, overlap search, redaction status, Project Brain routing, and prevention guidance; otherwise block instead of writing a generic note."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(source_prompt_family_status|Solved Problem Learning|Project Brain|continuity|stale learning)"}
+      - {type: regex, value: "(?is)(solved|validation|overlap|redaction|blocked|\\.harness/solutions)"}
+  - id: old-compound-full-capture-preserved
+    name: "Old compound full capture preserved"
+    category: happy
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: false
+    why_realistic: "Jamie asked to remove he-compound only if he-reinforce carries the correct information from the old compound-learning workflow."
+    prompt: "Before removing he-compound, prove he-reinforce can run the old full learning-capture flow for a verified fix: choose full versus compact_safe, use memory only as secondary evidence, enforce one primary artifact, classify high/moderate/low overlap, and report Project Brain plus Local Memory indexing status."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(capture_depth|full|compact_safe|one primary artifact|overlap_decision)"}
+      - {type: regex, value: "(?is)(Project Brain|Local Memory|secondary evidence|validated|blocked)"}
+  - id: old-compound-schema-docs-solutions-preserved
+    name: "Schema-driven docs solutions capture preserved"
+    category: edge
+    eval_modes: *modes
+    realistic: true
+    should_trigger: true
+    prepend_skill: false
+    prompt: "A target repo still declares docs/solutions with YAML frontmatter as canonical. Use he-reinforce to preserve the old compound-docs behavior: validate schema expectations, avoid duplicate creation on high overlap, and report legacy_docs_solution_status."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(legacy_docs_solution_status|docs/solutions|YAML|schema|frontmatter)"}
+      - {type: regex, value: "(?is)(high overlap|update existing|duplicate|blocked)"}
   - id: solved-problem-capture
     name: "Solved problem capture"
     category: happy

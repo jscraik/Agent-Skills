@@ -42,8 +42,9 @@ obvious.
 
 Compatibility and internal handles are retained so old prompts still route:
 `he-refactor` maps to `he-reframe`, `he-phase-heartbeat` maps to
-`he-phase-work`, and `he-compound` maps to `he-reconcile` or `he-reinforce`
-after intent classification.
+`he-phase-work`. The obsolete `he-compound` package has been removed;
+old compound-learning and Project Brain capture behavior now belongs to
+`he-reinforce`.
 
 ## Lifecycle Flow
 
@@ -79,8 +80,8 @@ Start with `he-router` when the stage is unclear. Direct stage calls are fine wh
 - `he-refactor` -> `he-reframe`
 - `he-refine` -> `he-improve`
 - `he-phase-heartbeat` -> `he-phase-work`
-- `he-compound` lifecycle state refresh -> `he-reconcile`
-- `he-compound` / `he-compound-refresh` solved-problem or learning refresh -> `he-reinforce`
+- old compound-learning or `he-compound-refresh` solved-problem refresh -> `he-reinforce`
+- lifecycle state refresh -> `he-reconcile`
 - `he-prune-branches` -> `he-router` branch-hygiene handoff
 
 Source of truth:

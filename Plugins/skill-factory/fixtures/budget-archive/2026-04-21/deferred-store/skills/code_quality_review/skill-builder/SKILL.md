@@ -81,6 +81,9 @@ Use repo wrappers from the repo root:
 - `./bin/ask skills audit <target-skill-path> --level strict --json`
 - `./bin/ask evals run <target-skill-path> --mode smoke --json` when evals exist
 - `Infrastructure/bin/plugin-eval analyze <target-plugin-or-skill-path> --format markdown`
+- `./bin/ask skills external-review <target-skill-path> --json` for the strict audit + local Plugin Eval + installed native Tessl review ladder
+
+Default order for skill hardening is: strict audit, smoke eval listing/run, Plugin Eval, then Tessl review through `ask skills external-review`. `ask evals run` includes native Tessl by default, stages the controlled input files in a temporary directory, and runs `tessl eval run --json <staged-temp-source>`, never the live source tree. Tessl eval saves runs to a Tessl project, and this repo treats that temp-staged project-save lane as automatic; `--allow-tessl-project-save` is accepted for compatibility but is not required. Do not use `npx tessl`, registry publish, registry upload, or package upload paths as a shortcut.
 
 Fail fast: stop at the first failed gate, fix it, and rerun. Before completion, run the focused gate plus the smallest broader gate covering the edit. Use `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills_sandbox_safe.sh` when sync is needed but user runtime paths are not writable.
 

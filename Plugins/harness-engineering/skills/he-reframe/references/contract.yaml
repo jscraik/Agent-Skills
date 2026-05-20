@@ -32,19 +32,26 @@ inputs:
 
 outputs:
   - root: .harness/reframes
+    mode: reframe-program
+    source_prompt_family: "Reframe Program Generation & Architectural Migration"
     pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<reframe-slug>.md"
     pattern_without_linear: "YYYY-MM-DD-<repo-name>-<reframe-slug>.md"
     legacy_supported_pattern: "<reframe-slug>.md"
     note: "Dated Linear identifiers are preferred for new programs."
+    required_sections: "Reframe Classification, Problem Statement, Root Cause Analysis, Evidence, Architectural Impact, Desired End State, Migration Strategy, Smallest Reversible Step, Execution Phases, Linear Mapping, Anti-Regression Constraints, Eval Requirements, Success Criteria, Safe Rollback Conditions, Future-Agent Guidance, Related Systems"
 
   - root: .harness/decisions
     mode: decision-compression
+    source_prompt_family: "Architectural Decision Compression"
     pattern: "ADR-###-<slug>.md"
     note: "Only when a selected migration needs durable architectural memory; otherwise Do Not Create."
+    required_sections: "ADR-###, Title, Status, Decision, Context, Why This Decision Exists, Alternatives Considered, Accepted Tradeoffs, Anti-Drift Constraints, Safe Revisit Conditions, Related Systems, Evidence"
   - root: .harness/core
     mode: core-invariant-compression
+    source_prompt_family: "Core Knowledge Compression & Architectural Invariants"
     pattern: "<invariant-domain>.md"
     note: "Only for irreducible migration or anti-drift invariants; keep stable names."
+    required_sections: "Purpose, Scope, Invariant Classification, Core Invariants, Forbidden Drift, Operational Justification, Evidence, Safe Revisit Conditions, Future-Agent Rules"
   - visual_references: "Required when the program spans multiple modules, phases, boundaries, coexistence states, rollback paths, or eval gates; prefer Mermaid before/after diagrams and migration maps."
 
 non_goals:
@@ -68,6 +75,9 @@ risks:
   - eval-free closure
   - creating new abstraction before deleting old abstraction
   - migration coupling hidden in prose instead of a before/after boundary or phase diagram
+  - source-prompt preservation collapsing into generic migration advice without lane-specific contracts
+  - strategic compression prompts being authored from he-reframe instead of routed to he-strategy
+  - ADR or core compression prompts creating artifacts without a selected migration phase and necessity gate
 
 observability: "Record selected lane, source artifacts read, affected systems and blast radius, fact/interpretation/assumption separation, migration phases or decision/invariant rationale, validation requirements, rollback conditions, visual reference status, Linear mapping without mutation, expected eval artifact pattern .harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<slug>-eval.md when a migration is created, dated output path or Do Not Create classification, required sections present, and validation outcomes recorded as pass, fail, or blocked."
 

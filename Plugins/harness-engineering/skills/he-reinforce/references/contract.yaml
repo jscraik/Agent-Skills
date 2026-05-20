@@ -17,13 +17,19 @@ inputs:
   - solved-problem context, validation evidence, diff/PR/Linear context, or repeated-failure trace
   - existing .harness/solutions, .harness/knowledge, .harness/decisions, .harness/rules, or docs/solutions candidates
   - active instruction surfaces that control discoverability
+  - source prompt family coverage matrix when old compound, Project Brain, solved-learning, refresh, or continuity prompts are being preserved
   - redaction requirements and repo ownership boundaries
 
 outputs:
   - "mode: capture_solved_problem, refresh_learning, consolidate_overlap, project_brain_sync, continuity_snapshot, or blocked"
+  - "capture_depth: full, compact_safe, not_applicable, or blocked"
+  - "source_prompt_family_status when source-prompt preservation is in scope"
   - "one primary .harness/solutions artifact for new solved-problem capture when eligible"
+  - "legacy_docs_solution_status when the target repo still treats docs/solutions as canonical or as source evidence"
   - "refresh decisions: keep, update, consolidate, replace, delete_candidate, or blocked"
+  - "overlap_decision: high_update_existing, moderate_create_and_flag_refresh, low_create_new, not_checked, or blocked"
   - "Project Brain status: updated, blocked, not_checked, or not_applicable"
+  - "local_memory_indexing_status: synced, blocked, not_available, or not_applicable"
   - "continuity_status: updated, blocked, not_checked, or not_applicable"
   - "structure_status proving any fixed memory template headings/instructions were preserved"
   - "size_budget_status proving oversized sections were condensed or explicitly blocked"
@@ -41,6 +47,8 @@ non_goals:
   - claiming route accuracy or product metrics from unlabelled anecdotes
 
 risks:
+  - source-prompt preservation can collapse into generic note-taking; mitigate with source_prompt_family_status, solved-proof gates, and mode-specific output contracts
+  - losing old compound-learning capture depth; mitigate with compound-learning-migration.md, full/compact-safe capture selection, overlap decisions, and Project Brain indexing status
   - false learning capture; mitigate with solved proof and validation evidence
   - duplicate or stale memory; mitigate with overlap search and refresh decisions
   - Project Brain drift; mitigate with explicit classification and blocked status when uncertain
@@ -51,9 +59,10 @@ risks:
 
 observability: >
   Record mode, evidence checked, selected artifact, overlap candidates,
-  validation status, redaction status, Project Brain status, discoverability
-  status, continuity status, structure status, size budget status, visual
-  reference status, writes, and blocked reason.
+  overlap decision, validation status, redaction status, Project Brain status,
+  local memory indexing status, discoverability status, continuity status,
+  structure status, size budget status, visual reference status, writes, and
+  blocked reason.
 
 continuity_memory_contract:
   source_pattern: >

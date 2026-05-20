@@ -132,7 +132,7 @@ Baseline facts from the implementation:
 - `ask skills handles --json --no-handles --robot` reports `108` generated
   command handles from rooted manifests with no command-surface violations.
 - `ask skills goal "use he-work to implement P5 product framing and outcome
-  proof documentation for JSC-246" --json --robot` resolves to `he-work`.
+proof documentation for JSC-246" --json --robot` resolves to `he-work`.
 
 ## Product Direction
 

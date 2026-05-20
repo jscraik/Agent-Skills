@@ -34,15 +34,25 @@ outputs:
   - root: .harness/features
     mode: intent
     pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-intent.md"
-    pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slug>-intent.md"
+    pattern_without_linear: "YYYY-MM-DD-<repo-name>-intent.md"
+    required_sections: "Project Intent, Stated Intent, Implied Intent, Alignment, Core Thesis, Strategic Direction, Intended Users, Non-Goals, System Philosophy, Architectural Patterns, Agent-Native Assumptions, Harness/Governance Model, Critical Constraints, Stable Interfaces, Sources of Complexity, Sources of Leverage, Probable Moat, Drift Risks, Technical Debt Signals, UX Philosophy, Future-Agent Preserve/Challenge, Open Questions, Recommended Decisions, Strategic Contradictions, Suggested Simplifications, Missing Capabilities, Long-Term Scalability Concerns, Modern Standards Assessment (May 2026), Direct Strategic Critique, Drift Detection Signals, Evidence & Traceability Matrix, post_artifact_review_status"
+    post_artifact_review: "Use request_user_input when available before finalizing; otherwise record blocked with concrete reason and assumption risk."
   - root: .harness/review
     mode: architecture-review
     pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-architecture-review.md"
     pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slug>-architecture-review.md"
+    source_prompt_family: "Multi-Disciplinary Architecture & Skill Review"
+    required_sections: "Executive Summary, Architectural Risk Assessment, Repository Cognition Review, Complexity Audit, Deep vs Shallow Module Analysis, Domain Integrity Review, Skill/Plugin Architecture Review, Agent-Native Capability Review, Governance & Workflow Review, Refactor Recommendations, Anti-Patterns Identified, Drift Risks, Technical Debt Hotspots, Strategic Review, Recommended Simplifications, Recommended Deletions, Recommended Core Investments, Long-Term Scalability Risks, Moat Analysis, Competitive Replication Risk, Evidence & Traceability Matrix, post_artifact_review_status"
+    required_lenses: "Pragmatic Programmer, Philosophy of Software Design, Extreme Programming, Domain-Driven Design, Five Lines of Code, agent-native architecture, moat pressure"
+    post_artifact_review: "Use request_user_input when available before finalizing; otherwise record blocked with concrete reason and assumption risk."
   - root: .harness/triage
     mode: triage
     pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-triage.md"
     pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slug>-triage.md"
+    source_prompt_family: "Structural Triage & Execution Prioritization"
+    required_sections: "Executive Triage Summary, Immediate Architectural Risks, Strategic Findings, Architectural Findings, Operational Findings, Governance Findings, Agent-Native Findings, Complexity Without Leverage, Moat-Critical Systems, Fake Sophistication Signals, Recommended Deletions, Refactor Candidates, Anti-Drift Priorities, Execution Priority Matrix, Recommended Linear Initiatives, Recommended ADRs, Recommended Refactor Programs, Future Agent Operational Risks, Recommended Compression Opportunities, Evidence & Traceability Matrix, post_artifact_review_status"
+    required_classifications: "high_leverage, medium_leverage, low_leverage, false_sophistication, strategic, architectural, operational, agent-native, governance, technical-debt, Do Not Create"
+    post_artifact_review: "Use request_user_input when available before finalizing; otherwise record blocked with concrete reason and assumption risk."
   - root: ".harness/features + .harness/review + .harness/triage"
     mode: repo-cognition-pipeline
     pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-intent.md, YYYY-MM-DD-JSC-###-<slug>-architecture-review.md, YYYY-MM-DD-JSC-###-<slug>-triage.md"
@@ -52,14 +62,20 @@ outputs:
     mode: strategic-compression
     pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<slug>-strategy.md"
     pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slug>-strategy.md"
+    source_prompt_family: "Strategic Compression & Direction"
+    required_sections: "Irreducible Core, Actual Moat, False Moat, Strategic Contradictions, Non-Negotiables, Should Be Deleted, Should Become Core, Safe To Rewrite, Risk Register, Future-Agent Guidance, Smallest Feedback-Producing Next Slice, Authority Limits, Evidence & Traceability Matrix"
   - root: .harness/decisions
     mode: decision-compression
     pattern: "ADR-###-<slug>.md"
     note: "Keep ADR filenames stable; include date and Linear identifiers in the body; choose the next unused ADR number by scanning existing .harness/decisions/ADR-###-*.md files and mark needs_human_triage if numbering cannot be proven."
+    source_prompt_family: "Architectural Decision Compression"
+    required_sections: "ADR Necessity Test, Existing ADR Scan, Context, Decision, Options Considered, Rejected Alternatives, Consequences, Future Re-Suggestion Risk, Authority Limits, Evidence & Traceability Matrix"
   - root: .harness/core
     mode: core-compression
     pattern: "<invariant-domain>.md"
     note: "Core invariant files are living policy and keep stable canonical names."
+    source_prompt_family: "Core Knowledge Compression & Architectural Invariants"
+    required_sections: "Invariant Necessity Test, Invariant Statement, Scope, Non-Goals, Allowed Variation, Prohibited Drift, Enforcement Surface, Owner or Review Surface, Future-Agent Guidance, Evidence & Traceability Matrix"
   - visual_references: "Required when strategy, architecture, triage, intent, ADR, or core relationships are easier to review as a strategy map, boundary diagram, drift map, route map, or matrix."
 
 non_goals:
@@ -80,6 +96,13 @@ risks:
   - leaking private or sensitive repository data
   - strategy relationships hidden in prose instead of a map or matrix when visual structure would reduce review effort
   - full-pipeline requests collapsing into a single generic strategy document
+  - repo intent requests collapsing into generic architecture documentation
+  - source-prompt preservation silently weakening May 2026 standards, drift signals, direct critique, or shared review loops
+  - architecture review source prompts collapsing into shallow code review or generic best-practice prose
+  - structural triage source prompts collapsing into repeated review findings, implementation specs, or backlog dumps
+  - strategic compression source prompts collapsing into roadmap repetition or vague product strategy
+  - decision compression source prompts creating ADRs for ephemeral or self-evident implementation details
+  - core compression source prompts turning local preferences or single-ticket context into permanent invariants
 
 overlays:
   source_prompt_equivalence:
@@ -87,7 +110,7 @@ overlays:
     applies_when: "The user asks whether a skill, artifact, or workflow captures an original prompt or prior method."
     required_fields: "coverage verdict, covered requirements, missing requirements, evidence depth, source prompt family, downstream confidence, and gaps that require a patch, handoff, or Do Not Create classification."
 
-observability: "Record source artifacts read, inspection method or command, affected systems or modules, confidence level, operational impact, drift or moat impact when relevant, fact/interpretation/assumption separation, clarification_status as asked/not_needed/assumed, ambiguity_impact, assumption_risk, visual reference status, dated output path or Do Not Create classification, source prompt family coverage when applicable, evidence and traceability matrix, and validation outcomes recorded as pass, fail, or blocked."
+observability: "Record source artifacts read, inspection method or command, affected systems or modules, confidence level, operational impact, drift or moat impact when relevant, fact/interpretation/assumption separation, clarification_status as asked/not_needed/assumed, ambiguity_impact, assumption_risk, visual reference status, dated output path or Do Not Create classification, source prompt family coverage when applicable, modern-standards evidence status, post_artifact_review_status, evidence and traceability matrix, and validation outcomes recorded as pass, fail, or blocked."
 
 reference_material_policy: "When the user supplies architecture or refactoring reference material, use it as an evaluative lens, not as repository evidence and not as material to summarize. When no fresh attachments are supplied, use references/architecture-lens-canon.md as the internal default lens set and record availability as internal-canon. Record which references were inspected, sampled, unavailable, not needed, or internal-canon. Do not claim attachment-specific coverage unless the material was actually inspected. Repository conclusions still require repo evidence."
 

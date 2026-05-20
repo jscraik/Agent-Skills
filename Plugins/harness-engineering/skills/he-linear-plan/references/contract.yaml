@@ -26,6 +26,7 @@ inputs:
   - .harness/refactors/*.md legacy input, read-only compatibility for older reframe program prompts
   - existing .harness/linear/*.md
   - source-prompt coverage or original-method comparison artifacts when present
+  - source prompt family coverage matrix when source-prompt equivalence or original-method preservation is in scope
   - live Linear project, label, initiative, and duplicate-project evidence when tool access is available
   - Linear issue, project, milestone, and initiative identifiers when available
   - actual Linear plugin/app evidence for team, project, initiative, label, duplicate, archived, canceled, and trashed state when the Linear connector is available
@@ -33,10 +34,14 @@ inputs:
 
 outputs:
   - root: .harness/linear
+    mode: linear-execution-orchestration
+    source_prompt_family: "Linear Execution Orchestration Prompt"
     pattern_when_linear_known: "YYYY-MM-DD-JSC-###-<repo-name>-<slice-slug>-linear-plan.md"
     pattern_without_linear: "YYYY-MM-DD-<repo-name>-<slice-slug>-linear-plan.md"
     legacy_supported_pattern: "<repo-name>-linear-plan.md"
     note: "Dated Linear identifiers are preferred for new plans."
+    required_sections: "Executive Linear Routing Summary, Target Linear Destination, Existing Project Match, ADR / Decision Artifact Readiness, Core / Invariant Artifact Readiness, Proposed Milestones, Proposed Parent Issues, Proposed Sub-Issues, Now / Next / Later / Do Not Create, Dependency Map, Eval Gate Map, Human vs Agent Execution Map, Story / Value Basis, Recommended Labels, Repo / Location Label, Priority Mapping, Project / Cycle Justification, Project Reactivation Recommendation, Portfolio Ops Items, Dev Portfolio Impact, GitHub PR Tracking, Delivery Evidence, Evidence & Traceability Matrix, Visual References / Diagrams"
+    required_fields: "schema_version, selected_stage, source_prompt_family_status, linear_mutation_status, live_linear_blocker, required_confirmation, decision_artifact_status, core_artifact_status, existing_project_match, live_linear_setup_status, label_status, template_status, repo_location_label, project_assignment_reason, cycle_assignment_reason, github_tracking_rule, delivery_evidence_rule"
   - ready_to_create_payloads: "Included in the artifact only; not applied without explicit confirmation."
   - legacy_refactor_input_status: "When .harness/refactors inputs are present, report read, absent, translated_to_reframes, or blocked; do not create new legacy refactor-root artifacts."
   - story_value_basis: "Required for each Now item; include user/operator value, expected feedback signal, and risk-reduction reason."
@@ -93,8 +98,10 @@ risks:
   - technically neat work being promoted to Now without story value or a feedback signal
   - local artifacts hiding missing live Linear mutation, confirmation, or connector blockers
   - multi-issue plans hiding dependency or route complexity that should be visible as an issue tree, dependency map, or eval-gate table
+  - source-prompt preservation collapsing into generic issue routing without source-prompt family status
+  - approved cognition being converted into broad live tracking before ADR, core, reframe, and source-coverage readiness gates are explicit
 
-observability: "Record source artifacts read, ADR status, core artifact status, live Linear setup status, live Linear evidence or blocker, destination, repo/location label, existing project match, duplicate/canceled/archived/trashed findings, issue-label status, project-label status, tag compatibility, template status, project/cycle reasons, Now/Next/Later/Do Not Create, Now value basis, dependencies, eval gates, human/agent route, visual reference status, PR/release evidence rules, traceability, output path or Do Not Create, Linear mutation status, and pass/fail/blocked validation."
+observability: "Record source prompt family status when applicable, source artifacts read, ADR status, core artifact status, live Linear setup status, live Linear evidence or blocker, destination, repo/location label, existing project match, duplicate/canceled/archived/trashed findings, issue-label status, project-label status, tag compatibility, template status, project/cycle reasons, Now/Next/Later/Do Not Create, Now value basis, dependencies, eval gates, human/agent route, visual reference status, PR/release evidence rules, traceability, output path or Do Not Create, Linear mutation status, and pass/fail/blocked validation."
 
 rollback_procedure: "If the destination is wrong, mark needs_human_triage and do not create objects; if the plan creates backlog noise, collapse to fewer parent issues or classify as Do Not Create; if a Linear object was accidentally created, stop and ask the user before modifying or deleting it; do not recommend closure unless eval and drift proof are present."
 

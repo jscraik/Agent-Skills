@@ -51,6 +51,7 @@ stay unapplied unless live mutation is explicitly approved.
 Always include `schema_version: 1`, `selected_stage: he-linear-plan`, evidence
 traceability, Target Linear Destination, Existing Project Match,
 Now/Next/Later/Do Not Create, `decision_artifact_status`,
+`source_prompt_family_status` when source-prompt preservation is in scope,
 `linear_mutation_status`, `required_confirmation` when needed, and
 `live_linear_blocker` when expected live tracking is blocked. Include
 `git_staging_status` and `staged_paths` when writing local Linear artifacts.
@@ -165,15 +166,23 @@ Use plain headings, stable IDs, explicit status words, no color-only signaling.
 
 ## Examples
 
-- "Create `.harness/linear/2026-05-13-JSC-321-agent-skills-routing-linear-plan.md`
-  from `.harness/reframes/2026-05-10-JSC-321-agent-skills-routing.md`: use the
-  existing `agent-skills` repo project, one milestone, one parent, and only
-  independently verifiable sub-issues."
-- "Use my JSC Dev Portfolio setup for `agent-skills`: confirm `Dev Portfolio`,
-  avoid the canceled duplicate project, keep `Portfolio Ops` only for cross-repo
-  work, and leave `linear_mutation_status: confirmation_required`."
-- "Create one issue for every CodeRabbit observation" -> refuse; ask for the
-  selected execution slice and classify low-value notes as `Later` or
+- "When the user asks to convert
+  `.harness/reframes/2026-05-10-JSC-321-agent-skills-routing.md` into Linear,
+  create `.harness/linear/2026-05-13-JSC-321-agent-skills-routing-linear-plan.md`
+  from `.harness/reframes/2026-05-10-JSC-321-agent-skills-routing.md` and
+  `.harness/decisions/ADR-007-portable-skill-and-memory-proof.md`: use the
+  existing `agent-skills` repo project, one milestone named `Routing projection
+  safety`, one parent, and child issues only for command-surface contract proof,
+  rooted sync dry-run validation, and source-prompt eval proof. Leave
+  `linear_mutation_status: confirmation_required`."
+- "When the user asks to validate live JSC Dev Portfolio routing, inspect whether
+  Linear shows a canonical `agent-skills` project plus a canceled duplicate:
+  plan under the canonical project, keep `Portfolio Ops` only for cross-repo
+  work, and set `live_linear_setup_status: blocked` if the project state is
+  trashed, contradictory, or cannot be verified."
+- "Create one issue for every CodeRabbit observation in
+  `.harness/reviews/2026-05-10-JSC-321-coderabbit-sweep.md`" -> refuse; ask
+  for the selected execution slice and classify low-value notes as `Later` or
   `Do Not Create`.
 
 ## Validation

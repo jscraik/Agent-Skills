@@ -3,7 +3,8 @@ schema_version: 1
 selected_stage: he-reframe
 program_path: .harness/reframes/2026-05-17-agent-skills-skill-sdk-doctor-trust-reframe.md
 source_strategy: .harness/strategy/2026-05-17-agent-skills-sdk-north-star.md
-source_strategy_status: missing_in_current_checkout
+source_strategy_status: present
+doctor_schema: Infrastructure/config/schemas/skill-doctor.v1.schema.json
 status: approved_for_he_plan
 date: 2026-05-17
 repo: agent-skills
@@ -14,13 +15,13 @@ handoff: he-plan
 
 ## Command Summary
 
-BLUF: This reframe converts the approved Skill SDK north star into a phased migration program so Agent Skills Kit can prove skill readiness through `./bin/ask skills doctor <handle> --json --robot` before Codex or coding-harness rely on a skill. It matters because readiness truth is currently split across source ownership, runtime projection, package metadata, profiles, events, memory, outcome proof, and the agent's ability to generalize high-signal feedback instead of patching one named instance. The first phase should harden doctor contract fixtures for one representative skill because a broad SDK rewrite would add ceremony before proving runtime trust.
+BLUF: This reframe converts the approved Skill SDK north star into a phased migration program so Agent Skills Kit can prove skill readiness through `./bin/ask skills doctor <handle> --json --robot` before Codex or coding-harness rely on a skill. It matters because readiness truth is currently split across source ownership, runtime projection, package metadata, profiles, events, memory, outcome proof, and the agent's ability to generalize high-signal feedback instead of patching one named instance. The first phase must register and prove the doctor contract for one representative skill because the live CLI does not expose `skills doctor` yet, and a broad SDK rewrite would add ceremony before proving runtime trust.
 
 Decision Needed: Approve RF-1 as the first implementation slice for `he-plan`.
 
-Top Risks: The SDK contract can become ceremony without behavior proof; harness can duplicate Agent Skills Kit logic; stale memory or runtime projections can look current; package readiness can be mistaken for outcome proof.
+Top Risks: The SDK contract can become ceremony without behavior proof; harness can duplicate Agent Skills Kit logic; stale memory or runtime projections can look current; package readiness can be mistaken for outcome proof; parser/help/guided-error actions can drift without a parity test.
 
-Next Action: Create an `he-plan` for RF-1 that adds doctor JSON contract fixtures and negative-path checks around `context7`, while preserving RF-0 steering uptake gates as a non-negotiable preflight for implementation work.
+Next Action: Create an `he-plan` for RF-1 that registers `skills doctor`, adds doctor JSON contract fixtures around `context7`, and records negative-path gaps without expanding into the RF-2 matrix, while preserving RF-0 steering uptake gates as a non-negotiable preflight for implementation work.
 
 ## Reframe Classification
 
@@ -51,10 +52,11 @@ It survived because each layer solves a real local problem:
 
 - `SKILL.md` gives Codex a compact runtime entrypoint.
 - `.agents/skills/**` and command handles make skills discoverable.
-- `./bin/ask skills doctor` diagnoses readiness.
-- `./bin/ask skills package` reports promotion and share metadata.
-- `./bin/ask skills profiles` exposes operation modes.
-- `./bin/ask skills events` exposes lifecycle evidence.
+- `./bin/ask skills prove` is the current public readiness-adjacent command.
+- `./bin/ask skills doctor` is the planned RF-1 readiness aggregator, but is
+  not registered in the live CLI as of 2026-05-20.
+- `./bin/ask skills package`, `skills profiles`, and `skills events` are
+  future SDK seams, not current baseline commands.
 - `coding-harness` needs a control pane over runs, evidence, and gates.
 - Review feedback often arrives as a local comment even when it expresses a broader design rule.
 - Agent steering often arrives in conversation, but the durable owner is the
@@ -65,13 +67,20 @@ The pressure is strategic and operational, not just historical. Jamie wants Code
 
 ## Evidence
 
-- Agent Skills Kit north star: `.harness/strategy/2026-05-17-agent-skills-sdk-north-star.md` is referenced by this reframe but is missing in the current checkout as of 2026-05-18. Restore it or replace the reference with an existing canonical source before using it as live evidence.
+- Agent Skills Kit north star: [`.harness/strategy/2026-05-17-agent-skills-sdk-north-star.md`](/Users/jamiecraik/dev/agent-skills/.harness/strategy/2026-05-17-agent-skills-sdk-north-star.md:1) defines the additive `skills doctor` facade decision and executable source-of-truth order.
+- Skills SDK apparatus lens: [`Infrastructure/references/skills-sdk-apparatus-lens.md`](/Users/jamiecraik/dev/agent-skills/Infrastructure/references/skills-sdk-apparatus-lens.md:1) defines RF-1 signoff proof.
+- Doctor schema: [`Infrastructure/config/schemas/skill-doctor.v1.schema.json`](/Users/jamiecraik/dev/agent-skills/Infrastructure/config/schemas/skill-doctor.v1.schema.json:1) is the canonical `data.skill_doctor` payload contract for RF-1.
 - [UBIQUITOUS_LANGUAGE.md](/Users/jamiecraik/dev/agent-skills/UBIQUITOUS_LANGUAGE.md:13) defines Agent Skills Kit as the governed repository and CLI system for authoring, validating, discovering, and syncing Codex skills.
 - [UBIQUITOUS_LANGUAGE.md](/Users/jamiecraik/dev/agent-skills/UBIQUITOUS_LANGUAGE.md:15) separates Canonical Skill Source from [Runtime Projection](/Users/jamiecraik/dev/agent-skills/UBIQUITOUS_LANGUAGE.md:16).
 - [Path Ownership Boundaries](/Users/jamiecraik/dev/agent-skills/Docs/agents/14-path-ownership-boundaries.md:10) uses a product, factory, and runtime plane model.
-- [Agent Capability Control Plane](/Users/jamiecraik/dev/agent-skills/Docs/product/agent-capability-control-plane.md:36) already maps diagnosis to `ask skills doctor <handle-or-path> --json --robot`.
-- `./bin/ask skills doctor context7 --json --robot` currently returns `blocked_runtime` while also preserving `outcome_proof_missing`, package metadata gaps, operation context, lifecycle event data, and a `next_command`.
-- `./bin/ask skills package context7 --json --robot` is the baseline package-readiness probe for separating package metadata gaps from runtime blockers.
+- [Agent Capability Control Plane](/Users/jamiecraik/dev/agent-skills/Docs/product/agent-capability-control-plane.md:35) currently names `ask skills prove`, audits, workouts, evals, validation logs, and closeout evidence as quality proof surfaces.
+- Live command check on 2026-05-20: `./bin/ask skills --help` lists `list, budget, handles, resolve, parse, proof, prove, explain, route, goal, improve, starter, sync, audit, validate-skill-gate, validate-openai-format, validate-boundaries, install, fold, init`; it does not list `doctor`, `package`, `profiles`, or `events`.
+- `./bin/ask skills doctor context7 --json --robot` exits 2 with parser error `invalid choice: 'doctor'`. RF-1 must treat this as the first blocker, not as a blocked-runtime doctor payload.
+- `./bin/ask skills package context7 --json --robot` exits 2 with parser error `invalid choice: 'package'`. Package readiness remains comparison design input until a real command seam exists.
+- Unknown-action guided-error text currently mentions `external-review` in
+  suggested valid actions even though `./bin/ask skills --help` and parser
+  choices do not list that action. Treat help/parser output as authoritative
+  until the guidance text is fixed.
 - [High-Signal Steering Feedback](/Users/jamiecraik/dev/agent-skills/Docs/agents/19-high-signal-steering-feedback.md:1) defines steering as operating evidence and requires classified uptake before ordinary work resumes.
 - [Steering Uptake Ledger](/Users/jamiecraik/dev/agent-skills/.harness/quality/steering-uptake.md:1) records the repeated-steering environment refinement with operating failure, blocker, mechanism, proof, validation, and repeat prevention.
 - [validate_steering_uptake.py](/Users/jamiecraik/dev/agent-skills/Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py:1) makes that uptake executable.
@@ -107,6 +116,11 @@ A representative skill such as `context7` can be checked through doctor and prod
 - `agent_summary`
 - `next_command`
 
+The payload validates against
+`Infrastructure/config/schemas/skill-doctor.v1.schema.json` as
+`data.skill_doctor`. RF-1 also requires one additional non-`context7`
+skill-class fixture so the first contract is not overfit to one handle.
+
 The same run clearly separates:
 
 - source resolution;
@@ -136,22 +150,111 @@ Stable does not mean frozen forever. Schema evolution should follow these rules 
 - deprecated fields need a documented replacement and a compatibility window;
 - cross-consumer fixtures must include the schema version and fail when `./bin/ask` and coding-harness interpret the same fixture differently.
 
+## Agent-Native Contract Principle
+
+The SDK should be agent-native first and human-readable second. The durable
+contract is executable evidence: CLI JSON, schema files, fixtures, eval
+artifacts, lifecycle event logs, package inspection output, and harness
+consumer tests. Human-facing docs should only explain those surfaces, link to
+the owning artifacts, and record decisions that are not yet executable.
+
+Agent-native means:
+
+- every readiness claim has a machine-readable status, blocker class, evidence
+  reference, and safe next command;
+- harness and future agents consume stable JSON fields instead of prose, file
+  layout guesses, or implementation internals;
+- HTML diagrams and Markdown plans are advisory views over the contract, not
+  parallel source-of-truth requirements;
+- new human docs are avoided unless they introduce or reconcile an executable
+  contract, schema, fixture, eval, or migration decision;
+- public interfaces stay small enough for agents to route through search,
+  namespaces, and schema discovery without loading implementation detail.
+
+## Eval-Driven Improvement Loop
+
+Skills should improve over time through use, evals, and feedback loops. The
+SDK must not treat evals as one-off scorecards. Every meaningful eval run
+should be able to produce a structured improvement delta that future agents can
+apply, test, accept, or reject.
+
+The loop is:
+
+1. Run skill in a real or fixture-backed scenario.
+2. Capture outcome as pass, fail, blocked, not_run, or warning with exact
+   evidence.
+3. Classify the learning as routing_gap, instruction_gap, missing_reference,
+   tool_contract_gap, eval_gap, permission_gap, package_metadata_gap, or
+   regression_guard_needed.
+4. Propose a bounded update to the canonical skill source, reference, schema,
+   fixture, eval case, or package metadata.
+5. Re-run the affected evals and doctor/proof command.
+6. Promote only when the new evidence improves the target behavior without
+   weakening existing fixtures; otherwise record rollback evidence.
+
+This makes improvement agent-native: the durable learning is a machine-readable
+delta with before/after evidence, not a memory-only note or a human narrative.
+
+## Terminology Flywheel
+
+The SDK needs a terminology flywheel so real use sharpens the shared language
+instead of producing one-off explanations. Every stable term should earn its
+place by helping an agent choose a safer next action, write a better eval, or
+classify a readiness state without rereading implementation internals.
+
+Flywheel loop:
+
+- Observe real use, eval output, review feedback, or runtime failure.
+- Name the pattern with a controlled SDK term.
+- Encode the term in command JSON, schema fields, fixtures, eval labels,
+  package metadata, or harness reports.
+- Reuse that term in routing, doctor output, eval-improvement deltas, and
+  promotion decisions.
+- Retire, rename, or version terms only through schema-compatible migration.
+
+Initial controlled vocabulary:
+
+- Readiness state: installed, projected, enabled, valid, discoverable,
+  routable, smoke_tested, outcome_proven, promotion_ready, non_promotional.
+- Outcome state: pass, fail, warning, blocked, not_run, skipped, unknown.
+- Blocker class: blocked_runtime, blocked_missing_source, permission_gap,
+  package_metadata_gap, runtime_projection_gap, outcome_proof_missing,
+  telemetry_projection_unavailable.
+- Learning class: routing_gap, instruction_gap, missing_reference,
+  tool_contract_gap, eval_gap, regression_guard_needed.
+- Delta type: schema_change, fixture_change, canonical_source_change,
+  reference_change, eval_case_change, package_metadata_change, projection_change,
+  docs_summary_change.
+- Promotion decision: promote, hold, rollback_required, deferred_public_api,
+  left_different_semantics, not_applicable.
+
+The terminology rule is restraint: do not add terms that only sound official.
+A good term routes action, blocks a false promotion, or creates reusable eval
+coverage. Human-facing names should follow the machine vocabulary, not invent
+parallel labels.
+
 ## Migration Strategy
 
-Use the smallest reversible sequence that proves the SDK direction without broad rewrites.
+Use the smallest reversible sequence that proves the SDK direction without broad rewrites or prose-only ceremony.
 
-1. Harden doctor contract fixtures for one non-mutating skill.
-2. Add negative-path coverage for contradictory readiness states.
-3. Add package/profile/event cross-consumer checks.
-4. Add review-feedback intent-radius handling for design-rule comments.
-5. Teach harness to consume the stable contract only after Agent Skills Kit owns it.
-6. Expand from `context7` to Harness Engineering skills after proof exists.
+1. Register the additive skills doctor facade over existing prove/proof/explain
+   surfaces; do not move or deprecate existing prove/proof semantics in RF-1.
+2. Harden doctor contract fixtures for one non-mutating skill.
+3. Add negative-path coverage for contradictory readiness states.
+4. Add package/profile/event cross-consumer checks after those seams exist.
+5. Add eval-driven improvement deltas so use and feedback can safely evolve a
+   skill over time.
+6. Add the terminology flywheel so repeated patterns become stable command,
+   schema, eval, and report vocabulary.
+7. Add review-feedback intent-radius handling for design-rule comments.
+8. Teach harness to consume the stable contract only after Agent Skills Kit owns it.
+9. Expand from context7 to Harness Engineering skills after proof exists.
 
 ## Smallest Reversible Step
 
-RF-1: Add doctor JSON fixture and contract assertions for `context7`.
+RF-1: Register `skills doctor`, then add doctor JSON fixture and contract assertions for `context7` and one additional non-`context7` skill class.
 
-This is reversible only if the phase records before/after command snapshots and names any tolerated output differences. If RF-1 changes doctor behavior, rollback must revert the implementation change as well as the fixtures/tests. It produces observable feedback immediately by showing whether `skills doctor` can act as the trusted operator view.
+This is reversible only if the phase records before/after command snapshots and names any tolerated output differences. Because the live command is absent, the first before snapshot is the parser-level invalid-choice error; a successful RF-1 must replace that with a structured doctor payload. Before acceptance, full revert may restore that parser baseline. After acceptance, ordinary rollback preserves the `skills doctor` seam with degraded/blocking schema-valid output; command removal requires an emergency waiver and reopens RF-1. The phase produces observable feedback immediately by showing whether `skills doctor` can act as the trusted operator view.
 
 ## Execution Phases
 
@@ -185,19 +288,27 @@ This is reversible only if the phase records before/after command snapshots and 
 
 ### RF-1: Doctor Contract Fixture For One Skill
 
-- Objective: Prove the doctor JSON contract shape and status precedence using `context7`.
+- Objective: Register the `skills doctor` command and prove its JSON contract shape and status precedence using `context7`.
 - Affected systems: `Infrastructure/scripts/lib/ask/commands/skills_impl.py`, relevant ask CLI tests, and fixture/report paths selected by `he-plan`.
 - Expected risk: medium, because command contract tests can expose existing drift.
-- Feedback expected from this phase: whether doctor already has enough structured output to serve as the SDK readiness spine.
-- Stop or pivot condition: doctor cannot expose required fields without duplicating package/eval implementation logic.
+- Feedback expected from this phase: whether the new doctor seam can compose existing `skills proof`, `skills prove`, audit, and future package/eval signals into one SDK-grade readiness spine.
+- Stop or pivot condition: doctor cannot be registered without duplicating package/eval implementation logic, or it cannot expose required fields over existing commands without inventing false package/profile/event evidence.
 - Can run in parallel: no.
 - Validation requirements:
+  - phase A: `./bin/ask skills --help` lists `doctor`, and unknown-action
+    guidance action suggestions match parser/help action names
   - `./bin/ask skills doctor context7 --json --robot`
+  - `./bin/ask skills prove context7 --json --robot` as the current readiness-adjacent comparison surface
+  - parser-failure snapshot showing pre-RF-1 `skills doctor` is unavailable
+  - schema validation against `Infrastructure/config/schemas/skill-doctor.v1.schema.json`
   - a focused ask CLI test covering required fields, status precedence, and `next_command` nullable semantics
   - before/after doctor JSON snapshots with explicit tolerated differences
-  - a read-only representativeness check against one additional skill class, chosen by `he-plan`, to prove `context7` is not hiding a contract assumption that fails immediately elsewhere
+  - an assertion-backed fixture against one additional non-`context7` skill class, chosen by `he-plan`, to prove `context7` is not hiding a contract assumption that fails immediately elsewhere
   - advisory document-governance check only: `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/strategy/2026-05-17-agent-skills-sdk-north-star.md --json`
-- Rollback conditions: remove the new fixture/tests, revert any doctor implementation changes made by RF-1, and verify the post-rollback `skills doctor context7` snapshot matches the recorded pre-change snapshot except for explicitly tolerated environmental fields such as trace IDs or timestamps.
+- Rollback conditions: before RF-1 acceptance, a full revert may restore the
+  parser-level invalid-choice baseline. After RF-1 acceptance, ordinary
+  rollback must preserve `skills doctor` with degraded/blocking output; command
+  removal requires an emergency waiver and reopens RF-1.
 - Linear mapping: create or map one implementation issue only after RF-1 plan is accepted.
 - Agent-safe: assisted.
 - Human review required: yes.
@@ -221,7 +332,7 @@ This is reversible only if the phase records before/after command snapshots and 
 ### RF-3: Profile And Freshness Determinism
 
 - Objective: Make profile semantics decide whether missing proof or stale memory is promotable, warning-only, or blocked.
-- Affected systems: `skills profiles`, memory/freshness reporting, doctor operation context, and tests.
+- Affected systems: planned `skills profiles` seam, memory/freshness reporting, doctor operation context, and tests.
 - Expected risk: medium-high, because freshness rules can affect promotion gates.
 - Feedback expected from this phase: whether deterministic UTC evaluation time and profile-owned thresholds are enough.
 - Stop or pivot condition: freshness cannot be represented without a broader memory contract change.
@@ -279,7 +390,8 @@ This is reversible only if the phase records before/after command snapshots and 
 - Can run in parallel: yes, one skill at a time after RF-2/RF-3.
 - Validation requirements:
   - `./bin/ask skills doctor <handle> --json --robot`
-  - `./bin/ask skills package <handle> --json --robot`
+  - package-readiness fixture or `skills package` / `skills package-doctor`
+    command only after a real package seam is registered
   - one proof/eval artifact per promoted skill
 - Rollback conditions: revert individual skill metadata/eval additions; keep core doctor contract.
 - Linear mapping: one child per skill family.
@@ -293,7 +405,7 @@ No Linear issue is assumed in this artifact.
 Recommended mapping if Jamie promotes this program:
 
 - Parent: Agent Skills Kit professional skill SDK readiness program.
-- RF-1 child: Harden `skills doctor` contract fixtures for `context7`.
+- RF-1 child: Register and harden `skills doctor` contract fixtures for `context7`.
 - RF-2 child: Add negative-path readiness matrix.
 - RF-3 child: Add profile and freshness determinism.
 - RF-4 child: Wire coding-harness as schema consumer.
@@ -312,6 +424,113 @@ Recommended mapping if Jamie promotes this program:
 - Do not apply principle-shaped review feedback only to the named line without classifying intent radius and sweeping the bounded scope.
 - Do not generalize feedback across a repository when the comment is genuinely local, compatibility-bound, or semantically different.
 
+## 2026-05-19 Codex Upstream Runtime-Contract Update
+
+This update integrates current research from /Users/jamiecraik/dev/codex and
+does not widen RF-1. The practical lesson is that upstream Codex is tightening
+runtime contracts around packages, hooks, tool lifecycle events, permissions,
+environment state, namespaces, plugin provenance, and skill enablement. Agent
+Skills Kit should absorb those as SDK design inputs after the first doctor seam
+is fixture-backed.
+
+Verified upstream inputs:
+
+- 7f4d7ae3a adds a Codex package builder with deterministic package layout,
+  metadata, target rules, archive serialization, and validation of required
+  files and executable bits.
+- d661ab70e adds a SubagentStart hook event with schema-backed fields for
+  agent id/type, cwd, model, permission mode, session id, transcript path, and
+  turn id.
+- c69cde354 adds tool lifecycle contributors for tool start, finish, aborted
+  outcomes, call id, tool name, source, and turn id.
+- 5c43a64e2 makes local environment optional, which means harness and SDK
+  outputs must distinguish local, optional-local, remote, CI, app-server, and
+  unknown execution contexts.
+- 3c7608187 makes deny canonical for filesystem permission entries.
+- 05b8ce435, 545ede569, and b3ae3de40 move multi-agent tools toward explicit
+  namespaces and search-gated visibility.
+- ae10708ae routes app and skill enablement through app-server state.
+- d3d38159e keeps plugin version upgrades additive.
+- a66e0e9c4 includes plugin id in plugin MCP tool metadata, giving reports
+  durable provenance.
+- 9e9a62dc2 separates turn skill and plugin injections.
+- 826b2182e preserves context baselines for full-history agent forks.
+- ba57aab13 and 55f6bbc66 make goal state durable and pause transitions
+  explicit.
+- 9289b7cea moves hook request plumbing into hook runtime.
+- 10f7dc6eb routes global AGENTS.md reads through auditable filesystem access.
+- 80fdd4688 adds body_after_prefix auto-compact scope, reinforcing short skill
+  front doors with deeper references behind explicit links.
+- 3009e2364 exposes permission profile picker metadata.
+- 4dbca61e2 defaults unknown tool schemas to empty schemas, making malformed
+  tool metadata a testable condition.
+
+SDK implications:
+
+- Add a future skills package-doctor <skill> seam after RF-1 closes. It should
+  validate package metadata, deterministic layout, namespace, permission
+  profile, required roots, version, maturity, additive upgrade policy,
+  projection, discoverability, provenance, lifecycle events, and safe
+  next_command.
+- Treat installed, projected, enabled, valid, discoverable, routable, and
+  smoke-tested as separate enablement states.
+- Add SDK metadata fields for namespace, permission_profile, required_roots,
+  tool_sources, maturity, version, upgrade_policy, mention_aliases, package_id,
+  plugin_id, source_path, and projection_targets.
+- Use deny as the canonical negative filesystem permission term.
+- Add lifecycle-event assertions to evals so proof can check that a package was
+  built, a projection was simulated, a smoke eval ran, a tool source was
+  resolved, and a compatibility diff completed.
+- Keep the SDK surface thin: namespaces and search-first discovery should
+  prevent a flat global command/tool namespace.
+- Preserve provenance in reports so skill/package/plugin/source identity
+  survives into harness and eval artifacts.
+- Keep TypeScript implementation lanes Effect-oriented and Python
+  implementation lanes uv-oriented when those runtime surfaces are introduced.
+
+This update changes the RF-2+ roadmap. It does not widen RF-1 acceptance:
+registering and proving `skills doctor context7 --json --robot` remains the
+first SDK trust boundary.
+
+## 2026-05-20 Live Checkout Gap
+
+Source: current branch codex/harden-he-domain-interview in
+/Users/jamiecraik/dev/agent-skills.
+
+The live ASK command surface does not yet expose skills doctor or skills
+package. The current parser advertises these skills actions: list, budget,
+handles, resolve, parse, proof, prove, explain, route, goal, improve, starter,
+sync, audit, validate-skill-gate, validate-openai-format,
+validate-boundaries, install, fold, and init.
+
+Observed command behavior:
+
+- ./bin/ask skills doctor context7 --json --robot exits with an unknown action
+  error.
+- ./bin/ask skills package context7 --json --robot exits with an unknown
+  action error.
+- ./bin/ask skills prove context7 --json --robot returns the existing
+  skill-proof-scorecard.v1 surface with reachability, structural quality,
+  analytics, outcome proof, blockers, and next command fields.
+- ./bin/ask skills proof context7 --json --robot is the existing command handle
+  reachability proof surface.
+
+Implementation implication: RF-1 cannot be fixture-only work against an
+already-registered skills doctor command. It must explicitly choose one of two
+boundary moves before writing golden fixtures:
+
+1. Introduce skills doctor as a thin public SDK facade over the existing prove,
+   proof, explain, and future package signals, emitting the planned
+   data.skill_doctor contract.
+2. Rename the RF-1 boundary to the existing skills prove / skills proof
+   contract and defer doctor until package metadata and lifecycle events are
+   ready.
+
+Preferred direction: create the skills doctor facade. The facade gives
+coding-harness and future SDK consumers one stable readiness seam while letting
+the existing proof, explanation, projection, and package internals evolve
+behind it.
+
 ## Eval Requirements
 
 Expected closure proof path:
@@ -322,11 +541,14 @@ Expected closure proof path:
 
 Minimum eval content:
 
-- baseline doctor output for `context7`;
-- package-readiness output for `context7`;
+- pre-RF-1 parser-failure output for `skills doctor context7`;
+- post-registration doctor output for `context7`;
+- current `skills prove context7` output as the comparison surface until package readiness exists;
 - one pass fixture, one warning fixture, and one blocked fixture;
 - negative-path fixture table for source, runtime, package, proof, validation, freshness, and cross-consumer drift;
 - review-feedback fixture table for local-only comments, API design rules, repeated patterns, public API deferrals, and durable guidance updates;
+- eval-improvement fixture showing a failed or warning outcome becomes a bounded canonical-source/reference/eval update, rerun proof, and promotion or rollback decision;
+- terminology-flywheel fixture showing repeated evidence becomes controlled vocabulary rather than new prose-only labels;
 - exact commands run and pass/fail/blocked outcomes;
 - reviewer signoff or explicit coverage gaps.
 
@@ -337,6 +559,8 @@ Minimum eval content:
 - Runtime blockers, package metadata gaps, and missing proof remain separate in output.
 - Freshness behavior is deterministic and profile-owned.
 - Harness has a clear consumer contract before any cross-repo implementation begins.
+- Eval outcomes produce structured improvement deltas with before/after evidence and do not silently mutate skills.
+- Repeated patterns produce stable SDK terms that appear in schemas, command JSON, fixtures, eval labels, and harness reports.
 - Review feedback that expresses a design rule produces intent classification, bounded sweep evidence, similar-case disposition, and durable-rule action.
 - Final reports preserve exact command evidence and classify blocked states honestly.
 
@@ -356,7 +580,8 @@ Rollback path:
 1. Keep the north-star strategy as product direction.
 2. Remove or disable the latest RF phase changes.
 3. Preserve failing fixtures as evidence debt.
-4. Re-run the previous passing doctor/package/profile/event commands.
+4. Re-run the previous passing live commands and preserve parser-failure
+   snapshots for seams that are intentionally removed or still unregistered.
 5. Re-enter `he-reframe` with the failed assumption named explicitly.
 
 ## Future-Agent Guidance

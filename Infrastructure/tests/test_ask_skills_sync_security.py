@@ -434,6 +434,31 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertFalse((self.fake_home / "plugins").is_symlink())
         self.assertEqual(result.data["projection_mode"], "rooted")
 
+    def test_sync_skills_rooted_user_scope_allows_generated_folded_handles(self) -> None:
+        workspace_result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+        self.assertEqual(workspace_result.status, "success")
+
+        folded_handle = self.repo_root / ".agents" / "skills" / "he-ideate" / "SKILL.md"
+        self.assertTrue(folded_handle.is_file())
+
+        with mock.patch.object(Path, "home", return_value=self.fake_home):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="user",
+                dry_run=False,
+                projection="rooted",
+            )
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["projection_mode"], "rooted")
+        self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
+        self.assertNotIn("ROOTED_WORKSPACE_MIXED_PROJECTION", result.data["plan"]["warnings"])
+
     def test_sync_skills_rooted_prunes_first_level_system_bridge_aliases(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"
         system_skills_dir = self.repo_root / "skills-system"

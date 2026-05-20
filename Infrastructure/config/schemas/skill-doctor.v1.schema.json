@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-skills.local/schemas/skill-doctor.v1.schema.json",
+  "title": "Skill Doctor Payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "target_summary",
+    "checks",
+    "blockers",
+    "warnings",
+    "operation_context",
+    "contract_schemas",
+    "agent_summary",
+    "next_command"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "skill-doctor.v1"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pass", "warning", "blocked"]
+    },
+    "target_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["handle", "resolved", "source_path"],
+      "properties": {
+        "handle": {"type": "string", "minLength": 1},
+        "resolved": {"type": "boolean"},
+        "source_path": {"type": ["string", "null"], "minLength": 1},
+        "projection_path": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "summary", "evidence"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "status": {
+            "type": "string",
+            "enum": ["pass", "warning", "blocked", "fail", "not_run"]
+          },
+          "summary": {"type": "string", "minLength": 1},
+          "evidence": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          },
+          "next_command": {"type": ["string", "null"], "minLength": 1}
+        }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["class", "summary", "evidence"],
+        "properties": {
+          "class": {
+            "type": "string",
+            "enum": [
+              "blocked_runtime",
+              "blocked_missing_source",
+              "permission_gap",
+              "package_metadata_gap",
+              "runtime_projection_gap",
+              "outcome_proof_missing",
+              "telemetry_projection_unavailable",
+              "command_surface_gap",
+              "schema_contract_gap"
+            ]
+          },
+          "summary": {"type": "string", "minLength": 1},
+          "evidence": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["class", "summary", "evidence"],
+        "properties": {
+          "class": {"type": "string", "minLength": 1},
+          "summary": {"type": "string", "minLength": 1},
+          "evidence": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "operation_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["execution_context", "profile", "evaluation_time"],
+      "properties": {
+        "execution_context": {
+          "type": "string",
+          "enum": ["local", "optional-local", "remote", "ci", "app-server", "unknown"]
+        },
+        "profile": {"type": "string", "minLength": 1},
+        "evaluation_time": {"type": "string", "format": "date-time"}
+      }
+    },
+    "contract_schemas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skill_doctor"],
+      "properties": {
+        "skill_doctor": {"type": "string", "const": "skill-doctor.v1"}
+      }
+    },
+    "agent_summary": {"type": "string", "minLength": 1},
+    "next_command": {"type": ["string", "null"], "minLength": 1}
+  }
+}

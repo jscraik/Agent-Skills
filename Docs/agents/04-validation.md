@@ -5,6 +5,7 @@
 - [Repository checks](#repository-checks)
 - [Config-sensitive checks](#config-sensitive-checks)
 - [AI workflow checks](#ai-workflow-checks)
+- [Skill quality ladder](#skill-quality-ladder)
 - [PR gate structure](#pr-gate-structure)
 - [Authoring-family contract behavior](#authoring-family-contract-behavior)
 - [Failure handling](#failure-handling)
@@ -24,6 +25,7 @@
 - `just validate` (or `bash Infrastructure/scripts/validate_all.sh`)
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`
 - Use the repo-local wrapper above instead of the global `~/.codex` `verify-work` helper for this repository.
+- `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json` when Jamie gives repeated or high-signal steering about agent behavior.
 - Scope policy reference: [hook-governance-scope-defaults.md](/Docs/guides/hook-governance-scope-defaults.md).
 - Path ownership policy: [14-path-ownership-boundaries.md](/Docs/agents/14-path-ownership-boundaries.md).
 
@@ -47,6 +49,56 @@
 
 - Ensure `README.md`, `AGENTS.md`, and linked docs agree on commands and scope.
 - Prefer repository-root commands over guessed defaults.
+
+## Skill quality ladder
+
+For skill hardening, do not rediscover local evals, Plugin Eval, or Tessl ad hoc.
+Run and report the ladder in this order, stopping at the first failed gate unless
+the user explicitly asks for a full matrix:
+
+```bash
+./bin/ask skills audit <skill-path> --level strict --json --robot
+./bin/ask evals run <skill-path> --mode smoke --json --robot
+./bin/plugin-eval analyze <skill-path> --format json
+./bin/ask skills external-review <skill-path> --json --robot
+```
+
+`ask evals run` must include the installed local Tessl CLI lane every time after
+the repo eval runner. Stage only the controlled Tessl input files into a
+temporary directory first, then run
+`tessl eval run --json <staged-temp-source>`; do not point Tessl at the live
+skill or plugin source tree. The hard boundary is registry upload: use native
+`tessl`, no `npx tessl`, no publish, no registry upload, and no package upload
+path.
+
+The staging layer must adapt repo-native eval metadata into Tessl's expected
+project shape: copy the skill entrypoint and eval reference files, synthesize
+`scenarios/<case-id>/task.md` from `references/evals.yaml`, and include a
+minimal `tessl.json` project marker. Do not duplicate eval cases by hand unless
+the canonical eval format changes.
+
+In Codex sandboxed sessions, do not request network permission for the Tessl
+eval lane up front. The repo wrapper already limits Tessl input to the staged
+temporary project, and asking the sandbox for network turns the command into an
+external-export approval path instead of exercising the local Tessl CLI
+contract. `--allow-tessl-project-save` is accepted for compatibility but is not
+required. Run the wrapper normally, then report any Tessl CLI credential,
+workspace/project-link, sandbox, or policy blocker from the command output with
+the exact staged command and blocker. `--skip-tessl` is only for an explicitly
+documented Tessl outage, policy block, or intentionally scoped debug run. If
+Tessl reports that no existing project safely matches the staged directory,
+classify it as a Tessl workspace/project-link setup blocker; do not loop back
+to auth, sandbox, temp-staging, or registry-upload explanations.
+
+`ask skills external-review` is the durable second-check entrypoint for the
+external-review ladder. It runs strict audit, local Plugin Eval, and native
+Tessl review by default. Treat `tessl skill review` path shape as the skill
+directory containing `SKILL.md`; Tessl lint expects a tile package with
+`tile.json` and is not interchangeable.
+
+When any rung is blocked, record the exact command, status, blocker class, and
+the next minimal diagnostic. Do not replace a blocked rung with a different tool
+and call the ladder complete.
 
 ## PR gate structure
 

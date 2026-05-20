@@ -36,6 +36,7 @@
 - [16-agent-operating-contract](/Docs/agents/16-agent-operating-contract.md)
 - [17-skill-management](/Docs/agents/17-skill-management.md)
 - [18-browser-and-local-preview](/Docs/agents/18-browser-and-local-preview.md)
+- [19-high-signal-steering-feedback](/Docs/agents/19-high-signal-steering-feedback.md)
 - [ask product golden path command contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md)
 
 ## Quick picks
@@ -51,4 +52,5 @@
 | Repo command behavior and robot mode              | [/Docs/agents/16-agent-operating-contract.md](/Docs/agents/16-agent-operating-contract.md)                                         |
 | Skill install, audit, fold, and line budgets      | [/Docs/agents/17-skill-management.md](/Docs/agents/17-skill-management.md)                                                         |
 | Browser and local preview fallback                | [/Docs/agents/18-browser-and-local-preview.md](/Docs/agents/18-browser-and-local-preview.md)                                       |
+| Repeated or high-signal Jamie steering            | [/Docs/agents/19-high-signal-steering-feedback.md](/Docs/agents/19-high-signal-steering-feedback.md)                               |
 | Product command contracts                         | [/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md) |

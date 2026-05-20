@@ -29,6 +29,16 @@ goal:
   slug: invalid-goal-dir
   status: active
   objective: "Reject boards where goal.md is not a file."
+completion_contract:
+  outcome: "Reject boards where goal.md is not a file."
+  verification_surface:
+    - "Goal board validator output."
+  constraints:
+    - "Preserve board safety rules."
+  boundaries:
+    - "Use only this temporary goal directory."
+  iteration_policy: "Fix the next validator blocker."
+  blocked_stop_condition: "Stop with the validator error."
 tasks:
   - id: T001
     type: scout
@@ -125,6 +135,43 @@ def test_native_goal_runtime_fields_accept_identity_and_timestamps() -> None:
     assert goal_status == "active"
 
 
+def test_native_goal_runtime_fields_accept_usage_limited_statuses() -> None:
+    for native_status in ("usageLimited", "usage_limited"):
+        state = {
+            "goal": {
+                "status": "blocked",
+                "native_objective": "/goal Follow docs/goals/current/goal.md",
+                "native_status": native_status,
+                "token_budget": 1000,
+                "tokens_used": 1000,
+                "time_used_seconds": 60,
+            }
+        }
+
+        errors, goal_status = check_goal_board.validate_goal_section(state)
+
+        assert errors == []
+        assert goal_status == "blocked"
+
+
+def test_native_goal_runtime_fields_accept_blocked_status() -> None:
+    state = {
+        "goal": {
+            "status": "blocked",
+            "native_objective": "/goal Follow docs/goals/current/goal.md",
+            "native_status": "blocked",
+            "token_budget": None,
+            "tokens_used": 500,
+            "time_used_seconds": 90,
+        }
+    }
+
+    errors, goal_status = check_goal_board.validate_goal_section(state)
+
+    assert errors == []
+    assert goal_status == "blocked"
+
+
 def test_native_goal_id_must_be_opaque_identifier_when_present() -> None:
     state = {
         "goal": {
@@ -138,3 +185,63 @@ def test_native_goal_id_must_be_opaque_identifier_when_present() -> None:
     errors, _ = check_goal_board.validate_goal_section(state)
 
     assert "goal.native_goal_id must be a non-empty opaque id when present" in errors
+
+
+def test_completion_contract_is_required() -> None:
+    state = {
+        "goal": {
+            "status": "active",
+            "objective": "Keep working until the board has evidence.",
+        }
+    }
+
+    errors = check_goal_board.validate_completion_contract(state)
+
+    assert "completion_contract must be a mapping" in errors
+
+
+def test_completion_contract_requires_goal_shape_fields() -> None:
+    state = {
+        "completion_contract": {
+            "outcome": "Produce an auditable goal board.",
+            "verification_surface": ["check_goal_board.py output"],
+            "constraints": ["Do not broaden Worker scope."],
+            "boundaries": ["docs/goals/current"],
+            "iteration_policy": "Choose the next action from current evidence.",
+            "blocked_stop_condition": "Stop with blocker evidence when no safe path remains.",
+        }
+    }
+
+    assert check_goal_board.validate_completion_contract(state) == []
+
+
+def test_continuation_gate_accepts_idle_thread_contract() -> None:
+    state = {
+        "continuation_gate": {
+            "native_status": "active",
+            "goal_active": "pass",
+            "thread_idle": "pass",
+            "queued_user_input": "absent",
+            "pending_work": "absent",
+            "auto_continue_allowed": "yes",
+        }
+    }
+
+    assert check_goal_board.validate_continuation_gate(state) == []
+
+
+def test_claim_ledger_validates_research_status_shape() -> None:
+    state = {
+        "claims": [
+            {
+                "id": "C001",
+                "claim": "The research result is approximately reproduced.",
+                "evidence_surface": ["benchmark output", "generated report"],
+                "route": "approximate",
+                "status": "supported",
+                "remaining_uncertainty": ["Original seeds are unavailable."],
+            }
+        ]
+    }
+
+    assert check_goal_board.validate_claims(state) == []

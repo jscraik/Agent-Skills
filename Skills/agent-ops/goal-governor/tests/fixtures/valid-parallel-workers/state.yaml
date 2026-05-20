@@ -3,6 +3,16 @@ goal:
   slug: valid-parallel-workers
   status: active
   objective: "Validate parallel worker scopes."
+completion_contract:
+  outcome: "Validate parallel worker scopes."
+  verification_surface:
+    - "Goal board validator output."
+  constraints:
+    - "Preserve disjoint Worker allowed_files."
+  boundaries:
+    - "Use only this fixture goal directory."
+  iteration_policy: "Fix the next validator-reported blocker and rerun the board check."
+  blocked_stop_condition: "Stop with the validator error when the fixture cannot be repaired safely."
 rules:
   one_active_task: false
   require_fresh_verification: true
