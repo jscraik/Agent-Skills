@@ -71,10 +71,10 @@ before/after evidence.
 
 Local evidence adapters available for later slices:
 
-- `/Users/jamiecraik/.agents/otel-collector`: local OTLP logs/traces/metrics,
+- `$HOME/.agents/otel-collector`: local OTLP logs/traces/metrics,
   `/health`, `/stats`, freshness, service contribution, skill invocation
   health counters, and telemetry confidence.
-- `/Users/jamiecraik/.agents/session-collector`: privacy-safe session
+- `$HOME/.agents/session-collector`: privacy-safe session
   summaries, skill invocation analytics, skill proof candidates, agent
   knowledge, skillify candidates, and Harness Engineering evidence.
 

@@ -98,7 +98,7 @@ only as the repo contract and risk surface require.
 
 ## Validation
 
-- Prefer repo-native wrappers: ./bin/ask, bash scripts/verify-work.sh, bash scripts/validate-codestyle.sh, package scripts, just, or documented validators.
+- Prefer repo-native wrappers: ./bin/ask, bash Infrastructure/scripts/validation-and-linting/verify-work.sh, bash Infrastructure/scripts/validation-and-linting/validate-codestyle.sh, package scripts, just, or documented validators.
 - Testing evidence must use: Command: <exact command> -> pass|fail|blocked (<reason>).
 - Blocked steps must name the blocker, the nearest meaningful validation that did run, and what would unblock the exact proof.
 - LLM or reviewer judgments may advise; deterministic commands, schemas, artifacts, and calibrated evals decide required gates.

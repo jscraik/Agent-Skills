@@ -2496,15 +2496,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 runner_tier1_failures.append(
                     f"should_trigger failed: expected {c.should_trigger}, detected {selected_skill}"
                 )
-            if c.should_trigger is True and selected_skill is None and not c.prepend_skill:
+            if c.should_trigger is True and selected_skill is None:
                 runner_tier1_failures.append(
                     f"should_trigger={c.should_trigger} but selection signal unavailable (selected_skill is None). "
                     f"Cannot verify selection expectation without signal evidence."
-                )
-            if c.should_trigger is True and selected_skill is None and c.prepend_skill:
-                runner_warnings.append(
-                    "should_trigger=true and selection signal unavailable; treating explicit prepend_skill context "
-                    "as sufficient selection evidence for this positive case."
                 )
             if c.should_trigger is False and selected_skill is None:
                 runner_warnings.append(

@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 
@@ -28,8 +29,10 @@ def test_lifecycle_tracer_covers_main_stages() -> None:
         assert f"stage: {stage}" in text
         assert f"expected_route: {stage}" in text
 
-    assert "he-compound has been removed" in text
-    assert "expected_route: he-reinforce" in text
+    assert re.search(
+        r"(?s)he-compound has been removed.*?expected_route:\s*he-reinforce",
+        text,
+    )
 
 
 def test_deferred_context_index_stays_router_with_preserved_context() -> None:

@@ -197,7 +197,7 @@
   "optional_evidence_providers": [
     {
       "id": "otel_collector",
-      "path": "/Users/jamiecraik/.agents/otel-collector",
+      "path": "${HOME}/.agents/otel-collector",
       "required_for_rf1": false,
       "degrade_when_absent": "warn",
       "extract": [
@@ -216,7 +216,7 @@
     },
     {
       "id": "session_collector",
-      "path": "/Users/jamiecraik/.agents/session-collector",
+      "path": "${HOME}/.agents/session-collector",
       "required_for_rf1": false,
       "degrade_when_absent": "warn",
       "extract": [

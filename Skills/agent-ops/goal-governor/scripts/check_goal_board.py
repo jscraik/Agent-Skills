@@ -30,7 +30,17 @@ NATIVE_STATUSES = {
     "complete",
     None,
 }
-CONTINUATION_NATIVE_STATUSES = {"active", "paused", "budget_limited", "usage_limited", "complete", "unknown", "blocked"}
+CONTINUATION_NATIVE_STATUSES = {
+    "active",
+    "paused",
+    "budgetLimited",
+    "budget_limited",
+    "usageLimited",
+    "usage_limited",
+    "complete",
+    "unknown",
+    "blocked",
+}
 GATE_STATUS = {"pass", "blocked", "unknown"}
 QUEUE_STATUS = {"absent", "present", "unknown"}
 AUTO_CONTINUE_STATUS = {"yes", "no", "unknown"}
@@ -357,8 +367,8 @@ def validate_continuation_gate(state: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     if gate.get("native_status") not in CONTINUATION_NATIVE_STATUSES:
         errors.append(
-            "continuation_gate.native_status must be active, paused, budget_limited, "
-            "usage_limited, complete, unknown, or blocked"
+            "continuation_gate.native_status must be active, paused, budgetLimited, "
+            "budget_limited, usageLimited, usage_limited, complete, unknown, or blocked"
         )
     for field in ("thread_idle", "goal_active"):
         if gate.get(field) not in GATE_STATUS:

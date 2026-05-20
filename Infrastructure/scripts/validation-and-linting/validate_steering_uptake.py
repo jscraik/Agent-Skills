@@ -234,6 +234,12 @@ def validate(root: Path = ROOT) -> list[Finding]:
                 findings.append(Finding("STEERING_LEDGER_STATUS", f"Row {index} has invalid status {record['Status']!r}.", _relative(ledger_path, root)))
             if record["Status"] == "validated" and "validate_steering_uptake.py" not in record["Validation"]:
                 findings.append(Finding("STEERING_LEDGER_VALIDATION_WEAK", f"Row {index} marked validated without steering validator evidence.", _relative(ledger_path, root)))
+            mechanism = record["Mechanism"]
+            guardrail = record["Durable guardrail"]
+            if "Category:" not in mechanism:
+                findings.append(Finding("STEERING_LEDGER_CATEGORY_MISSING", f"Row {index} is missing a failure category in Mechanism.", _relative(ledger_path, root)))
+            if "Improvement type:" not in guardrail:
+                findings.append(Finding("STEERING_LEDGER_IMPROVEMENT_TYPE_MISSING", f"Row {index} is missing a durable improvement type in Durable guardrail.", _relative(ledger_path, root)))
 
     if not readme_path.exists():
         findings.append(Finding("AGENT_DOC_INDEX_MISSING", "Agent docs index is missing.", _relative(readme_path, root)))

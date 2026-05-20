@@ -71,7 +71,7 @@ def _tessl_policy() -> dict:
         "temp_staged_project_input_only": True,
         "network_permission_required_by_repo": False,
         "project_save_may_use_tessl_service": False,
-        "project_save_default": "automatic",
+        "project_save_default": "explicit_approval",
     }
 
 
@@ -142,7 +142,10 @@ def _stable_tessl_stage_parent(path: str) -> Path:
 
 
 def _stage_tessl_eval_source(repo_root: Path, path: str, temp_root: Path | None = None) -> tuple[Path, list[str]]:
-    source_root = (repo_root / path).resolve()
+    repo_root_resolved = repo_root.resolve()
+    source_root = (repo_root_resolved / path).resolve()
+    if not source_root.is_relative_to(repo_root_resolved):
+        raise FileNotFoundError("Tessl eval source must be inside repo_root")
     if not source_root.is_dir():
         raise FileNotFoundError(f"Tessl eval source is not a directory: {path}")
 
@@ -178,7 +181,7 @@ def _tessl_project_save_approved(allow_project_save: bool) -> bool:
     return allow_project_save or env_value in {"1", "true", "yes", "approved"}
 
 
-def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = True) -> dict:
+def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = False) -> dict:
     """Run the local Tessl eval lane without any registry publish/upload command."""
     tessl_path = shutil.which("tessl")
     command_display = "tessl eval run --json <staged-temp-source>"
@@ -589,7 +592,7 @@ def run_evals(
     dashboard: bool = True,
     runner: str = "codex",
     skip_tessl: bool = False,
-    allow_tessl_project_save: bool = True,
+    allow_tessl_project_save: bool = False,
     model: str | None = None,
     cases: list[str] | None = None,
 ) -> CallResult:

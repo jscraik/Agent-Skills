@@ -10,7 +10,7 @@ completion_contract:
   constraints:
     - "Preserve disjoint Worker allowed_files."
   boundaries:
-    - "Use only this fixture goal directory."
+    - "Use only the declared worker allowed_files for this fixture scenario."
   iteration_policy: "Fix the next validator-reported blocker and rerun the board check."
   blocked_stop_condition: "Stop with the validator error when the fixture cannot be repaired safely."
 rules:

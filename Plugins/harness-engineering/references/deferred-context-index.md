@@ -263,7 +263,6 @@ contracts, not this audit note.
 
 Moved-to-reference evidence:
 
-Return schema_version when structured. Output a `.harness/plan/**.md` plan or
 Produce one of: strategy memo, architecture recommendation, refactor strategy,
 Strategy artifacts are cognition compression, not ceremony. Turn verified repo
 Write a dated `.harness/linear/**-linear-plan.md` artifact or return

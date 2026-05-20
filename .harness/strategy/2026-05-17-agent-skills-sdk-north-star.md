@@ -103,11 +103,11 @@ roll back with before/after evidence.
 
 Existing local adapters can supply this evidence without becoming the SDK core:
 
-- `/Users/jamiecraik/.agents/otel-collector` receives local OTLP HTTP logs,
+- `${HOME}/.agents/otel-collector` receives local OTLP HTTP logs,
   traces, and metrics on `127.0.0.1:4318`, writes raw NDJSON, and exposes
   `/health`, `/stats`, freshness, service contribution, and telemetry
   confidence signals.
-- `/Users/jamiecraik/.agents/session-collector` reads OTEL raw payloads plus
+- `${HOME}/.agents/session-collector` reads OTEL raw payloads plus
   Codex rollout sessions and emits privacy-safe session summaries, skill
   invocation analytics, proof candidates, and Harness Engineering evidence.
 - Agent Skills Kit should consume those outputs through an evidence-provider

@@ -39,5 +39,5 @@ The fallback prompt asks image generation to create a technical transformation m
 
 * canonical skill package: Skills/agent-ops/docs-expert
 * generated handle, not edited: .agents/skills/docs-expert/SKILL.md
-* source context: /Users/jamiecraik/Downloads/what_makes_documentation_good.md
-* source context: /Users/jamiecraik/Downloads/SKILL (15).md
+* source context: external local file (not committed) - see prompt metadata for reproducible artifact inputs
+* source context: external local file (not committed) - see prompt metadata for reproducible artifact inputs

@@ -1031,7 +1031,7 @@ def main():
                 dashboard=not args.no_dashboard,
                 runner=args.runner,
                 skip_tessl=args.skip_tessl,
-                allow_tessl_project_save=True,
+                allow_tessl_project_save=args.allow_tessl_project_save,
                 model=args.model,
                 cases=args.case,
             )

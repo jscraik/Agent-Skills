@@ -4038,7 +4038,7 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
         repo_root (Path): Repository root used to load builder modules and the skill catalog.
         source (str): Name or trailing path segment identifying the source skill to evaluate.
         target (str): Name or trailing path segment identifying the target skill to compare against.
-        sensitivity (float): Confidence threshold in the range 0–1 above which overlap is considered high (default 0.2).
+        sensitivity (float): Confidence threshold in the range 0-1 above which overlap is considered high (default 0.2).
 
     Returns:
         CallResult: Result object containing:

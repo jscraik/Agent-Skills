@@ -67,13 +67,13 @@ The pressure is strategic and operational, not just historical. Jamie wants Code
 
 ## Evidence
 
-- Agent Skills Kit north star: [`.harness/strategy/2026-05-17-agent-skills-sdk-north-star.md`](.harness/strategy/2026-05-17-agent-skills-sdk-north-star.md:1) defines the additive `skills doctor` facade decision and executable source-of-truth order.
-- Skills SDK apparatus lens: [`Infrastructure/references/skills-sdk-apparatus-lens.md`](Infrastructure/references/skills-sdk-apparatus-lens.md:1) defines RF-1 signoff proof.
+- Agent Skills Kit north star: [`.harness/strategy/2026-05-17-agent-skills-sdk-north-star.md`](.harness/strategy/2026-05-17-agent-skills-sdk-north-star.md) defines the additive `skills doctor` facade decision and executable source-of-truth order.
+- Skills SDK apparatus lens: [`Infrastructure/references/skills-sdk-apparatus-lens.md`](Infrastructure/references/skills-sdk-apparatus-lens.md) defines RF-1 signoff proof.
 - Doctor schema: [`Infrastructure/config/schemas/skill-doctor.v1.schema.json`](Infrastructure/config/schemas/skill-doctor.v1.schema.json:1) is the canonical `data.skill_doctor` payload contract for RF-1.
-- [UBIQUITOUS_LANGUAGE.md](UBIQUITOUS_LANGUAGE.md:13) defines Agent Skills Kit as the governed repository and CLI system for authoring, validating, discovering, and syncing Codex skills.
-- [UBIQUITOUS_LANGUAGE.md](UBIQUITOUS_LANGUAGE.md:15) separates Canonical Skill Source from [Runtime Projection](UBIQUITOUS_LANGUAGE.md:16).
-- [Path Ownership Boundaries](Docs/agents/14-path-ownership-boundaries.md:10) uses a product, factory, and runtime plane model.
-- [Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md:35) currently names `ask skills prove`, audits, workouts, evals, validation logs, and closeout evidence as quality proof surfaces.
+- [UBIQUITOUS_LANGUAGE.md](UBIQUITOUS_LANGUAGE.md) defines Agent Skills Kit as the governed repository and CLI system for authoring, validating, discovering, and syncing Codex skills.
+- [UBIQUITOUS_LANGUAGE.md](UBIQUITOUS_LANGUAGE.md) separates Canonical Skill Source from [Runtime Projection](UBIQUITOUS_LANGUAGE.md).
+- [Path Ownership Boundaries](Docs/agents/14-path-ownership-boundaries.md) uses a product, factory, and runtime plane model.
+- [Agent Capability Control Plane](Docs/product/agent-capability-control-plane.md) currently names `ask skills prove`, audits, workouts, evals, validation logs, and closeout evidence as quality proof surfaces.
 - Live command check on 2026-05-20: `./bin/ask skills --help` lists `list, budget, handles, resolve, parse, proof, prove, explain, route, goal, improve, starter, sync, audit, validate-skill-gate, validate-openai-format, validate-boundaries, install, fold, init`; it does not list `doctor`, `package`, `profiles`, or `events`.
 - `./bin/ask skills doctor context7 --json --robot` exits 2 with parser error `invalid choice: 'doctor'`. RF-1 must treat this as the first blocker, not as a blocked-runtime doctor payload.
 - `./bin/ask skills package context7 --json --robot` exits 2 with parser error `invalid choice: 'package'`. Package readiness remains comparison design input until a real command seam exists.
@@ -81,14 +81,14 @@ The pressure is strategic and operational, not just historical. Jamie wants Code
   suggested valid actions even though `./bin/ask skills --help` and parser
   choices do not list that action. Treat help/parser output as authoritative
   until the guidance text is fixed.
-- [High-Signal Steering Feedback](Docs/agents/19-high-signal-steering-feedback.md:1) defines steering as operating evidence and requires classified uptake before ordinary work resumes.
-- [Steering Uptake Ledger](.harness/quality/steering-uptake.md:1) records the repeated-steering environment refinement with operating failure, blocker, mechanism, proof, validation, and repeat prevention.
+- [High-Signal Steering Feedback](Docs/agents/19-high-signal-steering-feedback.md) defines steering as operating evidence and requires classified uptake before ordinary work resumes.
+- [Steering Uptake Ledger](.harness/quality/steering-uptake.md) records the repeated-steering environment refinement with operating failure, blocker, mechanism, proof, validation, and repeat prevention.
 - [validate_steering_uptake.py](Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py:1) makes that uptake executable.
-- [CTF Workflow Evals](Docs/agents/23-ctf-workflow-evals.md:1) makes flag capture the win condition for workflow skills whose truth lives in UI or app state.
+- [CTF Workflow Evals](Docs/agents/23-ctf-workflow-evals.md) makes flag capture the win condition for workflow skills whose truth lives in UI or app state.
 - Final review artifacts approved the strategy after fixes:
-  - [adversarial reviewer](artifacts/reviews/sdk_north_star_round4d_adversarial_reviewer.md:5)
-  - [adversarial document reviewer](artifacts/reviews/sdk_north_star_round4_adversarial_document_reviewer.md:6)
-  - [architecture strategist](artifacts/reviews/sdk_north_star_round4b_architecture_strategist.md:6)
+  - [adversarial reviewer](artifacts/reviews/sdk_north_star_round4d_adversarial_reviewer.md)
+  - [adversarial document reviewer](artifacts/reviews/sdk_north_star_round4_adversarial_document_reviewer.md)
+  - [architecture strategist](artifacts/reviews/sdk_north_star_round4b_architecture_strategist.md)
 
 ## Architectural Impact
 

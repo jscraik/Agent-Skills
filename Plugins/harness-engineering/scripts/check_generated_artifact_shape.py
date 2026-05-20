@@ -165,9 +165,10 @@ def validate_spec(text: str) -> list[str]:
     proposed = section_body(text, "Proposed Behavior")
     if not proposed.strip():
         errors.append("Proposed Behavior must include the user-facing solution")
-    user_facing_solution_body = re.sub(r"(?im)^###\s+User-Facing Solution\b", "", proposed).strip()
-    if re.search(r"(?im)^###\s+User-Facing Solution\b", proposed) and "user" not in user_facing_solution_body.lower():
-        errors.append("User-Facing Solution must stay grounded in user/operator value")
+    if re.search(r"(?im)^###\s+User-Facing Solution\b", proposed):
+        user_facing_solution_body = re.sub(r"(?im)^###\s+User-Facing Solution\b", "", proposed).strip()
+        if not re.search(r"\b(users?|operators?|customers?|admins?)\b", user_facing_solution_body, re.IGNORECASE):
+            errors.append("User-Facing Solution must stay grounded in user/operator value")
     if not has_visual_decision(text):
         errors.append("Visual References / Diagrams must contain Mermaid, table, image, or Not needed reason")
     return errors

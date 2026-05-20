@@ -222,7 +222,12 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
         mock.patch.object(evals.subprocess, "run", side_effect=fake_run) as run,
         mock.patch.dict(evals.os.environ, {"ASK_TESSL_PROJECT_SAVE_APPROVED": ""}, clear=False),
     ):
-        result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke")
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            allow_tessl_project_save=True,
+        )
 
     assert result.status == "success"
     assert run.call_count == 2
@@ -243,7 +248,7 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
     assert result.data["tessl_eval"]["policy"]["no_registry_upload"] is True
     assert result.data["tessl_eval"]["policy"]["temp_staged_project_input_only"] is True
     assert result.data["tessl_eval"]["policy"]["network_permission_required_by_repo"] is False
-    assert result.data["tessl_eval"]["policy"]["project_save_default"] == "automatic"
+    assert result.data["tessl_eval"]["policy"]["project_save_default"] == "explicit_approval"
 
 
 def test_evals_skip_tessl_escape_hatch(tmp_path: Path) -> None:
@@ -270,7 +275,12 @@ def test_evals_classify_missing_tessl_project_link(tmp_path: Path) -> None:
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
         mock.patch.object(evals.subprocess, "run", side_effect=[completed_eval, completed_tessl]),
     ):
-        result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke")
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            allow_tessl_project_save=True,
+        )
 
     assert result.status == "error"
     tessl_eval = result.data["tessl_eval"]

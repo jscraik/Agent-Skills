@@ -94,7 +94,7 @@ def prune_command_handle_skill_entries(
         if target in owner_handles and "/" not in alias and ".." not in alias:
             handles_to_prune.add(alias)
     for hidden_handle in HIDDEN_COMPATIBILITY_COMMAND_HANDLES:
-        if "/" not in hidden_handle and ".." not in hidden_handle:
+        if hidden_handle in owner_handles and "/" not in hidden_handle and ".." not in hidden_handle:
             handles_to_prune.add(hidden_handle)
 
     logs: list[str] = []

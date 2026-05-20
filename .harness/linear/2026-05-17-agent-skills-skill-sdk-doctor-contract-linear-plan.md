@@ -223,9 +223,9 @@ Observability Feedback Loop:
   with affected paths, rerun commands, before/after evidence, and a final
   decision.
 - Existing local adapters are available for this loop:
-  `/Users/jamiecraik/.agents/otel-collector` for OTLP logs, traces, metrics,
+  `$HOME/.agents/otel-collector` for OTLP logs, traces, metrics,
   health, stats, freshness, and telemetry confidence; and
-  `/Users/jamiecraik/.agents/session-collector` for privacy-safe session
+  `$HOME/.agents/session-collector` for privacy-safe session
   summaries, skill invocation analytics, skill proof candidates, and Harness
   Engineering evidence.
 - Treat those collectors as optional evidence providers behind the SDK seam,
@@ -419,7 +419,7 @@ RF-1 also enables RF-3 profile and freshness determinism, RF-5 review intent rad
 
 ## 2026-05-19 SDK Runtime-Contract Addendum
 
-Source: local research against /Users/jamiecraik/dev/codex upstream commits
+Source: local research against the adjacent `codex` checkout's upstream commits
 including 7f4d7ae3a, d661ab70e, c69cde354, 5c43a64e2, 3c7608187,
 05b8ce435, 545ede569, b3ae3de40, ae10708ae, d3d38159e, a66e0e9c4,
 9e9a62dc2, 826b2182e, ba57aab13, 55f6bbc66, 9289b7cea, 10f7dc6eb,
@@ -459,7 +459,7 @@ and safe next command.
 ## 2026-05-20 Live Checkout Reconciliation
 
 Source: current branch codex/harden-he-domain-interview in
-/Users/jamiecraik/dev/agent-skills.
+`<repo-root>`.
 
 The current branch does not register ./bin/ask skills doctor ... or ./bin/ask
 skills package .... Both commands currently fail at argument parsing as unknown

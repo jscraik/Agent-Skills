@@ -99,8 +99,8 @@ Structured output: `schema_version`, `mode`, `selected_artifact`,
 `evidence_checked`, `solved_status`, `validation_status`, `overlap_status`,
 `refresh_decisions`, `project_brain_status`, `continuity_status`,
 `structure_status`, `size_budget_status`, `discoverability_status`,
-`redaction_status`, `writes`, `git_staging_status`, `staged_paths`,
-`blocked_reason`, and `handoff`.
+`source_prompt_family_status`, `redaction_status`, `writes`,
+`git_staging_status`, `staged_paths`, `blocked_reason`, and `handoff`.
 
 ## Examples
 - When the user asks to inspect `.harness/session-evidence/latest.md` for JSC-246,

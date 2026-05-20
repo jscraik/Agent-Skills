@@ -15,7 +15,7 @@ cases:
     why_realistic: "Older he-compound prompts and Jamie steering ask for solved failures, Project Brain memory, and prevention guidance to survive as durable repo memory without reviving he-compound as an active stage."
     expected_behavior: "Select the reinforcement mode, include source_prompt_family_status, require solved evidence and validation proof before capture, choose Project Brain or .harness/solutions routing deliberately, run overlap and redaction checks, and block if the request is unsolved or only a transcript dump."
     anti_overfit_notes: "A passing response cannot merely say to remember the issue. It must preserve the learning-capture prompt family and distinguish solved-problem capture, Project Brain sync, stale refresh, and continuity snapshot responsibilities."
-    prompt: "Can you preserve the old compound-learning behavior for `/Users/jamiecraik/dev/agent-skills` now that `he-compound` is obsolete: generate durable memory only if the projection-picker fix is solved, include source_prompt_family_status, exact validation evidence, overlap search, redaction status, Project Brain routing, and prevention guidance; otherwise block instead of writing a generic note."
+    prompt: "Can you preserve the old compound-learning behavior for `<repo-root>` now that `he-compound` is obsolete: generate durable memory only if the projection-picker fix is solved, include source_prompt_family_status, exact validation evidence, overlap search, redaction status, Project Brain routing, and prevention guidance; otherwise block instead of writing a generic note."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(source_prompt_family_status|Solved Problem Learning|Project Brain|continuity|stale learning)"}
@@ -52,7 +52,7 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: false
-    prompt: "Generate a solved-problem capture in `/Users/jamiecraik/dev/agent-skills` for the fixed he-linear-plan validator failure, including root cause, exact validation evidence, and prevention guidance under `.harness/solutions/**` without writing secrets."
+    prompt: "Generate a solved-problem capture in `<repo-root>` for the fixed he-linear-plan validator failure, including root cause, exact validation evidence, and prevention guidance under `.harness/solutions/**` without writing secrets."
     deterministic_checks: *safe
     acceptance: *accept
   - id: unsolved-learning-blocked
@@ -96,7 +96,7 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: false
-    prompt: "Check whether the solved Linear template rule in `/Users/jamiecraik/dev/agent-skills` should become durable Project Brain knowledge under `.harness/**` when validation evidence supports it."
+    prompt: "Check whether the solved Linear template rule in `<repo-root>` should become durable Project Brain knowledge under `.harness/**` when validation evidence supports it."
     deterministic_checks: *safe
     acceptance:
       - type: regex
@@ -160,7 +160,7 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: true
-    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` for a normal in-scope HE request and start from the first useful source/tool/read before returning proof."
+    prompt: "Inspect `<repo-root>/.harness/session-evidence/latest.md` for a normal in-scope HE request and start from the first useful source/tool/read before returning proof."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(first|source|evidence|proof|validation|readback)"}
@@ -175,7 +175,7 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: true
-    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` when one harmless detail is missing; infer conservatively, but ask only if authority, tracker mutation, destructive behavior, publication, external writes, or closure proof would change."
+    prompt: "Inspect `<repo-root>/.harness/session-evidence/latest.md` when one harmless detail is missing; infer conservatively, but ask only if authority, tracker mutation, destructive behavior, publication, external writes, or closure proof would change."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(assum|infer|proceed|ask|blocked|authority|tracker|closure)"}
@@ -220,7 +220,7 @@ cases:
     realistic: true
     should_trigger: false
     prepend_skill: false
-    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills` and ask for an adjacent HE or non-HE task that should be routed away from he-reinforce."
+    prompt: "Inspect `<repo-root>` and ask for an adjacent HE or non-HE task that should be routed away from he-reinforce."
     deterministic_checks: *safe
     acceptance:
       - {type: not_regex, value: "(?is)(he-reinforce|schema_version|selected_stage|stage:)"}
