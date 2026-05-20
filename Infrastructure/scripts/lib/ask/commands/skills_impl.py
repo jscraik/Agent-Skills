@@ -4107,7 +4107,7 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
 
 
 def _scope_rank_for_path(repo_root: Path, skill_path: str) -> int:
-    scope = classify_skill_scope(repo_root / skill_path)
+    scope = classify_skill_scope(repo_root / skill_path, repo_root=repo_root)
     max_precedence = max(USER_SKILL_SCOPE_PRECEDENCE.values())
     scope_precedence = USER_SKILL_SCOPE_PRECEDENCE.get(scope)
     if scope_precedence is not None:

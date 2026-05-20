@@ -55,7 +55,7 @@ class SkillEntry:
     description: str
 
 
-def classify_skill_scope(source_dir: Path) -> str:
+def classify_skill_scope(source_dir: Path, repo_root: Path | None = None) -> str:
     """
     Classify a skill source directory into its ownership scope.
 
@@ -63,11 +63,12 @@ def classify_skill_scope(source_dir: Path) -> str:
     visible in reports and win deterministic name collisions without mutating
     lower-precedence global sources.
     """
+    root = (repo_root or REPO_ROOT).resolve()
     try:
-        rel_parts = tuple(part.lower() for part in source_dir.relative_to(REPO_ROOT).parts)
+        rel_parts = tuple(part.lower() for part in source_dir.relative_to(root).parts)
     except ValueError:
         try:
-            rel_parts = tuple(part.lower() for part in source_dir.resolve().relative_to(REPO_ROOT).parts)
+            rel_parts = tuple(part.lower() for part in source_dir.resolve().relative_to(root).parts)
         except ValueError:
             return "external"
 

@@ -10,6 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
+from ask.commands import skills_impl  # noqa: E402
 from ask.commands.skills import route_skills  # noqa: E402
 
 
@@ -226,6 +227,17 @@ class TestAskSkillsRoute(unittest.TestCase):
             self.assertTrue(classified_paths)
             self.assertTrue(all(path.is_relative_to(repo_root) for path in classified_paths))
             self.assertIn(repo_root / ".agents" / "skills" / "unslopify", classified_paths)
+
+    def test_scope_rank_uses_caller_repo_root_for_exact_handle_precedence(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+
+            project_rank = skills_impl._scope_rank_for_path(repo_root, "Skills/project/unslopify")
+            plugin_rank = skills_impl._scope_rank_for_path(repo_root, "Plugins/local-pack/skills/unslopify")
+            global_rank = skills_impl._scope_rank_for_path(repo_root, "Skills/agent-ops/unslopify")
+
+        self.assertLess(project_rank, plugin_rank)
+        self.assertLess(plugin_rank, global_rank)
 
     def test_route_uses_advanced_catalog_surface_for_hidden_lane_skills(self):
         entries = [
