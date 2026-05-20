@@ -23,6 +23,7 @@ For output-classification edits, use a fixture or direct helper path that proves
 - Untagged `Findings`, `Findings: one issue`, or `Issues` output does not get marked clean
 - Inline quoted `[P2]` examples are not treated as actionable
 - Numbered or line-start severity findings override broad clean prose
+- Clean phrases do not hide later actionable prose such as security vulnerabilities or regressions
 - Empty structured results such as `{"findings": []}`, pretty-printed empty arrays, and `## Findings` followed by `None` or `- None` stay clean
 
 For runtime-policy edits, first run the helper without permission expansion when nested Codex review is expected to fail locally. Then rerun the helper from the active Codex session with scoped filesystem access to Codex runtime state only and no extra network permission. Pass condition: the filesystem-only run launches nested Codex review, while a still-blocked run emits `codex-review blocked: blocked_runtime` and a source-backed fallback instruction instead of silently failing.

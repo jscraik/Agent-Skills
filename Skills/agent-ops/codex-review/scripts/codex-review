@@ -338,7 +338,10 @@ clean_phrases = (
 
 clean_value = re.compile(r'^(?:none|no(?:ne)?|0|n/a|not applicable|nothing)\b', re.IGNORECASE)
 severity_line = re.compile(r'^\s*(?:(?:[-*]|\d+[.)])\s*)?\[P[0-3]\]')
-generic_issue_mention = re.compile(r'^\s*(?![>#`]).*\b(findings?|issues?)\b', re.IGNORECASE)
+generic_issue_mention = re.compile(
+    r'^\s*(?![>#`]).*\b(findings?|issues?|bugs?|vulnerabilit(?:y|ies)|regressions?)\b',
+    re.IGNORECASE,
+)
 heading_line = re.compile(
     r'^\s*(?:#+\s*)?(?:accepted/actionable\s+)?(?:actionable\s+)?(?:findings?|issues?)\s*(?::\s*(.*))?$',
     re.IGNORECASE,
@@ -359,6 +362,17 @@ clean_marker_lines = set()
 
 def clean_value_text(value):
     return re.sub(r'^\s*[-*+]\s+', '', value).strip()
+
+def line_has_clean_signal(line):
+    normalized_line = re.sub(r"\s+", " ", line).lower()
+    if any(phrase in normalized_line for phrase in clean_phrases):
+        return True
+    return bool(
+        re.search(
+            r'\b(no|not|without|none)\b.*\b(findings?|issues?|bugs?|vulnerabilit(?:y|ies)|regressions?)\b',
+            normalized_line,
+        )
+    )
 
 if priority_seen:
     sys.exit(0)
@@ -390,18 +404,20 @@ for index, line in enumerate(lines):
         continue
     sys.exit(0)
 
-if has_clean_signal:
-    sys.exit(1)
-
 for index, line in enumerate(lines):
     if index in clean_marker_lines:
         continue
     if has_json_empty_array and json_issue_key_line.search(line):
         continue
+    if line_has_clean_signal(line):
+        continue
     if generic_issue_mention.search(line):
         sys.exit(0)
 
 if has_json_empty_array or clean_marker_lines:
+    sys.exit(1)
+
+if has_clean_signal:
     sys.exit(1)
 
 sys.exit(1)
