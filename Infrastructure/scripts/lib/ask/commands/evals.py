@@ -91,20 +91,29 @@ def _yaml_scalar(value: str) -> str:
 
 
 def _consume_yaml_block(lines: list[str], index: int, parent_indent: int, style: str) -> tuple[str, int]:
-    block_indent: int | None = None
-    block_lines: list[str] = []
+    raw_block_lines: list[str] = []
     while index < len(lines):
         raw_line = lines[index]
         if not raw_line.strip():
-            block_lines.append("")
+            raw_block_lines.append("")
             index += 1
             continue
         indent = len(raw_line) - len(raw_line.lstrip(" "))
         if indent <= parent_indent:
             break
-        block_indent = indent if block_indent is None else min(block_indent, indent)
-        block_lines.append(raw_line[block_indent:])
+        raw_block_lines.append(raw_line)
         index += 1
+
+    non_empty_indents = [
+        len(line) - len(line.lstrip(" "))
+        for line in raw_block_lines
+        if line.strip()
+    ]
+    block_indent = min(non_empty_indents) if non_empty_indents else parent_indent + 1
+    block_lines = [
+        line[block_indent:] if line.strip() else ""
+        for line in raw_block_lines
+    ]
 
     if style.startswith(">"):
         folded: list[str] = []
@@ -177,7 +186,10 @@ def _parse_tessl_eval_cases(evals_path: Path) -> list[dict[str, str]]:
     except ImportError:
         return _parse_tessl_eval_cases_compat(text)
 
-    loaded = yaml.safe_load(text) or {}
+    try:
+        loaded = yaml.safe_load(text) or {}
+    except yaml.YAMLError as e:
+        raise ValueError(f"Failed to parse Tessl eval cases from {evals_path}: {e}") from e
     raw_cases = loaded.get("cases", []) if isinstance(loaded, dict) else []
     cases: list[dict[str, str]] = []
     for raw_case in raw_cases:
@@ -337,8 +349,10 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
             "blocker_class": blocker_class,
             "policy": _tessl_policy(),
         }
-    except OSError as e:
+    except (OSError, ValueError) as e:
         blocker_class = "blocked_validation" if isinstance(e, FileNotFoundError) else "blocked_runtime"
+        if isinstance(e, ValueError):
+            blocker_class = "blocked_validation"
         return {
             "status": "blocked",
             "command": command_display,

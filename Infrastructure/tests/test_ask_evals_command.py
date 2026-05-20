@@ -268,6 +268,62 @@ def test_evals_stage_folded_yaml_prompts_for_tessl(tmp_path: Path) -> None:
     ).read_text(encoding="utf-8") == "Investigate the target workflow and preserve the whole prompt.\n"
 
 
+def test_evals_fallback_parser_preserves_literal_block_relative_indent(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: literal-prompt\n"
+            "    prompt: |\n"
+            "        def example():\n"
+            "            return 1\n"
+            "      done\n"
+        ),
+        encoding="utf-8",
+    )
+    staged_root = tmp_path / "staged"
+
+    copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
+
+    assert copied == ["scenarios/literal-prompt/task.md"]
+    assert (
+        staged_root / "scenarios" / "literal-prompt" / "task.md"
+    ).read_text(encoding="utf-8") == "  def example():\n      return 1\ndone\n"
+
+
+def test_evals_classify_malformed_yaml_as_blocked_validation(tmp_path: Path) -> None:
+    class FakeYAMLError(Exception):
+        pass
+
+    class FakeYaml:
+        YAMLError = FakeYAMLError
+
+        @staticmethod
+        def safe_load(_text: str) -> object:
+            raise FakeYAMLError("bad yaml")
+
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    _write_example_skill(tmp_path)
+
+    with (
+        mock.patch.dict(sys.modules, {"yaml": FakeYaml}),
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", return_value=completed),
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            allow_tessl_project_save=True,
+        )
+
+    tessl_eval = result.data["tessl_eval"]
+    assert result.status == "error"
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_validation"
+    assert "Failed to parse Tessl eval cases" in tessl_eval["blocker"]
+
+
 def test_evals_skip_tessl_escape_hatch(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
