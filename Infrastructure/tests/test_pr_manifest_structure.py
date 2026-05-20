@@ -342,7 +342,7 @@ class TestGitignore(unittest.TestCase):
     def setUp(self):
         """
         Prepare test fixture by loading the repository .gitignore file into self._lines as a list of lines.
-        
+
         Each line is decoded as UTF-8 and split on line boundaries; the resulting list preserves original ordering and excludes trailing newline characters.
         """
         self._lines = GITIGNORE_PATH.read_text(encoding="utf-8").splitlines()
@@ -350,7 +350,7 @@ class TestGitignore(unittest.TestCase):
     def test_artifacts_policy_entry_present(self):
         """
         Ensure the repository .gitignore includes an artifacts/policy/ ignore entry in either relative or leading-slash form.
-        
+
         Checks that either "artifacts/policy/" or "/artifacts/policy/" appears among the file's lines.
         """
         self.assertTrue(

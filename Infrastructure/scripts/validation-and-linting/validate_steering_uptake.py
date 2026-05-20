@@ -1,263 +1,289 @@
 #!/usr/bin/env python3
-"""Validate that high-signal steering has an executable uptake record."""
+"""Validate high-signal steering uptake surfaces."""
 
 from __future__ import annotations
 
 import argparse
 import json
 import re
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterable
 
 
-DEFAULT_LEDGER = Path(".harness/quality/steering-uptake.md")
-ACTIVE_RULE_REQUIRED_PHRASES = (
-    "high-signal candidate",
-    "classified",
-    "do not resume ordinary task work",
-    "environment refinement",
-    "systems thinker",
-    "larger perspective",
-    "class of failure",
-    "sibling instances",
-    "equivalent cases",
-    "correction -> pattern -> sweep -> classification -> enforcement",
-    "horizontal ooda",
-    "vertical ooda",
-    "cross-boundary",
-    "target context window",
-)
-REQUIRED_MARKERS = (
-    "Operating failure:",
-    "Feedback type:",
-    "Intent radius:",
-    "Blocker:",
-    "Horizontal OODA:",
-    "Vertical OODA:",
-    "Durable surface:",
-    "Environment refinement:",
-    "Mechanism:",
-    "Proof:",
-    "Validation:",
-    "Repeat prevention:",
-)
-BROAD_RADII = {"package", "repository", "architecture_rule", "durable_memory"}
-TRANSFERABLE_FEEDBACK_TYPES = {
-    "api_design_rule",
-    "repeated_pattern",
-    "repeated_error_protocol",
-    "architecture_boundary",
-    "naming_language",
-    "validation_gap",
-    "diagnostic_debt",
-    "test_contract_gap",
-    "documentation_drift",
-    "product_contract_rule",
-    "agent_operating_rule",
-}
-TRANSFERABLE_INVALID_RADII = {"line", "function"}
-DISPOSITION_MARKERS = (
-    "fixed now",
-    "different semantics",
-    "deferred",
-    "not applicable",
-    "policy surface",
-    "no code sweep",
-)
-DIAGNOSTIC_CLASSIFICATION_MARKER = "Diagnostic classification:"
-DIAGNOSTIC_FEEDBACK_TYPES = {"diagnostic_debt"}
-DIAGNOSTIC_REQUIRED_TERMS = ("category", "owner", "next action")
-REPEATED_ERROR_PROTOCOL_MARKER = "Repeated error protocol:"
-REPEATED_ERROR_FEEDBACK_TYPES = {"repeated_error_protocol"}
-REPEATED_ERROR_REQUIRED_TERMS = (
-    "same error twice",
-    "research",
-    "3-5",
-    "choose",
-    "implement",
-)
-PATTERN_SWEEP_REQUIRED_MARKERS = (
-    "Sweep scope:",
-    "Search terms:",
-    "Matches considered:",
-    "Exclusions:",
-)
-GENERALIZATION_REQUIRED_MARKERS = (
-    "Generalized rule:",
-    "Similar-case disposition:",
-)
-OODA_SCALING_PROTOCOL_MARKER = "OODA scaling protocol:"
-OODA_SCALING_REQUIRED_TERMS = (
-    "horizontal",
-    "vertical",
-    "compaction",
-    "harness",
-    "environment",
-    "target context window",
-    "reflect",
-)
-OODA_SCALING_TRIGGERS = (
-    "cross-boundary",
-    "target context window",
-    "target context-window",
-    "stacked trajectories",
+ROOT = Path(__file__).resolve().parents[3]
+DOC_REL_PATH = Path("Docs/agents/19-high-signal-steering-feedback.md")
+LEDGER_REL_PATH = Path(".harness/quality/steering-uptake.md")
+README_REL_PATH = Path("Docs/agents/README.md")
+DOC_PATH = ROOT / DOC_REL_PATH
+LEDGER_PATH = ROOT / LEDGER_REL_PATH
+README_PATH = ROOT / README_REL_PATH
+VALID_STATUSES = {"open", "validated", "blocked"}
+REQUIRED_HEADERS = [
+    "Date",
+    "Trigger",
+    "Failure pattern",
+    "Mechanism",
+    "Durable guardrail",
+    "Validation",
+    "Status",
+]
+STEERING_DOC_LINK_RE = re.compile(
+    r"\[[^\]]+\]\((?:/)?Docs/agents/19-high-signal-steering-feedback\.md\)"
 )
 
 
-def _field_value(record: str, field: str) -> str | None:
-    match = re.search(rf"^{re.escape(field)}\s*([^\n]+)", record, flags=re.MULTILINE)
-    if not match:
-        return None
-    return match.group(1).strip()
+@dataclass
+class Finding:
+    code: str
+    message: str
+    path: str
 
 
-def _uptake_records(text: str) -> list[tuple[str, str]]:
-    records: list[tuple[str, str]] = []
-    parts = re.split(r"^## Uptake Record:\s*", text, flags=re.MULTILINE)
-    for part in parts[1:]:
-        title, _, body = part.partition("\n")
-        records.append((title.strip(), body))
-    return records
+def _relative(path: Path, root: Path = ROOT) -> str:
+    """
+    Produce the path string relative to the repository root when the given path is inside it.
+
+    Parameters:
+        path (Path): The filesystem path to convert.
+
+    Returns:
+        str: The path as a string relative to `root` if `path` is inside `root`, otherwise the original path as a string.
+    """
+    try:
+        return str(path.relative_to(root))
+    except ValueError:
+        return str(path)
 
 
-def _requires_ooda_scaling_protocol(text: str) -> bool:
-    text_lower = text.lower()
-    return any(trigger in text_lower for trigger in OODA_SCALING_TRIGGERS)
+def _read(path: Path) -> str:
+    """
+    Read text from the given file path using UTF-8 encoding.
+
+    Returns:
+        The file contents as a string.
+    """
+    return path.read_text(encoding="utf-8")
 
 
-def validate_ledger(path: Path) -> dict[str, object]:
-    errors: list[str] = []
-    if not path.exists():
-        return {
-            "path": str(path),
-            "status": "fail",
-            "errors": [f"missing steering uptake ledger: {path}"],
-        }
+def _is_table_row(line: str) -> bool:
+    return "|" in line.strip()
 
-    text = path.read_text(encoding="utf-8")
-    if "# Steering Uptake Ledger" not in text:
-        errors.append("missing '# Steering Uptake Ledger' heading")
-    if "## Active Rule" not in text:
-        errors.append("missing '## Active Rule' section")
+
+def _collect_table_lines(lines: list[str], start_index: int) -> list[str]:
+    table_lines: list[str] = []
+    for line in lines[start_index:]:
+        stripped = line.strip()
+        if not _is_table_row(stripped):
+            break
+        table_lines.append(stripped)
+    return table_lines
+
+
+def _find_table_lines(markdown: str) -> list[str]:
+    lines = markdown.splitlines()
+    malformed_candidate: list[str] = []
+    for index, line in enumerate(lines):
+        if not _is_table_row(line):
+            continue
+        candidate = _collect_table_lines(lines, index)
+        if len(candidate) < 2:
+            continue
+        if _is_table_separator(candidate[1]):
+            return candidate
+        if not malformed_candidate:
+            malformed_candidate = candidate
+    return malformed_candidate
+
+
+def _table_rows(markdown: str) -> tuple[list[str], list[list[str]]]:
+    """
+    Extracts the header and data rows from the first Markdown-style table found in the input text.
+
+    Parameters:
+        markdown (str): Text that may contain one or more Markdown tables.
+
+    Returns:
+        tuple[list[str], list[list[str]]]:
+            `headers`: list of header column names (trimmed of surrounding whitespace and outer pipes).
+            `rows`: list of data rows; each row is a list of trimmed cell strings. Returns ([], []) if no complete Markdown table (header and divider) is found.
+    """
+    table_lines = _find_table_lines(markdown)
+
+    if len(table_lines) < 3:
+        if len(table_lines) >= 2:
+            return _table_cells(table_lines[0]), []
+        return [], []
+
+    if not _is_table_separator(table_lines[1]):
+        return _table_cells(table_lines[0]), []
+
+    headers = _table_cells(table_lines[0])
+    rows: list[list[str]] = []
+    for line in table_lines[2:]:
+        cells = _table_cells(line)
+        if any(cells):
+            rows.append(cells)
+    return headers, rows
+
+
+def _table_cells(line: str) -> list[str]:
+    text = line.strip()
+    if text.startswith("|"):
+        text = text[1:]
+    if text.endswith("|"):
+        text = text[:-1]
+
+    cells: list[str] = []
+    current: list[str] = []
+    escaped = False
+    for char in text:
+        if escaped:
+            if char == "|":
+                current.append("|")
+            else:
+                current.extend(["\\", char])
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if char == "|":
+            cells.append("".join(current).strip())
+            current = []
+            continue
+        current.append(char)
+    if escaped:
+        current.append("\\")
+    cells.append("".join(current).strip())
+    return cells
+
+
+def _is_table_separator(line: str) -> bool:
+    cells = _table_cells(line)
+    if not cells:
+        return False
+    for cell in cells:
+        stripped = cell.strip()
+        if len(stripped) < 3:
+            return False
+        if not set(stripped) <= {"-", ":"}:
+            return False
+        if "-" not in stripped:
+            return False
+    return True
+
+
+def _has_malformed_table_separator(markdown: str) -> bool:
+    table_lines = _find_table_lines(markdown)
+    return len(table_lines) >= 2 and not _is_table_separator(table_lines[1])
+
+
+def _contains_steering_doc_link(text: str) -> bool:
+    return bool(STEERING_DOC_LINK_RE.search(text))
+
+
+def validate(root: Path = ROOT) -> list[Finding]:
+    """
+    Validate the steering feedback documentation, ledger, and agent docs index under the given repository root.
+
+    Performs these checks:
+    - Ensures the main steering feedback doc exists and contains required phrases.
+    - Ensures the steering uptake ledger exists, has the expected table headers, at least one row, correct column counts, non-empty required fields, valid `Status` values, and that rows marked `validated` include validator evidence.
+    - Ensures the agent docs index README exists and references the steering feedback doc.
+
+    Parameters:
+        root (Path): Repository root used to resolve the expected documentation paths.
+
+    Returns:
+        list[Finding]: A list of findings describing missing files or content issues; empty if all checks pass.
+    """
+    findings: list[Finding] = []
+    doc_path = root / DOC_REL_PATH
+    ledger_path = root / LEDGER_REL_PATH
+    readme_path = root / README_REL_PATH
+
+    if not doc_path.exists():
+        findings.append(Finding("STEERING_DOC_MISSING", "High-signal steering feedback doc is missing.", _relative(doc_path, root)))
     else:
-        active_rule = text.split("## Active Rule", 1)[1].split("## Uptake Record:", 1)[0]
-        active_rule_lower = active_rule.lower()
-        for phrase in ACTIVE_RULE_REQUIRED_PHRASES:
-            if phrase.lower() not in active_rule_lower:
-                errors.append(
-                    f"active rule must state steering is a '{phrase}' before ordinary work"
-                )
-    records = _uptake_records(text)
-    if not records:
-        errors.append("missing at least one '## Uptake Record:' section")
+        doc = _read(doc_path)
+        for phrase in ["Stop Rule", "Uptake Loop", "Required Evidence", "validate_steering_uptake.py"]:
+            if phrase not in doc:
+                findings.append(Finding("STEERING_DOC_INCOMPLETE", f"Missing required phrase: {phrase}", _relative(doc_path, root)))
 
-    for title, body in records:
-        for marker in REQUIRED_MARKERS:
-            if marker not in body:
-                errors.append(f"{title}: missing required marker '{marker}'")
+    if not ledger_path.exists():
+        findings.append(Finding("STEERING_LEDGER_MISSING", "Steering uptake ledger is missing.", _relative(ledger_path, root)))
+    else:
+        ledger = _read(ledger_path)
+        headers, rows = _table_rows(ledger)
+        if headers != REQUIRED_HEADERS:
+            findings.append(Finding("STEERING_LEDGER_HEADERS", f"Expected headers {REQUIRED_HEADERS}, got {headers}", _relative(ledger_path, root)))
+        if headers and not rows and _has_malformed_table_separator(ledger):
+            findings.append(Finding("STEERING_LEDGER_SEPARATOR", "Ledger table must include a Markdown separator row before data rows.", _relative(ledger_path, root)))
+        if not rows:
+            findings.append(Finding("STEERING_LEDGER_EMPTY", "Ledger must contain at least one steering uptake row.", _relative(ledger_path, root)))
+        for index, row in enumerate(rows, start=1):
+            if len(row) != len(REQUIRED_HEADERS):
+                findings.append(Finding("STEERING_LEDGER_ROW_WIDTH", f"Row {index} has {len(row)} cells, expected {len(REQUIRED_HEADERS)}.", _relative(ledger_path, root)))
+                continue
+            record = dict(zip(REQUIRED_HEADERS, row, strict=True))
+            for field in REQUIRED_HEADERS:
+                if not record[field] or record[field].lower() in {"none", "n/a", "todo"}:
+                    findings.append(Finding("STEERING_LEDGER_FIELD_EMPTY", f"Row {index} has weak value for {field}.", _relative(ledger_path, root)))
+            if record["Status"] not in VALID_STATUSES:
+                findings.append(Finding("STEERING_LEDGER_STATUS", f"Row {index} has invalid status {record['Status']!r}.", _relative(ledger_path, root)))
+            if record["Status"] == "validated" and "validate_steering_uptake.py" not in record["Validation"]:
+                findings.append(Finding("STEERING_LEDGER_VALIDATION_WEAK", f"Row {index} marked validated without steering validator evidence.", _relative(ledger_path, root)))
+            mechanism = record["Mechanism"]
+            guardrail = record["Durable guardrail"]
+            if "Category:" not in mechanism:
+                findings.append(Finding("STEERING_LEDGER_CATEGORY_MISSING", f"Row {index} is missing a failure category in Mechanism.", _relative(ledger_path, root)))
+            if "Improvement type:" not in guardrail:
+                findings.append(Finding("STEERING_LEDGER_IMPROVEMENT_TYPE_MISSING", f"Row {index} is missing a durable improvement type in Durable guardrail.", _relative(ledger_path, root)))
 
-        feedback_type = _field_value(body, "Feedback type:")
-        intent_radius = _field_value(body, "Intent radius:")
-        broad_radius = intent_radius in BROAD_RADII
-        transferable_type = feedback_type in TRANSFERABLE_FEEDBACK_TYPES
-        if transferable_type and intent_radius in TRANSFERABLE_INVALID_RADII:
-            errors.append(
-                f"{title}: transferable feedback cannot be scoped to {intent_radius}; "
-                "choose a radius that can classify equivalent cases"
-            )
-        if broad_radius or transferable_type:
-            if "Pattern sweep:" not in body:
-                errors.append(
-                    f"{title}: broad or transferable feedback requires 'Pattern sweep:'"
-                )
-            for marker in PATTERN_SWEEP_REQUIRED_MARKERS:
-                if marker not in body:
-                    errors.append(
-                        f"{title}: broad or transferable feedback requires '{marker}'"
-                    )
-            if "Disposition:" not in body:
-                errors.append(
-                    f"{title}: broad or transferable feedback requires 'Disposition:'"
-                )
-            elif not any(marker in body for marker in DISPOSITION_MARKERS):
-                errors.append(
-                    f"{title}: disposition must classify matches or explain no code sweep"
-                )
-        if transferable_type:
-            for marker in GENERALIZATION_REQUIRED_MARKERS:
-                if marker not in body:
-                    errors.append(
-                        f"{title}: transferable feedback requires '{marker}'"
-                    )
-        if feedback_type in DIAGNOSTIC_FEEDBACK_TYPES:
-            diagnostic_classification = _field_value(body, DIAGNOSTIC_CLASSIFICATION_MARKER)
-            if diagnostic_classification is None:
-                errors.append(
-                    f"{title}: diagnostic feedback requires '{DIAGNOSTIC_CLASSIFICATION_MARKER}'"
-                )
-            elif not all(term in diagnostic_classification.lower() for term in DIAGNOSTIC_REQUIRED_TERMS):
-                errors.append(
-                    f"{title}: diagnostic classification must name category, owner, and next action"
-                )
-        if feedback_type in REPEATED_ERROR_FEEDBACK_TYPES:
-            repeated_error_protocol = _field_value(body, REPEATED_ERROR_PROTOCOL_MARKER)
-            if repeated_error_protocol is None:
-                errors.append(
-                    f"{title}: repeated error feedback requires '{REPEATED_ERROR_PROTOCOL_MARKER}'"
-                )
-            elif not all(term in repeated_error_protocol.lower() for term in REPEATED_ERROR_REQUIRED_TERMS):
-                errors.append(
-                    f"{title}: repeated error protocol must say same error twice, research 3-5 fixes, choose, and implement"
-                )
-        if _requires_ooda_scaling_protocol(f"{title}\n{body}"):
-            ooda_scaling_protocol = _field_value(body, OODA_SCALING_PROTOCOL_MARKER)
-            if ooda_scaling_protocol is None:
-                errors.append(
-                    f"{title}: cross-boundary OODA feedback requires '{OODA_SCALING_PROTOCOL_MARKER}'"
-                )
-            elif not all(
-                term in ooda_scaling_protocol.lower()
-                for term in OODA_SCALING_REQUIRED_TERMS
-            ):
-                errors.append(
-                    f"{title}: OODA scaling protocol must name horizontal, vertical, compaction, harness, environment, target context window, and reflection"
-                )
+    if not readme_path.exists():
+        findings.append(Finding("AGENT_DOC_INDEX_MISSING", "Agent docs index is missing.", _relative(readme_path, root)))
+    elif not _contains_steering_doc_link(_read(readme_path)):
+        findings.append(Finding("STEERING_DOC_NOT_INDEXED", "Agent docs index must link the steering feedback doc.", _relative(readme_path, root)))
 
-    status = "fail" if errors else "pass"
-    return {
-        "path": str(path),
-        "status": status,
-        "errors": errors,
-    }
+    return findings
 
 
-def parse_args() -> argparse.Namespace:
+def main(argv: Iterable[str] | None = None) -> int:
+    """
+    Run the steering uptake validator and print its results to stdout.
+
+    Parses optional CLI arguments (currently `--json`) from `argv` if provided; otherwise uses system arguments. Executes `validate()` and emits a payload describing the checked files and any findings. When `--json` is set, prints the full payload as pretty JSON; otherwise prints a one-line status ("pass" or "fail") followed by one line per finding in the format "<code>: <path>: <message>".
+
+    Parameters:
+        argv (Iterable[str] | None): Optional list of command-line arguments to parse. If `None`, the process's command-line arguments are used.
+
+    Returns:
+        int: Exit code — `0` when no findings were produced, `1` when one or more findings exist.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "paths",
-        nargs="*",
-        type=Path,
-        default=[DEFAULT_LEDGER],
-        help="Steering uptake ledger file(s) to validate.",
-    )
-    parser.add_argument("--json", action="store_true", help="Emit JSON output.")
-    return parser.parse_args()
+    parser.add_argument("--json", action="store_true", help="Emit machine-readable output.")
+    args = parser.parse_args(list(argv) if argv is not None else None)
 
-
-def main() -> int:
-    args = parse_args()
-    results = [validate_ledger(path) for path in args.paths]
-    status = "fail" if any(result["status"] == "fail" for result in results) else "pass"
-    payload = {"schema_version": "steering-uptake-validation.v1", "status": status, "results": results}
+    findings = validate()
+    payload = {
+        "status": "fail" if findings else "pass",
+        "checked": [
+            _relative(DOC_PATH),
+            _relative(LEDGER_PATH),
+            _relative(README_PATH),
+        ],
+        "findings": [finding.__dict__ for finding in findings],
+    }
 
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
-        for result in results:
-            print(f"{result['status']}: {result['path']}")
-            for error in result["errors"]:
-                print(f"  - {error}")
+        print(payload["status"])
+        for finding in findings:
+            print(f"{finding.code}: {finding.path}: {finding.message}")
 
-    return 1 if status == "fail" else 0
+    return 1 if findings else 0
 
 
 if __name__ == "__main__":

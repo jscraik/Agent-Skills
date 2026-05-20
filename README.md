@@ -12,8 +12,7 @@ remembered.
 
 This repository currently exposes **27 skills** in the default catalog: root
 routers plus policy-promoted command handles. The rooted command surface
-contains **109 generated `$` handles**, backed by first-party canonical skill
-source across 7 topic clusters (agent-ops: 49, backend-platform: 4, content-publishing: 6, frontend-ui: 10, mobile-native: 1, product-strategy: 3, security-ops: 5). Author a capability once, route it intelligently, validate
+contains **109 generated `$` handles**, including **75 first-party handles** backed by canonical skill source across 7 topic clusters (agent-ops: 46, backend-platform: 4, content-publishing: 6, frontend-ui: 10, mobile-native: 1, product-strategy: 3, security-ops: 5). Author a capability once, route it intelligently, validate
 quality, project it safely into runtime, and keep the human and agent command
 surface small enough to use.
 
@@ -366,7 +365,7 @@ This table is a human-oriented grouping for quick navigation and is not used for
 
 | Topic              | Skills | Examples                                              |
 | ------------------ | ------ | ----------------------------------------------------- |
-| agent-ops          | 49     | docs-expert, codex-review, autofix, simplify          |
+| agent-ops          | 46     | docs-expert, codex-review, autofix, simplify          |
 | frontend-ui        | 10     | baseline-ui, frontend-ui-design, ui-visual-regression |
 | backend-platform   | 4      | cli-spec, mcp-builder, backend-engineer               |
 | product-strategy   | 3      | architecture-interview, deep-interview, interview-me  |
@@ -385,7 +384,7 @@ agent-skills/
 |-- .workouts/                # Canonical skill workout fixtures
 |
 |-- Skills/                   # All canonical skills organised by topic cluster
-|   |-- agent-ops/            # 49 skills: docs-expert, codex-review, autofix, simplify, ...
+|   |-- agent-ops/            # 46 skills: docs-expert, codex-review, autofix, simplify, ...
 |   |-- frontend-ui/          # 10 skills: baseline-ui, frontend-ui-design, ui-visual-regression, ...
 |   |-- backend-platform/     #  4 skills: cli-spec, mcp-builder, backend-engineer, ...
 |   |-- product-strategy/     #  3 skills: architecture-interview, deep-interview, interview-me

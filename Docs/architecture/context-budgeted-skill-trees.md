@@ -85,8 +85,9 @@ Reviewer and inspector handles are intentionally separate from skill handles:
 Use the bounded router:
 
 ```bash
-python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py \
+python3 <agent-skills-root>/Infrastructure/scripts/lifecycle-and-sync/route_skillset.py \
   --skill-set agent-ops \
+  --skillsets-dir <agent-skills-root>/.skillsets \
   --task "verify this implementation is complete" \
   --top-k 3 \
   --json

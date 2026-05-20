@@ -33,4 +33,3 @@ Concept nodes to visually represent:
 - .harness/media/
 - context budget / invoke cost
 - compatibility aliases for legacy headings
-

@@ -194,40 +194,26 @@ Repo-specific agent knowledge base. Append-only.
 
 - **2026-05-10 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:4203147734)
 
-- **2026-05-11 [Codex]:** Bash command 'cat' failed with exit code 1 while reading an unavailable local path -> File read failed; verify the target path exists and is readable, check permissions, confirm the working directory is correct, then use an alternative read method or correct the path before retrying. Repeat-learning marker: this is a duplicate of prior cat exit-code-1 entries. Recommended diagnostic: run 'ls -la' on the target parent directory to confirm file presence and permissions. (auto-key:3040072751)
+**2026-05-11 [Codex]:** Bash command 'cat' failed with exit code 1 while reading an unavailable local path -> File read failed; verify the target path exists and is readable, check permissions, confirm the working directory is correct, then use an alternative read method or correct the path before retrying. argv/cwd/target-path not captured in runtime log; no artifact at .harness/memory/command-failure-3040072751.log. Recommended diagnostic: run `ls -la` on the suspected target directory to confirm file presence and permissions before retrying. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:3040072751)
 
-- **2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2293629618)
+**2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-2293629618.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:2293629618)
 
-- **2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3406616513)
+**2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-3406616513.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:3406616513)
 
-- **2026-05-13 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1318967753)
+**2026-05-13 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-1318967753.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:1318967753)
 
-- **2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3199628742)
+**2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-3199628742.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:3199628742)
 
-- **2026-05-14 [Codex]:** Bash command 'python3' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-2135778639.log. Verify target path exists, check cwd, and use Read tool instead of shell python3 for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:2135778639)
+**2026-05-14 [Codex]:** Bash command 'python3' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-2135778639.log. Verify target path exists, check cwd, and use Read tool instead of shell python3 for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:2135778639)
 
-- **2026-05-14 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:703433997)
+**2026-05-18 [Codex]:** Bash command 'python3' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:3201373903)
 
-- **2026-05-15 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3377052620)
+**2026-05-18 [Codex]:** Tessl eval steering -> when running skill/plugin evals, use the installed local `tessl` CLI every time, but stage only controlled input files into a temporary directory and run `tessl eval run --json <staged-temp-source>`; never point Tessl at the live repo source tree, never use `npx tessl`, and never use publish/registry upload paths.
 
-- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:872490936)
+**2026-05-19 [Codex]:** Tessl sandbox steering -> the durable eval lane is local Tessl CLI plus temp-staged project input under `/tmp`, not a live-source or registry operation. Do not request Codex sandbox network permission up front for `ask evals run`; doing so misclassifies the local temp-staged Tessl lane as an external export. Run the wrapper normally, then classify the actual Tessl CLI output.
 
-- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1758991561)
+**2026-05-19 [Codex]:** Tessl automatic eval preference -> Jamie explicitly wants `ask evals run` to run the temp-staged Tessl eval lane automatically every time evals run. Preserve the hard boundaries (native local `tessl`, staged temp source, no live source path, no `npx`, no publish or registry upload) and do not add manual approval or network-permission preflights unless the Tessl CLI itself returns a concrete blocker.
 
-- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:106538740)
+**2026-05-19 [Codex]:** PR green sweep repeated `gh` failures as if GitHub were down, but `gh api rate_limit` and `curl -I https://api.github.com` passed when the command was run with explicit Codex sandbox network permission; `gh run view --log-failed` also proved run-log caches default to `~/.cache/gh` unless `XDG_CACHE_HOME` is set. -> For all PR/CircleCI/Snyk live-state commands in this repo, use explicit network permission first and set `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, and `UV_CACHE_DIR` as applicable when `gh`, `mise`, or `uv` may run; after two equivalent failures, stop and refine the environment contract before retrying.
 
-- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:876251262)
-
-- **2026-05-16 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2515931723)
-
-- **2026-05-16 [Codex]:** Bash command 'python3' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:999518231)
-
-- **2026-05-17 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:4191692106)
-
-- **2026-05-17 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1301257671)
-
-- **2026-05-18 [Claude]:** Supersedes/clarifies earlier cat/python3/jq exit-code-2 entries (see auto-key:3040072751, auto-key:872490936, auto-key:1758991561, auto-key:106538740, auto-key:876251262, auto-key:2515931723, auto-key:999518231) — when bash commands fail with exit code 2 and the auto-capture entry omits argv/cwd/input path, the root cause is almost always a missing interpreter dependency, wrong working directory, or missing file rather than a skill regression; run `which python3`, `pwd`, and `ls` diagnostics first, then rerun with full command logging (explicit paths, cwd, and input) before changing skill logic or assuming tool failure.
-
-- **2026-05-19 [Codex]:** PR green sweep repeated `gh` failures as if GitHub were down, but `gh api rate_limit` and `curl -I https://api.github.com` passed when the command was run with explicit Codex sandbox network permission. `gh run view --log-failed` also proved that run-log caches default to `~/.cache/gh` unless `XDG_CACHE_HOME` is set. -> For all PR/CircleCI/Snyk live-state commands in this repo, use explicit network permission first and set sandbox-approved writable `XDG_CACHE_HOME`, `MISE_CACHE_DIR`, `UV_CACHE_DIR`, and `XDG_STATE_HOME` paths when `gh`, `mise`, or `uv` may run; after two equivalent failures, stop and refine the environment contract before retrying.
-
-- **2026-05-19 [Codex]:** High-signal Jamie steering about agent behavior must stop the active delivery lane before more feature work. -> Use `Docs/agents/19-high-signal-steering-feedback.md`, record uptake in `.harness/quality/steering-uptake.md`, and run `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json` plus `python3 -m pytest Infrastructure/scripts/testing/test_validate_steering_uptake.py -q` before resuming.
+**2026-05-19 [Codex]:** High-signal Jamie steering about agent behavior must stop the active delivery lane before more feature work. -> Use `Docs/agents/19-high-signal-steering-feedback.md`, record uptake in `.harness/quality/steering-uptake.md`, and run `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json` plus `python3 -m pytest Infrastructure/scripts/testing/test_validate_steering_uptake.py -q` before resuming.

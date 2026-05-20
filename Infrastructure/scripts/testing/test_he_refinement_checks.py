@@ -58,7 +58,21 @@ def test_lifecycle_mutation_contract_requires_shared_reference(tmp_path):
 
 def test_migration_report_covers_active_he_skills():
     module = load_script("report_legacy_migration")
-    rows = module.skill_rows(ROOT / "Plugins/harness-engineering")
+    he_root = ROOT / "Plugins/harness-engineering"
+    active_skills = sorted(path.parent.name for path in (he_root / "skills").glob("*/SKILL.md"))
+    rows = module.skill_rows(he_root)
+    reported_skills = sorted(row["skill"] for row in rows)
 
-    assert len(rows) >= 18
+    assert reported_skills == active_skills
+    assert len(rows) >= 17
     assert all(row["operator_contract"] == "present" for row in rows)
+
+
+def test_progressive_validator_checks_shared_stage_references():
+    script = (
+        ROOT
+        / "Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure_impl.sh"
+    ).read_text(encoding="utf-8")
+
+    assert 'shared_ref_dir="Plugins/harness-engineering/references/skills/${skill_name}"' in script
+    assert 'find -L "$shared_ref_dir" -type f -print0' in script

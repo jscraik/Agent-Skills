@@ -121,18 +121,18 @@ repo validation is unavailable.
 - For any monitor, watch, keep-going, or until-green request, `[$he-heartbeat]` is mandatory: create, update, or reuse exactly one thread heartbeat before starting the PR rotation unless a matching active heartbeat already exists. Start every sweep response by reporting `heartbeat_status`.
 - If heartbeat creation/reuse cannot be attempted because the automation surface, approval path, or local thread context is unavailable, set `heartbeat_status: blocked`, name the missing capability, and stop before PR rotation.
 - Use cron only when the user explicitly wants a detached workspace job; if the heartbeat/automation surface is unavailable, stop and report `blocked` instead of running an unmanaged long-lived sweep.
-- GitHub, CodeRabbit, CircleCI, Snyk, package registry, and branch-protection discovery are live network operations in Codex sandboxed runs. Before diagnosing outage, auth, credential, or platform failure, retry the live-state command with explicit network permission and record that evidence.
-- If a live-state or validation command may invoke `gh`, `mise`, or `uv`, set `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, and `UV_CACHE_DIR` to sandbox-approved writable directories as applicable before treating cache or state warnings as the root failure.
-- If the same live-state, sandbox, approval, or user-correction failure repeats twice, stop the PR rotation. First refine the closest durable contract (this skill, repo AGENTS guidance, solution docs, wrapper scripts, or validation), validate that refinement, and then resume.
 - Use `[@github]` and `[@git-project-triage]` for open PR discovery, rotation order, mergeability, review state, and branch protection truth.
 - Use `[$autofix]`, `[@coderabbit]`, and `[@coderabbit]` subagent coverage for unresolved CodeRabbit threads and Codex P1-P3 findings.
 - Use `[@circleci]` and `[@circleci]` subagent coverage for failing CircleCI jobs; fix from exact failing job logs.
 - Use `[$he-router]` in prune-branches mode after every target PR is merged to prune/delete local and remote branches/worktrees.
 - Do not hand-edit generated review artifacts, fabricate check status, mark comments resolved without a real fix or stale classification, or delete branches/worktrees before merge state is verified.
+- In Codex sandboxed sessions, every GitHub, CodeRabbit, CircleCI, Snyk, or package-registry command is a networked operation. Run live-state commands with explicit network permission before classifying a failed API call as a service outage or credential problem.
+- When a live-state command also invokes `mise`, set `MISE_CACHE_DIR` to a sandbox-approved writable cache directory before treating `mise` cache write warnings as command failure evidence.
+- If the same live-state or approval error happens twice, stop the PR rotation and refine the environment contract before another retry. The required refinement is a documented command shape, permission profile, script change, or validation check that prevents the same failure class from reaching the user again.
 
 ## Workflow
 1. Load applicable repo instructions, then record `git status --short --branch` and the active branch.
-2. Establish the live-state environment contract: network permission is available for GitHub, CodeRabbit, CircleCI, Snyk, and package-registry calls; writable `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, and `UV_CACHE_DIR` paths are set for commands that may invoke `gh`, `mise`, or `uv`; and repeated permission failures have a stop-and-refine path.
+2. Establish the live-state environment contract before discovery: use explicit network permission for `gh`, CircleCI, CodeRabbit, Snyk, and registry calls; set `MISE_CACHE_DIR` to a sandbox-approved writable cache directory when `mise` can run; and keep commands short and non-watch unless actively waiting for a specific check.
 3. Discover open PRs for the current project with GitHub and classify each PR by mergeability, required checks, review-thread state, CodeRabbit status, CircleCI status, and local branch/worktree ownership.
 4. Create, update, or reuse one heartbeat with `he-heartbeat` unless a matching active automation already exists. Record `heartbeat_status`, automation id or reuse evidence, and the stop rule before editing PRs. The stop rule is: all target PRs merged to `main`, cleanup completed, or a concrete blocker needs the user. If this step is blocked, stop here.
 5. Start a bounded rotation. For each PR, refresh live state before editing, after every push, and before merge.
@@ -168,8 +168,8 @@ repo validation is unavailable.
 - Fixing CircleCI failures from guesses instead of the failing job output.
 - Creating duplicate heartbeats for the same project PR sweep.
 - Deleting branches because they look stale without checking worktrees, upstream state, and unique commits.
-- Retrying `gh pr list`, check refreshes, or review-thread queries after an `api.github.com` connection error without first proving explicit sandbox network permission.
-- Treating `gh`, `mise`, or `uv` cache/state warnings as GitHub, CircleCI, Snyk, or package-registry evidence before setting writable sandbox cache and state paths.
+- Repeating `gh pr list`, `gh pr checks`, or CircleCI commands after `error connecting to api.github.com` without first proving whether the Codex sandbox granted network permission.
+- Treating `mise` home-cache write warnings as network or API failure evidence.
 
 ## Gotchas
 
@@ -263,7 +263,6 @@ snyk test --all-projects --severity-threshold=high
 - Read `references/evals.yaml` for trigger and safety benchmark expectations.
 
 - Start here for routing, boundaries, and stop rules.
-- For Cookbook-derived PR repair and secure quality gate checks, use `Infrastructure/references/openai-cookbook-expert-lens-pack.md` and `Infrastructure/references/openai-cookbook-skill-expertise-map.md`.
 - Use `references/contract.yaml` for the machine-readable contract.
 - Use `references/evals.yaml` for trigger and safety benchmark expectations.
 - Use `references/task-profile.json` for evaluator thresholds.

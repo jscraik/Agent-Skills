@@ -17,6 +17,24 @@ cases:
     prompt: "Convert `.harness/reframes/2026-05-10-JSC-321-agent-skills-routing.md` into a small Linear execution plan with one parent, repo/location label, dependencies, and validation gates."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: linear-execution-source-prompt-preservation
+    name: "Linear execution source prompt preservation"
+    category: edge
+    realistic: true
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    why_realistic: "Jamie expects he-linear-plan to preserve the original Linear Execution Orchestration prompt as confirmation-gated live-ready execution routing, not generic issue creation."
+    expected_behavior: "Select linear execution orchestration, preserve source-prompt family status, consume approved cognition, gate ADR/core/reframe readiness, verify or block live Linear setup, collapse work into the smallest useful active set, and keep mutation confirmation-gated."
+    anti_overfit_notes: "The response must not create broad tracking, new projects, labels, or one issue per finding; it must separate ready-to-create payloads from applied Linear changes."
+    prompt: "Does he-linear-plan still answer my original Linear Execution Orchestration prompt? It should read approved features, review, triage, strategy, core, decisions, reframes, and legacy refactors; inherit source-prompt coverage limits; generate .harness/linear execution plans; use the JSC Dev Portfolio model only when proven; verify existing project, labels, templates, duplicate/canceled/trashed state when live Linear evidence is available; classify Now, Next, Later, and Do Not Create; collapse work into the smallest milestone, parent, and independently verifiable sub-issues; include decision_artifact_status, core_artifact_status, live_linear_setup_status, source_prompt_family_status, dependencies, eval gates, rollback gates, human/agent routing, ready-to-create payloads, required_confirmation, and never mutate Linear without explicit post-plan approval."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Linear Execution Orchestration|source prompt|preserved|source_prompt_family_status)"}
+      - {type: regex, value: "(?is)(approved cognition|coverage limits|decision_artifact_status|core_artifact_status|live_linear_setup_status)"}
+      - {type: regex, value: "(?is)(Now|Next|Later|Do Not Create|smallest.*milestone|parent|sub-issues|active set)"}
+      - {type: regex, value: "(?is)(ready-to-create|required_confirmation|confirmation_required|without explicit|post-plan approval)"}
+      - {type: regex, value: "(?is)(labels|templates|duplicate|canceled|trashed|Dev Portfolio|Portfolio Ops|repo.?location)"}
   - id: destination-ambiguous
     name: "Destination ambiguous"
     category: edge

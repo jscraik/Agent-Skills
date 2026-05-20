@@ -163,7 +163,7 @@ def test_harness_curated_context_paths_are_classified() -> None:
 def test_harness_runtime_outputs_are_violations() -> None:
     """
     Verifies that selected `.harness/` runtime output paths are classified as violations.
-    
+
     Asserts each path produces a finding with status "violation", `blocking` set to True, and the expected violation `code`.
     """
     cases = {

@@ -180,7 +180,10 @@ has_context_move_evidence() {
   local skill_path="$2"
   local skill_dir
   skill_dir="$(dirname "$skill_path")"
+  local skill_name
+  skill_name="$(basename "$skill_dir")"
   local ref_dir="${skill_dir}/references"
+  local shared_ref_dir="Plugins/harness-engineering/references/skills/${skill_name}"
   local infra_ref_dir="${skill_dir}/Infrastructure/references"
   local candidates=()
   local f
@@ -192,6 +195,11 @@ has_context_move_evidence() {
     while IFS= read -r -d '' f; do
       candidates+=("${f#$REPO_ROOT/}")
     done < <(find -L "$ref_dir" -type f -print0)
+  fi
+  if [[ -d "$shared_ref_dir" ]]; then
+    while IFS= read -r -d '' f; do
+      candidates+=("${f#$REPO_ROOT/}")
+    done < <(find -L "$shared_ref_dir" -type f -print0)
   fi
   if [[ -d "$infra_ref_dir" ]]; then
     while IFS= read -r -d '' f; do

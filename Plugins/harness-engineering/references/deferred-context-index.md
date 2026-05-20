@@ -15,6 +15,7 @@ the reference below, and let validators catch stale duplicated procedure text.
   - `references/deterministic-stage-routing.md`
   - `references/domain-model-routing.md`
   - `references/domain-context-contract.md`
+  - `references/ubiquitous-language-contract.md`
   - `references/domain-model-production-contract.md`
   - `references/design-complexity-contract.md`
   - `references/gate-selection-contract.md`
@@ -77,6 +78,7 @@ Load references by trigger instead of by habit:
 | Stage would copy external process, add lifecycle surface area, expand governance, or preserve complexity without proven HE-specific failure evidence | `references/first-principles-contract.md` | first_principles_check with verified failure, smallest mechanism, decision type, rejected analogy, and proceed/ask/defer/reject/delete outcome |
 | Plugin hook, `hooks/hooks.json`, `.codex-plugin/plugin.json` hook declaration, or hook-enforced guardrail appears in scope | `references/plugin-hook-capability-contract.md` | plugin_hook_capability_check with feature gate status, fallback path, portability status, side-effect class, lifecycle authority, and outcome |
 | Domain-specific knowledge could sharpen output | `references/specialist-skill-steering-contract.md` | chosen specialist, skipped reason, or blocker |
+| Ubiquitous language, glossary conflicts, domain interview, or term drift shape behavior | `references/domain-model-routing.md`, `references/domain-context-contract.md`, `references/ubiquitous-language-contract.md`, `references/interactive-steering-contract.md` | canonical terms, avoided aliases, language file, one-question-at-a-time steering status, and ADR threshold outcome |
 | User choice affects downstream scope | `references/interactive-steering-contract.md` | asked choice, headless assumption, or blocked state |
 | Product compression is the blocker | `references/agent-native-compression-contract.md` | subtractive proof, fresh-agent eval, and ablation gate |
 | HE plugin confidence or budget quality is claimed | `references/plugin-eval-confidence-contract.md` | static plugin-eval result, rooted handle proof, release eval lane, and cache-sync status |
@@ -265,7 +267,6 @@ reference destinations below.
 
 Moved-to-reference evidence:
 
-Return schema_version when structured. Output a `.harness/plan/**.md` plan or
 Produce one of: strategy memo, architecture recommendation, refactor strategy,
 Strategy artifacts are cognition compression, not ceremony. Turn verified repo
 Write a dated `.harness/linear/**-linear-plan.md` artifact or return

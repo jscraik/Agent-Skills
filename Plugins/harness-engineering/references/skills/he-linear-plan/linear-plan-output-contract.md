@@ -44,6 +44,10 @@ Linear.
 
 - `schema_version: 1`
 - `selected_stage: he-linear-plan`
+- `source_prompt_family_status`: required when the request references an
+  original prompt method, source-prompt coverage, or upstream artifacts produced
+  from source-prompt preservation. Include covered prompt family, authority
+  limits, and downstream confidence.
 - `subagent_policy`
 - `roles_used`
 - `roles_recommended`

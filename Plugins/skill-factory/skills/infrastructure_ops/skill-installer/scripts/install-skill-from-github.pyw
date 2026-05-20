@@ -31,7 +31,7 @@ for _name, _value in vars(_MODULE).items():
         globals()[_name] = _value
 
 _PINNED_REF = re.compile(r"^[0-9a-fA-F]{40}$")
-_TRUSTED_REPOS = {"openai/skills"}
+_TRUSTED_REPOS = {"openai/skills", "jscraik/agent-skills"}
 
 
 def _canonical_repo_dest() -> str | None:
@@ -120,6 +120,19 @@ def _signer_allowed(identity: dict[str, list[str]], args: argparse.Namespace) ->
     return True
 
 
+def _resolve_skill_source_path(repo_root: str, path: str) -> str:
+    skill_src = os.path.join(repo_root, path)
+    if os.path.isdir(skill_src):
+        return skill_src
+
+    parts = Path(path).parts
+    if parts and parts[0].lower() == "skills":
+        normalized = os.path.join(repo_root, "skills", *parts[1:])
+        if os.path.isdir(normalized):
+            return normalized
+    return skill_src
+
+
 def _parse_compat_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Install a skill from GitHub.")
     parser.add_argument("--repo")
@@ -166,7 +179,7 @@ def main(argv: list[str]) -> int:
                 skill_name = skill_name or os.path.basename(path.rstrip("/"))
                 _validate_skill_name(skill_name)
                 dest_dir = os.path.join(dest_root, skill_name)
-                skill_src = os.path.join(repo_root, path)
+                skill_src = _resolve_skill_source_path(repo_root, path)
                 _validate_skill(skill_src)
                 _copy_skill(skill_src, dest_dir)
                 installed.append((skill_name, dest_dir))

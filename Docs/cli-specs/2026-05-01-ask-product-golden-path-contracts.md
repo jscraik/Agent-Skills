@@ -320,7 +320,7 @@ Required data fields:
     },
     "contract_schemas": {
       "doctor": {"version": "skill-doctor.v1", "owner": "Agent Skills Kit"},
-      "events": {"version": "skill-events.v1", "owner": "Agent Skills Kit"},
+      "events": {"version": "capability-lifecycle-event.v1", "owner": "Agent Skills Kit"},
       "profiles": "skill-operation-profiles.v1",
       "package": "skill-package-readiness.v1"
     },
@@ -734,8 +734,6 @@ JSON output example:
   }
 }
 ```
-
-Required behavior:
 
 Required data fields for JSON output:
 

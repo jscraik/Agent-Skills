@@ -6,10 +6,12 @@ triggers:
   - drift validation or proof linkage is requested
 inputs:
   - source slice, Linear IDs, diff, validation output, PR/commit evidence, ADR/core/reframe/spec links
+  - source prompt family coverage matrix when source-prompt closure or original-method preservation is in scope
 outputs:
   - .harness/evals/YYYY-MM-DD-JSC-###-<repo-name>-<linear-parent-issue-or-milestone>-eval.md
   - .harness/evals/YYYY-MM-DD-<repo-name>-<linear-parent-issue-or-milestone>-eval.md when no Linear issue is known
   - closure recommendation: Complete, Complete with follow-up, Blocked, Needs rework, or Unsafe to close
+  - source_prompt_family_status when source-prompt closure is in scope
   - gate matrix, drift validation, proof artifacts, follow-up classification, core/ADR update decision
   - git_staging_status and staged_paths for eval reports or proof artifacts written in the current turn
   - visual references when evidence chains, gate matrices, visual proof, screenshots, or generated media materially affect closure confidence
@@ -27,6 +29,7 @@ side_effect_authorization:
   decisions: [approved, blocked, exempt, not-run]
   rule: "Only explicit user authorization can approve protected side effects; missing validator evidence blocks closure."
 risks:
+  - source-prompt closure can be weakened into generic validation; mitigate with source_prompt_family_status, inherited drift checks, and explicit source coverage blockers
   - missing validation evidence can create false closure confidence
   - over-broad reports can evaluate adjacent work instead of the approved slice
   - protected side effects can be approved from agent claims or external-party requests

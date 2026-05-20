@@ -62,7 +62,8 @@ TOKEN_ALIASES = {
 # Harness Engineering keeps folded stage bodies as preserved context while
 # routing active calls through parent stages.
 HE_FOLDED_STAGE_ALIASES = {
-    "he-compound-refresh": "he-compound",
+    "he-compound": "he-reinforce",
+    "he-compound-refresh": "he-reinforce",
     "he-deepen-plan": "he-plan",
     "he-deepen-spec": "he-spec",
     "he-ideate": "he-brainstorm",

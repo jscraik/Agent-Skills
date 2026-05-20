@@ -19,7 +19,7 @@ Do not hand-edit runtime projections.
 - `total_skills`: 27
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: b50161b26b4914a2
+- `policy_identity`: 53abbc2e5c384b95
 
 ## Catalog
 
@@ -37,7 +37,7 @@ Do not hand-edit runtime projections.
 - `context7` — Analyze current external library or API docs with Context7 when dependency behavior, version-sensitive references, or ctx7 CLI setup/install guidance is needed.
 - `docs-expert` — Audit, rewrite, and validate README, runbook, code-doc, config-doc, and public trust-surface documentation by checking stale instructions, command examples, dependency claims, file paths, configs, workflows, and code references against live repository evidence. Use when documentation needs proof-backed correction or reader-focused validation.
 - `fix-mise` — Diagnose, fix, and validate mise runtime failures. Use when commands fail from mise config, missing runtimes, stale pins, trust prompts, or shell activation drift.
-- `improve-codebase-architecture` — Reviews architecture change pressure in module boundaries, coupling, ownership, hidden state, tests, and decisions. Use when asked for architecture review, design review, refactoring assessment, code-structure analysis, patch-vs-interface tradeoffs, tracer proof, or repo decision evidence; not for cleanup, bugs, naming, or style refactors.
+- `improve-codebase-architecture` — Use when reviewing or improving codebase architecture needs deeper module boundaries, clearer context language, better interfaces, stronger testability, or Linear-backed decisions.
 - `keep-codex-fast` — Diagnose Codex Desktop or CLI local-state bloat and safe recovery options. Use when sessions, archived history, logs, worktrees, or stale Codex config may be making Codex feel slow.
 - `npm-release` — Create, review, and validate npm release workflows. Use when preparing or publishing npm packages, release channels, dist-tags, provenance, or 2FA-protected publishes.
 - `pnpm-manager` — Run, plan, and validate pnpm workspace operations. Use when a user needs pnpm monorepo installs, tests, builds, filters, changed-package selection, or publish routing.

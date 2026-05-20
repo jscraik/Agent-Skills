@@ -71,6 +71,16 @@ Plan unit contract:
 - Do not include implementation discoveries as settled facts until source
   inspection proves them. Mark them as `implementation-time unknown` or
   `[NEEDS CLARIFICATION: ...]`.
+- If the source spec includes `Implementation Notes`, `Implementation
+  Decisions`, prototype-derived snippets, or decision logs, project only the
+  execution-relevant parts into `Implementation Strategy`, `Work Units`, and
+  `Risk Register`. Preserve durable behavior/interface/schema/state decisions
+  by source ID, but do not copy long rationale or turn the plan into a duplicate
+  spec.
+- If the source spec includes `Testing Decisions` or validation doctrine,
+  project it into `Validation Gates` and each affected `PU-*` as external
+  behavior expectations, prior-art test families to inspect, exact commands when
+  known, and stop conditions when confidence cannot be proven.
 
 Enforcement Contract requirements:
 
@@ -102,6 +112,10 @@ Validation and proof requirements:
 - Include smoke, release, docs/prose, security, accessibility, package-boundary,
   and runtime checks only when the source contract or touched surface requires
   them; do not paste a generic checklist.
+- Testing decisions in plans must name the observable behavior under test, the
+  source requirement or acceptance ID, the test surface or prior-art family to
+  inspect, and the expected proof. Avoid tests that assert private implementation
+  details unless the private contract is itself the approved behavior.
 - A plan is not ready for `he-work` when validation commands, rollback,
   ownership, or source traceability are missing.
 

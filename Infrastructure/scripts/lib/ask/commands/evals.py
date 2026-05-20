@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import datetime as dt
 import json
 import re
 import shlex
 import subprocess
 import sys
+import shutil
+import tempfile
+import hashlib
 from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
 from ask.skill_review_dashboard import render_skill_review_dashboard
@@ -58,6 +63,312 @@ def _as_text(value, encoding="utf-8") -> str:
     if isinstance(value, bytes):
         return value.decode(encoding, errors="replace")
     return str(value)
+
+
+def _tessl_policy() -> dict:
+    """Return the repo's Tessl safety contract for eval runs."""
+    return {
+        "native_tessl_only": True,
+        "no_npx": True,
+        "no_publish": True,
+        "no_registry_upload": True,
+        "temp_staged_project_input_only": True,
+        "network_permission_required_by_repo": False,
+        "project_save_may_use_tessl_service": False,
+        "project_save_default": "compatibility_flag_not_required",
+    }
+
+
+def _copy_if_present(source_root: Path, relative_path: str, target_root: Path) -> list[str]:
+    source = source_root / relative_path
+    if not source.exists():
+        return []
+    target = target_root / relative_path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, target)
+    return [relative_path]
+
+
+def _yaml_scalar(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    return value
+
+
+def _consume_yaml_block(lines: list[str], index: int, parent_indent: int, style: str) -> tuple[str, int]:
+    raw_block_lines: list[str] = []
+    while index < len(lines):
+        raw_line = lines[index]
+        if not raw_line.strip():
+            raw_block_lines.append("")
+            index += 1
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        if indent <= parent_indent:
+            break
+        raw_block_lines.append(raw_line)
+        index += 1
+
+    non_empty_indents = [
+        len(line) - len(line.lstrip(" "))
+        for line in raw_block_lines
+        if line.strip()
+    ]
+    block_indent = min(non_empty_indents) if non_empty_indents else parent_indent + 1
+    block_lines = [
+        line[block_indent:] if line.strip() else ""
+        for line in raw_block_lines
+    ]
+
+    if style.startswith(">"):
+        folded: list[str] = []
+        paragraph: list[str] = []
+        for line in block_lines:
+            if line.strip():
+                paragraph.append(line.strip())
+                continue
+            if paragraph:
+                folded.append(" ".join(paragraph))
+                paragraph = []
+        if paragraph:
+            folded.append(" ".join(paragraph))
+        return "\n".join(folded), index
+    return "\n".join(block_lines), index
+
+
+def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
+    cases: list[dict[str, str]] = []
+    current: dict[str, str] | None = None
+    in_cases = False
+    lines = text.splitlines()
+    index = 0
+    while index < len(lines):
+        raw_line = lines[index]
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            index += 1
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        if stripped == "cases:":
+            in_cases = True
+            index += 1
+            continue
+        if not in_cases:
+            index += 1
+            continue
+        if stripped.startswith("- "):
+            if current and current.get("id") and current.get("prompt"):
+                cases.append(current)
+            current = {}
+            stripped = stripped[2:].strip()
+        if current is None or ":" not in stripped:
+            index += 1
+            continue
+        key, raw_value = stripped.split(":", 1)
+        key = key.strip()
+        raw_value = raw_value.strip()
+        if key not in {"id", "prompt"}:
+            index += 1
+            continue
+        if key == "prompt" and raw_value.startswith((">", "|")):
+            current[key], index = _consume_yaml_block(lines, index + 1, indent, raw_value)
+            continue
+        current[key] = _yaml_scalar(raw_value)
+        index += 1
+
+    if current and current.get("id") and current.get("prompt"):
+        cases.append(current)
+    return cases
+
+
+def _parse_tessl_eval_cases(evals_path: Path) -> list[dict[str, str]]:
+    if not evals_path.exists():
+        return []
+
+    text = evals_path.read_text(encoding="utf-8")
+    try:
+        import yaml  # type: ignore
+    except ImportError:
+        return _parse_tessl_eval_cases_compat(text)
+
+    try:
+        loaded = yaml.safe_load(text) or {}
+    except yaml.YAMLError as e:
+        raise ValueError(f"Failed to parse Tessl eval cases from {evals_path}: {e}") from e
+    raw_cases = loaded.get("cases", []) if isinstance(loaded, dict) else []
+    cases: list[dict[str, str]] = []
+    for raw_case in raw_cases:
+        if not isinstance(raw_case, dict):
+            continue
+        case_id = raw_case.get("id")
+        prompt = raw_case.get("prompt")
+        if case_id is None or prompt is None:
+            continue
+        cases.append({"id": str(case_id), "prompt": str(prompt)})
+    return cases
+
+
+def _write_tessl_scenarios_from_evals(source_root: Path, staged_root: Path) -> list[str]:
+    copied: list[str] = []
+    for case in _parse_tessl_eval_cases(source_root / "references" / "evals.yaml"):
+        case_id = case["id"].replace("/", "-")
+        task_path = staged_root / "scenarios" / case_id / "task.md"
+        task_path.parent.mkdir(parents=True, exist_ok=True)
+        task_path.write_text(case["prompt"].rstrip() + "\n", encoding="utf-8")
+        copied.append(str(task_path.relative_to(staged_root)))
+    return copied
+
+
+def _write_tessl_project_marker(source_root: Path, staged_root: Path) -> list[str]:
+    marker_path = staged_root / "tessl.json"
+    if marker_path.exists():
+        return ["tessl.json"]
+    marker_path.write_text(
+        json.dumps({"name": source_root.name}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return ["tessl.json"]
+
+
+def _stable_tessl_stage_parent(path: str) -> Path:
+    safe_name = path.replace("/", "__").replace(" ", "_")
+    digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
+    return Path(tempfile.gettempdir()) / "ask-tessl-evals" / f"{safe_name}-{digest}"
+
+
+def _stage_tessl_eval_source(repo_root: Path, path: str, temp_root: Path | None = None) -> tuple[Path, list[str]]:
+    repo_root_resolved = repo_root.resolve()
+    source_root = (repo_root_resolved / path).resolve()
+    if not source_root.is_relative_to(repo_root_resolved):
+        raise FileNotFoundError("Tessl eval source must be inside repo_root")
+    if not source_root.is_dir():
+        raise FileNotFoundError(f"Tessl eval source is not a directory: {path}")
+
+    staged_root = (temp_root / source_root.name) if temp_root else _stable_tessl_stage_parent(path)
+    staged_root.mkdir(parents=True, exist_ok=True)
+    preserved_marker = staged_root / "tessl.json"
+    for child in staged_root.iterdir():
+        if child == preserved_marker:
+            continue
+        if child.is_dir():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
+
+    copied: list[str] = []
+    for relative_path in (
+        "SKILL.md",
+        "references/evals.yaml",
+        "references/contract.yaml",
+        "references/task-profile.json",
+    ):
+        copied.extend(_copy_if_present(source_root, relative_path, staged_root))
+    copied.extend(_write_tessl_scenarios_from_evals(source_root, staged_root))
+    copied.extend(_write_tessl_project_marker(source_root, staged_root))
+
+    if not copied:
+        raise FileNotFoundError(f"No Tessl eval staging files found under: {path}")
+    return staged_root, copied
+
+
+def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = False) -> dict:
+    """Run the local Tessl eval lane without any registry publish/upload command."""
+    _ = allow_project_save  # Compatibility flag retained; temp-staged local runs are default-safe.
+    tessl_path = shutil.which("tessl")
+    command_display = "tessl eval run --json <staged-temp-source>"
+    if not tessl_path:
+        return {
+            "status": "blocked",
+            "command": command_display,
+            "blocker": "Installed native tessl CLI was not found on PATH.",
+            "blocker_class": "blocked_runtime",
+            "policy": _tessl_policy(),
+        }
+
+    try:
+        staged_source, copied_files = _stage_tessl_eval_source(repo_root, path)
+        command_display = f"tessl eval run --json {staged_source}"
+        cmd = [tessl_path, "eval", "run", "--json", str(staged_source)]
+        try:
+            process = subprocess.run(cmd, cwd=str(staged_source), capture_output=True, text=True, timeout=600)
+        except subprocess.TimeoutExpired as e:
+            return {
+                "status": "blocked",
+                "command": command_display,
+                "source_path": path,
+                "staged_source": str(staged_source),
+                "staged_files": copied_files,
+                "raw_output": _as_text(e.stdout),
+                "raw_error": _as_text(e.stderr),
+                "blocker": "Tessl eval timed out after 600 seconds.",
+                "blocker_class": "blocked_runtime",
+                "policy": _tessl_policy(),
+            }
+        except OSError as e:
+            return {
+                "status": "blocked",
+                "command": command_display,
+                "source_path": path,
+                "staged_source": str(staged_source),
+                "staged_files": copied_files,
+                "raw_output": "",
+                "raw_error": str(e),
+                "blocker": f"Failed to run Tessl eval: {e}",
+                "blocker_class": "blocked_runtime",
+                "policy": _tessl_policy(),
+            }
+
+        raw_output = process.stdout
+        raw_error = process.stderr
+        auth_text = f"{raw_output}\n{raw_error}".lower()
+        if process.returncode != 0 and "authenticate with tessl" in auth_text:
+            status = "blocked"
+            blocker = "Tessl CLI is installed locally, but authentication is required before evals can run."
+            blocker_class = "blocked_auth"
+        elif process.returncode != 0 and "no existing project safely matches this directory" in auth_text:
+            status = "blocked"
+            blocker = (
+                "Tessl CLI is authenticated, but no Tessl project/workspace is linked for the "
+                "temp-staged eval directory. Create or link a Tessl project/workspace before rerunning."
+            )
+            blocker_class = "blocked_validation"
+        elif process.returncode != 0 and "no tessl project found" in auth_text:
+            status = "blocked"
+            blocker = "Tessl CLI could not find a tessl.json project marker in the staged eval directory."
+            blocker_class = "blocked_validation"
+        else:
+            status = "pass" if process.returncode == 0 else "fail"
+            blocker = None
+            blocker_class = None
+
+        return {
+            "status": status,
+            "command": command_display,
+            "source_path": path,
+            "staged_source": str(staged_source),
+            "staged_files": copied_files,
+            "exit_code": process.returncode,
+            "raw_output": raw_output,
+            "raw_error": raw_error,
+            "blocker": blocker,
+            "blocker_class": blocker_class,
+            "policy": _tessl_policy(),
+        }
+    except (OSError, ValueError) as e:
+        blocker_class = "blocked_validation" if isinstance(e, FileNotFoundError) else "blocked_runtime"
+        if isinstance(e, ValueError):
+            blocker_class = "blocked_validation"
+        return {
+            "status": "blocked",
+            "command": command_display,
+            "source_path": path,
+            "raw_output": "",
+            "raw_error": str(e),
+            "blocker": f"Failed to stage Tessl eval source: {e}",
+            "blocker_class": blocker_class,
+            "policy": _tessl_policy(),
+        }
 
 
 def _repo_relative_text(repo_root: Path, text: str) -> str:
@@ -406,6 +717,10 @@ def run_evals(
     mode: str = "smoke",
     dashboard: bool = True,
     runner: str = "codex",
+    skip_tessl: bool = False,
+    allow_tessl_project_save: bool = False,
+    model: str | None = None,
+    cases: list[str] | None = None,
 ) -> CallResult:
     """Runs evaluation cases for a skill."""
     result = CallResult()
@@ -426,9 +741,10 @@ def run_evals(
     ]
     timeout = RELEASE_EVAL_TIMEOUT_SECONDS if mode == "release" else 300
     if mode == "smoke" and runner == "codex":
+        smoke_model = model or SMOKE_EVAL_MODEL
         cmd.extend([
             "--model",
-            SMOKE_EVAL_MODEL,
+            smoke_model,
             "--timeout-sec",
             str(SMOKE_CASE_TIMEOUT_SECONDS),
             "--codex-arg",
@@ -437,6 +753,12 @@ def run_evals(
         timeout = SMOKE_EVAL_TIMEOUT_SECONDS
     elif mode == "smoke":
         timeout = SMOKE_EVAL_TIMEOUT_SECONDS
+
+    for raw_case in cases or []:
+        for case in raw_case.split(","):
+            case = case.strip()
+            if case:
+                cmd.extend(["--case", case])
 
     _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
 
@@ -519,6 +841,41 @@ def run_evals(
             blocker_class="blocked_runtime",
         )
         result.errors.append(ErrorObject(code="ERR_RUNTIME", message=f"Failed to run evaluation: {e}"))
+
+    if skip_tessl:
+        result.data["tessl_eval"] = {
+            "status": "skipped",
+            "reason": "--skip-tessl",
+            "policy": _tessl_policy(),
+        }
+    else:
+        tessl_eval = _run_tessl_eval(repo_root, path, allow_project_save=allow_tessl_project_save)
+        result.data["tessl_eval"] = tessl_eval
+        if tessl_eval.get("status") != "pass":
+            tessl_status = str(tessl_eval.get("status") or "fail")
+            blocker_class = tessl_eval.get("blocker_class")
+            eval_status = blocker_class or tessl_status
+            result.data["tessl_eval_status"] = eval_status
+            result.data["tessl_blocker_class"] = blocker_class
+            if result.status != "error":
+                result.data["eval_status"] = eval_status
+                result.data["blocker_class"] = blocker_class
+                lifecycle_events = result.data.setdefault("lifecycle_events", [])
+                if lifecycle_events and lifecycle_events[-1].get("event_type") in {"eval_completed", "eval_blocked"}:
+                    lifecycle_events.pop()
+                _finish_eval_lifecycle(
+                    result,
+                    path=path,
+                    mode=mode,
+                    runner=runner,
+                    eval_status=eval_status,
+                    blocker_class=blocker_class,
+                )
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_RUNTIME" if tessl_eval.get("status") == "blocked" else "ERR_VALIDATION",
+                message=f"Tessl eval {tessl_eval.get('status')}: {tessl_eval.get('blocker') or 'see data.tessl_eval'}",
+            ))
 
     return result
 

@@ -137,34 +137,34 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
-        
+
       <div class="metric">
         <div class="metric-head"><span>Quality</span><strong class="bad">69%</strong></div>
         <div class="bar"><span class="bad" style="width:69%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-    
-        
+
+
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="bad">0%</strong></div>
         <div class="bar"><span class="bad" style="width:0%"></span></div>
         <p>No scenario eval scorecard found yet.</p>
       </div>
-    
-        
+
+
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
       </div>
-    
+
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
+    <section id="quality" class="tab-panel is-active" role="tabpanel">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill bad">69%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">75%</strong></div>
@@ -194,17 +194,17 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Add more specific concrete actions, e.g., &#x27;Applies suggested code changes from CodeRabbit comments, resolves review threads, and runs validation tests to confirm fixes&#x27;.</li><li>Expand trigger terms to include natural variations like &#x27;review comments&#x27;, &#x27;code review findings&#x27;, &#x27;unresolved comments&#x27;, &#x27;address PR feedback&#x27;, or &#x27;fix review issues&#x27;.</li><li>Add concrete, executable command examples for key workflow steps (e.g., actual CodeRabbit CLI commands for inventory, specific GitHub API calls for fallback, example validation commands).</li><li>Embed validation checkpoints directly within the workflow steps (e.g., after step 6: &#x27;Verify inventory count matches thread count before proceeding&#x27;) rather than having a separate Validation section.</li><li>Provide a concrete example of the expected output structure/schema rather than just listing field names in the Outputs section (e.g., a JSON snippet showing schema_version, inventory entries with status, and validation evidence).</li><li>Consolidate the overlapping Constraints and Execution Boundaries sections to reduce redundancy and improve token efficiency.</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
-      
+    <section id="evals" class="tab-panel" role="tabpanel" hidden>
+
         <section class="empty-state">
           <h2>Evals Not Run Yet</h2>
           <p>No skill eval scorecard found for this skill yet.</p>
           <p>Run <code>./bin/ask evals run &lt;skill-path&gt; --mode smoke</code>, then rerun the dashboard to see scenario-level behavior.</p>
         </section>
-        
+
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
       <div class="panel plugin-posture">
@@ -222,10 +222,10 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="./autofix.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/autofix.json</span></a>
+        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/autofix.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/autofix.json</span></a>
         <div>Latest Eval Scorecard<br><span>No scorecard found for this skill.</span></div>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>

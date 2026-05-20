@@ -97,6 +97,37 @@ class SkillInstallerSecurityPolicyTests(unittest.TestCase):
         code = installer.main(args)
         self.assertEqual(code, 1)
 
+    def test_compatibility_installer_trusts_canonical_agent_skills_repo(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="skill-installer-policy-") as tmpdir:
+            repo_root = Path(tmpdir) / "repo"
+            skill_dir = repo_root / "skills" / "sample"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("# Sample\n", encoding="utf-8")
+
+            dest_root = Path(tmpdir) / "dest"
+            dest_root.mkdir(parents=True)
+
+            with patch.object(installer, "_resolve_dest_root", return_value=str(dest_root)):
+                with patch.object(
+                    installer,
+                    "_resolve_commit_provenance",
+                    return_value=("a" * 40, {"verified": True, "reason": "valid"}, {"emails": ["dev@example.com"], "logins": ["dev"]}),
+                ):
+                    with patch.object(installer, "_prepare_repo", return_value=(str(repo_root), "zipball")):
+                        code = installer.main(
+                            [
+                                "--repo",
+                                "jscraik/agent-skills",
+                                "--path",
+                                "skills/sample",
+                                "--ref",
+                                "a" * 40,
+                            ]
+                        )
+
+            self.assertEqual(code, 0)
+            self.assertTrue((dest_root / "sample" / "SKILL.md").is_file())
+
     def test_canonical_installer_rejects_unpinned_ref_without_override(self) -> None:
         with tempfile.TemporaryDirectory(prefix="skill-installer-policy-") as tmpdir:
             code = system_installer.main(

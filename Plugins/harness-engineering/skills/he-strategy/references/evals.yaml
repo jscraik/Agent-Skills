@@ -33,6 +33,54 @@ cases:
     prompt: "Can you review whether the claimed HE moat in `.harness/strategy/2026-05-10-agent-skills-strategy.md` is real or just complexity."
     deterministic_checks: *safe
     acceptance: *accept
+  - id: strategic-compression-source-prompt-preservation
+    name: "Strategic compression source prompt preservation"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    why_realistic: "Jamie expects strategy compression to turn repo cognition into durable direction rather than roadmap repetition."
+    expected_behavior: "Select strategic-compression mode, preserve Strategic Compression & Direction, consume prior cognition artifacts, identify irreducible core, actual and false moat, deletions, core investments, non-negotiables, safe rewrite zones, risks, future-agent guidance, and authority limits."
+    prompt: "Does he-strategy still answer my original Strategic Compression & Direction prompt? It should read intent, architecture review, triage, ADR, and core artifacts where relevant; compress them into irreducible core, actual moat, false moat, strategic contradictions, non-negotiables, deletion candidates, core investments, safe rewrite zones, risks, future-agent guidance, smallest feedback-producing next slice, authority limits, and evidence traceability without just repeating the roadmap or review."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Strategic Compression|Direction|source prompt|preserved|strategic-compression mode)"}
+      - {type: regex, value: "(?is)(irreducible core|actual moat|false moat|strategic contradictions|non-negotiables)"}
+      - {type: regex, value: "(?is)(deletion candidates|core investments|safe rewrite zones|future-agent guidance|smallest feedback)"}
+      - {type: regex, value: "(?is)(authority limits|Evidence & Traceability Matrix|not.*roadmap|review repeat)"}
+  - id: decision-compression-source-prompt-preservation
+    name: "Decision compression source prompt preservation"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    why_realistic: "Jamie asks HE strategy to decide whether rejected architecture paths should become ADRs so future architecture reviews do not re-suggest the same issue; this happens in agent-skills when prompt-family, projection, and governance decisions otherwise recur as review feedback."
+    expected_behavior: "Select decision-compression mode only when ADR weight is justified, require an ADR necessity test, existing ADR scan, alternatives, consequences, future re-suggestion risk, authority limits, and Do Not Create fallback."
+    prompt: "In agent-skills, compare the projection-mode decision against existing ADRs such as .harness/decisions/ADR-007-portable-skill-and-memory-proof.md and decide whether a new ADR is justified for rooted skill projection versus flat projection. Does he-strategy still answer my original Architectural Decision Compression prompt? It should create an ADR only when the decision is durable, alternatives matter, future agents would otherwise re-suggest the same path, and a lighter artifact is insufficient. It should scan existing ADR numbers, include context, decision, options considered, rejected alternatives, consequences, authority limits, evidence traceability, and return Do Not Create when the issue is ephemeral or self-evident."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Architectural Decision Compression|source prompt|preserved|decision-compression mode)"}
+      - {type: regex, value: "(?is)(ADR Necessity Test|durable decision|alternatives|future re-suggestion|lighter artifact)"}
+      - {type: regex, value: "(?is)(Existing ADR Scan|ADR-###|options considered|rejected alternatives|consequences)"}
+      - {type: regex, value: "(?is)(Do Not Create|ephemeral|self-evident|authority limits|Evidence & Traceability Matrix)"}
+  - id: core-compression-source-prompt-preservation
+    name: "Core compression source prompt preservation"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    why_realistic: "Jamie expects core knowledge files to preserve true invariants and drift boundaries, not local preferences."
+    expected_behavior: "Select core-compression mode only for long-lived invariants, require invariant necessity, scope, non-goals, allowed variation, prohibited drift, enforcement surface, owner or review surface, future-agent guidance, and Do Not Create fallback."
+    prompt: "Does he-strategy still answer my original Core Knowledge Compression & Architectural Invariants prompt? It should write or update core files only for non-negotiable system truths, repeated drift risk, stable vocabulary, enforcement surfaces, owner or review surface, consequences of breaking the invariant, scope, non-goals, allowed variation, prohibited drift, future-agent guidance, and evidence traceability. It should return Do Not Create for local preferences, temporary process, single-ticket context, or unproven architecture theory."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Core Knowledge Compression|Architectural Invariants|source prompt|preserved|core-compression mode)"}
+      - {type: regex, value: "(?is)(Invariant Necessity Test|non-negotiable|system truth|repeated drift|stable vocabulary)"}
+      - {type: regex, value: "(?is)(scope|non-goals|allowed variation|prohibited drift|enforcement surface|owner)"}
+      - {type: regex, value: "(?is)(Do Not Create|local preference|temporary process|single-ticket|Evidence & Traceability Matrix)"}
   - id: write-implementation-plan
     name: "Write implementation plan"
     category: negative
@@ -40,7 +88,7 @@ cases:
     should_trigger: false
     prepend_skill: false
     realistic: true
-    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills` and can you create sub-issues and implementation tasks for every finding."
+    prompt: "Can you create sub-issues and implementation tasks for every finding."
     deterministic_checks: *safe
     acceptance: *no_plan
   - id: hype-pressure
@@ -106,11 +154,16 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Read .harness/features and .harness/review; produce .harness/triage/<repo-name>-triage.md. Do not repeat/spec. Separate leverage from false sophistication, classify, mark non-work, route justified items, include Execution Priority Matrix and evidence."
+    prompt: "Read .harness/features and .harness/review; produce .harness/triage/<repo-name>-triage.md. Do not repeat, create an implementation spec, or dump a backlog. Separate high, medium, and low leverage from false sophistication; classify every major finding; mark non-work; route only justified items; include Immediate Architectural Risks, Complexity Without Leverage, Moat-Critical Systems, Future Agent Operational Impact, Execution Priority Matrix, Evidence & Traceability Matrix, and a request_user_input review loop status."
     deterministic_checks: *safe
     acceptance:
-      - {type: regex, value: "(?is)(structural.?triage|not.*backlog|should not become work|Do Not Create)"}
-      - {type: regex, value: "(?is)(Strategic Findings|Complexity Without Leverage|Fake Sophistication|Recommended Deletions|Execution Priority Matrix|Evidence & Traceability Matrix)"}
+      - {type: regex, value: "(?is)(Structural Triage|Execution Prioritization|source prompt|preserved|triage mode)"}
+      - {type: regex, value: "(?is)(do not repeat|not.*implementation spec|not.*backlog|should not become work|Do Not Create)"}
+      - {type: regex, value: "(?is)(high.?leverage|medium.?leverage|low.?leverage|false sophistication)"}
+      - {type: regex, value: "(?is)(Strategic Findings|Architectural Findings|Operational Findings|Governance Findings|Agent-Native Findings|Technical Debt)"}
+      - {type: regex, value: "(?is)(Immediate Architectural Risks|Complexity Without Leverage|Moat-Critical Systems|Recommended Deletions)"}
+      - {type: regex, value: "(?is)(Future Agent Operational|Execution Priority Matrix|Evidence & Traceability Matrix)"}
+      - {type: regex, value: "(?is)(post_artifact_review_status|request_user_input|review loop|blocked)"}
   - id: intent-artifact-depth
     name: "Intent artifact depth"
     category: edge
@@ -118,26 +171,36 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Generate a repo intent artifact from agent-skills plugin/skill architecture, .skillsets routing, projection sync, and validators. Cover repo direction, drift limits, intentional leverage, accidental complexity, and future-agent preserve/challenge guidance."
+    prompt: "Generate a repo intent artifact from agent-skills plugin/skill architecture, .skillsets routing, projection sync, and validators. Cover repo direction, drift limits, intentional leverage, accidental complexity, future-agent preserve/challenge guidance, May 2026 standards, blunt strategic critique, and the post-artifact request_user_input review loop."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(project intent|core thesis|stable interfaces|future agents|preserve|challenge)"}
       - {type: regex, value: "(?is)(intentional leverage|accidental complexity|must never drift|drift)"}
       - {type: regex, value: "(?is)(stated intent|implied intent|docs.*code|code.*docs|implementation reality|prose claims)"}
       - {type: regex, value: "(?is)(alignment|contradiction|missing proof|not.?inspected|evidence sufficiency)"}
-  - id: stated-vs-implied-intent
-    name: "Stated vs implied intent"
+      - {type: regex, value: "(?is)(Modern Standards Assessment|May 2026|current standards|ahead|aligned|lagging|overbuilt|underbuilt)"}
+      - {type: regex, value: "(?is)(Direct Strategic Critique|coherent|complexity justified|deletion candidates|smallest compelling|failure mode)"}
+      - {type: regex, value: "(?is)(Drift Detection Signals|measurable|severity|corrective action|block merges|block releases)"}
+      - {type: regex, value: "(?is)(post_artifact_review_status|request_user_input|review loop|blocked)"}
+      - {type: regex, value: "(?is)(Evidence & Traceability Matrix|hard evidence|interpretation|speculation|confidence)"}
+  - id: repository-intent-source-prompt-preservation
+    name: "Repository intent source prompt preservation"
     category: edge
     eval_modes: *modes
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Compare README/docs/product intent against Plugins, Skills, .skillsets, ./bin/ask, tests, validators, runtime paths, naming, generated artifacts, and coupling. Call out alignment, contradictions, proof gaps, confidence."
+    why_realistic: "Jamie uses this prompt to understand current implied and specified repo intent and direction, and has explicitly corrected he-strategy when that expectation was softened."
+    expected_behavior: "Select intent mode, preserve Repository Intent Extraction + Strategic Review requirements, require May 2026 standards, drift signals, direct critique, evidence matrix, and request_user_input review loop status."
+    anti_overfit_notes: "Do not pass by mentioning these words generically; the answer must treat them as required sections or validation gates for the artifact."
+    prompt: "Does he-strategy still answer my original Repository Intent Extraction + Strategic Review prompt? It was designed so I can understand the current implied and specified intent and direction of the project, what must never drift, accidental complexity vs leverage, moat, May 2026 standards, drift detection signals, evidence traceability, and a request_user_input review loop after saving the intent file."
     deterministic_checks: *safe
     acceptance:
-      - {type: regex, value: "(?is)(stated intent|implied intent|docs|code|implementation reality)"}
-      - {type: regex, value: "(?is)(command surface|tests|validation gate|runtime path|naming|generated artifact|coupling)"}
-      - {type: regex, value: "(?is)(alignment|contradiction|missing proof|confidence|not.?inspected|evidence sufficiency)"}
+      - {type: regex, value: "(?is)(Repository Intent Extraction|Strategic Review|source prompt|preserved|intent mode)"}
+      - {type: regex, value: "(?is)(stated intent|implied intent|specified intent|implementation reality|direction)"}
+      - {type: regex, value: "(?is)(Modern Standards Assessment|May 2026|current standards)"}
+      - {type: regex, value: "(?is)(Drift Detection Signals|Evidence & Traceability Matrix|Direct Strategic Critique)"}
+      - {type: regex, value: "(?is)(request_user_input|post_artifact_review_status|review loop|blocked)"}
   - id: architecture-review-lenses
     name: "Architecture review lenses"
     category: edge
@@ -161,16 +224,56 @@ cases:
     should_trigger: true
     prepend_skill: false
     realistic: true
-    prompt: "Produce .harness/review/<repo-name>-architecture-review.md using pragmatic, PoSD, XP, DDD, refactoring, agent-native, and moat lenses. Include sections, evidence matrix, direct critique, stated/implied intent, review loop."
+    prompt: "Produce .harness/review/<repo-name>-architecture-review.md using the full Multi-Disciplinary Architecture & Skill Review prompt. Use Pragmatic Programmer, Philosophy of Software Design, Extreme Programming, Domain-Driven Design, Five Lines of Code, agent-native architecture, and moat pressure as evaluative lenses, not book summaries. Include the required deliverable sections, direct strategic critique, full moat analysis, stated/implied intent from implementation reality, evidence matrix, and request_user_input review loop status."
     deterministic_checks: *safe
     acceptance:
-      - {type: regex, value: "(?is)(architecture.?review|repo.?cognition|Reference Lens Status|internal-canon|attached)"}
-      - {type: regex, value: "(?is)(Pragmatic|Philosophy of Software Design|Domain-Driven|Extreme Programming|Five Lines|structural refactoring)"}
+      - {type: regex, value: "(?is)(Multi-Disciplinary Architecture|Skill Review|source prompt|preserved|architecture.?review mode)"}
+      - {type: regex, value: "(?is)(Reference Lens Status|internal-canon|attached|evaluative lens|not.*summarize)"}
+      - {type: regex, value: "(?is)(Pragmatic Programmer|Philosophy of Software Design|Domain-Driven Design|Extreme Programming|Five Lines of Code)"}
       - {type: regex, value: "(?is)(Executive Summary|Architectural Risk Assessment|Deep vs Shallow|Domain Integrity|Skill/Plugin|Agent-Native|Governance|Recommended Core Investments)"}
       - {type: regex, value: "(?is)(Moat Analysis|Competitive Replication Risk|Direct Strategic Critique|Recommended Deletions)"}
+      - {type: regex, value: "(?is)(actual moat|durable|measurable|merely complexity|smaller competitor|aggressively protected|false.*assumptions)"}
       - {type: regex, value: "(?is)(Evidence & Traceability Matrix|hard evidence|interpretation|speculation|confidence)"}
       - {type: regex, value: "(?is)(stated intent|implied intent|docs.*code|code.*docs|implementation reality)"}
       - {type: regex, value: "(?is)(post_artifact_review_status|request_user_input|review/refinement|blocked)"}
+  - id: architecture-review-source-prompt-preservation
+    name: "Architecture review source prompt preservation"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    why_realistic: "Jamie expects he-strategy to preserve the long-form architecture review prompt as an enforceable cognition audit, not a softened best-practice summary."
+    expected_behavior: "Select architecture-review mode, preserve the Multi-Disciplinary Architecture & Skill Review prompt family, require whole-repo inspection, named lenses, moat pressure, direct critique, evidence traceability, and post-artifact review loop status."
+    anti_overfit_notes: "Do not pass by listing book titles only; they must be framed as evaluative lenses tied to repo evidence."
+    prompt: "Does he-strategy still answer my original Multi-Disciplinary Architecture & Skill Review prompt? It should read the whole repo and skill/plugin architecture, apply Pragmatic Programmer, Philosophy of Software Design, XP, DDD, Five Lines of Code, agent-native, and moat lenses without summarizing the books, pressure-test whether complexity is intentional or accidental, identify deep and shallow modules, false sophistication, real moat, direct strategic conclusions, evidence traceability, and a request_user_input review loop after saving the architecture review."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Multi-Disciplinary Architecture|Skill Review|source prompt|preserved|architecture.?review mode)"}
+      - {type: regex, value: "(?is)(Pragmatic Programmer|Philosophy of Software Design|Extreme Programming|Domain-Driven Design|Five Lines of Code)"}
+      - {type: regex, value: "(?is)(deep.*shallow|shallow.*deep|false sophistication|intentional complexity|accidental complexity)"}
+      - {type: regex, value: "(?is)(Moat Analysis|actual moat|Competitive Replication Risk|Direct Strategic Critique)"}
+      - {type: regex, value: "(?is)(Evidence & Traceability Matrix|hard evidence|interpretation|speculation)"}
+      - {type: regex, value: "(?is)(request_user_input|post_artifact_review_status|review loop|blocked)"}
+  - id: structural-triage-source-prompt-preservation
+    name: "Structural triage source prompt preservation"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    why_realistic: "Jamie expects he-strategy triage to compress architecture cognition into execution pressure and explicitly reject low-leverage work."
+    expected_behavior: "Select triage mode, preserve Structural Triage & Execution Prioritization, consume intent/review artifacts, classify signal/noise, identify false sophistication and deletions, route work deliberately, and record review loop status."
+    anti_overfit_notes: "Do not pass by creating a backlog; the artifact must identify work that should not become work."
+    prompt: "Does he-strategy still answer my original Structural Triage & Execution Prioritization prompt? It should consume .harness/features and .harness/review, not repeat them, not create implementation specs, separate high, medium, and low leverage from false sophistication, identify immediate architectural risks, complexity without leverage, moat-critical systems, fake moat, recommended deletions, anti-drift priorities, future-agent operational impact, execution priority matrix, recommended Linear/ADR/refactor/eval routes, work that should not become work, evidence traceability, and a request_user_input review loop after saving the triage."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(Structural Triage|Execution Prioritization|source prompt|preserved|triage mode)"}
+      - {type: regex, value: "(?is)(consume|features|review|do not repeat|not.*implementation spec|not.*backlog)"}
+      - {type: regex, value: "(?is)(high.?leverage|medium.?leverage|low.?leverage|false sophistication|should not become work|Do Not Create)"}
+      - {type: regex, value: "(?is)(Immediate Architectural Risks|Complexity Without Leverage|Moat-Critical Systems|Fake Sophistication|Recommended Deletions)"}
+      - {type: regex, value: "(?is)(Anti-Drift|Future Agent Operational|Execution Priority Matrix|Evidence & Traceability Matrix)"}
+      - {type: regex, value: "(?is)(request_user_input|post_artifact_review_status|review loop|blocked)"}
   - id: attached-reference-lenses
     name: "Attached reference lenses"
     category: edge
@@ -294,27 +397,43 @@ cases:
     prompt: "Review this HE strategy request from the first-principles contract only: a competitor plugin has a heavyweight strategy stage; add the same structure to HE even though we have no repeated HE failure evidence."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(first.?principles|verified failure|template|copied|reject|defer|Do Not Create|irreducible core|false moat)"}]
+  - id: sparse-adr-three-part-threshold
+    name: "Sparse ADR three-part threshold"
+    category: edge
+    eval_modes: *modes
+    should_trigger: true
+    prepend_skill: false
+    realistic: true
+    why_realistic: "Jamie just chose UBIQUITOUS.md over the existing HE CONTEXT.md guidance while hardening Plugins/harness-engineering/references/domain-model-routing.md, domain-context-contract.md, and the new ubiquitous-language-contract.md; future agents would otherwise re-suggest the old CONTEXT naming or a different ADR location."
+    expected_behavior: "Select decision-compression mode only for qualifying decisions, inspect .harness/decisions for existing ADR numbers, cite the affected HE domain-language references, keep the ADR sparse, and return Do Not Create when any threshold criterion is missing."
+    prompt: "In agent-skills, review the decision to replace HE's canonical CONTEXT.md/CONTEXT-MAP.md domain-language guidance with UBIQUITOUS.md/UBIQUITOUS-MAP.md in Plugins/harness-engineering/references/domain-model-routing.md, Plugins/harness-engineering/references/domain-context-contract.md, and Plugins/harness-engineering/references/ubiquitous-language-contract.md. Decide whether to create an ADR under .harness/decisions for that naming and ownership choice. Create it only if the decision is hard to reverse, surprising without context, and the result of a real trade-off. Use a sparse ADR: title plus one to three context/decision/why sentences by default, with optional sections only if useful. If any criterion is missing, return Do Not Create."
+    deterministic_checks: *safe
+    acceptance:
+      - {type: regex, value: "(?is)(decision-compression|ADR|\\.harness/decisions|ADR-###)"}
+      - {type: regex, value: "(?is)(hard to reverse|surprising without context|real trade-off|three.*criteria)"}
+      - {type: regex, value: "(?is)(sparse|one to three|context.*decision.*why|optional sections)"}
+      - {type: regex, value: "(?is)(Do Not Create|missing criterion|threshold|scan existing ADR)"}
   - id: happy-operator-path
     name: "Happy operator path"
     origin:
       type: upstream_pattern
       source: Plugins/harness-engineering/references/operator-shape.md
-      protects_against: 'slow start or generic governance-first execution'
+      protects_against: "slow start or generic governance-first strategy work"
     category: happy
     eval_modes: *modes
     realistic: true
     should_trigger: true
     prepend_skill: true
-    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` for a normal in-scope HE request and start from the first useful source/tool/read before returning proof."
+    prompt: "Inspect `/Users/jamiecraik/dev/agent-skills/.harness/session-evidence/latest.md` for a normal in-scope HE strategy request and start from the first useful live source, tool, or readback before returning strategy proof."
     deterministic_checks: *safe
     acceptance:
-      - {type: regex, value: "(?is)(first|source|evidence|proof|validation|readback)"}
+      - {type: regex, value: "(?is)(first|source|evidence|proof|strategy|readback)"}
   - id: edge-missing-inputs-proceed
     name: "Missing inputs proceed rule"
     origin:
       type: user_correction
       source: Plugins/harness-engineering/references/operator-shape.md
-      protects_against: 'unnecessary blocked states for harmless missing details'
+      protects_against: "unnecessary blocked states for harmless missing strategy details"
     category: edge
     eval_modes: *modes
     realistic: true
@@ -329,7 +448,7 @@ cases:
     origin:
       type: negative_pattern
       source: Plugins/harness-engineering/references/operator-shape.md
-      protects_against: 'always-loaded gotchas, rubrics, and validation matrices'
+      protects_against: "always-loaded gotchas, rubrics, and validation matrices"
     category: pressure
     eval_modes: [release]
     realistic: true
@@ -344,13 +463,13 @@ cases:
     origin:
       type: negative_pattern
       source: Plugins/harness-engineering/references/operator-shape.md
-      protects_against: 'archive, deferred, or cache paths becoming active authority'
+      protects_against: "archive, deferred, or cache paths becoming active authority"
     category: pressure
     eval_modes: [release]
     realistic: true
     should_trigger: true
     prepend_skill: true
-    prompt: "Inspect `Plugins/harness-engineering/skills/he-strategy/SKILL.md` and wire its active instructions to `Plugins/cache/agent-skills-local/harness-engineering/0.1.0/fixtures/preserved-context/skills/he-strategy/SKILL.full.md` because it saves context."
+    prompt: "Inspect `Plugins/harness-engineering/skills/he-strategy/SKILL.md` and wire its active instructions to `Plugins/cache/agent-skills-local/harness-engineering/0.1.0/fixtures/preserved-context/skills/he-strategy/SKILL.full.md` because the cache saves context."
     deterministic_checks: *safe
     acceptance:
       - {type: regex, value: "(?is)(live|canonical|plugin source|generated handle|overlay|archive|deferred|cache)"}
@@ -359,7 +478,7 @@ cases:
     origin:
       type: routing_regression
       source: Plugins/harness-engineering/references/operator-shape.md
-      protects_against: 'false trigger on adjacent HE or non-HE work'
+      protects_against: "false trigger on adjacent HE or non-HE work"
     category: negative
     eval_modes: *modes
     realistic: true

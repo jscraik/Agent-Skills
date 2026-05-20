@@ -21,12 +21,12 @@ domain_language:
   canonical_terms: []
   avoided_aliases: []
   unresolved_terms: []
-  context_file: CONTEXT.md|CONTEXT-MAP.md|not_applicable
+  language_file: UBIQUITOUS.md|UBIQUITOUS-MAP.md|domain-context-contract.md|legacy_CONTEXT.md|not_applicable
 ```
 
 Stage guidance:
 
-- `he-brainstorm`: surface fuzzy terms, avoided aliases, and the question that will settle meaning.
+- `he-brainstorm`: surface fuzzy terms, avoided aliases, and the question that will settle meaning. In `domain_interview` mode, use `request_user_input` for one bounded branch question at a time when available and update the owning ubiquitous language file as soon as a glossary term is resolved.
 - `he-spec`: lock canonical terms into behavior, acceptance IDs, and non-goals.
 - `he-plan`: preserve canonical terms in plan units without renumbering source IDs.
 - `he-work`: stop when implementation reveals term drift and update the owning artifact before coding past it.
@@ -81,6 +81,7 @@ The HE core domain is preserving intent, evidence, and lifecycle truth across ag
 - blocked exit
 - next stage
 - domain language and term drift
+- ubiquitous language file ownership
 - Production Model Integrity
 - aggregate invariants
 
@@ -91,6 +92,8 @@ Supporting docs, examples, reviewer fanout, and implementation sketches are seco
 Before a domain-sensitive HE handoff, verify:
 
 - canonical terms and avoided aliases are recorded or marked not applicable;
+- the relevant `UBIQUITOUS.md`, `UBIQUITOUS-MAP.md`, or legacy context evidence
+  is named;
 - source context and target context are explicit when artifacts disagree;
 - conflict resolution is `resolved`, `blocked`, or `not_applicable`;
 - external inputs have been translated through the anti-corruption table;

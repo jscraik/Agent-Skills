@@ -258,7 +258,7 @@ churn unless the final commit stage explicitly selects them.
 | `JSC-285` | Responsibility map and baseline gate evidence recorded. | Done in Linear |
 | `JSC-286` | Plugin-cache service extraction, focused tests, dry-run parity, and review-loop fixes recorded. | Done in Linear |
 | `JSC-287` | Proof taxonomy ADR exists and PLAN-ASK-004 review loop recorded. | Done in Linear |
- 
+
 ## Rollback Conditions
 
 No rollback condition was hit for the local plan units.
