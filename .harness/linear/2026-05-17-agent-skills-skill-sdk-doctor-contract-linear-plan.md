@@ -110,6 +110,27 @@ Relevant invariants:
   before claiming a doctor baseline.
 - skills doctor composes readiness signals; it does not replace package, eval, audit, or lifecycle events.
 - The SDK is agent-native first: schemas, JSON output, fixtures, eval artifacts, lifecycle events, and harness consumer tests are authoritative. Human-facing docs are thin summaries and decision records only.
+- Agent Skills standard compatibility means `SKILL.md` package shape and
+  progressive disclosure. It does not make `.agents/skills/**` canonical
+  source automatically.
+- `.agents/skills/` is the interoperable cross-client root; `.codex/skills/`
+  is a Codex-native root. Either may be project-local source only when the
+  owner repo's `skills-sdk.json` declares it as
+  `canonical_project_source`.
+- Project-local skills are evaluated in place in their owner repo and write
+  evidence back to that repo. Do not copy them into `agent-skills` or
+  hand-edit generated projections to satisfy SDK checks.
+- Project-local skills are created, installed, and updated through Skills SDK
+  lifecycle commands, with evals as the promotion gate. The SDK saves skill
+  source to `<owner-repo>/<declared-root>/<skill-handle>/`, portable evals to
+  `<owner-repo>/<declared-root>/<skill-handle>/evals/evals.json`, SDK eval
+  extensions to `<owner-repo>/.harness/evals/skills/<skill-handle>/`, and run
+  evidence/events to
+  `<owner-repo>/.harness/session-evidence/skills/<skill-handle>/<eval-run-id>/`.
+- The planned lifecycle command surfaces are `skills create`,
+  `skills install`, and `skills update`; each must return JSON evidence for
+  the target root, eval gate, lifecycle events, and promote/rollback/blocked
+  decision.
 - Skills improve over time through eval feedback loops: every material pass, fail, warning, blocked, or not_run result can produce a classified improvement delta, bounded canonical update, rerun proof, and promotion or rollback evidence.
 - The terminology flywheel is part of the SDK contract: repeated patterns from use and evals become controlled vocabulary in command JSON, schemas, fixtures, eval labels, package metadata, and harness reports.
 - Jamie's mantra is the operating shape: Thin surface. Strong guardrails. Durable memory. Professional output.
@@ -166,6 +187,10 @@ Scope:
 - Assert status precedence: blocked outranks warning, warning outranks pass, and pass requires no blockers or warnings.
 - Assert next_command is present for blocked, warning, and pass states, and is null only when no safe next command exists.
 - Preserve separate reporting for runtime reachability, package readiness, and outcome proof; package readiness may be reported as unavailable until a real package seam exists.
+- Preserve separate reporting for source ownership: canonical `Skills/**` and
+  plugin-owned sources in this repo, manifest-declared project-local roots in
+  owner repos, generated runtime projections, and unknown paths must not be
+  collapsed into one source status.
 - Capture before and after doctor output and document tolerated environmental differences such as trace IDs and timestamps.
 - Map readiness claims to the apparatus that signs them off: typed field assertions, focused tests, doctor/package probes, structural audit, representativeness, changed-file validation, and rollback evidence.
 - Avoid adding human-facing docs unless they link to or reconcile the executable contract; prefer schema, fixture, eval, or machine-readable closeout artifacts.
@@ -198,9 +223,9 @@ Layered Project Module Map:
 - Config: validation policy, permission profiles, runtime profiles, and repo
   execution defaults.
 - Repo: canonical `Skills/**`, `Plugins/**`, `.harness/**`, and source
-  artifacts.
-- Providers: source, projection, package, audit, and eval readers that adapt
-  repo state into typed inputs.
+  artifacts, plus manifest-declared project-local skill roots in owner repos.
+- Providers: project-root, source, projection, package, audit, and eval readers
+  that adapt repo state into typed inputs.
 - Service: deep SDK modules such as doctor, package-doctor, profiles, events,
   routing, and compatibility checks.
 - Runtime: `./bin/ask`, generated projections, plugin mirrors, and future
@@ -222,6 +247,12 @@ Observability Feedback Loop:
 - Skills improve over time only when eval findings become classified deltas
   with affected paths, rerun commands, before/after evidence, and a final
   decision.
+- Portable skill evals should remain compatible with the Agent Skills
+  `evals/evals.json` pattern: realistic prompts, expected outputs, optional
+  files, assertions, and with-skill versus without-skill or previous-skill
+  comparisons. SDK fields such as trace IDs, lifecycle events, provenance,
+  permission profile, namespace, telemetry confidence, and promotion decision
+  are extensions over that baseline.
 - Existing local adapters are available for this loop:
   `$HOME/.agents/otel-collector` for OTLP logs, traces, metrics,
   health, stats, freshness, and telemetry confidence; and
@@ -238,7 +269,7 @@ Observability Feedback Loop:
 Out of Scope:
 
 - Broad SDK metadata migration.
-- Publishing, sharing, or installing skills.
+- Registry publishing or hosted package upload in RF-1.
 - Editing runtime projections by hand.
 - Coding-harness consumer implementation.
 - RF-2 negative-path matrix beyond the minimum needed to prove RF-1.
@@ -447,14 +478,62 @@ Do not expand JSC-329. The addendum is a post-RF-1 SDK plan input.
 | Permission picker metadata | Let future control panes present valid permission profiles instead of prose-only modes. |
 | Empty unknown tool schemas | Classify missing/malformed schemas as testable metadata defects. |
 
+## 2026-05-20 Codex Runtime-Alignment Delta
+
+Source: read-only check of adjacent `~/dev/codex` after origin/main reached
+`59507b849` on 2026-05-20. The local Codex worktree was not modified.
+
+This delta does not expand JSC-329/RF-1. It identifies Codex behaviors that
+Agent Skills Kit should align to in RF-2+ package, lifecycle, profile, event,
+and evidence contracts.
+
+| New Codex signal | Commits | Agent Skills SDK alignment |
+| --- | --- | --- |
+| Turn-start metadata and async turn processing | `59507b849`, `1392a2a77` | Model skill runs as lifecycle events with run metadata, not prompt-in/prose-out transcripts. |
+| Async approval contributors | `f64fce61b` | Add explicit approval states: not_required, requested, pending, approved, denied, expired, resumed, blocked. |
+| Durable goal store wiring | `b555dd5d1`, plus `ba57aab13` baseline | Separate user objective, active goal, run contract, artifact contract, validation status, and closeout evidence. |
+| Remote compaction timeout | `18cefba92` | Classify remote_compaction_timeout as runtime/infrastructure blocker, not task failure. |
+| Remote/environment registration | `000bf5ce6`, `5c43a64e2`, `83af3abc6`, `954a9c857`, `1509ae6d8`, `c2141c7ce` | Require environment profiles: local, optional-local, remote, CI, app-server, unknown; default remote_ready false until proven. |
+| Package layout detection and archives | `cfa16fcc2`, `57a68fb9e`, `343a74076`, `79f044ed3`, `59f262a2b`, `7f4d7ae3a` | Treat skills as packages with build, inspect, validate, install/project, warm, and smoke proof. |
+| Skill/plugin startup warmup and enablement | `532b9c83a`, `ae10708ae`, `8335b56c3`, `dc255b0d8`, `d3d38159e` | Separate available, installable, installed, projected, enabled, warmed, runnable, validated, and release-ready. Keep upgrades additive unless a migration says otherwise. |
+| Permission profile API and canonical deny | `c3faea0b0`, `3009e2364`, `3c7608187` | Add declared permission_profile metadata and drift checks; use `deny` as the canonical filesystem exclusion term. |
+| Subagent lifecycle and namespace restraint | `d661ab70e`, `c53da029b`, `c58c84d6e`, `05b8ce435`, `b3ae3de40` | Record SubagentStart-style events with role, reason, expected artifact, service tier, timeout, closeout, and parent integration. Keep tools namespaced/search-first. |
+| Raw/sensitive evidence handling | `5a4202ad9`, `34aad4368`, `e43a2e297`, `826b2182e`, `80fdd4688` | Evidence envelopes should distinguish raw_output_ref, parsed_result, summary, redaction_status, encrypted/sensitive output handling, and compacted context. |
+| App-server/version/tool surface introspection | `149530234`, `05e171094`, `1dd9bf9a7`, `d269aa2af` | Prefer runtime introspection over inferred tool assumptions: app-server version, permission profiles, enabled skills/plugins, environment profile, and active goal state. |
+
+Post-RF-1 contract fields to reserve:
+
+```text
+skill_package
+permission_profile
+environment_profile
+runtime_capability
+turn_start_metadata
+async_approval_state
+goal_ref
+subagent_event
+artifact_contract
+evidence_envelope
+raw_output_ref
+redaction_status
+validation_gate
+drift_classification
+```
+
+Avoid using vague readiness terms in new contracts unless they map to fields:
+`safe`, `done`, `handled`, `available`, `works`, `synced`,
+`verified`, and `agent-ready`.
+
 Recommended post-RF-1 vertical slice:
 
     ./bin/ask skills package-doctor context7 --json --robot
 
 Minimum output contract: package metadata, namespace, permission profile,
-required roots, enablement states, execution context, lifecycle events,
-provenance, additive upgrade policy, checks, blockers, warnings, agent summary,
-and safe next command.
+required roots, enablement states, warmup state, runtime capability,
+environment profile, async approval state, goal_ref compatibility, subagent
+artifact policy, evidence envelope, lifecycle events, provenance, additive
+upgrade policy, checks, blockers, warnings, agent summary, and safe next
+command.
 
 ## 2026-05-20 Live Checkout Reconciliation
 
