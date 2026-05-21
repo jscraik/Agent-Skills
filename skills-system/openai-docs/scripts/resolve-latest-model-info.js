@@ -13,21 +13,13 @@ function parseArgs(argv) {
     baseUrl: process.env.LATEST_MODEL_BASE_URL || DEFAULT_BASE_URL,
   };
 
-  const requireValue = (flagName, index) => {
-    const value = argv[index + 1];
-    if (!value || value.startsWith("-")) {
-      throw new Error(`${flagName} requires a value`);
-    }
-    return value;
-  };
-
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === "--source" || arg === "--url") {
-      args.source = requireValue(arg, i);
+      args.source = argv[i + 1];
       i += 1;
     } else if (arg === "--base-url") {
-      args.baseUrl = requireValue(arg, i);
+      args.baseUrl = argv[i + 1];
       i += 1;
     }
   }
@@ -35,8 +27,7 @@ function parseArgs(argv) {
   return args;
 }
 
-async function readSource(source, options = {}) {
-  const { signal, timeoutMs = 30000 } = options;
+async function readSource(source) {
   if (source.startsWith("file://")) {
     return fs.readFile(new URL(source), "utf8");
   }
@@ -45,41 +36,15 @@ async function readSource(source, options = {}) {
     return fs.readFile(path.resolve(source), "utf8");
   }
 
-  const timeoutController = new AbortController();
-  const timeoutHandle = setTimeout(() => {
-    timeoutController.abort();
-  }, timeoutMs);
-  const onAbort = () => timeoutController.abort();
-  if (signal) {
-    if (signal.aborted) {
-      onAbort();
-    } else {
-      signal.addEventListener("abort", onAbort, { once: true });
-    }
+  const response = await fetch(source, {
+    headers: { accept: "text/markdown,text/plain,*/*" },
+  });
+
+  if (!response.ok) {
+    throw new Error(`failed to fetch ${source}: ${response.status}`);
   }
 
-  try {
-    const response = await fetch(source, {
-      headers: { accept: "text/markdown,text/plain,*/*" },
-      signal: timeoutController.signal,
-    });
-
-    if (!response.ok) {
-      throw new Error(`failed to fetch ${source}: ${response.status}`);
-    }
-
-    return response.text();
-  } catch (error) {
-    if (timeoutController.signal.aborted && !signal?.aborted) {
-      throw new Error(`failed to fetch ${source}: timed out after ${timeoutMs}ms`, {
-        cause: error,
-      });
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeoutHandle);
-    signal?.removeEventListener("abort", onAbort);
-  }
+  return response.text();
 }
 
 function parseIndentedInfo(lines, startIndex) {
@@ -106,7 +71,7 @@ function parseFlatInfo(block) {
   const info = {};
 
   for (const line of block.split(/\r?\n/)) {
-    const match = line.match(/^([A-Za-z][A-Za-z0-9_-]*):\s*(.+?)\s*$/);
+    const match = line.match(/^\s*([A-Za-z][A-Za-z0-9_-]*):\s*(.+?)\s*$/);
     if (match) {
       info[match[1]] = match[2].replace(/^["']|["']$/g, "");
     }
@@ -140,14 +105,7 @@ function modelToSkillSlug(model) {
 }
 
 function absoluteUrl(baseUrl, value) {
-  try {
-    return new URL(value, baseUrl).toString();
-  } catch (error) {
-    throw new Error(
-      `absoluteUrl failed to resolve value "${value}" against base "${baseUrl}"`,
-      { cause: error }
-    );
-  }
+  return new URL(value, baseUrl).toString();
 }
 
 function normalizeInfo(info, baseUrl) {

@@ -1519,7 +1519,7 @@ def _doctor_contract_schema_refs() -> dict[str, dict[str, str]]:
         "Governed inline contract; concrete schema file is deferred until "
         "external consumers require it."
     )
-    return {
+    refs = {
         schema_name: {
             "name": schema_name,
             "version": version,
@@ -1529,6 +1529,9 @@ def _doctor_contract_schema_refs() -> dict[str, dict[str, str]]:
         }
         for schema_name, version in DOCTOR_CONTRACT_SCHEMA_VERSIONS.items()
     }
+    refs["doctor"].pop("missing_schema_reason", None)
+    refs["doctor"]["path"] = "Infrastructure/config/schemas/skill-doctor.v1.schema.json"
+    return refs
 
 
 def _doctor_contract_schema_versions() -> dict[str, str]:

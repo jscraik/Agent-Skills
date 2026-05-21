@@ -7,105 +7,9 @@ import re
 import sys
 from pathlib import Path
 
+import yaml
+
 MAX_SKILL_NAME_LENGTH = 64
-TOP_LEVEL_LIST_KEYS = {"allowed-tools"}
-
-
-class FrontmatterError(ValueError):
-    """Raised when SKILL.md frontmatter cannot be parsed by the quick validator."""
-
-
-def _parse_scalar(raw_value):
-    value = raw_value.strip()
-    if not value:
-        return {}
-    if value[0:1] in {'"', "'"}:
-        quote = value[0]
-        if not value.endswith(quote) or len(value) == 1:
-            raise FrontmatterError("unterminated quoted scalar")
-        return value[1:-1]
-    if value.startswith("[") and value.endswith("]"):
-        items = value[1:-1].strip()
-        if not items:
-            return []
-        return [item.strip().strip('"').strip("'") for item in items.split(",")]
-    if value in {"true", "false"}:
-        return value == "true"
-    if value in {"True", "False"}:
-        return value == "True"
-    return value
-
-
-def _parse_frontmatter(frontmatter_text):
-    """Parse the small YAML subset allowed in SKILL.md frontmatter.
-
-    The quick validator only needs top-level keys, scalar `name` and
-    `description`, and optional nested/list metadata. Keeping this parser local
-    avoids making basic skill validation depend on PyYAML in the ambient
-    `python3` environment.
-    """
-    fields = {}
-    current_map = None
-    current_list_key = None
-
-    for line_number, line in enumerate(frontmatter_text.splitlines(), start=1):
-        if not line.strip() or line.lstrip().startswith("#"):
-            continue
-        if "\t" in line:
-            raise FrontmatterError(f"line {line_number}: tabs are not allowed in YAML frontmatter")
-
-        indent = len(line) - len(line.lstrip(" "))
-        stripped = line.strip()
-
-        if stripped.startswith("- "):
-            item = _parse_scalar(stripped[2:])
-            if current_map and current_list_key:
-                target = fields.setdefault(current_map, {})
-                if not isinstance(target, dict):
-                    raise FrontmatterError(f"line {line_number}: list item has no mapping parent")
-                values = target.setdefault(current_list_key, [])
-                if not isinstance(values, list):
-                    raise FrontmatterError(f"line {line_number}: list item parent is not a list")
-                values.append(item)
-                continue
-            if current_map and isinstance(fields.get(current_map), list):
-                fields[current_map].append(item)
-                continue
-            raise FrontmatterError(f"line {line_number}: list item has no list parent")
-
-        if ":" not in line:
-            raise FrontmatterError(f"line {line_number}: expected 'key: value'")
-
-        key, raw_value = line.split(":", 1)
-        key = key.strip()
-        if not key:
-            raise FrontmatterError(f"line {line_number}: empty key")
-
-        if indent:
-            if not current_map:
-                raise FrontmatterError(f"line {line_number}: nested key has no parent")
-            parent = fields.setdefault(current_map, {})
-            if not isinstance(parent, dict):
-                raise FrontmatterError(f"line {line_number}: nested parent is not a mapping")
-            value = raw_value.strip()
-            if value:
-                parent[key] = _parse_scalar(value)
-                current_list_key = None
-            else:
-                parent[key] = []
-                current_list_key = key
-            continue
-
-        current_map = None
-        current_list_key = None
-        value = raw_value.strip()
-        if value:
-            fields[key] = _parse_scalar(value)
-        else:
-            fields[key] = [] if key in TOP_LEVEL_LIST_KEYS else {}
-            current_map = key
-
-    return fields
 
 
 def validate_skill(skill_path):
@@ -127,10 +31,10 @@ def validate_skill(skill_path):
     frontmatter_text = match.group(1)
 
     try:
-        frontmatter = _parse_frontmatter(frontmatter_text)
+        frontmatter = yaml.safe_load(frontmatter_text)
         if not isinstance(frontmatter, dict):
             return False, "Frontmatter must be a YAML dictionary"
-    except FrontmatterError as e:
+    except yaml.YAMLError as e:
         return False, f"Invalid YAML in frontmatter: {e}"
 
     allowed_properties = {"name", "description", "license", "allowed-tools", "metadata"}

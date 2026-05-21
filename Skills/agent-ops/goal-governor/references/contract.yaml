@@ -3,6 +3,7 @@ purpose: "Operational contract for Codex goal governance skills."
 triggers:
   - "create durable /goal board"
   - "continue Codex goal work"
+  - "review or tighten a /goal prompt without starting execution"
   - "doctor or audit goal workflow"
   - "repair stale or invalid goal state"
 inputs:
@@ -13,6 +14,7 @@ inputs:
   - "stop condition"
 outputs:
   - "native and board state reconciliation"
+  - "prompt readiness report for review-mode launch packages"
   - "native goal identity and objective-edit reconciliation when available"
   - "next safe action"
   - "validation evidence"
@@ -24,11 +26,21 @@ non_goals:
   - "native Codex goal API implementation"
 risks:
   - "stale board state can mislead continuation"
+  - "prompt review can accidentally start native goal machinery without a review-mode guard"
   - "native /goal objective can drift from the repo-visible board"
   - "goal tools may be unavailable for ephemeral or state-less turns even when source support exists"
   - "unscoped workers can edit outside the intended boundary"
 output_contract:
   schema_version: "1"
+  applies_to_modes:
+    - "create"
+    - "continue"
+    - "doctor"
+    - "check"
+    - "repair"
+    - "import"
+  mode_specific_overrides:
+    review: "Use review_mode_contract.required_fields instead of the global output contract fields."
   required_fields:
     - "schema_version"
     - "mode"
@@ -38,5 +50,34 @@ output_contract:
     - "next_action"
     - "validation_evidence"
     - "risks"
+review_mode_contract:
+  trigger_phrases:
+    - "check this prompt"
+    - "review this"
+    - "tighten this"
+    - "improve this"
+    - "not start yet"
+  execution_override_phrase: "proceed with governed implementation"
+  route_when_override_present: "continue"
+  required_fields:
+    - "prompt_readiness"
+    - "interpreted_objective"
+    - "target_repository"
+    - "proposed_first_slice"
+    - "required_permissions"
+    - "external_systems_that_would_be_touched"
+    - "expected_artifacts"
+    - "stop_conditions"
+    - "questions_or_contradictions"
+    - "governor_start_command"
+  forbidden_actions:
+    - "create_goal"
+    - "native goal continuation"
+    - "spawn agents"
+    - "tracker mutation"
+    - "commit"
+    - "pull request"
+    - "CI monitoring"
+    - "implementation edits"
 rollback_procedure: "Do not mutate implementation files during repair unless the active Worker task allows them; revert board-only changes if validation fails."
 observability: "Record exact command, outcome, and note for every verifier and guard."

@@ -4,7 +4,6 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 Entries are grouped by declared semantic type; each path names the owning skill package root, including plugin-owned surfaces.
 
 ## Table of Contents
-
 - [Summary](#summary)
 - [Semantic Types](#semantic-types)
 - [Validation Notes](#validation-notes)
@@ -12,11 +11,11 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 ## Summary
 
 - `library_api_reference`: 2
-- `product_verification`: 3
+- `product_verification`: 4
 - `data_fetch_analysis`: 3
-- `team_automation`: 37
+- `team_automation`: 35
 - `scaffolding_templates`: 16
-- `code_quality_review`: 23
+- `code_quality_review`: 24
 - `ci_cd_deployment`: 0
 - `runbook`: 13
 - `infrastructure_ops`: 3
@@ -34,6 +33,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 
 - `agentation` — `Skills/frontend-ui`
 - `design-system` — `Skills/frontend-ui`
+- `he-spec` — `Plugins/harness-engineering/skills`
 - `ui-visual-regression` — `Skills/frontend-ui`
 
 ### Data Fetch Analysis
@@ -54,7 +54,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `deep-interview` — `Skills/product-strategy`
 - `goal-governor` — `Skills/agent-ops`
 - `he-brainstorm` — `Plugins/harness-engineering/skills`
-- `he-compound` — `Plugins/harness-engineering/skills`
 - `he-fix-bugs` — `Plugins/harness-engineering/skills`
 - `he-heartbeat` — `Plugins/harness-engineering/skills`
 - `he-improve` — `Plugins/harness-engineering/skills`
@@ -65,7 +64,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `he-reframe` — `Plugins/harness-engineering/skills`
 - `he-reinforce` — `Plugins/harness-engineering/skills`
 - `he-router` — `Plugins/harness-engineering/skills`
-- `he-spec` — `Plugins/harness-engineering/skills`
 - `he-strategy` — `Plugins/harness-engineering/skills`
 - `he-work` — `Plugins/harness-engineering/skills`
 - `interview-me` — `Skills/product-strategy`
@@ -122,6 +120,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `rust-pro` — `Skills/agent-ops`
 - `simplify` — `Skills/agent-ops`
 - `skill-builder` — `Plugins/skill-factory/skills/code_quality_review`
+- `testing` — `Skills/agent-ops`
 - `toml` — `Skills/agent-ops`
 - `typescript` — `Skills/agent-ops`
 - `verification-before-completion` — `Skills/agent-ops`
@@ -156,3 +155,4 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 ## Validation Notes
 
 - No invalid semantic type tags detected.
+

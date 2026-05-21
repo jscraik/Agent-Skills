@@ -1,0 +1,98 @@
+slice: T003-doctor-contract-live-reconciliation
+timestamp: "2026-05-21T11:55:26Z"
+mode: GOVERNED_IMPLEMENTATION
+objective: "Make the live skills doctor payload schema-backed without broadening RF-1 into runtime-governance work."
+runtime_reconciliation:
+  linear:
+    issue: JSC-329
+    status: Todo
+    priority: High
+    observation: "The live issue says the current repo now exposes doctor and first governed action is reconciliation."
+  live_doctor:
+    command: "./bin/ask skills doctor context7 --json --robot"
+    outcome: blocked_expected
+    status: blocked
+    next_command: "./bin/ask skills proof context7 --json --robot"
+    key_payload_surface: "data.skill_doctor"
+  live_proof:
+    command: "./bin/ask skills proof context7 --json --robot"
+    outcome: blocked
+    blocker: "Generated .skillsets command-surface projection is fixed, but .agents/skills command-handle drift still blocks context7 proof; generated_command_handle_check remains false."
+implementation:
+  - file: Infrastructure/scripts/lib/ask/commands/skills_impl.py
+    change: "Advertise Infrastructure/config/schemas/skill-doctor.v1.schema.json as the concrete doctor schema reference while preserving missing_schema_reason for other inline contracts."
+  - file: Infrastructure/config/schemas/skill-doctor.v1.schema.json
+    change: "Replaced stale simplified schema with a schema matching the live public skill_doctor payload, including target metadata, taxonomy, schema refs, lifecycle event, checks object, check summary, and next command."
+  - file: Infrastructure/tests/test_ask_skills_doctor.py
+    change: "Added optional jsonschema validation helper and direct schema checks for warning, runtime-blocked, path-target, and invalid-path doctor payloads."
+review_stack:
+  simplify:
+    artifact: ".harness/reviews/2026-05-21-jsc-329-doctor-contract/simplify.md"
+    status: pass
+    findings: []
+  architecture:
+    artifact: ".harness/reviews/2026-05-21-jsc-329-doctor-contract/architecture.md"
+    status: pass
+    findings: []
+  testing:
+    artifact: ".harness/reviews/2026-05-21-jsc-329-doctor-contract/testing.md"
+    status: pass_after_fix
+    findings:
+      - "Initial invalid-path and optional runtime_reachability coverage findings were fixed with focused assertions."
+  codex_review:
+    artifact: ".harness/reviews/2026-05-21-jsc-329-doctor-contract/codex-review.md"
+    status: pass
+    findings: []
+  unslopify:
+    artifact: ".harness/reviews/2026-05-21-jsc-329-doctor-contract/unslopify.md"
+    status: pass_via_coordinator_fallback
+    findings: []
+    note: "Initial reviewer and rerun reviewer failed artifact verification; coordinator fallback completed after repairing command-surface projection drift."
+validation_evidence:
+  - command: "python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q"
+    outcome: pass
+    detail: "7 passed, 15 subtests passed"
+  - command: "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache uv run --python 3.12 --with pytest --with jsonschema python -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q"
+    outcome: pass
+    detail: "7 passed, 15 subtests passed after invalid-path follow-up."
+  - command: "./bin/ask skills doctor context7 --json --robot"
+    outcome: blocked_expected
+    detail: "Structured blocked skill_doctor payload validates against public schema; context7 remains blocked by runtime proof."
+  - command: "./bin/ask skills proof context7 --json --robot"
+    outcome: blocked
+    detail: "After command-surface projection refresh, proof still fails on .agents/skills command-handle drift; runtime_satisfied_by agents_user_runtime and doctor contract patch is not the blocker."
+  - command: "./bin/ask skills handles --check --json"
+    outcome: blocked
+    detail: "COMMAND_SURFACE_PROJECTION_DRIFT blocks unslopify gate."
+  - command: "./bin/ask skills handles --no-handles --write-projection --json --robot"
+    outcome: pass
+    detail: "Refreshed .skillsets/command-surface.json with canonical generated projection; handle_count 109."
+  - command: "./bin/ask skills handles --no-handles --check-projection --json --robot"
+    outcome: pass
+    detail: "Command-surface projection matched after refresh."
+  - command: "./bin/ask skills handles --check --no-handles --json --robot"
+    outcome: pass
+    detail: "Handles gate passed after command-surface projection refresh."
+  - command: "python3 -m py_compile Infrastructure/scripts/lib/ask/commands/skills_impl.py Infrastructure/tests/test_ask_skills_doctor.py"
+    outcome: pass
+    detail: "Scoped syntax/import validation passed for implementation and tests."
+  - command: "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache uv run --python 3.12 --with jsonschema python -c <validate context7 and autofix skill_doctor payloads>"
+    outcome: pass
+    detail: "context7 schema-pass status blocked exit 2; Skills/agent-ops/autofix schema-pass status warning exit 0."
+  - command: "./bin/ask repo validate --changed-files <37 changed files> --json --robot"
+    outcome: pass
+    detail: "required_failures 0; warn_only_issues 0; logs Infrastructure/artifacts/validation/20260521T120050Z."
+  - command: "./bin/ask repo validate --changed-files <39 changed files> --json --robot"
+    outcome: pass
+    detail: "required_failures 0; warn_only_issues 0; logs Infrastructure/artifacts/validation/20260521T121411Z; trace 67e2b353-3f0e-40b8-a839-127a1864556c."
+  - command: "bash scripts/validate-codestyle.sh"
+    outcome: pass
+    detail: "Delegated to validate_all --ephemeral; required_failures 0; warn_only_issues 0."
+  - command: "test -f memory.json && jq -e '.meta.version == \"1.0\" and (.preamble.bootstrap | type == \"boolean\") and (.preamble.search | type == \"boolean\") and (.entries | type == \"array\")' memory.json >/dev/null"
+    outcome: pass
+    detail: "memory.json contract check passed."
+  - command: "./bin/ask repo validate --json --robot"
+    outcome: pass
+    detail: "required_failures 0; warn_only_issues 0; logs Infrastructure/artifacts/validation/20260521T121612Z; trace f05328a0-98c2-48c8-ab50-de589bce8b09."
+status: active_review_stack_green_runtime_blocked
+next_action: "Commit/PR the validated doctor-contract slice or explicitly escalate the remaining .agents/skills runtime projection blocker before claiming full goal completion."

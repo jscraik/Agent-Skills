@@ -8,6 +8,32 @@ x_negative: &negative {eval_modes: [smoke, release], category: negative, should_
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "netcat"]}
 
 cases:
+  - id: review-goal-prompt-not-start-yet
+    <<: *common
+    name: "Review Goal Prompt Not Start Yet"
+    category: edge
+    realistic: true
+    prompt: "This is a check my prompt first before kicking off goal. Update the /goal prompt recommendations, include Goal Governor improvements, but do not start yet."
+    deterministic_checks: *safe
+    expected_route: "review"
+    acceptance:
+      - {type: regex, value: "(?is)PROMPT_REVIEW_ONLY|prompt[_ -]?readiness"}
+      - {type: regex, value: "(?is)interpreted[_ -]?objective.*target[_ -]?repository.*proposed[_ -]?first[_ -]?slice"}
+      - {type: regex, value: "(?is)(do not|no).*(create_goal|native goal|spawn agents|tracker|commit|PR|CI)"}
+      - {type: regex, value: "(?is)governor[_ -]?start[_ -]?command|/goal Follow"}
+      - {type: not_regex, value: "(?is)created native goal|started implementation|opened PR|spawned agent"}
+  - id: review-language-with-execution-override
+    <<: *common
+    name: "Review Language With Execution Override"
+    category: edge
+    realistic: true
+    prompt: "Review the goal board and proceed with governed implementation for docs/goals/jsc-329-skill-sdk-doctor-contract/goal.md."
+    deterministic_checks: *safe
+    expected_route: "continue"
+    acceptance:
+      - {type: regex, value: "(?is)read goal\.md and state\.yaml first|receipts\.jsonl"}
+      - {type: regex, value: "(?is)proceed with governed implementation|governed implementation"}
+      - {type: not_regex, value: "(?is)PROMPT_REVIEW_ONLY.*do not start|not start yet"}
   - id: smoke-blocked-runtime-doctor
     <<: *smoke
     name: "Smoke Blocked Runtime Doctor"
