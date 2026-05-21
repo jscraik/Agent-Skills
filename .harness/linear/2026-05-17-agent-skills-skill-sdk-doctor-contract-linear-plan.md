@@ -9,6 +9,15 @@ slice: RF-1 doctor contract fixture for one skill
 doctor_schema: Infrastructure/config/schemas/skill-doctor.v1.schema.json
 live_cli_contract_status: blocked_missing_skills_doctor_action
 live_cli_contract_checked_at: 2026-05-20
+codex_runtime_alignment_checked_at: 2026-05-21
+codex_runtime_alignment_origin_main: "20fedafff"
+codex_runtime_alignment_sources: ["~/dev/codex", "codex-repo-mcp"]
+runtime_evidence_contract_status: post_rf1_design_input
+agents_observability_bridge_status: post_rf1_design_input
+goal_board_status: prepared_not_started
+goal_board_path: docs/goals/jsc-329-skill-sdk-doctor-contract/goal.md
+goal_board_validated_at: 2026-05-21T10:58:43Z
+goal_governor_guard_status: included_as_pre_slice
 linear_mutation_status: created
 live_linear_setup_status: partial
 live_linear_checked_at: 2026-05-18
@@ -40,7 +49,11 @@ Decision Needed: Use the created Linear issue as the RF-1 execution handle, then
 
 Top Risks: Over-scoping RF-1 can turn a doctor registration and fixture slice into a broad SDK rewrite; treating planned package/profile/event seams as live commands would weaken the contract this issue is meant to prove; treating a polished skill artifact or AI review as readiness would bypass the verification apparatus; creating follow-on issues before RF-1 evidence would recreate backlog ceremony.
 
-Next Action: Implement RF-1 against the live Linear issue after confirming the created issue routing is acceptable.
+Next Action: Use the prepared \`/goal\` board only after Jamie says
+\`proceed with governed implementation\`. Start with the
+\`goal-governor-review-mode-guard\` pre-slice unless Jamie explicitly defers it,
+then reconcile live \`skills doctor\` runtime state before choosing the smallest
+remaining RF-1 contract proof.
 
 ## Executive Linear Routing Summary
 
@@ -71,6 +84,24 @@ live_linear_setup_status: partial.
 live_linear_blocker: the issue was created without project assignment because exact repo-control project health and issue template IDs were not fully verified in this turn.
 
 Live issue: JSC-329, https://linear.app/jscraik/issue/JSC-329/harden-skills-doctor-contract-fixture-for-context7.
+
+Goal kickoff package, 2026-05-21:
+
+- Board: docs/goals/jsc-329-skill-sdk-doctor-contract/goal.md
+- State: docs/goals/jsc-329-skill-sdk-doctor-contract/state.yaml
+- Receipts: docs/goals/jsc-329-skill-sdk-doctor-contract/receipts.jsonl
+- Notes: docs/goals/jsc-329-skill-sdk-doctor-contract/notes/kickoff.md
+- Implementation notes: .harness/implementation-notes/2026-05-21-agent-skills-jsc-329-goal-kickoff.html
+- Validation: \`python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-329-skill-sdk-doctor-contract\` -> pass at 2026-05-21T10:58:43Z
+- Status: prepared, paused, not started.
+
+Included Goal Governor pre-slice:
+
+- \`goal-governor-review-mode-guard\`
+- Purpose: add review/dry-run mode so prompt review and \`not start yet\`
+  requests cannot create or continue native goals.
+- Run before the doctor RF-1 implementation slice unless Jamie explicitly
+  defers it.
 
 ## Existing Project Match
 
@@ -133,6 +164,31 @@ Relevant invariants:
   decision.
 - Skills improve over time through eval feedback loops: every material pass, fail, warning, blocked, or not_run result can produce a classified improvement delta, bounded canonical update, rerun proof, and promotion or rollback evidence.
 - The terminology flywheel is part of the SDK contract: repeated patterns from use and evals become controlled vocabulary in command JSON, schemas, fixtures, eval labels, package metadata, and harness reports.
+- Post-RF-1 runtime evidence must distinguish declared capability, resolved
+  runtime state, observed telemetry, portable eval proof, and harness
+  enforcement. A polished readiness summary is not a substitute for those
+  layers.
+- Permission claims must separate declared profile, inherited profile, managed
+  profile source, effective profile, runtime refresh, approval availability,
+  fallback policy, runner enforcement, and observed effects. A single
+  `repo-write` label is insufficient for an SDK-grade runtime contract.
+- Goal-aware skills must distinguish active goal state, progress accounting,
+  failed accounting flushes, goal-store availability, and final completion.
+  Chat summaries and Linear issue state are linked context, not durable goal
+  truth by themselves.
+- Delegation evidence must cover both `SubagentStart` and `SubagentStop`
+  or an equivalent terminal event. Artifact-written evidence alone does not
+  prove delegated work closed cleanly.
+- Extension and MCP-backed evidence must preserve `turn_id`,
+  `truncation_policy`, `plugin_id`, marketplace/source attribution, and
+  raw output references when those fields are available from the runtime.
+- Package-backed skill or runtime claims must preserve archive checksum,
+  platform package, DotSlash entrypoint, SDK launch source, bundled resource,
+  and install-context provenance before they can support release-readiness
+  claims.
+- Networked skill evidence must distinguish disabled network, allowed network,
+  MITM-inspected traffic, MITM hook enforcement, websearch-client use,
+  external ingest, and redaction status.
 - Jamie's mantra is the operating shape: Thin surface. Strong guardrails. Durable memory. Professional output.
 - Skill readiness is trusted only to the degree that the verification apparatus signs off the exact claim: typed contract assertions, doctor/package/prove/eval commands, structural audits, representativeness probes, closeout validation, and rollback evidence.
 - High-signal steering uptake is RF-0 and must remain a preflight gate.
@@ -265,6 +321,16 @@ Observability Feedback Loop:
   contract for these sources. It defines which fields RF-1 and later slices
   should collect from doctor output, command surfaces, eval artifacts, Linear,
   and optional collector evidence.
+- Post-RF-1, `.agents` should be treated as the local observed-evidence
+  bridge: session collector and OTel collector evidence can prove permission
+  profile refreshes, approval fallback rejections, goal accounting events,
+  SubagentStart/SubagentStop pairs, extension tool-call turn binding, plugin
+  attribution, MITM decisions, package runtime provenance, and websocket
+  warmup versus logical request traces.
+- The SDK must keep those collector fields optional until a slice explicitly
+  wires them. The contract should say which fields are required, optional,
+  unavailable, or not_applicable for each skill type rather than requiring all
+  telemetry providers in RF-1.
 
 Out of Scope:
 
@@ -354,6 +420,12 @@ contract signals. Do not add those to JSC-329. Capture them as RF-2+ design
 inputs and make the first post-RF-1 vertical slice skills package-doctor
 <skill>.
 
+Next SDK contract import, 2026-05-21: upstream Codex now treats permissions,
+goals, hooks, plugins, package runtimes, network policy, extension calls, and
+thread settings as runtime-governed state. Do not add those to JSC-329/RF-1.
+Capture them as RF-2+ Runtime Evidence Contract inputs and keep RF-1 focused
+on registering the doctor seam and proving one stable JSON fixture.
+
 Later: RF-3 profile/freshness determinism; RF-4 coding-harness schema consumer boundary; RF-5 review feedback intent radius; RF-6 migration of high-value HE/factory skills.
 
 Do Not Create: one issue per SDK field; a broad package metadata migration issue before RF-1 proves doctor contract value; a coding-harness implementation issue before Agent Skills Kit owns a stable fixture.
@@ -441,6 +513,7 @@ delivery_evidence_rule: a merged PR is implementation evidence, not shipped evid
 | Guided-error action list drifts from parser/help | Unknown-action guidance currently mentions `external-review`, but `./bin/ask skills --help` and parser choices do not list it. Parser/help remain authoritative until reconciled. |
 | Steering uptake is a preflight gate | .harness/quality/steering-uptake.md and validate_steering_uptake.py |
 | Live Linear issue exists | JSC-329 verified live on 2026-05-18: Triage, no project, no assignee |
+| Latest Codex runtime-governance delta is design input only | Read-only local `~/dev/codex` check on 2026-05-21 showed `origin/main` at `20fedafff`; codex-repo MCP search confirmed matching code surfaces for permissions, hooks, plugins, packages, and extension evidence. |
 
 ## Visual References / Diagrams
 
@@ -567,3 +640,248 @@ Implementation-order correction:
    package metadata warnings, outcome-proof gaps, and safe next command.
 4. Only after that, design skills package-doctor as a post-RF-1 package
    readiness vertical slice.
+
+## 2026-05-21 Codex Runtime-Governance Delta
+
+Source: read-only local check of adjacent `~/dev/codex` plus codex-repo MCP
+search after upstream `origin/main` moved from `59507b849` to
+`20fedafff`. The local Codex worktree was not modified. Relevant local state
+at the time of review: `~/dev/codex` remained on
+`codex/update-codex-environment` with local edits and untracked harness/tmp
+files, so this plan imports runtime ideas and contract shape only.
+
+This delta does not expand JSC-329/RF-1. It upgrades the post-RF-1 design input
+from package-oriented SDK readiness to runtime-governed agent operations:
+
+```text
+declared skill contract
+-> resolved Codex runtime state
+-> observed .agents telemetry/provenance
+-> portable eval proof
+-> coding-harness enforcement
+```
+
+| New Codex runtime-governance signal | Commits | Agent Skills SDK integration point |
+| --- | --- | --- |
+| Permission profiles are runtime policy, not static labels | `713a5b1b0`, `40ad7be2b`, `a27d3847b`, `63a72e6b7`, `729bdf3c8`, `896ee672c`, `e1ec0eee5`, `fe7c069fe`, `0edcc4b94`, `2b4898cc4` | Add permission resolution fields: declared, inherited, managed_source, effective, refreshed_at, approvals_enabled, fallback_policy, runner_enforcement, observed_effects. |
+| Goals are default-on runtime state with accounting semantics | `0e9d22217`, `d4f842f3b`, `d84b824d5` | Model goal_absent, goal_active, goal_progress_accounted, goal_accounting_flush_failed, goal_store_unavailable, goal_cleared, and goal_complete. |
+| Subagent lifecycle now has terminal stop evidence | `eee3e60db` | Require SubagentStart, ArtifactExpected, ArtifactWritten, SubagentStop, ParentIntegrated, ValidationRun, and ReviewerClosed before delegation is closed. |
+| Extension tool calls carry turn identity and truncation policy | `c5bd13156` | Evidence envelopes should include turn_id, truncation_policy, evidence_complete, and raw_output_ref for extension-backed artifacts. |
+| Plugin discovery and MCP tool items carry source identity | `0a4179bb1`, `60b45d92d`, `3075061bd`, `9265701b` | Preserve plugin_id, plugin marketplace, plugin source, and MCP attribution in skill reports and eval payloads. |
+| Packages are installable, checksum-verifiable, platform-aware runtimes | `e9f59e30d`, `110b30d54`, `e389e01f8`, `cb05de672`, `f48be015d`, `80c4a978f`, `0b4f86095`, `0b5cf85b6`, `b0b383bea` | Extend package contracts with archive checksum, platform package, DotSlash entrypoint, SDK launch support, bundled resources, and install context. |
+| Network policy can be enforced through MITM hooks and websearch clients | `3d94e24a3`, `f6970214d`, `3cae84009`, `ed6d73b3b` | Distinguish network_disabled, network_allowed, mitm_configured, mitm_enforced, websearch_client_used, external_ingest_allowed, and redaction status. |
+| App-server thread settings are mutable runtime state | `771a4e74a`, `edc48e461`, `370b13afc` | Snapshot thread_settings_revision, resolved model/service tier, and permission profile at run start and closeout. |
+| Compact SessionStart and websocket trace boundaries are observable | `af49d3837`, `20fedafff` | Separate compact startup/warmup evidence from logical user request evidence in collectors and harness reports. |
+| Deferred tools are hidden from code-mode prompt | `a52c91d8b` | Skill docs and doctor guidance must not assume every capability is prompt-visible; prefer discover/request/probe semantics. |
+
+Post-RF-1 agent-skills contract files to update after JSC-329 closes:
+
+```text
+Infrastructure/references/agent-native-skill-contract.md
+Infrastructure/references/skill-validation-reporting-contract.md
+Infrastructure/config/skills-sdk.json
+Infrastructure/config/schemas/skill-doctor.v1.schema.json
+```
+
+Recommended split:
+
+```text
+skill-package-contract-v1:
+  package layout, checksum, platform package, DotSlash entrypoint,
+  SDK launch support, install context, bundled resources, projection targets
+
+skill-runtime-contract-v1:
+  permission resolution, goal accounting, hook lifecycle, turn binding,
+  plugin attribution, network policy, thread settings, evidence envelope,
+  runtime telemetry availability, harness enforcement classification
+```
+
+Runtime Evidence Contract v1 fields to reserve:
+
+```yaml
+runtime_evidence:
+  codex_origin_main: 20fedafff
+  thread_settings_revision: optional
+  declared_permission_profile: required
+  inherited_permission_profile: optional
+  managed_permission_profile_source: optional
+  effective_permission_profile: required
+  permission_profile_refreshed_at: optional
+  approvals_enabled: required
+  fallback_policy: required
+  fallback_rejected_reason: optional
+  goal_accounting_status: optional
+  goal_accounting_flush_status: optional
+  extension_turn_id: optional
+  truncation_policy: optional
+  plugin_id: optional
+  plugin_marketplace: optional
+  subagent_start_seen: optional
+  subagent_stop_seen: optional
+  mitm_policy: optional
+  websearch_client_used: optional
+  package_checksum_ref: optional
+  platform_package: optional
+  dotslash_entrypoint: optional
+  sdk_launch_source: optional
+  warmup_trace: optional
+  logical_websocket_request_id: optional
+  raw_output_refs: required
+```
+
+Agent Skills Kit import rules:
+
+- Keep JSC-329 focused on the public doctor seam and one stable fixture.
+- Rename or extend the earlier package-only manifest concept so it does not
+  underspecify runtime behavior. Preferred shape: skill package contract plus
+  skill runtime contract.
+- Add permission resolution tests after RF-1: a strict skill validation should
+  fail when declared profile, inherited/effective profile, managed source, or
+  fallback behavior is missing for operational skills.
+- Add goal accounting language only to skills that claim to manage ongoing
+  work. Skills that merely emit artifacts should explicitly mark goal progress
+  accounting as not_applicable.
+- Add plugin attribution fields for plugin-backed skills and MCP-backed tool
+  evidence.
+- Add compact warmup constraints: front-door `SKILL.md` content survives
+  startup and compact startup; deep references remain lazy-loaded.
+- Add discover/request language for deferred tools rather than assuming tools
+  are visible in code-mode prompt.
+
+Future eval cases to reserve in RF-2+:
+
+```text
+permission-profile-inheritance.case.json
+managed-permission-profile-requirements.case.json
+runtime-permission-refresh.case.json
+approval-disabled-readonly-fallback.case.json
+goal-accounting-flush-failure.case.json
+subagent-stop-missing.case.json
+thread-settings-drift.case.json
+extension-tool-call-turn-id-missing.case.json
+extension-tool-call-truncation-policy-missing.case.json
+plugin-id-attribution-missing.case.json
+plugin-marketplace-source-missing.case.json
+mitm-network-policy-missing.case.json
+package-checksum-missing.case.json
+sdk-launch-provenance-missing.case.json
+logical-websocket-warmup-noise.case.json
+```
+
+Future `.agents` bridge fields to reserve:
+
+```text
+permission_profile_resolution
+permission_profile_runtime_refresh
+managed_requirements_profile_source
+approval_availability
+approval_fallback_rejection
+goal_accounting_event
+goal_accounting_flush_failure
+thread_settings_update
+extension_turn_id
+extension_truncation_policy
+plugin_id
+plugin_marketplace
+marketplaces_considered
+subagent_start
+subagent_stop
+compact_session_start
+mitm_hook_decision
+websearch_client_use
+package_archive_checksum
+platform_package
+dotslash_entrypoint
+sdk_runtime_launch_source
+warmup_trace
+logical_websocket_request_id
+```
+
+Do not edit `$HOME/.agents/otel-collector` or
+`$HOME/.agents/session-collector` from this plan until their current dirty
+work is intentionally adopted or stabilized. Treat them as optional evidence
+providers for RF-2+ and as the likely owner of observed local telemetry,
+provenance, and installed-state evidence.
+
+Updated cross-repo ownership:
+
+```text
+agent-skills:
+  owns declared skill package and runtime contracts
+
+coding-harness:
+  owns run-time enforcement and closeout governance
+
+evals:
+  owns portable positive and negative proof cases
+
+.agents:
+  owns observed local telemetry, provenance, installed-state, and runtime
+  behavior evidence
+
+codex:
+  provides runtime primitives, app-server surfaces, hooks, package runtime,
+  permissions, goals, extension calls, and plugin attribution
+```
+
+Updated risk list:
+
+- Permission inheritance drift: declared skill profile differs from inherited,
+  managed, or effective runtime profile.
+- Runtime refresh drift: permissions change mid-run and risky phases continue
+  under stale assumptions.
+- Approval-disabled fallback: a write-required task silently continues in
+  read-only mode when approvals are unavailable.
+- Goal accounting loss: chat or Linear claims progress while durable goal
+  accounting failed to flush.
+- Subagent non-closure: a delegated agent writes an artifact but never emits a
+  terminal stop event.
+- Plugin attribution gap: MCP-backed evidence cannot identify the plugin or
+  marketplace that supplied it.
+- Network policy laundering: websearch or network ingest happens without MITM
+  policy, enforcement, and redaction evidence.
+- Package provenance gap: a packaged runtime launches without checksum,
+  platform package, DotSlash entrypoint, or SDK launch-source evidence.
+- Warmup trace confusion: warmup websocket traffic is misclassified as logical
+  user work.
+
+## 2026-05-21 Goal Kickoff Status
+
+JSC-329 kickoff is now governed by
+`docs/goals/jsc-329-skill-sdk-doctor-contract/goal.md`.
+
+First slice completed:
+
+- `T002 goal-governor-review-mode-guard` hardened Goal Governor so
+  prompt-review and not-start-yet launch package requests route to
+  `PROMPT_REVIEW_ONLY` unless the user explicitly says
+  `proceed with governed implementation`.
+- The slice added mode-specific contract metadata, review-mode eval metadata,
+  and structure-aware regression coverage.
+- Mandatory review stack findings were normalized in
+  `.harness/reviews/2026-05-21-jsc-329-goal-governor/`.
+- Accepted findings were fixed. Broader Goal Governor instruction dedupe and
+  doctor-mode simplification are deferred to later bounded slices.
+
+Validation evidence:
+
+- `python3 -m pytest Skills/agent-ops/goal-governor/tests/test_check_goal_board.py`
+  -> pass, 13 passed.
+- `python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-329-skill-sdk-doctor-contract`
+  -> pass.
+- `python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json`
+  -> pass, 10 rooted skillset manifests written.
+- `./bin/ask repo validate --changed-files <27 changed files> --json --robot`
+  -> pass, required_failures 0, warn_only_issues 0, logs
+  `Infrastructure/artifacts/validation/20260521T113707Z`.
+
+Known deferral:
+
+- Full rooted workspace sync remains blocked before mutation by pre-existing
+  `COMMAND_HANDLE_PARENT_SYMLINK` violations under `.agents/skills`.
+
+Next implementation slice:
+
+- `T003 doctor-contract-live-reconciliation`: reconcile the smallest remaining
+  RF-1 skills doctor public-contract proof without broadening into RF-2 runtime
+  governance fields.

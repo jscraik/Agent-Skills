@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>JSC-329 Skill SDK Doctor Contract Goal Kickoff</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 40px; line-height: 1.5; color: #202124; max-width: 1080px; }
+    h1, h2 { line-height: 1.2; }
+    code, pre { font-family: "SFMono-Regular", Consolas, monospace; }
+    pre { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 12px; overflow-x: auto; }
+    .status { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #fff3cd; border: 1px solid #ffe08a; }
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+    th, td { border: 1px solid #d0d7de; padding: 8px; vertical-align: top; }
+    th { background: #f6f8fa; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>JSC-329 Skill SDK Doctor Contract Goal Kickoff</h1>
+  <p><strong>Status:</strong> <span class="status">first slice green; PR decision pending</span></p>
+
+  <h2>Purpose</h2>
+  <p>
+    Prepare the Goal Governor launch package for JSC-329 without starting
+    implementation. The kickoff package makes the next turn deterministic:
+    read the goal board, refresh runtime truth, reconcile Linear, emit a slice
+    manifest, and only then implement if Jamie explicitly approves governed
+    implementation.
+  </p>
+
+  <h2>Mode Gate</h2>
+  <pre>Default mode: PROMPT_REVIEW_ONLY
+Execution trigger: proceed with governed implementation
+Until trigger: no native goal creation, no Worker implementation, no PR mutation, no CI monitoring, no merge.</pre>
+
+  <h2>Primary Surfaces</h2>
+  <table>
+    <tr><th>Surface</th><th>Path or ID</th><th>Purpose</th></tr>
+    <tr><td>Goal board</td><td><code>docs/goals/jsc-329-skill-sdk-doctor-contract/goal.md</code></td><td>Prompt convention and operating contract.</td></tr>
+    <tr><td>Goal state</td><td><code>docs/goals/jsc-329-skill-sdk-doctor-contract/state.yaml</code></td><td>Machine-checkable continuation state.</td></tr>
+    <tr><td>Receipts</td><td><code>docs/goals/jsc-329-skill-sdk-doctor-contract/receipts.jsonl</code></td><td>Future task receipts.</td></tr>
+    <tr><td>Linear</td><td><code>JSC-329</code></td><td>Execution tracker and durable handoff.</td></tr>
+    <tr><td>Audit</td><td><code>.harness/linear/2026-05-17-agent-skills-skill-sdk-doctor-contract-linear-plan.md</code></td><td>RF-1 scope, risks, and acceptance criteria.</td></tr>
+  </table>
+
+  <h2>Runtime Discovery</h2>
+  <p>
+    The live repository currently exposes <code>./bin/ask skills doctor</code>,
+    while the audit frontmatter still records the older
+    <code>blocked_missing_skills_doctor_action</code> state. Kickoff must
+    reconcile that drift before implementation and select only the missing
+    contract proof.
+  </p>
+
+  <h2>Proposed First Slice</h2>
+  <pre>slice: goal-governor-review-mode-guard
+objective: Add Goal Governor review/dry-run guardrails so prompt review and not-start-yet requests cannot start native goal work.
+why first: The current lane exposed a false-start failure mode in the governor itself.
+
+second slice: doctor-contract-live-reconciliation
+objective: Refresh repo, Linear, native goal, and live doctor command state.
+output: slice manifest or blocked pre-start report.
+implementation: forbidden until Jamie says proceed with governed implementation.</pre>
+
+  <h2>Validation Evidence</h2>
+  <p>Initial and first-slice validation evidence is recorded here during kickoff.</p>
+  <pre>Command: python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-329-skill-sdk-doctor-contract
+Outcome: pass at 2026-05-21T10:58:43Z
+
+Command: python3 -m pytest Skills/agent-ops/goal-governor/tests/test_check_goal_board.py
+Outcome: pass, 13 passed in 0.11s
+
+Command: python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-329-skill-sdk-doctor-contract
+Outcome: pass, PASS: goal board is valid
+
+Command: python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json
+Outcome: pass, wrote 10 rooted skillset manifests
+
+Command: ./bin/ask repo validate --changed-files &lt;27 changed files&gt; --json --robot
+Outcome: pass, required_failures 0, warn_only_issues 0
+Logs: Infrastructure/artifacts/validation/20260521T113707Z
+Trace: c4222b3d-97d8-4150-8793-abd246c75583</pre>
+
+  <h2>Review And PR Policy</h2>
+  <p>
+    Start the mandatory review stack only after an implementation slice exists.
+    Start PR green sweep only after a PR exists and PR monitoring is approved.
+    Merge authority remains with Jamie unless explicitly delegated.
+  </p>
+
+  <h2>Open Governance Notes</h2>
+  <ul>
+    <li>The paused native goal from the earlier false start should not be continued automatically.</li>
+    <li>Goal Governor should gain review or dry-run mode with regression evidence before the implementation loop depends on it.</li>
+    <li>Linear JSC-329 should cite this goal board as the kickoff package.</li>
+    <li>RF-2+ runtime-governance ideas remain design input only until RF-1 closes.</li>
+  </ul>
+
+  <h2>Slice T002 Update</h2>
+  <p>
+    The first governed slice hardened Goal Governor review mode so prompt-review
+    and not-start-yet requests are treated as <code>PROMPT_REVIEW_ONLY</code>
+    unless the user explicitly says <code>proceed with governed implementation</code>.
+    The change is intentionally bounded to Goal Governor instructions, contract
+    metadata, eval metadata, focused tests, generated skillset manifests, and
+    this goal board.
+  </p>
+  <table>
+    <tr><th>Review Lane</th><th>Disposition</th></tr>
+    <tr><td>Simplify</td><td>Accepted low-level test/contract ambiguity fixes; deferred broader instruction dedupe.</td></tr>
+    <tr><td>Unslopify</td><td>Fixed brittle prose-coupled test behavior with structure-aware YAML assertions.</td></tr>
+    <tr><td>Architecture</td><td>Fixed mode-specific output contract ambiguity.</td></tr>
+    <tr><td>Testing</td><td>Fixed keyword-only coverage and added execution-override eval coverage.</td></tr>
+    <tr><td>Codex Review</td><td>No blocker, high, or medium findings remain after accepted fixes.</td></tr>
+  </table>
+
+  <h2>Slice T003 Update</h2>
+  <p>
+    The second governed slice reconciled the live <code>skills doctor</code>
+    command with RF-1 and made the public <code>data.skill_doctor</code> payload
+    schema-backed. The live <code>context7</code> doctor run still reports
+    <code>blocked_runtime</code>, but the follow-up proof shows that blocker is
+    projection/user-runtime drift rather than a doctor-contract defect.
+  </p>
+  <table>
+    <tr><th>Surface</th><th>Outcome</th></tr>
+    <tr><td>Doctor schema reference</td><td><code>contract_schemas.doctor.path</code> now points at <code>Infrastructure/config/schemas/skill-doctor.v1.schema.json</code>.</td></tr>
+    <tr><td>Public schema</td><td><code>skill-doctor.v1.schema.json</code> now matches the live payload shape: target metadata, taxonomy, schema refs, lifecycle event, checks object, check summary, agent summary, and next command.</td></tr>
+    <tr><td>Focused tests</td><td><code>Infrastructure/tests/test_ask_skills_doctor.py</code> validates command-handle, runtime-blocked, path-target, and invalid-path payloads against the schema when <code>jsonschema</code> is available.</td></tr>
+    <tr><td>Review stack</td><td>Simplify, architecture, testing, Codex review, and unslopify are clean. Unslopify completed by coordinator fallback after repairing command-surface projection drift.</td></tr>
+  </table>
+
+  <h2>T003 Validation Evidence</h2>
+  <pre>Command: python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q
+Outcome: pass, 7 passed, 15 subtests passed
+
+Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache uv run --python 3.12 --with pytest --with jsonschema python -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q
+Outcome: pass, 7 passed, 15 subtests passed
+
+Command: ./bin/ask skills doctor context7 --json --robot
+Outcome: blocked_expected, structured skill_doctor payload with next_command ./bin/ask skills proof context7 --json --robot
+
+Command: ./bin/ask skills proof context7 --json --robot
+Outcome: blocked, .agents/skills command-handle drift remains after repo command-surface projection repair; not introduced by the doctor schema patch
+
+Command: ./bin/ask skills handles --check --json
+Outcome: blocked, COMMAND_SURFACE_PROJECTION_DRIFT blocks the $unslopify gate
+
+Command: ./bin/ask skills handles --no-handles --write-projection --json --robot
+Outcome: pass, refreshed .skillsets/command-surface.json
+
+Command: ./bin/ask skills handles --check --no-handles --json --robot
+Outcome: pass, command-surface projection drift repaired
+
+Command: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache uv run --python 3.12 --with jsonschema python -c &lt;validate context7 and autofix skill_doctor payloads&gt;
+Outcome: pass, context7 schema-pass status blocked exit 2; autofix schema-pass status warning exit 0
+
+Command: ./bin/ask repo validate --changed-files &lt;39 changed files&gt; --json --robot
+Outcome: pass, required_failures 0, warn_only_issues 0
+Logs: Infrastructure/artifacts/validation/20260521T121411Z
+
+Command: bash scripts/validate-codestyle.sh
+Outcome: pass, delegated validate_all --ephemeral with required_failures 0 and warn_only_issues 0
+
+Command: test -f memory.json &amp;&amp; jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json &gt;/dev/null
+Outcome: pass
+
+Command: ./bin/ask repo validate --json --robot
+Outcome: pass, required_failures 0, warn_only_issues 0
+Logs: Infrastructure/artifacts/validation/20260521T121612Z</pre>
+
+  <h2>Current Blockers And Deferrals</h2>
+  <ul>
+    <li>Full rooted workspace sync remains blocked before mutation by pre-existing <code>COMMAND_HANDLE_PARENT_SYMLINK</code> violations under <code>.agents/skills</code>.</li>
+    <li>The narrower repo-owned skillset manifest generator passed and refreshed generated manifests.</li>
+    <li>The repo-owned command-surface projection check now passes; <code>context7</code> proof still blocks on generated runtime handle drift under <code>.agents/skills</code>.</li>
+    <li>Broader Goal Governor instruction dedupe is deferred to a separate cleanup slice to keep this slice small.</li>
+  </ul>
+</body>
+</html>

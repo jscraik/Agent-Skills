@@ -1,0 +1,208 @@
+version: 2
+goal:
+  slug: jsc-329-skill-sdk-doctor-contract
+  status: active
+  objective: "Prepare Goal Governor review-mode hardening and JSC-329 RF-1 for the Agent Skills Kit skills doctor contract."
+  native_objective: "/goal Follow docs/goals/jsc-329-skill-sdk-doctor-contract/goal.md"
+  native_status: active
+  native_goal_id: 019e4a55-432b-7390-bbe2-1c297d6b19da
+  tokens_used: 416387
+  time_used_seconds: 972
+  native_created_at: "2026-05-21T11:39:34Z"
+  native_updated_at: "2026-05-21T11:55:47Z"
+completion_contract:
+  outcome: "Goal Governor review-mode hardening and JSC-329 RF-1 are implemented or escalated with validated, reviewable, PR-backed evidence trails."
+  verification_surface:
+    - "Goal board validator output."
+    - "Focused ask skills doctor tests."
+    - "Goal Governor review-mode guard tests or fixtures."
+    - "Changed-file repository validation."
+    - "Mandatory review stack disposition."
+    - "Implementation notes and Linear handoff."
+  constraints:
+    - "Do not start implementation until Jamie says proceed with governed implementation."
+    - "Apply Goal Governor prompt-review guardrails before relying on the governed implementation loop."
+    - "Keep RF-1 bounded to the skills doctor public contract and fixtures after Goal Governor hardening."
+    - "Do not broaden into RF-2 runtime-governance work before the Goal Governor guard and RF-1 close."
+    - "Prefer machine-readable contracts and evidence over human-facing docs."
+  boundaries:
+    - "Target repository is /Users/jamiecraik/dev/agent-skills."
+    - "Primary audit is .harness/linear/2026-05-17-agent-skills-skill-sdk-doctor-contract-linear-plan.md."
+    - "Goal Governor canonical source is Skills/agent-ops/goal-governor/SKILL.md."
+    - "Implementation notes are .harness/implementation-notes/2026-05-21-agent-skills-jsc-329-goal-kickoff.html."
+    - "Do not edit generated runtime projections, plugin caches, user runtime config, or unrelated repos."
+  iteration_policy: "First choose the Goal Governor review-mode guard or explicitly defer it with rationale, then choose one independently verifiable RF-1 slice, validate it, run the review stack, update notes, then commit and PR only after green evidence."
+  blocked_stop_condition: "Stop on stale runtime state, red validation, unclear blast radius, missing permission, review churn, unprovable merge safety, or user steering that changes the objective."
+rules:
+  one_active_task: true
+  require_fresh_verification: true
+  require_final_audit: true
+checks:
+  dirty_fingerprint: unknown
+  last_verification:
+    command: "./bin/ask repo validate --json --robot"
+    outcome: pass
+    checked_at: "2026-05-21T12:16:12Z"
+  last_delivery_attempt:
+    command: "git push -u origin codex/jsc-329-skill-sdk-doctor-contract"
+    outcome: pass
+    checked_at: "2026-05-21T12:40:10Z"
+    commit: 385d7b56e
+    detail: "Branch published to origin after explicit user approval; PR #191 opened as draft."
+  last_pr_state:
+    url: "https://github.com/jscraik/Agent-Skills/pull/191"
+    number: 191
+    state: open
+    draft: true
+    mergeable: true
+    checked_at: "2026-05-21T12:42:28Z"
+    outcome: checks_pending
+    detail: "Most PR checks are passing after PR body correction; CodeQL Python and the stale original pr-template run still require final settlement/rerun."
+continuation_gate:
+  native_status: active
+  goal_active: pass
+  thread_idle: unknown
+  queued_user_input: unknown
+  pending_work: present
+  auto_continue_allowed: yes
+claims:
+  - id: C001
+    claim: "JSC-329 is the active Linear execution handle for RF-1 skills doctor contract hardening."
+    evidence_surface:
+      - "Linear issue JSC-329."
+      - ".harness/linear/2026-05-17-agent-skills-skill-sdk-doctor-contract-linear-plan.md."
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Linear state should be refreshed at kickoff."
+  - id: C002
+    claim: "The current repository already exposes a skills doctor command, so kickoff must reconcile the audit with live runtime state before implementation."
+    evidence_surface:
+      - "./bin/ask skills --help."
+      - "./bin/ask skills doctor context7 --json --robot."
+      - "Infrastructure/tests/test_ask_skills_doctor.py."
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "The next missing RF-1 contract proof must be selected after fresh validation."
+  - id: C003
+    claim: "The previous accidental native goal exists in paused state and should not be continued automatically."
+    evidence_surface:
+      - "get_goal native state in this thread."
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Jamie may choose whether to reuse, clear, or ignore the paused native goal at kickoff."
+  - id: C004
+    claim: "Goal Governor needs a prompt-review or dry-run mode so launch-package preparation cannot accidentally start native goal work."
+    evidence_surface:
+      - "Jamie correction said this is a check my prompt first before kicking off goal."
+      - "Goal Governor source currently lists create, continue, doctor, check, repair, and import modes but not review mode."
+      - "Earlier false start created native goal state during prompt review."
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Exact test location and fixture shape should be selected during the first slice manifest."
+tasks:
+  - id: T001
+    type: scout
+    assignee: Scout
+    status: done
+    objective: "Pre-start reconciliation: refresh repo, Linear, native goal, and live doctor contract state before any Worker implementation."
+    inputs:
+      - "docs/goals/jsc-329-skill-sdk-doctor-contract/goal.md"
+      - "docs/goals/jsc-329-skill-sdk-doctor-contract/state.yaml"
+      - "docs/goals/jsc-329-skill-sdk-doctor-contract/receipts.jsonl"
+      - ".harness/linear/2026-05-17-agent-skills-skill-sdk-doctor-contract-linear-plan.md"
+      - ".harness/implementation-notes/2026-05-21-agent-skills-jsc-329-goal-kickoff.html"
+      - "Linear JSC-329"
+    constraints:
+      - "Read-only until Jamie says proceed with governed implementation."
+      - "Do not create a new native goal during prompt review or pre-start reconciliation."
+      - "Do not spawn review lanes before a slice manifest exists."
+    expected_output: "A slice manifest or blocked pre-start report with refreshed evidence."
+    allowed_files: []
+    verify:
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-329-skill-sdk-doctor-contract"
+    stop_if:
+      - "Target repository is not /Users/jamiecraik/dev/agent-skills."
+      - "Linear JSC-329 cannot be refreshed."
+      - "Native goal state conflicts with this paused board."
+      - "Live doctor command state contradicts the selected slice."
+      - "Jamie has not said proceed with governed implementation."
+    receipt_id: R001
+  - id: T002
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Add Goal Governor review-mode guardrails so prompt review and not-start-yet requests cannot create or continue native goals."
+    inputs:
+      - "Skills/agent-ops/goal-governor/SKILL.md"
+      - "Skills/agent-ops/goal-governor/tests/test_check_goal_board.py"
+      - "Skills/agent-ops/goal-governor/tests/fixtures"
+      - "docs/goals/jsc-329-skill-sdk-doctor-contract/notes/kickoff.md"
+    constraints:
+      - "Do not start until Jamie says proceed with governed implementation."
+      - "Keep the change scoped to Goal Governor review-mode contract and tests."
+      - "Do not mutate native goal lifecycle from the skill."
+    expected_output: "Review-mode contract update plus regression evidence or blocked implementation report."
+    allowed_files:
+      - "Skills/agent-ops/goal-governor/SKILL.md"
+      - "Skills/agent-ops/goal-governor/tests/test_check_goal_board.py"
+      - "Skills/agent-ops/goal-governor/tests/fixtures/**"
+      - "docs/goals/jsc-329-skill-sdk-doctor-contract/**"
+      - ".harness/implementation-notes/2026-05-21-agent-skills-jsc-329-goal-kickoff.html"
+      - "docs/goals/jsc-329-skill-sdk-doctor-contract/notes/T002-goal-governor-review-mode-guard.yaml"
+      - ".skillsets/agent-ops/manifest.jsonl"
+      - ".skillsets/backend-platform/manifest.jsonl"
+      - ".skillsets/content-publishing/manifest.jsonl"
+      - ".skillsets/frontend-ui/manifest.jsonl"
+      - ".skillsets/harness-engineering/manifest.jsonl"
+      - ".skillsets/mobile-native/manifest.jsonl"
+      - ".skillsets/plugin-factory/manifest.jsonl"
+      - ".skillsets/product-strategy/manifest.jsonl"
+      - ".skillsets/security-ops/manifest.jsonl"
+      - ".skillsets/skill-factory/manifest.jsonl"
+    verify:
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-329-skill-sdk-doctor-contract"
+      - "python3 -m pytest Skills/agent-ops/goal-governor/tests/test_check_goal_board.py"
+      - "./bin/ask repo validate --changed-files <27 changed files> --json --robot"
+    stop_if:
+      - "Review-mode behavior cannot be tested without broad Goal Governor runtime changes."
+      - "The change requires native goal lifecycle mutation."
+      - "Jamie has not said proceed with governed implementation."
+    receipt_id: R002
+  - id: T003
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Implement or reconcile the smallest remaining JSC-329 skills doctor RF-1 contract proof after Goal Governor guardrails are handled."
+    inputs:
+      - ".harness/linear/2026-05-17-agent-skills-skill-sdk-doctor-contract-linear-plan.md"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/tests/test_ask_skills_doctor.py"
+      - "Infrastructure/tests/test_ask_cli_impl.py"
+      - "Infrastructure/config/schemas/skill-doctor.v1.schema.json"
+    constraints:
+      - "Do not broaden into RF-2 runtime-governance fields."
+      - "Keep public interface additive."
+      - "Preserve prove, proof, explain, audit, package, events, and memory semantics."
+    expected_output: "Validated skills doctor contract slice or blocked reconciliation report."
+    allowed_files:
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/tests/test_ask_skills_doctor.py"
+      - "Infrastructure/tests/test_ask_cli_impl.py"
+      - "Infrastructure/config/schemas/skill-doctor.v1.schema.json"
+      - ".skillsets/command-surface.json"
+      - ".harness/linear/2026-05-17-agent-skills-skill-sdk-doctor-contract-linear-plan.md"
+      - ".harness/implementation-notes/2026-05-21-agent-skills-jsc-329-goal-kickoff.html"
+      - "docs/goals/jsc-329-skill-sdk-doctor-contract/**"
+    verify:
+      - "./bin/ask skills doctor context7 --json --robot"
+      - "python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py"
+      - "./bin/ask repo validate --changed-files Infrastructure/tests/test_ask_skills_doctor.py --json --robot"
+    stop_if:
+      - "Live doctor state shows RF-1 is already complete and only planning drift remains."
+      - "Runtime reachability blocker belongs to projection/user sync rather than doctor contract."
+      - "Blast radius expands beyond the doctor seam."
+    receipt_id: R003

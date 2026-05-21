@@ -39,6 +39,8 @@ Do not use for quick questions, ordinary one-file fixes, or implementation tasks
 ## Modes
 
 - `create`: scaffold a board and print `/goal Follow <goal.md>`.
+- `review`: inspect, tighten, or prepare a goal prompt or launch package
+  without starting native goal work or Worker implementation.
 - `continue`: reconcile native and board state, then choose the next safe action.
 - `doctor`: check goal feature/tool availability, agent depth, board validity, and verification freshness.
 - `check`: validate a board and receipts without changing files.
@@ -57,6 +59,13 @@ Do not use for quick questions, ordinary one-file fixes, or implementation tasks
 
 Return a board health report with native/board reconciliation, next safe action, validation evidence, changed board files when applicable, `blackboard_delta`, `slack_policy`, and residual risks.
 
+For `review`, return prompt readiness and launch safety instead of starting
+the goal. The required fields are `prompt_readiness`,
+`interpreted_objective`, `target_repository`, `proposed_first_slice`,
+`required_permissions`, `external_systems_that_would_be_touched`,
+`expected_artifacts`, `stop_conditions`, `questions_or_contradictions`,
+and `governor_start_command`.
+
 ## Non-Optional Checklist
 
 For every governed answer, include the matching checklist item before any broad
@@ -66,6 +75,10 @@ repo diagnosis or implementation suggestion:
   `repo-canonical validation command`; include `completion_contract` with
   `outcome`, `verification_surface`, `constraints`, `boundaries`,
   `iteration_policy`, and `blocked_stop_condition`.
+- review: say `PROMPT_REVIEW_ONLY`; do not call `create_goal`, continue
+  native goal state, spawn agents, mutate trackers, commit, push, open PRs, or
+  start CI; return the review-mode prompt readiness fields before any launch
+  recommendation.
 - continue: say `read goal.md and state.yaml first`; name `receipts.jsonl`; if
   board health is unclear, say `verification recovery` and no Worker work starts
   before board health is clear.
@@ -179,19 +192,31 @@ Use explicit Goal Governor vocabulary in every governed response:
 - If the prompt is only an ordinary review request or one-file fix with no
   durable goal governance, do not emit Goal Governor fields such as
   `native_goal_status`, `goal_path`, `/goal Follow`, or `goal board`.
+- If the user asks to check, review, tighten, or improve a `/goal` prompt,
+  goal board, launch package, or says `not start yet`, use `review` mode and
+  write `PROMPT_REVIEW_ONLY` unless the same request explicitly says
+  `proceed with governed implementation`.
+- In `review` mode, forbidden actions are: no `create_goal`, no native goal
+  continuation, no agents, no tracker mutation, no commit, no PR, no CI, and no
+  implementation edits. Board-file writes are allowed only when the user
+  explicitly asks to prepare the launch package files.
 
 ## Workflow
 
 1. Read nearest project instructions first. In `~/dev/codex`, read `instructions/CODESTYLE.md` when present before technical edits.
-2. Run doctor checks before `create` or `continue`: the `goals` feature is enabled, goal tools are exposed for this turn, the thread is not ephemeral when native tools are needed, the native objective is non-empty and at most 4,000 characters, delegation depth fits the task, repo validators exist, and any board passes `check_goal_board.py`. If the prompt says `ephemeral` or `get_goal unavailable`, immediately report `ephemeral turns cannot support goals`, `get_goal/native inspection blocked or unavailable`, and `do not claim native runtime available`.
-3. Reconcile native state and board state. Track `goal_id`, objective, status, token budget, tokens used, elapsed seconds, timestamps, objective edits, and budget-limited transitions as evidence, not completion proof.
-4. Normalize native `budgetLimited` or `budget_limited` to output `budget_limited`.
-5. If `/goal edit`, `objective_updated`, or a changed `goal_id` appears, route to PM or Judge reconciliation before continuing old work.
-6. Ensure exactly one active task unless the user explicitly requested parallel Workers with disjoint `allowed_files`.
-7. Refuse Worker implementation until the active Worker declares `allowed_files`, `verify`, and `stop_if`.
-8. Recover verification before feature work when evidence is missing, red, stale, blocked, or from a different dirty fingerprint.
-9. Append a machine-checkable receipt after each task.
-10. Mark a goal complete only after a final Judge or PM audit receipt with `decision: complete`; then update native goal status.
+2. If the prompt is a launch-package or prompt-readiness request and contains
+   review language such as `check this prompt`, `review this`, `tighten this`,
+   `improve this`, or `not start yet`, stay in `review` mode unless it also
+   says `proceed with governed implementation`.
+3. Run doctor checks before `create` or `continue`: the `goals` feature is enabled, goal tools are exposed for this turn, the thread is not ephemeral when native tools are needed, the native objective is non-empty and at most 4,000 characters, delegation depth fits the task, repo validators exist, and any board passes `check_goal_board.py`. If the prompt says `ephemeral` or `get_goal unavailable`, immediately report `ephemeral turns cannot support goals`, `get_goal/native inspection blocked or unavailable`, and `do not claim native runtime available`.
+4. Reconcile native state and board state. Track `goal_id`, objective, status, token budget, tokens used, elapsed seconds, timestamps, objective edits, and budget-limited transitions as evidence, not completion proof.
+5. Normalize native `budgetLimited` or `budget_limited` to output `budget_limited`.
+6. If `/goal edit`, `objective_updated`, or a changed `goal_id` appears, route to PM or Judge reconciliation before continuing old work.
+7. Ensure exactly one active task unless the user explicitly requested parallel Workers with disjoint `allowed_files`.
+8. Refuse Worker implementation until the active Worker declares `allowed_files`, `verify`, and `stop_if`.
+9. Recover verification before feature work when evidence is missing, red, stale, blocked, or from a different dirty fingerprint.
+10. Append a machine-checkable receipt after each task.
+11. Mark a goal complete only after a final Judge or PM audit receipt with `decision: complete`; then update native goal status.
 
 ## Safety Rules
 
@@ -238,7 +263,7 @@ Use explicit Goal Governor vocabulary in every governed response:
 
 ```yaml
 schema_version: 1
-mode: create|continue|doctor|check|repair|import
+mode: create|review|continue|doctor|check|repair|import
 goal_path: path-or-null
 native_goal_status: active|paused|budget_limited|complete|missing|unknown|blocked
 board_status: active|paused|done|blocked|invalid|missing
