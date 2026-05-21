@@ -89,6 +89,126 @@ consumers. Cross-cutting observability and eval feedback may read all layers,
 but must report through structured events, eval artifacts, and closeout
 evidence rather than private module state.
 
+## Project-Local Skill Roots
+
+The SDK should support project-local skills without confusing source ownership:
+
+- Agent Skills standard compatibility means a skill directory contains one
+  `SKILL.md` manifest plus optional `scripts/`, `references/`, `assets/`,
+  and eval files. The standard defines package contents, not a single
+  mandatory filesystem root.
+- `.agents/skills/` is the interoperable project/user discovery convention for
+  cross-client skills.
+- `.codex/skills/` is a Codex-native client root, not the generic Agent Skills
+  standard path.
+- In this repository, `.agents/skills/**` remains generated runtime projection.
+  Do not hand-edit it.
+- In another owner repo, `.agents/skills/**` or `.codex/skills/**` may be
+  canonical only when that repo's `skills-sdk.json` declares the root as
+  `canonical_project_source`.
+- Project-local skills are evaluated in place. Evidence is written to the owner
+  repo, for example `.harness/session-evidence/skills/<skill>/`, rather than
+  copying the skill into `agent-skills`.
+
+`Infrastructure/config/skills-sdk.json` is the machine-readable source for this
+root-classification policy.
+
+## Project-Local Lifecycle
+
+The SDK should be the tool that creates, installs, and updates project-local
+skills. A filesystem write is not enough. Each lifecycle command must finish
+with eval evidence and an explicit promotion decision.
+
+Project-local skills are saved in the owner repo, under the root declared by
+that repo's `skills-sdk.json`:
+
+- Skill source: `<owner-repo>/<declared-root>/<skill-handle>/`.
+- Portable Agent Skills evals: `<owner-repo>/<declared-root>/<skill-handle>/evals/evals.json`.
+- SDK eval extensions: `<owner-repo>/.harness/evals/skills/<skill-handle>/`.
+- Run evidence: `<owner-repo>/.harness/session-evidence/skills/<skill-handle>/<eval-run-id>/`.
+- Lifecycle events: `<owner-repo>/.harness/session-evidence/skills/<skill-handle>/<eval-run-id>/events.jsonl`.
+
+The post-RF-1 reserved lifecycle surfaces are listed here so naming stays
+consistent, but they are not required for RF-1 implementation or acceptance:
+
+- `./bin/ask skills create <handle> --project <owner-repo> --root <declared-root> --eval-gate full --json --robot`
+- `./bin/ask skills install <source> --project <owner-repo> --root <declared-root> --eval-gate install-smoke --json --robot`
+- `./bin/ask skills update <handle> --project <owner-repo> --eval-gate regression --json --robot`
+
+Create must generate a realistic eval suite before promotion. Install must prove
+provenance, namespace, manifest, permission profile, and smoke behavior. Update
+must compare the candidate against the owner baseline and record promote,
+rollback, or blocked with exact before/after evidence.
+
+RF-1 acceptance must not implement these lifecycle commands unless the Linear
+issue is explicitly rescoped. RF-1 should only avoid vocabulary and schema
+choices that would conflict with them later.
+
+## Runtime Targets
+
+Keep local and hosted skill execution targets separate:
+
+- OpenAI local shell skills use local descriptors: `name`, `description`, and
+  `path`.
+- OpenAI hosted shell skills use uploaded, versioned `skill_reference` bundles.
+- Sandbox Agents can materialize skills into a workspace when the agent needs
+  files, commands, artifacts, or resumable state.
+- Codex runtime projection exposes governed skills to local Codex sessions
+  without turning generated handles into editable source.
+
+The SDK may emit adapters for these targets later, but RF-1 remains limited to
+the doctor facade and evidence contract.
+
+## Codex Runtime Alignment
+
+The adjacent `~/dev/codex` runtime is moving toward structured, inspectable
+agent work: package layout detection, session-start skill/plugin warmup,
+permission profile APIs, app-server enablement, durable goal storage, async
+approval contributors, async turn item processing, turn-start metadata,
+`SubagentStart` hooks, remote environment registration, remote compaction
+timeouts, raw exec-output preservation, encrypted function output, and
+namespaced/deferred subagent tools.
+
+Agent Skills Kit should align to those behaviors as contracts, not by copying
+Codex internals:
+
+- Package contract: skills are buildable, inspectable, projected, warmed,
+  smoke-tested packages, not loose Markdown folders.
+- Enablement contract: `available`, `installable`, `installed`,
+  `projected`, `enabled`, `warmed`, `runnable`, and `validated` are
+  separate states.
+- Permission contract: every operational skill declares a permission profile,
+  uses canonical `deny`, and can be checked for declared-versus-observed
+  drift.
+- Environment contract: skills declare local, optional-local, remote, CI, and
+  app-server compatibility instead of assuming Jamie's laptop.
+- Async contract: approvals, deferred contributors, remote compaction, and
+  resumed work use explicit states rather than being collapsed into generic
+  pass/fail.
+- Goal contract: goal-managed skills bind to a durable `goal_ref` or state
+  that no durable goal is required; Linear issue, chat summary, and plan item
+  are linked context, not goal truth.
+- Delegation contract: every subagent start has a role, reason, expected
+  artifact, parent run, timeout, artifact-written event, and parent
+  integration status.
+- Evidence contract: command-backed claims keep raw output references,
+  redaction status, parsed result, summary, and blocker classification.
+- Warmup contract: session-start warmup loads only routing metadata and compact
+  execution boundaries; deep references stay lazy.
+
+These are post-RF-1 SDK imports. RF-1 should not widen beyond the doctor seam,
+but the doctor output should avoid names that conflict with these future
+states.
+
+## Eval Compatibility
+
+Use the Agent Skills eval pattern as the portable baseline: `evals/evals.json`
+with realistic prompts, expected outputs, optional files, assertions, and
+with-skill versus without-skill or previous-skill comparisons. SDK-specific
+extensions may add trace IDs, lifecycle events, tool calls, guardrails,
+permission profiles, namespaces, provenance, telemetry confidence, and
+promotion decisions, but only as structured evidence fields.
+
 ## Observability Feedback Loop
 
 The SDK should improve through use. RF-1 starts the loop by making doctor

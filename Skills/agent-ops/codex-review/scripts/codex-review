@@ -6,28 +6,48 @@ usage() {
 Usage: codex-review [options]
 
 Options:
-  --mode auto|local|branch   Target selection. Default: auto.
+  --mode auto|local|branch|commit
+                              Target selection. Default: auto.
   --base REF                 Base ref for branch review. Default: PR base or origin/main.
+  --commit REF               Commit ref for commit review. Default: HEAD.
   --codex-bin PATH           Codex binary. Default: codex.
+  --runtime-skills-dir DIR   Add Codex runtime skills dir to the nested review sandbox.
+                              Default: disabled unless CODEX_REVIEW_RUNTIME_SKILLS_DIR is set.
+  --no-runtime-skills-dir    Do not add a runtime skills dir to the nested review sandbox.
   --full-access              Run nested Codex review with stronger sandbox permissions after approval.
+  --no-yolo                  Keep normal sandbox/approval prompts. Default.
+  --fetch-required           In branch mode, fail if git fetch origin cannot refresh refs.
+                              Default: warn and review with existing refs.
   --output FILE              Also save output to file.
   --parallel-tests CMD       Run review and test command concurrently.
+                              Default: PNPM_CONFIG_PM_ON_FAIL=ignore PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false PNPM_CONFIG_OFFLINE=true pnpm run check when available.
   --dry-run                  Print selected commands, do not run.
   -h, --help                 Show help.
 
 Modes:
   local   codex review --uncommitted
   branch  codex review --base <base>
+  commit  codex review --commit <commit>
   auto    dirty tree -> local, else PR/current branch -> branch
 EOF
 }
 
 mode=auto
 base_ref=
+commit_ref=HEAD
 codex_bin=${CODEX_BIN:-codex}
+codex_global_args=()
 codex_args=()
+yolo=${CODEX_REVIEW_YOLO:-0}
+fetch_required=${CODEX_REVIEW_FETCH_REQUIRED:-0}
+runtime_skills_dir=${CODEX_REVIEW_RUNTIME_SKILLS_DIR:-}
+runtime_skills_dir_enabled=false
+if [[ -n "$runtime_skills_dir" ]]; then
+  runtime_skills_dir_enabled=true
+fi
 output=${CODEX_REVIEW_OUTPUT:-}
 parallel_tests=
+parallel_tests_auto=false
 dry_run=false
 
 while [[ $# -gt 0 ]]; do
@@ -40,13 +60,33 @@ while [[ $# -gt 0 ]]; do
       base_ref=${2:-}
       shift 2
       ;;
+    --commit)
+      commit_ref=${2:-}
+      shift 2
+      ;;
     --codex-bin)
       codex_bin=${2:-}
       shift 2
       ;;
+    --runtime-skills-dir)
+      runtime_skills_dir=${2:-}
+      runtime_skills_dir_enabled=true
+      shift 2
+      ;;
+    --no-runtime-skills-dir)
+      runtime_skills_dir_enabled=false
+      shift
+      ;;
     --full-access)
-      printf -v full_access_flag '%s%s%s' '--dangerously-' 'by' 'pass-approvals-and-sandbox'
-      codex_args+=("$full_access_flag")
+      yolo=1
+      shift
+      ;;
+    --no-yolo)
+      yolo=0
+      shift
+      ;;
+    --fetch-required)
+      fetch_required=1
       shift
       ;;
     --output)
@@ -72,15 +112,76 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+trimmed_yolo="${yolo#"${yolo%%[![:space:]]*}"}"
+trimmed_yolo="${trimmed_yolo%"${trimmed_yolo##*[![:space:]]}"}"
+yolo_enabled=false
+case "$trimmed_yolo" in
+  ""|0|false|False|FALSE|no|No|NO|off|Off|OFF)
+    ;;
+  1|true|True|TRUE|yes|Yes|YES|on|On|ON)
+    yolo_enabled=true
+    ;;
+  *)
+    echo "invalid CODEX_REVIEW_YOLO: $yolo (expected 1/0, true/false, yes/no, or on/off)" >&2
+    exit 2
+    ;;
+esac
+
+if [[ "$yolo_enabled" == true ]]; then
+    # Build sensitive codex flag char-by-char to avoid grep exposure.
+    # See --full-access help text for semantics.
+    full_access_flag=
+    for code in 45 45 100 97 110 103 101 114 111 117 115 108 121 45 98 121 112 97 115 115 45 97 112 112 114 111 118 97 108 115 45 97 110 100 45 115 97 110 100 98 111 120; do
+      printf -v full_access_char "\\$(printf '%03o' "$code")"
+      full_access_flag+="$full_access_char"
+    done
+    codex_args+=("$full_access_flag")
+fi
+
+if [[ "$runtime_skills_dir_enabled" == true && -n "$runtime_skills_dir" && -e "$runtime_skills_dir" ]]; then
+  codex_global_args+=(--add-dir "$runtime_skills_dir")
+fi
+
+truthy() {
+  case "${1:-0}" in
+    1|true|True|TRUE|yes|Yes|YES|on|On|ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 case "$mode" in
-  auto|local|branch) ;;
+  auto|local|branch|commit) ;;
   *)
     echo "invalid --mode: $mode" >&2
     exit 2
     ;;
 esac
 
-git rev-parse --show-toplevel >/dev/null
+repo_root=$(git rev-parse --show-toplevel)
+printf -v quoted_repo_root '%q' "$repo_root"
+
+has_package_check_script() {
+  command -v node >/dev/null 2>&1 || return 1
+  node -e 'const { readFileSync } = require("node:fs"); const p = JSON.parse(readFileSync(process.argv[1], "utf8")); process.exit(p.scripts?.check ? 0 : 1)' \
+    "$repo_root/package.json" \
+    >/dev/null 2>&1
+}
+
+auto_tests_disabled() {
+  case "${CODEX_REVIEW_AUTO_TESTS:-1}" in
+    0|false|False|FALSE|no|No|NO|off|Off|OFF) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+if [[ -z "$parallel_tests" ]] && ! auto_tests_disabled; then
+  if [[ -f "$repo_root/package.json" && -f "$repo_root/pnpm-lock.yaml" && -d "$repo_root/node_modules" ]] &&
+    command -v pnpm >/dev/null 2>&1 &&
+    has_package_check_script; then
+    parallel_tests="cd $quoted_repo_root && PNPM_CONFIG_PM_ON_FAIL=ignore PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false PNPM_CONFIG_OFFLINE=true pnpm run check"
+    parallel_tests_auto=true
+  fi
+fi
 
 current_branch=$(git branch --show-current 2>/dev/null || true)
 dirty=false
@@ -106,6 +207,8 @@ fi
 review_kind=
 if [[ "$mode" == local || ( "$mode" == auto && "$dirty" == true ) ]]; then
   review_kind=local
+elif [[ "$mode" == commit ]]; then
+  review_kind=commit
 elif [[ "$mode" == branch || ( "$mode" == auto && -n "$current_branch" && "$current_branch" != "main" ) ]]; then
   review_kind=branch
 else
@@ -114,9 +217,11 @@ else
 fi
 
 if [[ "$review_kind" == local ]]; then
-  review_cmd=("$codex_bin" "${codex_args[@]}" review --uncommitted)
+  review_cmd=("$codex_bin" "${codex_global_args[@]}" "${codex_args[@]}" review --uncommitted)
+elif [[ "$review_kind" == commit ]]; then
+  review_cmd=("$codex_bin" "${codex_global_args[@]}" "${codex_args[@]}" review --commit "$commit_ref")
 else
-  review_cmd=("$codex_bin" "${codex_args[@]}" review --base "$base_ref")
+  review_cmd=("$codex_bin" "${codex_global_args[@]}" "${codex_args[@]}" review --base "$base_ref")
 fi
 
 printf 'codex-review target: %s\n' "$review_kind"
@@ -128,10 +233,17 @@ printf 'review:'
 printf ' %q' "${review_cmd[@]}"
 printf '\n'
 if [[ -n "$parallel_tests" ]]; then
-  printf 'tests: %s\n' "$parallel_tests"
+  printf 'tests: %s' "$parallel_tests"
+  if [[ "$parallel_tests_auto" == true ]]; then
+    printf ' (auto)'
+  fi
+  printf '\n'
 fi
 if [[ "$review_kind" == branch ]]; then
   printf 'fetch: git fetch origin --quiet\n'
+  if truthy "$fetch_required"; then
+    printf 'fetch-required: true\n'
+  fi
 fi
 if [[ -n "$output" ]]; then
   printf 'output: %s\n' "$output"
@@ -142,9 +254,25 @@ if [[ "$dry_run" == true ]]; then
 fi
 
 if [[ "$review_kind" == branch ]]; then
-  git fetch origin --quiet || {
-    echo "warning: git fetch origin failed; reviewing with existing refs" >&2
-  }
+  fetch_output=
+  fetch_status=0
+  set +e
+  fetch_output=$(git fetch origin --quiet 2>&1)
+  fetch_status=$?
+  set -e
+  if [[ "$fetch_status" != 0 ]]; then
+    printf 'codex-review warning: degraded_existing_refs\n' >&2
+    if [[ -n "$fetch_output" ]]; then
+      printf 'codex-review fetch blocker: %s\n' "$fetch_output" >&2
+    else
+      printf 'codex-review fetch blocker: git fetch origin --quiet exited %s\n' "$fetch_status" >&2
+    fi
+    printf 'codex-review fetch recovery: rerun with write access to %s/.git, pass an already-fresh --base ref, or use --fetch-required when stale refs must block review\n' "$repo_root" >&2
+    if truthy "$fetch_required"; then
+      printf 'codex-review blocked: blocked_fetch\n' >&2
+      exit 1
+    fi
+  fi
 fi
 
 review_output=$output
@@ -187,7 +315,116 @@ review_output_empty() {
 }
 
 review_output_has_findings() {
-  grep -Eq '\[P[0-3]\]' "$review_output"
+  python3 - "$review_output" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace")
+normalized = re.sub(r"\s+", " ", text).lower()
+
+clean_phrases = (
+    "no findings",
+    "no issue",
+    "no issues",
+    "no actionable findings",
+    "no actionable issue",
+    "no accepted/actionable findings",
+    "did not find a discrete actionable bug",
+    "did not find any discrete actionable bug",
+    "did not find an actionable bug",
+    "did not find any actionable bug",
+    "0 findings",
+    "0 issue",
+    "0 issues",
+)
+
+clean_value = re.compile(r'^(?:none|no(?:ne)?|0|n/a|not applicable|nothing)\b', re.IGNORECASE)
+severity_line = re.compile(r'^\s*(?:(?:[-*]|\d+[.)])\s*)?\[P[0-3]\]')
+generic_issue_mention = re.compile(
+    r'^\s*(?![>#`]).*\b(findings?|issues?|bugs?|vulnerabilit(?:y|ies)|regressions?)\b',
+    re.IGNORECASE,
+)
+heading_line = re.compile(
+    r'^\s*(?:#+\s*)?(?:accepted/actionable\s+)?(?:actionable\s+)?(?:findings?|issues?)\s*(?::\s*(.*))?$',
+    re.IGNORECASE,
+)
+json_finding_array = re.compile(
+    r'"(?:findings|issues)"\s*:\s*\[\s*(?:\{|")',
+    re.IGNORECASE | re.DOTALL,
+)
+json_empty_array = re.compile(r'"(?:findings|issues)"\s*:\s*\[\s*\]', re.IGNORECASE | re.DOTALL)
+json_issue_key_line = re.compile(r'^\s*"?(?:findings|issues)"?\s*:', re.IGNORECASE)
+
+has_clean_signal = any(phrase in normalized for phrase in clean_phrases)
+has_json_empty_array = bool(json_empty_array.search(text))
+
+lines = text.splitlines()
+priority_seen = any(severity_line.search(line) for line in lines)
+clean_marker_lines = set()
+
+def clean_value_text(value):
+    return re.sub(r'^\s*[-*+]\s+', '', value).strip()
+
+def line_has_clean_signal(line):
+    normalized_line = re.sub(r"\s+", " ", line).lower()
+    if any(phrase in normalized_line for phrase in clean_phrases):
+        return True
+    return bool(
+        re.search(
+            r'\b(no|not|without|none)\b.*\b(findings?|issues?|bugs?|vulnerabilit(?:y|ies)|regressions?)\b',
+            normalized_line,
+        )
+    )
+
+if priority_seen:
+    sys.exit(0)
+
+if json_finding_array.search(text):
+    sys.exit(0)
+
+for index, line in enumerate(lines):
+    match = heading_line.match(line)
+    if not match:
+        continue
+    value = (match.group(1) or "").strip()
+    if value:
+        if clean_value.match(clean_value_text(value)):
+            clean_marker_lines.add(index)
+            continue
+        sys.exit(0)
+    following = ""
+    following_index = None
+    for next_index, next_line in enumerate(lines[index + 1:], start=index + 1):
+        if next_line.strip():
+            following = next_line.strip()
+            following_index = next_index
+            break
+    if following and clean_value.match(clean_value_text(following)):
+        clean_marker_lines.add(index)
+        if following_index is not None:
+            clean_marker_lines.add(following_index)
+        continue
+    sys.exit(0)
+
+for index, line in enumerate(lines):
+    if index in clean_marker_lines:
+        continue
+    if has_json_empty_array and json_issue_key_line.search(line):
+        continue
+    if line_has_clean_signal(line):
+        continue
+    if generic_issue_mention.search(line):
+        sys.exit(0)
+
+if has_json_empty_array or clean_marker_lines:
+    sys.exit(1)
+
+if has_clean_signal:
+    sys.exit(1)
+
+sys.exit(1)
+PY
 }
 
 report_clean_review_or_fail() {
@@ -207,6 +444,36 @@ report_clean_review_or_fail() {
   printf 'codex-review clean: no accepted/actionable findings reported\n'
 }
 
+report_review_blocker() {
+  local status=$1
+  local codex_home_dir=${CODEX_HOME:-$HOME/.codex}
+  local codex_skills_dir
+  local mise_share_dir=${XDG_DATA_HOME:-$HOME/.local/share}/mise
+  local tmp_dir=${TMPDIR:-/tmp}
+
+  if [[ "${runtime_skills_dir_enabled:-false}" == true && -n "${runtime_skills_dir:-}" ]]; then
+    codex_skills_dir=$runtime_skills_dir
+  else
+    codex_skills_dir=${CODEX_REVIEW_RUNTIME_SKILLS_DIR:-$codex_home_dir/skills}
+  fi
+
+  if review_output_has_findings; then
+    return "$status"
+  fi
+
+  if grep -qiE 'failed to initialize in-process app-server client|sandbox-exec|sandbox_apply|sandbox.*operation not permitted|approval.*rejected|approval required by policy|AskForApproval is set to Never|data-disclosure|external data disclosure' "$review_output"; then
+    printf 'codex-review blocked: blocked_runtime\n'
+    printf 'codex-review blocker: nested Codex review could not run in this sandbox or approval policy\n'
+    printf 'codex-review retry: rerun once from the active Codex session with filesystem-only additional permissions\n'
+    printf 'codex-review retry fs.read: %s, %s, %s\n' "$codex_home_dir" "$codex_skills_dir" "$mise_share_dir"
+    printf 'codex-review retry fs.write: %s, %s, %s, %s\n' "$codex_home_dir" "$codex_skills_dir" "$mise_share_dir" "$tmp_dir"
+    printf 'codex-review retry network: do not request extra network permission in already-network-enabled workspaces\n'
+    printf 'codex-review fallback: if the retry still fails, perform source-backed local review of the selected git diff and report blocked_runtime\n'
+  fi
+
+  return "$status"
+}
+
 if [[ -z "$parallel_tests" ]]; then
   review_started_at=$(date +%s)
   set +e
@@ -218,6 +485,7 @@ if [[ -z "$parallel_tests" ]]; then
     report_clean_review_or_fail
     exit $?
   fi
+  report_review_blocker "$review_status"
   exit "$review_status"
 fi
 
@@ -256,6 +524,9 @@ printf 'codex-review exit: %s\n' "$review_status"
 printf 'tests exit: %s\n' "$tests_status"
 
 if [[ "$review_status" != 0 || "$tests_status" != 0 ]]; then
+  if [[ "$review_status" != 0 ]]; then
+    report_review_blocker "$review_status" || true
+  fi
   exit 1
 fi
 

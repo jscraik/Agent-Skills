@@ -59,6 +59,51 @@ Caller contract: future agents and coding-harness should consume
 `data.skill_doctor`; they should not reconstruct readiness from skill source
 files, projections, package folders, audit output, and eval reports.
 
+## Project-Local Skill Root Check
+
+The SDK must not treat every `.agents/skills/**` path as the same ownership
+class:
+
+| Root | Meaning in this repo | Meaning in owner repos |
+| --- | --- | --- |
+| `.agents/skills/` | generated runtime projection; do not hand-edit | interoperable project skill root only when `skills-sdk.json` declares `canonical_project_source` |
+| `.codex/skills/` | Codex runtime/config surface unless declared otherwise | Codex-native project skill root only when `skills-sdk.json` declares `canonical_project_source` |
+| `Skills/**` | canonical Agent Skills Kit source | not assumed unless the owner repo defines the same convention |
+| `Plugins/*/skills/**` | plugin-owned canonical source | not assumed unless the owner repo defines the same convention |
+
+Eval implication: project-local skills should be evaluated in place with
+evidence written to the owner repo, not copied into `agent-skills` to satisfy a
+local audit.
+
+## Project-Local Lifecycle Eval Gate
+
+Project-local skills are saved in the owner repo, under the root declared by
+that repo's `skills-sdk.json`:
+
+| Artifact | Save location |
+| --- | --- |
+| Skill source | `<owner-repo>/<declared-root>/<skill-handle>/` |
+| Portable eval suite | `<owner-repo>/<declared-root>/<skill-handle>/evals/evals.json` |
+| SDK eval extensions | `<owner-repo>/.harness/evals/skills/<skill-handle>/` |
+| Run evidence and events | `<owner-repo>/.harness/session-evidence/skills/<skill-handle>/<eval-run-id>/` |
+
+The SDK lifecycle rule is strict: `skills create`, `skills install`, and
+`skills update` are complete only when their configured eval gate records a
+promotion decision. Create requires realistic initial evals. Install requires
+provenance, namespace, manifest, permission, and smoke evidence. Update requires
+candidate-versus-owner-baseline regression evidence plus promote, rollback, or
+blocked classification.
+
+## Agent Skills Eval Compatibility
+
+Portable evals should follow the Agent Skills `evals/evals.json` baseline:
+realistic prompts, expected outputs, optional input files, assertions, and
+with-skill versus without-skill or previous-skill comparisons. The Skills SDK
+may add trace IDs, lifecycle events, tool calls, guardrails, permission
+profiles, namespace, provenance, telemetry confidence, and promotion decisions,
+but those are structured extensions rather than replacements for the portable
+eval shape.
+
 ## Observability Feedback Loop
 
 The RF-1 eval records the first version of the feedback loop: command evidence,

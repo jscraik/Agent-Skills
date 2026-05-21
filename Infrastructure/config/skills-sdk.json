@@ -10,6 +10,166 @@
     "payload_schema": "Infrastructure/config/schemas/skill-doctor.v1.schema.json",
     "agent_safe_boundary": "risky_until_registered_and_seam_tested"
   },
+  "standards_alignment": {
+    "agent_skills_standard": {
+      "role": "skill package format",
+      "source": "https://agentskills.io/specification",
+      "contract": "A skill is a directory with one SKILL.md manifest plus optional scripts, references, assets, and other files. The standard defines package contents and frontmatter validation, not one mandatory filesystem root."
+    },
+    "agent_skills_client_discovery": {
+      "role": "local discovery convention",
+      "source": "https://agentskills.io/client-implementation/adding-skills-support",
+      "contract": "Clients may scan project and user roots, including client-specific roots and .agents/skills for cross-client interoperability. Project-level skills override user-level skills only after trust and precedence rules are applied."
+    },
+    "openai_skills_runtime": {
+      "role": "OpenAI local and hosted execution target",
+      "source": "https://developers.openai.com/api/docs/guides/tools-skills",
+      "contract": "Hosted shell mounts uploaded versioned skill_reference bundles. Local shell mounts local skill descriptors with name, description, and path. SDK packaging must keep those targets distinct."
+    }
+  },
+  "skill_roots": [
+    {
+      "path": ".agents/skills",
+      "scope": "project",
+      "standard_role": "cross_client_interop",
+      "ownership": "canonical_only_if_manifest_declares",
+      "agent_skills_kit_default": "generated_runtime_projection",
+      "notes": "In this repository, .agents/skills is generated and must not be hand-edited. In an owner repo, skills-sdk.json may declare this root as canonical_project_source."
+    },
+    {
+      "path": ".codex/skills",
+      "scope": "project",
+      "standard_role": "codex_native",
+      "ownership": "canonical_only_if_manifest_declares",
+      "agent_skills_kit_default": "runtime_or_client_config_surface",
+      "notes": ".codex/skills is a Codex client-specific root, not the cross-client Agent Skills standard path. In an owner repo, skills-sdk.json may declare it as canonical_project_source."
+    },
+    {
+      "path": "Skills/**",
+      "scope": "agent_skills_kit_repo",
+      "standard_role": "canonical_source",
+      "ownership": "canonical_skill_source",
+      "agent_skills_kit_default": "editable_source"
+    },
+    {
+      "path": "Plugins/*/skills/**",
+      "scope": "agent_skills_kit_repo",
+      "standard_role": "plugin_owned_canonical_source",
+      "ownership": "canonical_skill_source",
+      "agent_skills_kit_default": "editable_source"
+    }
+  ],
+  "runtime_targets": [
+    {
+      "id": "local_shell_skill_path",
+      "source": "OpenAI Skills local shell mode",
+      "shape": {
+        "name": "skill name",
+        "description": "skill description",
+        "path": "local skill folder"
+      },
+      "purpose": "Run project-local or user-local skills from a filesystem path controlled by the runtime."
+    },
+    {
+      "id": "hosted_shell_skill_reference",
+      "source": "OpenAI Skills hosted shell mode",
+      "shape": {
+        "type": "skill_reference",
+        "skill_id": "uploaded skill id",
+        "version": "integer or latest"
+      },
+      "purpose": "Mount uploaded versioned skill bundles in hosted container execution."
+    },
+    {
+      "id": "sandbox_agent_skills_capability",
+      "source": "OpenAI Agents SDK Sandbox Agents",
+      "shape": "sandbox capability materializes skills into the workspace",
+      "purpose": "Use skills when an agent needs a filesystem, shell, commands, artifacts, or resumable workspace state."
+    },
+    {
+      "id": "codex_runtime_projection",
+      "source": "Agent Skills Kit",
+      "shape": ".agents/skills generated handles and user runtime links",
+      "purpose": "Expose governed skills to Codex without making generated projections the editable source."
+    }
+  ],
+  "project_local_skill_manifest": {
+    "filename": "skills-sdk.json",
+    "purpose": "Declare which project-local skill roots are canonical source, projection, runtime config, or unknown before the SDK creates, installs, updates, audits, or runs evals.",
+    "root_classifications": [
+      "canonical_project_source",
+      "generated_runtime_projection",
+      "client_runtime_config",
+      "unknown"
+    ],
+    "required_when": [
+      "a project wants .agents/skills to be edited as source",
+      "a project wants .codex/skills to be edited as source",
+      "the SDK should create skills directly inside a project-local root",
+      "the SDK should install skills directly into a project-local root",
+      "the SDK should update skills directly inside a project-local root",
+      "the full eval suite should run in the owner repo rather than by copying skills into agent-skills"
+    ],
+    "required_fields": [
+      "project_id",
+      "skill_roots[].path",
+      "skill_roots[].classification",
+      "skill_roots[].default_for_create",
+      "skill_roots[].default_for_install",
+      "skill_roots[].default_for_update",
+      "eval_suite.path",
+      "evidence.output_path",
+      "trust_policy",
+      "precedence_policy"
+    ],
+    "owner_repo_evidence_path": ".harness/session-evidence/skills/<skill>/",
+    "rule": "Evaluate project-local skills in place and write evidence to the owner repo. Do not copy project-local skills into agent-skills or hand-edit generated projections to satisfy SDK checks."
+  },
+  "project_local_skill_lifecycle": {
+    "purpose": "Project-local skills are created, installed, and updated by Skills SDK lifecycle commands, with evals acting as the promotion gate.",
+    "save_policy": {
+      "skill_source": "<owner-repo>/<declared-root>/<skill-handle>/",
+      "portable_eval_suite": "<owner-repo>/<declared-root>/<skill-handle>/evals/evals.json",
+      "sdk_eval_extensions": "<owner-repo>/.harness/evals/skills/<skill-handle>/",
+      "run_evidence": "<owner-repo>/.harness/session-evidence/skills/<skill-handle>/<eval-run-id>/",
+      "lifecycle_events": "<owner-repo>/.harness/session-evidence/skills/<skill-handle>/<eval-run-id>/events.jsonl"
+    },
+    "commands": [
+      {
+        "id": "create_project_skill",
+        "planned_interface": "./bin/ask skills create <handle> --project <owner-repo> --root <declared-root> --eval-gate full --json --robot",
+        "writes": [
+          "skill_source",
+          "portable_eval_suite",
+          "sdk_eval_extensions",
+          "run_evidence"
+        ],
+        "gate": "A new project-local skill is promotable only after the generated eval suite has at least one realistic positive case, one negative or boundary case, and a passing SDK eval run."
+      },
+      {
+        "id": "install_project_skill",
+        "planned_interface": "./bin/ask skills install <source> --project <owner-repo> --root <declared-root> --eval-gate install-smoke --json --robot",
+        "writes": [
+          "skill_source",
+          "portable_eval_suite when missing",
+          "run_evidence"
+        ],
+        "gate": "An installed skill is enabled only after provenance, namespace, manifest, permission profile, and install-smoke evals pass or produce an explicit blocked status."
+      },
+      {
+        "id": "update_project_skill",
+        "planned_interface": "./bin/ask skills update <handle> --project <owner-repo> --eval-gate regression --json --robot",
+        "writes": [
+          "skill_source",
+          "portable_eval_suite updates",
+          "sdk_eval_extensions",
+          "run_evidence"
+        ],
+        "gate": "An updated skill is promoted only when regression evals compare candidate output against the owner baseline and record promote, rollback, or blocked with exact evidence."
+      }
+    ],
+    "rule": "The SDK never treats create, install, or update as complete at filesystem write time. Completion requires eval-backed lifecycle evidence and a promotion decision."
+  },
   "module_layers": [
     {
       "id": "types",
@@ -34,6 +194,7 @@
       "id": "repo",
       "owns": [
         "canonical skill sources",
+        "manifest-declared project-local skill roots",
         "plugin sources",
         "harness artifacts",
         "eval artifacts",
@@ -43,6 +204,7 @@
     {
       "id": "providers",
       "owns": [
+        "project root readers",
         "source readers",
         "projection readers",
         "package readers",
@@ -59,7 +221,8 @@
         "profiles",
         "events",
         "routing",
-        "compatibility checks"
+        "compatibility checks",
+        "project-local create/install/update lifecycle gates"
       ]
     },
     {
@@ -70,7 +233,8 @@
         "plugin mirrors",
         "app-server execution",
         "CI execution",
-        "local execution"
+        "local execution",
+        "project-local skill writes"
       ]
     },
     {
@@ -192,8 +356,55 @@
         "collector adaptation comments",
         "closure blockers"
       ]
+    },
+    {
+      "id": "project_skill_manifest",
+      "kind": "owner_repo_manifest",
+      "required_for_rf1": false,
+      "path": "skills-sdk.json",
+      "extract": [
+        "declared skill roots",
+        "root ownership classification",
+        "create/install/update target root",
+        "runtime targets",
+        "eval suite path",
+        "evidence output path",
+        "lifecycle command policy",
+        "trust policy",
+        "precedence policy"
+      ]
     }
   ],
+  "eval_contract": {
+    "base_standard": "https://agentskills.io/skill-creation/evaluating-skills",
+    "compatible_skill_eval_file": "evals/evals.json",
+    "base_fields": [
+      "skill_name",
+      "evals[].id",
+      "evals[].prompt",
+      "evals[].expected_output",
+      "evals[].files",
+      "evals[].assertions"
+    ],
+    "comparison_modes": [
+      "with_skill_vs_without_skill",
+      "new_skill_vs_previous_skill",
+      "candidate_vs_owner_baseline"
+    ],
+    "sdk_extensions": [
+      "trace_id",
+      "eval_run_id",
+      "lifecycle_events",
+      "tool_calls",
+      "guardrails",
+      "permission_profile",
+      "namespace",
+      "provenance",
+      "telemetry_confidence",
+      "promotion_decision"
+    ],
+    "rule": "Use Agent Skills evals as the portable baseline and add SDK extensions only as structured evidence fields."
+  },
   "optional_evidence_providers": [
     {
       "id": "otel_collector",
@@ -256,6 +467,6 @@
     "manual runtime projection edits",
     "coding-harness implementation",
     "full logs metrics traces event stack",
-    "package publishing or installation"
+    "registry publishing or hosted package upload in RF-1"
   ]
 }

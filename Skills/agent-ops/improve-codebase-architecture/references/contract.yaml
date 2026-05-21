@@ -24,6 +24,7 @@ outputs:
   - fresh_evidence
   - missing_evidence
   - reviewer_coverage
+  - experience_lenses
   - agent_safe_boundary
   - patch_design
   - interface_design
@@ -50,6 +51,14 @@ capability_surface:
 reviewer_coverage:
   expected_roles: [agent-native-reviewer, api-contract-reviewer, architecture-strategist]
   unavailable_behavior: "Continue locally and mark the role blocked with the exact missing capability or runtime blocker."
+experience_lenses:
+  reference: "../../../../Infrastructure/references/software-literature-expert-lens-pack.md"
+  companion_map: "../../../../Infrastructure/references/software-literature-skill-expertise-map.md"
+  max_selected: 4
+  default_architecture_lenses: [Deep Module Examiner, Architectural Pattern Cartographer, Pattern Catalog Skeptic, Pragmatic Delivery Partner]
+  conditional_lenses: [Data-Intensive Systems Critic, Domain Language Guardian, Integration Pattern Mechanic, Refactoring Catalog Operator, Micro-Refactoring Surgeon, XP Feedback Coach]
+  validity_rule: "Use literature lenses as experience-derived questions over local repo evidence, never as authority by themselves."
+  required_fields: [selected, mode, evidence_trigger, findings, blocked_or_not_applicable_reason]
 grilling_loop:
   statuses: [active, complete, blocked]
   required_fields: [status, current_question, recommended_answer, decision_dependency, answered_by_code_exploration, next_question_blocked_until_user_feedback]
@@ -95,6 +104,7 @@ validation:
   - request_user_input_checkpoint_or_blocker
   - agent_safe_boundary_classification
   - reviewer_coverage_or_blocker
+  - experience_lenses_or_not_applicable
   - decision_surface_location_or_blocker
   - vocabulary_surface_or_blocker
   - harness_decision_surface_or_blocker
