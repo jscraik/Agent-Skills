@@ -1,3 +1,5 @@
+import importlib.util
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -14,6 +16,17 @@ from ask.commands.skills_impl import (  # noqa: E402
     skills_doctor,
 )
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
+
+
+def _assert_skill_doctor_schema_validates(test_case: unittest.TestCase, payload: dict) -> None:
+    if importlib.util.find_spec("jsonschema") is None:
+        return
+    import jsonschema  # type: ignore[import-untyped]  # noqa: PLC0415
+
+    schema_path = REPO_ROOT / "Infrastructure" / "config" / "schemas" / "skill-doctor.v1.schema.json"
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    jsonschema.Draft7Validator.check_schema(schema)
+    jsonschema.Draft7Validator(schema).validate(payload)
 
 
 def _proof_result(handle: str, status: str = "pass") -> CallResult:
@@ -90,6 +103,10 @@ class TestAskSkillsDoctor(unittest.TestCase):
         )
         self.assertEqual(doctor["checks"]["outcome_proof"]["sdk_layer"], "Evidence")
         _assert_consumer_usable_schema_refs(self, doctor["contract_schemas"])
+        self.assertEqual(
+            doctor["contract_schemas"]["doctor"]["path"],
+            "Infrastructure/config/schemas/skill-doctor.v1.schema.json",
+        )
         self.assertEqual(doctor["contract_schema_versions"]["doctor"], "skill-doctor.v1")
         self.assertIn("blocked_user_input", doctor["readiness_taxonomy"]["blockers"])
         self.assertIn("timeout_no_output", doctor["readiness_taxonomy"]["blockers"])
@@ -98,6 +115,7 @@ class TestAskSkillsDoctor(unittest.TestCase):
         self.assertEqual(doctor["lifecycle_event"]["event_type"], "skill_doctor_completed")
         self.assertIn("eval_blocked", doctor["lifecycle_event_types"])
         self.assertEqual(len(doctor["warnings"]), 1)
+        _assert_skill_doctor_schema_validates(self, doctor)
 
     def test_doctor_blocks_when_runtime_reachability_fails(self) -> None:
         resolution = {
@@ -124,6 +142,7 @@ class TestAskSkillsDoctor(unittest.TestCase):
         self.assertIn("definition", runtime_blockers[0])
         self.assertIn("blocked_runtime", doctor["lifecycle_event"]["outcome"]["blocker_classes"])
         self.assertTrue(result.errors)
+        _assert_skill_doctor_schema_validates(self, doctor)
 
     def test_doctor_selects_structural_audit_next_when_validation_blocks(self) -> None:
         resolution = {
@@ -288,6 +307,7 @@ class TestAskSkillsDoctor(unittest.TestCase):
         self.assertEqual(doctor["target_kind"], "canonical_source_path")
         self.assertEqual(doctor["checks"]["resolver"]["status"], "skipped")
         self.assertEqual(doctor["checks"]["canonical_source"]["status"], "pass")
+        self.assertNotIn("runtime_reachability", doctor["checks"])
         self.assertEqual(doctor["checks"]["structural_audit"]["status"], "pass")
         metadata = doctor["checks"]["capability_metadata"]
         self.assertEqual(metadata["status"], "pass")
@@ -311,6 +331,23 @@ class TestAskSkillsDoctor(unittest.TestCase):
         self.assertFalse(readiness["promotion_gate"]["share_ready"])
         self.assertFalse(metadata["package_contract"]["promotion_gate"]["share_ready"])
         self.assertIn("compatible_roles", readiness["promotion_gate"]["recommended_next_fields"])
+        _assert_skill_doctor_schema_validates(self, doctor)
+
+    def test_doctor_invalid_path_payload_matches_public_schema(self) -> None:
+        with patch("ask.commands.skills_impl._skill_workout_candidates", return_value=[]):
+            result = skills_doctor(REPO_ROOT, "../outside")
+
+        self.assertEqual(result.status, "error")
+        doctor = result.data["skill_doctor"]
+        self.assertEqual(doctor["target_kind"], "invalid_path")
+        self.assertIsNone(doctor["handle"])
+        self.assertIsNone(doctor["canonical_source_path"])
+        self.assertIsNone(doctor["audit_target"])
+        self.assertEqual(doctor["checks"]["resolver"]["status"], "skipped")
+        self.assertEqual(doctor["checks"]["canonical_source"]["status"], "fail")
+        self.assertNotIn("runtime_reachability", doctor["checks"])
+        self.assertIn("blocked_missing_source", doctor["lifecycle_event"]["outcome"]["blocker_classes"])
+        _assert_skill_doctor_schema_validates(self, doctor)
 
 
 if __name__ == "__main__":

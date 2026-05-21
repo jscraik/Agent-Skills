@@ -9,11 +9,62 @@ from tempfile import TemporaryDirectory
 
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "check_goal_board.py"
+SKILL_PATH = Path(__file__).resolve().parents[1] / "SKILL.md"
+CONTRACT_PATH = Path(__file__).resolve().parents[1] / "references" / "contract.yaml"
+EVALS_PATH = Path(__file__).resolve().parents[1] / "references" / "evals.yaml"
 SPEC = importlib.util.spec_from_file_location("check_goal_board", SCRIPT_PATH)
 assert SPEC is not None
 assert SPEC.loader is not None
 check_goal_board = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(check_goal_board)
+
+
+def test_goal_governor_review_mode_guard_is_documented() -> None:
+    skill = SKILL_PATH.read_text(encoding="utf-8")
+    normalized_skill = " ".join(skill.split())
+    contract = check_goal_board.load_yaml(CONTRACT_PATH)
+    evals = check_goal_board.load_yaml(EVALS_PATH)
+
+    for expected in (
+        "review",
+        "PROMPT_REVIEW_ONLY",
+        "proceed with governed implementation",
+        "check this prompt",
+        "not start yet",
+    ):
+        assert expected in normalized_skill
+
+    review_contract = contract["review_mode_contract"]
+    assert review_contract["execution_override_phrase"] == "proceed with governed implementation"
+    assert review_contract["route_when_override_present"] == "continue"
+    assert contract["output_contract"]["mode_specific_overrides"]["review"]
+
+    assert review_contract["required_fields"] == [
+        "prompt_readiness",
+        "interpreted_objective",
+        "target_repository",
+        "proposed_first_slice",
+        "required_permissions",
+        "external_systems_that_would_be_touched",
+        "expected_artifacts",
+        "stop_conditions",
+        "questions_or_contradictions",
+        "governor_start_command",
+    ]
+    assert review_contract["forbidden_actions"] == [
+        "create_goal",
+        "native goal continuation",
+        "spawn agents",
+        "tracker mutation",
+        "commit",
+        "pull request",
+        "CI monitoring",
+        "implementation edits",
+    ]
+
+    cases = {case["id"]: case for case in evals["cases"]}
+    assert cases["review-goal-prompt-not-start-yet"]["expected_route"] == "review"
+    assert cases["review-language-with-execution-override"]["expected_route"] == "continue"
 
 
 def test_goal_md_must_be_a_file() -> None:
