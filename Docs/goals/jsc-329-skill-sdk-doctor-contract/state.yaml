@@ -43,12 +43,18 @@ checks:
     command: "./bin/ask repo validate --json --robot"
     outcome: pass
     checked_at: "2026-05-21T12:16:12Z"
+  last_delivery_attempt:
+    command: "git push -u origin codex/jsc-329-skill-sdk-doctor-contract"
+    outcome: blocked
+    checked_at: "2026-05-21T12:22:17Z"
+    commit: d93f196c5
+    blocker: "External GitHub publication requires explicit user approval after app policy warning."
 continuation_gate:
   native_status: active
   goal_active: pass
   thread_idle: unknown
   queued_user_input: unknown
-  pending_work: unknown
+  pending_work: present
   auto_continue_allowed: yes
 claims:
   - id: C001
