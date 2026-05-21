@@ -45,10 +45,19 @@ checks:
     checked_at: "2026-05-21T12:16:12Z"
   last_delivery_attempt:
     command: "git push -u origin codex/jsc-329-skill-sdk-doctor-contract"
-    outcome: blocked
-    checked_at: "2026-05-21T12:22:17Z"
-    commit: d93f196c5
-    blocker: "External GitHub publication requires explicit user approval after app policy warning."
+    outcome: pass
+    checked_at: "2026-05-21T12:40:10Z"
+    commit: 385d7b56e
+    detail: "Branch published to origin after explicit user approval; PR #191 opened as draft."
+  last_pr_state:
+    url: "https://github.com/jscraik/Agent-Skills/pull/191"
+    number: 191
+    state: open
+    draft: true
+    mergeable: true
+    checked_at: "2026-05-21T12:42:28Z"
+    outcome: checks_pending
+    detail: "Most PR checks are passing after PR body correction; CodeQL Python and the stale original pr-template run still require final settlement/rerun."
 continuation_gate:
   native_status: active
   goal_active: pass
