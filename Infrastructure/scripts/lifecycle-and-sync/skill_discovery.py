@@ -262,7 +262,6 @@ def is_skill_visible(name: str, source_dir: Path, visibility: str) -> bool:
     if (
         name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES
         and name not in ROOT_SKILL_SET_NAMES
-        and name not in SYSTEM_BRIDGE_SKILL_NAMES
     ):
         return False
     if plugin_owned and name not in PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
@@ -511,8 +510,8 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
             # augments from plugin sources so lanes remain discoverable.
             skill_dirs.extend(_sort_for_user_scope_precedence(_iter_plugin_skill_dirs()))
         else:
-            # Keep governed system bridge skills visible from the default listing
-            # without forcing advanced-mode discovery.
+            # Include the system lane so policy-default bridge skills can remain
+            # visible without forcing advanced-mode discovery.
             skill_dirs.extend(_sort_for_user_scope_precedence(_iter_system_lane_skill_dirs()))
     elif source == "repo":
         skill_dirs = _sort_for_user_scope_precedence([
@@ -535,8 +534,8 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
                     ])
                 )
             else:
-                # Keep governed system bridge skills visible from the default listing
-                # when flat discovery is present.
+                # Include the system lane so policy-default bridge skills can remain
+                # visible when flat discovery is present.
                 skill_dirs.extend(_sort_for_user_scope_precedence(_iter_system_lane_skill_dirs()))
         else:
             skill_dirs = _sort_for_user_scope_precedence([

@@ -13,7 +13,13 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity
+from selection_policy import (
+    EXCLUDED_SCAN_SEGMENTS,
+    PLUGIN_SKILL_ROOT_GLOB,
+    REPO_SCAN_ROOTS,
+    ROOT_SKILL_SET_NAMES,
+    policy_identity,
+)
 from skill_discovery import (
     REPO_ROOT,
     classify_skill_scope,
@@ -123,25 +129,27 @@ class SkillModule:
         return asdict(self)
 
 
-def repo_root() -> Path:
-    return REPO_ROOT
+def repo_root(repo_root_path: Path | None = None) -> Path:
+    return (repo_root_path or REPO_ROOT).resolve()
 
 
-def rel(path: Path) -> str:
+def rel(path: Path, repo_root_path: Path | None = None) -> str:
+    root = repo_root(repo_root_path)
     try:
-        return path.relative_to(REPO_ROOT).as_posix()
+        return path.relative_to(root).as_posix()
     except ValueError:
         return path.as_posix()
 
 
-def source_revision() -> str:
+def source_revision(repo_root_path: Path | None = None) -> str:
     git_bin = shutil.which("git")
     if not git_bin:
         return "unknown"
+    root = repo_root(repo_root_path)
     try:
         return subprocess.check_output(
             [git_bin, "rev-parse", "--short", "HEAD"],
-            cwd=REPO_ROOT,
+            cwd=root,
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
@@ -168,7 +176,11 @@ def listish(value: str | None) -> list[str]:
     return [cleaned.strip().strip("\"'")]
 
 
-def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str | None, str]:
+def infer_skill_set(
+    source_dir: Path,
+    frontmatter: dict[str, str],
+    repo_root_path: Path | None = None,
+) -> tuple[str | None, str]:
     """
     Infer the root skill-set for a skill directory using frontmatter declarations and repository path heuristics.
 
@@ -193,15 +205,16 @@ def infer_skill_set(source_dir: Path, frontmatter: dict[str, str]) -> tuple[str 
         normalized = declared.strip().lower().replace("_", "-")
         return (normalized if normalized in ROOT_SKILL_SETS else None), "declared"
 
+    root = repo_root(repo_root_path)
     try:
-        parts = tuple(source_dir.relative_to(REPO_ROOT).parts)
+        parts = tuple(source_dir.relative_to(root).parts)
     except ValueError:
         try:
-            parts = tuple(source_dir.resolve().relative_to(REPO_ROOT).parts)
+            parts = tuple(source_dir.resolve().relative_to(root).parts)
         except ValueError:
             return None, "untagged"
     lowered = tuple(part.lower() for part in parts)
-    scope = classify_skill_scope(source_dir)
+    scope = classify_skill_scope(source_dir, repo_root=root)
     if scope == "system" and source_dir.name in SYSTEM_BRIDGE_SKILL_NAMES:
         return "agent-ops", "system-bridge"
     if len(lowered) >= 2 and lowered[0] == "skills":
@@ -272,7 +285,53 @@ def runtime_visibility_for(frontmatter: dict[str, str]) -> str:
     return visibility if visibility in {"latent", "root", "flat", "hidden"} else "latent"
 
 
-def iter_candidate_skill_dirs() -> list[Path]:
+def _iter_repo_skill_dirs_for_root(root: Path) -> list[Path]:
+    dirs: list[Path] = []
+    for root_name in REPO_SCAN_ROOTS:
+        scan_root = root / root_name
+        if not scan_root.is_dir():
+            continue
+        for skill_md in sorted(scan_root.rglob("SKILL.md")):
+            rel_parts = skill_md.relative_to(scan_root).parts
+            if any(part in EXCLUDED_SCAN_SEGMENTS for part in rel_parts):
+                continue
+            dirs.append(skill_md.parent)
+    return dirs
+
+
+def _iter_plugin_skill_dirs_for_root(root: Path) -> list[Path]:
+    pattern = PLUGIN_SKILL_ROOT_GLOB.removeprefix("./")
+    patterns = {pattern}
+    if pattern.endswith("/*/skills"):
+        patterns.add(pattern[: -len("/*/skills")] + "/*/*/skills")
+    dirs: list[Path] = []
+    seen_roots: set[str] = set()
+    for plugin_pattern in sorted(patterns):
+        for plugin_root in sorted(root.glob(plugin_pattern)):
+            key = plugin_root.resolve().as_posix()
+            if key in seen_roots or not plugin_root.is_dir():
+                continue
+            seen_roots.add(key)
+            for skill_md in sorted(plugin_root.rglob("SKILL.md")):
+                rel_parts = skill_md.relative_to(plugin_root).parts
+                if any(part in EXCLUDED_SCAN_SEGMENTS for part in rel_parts):
+                    continue
+                dirs.append(skill_md.parent)
+    return dirs
+
+
+def _iter_system_lane_skill_dirs_for_root(root: Path) -> list[Path]:
+    system_dir = root / "skills-system"
+    if not system_dir.is_dir():
+        return []
+    return sorted(
+        item
+        for item in system_dir.iterdir()
+        if item.is_dir() and (item / "SKILL.md").exists()
+    )
+
+
+def iter_candidate_skill_dirs(repo_root_path: Path | None = None) -> list[Path]:
     """
     Collect candidate skill directories for projection.
 
@@ -281,19 +340,27 @@ def iter_candidate_skill_dirs() -> list[Path]:
     Returns:
         list[Path]: Unique candidate skill directory paths sorted by repository-relative path.
     """
-    system_dirs = iter_system_lane_skill_dirs()
-    canonical_system_dir = REPO_ROOT / "skills-system"
-    if canonical_system_dir.is_dir():
-        system_dirs = sorted(
-            item
-            for item in canonical_system_dir.iterdir()
-            if item.is_dir() and (item / "SKILL.md").exists()
-        )
-    candidate_dirs = [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs(), *system_dirs]
+    root = repo_root(repo_root_path)
+    if root == REPO_ROOT.resolve():
+        system_dirs = iter_system_lane_skill_dirs()
+        canonical_system_dir = root / "skills-system"
+        if canonical_system_dir.is_dir():
+            system_dirs = sorted(
+                item
+                for item in canonical_system_dir.iterdir()
+                if item.is_dir() and (item / "SKILL.md").exists()
+            )
+        candidate_dirs = [*iter_repo_skill_dirs(), *iter_plugin_skill_dirs(), *system_dirs]
+    else:
+        candidate_dirs = [
+            *_iter_repo_skill_dirs_for_root(root),
+            *_iter_plugin_skill_dirs_for_root(root),
+            *_iter_system_lane_skill_dirs_for_root(root),
+        ]
     canonical_names = {
         skill_dir.name
         for skill_dir in candidate_dirs
-        if classify_skill_scope(skill_dir) != "system"
+        if classify_skill_scope(skill_dir, repo_root=root) != "system"
     }
     seen: set[tuple[int, int] | str] = set()
     dirs: list[Path] = []
@@ -301,7 +368,7 @@ def iter_candidate_skill_dirs() -> list[Path]:
         skill_md = skill_dir / "SKILL.md"
         if not skill_md.exists():
             continue
-        scope = classify_skill_scope(skill_dir)
+        scope = classify_skill_scope(skill_dir, repo_root=root)
         if scope == "system":
             if skill_dir.name not in SYSTEM_BRIDGE_SKILL_NAMES:
                 continue
@@ -318,9 +385,14 @@ def iter_candidate_skill_dirs() -> list[Path]:
             continue
         seen.add(key)
         dirs.append(skill_dir)
-    return sorted(dirs, key=rel)
+    return sorted(dirs, key=lambda path: rel(path, root))
 
-def canonical_source_path_for_row(source_dir: Path, scope: str, skill_set: str | None) -> str:
+def canonical_source_path_for_row(
+    source_dir: Path,
+    scope: str,
+    skill_set: str | None,
+    repo_root_path: Path | None = None,
+) -> str:
     """
     Produce a repo-relative canonical path to the SKILL.md used for manifest provenance.
 
@@ -352,13 +424,13 @@ def canonical_source_path_for_row(source_dir: Path, scope: str, skill_set: str |
         scope == "system"
         and skill_set == "agent-ops"
         and source_dir.name in SYSTEM_BRIDGE_SKILL_NAMES
-        and source_dir.parent.name == ".system"
+        and source_dir.parent.name in {".system", "skills-system"}
     ):
         return f"skills-system/{source_dir.name}/SKILL.md"
-    return rel(source_dir / "SKILL.md")
+    return rel(source_dir / "SKILL.md", repo_root_path)
 
 
-def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
+def build_skill_modules(repo_root_path: Path | None = None) -> tuple[list[SkillModule], list[dict[str, str]]]:
     """
     Builds SkillModule records for all discovered candidate skill directories and collects any unmapped candidates.
 
@@ -375,26 +447,28 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
     """
     modules: list[SkillModule] = []
     unmapped: list[dict[str, str]] = []
-    revision = source_revision()
+    root = repo_root(repo_root_path)
+    revision = source_revision(root)
     current_policy_identity = policy_identity()
-    for source_dir in iter_candidate_skill_dirs():
+    for source_dir in iter_candidate_skill_dirs(root):
         skill_md = source_dir / "SKILL.md"
         frontmatter = parse_skill_frontmatter(skill_md)
         description = normalize_skill_description(
             frontmatter.get("metadata.short-description") or frontmatter.get("description", "")
         )
-        skill_set, skill_set_status = infer_skill_set(source_dir, frontmatter)
+        skill_set, skill_set_status = infer_skill_set(source_dir, frontmatter, root)
         if not skill_set:
-            unmapped.append({"id": source_dir.name, "source_path": rel(skill_md), "reason": skill_set_status})
+            unmapped.append({"id": source_dir.name, "source_path": rel(skill_md, root), "reason": skill_set_status})
             continue
         level, _level_status = infer_level(source_dir.name, frontmatter, description)
-        scope = classify_skill_scope(source_dir)
+        scope = classify_skill_scope(source_dir, repo_root=root)
         source_path = canonical_source_path_for_row(
             source_dir=source_dir,
             scope=scope,
             skill_set=skill_set,
+            repo_root_path=root,
         )
-        manifest_source = REPO_ROOT / source_path
+        manifest_source = root / source_path
         source_for_hash = manifest_source if manifest_source.is_file() else skill_md
         metadata_status = "frontmatter" if frontmatter else "inferred"
         modules.append(
@@ -408,7 +482,7 @@ def build_skill_modules() -> tuple[list[SkillModule], list[dict[str, str]]]:
                 risk=risk_for(frontmatter),
                 runtime_visibility=runtime_visibility_for(frontmatter),
                 metadata_status=metadata_status,
-                scope=classify_skill_scope(source_dir),
+                scope=classify_skill_scope(source_dir, repo_root=root),
                 description=description,
                 provenance={
                     "generator": GENERATOR_NAME,

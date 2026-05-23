@@ -27,6 +27,22 @@ from command_surface import (
 RUNTIME_CACHE_RELATIVE_ROOT = Path(".agents/plugins-runtime/cache")
 PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED = "PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED"
 PLUGIN_CACHE_PERMISSION_RERUN = "rerun with write access to .agents/plugins-runtime/cache."
+PICKER_INTERNAL_SKILL_DIRS = {
+    "code_quality_review",
+    "data_fetch_analysis",
+    "examples",
+    "fixtures",
+    "infrastructure_ops",
+    "references",
+    "scaffolding_templates",
+    "scripts",
+    "shared",
+    "team_automation",
+    "templates",
+}
+PICKER_INTERNAL_PLUGIN_ROOT_DIRS = {
+    "fixtures",
+}
 
 
 @dataclass
@@ -85,6 +101,9 @@ def prune_command_handle_skill_entries(
         command_handle_path = str(row.get("command_handle_path") or "")
         if not command_handle_path.startswith(".agents/skills/"):
             continue
+        command_handle_file = repo_root / command_handle_path
+        if not (command_handle_file.exists() or command_handle_file.is_symlink()):
+            continue
         handle = str(row.get("handle") or "").strip()
         if not handle or "/" in handle or ".." in handle:
             continue
@@ -120,6 +139,38 @@ def prune_command_handle_skill_entries(
     return logs, deletes
 
 
+def prune_picker_internal_skill_dirs(plugin_root: Path) -> tuple[list[str], list[str]]:
+    """Remove copied implementation and archive folders that broad picker scans can see."""
+    logs: list[str] = []
+    deletes: list[str] = []
+    for name in sorted(PICKER_INTERNAL_PLUGIN_ROOT_DIRS):
+        target = plugin_root / name
+        if not (target.exists() or target.is_symlink()):
+            continue
+        if target.is_symlink() or target.is_file():
+            target.unlink()
+        else:
+            shutil.rmtree(target)
+        deletes.append(str(target))
+        logs.append(f"Removed picker-internal plugin archive: {target}")
+
+    skills_root = plugin_root / "skills"
+    if not skills_root.is_dir():
+        return logs, deletes
+
+    for name in sorted(PICKER_INTERNAL_SKILL_DIRS):
+        target = skills_root / name
+        if not (target.exists() or target.is_symlink()):
+            continue
+        if target.is_symlink() or target.is_file():
+            target.unlink()
+        else:
+            shutil.rmtree(target)
+        deletes.append(str(target))
+        logs.append(f"Removed picker-internal plugin skill category: {target}")
+    return logs, deletes
+
+
 def plugin_version(source_dir: Path) -> str:
     """Return the declared plugin version, falling back to the local-dev version."""
     plugin_json = source_dir / ".codex-plugin" / "plugin.json"
@@ -148,8 +199,11 @@ def replace_plugin_cache_copy(
         deletes.extend(str(child) for child in target_dir.iterdir())
     copy_directory_contents(source_dir, target_dir)
     materialize_first_level_skill_aliases(target_dir)
-    logs, prune_deletes = prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
-    deletes.extend(prune_deletes)
+    logs, internal_deletes = prune_picker_internal_skill_dirs(target_dir)
+    deletes.extend(path for path in internal_deletes if path not in deletes)
+    prune_logs, prune_deletes = prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+    logs.extend(prune_logs)
+    deletes.extend(path for path in prune_deletes if path not in deletes)
     logs.append(f"Replaced local plugin cache: {target_dir} <- {source_dir}")
     return PluginCacheRefreshReport(writes=[str(target_dir)], deletes=deletes, logs=logs)
 

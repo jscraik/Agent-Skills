@@ -85,6 +85,7 @@ def materialize_first_level_skill_aliases(plugin_root: Path) -> None:
         "team_automation",
         "templates",
         "code_quality_review",
+        "data_fetch_analysis",
     }
     for child in skills_root.iterdir():
         if child.name.startswith("_") or child.name in hidden_entries or not child.is_symlink():

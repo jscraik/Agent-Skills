@@ -22,7 +22,8 @@
     "checks",
     "check_summary",
     "agent_summary",
-    "next_command"
+    "next_command",
+    "next_command_decision"
   ],
   "properties": {
     "schema_version": {
@@ -294,6 +295,33 @@
     "next_command": {
       "type": ["string", "null"],
       "minLength": 1
+    },
+    "next_command_decision": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["command", "precedence", "reason"],
+      "properties": {
+        "command": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "precedence": {
+          "type": "string",
+          "enum": ["blocker", "warning", "default"]
+        },
+        "source_class": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "source_check": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     }
   },
   "definitions": {

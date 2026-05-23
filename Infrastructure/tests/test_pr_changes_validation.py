@@ -22,7 +22,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 LIFECYCLE_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"
 sys.path.insert(0, str(LIFECYCLE_DIR))
 
-from selection_policy import policy_identity  # noqa: E402
+from selection_policy import SYSTEM_BRIDGE_SKILL_NAMES, policy_identity  # noqa: E402
 
 COMMAND_SURFACE_PATH = REPO_ROOT / ".skillsets" / "command-surface.json"
 CONTEXT_BUDGET_PATH = REPO_ROOT / "Infrastructure" / "GOVERNANCE" / "context-budget.yaml"
@@ -33,6 +33,7 @@ ENVIRONMENT_TOML_PATH = REPO_ROOT / ".codex" / "environments" / "environment.tom
 SKILLSETS_DIR = REPO_ROOT / ".skillsets"
 
 EXPECTED_POLICY_IDENTITY = policy_identity()
+SYSTEM_BRIDGE_HANDLES = set(SYSTEM_BRIDGE_SKILL_NAMES)
 
 MANIFEST_REQUIRED_FIELDS = {
     "description",
@@ -233,22 +234,27 @@ class TestCommandSurfaceJsonStructure(unittest.TestCase):
                 )
 
     def test_command_handle_path_starts_with_agents_skills(self) -> None:
-        """All skill command handles must live under .agents/skills/."""
+        """Generated command handles must live under .agents/skills/."""
         for handle in self.handles:
             with self.subTest(handle=handle.get("handle")):
                 path = handle.get("command_handle_path", "")
+                if handle.get("handle") in SYSTEM_BRIDGE_HANDLES and not path:
+                    continue
                 self.assertTrue(
                     path.startswith(".agents/skills/"),
                     f"Handle '{handle.get('handle')}' has unexpected path: {path}",
                 )
 
     def test_source_paths_start_with_skills_or_plugins(self) -> None:
-        """source_path must point into the canonical Skills/ or Plugins/ trees."""
+        """source_path must point into canonical source trees or system bridges."""
         for handle in self.handles:
             with self.subTest(handle=handle.get("handle")):
                 src = handle.get("source_path", "")
+                allowed_source = src.startswith("Skills/") or src.startswith("Plugins/")
+                if handle.get("handle") in SYSTEM_BRIDGE_HANDLES:
+                    allowed_source = allowed_source or src.startswith("skills-system/")
                 self.assertTrue(
-                    src.startswith("Skills/") or src.startswith("Plugins/"),
+                    allowed_source,
                     f"Handle '{handle.get('handle')}' has non-canonical source_path: {src}",
                 )
 

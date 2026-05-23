@@ -1,0 +1,197 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-skills.local/schemas/skill-package-readiness.v1.schema.json",
+  "title": "Skill Package Readiness Payload v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "query",
+    "target_kind",
+    "status",
+    "package_schema",
+    "package_readiness_schema",
+    "compatibility_snapshot",
+    "skill_package_contract",
+    "package_contract",
+    "gate_summary",
+    "readiness_summary",
+    "contract_schemas",
+    "blockers",
+    "warnings",
+    "lifecycle_event",
+    "lifecycle_events",
+    "agent_summary",
+    "next_command"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "skill-package-readiness.v1"
+    },
+    "query": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_kind": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "handle": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "canonical_source_path": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "audit_target": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "target_summary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pass", "warning", "blocked"]
+    },
+    "strict": {
+      "type": "boolean"
+    },
+    "package_schema": {
+      "$ref": "#/definitions/schemaPointer"
+    },
+    "package_readiness_schema": {
+      "$ref": "#/definitions/schemaPointer"
+    },
+    "compatibility_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "schema_version", "path", "covers"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version": {
+          "type": "string",
+          "const": "skill-package-readiness.v1"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "covers": {
+          "$ref": "#/definitions/stringList"
+        }
+      }
+    },
+    "skill_package_contract": {
+      "$ref": "skill-package.v1.schema.json"
+    },
+    "package_contract": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "readiness_level",
+        "required_fields",
+        "values",
+        "role_compatibility",
+        "runtime_contract",
+        "install_gate",
+        "promotion_gate"
+      ]
+    },
+    "gate_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "install_ready",
+        "checkout_test_status",
+        "promotion_status",
+        "promotion_ready",
+        "blocked_reasons"
+      ]
+    },
+    "readiness_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "readiness_level",
+        "present_fields",
+        "missing_fields",
+        "missing_field_count",
+        "promotion_status"
+      ]
+    },
+    "contract_schemas": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["package", "skill_package"]
+    },
+    "operation_context": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "lifecycle_event": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["schema_version", "event_type", "event_identity", "outcome"]
+    },
+    "lifecycle_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "agent_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "next_command": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "definitions": {
+    "schemaPointer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "path"],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

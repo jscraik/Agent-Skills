@@ -1,0 +1,192 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-skills.local/schemas/skill-package.v1.schema.json",
+  "title": "Skill Package v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "metadata", "required_fields", "compatibility_status"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "skill-package.v1"
+    },
+    "source_files": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skill_md", "agents_openai_yaml"],
+      "properties": {
+        "skill_md": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "agents_openai_yaml": {
+          "type": ["string", "null"],
+          "minLength": 1
+        }
+      }
+    },
+    "codex_abi_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "struct", "evidence_fields"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "struct": {
+          "type": "string",
+          "const": "SkillMetadata"
+        },
+        "evidence_fields": {
+          "$ref": "#/definitions/stringList"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description"],
+      "properties": {
+        "name": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "description": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "short_description": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "interface": {
+          "type": ["object", "null"],
+          "additionalProperties": true,
+          "properties": {
+            "display_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "short_description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "icon_small": {
+              "type": "string",
+              "minLength": 1
+            },
+            "icon_large": {
+              "type": "string",
+              "minLength": 1
+            },
+            "brand_color": {
+              "type": "string",
+              "minLength": 1
+            },
+            "default_prompt": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "dependencies": {
+          "type": ["object", "null"],
+          "additionalProperties": true,
+          "properties": {
+            "tools": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": ["type", "value"],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": {
+                    "type": ["string", "null"],
+                    "minLength": 1
+                  },
+                  "transport": {
+                    "type": ["string", "null"],
+                    "minLength": 1
+                  },
+                  "command": {
+                    "type": ["string", "null"],
+                    "minLength": 1
+                  },
+                  "url": {
+                    "type": ["string", "null"],
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "policy": {
+          "type": ["object", "null"],
+          "additionalProperties": true,
+          "properties": {
+            "allow_implicit_invocation": {
+              "type": "boolean"
+            },
+            "products": {
+              "$ref": "#/definitions/stringList"
+            }
+          }
+        },
+        "scope": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "plugin_id": {
+          "type": ["string", "null"],
+          "minLength": 1
+        }
+      }
+    },
+    "required_fields": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["present", "missing"],
+      "properties": {
+        "present": {
+          "$ref": "#/definitions/stringList"
+        },
+        "missing": {
+          "$ref": "#/definitions/stringList"
+        }
+      }
+    },
+    "optional_fields": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["present"],
+      "properties": {
+        "present": {
+          "$ref": "#/definitions/stringList"
+        }
+      }
+    },
+    "compatibility_status": {
+      "type": "string",
+      "enum": ["compatible", "blocked_validation", "blocked_missing_source"]
+    }
+  },
+  "definitions": {
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

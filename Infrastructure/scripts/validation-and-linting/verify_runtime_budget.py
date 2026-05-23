@@ -346,7 +346,9 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     system_default = {
         entry["name"]
         for entry in hidden_system_entries
-        if entry["name"] in BRIDGE_SKILLS and not is_plugin_owned_skill_dir(REPO_ROOT / entry["path"])
+        if entry["name"] in BRIDGE_SKILLS
+        and entry["name"] in policy_default
+        and not is_plugin_owned_skill_dir(REPO_ROOT / entry["path"])
     }
     # Real system bridge sources stay discoverable in default repo catalogs even
     # though plugin-backed bridge aliases remain hidden behind plugin routing.

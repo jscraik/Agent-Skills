@@ -244,8 +244,8 @@ def build_prompt_injection_context() -> str:
     return json.dumps(payload, separators=(",", ":"), sort_keys=True) + "\n"
 
 
-def build_roots(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
-    modules, unmapped = build_skill_modules()
+def build_roots(output_dir: Path = DEFAULT_OUTPUT_DIR, repo_root_path: Path | None = None) -> dict[str, Any]:
+    modules, unmapped = build_skill_modules(repo_root_path=repo_root_path)
     grouped = modules_by_skill_set(modules)
     roots = []
     violations: list[dict[str, Any]] = []
