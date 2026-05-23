@@ -46,19 +46,19 @@ checks:
     outcome: pass
     checked_at: "2026-05-23T17:18:51Z"
   last_delivery_attempt:
-    command: "PR #192 branch-after-merge delivery triage and follow-up branch preparation"
-    outcome: pending_followup_pr_for_post_merge_remediation
-    checked_at: "2026-05-23T23:45:00Z"
-    detail: "PR #192 was merged at head 5f20d846e7837eb05bf123f6e87ee9a9bb406ff8 before the rooted-handle/default-bridge remediation could be delivered through that PR. The remediation commit 5df1682deb34d1e391b1b5a4af3e40f360006143 is not contained in origin/main, but the two-dot diff from origin/main to that commit is the bounded 13-file remediation boundary. A follow-up branch codex/jsc-351-post-merge-review-remediation was created and pushed. Full repo validation passed, but generated validation artifacts changed and require a small proof-state commit before opening the follow-up draft PR."
+    command: "PR #193 rebuilt follow-up branch checks and subagent triage"
+    outcome: blocked_pending_independent_review_policy_decision
+    checked_at: "2026-05-23T22:41:32Z"
+    detail: "PR #193 was rebuilt from origin/main, force-with-lease pushed to codex/jsc-351-post-merge-review-remediation, and refreshed through head 128e534b8d1dea8aebf6a363bea3220cf6aa8bf0. Live GitHub checks are green and the PR is mergeable as a draft, but CodeRabbit produced only a passing status context plus a rate-limit/usage-credit comment and no actionable inline findings. Continuation is blocked until the independent-review policy is satisfied or explicitly waived in governance notes."
   last_pr_state:
-    url: "https://github.com/jscraik/Agent-Skills/pull/192"
-    number: 192
-    state: merged
-    draft: false
-    mergeable: UNKNOWN
-    checked_at: "2026-05-23T23:45:00Z"
-    outcome: historical_merged_pr_not_delivery_surface_for_5df1682
-    detail: "PR #192 merged at 2026-05-23T22:00:47Z with head 5f20d846e7837eb05bf123f6e87ee9a9bb406ff8. Branch codex/jsc-351-post-merge-review-remediation now carries commit 5df1682deb34d1e391b1b5a4af3e40f360006143 for a follow-up PR because PR #192 can no longer prove the new remediation commit."
+    url: "https://github.com/jscraik/Agent-Skills/pull/193"
+    number: 193
+    state: open
+    draft: true
+    mergeable: MERGEABLE
+    checked_at: "2026-05-23T22:41:32Z"
+    outcome: checks_green_review_policy_blocked
+    detail: "PR #193 head 128e534b8d1dea8aebf6a363bea3220cf6aa8bf0 has passing required checks after the template-refresh commit, no inline GitHub review comments, no submitted reviews, and subagent triage artifact artifacts/reviews/jsc-351-pr193-triage-lane/post-push-128e534b.md. CodeRabbit status is green, but the CodeRabbit issue comment reports review-limit/usage-credit exhaustion, so independent-review satisfaction remains ambiguous."
 continuation_gate:
   native_status: active
   goal_active: pass
@@ -66,7 +66,7 @@ continuation_gate:
   queued_user_input: unknown
   pending_work: present
   auto_continue_allowed: "no"
-  blocked_by: "pending_followup_pr_creation_checks_review_threads_linear_triage_after_pr192_merge"
+  blocked_by: "pending_independent_review_policy_decision_for_pr193_codeRabbit_rate_limit"
 claims:
   - id: C001
     claim: "JSC-351 plan and spec are the canonical local sources for the governed implementation lane."
@@ -615,7 +615,7 @@ tasks:
     inputs:
       - "PR #192 current head 5f20d846e7837eb05bf123f6e87ee9a9bb406ff8."
       - "PR #193 follow-up URL https://github.com/jscraik/Agent-Skills/pull/193."
-      - "PR #193 current rebuilt head a5b0c1749 after cherry-picking 5df1682 and dfab893 onto origin/main."
+      - "PR #193 current head 128e534b8d1dea8aebf6a363bea3220cf6aa8bf0 after rebuild, PR-state commit, and template-refresh commit."
       - "artifacts/reviews/jsc-351-pr192-triage-lane/review-comment-disposition-52f2038.md"
       - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-52f2038.md"
       - "artifacts/reviews/jsc-351-pr192-triage-lane/post-push-9a4ee3c.md"
@@ -624,11 +624,13 @@ tasks:
       - "artifacts/reviews/jsc-351-pr192-triage-lane/post-push-5f20d84.md"
       - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-5f20d84.md"
       - "artifacts/reviews/jsc-351-pr192-triage-lane/branch-after-merge-5df1682.md"
+      - "artifacts/reviews/jsc-351-pr193-triage-lane/post-push-128e534b.md"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
     constraints:
       - "Do not start PU-006 service extraction or any new implementation slice while review-remediation, PR checks, review-thread state, or Linear state are stale."
       - "Commit only review-remediation code, tests, schema/spec/goal evidence, and repo-owned generated proof surfaces."
-      - "After push, recheck PR checks, review threads, draft/mergeability state, and Linear state before continuation."
+      - "After each push, recheck PR checks, review threads, draft/mergeability state, subagent artifact state, and Linear state before continuation."
+      - "Do not undraft or continue to PU-006 until CodeRabbit/Codex independent-review requirements are satisfied or explicitly waived by governance authority."
       - "Treat subagent audit output as input evidence; governor disposition must resolve stale-worktree misclassifications before commit."
     expected_output: "PR #193 from codex/jsc-351-post-merge-review-remediation to main carries the rooted command-handle and default system bridge remediation after PR #192 merged, is based on current origin/main, has current checks, review-thread triage, Linear traceability, and no approval to continue until safe state is confirmed."
     receipt_id: null

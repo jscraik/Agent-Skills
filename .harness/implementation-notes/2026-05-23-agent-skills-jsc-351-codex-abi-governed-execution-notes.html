@@ -552,5 +552,20 @@
     <p>PR template recovery: after force-with-lease pushing the rebuilt branch, PR #193 became <code>MERGEABLE</code> at <code>ce5db3be8</code>, but the old <code>pr-template</code> run remained red. The failure log showed unchecked review checklist items needed explicit <code>**(Pending)**</code> or <code>**(N/A)**</code> markers. The PR body was updated and verified through <code>gh pr view --json body</code>; rerunning the old failed job still used the stale event payload, so the governor is adding this delivery-state commit to trigger a fresh synchronize event with the current body.</p>
     <p>Governor disposition: force-with-lease push the rebuilt two-commit follow-up branch to PR #193, then refresh checks, review threads, mergeability, Linear state, and subagent triage. PR #192 remains historical evidence only for the merged 5f20 head; it is not merge-safety evidence for the follow-up branch.</p>
   </section>
+  <section class="entry validation">
+    <h2>PR #193 Post-Push Triage At Head 128e534b</h2>
+    <p>Runtime truth: PR #193 is now the live delivery surface for the post-merge remediation that could not land through merged PR #192. The rebuilt branch was pushed to <code>codex/jsc-351-post-merge-review-remediation</code>, the PR template body was corrected with explicit pending markers, and commit <code>128e534b8d1dea8aebf6a363bea3220cf6aa8bf0</code> triggered fresh checks against the corrected PR body.</p>
+    <p>Live check state: <code>gh pr checks 193 --repo jscraik/Agent-Skills</code> passed on head <code>128e534b</code>. Required CI, security, structure, docs, PR-template, CircleCI, CodeQL, Semgrep, Snyk, and CodeRabbit status contexts were green or neutral where configured as skipped. GitHub review APIs returned no inline review comments and no submitted reviews for PR #193.</p>
+    <p>Subagent triage: after a stale-checkout first pass, the retry artifact was written from the active rebuilt worktree at <code>artifacts/reviews/jsc-351-pr193-triage-lane/post-push-128e534b.md</code>. The artifact records no blocker or high-severity findings, one medium governance ambiguity, and a conditional go only after the CodeRabbit independent-review requirement is either confirmed satisfied or explicitly waived.</p>
+    <p>Remaining blocker: CodeRabbit has a passing status context, but the PR issue comment reports review-limit or usage-credit exhaustion and no actionable inline findings were available to classify. The governor does not treat a green status alone as proof that the mandated independent review stack has completed. PR #193 remains draft, and PU-006 service extraction remains blocked until this review-policy ambiguity is resolved by runtime evidence or explicit governance waiver.</p>
+    <table>
+      <tr><th>Runtime check</th><th>Outcome</th></tr>
+      <tr><td><code>gh pr checks 193 --repo jscraik/Agent-Skills</code></td><td>Pass on head <code>128e534b8d1dea8aebf6a363bea3220cf6aa8bf0</code>; fresh PR-template and CI/security/docs/status checks are green, with <code>eval-baseline</code> skipped/neutral.</td></tr>
+      <tr><td><code>gh api repos/jscraik/Agent-Skills/pulls/193/comments</code></td><td>Pass: empty inline review-comment list.</td></tr>
+      <tr><td><code>gh api repos/jscraik/Agent-Skills/pulls/193/reviews</code></td><td>Pass: empty submitted-review list.</td></tr>
+      <tr><td><code>test -s artifacts/reviews/jsc-351-pr193-triage-lane/post-push-128e534b.md</code></td><td>Pass: artifact exists, is non-empty, and ends with the required <code>WROTE</code> line.</td></tr>
+    </table>
+    <p>Governor disposition: commit and push this triage evidence, refresh PR #193 checks on the new evidence-only head, update Linear with the blocked review-policy state, and keep the goal active. No next implementation slice is approved while the independent-review ambiguity remains.</p>
+  </section>
 </body>
 </html>
