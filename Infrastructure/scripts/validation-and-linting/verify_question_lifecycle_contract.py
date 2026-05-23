@@ -47,9 +47,34 @@ REQUIRED_LINKS = (
 )
 
 
+EXCLUDED_SCAN_ROOTS = (
+    REPO_ROOT / ".agents",
+    REPO_ROOT / ".skillsets",
+    REPO_ROOT / "Plugins" / "cache",
+    REPO_ROOT / "plugins" / "cache",
+)
+
+
+def should_scan_path(path: Path) -> bool:
+    """Return whether a path belongs to a canonical source tree."""
+    try:
+        resolved = path.resolve(strict=False)
+    except OSError:
+        resolved = path
+    for root in EXCLUDED_SCAN_ROOTS:
+        try:
+            resolved.relative_to(root)
+            return False
+        except ValueError:
+            continue
+    return True
+
+
 def find_forbidden_skill_phrases() -> list[Finding]:
     findings: list[Finding] = []
     for path in sorted(REPO_ROOT.rglob("SKILL.md")):
+        if not should_scan_path(path):
+            continue
         try:
             lines = path.read_text(encoding="utf-8").splitlines()
         except OSError as exc:
@@ -72,6 +97,8 @@ def find_forbidden_skill_phrases() -> list[Finding]:
 def find_stale_graph_references() -> list[Finding]:
     findings: list[Finding] = []
     for path in sorted(REPO_ROOT.rglob("*.md")):
+        if not should_scan_path(path):
+            continue
         try:
             lines = path.read_text(encoding="utf-8").splitlines()
         except OSError as exc:

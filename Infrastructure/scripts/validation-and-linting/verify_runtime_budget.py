@@ -343,11 +343,16 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
     bridge_exposed = sorted((first_level & BRIDGE_SKILLS) - command_handle_names)
     policy_default = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
+    higher_precedence_names = {
+        entry["name"]
+        for entry in scoped_entries
+        if entry["scope"] in {"global", "local-plugin", "project"}
+    }
     system_default = {
         entry["name"]
         for entry in hidden_system_entries
         if entry["name"] in BRIDGE_SKILLS
-        and entry["name"] in policy_default
+        and entry["name"] not in higher_precedence_names
         and not is_plugin_owned_skill_dir(REPO_ROOT / entry["path"])
     }
     # Real system bridge sources stay discoverable in default repo catalogs even
