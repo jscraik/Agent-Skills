@@ -110,7 +110,7 @@ def _read_skill_frontmatter_fields(skill_md: Path) -> dict[str, Any]:
 
 
 def _read_agents_openai_yaml_fields(skill_md: Path | None) -> dict[str, Any]:
-    """Extract a conservative one-level agents/openai.yaml contract view."""
+    """Extract a conservative agents/openai.yaml contract view."""
     if not skill_md:
         return {}
     agents_openai = skill_md.parent / "agents" / "openai.yaml"
@@ -129,12 +129,35 @@ def _read_agents_openai_yaml_fields(skill_md: Path | None) -> dict[str, Any]:
             return {str(key): value for key, value in loaded.items()}
     fields: dict[str, Any] = {}
     current_map: str | None = None
+    current_nested_key: str | None = None
+    current_list_item: dict[str, Any] | None = None
     lines = text.splitlines()
     for line in lines:
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
         indent = len(line) - len(line.lstrip(" "))
+        if current_map and stripped.startswith("- "):
+            nested = fields.setdefault(current_map, {})
+            if not isinstance(nested, dict):
+                continue
+            item_text = stripped[2:].strip()
+            if not current_nested_key:
+                continue
+            values = nested.setdefault(current_nested_key, [])
+            if not isinstance(values, list):
+                values = []
+                nested[current_nested_key] = values
+            if ":" in item_text:
+                item_key, item_value = item_text.split(":", 1)
+                current_list_item = {
+                    item_key.strip(): _parse_frontmatter_scalar(item_value.strip())
+                }
+                values.append(current_list_item)
+            else:
+                values.append(_parse_frontmatter_scalar(item_text))
+                current_list_item = None
+            continue
         if ":" not in stripped:
             continue
         key, value = stripped.split(":", 1)
@@ -144,14 +167,29 @@ def _read_agents_openai_yaml_fields(skill_md: Path | None) -> dict[str, Any]:
             if value:
                 fields[key] = _parse_frontmatter_scalar(value)
                 current_map = None
+                current_nested_key = None
+                current_list_item = None
             else:
                 fields[key] = {}
                 current_map = key
+                current_nested_key = None
+                current_list_item = None
             continue
         if current_map:
             nested = fields.setdefault(current_map, {})
-            if isinstance(nested, dict) and value:
+            if not isinstance(nested, dict):
+                continue
+            if current_list_item is not None and indent >= 4 and value:
+                current_list_item[key] = _parse_frontmatter_scalar(value)
+                continue
+            if value:
                 nested[key] = _parse_frontmatter_scalar(value)
+                current_nested_key = None
+                current_list_item = None
+            else:
+                nested[key] = []
+                current_nested_key = key
+                current_list_item = None
     return fields
 
 

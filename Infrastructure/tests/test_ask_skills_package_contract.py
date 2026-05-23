@@ -282,6 +282,11 @@ policy:
   short_description: OpenAI package fixture.
 dependencies:
   openai_tool: required
+  required_skills:
+    - skill-builder
+  tools:
+    - type: mcp
+      name: browser
 policy:
   openai_policy: strict
 """,
@@ -298,6 +303,15 @@ policy:
             {
                 "frontmatter_tool": "required",
                 "openai_tool": "required",
+                "required_skills": [
+                    "skill-builder",
+                ],
+                "tools": [
+                    {
+                        "type": "mcp",
+                        "name": "browser",
+                    },
+                ],
             },
         )
         self.assertEqual(

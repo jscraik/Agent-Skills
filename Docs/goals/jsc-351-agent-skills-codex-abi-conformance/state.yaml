@@ -613,16 +613,17 @@ tasks:
     status: active
     objective: "Complete PR #192 review-remediation delivery boundary before any next implementation slice."
     inputs:
-      - "PR #192 current head a0ed16032e660d0c2cf97367c7a3b8c9c98baa66."
+      - "PR #192 current head d55d9159cf49b290419ce0d4d3846b87711639e5."
       - "artifacts/reviews/jsc-351-pr192-triage-lane/review-comment-disposition-52f2038.md"
       - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-52f2038.md"
       - "artifacts/reviews/jsc-351-pr192-triage-lane/post-push-9a4ee3c.md"
       - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-a0ed160.md"
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-d55d915.md"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
     constraints:
       - "Do not start PU-006 service extraction or any new implementation slice while review-remediation, PR checks, review-thread state, or Linear state are stale."
       - "Commit only review-remediation code, tests, schema/spec/goal evidence, and repo-owned generated proof surfaces."
       - "After push, recheck PR checks, review threads, draft/mergeability state, and Linear state before continuation."
       - "Treat subagent audit output as input evidence; governor disposition must resolve stale-worktree misclassifications before commit."
-    expected_output: "A pushed follow-up commit on PR #192 resolving the current codex_preview.py review threads, focused validation evidence, refreshed PR/CI/review state, Linear traceability, and no approval to continue until safe state is confirmed."
+    expected_output: "A pushed follow-up commit on PR #192 resolving the current package and preview YAML metadata review threads, focused validation evidence in the normal no-PyYAML runtime and dependency-supplied runtime, refreshed PR/CI/review state, Linear traceability, and no approval to continue until safe state is confirmed."
     receipt_id: null

@@ -507,5 +507,21 @@
     </table>
     <p>Governor disposition: commit and push the preview remediation, then refresh PR checks, review threads, Linear state, and mergeability. No next slice may start until the current review threads are either resolved or proven stale after the pushed fix.</p>
   </section>
+  <section class="entry validation">
+    <h2>PR #192 Package YAML List Remediation At Head d55d915</h2>
+    <p>Runtime truth: after pushing <code>d55d9159cf49b290419ce0d4d3846b87711639e5</code>, live GraphQL review truth showed a new current unresolved thread at <code>Infrastructure/scripts/lib/ask/commands/skills_impl.py:2947</code>. The finding was valid: the package contract path still relied on the old hand parser for <code>agents/openai.yaml</code>, so list-valued dependency metadata could be flattened or lost in the base CLI environment where PyYAML is not installed.</p>
+    <p>Fix applied: the package contract parser now uses <code>yaml.safe_load</code> when PyYAML is available and a deterministic fallback that preserves scalar lists and simple nested list-of-map metadata such as <code>dependencies.required_skills[]</code> and <code>dependencies.tools[].name</code>. The preview parser received the same fallback hardening so preview and package contract behavior stay aligned when PyYAML is absent.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest python -m pytest Infrastructure/tests/test_ask_skills_package_contract.py -q</code></td><td>Pass: 9 tests without installing PyYAML.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest python -m pytest Infrastructure/tests/test_ask_skills_codex_preview.py -q</code></td><td>Pass: 20 tests without installing PyYAML.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest python -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q</code></td><td>Pass: 15 tests and 15 subtests.</td></tr>
+      <tr><td><code>/usr/bin/python3 -m py_compile Infrastructure/scripts/lib/ask/commands/skills_impl.py Infrastructure/scripts/lib/ask/services/codex_preview.py Infrastructure/tests/test_ask_skills_package_contract.py Infrastructure/tests/test_ask_skills_codex_preview.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>./bin/ask repo doctor --json --robot</code></td><td>Pass with <code>blocking=false</code>; ask bootstrap and repo surface remain diagnostic debt only.</td></tr>
+      <tr><td><code>git diff --check HEAD</code></td><td>Pass.</td></tr>
+    </table>
+    <p>Governor disposition: commit and push this follow-up remediation, then refresh PR checks, review threads, Linear state, mergeability, and subagent triage before any PU-006 service extraction work. The continuation gate remains blocked until that live post-push truth is known.</p>
+  </section>
 </body>
 </html>
