@@ -107,6 +107,13 @@ SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
     "skill-installer",
 )
 
+# System bridge skills that are intentionally visible on the default catalog
+# surface. Other bridge skills remain available through explicit routing.
+DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
+    "imagegen",
+    "openai-docs",
+)
+
 # Runtime projection modes. These are intentionally outside the selection
 # policy identity: mode support is command behavior, not a change to which
 # flat skills are selected by default.
@@ -152,6 +159,7 @@ def payload() -> dict[str, Any]:
             - "plugin_visible_router_skill_names": list[str]
             - "plugin_hidden_lane_skill_names": list[str]
             - "system_bridge_skill_names": list[str]
+            - "default_visible_system_bridge_skill_names": list[str]
     """
     return {
         "policy_version": POLICY_VERSION,
@@ -164,6 +172,9 @@ def payload() -> dict[str, Any]:
         "plugin_visible_router_skill_names": list(PLUGIN_VISIBLE_ROUTER_SKILL_NAMES),
         "plugin_hidden_lane_skill_names": list(PLUGIN_HIDDEN_LANE_SKILL_NAMES),
         "system_bridge_skill_names": list(SYSTEM_BRIDGE_SKILL_NAMES),
+        "default_visible_system_bridge_skill_names": list(
+            DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES
+        ),
     }
 
 
@@ -205,6 +216,10 @@ def render_shell() -> str:
         _shell_array(
             "SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS",
             SYSTEM_BRIDGE_SKILL_NAMES,
+        ),
+        _shell_array(
+            "SELECTION_POLICY_DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILLS",
+            DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES,
         ),
         f"SELECTION_POLICY_PLUGIN_SKILL_ROOT_GLOB={shlex.quote(PLUGIN_SKILL_ROOT_GLOB)}",
     ]

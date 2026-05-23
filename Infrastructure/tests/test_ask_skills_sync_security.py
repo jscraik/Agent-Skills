@@ -655,7 +655,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue(system_link.is_symlink())
         self.assertEqual(os.readlink(system_link), "../../skills-system")
 
-    def test_sync_skills_workspace_preserves_existing_system_bridge_command_handle(self) -> None:
+    def test_sync_skills_workspace_skips_system_bridge_entries_from_flat_projection(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"
         generated_handle = skills_dir / "imagegen"
         generated_handle.mkdir()
@@ -687,7 +687,38 @@ class TestAskSkillsSyncSecurity(TestCase):
             "# Generated Imagegen Handle\n",
         )
         self.assertIn(
-            f"Skipped existing non-symlink path: {generated_handle}",
+            "Skipped hidden system bridge from flat projection: imagegen",
+            result.data["logs"],
+        )
+
+    def test_sync_skills_workspace_prunes_first_level_system_bridge_symlinks(self) -> None:
+        skills_dir = self.repo_root / ".agents" / "skills"
+        system_source = self.repo_root / "skills-system" / "imagegen"
+        system_source.mkdir(parents=True)
+        (system_source / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
+        (skills_dir / ".system").symlink_to(Path("../../skills-system"))
+        bridge_link = skills_dir / "imagegen"
+        bridge_link.symlink_to(Path("../../skills-system/imagegen"))
+
+        fake_entry = SimpleNamespace(
+            name="imagegen",
+            source_dir=system_source,
+            category="skills-system",
+            description="Generate images.",
+        )
+        with mock.patch("ask.commands.skills_impl.discover_skill_entries", return_value=[fake_entry]):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                projection="flat",
+            )
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse(bridge_link.exists())
+        self.assertTrue((skills_dir / ".system").is_symlink())
+        self.assertTrue(
+            any("Removed first-level system bridge alias" in item and "imagegen" in item for item in result.data["logs"]),
             result.data["logs"],
         )
 
