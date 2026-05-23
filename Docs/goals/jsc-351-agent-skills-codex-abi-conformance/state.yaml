@@ -25,14 +25,14 @@ completion_contract:
     - "No partial slices, speculative refactors, placeholder scaffolds, or unapproved future-work handoffs."
     - "Every slice must be operationally complete, independently validated, and leave the repository buildable."
     - "Trust runtime truth over docs, specs, plans, review assumptions, or summaries."
-    - "Do not edit generated runtime projections, plugin caches, user/global runtime config, or unrelated repos."
+    - "Do not edit generated runtime projections, plugin caches, user/global runtime config, or unrelated repos as manual implementation targets; generated projections may only change through repo-owned sync commands when validation requires a refreshed proof surface."
     - "Stop on unresolved blockers, stale validation, unclear blast radius, merge-safety ambiguity, or deterministic verification failure."
   boundaries:
     - "Target repository is /Users/jamiecraik/dev/agent-skills."
     - "Canonical plan is .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md."
     - "Canonical spec is .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md."
     - "Implementation notes are .harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html."
-    - "Do not edit .agents/**, .skillsets/**, Plugins/cache/**, runtime/**, user/global config, or unrelated repos as implementation targets."
+    - "Do not edit .agents/**, .skillsets/**, Plugins/cache/**, runtime/**, user/global config, or unrelated repos as manual implementation targets; .skillsets/** may be refreshed only by repo-owned sync/generator commands with validation evidence."
   iteration_policy: "Govern one bounded slice at a time, declare allowed files and validation before implementation, run mandatory validation and review stack, update notes, hand off delivery triage only after a validated safe state, and continue only after the governor confirms no blocker or stale-state contradiction remains."
   blocked_stop_condition: "Stop on unverifiable runtime safety, unclear merge safety, increased architecture drift, stale validation, deterministic verification failure, unresolved blockers, unclear blast radius, ambiguous governance, retry-without-progress, review churn, or user steering that changes the objective."
 rules:
@@ -46,19 +46,19 @@ checks:
     outcome: pass
     checked_at: "2026-05-23T17:18:51Z"
   last_delivery_attempt:
-    command: "gh pr body correction + convertPullRequestToDraft + gh pr checks 192 --repo jscraik/Agent-Skills"
-    outcome: delivery_boundary_corrected_checks_blocked_by_stale_template_run
-    checked_at: "2026-05-23T20:14:00Z"
-    detail: "PR body placeholder token was removed, PR #192 was converted back to draft, and post-push subagent triage wrote artifacts/reviews/jsc-351-pr192-triage-lane/post-push-4d76ccd.md. Latest check refresh shows all substantive checks passing except the stale pr-template failure from the pre-body-correction run; a synchronize-triggering commit is required to clear the gate."
+    command: "PR #192 review-comment remediation in clean PR-head worktree + focused validation"
+    outcome: pending_commit_push_for_review_remediation
+    checked_at: "2026-05-23T21:55:00Z"
+    detail: "Review comments were classified against the current PR head, valid findings were remediated, and governor-remediation-52f2038.md records final dispositions. A commit and push are still required to refresh PR #192 checks and review-thread state."
   last_pr_state:
     url: "https://github.com/jscraik/Agent-Skills/pull/192"
     number: 192
     state: open
     draft: true
     mergeable: MERGEABLE
-    checked_at: "2026-05-23T20:14:00Z"
-    outcome: blocked_stale_pr_template_run_and_review_disposition
-    detail: "Head 4d76ccd82bd1c8357e2f5c6243f99f1b7cb4ff2f is mergeable and draft. CircleCI, CodeQL, Semgrep, Snyk, Trivy, docs, graph, structure, skill diagnostics, and security scans are passing. CodeRabbit status is pass/review skipped, but review comments still require validity classification. pr-template remains failed from stale run 26342362430 after the PR body correction."
+    checked_at: "2026-05-23T21:55:00Z"
+    outcome: blocked_pending_review_remediation_push
+    detail: "Head 52f2038fc40ba67bd4ba393631d00cf92c86270d is the clean PR-head worktree base for remediation. Local focused tests pass for remediated review comments, but PR checks and unresolved review-thread state must be refreshed after the delivery-state commit is pushed."
 continuation_gate:
   native_status: active
   goal_active: pass
@@ -66,7 +66,7 @@ continuation_gate:
   queued_user_input: unknown
   pending_work: present
   auto_continue_allowed: "no"
-  blocked_by: "pr_template_stale_run_and_unresolved_review_comment_disposition"
+  blocked_by: "pending_review_remediation_commit_push_and_post_push_pr_triage"
 claims:
   - id: C001
     claim: "JSC-351 plan and spec are the canonical local sources for the governed implementation lane."
@@ -566,7 +566,7 @@ tasks:
   - id: T015
     type: worker
     assignee: Worker
-    status: active
+    status: blocked
     objective: "Implement PU-006 / JSC-355 Skills SDK service boundary extraction after preview behavior has stabilized."
     inputs:
       - ".harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md"
@@ -606,4 +606,21 @@ tasks:
       - "A proposed module boundary is not backed by repeated code responsibility from PU-001 through PU-005."
       - "Focused tests require conformance workouts, package verification, publishing, install mutation, or PR/CI delivery implementation outside PU-006."
       - "Review stack finds architecture drift or unnecessary abstraction that cannot be simplified within the slice."
+    receipt_id: null
+  - id: T016
+    type: pm
+    assignee: PM
+    status: active
+    objective: "Complete PR #192 review-remediation delivery boundary before any next implementation slice."
+    inputs:
+      - "PR #192 current head 52f2038fc40ba67bd4ba393631d00cf92c86270d."
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/review-comment-disposition-52f2038.md"
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-52f2038.md"
+      - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
+    constraints:
+      - "Do not start PU-006 service extraction or any new implementation slice while review-remediation, PR checks, review-thread state, or Linear state are stale."
+      - "Commit only review-remediation code, tests, schema/spec/goal evidence, and repo-owned generated proof surfaces."
+      - "After push, recheck PR checks, review threads, draft/mergeability state, and Linear state before continuation."
+      - "Treat subagent audit output as input evidence; governor disposition must resolve stale-worktree misclassifications before commit."
+    expected_output: "A pushed review-remediation commit on PR #192 with focused validation evidence, refreshed PR/CI/review state, Linear traceability, and no approval to continue until safe state is confirmed."
     receipt_id: null

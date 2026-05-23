@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import sys
@@ -504,6 +505,10 @@ class TestAskSkillsSyncSecurity(TestCase):
         stale_first_level_bridge = skills_dir / "imagegen"
         stale_first_level_bridge.mkdir()
         (stale_first_level_bridge / "SKILL.md").write_text("# Stale Imagegen\n", encoding="utf-8")
+        (stale_first_level_bridge / ".agent-skills-system-bridge-alias.json").write_text(
+            json.dumps({"kind": "system_bridge_alias", "target": "imagegen"}),
+            encoding="utf-8",
+        )
 
         result = skills_commands.sync_skills(
             self.repo_root,
@@ -534,6 +539,10 @@ class TestAskSkillsSyncSecurity(TestCase):
         (bridge_skill_dir / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
         stale_first_level_bridge = skills_dir / "imagegen"
         stale_first_level_bridge.write_text("# Stale Imagegen\n", encoding="utf-8")
+        (skills_dir / ".imagegen-.agent-skills-system-bridge-alias.json").write_text(
+            json.dumps({"kind": "system_bridge_alias", "target": "imagegen"}),
+            encoding="utf-8",
+        )
 
         result = skills_commands.sync_skills(
             self.repo_root,
@@ -551,6 +560,34 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue(
             any(
                 "Removed first-level system bridge alias" in item and "imagegen" in item
+                for item in result.data["logs"]
+            ),
+            result.data["logs"],
+        )
+
+    def test_sync_skills_rooted_preserves_unmarked_first_level_system_bridge_directory(self) -> None:
+        skills_dir = self.repo_root / ".agents" / "skills"
+        system_skills_dir = self.repo_root / "skills-system"
+        bridge_skill_dir = system_skills_dir / "imagegen"
+        bridge_skill_dir.mkdir(parents=True)
+        (bridge_skill_dir / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
+        user_owned_bridge = skills_dir / "imagegen"
+        user_owned_bridge.mkdir()
+        (user_owned_bridge / "SKILL.md").write_text("# User-owned Imagegen\n", encoding="utf-8")
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(user_owned_bridge.exists())
+        self.assertTrue(
+            any(
+                "Skipped first-level system bridge alias without generated provenance" in item
+                and "imagegen" in item
                 for item in result.data["logs"]
             ),
             result.data["logs"],

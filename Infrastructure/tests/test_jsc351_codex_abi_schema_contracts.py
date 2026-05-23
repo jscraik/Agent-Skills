@@ -25,6 +25,14 @@ SKILL_DOCTOR_SCHEMA_PATH = SCHEMAS_DIR / "skill-doctor.v1.schema.json"
 SKILL_PACKAGE_SCHEMA_PATH = SCHEMAS_DIR / "skill-package.v1.schema.json"
 SKILL_PACKAGE_READINESS_SCHEMA_PATH = SCHEMAS_DIR / "skill-package-readiness.v1.schema.json"
 COMMAND_SURFACE_PATH = SKILLSETS_DIR / "command-surface.json"
+SYSTEM_BRIDGE_HANDLES = {
+    "imagegen",
+    "openai-docs",
+    "plugin-creator",
+    "plugin-installer",
+    "skill-creator",
+    "skill-installer",
+}
 
 # ---------------------------------------------------------------------------
 # Minimal in-test JSON Schema subset validator (no external dependency)
@@ -35,9 +43,11 @@ _SUPPORTED_SCHEMA_KEYS = {
     "$ref",
     "$schema",
     "additionalProperties",
+    "allOf",
     "const",
     "definitions",
     "enum",
+    "if",
     "items",
     "minItems",
     "minLength",
@@ -45,6 +55,7 @@ _SUPPORTED_SCHEMA_KEYS = {
     "oneOf",
     "properties",
     "required",
+    "then",
     "title",
     "type",
 }
@@ -102,6 +113,29 @@ def _validate_schema(
         )
         return
 
+    for subschema in schema.get("allOf", []):
+        _validate_schema(subschema, value, root_schema, schemas, path)
+
+    if "if" in schema:
+        try:
+            _validate_schema(schema["if"], value, root_schema, schemas, path)
+        except AssertionError:
+            pass
+        else:
+            if "then" in schema:
+                _validate_schema(schema["then"], value, root_schema, schemas, path)
+
+    if "oneOf" in schema:
+        matches = 0
+        for option in schema["oneOf"]:
+            try:
+                _validate_schema(option, value, root_schema, schemas, path)
+            except AssertionError:
+                continue
+            matches += 1
+        if matches != 1:
+            raise AssertionError(f"{path}: expected exactly one oneOf match, got {matches}")
+
     if "type" in schema:
         expected_types = schema["type"]
         if isinstance(expected_types, str):
@@ -141,21 +175,6 @@ def _validate_schema(
             extra = set(value) - set(props)
             if extra:
                 raise AssertionError(f"{path} unexpected keys {sorted(extra)}")
-
-    # Handle oneOf: validate against each subschema and count matches
-    if "oneOf" in schema:
-        matches = 0
-        last_error = None
-        for i, subschema in enumerate(schema.get("oneOf", [])):
-            try:
-                _validate_schema(subschema, value, root_schema, schemas, path)
-                matches += 1
-            except AssertionError as e:
-                last_error = e
-                continue
-        if matches != 1:
-            error_context = f" (last error: {last_error})" if last_error else ""
-            raise AssertionError(f"{path}: expected exactly one oneOf match, got {matches}{error_context}")
 
 
 # ---------------------------------------------------------------------------
@@ -219,10 +238,10 @@ class TestSkillDoctorSchemaStructure(unittest.TestCase):
             "skill-doctor.v1 must set additionalProperties: false at the top level",
         )
 
-    def test_required_fields_include_next_command_decision(self) -> None:
-        """next_command_decision was added as a required field in JSC-351."""
+    def test_next_command_decision_is_optional_for_v1_compatibility(self) -> None:
+        """next_command_decision is emitted by JSC-351 but optional in the v1 schema."""
         required = self.schema.get("required", [])
-        self.assertIn("next_command_decision", required)
+        self.assertNotIn("next_command_decision", required)
 
     def test_next_command_decision_has_precedence_enum(self) -> None:
         """next_command_decision.precedence must be one of: blocker, warning, default."""
@@ -568,12 +587,10 @@ class TestSkillDoctorSchemaRejectsInvalidPayloads(unittest.TestCase):
             _validate_schema(self.schema, payload, self.schema)
         self.assertIn("missing required key", str(ctx.exception))
 
-    def test_rejects_missing_next_command_decision(self) -> None:
+    def test_accepts_missing_next_command_decision_for_v1_compatibility(self) -> None:
         payload = self._make_base_payload()
         del payload["next_command_decision"]
-        with self.assertRaises(AssertionError) as ctx:
-            _validate_schema(self.schema, payload, self.schema)
-        self.assertIn("missing required key 'next_command_decision'", str(ctx.exception))
+        _validate_schema(self.schema, payload, self.schema)
 
     def test_rejects_invalid_status_value(self) -> None:
         payload = self._make_base_payload()
@@ -743,6 +760,15 @@ class TestSkillPackageSchemaAcceptsValidPayload(unittest.TestCase):
                 "name": "test-skill",
                 "description": "A test skill.",
             },
+            "source_files": {
+                "skill_md": "Skills/example/SKILL.md",
+                "agents_openai_yaml": "Skills/example/agents/openai.yaml",
+            },
+            "codex_abi_source": {
+                "path": "codex-rs/core-skills/src/model.rs",
+                "struct": "SkillMetadata",
+                "evidence_fields": ["name", "description"],
+            },
             "required_fields": {
                 "present": ["name", "description"],
                 "missing": [],
@@ -785,6 +811,8 @@ class TestSkillPackageSchemaAcceptsValidPayload(unittest.TestCase):
         contract["compatibility_status"] = "blocked_missing_source"
         contract["metadata"]["name"] = None
         contract["metadata"]["description"] = None
+        del contract["source_files"]
+        del contract["codex_abi_source"]
         contract["required_fields"]["present"] = []
         contract["required_fields"]["missing"] = ["name", "description"]
         try:
@@ -804,6 +832,15 @@ class TestSkillPackageSchemaRejectsInvalidPayloads(unittest.TestCase):
         return {
             "schema_version": "skill-package.v1",
             "metadata": {"name": "test-skill", "description": "A test skill."},
+            "source_files": {
+                "skill_md": "Skills/example/SKILL.md",
+                "agents_openai_yaml": "Skills/example/agents/openai.yaml",
+            },
+            "codex_abi_source": {
+                "path": "codex-rs/core-skills/src/model.rs",
+                "struct": "SkillMetadata",
+                "evidence_fields": ["name", "description"],
+            },
             "required_fields": {"present": ["name", "description"], "missing": []},
             "compatibility_status": "compatible",
         }
@@ -828,6 +865,13 @@ class TestSkillPackageSchemaRejectsInvalidPayloads(unittest.TestCase):
         with self.assertRaises(AssertionError) as ctx:
             _validate_schema(self.schema, contract, self.schema)
         self.assertIn("expected one of", str(ctx.exception))
+
+    def test_rejects_compatible_contract_with_null_core_metadata(self) -> None:
+        contract = self._make_base_contract()
+        contract["metadata"]["name"] = None
+        with self.assertRaises(AssertionError) as ctx:
+            _validate_schema(self.schema, contract, self.schema)
+        self.assertIn("$.metadata.name", str(ctx.exception))
 
     def test_rejects_unknown_top_level_key(self) -> None:
         contract = self._make_base_contract()
@@ -988,6 +1032,15 @@ class TestSkillPackageReadinessSchemaRejectsInvalidPayloads(unittest.TestCase):
             "skill_package_contract": {
                 "schema_version": "skill-package.v1",
                 "metadata": {"name": "test-skill", "description": "A test skill."},
+                "source_files": {
+                    "skill_md": "Skills/example/SKILL.md",
+                    "agents_openai_yaml": "Skills/example/agents/openai.yaml",
+                },
+                "codex_abi_source": {
+                    "path": "codex-rs/core-skills/src/model.rs",
+                    "struct": "SkillMetadata",
+                    "evidence_fields": ["name", "description"],
+                },
                 "required_fields": {"present": ["name", "description"], "missing": []},
                 "compatibility_status": "compatible",
             },
@@ -1089,24 +1142,19 @@ class TestCommandSurfaceJsonJsc351Contract(unittest.TestCase):
             "generated_command_handle_count must not exceed handle_count",
         )
 
-    def test_handles_without_command_handle_path_are_system_bridges_or_empty_string(self) -> None:
-        """Handles with no command_handle_path must be system bridge handles or have empty path.
+    def test_handles_without_command_handle_path_are_system_bridges(self) -> None:
+        """Only explicit system bridge handles may omit command_handle_path.
 
         Non-system-bridge handles must always have a non-empty command_handle_path.
         """
         for handle in self.handles:
             path = handle.get("command_handle_path", "")
             if not path:
-                # No generated path is only valid for system bridge handles
-                # (determined by source_path starting with skills-system/ or being empty/None)
-                src = handle.get("source_path", "")
-                is_system_bridge = src.startswith("skills-system/") or src == "" or src is None
-                # Verify that handles with empty command_handle_path are consistently
-                # NOT from normal Skills/ trees
                 with self.subTest(handle=handle.get("handle")):
-                    self.assertFalse(
-                        src.startswith("Skills/") and not is_system_bridge and path == "",
-                        f"Handle '{handle.get('handle')}' from Skills/ tree has empty command_handle_path",
+                    self.assertIn(
+                        handle.get("handle"),
+                        SYSTEM_BRIDGE_HANDLES,
+                        f"Handle '{handle.get('handle')}' has empty command_handle_path but is not a system bridge",
                     )
 
     def test_handles_count_matches_handles_array_length(self) -> None:

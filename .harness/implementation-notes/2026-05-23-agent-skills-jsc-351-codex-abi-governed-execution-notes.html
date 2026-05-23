@@ -29,7 +29,7 @@
       <tr><th>Source</th><th>Status</th></tr>
       <tr><td><code>.harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md</code></td><td>Present and canonical for execution order.</td></tr>
       <tr><td><code>.harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md</code></td><td>Present and canonical for requirements and acceptance IDs.</td></tr>
-      <tr><td><code>docs/goals/jsc-351-agent-skills-codex-abi-conformance/</code></td><td>Being created as the repo-visible governed execution board.</td></tr>
+      <tr><td><code>Docs/goals/jsc-351-agent-skills-codex-abi-conformance/</code></td><td>Being created as the repo-visible governed execution board.</td></tr>
     </table>
   </section>
 
@@ -54,7 +54,7 @@
       <tr><th>Check</th><th>Result</th><th>Evidence</th></tr>
       <tr><td><code>pwd</code></td><td>pass</td><td>Returned <code>/Users/jamiecraik/dev/agent-skills</code>.</td></tr>
       <tr><td><code>git status --short --branch</code></td><td>pass</td><td>Repository state captured; dirty tree is pre-existing and must be isolated from this lane.</td></tr>
-      <tr><td>Goal board validator</td><td>pass</td><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance</code> returned <code>PASS: goal board is valid</code>.</td></tr>
+      <tr><td>Goal board validator</td><td>pass</td><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code> returned <code>PASS: goal board is valid</code>.</td></tr>
     </table>
   </section>
 
@@ -271,7 +271,7 @@
       <tr><td><code>./bin/ask skills proof autofix --runtime-target cloud --json --robot</code></td><td>Expected validation failure: exit 2 with <code>data.runtime_failure.schema_version=skill-runtime-failure.v1</code>.</td></tr>
       <tr><td><code>./bin/ask skills doctor autofix --codex-parity --json --robot</code></td><td>Expected validation failure: exit 2 with <code>runtime_reachability.runtime_failure</code> and blocker-precedence <code>next_command_decision</code>.</td></tr>
       <tr><td><code>./bin/ask repo doctor --json --robot</code></td><td>Pass: no blockers; repo-surface ownership debt remains diagnostic advisory.</td></tr>
-      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
     </table>
     <p>The review stack found two medium issues and one low issue. The public CLI regression gap, dead wrapper, and future-tense note wording were fixed immediately. Re-review artifacts report no remaining actionable architecture, testing, simplify, docs, unslopify, or ubiquitous-language findings. The only residual is a low compatibility tradeoff: <code>next_command_decision.additionalProperties=true</code> remains in the experimental v1 schema to preserve additive JSON compatibility.</p>
   </section>
@@ -320,7 +320,7 @@
       <tr><td><code>./bin/ask skills inject-preview '$skill-builder' --json --robot</code></td><td>Pass: command exits 0 and selects the unique <code>skill-builder</code> mention while reporting blocked live-runtime parity checks.</td></tr>
       <tr><td><code>./bin/ask skills implicit-preview --command './bin/ask skills package skill-builder --json --robot' --json --robot</code></td><td>Pass: command exits 0 and correctly reports no implicit skill attribution for an ordinary package command.</td></tr>
       <tr><td><code>./bin/ask repo doctor --json --robot</code></td><td>Pass: no blockers; repo-surface ownership debt remains a non-blocking diagnostic advisory.</td></tr>
-      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
     </table>
   </section>
   <section class="entry validation">
@@ -452,6 +452,28 @@
       <tr><td><code>gh pr checks 192 --repo jscraik/Agent-Skills</code></td><td>Fail: stale <code>pr-template</code> run remains red; all substantive checks shown in the refresh are passing. A synchronize-triggering delivery-state commit is required to rerun the template gate against the corrected body.</td></tr>
     </table>
     <p>Governor disposition: commit only delivery-state evidence and PR-truth updates, then push to trigger a fresh PR workflow. No next implementation slice is approved while <code>pr-template</code> remains red or CodeRabbit/Codex review comments are undispositioned.</p>
+  </section>
+  <section class="entry validation">
+    <h2>PR #192 Review Comment Remediation At Head 52f2038</h2>
+    <p>Runtime truth: the review-disposition subagent wrote <code>artifacts/reviews/jsc-351-pr192-triage-lane/review-comment-disposition-52f2038.md</code> against the current PR head. The artifact was copied into the clean PR worktree as input evidence. The governor then added <code>artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-52f2038.md</code> because two test-contract findings were misclassified as stale when the subagent inspected the primary stale checkout rather than this PR worktree.</p>
+    <p>Fixes applied: the spec now uses the implemented <code>implicit-preview --command</code> interface; JSC-351 goal-board paths use canonical <code>Docs/goals</code> casing; <code>next_command_decision</code> remains emitted but is optional in the v1 doctor schema; compatible package contracts require non-empty core metadata and source files; runtime proof emits <code>live_runtime_invocation</code> only when the required runtime is ready; first-level system bridge pruning now requires generated provenance; facade <code>__all__</code> values are concrete lists; and the local schema harness now enforces the conditional constructs it declares.</p>
+    <p>Generated-surface decision: <code>./bin/ask skills sync --scope workspace --projection rooted --plugin-cache-refresh skip --json --robot</code> refreshed <code>.skillsets/**</code> and <code>SKILL.md</code> source identity after schema-contract tests detected command-surface/manifest revision drift. These are generated validation outputs from the repo-owned sync command, not manual implementation targets.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>PYTHONPYCACHEPREFIX=/private/tmp/agent-skills-pycache /usr/bin/python3 -m py_compile Infrastructure/bin/ask Infrastructure/scripts/lib/ask/commands/skills_impl.py Infrastructure/scripts/lib/ask/commands/skills.py Infrastructure/scripts/lib/ask/commands/repo.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_ask_skills_package_contract.py -q</code></td><td>Pass: 8 tests.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q</code></td><td>Pass: 15 tests and 15 subtests.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_ask_skills_sync_security.py -q -k 'first_level_system_bridge or prune_first_level'</code></td><td>Pass: 4 tests, 36 deselected.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_ask_cli_impl.py -q -k 'skills_proof_json_contract or skills_proof_human_output'</code></td><td>Pass: 2 tests, 203 deselected.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_jsc351_codex_abi_schema_contracts.py -q</code></td><td>Pass: 98 tests and 666 subtests after schema harness and fixture remediation.</td></tr>
+      <tr><td><code>./bin/ask skills sync --scope workspace --projection rooted --plugin-cache-refresh skip --json --robot</code></td><td>Pass: command-surface and manifest source identity refreshed with plugin cache refresh skipped.</td></tr>
+      <tr><td><code>uv run --python 3.12 ruff check Infrastructure/scripts/lib/ask/commands/skills.py Infrastructure/scripts/lib/ask/commands/repo.py --select PLE0605</code></td><td>Pass after replacing dynamic facade <code>__all__</code> assignments with static literal export lists.</td></tr>
+      <tr><td><code>git diff --check</code></td><td>Pass after removing a generated trailing blank line in <code>SKILL.md</code>.</td></tr>
+      <tr><td><code>./bin/ask repo doctor --json --robot</code></td><td>Pass with diagnostic debt only; runtime budget, command handles, package readiness, and projection sync signals pass.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+    </table>
+    <p>Governor disposition: commit and push this review-remediation boundary to PR #192, then refresh PR checks, review-thread state, and Linear state before any next implementation slice. The board remains blocked until the post-push delivery truth is known.</p>
+    <p>Rebase discovery: while pushing, the remote branch advanced with a CodeRabbit autofix commit. Rebasing exposed that <code>Infrastructure/tests/test_ask_skills_doctor.py</code> imported <code>helpers.schema_validator</code> but the helper package was not present in the branch tree. The remediation commit now adds <code>Infrastructure/tests/helpers/schema_validator.py</code> and <code>Infrastructure/tests/helpers/__init__.py</code> so the shared validator import is real and repeatable.</p>
   </section>
 </body>
 </html>

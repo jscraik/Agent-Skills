@@ -9,15 +9,30 @@ from unittest.mock import patch
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
-sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.commands.skills_impl import skills_package  # noqa: E402
-from helpers.schema_validator import (  # noqa: E402
-    SUPPORTED_SCHEMA_KEYS,
-    _resolve_schema_ref,
-    _schema_type_matches,
-    _validate_schema_subset,
-)
+
+
+SUPPORTED_SCHEMA_KEYS = {
+    "$id",
+    "$ref",
+    "$schema",
+    "additionalProperties",
+    "allOf",
+    "const",
+    "definitions",
+    "enum",
+    "if",
+    "items",
+    "minItems",
+    "minLength",
+    "oneOf",
+    "properties",
+    "required",
+    "then",
+    "title",
+    "type",
+}
 
 
 def _load_schema(name: str) -> dict:
@@ -35,6 +50,120 @@ def _load_snapshot() -> dict:
             / "skill-package-readiness-public-output.v1.json"
         ).read_text(encoding="utf-8")
     )
+
+
+def _resolve_schema_ref(ref: str, schema: dict, schemas: dict[str, dict]) -> dict:
+    if ref in schemas:
+        return schemas[ref]
+    if "#" in ref and not ref.startswith("#/"):
+        schema_name, fragment = ref.split("#", 1)
+        base = schemas[schema_name]
+        return _resolve_schema_ref("#" + fragment, base, schemas)
+    node = schema
+    for part in ref.removeprefix("#/").split("/"):
+        if not part:
+            continue
+        node = node[part]
+    return node
+
+
+def _schema_type_matches(value: object, expected: str) -> bool:
+    if expected == "object":
+        return isinstance(value, dict)
+    if expected == "array":
+        return isinstance(value, list)
+    if expected == "string":
+        return isinstance(value, str)
+    if expected == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
+    if expected == "boolean":
+        return isinstance(value, bool)
+    if expected == "null":
+        return value is None
+    raise AssertionError(f"Unsupported schema type in test validator: {expected}")
+
+
+def _validate_schema_subset(
+    schema: dict,
+    value: object,
+    schemas: dict[str, dict],
+    path: str = "$",
+    root_schema: dict | None = None,
+) -> None:
+    if root_schema is None:
+        root_schema = schema
+    unsupported = set(schema) - SUPPORTED_SCHEMA_KEYS
+    if unsupported:
+        raise AssertionError(f"Unsupported schema keys at {path}: {sorted(unsupported)}")
+
+    if "$ref" in schema:
+        _validate_schema_subset(
+            _resolve_schema_ref(schema["$ref"], root_schema, schemas),
+            value,
+            schemas,
+            path,
+            root_schema,
+        )
+        return
+
+    for subschema in schema.get("allOf", []):
+        _validate_schema_subset(subschema, value, schemas, path, root_schema)
+
+    if "if" in schema:
+        try:
+            _validate_schema_subset(schema["if"], value, schemas, path, root_schema)
+        except AssertionError:
+            pass
+        else:
+            if "then" in schema:
+                _validate_schema_subset(schema["then"], value, schemas, path, root_schema)
+
+    if "oneOf" in schema:
+        matches = 0
+        for option in schema["oneOf"]:
+            try:
+                _validate_schema_subset(option, value, schemas, path, root_schema)
+            except AssertionError:
+                continue
+            matches += 1
+        if matches != 1:
+            raise AssertionError(f"{path} expected exactly one oneOf match, got {matches}")
+
+    if "type" in schema:
+        expected_types = schema["type"]
+        if isinstance(expected_types, str):
+            expected_types = [expected_types]
+        if not any(_schema_type_matches(value, expected) for expected in expected_types):
+            raise AssertionError(f"{path} expected {expected_types}, got {type(value).__name__}")
+
+    if "const" in schema and value != schema["const"]:
+        raise AssertionError(f"{path} expected const {schema['const']!r}, got {value!r}")
+
+    if "enum" in schema and value not in schema["enum"]:
+        raise AssertionError(f"{path} expected one of {schema['enum']!r}, got {value!r}")
+
+    if isinstance(value, str) and "minLength" in schema and len(value) < schema["minLength"]:
+        raise AssertionError(f"{path} shorter than minLength {schema['minLength']}")
+
+    if isinstance(value, list):
+        if "minItems" in schema and len(value) < schema["minItems"]:
+            raise AssertionError(f"{path} shorter than minItems {schema['minItems']}")
+        if "items" in schema:
+            for index, item in enumerate(value):
+                _validate_schema_subset(schema["items"], item, schemas, f"{path}[{index}]", root_schema)
+
+    if isinstance(value, dict):
+        for key in schema.get("required", []):
+            if key not in value:
+                raise AssertionError(f"{path} missing required key {key!r}")
+        properties = schema.get("properties", {})
+        for key, child in properties.items():
+            if key in value:
+                _validate_schema_subset(child, value[key], schemas, f"{path}.{key}", root_schema)
+        if schema.get("additionalProperties") is False:
+            extra = set(value) - set(properties)
+            if extra:
+                raise AssertionError(f"{path} unexpected keys {sorted(extra)}")
 
 
 def _snapshot_projection(package: dict) -> dict:

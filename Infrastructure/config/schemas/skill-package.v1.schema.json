@@ -180,126 +180,49 @@
       "enum": ["compatible", "blocked_validation", "blocked_missing_source"]
     }
   },
-  "if": {
-    "properties": {
-      "compatibility_status": {
-        "const": "compatible"
-      }
-    }
-  },
-  "then": {
-    "properties": {
-      "metadata": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["name", "description"],
+  "allOf": [
+    {
+      "if": {
         "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1
-          },
-          "description": {
-            "type": "string",
-            "minLength": 1
-          },
-          "short_description": {
-            "type": ["string", "null"],
-            "minLength": 1
-          },
-          "interface": {
-            "type": ["object", "null"],
-            "additionalProperties": true,
+          "compatibility_status": {
+            "const": "compatible"
+          }
+        },
+        "required": ["compatibility_status"]
+      },
+      "then": {
+        "required": ["metadata", "source_files", "codex_abi_source"],
+        "properties": {
+          "metadata": {
+            "required": ["name", "description"],
             "properties": {
-              "display_name": {
+              "name": {
                 "type": "string",
                 "minLength": 1
               },
-              "short_description": {
-                "type": "string",
-                "minLength": 1
-              },
-              "icon_small": {
-                "type": "string",
-                "minLength": 1
-              },
-              "icon_large": {
-                "type": "string",
-                "minLength": 1
-              },
-              "brand_color": {
-                "type": "string",
-                "minLength": 1
-              },
-              "default_prompt": {
+              "description": {
                 "type": "string",
                 "minLength": 1
               }
             }
           },
-          "dependencies": {
-            "type": ["object", "null"],
-            "additionalProperties": true,
+          "source_files": {
+            "required": ["skill_md", "agents_openai_yaml"],
             "properties": {
-              "tools": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "required": ["type", "value"],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "value": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "description": {
-                      "type": ["string", "null"],
-                      "minLength": 1
-                    },
-                    "transport": {
-                      "type": ["string", "null"],
-                      "minLength": 1
-                    },
-                    "command": {
-                      "type": ["string", "null"],
-                      "minLength": 1
-                    },
-                    "url": {
-                      "type": ["string", "null"],
-                      "minLength": 1
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "policy": {
-            "type": ["object", "null"],
-            "additionalProperties": true,
-            "properties": {
-              "allow_implicit_invocation": {
-                "type": "boolean"
+              "skill_md": {
+                "type": "string",
+                "minLength": 1
               },
-              "products": {
-                "$ref": "#/definitions/stringList"
+              "agents_openai_yaml": {
+                "type": "string",
+                "minLength": 1
               }
             }
-          },
-          "scope": {
-            "type": ["string", "null"],
-            "minLength": 1
-          },
-          "plugin_id": {
-            "type": ["string", "null"],
-            "minLength": 1
           }
         }
       }
     }
-  },
+  ],
   "definitions": {
     "stringList": {
       "type": "array",
