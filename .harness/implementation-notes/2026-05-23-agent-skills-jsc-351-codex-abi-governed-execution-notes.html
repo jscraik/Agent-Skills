@@ -426,7 +426,7 @@
       <tr><td><code>env XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state PREK_HOME=/private/tmp/agent-skills-prek git commit ...</code></td><td>Blocked: pre-commit stashed unrelated dirty work and then failed whole-repo context-budget/projection checks because the local generated plugin cache no longer matched the stashed source view. Standalone projection verification in the dirty workspace passed, so the governor classified this as a local stale-state/projection-cache blocker rather than permission to stage unrelated HE work into the JSC-351 remediation commit.</td></tr>
     </table>
   </section>
-+  <section class="entry validation">
+  <section class="entry validation">
     <h2>Delivery Boundary Remediation: Clean Commit Gate</h2>
     <p>Runtime discovery: the clean commit worktree reproduced the delivery blocker without unrelated dirty workspace state. <code>verify_runtime_budget.py --json</code> failed because default discovery exposed Codex system bridge skills while the runtime-budget oracle still expected only the old flat allowlist. This was a real contract mismatch in the JSC-351 slice, not a hook problem.</p>
     <p>Fix applied: <code>Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py</code> now derives expected default system bridge names from non-shadowed system lane entries. Plugin-owned bridge names such as <code>plugin-creator</code> and <code>plugin-installer</code> remain shadowed by local plugin sources and are not expected on the default flat surface.</p>
@@ -438,6 +438,20 @@
       <tr><td><code>env MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-jsc351-commit.hlFxWt/.mise.toml python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json</code></td><td>Pass in clean commit worktree after manifest refresh.</td></tr>
     </table>
     <p>Governor disposition: continue only through the commit/push/PR-triage boundary. No next implementation slice is approved until the new commit is on PR #192 and live checks/review/tracker truth are refreshed.</p>
+  </section>
+  <section class="entry validation">
+    <h2>PR #192 Post-Push Triage And Template Recovery</h2>
+    <p>Runtime truth: PR #192 advanced after the clean delivery-boundary commit because five GitHub-authored follow-up commits were added on top of <code>5e23628bbdf9d2f81907629e5f66c34bfaa4e760</code>. The current remote head is <code>4d76ccd82bd1c8357e2f5c6243f99f1b7cb4ff2f</code>. The local primary checkout is stale and dirty, so remediation work moved to a clean detached worktree at the current PR head.</p>
+    <p>Review governance: a continuous subagent triage lane wrote <code>artifacts/reviews/jsc-351-pr192-triage-lane/post-push-4d76ccd.md</code>. The artifact records the current PR head, failed <code>pr-template</code> gate, passing CI/security/docs checks, CodeRabbit/Codex review presence, and next remediation steps. The governor treats CodeRabbit-generated or assistant-suggested commits as untrusted until classified; the five post-<code>5e23628b</code> commits are recorded as remote follow-ups requiring review, not automatic acceptance.</p>
+    <p>PR body remediation: the failing template token was the literal text <code>pass/fail</code> in the Testing section. The PR body was updated through GitHub API to say <code>pass, fail, or blocked</code>, and stale CodeRabbit wording was corrected to reflect the latest pending/skipped review state. The PR was converted back to draft through GraphQL because red or stale checks mean it is not merge-ready.</p>
+    <table>
+      <tr><th>Runtime check</th><th>Outcome</th></tr>
+      <tr><td><code>gh api repos/jscraik/Agent-Skills/issues/192 --method PATCH --input /private/tmp/pr192-update.json</code></td><td>Pass: PR body updated; placeholder scan later returned no <code>pass/fail</code> or unresolved angle-bracket tokens.</td></tr>
+      <tr><td><code>gh api graphql convertPullRequestToDraft</code></td><td>Pass: PR #192 reports <code>isDraft=true</code>.</td></tr>
+      <tr><td><code>test -f artifacts/reviews/jsc-351-pr192-triage-lane/post-push-4d76ccd.md &amp;&amp; wc -c ... &amp;&amp; tail -n 3 ...</code></td><td>Pass: artifact exists, is non-empty, and ends with the required <code>WROTE</code> line.</td></tr>
+      <tr><td><code>gh pr checks 192 --repo jscraik/Agent-Skills</code></td><td>Fail: stale <code>pr-template</code> run remains red; all substantive checks shown in the refresh are passing. A synchronize-triggering delivery-state commit is required to rerun the template gate against the corrected body.</td></tr>
+    </table>
+    <p>Governor disposition: commit only delivery-state evidence and PR-truth updates, then push to trigger a fresh PR workflow. No next implementation slice is approved while <code>pr-template</code> remains red or CodeRabbit/Codex review comments are undispositioned.</p>
   </section>
 </body>
 </html>
