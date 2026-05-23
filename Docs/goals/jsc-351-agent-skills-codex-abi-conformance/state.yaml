@@ -611,9 +611,11 @@ tasks:
     type: pm
     assignee: PM
     status: active
-    objective: "Complete PR #192 review-remediation delivery boundary before any next implementation slice."
+    objective: "Complete PR #193 follow-up delivery boundary for post-merge PR #192 remediation before any next implementation slice."
     inputs:
       - "PR #192 current head 5f20d846e7837eb05bf123f6e87ee9a9bb406ff8."
+      - "PR #193 follow-up URL https://github.com/jscraik/Agent-Skills/pull/193."
+      - "PR #193 current rebuilt head a5b0c1749 after cherry-picking 5df1682 and dfab893 onto origin/main."
       - "artifacts/reviews/jsc-351-pr192-triage-lane/review-comment-disposition-52f2038.md"
       - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-52f2038.md"
       - "artifacts/reviews/jsc-351-pr192-triage-lane/post-push-9a4ee3c.md"
@@ -628,5 +630,5 @@ tasks:
       - "Commit only review-remediation code, tests, schema/spec/goal evidence, and repo-owned generated proof surfaces."
       - "After push, recheck PR checks, review threads, draft/mergeability state, and Linear state before continuation."
       - "Treat subagent audit output as input evidence; governor disposition must resolve stale-worktree misclassifications before commit."
-    expected_output: "A follow-up draft PR from codex/jsc-351-post-merge-review-remediation to main that carries the rooted command-handle and default system bridge remediation after PR #192 merged, plus current checks, review-thread triage, Linear traceability, and no approval to continue until safe state is confirmed."
+    expected_output: "PR #193 from codex/jsc-351-post-merge-review-remediation to main carries the rooted command-handle and default system bridge remediation after PR #192 merged, is based on current origin/main, has current checks, review-thread triage, Linear traceability, and no approval to continue until safe state is confirmed."
     receipt_id: null
