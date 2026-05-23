@@ -1189,7 +1189,7 @@ current_agent_skills_kit_sentence = (
     "Author skills once, validate quality, expose `$` command handles, and sync "
     "routed skills and plugins into runtime projections through the `ask` CLI."
 )
-content, replacements = re.subn(
+content, sentence_replacements = re.subn(
     r"A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\."
     r" Author skills once, validate quality, expose `\$` command handles, and sync "
     r"routed skills and plugins into runtime projections through the `ask` CLI\.",
@@ -1197,27 +1197,36 @@ content, replacements = re.subn(
     content,
     count=1,
 )
-if replacements == 0:
-    content, replacements = re.subn(
+if sentence_replacements == 0:
+    content, sentence_replacements = re.subn(
         r"A governed repository of \*\*skills\*\* for AI coding agents\. Built around the \*\*Agent Skills Kit \(`ask`\)\*\* CLI\.",
         current_agent_skills_kit_sentence,
         content,
         count=1,
     )
-content, replacements = re.subn(
+if sentence_replacements == 0:
+    content, sentence_replacements = re.subn(
+        r"A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\.\n"
+        r"Author skills once, validate quality, expose `\$` command handles, and sync\n"
+        r"routed skills and plugins into runtime projections through the `ask` CLI\.",
+        current_agent_skills_kit_sentence,
+        content,
+        count=1,
+    )
+content, count_replacements = re.subn(
     r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
     f"A governed repository of **{catalog_count} skills** for AI coding agents",
     content,
     count=1,
 )
-if replacements == 0:
-    content, replacements = re.subn(
+if count_replacements == 0:
+    content, count_replacements = re.subn(
         r"A governed repository of AI coding skills\.",
         f"A governed repository of **{catalog_count} skills** for AI coding agents.",
         content,
         count=1,
     )
-if replacements == 0:
+if sentence_replacements == 0 and count_replacements == 0:
     content, insertions = re.subn(
         r"^(# Agent Skills\s*\n\s*)",
         rf"\1{current_agent_skills_kit_sentence}\n\n",
@@ -1238,6 +1247,21 @@ content = re.sub(
 content = re.sub(
     r"A governed \*\*Agent Skills Kit\*\* repository(?: of \*\*\d+(?: canonical)? skills\*\*)? for Codex and AI coding agents",
     "A governed **Agent Skills Kit** repository for Codex and AI coding agents",
+    content,
+    count=1,
+)
+content = re.sub(
+    r"(?:A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\. "
+    r"Author skills once, validate quality, expose `\$` command handles, and sync "
+    r"routed skills and plugins into runtime projections through the `ask` CLI\.\n\n)+"
+    r"(?=A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\.\n"
+    r"Author skills once)",
+    "",
+    content,
+)
+content = re.sub(
+    r"This repository currently exposes \*\*\d+ skills\*\* in the default catalog",
+    f"This repository currently exposes **{catalog_count} skills** in the default catalog",
     content,
     count=1,
 )

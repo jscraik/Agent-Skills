@@ -523,5 +523,24 @@
     </table>
     <p>Governor disposition: commit and push this follow-up remediation, then refresh PR checks, review threads, Linear state, mergeability, and subagent triage before any PU-006 service extraction work. The continuation gate remains blocked until that live post-push truth is known.</p>
   </section>
+  <section class="entry validation">
+    <h2>PR #192 Rooted Handle And System Bridge Remediation At Head 5f20d84</h2>
+    <p>Runtime truth: PR #192 head <code>5f20d846e7837eb05bf123f6e87ee9a9bb406ff8</code> had two current unresolved P1 review threads after post-push triage. The PR was converted back to draft while the review blockers were remediated. The subagent evidence artifact is <code>artifacts/reviews/jsc-351-pr192-triage-lane/post-push-5f20d84.md</code>, and the governor remediation artifact is <code>artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-5f20d84.md</code>.</p>
+    <p>Review-thread classification: both findings were valid. Rooted command-handle symlink validation could return a target without proving the source file and runtime handle <code>SKILL.md</code> existed. Default discovery also exposed all first-level system bridges when only the policy-approved default bridges should be visible.</p>
+    <p>Fix applied: <code>_runtime_handle_symlink_target</code> now requires both the canonical source file and runtime handle <code>SKILL.md</code>. Default-visible system bridge discovery is restricted to <code>imagegen</code> and <code>openai-docs</code>, with the same allowlist mirrored in runtime budget validation. <code>sync_skills_impl.sh</code> now refreshes README intro/count text deterministically, and repo-owned sync refreshed <code>README.md</code> plus root <code>SKILL.md</code> from 27 to 25 default catalog skills.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_command_surface_handles.py Infrastructure/tests/test_skill_scope_precedence.py -q</code></td><td>Pass: 51 tests and 11 subtests.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_command_surface_handles.py Infrastructure/tests/test_skill_scope_precedence.py Infrastructure/tests/test_ask_skills_sync_security.py -q -k 'rooted_symlink or system_bridge or runtime_budget or command_handle or render_index'</code></td><td>Pass: 29 tests, 62 deselected, and 6 subtests.</td></tr>
+      <tr><td><code>python3 -m py_compile Infrastructure/scripts/lifecycle-and-sync/command_surface.py Infrastructure/scripts/lifecycle-and-sync/skill_discovery.py Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py Infrastructure/tests/test_command_surface_handles.py Infrastructure/tests/test_skill_scope_precedence.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>bash -n Infrastructure/scripts/lifecycle-and-sync/sync_skills_impl.sh</code></td><td>Pass.</td></tr>
+      <tr><td><code>./bin/ask repo doctor-catalog --json --robot</code></td><td>Pass after sync script repair and repo-owned catalog refresh.</td></tr>
+      <tr><td><code>./bin/ask skills handles --check --check-command-handles --no-handles --json --robot</code></td><td>Pass after repo-owned command-handle refresh.</td></tr>
+      <tr><td><code>./bin/ask runtime budget --json --robot</code></td><td>Pass.</td></tr>
+      <tr><td><code>./bin/ask repo doctor --json --robot</code></td><td>Pass.</td></tr>
+      <tr><td><code>git diff --check HEAD</code></td><td>Pass after generated <code>SKILL.md</code> trailing blank-line repair.</td></tr>
+    </table>
+    <p>Governor disposition: commit and push this follow-up remediation, then refresh PR checks, review threads, mergeability, Linear state, and subagent triage. No PU-006 service extraction work is approved until that post-push runtime truth is known.</p>
+  </section>
 </body>
 </html>
