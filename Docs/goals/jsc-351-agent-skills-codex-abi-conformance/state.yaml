@@ -65,7 +65,7 @@ continuation_gate:
   thread_idle: unknown
   queued_user_input: unknown
   pending_work: present
-  auto_continue_allowed: no
+  auto_continue_allowed: false
   blocked_by: "draft_pr_and_continuous_triage_surface_missing_after_validation_failure"
 claims:
   - id: C001
