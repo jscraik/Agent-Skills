@@ -184,7 +184,7 @@ Implementation sequencing rule: a later child issue may start discovery, but it 
 | `./bin/ask skills render-preview --codex-parity --json --robot` | Reports Codex renderer budget and warnings. | JSC-354 |
 | `./bin/ask skills config explain --json --robot` | Explains Codex skill config enable/disable effects. | JSC-354 |
 | `./bin/ask skills inject-preview <prompt> --codex-parity --json --robot` | Reports explicit Codex skill injection predictions. | JSC-354 |
-| `./bin/ask skills implicit-preview --command-json <file> --codex-parity --json --robot` | Reports implicit invocation attribution for shell commands or file reads. | JSC-354 |
+| `./bin/ask skills implicit-preview --command '<...>' --codex-parity --json --robot` | Reports implicit invocation attribution for shell commands or file reads. | JSC-354 |
 | `./bin/ask skills conformance run --suite codex-parity --json --robot` | Emits replayable conformance evidence. | JSC-356 |
 
 ## Data / Domain Contract

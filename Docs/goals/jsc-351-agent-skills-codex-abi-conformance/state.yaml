@@ -42,7 +42,7 @@ rules:
 checks:
   dirty_fingerprint: "main...origin/main ahead 5 with pre-existing dirty tree observed 2026-05-23T14:30:18Z"
   last_verification:
-    command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+    command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     outcome: pass
     checked_at: "2026-05-23T17:18:51Z"
   last_delivery_attempt:
@@ -132,7 +132,7 @@ tasks:
     expected_output: "Valid repo-visible goal board and seeded implementation notes ledger."
     allowed_files: []
     verify:
-      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     stop_if:
       - "Board validator fails."
       - "Canonical plan or spec path is missing."
@@ -144,9 +144,9 @@ tasks:
     status: done
     objective: "Refresh runtime truth for repo, plan, spec, Linear, parser, and doctor surfaces before PU-001 Worker implementation."
     inputs:
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/goal.md"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/state.yaml"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/receipts.jsonl"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/goal.md"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/state.yaml"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/receipts.jsonl"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
       - ".harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md"
       - ".harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
@@ -158,7 +158,7 @@ tasks:
     expected_output: "Fresh pre-implementation truth packet or blocked scout report."
     allowed_files: []
     verify:
-      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
       - "python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
       - "python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
       - "python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md --json"
@@ -194,9 +194,9 @@ tasks:
       - "Infrastructure/tests/test_ask_skills_doctor.py"
       - "Infrastructure/tests/fixtures/**"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
     verify:
-      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
       - "python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py"
       - "./bin/ask skills doctor context7 --json --robot"
       - "./bin/ask skills proof context7 --runtime-target codex --json --robot"
@@ -269,7 +269,7 @@ tasks:
       - ".harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md"
       - ".harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
     verify:
       - "python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md --kind plan --json"
       - "python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md --kind spec --json"
@@ -305,10 +305,10 @@ tasks:
       - "Infrastructure/tests/test_ask_repo_doctor.py"
       - "Infrastructure/tests/fixtures/**"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
       - "artifacts/reviews/jsc-351-pu002/**"
     verify:
-      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
       - "python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q"
       - "./bin/ask repo doctor --json --robot"
       - "./bin/ask skills handles --check --check-command-handles --no-handles --json --robot"
@@ -335,7 +335,7 @@ tasks:
     allowed_files:
       - "artifacts/reviews/jsc-351-pu002/**"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
     verify:
       - "wc -c artifacts/reviews/jsc-351-pu002/architecture.md artifacts/reviews/jsc-351-pu002/simplicity.md artifacts/reviews/jsc-351-pu002/testing.md artifacts/reviews/jsc-351-pu002/architecture-rereview.md artifacts/reviews/jsc-351-pu002/testing-rereview.md artifacts/reviews/jsc-351-pu002/governor-disposition.md"
       - "python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q"
@@ -359,7 +359,7 @@ tasks:
       - "Linear state must reflect PU-002 code completion and live repo-doctor blockers separately."
     expected_output: "PU-002 delivery-state packet with classified live blockers and tracker trace."
     allowed_files:
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
     verify:
       - "git status --short --branch"
@@ -386,7 +386,7 @@ tasks:
     expected_output: "A blocker classification packet and next governed slice recommendation."
     allowed_files:
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
     verify:
       - "./bin/ask repo doctor --json --robot"
       - "./bin/ask runtime budget --json --robot"
@@ -427,7 +427,7 @@ tasks:
       - "SKILL.md"
       - "README.md"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
       - "artifacts/reviews/jsc-351-pu011/**"
     verify:
       - "python3 -m pytest Infrastructure/tests/test_ask_skills_sync_security.py::TestAskSkillsSyncSecurity::test_sync_skills_rooted_prunes_first_level_system_bridge_aliases Infrastructure/tests/test_ask_skills_sync_security.py::TestAskSkillsSyncSecurity::test_sync_skills_rooted_prunes_first_level_system_bridge_directories -q"
@@ -437,7 +437,7 @@ tasks:
       - "./bin/ask skills handles --check --check-command-handles --no-handles --json --robot"
       - "./bin/ask runtime budget --json --robot"
       - "./bin/ask repo doctor --json --robot"
-      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     stop_if:
       - "Sync dry-run plans unexpected plugin cache, user home, or global config mutation."
       - "Repo-owned sync cannot reconcile stale bridge directories without hand-editing runtime projection files."
@@ -470,13 +470,13 @@ tasks:
       - "Infrastructure/bin/ask"
       - "Infrastructure/config/schemas/**"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
       - "artifacts/reviews/jsc-351-pu003/**"
     verify:
       - "python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q"
       - "Focused schema validation command if the repo exposes one."
       - "Focused next-command precedence fixture."
-      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     stop_if:
       - "jsonschema or an equivalent deterministic validator is missing and cannot be resolved inside existing repo-owned validation paths."
       - "Runtime failure serialization requires broad CLI architecture changes outside PU-003."
@@ -508,14 +508,14 @@ tasks:
       - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
       - "Infrastructure/tests/**"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
       - "artifacts/reviews/jsc-351-pu004/**"
     verify:
       - "python3 -m pytest Infrastructure/tests -q -k 'skill_package or package or doctor'"
       - "Focused schema validation command if the repo exposes one."
       - "./bin/ask skills package skill-builder --json --robot"
       - "./bin/ask repo doctor --json --robot"
-      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     stop_if:
       - "Schema fields diverge from Codex loader metadata without source evidence."
       - "Package output changes require broad service extraction outside package verification paths."
@@ -546,7 +546,7 @@ tasks:
       - "Infrastructure/config/schemas/**"
       - "Infrastructure/tests/**"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
       - "artifacts/reviews/jsc-351-pu005/**"
     verify:
       - "python3 -m pytest Infrastructure/tests -q -k 'preview or codex_parity or invocation or render'"
@@ -556,7 +556,7 @@ tasks:
       - "./bin/ask skills inject-preview '$skill-builder' --json --robot"
       - "./bin/ask skills implicit-preview --command './bin/ask skills package skill-builder --json --robot' --json --robot"
       - "./bin/ask repo doctor --json --robot"
-      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     stop_if:
       - "Codex source version or fixture identity cannot be identified."
       - "Preview command output would imply parity beyond the implemented source-backed model."
@@ -588,7 +588,7 @@ tasks:
       - "Infrastructure/tests/**"
       - "Infrastructure/config/schemas/**"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
-      - "docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
       - "artifacts/reviews/jsc-351-pu006/**"
     verify:
       - "python3 -m pytest Infrastructure/tests -q -k 'skills or repo_doctor or package or preview'"
@@ -600,7 +600,7 @@ tasks:
       - "./bin/ask skills inject-preview '$skill-builder' --json --robot"
       - "./bin/ask skills implicit-preview --command './bin/ask skills package skill-builder --json --robot' --json --robot"
       - "./bin/ask repo doctor --json --robot"
-      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     stop_if:
       - "Service extraction changes public command output without compatibility proof."
       - "A proposed module boundary is not backed by repeated code responsibility from PU-001 through PU-005."

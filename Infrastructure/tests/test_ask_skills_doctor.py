@@ -10,6 +10,7 @@ from unittest.mock import patch
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "tests"))
 
 from ask.commands.skills_impl import (  # noqa: E402
     _doctor_sdk_layer_for,
@@ -18,47 +19,11 @@ from ask.commands.skills_impl import (  # noqa: E402
     skills_proof,
 )
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
-
-
-# Keep this test deterministic in a fresh checkout; jsonschema is optional here.
-_SUPPORTED_SCHEMA_KEYS = {
-    "$id",
-    "$ref",
-    "$schema",
-    "additionalProperties",
-    "const",
-    "enum",
-    "items",
-    "minItems",
-    "minLength",
-    "minimum",
-    "oneOf",
-    "properties",
-    "required",
-    "title",
-    "type",
-}
-
-
-def _resolve_schema_ref(ref: str, root_schema: dict) -> dict:
-    node = root_schema
-    for part in ref.removeprefix("#/").split("/"):
-        node = node[part]
-    return node
-
-
-def _schema_type_matches(value: object, expected: str) -> bool:
-    if expected == "object":
-        return isinstance(value, dict)
-    if expected == "array":
-        return isinstance(value, list)
-    if expected == "string":
-        return isinstance(value, str)
-    if expected == "integer":
-        return isinstance(value, int) and not isinstance(value, bool)
-    if expected == "null":
-        return value is None
-    raise AssertionError(f"Unsupported schema type in test validator: {expected}")
+from helpers.schema_validator import (  # noqa: E402
+    SUPPORTED_SCHEMA_KEYS as _SUPPORTED_SCHEMA_KEYS,
+    _resolve_schema_ref,
+    _schema_type_matches,
+)
 
 
 def _validate_json_schema_subset(

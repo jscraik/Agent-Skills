@@ -142,6 +142,21 @@ def _validate_schema(
             if extra:
                 raise AssertionError(f"{path} unexpected keys {sorted(extra)}")
 
+    # Handle oneOf: validate against each subschema and count matches
+    if "oneOf" in schema:
+        matches = 0
+        last_error = None
+        for i, subschema in enumerate(schema.get("oneOf", [])):
+            try:
+                _validate_schema(subschema, value, root_schema, schemas, path)
+                matches += 1
+            except AssertionError as e:
+                last_error = e
+                continue
+        if matches != 1:
+            error_context = f" (last error: {last_error})" if last_error else ""
+            raise AssertionError(f"{path}: expected exactly one oneOf match, got {matches}{error_context}")
+
 
 # ---------------------------------------------------------------------------
 # Schema file structural validity tests
@@ -1083,9 +1098,9 @@ class TestCommandSurfaceJsonJsc351Contract(unittest.TestCase):
             path = handle.get("command_handle_path", "")
             if not path:
                 # No generated path is only valid for system bridge handles
-                # (determined by source_path starting with skills-system/ or having no command handle)
+                # (determined by source_path starting with skills-system/ or being empty/None)
                 src = handle.get("source_path", "")
-                is_system_bridge = src.startswith("skills-system/") or not src.startswith("Skills/")
+                is_system_bridge = src.startswith("skills-system/") or src == "" or src is None
                 # Verify that handles with empty command_handle_path are consistently
                 # NOT from normal Skills/ trees
                 with self.subTest(handle=handle.get("handle")):

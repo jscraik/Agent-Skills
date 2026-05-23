@@ -12,7 +12,7 @@ review-stack evidence, and stop conditions.
 
 ## Kickoff Command
 
-/goal Follow docs/goals/jsc-351-agent-skills-codex-abi-conformance/goal.md
+/goal Follow Docs/goals/jsc-351-agent-skills-codex-abi-conformance/goal.md
 
 That command is a prompt convention. It is not a native file binding.
 
@@ -196,11 +196,11 @@ Initial allowed implementation files:
 - Infrastructure/tests/test_ask_skills_doctor.py
 - Infrastructure/tests/fixtures/**
 - .harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html
-- docs/goals/jsc-351-agent-skills-codex-abi-conformance/**
+- Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**
 
 Initial verification:
 
-- python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/jsc-351-agent-skills-codex-abi-conformance
+- python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance
 - python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md
 - python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md
 - python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md --json

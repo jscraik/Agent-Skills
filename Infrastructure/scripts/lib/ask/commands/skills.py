@@ -132,4 +132,4 @@ _FACADE_WRAPPERS.update(
 _skill_sections = _impl._skill_sections
 _skill_workout_candidates = _impl._skill_workout_candidates
 
-__all__ = getattr(_impl, "__all__", [name for name in globals() if not name.startswith("_")])
+__all__ = list(getattr(_impl, "__all__", [name for name in globals() if not name.startswith("_")]))

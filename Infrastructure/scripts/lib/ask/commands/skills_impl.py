@@ -393,7 +393,8 @@ def _parse_frontmatter_scalar(value: str) -> Any:
     return cleaned
 
 
-CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS: tuple[str, ...] = (
+# Canonical ordered definition of Codex SkillMetadata fields
+CODEX_SKILL_PACKAGE_FIELDS: tuple[str, ...] = (
     "name",
     "description",
     "short_description",
@@ -402,6 +403,14 @@ CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS: tuple[str, ...] = (
     "policy",
     "scope",
     "plugin_id",
+)
+
+# Derived field groupings
+CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS: tuple[str, ...] = CODEX_SKILL_PACKAGE_FIELDS
+CODEX_SKILL_PACKAGE_ABI_EVIDENCE_FIELDS: tuple[str, ...] = CODEX_SKILL_PACKAGE_FIELDS
+CODEX_SKILL_PACKAGE_REQUIRED_FIELDS: tuple[str, ...] = ("name", "description")
+CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS: tuple[str, ...] = tuple(
+    field for field in CODEX_SKILL_PACKAGE_FIELDS if field not in CODEX_SKILL_PACKAGE_REQUIRED_FIELDS
 )
 
 
@@ -1322,11 +1331,13 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
             validation_commands=proof["validation_commands"],
         )
         result.data["runtime_failure"] = proof["runtime_failure"]
-    if user_runtime_ready:
-        proof["live_codex_invocation"] = {
+    if user_runtime_ready and required_runtime_ready:
+        runtime_name = proof["runtime_satisfied_by"]
+        hint_key = f"live_{runtime_name}_invocation" if runtime_name else "live_runtime_invocation"
+        proof[hint_key] = {
             "status": "manual_session_gate",
-            "runtime_satisfied_by": proof["runtime_satisfied_by"],
-            "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
+            "runtime_satisfied_by": runtime_name,
+            "operator_action": f"Open or reload a {runtime_name} session and verify the handle appears in the picker or can be invoked as a $ handle." if runtime_name else "Open or reload a runtime session and verify the handle appears in the picker.",
         }
     result.data["proof"] = proof
     if proof["status"] != "pass":
@@ -2814,26 +2825,6 @@ SKILL_PACKAGE_SNAPSHOT_PATH = (
     "skill-package-readiness-public-output.v1.json"
 )
 CODEX_SKILL_PACKAGE_ABI_SOURCE_PATH = "codex-rs/core-skills/src/model.rs"
-CODEX_SKILL_PACKAGE_ABI_EVIDENCE_FIELDS: tuple[str, ...] = (
-    "name",
-    "description",
-    "short_description",
-    "interface",
-    "dependencies",
-    "policy",
-    "scope",
-    "plugin_id",
-)
-
-CODEX_SKILL_PACKAGE_REQUIRED_FIELDS: tuple[str, ...] = ("name", "description")
-CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS: tuple[str, ...] = (
-    "short_description",
-    "interface",
-    "dependencies",
-    "policy",
-    "scope",
-    "plugin_id",
-)
 
 
 def _codex_skill_package_abi_source() -> dict[str, Any]:
@@ -2932,6 +2923,14 @@ def _read_agents_openai_yaml_fields(skill_md: Path | None) -> dict[str, Any]:
         if not stripped or stripped.startswith("#"):
             continue
         indent = len(line) - len(line.lstrip(" "))
+
+        # Fail-fast on block sequence items inside a map
+        if current_map and stripped.startswith("-"):
+            raise ValueError(
+                f"Unsupported YAML shape in {agents_openai}: block sequence items are not supported inside maps. "
+                f"Found '- {stripped[1:].strip()}' inside map '{current_map}'."
+            )
+
         if ":" not in stripped:
             continue
         key, value = stripped.split(":", 1)
@@ -2942,12 +2941,23 @@ def _read_agents_openai_yaml_fields(skill_md: Path | None) -> dict[str, Any]:
                 fields[key] = _parse_frontmatter_scalar(value)
                 current_map = None
             else:
+                # Fail-fast on nested keys with empty values at top level
+                if current_map is not None:
+                    raise ValueError(
+                        f"Unsupported YAML shape in {agents_openai}: nested empty map detected at key '{key}'. "
+                        "Only one level of nesting is supported."
+                    )
                 fields[key] = {}
                 current_map = key
             continue
         if current_map:
             nested = fields.setdefault(current_map, {})
-            if isinstance(nested, dict) and value:
+            if isinstance(nested, dict):
+                if not value:
+                    raise ValueError(
+                        f"Unsupported YAML shape in {agents_openai}: empty value for nested key '{key}' inside map '{current_map}'. "
+                        "Nested maps beyond one level are not supported."
+                    )
                 nested[key] = _parse_frontmatter_scalar(value)
     return fields
 
@@ -6157,13 +6167,29 @@ def _prune_first_level_system_bridge_aliases(
         if not (system_source / "SKILL.md").exists():
             continue
 
-        logs.append(f"Removed first-level system bridge alias: {item}")
-        if dry_run:
-            continue
-        if item.is_symlink() or item.is_file():
-            item.unlink()
-        else:
-            shutil.rmtree(item)
+        # Restrict deletion to only proven generated aliases by checking provenance
+        should_delete = False
+        if item.is_symlink():
+            # For symlinks, require that they point to the hidden system source
+            if item.resolve() == system_source.resolve():
+                should_delete = True
+        elif item.is_dir():
+            # For non-symlink directories, require a specific marker file indicating generated content
+            marker_file = item / ".generated_alias_marker"
+            if marker_file.exists():
+                should_delete = True
+        elif item.is_file():
+            # Files should not exist at first level for bridge skills, but if they do and are symlinks that's covered above
+            pass
+
+        if should_delete:
+            logs.append(f"Removed first-level system bridge alias: {item}")
+            if dry_run:
+                continue
+            if item.is_symlink() or item.is_file():
+                item.unlink()
+            else:
+                shutil.rmtree(item)
     return logs
 
 
