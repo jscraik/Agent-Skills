@@ -34,8 +34,8 @@
       "minLength": 1
     },
     "target_kind": {
-      "type": ["string", "null"],
-      "minLength": 1
+      "type": "string",
+      "enum": ["command_handle", "canonical_source_path", "invalid_path", "unknown"]
     },
     "handle": {
       "type": ["string", "null"],
