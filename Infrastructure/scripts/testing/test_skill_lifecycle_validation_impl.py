@@ -1249,7 +1249,12 @@ class SkillLifecycleValidationTests(unittest.TestCase):
     def test_route_exact_handle_prefers_canonical_plugin_source(self) -> None:
         skills_impl = load_skills_impl_module()
 
-        result = skills_impl.route_skills(REPO_ROOT, "plugin-creator")
+        with mock.patch.object(
+            skills_impl,
+            "compute_catalog_parity",
+            return_value={"drift_detected": False},
+        ):
+            result = skills_impl.route_skills(REPO_ROOT, "plugin-creator")
 
         self.assertEqual(result.status, "success")
         selected = result.data["decision"]["selected_candidates"][0]

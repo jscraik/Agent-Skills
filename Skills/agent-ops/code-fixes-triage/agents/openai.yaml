@@ -1,0 +1,5 @@
+interface:
+  display_name: "Code Fixes Triage"
+  short_description: "Turn review noise into an action queue"
+  default_prompt: "Use $code-fixes-triage to turn recent #code-fixes signals into a repo-and-PR action queue."
+
