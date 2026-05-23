@@ -1,0 +1,396 @@
+{
+  "missing_source_package": {
+    "blocker_classes": [
+      "blocked_missing_source"
+    ],
+    "compatibility_snapshot": {
+      "covers": [
+        "valid_share_ready_package",
+        "missing_source_package",
+        "strict_incomplete_package"
+      ],
+      "id": "skill-package-readiness.v1.public-output.2026-05-23",
+      "path": "Infrastructure/tests/fixtures/skill_package_snapshots/skill-package-readiness-public-output.v1.json",
+      "schema_version": "skill-package-readiness.v1"
+    },
+    "gate_summary": {
+      "blocked_reasons": [
+        "version",
+        "compatible_roles",
+        "runtime_needs",
+        "maturity",
+        "provenance",
+        "share_readiness"
+      ],
+      "checkout_test_status": "not_run",
+      "install_ready": false,
+      "promotion_ready": false,
+      "promotion_status": "blocked_missing_source"
+    },
+    "package_contract": {
+      "install_gate": {
+        "blocked_reasons": [
+          "version",
+          "compatible_roles",
+          "runtime_needs",
+          "maturity",
+          "provenance",
+          "share_readiness"
+        ],
+        "checkout_test_status": "not_run",
+        "install_ready": false
+      },
+      "promotion_gate": {
+        "blocked_reasons": [
+          "version",
+          "compatible_roles",
+          "runtime_needs",
+          "maturity",
+          "provenance",
+          "share_readiness"
+        ],
+        "promotion_ready": false,
+        "share_ready": false,
+        "status": "blocked_missing_source"
+      },
+      "readiness_level": "blocked_missing_source",
+      "required_fields": {
+        "missing": [
+          "version",
+          "compatible_roles",
+          "runtime_needs",
+          "maturity",
+          "provenance",
+          "share_readiness"
+        ],
+        "present": []
+      },
+      "values": {}
+    },
+    "package_readiness_schema": {
+      "path": "Infrastructure/config/schemas/skill-package-readiness.v1.schema.json",
+      "schema_version": "skill-package-readiness.v1"
+    },
+    "package_schema": {
+      "path": "Infrastructure/config/schemas/skill-package.v1.schema.json",
+      "schema_version": "skill-package.v1"
+    },
+    "readiness_summary": {
+      "missing_field_count": 6,
+      "missing_fields": [
+        "version",
+        "compatible_roles",
+        "runtime_needs",
+        "maturity",
+        "provenance",
+        "share_readiness"
+      ],
+      "promotion_status": "blocked_missing_source",
+      "readiness_level": "blocked_missing_source"
+    },
+    "schema_version": "skill-package-readiness.v1",
+    "skill_package_contract": {
+      "codex_abi_source": {
+        "evidence_fields": [
+          "name",
+          "description",
+          "short_description",
+          "interface",
+          "dependencies",
+          "policy",
+          "scope",
+          "plugin_id"
+        ],
+        "path": "codex-rs/core-skills/src/model.rs",
+        "struct": "SkillMetadata"
+      },
+      "compatibility_status": "blocked_missing_source",
+      "metadata": {
+        "dependencies": null,
+        "description": null,
+        "interface": null,
+        "name": null,
+        "plugin_id": null,
+        "policy": null,
+        "scope": null,
+        "short_description": null
+      },
+      "optional_fields": {
+        "present": []
+      },
+      "required_fields": {
+        "missing": [
+          "name",
+          "description"
+        ],
+        "present": []
+      },
+      "schema_version": "skill-package.v1",
+      "source_files": {
+        "agents_openai_yaml": null,
+        "skill_md": null
+      }
+    },
+    "status": "blocked",
+    "strict": false,
+    "target_kind": "command_handle",
+    "warning_classes": []
+  },
+  "strict_incomplete_package": {
+    "blocker_classes": [
+      "blocked_validation"
+    ],
+    "compatibility_snapshot": {
+      "covers": [
+        "valid_share_ready_package",
+        "missing_source_package",
+        "strict_incomplete_package"
+      ],
+      "id": "skill-package-readiness.v1.public-output.2026-05-23",
+      "path": "Infrastructure/tests/fixtures/skill_package_snapshots/skill-package-readiness-public-output.v1.json",
+      "schema_version": "skill-package-readiness.v1"
+    },
+    "gate_summary": {
+      "blocked_reasons": [
+        "identity_incomplete"
+      ],
+      "checkout_test_status": "not_run",
+      "install_ready": false,
+      "promotion_ready": false,
+      "promotion_status": "blocked_validation"
+    },
+    "package_contract": {
+      "install_gate": {
+        "blocked_reasons": [
+          "identity_incomplete"
+        ],
+        "checkout_test_status": "not_run",
+        "install_ready": false
+      },
+      "promotion_gate": {
+        "blocked_reasons": [
+          "identity_incomplete"
+        ],
+        "promotion_ready": false,
+        "share_ready": false,
+        "status": "blocked_validation"
+      },
+      "readiness_level": "incomplete_identity",
+      "required_fields": {
+        "missing": [],
+        "present": [
+          "compatible_roles",
+          "maturity",
+          "provenance",
+          "runtime_needs",
+          "share_readiness",
+          "version"
+        ]
+      },
+      "values": {
+        "compatible_roles": [
+          "worker"
+        ],
+        "maturity": "beta",
+        "provenance": "internal",
+        "runtime_needs": [
+          "filesystem"
+        ],
+        "share_readiness": "ready",
+        "version": "2.0.0"
+      }
+    },
+    "package_readiness_schema": {
+      "path": "Infrastructure/config/schemas/skill-package-readiness.v1.schema.json",
+      "schema_version": "skill-package-readiness.v1"
+    },
+    "package_schema": {
+      "path": "Infrastructure/config/schemas/skill-package.v1.schema.json",
+      "schema_version": "skill-package.v1"
+    },
+    "readiness_summary": {
+      "missing_field_count": 0,
+      "missing_fields": [],
+      "promotion_status": "blocked_validation",
+      "readiness_level": "incomplete_identity"
+    },
+    "schema_version": "skill-package-readiness.v1",
+    "skill_package_contract": {
+      "codex_abi_source": {
+        "evidence_fields": [
+          "name",
+          "description",
+          "short_description",
+          "interface",
+          "dependencies",
+          "policy",
+          "scope",
+          "plugin_id"
+        ],
+        "path": "codex-rs/core-skills/src/model.rs",
+        "struct": "SkillMetadata"
+      },
+      "compatibility_status": "blocked_validation",
+      "metadata": {
+        "dependencies": null,
+        "description": null,
+        "interface": null,
+        "name": null,
+        "plugin_id": null,
+        "policy": null,
+        "scope": null,
+        "short_description": null
+      },
+      "optional_fields": {
+        "present": []
+      },
+      "required_fields": {
+        "missing": [
+          "description",
+          "name"
+        ],
+        "present": []
+      },
+      "schema_version": "skill-package.v1",
+      "source_files": {
+        "agents_openai_yaml": null,
+        "skill_md": "Skills/agent-ops/packaged-skill/SKILL.md"
+      }
+    },
+    "status": "blocked",
+    "strict": true,
+    "target_kind": "canonical_source_path",
+    "warning_classes": [
+      "capability_contract_incomplete"
+    ]
+  },
+  "valid_share_ready_package": {
+    "blocker_classes": [],
+    "compatibility_snapshot": {
+      "covers": [
+        "valid_share_ready_package",
+        "missing_source_package",
+        "strict_incomplete_package"
+      ],
+      "id": "skill-package-readiness.v1.public-output.2026-05-23",
+      "path": "Infrastructure/tests/fixtures/skill_package_snapshots/skill-package-readiness-public-output.v1.json",
+      "schema_version": "skill-package-readiness.v1"
+    },
+    "gate_summary": {
+      "blocked_reasons": [],
+      "checkout_test_status": "not_run",
+      "install_ready": true,
+      "promotion_ready": false,
+      "promotion_status": "ready_pending_checkout"
+    },
+    "package_contract": {
+      "install_gate": {
+        "blocked_reasons": [],
+        "checkout_test_status": "not_run",
+        "install_ready": true
+      },
+      "promotion_gate": {
+        "blocked_reasons": [],
+        "promotion_ready": false,
+        "share_ready": true,
+        "status": "ready_pending_checkout"
+      },
+      "readiness_level": "share_ready",
+      "required_fields": {
+        "missing": [],
+        "present": [
+          "compatible_roles",
+          "maturity",
+          "provenance",
+          "runtime_needs",
+          "share_readiness",
+          "version"
+        ]
+      },
+      "values": {
+        "compatible_roles": [
+          "default",
+          "worker",
+          "skill-inspector"
+        ],
+        "maturity": "canonical",
+        "provenance": "frontmatter:Agent Skills Team:2026-05-15:canonical-source",
+        "runtime_needs": [
+          "repo-owned skill source path",
+          "./bin/ask skills audit and eval wrappers",
+          "Python 3 standard library validators"
+        ],
+        "share_readiness": "ready",
+        "version": "1.0.0"
+      }
+    },
+    "package_readiness_schema": {
+      "path": "Infrastructure/config/schemas/skill-package-readiness.v1.schema.json",
+      "schema_version": "skill-package-readiness.v1"
+    },
+    "package_schema": {
+      "path": "Infrastructure/config/schemas/skill-package.v1.schema.json",
+      "schema_version": "skill-package.v1"
+    },
+    "readiness_summary": {
+      "missing_field_count": 0,
+      "missing_fields": [],
+      "promotion_status": "ready_pending_checkout",
+      "readiness_level": "share_ready"
+    },
+    "schema_version": "skill-package-readiness.v1",
+    "skill_package_contract": {
+      "codex_abi_source": {
+        "evidence_fields": [
+          "name",
+          "description",
+          "short_description",
+          "interface",
+          "dependencies",
+          "policy",
+          "scope",
+          "plugin_id"
+        ],
+        "path": "codex-rs/core-skills/src/model.rs",
+        "struct": "SkillMetadata"
+      },
+      "compatibility_status": "compatible",
+      "metadata": {
+        "dependencies": null,
+        "description": "Hardens existing Codex skills or plugin skills by fixing audits, improving trigger wording, reducing token cost, adding examples and evals, and rerunning validation. Use when users say fix this skill, improve skill quality, optimize token usage, make this plugin production-ready, repair skill tests, or prepare a skill for release.",
+        "interface": {
+          "display_name": "Skill Builder",
+          "short_description": "Harden Codex skills and plugin packages with contract checks, eval coverage, and validation evidence."
+        },
+        "name": "skill-builder",
+        "plugin_id": null,
+        "policy": null,
+        "scope": null,
+        "short_description": "Harden Codex skills and plugin packages with contract checks, eval coverage, and validation evidence."
+      },
+      "optional_fields": {
+        "present": [
+          "interface",
+          "short_description"
+        ]
+      },
+      "required_fields": {
+        "missing": [],
+        "present": [
+          "description",
+          "name"
+        ]
+      },
+      "schema_version": "skill-package.v1",
+      "source_files": {
+        "agents_openai_yaml": "Plugins/skill-factory/skills/code_quality_review/skill-builder/agents/openai.yaml",
+        "skill_md": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md"
+      }
+    },
+    "status": "pass",
+    "strict": false,
+    "target_kind": "command_handle",
+    "warning_classes": []
+  }
+}
+

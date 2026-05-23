@@ -132,7 +132,11 @@ def _handle_from_manifest_row(row: dict[str, Any]) -> CommandHandle:
     handle = str(row.get("handle") or row.get("id") or "").strip()
     command_visibility = _command_visibility_for(row)
     source_path = str(row.get("source_path") or "").strip() or None
-    command_handle_path = f".agents/skills/{handle}/SKILL.md" if handle and command_visibility != "none" else None
+    command_handle_path = (
+        f".agents/skills/{handle}/SKILL.md"
+        if handle and command_visibility != "none" and handle not in SYSTEM_BRIDGE_SKILL_NAMES
+        else None
+    )
     return CommandHandle(
         handle=handle,
         kind="skill",
@@ -210,6 +214,8 @@ def requires_generated_command_handle(handle: CommandHandle) -> bool:
     if handle.kind != "skill" or not handle.command_handle_path:
         return False
     if handle.handle in ROOT_SKILL_SET_NAMES:
+        return False
+    if handle.handle in SYSTEM_BRIDGE_SKILL_NAMES:
         return False
     return handle.command_visibility in {"orchestrator", "direct", "target"}
 
@@ -408,6 +414,53 @@ def _prune_obsolete_command_handle_dirs(
     return deletes
 
 
+def _runtime_handle_symlink_target(
+    *,
+    root: Path,
+    handle: CommandHandle,
+    path: Path,
+) -> Path | None:
+    """Return the expected rooted runtime target when a handle is already projected."""
+    if not handle.source_path:
+        return None
+    handle_dir = root / ".agents" / "skills" / handle.handle
+    if not handle_dir.is_symlink():
+        return None
+    try:
+        target = handle_dir.resolve()
+        source_parent = (root / handle.source_path).resolve().parent
+        source_parent.relative_to(root.resolve())
+    except (OSError, ValueError):
+        return None
+    if target != source_parent:
+        return None
+    return target
+
+
+def _rows_needing_generated_command_handles(
+    *,
+    root: Path,
+    handles: list[CommandHandle],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split generated handle rows from handles already covered by rooted projection."""
+    by_handle = {handle.handle: handle for handle in _with_folded_alias_handles(handles)}
+    rows: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    for row in _command_handle_write_rows(handles):
+        handle = by_handle.get(str(row["handle"]))
+        path = root / row["path"]
+        if handle and _runtime_handle_symlink_target(root=root, handle=handle, path=path):
+            skipped.append({
+                "handle": row["handle"],
+                "kind": row["kind"],
+                "path": row["path"],
+                "reason": "rooted_runtime_symlink",
+            })
+            continue
+        rows.append(row)
+    return rows, skipped
+
+
 def _write_generated_text(path: Path, content: str) -> None:
     """Write generated content via same-directory replace to tolerate protected files."""
     if path.is_file():
@@ -429,7 +482,7 @@ def _write_generated_text(path: Path, content: str) -> None:
 def build_skill_handles(*, repo_root_path: Path | None = None) -> list[CommandHandle]:
     """Build command-visible skill handles from the canonical rooted manifest report."""
     root = repo_root_path or repo_root()
-    report = build_manifest_report(root / ".skillsets")
+    report = build_manifest_report(root / ".skillsets", repo_root_path=root)
     handles: list[CommandHandle] = []
     for manifest in report.get("manifests", []):
         for row in manifest.get("rows", []):
@@ -834,7 +887,7 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
     """Write or preview generated runtime command handles for non-root handles."""
     root = repo_root_path or repo_root()
     handles = build_skill_handles(repo_root_path=root)
-    rows = _command_handle_write_rows(handles)
+    rows, skipped = _rows_needing_generated_command_handles(root=root, handles=handles)
     violations = validate_skill_handles(handles, repo_root_path=root)
     violations.extend([
         violation
@@ -870,6 +923,7 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
         "command_handle_count": len({row["handle"] for row in rows if row["kind"] == "skill_command_handle"}),
         "write_count": len(rows),
         "writes": [{key: value for key, value in row.items() if key != "content"} for row in rows],
+        "skipped": skipped,
         "deletes": deletes,
         "violations": violations,
     }
@@ -878,7 +932,10 @@ def write_command_handles(*, repo_root_path: Path | None = None, dry_run: bool =
 def check_command_handles(*, repo_root_path: Path | None = None) -> dict[str, Any]:
     """Verify generated runtime command handles exist and match the rooted projection."""
     root = repo_root_path or repo_root()
-    rows = _command_handle_write_rows(build_skill_handles(repo_root_path=root))
+    rows, skipped = _rows_needing_generated_command_handles(
+        root=root,
+        handles=build_skill_handles(repo_root_path=root),
+    )
     violations: list[dict[str, Any]] = []
     expected_dirs = {
         root / ".agents" / "skills" / row["handle"]
@@ -921,5 +978,6 @@ def check_command_handles(*, repo_root_path: Path | None = None) -> dict[str, An
         "status": "pass" if not violations else "fail",
         "command_handle_count": len({row["handle"] for row in rows if row["kind"] == "skill_command_handle"}),
         "checked_count": len(rows),
+        "skipped": skipped,
         "violations": violations,
     }

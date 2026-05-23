@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import sys
@@ -290,6 +291,10 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection"]["mode_source"], "cli")
 
     def test_sync_skills_rooted_non_dry_run_writes_generated_surface(self) -> None:
+        he_source = self.repo_root / "Skills" / "harness-engineering" / "he-heartbeat"
+        he_source.mkdir(parents=True)
+        (he_source / "SKILL.md").write_text("# HE Heartbeat\n", encoding="utf-8")
+
         result = skills_commands.sync_skills(
             self.repo_root,
             scope="workspace",
@@ -435,6 +440,13 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection_mode"], "rooted")
 
     def test_sync_skills_rooted_user_scope_allows_generated_folded_handles(self) -> None:
+        brainstorm_source = self.repo_root / "Plugins" / "harness-engineering" / "skills" / "he-brainstorm"
+        brainstorm_source.mkdir(parents=True)
+        (brainstorm_source / "SKILL.md").write_text(
+            "---\nname: he-brainstorm\n---\n# HE Brainstorm\n",
+            encoding="utf-8",
+        )
+
         workspace_result = skills_commands.sync_skills(
             self.repo_root,
             scope="workspace",
@@ -465,6 +477,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         bridge_skill_dir = system_skills_dir / "imagegen"
         bridge_skill_dir.mkdir(parents=True)
         (bridge_skill_dir / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
+        (skills_dir / ".system").symlink_to(Path("../../skills-system"))
         bridge_link = skills_dir / "imagegen"
         bridge_link.symlink_to(Path(".system/imagegen"))
 
@@ -482,6 +495,103 @@ class TestAskSkillsSyncSecurity(TestCase):
         )
         self.assertIn("imagegen", result.data["plan"]["system_bridge_skill_names"])
         self.assertNotIn("imagegen", result.data["plan"]["preserved_bridge_lane_entries"])
+
+    def test_sync_skills_rooted_prunes_first_level_system_bridge_directories(self) -> None:
+        skills_dir = self.repo_root / ".agents" / "skills"
+        system_skills_dir = self.repo_root / "skills-system"
+        bridge_skill_dir = system_skills_dir / "imagegen"
+        bridge_skill_dir.mkdir(parents=True)
+        (bridge_skill_dir / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
+        stale_first_level_bridge = skills_dir / "imagegen"
+        stale_first_level_bridge.mkdir()
+        (stale_first_level_bridge / "SKILL.md").write_text("# Stale Imagegen\n", encoding="utf-8")
+        (stale_first_level_bridge / ".agent-skills-system-bridge-alias.json").write_text(
+            json.dumps({"kind": "system_bridge_alias", "target": "imagegen"}),
+            encoding="utf-8",
+        )
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse(
+            stale_first_level_bridge.exists(),
+            "rooted projection should prune real first-level system bridge directories",
+        )
+        self.assertTrue((skills_dir / ".system").exists())
+        self.assertTrue(
+            any(
+                "Removed first-level system bridge alias" in item and "imagegen" in item
+                for item in result.data["logs"]
+            ),
+            result.data["logs"],
+        )
+
+    def test_sync_skills_rooted_prunes_first_level_system_bridge_files(self) -> None:
+        skills_dir = self.repo_root / ".agents" / "skills"
+        system_skills_dir = self.repo_root / "skills-system"
+        bridge_skill_dir = system_skills_dir / "imagegen"
+        bridge_skill_dir.mkdir(parents=True)
+        (bridge_skill_dir / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
+        stale_first_level_bridge = skills_dir / "imagegen"
+        stale_first_level_bridge.write_text("# Stale Imagegen\n", encoding="utf-8")
+        (skills_dir / ".imagegen-.agent-skills-system-bridge-alias.json").write_text(
+            json.dumps({"kind": "system_bridge_alias", "target": "imagegen"}),
+            encoding="utf-8",
+        )
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse(
+            stale_first_level_bridge.exists(),
+            "rooted projection should prune file-shaped first-level system bridge aliases",
+        )
+        self.assertTrue((skills_dir / ".system").exists())
+        self.assertTrue(
+            any(
+                "Removed first-level system bridge alias" in item and "imagegen" in item
+                for item in result.data["logs"]
+            ),
+            result.data["logs"],
+        )
+
+    def test_sync_skills_rooted_preserves_unmarked_first_level_system_bridge_directory(self) -> None:
+        skills_dir = self.repo_root / ".agents" / "skills"
+        system_skills_dir = self.repo_root / "skills-system"
+        bridge_skill_dir = system_skills_dir / "imagegen"
+        bridge_skill_dir.mkdir(parents=True)
+        (bridge_skill_dir / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
+        user_owned_bridge = skills_dir / "imagegen"
+        user_owned_bridge.mkdir()
+        (user_owned_bridge / "SKILL.md").write_text("# User-owned Imagegen\n", encoding="utf-8")
+
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(user_owned_bridge.exists())
+        self.assertTrue(
+            any(
+                "Skipped first-level system bridge alias without generated provenance" in item
+                and "imagegen" in item
+                for item in result.data["logs"]
+            ),
+            result.data["logs"],
+        )
 
     def test_sync_skills_projection_does_not_mask_invalid_scope(self) -> None:
         result = skills_commands.sync_skills(
@@ -545,6 +655,42 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue(system_link.is_symlink())
         self.assertEqual(os.readlink(system_link), "../../skills-system")
 
+    def test_sync_skills_workspace_preserves_existing_system_bridge_command_handle(self) -> None:
+        skills_dir = self.repo_root / ".agents" / "skills"
+        generated_handle = skills_dir / "imagegen"
+        generated_handle.mkdir()
+        (generated_handle / "SKILL.md").write_text("# Generated Imagegen Handle\n", encoding="utf-8")
+
+        system_source = self.repo_root / "skills-system" / "imagegen"
+        system_source.mkdir(parents=True)
+        (system_source / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
+
+        fake_entry = SimpleNamespace(
+            name="imagegen",
+            source_dir=system_source,
+            category="skills-system",
+            description="Generate images.",
+        )
+        with mock.patch("ask.commands.skills_impl.discover_skill_entries", return_value=[fake_entry]):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                projection="flat",
+            )
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(generated_handle.is_dir())
+        self.assertFalse(generated_handle.is_symlink())
+        self.assertEqual(
+            (generated_handle / "SKILL.md").read_text(encoding="utf-8"),
+            "# Generated Imagegen Handle\n",
+        )
+        self.assertIn(
+            f"Skipped existing non-symlink path: {generated_handle}",
+            result.data["logs"],
+        )
+
     def test_create_symlink_preserves_current_target_without_unlinking(self) -> None:
         target = self.repo_root / ".agents" / "skills" / ".system"
         target.symlink_to(Path("../../skills-system"))
@@ -569,6 +715,93 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertEqual((target / "README.md").read_text(encoding="utf-8"), "fresh\n")
         self.assertIn(str(target / "README.md"), report.deletes)
+
+    def test_plugin_cache_prune_keeps_skill_when_command_handle_file_is_missing(self) -> None:
+        plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "harness-engineering"
+        skill_dir = plugin_root / "skills" / "he-work"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("# HE Work\n", encoding="utf-8")
+
+        with mock.patch.object(
+            plugin_cache,
+            "handles_report",
+            return_value={
+                "handles": [
+                    {
+                        "owner": "harness-engineering",
+                        "handle": "he-work",
+                        "command_handle_path": ".agents/skills/he-work/SKILL.md",
+                    }
+                ]
+            },
+        ):
+            logs, deletes = plugin_cache.prune_command_handle_skill_entries(
+                self.repo_root,
+                "harness-engineering",
+                plugin_root,
+            )
+
+        self.assertEqual([], logs)
+        self.assertEqual([], deletes)
+        self.assertTrue((skill_dir / "SKILL.md").exists())
+
+    def test_plugin_cache_prune_removes_skill_when_command_handle_file_exists(self) -> None:
+        plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "harness-engineering"
+        skill_dir = plugin_root / "skills" / "he-work"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("# HE Work\n", encoding="utf-8")
+        command_handle = self.repo_root / ".agents" / "skills" / "he-work" / "SKILL.md"
+        command_handle.parent.mkdir(parents=True, exist_ok=True)
+        command_handle.write_text("# Generated HE Work Handle\n", encoding="utf-8")
+
+        with mock.patch.object(
+            plugin_cache,
+            "handles_report",
+            return_value={
+                "handles": [
+                    {
+                        "owner": "harness-engineering",
+                        "handle": "he-work",
+                        "command_handle_path": ".agents/skills/he-work/SKILL.md",
+                    }
+                ]
+            },
+        ):
+            logs, deletes = plugin_cache.prune_command_handle_skill_entries(
+                self.repo_root,
+                "harness-engineering",
+                plugin_root,
+            )
+
+        self.assertTrue(any("he-work" in log for log in logs))
+        self.assertEqual([str(skill_dir)], deletes)
+        self.assertFalse(skill_dir.exists())
+
+    def test_plugin_cache_prune_removes_internal_skill_category_dirs(self) -> None:
+        plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "skill-factory"
+        skill_builder = plugin_root / "skills" / "skill-builder"
+        archived_skill_builder = plugin_root / "fixtures" / "budget-archive" / "skills" / "skill-builder"
+        internal_skill_builder = plugin_root / "skills" / "code_quality_review" / "skill-builder"
+        internal_skill_refactor = plugin_root / "skills" / "data_fetch_analysis" / "skill-refactor"
+        skill_builder.mkdir(parents=True)
+        archived_skill_builder.mkdir(parents=True)
+        internal_skill_builder.mkdir(parents=True)
+        internal_skill_refactor.mkdir(parents=True)
+        (skill_builder / "SKILL.md").write_text("# Skill Builder\n", encoding="utf-8")
+        (archived_skill_builder / "SKILL.md").write_text("# Archived Skill Builder\n", encoding="utf-8")
+        (internal_skill_builder / "SKILL.md").write_text("# Internal Skill Builder\n", encoding="utf-8")
+        (internal_skill_refactor / "SKILL.md").write_text("# Internal Skill Refactor\n", encoding="utf-8")
+
+        logs, deletes = plugin_cache.prune_picker_internal_skill_dirs(plugin_root)
+
+        self.assertTrue((skill_builder / "SKILL.md").exists())
+        self.assertFalse(archived_skill_builder.exists())
+        self.assertFalse(internal_skill_builder.exists())
+        self.assertFalse(internal_skill_refactor.exists())
+        self.assertIn(str(plugin_root / "fixtures"), deletes)
+        self.assertIn(str(plugin_root / "skills" / "code_quality_review"), deletes)
+        self.assertIn(str(plugin_root / "skills" / "data_fetch_analysis"), deletes)
+        self.assertTrue(any("picker-internal" in log for log in logs))
 
     def test_plugin_cache_permission_failure_returns_error(self) -> None:
         marketplace = self.repo_root / "Plugins" / "marketplace.json"

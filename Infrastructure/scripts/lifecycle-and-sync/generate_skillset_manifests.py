@@ -38,8 +38,9 @@ def _apply_scope_precedence(modules: list[Any]) -> list[Any]:
     return sorted(selected, key=lambda module: (module.skill_set, module.id, module.source_path))
 
 
-def build_manifest_report(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, Any]:
-    discovered_modules, unmapped = build_skill_modules()
+def build_manifest_report(output_dir: Path = DEFAULT_OUTPUT_DIR, repo_root_path: Path | None = None) -> dict[str, Any]:
+    root = repo_root(repo_root_path)
+    discovered_modules, unmapped = build_skill_modules(repo_root_path=root)
     modules = _apply_scope_precedence(discovered_modules)
     grouped = modules_by_skill_set(modules)
     duplicate_ids: list[dict[str, Any]] = []
@@ -82,7 +83,7 @@ def build_manifest_report(output_dir: Path = DEFAULT_OUTPUT_DIR) -> dict[str, An
         manifest_path = output_dir / skill_set / "manifest.jsonl"
         manifests.append({
             "skill_set": skill_set,
-            "path": rel(manifest_path),
+            "path": rel(manifest_path, root),
             "count": len(rows),
             "metadata_status_counts": _count_by(rows, "metadata_status"),
             "rows": [row.to_manifest_row() for row in rows],
@@ -118,7 +119,7 @@ def write_manifests(report: dict[str, Any], output_dir: Path) -> list[dict[str, 
         rows = sorted(manifest["rows"], key=lambda row: (row["id"], row["source_path"]))
         content = "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
         target.write_text(content, encoding="utf-8")
-        writes.append({"path": rel(target), "action": "write", "count": str(len(rows))})
+        writes.append({"path": rel(target, output_dir.parent), "action": "write", "count": str(len(rows))})
     return writes
 
 

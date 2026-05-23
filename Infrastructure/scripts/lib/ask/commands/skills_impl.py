@@ -15,6 +15,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, List, Optional
 
+try:
+    import yaml  # type: ignore
+except ImportError:  # pragma: no cover - exercised only in minimal runtimes
+    yaml = None
+
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 REPO_ROOT = SCRIPTS_ROOT.parents[1]
 if str(SCRIPTS_ROOT) not in sys.path:
@@ -38,6 +43,16 @@ from ask.services.plugin_sources import (  # noqa: E402
     copy_directory_contents as _copy_directory_contents,
     load_local_marketplace as _load_local_marketplace,
     materialize_first_level_skill_aliases as _materialize_first_level_skill_aliases,
+)
+from ask.services.codex_preview import (  # noqa: E402
+    CODEX_PREVIEW_MODELED_RULE_VERSION,
+    CODEX_PREVIEW_SCHEMA_VERSION,
+    CODEX_PREVIEW_SOURCE_FILES,
+    build_codex_config_explain,
+    build_codex_implicit_preview,
+    build_codex_inject_preview,
+    build_codex_load_preview,
+    build_codex_render_preview,
 )
 from skill_discovery import (  # noqa: E402
     USER_SKILL_SCOPE_PRECEDENCE,
@@ -93,16 +108,21 @@ __all__ = [
     "reviewers_resolve",
     "route_skills",
     "skills_budget",
+    "skills_config_explain",
+    "skills_implicit_preview",
+    "skills_inject_preview",
     "skills_doctor",
     "skills_events",
     "skills_explain_boundary",
     "skills_handles",
+    "skills_load_preview",
     "skills_memory",
     "skills_package",
     "skills_parse",
     "skills_profiles",
     "skills_proof",
     "skills_prove",
+    "skills_render_preview",
     "skills_resolve",
     "sync_skills",
     "validate_openai_skill_format",
@@ -184,6 +204,8 @@ def _python_command_supports_packages(command: List[str], packages: List[str]) -
     if os.sep not in command[0] and not shutil.which(command[0]):
         return False
     module_names = ["yaml" if package == "pyyaml" else package for package in packages]
+    if Path(command[0]).resolve() == Path(sys.executable).resolve():
+        return all(importlib.util.find_spec(module_name) is not None for module_name in module_names)
     probe = (
         "import importlib.util, sys; "
         "missing=[name for name in sys.argv[1:] if importlib.util.find_spec(name) is None]; "
@@ -376,6 +398,21 @@ def _parse_frontmatter_scalar(value: str) -> Any:
     return cleaned
 
 
+CODEX_SKILL_PACKAGE_FIELDS: tuple[tuple[str, bool], ...] = (
+    ("name", True),
+    ("description", True),
+    ("short_description", False),
+    ("interface", False),
+    ("dependencies", False),
+    ("policy", False),
+    ("scope", False),
+    ("plugin_id", False),
+)
+CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS: tuple[str, ...] = tuple(
+    field for field, _required in CODEX_SKILL_PACKAGE_FIELDS
+)
+
+
 def _read_skill_frontmatter_fields(skill_md: Path) -> dict[str, Any]:
     """Extract conservative scalar and one-level metadata fields from SKILL.md frontmatter."""
     fields: dict[str, Any] = {}
@@ -428,7 +465,11 @@ def _read_skill_frontmatter_fields(skill_md: Path) -> dict[str, Any]:
             current_map = key
             continue
         parsed_value = _parse_frontmatter_scalar(value)
-        if key in {"name", "description", "metadata", *PACKAGE_CONTRACT_FIELDS} and parsed_value:
+        if key in {
+            *CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS,
+            "metadata",
+            *PACKAGE_CONTRACT_FIELDS,
+        } and parsed_value:
             fields[key] = parsed_value
     return fields
 
@@ -1107,10 +1148,34 @@ def skills_parse(repo_root: Path, request_text: str) -> CallResult:
     return result
 
 
-def skills_proof(repo_root: Path, handle: str) -> CallResult:
+def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> CallResult:
     """Prove a command-visible skill handle reaches the workspace and user runtime surfaces."""
     result = CallResult()
     result.metadata["command"] = "skills proof"
+    runtime_target = runtime_target.strip().lower()
+    if runtime_target not in {"any", "codex", "agents"}:
+        recovery_guidance = "Use --runtime-target any, --runtime-target codex, or --runtime-target agents."
+        safe_handle = handle.strip().lstrip("$") or handle
+        result.data["runtime_failure"] = _runtime_failure_payload(
+            command="skills proof",
+            error_code="ERR_VALIDATION",
+            failed_check_id="runtime_target",
+            path="runtime_target",
+            message=f"Invalid runtime target '{runtime_target}'.",
+            recovery_guidance=recovery_guidance,
+            validation_commands=[
+                _skills_validation_command("proof", safe_handle, "--runtime-target", "any"),
+            ],
+        )
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Invalid runtime target '{runtime_target}'.",
+                fix_suggestion=recovery_guidance,
+            )
+        )
+        return result
     resolution = resolve_skill_handle(handle, repo_root_path=repo_root)
     normalized = resolution.get("handle", handle.lstrip("$"))
     handle_check = check_command_handles(repo_root_path=repo_root)
@@ -1165,12 +1230,22 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
     gates["codex_user_runtime_ready"] = codex_runtime_ready
     gates["agents_user_runtime_ready"] = agents_runtime_ready
     gates["user_runtime_ready"] = user_runtime_ready
+    required_runtime_gate = {
+        "any": "user_runtime_ready",
+        "codex": "codex_user_runtime_ready",
+        "agents": "agents_user_runtime_ready",
+    }[runtime_target]
+    required_runtime_ready = bool(gates[required_runtime_gate])
+    validation_args = [str(normalized)]
+    if runtime_target != "any":
+        validation_args.extend(["--runtime-target", runtime_target])
     proof = {
         "schema_version": "command-handle-proof.v2",
         "handle": normalized,
-        "status": "pass" if all(core_gates) and user_runtime_ready else "fail",
+        "runtime_target": runtime_target,
+        "status": "pass" if all(core_gates) and required_runtime_ready else "fail",
         "validation_commands": [
-            _skills_validation_command("proof", str(normalized)),
+            _skills_validation_command("proof", *validation_args),
         ],
         "gates": gates,
         "gate_policy": {
@@ -1178,9 +1253,14 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
                 "resolver",
                 "generated_command_handle_check",
                 "workspace_command_handle_exists",
-                "user_runtime_ready",
+                required_runtime_gate,
             ],
-            "required_semantics": "user_runtime_ready accepts either supported user runtime link.",
+            "runtime_target": runtime_target,
+            "required_semantics": (
+                "user_runtime_ready accepts either supported user runtime link."
+                if runtime_target == "any"
+                else f"{required_runtime_gate} must be true for runtime_target={runtime_target}."
+            ),
             "supporting_runtime_diagnostics": [
                 "codex_user_link",
                 "codex_user_command_handle_exists",
@@ -1190,11 +1270,19 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
                 "agents_user_runtime_ready",
             ],
         },
+        "available_runtimes": [
+            runtime_name
+            for runtime_name, ready in (
+                ("codex_user_runtime", codex_runtime_ready),
+                ("agents_user_runtime", agents_runtime_ready),
+            )
+            if ready
+        ],
         "runtime_satisfied_by": (
             "codex_user_runtime"
-            if codex_runtime_ready
+            if runtime_target in {"any", "codex"} and codex_runtime_ready
             else "agents_user_runtime"
-            if agents_runtime_ready
+            if runtime_target in {"any", "agents"} and agents_runtime_ready
             else None
         ),
         "resolution": resolution,
@@ -1219,10 +1307,40 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
             "agents_handle_exists": user_agents_handle.is_file(),
         },
     }
-    if codex_runtime_ready:
-        proof["live_codex_invocation"] = {
+    if proof["status"] != "pass":
+        failed_check_id = next(
+            (
+                check_id
+                for check_id in proof["gate_policy"]["required"]
+                if not gates.get(check_id)
+            ),
+            "runtime_reachability",
+        )
+        recovery_guidance = (
+            "Run ./bin/ask skills sync --scope workspace --projection rooted, "
+            "then ./bin/ask skills sync --scope user --projection rooted, and rerun proof."
+        )
+        proof["runtime_failure"] = _runtime_failure_payload(
+            command="skills proof",
+            error_code="ERR_VALIDATION",
+            failed_check_id=str(failed_check_id),
+            path=f"gates.{failed_check_id}",
+            message=f"Command handle proof failed for '{normalized}'.",
+            recovery_guidance=recovery_guidance,
+            validation_commands=proof["validation_commands"],
+        )
+        result.data["runtime_failure"] = proof["runtime_failure"]
+    if required_runtime_ready:
+        runtime = proof["runtime_satisfied_by"]
+        operator_action = (
+            "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle."
+            if runtime == "codex_user_runtime"
+            else "Open or reload the Agents runtime and verify the handle is available there."
+        )
+        proof["live_runtime_invocation"] = {
             "status": "manual_session_gate",
-            "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
+            "runtime_satisfied_by": runtime,
+            "operator_action": operator_action,
         }
     result.data["proof"] = proof
     if proof["status"] != "pass":
@@ -1231,7 +1349,7 @@ def skills_proof(repo_root: Path, handle: str) -> CallResult:
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=f"Command handle proof failed for '{normalized}'.",
-                fix_suggestion="Run `./bin/ask skills sync --scope workspace --projection rooted`, then `./bin/ask skills sync --scope user --projection rooted`, and rerun proof.",
+                fix_suggestion=proof["runtime_failure"]["recovery_guidance"],
             )
         )
     return result
@@ -2504,7 +2622,29 @@ def _doctor_check(status: str, **details: Any) -> dict[str, Any]:
     return payload
 
 
-def _skill_doctor_next_command(
+def _runtime_failure_payload(
+    *,
+    command: str,
+    error_code: str,
+    failed_check_id: str,
+    path: str,
+    message: str,
+    recovery_guidance: str,
+    validation_commands: list[str],
+) -> dict[str, Any]:
+    return {
+        "schema_version": "skill-runtime-failure.v1",
+        "command": command,
+        "error_code": error_code,
+        "failed_check_id": failed_check_id,
+        "path": path,
+        "message": message,
+        "recovery_guidance": recovery_guidance,
+        "validation_commands": validation_commands,
+    }
+
+
+def _skill_doctor_next_command_decision(
     *,
     blockers: list[dict[str, str]],
     warnings: list[dict[str, str]],
@@ -2513,41 +2653,113 @@ def _skill_doctor_next_command(
     query: str,
     audit_target: str | None,
     strict: bool,
-) -> str:
+) -> dict[str, str | None]:
     """Select the most actionable follow-up command from classified doctor evidence."""
     blocker_classes = [blocker.get("class") for blocker in blockers]
     if "blocked_validation" in blocker_classes:
         command = checks.get("structural_audit", {}).get("command")
         if command:
-            return str(command)
+            return {
+                "command": str(command),
+                "precedence": "blocker",
+                "source_class": "blocked_validation",
+                "source_check": "structural_audit",
+                "reason": "blocked_validation takes precedence; rerun the structural audit that failed.",
+            }
         if audit_target:
-            return _skills_validation_command("audit", audit_target, "--level", "compat")
+            return {
+                "command": _skills_validation_command("audit", audit_target, "--level", "compat"),
+                "precedence": "blocker",
+                "source_class": "blocked_validation",
+                "source_check": "structural_audit",
+                "reason": "blocked_validation takes precedence; no check command was present, so use the compatibility audit fallback.",
+            }
     if "blocked_runtime" in blocker_classes:
         command = checks.get("runtime_reachability", {}).get("command")
         if command:
-            return str(command)
+            return {
+                "command": str(command),
+                "precedence": "blocker",
+                "source_class": "blocked_runtime",
+                "source_check": "runtime_reachability",
+                "reason": "blocked_runtime takes precedence after validation blockers; rerun the runtime reachability proof.",
+            }
     if "blocked_missing_source" in blocker_classes:
-        return _skills_validation_command("resolve", str(normalized_handle or query))
+        return {
+            "command": _skills_validation_command("resolve", str(normalized_handle or query)),
+            "precedence": "blocker",
+            "source_class": "blocked_missing_source",
+            "source_check": "canonical_source",
+            "reason": "blocked_missing_source requires resolving the target before any runtime or package proof.",
+        }
     if "blocked_resolution" in blocker_classes:
-        return _skills_validation_command("resolve", str(normalized_handle or query))
+        return {
+            "command": _skills_validation_command("resolve", str(normalized_handle or query)),
+            "precedence": "blocker",
+            "source_class": "blocked_resolution",
+            "source_check": "resolver",
+            "reason": "blocked_resolution requires resolving the requested handle before follow-up checks.",
+        }
     if blockers:
-        return _skills_validation_command("doctor", str(normalized_handle or query))
+        return {
+            "command": _skills_validation_command("doctor", str(normalized_handle or query)),
+            "precedence": "blocker",
+            "source_class": str(blocker_classes[0] or "unclassified_blocker"),
+            "source_check": None,
+            "reason": "An unclassified blocker remains; rerun doctor to preserve the full diagnostic payload.",
+        }
 
     warning_classes = {warning.get("class") for warning in warnings}
     package_or_metadata_warning = bool(
         {"metadata_incomplete", "capability_contract_incomplete"} & warning_classes
     )
     if package_or_metadata_warning and audit_target and not strict:
-        return _skills_validation_command("audit", audit_target, "--level", "strict")
+        return {
+            "command": _skills_validation_command("audit", audit_target, "--level", "strict"),
+            "precedence": "warning",
+            "source_class": "metadata_incomplete" if "metadata_incomplete" in warning_classes else "capability_contract_incomplete",
+            "source_check": "capability_metadata",
+            "reason": "Package or metadata warnings should be tightened by strict audit before package proof.",
+        }
     if "capability_contract_incomplete" in warning_classes:
-        return _skills_validation_command("package", str(normalized_handle or query))
+        return {
+            "command": _skills_validation_command("package", str(normalized_handle or query)),
+            "precedence": "warning",
+            "source_class": "capability_contract_incomplete",
+            "source_check": "package_readiness",
+            "reason": "Capability package metadata is incomplete; run the package readiness command.",
+        }
     if "outcome_proof_missing" in warning_classes:
-        return _skills_validation_command("prove", str(normalized_handle or query))
+        return {
+            "command": _skills_validation_command("prove", str(normalized_handle or query)),
+            "precedence": "warning",
+            "source_class": "outcome_proof_missing",
+            "source_check": "outcome_proof",
+            "reason": "Outcome proof is missing; run the proof scorecard command.",
+        }
     if warnings and audit_target and not strict:
-        return _skills_validation_command("audit", audit_target, "--level", "strict")
+        return {
+            "command": _skills_validation_command("audit", audit_target, "--level", "strict"),
+            "precedence": "warning",
+            "source_class": str(next(iter(warning_classes), "unclassified_warning")),
+            "source_check": None,
+            "reason": "A warning remains and strict audit has not run; run strict audit before claiming readiness.",
+        }
     if normalized_handle:
-        return _skills_validation_command("prove", str(normalized_handle))
-    return _skills_validation_command("audit", str(audit_target), "--level", "strict")
+        return {
+            "command": _skills_validation_command("prove", str(normalized_handle)),
+            "precedence": "default",
+            "source_class": None,
+            "source_check": "outcome_proof",
+            "reason": "No blockers or warnings remain; run the proof scorecard as the next evidence command.",
+        }
+    return {
+        "command": _skills_validation_command("audit", str(audit_target), "--level", "strict"),
+        "precedence": "default",
+        "source_class": None,
+        "source_check": "structural_audit",
+        "reason": "No handle is available; strict audit is the safest remaining source-path evidence command.",
+    }
 
 
 def _capability_metadata_status(frontmatter: dict[str, Any]) -> dict[str, Any]:
@@ -2606,6 +2818,68 @@ PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
     "share_readiness",
 )
 
+SKILL_PACKAGE_SCHEMA_VERSION = "skill-package.v1"
+SKILL_PACKAGE_READINESS_SCHEMA_VERSION = "skill-package-readiness.v1"
+SKILL_PACKAGE_COMPATIBILITY_SNAPSHOT_ID = "skill-package-readiness.v1.public-output.2026-05-23"
+SKILL_PACKAGE_SCHEMA_PATH = "Infrastructure/config/schemas/skill-package.v1.schema.json"
+SKILL_PACKAGE_READINESS_SCHEMA_PATH = "Infrastructure/config/schemas/skill-package-readiness.v1.schema.json"
+SKILL_PACKAGE_SNAPSHOT_PATH = (
+    "Infrastructure/tests/fixtures/skill_package_snapshots/"
+    "skill-package-readiness-public-output.v1.json"
+)
+CODEX_SKILL_PACKAGE_ABI_SOURCE_PATH = "codex-rs/core-skills/src/model.rs"
+CODEX_SKILL_PACKAGE_ABI_EVIDENCE_FIELDS: tuple[str, ...] = CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS
+CODEX_SKILL_PACKAGE_REQUIRED_FIELDS: tuple[str, ...] = tuple(
+    field for field, required in CODEX_SKILL_PACKAGE_FIELDS if required
+)
+CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS: tuple[str, ...] = tuple(
+    field for field, required in CODEX_SKILL_PACKAGE_FIELDS if not required
+)
+
+
+def _codex_skill_package_abi_source() -> dict[str, Any]:
+    """Return repo-neutral provenance for the Codex SkillMetadata ABI shape."""
+    return {
+        "path": CODEX_SKILL_PACKAGE_ABI_SOURCE_PATH,
+        "struct": "SkillMetadata",
+        "evidence_fields": list(CODEX_SKILL_PACKAGE_ABI_EVIDENCE_FIELDS),
+    }
+
+
+def skills_load_preview(repo_root: Path) -> CallResult:
+    result = CallResult()
+    result.metadata["command"] = "skills load-preview"
+    result.data["codex_load_preview"] = build_codex_load_preview(repo_root)
+    return result
+
+
+def skills_render_preview(repo_root: Path, context_window: int | None = None) -> CallResult:
+    result = CallResult()
+    result.metadata["command"] = "skills render-preview"
+    result.data["codex_render_preview"] = build_codex_render_preview(repo_root, context_window)
+    return result
+
+
+def skills_config_explain(repo_root: Path) -> CallResult:
+    result = CallResult()
+    result.metadata["command"] = "skills config explain"
+    result.data["codex_config_explain"] = build_codex_config_explain(repo_root)
+    return result
+
+
+def skills_inject_preview(repo_root: Path, text: str) -> CallResult:
+    result = CallResult()
+    result.metadata["command"] = "skills inject-preview"
+    result.data["codex_inject_preview"] = build_codex_inject_preview(repo_root, text)
+    return result
+
+
+def skills_implicit_preview(repo_root: Path, command: str, workdir: str | None = None) -> CallResult:
+    result = CallResult()
+    result.metadata["command"] = "skills implicit-preview"
+    result.data["codex_implicit_preview"] = build_codex_implicit_preview(repo_root, command, workdir)
+    return result
+
 
 def _metadata_value(frontmatter: dict[str, Any], field: str) -> Any:
     """Return a package field from top-level frontmatter or nested metadata."""
@@ -2638,6 +2912,206 @@ def _package_field_values(frontmatter: dict[str, Any]) -> dict[str, Any]:
         "maturity": values.get("maturity"),
         "provenance": values.get("provenance"),
         "share_readiness": values.get("share_readiness"),
+    }
+
+
+def _read_agents_openai_yaml_fields(skill_md: Path | None) -> dict[str, Any]:
+    """Extract a conservative agents/openai.yaml contract view."""
+    if not skill_md:
+        return {}
+    agents_openai = skill_md.parent / "agents" / "openai.yaml"
+    if not agents_openai.is_file():
+        return {}
+    try:
+        text = agents_openai.read_text(encoding="utf-8")
+    except OSError:
+        return {}
+    if yaml is not None:
+        try:
+            loaded = yaml.safe_load(text) or {}
+        except yaml.YAMLError:
+            loaded = {}
+        if isinstance(loaded, dict):
+            return {str(key): value for key, value in loaded.items()}
+    fields: dict[str, Any] = {}
+    current_map: str | None = None
+    current_nested_key: str | None = None
+    current_list_item: dict[str, Any] | None = None
+    lines = text.splitlines()
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        if current_map and stripped.startswith("- "):
+            nested = fields.setdefault(current_map, {})
+            if not isinstance(nested, dict):
+                continue
+            item_text = stripped[2:].strip()
+            if not current_nested_key:
+                continue
+            values = nested.setdefault(current_nested_key, [])
+            if not isinstance(values, list):
+                values = []
+                nested[current_nested_key] = values
+            if ":" in item_text:
+                item_key, item_value = item_text.split(":", 1)
+                current_list_item = {
+                    item_key.strip(): _parse_frontmatter_scalar(item_value.strip())
+                }
+                values.append(current_list_item)
+            else:
+                values.append(_parse_frontmatter_scalar(item_text))
+                current_list_item = None
+            continue
+        if ":" not in stripped:
+            continue
+        key, value = stripped.split(":", 1)
+        key = key.strip()
+        value = value.strip()
+        if indent == 0:
+            if value:
+                fields[key] = _parse_frontmatter_scalar(value)
+                current_map = None
+                current_nested_key = None
+                current_list_item = None
+            else:
+                fields[key] = {}
+                current_map = key
+                current_nested_key = None
+                current_list_item = None
+            continue
+        if current_map:
+            nested = fields.setdefault(current_map, {})
+            if not isinstance(nested, dict):
+                continue
+            if current_list_item is not None and indent >= 4 and value:
+                current_list_item[key] = _parse_frontmatter_scalar(value)
+                continue
+            if value:
+                nested[key] = _parse_frontmatter_scalar(value)
+                current_nested_key = None
+                current_list_item = None
+            else:
+                nested[key] = []
+                current_nested_key = key
+                current_list_item = None
+    return fields
+
+
+def _skill_package_contract(
+    repo_root: Path,
+    source_path: Path | None,
+    frontmatter: dict[str, Any],
+) -> dict[str, Any]:
+    """Return the Codex-native package contract for SKILL.md plus agents/openai.yaml."""
+    openai_fields = _read_agents_openai_yaml_fields(source_path)
+    interface = frontmatter.get("interface")
+    if not isinstance(interface, dict):
+        interface = {}
+    openai_interface = openai_fields.get("interface")
+    if isinstance(openai_interface, dict):
+        interface = {**interface, **openai_interface}
+
+    dependencies = frontmatter.get("dependencies")
+    if not isinstance(dependencies, dict):
+        dependencies = {}
+    openai_dependencies = openai_fields.get("dependencies")
+    if isinstance(openai_dependencies, dict):
+        dependencies = {**dependencies, **openai_dependencies}
+    policy = frontmatter.get("policy")
+    if not isinstance(policy, dict):
+        policy = {}
+    openai_policy = openai_fields.get("policy")
+    if isinstance(openai_policy, dict):
+        policy = {**policy, **openai_policy}
+
+    codex_metadata = {
+        "name": frontmatter.get("name"),
+        "description": frontmatter.get("description"),
+        "short_description": frontmatter.get("short_description")
+        or interface.get("short_description"),
+        "interface": interface or None,
+        "dependencies": dependencies or None,
+        "policy": policy or None,
+        "scope": frontmatter.get("scope"),
+        "plugin_id": frontmatter.get("plugin_id"),
+    }
+    required_present = sorted(
+        field for field in CODEX_SKILL_PACKAGE_REQUIRED_FIELDS if codex_metadata.get(field)
+    )
+    required_missing = sorted(
+        field for field in CODEX_SKILL_PACKAGE_REQUIRED_FIELDS if not codex_metadata.get(field)
+    )
+    optional_present = sorted(
+        field for field in CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS if codex_metadata.get(field)
+    )
+    source_rel = _repo_relative_path(repo_root, source_path) if source_path else None
+    openai_rel = None
+    if source_path:
+        openai_path = source_path.parent / "agents" / "openai.yaml"
+        if openai_path.is_file():
+            openai_rel = _repo_relative_path(repo_root, openai_path)
+    return {
+        "schema_version": SKILL_PACKAGE_SCHEMA_VERSION,
+        "source_files": {
+            "skill_md": source_rel,
+            "agents_openai_yaml": openai_rel,
+        },
+        "codex_abi_source": _codex_skill_package_abi_source(),
+        "metadata": codex_metadata,
+        "required_fields": {
+            "present": required_present,
+            "missing": required_missing,
+        },
+        "optional_fields": {
+            "present": optional_present,
+        },
+        "compatibility_status": "blocked_validation" if required_missing else "compatible",
+    }
+
+
+def _empty_skill_package_contract() -> dict[str, Any]:
+    """Return a package contract for unresolved or missing source paths."""
+    return {
+        "schema_version": SKILL_PACKAGE_SCHEMA_VERSION,
+        "source_files": {
+            "skill_md": None,
+            "agents_openai_yaml": None,
+        },
+        "codex_abi_source": _codex_skill_package_abi_source(),
+        "metadata": {
+            "name": None,
+            "description": None,
+            "short_description": None,
+            "interface": None,
+            "dependencies": None,
+            "policy": None,
+            "scope": None,
+            "plugin_id": None,
+        },
+        "required_fields": {
+            "present": [],
+            "missing": list(CODEX_SKILL_PACKAGE_REQUIRED_FIELDS),
+        },
+        "optional_fields": {
+            "present": [],
+        },
+        "compatibility_status": "blocked_missing_source",
+    }
+
+
+def _skill_package_compatibility_snapshot() -> dict[str, Any]:
+    """Return the public package-output snapshot identity for drift tests."""
+    return {
+        "id": SKILL_PACKAGE_COMPATIBILITY_SNAPSHOT_ID,
+        "schema_version": SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
+        "path": SKILL_PACKAGE_SNAPSHOT_PATH,
+        "covers": [
+            "valid_share_ready_package",
+            "missing_source_package",
+            "strict_incomplete_package",
+        ],
     }
 
 
@@ -2986,11 +3460,13 @@ def skills_package(
                 "recommended_next_fields": list(PACKAGE_CONTRACT_FIELDS),
             },
         }
+        skill_package_contract = _empty_skill_package_contract()
     else:
         try:
             frontmatter = _read_skill_frontmatter_fields(source_path)
         except OSError:
             frontmatter = {}
+        skill_package_contract = _skill_package_contract(repo_root, source_path, frontmatter)
         package_contract = _skill_package_readiness(frontmatter)
         missing_fields = package_contract["required_fields"]["missing"]
         gate_blockers = package_contract["install_gate"]["blocked_reasons"]
@@ -3060,7 +3536,7 @@ def skills_package(
     )
     lifecycle_events = [lifecycle_event, readiness_event]
     payload = {
-        "schema_version": "skill-package-readiness.v1",
+        "schema_version": SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
         "query": query,
         "target_kind": target_info.get("target_kind"),
         "handle": target_info.get("handle"),
@@ -3075,11 +3551,22 @@ def skills_package(
         ),
         "status": status,
         "strict": strict,
+        "package_schema": {
+            "schema_version": SKILL_PACKAGE_SCHEMA_VERSION,
+            "path": SKILL_PACKAGE_SCHEMA_PATH,
+        },
+        "package_readiness_schema": {
+            "schema_version": SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
+            "path": SKILL_PACKAGE_READINESS_SCHEMA_PATH,
+        },
+        "compatibility_snapshot": _skill_package_compatibility_snapshot(),
+        "skill_package_contract": skill_package_contract,
         "package_contract": package_contract,
         "gate_summary": gate_summary,
         "readiness_summary": readiness_summary,
         "contract_schemas": {
-            "package": "skill-package-readiness.v1",
+            "package": SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
+            "skill_package": SKILL_PACKAGE_SCHEMA_VERSION,
             "events": "skill-events.v1",
             "lifecycle_event": "capability-lifecycle-event.v1",
             "profiles": "skill-operation-profiles.v1",
@@ -3123,7 +3610,12 @@ def skills_package(
     return result
 
 
-def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallResult:
+def skills_doctor(
+    repo_root: Path,
+    target: str,
+    strict: bool = False,
+    codex_parity: bool = False,
+) -> CallResult:
     """Run a compact per-capability diagnostic for a skill handle or source path."""
     result = CallResult()
     result.metadata["command"] = "skills doctor"
@@ -3158,13 +3650,30 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
                 )
             )
 
-        proof_result = skills_proof(repo_root, str(normalized_handle))
+        proof_runtime_target = "codex" if codex_parity else "any"
+        proof_result = skills_proof(repo_root, str(normalized_handle), runtime_target=proof_runtime_target)
         proof = proof_result.data.get("proof", {})
+        runtime_failure = (
+            proof.get("runtime_failure")
+            if isinstance(proof, dict) and isinstance(proof.get("runtime_failure"), dict)
+            else proof_result.data.get("runtime_failure")
+        )
+        proof_command_args = [str(normalized_handle)]
+        if codex_parity:
+            proof_command_args.extend(["--runtime-target", "codex"])
         checks["runtime_reachability"] = _doctor_check(
             proof.get("status", "fail") if isinstance(proof, dict) else "fail",
             check_name="runtime_reachability",
-            command=_skills_validation_command("proof", str(normalized_handle)),
+            command=_skills_validation_command("proof", *proof_command_args),
+            codex_parity=codex_parity,
+            runtime_target=proof_runtime_target,
+            gate_policy=proof.get("gate_policy", {}) if isinstance(proof, dict) else {},
             gates=proof.get("gates", {}) if isinstance(proof, dict) else {},
+            runtime_failure=runtime_failure if isinstance(runtime_failure, dict) else None,
+            error_code=runtime_failure.get("error_code") if isinstance(runtime_failure, dict) else None,
+            failed_check_id=runtime_failure.get("failed_check_id") if isinstance(runtime_failure, dict) else None,
+            path=runtime_failure.get("path") if isinstance(runtime_failure, dict) else None,
+            recovery_guidance=runtime_failure.get("recovery_guidance") if isinstance(runtime_failure, dict) else None,
         )
         if proof_result.status != "success":
             blockers.append(
@@ -3179,6 +3688,20 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
             check_name="resolver",
             reason="Path targets are audited as canonical source; command-handle proof requires a handle.",
         )
+        if codex_parity:
+            checks["runtime_reachability"] = _doctor_check(
+                "fail",
+                check_name="runtime_reachability",
+                codex_parity=True,
+                runtime_target="codex",
+                reason="Codex parity requires a command-handle target so Codex runtime proof can run.",
+            )
+            blockers.append(
+                _doctor_blocker(
+                    "blocked_runtime",
+                    "Codex parity requires a command-handle target.",
+                )
+            )
 
     source_exists = bool(target_info.get("source_exists"))
     checks["canonical_source"] = _doctor_check(
@@ -3271,7 +3794,7 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
             )
         )
     doctor_status = "blocked" if blockers else ("warning" if warnings else "pass")
-    next_command = _skill_doctor_next_command(
+    next_command_decision = _skill_doctor_next_command_decision(
         blockers=blockers,
         warnings=warnings,
         checks=checks,
@@ -3280,6 +3803,7 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
         audit_target=audit_target,
         strict=strict,
     )
+    next_command = str(next_command_decision["command"])
 
     handle_label = "$" + str(normalized_handle) if normalized_handle else query
     lifecycle_event = _capability_lifecycle_event(
@@ -3332,6 +3856,7 @@ def skills_doctor(repo_root: Path, target: str, strict: bool = False) -> CallRes
             )
         ),
         "next_command": next_command,
+        "next_command_decision": next_command_decision,
     }
     if blockers:
         result.status = "error"
@@ -5371,7 +5896,17 @@ def improve_skills(
     gates = proof.get("gates", {}) if isinstance(proof, dict) else {}
     required = proof.get("gate_policy", {}).get("required", []) if isinstance(proof, dict) else []
     required_gates_passed = all(bool(gates.get(gate)) for gate in required)
-    user_runtime_ready = bool(gates.get("user_runtime_ready"))
+    user_runtime_ready = bool(
+        gates.get("user_runtime_ready")
+        or (
+            gates.get("codex_user_link")
+            and gates.get("codex_user_command_handle_exists")
+        )
+        or (
+            gates.get("agents_user_link")
+            and gates.get("agents_user_command_handle_exists")
+        )
+    )
     rationale = recommended.get("rationale") or []
     capability = {
         "handle": handle,
@@ -5656,6 +6191,69 @@ def _prune_generated_root_skill_dirs(target_dir: Path, keep_names: set[str], *, 
     return logs
 
 
+SYSTEM_BRIDGE_ALIAS_MARKER = ".agent-skills-system-bridge-alias.json"
+
+
+def _is_generated_system_bridge_alias(item: Path, system_source: Path) -> bool:
+    if item.is_symlink():
+        try:
+            return item.resolve(strict=True) == system_source.resolve(strict=True)
+        except OSError:
+            return False
+
+    marker = (
+        item / SYSTEM_BRIDGE_ALIAS_MARKER
+        if item.is_dir()
+        else item.parent / f".{item.name}-{SYSTEM_BRIDGE_ALIAS_MARKER}"
+    )
+    if not marker.is_file():
+        return False
+    try:
+        payload = json.loads(marker.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if payload.get("kind") != "system_bridge_alias":
+        return False
+    try:
+        target = system_source.parent / str(payload.get("target", ""))
+        return target.resolve(strict=True) == system_source.resolve(strict=True)
+    except OSError:
+        return False
+
+
+def _prune_first_level_system_bridge_aliases(
+    target_dir: Path,
+    system_skills_dir: Path,
+    *,
+    dry_run: bool = False,
+) -> list[str]:
+    """Remove stale first-level aliases for skills that belong in the hidden system lane."""
+    logs: list[str] = []
+    if not target_dir.exists() or not system_skills_dir.is_dir():
+        return logs
+
+    for bridge_skill in sorted(SYSTEM_BRIDGE_SKILL_NAMES):
+        item = target_dir / bridge_skill
+        system_source = system_skills_dir / bridge_skill
+        if not (item.exists() or item.is_symlink()):
+            continue
+        if not (system_source / "SKILL.md").exists():
+            continue
+
+        if not _is_generated_system_bridge_alias(item, system_source):
+            logs.append(f"Skipped first-level system bridge alias without generated provenance: {item}")
+            continue
+
+        logs.append(f"Removed first-level system bridge alias: {item}")
+        if dry_run:
+            continue
+        if item.is_symlink() or item.is_file():
+            item.unlink()
+        else:
+            shutil.rmtree(item)
+    return logs
+
+
 def _public_root_report(report: dict) -> dict:
     return {
         **report,
@@ -5860,8 +6458,8 @@ def _sync_rooted_projection(
     system_skills_dir: Path,
 ) -> tuple[bool, list[ErrorObject]]:
     """Generate the rooted runtime projection and latent manifests."""
-    root_report = build_roots(skills_dir)
-    manifest_report = build_manifest_report(repo_root / ".skillsets")
+    root_report = build_roots(skills_dir, repo_root_path=repo_root)
+    manifest_report = build_manifest_report(repo_root / ".skillsets", repo_root_path=repo_root)
     command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=True)
     command_handle_write = write_command_handles(repo_root_path=repo_root, dry_run=True)
     plan["root_skill_sets"] = _public_root_report(root_report)
@@ -5916,6 +6514,13 @@ def _sync_rooted_projection(
         try:
             pre_prune_logs = _prune_first_level_symlinks(skills_dir, keep_names, dry_run)
             pre_prune_logs.extend(_prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run))
+            pre_prune_logs.extend(
+                _prune_first_level_system_bridge_aliases(
+                    skills_dir,
+                    system_skills_dir,
+                    dry_run=dry_run,
+                )
+            )
             prune_logs = prune_unowned_skillset_files(repo_root / ".skillsets", dry_run)
             root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
             manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
@@ -5948,6 +6553,13 @@ def _sync_rooted_projection(
             plan["deletes"].append(log)
             logs.append(log)
         for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run):
+            plan["deletes"].append(log)
+            logs.append(log)
+        for log in _prune_first_level_system_bridge_aliases(
+            skills_dir,
+            system_skills_dir,
+            dry_run=dry_run,
+        ):
             plan["deletes"].append(log)
             logs.append(log)
     except OSError as exc:

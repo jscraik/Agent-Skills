@@ -27,6 +27,9 @@ DOCTOR_SIGNAL_PRIORITY = {
     "repo_surface": 60,
 }
 PACKAGE_READINESS_SENTINEL = "skill-builder"
+COMMAND_HANDLE_CHECK_COMMAND = (
+    "./bin/ask skills handles --check --no-handles --check-command-handles --json --robot"
+)
 GENERATED_SURFACE_PREFIXES = (
     ".agents/skills/",
     ".skillsets/",
@@ -457,12 +460,60 @@ def _runtime_budget_signal(runtime_result: CallResult) -> dict[str, Any]:
 def _command_handles_signal(handles_result: CallResult) -> dict[str, Any]:
     report = handles_result.data.get("command_surface", {})
     violations = report.get("violations") or []
+    projection_check_raw = handles_result.data.get("command_surface_projection_check")
+    projection_check = projection_check_raw if isinstance(projection_check_raw, dict) else {}
+    projection_violations = projection_check.get("violations") or []
+    command_handle_check_raw = handles_result.data.get("command_handle_check")
+    command_handle_check = command_handle_check_raw if isinstance(command_handle_check_raw, dict) else {}
+    generated_violations = command_handle_check.get("violations") or []
+    missing_required_checks = [
+        name
+        for name, payload in (
+            ("command_surface_projection_check", projection_check_raw),
+            ("command_handle_check", command_handle_check_raw),
+        )
+        if not isinstance(payload, dict)
+    ]
     details = {
         "status": report.get("status"),
         "handle_count": report.get("handle_count"),
         "violation_count": len(violations),
+        "command_surface_projection": {
+            "status": projection_check.get("status"),
+            "path": projection_check.get("path"),
+            "violation_count": len(projection_violations),
+            "violation_codes": sorted(
+                {
+                    str(violation.get("code"))
+                    for violation in projection_violations
+                    if violation.get("code")
+                }
+            ),
+        },
+        "generated_command_handles": {
+            "status": command_handle_check.get("status"),
+            "command_handle_count": command_handle_check.get("command_handle_count"),
+            "checked_count": command_handle_check.get("checked_count"),
+            "violation_count": len(generated_violations),
+            "violation_codes": sorted(
+                {
+                    str(violation.get("code"))
+                    for violation in generated_violations
+                    if violation.get("code")
+                }
+            ),
+        },
+        "missing_required_checks": missing_required_checks,
     }
-    if handles_result.status == "success" and report.get("status") == "pass":
+    generated_check_pass = command_handle_check.get("status") == "pass"
+    projection_check_pass = projection_check.get("status") == "pass"
+    if (
+        handles_result.status == "success"
+        and report.get("status") == "pass"
+        and not missing_required_checks
+        and projection_check_pass
+        and generated_check_pass
+    ):
         return {
             "state": "pass",
             "severity": "info",
@@ -470,16 +521,37 @@ def _command_handles_signal(handles_result: CallResult) -> dict[str, Any]:
             "source": "skills_handles",
             "details": details,
         }
-    if violations:
+    if missing_required_checks:
+        summary = (
+            "Command-handle validation payload missing required generated check(s): "
+            + ", ".join(missing_required_checks)
+            + "."
+        )
+        details["failure_code"] = "command_handle_subcheck_missing"
+    elif generated_violations:
+        summary = f"Generated command-handle check found {len(generated_violations)} violation(s)."
+        details["failure_code"] = "generated_command_handle_check_failed"
+    elif projection_violations:
+        summary = f"Command-surface projection check found {len(projection_violations)} violation(s)."
+        details["failure_code"] = "command_surface_projection_check_failed"
+    elif command_handle_check.get("status") != "pass":
+        summary = "Generated command-handle check failed without explicit violations."
+        details["failure_code"] = "generated_command_handle_check_status_failed"
+    elif projection_check.get("status") != "pass":
+        summary = "Command-surface projection check failed without explicit violations."
+        details["failure_code"] = "command_surface_projection_check_status_failed"
+    elif violations:
         summary = f"Command-handle validation found {len(violations)} violation(s)."
+        details["failure_code"] = "command_surface_validation_failed"
     else:
         summary = _error_summary(handles_result, "Command-handle validation failed.")
+        details["failure_code"] = "command_handle_validation_failed"
     return {
         "state": "block",
         "severity": "blocker",
         "summary": summary,
         "source": "skills_handles",
-        "next_command": "./bin/ask skills handles --check --json --robot",
+        "next_command": COMMAND_HANDLE_CHECK_COMMAND,
         "details": details,
     }
 
@@ -869,7 +941,12 @@ def repo_doctor(repo_root: Path) -> CallResult:
                     ),
                     "command_handles": _safe_signal(
                         lambda: _command_handles_signal(
-                            skills_handles(repo_root, check=True, include_handles=False)
+                            skills_handles(
+                                repo_root,
+                                check=True,
+                                include_handles=False,
+                                check_command_handle_files=True,
+                            )
                         )
                     ),
                     "capability_readiness": _safe_signal(
@@ -976,11 +1053,11 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
         commands.extend(
             [
                 "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
-                "./bin/ask skills handles --check --json --robot",
+                COMMAND_HANDLE_CHECK_COMMAND,
             ]
         )
     elif generated_changed:
-        validation_commands.append("./bin/ask skills handles --check --json --robot")
+        validation_commands.append(COMMAND_HANDLE_CHECK_COMMAND)
     return {
         "needed": bool(commands),
         "commands": commands,
@@ -1130,7 +1207,7 @@ def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any
             {
                 "id": "skill_handles",
                 "reason": "Validate generated command handles for changed projection files.",
-                "command": "./bin/ask skills handles --check --json --robot",
+                "command": COMMAND_HANDLE_CHECK_COMMAND,
             }
         )
     if changed_files:

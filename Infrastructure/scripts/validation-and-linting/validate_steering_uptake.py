@@ -207,7 +207,19 @@ def validate(root: Path = ROOT) -> list[Finding]:
         findings.append(Finding("STEERING_DOC_MISSING", "High-signal steering feedback doc is missing.", _relative(doc_path, root)))
     else:
         doc = _read(doc_path)
-        for phrase in ["Stop Rule", "Uptake Loop", "Required Evidence", "validate_steering_uptake.py"]:
+        for phrase in [
+            "Stop Rule",
+            "Proof Before Proceeding",
+            "Scope Closure Authority",
+            "full implementation",
+            "explicitly approves that scope change",
+            "claim-vs-evidence closeout check",
+            "closeout caveat",
+            "changes future behavior",
+            "Uptake Loop",
+            "Required Evidence",
+            "validate_steering_uptake.py",
+        ]:
             if phrase not in doc:
                 findings.append(Finding("STEERING_DOC_INCOMPLETE", f"Missing required phrase: {phrase}", _relative(doc_path, root)))
 
