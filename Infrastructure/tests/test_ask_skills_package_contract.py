@@ -257,6 +257,63 @@ class TestAskSkillsPackageContract(unittest.TestCase):
             "Skill Builder",
         )
 
+    def test_skill_package_contract_merges_agents_openai_policy_and_dependencies(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "codex-package"
+            agents_dir = skill_dir / "agents"
+            agents_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: codex-package
+description: Codex package metadata fixture.
+dependencies:
+  frontmatter_tool: required
+policy:
+  frontmatter_policy: strict
+---
+
+# Codex Package
+""",
+                encoding="utf-8",
+            )
+            (agents_dir / "openai.yaml").write_text(
+                """interface:
+  short_description: OpenAI package fixture.
+dependencies:
+  openai_tool: required
+policy:
+  openai_policy: strict
+""",
+                encoding="utf-8",
+            )
+
+            contract = skills_package(
+                repo_root,
+                "Skills/agent-ops/codex-package",
+            ).data["skill_package"]["skill_package_contract"]
+
+        self.assertEqual(
+            contract["metadata"]["dependencies"],
+            {
+                "frontmatter_tool": "required",
+                "openai_tool": "required",
+            },
+        )
+        self.assertEqual(
+            contract["metadata"]["policy"],
+            {
+                "frontmatter_policy": "strict",
+                "openai_policy": "strict",
+            },
+        )
+        self.assertEqual(
+            contract["metadata"]["short_description"],
+            "OpenAI package fixture.",
+        )
+        self.assertIn("dependencies", contract["optional_fields"]["present"])
+        self.assertIn("policy", contract["optional_fields"]["present"])
+
     def test_skill_package_schema_rejects_missing_identity_contract(self) -> None:
         schema = self.schemas["skill-package.v1.schema.json"]
         invalid_contract = {

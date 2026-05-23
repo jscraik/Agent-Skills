@@ -475,5 +475,21 @@
     <p>Governor disposition: commit and push this review-remediation boundary to PR #192, then refresh PR checks, review-thread state, and Linear state before any next implementation slice. The board remains blocked until the post-push delivery truth is known.</p>
     <p>Rebase discovery: while pushing, the remote branch advanced with a CodeRabbit autofix commit. Rebasing exposed that <code>Infrastructure/tests/test_ask_skills_doctor.py</code> imported <code>helpers.schema_validator</code> but the helper package was not present in the branch tree. The remediation commit now adds <code>Infrastructure/tests/helpers/schema_validator.py</code> and <code>Infrastructure/tests/helpers/__init__.py</code> so the shared validator import is real and repeatable.</p>
   </section>
+  <section class="entry validation">
+    <h2>PR #192 Post-Push Review Thread Remediation At Head 9a4ee3c</h2>
+    <p>Runtime truth: commit <code>9a4ee3c44330cd551f86cc91db45941453539fc9</code> was pushed to <code>codex/jsc-351-abi-conformance</code>. A fresh subagent triage artifact was written at <code>artifacts/reviews/jsc-351-pr192-triage-lane/post-push-9a4ee3c.md</code>. The artifact records PR #192 as open, no longer draft, mergeable but blocked, with pending checks at first refresh and one current unresolved review thread.</p>
+    <p>Review-thread classification: the unresolved thread at <code>Infrastructure/scripts/lib/ask/commands/skills_impl.py:2970</code> was valid. The SkillPackage contract merged <code>agents/openai.yaml</code> interface metadata, but dependencies and policy were read only from <code>SKILL.md</code> frontmatter. That under-reported Codex-native package metadata and contradicted the SkillPackage v1 parity goal.</p>
+    <p>Fix applied: <code>_skill_package_contract</code> now merges <code>agents/openai.yaml</code> <code>dependencies</code> and <code>policy</code> maps over frontmatter maps before building <code>codex_metadata</code>. A focused package-contract regression test creates a temporary package with frontmatter metadata and <code>agents/openai.yaml</code> metadata, then asserts both maps and the OpenAI short description are present in the emitted contract.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_ask_skills_package_contract.py -q</code></td><td>Pass: 9 tests.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q</code></td><td>Pass: 15 tests and 15 subtests.</td></tr>
+      <tr><td><code>/usr/bin/python3 -m py_compile Infrastructure/scripts/lib/ask/commands/skills_impl.py Infrastructure/tests/test_ask_skills_package_contract.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>./bin/ask repo doctor --json --robot</code></td><td>Pass with blocking=false; only diagnostic ask bootstrap and repo surface warnings remain.</td></tr>
+      <tr><td><code>git diff --check HEAD</code></td><td>Pass.</td></tr>
+    </table>
+    <p>Tooling discovery: the GitHub MCP transport closed during refresh, so the governor used <code>gh</code> with trusted <code>mise</code> and sandboxed network permission for live PR checks and GraphQL review-thread inspection. This is a tooling blocker classification, not evidence that the GitHub service was unavailable.</p>
+    <p>Governor disposition: commit and push this follow-up remediation, then refresh PR checks, review-thread state, Linear state, and mergeability before any PU-006 service extraction work. The continuation gate remains blocked until that post-push truth is known.</p>
+  </section>
 </body>
 </html>

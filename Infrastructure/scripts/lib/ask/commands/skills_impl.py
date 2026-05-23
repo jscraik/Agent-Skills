@@ -2965,9 +2965,15 @@ def _skill_package_contract(
     dependencies = frontmatter.get("dependencies")
     if not isinstance(dependencies, dict):
         dependencies = {}
+    openai_dependencies = openai_fields.get("dependencies")
+    if isinstance(openai_dependencies, dict):
+        dependencies = {**dependencies, **openai_dependencies}
     policy = frontmatter.get("policy")
     if not isinstance(policy, dict):
         policy = {}
+    openai_policy = openai_fields.get("policy")
+    if isinstance(openai_policy, dict):
+        policy = {**policy, **openai_policy}
 
     codex_metadata = {
         "name": frontmatter.get("name"),
