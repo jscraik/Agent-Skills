@@ -542,5 +542,13 @@
     </table>
     <p>Governor disposition: commit and push this follow-up remediation, then refresh PR checks, review threads, mergeability, Linear state, and subagent triage. No PU-006 service extraction work is approved until that post-push runtime truth is known.</p>
   </section>
+  <section class="entry validation">
+    <h2>PR #192 Branch-After-Merge Delivery Triage</h2>
+    <p>Runtime truth contradicted the expected delivery lane: PR #192 is already merged at head <code>5f20d846e7837eb05bf123f6e87ee9a9bb406ff8</code>, while the remediation commit <code>5df1682deb34d1e391b1b5a4af3e40f360006143</code> was pushed to the feature branch after the merge. The commit is not contained in <code>origin/main</code>. The safe delivery path is a follow-up PR from <code>codex/jsc-351-post-merge-review-remediation</code> rather than resolving merged PR #192 as if it were still live.</p>
+    <p>Subagent triage: the retry artifact was written at <code>artifacts/reviews/jsc-351-pr192-triage-lane/branch-after-merge-5df1682.md</code> after the first subagent pass inspected the stale root checkout. This is a stale-state recovery event and the governor treats the retry artifact as the operative triage evidence.</p>
+    <p>Validation discovery: <code>bash scripts/validate-codestyle.sh</code> and <code>./bin/ask repo validate --json --robot</code> both passed. The non-ephemeral repo validation refreshed <code>Infrastructure/GOVERNANCE/runtime-separation/current.json</code> and <code>Infrastructure/artifacts/selection-quality/history.jsonl</code>; those validation artifacts are being committed as proof-state output before opening the follow-up draft PR. A first commit attempt failed because hooks did not trust this worktree's <code>.mise.toml</code>; <code>mise trust --yes .mise.toml</code> fixed the runtime trust blocker without bypassing hooks.</p>
+    <p>Repeated-failure uptake: a second commit attempt hit the same hook-facing trust failure because <code>mise trust</code> needs write access to <code>/Users/jamiecraik/.local/state/mise</code> when the worktree lives under <code>/private/tmp</code>. The governor recorded this as a steering-uptake recovery handler in <code>.harness/quality/steering-uptake.md</code> and re-ran <code>mise trust --yes .mise.toml</code> with that exact write root before retrying hooks. This keeps the lane on deterministic hook validation rather than bypassing pre-commit.</p>
+    <p>Governor disposition: open a new draft PR after the proof-state commit and push. PR #192 is historical evidence only for the merged 5f20 head; it is not merge-safety evidence for the 5df remediation commit or its proof-state follow-up.</p>
+  </section>
 </body>
 </html>
