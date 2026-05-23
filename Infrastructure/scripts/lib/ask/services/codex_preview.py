@@ -7,6 +7,11 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+try:
+    import yaml  # type: ignore
+except ImportError:  # pragma: no cover - exercised only in minimal runtimes
+    yaml = None
+
 
 CODEX_PREVIEW_SCHEMA_VERSION = "codex-skill-runtime-preview.v1"
 CODEX_PREVIEW_MODELED_RULE_VERSION = "codex-core-skills.2026-05-23.source-model.v1"
@@ -111,12 +116,20 @@ def _read_agents_openai_yaml_fields(skill_md: Path | None) -> dict[str, Any]:
     agents_openai = skill_md.parent / "agents" / "openai.yaml"
     if not agents_openai.is_file():
         return {}
-    fields: dict[str, Any] = {}
-    current_map: str | None = None
     try:
-        lines = agents_openai.read_text(encoding="utf-8").splitlines()
+        text = agents_openai.read_text(encoding="utf-8")
     except OSError:
         return {}
+    if yaml is not None:
+        try:
+            loaded = yaml.safe_load(text) or {}
+        except yaml.YAMLError:
+            loaded = {}
+        if isinstance(loaded, dict):
+            return {str(key): value for key, value in loaded.items()}
+    fields: dict[str, Any] = {}
+    current_map: str | None = None
+    lines = text.splitlines()
     for line in lines:
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
@@ -629,11 +642,22 @@ def _extract_preview_mentions(text: str) -> dict[str, set[str]]:
         path = match.group(2).strip()
         if name:
             names.add(name)
-        if path:
-            paths.add(path.removeprefix("skill://"))
+        normalized_path = _normalize_preview_skill_path_reference(path)
+        if normalized_path:
+            paths.add(normalized_path)
     for match in re.finditer(r"(?<![A-Za-z0-9_])\$([A-Za-z0-9_.:-]+)", text):
         names.add(match.group(1))
     return {"names": names, "paths": paths}
+
+
+def _normalize_preview_skill_path_reference(path: str) -> str | None:
+    """Normalize skill:// directory and SKILL.md links to the preview skill path."""
+    normalized = path.removeprefix("skill://").strip().rstrip("/")
+    if not normalized:
+        return None
+    if normalized.endswith("/SKILL.md") or normalized == "SKILL.md":
+        return normalized
+    return f"{normalized}/SKILL.md"
 
 
 def _select_preview_explicit_mentions(skills: list[dict[str, Any]], text: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:

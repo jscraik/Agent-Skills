@@ -491,5 +491,21 @@
     <p>Tooling discovery: the GitHub MCP transport closed during refresh, so the governor used <code>gh</code> with trusted <code>mise</code> and sandboxed network permission for live PR checks and GraphQL review-thread inspection. This is a tooling blocker classification, not evidence that the GitHub service was unavailable.</p>
     <p>Governor disposition: commit and push this follow-up remediation, then refresh PR checks, review-thread state, Linear state, and mergeability before any PU-006 service extraction work. The continuation gate remains blocked until that post-push truth is known.</p>
   </section>
+  <section class="entry validation">
+    <h2>PR #192 Preview Review Thread Remediation At Head a0ed160</h2>
+    <p>Runtime truth: follow-up commit <code>a0ed16032e660d0c2cf97367c7a3b8c9c98baa66</code> was pushed to PR #192. Live checks showed <code>pr-template</code>, CircleCI, docs, risk, graph, structure, and security gates passing at refresh time while CodeQL, Semgrep, audit, check, and test gates were still pending. GraphQL review-thread truth showed the package metadata thread was fixed but still unresolved, and two new current P2 threads existed in <code>Infrastructure/scripts/lib/ask/services/codex_preview.py</code>.</p>
+    <p>Review-thread classification: both new preview findings were valid. The explicit mention matcher normalized <code>skill://</code> links by stripping the scheme only, so a directory-form link such as <code>skill://.agents/skills/a1</code> could not match a skill path stored as <code>.agents/skills/a1/SKILL.md</code>. The <code>agents/openai.yaml</code> reader also used a one-level hand parser that flattened list-valued YAML metadata, which undercut preview accuracy for tool dependency lists.</p>
+    <p>Fix applied: preview path references now normalize directory links to their corresponding <code>SKILL.md</code> path before matching, and <code>agents/openai.yaml</code> is parsed with PyYAML when available so nested lists and maps keep their structure. The fallback hand parser remains in place for minimal runtimes. Regression tests cover duplicate-name disambiguation through a directory-form <code>skill://</code> link and list-valued <code>agents/openai.yaml</code> dependency metadata.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_ask_skills_codex_preview.py -q</code></td><td>Pass: 20 tests.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_ask_skills_package_contract.py -q</code></td><td>Pass: 9 tests.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q</code></td><td>Pass: 15 tests and 15 subtests.</td></tr>
+      <tr><td><code>/usr/bin/python3 -m py_compile Infrastructure/scripts/lib/ask/services/codex_preview.py Infrastructure/scripts/lib/ask/commands/skills_impl.py Infrastructure/tests/test_ask_skills_codex_preview.py Infrastructure/tests/test_ask_skills_package_contract.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>./bin/ask repo doctor --json --robot</code></td><td>Pass with blocking=false; diagnostic ask bootstrap and repo surface warnings remain.</td></tr>
+      <tr><td><code>git diff --check HEAD</code></td><td>Pass.</td></tr>
+    </table>
+    <p>Governor disposition: commit and push the preview remediation, then refresh PR checks, review threads, Linear state, and mergeability. No next slice may start until the current review threads are either resolved or proven stale after the pushed fix.</p>
+  </section>
 </body>
 </html>
