@@ -338,7 +338,7 @@ JSC-354 validation:
 - `./bin/ask skills render-preview --codex-parity --json --robot`
 - `./bin/ask skills config explain --json --robot`
 - `./bin/ask skills inject-preview 'use $context7 for docs' --codex-parity --json --robot`
-- `python3 -m pytest Infrastructure/tests/test_ask_skills_codex_parity.py -q`
+- `python3 -m pytest Infrastructure/tests/test_ask_skills_codex_preview.py -q`
 
 Artifact validation:
 - `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md --json`
