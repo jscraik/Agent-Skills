@@ -1,16 +1,35 @@
 version: 2
 goal:
   slug: jsc-351-agent-skills-codex-abi-conformance
-  status: active
+  status: in_progress
   objective: "Fully implement the JSC-351 Agent Skills Codex ABI Conformance plan and spec through governed, validated, runtime-truth-first slices."
-  native_objective: "Govern and fully implement the JSC-351 Agent Skills Codex ABI Conformance plan/spec in <REPO_ROOT>, using bounded validated slices with runtime-truth-first proof, review-stack governance, implementation notes, tracker/PR/CI triage, and no unresolved blockers or unapproved future-work placeholders."
-  native_status: active
+  native_objective: "Govern and fully implement the JSC-351 Agent Skills Codex ABI Conformance plan/spec in /Users/jamiecraik/dev/agent-skills, using bounded validated slices with runtime-truth-first proof, review-stack governance, implementation notes, tracker/PR/CI triage, and no unresolved blockers or unapproved future-work placeholders."
+  native_status: blocked
   native_goal_id: 019e4cb4-62bd-7f93-8de8-6af42d620e70
   token_budget: null
   tokens_used: 9700
   time_used_seconds: 26
   native_created_at: "2026-05-23T14:28:16Z"
   native_updated_at: "2026-05-23T14:28:42Z"
+governance_evidence:
+  objective: "Fully implement the JSC-351 Agent Skills Codex ABI Conformance plan and spec through governed, validated, runtime-truth-first slices."
+  native_objective: "Govern and fully implement the JSC-351 Agent Skills Codex ABI Conformance plan/spec in /Users/jamiecraik/dev/agent-skills, using bounded validated slices with runtime-truth-first proof, review-stack governance, implementation notes, tracker/PR/CI triage, and no unresolved blockers or unapproved future-work placeholders."
+  outstanding_gates:
+    - id: PR-196-MERGE
+      kind: required_PR
+      status: blocked_until_verified
+      evidence: "https://github.com/jscraik/Agent-Skills/pull/196"
+      action: "Push the final closeout/remediation head, verify latest-head checks and review threads, then merge only after GitHub reports clean mergeability."
+    - id: PR-196-REVIEWS
+      kind: unresolved_reviewers
+      status: blocked_until_verified
+      evidence: "GitHub review threads for PR #196"
+      action: "Resolve or explicitly classify every active CodeRabbit/Codex review thread against the latest pushed head."
+    - id: PR-196-CI
+      kind: CI_checks
+      status: blocked_until_verified
+      evidence: "GitHub and CircleCI checks for PR #196 latest head"
+      action: "Wait for all latest-head required checks to pass; stale green checks do not satisfy this gate."
 completion_contract:
   outcome: "The JSC-351 plan and spec are fully implemented through operationally complete, independently validated slices that prove Codex ABI conformance without false readiness claims."
   verification_surface:
@@ -25,14 +44,14 @@ completion_contract:
     - "No partial slices, speculative refactors, placeholder scaffolds, or unapproved future-work handoffs."
     - "Every slice must be operationally complete, independently validated, and leave the repository buildable."
     - "Trust runtime truth over docs, specs, plans, review assumptions, or summaries."
-    - "Do not edit generated runtime projections, plugin caches, user/global runtime config, or unrelated repos."
+    - "Do not edit generated runtime projections, plugin caches, user/global runtime config, or unrelated repos as manual implementation targets; generated projections may only change through repo-owned sync commands when validation requires a refreshed proof surface."
     - "Stop on unresolved blockers, stale validation, unclear blast radius, merge-safety ambiguity, or deterministic verification failure."
   boundaries:
-    - "Target repository is <REPO_ROOT>."
+    - "Target repository is /Users/jamiecraik/dev/agent-skills."
     - "Canonical plan is .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md."
     - "Canonical spec is .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md."
     - "Implementation notes are .harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html."
-    - "Do not edit .agents/**, .skillsets/**, Plugins/cache/**, runtime/**, user/global config, or unrelated repos as implementation targets."
+    - "Do not edit .agents/**, .skillsets/**, Plugins/cache/**, runtime/**, user/global config, or unrelated repos as manual implementation targets; .skillsets/** may be refreshed only by repo-owned sync/generator commands with validation evidence."
   iteration_policy: "Govern one bounded slice at a time, declare allowed files and validation before implementation, run mandatory validation and review stack, update notes, hand off delivery triage only after a validated safe state, and continue only after the governor confirms no blocker or stale-state contradiction remains."
   blocked_stop_condition: "Stop on unverifiable runtime safety, unclear merge safety, increased architecture drift, stale validation, deterministic verification failure, unresolved blockers, unclear blast radius, ambiguous governance, retry-without-progress, review churn, or user steering that changes the objective."
 rules:
@@ -43,30 +62,30 @@ checks:
   dirty_fingerprint: "main...origin/main ahead 5 with pre-existing dirty tree observed 2026-05-23T14:30:18Z"
   last_verification:
     command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
-    outcome: "pass"
-    checked_at: "2026-05-23T17:18:51Z"
+    outcome: pass
+    checked_at: "2026-05-24T07:34:06Z"
   last_delivery_attempt:
-    command: "git switch -c codex/jsc-351-abi-conformance && git add -- <classified JSC-351 files> && bash scripts/validate-codestyle.sh && ./bin/ask repo validate --json --robot"
-    outcome: branch_staged_required_validation_failed
-    checked_at: "2026-05-23T19:19:19Z"
-    detail: "Dedicated delivery branch exists and JSC-351-owned files are staged. Required gates failed with three required failures: missing plugin-factory README projection paths in question lifecycle, lifecycle readiness missing imagegen in tracked system-skill repo discovery, and projection integrity drift across harness-engineering/plugin-factory/skill-factory mirrors."
+    command: "PU-008 closeout governance commit prepared after review-remediation push and latest-head triage"
+    outcome: ready_for_final_push_triage
+    checked_at: "2026-05-24T07:34:06Z"
+    detail: "PU-008 review-remediation commit e48b09fd6276537d19e86f47e75139ff58f9aaa7 was pushed. PR #196 checks, CodeRabbit, CircleCI, mergeability, and review-thread state passed for that exact head in governor and subagent artifacts. This closeout-state commit intentionally excludes post-push proof artifacts because committing latest-head proof creates another head; after this commit is pushed, fresh uncommitted governor and subagent triage artifacts must verify the final head before final completion is claimed."
   last_pr_state:
-    url: null
-    number: null
-    state: "absent"
-    draft: null
-    mergeable: null
-    checked_at: "2026-05-23T19:19:19Z"
-    outcome: pending_draft_pr_after_validation_truth_capture
-    detail: "Branch and staged diff exist; draft PR must be opened with failing validation truth before any further implementation slice begins."
+    url: "https://github.com/jscraik/Agent-Skills/pull/196"
+    number: 196
+    state: open
+    draft: true
+    mergeable: MERGEABLE
+    checked_at: "2026-05-24T07:26:08Z"
+    outcome: pass_for_review_remediation_head_before_closeout_commit
+    detail: "PR #196 was open draft, mergeable, green, and had 0 active inline review comments at review-remediation head e48b09fd6276537d19e86f47e75139ff58f9aaa7. Draft state and empty GitHub reviewDecision remain final-delivery constraints; they do not invalidate implementation proof, but undraft/merge requires owner-governed delivery action. Any new commit must be pushed and freshly triaged before merge readiness is claimed."
 continuation_gate:
-  native_status: "active"
-  goal_active: "pass"
-  thread_idle: "unknown"
-  queued_user_input: "unknown"
-  pending_work: "present"
+  native_status: complete
+  goal_active: blocked
+  thread_idle: unknown
+  queued_user_input: absent
+  pending_work: absent
   auto_continue_allowed: "no"
-  blocked_by: "draft_pr_and_continuous_triage_surface_missing_after_validation_failure"
+  blocked_by: "none"
 claims:
   - id: C001
     claim: "JSC-351 plan and spec are the canonical local sources for the governed implementation lane."
@@ -165,7 +184,7 @@ tasks:
       - "python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md --kind plan --json"
       - "python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md --kind spec --json"
     stop_if:
-      - "Target repository is not <REPO_ROOT>."
+      - "Target repository is not /Users/jamiecraik/dev/agent-skills."
       - "Plan/spec validators fail."
       - "Linear state cannot be refreshed but implementation depends on tracker truth."
       - "Parser or doctor runtime shape contradicts PU-001 scope."
@@ -566,7 +585,7 @@ tasks:
   - id: T015
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-006 / JSC-355 Skills SDK service boundary extraction after preview behavior has stabilized."
     inputs:
       - ".harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md"
@@ -589,7 +608,8 @@ tasks:
       - "Infrastructure/config/schemas/**"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
       - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
-      - "artifacts/reviews/jsc-351-pu006/**"
+      - "artifacts/reviews/jsc-351-pu006-service-boundary/**"
+      - "artifacts/reviews/jsc-351-pu006-triage-lane/**"
     verify:
       - "python3 -m pytest Infrastructure/tests -q -k 'skills or repo_doctor or package or preview'"
       - "./bin/ask skills doctor skill-builder --codex-parity --json --robot"
@@ -606,4 +626,127 @@ tasks:
       - "A proposed module boundary is not backed by repeated code responsibility from PU-001 through PU-005."
       - "Focused tests require conformance workouts, package verification, publishing, install mutation, or PR/CI delivery implementation outside PU-006."
       - "Review stack finds architecture drift or unnecessary abstraction that cannot be simplified within the slice."
-    receipt_id: null
+    receipt_id: R032
+  - id: T017
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Implement PU-007 / JSC-356 conformance workouts, replayable evidence, and package verification without mutating runtime roots."
+    inputs:
+      - ".harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md"
+      - ".harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
+      - "PU-001 through PU-006 implementation and validation evidence."
+      - "PR #196 latest-head safe-state artifact artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-916f748.md"
+      - "Linear JSC-356 corrected from stale Done to In Progress on 2026-05-24T03:47:46Z."
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/scripts/lib/ask/skills_sdk/**"
+      - "Infrastructure/tests/**"
+    constraints:
+      - "Keep conformance and package verification deterministic, replayable, and fixture-backed."
+      - "Do not perform real installs, package publishing, network writes, global config writes, runtime-root mutation, or plugin cache mutation."
+      - "Do not claim full Codex ABI conformance from skipped, unavailable, or environment-blocked checks."
+      - "Every package verification result must include archive identity or target identity, provenance identity, rule evidence, mutation status, and rollback hint."
+      - "Every conformance run must emit reviewable evidence under a caller-provided evidence directory."
+    expected_output: "ask skills conformance run and ask skills package verify exist with JSON/robot output, focused fixtures, replayable evidence files, staged package safety checks, and tests for malformed frontmatter, invalid agents/openai.yaml, duplicate names, plugin namespace, disabled config, symlinked roots, thin handles, context truncation, unsafe archive traversal, symlink escape, digest mismatch, untrusted provenance, and rollback-journal evidence."
+    allowed_files:
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/scripts/lib/ask/**"
+      - "Infrastructure/config/schemas/**"
+      - "Infrastructure/tests/**"
+      - "Skills/agent-ops/goal-governor/scripts/write_pr_triage_report.py"
+      - "Skills/agent-ops/goal-governor/tests/test_write_pr_triage_report.py"
+      - ".harness/evidence/**"
+      - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "artifacts/reviews/jsc-351-pu007-conformance/**"
+      - "artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-916f748.md"
+    verify:
+      - "python3 -m pytest Infrastructure/tests -q -k 'conformance or package_verify or package'"
+      - "./bin/ask skills conformance run --suite codex-parity --json --robot --evidence-dir /private/tmp/jsc351-pu007-evidence"
+      - "./bin/ask skills package verify <fixture-or-skill> --json --robot"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "git diff --check HEAD"
+      - "bash scripts/validate-codestyle.sh"
+      - "./bin/ask repo validate --json --robot"
+    stop_if:
+      - "Package verification requires a real install, external write, registry access, global config write, runtime-root mutation, or plugin-cache mutation."
+      - "Conformance evidence is not deterministic, not replayable, or does not include command evidence and blocker classification."
+      - "A check with missing runtime proof is represented as pass or warning instead of blocked."
+      - "The implementation requires broad command rewrites unrelated to PU-007."
+      - "Review stack finds unresolved blocker, architecture drift, or unsafe supply-chain behavior."
+    receipt_id: R049
+  - id: T018
+    type: pm
+    assignee: PM
+    status: done
+    objective: "Implement PU-008 / JSC-351 traceability, validation, and closeout control without inventing tracker or merge readiness."
+    inputs:
+      - ".harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md"
+      - ".harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
+      - "PR #196 latest-head safe-state artifact artifacts/reviews/jsc-351-pu007-conformance/subagent-post-push-ab23f2e3.md"
+      - "PU-001 through PU-007 receipts and validation evidence."
+      - "Live Linear JSC-351 through JSC-356 state."
+      - "Implementation notes ledger .harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
+    constraints:
+      - "Keep local validation, tracker state, PR state, review-thread state, and merge readiness as separate truths."
+      - "Do not assign or change Linear project/cycle metadata while project destination and cycle authority remain unconfirmed."
+      - "Do not undraft, merge, close the native goal, or claim final completion without a final Judge or PM audit receipt."
+      - "Do not edit generated projections, plugin caches, user/global runtime config, or implementation code unless closeout validation proves a scoped defect."
+      - "Post-push triage artifacts verify pushed heads; committing them creates a new head that requires fresh triage."
+    expected_output: "Traceability and closeout evidence links JSC-351 through JSC-356, acceptance IDs, PR #196, validation commands, review-state truth, and remaining blockers without claiming unsupported project/cycle assignment or final goal completion."
+    allowed_files:
+      - ".harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md"
+      - ".harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
+      - ".harness/research/**"
+      - ".harness/quality/steering-uptake.md"
+      - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "artifacts/reviews/jsc-351-pu008-closeout/**"
+      - "artifacts/reviews/jsc-351-pu007-conformance/subagent-post-push-ab23f2e3.md"
+    verify:
+      - "python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
+      - "python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
+      - "python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md --json"
+      - "python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md --kind plan --json"
+      - "python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md --kind spec --json"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "git diff --check HEAD"
+      - "bash scripts/validate-codestyle.sh"
+      - "./bin/ask repo validate --json --robot"
+    stop_if:
+      - "Live Linear state contradicts the JSC-351 through JSC-356 tracker tree."
+      - "Project or cycle assignment requires an owner decision."
+      - "PR #196 head, checks, review state, or mergeability become stale or blocked."
+      - "Acceptance traceability cannot connect a requirement to validation evidence."
+      - "A closeout claim would require implementation testing, runtime validation, or external approval not yet available."
+    receipt_id: R054
+  - id: T016
+    type: pm
+    assignee: PM
+    status: done
+    objective: "Complete PR #193 follow-up delivery boundary for post-merge PR #192 remediation before any next implementation slice."
+    inputs:
+      - "PR #192 current head 5f20d846e7837eb05bf123f6e87ee9a9bb406ff8."
+      - "PR #193 follow-up URL https://github.com/jscraik/Agent-Skills/pull/193."
+      - "PR #193 current head efcade54646527beff3b60b37af898488e2df2a7 after rebuild, PR-state commit, template-refresh commit, and triage-evidence commit."
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/review-comment-disposition-52f2038.md"
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-52f2038.md"
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/post-push-9a4ee3c.md"
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-a0ed160.md"
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-d55d915.md"
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/post-push-5f20d84.md"
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/governor-remediation-5f20d84.md"
+      - "artifacts/reviews/jsc-351-pr192-triage-lane/branch-after-merge-5df1682.md"
+      - "artifacts/reviews/jsc-351-pr193-triage-lane/post-push-128e534b.md"
+      - "artifacts/reviews/jsc-351-pr193-triage-lane/post-push-efcade546.md"
+      - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
+    constraints:
+      - "Do not start PU-006 service extraction or any new implementation slice while review-remediation, PR checks, review-thread state, or Linear state are stale."
+      - "Commit only review-remediation code, tests, schema/spec/goal evidence, and repo-owned generated proof surfaces."
+      - "After each push, recheck PR checks, review threads, draft/mergeability state, subagent artifact state, and Linear state before continuation."
+      - "Do not undraft or continue to PU-006 until CodeRabbit/Codex independent-review requirements are satisfied or explicitly waived by governance authority."
+      - "Treat subagent audit output as input evidence; governor disposition must resolve stale-worktree misclassifications before commit."
+    expected_output: "PR #193 from codex/jsc-351-post-merge-review-remediation to main carries the rooted command-handle and default system bridge remediation after PR #192 merged, is based on current origin/main, has current checks, review-thread triage, Linear traceability, and no approval to continue until safe state is confirmed."
+    receipt_id: R031

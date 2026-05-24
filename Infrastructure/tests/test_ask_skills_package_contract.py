@@ -11,6 +11,8 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from ask.commands.skills_impl import skills_package  # noqa: E402
+from ask.skills_sdk.contracts import read_skill_frontmatter_fields  # noqa: E402
+from ask.skills_sdk import package_contracts  # noqa: E402
 
 
 SUPPORTED_SCHEMA_KEYS = {
@@ -18,15 +20,18 @@ SUPPORTED_SCHEMA_KEYS = {
     "$ref",
     "$schema",
     "additionalProperties",
+    "allOf",
     "const",
     "definitions",
     "enum",
+    "if",
     "items",
     "minItems",
     "minLength",
     "oneOf",
     "properties",
     "required",
+    "then",
     "title",
     "type",
 }
@@ -102,6 +107,29 @@ def _validate_schema_subset(
             root_schema,
         )
         return
+
+    for subschema in schema.get("allOf", []):
+        _validate_schema_subset(subschema, value, schemas, path, root_schema)
+
+    if "if" in schema:
+        try:
+            _validate_schema_subset(schema["if"], value, schemas, path, root_schema)
+        except AssertionError:
+            pass
+        else:
+            if "then" in schema:
+                _validate_schema_subset(schema["then"], value, schemas, path, root_schema)
+
+    if "oneOf" in schema:
+        matches = 0
+        for option in schema["oneOf"]:
+            try:
+                _validate_schema_subset(option, value, schemas, path, root_schema)
+            except AssertionError:
+                continue
+            matches += 1
+        if matches != 1:
+            raise AssertionError(f"{path} expected exactly one oneOf match, got {matches}")
 
     if "type" in schema:
         expected_types = schema["type"]
@@ -206,6 +234,24 @@ class TestAskSkillsPackageContract(unittest.TestCase):
             ),
         }
 
+    def test_package_contract_logic_lives_in_skills_sdk_service(self) -> None:
+        command_source = (
+            REPO_ROOT / "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+        ).read_text(encoding="utf-8")
+        service_source = (
+            REPO_ROOT / "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py"
+        ).read_text(encoding="utf-8")
+
+        self.assertEqual(
+            package_contracts.skill_package_contract.__module__,
+            "ask.skills_sdk.package_contracts",
+        )
+        self.assertNotIn("def _skill_package_contract", command_source)
+        self.assertNotIn("ask.commands", service_source)
+        self.assertNotIn("CallResult", service_source)
+        self.assertNotIn("ErrorObject", service_source)
+        self.assertIn("def skill_package_contract", service_source)
+
     def test_skill_package_schema_accepts_codex_metadata_contract(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
@@ -230,6 +276,200 @@ class TestAskSkillsPackageContract(unittest.TestCase):
             contract["metadata"]["interface"]["display_name"],
             "Skill Builder",
         )
+
+    def test_skill_package_contract_merges_agents_openai_policy_and_dependencies(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "codex-package"
+            agents_dir = skill_dir / "agents"
+            agents_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: codex-package
+description: Codex package metadata fixture.
+dependencies:
+  frontmatter_tool: required
+policy:
+  frontmatter_policy: strict
+---
+
+# Codex Package
+""",
+                encoding="utf-8",
+            )
+            (agents_dir / "openai.yaml").write_text(
+                """interface:
+  short_description: OpenAI package fixture.
+dependencies:
+  openai_tool: required
+  required_skills:
+    - skill-builder
+  tools:
+    - type: mcp
+      name: browser
+policy:
+  openai_policy: strict
+""",
+                encoding="utf-8",
+            )
+
+            contract = skills_package(
+                repo_root,
+                "Skills/agent-ops/codex-package",
+            ).data["skill_package"]["skill_package_contract"]
+
+        self.assertEqual(
+            contract["metadata"]["dependencies"],
+            {
+                "frontmatter_tool": "required",
+                "openai_tool": "required",
+                "required_skills": [
+                    "skill-builder",
+                ],
+                "tools": [
+                    {
+                        "type": "mcp",
+                        "name": "browser",
+                    },
+                ],
+            },
+        )
+        self.assertEqual(
+            contract["metadata"]["policy"],
+            {
+                "frontmatter_policy": "strict",
+                "openai_policy": "strict",
+            },
+        )
+        self.assertEqual(
+            contract["metadata"]["short_description"],
+            "OpenAI package fixture.",
+        )
+        self.assertIn("dependencies", contract["optional_fields"]["present"])
+        self.assertIn("policy", contract["optional_fields"]["present"])
+
+    def test_skill_frontmatter_parser_preserves_nested_contract_lists(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_md = Path(temp_dir) / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: codex-package
+description: Codex package metadata fixture.
+dependencies:
+  required_skills:
+    - skill-builder
+  tools:
+    - browser
+policy:
+  permissions:
+    - network
+---
+
+# Codex Package
+""",
+                encoding="utf-8",
+            )
+
+            frontmatter = read_skill_frontmatter_fields(skill_md)
+
+        self.assertEqual(frontmatter["dependencies"]["required_skills"], ["skill-builder"])
+        self.assertEqual(frontmatter["dependencies"]["tools"], ["browser"])
+        self.assertEqual(frontmatter["policy"]["permissions"], ["network"])
+
+    def test_normalized_list_sorts_sets_without_reordering_lists(self) -> None:
+        self.assertEqual(package_contracts.normalized_list({"beta", "alpha"}), ["alpha", "beta"])
+        self.assertEqual(package_contracts.normalized_list(("beta", "alpha")), ["beta", "alpha"])
+
+    def test_package_contract_manual_yaml_fallback_preserves_openai_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "codex-package"
+            agents_dir = skill_dir / "agents"
+            agents_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: codex-package
+description: Codex package metadata fixture.
+---
+
+# Codex Package
+""",
+                encoding="utf-8",
+            )
+            (agents_dir / "openai.yaml").write_text(
+                """interface:
+  short_description: OpenAI package fixture.
+dependencies:
+  required_skills:
+    - skill-builder
+  tools:
+    - type: mcp
+      name: browser
+policy:
+  openai_policy: strict
+""",
+                encoding="utf-8",
+            )
+
+            frontmatter = read_skill_frontmatter_fields(skill_md)
+            with patch.object(package_contracts, "yaml", None):
+                contract = package_contracts.skill_package_contract(
+                    repo_root,
+                    skill_md,
+                    frontmatter,
+                )
+
+        self.assertEqual(contract["metadata"]["short_description"], "OpenAI package fixture.")
+        self.assertEqual(contract["metadata"]["dependencies"]["required_skills"], ["skill-builder"])
+        self.assertEqual(
+            contract["metadata"]["dependencies"]["tools"],
+            [{"type": "mcp", "name": "browser"}],
+        )
+        self.assertEqual(contract["metadata"]["policy"], {"openai_policy": "strict"})
+
+    def test_package_contract_malformed_yaml_falls_back_to_empty_openai_fields(self) -> None:
+        class BrokenYaml:
+            class YAMLError(Exception):
+                pass
+
+            @staticmethod
+            def safe_load(_text: str) -> object:
+                raise BrokenYaml.YAMLError("malformed")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "codex-package"
+            agents_dir = skill_dir / "agents"
+            agents_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: codex-package
+description: Codex package metadata fixture.
+dependencies:
+  frontmatter_tool: required
+policy:
+  frontmatter_policy: strict
+---
+
+# Codex Package
+""",
+                encoding="utf-8",
+            )
+            (agents_dir / "openai.yaml").write_text("interface: [malformed\n", encoding="utf-8")
+
+            frontmatter = read_skill_frontmatter_fields(skill_md)
+            with patch.object(package_contracts, "yaml", BrokenYaml):
+                contract = package_contracts.skill_package_contract(
+                    repo_root,
+                    skill_md,
+                    frontmatter,
+                )
+
+        self.assertIsNone(contract["metadata"]["short_description"])
+        self.assertEqual(contract["metadata"]["dependencies"], {"frontmatter_tool": "required"})
+        self.assertEqual(contract["metadata"]["policy"], {"frontmatter_policy": "strict"})
 
     def test_skill_package_schema_rejects_missing_identity_contract(self) -> None:
         schema = self.schemas["skill-package.v1.schema.json"]

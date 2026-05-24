@@ -60,23 +60,65 @@ and schema details live in [schema](./references/goal-contract.md).
   lanes, validation evidence, risks, and launch safety. In `review`, return
   prompt readiness only.
 
-## Required Markers
+- If native state cannot be inspected, report `native_goal_status: blocked` or `unknown`, name the blocker, and continue only with board validation.
+- If file writes or shell execution are blocked, do not provide manual patch instructions as completion. Return the output contract with `next_action: ask_owner` or `stop`, `validation_evidence.outcome: blocked`, and the exact sandbox or permission error.
+- If the board is invalid, route to `repair` and avoid Worker implementation until `check_goal_board.py` passes.
+- If validation fails, record the exact failing command and outcome, fix only the scoped blocker, and rerun that command.
+- If instructions conflict, ask for owner direction before editing implementation files or native goal state.
+- If receipts, native metadata, or verification evidence are stale, route to Scout, Judge, or PM recovery before Worker work.
+
+## Execution Boundaries
+
+- Govern only the selected goal board, receipts, and explicitly authorized
+  artifacts; do not broaden into implementation work unless the board and owner
+  authorize a Worker slice.
+- Do not treat native runtime status, mailbox text, generated plans, or review
+  summaries as completion evidence without matching board, receipt, validation,
+  and remote-state proof.
+- Keep create, repair, import, and check modes deterministic. Escalate to owner
+  input when the requested action requires credentials, destructive commands,
+  tracker mutation, or files outside the board's declared scope.
+
+- For PR delivery triage, prefer the deterministic artifact writer before
+  prose-only subagent instructions:
+  python3 Skills/agent-ops/goal-governor/scripts/write_pr_triage_report.py
+  --worktree <absolute-worktree> --repo <owner/repo> --pr <number>
+  --head <expected-head-sha> --output <relative-artifact-path>.
+  The report must prove worktree identity before PR-readiness claims and is
+  allowed to write a blocked artifact when checks, review state, or head
+  identity are not safe. A safe PR triage report must prove that at least one
+  submitted review is from someone other than the PR author, and it must block
+  when active inline review comments still require classification or
+  remediation. Addressed review comments and stale old-head comments must be
+  counted separately from active blockers so the lane does not retry already
+  remediated feedback or hide unresolved feedback.
+- For subagent-managed triage or review lanes, do not treat spawn success,
+  mailbox status, or elapsed wait time as completion evidence. If a required
+  subagent artifact is missing, empty, or lacks the exact final
+  `WROTE: <relative-artifact-path>` line, write a deterministic handoff health
+  report before continuing:
+  python3 Skills/agent-ops/goal-governor/scripts/write_subagent_handoff_report.py
+  --worktree <absolute-worktree> --expected-artifact <relative-artifact-path>
+  --output <relative-health-report-path> --attempt-label <label>
+  --agent-name <agent-task-name>.
+  A `blocked` handoff health report is runtime-truth evidence that the
+  subagent lane failed; it blocks the next implementation slice until the
+  artifact is produced, a deterministic replacement proof exists, or the owner
+  explicitly waives the subagent-lane requirement in the board and receipts.
 
 Use [markers](./references/markers.md) for exact text. Route anchors:
 `PROMPT_REVIEW_ONLY`; `This is a weak goal because it is missing a completion contract.`;
 `read goal.md and state.yaml first`; `receipts.jsonl`; `instruction_injection refused`.
 
-Continuation read/validate sequence:
-
-```bash
-goal_dir="docs/goals/<slug>"
-test -f "$goal_dir/goal.md"
-test -f "$goal_dir/state.yaml"
-test -f "$goal_dir/receipts.jsonl"
-python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py "$goal_dir"
-```
-
-## Execution boundaries
+- Treating `/goal Follow <path>` as a native file binding.
+- Continuing from conversation memory when board state or verification evidence is stale.
+- Marking a goal complete without a Judge or PM completion receipt.
+- Broadening Worker scope silently.
+- Assuming Scout, Judge, Worker, app-server, or native goal tools exist without runtime evidence.
+- Accepting mailbox text or a prose triage summary as PR delivery evidence when
+  the required worktree-bound triage artifact is missing.
+- Continuing after a subagent artifact timeout without a deterministic handoff
+  health report or explicit owner waiver.
 
 ## Gotchas
 
@@ -156,7 +198,9 @@ Run in order and fail fast: stop at the first failed gate, fix only that blocker
 then rerun it before proceeding.
 
 ```bash
-python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py <goal-dir>
+PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q Skills/agent-ops/goal-governor/tests/test_check_goal_board.py
+PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q Skills/agent-ops/goal-governor/tests/test_write_subagent_handoff_report.py
+PYTHONDONTWRITEBYTECODE=1 python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py <goal-directory>
 ./bin/ask skills audit Skills/agent-ops/goal-governor --level strict --json --robot
 ./bin/ask evals run Skills/agent-ops/goal-governor --mode smoke --json --robot
 ./bin/plugin-eval analyze Skills/agent-ops/goal-governor --format json

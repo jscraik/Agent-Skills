@@ -1,14 +1,6 @@
 import json
-import os
-import shutil
-from pathlib import Path
-from typing import Any
-
-
-import json
-import os
-import shutil
 import logging
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -47,7 +39,9 @@ def load_local_marketplace(repo_root: Path) -> tuple[Path, list[dict[str, Any]]]
 
 
 def copy_directory_contents(source_dir: Path, target_dir: Path) -> None:
-    """Replace target_dir contents with source_dir first-level entries."""
+    """Replace target_dir contents with a self-contained copy of source_dir entries."""
+    _assert_symlinks_resolve_inside_source(source_dir)
+
     target_dir.mkdir(parents=True, exist_ok=True)
     for child in list(target_dir.iterdir()):
         if child.is_symlink() or child.is_file():
@@ -58,11 +52,29 @@ def copy_directory_contents(source_dir: Path, target_dir: Path) -> None:
     for child in source_dir.iterdir():
         destination = target_dir / child.name
         if child.is_symlink():
-            destination.symlink_to(os.readlink(child), target_is_directory=child.is_dir())
+            resolved = child.resolve(strict=True)
+            if resolved.is_dir():
+                shutil.copytree(resolved, destination, symlinks=False)
+            else:
+                shutil.copy2(resolved, destination)
         elif child.is_dir():
-            shutil.copytree(child, destination, symlinks=True)
+            shutil.copytree(child, destination, symlinks=False)
         else:
             shutil.copy2(child, destination)
+
+
+def _assert_symlinks_resolve_inside_source(source_dir: Path) -> None:
+    """Reject plugin cache sources with broken or escaping symlink entries."""
+    source_root = source_dir.resolve(strict=True)
+    for path in source_dir.rglob("*"):
+        if not path.is_symlink():
+            continue
+        try:
+            resolved = path.resolve(strict=True)
+            resolved.relative_to(source_root)
+        except (FileNotFoundError, RuntimeError, ValueError) as exc:
+            rel = path.relative_to(source_dir)
+            raise ValueError(f"Unsafe plugin cache symlink: {rel}") from exc
 
 
 def materialize_first_level_skill_aliases(plugin_root: Path) -> None:

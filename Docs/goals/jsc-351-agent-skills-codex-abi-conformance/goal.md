@@ -35,7 +35,7 @@ stronger validation, lower stale-state risk, and safer autonomous operation.
 
 ## Target Repository
 
-<REPO_ROOT>
+/Users/jamiecraik/dev/agent-skills
 
 ## Implementation Notes
 
@@ -87,32 +87,14 @@ Boundaries:
 
 - Canonical implementation surfaces are Infrastructure/bin/ask,
   Infrastructure/scripts/lib/ask/**, Infrastructure/config/schemas/**, and
-  focused tests under Infrastructure/tests/\*\*.
-- Planning, governance, and evidence surfaces are .harness/\*\*, this goal board,
+  focused tests under Infrastructure/tests/**.
+- Planning, governance, and evidence surfaces are .harness/**, this goal board,
   and implementation notes.
 - Runtime projections such as .agents/**, .skillsets/**, Plugins/cache/**, and
   runtime/** are not implementation targets for this goal unless a later
   reviewed slice proves the canonical source requires projection regeneration.
 - External writes to Linear, GitHub, CircleCI, or CodeRabbit require the relevant
   lane evidence and must preserve runtime truth.
-
-Target Skills SDK layout:
-
-- The goal must converge toward a Python-native Skills SDK service package under
-  Infrastructure/scripts/lib/ask/skills_sdk/\*\* or the closest existing ask
-  package boundary approved by the governor.
-- Expected service areas are contracts, catalog, validation, packaging,
-  runtime_adapters/codex, runtime_adapters/agents, evidence, and governance.
-- Infrastructure/scripts/lib/ask/commands/skills_impl.py must become a thin CLI
-  facade by JSC-355 acceptance: parse arguments, call service modules, format
-  command output, and return exit status.
-- This is not a repo-wide codex-rs-style workspace migration. The Python-native
-  equivalent is modular package boundaries plus import-boundary tests.
-- JSC-355 may not close if SDK/domain behavior touched by JSC-352 through
-  JSC-354 remains concentrated in commands/skills_impl.py without a governor
-  disposition and validation-backed reason.
-- Import-boundary validation must prove ask.skills_sdk does not depend on
-  ask.commands, and runtime adapters do not depend on command presentation code.
 
 Iteration policy:
 
@@ -212,9 +194,9 @@ Initial allowed implementation files:
 - Infrastructure/bin/ask
 - Infrastructure/scripts/lib/ask/commands/skills_impl.py
 - Infrastructure/tests/test_ask_skills_doctor.py
-- Infrastructure/tests/fixtures/\*\*
+- Infrastructure/tests/fixtures/**
 - .harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html
-- Docs/goals/jsc-351-agent-skills-codex-abi-conformance/\*\*
+- Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**
 
 Initial verification:
 
@@ -250,3 +232,4 @@ decision=complete and confirms:
 - PR state is healthy and mergeability is confirmed where applicable.
 - Linear state matches actual implementation state.
 - No stale-state contradictions remain.
+

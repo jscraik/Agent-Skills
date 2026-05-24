@@ -152,10 +152,19 @@ def main():
     skills_doctor_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
     skills_doctor_parser.add_argument("--strict", action="store_true", help="Run strict audit instead of the default compat audit")
     skills_doctor_parser.add_argument("--codex-parity", action="store_true", help="Require Codex-targeted runtime proof before reporting SDK conformance")
-    skills_package_parser = skills_subparsers.add_parser("package", help="Report version and role-aware package readiness for one skill", parents=[global_parser])
-    skills_package_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
+    skills_package_parser = skills_subparsers.add_parser("package", help="Report or verify package readiness for one skill", parents=[global_parser])
+    skills_package_parser.add_argument("target", help="Skill handle, repo-relative skill source path, or 'verify'")
+    skills_package_parser.add_argument("verify_target", nargs="?", help="Skill handle, source path, or package archive to verify when target is 'verify'")
     skills_package_parser.add_argument("--strict", action="store_true", help="Fail when package readiness metadata is incomplete")
     skills_package_parser.add_argument("--checkout-test", action="store_true", help="Run read-only local checkout evidence for the install gate")
+    skills_package_parser.add_argument("--expected-sha256", help="Expected package archive digest for verify mode")
+    skills_package_parser.add_argument("--trusted-provenance", help="Comma-separated trusted provenance sources for verify mode")
+    skills_package_parser.add_argument("--rollback-journal", help="Rollback journal JSONL evidence for verify mode")
+    skills_conformance_parser = skills_subparsers.add_parser("conformance", help="Run skill conformance suites with replayable evidence", parents=[global_parser])
+    skills_conformance_subparsers = skills_conformance_parser.add_subparsers(dest="conformance_action")
+    skills_conformance_run_parser = skills_conformance_subparsers.add_parser("run", help="Run a deterministic conformance suite", parents=[global_parser])
+    skills_conformance_run_parser.add_argument("--suite", default="codex-parity", choices=["codex-parity"], help="Conformance suite to run")
+    skills_conformance_run_parser.add_argument("--evidence-dir", required=True, help="Directory where JSON evidence files will be written")
     skills_profiles_parser = skills_subparsers.add_parser("profiles", help="Show skill operation profiles and readiness contracts", parents=[global_parser])
     skills_profiles_parser.add_argument("profile", nargs="?", help="Optional profile name")
     skills_events_parser = skills_subparsers.add_parser("events", help="Show skill lifecycle event contracts", parents=[global_parser])
@@ -560,12 +569,33 @@ def main():
         elif args.action == "doctor":
             result = skills_commands.skills_doctor(repo_root, target=args.target, strict=args.strict, codex_parity=args.codex_parity)
         elif args.action == "package":
-            result = skills_commands.skills_package(
-                repo_root,
-                target=args.target,
-                strict=args.strict,
-                checkout_test=args.checkout_test,
-            )
+            verify_flags_present = any([args.expected_sha256, args.trusted_provenance, args.rollback_journal])
+            package_flags_present = args.strict or args.checkout_test
+            if args.target == "verify" and not args.verify_target:
+                result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: verify_target")
+            elif args.target == "verify" and package_flags_present:
+                result = build_argument_error("skills", "package", raw_args, parser_error="unexpected package-only arguments")
+            elif args.target != "verify" and (args.verify_target or verify_flags_present):
+                result = build_argument_error("skills", "package", raw_args, parser_error="unexpected verify-only arguments")
+            elif args.target == "verify":
+                result = skills_commands.skills_package_verify(
+                    repo_root,
+                    target=args.verify_target,
+                    expected_sha256=args.expected_sha256,
+                    trusted_provenance=args.trusted_provenance,
+                    rollback_journal=args.rollback_journal,
+                )
+            else:
+                result = skills_commands.skills_package(repo_root, target=args.target, strict=args.strict, checkout_test=args.checkout_test)
+        elif args.action == "conformance":
+            if args.conformance_action == "run":
+                result = skills_commands.skills_conformance_run(
+                    repo_root,
+                    suite=args.suite,
+                    evidence_dir=args.evidence_dir,
+                )
+            else:
+                result = build_unknown_action_result("skills conformance", args.conformance_action)
         elif args.action == "profiles":
             result = skills_commands.skills_profiles(repo_root, profile=args.profile)
         elif args.action == "events":
@@ -1177,7 +1207,7 @@ def main():
                     for gate, passed in proof.get("gates", {}).items():
                         marker = "pass" if passed else "fail"
                         print(f"  {gate}: {marker}")
-                    live = proof.get("live_codex_invocation", {})
+                    live = proof.get("live_runtime_invocation", {})
                     if live.get("status"):
                         print(f"  live invocation: {live.get('status')}")
                     print_first_validation_command(proof)
@@ -1217,35 +1247,42 @@ def main():
                     print_first_validation_command(doctor)
                     print(f"Next: {doctor.get('next_command')}")
                 elif args.topic == "skills" and args.action == "package":
-                    package = result.data.get("skill_package", {})
-                    gate = package.get("gate_summary", {})
-                    contract = package.get("package_contract", {})
-                    values = contract.get("values", {})
-                    roles = (contract.get("role_compatibility") or {}).get("roles") or []
-                    runtime_needs = (contract.get("runtime_contract") or {}).get("needs") or []
+                    package = result.data.get("skill_package_verification") or result.data.get("skill_package", {})
                     print(f"Skill package: {package.get('query')} ({package.get('status')})")
                     print(package.get("agent_summary", ""))
-                    print(f"Source: {package.get('canonical_source_path')}")
+                    identity = package.get("target_identity") or {}
+                    source = identity.get("path") or package.get("canonical_source_path") or package.get("query")
+                    print(f"Source: {source}")
                     event = package.get("lifecycle_event") or {}
                     if event.get("event_type"):
                         print(f"Event: {event.get('event_type')}")
+                    contract = package.get("package_contract") or {}
+                    values = contract.get("values") or {}
                     if contract.get("readiness_level"):
                         print(f"Readiness level: {contract.get('readiness_level')}")
-                    if roles:
-                        print(f"Compatible roles: {', '.join(roles)}")
-                    if runtime_needs:
-                        print(f"Runtime needs: {len(runtime_needs)} declared")
+                    if values.get("compatible_roles"):
+                        print(f"Compatible roles: {', '.join(values.get('compatible_roles'))}")
+                    if values.get("runtime_needs"):
+                        print(f"Runtime needs: {len(values.get('runtime_needs'))} declared")
                     if values.get("provenance"):
                         print(f"Provenance: {values.get('provenance')}")
-                    print(f"Install ready: {gate.get('install_ready')}")
-                    if gate.get("checkout_test_status"):
+                    gate = package.get("gate_summary", {})
+                    if gate:
+                        print(f"Install ready: {gate.get('install_ready')}")
                         print(f"Checkout test: {gate.get('checkout_test_status')}")
-                    print(f"Promotion: {gate.get('promotion_status')}")
-                    blocked = gate.get("blocked_reasons") or []
-                    if blocked:
-                        print(f"Blocked reasons: {', '.join(blocked)}")
+                        print(f"Promotion: {gate.get('promotion_status')}")
                     print_first_validation_command(package)
                     print(f"Next: {package.get('next_command')}")
+                elif args.topic == "skills" and args.action == "conformance":
+                    conformance = result.data.get("skills_conformance", {})
+                    print(f"Skills conformance: {conformance.get('suite')} ({conformance.get('status')})")
+                    print(conformance.get("agent_summary", ""))
+                    print(f"Evidence dir: {conformance.get('evidence_dir')}")
+                    if conformance.get("evidence_jsonl"):
+                        print(f"Evidence JSONL: {conformance.get('evidence_jsonl')}")
+                    print(f"Checks: {len(conformance.get('checks') or [])}")
+                    print_first_validation_command(conformance)
+                    print(f"Next: {conformance.get('next_command')}")
                 elif args.topic == "skills" and args.action == "profiles":
                     profiles = result.data.get("skill_profiles", {})
                     print(f"Skill profiles: {profiles.get('status')}")

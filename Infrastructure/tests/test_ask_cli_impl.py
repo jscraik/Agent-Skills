@@ -393,10 +393,10 @@ class TestAskCLI(unittest.TestCase):
             proof["validation_commands"],
             ["./bin/ask skills proof he-heartbeat --json --robot"],
         )
-        if proof["gates"].get("codex_user_link") or proof["gates"].get("agents_user_link"):
-            self.assertEqual(proof["live_codex_invocation"]["status"], "manual_session_gate")
+        if proof["gates"].get("user_runtime_ready"):
+            self.assertEqual(proof["live_runtime_invocation"]["status"], "manual_session_gate")
         else:
-            self.assertNotIn("live_codex_invocation", proof)
+            self.assertNotIn("live_runtime_invocation", proof)
 
     def test_skills_proof_human_output(self):
         """Verify ask skills proof has a useful non-JSON success render."""
@@ -1725,6 +1725,75 @@ class TestAskCLI(unittest.TestCase):
             "./bin/ask skills events package_readiness_checked --json --robot",
         )
         self.assertIn("package_readiness_checked", [event["event_type"] for event in package["lifecycle_events"]])
+
+    def test_skills_package_rejects_missing_target(self):
+        """Verify ask skills package preserves the required target contract."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("the following arguments are required: target", output["errors"][0]["message"])
+
+    def test_skills_package_rejects_extra_non_verify_target(self):
+        """Verify ask skills package does not ignore unexpected positional input."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "package",
+            "skill-builder",
+            "extra",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("unexpected verify-only arguments", output["errors"][0]["message"])
+
+    def test_skills_package_rejects_verify_flags_without_verify_mode(self):
+        """Verify verify-only flags cannot silently alter package readiness."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "package",
+            "skill-builder",
+            "--expected-sha256",
+            "0" * 64,
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("unexpected verify-only arguments", output["errors"][0]["message"])
+
+    def test_skills_package_verify_rejects_package_only_flags(self):
+        """Verify package-only flags cannot be ignored by verify mode."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "package",
+            "verify",
+            "skill-builder",
+            "--strict",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("unexpected package-only arguments", output["errors"][0]["message"])
 
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""

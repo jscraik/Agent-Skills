@@ -17,6 +17,7 @@ if str(LIFECYCLE_DIR) not in sys.path:
 
 from selection_policy import (  # type: ignore  # noqa: E402
     DEFAULT_VISIBLE_FLAT_SKILL_NAMES,
+    DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES,
     DEFAULT_PROJECTION_MODE,
     ROOT_SKILL_SET_NAMES,
     SYSTEM_BRIDGE_SKILL_NAMES,
@@ -41,6 +42,7 @@ from skill_discovery import (  # type: ignore  # noqa: E402
 DEFAULT_MAX_VISIBLE = 30
 ADVANCED_WARN_VISIBLE = 60
 BRIDGE_SKILLS = set(SYSTEM_BRIDGE_SKILL_NAMES)
+DEFAULT_VISIBLE_BRIDGE_SKILLS = set(DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES)
 ROOT_SKILL_SETS = set(ROOT_SKILL_SET_NAMES)
 SCOPE_PRECEDENCE = USER_SKILL_SCOPE_PRECEDENCE
 BASELINED_SCOPE_COLLISIONS = {
@@ -255,7 +257,7 @@ def _iter_default_visibility_candidates() -> list[tuple[str, Path]]:
             continue
         if name in DISCOVERY_HIDDEN_FLAT_SKILL_NAMES:
             continue
-        if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES and name not in BRIDGE_SKILLS:
+        if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES and name not in DEFAULT_VISIBLE_BRIDGE_SKILLS:
             continue
         plugin_owned = is_plugin_owned_skill_dir(source_dir)
         if plugin_owned and name not in DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
@@ -351,7 +353,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     system_default = {
         entry["name"]
         for entry in hidden_system_entries
-        if entry["name"] in BRIDGE_SKILLS
+        if entry["name"] in DEFAULT_VISIBLE_BRIDGE_SKILLS
         and entry["name"] not in higher_precedence_names
         and not is_plugin_owned_skill_dir(REPO_ROOT / entry["path"])
     }

@@ -57,13 +57,22 @@ EXCLUDED_SCAN_ROOTS = (
 
 def should_scan_path(path: Path) -> bool:
     """Return whether a path belongs to a canonical source tree."""
+    # Check lexical path first
     for root in EXCLUDED_SCAN_ROOTS:
         try:
             path.relative_to(root)
             return False
         except ValueError:
             continue
-    return True
+    # Check resolved path
+    try:
+        resolved = path.resolve(strict=False)
+    except OSError:
+        resolved = path
+    for root in EXCLUDED_SCAN_ROOTS:
+        try:
+            resolved.relative_to(root)
+            return False
         except ValueError:
             continue
     return True
