@@ -91,11 +91,12 @@ def _matches_plugin_subpath(path: str, subpath: str) -> bool:
 
 def _is_root_front_door_doc(path: str) -> bool:
     """
-    Determine whether a path is a top-level "front door" documentation filename.
+    Check whether a path is a top-level "front door" documentation filename.
+    
+    The path must not contain directory separators and must exactly match one of the recognized front-door filenames (for example "README.md" or "SECURITY.md").
     
     Returns:
-        True if `path` contains no directory separators and exactly matches one of the recognized
-        front-door documentation filenames (e.g., README.md, SECURITY.md), False otherwise.
+        True if the path is a recognized top-level front-door documentation filename, False otherwise.
     """
     if "/" in path:
         return False
@@ -211,13 +212,13 @@ def _normalize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
 
 def classify_path(path: str | Path) -> SurfaceFinding:
     """
-    Classify a repository file path into a SurfaceFinding that describes its ownership policy surface, status, and recommended next steps.
-
+    Classify a repository-relative path into a SurfaceFinding describing its policy classification, status, severity, blocking flag, and recommended next steps.
+    
     Parameters:
-        path (str | Path): Repository-relative file path to classify. The path is normalized (POSIX, no leading "./") before classification.
-
+        path (str | Path): Repository-relative path to classify; the path is normalized to POSIX form (leading "./" removed) before classification.
+    
     Returns:
-        SurfaceFinding: A finding containing `path`, `classification`, `status`, `code`, `severity`, `blocking`, optional `allowlist_entry`, `reason`, `recommendation`, and `metadata` (which may include normalized `next_steps`).
+        SurfaceFinding: A finding populated with `path`, `classification`, `status`, `code`, `severity`, `blocking`, optional `allowlist_entry`, `reason`, `recommendation`, and `metadata` (where `metadata["next_steps"]`, if present, is normalized into structured step objects).
     """
     normalized = _normalize_path(path)
     suffix = Path(normalized).suffix.lower()

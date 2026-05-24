@@ -36,13 +36,13 @@ def skill_files(root: Path) -> list[Path]:
 
 def validate(root: Path) -> list[str]:
     """
-    Validate SKILL.md files under a plugin root for required stage-arc and persona-lens terms.
+    Check each SKILL.md under the plugin root's skills directory for required stage-arc and persona-lens terms.
     
     Parameters:
-        root (Path): Path to the plugin repository root; the function looks for skill entrypoints under the "skills" subdirectory.
+        root (Path): Plugin repository root; the function searches for SKILL.md files directly under the immediate subdirectories of <root>/skills.
     
     Returns:
-        list[str]: A list of error messages. Returns an empty list when all SKILL.md files contain the required terms. If no skill entrypoints are found, returns a single-item list like "no skill entrypoints found under <root>/skills". For missing terms, each message is formatted as "<relative path> missing stage arc coverage: term1, term2".
+        list[str]: A list of error messages. Returns an empty list when all SKILL.md files contain the required terms. If no SKILL.md files are found, returns a single-item list: "no skill entrypoints found under <root>/skills". For files missing terms, each message is formatted as "<relative path> missing stage arc coverage: term1, term2".
     """
     errors: list[str] = []
     files = skill_files(root)
@@ -60,12 +60,12 @@ def validate(root: Path) -> list[str]:
 
 def main() -> int:
     """
-    Run the CLI that validates SKILL.md files under a plugin root and prints the results.
+    CLI entry point that validates SKILL.md files under a plugin root and prints the results.
     
-    Parses command-line arguments, checks discovered skills for the required stage-arc and persona-lens terms, emits either JSON or human-readable output, and returns an exit status code.
+    Parses command-line arguments to determine the plugin root and output mode, runs validation of discovered SKILL.md files for required stage-arc and persona-lens terms, and emits either JSON or human-readable output.
     
     Returns:
-        int: 0 if no validation errors were found, 1 if any validation errors occurred.
+        int: Exit status code — 0 when all checked skills contain the required terms, 1 when any validation errors were found.
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(

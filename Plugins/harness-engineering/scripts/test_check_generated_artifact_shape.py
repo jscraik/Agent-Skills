@@ -190,6 +190,11 @@ class GeneratedArtifactShapeTests(unittest.TestCase):
         )
 
     def test_spec_rejects_missing_scope_authority(self) -> None:
+        """
+        Check that spec validation fails when the Authority and Scope Boundary lacks the `downscope_authority` field.
+        
+        Asserts that removing `downscope_authority: not_applicable` from VALID_SPEC causes MODULE.validate_spec(...) to include the error: "Authority and Scope Boundary missing required field: downscope_authority".
+        """
         invalid = VALID_SPEC.replace("downscope_authority: not_applicable\n", "")
 
         self.assertIn(
@@ -198,6 +203,11 @@ class GeneratedArtifactShapeTests(unittest.TestCase):
         )
 
     def test_plan_rejects_missing_testing_lens(self) -> None:
+        """
+        Checks that plan validation fails when the `testing_lens` field is missing from a plan.
+        
+        Constructs an invalid plan by removing the `testing_lens` line from the canonical `VALID_PLAN` and asserts that `validate_plan` reports the error "Coding and Testing Lenses missing required field: testing_lens".
+        """
         invalid = VALID_PLAN.replace(
             "testing_lens: observable behavior proof for SA-001 using prior-art account summary tests plus negative mutation check.\n",
             "",

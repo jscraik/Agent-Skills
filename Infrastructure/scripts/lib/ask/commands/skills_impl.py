@@ -585,29 +585,26 @@ def _safe_tessl_skill_key(raw_name: str) -> str:
 
 def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root: Path) -> tuple[Path, dict[str, str]]:
     """
-    Create a stable local Tessl wrapper for a SKILL.md-based skill.
+    Create a deterministic local Tessl tile package for a skill and return the tile manifest path with staging metadata.
     
-    This prepares a deterministic temporary "tile" package that copies the skill's SKILL.md
-    (and selected support directories) into a run-specific staging directory, writes a
-    tile.json manifest and a tessl.json marker, and returns the tile manifest path plus
-    metadata needed to run Tessl commands against the staged package.
+    Stages the skill's SKILL.md (and optional support directories: references, scripts, assets, evals) under a per-run temporary directory, writes a tiled manifest (tile.json) and a Tessl project marker (tessl.json), and returns the manifest path plus a metadata mapping needed to invoke Tessl commands against the staged package.
     
     Parameters:
         repo_root (Path): Repository root directory.
-        audit_target_path (str): Path (relative to repo_root) pointing at the skill directory
-            or a SKILL.md file to be wrapped.
-        temp_root (Path): Directory under which a per-run staging root will be created.
+        audit_target_path (str): Repository-relative path pointing at a skill directory or a SKILL.md file to stage for review.
+        temp_root (Path): Base directory under which a per-run staging root will be created.
     
     Returns:
-        tuple[Path, dict[str, str]]: A tuple where the first element is the Path to the
-        generated tile.json manifest, and the second element is a metadata mapping with:
-            - tile_path: str path to the generated tile.json
-            - tessl_project_marker: str path to the generated tessl.json marker
-            - staging_root: str path to the per-run staging directory
-            - review_path: str path to the staged skill directory containing SKILL.md
-            - skill_key: stable safe key used for the staged skill name
-            - source_skill: the provided audit_target_path (repo-relative)
-            - evidence_retention: textual hint describing retention of the staging root
+        tuple[Path, dict[str, str]]: A tuple where:
+            - The first element is the Path to the generated tile.json manifest.
+            - The second element is a metadata mapping with the following keys:
+                - tile_path: path to the generated tile.json
+                - tessl_project_marker: path to the generated tessl.json marker
+                - staging_root: per-run staging directory path
+                - review_path: staged skill directory containing SKILL.md
+                - skill_key: deterministic, safe key used for the staged skill name
+                - source_skill: the provided audit_target_path (repo-relative)
+                - evidence_retention: hint describing retention of the staging root for post-run inspection
     """
     source_skill_dir = repo_root / audit_target_path
     source_skill = source_skill_dir / "SKILL.md"
@@ -655,13 +652,13 @@ def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root
 
 def _stable_tessl_review_root(audit_target_path: str) -> Path:
     """
-    Constructs a deterministic temporary directory path used to stage Tessl reviews for a given audit target.
+    Create a deterministic temporary staging directory path for Tessl reviews derived from an audit target.
     
     Parameters:
-        audit_target_path (str): The audit target path (typically a repo-relative or absolute string) used to derive a stable directory name.
+        audit_target_path (str): Audit target path (typically repo-relative or absolute) used to derive the stable directory name.
     
     Returns:
-        Path: A stable Path under the system temporary directory (TMPDIR) in ask-tessl-reviews, combining a filesystem-safe name and a 12-character SHA256 digest of the input.
+        Path: A Path under the system temporary directory (ask-tessl-reviews) combining a filesystem-safe name and a 12-character SHA256 digest of the input.
     """
     safe_name = audit_target_path.replace("/", "__").replace(" ", "_")
     digest = hashlib.sha256(audit_target_path.encode("utf-8")).hexdigest()[:12]
@@ -670,19 +667,24 @@ def _stable_tessl_review_root(audit_target_path: str) -> Path:
 
 def _parse_tessl_review_output(stdout: str, status: str = "") -> dict[str, Any]:
     """
-    Parse Tessl command output and extract a structured review score payload.
+    Normalize Tessl CLI output into a structured review payload.
+    
+    Parses the provided Tessl stdout to extract a numeric review score (preferring embedded JSON when present,
+    otherwise using the human-text parser) and augments the result with the configured minimum threshold
+    and an acceptability flag.
     
     Parameters:
-        stdout (str): Full stdout from a Tessl invocation (may contain JSON or human-readable text).
-        status (str): Optional status string to include when JSON contains a score (defaults to "reported" when supplied).
+        stdout (str): Full stdout from a Tessl invocation; may contain JSON or human-readable text.
+        status (str): Optional status to attach to the returned payload. When omitted and JSON is parsed,
+            the payload uses "reported" as the status.
     
     Returns:
-        dict[str, Any]: A normalized review payload with keys:
-            - review_score: numeric score if found, otherwise None or value extracted from human parse.
-            - minimum_score: configured minimum acceptable score (TESSL_REVIEW_MIN_SCORE).
+        dict[str, Any]: A normalized review payload containing:
+            - review_score: numeric score if found, otherwise None.
+            - minimum_score: the configured minimum acceptable score (TESSL_REVIEW_MIN_SCORE).
             - score_acceptable: `True` if `review_score` is a number >= `minimum_score`, `False` otherwise.
-            - status: provided `status` or a fallback ("reported" for JSON-based parse or value from human parse).
-            - raw: parsed JSON object when JSON was present, or the human-parse payload.
+            - status: the provided status or the fallback described above.
+            - raw: the parsed JSON object when JSON was present, or the human-parse payload.
     """
     json_start = stdout.find("{")
     if json_start >= 0:
@@ -2649,14 +2651,14 @@ def _skill_doctor_next_command_decision(
 
 def skills_load_preview(repo_root: Path) -> CallResult:
     """
-    Produce a CallResult containing a codex load-preview payload for the given repository.
+    Build a Codex load-preview payload for the repository and return it wrapped in a CallResult.
     
     Parameters:
-        repo_root (Path): Path to the repository root used to build the preview.
+        repo_root (Path): Repository root used to build the codex load-preview.
     
     Returns:
-        CallResult: A result whose metadata includes the command "skills load-preview" and whose
-        data contains a `codex_load_preview` entry with the generated preview payload.
+        CallResult: Result whose `metadata["command"]` is `"skills load-preview"` and whose
+        `data["codex_load_preview"]` contains the generated preview payload.
     """
     result = CallResult()
     result.metadata["command"] = "skills load-preview"
@@ -2697,13 +2699,15 @@ CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS: tuple[str, ...] = (
 
 def _codex_skill_package_abi_source() -> dict[str, Any]:
     """
-    Provide repository-neutral provenance for the Codex SkillMetadata ABI.
+    Return repository-neutral provenance for the Codex `SkillMetadata` ABI.
+    
+    Provides the canonical source path, ABI struct name, and the list of evidence fields required by the ABI.
     
     Returns:
-        dict: A provenance mapping with keys:
-            - `path`: canonical source path for the ABI definition.
-            - `struct`: ABI struct name (`"SkillMetadata"`).
-            - `evidence_fields`: list of evidence field names required by the ABI.
+        dict: Mapping with keys:
+            - path: Canonical source path for the ABI definition.
+            - struct: ABI struct name (`"SkillMetadata"`).
+            - evidence_fields: List of evidence field names required by the ABI.
     """
     return {
         "path": CODEX_SKILL_PACKAGE_ABI_SOURCE_PATH,
@@ -2714,14 +2718,14 @@ def _codex_skill_package_abi_source() -> dict[str, Any]:
 
 def skills_load_preview(repo_root: Path) -> CallResult:
     """
-    Produce a CallResult containing a codex load-preview payload for the given repository.
+    Build a Codex load-preview payload for the repository and return it wrapped in a CallResult.
     
     Parameters:
-        repo_root (Path): Path to the repository root used to build the preview.
+        repo_root (Path): Repository root used to build the codex load-preview.
     
     Returns:
-        CallResult: A result whose metadata includes the command "skills load-preview" and whose
-        data contains a `codex_load_preview` entry with the generated preview payload.
+        CallResult: Result whose `metadata["command"]` is `"skills load-preview"` and whose
+        `data["codex_load_preview"]` contains the generated preview payload.
     """
     result = CallResult()
     result.metadata["command"] = "skills load-preview"
@@ -2752,15 +2756,15 @@ def skills_inject_preview(repo_root: Path, text: str) -> CallResult:
 
 def skills_implicit_preview(repo_root: Path, command: str, workdir: str | None = None) -> CallResult:
     """
-    Create an implicit codex preview for a given command and return it wrapped in a CallResult.
+    Builds an implicit Codex preview for a single command and returns it in a CallResult.
     
     Parameters:
     	repo_root (Path): Repository root used to resolve workspace context.
-    	command (str): The command text to build an implicit preview for.
-    	workdir (str | None): Optional working directory to use when generating the preview; when None, the repo root context is used.
+    	command (str): Command text to generate the implicit preview for.
+    	workdir (str | None): Optional working directory to use when generating the preview; when None, the repo root is used.
     
     Returns:
-    	CallResult: A result whose metadata includes "command" set to "skills implicit-preview" and whose data["codex_implicit_preview"] contains the generated implicit preview payload.
+    	CallResult: Result whose metadata["command"] is "skills implicit-preview" and whose data["codex_implicit_preview"] contains the generated preview payload.
     """
     result = CallResult()
     result.metadata["command"] = "skills implicit-preview"
@@ -2770,14 +2774,14 @@ def skills_implicit_preview(repo_root: Path, command: str, workdir: str | None =
 
 def skills_render_preview(repo_root: Path, context_window: int | None = None) -> CallResult:
     """
-    Create a CallResult containing a Codex-rendered preview of skills for the repository.
+    Render a Codex-generated preview of skills found in the repository.
     
     Parameters:
-    	repo_root (Path): Path to the repository root used to discover/render skills.
-    	context_window (int | None): Optional context window size passed to the renderer; when None the renderer's default is used.
+        repo_root (Path): Repository root used to discover and render skills.
+        context_window (int | None): Optional context window size passed to the renderer; when None the renderer default is used.
     
     Returns:
-    	CallResult: Result with `data["codex_render_preview"]` set to the payload returned by build_codex_render_preview(repo_root, context_window).
+        CallResult: Result whose `data["codex_render_preview"]` contains the renderer payload for the repository skills.
     """
     result = CallResult()
     result.metadata["command"] = "skills render-preview"
@@ -2820,15 +2824,15 @@ def skills_inject_preview(repo_root: Path, text: str) -> CallResult:
 
 def skills_implicit_preview(repo_root: Path, command: str, workdir: str | None = None) -> CallResult:
     """
-    Create an implicit codex preview for a given command and return it wrapped in a CallResult.
+    Builds an implicit Codex preview for a single command and returns it in a CallResult.
     
     Parameters:
     	repo_root (Path): Repository root used to resolve workspace context.
-    	command (str): The command text to build an implicit preview for.
-    	workdir (str | None): Optional working directory to use when generating the preview; when None, the repo root context is used.
+    	command (str): Command text to generate the implicit preview for.
+    	workdir (str | None): Optional working directory to use when generating the preview; when None, the repo root is used.
     
     Returns:
-    	CallResult: A result whose metadata includes "command" set to "skills implicit-preview" and whose data["codex_implicit_preview"] contains the generated implicit preview payload.
+    	CallResult: Result whose metadata["command"] is "skills implicit-preview" and whose data["codex_implicit_preview"] contains the generated preview payload.
     """
     result = CallResult()
     result.metadata["command"] = "skills implicit-preview"
@@ -2838,16 +2842,15 @@ def skills_implicit_preview(repo_root: Path, command: str, workdir: str | None =
 
 def _skill_package_operation_context() -> dict[str, Any]:
     """
-    Provide operation profiles, event routing, and validation commands used for package readiness checks.
+    Provide operation profiles, lifecycle events, and validation commands used when evaluating a skill's package readiness.
     
     Returns:
-        context (dict): A mapping with keys:
-            - "primary_profile": primary profile name for the operation.
-            - "promotion_profile": profile name used for post-review promotion.
-            - "profiles": dict of profile-name → subset of profile metadata containing
-              "intent", "write_policy", and "required_evidence".
-            - "events": mapping of lifecycle event names to their consumer definitions.
-            - "validation_commands": list of validation command strings to run for this context.
+        context (dict): Mapping with:
+            - "primary_profile" (str): Primary profile name for the operation.
+            - "promotion_profile" (str): Profile name used for post-review promotion.
+            - "profiles" (dict): Per-profile subset of metadata containing "intent", "write_policy", and "required_evidence".
+            - "events" (dict): Lifecycle event names mapped to their consumer definitions.
+            - "validation_commands" (list[str]): Command strings useful for reproducing or running the checks.
     """
     return {
         "primary_profile": "package-review",

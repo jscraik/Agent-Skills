@@ -577,15 +577,15 @@ def _finish_eval_lifecycle(
 
 def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool = False) -> str | None:
     """
-    Identify an eval blocker class ID by scanning combined stdout/stderr for known marker phrases.
+    Classify an evaluation blocker ID by scanning combined stdout/stderr for known marker phrases.
     
     Parameters:
         raw_output (str): Captured standard output text to inspect.
         raw_error (str): Captured standard error text to inspect.
-        timed_out (bool): If True, classify as a timeout blocker based on whether any output exists.
+        timed_out (bool): When True, classify as a timeout blocker based on whether any output exists.
     
     Returns:
-        Blocker class ID string (for example, "blocked_auth" or "timeout_partial_output") when a matching marker is found, `None` otherwise.
+        str | None: Blocker class ID (for example, "blocked_auth" or "timeout_partial_output") when a matching marker is found, `None` otherwise.
     """
     text = "\n".join([raw_output or "", raw_error or ""])
     low = text.lower()

@@ -54,13 +54,13 @@ NATIVE_GOAL_ID = re.compile(r"^[A-Za-z0-9_-]+$")
 
 def fail(message: str) -> int:
     """
-    Emit a standardized failure message to stderr and return exit code 1.
+    Print a standardized failure message to stderr.
     
     Parameters:
         message (str): Human-readable failure description to include in the printed message.
     
     Returns:
-        int: Exit code `1`.
+        int: Exit code 1.
     """
     print(f"FAIL: {message}", file=sys.stderr)
     return 1
@@ -127,15 +127,13 @@ class SimpleYamlParser:
 
     def parse(self) -> Any:
         """
-        Parse the tokenized YAML-like input and return the resulting Python data structure.
-        
-        Parses from the beginning of the token stream produced during initialization and verifies that the entire input is consumed; if any unparsed lines remain a ValueError is raised.
+        Parse the tokenized YAML-like input into a structured document.
         
         Returns:
-            The parsed Python object representing the document (mapping, list, or scalar).
+            The parsed document as a mapping, list, or scalar value.
         
         Raises:
-            ValueError: if the parser does not consume all input rows (error message: "could not parse entire state.yaml").
+            ValueError: if some input rows remain unparsed (message: "could not parse entire state.yaml").
         """
         parsed, final_index = self._parse_block(0, self.rows[0][0] if self.rows else 0)
         if final_index != len(self.rows):
@@ -163,14 +161,15 @@ class SimpleYamlParser:
 
     def _parse_sequence(self, index: int, indent: int) -> tuple[list[Any], int]:
         """
-        Parse a YAML sequence starting at the given token index and indentation level.
+        Parse a YAML sequence at the given token index and indentation level.
         
         Parameters:
-            index (int): Index in the token stream where the sequence begins.
-            indent (int): Expected indentation level for sequence items.
+        	index (int): Index in the token stream where the first sequence item (a line starting with '- ') is expected.
+        	indent (int): Expected indentation (number of leading spaces) for each sequence item.
         
         Returns:
-            tuple[list[Any], int]: A tuple (values, next_index) where `values` is the list of parsed sequence items and `next_index` is the index of the first token not consumed by this sequence.
+        	values (list[Any]): Parsed sequence items in order.
+        	next_index (int): Index of the first token not consumed by this sequence.
         """
         values: list[Any] = []
         while self._is_sequence_item(index, indent):
@@ -180,7 +179,7 @@ class SimpleYamlParser:
 
     def _is_sequence_item(self, index: int, indent: int) -> bool:
         """
-        Determine whether the row at `index` is a YAML sequence item at the specified `indent`.
+        Return whether the row at the given index is a YAML sequence item at the specified indentation.
         
         Parameters:
             index (int): Row index to check.
@@ -197,14 +196,16 @@ class SimpleYamlParser:
 
     def _parse_sequence_item(self, index: int, indent: int) -> tuple[Any, int]:
         """
-        Parse a single YAML sequence item at the given row index and indentation, and return the parsed value with the next row index.
+        Parse a single sequence item at the given position and return the parsed value and next row index.
+        
+        If the list item is empty the function parses a nested block as the item's value. If the item contains no ":" it is parsed as a scalar. If the item contains ":", it is treated as an inline mapping which may be extended by subsequent indented mapping children.
         
         Parameters:
         	index (int): Current row index in the tokenized input.
         	indent (int): Expected indentation (number of spaces) for items at this sequence level.
         
         Returns:
-        	tuple[Any, int]: A pair where the first element is the parsed item (a scalar, mapping, or nested block structure) and the second element is the index of the next unconsumed row.
+        	tuple[Any, int]: (parsed_item, next_index) where parsed_item is a scalar, mapping, or nested structure and next_index is the index of the next unconsumed row.
         """
         item_text = self.rows[index][1][2:].strip()
         index += 1
@@ -235,15 +236,19 @@ class SimpleYamlParser:
         self, item: dict[str, Any], index: int, indent: int
     ) -> tuple[dict[str, Any], int]:
         """
-        Populate `item` by parsing consecutive mapping children from `self.rows` starting at `index` for the given `indent`.
+        Parse and attach mapping children from consecutive rows at a given indentation into `item`.
+        
+        The method reads rows from the current `index` while their indentation is at least `indent`. For each row that has exactly `indent` spaces and contains a `":"`, it extracts the key and either:
+        - uses the inline value (parsed with `parse_scalar`) when present, or
+        - parses a nested block at `indent + 2` and assigns that nested value.
         
         Parameters:
-            item (dict[str, Any]): Mapping to be populated with parsed child key/value pairs.
-            index (int): Row index in `self.rows` where child parsing begins.
-            indent (int): Expected indentation level for mapping children.
+            item (dict[str, Any]): Mapping to populate with parsed child key/value pairs.
+            index (int): Starting row index in `self.rows` for parsing children.
+            indent (int): Expected indentation level for mapping child lines.
         
         Returns:
-            tuple[dict[str, Any], int]: The updated `item` and the index of the next unconsumed row.
+            tuple[dict[str, Any], int]: The updated mapping and the index of the next unconsumed row.
         """
         while index < len(self.rows) and self.rows[index][0] >= indent:
             child_indent, child_text = self.rows[index]
@@ -261,14 +266,14 @@ class SimpleYamlParser:
 
     def _parse_mapping(self, index: int, indent: int) -> tuple[dict[str, Any], int]:
         """
-        Parse a contiguous mapping block from the parser's tokenized rows starting at the given index and indentation.
+        Parse a contiguous mapping block from the parser's tokenized rows.
         
         Parameters:
-        	index (int): Row index at which to begin parsing the mapping.
-        	indent (int): Expected indentation level for mapping items.
+            index (int): Row index where the mapping starts.
+            indent (int): Expected indentation level for mapping entries.
         
         Returns:
-        	tuple[dict[str, Any], int]: A mapping of parsed keys to values and the index of the first row not consumed by this mapping.
+            tuple[dict[str, Any], int]: A dictionary of parsed key→value pairs and the index of the first unconsumed row.
         """
         mapping: dict[str, Any] = {}
         while self._is_mapping_item(index, indent):
@@ -327,28 +332,27 @@ class SimpleYamlParser:
 
 def parse_simple_yaml(text: str) -> Any:
     """
-    Parse a strict subset of YAML into native Python objects.
+    Parse a strict subset of YAML produced by Goal Governor templates.
     
-    Parses text written in the limited YAML dialect produced by Goal Governor templates and returns the corresponding Python value: mappings to dict, sequences to list, scalars to str/int/bool/None.
-    
-    Parameters:
-        text (str): YAML content to parse.
+    Parses the limited YAML dialect used by templates and returns the corresponding Python value: mappings become dicts, sequences become lists, and scalars become str, int, bool, or None.
     
     Returns:
-        The Python object representation of the parsed YAML (dict, list, or scalar).
+        The parsed Python value (dict, list, or scalar).
     """
     return SimpleYamlParser(text).parse()
 
 
 def load_yaml(path: Path) -> Any:
     """
-    Load and parse YAML content from the given file path, using PyYAML if available and falling back to the bundled simple YAML parser otherwise.
+    Load YAML from the given path and return its parsed Python representation.
+    
+    Uses PyYAML's safe_load when the PyYAML package is available; otherwise falls back to the script's strict simple YAML parser. The file is read using UTF-8 encoding.
     
     Parameters:
-        path (Path): Path to the YAML file; the file is read using UTF-8 encoding.
+        path (Path): Path to the YAML file.
     
     Returns:
-        Any: The parsed Python representation of the YAML content (mapping, sequence, scalar, or None).
+        The parsed Python value (mapping, sequence, scalar, or None).
     """
     if yaml is None:
         return parse_simple_yaml(path.read_text(encoding="utf-8"))
@@ -373,16 +377,16 @@ def active_tasks_are_parallel_workers(
     active_tasks: list[dict[str, Any]], rules: dict[str, Any]
 ) -> bool:
     """
-    Check whether the provided active tasks qualify as parallel worker tasks with disjoint allowed_files under the given rules.
+    Determine whether the provided active tasks can run in parallel as disjoint worker tasks under the given rules.
     
-    Evaluates whether multiple active tasks can run in parallel by requiring each active task to be of type "worker", to have a non-empty `allowed_files` list, and for those file sets to be pairwise disjoint. The rules mapping can override default constraints: if `rules["one_active_task"]` is not False and `rules["parallel_workers"]` is not True, parallel workers are disallowed.
+    Checks that either there is exactly one active task, or all active tasks are of type "worker", each has a non-empty `allowed_files` list, and the sets of allowed files are pairwise disjoint. Honors rule overrides: if `rules.get("one_active_task") is not False` and `rules.get("parallel_workers") is not True`, parallel workers are disallowed.
     
     Parameters:
-    	active_tasks (list[dict[str, Any]]): Active task mappings to evaluate.
-    	rules (dict[str, Any]): Optional rules that may contain `one_active_task` and `parallel_workers` keys to permit or forbid parallel worker tasks.
+    	active_tasks (list[dict[str, Any]]): Active task mappings to evaluate; expected keys include `"type"` and `"allowed_files"`.
+    	rules (dict[str, Any]): Optional rules that may contain `one_active_task` and `parallel_workers` to permit or forbid parallel worker tasks.
     
     Returns:
-    	`true` if the tasks meet the parallel-worker requirements (or a single active task), `false` otherwise.
+    	True if the tasks meet the parallel-worker requirements (or there is a single active task), False otherwise.
     """
     if not active_tasks:
         return False
@@ -406,16 +410,15 @@ def active_tasks_are_parallel_workers(
 
 def validate_receipts(path: Path) -> dict[str, dict[str, Any]]:
     """
-    Validate and load receipts from a JSONL file.
+    Load and validate receipts from a JSONL file.
     
-    Parameters:
-        path (Path): Path to a receipts.jsonl file.
+    If the file does not exist, returns an empty mapping. Each non-blank line must be a JSON object with a non-empty string `id` and a `task_id` matching the `TASK_ID` pattern; duplicate `id` values are rejected.
     
     Returns:
-        dict[str, dict[str, Any]]: Mapping from receipt `id` to the parsed receipt object. Returns an empty dict if the file does not exist.
+        dict[str, dict[str, Any]]: Mapping from receipt `id` to the parsed receipt object.
     
     Raises:
-        ValueError: If a non-blank line is invalid JSON, not an object, missing/empty `id`, has an invalid `task_id` (must match TASK_ID), or contains a duplicate `id`. Error messages are prefixed with "receipts.jsonl:<line>:".
+        ValueError: If a non-blank line is invalid JSON, not an object, missing or empty `id`, has an invalid `task_id`, or contains a duplicate `id`. Error messages are prefixed with "receipts.jsonl:<line>:".
     """
     receipts: dict[str, dict[str, Any]] = {}
     if not path.exists():
@@ -515,12 +518,9 @@ def validate_root(goal_dir: Path) -> list[str]:
 
 def validate_goal_section(state: dict[str, Any]) -> tuple[list[str], str | None]:
     """
-    Validate the `goal` section of a parsed state mapping and collect semantic errors.
+    Validate the "goal" section of a parsed state mapping and return semantic errors plus the goal's status.
     
-    Checks that `state["goal"]` is a mapping and enforces constraints on fields such as
-    `status`, `native_objective`, `native_status`, `native_goal_id`, numeric counters,
-    `token_budget`, and timestamp strings. Returns any validation errors and the
-    string value of `goal.status` when present and a string.
+    Checks that `state["goal"]` is a mapping and enforces constraints on fields such as `status`, `native_objective`, `native_status`, `native_goal_id`, numeric counters, `token_budget`, and timestamp strings.
     
     Parameters:
     	state (dict[str, Any]): Parsed top-level state mapping from `state.yaml`.
@@ -591,13 +591,9 @@ def require_non_empty_string(mapping: dict[str, Any], field: str, label: str, er
 
 def require_non_empty_string_list(mapping: dict[str, Any], field: str, label: str, errors: list[str]) -> None:
     """
-    Append an error if the specified mapping field is not a non-empty list of non-empty strings.
+    Ensure a mapping field is a non-empty list of non-empty strings and append an error if not.
     
-    Parameters:
-    	mapping (dict[str, Any]): Mapping to validate.
-    	field (str): Key in `mapping` whose value should be validated.
-    	label (str): Prefix used in the error message (typically the section name).
-    	errors (list[str]): Mutable list to which an error message will be appended when validation fails.
+    If validation fails, appends the message "{label}.{field} must be a non-empty list of strings" to the supplied errors list.
     """
     values = mapping.get(field)
     if not isinstance(values, list) or not values or not all(isinstance(item, str) and item.strip() for item in values):
@@ -606,9 +602,9 @@ def require_non_empty_string_list(mapping: dict[str, Any], field: str, label: st
 
 def validate_completion_contract(state: dict[str, Any]) -> list[str]:
     """
-    Validate the `completion_contract` section of the parsed state mapping.
+    Validate the `completion_contract` section of the state mapping.
     
-    Checks that `state["completion_contract"]` is a mapping and that it contains the required non-empty fields:
+    Checks that `completion_contract` is a mapping and that the following fields are present and non-empty:
     - `outcome` (non-empty string)
     - `verification_surface` (non-empty list of strings)
     - `constraints` (non-empty list of strings)
@@ -616,11 +612,10 @@ def validate_completion_contract(state: dict[str, Any]) -> list[str]:
     - `iteration_policy` (non-empty string)
     - `blocked_stop_condition` (non-empty string)
     
-    Parameters:
-        state (dict[str, Any]): Parsed state mapping from `state.yaml`.
-    
     Returns:
-        list[str]: A list of validation error messages. Empty if `completion_contract` is present, a mapping, and all required fields are valid. If `completion_contract` is missing or not a mapping, returns `["completion_contract must be a mapping"]`.
+        list[str]: Validation error messages. Empty if the section is valid.
+                   If `completion_contract` is missing or not a mapping, returns
+                   `["completion_contract must be a mapping"]`.
     """
     errors: list[str] = []
     contract = state.get("completion_contract")
@@ -840,12 +835,12 @@ def validate_tasks_and_receipts(
 
 def validate_board(goal_dir: Path) -> list[str]:
     """
-    Validate a Goal Governor board directory and return any validation errors.
+    Validate a Goal Governor board directory.
     
-    Performs the full board validation pass: checks the directory layout, parses and validates
-    state.yaml (including version and goal section), validates completion contract,
-    continuation gate, and claims, loads and validates receipts.jsonl, and validates tasks
-    against receipts and board-level rules.
+    Performs a full validation pass: checks the directory layout, parses and validates state.yaml
+    (version and semantic sections), validates the completion contract, continuation gate, and
+    claims, loads and validates receipts.jsonl, and validates tasks against receipts and board-level
+    rules.
     
     Parameters:
     	goal_dir (Path): Path to the goal board directory to validate.
@@ -889,9 +884,12 @@ def validate_board(goal_dir: Path) -> list[str]:
 
 def main(argv: list[str]) -> int:
     """
-    Validate a Goal Governor goal directory specified on the command-line and return an exit code.
+    Validate a Goal Governor goal directory specified on the command line.
     
-    If the argument count is incorrect this prints a usage failure and returns 1. Runs full board validation for the directory path given as argv[1]; if validation errors are found it prints each error prefixed with "FAIL: " to stderr and returns 1. On successful validation it prints "PASS: goal board is valid" to stdout and returns 0.
+    If the provided argv does not contain exactly one path argument, prints a usage failure message and exits with failure. Runs full board validation for the directory path given as argv[1]; if validation errors are found, prints each error to stderr prefixed with "FAIL: ". On successful validation prints "PASS: goal board is valid" to stdout.
+    
+    Parameters:
+        argv (list[str]): Command-line arguments; argv[1] must be the path to the goal directory.
     
     Returns:
         int: 0 on successful validation, 1 on validation failure or incorrect usage.

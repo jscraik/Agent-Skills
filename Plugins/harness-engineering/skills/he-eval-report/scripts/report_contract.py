@@ -34,13 +34,13 @@ def load_contract() -> dict[str, Any]:
 
 def contract_list(key: str) -> list[str]:
     """
-    Retrieve a list of string values from the loaded eval report contract for the specified key.
+    Get the values for a contract field and convert each value to a string.
     
     Parameters:
-        key (str): Name of the contract field to retrieve.
+        key (str): Contract field name to retrieve.
     
     Returns:
-        list[str]: The field's values converted to strings.
+        list[str]: Field values converted to strings.
     
     Raises:
         TypeError: If the contract field exists but is not a list.

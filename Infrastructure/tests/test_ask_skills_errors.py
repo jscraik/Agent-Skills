@@ -238,6 +238,23 @@ class TestAskSkillsErrors(unittest.TestCase):
         mock_which,
         mock_audit,
     ):
+        """
+        Verify that external_review_skill runs plugin-eval and tessl (lint and review) by default and records expected policy and tessl outputs.
+        
+        Asserts that:
+        - The overall result status is "success".
+        - Policy fields indicate no_publish and not using npx.
+        - plugin-eval, tessl lint, and tessl review stages are marked "success".
+        - Exactly three subprocess invocations occur and none invoke "npx" or "publish".
+        - The HOME environment used for tessl invocations does not contain the "agent-skills-tessl-" marker.
+        - The tessl review invocation uses the arguments sequence ["skill", "review", "--json", "--threshold", "95", <skill_dir>].
+        - The returned tessl_tile marks support_refs_included as truthy.
+        
+        Parameters:
+            mock_run: patched subprocess.run used to simulate external tool invocations.
+            mock_which: patched shutil.which used to indicate presence of required binaries.
+            mock_audit: patched audit_skill used to simulate a prior audit result.
+        """
         skill_dir = "Skills/backend-platform/example-skill"
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)

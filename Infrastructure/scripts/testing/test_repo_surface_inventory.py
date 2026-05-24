@@ -41,6 +41,11 @@ def test_duplicated_infrastructure_path_is_violation() -> None:
 
 
 def test_skill_source_path_is_source() -> None:
+    """
+    Verify that a SKILL.md file under Skills/... is classified as source surface.
+    
+    Asserts the resulting finding has classification "source", status "ok", and is not blocking.
+    """
     finding = MODULE.classify_path("Skills/agent-ops/autofix/SKILL.md")
 
     assert finding.classification == "source"

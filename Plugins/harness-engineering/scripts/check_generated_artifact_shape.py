@@ -177,13 +177,13 @@ def has_visual_decision(text: str) -> bool:
 
 def check_enforcement_contract(text: str) -> list[str]:
     """
-    Validate the "Enforcement Contract" section of a markdown artifact for presence and required terms.
+    Validate that the "Enforcement Contract" H2 section exists and contains every required enforcement term.
     
     Parameters:
         text (str): Full markdown document to inspect.
     
     Returns:
-        list[str]: A list of error messages. Returns a single error "Enforcement Contract section is empty" if the section is missing or blank; otherwise returns one error per required enforcement term that is not present in the section (terms compared case-insensitively).
+        list[str]: `["Enforcement Contract section is empty"]` if the section is missing or blank; otherwise one error per missing required term formatted as `"Enforcement Contract missing required field: <term>"`.
     """
     errors: list[str] = []
     body = section_body(text, "Enforcement Contract")
@@ -303,21 +303,21 @@ def validate_spec(text: str) -> list[str]:
 
 def validate_plan(text: str) -> list[str]:
     """
-    Validate a plan markdown document for required sections, terms, identifiers, and wiring.
+    Validate a plan Markdown document for required structure, sections, terms, identifiers, and wiring.
     
-    Performs a series of content checks on the provided plan text and returns any violations found. Checks include:
-    - Required H2 section ordering and presence.
-    - Presence and required terms within the "Enforcement Contract", "Authority and Scope Boundary", "Runtime Persistence and State", and "Coding and Testing Lenses" sections.
-    - "Work Units" section contains at least one stable PU-* ID and the required execution phrases: "allowed path", "forbidden path", "validation", "stop condition", "rollback", and "handoff".
-    - The document contains at least one source/acceptance mapping (FR-*, NFR-*, SA-*, or VAC-*).
-    - "Validation Gates" (when present) ties testing decisions to observable behavior, prior art, source requirement, or acceptance ID.
-    - Presence of a visual decision (Mermaid/table/image/"not needed") in the Visual References / Diagrams section.
+    Performs content checks specific to plan artifacts and returns any violations found. Key checks:
+    - required H2 section ordering and presence;
+    - required phrases in "Enforcement Contract", "Authority and Scope Boundary", "Runtime Persistence and State", and "Coding and Testing Lenses";
+    - "Work Units" contains at least one stable `PU-*` ID and the execution phrases: "allowed path", "forbidden path", "validation", "stop condition", "rollback", and "handoff";
+    - presence of at least one source/acceptance mapping (`FR-*`, `NFR-*`, `SA-*`, or `VAC-*`);
+    - when present, "Validation Gates" must reference observable behavior, proof, prior art, source requirements, or acceptance IDs;
+    - "Visual References / Diagrams" must include a Mermaid diagram, image, table row, or an explicit "not needed" justification.
     
     Parameters:
         text (str): Markdown content of the plan to validate.
     
     Returns:
-        list[str]: A list of error messages describing each validation failure; empty if the plan passes all checks.
+        list[str]: Error messages for each validation failure; empty when no violations are found.
     """
     errors = check_section_order(headings(text), PLAN_SECTIONS)
     errors.extend(check_enforcement_contract(text))

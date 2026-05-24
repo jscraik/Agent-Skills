@@ -61,7 +61,20 @@ _REVISION_PATTERN = re.compile(r"^[0-9a-f]{7,}", re.IGNORECASE)
 
 
 def _load_jsonl(path: Path) -> list[dict[str, Any]]:
-    """Return a list of parsed JSON objects from a JSONL file."""
+    """
+    Load and parse a JSON Lines (JSONL) file into a list of JSON objects.
+    
+    Empty or whitespace-only lines are ignored; each non-empty line is parsed as a separate JSON object.
+    
+    Parameters:
+        path (Path): Path to the JSONL file to read (UTF-8 encoded).
+    
+    Returns:
+        list[dict[str, Any]]: List of parsed JSON objects, in file order.
+    
+    Raises:
+        AssertionError: If a non-empty line contains invalid JSON; the message includes the offending line number and file path.
+    """
     records: list[dict[str, Any]] = []
     with open(path, encoding="utf-8") as fh:
         for lineno, raw in enumerate(fh, start=1):
@@ -86,6 +99,13 @@ class TestManifestRevisionBump(unittest.TestCase):
     """All manifest.jsonl files must use the new source_revision "93ef5f8dc"."""
 
     def _assert_all_revisions(self, path: Path, expected: str) -> None:
+        """
+        Assert every JSONL record in the given file has `provenance.source_revision` equal to the expected revision.
+        
+        Parameters:
+            path (Path): Path to a JSONL file containing manifest records.
+            expected (str): The expected `provenance.source_revision` value for each record.
+        """
         records = _load_jsonl(path)
         for rec in records:
             rev = rec.get("provenance", {}).get("source_revision", "")
@@ -110,6 +130,9 @@ class TestManifestRevisionBump(unittest.TestCase):
         )
 
     def test_content_publishing_revision_is_new(self) -> None:
+        """
+        Assert every record in the content-publishing manifest uses the expected new manifest revision (`NEW_MANIFEST_REVISION`).
+        """
         self._assert_all_revisions(
             REPO_ROOT / ".skillsets" / "content-publishing" / "manifest.jsonl",
             NEW_MANIFEST_REVISION,
@@ -122,18 +145,31 @@ class TestManifestRevisionBump(unittest.TestCase):
         )
 
     def test_harness_engineering_revision_is_new(self) -> None:
+        """
+        Assert that every entry in the harness-engineering manifest uses the expected new source_revision.
+        """
         self._assert_all_revisions(
             REPO_ROOT / ".skillsets" / "harness-engineering" / "manifest.jsonl",
             NEW_MANIFEST_REVISION,
         )
 
     def test_mobile_native_revision_is_new(self) -> None:
+        """
+        Verify every record in .skillsets/mobile-native/manifest.jsonl has provenance.source_revision equal to NEW_MANIFEST_REVISION.
+        
+        This test fails if any record in the mobile-native manifest uses a different `provenance.source_revision`.
+        """
         self._assert_all_revisions(
             REPO_ROOT / ".skillsets" / "mobile-native" / "manifest.jsonl",
             NEW_MANIFEST_REVISION,
         )
 
     def test_plugin_factory_revision_is_new(self) -> None:
+        """
+        Assert that every record in the plugin-factory manifest has the expected new provenance source_revision.
+        
+        Uses the test helper to load and check all JSONL records in .skillsets/plugin-factory/manifest.jsonl and verifies each record's `provenance.source_revision` equals NEW_MANIFEST_REVISION.
+        """
         self._assert_all_revisions(
             REPO_ROOT / ".skillsets" / "plugin-factory" / "manifest.jsonl",
             NEW_MANIFEST_REVISION,
@@ -146,12 +182,18 @@ class TestManifestRevisionBump(unittest.TestCase):
         )
 
     def test_security_ops_revision_is_new(self) -> None:
+        """
+        Assert that every record in .skillsets/security-ops/manifest.jsonl has provenance.source_revision equal to NEW_MANIFEST_REVISION.
+        """
         self._assert_all_revisions(
             REPO_ROOT / ".skillsets" / "security-ops" / "manifest.jsonl",
             NEW_MANIFEST_REVISION,
         )
 
     def test_skill_factory_revision_is_new(self) -> None:
+        """
+        Assert that every record in the .skillsets/skill-factory/manifest.jsonl file has the expected new manifest revision.
+        """
         self._assert_all_revisions(
             REPO_ROOT / ".skillsets" / "skill-factory" / "manifest.jsonl",
             NEW_MANIFEST_REVISION,
@@ -207,12 +249,27 @@ class TestGoalGovernorEntryUpdated(unittest.TestCase):
     _MANIFEST_PATH = REPO_ROOT / ".skillsets" / "agent-ops" / "manifest.jsonl"
 
     def _get_goal_governor(self) -> dict[str, Any]:
+        """
+        Retrieve the 'goal-governor' entry from the agent-ops manifest.
+        
+        Searches the JSONL records loaded from the manifest path and returns the record whose `id` is "goal-governor".
+        If no such entry is found the test fails via an assertion.
+        
+        Returns:
+            dict[str, Any]: The manifest record for "goal-governor".
+        """
         records = _load_jsonl(self._MANIFEST_PATH)
         entry = next((r for r in records if r.get("id") == "goal-governor"), None)
         self.assertIsNotNone(entry, "goal-governor entry not found in agent-ops manifest")
         return entry  # type: ignore[return-value]
 
     def test_goal_governor_exists(self) -> None:
+        """
+        Ensure the `goal-governor` entry is present in the agent-ops manifest.
+        
+        Raises:
+            AssertionError: If the `goal-governor` record is not found.
+        """
         self._get_goal_governor()
 
     def test_goal_governor_description_mentions_stuck(self) -> None:
@@ -226,6 +283,12 @@ class TestGoalGovernorEntryUpdated(unittest.TestCase):
         )
 
     def test_goal_governor_description_mentions_hanging(self) -> None:
+        """
+        Assert that the goal-governor entry's description contains the word "hanging" (case-insensitive).
+        
+        Raises:
+        	AssertionError: If the description does not include "hanging".
+        """
         entry = self._get_goal_governor()
         desc = entry["description"]
         self.assertIn(
@@ -271,7 +334,11 @@ class TestGoalGovernorEntryUpdated(unittest.TestCase):
         )
 
     def test_goal_governor_level_is_molecule(self) -> None:
-        """Level was changed from compound to molecule in this PR."""
+        """
+        Assert that the `goal-governor` manifest entry has its `level` set to "molecule".
+        
+        Fails the test if the entry's `level` field is not equal to "molecule".
+        """
         entry = self._get_goal_governor()
         self.assertEqual(
             entry.get("level"),
@@ -298,6 +365,11 @@ class TestGoalGovernorEntryUpdated(unittest.TestCase):
         )
 
     def test_goal_governor_source_revision_is_new(self) -> None:
+        """
+        Assert that the `goal-governor` entry's `provenance.source_revision` equals the expected new manifest revision.
+        
+        Loads the `goal-governor` record and fails the test if its `provenance.source_revision` is not exactly `NEW_MANIFEST_REVISION`.
+        """
         entry = self._get_goal_governor()
         rev = entry.get("provenance", {}).get("source_revision", "")
         self.assertEqual(
@@ -307,6 +379,13 @@ class TestGoalGovernorEntryUpdated(unittest.TestCase):
         )
 
     def test_goal_governor_required_fields_present(self) -> None:
+        """
+        Verify the `goal-governor` entry in the agent-ops manifest contains all required top-level fields.
+        
+        Asserts that the entry returned by _get_goal_governor() includes the keys:
+        "description", "id", "level", "provenance", "risk", "runtime_visibility",
+        "scope", "skill_set", "source_path", and "triggers".
+        """
         required: ClassVar[tuple[str, ...]] = (
             "description",
             "id",
@@ -349,6 +428,15 @@ class TestSessionWorkflowMinerAdded(unittest.TestCase):
     )
 
     def _get_session_workflow_miner(self) -> dict[str, Any]:
+        """
+        Retrieve the "session-workflow-miner" entry from the agent-ops manifest.
+        
+        Loads the manifest JSONL and asserts that an entry with id "session-workflow-miner" exists,
+        failing the test if it is not found.
+        
+        Returns:
+            dict[str, Any]: The manifest record for the "session-workflow-miner" entry.
+        """
         records = _load_jsonl(self._MANIFEST_PATH)
         entry = next(
             (r for r in records if r.get("id") == "session-workflow-miner"), None
@@ -382,6 +470,9 @@ class TestSessionWorkflowMinerAdded(unittest.TestCase):
         )
 
     def test_session_workflow_miner_scope_is_global(self) -> None:
+        """
+        Verify that the 'session-workflow-miner' manifest entry has its `scope` set to "global".
+        """
         entry = self._get_session_workflow_miner()
         self.assertEqual(
             entry.get("scope"),
@@ -437,6 +528,9 @@ class TestSessionWorkflowMinerAdded(unittest.TestCase):
         )
 
     def test_session_workflow_miner_level_is_compound(self) -> None:
+        """
+        Assert that the 'session-workflow-miner' manifest entry has its 'level' set to 'compound'.
+        """
         entry = self._get_session_workflow_miner()
         self.assertEqual(
             entry.get("level"),
@@ -453,6 +547,11 @@ class TestSessionWorkflowMinerAdded(unittest.TestCase):
         )
 
     def test_session_workflow_miner_source_path_ends_with_skill_md(self) -> None:
+        """
+        Assert the session-workflow-miner entry's `source_path` ends with 'SKILL.md'.
+        
+        Raises an assertion failure if the `session-workflow-miner` record's `source_path` does not end with 'SKILL.md'; the failure message includes the actual `source_path` value.
+        """
         entry = self._get_session_workflow_miner()
         source_path = entry.get("source_path", "")
         self.assertTrue(
@@ -470,11 +569,21 @@ class TestCommandSurfaceCountsAndRevision(unittest.TestCase):
     """command-surface.json must reflect the new counts and source_revision."""
 
     def setUp(self) -> None:
+        """
+        Load the command-surface JSON file into self._data for use by the test methods.
+        
+        Reads COMMAND_SURFACE_PATH using UTF-8 encoding and parses its contents with json.load,
+        assigning the resulting Python object to self._data.
+        """
         with open(COMMAND_SURFACE_PATH, encoding="utf-8") as fh:
             self._data = json.load(fh)
 
     def test_handle_count_is_111(self) -> None:
-        """handle_count must be updated to 111 (was 110)."""
+        """
+        Verify the command-surface JSON's top-level "handle_count" equals the expected value.
+        
+        Asserts that the parsed command-surface data's "handle_count" field is equal to EXPECTED_HANDLE_COUNT.
+        """
         self.assertEqual(
             self._data.get("handle_count"),
             EXPECTED_HANDLE_COUNT,
@@ -483,7 +592,9 @@ class TestCommandSurfaceCountsAndRevision(unittest.TestCase):
         )
 
     def test_generated_command_handle_count_is_105(self) -> None:
-        """generated_command_handle_count must be updated to 105 (was 104)."""
+        """
+        Verify that the command-surface entry `generated_command_handle_count` equals 105.
+        """
         self.assertEqual(
             self._data.get("generated_command_handle_count"),
             EXPECTED_GENERATED_HANDLE_COUNT,
@@ -517,7 +628,12 @@ class TestCommandSurfaceCountsAndRevision(unittest.TestCase):
         )
 
     def test_no_source_revision_uses_old_manifest_revision(self) -> None:
-        """The old manifest revision '83f7ab9ed' must not appear in command-surface."""
+        """
+        Ensure no command-surface handle references the old manifest revision.
+        
+        Asserts that none of the entries in the command-surface `handles` list have
+        `provenance.source_revision` equal to the known old revision.
+        """
         for entry in self._data.get("handles", []):
             rev = entry.get("provenance", {}).get("source_revision", "")
             with self.subTest(handle=entry.get("handle", "?")):
@@ -529,6 +645,9 @@ class TestCommandSurfaceCountsAndRevision(unittest.TestCase):
                 )
 
     def test_command_surface_new_revision_matches_git_hash_pattern(self) -> None:
+        """
+        Assert that NEW_COMMAND_SURFACE_REVISION matches the expected short git-hash pattern.
+        """
         self.assertRegex(
             NEW_COMMAND_SURFACE_REVISION,
             _REVISION_PATTERN,
@@ -536,6 +655,9 @@ class TestCommandSurfaceCountsAndRevision(unittest.TestCase):
         )
 
     def test_generated_from_is_rooted_manifests(self) -> None:
+        """
+        Asserts that the command-surface metadata indicates it was generated from "rooted_manifests".
+        """
         self.assertEqual(
             self._data.get("generated_from"),
             "rooted_manifests",
@@ -571,6 +693,11 @@ class TestJsc351StateYamlStructure(unittest.TestCase):
     """state.yaml must contain the required top-level keys and values."""
 
     def setUp(self) -> None:
+        """
+        Prepare test fixture by loading and parsing the state YAML file into self._data.
+        
+        Reads STATE_YAML_PATH using UTF-8 and parses it with yaml.safe_load, storing the resulting dictionary in self._data for use by the test methods.
+        """
         self._data: dict[str, Any] = yaml.safe_load(
             STATE_YAML_PATH.read_text(encoding="utf-8")
         )
@@ -586,11 +713,21 @@ class TestJsc351StateYamlStructure(unittest.TestCase):
     )
 
     def test_required_top_level_keys_present(self) -> None:
+        """
+        Assert that the state YAML contains all required top-level keys.
+        
+        Each key in self.REQUIRED_TOP_LEVEL_KEYS is checked in a subtest; the test fails with a clear message if a key is missing from self._data.
+        """
         for key in self.REQUIRED_TOP_LEVEL_KEYS:
             with self.subTest(key=key):
                 self.assertIn(key, self._data, f"state.yaml is missing key '{key}'")
 
     def test_version_is_2(self) -> None:
+        """
+        Verify the top-level `version` field in the loaded state YAML equals 2.
+        
+        Checks that `self._data["version"]` is exactly 2 and fails the test with a message showing the actual value if it does not match.
+        """
         self.assertEqual(
             self._data.get("version"),
             2,
@@ -598,6 +735,11 @@ class TestJsc351StateYamlStructure(unittest.TestCase):
         )
 
     def test_goal_slug_is_jsc_351(self) -> None:
+        """
+        Verify that the goal slug contains "jsc-351".
+        
+        Asserts that the loaded YAML's `goal.slug` includes the substring "jsc-351"; on failure the assertion message shows the actual slug.
+        """
         goal = self._data.get("goal", {})
         slug = goal.get("slug", "")
         self.assertIn(
@@ -607,6 +749,11 @@ class TestJsc351StateYamlStructure(unittest.TestCase):
         )
 
     def test_goal_status_is_in_progress(self) -> None:
+        """
+        Assert that the loaded goal's status equals "in_progress".
+        
+        If the status differs or the goal is missing, the test fails and reports the actual value.
+        """
         goal = self._data.get("goal", {})
         self.assertEqual(
             goal.get("status"),
@@ -615,16 +762,31 @@ class TestJsc351StateYamlStructure(unittest.TestCase):
         )
 
     def test_goal_has_objective(self) -> None:
+        """
+        Verify that the loaded goal contains a non-empty objective.
+        
+        Asserts that `goal.objective` exists and has length greater than zero.
+        """
         goal = self._data.get("goal", {})
         objective = goal.get("objective", "")
         self.assertGreater(len(objective), 0, "goal.objective must not be empty")
 
     def test_tasks_is_non_empty_list(self) -> None:
+        """
+        Assert that the YAML state's "tasks" field exists and contains at least one task.
+        
+        This test verifies that `self._data["tasks"]` is a list and that its length is greater than zero; it fails the test if the key is missing, not a list, or empty.
+        """
         tasks = self._data.get("tasks", [])
         self.assertIsInstance(tasks, list)
         self.assertGreater(len(tasks), 0, "state.yaml must have at least one task")
 
     def test_each_task_has_id_and_status(self) -> None:
+        """
+        Assert that every task in the loaded state YAML contains both the `id` and `status` keys.
+        
+        Each task in `self._data["tasks"]` is checked and will cause the test to fail if either key is missing.
+        """
         tasks = self._data.get("tasks", [])
         for task in tasks:
             task_id = task.get("id", "?")
@@ -633,6 +795,11 @@ class TestJsc351StateYamlStructure(unittest.TestCase):
                 self.assertIn("status", task, f"Task '{task_id}' is missing 'status'")
 
     def test_governance_evidence_has_outstanding_gates(self) -> None:
+        """
+        Verify that `governance_evidence` defines an `outstanding_gates` list and that the list contains at least one entry.
+        
+        Asserts that `governance_evidence.outstanding_gates` is a list and its length is greater than zero.
+        """
         evidence = self._data.get("governance_evidence", {})
         gates = evidence.get("outstanding_gates", [])
         self.assertIsInstance(gates, list)
@@ -641,6 +808,11 @@ class TestJsc351StateYamlStructure(unittest.TestCase):
         )
 
     def test_each_outstanding_gate_has_id_kind_status(self) -> None:
+        """
+        Assert that each outstanding governance gate entry includes the required keys.
+        
+        Loads the top-level `governance_evidence.outstanding_gates` list and, for every gate in that list, asserts the presence of the keys `"id"`, `"kind"`, and `"status"`. Each gate is tested in a subTest keyed by the gate's `id` (or `"?"` if missing).
+        """
         evidence = self._data.get("governance_evidence", {})
         gates = evidence.get("outstanding_gates", [])
         for gate in gates:
@@ -658,11 +830,22 @@ class TestJsc351StateYamlStructure(unittest.TestCase):
         )
 
     def test_completion_contract_has_outcome(self) -> None:
+        """
+        Assert that the state's completion contract contains a non-empty 'outcome' value.
+        
+        Checks that the top-level `completion_contract` mapping has a non-empty `outcome` string; fails the test if `outcome` is missing or empty.
+        """
         contract = self._data.get("completion_contract", {})
         outcome = contract.get("outcome", "")
         self.assertGreater(len(outcome), 0, "completion_contract.outcome must not be empty")
 
     def test_continuation_gate_auto_continue_is_no(self) -> None:
+        """
+        Assert that the loaded state's continuation_gate has "auto_continue_allowed" set to "no".
+        
+        Raises:
+            AssertionError: if the key is missing or its value is not "no".
+        """
         gate = self._data.get("continuation_gate", {})
         self.assertEqual(
             gate.get("auto_continue_allowed"),
@@ -671,10 +854,20 @@ class TestJsc351StateYamlStructure(unittest.TestCase):
         )
 
     def test_checks_has_last_verification(self) -> None:
+        """
+        Assert that the loaded YAML `checks` mapping includes a `last_verification` key.
+        
+        This test fails if the `checks` section is missing the required `last_verification` entry.
+        """
         checks = self._data.get("checks", {})
         self.assertIn("last_verification", checks, "checks must contain last_verification")
 
     def test_last_verification_outcome_is_pass(self) -> None:
+        """
+        Assert that the checks.last_verification outcome is "pass".
+        
+        Raises an assertion failure if the `checks.last_verification.outcome` value is not the string "pass".
+        """
         checks = self._data.get("checks", {})
         lv = checks.get("last_verification", {})
         self.assertEqual(
@@ -693,12 +886,23 @@ class TestLearningsMdNewEntries(unittest.TestCase):
     """LEARNINGS.md must contain the new 2026-05-24 log entries from this PR."""
 
     def setUp(self) -> None:
+        """
+        Prepare the test fixture by reading the repository LEARNINGS.md file into self._content.
+        
+        Reads the entire .harness/memory/LEARNINGS.md file using UTF-8 encoding and stores its text for use by subsequent tests.
+        """
         self._content = LEARNINGS_MD_PATH.read_text(encoding="utf-8")
 
     def test_learnings_md_exists(self) -> None:
+        """
+        Check that the repository's LEARNINGS.md file exists at the expected path.
+        """
         self.assertTrue(LEARNINGS_MD_PATH.exists(), "LEARNINGS.md file must exist")
 
     def test_learnings_md_is_non_empty(self) -> None:
+        """
+        Assert that the loaded LEARNINGS.md content is not empty after trimming whitespace.
+        """
         self.assertGreater(len(self._content.strip()), 0, "LEARNINGS.md must not be empty")
 
     def test_learnings_md_contains_2026_05_24_entries(self) -> None:
