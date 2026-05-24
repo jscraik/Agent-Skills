@@ -696,6 +696,32 @@ class TestSkillsPackageVerifyDirectoryTarget(unittest.TestCase):
         self.assertFalse(verification["provenance_identity"]["trusted"])
         self.assertIn("provenance_trusted:false", verification["rule_evidence"])
 
+    def test_directory_target_uses_custom_trusted_provenance_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            skill_dir = Path(tmp_dir) / "partner-skill"
+            skill_dir.mkdir()
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                "---\n"
+                "name: partner-skill\n"
+                "description: Partner provenance fixture.\n"
+                "version: 1.0.0\n"
+                "compatible_roles: default\n"
+                "runtime_needs: local files\n"
+                "maturity: fixture\n"
+                "provenance: partner-source\n"
+                "share_readiness: ready\n"
+                "---\n",
+                encoding="utf-8",
+            )
+
+            result = skills_package_verify(REPO_ROOT, str(skill_dir), trusted_provenance="partner-source")
+
+        self.assertEqual(result.status, "success")
+        verification = result.data["skill_package_verification"]
+        self.assertTrue(verification["provenance_identity"]["trusted"])
+        self.assertIn("provenance_trusted:true", verification["rule_evidence"])
+
     def test_directory_target_schema_version(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             skill_dir = Path(tmp_dir) / "schema-skill"
@@ -709,6 +735,18 @@ class TestSkillsPackageVerifyDirectoryTarget(unittest.TestCase):
 
         verification = result.data["skill_package_verification"]
         self.assertEqual(verification["schema_version"], "skill-package-verify.v1")
+
+    def test_missing_zip_target_uses_archive_missing_artifact_blocker(self) -> None:
+        missing_archive = Path(tempfile.gettempdir()) / "agent-skills-missing-package-fixture.zip"
+
+        result = skills_package_verify(REPO_ROOT, str(missing_archive))
+
+        self.assertEqual(result.status, "error")
+        verification = result.data["skill_package_verification"]
+        self.assertEqual(verification["target_identity"]["kind"], "archive")
+        self.assertTrue(
+            any(blocker.get("rule_id") == "blocked_missing_artifact" for blocker in verification["blockers"])
+        )
 
 
 class TestSkillsPackageVerifyArchiveTarget(unittest.TestCase):

@@ -40,6 +40,10 @@ RUNTIME_MUTATION_SENTINELS = (
 )
 
 
+def _normalized_trusted_sources(trusted_sources: set[str] | None = None) -> set[str]:
+    return {source.strip().lower() for source in (trusted_sources or TRUSTED_PROVENANCE_SOURCES) if source.strip()}
+
+
 def sha256_bytes(data: bytes) -> str:
     digest = hashlib.sha256()
     digest.update(data)
@@ -205,7 +209,7 @@ def verify_archive_package(
     manifest: dict[str, Any] | None = None
     manifest_path: str | None = None
     rollback_journal: dict[str, Any] = {"status": "missing", "path": None, "entries": []}
-    trusted_sources = {source.strip().lower() for source in (trusted_sources or TRUSTED_PROVENANCE_SOURCES)}
+    trusted_sources = _normalized_trusted_sources(trusted_sources)
     runtime_before = _runtime_sentinels(repo_root)
     archive_sha256 = sha256_file(archive_path) if archive_path.is_file() else None
 
@@ -449,8 +453,15 @@ def verify_archive_package(
     }
 
 
-def verify_skill_directory(repo_root: Path, skill_md: Path, query: str) -> dict[str, Any]:
+def verify_skill_directory(
+    repo_root: Path,
+    skill_md: Path,
+    query: str,
+    *,
+    trusted_sources: set[str] | None = None,
+) -> dict[str, Any]:
     blockers: list[dict[str, Any]] = []
+    trusted_sources = _normalized_trusted_sources(trusted_sources)
     frontmatter = read_skill_frontmatter_fields(skill_md)
     contract = skill_package_contract(repo_root, skill_md, frontmatter)
     values = package_field_values(frontmatter)
@@ -464,7 +475,7 @@ def verify_skill_directory(repo_root: Path, skill_md: Path, query: str) -> dict[
             )
         )
     provenance_values = normalized_list(values.get("provenance"))
-    provenance_trusted = any(value.strip().lower() in TRUSTED_PROVENANCE_SOURCES for value in provenance_values)
+    provenance_trusted = any(value.strip().lower() in trusted_sources for value in provenance_values)
     if not provenance_trusted:
         blockers.append(
             _blocker(
@@ -481,12 +492,17 @@ def verify_skill_directory(repo_root: Path, skill_md: Path, query: str) -> dict[
         "archive_identity": None,
         "provenance_identity": {
             "trusted": provenance_trusted,
+            "policy": sorted(trusted_sources),
             "values": provenance_values,
         },
         "contract": contract,
         "checks": [
             _check("package_contract", "fail" if missing else "pass", {"missing": missing}),
-            _check("trusted_provenance", "pass" if provenance_trusted else "fail", {"values": provenance_values}),
+            _check(
+                "trusted_provenance",
+                "pass" if provenance_trusted else "fail",
+                {"values": provenance_values, "trusted_sources": sorted(trusted_sources)},
+            ),
             _check("no_runtime_mutation", "pass", {"install_attempted": False, "archive_extracted": False}),
         ],
         "blockers": blockers,
