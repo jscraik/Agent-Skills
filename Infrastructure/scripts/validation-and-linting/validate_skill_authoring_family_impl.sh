@@ -292,12 +292,12 @@ print(f"[family-gate] contract/eval/security benchmarks passed: {skill_dir}")
 # ---------------------------------------------------------------------------
 # Codex profile for live eval runs
 # ---------------------------------------------------------------------------
-# Set SKILL_FAMILY_CODEX_PROFILE to pass --profile <name> to run_skill_evals.py.
-# Example: SKILL_FAMILY_CODEX_PROFILE=fast uses the [profiles.fast] config (gpt-5.3-codex-spark).
-# Leave unset to use the default Codex profile from config.toml.
+# SKILL_FAMILY_CODEX_PROFILE defaults to fast so every live skill-family eval
+# selects [profiles.fast] unless a caller explicitly pins a different profile.
+skill_family_codex_profile="${SKILL_FAMILY_CODEX_PROFILE:-fast}"
 codex_profile_args=()
-if [[ -n "${SKILL_FAMILY_CODEX_PROFILE:-}" ]]; then
-  codex_profile_args=(--profile "${SKILL_FAMILY_CODEX_PROFILE}")
+if [[ "$runner_name" == "codex" ]]; then
+  codex_profile_args=(--profile "$skill_family_codex_profile")
 fi
 
 # ---------------------------------------------------------------------------
@@ -313,9 +313,7 @@ if [[ "$release_ready" == "1" ]]; then
   mkdir -p "$evidence_run_dir"
   echo "[family-gate] release-ready mode: evidence will be captured at ${evidence_run_dir}"
   echo "[family-gate] branch: ${git_branch} | sha: ${git_sha}"
-  if [[ -n "${SKILL_FAMILY_CODEX_PROFILE:-}" ]]; then
-    echo "[family-gate] codex profile: ${SKILL_FAMILY_CODEX_PROFILE}"
-  fi
+  echo "[family-gate] codex profile: ${skill_family_codex_profile} ([profiles.${skill_family_codex_profile}])"
 fi
 
 echo "[family-gate] using python: $python_cmd_display"
@@ -848,7 +846,7 @@ if [[ "$release_ready" == "1" ]] && [[ -n "$evidence_run_dir" ]]; then
   index_path="${evidence_run_dir}/evidence-index.json"
 
   runner_label="${SKILL_FAMILY_RUNNER:-codex}"
-  codex_profile_label="${SKILL_FAMILY_CODEX_PROFILE:-default}"
+  codex_profile_label="$skill_family_codex_profile"
 
   # Build skills JSON array safely with jq
   skills_json_array="[]"
@@ -869,6 +867,7 @@ if [[ "$release_ready" == "1" ]] && [[ -n "$evidence_run_dir" ]]; then
     --arg sha "$git_sha" \
     --arg runner "$runner_label" \
     --arg profile "$codex_profile_label" \
+    --arg profile_config "[profiles.${codex_profile_label}]" \
     --arg dir "$evidence_run_dir" \
     --argjson skills "$skills_json_array" \
     '{
@@ -880,6 +879,9 @@ if [[ "$release_ready" == "1" ]] && [[ -n "$evidence_run_dir" ]]; then
       freshness_window_days: 7,
       mode: "release-ready",
       codex_profile: $profile,
+      codex_profile_config: $profile_config,
+      tessl_eval_staging_policy: "stable /tmp/ask-tessl-evals staging with copied canonical eval inputs and tessl.json project marker",
+      tessl_review_policy: "Tessl review score must be >= 95; Plugin Eval B+ or better is acceptable with zero failures",
       evidence_dir: $dir,
       skill_coverage: $skills,
       degraded_mode_policy: "runner failures block closeout; retry-limited reruns are required before marking release-ready; one successful trusted rerun per skill is the minimum evidence standard",

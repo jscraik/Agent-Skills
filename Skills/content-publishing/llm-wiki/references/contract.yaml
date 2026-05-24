@@ -1,12 +1,57 @@
 schema_version: 1
 skill: llm-wiki
-purpose: "Create or validate a persistent markdown wiki for LLM-managed knowledge. Use this skill when ingest, query, lint, schema, or governance workflows are needed."
-triggers: ["Use when the user request matches the skill scope."]
-non_goals: ["Route unrelated work away from this skill."]
-inputs: [user_request, target_context, evidence]
-outputs: [result, evidence_summary, validation_status]
-risks: [over_triggering, untrusted_input, validation_drift]
+purpose: "Build, restore, or operate a persistent LLM-maintained markdown knowledge base, including Obsidian-friendly personal or team wikis where raw sources, wiki pages, and governance remain separate."
+triggers:
+  - "Persistent markdown wiki or personal/team knowledge base work."
+  - "Raw-source ingest, query, lint, citation, contradiction, or governance workflows."
+  - "Obsidian-friendly vault work involving wikilinks, backlinks, graph/local graph, local assets, Dataview/Marp, or git-backed markdown."
+  - "Restoring or instantiating the original LLM Wiki concept."
+non_goals:
+  - "One-off Q&A over a small static document set."
+  - "Vector/database infrastructure before the wiki workflow is validated."
+  - "Manual Obsidian linking advice without LLM-maintained wiki operations."
+inputs:
+  - user_request
+  - target_context
+  - source_corpus
+  - sensitivity_profile
+  - wiki_workspace
+  - governance_target
+outputs:
+  - wiki_architecture_or_restoration_plan
+  - seed_or_updated_pages
+  - governance_rules
+  - obsidian_vault_contract
+  - lint_report_v1
+  - privacy_and_citation_status
+  - lint_status
+  - validation_status
+risks:
+  - underspecified_scaffold
+  - over_triggering
+  - untrusted_input
+  - private_source_spill
+  - citation_drift
+  - weak_cross_links
+  - validation_drift
 safety: {untrusted_inputs: true, redact_secrets: true, destructive_commands: false}
-validation: [plugin_eval_grade_a, strict_skill_audit]
+validation:
+  required:
+    - strict_skill_audit
+    - smoke_eval_with_profiles_fast
+    - tessl_eval_staged_under_tmp_with_tessl_json
+    - tessl_review_score_gte_95
+  accepted_guardrail:
+    - plugin_eval_grade_b_plus_or_better_with_zero_failures
 observability: "Report validation commands and outcomes."
-rollback_procedure: "Restore archived context, then rerun strict audit and Plugin Eval."
+rollback_procedure: "Restore archived context, then rerun strict audit, profiles.fast smoke eval, staged Tessl eval/review, and Plugin Eval."
+fidelity_requirements:
+  - "Distinguish persistent LLM-maintained wiki work from one-off RAG."
+  - "State that the LLM maintains the wiki while the human curates sources and judgment."
+  - "Preserve raw source, wiki, and schema/governance layers."
+  - "Require ingest, query, and lint workflows."
+  - "File high-value query outputs back into the wiki when useful."
+  - "Support Obsidian as an optional IDE for browsing the markdown wiki."
+  - "Preserve local-file-first markdown and git friendliness."
+  - "Use a concrete vault contract for page types, frontmatter, aliases, citations, attachments, and no-bulk-rename safety when Obsidian matters."
+  - "Use lint-report/v1 for formal vault health sweeps."

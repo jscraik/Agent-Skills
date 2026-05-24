@@ -39,7 +39,9 @@ context, repeated-failure trace, existing `.harness/solutions/**` or
 ## Outputs
 A capture, refresh, consolidation, continuity-snapshot, stale-note, or blocked
 status; exactly one primary learning artifact when writing; Project Brain sync
-status; `source_prompt_family_status` when source-prompt preservation is in
+status; Codex-native sync receipt status when memory, artifact, goal, Chronicle,
+Local Memory, vault, or native citation surfaces are touched;
+source_prompt_family_status when source-prompt preservation is in
 scope; overlap and freshness findings; validation evidence; and a handoff for
 unresolved work.
 
@@ -61,7 +63,12 @@ secrets, credentials, or unredacted sensitive data into learning artifacts.
 3. Keep scope tight: start with 2-3 focused learning surfaces first, such as
    `.harness/solutions/**`, Project Brain paths, active `AGENTS.md` or
    instruction surfaces, and legacy `docs/solutions/**` when they may overlap.
-4. Avoid duplicate memory. Update an existing high-overlap artifact; create a
+4. If reinforcement touches Project Brain, goal boards, artifacts, Chronicle,
+   Local Memory, vault sync, or native citation state, apply
+   ../../references/codex-native-memory-baseline.md and write or verify the
+   matching sync receipt.
+5. Avoid duplicate memory. Update an existing high-overlap artifact; create a
+   new one only when no high-overlap canonical artifact exists.
 - See references/hot-path-folded-context.md for folded procedure detail.
 
 ## Validation
@@ -98,6 +105,7 @@ Hand off lifecycle-state conflicts to `he-reconcile`, unresolved defects to
 Structured output: `schema_version`, `mode`, `selected_artifact`,
 `evidence_checked`, `solved_status`, `validation_status`, `overlap_status`,
 `refresh_decisions`, `project_brain_status`, `continuity_status`,
+`codex_native_memory_status`,
 `structure_status`, `size_budget_status`, `discoverability_status`,
 `source_prompt_family_status`, `redaction_status`, `writes`,
 `git_staging_status`, `staged_paths`, `blocked_reason`, and `handoff`.
@@ -117,6 +125,14 @@ Structured output: `schema_version`, `mode`, `selected_artifact`,
   preserving.
 - See references/hot-path-folded-context.md for folded gotchas detail.
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 - Use `assets/` only when this skill's local visual or template assets are explicitly needed.
 Read `references/contract.yaml` for the full reinforcement contract and
@@ -135,6 +151,9 @@ Read when a durable learning would be clearer as a causal or source-of-truth
 visual: `../../references/visual-reference-contract.md`.
 Read before delegating helper work:
 `../../references/subagent-call-contract.md`.
+Read before writing or verifying memory, artifact, goal, Chronicle, Local Memory,
+vault, or native citation state:
+`../../references/codex-native-memory-baseline.md`.
 - See references/hot-path-folded-context.md for folded references detail.
 - ../../references/deferred-context-index.md for folded/discarded context.
 - Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

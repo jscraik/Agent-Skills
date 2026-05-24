@@ -167,6 +167,14 @@ budget trimming; move deep context to references with a clear route.
 Reference `assets/` only for skill packaging and browseability; workflow source
 of truth stays in this SKILL and references.
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 
 Read when detailed flow is needed: `references/brainstorm-workflow-details.md`.

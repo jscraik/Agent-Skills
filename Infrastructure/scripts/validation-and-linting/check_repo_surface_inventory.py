@@ -75,15 +75,59 @@ def _is_governed_system_skill_surface(path: str) -> bool:
 
 
 def _matches_plugin_subpath(path: str, subpath: str) -> bool:
+    """
+    Determine whether a path identifies a Plugins entry whose third path component equals the given subpath.
+    
+    Parameters:
+        path (str): Repository-relative path string (should be normalized to POSIX form).
+        subpath (str): Expected value of the third path component.
+    
+    Returns:
+        bool: `True` if the path has at least three components, the first component is "Plugins", and the third component equals `subpath`, `False` otherwise.
+    """
     parts = _path_parts(path)
     return len(parts) >= 3 and parts[0] == "Plugins" and parts[2] == subpath
 
 
-def _is_root_doc(path: str) -> bool:
-    return "/" not in path and path.endswith((".md", ".txt"))
+def _is_root_front_door_doc(path: str) -> bool:
+    """
+    Check whether a path is a top-level "front door" documentation filename.
+    
+    The path must not contain directory separators and must exactly match one of the recognized front-door filenames (for example "README.md" or "SECURITY.md").
+    
+    Returns:
+        True if the path is a recognized top-level front-door documentation filename, False otherwise.
+    """
+    if "/" in path:
+        return False
+    names = {
+        "AGENTS.md",
+        "ARCHITECTURE.md",
+        "CHANGELOG.md",
+        "CODE_OF_CONDUCT.md",
+        "CODESTYLE.md",
+        "CONTEXT.md",
+        "CONTRIBUTING.md",
+        "README.md",
+        "SECURITY.md",
+        "SKILL.md",
+        "SUPPORT.md",
+        "UBIQUITOUS_LANGUAGE.md",
+        "WORKFLOW.md",
+    }
+    return path in names
 
 
 def _is_root_config(path: str) -> bool:
+    """
+    Determine whether a path refers to a recognized top-level repository configuration or manifest filename.
+    
+    Parameters:
+        path (str): A single path segment (no directory separators) to test.
+    
+    Returns:
+        True if the given filename is one of the repository's known root-level config/manifest names, False otherwise.
+    """
     if "/" in path:
         return False
     names = {
@@ -168,16 +212,29 @@ def _normalize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
 
 def classify_path(path: str | Path) -> SurfaceFinding:
     """
-    Classify a repository file path into a SurfaceFinding that describes its ownership policy surface, status, and recommended next steps.
-
+    Classify a repository-relative path into a SurfaceFinding describing its policy classification, status, severity, blocking flag, and recommended next steps.
+    
     Parameters:
-        path (str | Path): Repository-relative file path to classify. The path is normalized (POSIX, no leading "./") before classification.
-
+        path (str | Path): Repository-relative path to classify; the path is normalized to POSIX form (leading "./" removed) before classification.
+    
     Returns:
-        SurfaceFinding: A finding containing `path`, `classification`, `status`, `code`, `severity`, `blocking`, optional `allowlist_entry`, `reason`, `recommendation`, and `metadata` (which may include normalized `next_steps`).
+        SurfaceFinding: A finding populated with `path`, `classification`, `status`, `code`, `severity`, `blocking`, optional `allowlist_entry`, `reason`, `recommendation`, and `metadata` (where `metadata["next_steps"]`, if present, is normalized into structured step objects).
     """
     normalized = _normalize_path(path)
     suffix = Path(normalized).suffix.lower()
+
+    if _starts_with(normalized, "docs"):
+        return _make_finding(
+            normalized,
+            classification="unknown",
+            status="violation",
+            code="lowercase_docs_drift",
+            severity="error",
+            blocking=True,
+            reason="Docs/** is the canonical documentation root; lowercase docs/** is casing drift.",
+            recommendation="Move the content to Docs/** or document an explicit compatibility migration.",
+            metadata={"next_steps": ["move_to_canonical_docs_root", "update_references"]},
+        )
 
     if _starts_with(normalized, "Infrastructure/Infrastructure"):
         return _make_finding(
@@ -529,8 +586,7 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         or _starts_with(normalized, "Infrastructure/ops")
         or _starts_with(normalized, "Infrastructure/reports")
         or _starts_with(normalized, "Infrastructure/storage")
-        or _is_root_doc(normalized)
-        or normalized in {".move-docs.sh", ".move.sh"}
+        or _is_root_front_door_doc(normalized)
     ):
         return _make_finding(
             normalized,

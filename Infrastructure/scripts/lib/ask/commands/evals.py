@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import os
 import re
 import shlex
 import subprocess
@@ -19,6 +20,8 @@ SMOKE_CASE_TIMEOUT_SECONDS = 600
 SMOKE_EVAL_TIMEOUT_SECONDS = 10800
 RELEASE_EVAL_TIMEOUT_SECONDS = 21600
 SMOKE_EVAL_MODEL = "gpt-5.3-codex-spark"
+# Codex CLI selects `[profiles.fast]` with the plain profile name.
+SMOKE_EVAL_PROFILE = "fast"
 
 
 EVAL_BLOCKER_TAXONOMY = {
@@ -78,13 +81,44 @@ def _as_text(value, encoding="utf-8") -> str:
 
 
 def _tessl_policy() -> dict:
-    """Return the repo's Tessl safety contract for eval runs."""
+    """
+    Repository-specific Tessl safety contract used to stage and run local evals.
+    
+    Provides a stable, minimal policy controlling what the Tessl runner may do during
+    an eval: restricts to native Tessl, disables publishing/registry/npm operations,
+    limits staged inputs to a small allowlist, and exposes stable staging and
+    evidence-retention metadata for post-run inspection.
+    
+    Returns:
+        policy (dict): Mapping of policy fields, including:
+            - native_tessl_only (bool): require native Tessl CLI usage.
+            - no_npx / no_publish / no_registry_upload (bool): forbid package publish/upload.
+            - temp_staged_project_input_only (bool): limit inputs to staged project files.
+            - stable_staging_root (str): path template for deterministic staging root.
+            - evidence_retention (str): human-readable guidance about retained staging evidence.
+            - tessl_project_marker (str): filename used as project marker (e.g., "tessl.json").
+            - staged_inputs (list[str]): allowed relative input paths to be staged.
+            - network_permission_required_by_repo (bool): whether network access is required.
+            - project_save_may_use_tessl_service (bool): whether project save may call Tessl service.
+            - project_save_default (str): default behavior flag for project-save compatibility.
+    """
+    temp_root = tempfile.gettempdir()
     return {
         "native_tessl_only": True,
         "no_npx": True,
         "no_publish": True,
         "no_registry_upload": True,
         "temp_staged_project_input_only": True,
+        "stable_staging_root": f"{temp_root}/ask-tessl-evals/<skill-path>-<sha12>",
+        "evidence_retention": "stable tmp staging is intentionally left for post-run inspection",
+        "tessl_project_marker": "tessl.json",
+        "staged_inputs": [
+            "SKILL.md",
+            "references/evals.yaml",
+            "references/contract.yaml",
+            "references/task-profile.json",
+            "scenarios/<case-id>/task.md",
+        ],
         "network_permission_required_by_repo": False,
         "project_save_may_use_tessl_service": False,
         "project_save_default": "compatibility_flag_not_required",
@@ -285,7 +319,33 @@ def _stage_tessl_eval_source(repo_root: Path, path: str, temp_root: Path | None 
 
 
 def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = False) -> dict:
-    """Run the local Tessl eval lane without any registry publish/upload command."""
+    """
+    Run a local Tessl "eval" lane against a staged copy of a skill directory.
+    
+    Stages a Tessl-compatible project from the given skill path and invokes the native
+    `tessl eval run --json` command in that staged workspace. The function returns a
+    summary dictionary describing the outcome, staging metadata, raw CLI output, and
+    any blocker classification when the run could not complete.
+    
+    Parameters:
+        repo_root (Path): Repository root directory used to resolve and stage the skill.
+        path (str): Skill path to stage and evaluate (as provided to the caller).
+        allow_project_save (bool): Compatibility flag retained for callers; ignored by this implementation.
+    
+    Returns:
+        dict: A result object containing keys such as:
+            - status: "pass", "fail", or "blocked".
+            - command: human-readable tessl command that was (or would be) executed.
+            - source_path: original requested `path`.
+            - staged_source: filesystem path to the staged workspace (when available).
+            - staged_files: list of files copied/written into the staged workspace.
+            - staging_policy / tessl_project_marker / evidence_retention: metadata about staging and evidence handling.
+            - exit_code: numeric process exit code (when available).
+            - raw_output, raw_error: captured stdout/stderr from the tessl run.
+            - blocker: human-readable blocker message when status == "blocked".
+            - blocker_class: taxonomy id for the blocker (e.g., "blocked_runtime", "blocked_auth", "blocked_validation").
+            - policy: the Tessl policy dictionary returned by _tessl_policy().
+    """
     _ = allow_project_save  # Compatibility flag retained; temp-staged local runs are default-safe.
     tessl_path = shutil.which("tessl")
     command_display = "tessl eval run --json <staged-temp-source>"
@@ -302,8 +362,17 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
         staged_source, copied_files = _stage_tessl_eval_source(repo_root, path)
         command_display = f"tessl eval run --json {staged_source}"
         cmd = [tessl_path, "eval", "run", "--json", str(staged_source)]
+        tessl_env = dict(os.environ)
+        tessl_env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
         try:
-            process = subprocess.run(cmd, cwd=str(staged_source), capture_output=True, text=True, timeout=600)
+            process = subprocess.run(
+                cmd,
+                cwd=str(staged_source),
+                capture_output=True,
+                text=True,
+                timeout=600,
+                env=tessl_env,
+            )
         except subprocess.TimeoutExpired as e:
             return {
                 "status": "blocked",
@@ -311,6 +380,9 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
                 "source_path": path,
                 "staged_source": str(staged_source),
                 "staged_files": copied_files,
+                "staging_policy": "stable_tmp_evidence",
+                "tessl_project_marker": str(staged_source / "tessl.json"),
+                "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
                 "raw_output": _as_text(e.stdout),
                 "raw_error": _as_text(e.stderr),
                 "blocker": "Tessl eval timed out after 600 seconds.",
@@ -324,6 +396,9 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
                 "source_path": path,
                 "staged_source": str(staged_source),
                 "staged_files": copied_files,
+                "staging_policy": "stable_tmp_evidence",
+                "tessl_project_marker": str(staged_source / "tessl.json"),
+                "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
                 "raw_output": "",
                 "raw_error": str(e),
                 "blocker": f"Failed to run Tessl eval: {e}",
@@ -360,6 +435,9 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
             "source_path": path,
             "staged_source": str(staged_source),
             "staged_files": copied_files,
+            "staging_policy": "stable_tmp_evidence",
+            "tessl_project_marker": str(staged_source / "tessl.json"),
+            "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
             "exit_code": process.returncode,
             "raw_output": raw_output,
             "raw_error": raw_error,
@@ -498,6 +576,17 @@ def _finish_eval_lifecycle(
 
 
 def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool = False) -> str | None:
+    """
+    Classify an evaluation blocker ID by scanning combined stdout/stderr for known marker phrases.
+    
+    Parameters:
+        raw_output (str): Captured standard output text to inspect.
+        raw_error (str): Captured standard error text to inspect.
+        timed_out (bool): When True, classify as a timeout blocker based on whether any output exists.
+    
+    Returns:
+        str | None: Blocker class ID (for example, "blocked_auth" or "timeout_partial_output") when a matching marker is found, `None` otherwise.
+    """
     text = "\n".join([raw_output or "", raw_error or ""])
     low = text.lower()
 
@@ -561,6 +650,8 @@ def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool =
         "host_execution_untrusted",
         "sandbox-exec",
         "operation not permitted",
+        "selected model is at capacity",
+        "model is at capacity",
         "context window",
         "start a new thread",
         "blocked_runtime",
@@ -638,9 +729,23 @@ def _latest_review_report(repo_root: Path, skill_identifier: str) -> Path | None
 
 
 def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path: str) -> Path:
+    """
+    Create an "eval-only" skill review JSON report under Infrastructure/artifacts/skill-reviews and return its filesystem path.
+    
+    The report documents a synthesized review for a skill when no prior review exists: it records the target skill path, generation timestamp, `review_mode: "eval_only"`, recommended policy thresholds (Codex smoke profile, Tessl thresholds, Snyk defaults, and a deterministic Tessl staging marker), per-lane `review_mode_details` describing which local checks would run, and placeholder results for `ask_audit`, `plugin_eval`, and `tessl_review`. The report file is written as <safe_slug(skill_name)>-eval-latest.json under repo_root/Infrastructure/artifacts/skill-reviews.
+    
+    Parameters:
+    	repo_root (Path): Repository root directory where the artifacts folder will be created.
+    	skill_name (str): Human-readable skill name used to construct the filename.
+    	skill_path (str): Canonical or requested skill path recorded as the report target.
+    
+    Returns:
+    	Path: The path to the written JSON report file.
+    """
     review_root = repo_root / "Infrastructure" / "artifacts" / "skill-reviews"
     review_root.mkdir(parents=True, exist_ok=True)
     report_path = review_root / f"{_safe_slug(skill_name)}-eval-latest.json"
+    temp_root = tempfile.gettempdir()
     report = {
         "status": "success",
         "data": {
@@ -651,6 +756,10 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                 "mode": "local_internal_only",
                 "primary_gate": "local_eval_ask_audit",
                 "plugin_eval_min_acceptable_grade": "B+",
+                "tessl_review_min_score": 95,
+                "codex_smoke_profile": "[profiles.fast]",
+                "tessl_eval_staging_root": f"{temp_root}/ask-tessl-evals/<skill-path>-<sha12>",
+                "tessl_project_marker": "tessl.json",
                 "snyk_default": "disabled_until_requested",
                 "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
             },
@@ -658,6 +767,8 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                 "local_evals": {
                     "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
                     "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates",
+                    "profile": "[profiles.fast] for Codex smoke runs",
+                    "tessl_evidence": f"stages copied eval inputs under {temp_root}/ask-tessl-evals with tessl.json",
                     "status": "run_for_this_dashboard",
                 },
                 "plugin_eval": {
@@ -744,7 +855,28 @@ def run_evals(
     model: str | None = None,
     cases: list[str] | None = None,
 ) -> CallResult:
-    """Runs evaluation cases for a skill."""
+    """
+    Run eval cases for a skill, optionally run a local Tessl eval lane, and (optionally) render a dashboard.
+    
+    Parameters:
+        repo_root (Path): Repository root directory used to relativize paths and run subprocesses.
+        path (str): Skill or eval path to run; may be a generated runtime path and will be resolved to a canonical skill source.
+        mode (str): Eval mode, either "smoke" or "release". Affects timeouts and runner/profile behavior.
+        dashboard (bool): When True, attempt to render an HTML dashboard from any produced scorecard.
+        runner (str): Eval runner identifier (e.g., "codex"); influences command-line args and profile selection.
+        skip_tessl (bool): When True, skip running the local Tessl eval lane.
+        allow_tessl_project_save (bool): Passed to the Tessl runner for compatibility; controls project save behavior when staging.
+        model (str | None): Optional model override used for Codex smoke runs.
+        cases (list[str] | None): Optional list of case spec strings; each string may contain comma-separated case ids.
+    
+    Returns:
+        CallResult: Aggregated result object containing:
+          - status: "success" or "error"
+          - data: keys such as `validation_commands`, `profile_contract`, `raw_output`, `raw_error`,
+            `eval_status`, `blocker_class`, `blocker_taxonomy`, lifecycle events, and `tessl_eval`
+            (when run) including tessl staging/evidence metadata.
+          - errors: list of ErrorObject entries describing runtime/validation issues encountered.
+    """
     result = CallResult()
     requested_path = path
     path = _resolve_eval_skill_path(repo_root, path)
@@ -754,6 +886,12 @@ def run_evals(
     result.data["validation_commands"] = [
         _evals_run_validation_command(path, mode=mode, runner=runner, dashboard=dashboard)
     ]
+    result.data["profile_contract"] = {
+        "codex_profile": SMOKE_EVAL_PROFILE if mode == "smoke" and runner == "codex" else None,
+        "codex_profile_config": "[profiles.fast]" if mode == "smoke" and runner == "codex" else None,
+        "codex_profile_required_for_smoke": runner == "codex",
+        "tessl_policy": _tessl_policy(),
+    }
 
     cmd = [
         sys.executable, f"{SKILL_BUILDER_SCRIPTS}/run_skill_evals.py",
@@ -765,6 +903,8 @@ def run_evals(
     if mode == "smoke" and runner == "codex":
         smoke_model = model or SMOKE_EVAL_MODEL
         cmd.extend([
+            "--profile",
+            SMOKE_EVAL_PROFILE,
             "--model",
             smoke_model,
             "--timeout-sec",

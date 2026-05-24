@@ -160,6 +160,14 @@ mode-specific required sections from
 `../../references/skills/he-strategy/strategy-output-contract.md`,
 including post-artifact review status where the mode contract requires it.
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 
 - Read when selecting mode output -> `../../references/skills/he-strategy/strategy-output-contract.md`

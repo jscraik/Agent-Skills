@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
+# Legacy migration record retained for repository archaeology.
+# Do not run as a current layout command without first rewriting the paths and
+# validating the migration against ARCHITECTURE.md.
 set -ex
 
-cd /Users/jamiecraik/dev/Agent-Skills/Skills
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT/Skills"
 
 # Move root skills-system
 mkdir -p skills-system

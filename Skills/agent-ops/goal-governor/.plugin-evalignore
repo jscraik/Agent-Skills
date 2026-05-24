@@ -1,0 +1,7 @@
+# Eval fixtures and deep reference packs stay available to ask/Tessl, but they
+# are not normal prompt context for Plugin Eval's static token-budget score.
+agents/
+scripts/
+references/*.md
+references/evals.yaml
+references/task-profile.json

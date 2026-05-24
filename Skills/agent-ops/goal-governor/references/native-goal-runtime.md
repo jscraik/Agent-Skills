@@ -2,7 +2,8 @@
 
 Read when reconciling Goal Governor boards with the live Codex `/goal` runtime.
 
-This reference was refreshed from `/Users/jamiecraik/dev/codex` on 2026-05-13. The codex-repo MCP was attempted for cross-checking against `openai/codex@main`, but `mcp__codex_repo__search` and `mcp__codex_repo__fetch` did not return before the local timeout and were treated as blocked evidence for this pass.
+This reference was refreshed from `/Users/jamiecraik/dev/codex` and
+`openai/codex@main` through the codex-repo MCP on 2026-05-24.
 
 ## Current Evidence Surfaces
 
@@ -12,6 +13,9 @@ This reference was refreshed from `/Users/jamiecraik/dev/codex` on 2026-05-13. T
 - `/Users/jamiecraik/dev/codex/codex-rs/state/src/model/thread_goal.rs` defines persistent goal fields: `goal_id`, `objective`, `status`, `token_budget`, `tokens_used`, `time_used_seconds`, `created_at`, and `updated_at`.
 - `/Users/jamiecraik/dev/codex/codex-rs/state/src/runtime/goals.rs` owns state transitions, expected-goal-id guarded updates, token accounting, and budget-limit behavior.
 - `/Users/jamiecraik/dev/codex/codex-rs/core/src/context/goal_context.rs` wraps runtime-owned goal steering prompts in `<goal_context>` user-context fragments.
+- `/Users/jamiecraik/dev/codex/codex-rs/core/src/tools/handlers/goal_spec.rs` exposes `update_goal` only for `complete` and `blocked`; `blocked` requires a strict repeated-blocker audit.
+- `/Users/jamiecraik/dev/codex/codex-rs/core/templates/goals/continuation.md` tells agents to preserve the original scope, audit every requirement against current evidence, and use `blocked` only after the same blocker repeats for at least three consecutive goal turns.
+- `/Users/jamiecraik/dev/codex/codex-rs/core/templates/goals/budget_limit.md` tells agents not to start new substantive work once the system marks a goal `budget_limited`.
 - `/Users/jamiecraik/dev/codex/codex-rs/core/templates/goals/objective_updated.md` tells the model that edited objectives are user-provided data, supersede the previous objective, and do not justify `update_goal` unless the updated goal is actually complete.
 - `/Users/jamiecraik/dev/codex/codex-rs/tui/src/chatwidget/goal_validation.rs` enforces the native objective limit and instructs users to put longer instructions in a file.
 - `/Users/jamiecraik/dev/codex/codex-rs/tui/src/chatwidget/slash_dispatch.rs` handles `/goal edit`, `/goal pause`, `/goal resume`, `/goal clear`, and objective creation when the `goals` feature is enabled.
@@ -23,8 +27,11 @@ This reference was refreshed from `/Users/jamiecraik/dev/codex` on 2026-05-13. T
 - Native goals are feature-gated. Check the `goals` feature and current-turn tool exposure before assuming goal tools exist.
 - Ephemeral threads do not support goals because goal tools require a materialized thread and state database.
 - Native objective text must be non-empty and no more than 4,000 characters.
-- Native persistent storage uses status strings `active`, `paused`, `budget_limited`, and `complete`.
+- Native persistent storage uses status strings `active`, `paused`, `blocked`, `usage_limited`, `budget_limited`, and `complete`.
 - App-server JSON can expose the budget-limited state as `budgetLimited`. Goal Governor output normalizes either spelling to `budget_limited`.
+- `update_goal` can mark a native goal `complete` or `blocked`; pause, resume, budget-limit, and usage-limit are user/system controlled.
+- `blocked` is not a generic validation failure. Use it only when the same blocking condition has repeated for at least three consecutive goal turns and no meaningful progress is possible without owner input or external-state change.
+- `usage_limited` is a system usage stop state. Treat it like a native stop-state signal that pauses Worker implementation until owner or PM/Judge recovery.
 - Native `goal_id`, `created_at`, and `updated_at` identify the live objective version and help detect stale board reconciliation.
 - Native token budget, tokens used, elapsed seconds, and lifecycle timing are steering evidence, not completion proof.
 - `budget_limited` is terminal in the native status model, but runtime accounting can still include budget-limited goals for in-flight usage depending on the accounting mode.
@@ -50,11 +57,13 @@ Report each check as `pass`, `fail`, `blocked`, or `not applicable`:
 1. If native goal state is unavailable, report `native_goal_status: unknown` or `blocked` and continue only with board-safe read-only checks.
 2. If goal tools are unavailable because the thread is ephemeral or state storage is absent, classify native inspection as blocked rather than assuming runtime absence.
 3. If native status is `paused`, stop Worker implementation and ask for owner or PM direction.
-4. If native status is `budgetLimited` or `budget_limited`, classify scope, verification, and owner decision before Worker work.
-5. If native status is `complete` while board work remains active, route to PM or Judge reconciliation before editing implementation files.
-6. If board status is done while native status remains active, require a completion audit before updating the native goal.
-7. If `goal_id` changed since the last board receipt, treat verification as stale until a reconciliation receipt explains whether the objective changed intentionally.
-8. If `/goal edit` or `objective_updated` context appears, re-read the board objective and native objective before continuing previous work.
+4. If native status is `blocked`, verify the strict repeated-blocker audit and ask owner or PM/Judge direction before Worker work.
+5. If native status is `usage_limited`, classify system usage stop-state evidence and ask owner or PM/Judge direction before Worker work.
+6. If native status is `budgetLimited` or `budget_limited`, classify scope, verification, and owner decision before Worker work.
+7. If native status is `complete` while board work remains active, route to PM or Judge reconciliation before editing implementation files.
+8. If board status is done while native status remains active, require a completion audit before updating the native goal.
+9. If `goal_id` changed since the last board receipt, treat verification as stale until a reconciliation receipt explains whether the objective changed intentionally.
+10. If `/goal edit` or `objective_updated` context appears, re-read the board objective and native objective before continuing previous work.
 
 ## Board Metadata
 

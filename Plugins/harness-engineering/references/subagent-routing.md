@@ -28,6 +28,11 @@ Do not invent or prefer `he-*` role aliases. Stage names use the `he-*` prefix; 
 5. Split mapped roles into `available` and `missing` against the manifest.
 6. Auto-spawn only available roles and only when the stage policy allows it.
 7. If auto-spawn is unavailable, unsafe, or any mapped role is missing, continue inline and emit fallback guidance.
+8. When a missing role represents coding, testing, correctness, reliability,
+   security, adversarial, or agent-native coverage, emit coverage parity
+   evidence before handoff. Inline continuation must name the replacement
+   checklist, evidence inspected, unresolved risk, and whether the gap blocks
+   `he-work`, closure, or external mutation.
 
 ## Auto-Launch Policies
 - `always`: launch baseline roles by default when they are available and spawning is safe.
@@ -40,7 +45,10 @@ When auto-spawn is unavailable or one or more mapped roles are missing:
 1. Continue the stage in the main thread without blocking.
 2. Emit one concise note listing unavailable or missing roles.
 3. Keep the planned role list visible so coverage gaps are traceable.
-4. Route missing role creation or installation to `[[codex-agent-creator]]`.
+4. Add a `coverage_parity` block for each missing high-risk role with:
+   `lens`, `inline_checks_completed`, `evidence`, `unresolved_risk`, and
+   `blocks_handoff`.
+5. Route missing role creation or installation to `[[codex-agent-creator]]`.
 
 Fallback message template:
 
@@ -49,6 +57,7 @@ Subagent assist unavailable in this run. I will continue inline.
 Mapped roles: <comma-separated mapped roles>.
 Available roles: <comma-separated available roles or none>.
 Missing/unavailable roles: <comma-separated missing roles or none>.
+Coverage parity: <lens -> inline checks/evidence/unresolved risk/blocks_handoff>.
 If delegated coverage is required, provision missing roles with [[codex-agent-creator]] and rerun this stage with delegation enabled.
 ```
 
@@ -60,3 +69,5 @@ Every Harness Engineering stage output should include, in prose or structured fi
 - roles used automatically
 - roles recommended for manual launch
 - roles missing from the manifest
+- `coverage_parity` for missing high-risk roles, including whether the missing
+  lens blocks handoff, closure, or mutation

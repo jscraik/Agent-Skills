@@ -32,26 +32,29 @@ Use this default section order for standard specs:
 5. `Goals`
 6. `Non-Goals`
 7. `Current State / Evidence`
-8. `Proposed Behavior`
-9. `Requirements`
+8. `Authority and Scope Boundary`
+9. `Proposed Behavior`
+10. `Requirements`
    - `Functional Requirements` with stable `FR-*` IDs
    - `Non-Functional Requirements` with stable `NFR-*` IDs when relevant
-10. `Interfaces`
-11. `Data / Domain Contract`
-12. `Enforcement Contract`
-13. `Security, Privacy, and Safety`
-14. `Accessibility and Operator Ergonomics`
-15. `Failure and Recovery`
-16. `Validation Plan`
-17. `Acceptance Criteria` with stable `SA-*` IDs
-18. `Visual References / Diagrams`
-19. `Implementation Notes`
-20. `Open Questions`
-21. `Decision`
-22. `Evidence and References`
-23. `Appendix A. Harness Metadata / Traceability`
-24. `Appendix B. Review Outcomes`
-25. `Appendix C. he-plan Handoff`
+11. `Interfaces`
+12. `Data / Domain Contract`
+13. `Enforcement Contract`
+14. `Proof and Runtime Boundary`
+15. `Coding and Testing Lenses`
+16. `Security, Privacy, and Safety`
+17. `Accessibility and Operator Ergonomics`
+18. `Failure and Recovery`
+19. `Validation Plan`
+20. `Acceptance Criteria` with stable `SA-*` IDs
+21. `Visual References / Diagrams`
+22. `Implementation Notes`
+23. `Open Questions`
+24. `Decision`
+25. `Evidence and References`
+26. `Appendix A. Harness Metadata / Traceability`
+27. `Appendix B. Review Outcomes`
+28. `Appendix C. he-plan Handoff`
 
 For `spec_depth: lite`, keep the same order but collapse adjacent sections when
 that does not hide requirements, risk, or validation. For `spec_depth: full`,
@@ -69,6 +72,8 @@ Normative language:
   `FR-*`, `NFR-*`, or `SA-*` IDs.
 - Do not mix implementation task sequencing into the spec body; put likely
   execution ordering in `Implementation Notes` or the `he-plan` handoff.
+- Use `Plugins/harness-engineering/references/spec-plan-runtime-boundary-contract.md`
+  for strict scope, proof, runtime persistence, and coding/testing lens fields.
 
 Scenario and conformance requirements:
 
@@ -107,6 +112,20 @@ Scenario and conformance requirements:
 - UI specs must use `Dedicated UI Spec` instead of forcing visual behavior into
   this standard template.
 
+Authority and scope boundary requirements:
+
+- Every standard spec must include `requested_depth`,
+  `approved_execution_boundary`, `downscope_authority`,
+  `external_mutation_boundary`, `freshness_required`, and
+  `human_acceptance_boundary` under `Authority and Scope Boundary`, or an
+  explicit `not_applicable` reason for each field.
+- If `requested_depth` is `full_implementation`, the spec must preserve all
+  known unfinished surfaces. Downscope is valid only when
+  `downscope_authority` records explicit user approval or an approved source
+  artifact.
+- The section must distinguish live tracker/source truth from local artifacts,
+  session summaries, and inferred chat context.
+
 Enforcement Contract requirements:
 
 - Every standard spec must include an `Enforcement Contract` section using the
@@ -131,6 +150,25 @@ Enforcement Contract requirements:
 - Professional output must name the closeout evidence required before a done
   claim: files changed, exact commands, pass/fail state, blockers, warnings,
   next action, and rollback.
+
+Proof, runtime, and lens requirements:
+
+- `Proof and Runtime Boundary` must include `proof_boundary`,
+  `non_proof_sources`, `runtime_state`, `resumption_key`,
+  `persistent_artifacts`, `live_state_refresh`, and
+  `session_evidence_status` or an explicit `not_applicable` reason. Session or
+  collector evidence can support history and correlation, but it cannot prove
+  current tests, tracker state, PR state, runtime availability, or
+  implementation correctness without fresh evidence.
+- `Coding and Testing Lenses` must include compact `coding_lens:` and
+  `testing_lens:` blocks. The coding lens names ownership, allowed surfaces,
+  public contract/schema/API/CLI compatibility, failure/recovery paths,
+  generated-artifact boundaries, and complexity posture. The testing lens names
+  observable behavior, source acceptance IDs, prior-art test families, positive
+  and negative scenarios, exact validation commands when known, blocked gates,
+  and ownership of recovery.
+- Missing specialist reviewers do not make the lens optional. If no subagent is
+  available, record inline coverage parity and unresolved residual risk.
 
 Visual reference requirements:
 
@@ -213,4 +251,4 @@ Sections: overview, components, states, tokens, flows, accessibility, responsive
 
 ## Verification
 
-Verify required frontmatter and sections, stable `SA` or `VAC` IDs, tracked-work Linear traceability, explicit `linear_mutation_status`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <spec-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>` for tracked specs. For non-trivial generated specs, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <spec-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <spec-path> --kind spec --json` so reader-first structure, IDs, conformance rules, the Enforcement Contract, and visual-reference decisions are validated before handoff.
+Verify required frontmatter and sections, stable `SA` or `VAC` IDs, tracked-work Linear traceability, explicit `linear_mutation_status`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <spec-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>` for tracked specs. For non-trivial generated specs, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <spec-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <spec-path> --kind spec --json` so reader-first structure, IDs, conformance rules, authority/scope fields, proof/runtime persistence, coding/testing lenses, the Enforcement Contract, and visual-reference decisions are validated before handoff.

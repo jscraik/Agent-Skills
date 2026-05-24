@@ -39,7 +39,8 @@ tracker IDs, session evidence, PR/review state, constraints, and role inventory.
 Structured output, when requested: `route_preview_version`, `selected_stage` or
 `blocker`, `schema_version`, `matched_rule`, `why_not`, `authority_limit`,
 `missing_input`, `recommended_next_step`, `safe_to_continue`, `blocked_reason`,
-`handoff_payload`, `confidence`, and `source_path`.
+`handoff_payload`, `collector_freshness`, `blocker_taxonomy`, `confidence`, and
+`source_path`.
 
 ## Preconditions
 - Local `AGENTS.md` guidance outranks this skill.
@@ -61,12 +62,17 @@ Structured output, when requested: `route_preview_version`, `selected_stage` or
 ## Procedure
 1. Inspect 2-3 routing-critical surfaces first; expand only when blocked.
 2. Apply `routing-map.json` and deterministic decision order before keyword matching.
-3. Select one primary stage or folded mode; if still ambiguous, block with one
+3. For prior-session, session-collector, repeated-failure, or coverage-gap
+   inputs, classify freshness and blocker taxonomy before intended outcome.
+   If collector, repo head, tracker, or validation state is stale or unknown,
+   block for one live refresh step instead of routing from historical evidence.
+4. Select one primary stage or folded mode; if still ambiguous, block with one
    `missing_input`.
-4. Load only selected-stage context and preserve repo, artifact, tracker,
-   session, and validation identity.
-5. Record gate profile, why rejected candidates lost, and the smallest route.
-6. Hand `/goal` or resume-over-time intent to goal continuity after selection.
+5. Load only selected-stage context and preserve repo, artifact, tracker,
+  session, and validation identity.
+6. Record gate profile, why rejected candidates lost, blocker taxonomy,
+   freshness status, and the smallest route.
+7. Hand `/goal` or resume-over-time intent to goal continuity after selection.
 
 ## Validation
 Fail fast: stop at the first failed gate, fix source, and rerun that gate.
@@ -83,6 +89,8 @@ Fail fast: stop at the first failed gate, fix source, and rerun that gate.
   `missing_input`.
 - Separate facts, assumptions, inferred risks, blocked gates, and runtime
   unknowns.
+- Historical session evidence can explain recurrence but cannot prove current
+  repo, tracker, PR, validation, or runtime state without live refresh evidence.
 
 ## Safety Boundaries
 - Forbidden from router-only authority: code edits, artifact writes,
@@ -157,6 +165,14 @@ for new structured handoffs.
 Use `high` for deterministic rule plus required evidence, `medium` for
 reversible inference, and `blocked` for missing input, conflict, unavailable
 resolver, or unsafe authority gap.
+
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
 
 Deferred context index: `../../references/deferred-context-index.md`.
 Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.

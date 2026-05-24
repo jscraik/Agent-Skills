@@ -1,0 +1,59 @@
+{
+  "data": {
+    "ask_audit": {
+      "data": {
+        "openclaw": {
+          "status": "not_run",
+          "stdout": "Summary: 0 critical \u00b7 0 warn"
+        }
+      }
+    },
+    "generated_at": "2026-05-24T10:12:16Z",
+    "plugin_eval": {
+      "status": "not_run",
+      "stdout": "Plugin Eval was not run for this eval-only dashboard. Run ./bin/ask skills external-review <path> --json --robot for the static budget and ergonomics lane."
+    },
+    "policy": {
+      "mode": "local_internal_only",
+      "plugin_eval_min_acceptable_grade": "B+",
+      "primary_gate": "local_eval_ask_audit",
+      "snyk_default": "disabled_until_requested",
+      "snyk_release_requirement": "release_required_for_manifest_backed_candidates"
+    },
+    "review_mode": "eval_only",
+    "review_mode_details": {
+      "local_evals": {
+        "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
+        "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates",
+        "status": "run_for_this_dashboard"
+      },
+      "plugin_eval": {
+        "command": "./bin/ask skills external-review <path> --json --robot",
+        "role": "static budget and ergonomics guardrail; not a substitute for local evals",
+        "status": "not_run_in_eval_only_dashboard"
+      },
+      "snyk": {
+        "command": "./bin/ask skills external-review <path> --include-snyk --json --robot",
+        "role": "opt-in local dependency security screening; release-required for manifest-backed candidates",
+        "status": "not_run_by_default"
+      },
+      "tessl_lint": {
+        "command": "./bin/ask skills external-review <path> --json --robot",
+        "role": "disposable tile.json package-shape check, not a direct content finding",
+        "status": "not_run_in_eval_only_dashboard"
+      },
+      "tessl_review": {
+        "command": "./bin/ask skills external-review <path> --json --robot",
+        "role": "local best-practice/content review for private or work-in-progress skills",
+        "status": "not_run_in_eval_only_dashboard"
+      }
+    },
+    "target": "Skills/content-publishing/llm-wiki",
+    "tessl_review": {
+      "status": "not_run",
+      "stdout": "Tessl review was not run for this eval-only dashboard. Run ./bin/ask skills external-review <path> --json --robot for the local best-practice review lane."
+    }
+  },
+  "errors": [],
+  "status": "success"
+}

@@ -197,6 +197,14 @@ For non-trivial generated Linear plans, run or block
 `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
 <linear-plan-path> --json`.
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 
 - Read when drafting output: `../../references/skills/he-linear-plan/linear-plan-output-contract.md`

@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "Skills-agent-ops-session-workflow-miner",
+  "scope_skill": "Skills/agent-ops/session-workflow-miner",
+  "scope_profile": "Skills",
+  "rubric_version": "2026-04-13",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 180000,
+    "max_tokens": 12000,
+    "no_improvement_escalation_limit": 2
+  },
+  "criteria": [
+    {
+      "id": "evidence_filtering",
+      "label": "Session evidence is filtered for injected context, stale state, and copied prompts",
+      "threshold": 0.9,
+      "weight": 0.34,
+      "critical": true
+    },
+    {
+      "id": "reuse_before_creation",
+      "label": "Existing skills and agents are inventoried before new artifacts are created",
+      "threshold": 0.9,
+      "weight": 0.33,
+      "critical": true
+    },
+    {
+      "id": "bounded_artifacts",
+      "label": "Created skills or subagents are small, single-purpose, and side-effect bounded",
+      "threshold": 0.88,
+      "weight": 0.33,
+      "critical": true
+    }
+  ],
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 45.0,
+    "ai_process_minutes": 10.0,
+    "probability_of_success": 0.86,
+    "rationale": "Mining session evidence benefits from automated clustering, but artifact creation needs conservative human-aligned judgment and validation."
+  },
+  "learning_posture": {
+    "supported": ["guided", "execute"],
+    "default": "guided"
+  }
+}

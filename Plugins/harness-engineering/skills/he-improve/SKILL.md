@@ -104,6 +104,14 @@ Use concise sections: `Routing`, `Evidence`, `Gaps`, `Patch`, `Validation`,
   before new skill surfaces.
 - Session evidence is not a raw transcript dump; use a bounded evidence bundle.
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 - Use `assets/` only when this skill's local visual or template assets are explicitly needed.
 - Contract and eval routing: `references/contract.yaml`, `references/evals.yaml`.

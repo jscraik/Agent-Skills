@@ -56,7 +56,7 @@ class TestAskSkillsErrors(unittest.TestCase):
 
         self.assertEqual(env["UV_CACHE_DIR"], "/custom/uv-cache")
 
-    def test_tessl_wrapper_is_skill_md_only(self):
+    def test_tessl_wrapper_includes_package_local_support_dirs(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             skill_dir = repo_root / "Plugins/harness-engineering/skills/he-phase-work"
@@ -83,7 +83,8 @@ class TestAskSkillsErrors(unittest.TestCase):
             self.assertTrue(tile_path.is_file())
             self.assertEqual((tile_skill_dir / "SKILL.md").read_text(encoding="utf-8"), (skill_dir / "SKILL.md").read_text(encoding="utf-8"))
             self.assertFalse((tile_root / "references").exists())
-            self.assertFalse((tile_skill_dir / "references").exists())
+            self.assertEqual((tile_skill_dir / "references" / "local.md").read_text(encoding="utf-8"), "local")
+            self.assertFalse((tile_skill_dir / ".." / ".." / "references").resolve().exists())
 
     @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills_impl.subprocess.run")
@@ -237,6 +238,23 @@ class TestAskSkillsErrors(unittest.TestCase):
         mock_which,
         mock_audit,
     ):
+        """
+        Verify that external_review_skill runs plugin-eval and tessl (lint and review) by default and records expected policy and tessl outputs.
+        
+        Asserts that:
+        - The overall result status is "success".
+        - Policy fields indicate no_publish and not using npx.
+        - plugin-eval, tessl lint, and tessl review stages are marked "success".
+        - Exactly three subprocess invocations occur and none invoke "npx" or "publish".
+        - The HOME environment used for tessl invocations does not contain the "agent-skills-tessl-" marker.
+        - The tessl review invocation uses the arguments sequence ["skill", "review", "--json", "--threshold", "95", <skill_dir>].
+        - The returned tessl_tile marks support_refs_included as truthy.
+        
+        Parameters:
+            mock_run: patched subprocess.run used to simulate external tool invocations.
+            mock_which: patched shutil.which used to indicate presence of required binaries.
+            mock_audit: patched audit_skill used to simulate a prior audit result.
+        """
         skill_dir = "Skills/backend-platform/example-skill"
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
@@ -254,7 +272,7 @@ class TestAskSkillsErrors(unittest.TestCase):
                 subprocess.CompletedProcess(
                     args=["/usr/local/bin/plugin-eval", "analyze", skill_dir, "--format", "markdown"],
                     returncode=0,
-                    stdout="plugin-eval ok",
+                    stdout="Score: 91/100\nGrade: A\nRisk: low\nChecks: 0 fail, 0 warn",
                     stderr="",
                 ),
                 subprocess.CompletedProcess(
@@ -264,9 +282,9 @@ class TestAskSkillsErrors(unittest.TestCase):
                     stderr="",
                 ),
                 subprocess.CompletedProcess(
-                    args=["/usr/local/bin/tessl", "skill", "review", skill_dir],
+                    args=["/usr/local/bin/tessl", "skill", "review", "--json", "--threshold", "95", skill_dir],
                     returncode=0,
-                    stdout="tessl review ok",
+                    stdout='{"reviewScore": 96, "summary": "ok"}',
                     stderr="",
                 ),
             ]
@@ -284,10 +302,13 @@ class TestAskSkillsErrors(unittest.TestCase):
             self.assertNotIn("npx", call.args[0])
             self.assertNotIn("publish", call.args[0])
         tessl_call = mock_run.call_args_list[1]
-        self.assertIn("agent-skills-tessl-", tessl_call.kwargs["env"]["HOME"])
+        self.assertNotIn("agent-skills-tessl-", tessl_call.kwargs["env"].get("HOME", ""))
         review_call = mock_run.call_args_list[2]
         self.assertEqual(review_call.args[0][1:3], ["skill", "review"])
-        self.assertIn("agent-skills-tessl-", review_call.kwargs["env"]["HOME"])
+        self.assertEqual(review_call.args[0][3:5], ["--json", "--threshold"])
+        self.assertEqual(review_call.args[0][5], "95")
+        self.assertNotIn("agent-skills-tessl-", review_call.kwargs["env"].get("HOME", ""))
+        self.assertTrue(result.data["tessl_tile"]["support_refs_included"])
 
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")
@@ -679,6 +700,14 @@ class TestAskSkillsErrors(unittest.TestCase):
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")
     def test_external_review_can_skip_tessl_review(self, mock_which, mock_audit):
+        """
+        Verify that external_review_skill skips the tessl review when skip_tessl_review is True.
+        
+        Sets up a minimal skill directory, fakes plugin binaries and a successful audit, and asserts:
+        - overall result status is "success"
+        - the tessl_review entry in result.data is marked as "skipped"
+        - only the expected subprocess calls (plugin-eval and tessl lint) are made (call count == 2)
+        """
         skill_dir = "Skills/backend-platform/example-skill"
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
@@ -695,7 +724,12 @@ class TestAskSkillsErrors(unittest.TestCase):
 
             with patch("ask.commands.skills_impl.subprocess.run") as mock_run:
                 mock_run.side_effect = [
-                    subprocess.CompletedProcess(args=[], returncode=0, stdout="plugin-eval ok", stderr=""),
+                    subprocess.CompletedProcess(
+                        args=[],
+                        returncode=0,
+                        stdout="Score: 91/100\nGrade: A\nRisk: low\nChecks: 0 fail, 0 warn",
+                        stderr="",
+                    ),
                     subprocess.CompletedProcess(args=[], returncode=0, stdout="tessl lint ok", stderr=""),
                 ]
                 result = external_review_skill(

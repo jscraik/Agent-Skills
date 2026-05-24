@@ -1800,6 +1800,24 @@ def _classify_runner_blocker(
     stderr_text: str,
     exit_code: Optional[int] = None,
 ) -> Optional[str]:
+    """
+    Determine whether a runner's combined output indicates a runtime blocker and return its blocker taxonomy key.
+    
+    Scans the concatenated output, stdout, and stderr for known marker phrases and maps matches to one of:
+    - "blocked_user_input" — runner is awaiting user input.
+    - "blocked_auth" — authentication/login is required.
+    - "timeout_partial_output" or "timeout_no_output" — process timed out (exit_code == 124); chosen depending on whether any output text is present.
+    - "blocked_runtime" — sandbox/permission/capacity/runtime failures were detected.
+    
+    Parameters:
+        output_text (str): Final output text or last message from the runner.
+        stdout_text (str): Captured standard output from the runner process.
+        stderr_text (str): Captured standard error from the runner process.
+        exit_code (Optional[int]): Process exit code; when equal to 124 it is treated as a timeout.
+    
+    Returns:
+        Optional[str]: One of the blocker keys listed above, or `None` if no blocker markers are found.
+    """
     text = "\n".join([output_text or "", stdout_text or "", stderr_text or ""])
     low = text.lower()
 
@@ -1834,6 +1852,8 @@ def _classify_runner_blocker(
         "sandbox-exec",
         "operation not permitted",
         "ran out of room in the model's context window",
+        "selected model is at capacity",
+        "model is at capacity",
         "context window",
         "start a new thread",
         "blocked_runtime",
@@ -2494,6 +2514,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not skill_name:
         print(f"ERROR: SKILL.md frontmatter missing valid `name`: {skill_md}", file=sys.stderr)
         return 1
+    skill_contract_text = skill_md.read_text(encoding="utf-8")
 
     evals_path = skill_dir / "references" / "evals.yaml"
     if not evals_path.exists():
@@ -2742,7 +2763,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 return 1
 
         prompt_body = c.prompt.strip() + "\n"
-        composed_prompt = f"${skill_name}\n\n{prompt_body}" if c.prepend_skill else prompt_body
+        if c.prepend_skill:
+            composed_prompt = (
+                f"${skill_name}\n\n"
+                "The local skill handle may not expand inside this isolated eval runner. "
+                "Apply this SKILL.md content directly; do not try to read the skill file.\n\n"
+                f"<SKILL.md path=\"{skill_md}\">\n{skill_contract_text}\n</SKILL.md>\n\n"
+                f"Task:\n{prompt_body}"
+            )
+        else:
+            composed_prompt = prompt_body
         (case_dir / "prompt.txt").write_text(composed_prompt, encoding="utf-8")
         case_timeout_sec, case_timeout_profile = _resolve_case_timeout(
             c,

@@ -78,9 +78,13 @@ the user explicitly asks for a full matrix:
 ./bin/ask skills external-review <skill-path> --json --robot
 ```
 
+For Codex smoke runs, the wrapper must select `[profiles.fast]` by passing
+`--profile fast` to the eval runner. Do not leave smoke evals on the ambient
+Codex profile when validating skill-factory output.
+
 `ask evals run` must include the installed local Tessl CLI lane every time after
-the repo eval runner. Stage only the controlled Tessl input files into a
-temporary directory first, then run
+the repo eval runner. Stage only the controlled Tessl input files into the
+stable evidence directory `/tmp/ask-tessl-evals/<skill-path>-<sha12>`, then run
 `tessl eval run --json <staged-temp-source>`; do not point Tessl at the live
 skill or plugin source tree. The hard boundary is registry upload: use native
 `tessl`, no `npx tessl`, no publish, no registry upload, and no package upload
@@ -89,12 +93,14 @@ path.
 The staging layer must adapt repo-native eval metadata into Tessl's expected
 project shape: copy the skill entrypoint and eval reference files, synthesize
 `scenarios/<case-id>/task.md` from `references/evals.yaml`, and include a
-minimal `tessl.json` project marker. Do not duplicate eval cases by hand unless
-the canonical eval format changes.
+minimal `tessl.json` project marker. Leave the staged directory in place so the
+copied inputs, synthesized Tessl tasks, and Tessl project marker remain
+inspectable evidence. Do not duplicate eval cases by hand unless the canonical
+eval format changes.
 
 In Codex sandboxed sessions, do not request network permission for the Tessl
 eval lane up front. The repo wrapper already limits Tessl input to the staged
-temporary project, and asking the sandbox for network turns the command into an
+stable staged project, and asking the sandbox for network turns the command into an
 external-export approval path instead of exercising the local Tessl CLI
 contract. `--allow-tessl-project-save` is accepted for compatibility but is not
 required. Run the wrapper normally, then report any Tessl CLI credential,
@@ -109,7 +115,11 @@ to auth, sandbox, temp-staging, or registry-upload explanations.
 external-review ladder. It runs strict audit, local Plugin Eval, and native
 Tessl review by default. Treat `tessl skill review` path shape as the skill
 directory containing `SKILL.md`; Tessl lint expects a tile package with
-`tile.json` and is not interchangeable.
+`tile.json` and is not interchangeable. Plugin Eval is acceptable at `B+` or
+better when it has zero failures and the local/Tessl gates pass. Tessl review
+must meet the `95` threshold and must run through the wrapper, which preserves
+`/tmp/ask-tessl-reviews/<skill-path>-<sha12>` with `tile.json`, `tessl.json`,
+the copied skill, and included references for evidence.
 
 When any rung is blocked, record the exact command, status, blocker class, and
 the next minimal diagnostic. Do not replace a blocked rung with a different tool

@@ -8,15 +8,43 @@ from pathlib import Path
 from typing import Any
 
 
-CONTRACT_PATH = Path(__file__).resolve().parents[1] / "references" / "eval-report-schema.json"
+LOCAL_CONTRACT_PATH = Path(__file__).resolve().parents[1] / "references" / "eval-report-schema.json"
+SHARED_CONTRACT_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "references"
+    / "skills"
+    / "he-eval-report"
+    / "eval-report-schema.json"
+)
 
 
 @lru_cache(maxsize=1)
 def load_contract() -> dict[str, Any]:
-    return json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+    """
+    Load and parse the eval report JSON contract, using the local contract file when present and falling back to the shared contract file otherwise.
+    
+    Selects LOCAL_CONTRACT_PATH if it exists; otherwise selects SHARED_CONTRACT_PATH and parses its UTF-8 contents as JSON.
+    
+    Returns:
+        dict[str, Any]: The parsed JSON contract as a dictionary.
+    """
+    contract_path = LOCAL_CONTRACT_PATH if LOCAL_CONTRACT_PATH.exists() else SHARED_CONTRACT_PATH
+    return json.loads(contract_path.read_text(encoding="utf-8"))
 
 
 def contract_list(key: str) -> list[str]:
+    """
+    Get the values for a contract field and convert each value to a string.
+    
+    Parameters:
+        key (str): Contract field name to retrieve.
+    
+    Returns:
+        list[str]: Field values converted to strings.
+    
+    Raises:
+        TypeError: If the contract field exists but is not a list.
+    """
     value = load_contract()[key]
     if not isinstance(value, list):
         raise TypeError(f"eval report contract field is not a list: {key}")

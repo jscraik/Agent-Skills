@@ -14,7 +14,15 @@ Use this policy when `he-router` must choose one Harness Engineering stage. Appl
 8. RED/GREEN, TDD, failing-test-first, or regression-first language routes through folded `he-tdd`.
 9. Browser polish, accessibility, visual refinement, or dev-server loops route through folded `he-refine`.
 10. Benchmark, tune, experiment, or measured optimization routes to `he-improve`.
-11. Prior sessions, archived sessions, session collector, repeated failures, or coverage gaps route to `he-improve`, `he-reconcile`, `he-reinforce`, `he-heartbeat`, `he-work`, or `he-fix-bugs` by intended outcome.
+11. Prior sessions, archived sessions, session collector, repeated failures, or coverage gaps route by blocker taxonomy and freshness before intended outcome:
+    - stale collector, stale repo head, stale tracker, or missing live-state refresh -> `he-reconcile` or `he-phase-work` with a blocked freshness handoff;
+    - test failure, lint failure, runtime error, reproduction, or regression -> `he-fix-bugs` unless failing-test-first is explicit;
+    - missing validation, weak proof, false completion, or closure uncertainty -> `he-eval-report`;
+    - missing durable guardrail after repeated steering -> `he-reinforce`;
+    - approved implementation repair with current plan/spec boundary -> `he-work`;
+    - scheduled continuation or until-green/merged/done monitoring -> `he-heartbeat`;
+    - broad pattern improvement without a selected implementation slice -> `he-improve`.
+    If multiple bullets match, choose the first bullet with fresh evidence. If freshness is unknown, block for one live refresh step instead of guessing.
 12. Repo intent, architecture review, structural triage, strategic direction, ADR compression, or core invariant compression routes to `he-strategy`.
 13. High-leverage architectural migration/reframe program generation routes to `he-reframe`; legacy `he-refactor` prompts route there for compatibility.
 14. Linear execution orchestration, milestone/parent issue mapping, Now/Next/Later/Do Not Create classification, or Portfolio Ops routing routes to `he-linear-plan`.

@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>2/2 latest eval cases passed.</p>
+        <p>4/4 latest eval cases passed.</p>
       </div>
 
 
@@ -168,10 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a role="tab" id="tab-quality" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" id="tab-evals" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" id="tab-security" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" id="tab-evidence" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">88%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="good">100%</strong></div>
@@ -201,22 +201,22 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Add a concrete, filled-in output template example showing actual field values (e.g., a real patch_summary, validation evidence, and residual_risk) rather than just listing field names.</li><li>Consolidate the &#x27;Constraints&#x27; and &#x27;Execution Boundaries&#x27; sections—they overlap significantly and could be merged to save tokens.</li><li>In the Repair Map, add at least one concrete before/after example (e.g., show a weak trigger phrase transformed into a strong one, or a bloated SKILL.md section moved to references/).</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
 
       <section>
         <div class="section-head">
-          <div><h2>Evaluation Results</h2><p>2/2 latest eval cases passed.</p></div>
+          <div><h2>Evaluation Results</h2><p>4/4 latest eval cases passed.</p></div>
           <span class="pill good">100%</span>
         </div>
         <table>
           <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
-          <tbody><tr><td><strong>discovery round one contract</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>discovery confirmation contract</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
+          <tbody><tr><td><strong>happy basic</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>plugin handoff</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>unrelated request</strong><br><span>negative</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>prompt injection</strong><br><span>pressure</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
         </table>
       </section>
 
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
       <div class="panel plugin-posture">
@@ -234,11 +234,11 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/skill-builder-dashboard-smoke.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/skill-builder-dashboard-smoke.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/skill-builder/20260517-215241-926662/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/skill-builder/20260517-215241-926662/scorecard.json</span></a>
+        <a href="skill-builder-dashboard-smoke.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/skill-builder-dashboard-smoke.json</span></a>
+        <a href="../skills/skill-builder/20260524-172324-019139/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/skill-builder/20260524-172324-019139/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_explicit_confirmation</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>

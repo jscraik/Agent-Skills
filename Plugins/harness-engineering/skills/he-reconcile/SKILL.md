@@ -106,6 +106,14 @@ Structured output: `schema_version`, `mode`, `stage_map`,
 - Repeated failures may need both Linear tracking and durable learning capture.
 - Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 Read `references/contract.yaml` for the full reconcile contract and
 `references/evals.yaml` for validation scenarios. Use shared HE references only

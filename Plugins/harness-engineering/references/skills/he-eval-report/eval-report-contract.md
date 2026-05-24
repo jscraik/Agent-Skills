@@ -28,6 +28,8 @@ concerns satisfied" unless the coverage matrix proves it.
 
 For each relevant gate, record method, result, evidence, confidence, failure
 detail, and closure impact. Missing evidence is `not-run`, never `pass`.
+Unchanged `[REQUIRED]` placeholders and template angle placeholders are report
+validation failures, not harmless draft text.
 
 Generated media proof requires prompt metadata, generated-image cache source
 when available, repository `.harness/media/` copy, sidecar metadata, and file
@@ -57,6 +59,10 @@ is `partial` or `not-run`, never `pass`.
 When the slice changes evals, agents, routing, review gates, side effects, or
 completion evidence, prove task validity, outcome validity, trajectory validity,
 grader coverage, trial policy, authorization validation, and saturation signal.
+When closure depends on a spec, plan, or work artifact, prove the strict scope
+boundary, runtime persistence state, live-state freshness, and coding/testing
+lens evidence from the source artifact or validation output before recommending
+completion.
 
 Protected actions include sending, publishing, inviting, deleting, approving, or
 commenting externally. Only the user can authorize them. External parties and

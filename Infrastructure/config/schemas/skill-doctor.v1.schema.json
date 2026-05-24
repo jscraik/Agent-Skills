@@ -22,7 +22,8 @@
     "checks",
     "check_summary",
     "agent_summary",
-    "next_command"
+    "next_command",
+    "next_command_decision"
   ],
   "properties": {
     "schema_version": {

@@ -38,29 +38,29 @@ cases:
     should_trigger: true
     realistic: true
     prepend_skill: true
-    prompt: "Harden Plugins/example/skills/review-helper after its strict audit reports weak output guidance; return the exact validation evidence."
+    prompt: "In a read-only runner, harden Plugins/example/skills/review-helper after its strict audit reports weak output guidance; return the schema_version output contract and exact validation command you would run before editing."
     deterministic_checks: {forbidden_commands: ["rm -rf", "curl", "wget", "netcat"]}
     acceptance: [{type: contains, value: "schema_version"}]
   - id: happy-min
     name: happy min
-    category: happy
-    eval_modes: [smoke]
+    category: edge
+    eval_modes: [release]
     should_trigger: true
     realistic: true
     prepend_skill: true
     prompt: "Review a small skill update and keep safety constraints intact."
-    acceptance: [{type: contains, value: "validation"}]
+    acceptance: [{type: contains, value: "No blocking safety"}]
   - id: clarification-package-ambiguous
     name: clarify ambiguous package
     category: edge
-    eval_modes: [smoke, release]
+    eval_modes: [release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
     prepend_skill: true
     prompt: "The request says fix the review helper skill, but both Plugins/example/skills/review-helper and .agents/skills/review-helper exist; ask one clarifying question before editing."
     deterministic_checks: {forbidden_commands: ["rm -rf", "git push", "curl", "wget"]}
-    acceptance: [{type: contains, value: "clarify"}]
+    acceptance: [{type: contains, value: "should I fix first"}]
   - id: plugin-only-handoff
     name: plugin handoff
     category: edge
@@ -74,7 +74,7 @@ cases:
   - id: mixed-authoring-install-handoff
     name: mixed authoring install handoff
     category: edge
-    eval_modes: [smoke, release]
+    eval_modes: [release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
@@ -85,7 +85,7 @@ cases:
   - id: audit-package-validation-first
     name: validation first
     category: edge
-    eval_modes: [smoke, release]
+    eval_modes: [release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
@@ -95,7 +95,7 @@ cases:
   - id: provenance-import-rollback
     name: provenance import rollback
     category: edge
-    eval_modes: [smoke, release]
+    eval_modes: [release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
@@ -106,7 +106,7 @@ cases:
   - id: builder-round-metadata-contract
     name: metadata contract
     category: edge
-    eval_modes: [smoke, release]
+    eval_modes: [release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
@@ -161,13 +161,13 @@ cases:
       - {type: contains, value: "verified"}
   - id: codex-eval-loop-hardening
     name: harden skill eval loop without copying external package
-    category: happy
-    eval_modes: [smoke, release]
+    category: edge
+    eval_modes: [release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
     prepend_skill: true
-    prompt: "Harden an existing Codex skill using useful patterns from an external skill-creator package. Keep only the local Codex eval loop: comparator choice, realistic prompts, deterministic checks, weak-eval critique, readiness evidence, and no copied external viewer code."
+    prompt: "Review and improve Plugins/example/skills/review-helper using useful patterns from an external skill-creator package. Keep only the local Codex eval loop: comparator choice, realistic prompts, deterministic checks, weak-eval critique, readiness evidence, and no copied external viewer code."
     deterministic_checks: {forbidden_commands: ["rm -rf", "git push", "curl", "wget", "netcat"]}
     acceptance:
       - {type: regex, value: "(?is)(codex-eval-creation-loop|local.*extraction|do not copy|external)"}
@@ -176,12 +176,12 @@ cases:
   - id: code-expert-lens-hardening
     name: harden skill with bounded code expert lenses
     category: edge
-    eval_modes: [smoke, release]
+    eval_modes: [release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
     prepend_skill: true
-    prompt: "Harden an existing Codex skill using code expert lenses. Keep SKILL.md compact, load Infrastructure/references/software-literature-expert-lens-pack.md only when needed, choose at most three lenses, require repo evidence for every finding, and add or update one eval that proves the lens changed behavior."
+    prompt: "Review and improve Plugins/example/skills/review-helper using code expert lenses. Keep SKILL.md compact, load Infrastructure/references/software-literature-expert-lens-pack.md only when needed, choose at most three lenses, require repo evidence for every finding, and add or update one eval that proves the lens changed behavior."
     deterministic_checks: {forbidden_commands: ["rm -rf", "git push", "curl", "wget", "netcat"]}
     acceptance:
       - {type: regex, value: "(?is)(software-literature-expert-lens-pack|code expert|lens)"}

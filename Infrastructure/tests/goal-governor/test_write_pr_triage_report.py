@@ -11,7 +11,14 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "write_pr_triage_report.py"
+SCRIPT_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "Skills"
+    / "agent-ops"
+    / "goal-governor"
+    / "scripts"
+    / "write_pr_triage_report.py"
+)
 SPEC = importlib.util.spec_from_file_location("write_pr_triage_report", SCRIPT_PATH)
 assert SPEC is not None
 assert SPEC.loader is not None
