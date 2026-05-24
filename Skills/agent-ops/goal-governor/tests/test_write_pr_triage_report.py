@@ -90,6 +90,7 @@ def make_runner(
                             "repository": {
                                 "pullRequest": {
                                     "reviewThreads": {
+                                        "pageInfo": {"hasNextPage": False},
                                         "nodes": actual_review_threads,
                                     }
                                 }
@@ -317,6 +318,48 @@ def test_report_passes_when_inline_review_thread_is_resolved() -> None:
         assert "review_comments_present" not in report
 
 
+def test_report_blocks_when_review_thread_data_is_truncated() -> None:
+    with TemporaryDirectory() as tmp:
+        worktree = Path(tmp).resolve()
+        report = write_pr_triage_report.write_report(
+            worktree=worktree,
+            repo="jscraik/Agent-Skills",
+            pr_number="196",
+            expected_head="abc123",
+            output_path=Path("artifacts/reviews/triage.md"),
+            runner=make_runner(
+                worktree=worktree,
+                reviews=[
+                    {
+                        "id": 1,
+                        "state": "COMMENTED",
+                        "user": {"login": "coderabbitai[bot]"},
+                    }
+                ],
+                comments=[
+                    {
+                        "id": 12,
+                        "path": "Infrastructure/bin/ask",
+                        "line": 162,
+                        "commit_id": "abc123",
+                        "body": "Restore parser-level validation.",
+                    }
+                ],
+                review_threads=[
+                    {
+                        "id": "thread-1",
+                        "isResolved": True,
+                        "comments": {"pageInfo": {"hasNextPage": True}, "nodes": [{"databaseId": 12}]},
+                    }
+                ],
+            ),
+            now=datetime(2026, 5, 24, tzinfo=UTC),
+        )
+
+        assert "status: blocked" in report
+        assert "review_threads_truncated" in report
+
+
 def test_report_passes_when_inline_review_comments_are_stale_for_old_head() -> None:
     with TemporaryDirectory() as tmp:
         worktree = Path(tmp).resolve()
@@ -459,3 +502,25 @@ def test_parse_args_rejects_relative_worktree() -> None:
         assert exc.code == 2
     else:
         raise AssertionError("relative worktree was accepted")
+
+
+def test_parse_args_rejects_invalid_repo_shape() -> None:
+    try:
+        write_pr_triage_report.parse_args(
+            [
+                "--worktree",
+                "/tmp/worktree",
+                "--repo",
+                "Agent-Skills",
+                "--pr",
+                "196",
+                "--head",
+                "abc123",
+                "--output",
+                "artifacts/reviews/triage.md",
+            ]
+        )
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("invalid repo shape was accepted")

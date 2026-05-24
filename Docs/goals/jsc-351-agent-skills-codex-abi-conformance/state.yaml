@@ -46,19 +46,19 @@ checks:
     outcome: pass
     checked_at: "2026-05-24T03:48:30Z"
   last_delivery_attempt:
-    command: "PU-007 PR #196 latest-head delivery triage"
-    outcome: pass_ready_for_pu008_govern
-    checked_at: "2026-05-24T05:35:34Z"
-    detail: "PR #196 is open draft and mergeable at head ab23f2e3facd36a51305c5180a09a42aac7cad93. Live checks are green, including CodeRabbit, CircleCI, CodeQL, Semgrep, Snyk, docs, lint, typecheck, test, audit, and security scan. The required subagent-managed triage artifact artifacts/reviews/jsc-351-pu007-conformance/subagent-post-push-ab23f2e3.md was written from /private/tmp/agent-skills-jsc351-pu006 and reports 3 submitted reviews, 3 independent reviews, 19 inline comments, 19 addressed comments, 19 resolved-thread comments, 0 stale comments, 0 active comments, and no blockers. Because post-push artifacts necessarily audit an already-pushed head, this artifact is live runtime evidence and cannot be committed into the same head it verifies without creating a new head requiring fresh triage."
+    command: "PU-007 transition-head review remediation for PR #196"
+    outcome: blocked_review_remediation_in_progress
+    checked_at: "2026-05-24T05:55:00Z"
+    detail: "PR #196 reached green remote checks at head cd1a861c891f66d7660d02945324e2f4d190a540, including CodeRabbit. The required governor and subagent triage artifacts for that exact head both reported blocked because CodeRabbit opened 6 active inline review threads. Progression to PU-008 remains blocked until the review findings are remediated, committed, pushed, and a fresh latest-head triage artifact reports no active blockers."
   last_pr_state:
     url: "https://github.com/jscraik/Agent-Skills/pull/196"
     number: 196
     state: open
     draft: true
     mergeable: MERGEABLE
-    checked_at: "2026-05-24T05:35:34Z"
-    outcome: pass_latest_head_safe
-    detail: "PR #196 is open draft and mergeable at head ab23f2e3facd36a51305c5180a09a42aac7cad93. Remote checks are green, CodeRabbit reports review completed, all 19 inline review comments are in resolved threads, and the latest required subagent artifact reports no active review blockers. PR remains draft because this is not final goal completion."
+    checked_at: "2026-05-24T05:55:00Z"
+    outcome: blocked_active_review_comments
+    detail: "PR #196 is open draft and mergeable at head cd1a861c891f66d7660d02945324e2f4d190a540. Remote checks are green, but latest-head triage reports 25 inline review comments, 19 addressed or resolved-thread comments, and 6 active comments requiring classification or remediation before the governor may start PU-008."
 continuation_gate:
   native_status: active
   goal_active: pass

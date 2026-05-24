@@ -28,7 +28,8 @@ REVIEW_THREADS_QUERY = (
     "repository(owner:$owner,name:$repo){"
     "pullRequest(number:$number){"
     "reviewThreads(first:100){"
-    "nodes{id isResolved comments(first:50){nodes{databaseId}}}"
+    "pageInfo{hasNextPage}"
+    "nodes{id isResolved comments(first:50){pageInfo{hasNextPage} nodes{databaseId}}}"
     "}}}}"
 )
 
@@ -110,6 +111,27 @@ def resolved_review_thread_comment_ids(review_threads: object) -> set[int]:
             if isinstance(comment, dict) and isinstance(comment.get("databaseId"), int):
                 resolved_ids.add(comment["databaseId"])
     return resolved_ids
+
+
+def review_threads_truncated(review_threads: object) -> bool:
+    if not isinstance(review_threads, dict):
+        return False
+    try:
+        review_threads_payload = review_threads["data"]["repository"]["pullRequest"]["reviewThreads"]
+    except (KeyError, TypeError):
+        return False
+    if not isinstance(review_threads_payload, dict):
+        return False
+    page_info = review_threads_payload.get("pageInfo")
+    if isinstance(page_info, dict) and page_info.get("hasNextPage"):
+        return True
+    nodes = review_threads_payload.get("nodes")
+    for thread in nodes if isinstance(nodes, list) else []:
+        comments = thread.get("comments") if isinstance(thread, dict) else None
+        comment_page_info = comments.get("pageInfo") if isinstance(comments, dict) else None
+        if isinstance(comment_page_info, dict) and comment_page_info.get("hasNextPage"):
+            return True
+    return False
 
 
 def collect_results(worktree: Path, repo: str, pr_number: str, runner: Runner) -> dict[str, CommandResult]:
@@ -233,6 +255,7 @@ def classify(
         blockers.append("comments_unreadable")
     else:
         resolved_comment_ids = resolved_review_thread_comment_ids(review_threads)
+        review_thread_data_truncated = review_threads_truncated(review_threads)
         addressed_comments = [
             comment
             for comment in comments
@@ -258,6 +281,10 @@ def classify(
         facts["resolved_thread_inline_comments"] = str(len(resolved_comment_ids))
         facts["stale_inline_comments"] = str(len(stale_comments))
         facts["active_inline_comments"] = str(len(active_comments))
+        if review_thread_data_truncated:
+            blockers.append(
+                "review_threads_truncated: fail closed until all review threads/comments are paged"
+            )
         if active_comments and (results["review_threads"].returncode != 0 or review_threads is None):
             blockers.append(
                 "review_threads_unreadable: unresolved inline comments could not be checked against review thread state"
@@ -412,6 +439,9 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     args = parser.parse_args(argv)
     if not Path(args.worktree).is_absolute():
         parser.error("--worktree must be an absolute path")
+    repo_parts = args.repo.split("/")
+    if len(repo_parts) != 2 or not all(repo_parts):
+        parser.error("--repo must be in owner/name form")
     return args
 
 

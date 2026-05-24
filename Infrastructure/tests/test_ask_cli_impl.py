@@ -1775,6 +1775,26 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "error")
         self.assertIn("unexpected verify-only arguments", output["errors"][0]["message"])
 
+    def test_skills_package_verify_rejects_package_only_flags(self):
+        """Verify package-only flags cannot be ignored by verify mode."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "package",
+            "verify",
+            "skill-builder",
+            "--strict",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("unexpected package-only arguments", output["errors"][0]["message"])
+
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-builder", "--robot"]

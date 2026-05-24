@@ -2963,11 +2963,16 @@ def skills_package_verify(
             "validation_commands": [validation_command],
             "next_command": validation_command,
         }
+        original_rule_evidence = list(verification.get("rule_evidence") or [])
         verification = _normalize_package_verification(
             query=query,
             validation_command=validation_command,
             verification=verification,
         )
+        if original_rule_evidence:
+            verification["rule_evidence"] = list(
+                dict.fromkeys([*original_rule_evidence, *verification.get("rule_evidence", [])])
+            )
         result.data["skill_package_verification"] = verification
         if verification["status"] == "blocked":
             result.status = "error"

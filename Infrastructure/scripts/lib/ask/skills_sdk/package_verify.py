@@ -89,9 +89,9 @@ def _entry_is_symlink(info: zipfile.ZipInfo) -> bool:
 def _unsafe_archive_entry(name: str) -> str | None:
     if not name or "\x00" in name:
         return None
-    normalized = name.replace("\\", "/").rstrip("/")
-    path = PurePosixPath(normalized)
-    if path.is_absolute():
+    normalized = name.replace("\\", "/")
+    path = PurePosixPath(normalized.rstrip("/"))
+    if normalized.startswith("/") or path.is_absolute():
         return "absolute_archive_path"
     if len(normalized) >= 2 and normalized[1] == ":":
         return "absolute_archive_path"

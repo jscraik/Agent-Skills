@@ -570,8 +570,11 @@ def main():
             result = skills_commands.skills_doctor(repo_root, target=args.target, strict=args.strict, codex_parity=args.codex_parity)
         elif args.action == "package":
             verify_flags_present = any([args.expected_sha256, args.trusted_provenance, args.rollback_journal])
+            package_flags_present = args.strict or args.checkout_test
             if args.target == "verify" and not args.verify_target:
                 result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: verify_target")
+            elif args.target == "verify" and package_flags_present:
+                result = build_argument_error("skills", "package", raw_args, parser_error="unexpected package-only arguments")
             elif args.target != "verify" and (args.verify_target or verify_flags_present):
                 result = build_argument_error("skills", "package", raw_args, parser_error="unexpected verify-only arguments")
             elif args.target == "verify":

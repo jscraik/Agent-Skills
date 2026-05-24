@@ -174,6 +174,31 @@ class TestAskSkillsConformance(unittest.TestCase):
         verification = result.data["skill_package_verification"]
         self.assertTrue(any(item["rule_id"] == "archive_path_traversal" for item in verification["blockers"]))
 
+    def test_package_verify_blocks_absolute_root_archive_member(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = Path(temp_dir) / "skill.zip"
+            rollback_journal = Path(temp_dir) / "rollback.jsonl"
+            root_info = zipfile.ZipInfo("/")
+            with zipfile.ZipFile(archive_path, "w") as archive:
+                archive.writestr(root_info, "")
+                archive.writestr("rollback.jsonl", '{"action":"verify","decision":"blocked"}\n')
+                archive.writestr(
+                    "skill-package-manifest.json",
+                    json.dumps({"provenance": {"source": "agent-skills"}, "files": [], "rollback_journal": "rollback.jsonl"}),
+                )
+            _write_rollback_journal(rollback_journal)
+
+            result = skills_package_verify(
+                REPO_ROOT,
+                str(archive_path),
+                expected_sha256=_sha256(archive_path),
+                rollback_journal=str(rollback_journal),
+            )
+
+        self.assertEqual(result.status, "error")
+        verification = result.data["skill_package_verification"]
+        self.assertTrue(any(item["rule_id"] == "absolute_archive_path" for item in verification["blockers"]))
+
     def test_package_verify_rejects_manifest_self_attested_trust(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             archive_path = Path(temp_dir) / "skill.zip"
@@ -260,6 +285,17 @@ class TestAskSkillsConformance(unittest.TestCase):
         self.assertEqual(verification["status"], "blocked")
         self.assertFalse(verification["provenance_identity"]["trusted"])
         self.assertTrue(any(item["rule_id"] == "untrusted_provenance" for item in verification["blockers"]))
+
+    def test_handle_verify_preserves_branch_rule_evidence(self) -> None:
+        result = skills_package_verify(REPO_ROOT, "skill-builder")
+
+        self.assertEqual(result.status, "success")
+        verification = result.data["skill_package_verification"]
+        rule_evidence = verification["rule_evidence"]
+        self.assertIn("skill_md_present:true", rule_evidence)
+        self.assertIn("frontmatter_read:true", rule_evidence)
+        self.assertIn("package_metadata_complete:true", rule_evidence)
+        self.assertIn("provenance_trusted:true", rule_evidence)
 
     def test_conformance_run_writes_replayable_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

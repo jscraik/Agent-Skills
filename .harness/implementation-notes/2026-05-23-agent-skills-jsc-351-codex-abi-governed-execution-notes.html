@@ -841,5 +841,11 @@
     <p>Decision: PU-007 is complete for the current pushed implementation head. The goal board now marks <code>T017</code> done and opens <code>T018</code> for PU-008 traceability, validation, and closeout control. The next slice is a governance/traceability slice, not new implementation code.</p>
     <p>Invariant: committing this board transition creates a new PR head. Before any PU-008 work proceeds, that new head must be pushed, remote checks must refresh, and a new subagent-managed post-push triage artifact must prove the transition head is safe.</p>
   </section>
+  <section class="entry validation">
+    <h2>PU-007 REVIEW REMEDIATION: Transition-Head Review Blockers</h2>
+    <p>Runtime truth: after commit <code>cd1a861c891f66d7660d02945324e2f4d190a540</code> was pushed, remote checks became green, including CodeRabbit, CircleCI, CodeQL, Semgrep, Snyk, docs, lint, typecheck, test, audit, and security scan. The fresh governor and subagent triage artifacts under <code>artifacts/reviews/jsc-351-pu008-closeout/</code> still blocked progression because CodeRabbit opened 6 active inline review threads on the transition head.</p>
+    <p>Findings accepted: the goal board overstated readiness after a new head, <code>skills package verify</code> accepted package-only flags in verify mode, package verification normalization dropped branch-built rule evidence, archive root entries such as <code>/</code> bypassed absolute-path rejection, and the PR triage report needed fail-closed pagination detection plus early <code>owner/name</code> repo validation.</p>
+    <p>Fix validated before push: the remediation tightens those contracts with focused regression tests and updates the board to record blocked review-remediation truth instead of PU-008 readiness. Local proof passed for py_compile, focused CLI/package/governor pytest selectors, <code>ask skills package verify skill-builder --json --robot</code>, codestyle, repo validation, goal-board validation, and whitespace diff checks. This is review-remediation work, not PU-008 implementation; the next safe state still requires commit, push, refreshed checks, CodeRabbit convergence, and a new latest-head subagent triage report.</p>
+  </section>
 </body>
 </html>
