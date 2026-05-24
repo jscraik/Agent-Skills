@@ -217,7 +217,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-24T23:24:12Z">2026-05-24T23:24:12Z</time>
+          <time datetime="2026-05-24T23:41:30Z">2026-05-24T23:41:30Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -349,9 +349,9 @@
           </tr>
           <tr>
             <td>PU-002</td>
-            <td><span class="status">passed, pending delivery packaging</span></td>
+            <td><span class="status">passed, PR opened</span></td>
             <td>P0 RuntimeCard, EvidenceReceipt, ArtifactRecord, RuntimeSessionSummary, and RecoveryPlanSummary schemas plus dependency-free runtime proof validator.</td>
-            <td><code>validate_runtime_cards.py --help</code>, valid RuntimeCard fixture validation, runtime proof validation tests, doctor regression tests, py_compile, goal board validation, and final review artifacts pass.</td>
+            <td><code>validate_runtime_cards.py --help</code>, valid RuntimeCard fixture validation, runtime proof validation tests, doctor regression tests, py_compile, goal board validation, and final review artifacts pass. PR 201 is open as a stacked PR onto PR 200.</td>
           </tr>
           <tr>
             <td>PU-003</td>
@@ -514,6 +514,18 @@
           <li><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane</code> passed.</li>
         </ul>
         <p><strong>Remaining delivery note:</strong> PU-002 still needs slice packaging, push, PR creation or stacking decision, and PR green-sweep handoff before it should be described as delivered.</p>
+      </article>
+
+      <article class="entry">
+        <h3>PU-002 PR opened and green-sweep launched</h3>
+        <time datetime="2026-05-24T23:41:30Z">2026-05-24T23:41:30Z</time>
+        <p>PU-002 was committed, pushed, and opened as stacked PR 201: <code>https://github.com/jscraik/Agent-Skills/pull/201</code>.</p>
+        <ul>
+          <li>Branch: <code>codex/jsc-364-runtime-proof-plane-pu002</code>.</li>
+          <li>Commit: <code>d57093f74</code>.</li>
+          <li>Base: <code>codex/jsc-364-runtime-proof-plane-pu001</code>, because PR 200 is still open.</li>
+          <li>A PR green-sweep worker is triaging live checks and blockers for PR 201 while PU-003 starts.</li>
+        </ul>
       </article>
     </section>
 
