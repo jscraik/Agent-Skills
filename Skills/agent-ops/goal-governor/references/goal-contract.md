@@ -145,7 +145,7 @@ native_blocker_audit:
   required_repeated_turns: 3
   gate_met: false
 validation_evidence:
-  - command: python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/checkout-latency
+  - command: python3 scripts/check_goal_board.py docs/goals/checkout-latency
     outcome: blocked
     note: state.yaml invalid
 risks:
