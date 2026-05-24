@@ -1,0 +1,365 @@
+version: 2
+goal:
+  slug: "jsc-364-agent-skills-codex-runtime-proof-plane"
+  status: active
+  objective: "Implement JSC-364 Codex Runtime Proof Plane through governed, validated, runtime-truth-first slices."
+  native_objective: "/goal Follow Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/goal.md"
+  native_status: active
+  native_goal_id: null
+  token_budget: null
+  tokens_used: 0
+  time_used_seconds: 0
+  native_created_at: "2026-05-24T21:41:48Z"
+  native_updated_at: "2026-05-24T21:41:48Z"
+completion_contract:
+  outcome: "JSC-364 is implemented with reachable Codex Runtime Proof Plane commands that emit schema-valid proof or blocked_runtime evidence without false parity claims."
+  verification_surface:
+    - "Goal board validator output"
+    - "Plan and spec traceability checks"
+    - "Slice focused tests"
+    - "Runtime evidence schema validation"
+    - "Public ask wrapper smoke commands"
+    - "Mandatory review artifacts"
+    - "GitHub PR and CI truth"
+    - "Linear tracker truth"
+    - "Final PM or Judge receipt"
+  constraints:
+    - "Do not mutate the Codex source checkout"
+    - "Do not edit generated projections or plugin caches by hand"
+    - "Do not claim modeled conformance as live runtime parity"
+    - "Do not silently downgrade runtime absence into success"
+    - "Do not broaden into P1 telemetry before P0 proof-plane acceptance"
+    - "Do not merge without explicit current-turn authority"
+  boundaries:
+    - "Target repository is /Users/jamiecraik/dev/agent-skills"
+    - "Canonical plan is .harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-plan.md"
+    - "Canonical spec is .harness/specs/2026-05-24-agent-skills-codex-runtime-proof-plane-spec.md"
+    - "Implementation notes are .harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    - "PR green-sweep artifacts live under artifacts/reviews/jsc-364-runtime-proof-plane"
+  iteration_policy: "Govern one bounded slice at a time, record allowed files and validation before implementation, run mandatory reviews, update notes and receipts, then hand off delivery triage only after a validated safe state."
+  blocked_stop_condition: "Stop on unverifiable runtime safety, stale validation, unclear merge safety, deterministic verification failure, review blocker, unsafe external mutation, or a slice that cannot produce durable proof or blocked_runtime evidence."
+rules:
+  one_active_task: true
+  require_fresh_verification: true
+  require_final_audit: true
+checks:
+  dirty_fingerprint: "main...origin/main with untracked governed prompt observed 2026-05-24T21:41:48Z"
+  last_verification:
+    command: "PU-001 delivery packaging gates: branch creation, codestyle, repo validate, memory contract"
+    outcome: blocked_by_projection_drift
+    checked_at: "2026-05-24T22:18:32Z"
+    detail: "Dedicated branch codex/jsc-364-runtime-proof-plane-pu001 created; memory.json jq contract passes; bash scripts/validate-codestyle.sh and ./bin/ask repo validate --json --robot both fail on projection-integrity drift in cache-harness-engineering and cache-skill-factory, outside PU-001 touched files."
+  last_scout:
+    command: "PU-001 baseline: ./bin/ask skills handles --check --check-command-handles --no-handles --json --robot and ./bin/ask repo doctor --json --robot"
+    outcome: "blocked_as_expected"
+    checked_at: "2026-05-24T21:49:18Z"
+    detail: "Generated command-handle check reports 6 violations; repo doctor blocks on command_handles with next command ./bin/ask skills handles --check --no-handles --check-command-handles --json --robot."
+continuation_gate:
+  native_status: active
+  goal_active: pass
+  thread_idle: unknown
+  queued_user_input: absent
+  pending_work: present
+  auto_continue_allowed: yes
+  blocked_by: "none"
+claims:
+  - id: C001
+    claim: "JSC-364 is the active governed implementation lane after Jamie approved the mode switch."
+    evidence_surface:
+      - ".harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-implementation-prompt.md"
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/goal.md"
+    route: reproduced
+    status: confirmed
+    remaining_uncertainty:
+      - "Native goal tool state is not bound to this file board"
+  - id: C002
+    claim: "PU-001 is the first governed implementation slice and should repair command-handle drift before broader proof-plane features expand."
+    evidence_surface:
+      - ".harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-plan.md"
+      - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Delivery packaging remains before this slice is pushed or opened as a PR"
+  - id: C003
+    claim: "The proof plane must preserve the difference between modeled conformance, live runtime parity, and blocked runtime evidence."
+    evidence_surface:
+      - ".harness/specs/2026-05-24-agent-skills-codex-runtime-proof-plane-spec.md"
+      - ".harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-plan.md"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Exact schema module names remain implementation choices"
+tasks:
+  - id: T001
+    type: pm
+    assignee: PM
+    status: done
+    objective: "Switch JSC-364 from prompt review mode to governed implementation mode and create the repo-visible goal board."
+    inputs:
+      - ".harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-implementation-prompt.md"
+      - ".harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-plan.md"
+      - "Skills/agent-ops/goal-governor/references/goal-contract.md"
+    constraints:
+      - "No implementation code edits during board creation"
+      - "No external service mutation during board creation"
+      - "Validate the board before starting PU-001"
+    expected_output: "Governed implementation board and seeded execution notes"
+    allowed_files: []
+    verify:
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane"
+    stop_if:
+      - "Board validator fails"
+      - "Canonical plan or spec path is missing"
+    receipt_id: R001
+  - id: T002
+    type: scout
+    assignee: Scout
+    status: done
+    objective: "Refresh PU-001 runtime truth and record the implementation boundary before editing command-handle or repo doctor code."
+    inputs:
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/goal.md"
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/state.yaml"
+      - ".harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-plan.md"
+      - ".harness/specs/2026-05-24-agent-skills-codex-runtime-proof-plane-spec.md"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
+      - "Infrastructure/tests/test_ask_skills_doctor.py"
+      - "Infrastructure/tests/test_ask_cli_impl.py"
+    constraints:
+      - "Read-only except goal board and implementation notes updates"
+      - "Do not claim live tracker or PR truth from stale artifacts"
+      - "Stop if dirty worktree changes conflict with PU-001 ownership"
+    expected_output: "PU-001 boundary packet with allowed files, validation commands, and blockers"
+    allowed_files: []
+    verify:
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane"
+      - "./bin/ask skills handles --check --check-command-handles --no-handles --json --robot"
+      - "./bin/ask repo doctor --json --robot"
+    stop_if:
+      - "Command-handle generator ownership is unclear"
+      - "Repo doctor cannot report command-handle drift distinctly"
+      - "Dirty worktree contains conflicting edits to PU-001 paths"
+    receipt_id: R002
+  - id: T003
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Implement PU-001 command-handle drift repair and repo doctor baseline."
+    inputs:
+      - ".harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-plan.md"
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
+      - "Infrastructure/tests/test_ask_skills_doctor.py"
+      - "Infrastructure/tests/test_ask_cli_impl.py"
+    constraints:
+      - "Keep public CLI changes additive and focused"
+      - "Do not implement later proof-plane schemas in PU-001"
+      - "Do not edit generated projections by hand; use the command-handle generator only"
+    expected_output: "Command-handle drift is reachable, distinct, and blocking in repo doctor"
+    allowed_files:
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
+      - "Infrastructure/tests/test_ask_skills_doctor.py"
+      - "Infrastructure/tests/test_ask_cli_impl.py"
+      - "Infrastructure/tests/fixtures/**"
+      - ".agents/skills/**"
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    verify:
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane"
+      - "./bin/ask skills handles --check --check-command-handles --no-handles --json --robot"
+      - "./bin/ask repo doctor --json --robot"
+      - "python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q"
+      - "python3 -m pytest Infrastructure/tests/test_ask_cli_impl.py -q"
+    stop_if:
+      - "Required changes exceed PU-001 allowed files"
+      - "Repo doctor failures mask command-handle drift"
+      - "Focused tests require unrelated architecture migration"
+    receipt_id: R004
+  - id: T004
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Implement PU-002 P0 runtime evidence schemas and validator."
+    inputs:
+      - ".harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-plan.md"
+      - ".harness/specs/2026-05-24-agent-skills-codex-runtime-proof-plane-spec.md"
+    constraints:
+      - "Limit schemas to P0 evidence contracts"
+      - "No network dependency installation"
+      - "Every schema must have reachable validation"
+    expected_output: "Runtime evidence schemas and validator with positive and negative fixtures"
+    allowed_files:
+      - "Infrastructure/config/schemas/**"
+      - "Infrastructure/scripts/validation-and-linting/**"
+      - "Infrastructure/scripts/lib/ask/skills_sdk/**"
+      - "Infrastructure/tests/**"
+      - ".harness/evidence/**"
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    verify:
+      - "python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py --help"
+      - "python3 -m pytest Infrastructure/tests -q"
+    stop_if:
+      - "P1 telemetry becomes required for P0 acceptance"
+      - "Schema validation cannot run without new external dependencies"
+      - "Schemas are not reachable from command or test paths"
+    receipt_id: null
+  - id: T005
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement PU-003 Codex parity conformance status split."
+    inputs:
+      - "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+    constraints:
+      - "Keep modeled conformance separate from live runtime parity"
+      - "Do not mutate Codex source checkout"
+    expected_output: "Conformance output reports modeled_conformance, live_runtime_parity, and blocked_runtime separately"
+    allowed_files:
+      - "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/tests/**"
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    verify:
+      - "./bin/ask skills conformance run --suite codex-parity --evidence-dir /tmp/jsc-364-codex-parity --json --robot"
+      - "python3 -m pytest Infrastructure/tests -q"
+    stop_if:
+      - "Public suite semantics cannot preserve separate live and modeled statuses"
+      - "Status split requires broad SDK rewrite"
+    receipt_id: null
+  - id: T006
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement PU-004 capability discovery and public wrapper fixtures."
+    inputs:
+      - "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+    constraints:
+      - "Agents must discover proof commands through public surfaces"
+      - "Fixtures must exercise wrapper truth rather than private helpers only"
+    expected_output: "Public wrapper fixtures cover proof-plane and capability discovery output"
+    allowed_files:
+      - "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py"
+      - "Infrastructure/scripts/lib/ask/commands/**"
+      - "Infrastructure/tests/**"
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    verify:
+      - "python3 Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py"
+      - "python3 -m pytest Infrastructure/tests -q"
+    stop_if:
+      - "Capability discovery cannot be exposed without changing unrelated command families"
+      - "Wrapper fixture updates cannot run from a clean public command path"
+    receipt_id: null
+  - id: T007
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement PU-005 Codex preview source identity and truncation hardening."
+    inputs:
+      - "Infrastructure/scripts/lib/ask/services/codex_preview.py"
+      - "Infrastructure/tests/test_ask_skills_codex_preview.py"
+    constraints:
+      - "Preview basis must be explicit"
+      - "Preview cannot become live runtime parity proof by itself"
+    expected_output: "Codex preview output names source identity, source basis, and truncation status"
+    allowed_files:
+      - "Infrastructure/scripts/lib/ask/services/codex_preview.py"
+      - "Infrastructure/tests/test_ask_skills_codex_preview.py"
+      - "Infrastructure/tests/**"
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    verify:
+      - "python3 -m pytest Infrastructure/tests/test_ask_skills_codex_preview.py -q"
+      - "./bin/ask skills codex-preview --help"
+    stop_if:
+      - "Preview source identity cannot be determined without mutating Codex checkout"
+      - "Truncation behavior becomes ambiguous"
+    receipt_id: null
+  - id: T008
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement PU-006 runtime proof command and blocked runtime receipts."
+    inputs:
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/scripts/lib/ask/skills_sdk/**"
+    constraints:
+      - "Proof command must emit proof or blocked_runtime evidence"
+      - "Unstructured errors are not proof"
+      - "Runtime target must be explicit"
+    expected_output: "skills proof HANDLE --runtime-target codex writes RuntimeCard and EvidenceReceipt output"
+    allowed_files:
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/scripts/lib/ask/skills_sdk/**"
+      - "Infrastructure/tests/**"
+      - ".harness/evidence/**"
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    verify:
+      - "./bin/ask skills proof context7 --runtime-target codex --json --robot"
+      - "python3 -m pytest Infrastructure/tests -q"
+    stop_if:
+      - "Runtime absence cannot be captured as durable blocked_runtime evidence"
+      - "Proof command cannot report artifact paths"
+    receipt_id: null
+  - id: T009
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement PU-007 shared workspace evidence and closeout integration."
+    inputs:
+      - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+    constraints:
+      - "Closeout must separate command proof, schema proof, PR truth, tracker truth, and docs truth"
+      - "Do not claim external state without fresh verification"
+    expected_output: "Closeout and evidence surfaces are agent-operable from the shared workspace"
+    allowed_files:
+      - "Infrastructure/scripts/lib/ask/commands/**"
+      - "Infrastructure/scripts/lib/ask/skills_sdk/**"
+      - "Infrastructure/tests/**"
+      - ".harness/evidence/**"
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    verify:
+      - "./bin/ask repo closeout --changed --json --robot"
+      - "python3 -m pytest Infrastructure/tests -q"
+    stop_if:
+      - "Closeout would conflate local proof with live PR or Linear truth"
+      - "Shared workspace evidence cannot be written under repo-owned paths"
+    receipt_id: null
+  - id: T010
+    type: judge
+    assignee: Judge
+    status: queued
+    objective: "Run PU-008 final validation, docs accuracy review, and delivery sweep before completion."
+    inputs:
+      - "All JSC-364 slice receipts"
+      - "Mandatory review artifacts"
+      - "GitHub PR truth"
+      - "Linear JSC-364 truth"
+    constraints:
+      - "Read-only except final notes and receipts"
+      - "No cleanup announcement before docs-expert and agents-md checks"
+      - "No completion claim before final PR and CI truth are refreshed"
+    expected_output: "Final Judge decision with docs accuracy, review, validation, PR, CI, and tracker evidence"
+    allowed_files: []
+    verify:
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane"
+      - "./bin/ask repo closeout --changed --json --robot"
+    stop_if:
+      - "Any mandatory review artifact is missing"
+      - "Docs or AGENTS-facing guidance is stale"
+      - "PRs are unmerged or CI is failing without owner-approved blocker classification"
+    receipt_id: null

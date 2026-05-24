@@ -145,7 +145,7 @@ def main():
     skills_parse_parser.add_argument("request", nargs="+", help="Prompt text containing $ skill and @ reviewer handles")
     skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove a command handle reaches workspace and user runtime surfaces", parents=[global_parser])
     skills_proof_parser.add_argument("handle", help="Skill handle to prove, with or without leading $")
-    skills_proof_parser.add_argument("--runtime-target", default="any", choices=["any", "codex", "agents"], help="Runtime that must satisfy proof: any, codex, or agents")
+    skills_proof_parser.add_argument("--runtime-target", default="any", help="Runtime that must satisfy proof: any, codex, or agents")
     skills_subparsers.add_parser("prove", help="Show a skill proof scorecard", parents=[global_parser]).add_argument("handle", nargs="+", help="Skill handle or goal to prove")
     skills_subparsers.add_parser("explain", help="Explain when and how to use a skill handle", parents=[global_parser]).add_argument("handle", help="Skill handle to explain")
     skills_doctor_parser = skills_subparsers.add_parser("doctor", help="Diagnose readiness for one skill handle or source path", parents=[global_parser])
