@@ -702,7 +702,7 @@ tasks:
       - "PR #196 head, checks, review state, or mergeability become stale or blocked."
       - "Acceptance traceability cannot connect a requirement to validation evidence."
       - "A closeout claim would require implementation testing, runtime validation, or external approval not yet available."
-    receipt_id: R052
+    receipt_id: R053
   - id: T016
     type: pm
     assignee: PM

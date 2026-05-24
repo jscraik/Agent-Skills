@@ -550,8 +550,8 @@ Proceed with JSC-352 PU-001 first. Do not start package schemas, parity previews
 | Parent issue | JSC-351 |
 | First child issue | JSC-352 |
 | Later child issues | JSC-353, JSC-354, JSC-355, JSC-356 |
-| Current Linear status | Triage |
-| Project/cycle assignment | Blocked by current evidence |
+| Current Linear status | In Progress |
+| Project/cycle assignment | Project unresolved; cycle live but authority-unverified |
 | Required tracker behavior | Preserve parent/child traceability and avoid project/cycle assignment until confirmed |
 
 ## Linear / Spec / Plan / PR Traceability

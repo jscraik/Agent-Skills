@@ -860,5 +860,12 @@
     <p>Operational caveat: ./bin/ask repo validate --json --robot regenerates Infrastructure/GOVERNANCE/runtime-separation/current.json hash evidence. That generated file is outside the PU-008 allowed path and is restored before staging so the traceability commit stays scoped. The validation evidence remains valid because the gate itself passed before cleanup.</p>
     <p>Next gate: commit and push the PU-008 traceability correction, then require fresh PR checks plus latest-head governor and subagent triage before claiming merge readiness or final closeout.</p>
   </section>
+  <section class="entry validation">
+    <h2>PU-008 REVIEW REMEDIATION: Linear Status And Exact-Head Evidence</h2>
+    <p>Runtime truth: after commit <code>4a2b51b597ba5bc6f6fa3bf805d12a2b4841f91b</code> was pushed, remote checks turned green, including CodeRabbit, CircleCI, CodeQL, Semgrep, Snyk, docs, lint, typecheck, test, audit, and security scan. The fresh governor report still blocked progression because CodeRabbit opened two active inline comments against PU-008 traceability artifacts.</p>
+    <p>Findings accepted: the plan frontmatter reported Linear status <code>In Progress</code> while the Linear Work Item Contract table still said <code>Triage</code>; the PU-008 audit also described old PR proof for head <code>9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246</code> without enough timestamped scope. Both issues could cause stale tracker or stale-head governance assertions.</p>
+    <p>Fix applied: the plan table now matches <code>In Progress</code> and records project unresolved / cycle live but authority-unverified. The audit now scopes the older PR/check/review proof to capture time <code>2026-05-24T06:58:30Z</code> and exact head <code>9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246</code>, with explicit re-triage required for any later commit.</p>
+    <p>Next gate: validate the minimal remediation, commit and push it, then rerun latest-head checks plus governor and subagent triage for the new head. No next implementation slice may start before the latest head has no active review blockers.</p>
+  </section>
 </body>
 </html>

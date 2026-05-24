@@ -49,19 +49,19 @@ Refresh command source: Linear MCP `get_issue` for JSC-351 through JSC-356 on 20
 | SA-007 | JSC-355 | Issue live and Done. | Covered by service-boundary extraction slice. |
 | SA-008 | JSC-356 | Issue live and In Progress. | Covered by PU-007 implementation in PR #196; tracker remains In Progress until final PR/closeout evidence is accepted. |
 | SA-009 | JSC-351 through JSC-356 | Tracker metadata refreshed. | Project assignment unresolved; cycle assignment live and unverified for intent. |
-| SA-010 | PR #196 | Latest pushed head `9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246` was open draft, mergeable, and green before the PU-008 local traceability edits. | Any new commit must be pushed and freshly triaged before merge readiness is claimed. |
-| SA-011 | PR #196 / goal board | Review-thread truth is represented by governor and subagent reports for latest pushed head. | Local reports for `9b2f95e1` remain uncommitted evidence to avoid creating another stale-head proof loop. |
+| SA-010 | PR #196 | As of 2026-05-24T06:58:30Z, head `9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246` was open draft, mergeable, and green before the PU-008 local traceability edits. | This is scoped evidence for that immutable head only; any new commit must be pushed and freshly triaged before merge readiness is claimed. |
+| SA-011 | PR #196 / goal board | As of 2026-05-24T06:58:30Z, governor and subagent reports for head `9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246` recorded review-thread truth. | Local reports for `9b2f95e1` remain uncommitted scoped evidence to avoid creating another stale-head proof loop. |
 
 ## PR And Review State
 
-Latest remote evidence before local PU-008 edits:
+Latest remote evidence before local PU-008 edits, captured on 2026-05-24T06:58:30Z and scoped only to head `9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246`:
 
 | Surface | Evidence | Status |
 |---|---|---|
-| PR | `gh pr view 196 --repo jscraik/Agent-Skills --json number,state,isDraft,mergeable,headRefOid,headRefName,url,title,reviewDecision` | Open draft, mergeable, head `9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246`. |
-| Checks | `gh pr checks 196 --repo jscraik/Agent-Skills --watch=false` | All reported checks pass; `eval-baseline` is skipping. |
-| Governor review truth | `artifacts/reviews/jsc-351-pu008-closeout/governor-post-push-9b2f95e1.md` | Pass, 25 addressed inline comments, 25 resolved-thread comments, 0 active comments. |
-| Subagent review truth | `artifacts/reviews/jsc-351-pu008-closeout/subagent-post-push-9b2f95e1.md` | Pass, same latest-head state, WROTE footer present. |
+| PR | `gh pr view 196 --repo jscraik/Agent-Skills --json number,state,isDraft,mergeable,headRefOid,headRefName,url,title,reviewDecision` | Open draft, mergeable, head `9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246` at capture time. |
+| Checks | `gh pr checks 196 --repo jscraik/Agent-Skills --watch=false` | All reported checks passed for `9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246`; `eval-baseline` was skipping. |
+| Governor review truth | `artifacts/reviews/jsc-351-pu008-closeout/governor-post-push-9b2f95e1.md` | Scoped pass for `9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246`: 25 addressed inline comments, 25 resolved-thread comments, 0 active comments. |
+| Subagent review truth | `artifacts/reviews/jsc-351-pu008-closeout/subagent-post-push-9b2f95e1.md` | Scoped pass for `9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246`; WROTE footer present. |
 
 ## Local Validation Evidence
 
