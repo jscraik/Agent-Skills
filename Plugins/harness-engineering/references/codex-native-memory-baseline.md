@@ -13,7 +13,7 @@ A Codex-native harness baseline includes:
 - `.harness/artifacts/README.md` for artifact policy.
 - `.harness/artifacts/sync-receipts.jsonl` for sync receipts.
 - `.harness/artifacts/brownfield-memory-inventory.md` when adopting an existing repository.
-- `docs/goals/README.md` plus `docs/goals/<goal-slug>/goal.md`, `state.yaml`, and `receipts.jsonl` for long-running goal boards.
+- `Docs/goals/README.md` plus `Docs/goals/<goal-slug>/goal.md`, `state.yaml`, and `receipts.jsonl` for long-running goal boards.
 
 ## Sync Receipt Shape
 
