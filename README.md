@@ -10,7 +10,7 @@ coding agents.
 Teach your coding agents how your work actually works, then prove they
 remembered.
 
-This repository currently exposes **23 skills** in the default catalog: root
+This repository currently exposes **27 skills** in the default catalog: root
 routers plus policy-promoted command handles. The rooted command surface
 contains **109 generated `$` handles**, including **75 first-party handles** backed by canonical skill source across 7 topic clusters (agent-ops: 46, backend-platform: 4, content-publishing: 6, frontend-ui: 10, mobile-native: 1, product-strategy: 3, security-ops: 5). Author a capability once, route it intelligently, validate
 quality, project it safely into runtime, and keep the human and agent command
@@ -172,15 +172,18 @@ It never invokes `npx`, never publishes, and never uploads to a registry.
 Tessl documents this CLI path as reviewing locally from your machine for private
 repos and work-in-progress skills, with results only visible to you. Use
 `--skip-tessl-review` only when you need structural Tessl lint without the
-best-practice review output.
+best-practice review output. The acceptance floor is Plugin Eval `B+` or better
+with zero failures and Tessl review score `95` or better.
 
 Keep the lanes separate when reporting readiness:
 
 - `ask evals run` proves dynamic behavior: skill selection, commands, artifacts,
-  scorecards, and release gates.
+  scorecards, and release gates. Codex smoke evals run through `[profiles.fast]`
+  and Tessl evals stage copied inputs under `/tmp/ask-tessl-evals/<skill-path>-<sha12>`
+  with `tessl.json` for evidence retention.
 - Plugin Eval is a static budget and ergonomics guardrail; it does not prove
   runtime behavior or security posture by itself.
-- Tessl lint checks a temporary tile package shape because Tessl lint expects a
+- Tessl lint checks a stable staged tile package shape because Tessl lint expects a
   Tessl `tile.json` package. Canonical skills in this repo stay `SKILL.md`-first.
 - Tessl review is the local best-practice/content review for the copied skill.
 - Snyk is dependency security screening. It is optional in local external-review
@@ -188,9 +191,11 @@ Keep the lanes separate when reporting readiness:
 
 A direct `tessl skill lint <canonical-skill-dir>` failure about missing
 `tile.json` is a packaging-shape blocker, not a content finding. The repo
-wrapper creates a disposable local `tile.json` around the copied `SKILL.md` so
+wrapper creates a stable local `tile.json` around the copied `SKILL.md` so
 Tessl lint can check package compatibility without changing canonical sources
-or publishing anything.
+or publishing anything. The wrapper preserves the copied review package under
+`/tmp/ask-tessl-reviews/<skill-path>-<sha12>` with `tile.json`, `tessl.json`,
+the copied skill, and included references.
 
 Snyk screening is intentionally opt-in for local reviews because the CLI may
 contact Snyk services and requires local authentication. Run `snyk auth` once
@@ -209,7 +214,7 @@ the CircleCI/Snyk lane, or when the user explicitly asks for Snyk or dependency
 vulnerability evidence. Do not run it by default for pure `SKILL.md`-first
 instruction-only candidates with no supported dependency manifest.
 
-Tessl failures about missing files or links outside the disposable tile are
+Tessl failures about missing files or links outside the staged tile are
 preserved as findings; they show where a skill depends on repo-local context
 that would not be self-contained in an external tile package.
 

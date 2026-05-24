@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -23,6 +24,12 @@ from side_effect_authorization import validate_side_effect_authorization
 NOT_RUN_PASS_WARNING = (
     "report contains both not-run evidence and pass statuses; verify gates are not overstated"
 )
+TEMPLATE_PLACEHOLDER_RE = re.compile(r"\[[A-Z_ -]*REQUIRED[^\]]*\]|<(?:canonical-slug|Title Matching First H1|one substantive paragraph|accept \| challenge \| rework \| none|repo-relative plan or PR artifact|issue key when tracked|milestone when tracked)[^>]*>")
+
+
+def validate_unresolved_placeholders(text: str, errors: list[str]) -> None:
+    if TEMPLATE_PLACEHOLDER_RE.search(text):
+        errors.append("report contains unresolved required template placeholder")
 
 
 def validate_not_run_pass_consistency(document: ReportDocument, warnings: list[str]) -> None:
@@ -60,10 +67,11 @@ def validate(path: Path):
     validate_gate_matrix(document, errors, warnings)
     validate_agentic_eval_validity(document, errors, enforce_values=enforce_values)
     validate_side_effect_authorization(document, errors, enforce_values=enforce_values)
-    validate_drift_classifications(document, errors)
+    validate_drift_classifications(document, errors, enforce_values=enforce_values)
     validate_recommendation(document, errors)
     validate_consistency(document, path, warnings)
     if enforce_values:
+        validate_unresolved_placeholders(text, errors)
         validate_not_run_pass_consistency(document, warnings)
 
     return errors, warnings

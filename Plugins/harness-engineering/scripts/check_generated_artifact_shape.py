@@ -40,11 +40,14 @@ SPEC_SECTIONS = [
     "Goals",
     "Non-Goals",
     "Current State / Evidence",
+    "Authority and Scope Boundary",
     "Proposed Behavior",
     "Requirements",
     "Interfaces",
     "Data / Domain Contract",
     "Enforcement Contract",
+    "Proof and Runtime Boundary",
+    "Coding and Testing Lenses",
     "Security, Privacy, and Safety",
     "Failure and Recovery",
     "Validation Plan",
@@ -58,9 +61,12 @@ PLAN_SECTIONS = [
     "Objective",
     "Source Contract",
     "Scope and Boundaries",
+    "Authority and Scope Boundary",
     "Current State / Evidence",
     "Implementation Strategy",
+    "Runtime Persistence and State",
     "Enforcement Contract",
+    "Coding and Testing Lenses",
     "Work Units",
     "Validation Gates",
     "Review Plan",
@@ -94,6 +100,36 @@ ENFORCEMENT_TERMS = (
     "durable_memory",
     "professional_output",
 )
+AUTHORITY_TERMS = (
+    "requested_depth",
+    "approved_execution_boundary",
+    "downscope_authority",
+    "external_mutation_boundary",
+    "freshness_required",
+    "human_acceptance_boundary",
+)
+SPEC_RUNTIME_TERMS = (
+    "proof_boundary",
+    "non_proof_sources",
+    "runtime_state",
+    "resumption_key",
+    "runtime_invocation_receipt",
+    "artifact_chain_key",
+    "persistent_artifacts",
+    "live_state_refresh",
+    "session_evidence_status",
+)
+PLAN_RUNTIME_TERMS = (
+    "runtime_state",
+    "resumption_key",
+    "runtime_invocation_receipt",
+    "artifact_chain_key",
+    "persistent_artifacts",
+    "live_state_refresh",
+    "session_evidence_status",
+    "proof_boundary",
+)
+LENS_TERMS = ("coding_lens", "testing_lens")
 
 
 def strip_frontmatter(text: str) -> str:
@@ -140,6 +176,14 @@ def check_enforcement_contract(text: str) -> list[str]:
     return errors
 
 
+def check_required_terms(text: str, section: str, terms: tuple[str, ...], label: str) -> list[str]:
+    body = section_body(text, section)
+    if not body.strip():
+        return [f"{section} section is empty"]
+    lower = body.lower()
+    return [f"{label} missing required field: {term}" for term in terms if term not in lower]
+
+
 def check_section_order(found: list[str], required: list[str]) -> list[str]:
     errors: list[str] = []
     cursor = -1
@@ -158,6 +202,9 @@ def check_section_order(found: list[str], required: list[str]) -> list[str]:
 def validate_spec(text: str) -> list[str]:
     errors = check_section_order(headings(text), SPEC_SECTIONS)
     errors.extend(check_enforcement_contract(text))
+    errors.extend(check_required_terms(text, "Authority and Scope Boundary", AUTHORITY_TERMS, "Authority and Scope Boundary"))
+    errors.extend(check_required_terms(text, "Proof and Runtime Boundary", SPEC_RUNTIME_TERMS, "Proof and Runtime Boundary"))
+    errors.extend(check_required_terms(text, "Coding and Testing Lenses", LENS_TERMS, "Coding and Testing Lenses"))
 
     prefix = text.split("## Purpose", 1)[0]
     forbidden_prefix = ("Mode Decision", "Selection Evidence", "Blackboard Delta", "Validation Outcomes")
@@ -200,6 +247,9 @@ def validate_spec(text: str) -> list[str]:
 def validate_plan(text: str) -> list[str]:
     errors = check_section_order(headings(text), PLAN_SECTIONS)
     errors.extend(check_enforcement_contract(text))
+    errors.extend(check_required_terms(text, "Authority and Scope Boundary", AUTHORITY_TERMS, "Authority and Scope Boundary"))
+    errors.extend(check_required_terms(text, "Runtime Persistence and State", PLAN_RUNTIME_TERMS, "Runtime Persistence and State"))
+    errors.extend(check_required_terms(text, "Coding and Testing Lenses", LENS_TERMS, "Coding and Testing Lenses"))
     work_units = section_body(text, "Work Units")
     if not PU_RE.search(work_units):
         errors.append("Work Units section missing stable PU-* IDs")

@@ -79,8 +79,25 @@ def _matches_plugin_subpath(path: str, subpath: str) -> bool:
     return len(parts) >= 3 and parts[0] == "Plugins" and parts[2] == subpath
 
 
-def _is_root_doc(path: str) -> bool:
-    return "/" not in path and path.endswith((".md", ".txt"))
+def _is_root_front_door_doc(path: str) -> bool:
+    if "/" in path:
+        return False
+    names = {
+        "AGENTS.md",
+        "ARCHITECTURE.md",
+        "CHANGELOG.md",
+        "CODE_OF_CONDUCT.md",
+        "CODESTYLE.md",
+        "CONTEXT.md",
+        "CONTRIBUTING.md",
+        "README.md",
+        "SECURITY.md",
+        "SKILL.md",
+        "SUPPORT.md",
+        "UBIQUITOUS_LANGUAGE.md",
+        "WORKFLOW.md",
+    }
+    return path in names
 
 
 def _is_root_config(path: str) -> bool:
@@ -178,6 +195,19 @@ def classify_path(path: str | Path) -> SurfaceFinding:
     """
     normalized = _normalize_path(path)
     suffix = Path(normalized).suffix.lower()
+
+    if _starts_with(normalized, "docs"):
+        return _make_finding(
+            normalized,
+            classification="unknown",
+            status="violation",
+            code="lowercase_docs_drift",
+            severity="error",
+            blocking=True,
+            reason="Docs/** is the canonical documentation root; lowercase docs/** is casing drift.",
+            recommendation="Move the content to Docs/** or document an explicit compatibility migration.",
+            metadata={"next_steps": ["move_to_canonical_docs_root", "update_references"]},
+        )
 
     if _starts_with(normalized, "Infrastructure/Infrastructure"):
         return _make_finding(
@@ -529,8 +559,7 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         or _starts_with(normalized, "Infrastructure/ops")
         or _starts_with(normalized, "Infrastructure/reports")
         or _starts_with(normalized, "Infrastructure/storage")
-        or _is_root_doc(normalized)
-        or normalized in {".move-docs.sh", ".move.sh"}
+        or _is_root_front_door_doc(normalized)
     ):
         return _make_finding(
             normalized,

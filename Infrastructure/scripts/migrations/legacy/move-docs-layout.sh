@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Legacy migration record retained for repository archaeology.
+# Do not run as a current layout command without first validating the target
+# layout against ARCHITECTURE.md and Docs/agents/15-repo-surface-ownership.md.
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"

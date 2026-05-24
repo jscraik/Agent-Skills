@@ -17,7 +17,7 @@ from ask.commands import evals  # noqa: E402
 from ask.skill_review_dashboard import _parse_plugin_eval, render_skill_review_dashboard  # noqa: E402
 
 
-def test_smoke_evals_use_codex_spark_without_reasoning_level(tmp_path: Path) -> None:
+def test_smoke_evals_use_codex_spark_and_fast_profile_without_reasoning_level(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
@@ -27,9 +27,13 @@ def test_smoke_evals_use_codex_spark_without_reasoning_level(tmp_path: Path) -> 
     cmd = run.call_args.args[0]
     assert "--model" in cmd
     assert cmd[cmd.index("--model") + 1] == "gpt-5.3-codex-spark"
+    assert "--profile" in cmd
+    assert cmd[cmd.index("--profile") + 1] == "fast"
+    assert result.data["profile_contract"]["codex_profile"] == "fast"
+    assert result.data["profile_contract"]["codex_profile_config"] == "[profiles.fast]"
+    assert result.data["profile_contract"]["tessl_policy"]["tessl_project_marker"] == "tessl.json"
     assert "--reasoning" not in cmd
     assert "--reasoning-effort" not in cmd
-    assert "--profile" not in cmd
     assert "--codex-arg" in cmd
     assert cmd[cmd.index("--codex-arg") + 1] == "--ignore-user-config"
 
@@ -194,6 +198,9 @@ def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Pat
     tessl_eval = result.data["tessl_eval"]
     assert tessl_eval["status"] == "pass"
     assert "ask-tessl-evals" in tessl_eval["staged_source"]
+    assert tessl_eval["staging_policy"] == "stable_tmp_evidence"
+    assert tessl_eval["tessl_project_marker"].endswith("/tessl.json")
+    assert tessl_eval["policy"]["stable_staging_root"].startswith("/tmp/ask-tessl-evals")
     assert tessl_eval["policy"]["no_registry_upload"] is True
     assert tessl_eval["policy"]["network_permission_required_by_repo"] is False
 
@@ -212,6 +219,9 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
         assert staged_source.exists()
         assert "ask-tessl-evals" in str(staged_source)
         assert staged_source.is_relative_to(Path(str(kwargs["cwd"])))
+        assert "HOME" in kwargs["env"]
+        assert "ask-tessl-evals" not in str(kwargs["env"]["HOME"])
+        assert kwargs["env"]["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] == "0"
         assert (staged_source / "SKILL.md").read_text(encoding="utf-8") == "# Example Skill\n"
         assert (staged_source / "references" / "evals.yaml").exists()
         assert (staged_source / "references" / "contract.yaml").exists()

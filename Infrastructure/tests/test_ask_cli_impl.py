@@ -2016,6 +2016,11 @@ class TestAskCLI(unittest.TestCase):
             len(profiles["profiles"]["eval"]["allowed_roots"]),
         )
         self.assertEqual(list(profiles["profiles"]), ["eval"])
+        eval_contract = profiles["profiles"]["eval"]["eval_profile_contract"]
+        self.assertEqual(eval_contract["codex_profile"], "fast")
+        self.assertEqual(eval_contract["codex_profile_config"], "[profiles.fast]")
+        self.assertEqual(eval_contract["tessl_project_marker"], "tessl.json")
+        self.assertIn("/tmp/ask-tessl-evals", eval_contract["tessl_eval_staging_root"])
         self.assertEqual(profiles["operation_context"]["profile_model"], "profile-v2-inspired")
         self.assertEqual(profiles["operation_context"]["contract_schemas"]["doctor"], "skill-doctor.v1")
         self.assertEqual(profiles["operation_context"]["contract_schemas"]["memory"], "skill-memory-provider.v1")
@@ -4184,6 +4189,12 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["data"]["ask_audit"]["status"], "success")
         self.assertEqual(output["data"]["plugin_eval"]["status"], "skipped")
         self.assertEqual(output["data"]["tessl_lint"]["status"], "skipped")
+        self.assertEqual(output["data"]["policy"]["plugin_eval_min_acceptable_grade"], "B+")
+        self.assertEqual(output["data"]["policy"]["tessl_review_min_score"], 95)
+        self.assertEqual(output["data"]["policy"]["tessl_project_marker"], "tessl.json")
+        self.assertIn("/tmp/ask-tessl-reviews", output["data"]["policy"]["tessl_staging_root"])
+        self.assertEqual(output["data"]["review_mode_details"]["tessl_review"]["minimum_score"], 95)
+        self.assertIn("--threshold 95", output["data"]["review_mode_details"]["tessl_review"]["command"])
         self.assertEqual(
             output["data"]["validation_commands"],
             [

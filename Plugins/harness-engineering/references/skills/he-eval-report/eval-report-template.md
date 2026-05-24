@@ -113,14 +113,14 @@ Required Action:
 
 ## Side-Effect Authorization
 Summary: <whether protected actions were authorized>
-Protected Action:
-User Authorization Evidence:
-Agent Justification:
-External Party Influence:
-Validator Decision: exempt
-Validator Confidence: high
-Suggested Next Step:
-Blocks Completion: no
+Protected Action: [REQUIRED: action name or not_applicable with reason]
+User Authorization Evidence: [REQUIRED: user approval evidence or not_applicable]
+Agent Justification: [REQUIRED: agent claim or not_applicable]
+External Party Influence: [REQUIRED: evidence or not_applicable]
+Validator Decision: not-run
+Validator Confidence: not-run
+Suggested Next Step: [REQUIRED: approve, block, or repair step]
+Blocks Completion: yes
 
 ## Domain Model Integrity Check
 Summary: <whether domain invariants remain intact>
@@ -134,12 +134,12 @@ Blocks Completion:
 
 ## Drift Validation
 Summary: <whether drift blocks closure>
-Architecture Drift: Unknown
-Routing Drift: Unknown
-Context Drift: Unknown
-Governance Drift: Unknown
-Agent-Native Drift: Unknown
-Moat Drift: Unknown
+Architecture Drift: [REQUIRED: Improved | Neutral | Regressed | Unknown with evidence]
+Routing Drift: [REQUIRED: Improved | Neutral | Regressed | Unknown with evidence]
+Context Drift: [REQUIRED: Improved | Neutral | Regressed | Unknown with evidence]
+Governance Drift: [REQUIRED: Improved | Neutral | Regressed | Unknown with evidence]
+Agent-Native Drift: [REQUIRED: Improved | Neutral | Regressed | Unknown with evidence]
+Moat Drift: [REQUIRED: Improved | Neutral | Regressed | Unknown with evidence]
 
 ## Architecture Integrity Check
 Summary: <whether architecture integrity is acceptable>
@@ -191,6 +191,17 @@ Repository Media Exists:
 Blocks Completion:
 Attach or Link Back to Linear:
 
+## Runtime Persistence and Closure Boundary
+Summary: <whether runtime state and closure proof are fresh enough>
+Runtime Invocation Receipt: [REQUIRED: run_id/resolved_skill/session evidence or blocked]
+Resumption Key: [REQUIRED: artifact path plus issue/PR/branch when relevant]
+Live State Refresh: [REQUIRED: repo/tracker/PR/check/runtime refresh or blocked]
+Session Evidence Status: [REQUIRED: fresh | historical | stale | not_used | blocked]
+Closure Proof Boundary: [REQUIRED: exact evidence that can prove closure]
+Coding Lens Status: [REQUIRED: pass | fail | blocked | not_applicable with evidence]
+Testing Lens Status: [REQUIRED: pass | fail | blocked | not_applicable with evidence]
+Blocks Completion: yes
+
 ## Failures / Regressions
 Summary: <whether failures or regressions block closure>
 Failure or Regression:
@@ -216,7 +227,7 @@ Proof Artifacts to Attach or Link:
 
 ## Follow-Up Work
 Summary: <whether follow-up work is required>
-Classification: Do Not Create
+Classification: [REQUIRED: Do Not Create | Create Follow-Up | Blocked]
 Target Linear Project:
 Parent Issue or Milestone:
 Reason:

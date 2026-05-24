@@ -347,19 +347,21 @@ Objective: Split the CLI-heavy implementation into testable SDK service layers w
 
 Allowed path: Infrastructure/scripts/lib/ask/commands/skills_impl.py, new modules under Infrastructure/scripts/lib/ask/skills_sdk/** or the closest existing package boundary, import boundary tests, command regression tests.
 
-Forbidden path: Broad rewrites of unrelated ask commands, public JSON shape changes without schema and snapshot updates, moving tests without preserving coverage.
+Forbidden path: Broad rewrites of unrelated ask commands, public JSON shape changes without schema and snapshot updates, moving tests without preserving coverage, or a repo-wide codex-rs-style workspace migration.
+
+Target layout: Prefer `Infrastructure/scripts/lib/ask/skills_sdk/**` with service areas for `contracts`, `catalog`, `validation`, `packaging`, `runtime_adapters/codex`, `runtime_adapters/agents`, `evidence`, and `governance`. If implementation discovers a better Python-native ask package boundary, the governor must record the reason and validation evidence before accepting it.
 
 Implementation steps:
 
 1. Map functions touched by PU-001 through PU-005 into service responsibilities: contracts, catalog, validation, packaging, runtime adapters, evidence, and memory.
 2. Extract the smallest modules that remove command-file concentration while preserving parser and JSON behavior.
-3. Add import-boundary tests that prevent runtime adapters from depending on command presentation code.
-4. Keep CLI command functions as thin facades over service modules.
+3. Add import-boundary tests that prevent `ask.skills_sdk` from depending on `ask.commands`, and prevent runtime adapters from depending on command presentation code.
+4. Keep CLI command functions as thin facades over service modules: parse CLI inputs, call SDK services, format output, and return exit status.
 5. Run all previously added command tests to prove behavior did not drift.
 
 Validation: python3 -m pytest Infrastructure/tests -q -k 'skills or repo_doctor or package or preview'; import-boundary test command added in this unit.
 
-Stop condition: Stop if extraction changes public JSON output or command names; fix contract drift before continuing.
+Stop condition: Stop if extraction changes public JSON output or command names, or if SDK/domain behavior touched by PU-001 through PU-005 remains concentrated in commands/skills_impl.py without a governor-recorded reason and validation-backed exception; fix contract drift or extraction scope before continuing.
 
 Rollback: Inline extracted modules back into the previous implementation and preserve tests.
 

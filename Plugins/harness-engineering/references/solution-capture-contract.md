@@ -86,6 +86,12 @@ after implementation or review proves a reusable solved pattern.
 Apply the redaction gate before Project Brain or Local Memory sync: remove
 credentials, tokens, secrets, personal data, and internal-only URLs.
 
+When a solution capture writes or verifies Project Brain, Local Memory, vault,
+Chronicle, native citation, goal-board, or artifact state, also apply
+`codex-native-memory-baseline.md` and write or verify a
+`harness-sync-receipt/v1` row. Report each surface separately as updated,
+observed, not_applicable, deferred, or blocked.
+
 ## Output Status
 
 Use this shape when structured output helps downstream agents:

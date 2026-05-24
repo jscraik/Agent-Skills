@@ -123,3 +123,31 @@ Treat verification as stale when:
 - `/goal edit` or `objective_updated` context changed the live objective and the board has not recorded a reconciliation receipt.
 
 Stale verification routes to Scout, Judge, or PM recovery before Worker implementation.
+
+## Output Example
+
+```yaml
+schema_version: 1
+mode: continue
+goal_path: docs/goals/checkout-latency/goal.md
+native_goal_status: active
+board_status: blocked
+next_action: stop
+truth_lanes:
+  local_validation: blocked
+  generated_artifacts: unknown
+  remote_pr_checks: unknown
+  review_threads: unknown
+  tracker_state: unknown
+  merge_readiness: unknown
+native_blocker_audit:
+  observed_repeated_turns: 1
+  required_repeated_turns: 3
+  gate_met: false
+validation_evidence:
+  - command: python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/checkout-latency
+    outcome: blocked
+    note: state.yaml invalid
+risks:
+  - continuation gate closed; do not auto-continue Worker
+```

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import hashlib
 import json
 import shlex
 import shutil
@@ -86,7 +87,15 @@ from ask.selection_contract import (  # noqa: E402
     canonical_sort_key,
 )
 from ask.skill_analytics import skill_invocation_analytics  # noqa: E402
-from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: E402
+from ask.skill_review_dashboard import (  # noqa: E402
+    _parse_plugin_eval,
+    _parse_tessl_review,
+    render_skill_review_dashboard,
+)
+
+
+TESSL_REVIEW_MIN_SCORE = 95
+PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE = "B+"
 
 
 __all__ = [
@@ -473,14 +482,24 @@ def _safe_tessl_skill_key(raw_name: str) -> str:
 
 
 def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root: Path) -> tuple[Path, dict[str, str]]:
-    """Create a disposable Tessl tile package for a SKILL.md-first local skill."""
+    """Create a stable Tessl evidence wrapper for a SKILL.md-first local skill."""
     source_skill_dir = repo_root / audit_target_path
     source_skill = source_skill_dir / "SKILL.md"
     fields = _read_skill_frontmatter_fields(source_skill)
     skill_key = _safe_tessl_skill_key(fields.get("name") or Path(audit_target_path).name)
+    temp_root.mkdir(parents=True, exist_ok=True)
+    for child in temp_root.iterdir():
+        if child.is_dir():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
     tile_skill_dir = temp_root / "skills" / skill_key
     tile_skill_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source_skill, tile_skill_dir / "SKILL.md")
+    for support_dir_name in ("references", "scripts", "assets", "evals"):
+        support_dir = source_skill_dir / support_dir_name
+        if support_dir.is_dir():
+            shutil.copytree(support_dir, tile_skill_dir / support_dir_name)
 
     tile = {
         "name": f"local/{skill_key}",
@@ -494,12 +513,51 @@ def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root
     }
     tile_path = temp_root / "tile.json"
     tile_path.write_text(json.dumps(tile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    tessl_marker_path = temp_root / "tessl.json"
+    tessl_marker_path.write_text(
+        json.dumps({"name": f"agent-skills-{skill_key}", "version": "0.0.0-local"}, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     return tile_path, {
         "tile_path": str(tile_path),
+        "tessl_project_marker": str(tessl_marker_path),
+        "staging_root": str(temp_root),
         "review_path": str(tile_skill_dir),
         "skill_key": skill_key,
         "source_skill": audit_target_path,
+        "evidence_retention": "stable_tmp_directory_left_for_post-run_inspection",
     }
+
+
+def _stable_tessl_review_root(audit_target_path: str) -> Path:
+    safe_name = audit_target_path.replace("/", "__").replace(" ", "_")
+    digest = hashlib.sha256(audit_target_path.encode("utf-8")).hexdigest()[:12]
+    return Path(tempfile.gettempdir()) / "ask-tessl-reviews" / f"{safe_name}-{digest}"
+
+
+def _parse_tessl_review_output(stdout: str, status: str = "") -> dict[str, Any]:
+    json_start = stdout.find("{")
+    if json_start >= 0:
+        try:
+            parsed = json.loads(stdout[json_start:])
+        except json.JSONDecodeError:
+            parsed = None
+        if isinstance(parsed, dict):
+            nested_review = parsed.get("review")
+            score = parsed.get("reviewScore") or parsed.get("review_score") or parsed.get("score")
+            if score is None and isinstance(nested_review, dict):
+                score = nested_review.get("reviewScore") or nested_review.get("review_score") or nested_review.get("score")
+            return {
+                "review_score": score,
+                "minimum_score": TESSL_REVIEW_MIN_SCORE,
+                "score_acceptable": isinstance(score, (int, float)) and score >= TESSL_REVIEW_MIN_SCORE,
+                "status": status or "reported",
+                "raw": parsed,
+            }
+    parsed_human = _parse_tessl_review(stdout, status)
+    parsed_human["minimum_score"] = TESSL_REVIEW_MIN_SCORE
+    parsed_human["score_acceptable"] = parsed_human.get("review_score", 0) >= TESSL_REVIEW_MIN_SCORE
+    return parsed_human
 
 
 @dataclass(frozen=True)
@@ -1587,7 +1645,13 @@ SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
         "allowed_roots": ["Skills/**", "Plugins/**", "Infrastructure/artifacts/skill-reviews/**"],
         "write_policy": "reports_only_unless_fix_requested",
         "permissions": ["repo_read", "local_validation", "artifact_write"],
-        "required_evidence": ["compat or strict audit", "external review report", "metadata contract"],
+        "required_evidence": [
+            "compat or strict audit",
+            "external review report",
+            "Plugin Eval grade B+ or better",
+            "Tessl review score >= 95",
+            "metadata contract",
+        ],
         "stop_conditions": ["blocked_validation", "blocked_missing_artifact", "blocked_missing_tool"],
     },
     "plugin-share": {
@@ -1603,7 +1667,15 @@ SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
         "allowed_roots": ["Skills/**", "Infrastructure/workouts/**", "Infrastructure/artifacts/**"],
         "write_policy": "artifact_write_only",
         "permissions": ["repo_read", "local_validation", "artifact_write"],
-        "required_evidence": ["eval_started event", "eval_completed or eval_blocked event", "timeout classification"],
+        "required_evidence": [
+            "eval_started event",
+            "Codex smoke run uses [profiles.fast] via --profile fast",
+            "Tessl eval source staged under /tmp/ask-tessl-evals",
+            "staged tessl.json project marker",
+            "canonical references/evals.yaml copied into staged input",
+            "eval_completed or eval_blocked event",
+            "timeout classification",
+        ],
         "stop_conditions": list(EVAL_BLOCKER_CLASSES),
     },
     "live-mutation": {
@@ -2275,6 +2347,31 @@ def _profiles_with_effective_roots(profiles: dict[str, dict[str, Any]]) -> dict[
             enriched_profile["eval_blocker_classes"] = {
                 blocker_class: DOCTOR_BLOCKER_TAXONOMY[blocker_class]
                 for blocker_class in EVAL_BLOCKER_CLASSES
+            }
+            enriched_profile["eval_profile_contract"] = {
+                "codex_profile": "fast",
+                "codex_profile_config": "[profiles.fast]",
+                "codex_runner_args": ["--profile", "fast"],
+                "tessl_eval_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+                "tessl_project_marker": "tessl.json",
+                "staged_inputs": [
+                    "SKILL.md",
+                    "references/evals.yaml",
+                    "references/contract.yaml",
+                    "references/task-profile.json",
+                    "scenarios/<case-id>/task.md",
+                ],
+                "evidence_retention": "stable tmp staging is intentionally left for post-run inspection",
+            }
+        if name == "package-review":
+            enriched_profile["external_review_contract"] = {
+                "plugin_eval_min_acceptable_grade": PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE,
+                "plugin_eval_b_plus_is_acceptable": True,
+                "tessl_review_min_score": TESSL_REVIEW_MIN_SCORE,
+                "tessl_review_args": ["skill", "review", "--json", "--threshold", str(TESSL_REVIEW_MIN_SCORE)],
+                "tessl_review_staging_root": "/tmp/ask-tessl-reviews/<skill-path>-<sha12>",
+                "tessl_project_marker": "tessl.json",
+                "evidence_retention": "stable tmp wrapper is intentionally left for post-run inspection",
             }
         enriched[name] = enriched_profile
     return enriched
@@ -4491,14 +4588,19 @@ def external_review_skill(
         "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
         "primary_gate": "local_eval_ask_audit",
         "external_quality_judge": "tessl_local_review",
-        "tessl_lint_role": "temporary_tile_packaging_shape_check",
+        "tessl_review_min_score": TESSL_REVIEW_MIN_SCORE,
+        "tessl_review_threshold_policy": f"Tessl review must return reviewScore >= {TESSL_REVIEW_MIN_SCORE}.",
+        "tessl_staging_root": "/tmp/ask-tessl-reviews/<skill-path>-<sha12>",
+        "tessl_project_marker": "tessl.json",
+        "tessl_evidence_retention": "stable tmp wrapper is intentionally left for inspection and copied-input evidence",
+        "tessl_lint_role": "stable_tile_packaging_shape_check",
         "tessl_lint_shape": (
             "Tessl lint expects a Tessl tile.json package. Canonical repo skills are "
-            "SKILL.md-first, so this command builds a disposable local tile wrapper before linting."
+            "SKILL.md-first, so this command builds a stable local tile wrapper under /tmp before linting."
         ),
         "tessl_review_role": "local_best_practice_content_review",
         "plugin_eval_role": "budget_and_ergonomics_guardrail",
-        "plugin_eval_min_acceptable_grade": "B+",
+        "plugin_eval_min_acceptable_grade": PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE,
         "plugin_eval_warning_policy": (
             "Plugin Eval warnings are visible follow-up work, but they are not release blockers when "
             "there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass."
@@ -4532,13 +4634,14 @@ def external_review_skill(
             "role": "static budget, ergonomics, and reviewability guardrail; not a substitute for local evals",
         },
         "tessl_lint": {
-            "command": "tessl skill lint <temporary-tile.json>",
-            "role": "disposable tile.json package-shape check, not a direct content finding",
+            "command": "tessl skill lint <stable-tile.json>",
+            "role": "stable tile.json package-shape check, not a direct content finding",
             "canonical_source_shape": "SKILL.md-first",
         },
         "tessl_review": {
-            "command": "tessl skill review <temporary-skill-directory>",
+            "command": f"tessl skill review --json --threshold {TESSL_REVIEW_MIN_SCORE} <stable-skill-directory>",
             "role": "local best-practice/content review for private or work-in-progress skills",
+            "minimum_score": TESSL_REVIEW_MIN_SCORE,
             "publishes": False,
         },
         "snyk": {
@@ -4607,6 +4710,8 @@ def external_review_skill(
                 proc = _run_captured_tool(repo_root=repo_root, command=command, timeout_seconds=timeout_seconds)
                 payload = _completed_process_payload(proc)
                 payload["status"] = "success" if proc.returncode == 0 else "error"
+                plugin_summary = _parse_plugin_eval(payload.get("stdout", ""), payload["status"])
+                payload["summary"] = plugin_summary
                 result.data["plugin_eval"] = payload
                 if proc.returncode != 0:
                     result.status = "error"
@@ -4614,6 +4719,16 @@ def external_review_skill(
                         code="ERR_VALIDATION",
                         message="plugin-eval analysis failed during external-review lane.",
                         fix_suggestion="Inspect data.plugin_eval for full output.",
+                    ))
+                elif plugin_summary.get("fail_count", 0) or not plugin_summary.get("grade_acceptable", False):
+                    result.status = "error"
+                    result.errors.append(ErrorObject(
+                        code="ERR_VALIDATION",
+                        message=(
+                            "Plugin Eval did not meet the local acceptance floor "
+                            f"({PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE} with zero failures)."
+                        ),
+                        fix_suggestion="Inspect data.plugin_eval.summary for grade, fail count, and follow-up findings.",
                     ))
             except subprocess.TimeoutExpired:
                 result.status = "error"
@@ -4637,81 +4752,91 @@ def external_review_skill(
                 fix_suggestion="Install Tessl as a local machine tool and rerun. This command will not invoke npx or publish anything.",
             ))
         else:
-            with tempfile.TemporaryDirectory(prefix="agent-skills-tessl-") as tessl_tmp:
-                tessl_tmp_path = Path(tessl_tmp)
-                tile_path, tile_info = _write_tessl_tile_wrapper(repo_root, audit_target_path, tessl_tmp_path)
-                tessl_home = tessl_tmp_path / "home"
-                tessl_home.mkdir(parents=True, exist_ok=True)
-                tessl_env = {"HOME": str(tessl_home)}
-                result.data["tessl_tile"] = {
-                    **tile_info,
-                    "mode": "temporary_wrapper",
-                    "reason": (
-                        "Tessl lint validates tile.json packages. Canonical repo skills remain "
-                        "SKILL.md-first, so this is a disposable packaging-shape wrapper."
-                    ),
-                    "tessl_home": str(tessl_home),
-                }
+            tessl_tmp_path = _stable_tessl_review_root(audit_target_path)
+            tile_path, tile_info = _write_tessl_tile_wrapper(repo_root, audit_target_path, tessl_tmp_path)
+            tessl_env: dict[str, str] = {}
+            result.data["tessl_tile"] = {
+                **tile_info,
+                "mode": "stable_tmp_wrapper",
+                "reason": (
+                    "Tessl lint validates tile.json packages. Canonical repo skills remain "
+                    "SKILL.md-first, so this command stages a local packaging-shape wrapper under /tmp."
+                ),
+                "auth_home": "process_home",
+                "support_refs_included": True,
+            }
 
-                lint_command = [tessl_bin, "skill", "lint", str(tile_path)]
+            lint_command = [tessl_bin, "skill", "lint", str(tile_path)]
+            try:
+                lint_proc = _run_captured_tool(
+                    repo_root=repo_root,
+                    command=lint_command,
+                    timeout_seconds=timeout_seconds,
+                    env_overrides=tessl_env,
+                )
+                lint_payload = _completed_process_payload(lint_proc)
+                lint_payload["status"] = "success" if lint_proc.returncode == 0 else "error"
+                result.data["tessl_lint"] = lint_payload
+                if lint_proc.returncode != 0:
+                    result.status = "error"
+                    result.errors.append(ErrorObject(
+                        code="ERR_VALIDATION",
+                        message="Tessl skill lint failed during local-only external review.",
+                        fix_suggestion="Inspect data.tessl_lint for Tessl's validation output.",
+                    ))
+            except subprocess.TimeoutExpired:
+                result.status = "error"
+                result.data["tessl_lint"] = {"status": "timeout", "command": lint_command, "timeout_seconds": timeout_seconds}
+                result.errors.append(ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"Tessl skill lint timed out after {timeout_seconds} seconds.",
+                    fix_suggestion="Check the local Tessl installation and rerun once it responds normally.",
+                ))
+
+            if not skip_tessl_review:
+                review_command = [
+                    tessl_bin,
+                    "skill",
+                    "review",
+                    "--json",
+                    "--threshold",
+                    str(TESSL_REVIEW_MIN_SCORE),
+                    tile_info["review_path"],
+                ]
                 try:
-                    lint_proc = _run_captured_tool(
+                    review_proc = _run_captured_tool(
                         repo_root=repo_root,
-                        command=lint_command,
+                        command=review_command,
                         timeout_seconds=timeout_seconds,
                         env_overrides=tessl_env,
                     )
-                    lint_payload = _completed_process_payload(lint_proc)
-                    lint_payload["status"] = "success" if lint_proc.returncode == 0 else "error"
-                    result.data["tessl_lint"] = lint_payload
-                    if lint_proc.returncode != 0:
+                    review_payload = _completed_process_payload(review_proc)
+                    review_payload["status"] = "success" if review_proc.returncode == 0 else "error"
+                    review_summary = _parse_tessl_review_output(review_payload.get("stdout", ""), review_payload["status"])
+                    review_payload["summary"] = review_summary
+                    review_payload["minimum_score"] = TESSL_REVIEW_MIN_SCORE
+                    result.data["tessl_review"] = review_payload
+                    if review_proc.returncode != 0:
                         result.status = "error"
                         result.errors.append(ErrorObject(
                             code="ERR_VALIDATION",
-                            message="Tessl skill lint failed during local-only external review.",
-                            fix_suggestion="Inspect data.tessl_lint for Tessl's validation output.",
+                            message=f"Tessl skill review did not meet the >= {TESSL_REVIEW_MIN_SCORE} threshold.",
+                            fix_suggestion="Inspect data.tessl_review for full output and the staged wrapper path.",
                         ))
                 except subprocess.TimeoutExpired:
                     result.status = "error"
-                    result.data["tessl_lint"] = {"status": "timeout", "command": lint_command, "timeout_seconds": timeout_seconds}
+                    result.data["tessl_review"] = {"status": "timeout", "command": review_command, "timeout_seconds": timeout_seconds}
                     result.errors.append(ErrorObject(
                         code="ERR_RUNTIME",
-                        message=f"Tessl skill lint timed out after {timeout_seconds} seconds.",
+                        message=f"Tessl skill review timed out after {timeout_seconds} seconds.",
                         fix_suggestion="Check the local Tessl installation and rerun once it responds normally.",
                     ))
-
-                if not skip_tessl_review:
-                    review_command = [tessl_bin, "skill", "review", tile_info["review_path"]]
-                    try:
-                        review_proc = _run_captured_tool(
-                            repo_root=repo_root,
-                            command=review_command,
-                            timeout_seconds=timeout_seconds,
-                            env_overrides=tessl_env,
-                        )
-                        review_payload = _completed_process_payload(review_proc)
-                        review_payload["status"] = "success" if review_proc.returncode == 0 else "error"
-                        result.data["tessl_review"] = review_payload
-                        if review_proc.returncode != 0:
-                            result.status = "error"
-                            result.errors.append(ErrorObject(
-                                code="ERR_VALIDATION",
-                                message="Tessl skill review failed during local-only external review.",
-                                fix_suggestion="Inspect data.tessl_review for full output.",
-                            ))
-                    except subprocess.TimeoutExpired:
-                        result.status = "error"
-                        result.data["tessl_review"] = {"status": "timeout", "command": review_command, "timeout_seconds": timeout_seconds}
-                        result.errors.append(ErrorObject(
-                            code="ERR_RUNTIME",
-                            message=f"Tessl skill review timed out after {timeout_seconds} seconds.",
-                            fix_suggestion="Check the local Tessl installation and rerun once it responds normally.",
-                        ))
-                else:
-                    result.data["tessl_review"] = {
-                        "status": "skipped",
-                        "reason": "Skipped by --skip-tessl-review.",
-                    }
+            else:
+                result.data["tessl_review"] = {
+                    "status": "skipped",
+                    "reason": "Skipped by --skip-tessl-review.",
+                    "minimum_score": TESSL_REVIEW_MIN_SCORE,
+                }
     else:
         result.data["tessl_lint"] = {"status": "skipped"}
         result.data["tessl_review"] = {"status": "skipped"}

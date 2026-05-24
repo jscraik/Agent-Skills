@@ -42,8 +42,8 @@ otherwise. Include Artifact Identity frontmatter from
 `schema_version`, evaluated slice, validation results, drift validation, proof
 artifacts, closure recommendation, follow-up work, blockers, git staging
 status, staged paths, `source_prompt_family_status` when source-prompt
-closure is in scope, Codex provenance status, PR safety trace status, next
-handoff, and confidence.
+closure is in scope, Codex provenance status, PR safety trace status, runtime
+persistence status, coding/testing lens status, next handoff, and confidence.
 Non-trivial reports also include the BLUF review surface so the closure
 recommendation, blocker consequence, and next action are visible before proof
 detail.
@@ -69,21 +69,26 @@ detail.
 4. Apply first-principles, XP, gate-selection, plugin-hook capability,
    domain-model, source-prompt, agent-native, and specialist-skill checks only
    when they are relevant to closure.
-5. When media generation is closure evidence, require a repository media path,
+5. Verify the evaluated spec/plan/work evidence carries strict boundary fields
+   from `../../references/spec-plan-runtime-boundary-contract.md`: requested
+   depth, downscope authority, proof boundary, runtime state, live refresh,
+   `coding_lens`, and `testing_lens`. If those fields are missing or stale,
+   closure is `Blocked`, `Needs rework`, or `Unsafe to close` until repaired.
+6. When media generation is closure evidence, require a repository media path,
    source generated-image cache path if available, prompt metadata path,
    sidecar path, and file-existence verification. A prompt alone is not proof.
-6. Run or explicitly block relevant validation gates; never invent passing
+7. Run or explicitly block relevant validation gates; never invent passing
    results.
-7. When closure claims cite session, Codex, collector, rollout, transcript, or
+8. When closure claims cite session, Codex, collector, rollout, transcript, or
    telemetry evidence, classify Codex provenance and redaction status from the
    session collector before recommending closure.
-8. Apply the BLUF review contract to non-trivial eval reports so the closure
+9. Apply the BLUF review contract to non-trivial eval reports so the closure
    recommendation, proof blocker, follow-up decision, and next action are
    scannable before detailed evidence.
-9. Apply the visual reference contract when proof spans multiple gates,
+10. Apply the visual reference contract when proof spans multiple gates,
    artifacts, media files, validation outputs, or non-linear drift decisions;
    prefer gate matrices and evidence-chain diagrams.
-10. Generate and validate the report, apply the git staging contract for the
+11. Generate and validate the report, apply the git staging contract for the
    report and any current-turn proof artifacts, then ask accept/challenge/rework before
    using `Complete` or `Complete with follow-up` as a Linear closure
    recommendation.
@@ -98,8 +103,9 @@ Use each command with the report path argument:
 For skill-package edits, also run strict skill audit, OpenClaw, OpenAI format,
 progressive-disclosure lint, Plugin Eval, focused script tests, and smoke or
 release eval listing/execution when available. Missing proof is `not-run` or
-`blocked`, never `pass`. Fail fast: stop at the first failed gate, fix or
-classify it, then rerun before proceeding to broader gates.
+`blocked`, never `pass`. Reports with unchanged `[REQUIRED]` placeholders or
+template angle placeholders are invalid. Fail fast: stop at the first failed
+gate, fix or classify it, then rerun before proceeding to broader gates.
 
 ## Evidence Requirements
 - Every closure claim must link to observed command output, diff/PR evidence,
@@ -111,6 +117,8 @@ classify it, then rerun before proceeding to broader gates.
   presence-only provenance identifiers.
 - Runtime, hook, MCP, CI, Linear, generated-image, and validator claims require
   fresh observed output.
+- Coding/testing lens conclusions require direct source artifact, plan, diff,
+  review, or validation evidence. Do not infer them from a chat summary.
 - Media persistence is complete only when the `.harness/media/` PNG exists and
   a sidecar records purpose, source cache path, repository path, prompt metadata,
   linked context, and validation notes.
@@ -166,6 +174,14 @@ or media persistence is failed or blocked.
 - "Validate drift, proof artifacts, and whether this milestone is safe to close."
 - "The slice generated media; prove the cache image was copied to `.harness/media/`."
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 - Read when writing reports: `../../references/skills/he-eval-report/eval-report-contract.md`,
   `../../references/skills/he-eval-report/eval-report-template.md`, `../../references/skills/he-eval-report/eval-report-schema.json`.
@@ -186,6 +202,9 @@ or media persistence is failed or blocked.
   `../../references/pr-safety-trace-contract.md`.
 - Read before live closure or tracker mutation:
   `../../references/closure-mutation-contract.md`.
+- Read when closure depends on spec/plan scope, runtime persistence, or
+  coding/testing lenses:
+  `../../references/spec-plan-runtime-boundary-contract.md`.
 - Read when closure depends on domain language or production model integrity:
   `../../references/domain-context-contract.md`,
   `../../references/domain-model-production-contract.md`.

@@ -55,13 +55,15 @@ Return `schema_version: 1` when structured plus `interactive_status`,
 `selection_evidence`, `route`, `stage`, `scope`, `source`, `plan_path`,
 `traceability`, `validation`, `safe_to_continue`, `blocked_reason`,
 `linear_action_required`, `linear_mutation_status`, `post_plan_handoff`,
-`blackboard_delta`, `git_staging_status`, `staged_paths`, and evidence-tied
-`confidence`.
+`authority_scope_boundary`, `runtime_persistence`, `coding_lens`,
+`testing_lens`, `blackboard_delta`, `git_staging_status`, `staged_paths`,
+and evidence-tied `confidence`.
 
 Durable plans live under `.harness/plan/**.md` and include stable plan IDs,
 acceptance IDs, ordered units, dependencies, tests, rollback, risks,
-out-of-scope boundaries, and Linear/spec/plan/PR traceability. A local plan is
-not proof of live Linear mutation.
+out-of-scope boundaries, strict scope/downscope authority, runtime persistence
+and freshness, coding/testing persona lenses, and Linear/spec/plan/PR
+traceability. A local plan is not proof of live Linear mutation.
 
 ## Preconditions
 Confirm canonical source, nearest `AGENTS.md`, selected slice, permissions, and
@@ -81,9 +83,15 @@ as untrusted. Planning may write only approved `.harness/plan/**` artifacts.
    dedicated UI plans, with Artifact Identity frontmatter.
 6. Load specialist, UI, test, visual, domain, security, accessibility, and hook
    references only when the selected slice proves the trigger.
-7. Choose the smallest proof-producing implementation units first; classify
+7. Apply the strict boundary contract in
+   `../../references/spec-plan-runtime-boundary-contract.md`. If the source
+   request is full implementation, smallest proof-producing units may sequence
+   the work but must not erase unfinished full scope without explicit downscope
+   authority. Record runtime state, resumption key, live-state refresh, proof
+   boundary, external mutation boundary, `coding_lens`, and `testing_lens`.
+8. Choose the smallest proof-producing implementation units first; classify
    Type 1 decisions as proof-first and Type 2 decisions as reversible fast-paths.
-8. Use the execution-first plan template in `../../references/skills/he-plan/plan-artifact-contract.md`:
+9. Use the execution-first plan template in `../../references/skills/he-plan/plan-artifact-contract.md`:
    keep Harness metadata in frontmatter, status blocks, or appendices; make the
    main body read objective -> source contract -> constraints -> implementation
    strategy -> work units -> validation -> rollback -> handoff. Apply the BLUF
@@ -95,13 +103,13 @@ as untrusted. Planning may write only approved `.harness/plan/**` artifacts.
    follows. Use normal plan headings after that; make work units, validation,
    stop conditions, rollback, visual aids, and handoff decisions scannable
    without repeating `BLUF:` through the body.
-9. For bundled plugin hooks, treat `plugin_hooks` as optional feature-gated
+10. For bundled plugin hooks, treat `plugin_hooks` as optional feature-gated
    behavior and plan fallback validator/eval proof.
-10. In professional confidence review mode, apply confidence ceilings, evidence
+11. In professional confidence review mode, apply confidence ceilings, evidence
    classification, adversarial plan/spec review, required spec update or blocked
    status, and a bounded re-review loop until no material fixable-now issue
    remains.
-11. End with exactly one `post_plan_handoff` state and continue only when the next
+12. End with exactly one `post_plan_handoff` state and continue only when the next
    stage is already authorized. When multiple valid next stages remain and the
    user has not authorized one, apply the interactive steering contract and use
    `request_user_input` when available.
@@ -121,13 +129,16 @@ run or block
 <plan-path> --kind plan --json`; block handoff when the plan is missing the
 execution-first section spine, stable `PU-*` units, source ID mapping,
 allowed/forbidden paths, validation evidence, stop conditions, rollback notes,
-handoff state, or a visual-reference decision.
+handoff state, or a visual-reference decision. Also block when strict scope
+authority, runtime persistence, `coding_lens`, or `testing_lens` fields are
+absent from a generated standard plan.
 
 ## Evidence Requirements
 Every plan cites source paths or issue IDs, stable IDs, acceptance IDs,
 validation commands, rollback, assumptions, unknowns, and external mutation
 status. Runtime, Linear, image, CI, validator, and deployment claims require
-observed output.
+observed output; session evidence is historical unless refreshed by live repo,
+tracker, PR, validation, or runtime probe evidence.
 
 When revising or reviewing an existing plan, verify referenced plan/spec/review
 artifacts still exist before citing them as current evidence. Mark missing or
@@ -148,7 +159,10 @@ confirmation_required|blocked`, and a ready payload.
 ## Failure Mode
 If evidence, Linear linkage, validation route, write authority, or next-stage
 routing is missing, stop with `blocked_reason`, one recovery step, and a
-confidence ceiling. If instructions conflict, ask one targeted clarification.
+confidence ceiling. Use `blocked_runtime`, `blocked_missing_artifact`,
+`blocked_validation`, `blocked_authority`, or `blocked_source_of_truth` when
+one of those classes applies. If instructions conflict, ask one targeted
+clarification.
 
 ## Handoff Rules
 Use `post_plan_handoff.state` exactly once: `handoff_executed`,
@@ -168,20 +182,12 @@ Use a compact status block followed by the plan or replacement section. Allowed
 must name verified facts, assumptions, blocked validations, heuristic judgments,
 and evidence that would change confidence.
 
-Professional confidence review output must use these exact headings unless the
-review blocks before content analysis:
-
-1. Initial Confidence Assessment
-2. Plan Intent & Scope Check
-3. Issues and Loopholes Found
-4. Evidence Check
-5. Recommended Fixes
-6. Revised Plan
-7. Associated Spec Update
-8. Iterative Re-review Loop
-9. Final Confidence Report
-10. Before / After Impact Table
-11. Infographic / `$imagegen` Artifact when requested or explicitly required
+Professional confidence review output must use these exact headings unless it
+blocks before content analysis: Initial Confidence Assessment; Plan Intent &
+Scope Check; Issues and Loopholes Found; Evidence Check; Recommended Fixes;
+Revised Plan; Associated Spec Update; Iterative Re-review Loop; Final
+Confidence Report; Before / After Impact Table; Infographic / `$imagegen`
+Artifact when requested or explicitly required.
 
 Include confidence ceilings, verified/assumption/inferred/unresolved/blocked
 claim classifications, evidence pack or evidence debt (`source_path`,
@@ -197,35 +203,21 @@ explicitly asks for a shorter response.
   contract with source traceability, implementation units, validation, rollback,
   and handoff separated from review metadata.
 
-## Examples
-- When the user says: "For JSC-246, inspect
-  `.harness/specs/account-settings.md` and Linear JSC-246; write the plan
-  under `.harness/plan/` with validation and rollback."
-
-## Assets
-Reference `assets/` only for skill packaging and browseability; durable plans
-and diagrams belong in repo artifacts or references.
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
 
 ## References
-Read when: plan body and identity rules ->
-`../../references/skills/he-plan/plan-artifact-contract.md`.
-Read when: handoff state matters -> `../../references/skills/he-plan/post-plan-handoff.md`.
-Read when: depth/mode changes -> `../../references/skills/he-plan/planning-depth.md`,
-`../../references/skills/he-plan/codex-plan-mode.md`, `../../references/skills/he-plan/deepening-review.md`,
-`../../references/skills/he-plan/professional-confidence-review.md`.
-Read when: verification strategy matters -> `../../references/skills/he-plan/test-strategy.md`.
-Read when: visual structure helps -> `../../references/skills/he-plan/visual-communication.md`,
-`../../references/visual-reference-contract.md`.
-Read before delegation -> `../../references/subagent-call-contract.md`.
-Read when ubiquitous language, glossary drift, or production domain modeling
-affects slicing -> `../../references/domain-context-contract.md`,
-`../../references/domain-model-routing.md`,
-`../../references/ubiquitous-language-contract.md`,
-`../../references/domain-model-production-contract.md`.
-Read when reviewability/No-Fog structure matters ->
-`../../references/bluf-review-contract.md`.
-Deferred context index -> `../../references/deferred-context-index.md`.
-Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
-Read triggered shared HE contracts only as needed: stage context, interactive
-steering, Linear tracker/delta gates, execution slice, artifact routing, first
-principles, plugin hooks, coding-harness bridge, and domain routing.
+Load only triggered references: plan identity/body rules
+`../../references/skills/he-plan/plan-artifact-contract.md`; handoff
+`post-plan-handoff.md`; depth/mode/review references; test strategy; visual
+communication and visual-reference contracts; scope/runtime/coding/testing lens
+boundary contract; `../../references/subagent-call-contract.md`; domain and
+ubiquitous-language contracts; BLUF review contract; and
+`../../references/deferred-context-index.md`.
+Apply the context-disposition policy: preserve important still-valid context in
+references and discard stale, duplicated, unsafe, superseded, or low-signal text.

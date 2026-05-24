@@ -48,12 +48,16 @@ session-collector evidence, `.harness/**` artifacts, and write approval.
 Return `schema_version: 1`, `interactive_status`, `selection_evidence`, `route`,
 `stage`, `scope`, `traceability`, `validation`, `safe_to_continue`,
 `blocked_reason`, `linear_mutation_status`, `linear_action_required`,
-`spec_path`, `acceptance_ids`, `git_staging_status`, `staged_paths`,
-`handoff`, and evidence-tied `confidence`.
+`spec_path`, `acceptance_ids`, `authority_scope_boundary`,
+`proof_runtime_boundary`, `coding_lens`, `testing_lens`,
+`git_staging_status`, `staged_paths`, `handoff`, and evidence-tied
+`confidence`.
 
 Specs include stable `SA` or `VAC` IDs, source traceability, In/Out of Scope,
 validation, observability proof, rollback/supersession, Linear Acceptance Traceability
-for tracked work, and `blackboard_delta` for durable changes.
+for tracked work, strict scope/downscope authority, runtime persistence and
+freshness, coding/testing persona lenses, and `blackboard_delta` for durable
+changes.
 
 ## Preconditions
 Identify canonical source, repo instructions, permissions, and tracker/artifact
@@ -78,7 +82,13 @@ handles, runtime projections, plugin caches, or mirrors unless canonical.
    Use the interactive steering contract and `request_user_input` when available
    only if source inspection leaves one consequential product-intent, selected
    slice, scope, or acceptance-authority choice unresolved.
-6. Use the reader-first spec template in `../../references/skills/he-spec/spec-artifact-contract.md`:
+6. Apply the strict boundary contract in
+   `../../references/spec-plan-runtime-boundary-contract.md`. Preserve
+   `requested_depth: full_implementation` as unfinished scope unless the source
+   artifact or user explicitly approves downscope. Include runtime persistence,
+   live-state freshness, proof boundary, `coding_lens`, and `testing_lens`
+   fields or block with one recovery step.
+7. Use the reader-first spec template in `../../references/skills/he-spec/spec-artifact-contract.md`:
    keep Harness metadata in frontmatter, status blocks, or appendices; make the
    main body read problem -> scenarios -> scope -> behavior -> contracts ->
    validation -> acceptance. Apply the BLUF review contract to non-trivial
@@ -89,10 +99,10 @@ handles, runtime projections, plugin caches, or mirrors unless canonical.
    risk constrains it, and what happens next. Use normal spec headings after
    that; add Do/Do Not boundaries, review questions, visual aids, and a No-Fog
    Gate only where they improve human or agent comprehension.
-7. Write `.harness/specs/**.md` only when artifact writes are authorized;
+8. Write `.harness/specs/**.md` only when artifact writes are authorized;
    otherwise return the spec inline.
-8. Hand off to `he-plan` only after acceptance IDs and validation gates are
-   stable.
+9. Hand off to `he-plan` only after acceptance IDs, authority/proof boundaries,
+   runtime state, and validation gates are stable.
 
 ## Validation
 Fail fast: record each gate as `pass`, `fail`, or `blocked`; never claim
@@ -108,7 +118,9 @@ Also run or block
 <spec-path> --kind spec --json`; block handoff when the spec body is
 process-heavy, missing reader-first sections, missing stable requirement or
 acceptance IDs, missing conformance rules for data/interface contracts, or
-missing a visual-reference decision.
+missing a visual-reference decision. Also block when strict scope authority,
+proof/runtime persistence, `coding_lens`, or `testing_lens` fields are absent
+from a generated standard spec.
 
 ## Failure Mode
 If evidence, live tracker linkage, artifact permission, or routing is missing,
@@ -164,6 +176,14 @@ Reference `assets/icon-small.png`, `assets/icon-large.png`, and `assets/` only
 for skill packaging and browseability; spec source material belongs in
 references, not generated images.
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 `../../references/skills/he-spec/spec-mode-rules.md`,
 `../../references/skills/he-spec/spec-artifact-contract.md`.
@@ -181,6 +201,8 @@ Read when reviewability/No-Fog structure matters ->
 `../../references/bluf-review-contract.md`.
 Read when visual aids, generated media, or proof visuals matter ->
 `../../references/visual-reference-contract.md`.
+Read when spec scope, runtime persistence, or coding/testing lens boundaries
+matter -> `../../references/spec-plan-runtime-boundary-contract.md`.
 Read when retained doctrine is needed ->
 `Plugins/harness-engineering/references/he-spec-doctrine.md`.
 Deferred context index -> `../../references/deferred-context-index.md`.

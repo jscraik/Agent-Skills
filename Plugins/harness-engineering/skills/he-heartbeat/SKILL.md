@@ -48,6 +48,14 @@ Redact secrets; do not create cron workarounds for short thread follow-up. Apply
 - "Inspect PR 154 every 30 minutes in this thread until CI is green or a blocker appears."
 - "Keep watching JSC-246 after the merge queue starts and wake this thread with the next required action."
 - "Rotate across the open coding-harness PRs with GitHub, CircleCI, CodeRabbit, and Codex comments; use `git-project-triage` when available, wake every 30 minutes, and stop only once the PRs are green, merged, or explicitly blocked."
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 - OpenAI-style plugin design: `Infrastructure/references/openai-style-plugin-design-contract.md`
 - Shared subagent call policy: `Plugins/harness-engineering/references/subagent-call-contract.md`

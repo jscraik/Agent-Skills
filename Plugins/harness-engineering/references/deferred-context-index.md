@@ -24,6 +24,8 @@ the reference below, and let validators catch stale duplicated procedure text.
 - Lifecycle, artifact, slice, and tracker gates:
   - `references/stage-context-contract.md`
   - `references/lifecycle-exit-contract.md`
+  - `references/stage-arc-boundary-contract.md`
+  - `references/spec-plan-runtime-boundary-contract.md`
   - `references/git-staging-contract.md`
   - `references/artifact-routing-contract.md`
   - `references/artifact-classification-and-traceability.md`
@@ -58,13 +60,43 @@ the reference below, and let validators catch stale duplicated procedure text.
 - Folded compatibility:
   - `references/folded-skill-context.md`
 
+## 2026-05-24 HE Plan Hot-Path Budget Disposition
+
+The `he-plan` entrypoint was compacted to stay under the 240-line hot-path hard
+budget. The removed lines remain preserved here as reference context rather than
+runtime prompt ballast:
+
+Professional confidence review output must use these exact headings unless the
+review blocks before content analysis:
+
+1. Initial Confidence Assessment
+2. Plan Intent & Scope Check
+3. Issues and Loopholes Found
+4. Evidence Check
+5. Recommended Fixes
+6. Revised Plan
+7. Associated Spec Update
+8. Iterative Re-review Loop
+9. Final Confidence Report
+10. Before / After Impact Table
+11. Infographic / `$imagegen` Artifact when requested or explicitly required
+
+Example route: for JSC-246, inspect `.harness/specs/account-settings.md` and
+Linear JSC-246, then write the plan under `.harness/plan/` with validation and
+rollback. Assets are packaging-only; durable plans and diagrams belong in repo
+artifacts or references. Reference loading remains demand-driven: plan artifact,
+handoff, depth, review, test strategy, visual, runtime boundary, subagent,
+domain, ubiquitous language, BLUF, and deferred context contracts should be
+opened only when the selected slice proves they matter.
+
 ## Conditional Loading Map
 
 Load references by trigger instead of by habit:
 
 | Stage or condition | Load | Expected proof |
 | --- | --- | --- |
-| Any stage writes durable docs, mutates files, or hands off | `references/stage-context-contract.md`, `references/lifecycle-exit-contract.md`, `references/git-staging-contract.md` | compact stage context plus exit status plus git staging status for current-turn files |
+| Any stage accepts a task, writes durable docs, mutates files, schedules continuation, claims closure, or hands off | `references/stage-context-contract.md`, `references/stage-arc-boundary-contract.md`, `references/lifecycle-exit-contract.md`, `references/git-staging-contract.md` | compact stage context plus left/active/right arc boundary, coding/testing lens status, exit status, and git staging status for current-turn files |
+| Spec or plan can route implementation, closure, runtime claims, or resume state | `references/spec-plan-runtime-boundary-contract.md` | requested depth, approved boundary, proof boundary, runtime persistence, live refresh, and coding/testing lenses |
 | Non-trivial durable HE artifact is operator-facing | `references/bluf-review-contract.md` | Command Summary with one opening BLUF paragraph, No-Fog Gate, or compact not-applicable reason |
 | Non-trivial artifact has flow, dependency, boundary, state, validation, rollback, UI, media, or source-of-truth complexity | `references/visual-reference-contract.md` | Mermaid/table/image reference, or compact not-needed reason |
 | Stage choice is ambiguous | `references/routing-map.json`, `references/deterministic-stage-routing.md`, `references/interactive-steering-contract.md` | selected stage or one blocking question |

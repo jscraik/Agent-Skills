@@ -31,7 +31,9 @@ def validate_gate_matrix(document: ReportDocument, errors: list[str], warnings: 
                 errors.append(f"gate matrix entry {gate_name!r} is missing field: {field}")
 
 
-def validate_drift_classifications(document: ReportDocument, errors: list[str]):
+def validate_drift_classifications(
+    document: ReportDocument, errors: list[str], *, enforce_values: bool = True
+):
     for area in DRIFT_AREAS:
         value = document.field_value(area, section="Drift Validation")
         if value is None:
@@ -40,5 +42,7 @@ def validate_drift_classifications(document: ReportDocument, errors: list[str]):
             errors.append(f"missing drift classification: {area}")
             continue
         value = value.strip()
+        if not enforce_values and value.startswith("[REQUIRED:"):
+            continue
         if value not in DRIFT_VALUES:
             errors.append(f"invalid drift classification for {area} {value!r}")

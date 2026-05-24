@@ -8,12 +8,20 @@ from pathlib import Path
 from typing import Any
 
 
-CONTRACT_PATH = Path(__file__).resolve().parents[1] / "references" / "eval-report-schema.json"
+LOCAL_CONTRACT_PATH = Path(__file__).resolve().parents[1] / "references" / "eval-report-schema.json"
+SHARED_CONTRACT_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "references"
+    / "skills"
+    / "he-eval-report"
+    / "eval-report-schema.json"
+)
 
 
 @lru_cache(maxsize=1)
 def load_contract() -> dict[str, Any]:
-    return json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
+    contract_path = LOCAL_CONTRACT_PATH if LOCAL_CONTRACT_PATH.exists() else SHARED_CONTRACT_PATH
+    return json.loads(contract_path.read_text(encoding="utf-8"))
 
 
 def contract_list(key: str) -> list[str]:

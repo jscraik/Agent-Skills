@@ -48,6 +48,42 @@ def test_skill_source_path_is_source() -> None:
     assert finding.blocking is False
 
 
+def test_root_architecture_is_front_door_source() -> None:
+    finding = MODULE.classify_path("ARCHITECTURE.md")
+
+    assert finding.classification == "source"
+    assert finding.status == "ok"
+    assert finding.code == "authored_source_surface"
+    assert finding.blocking is False
+
+
+def test_stale_root_proposal_requires_relocation() -> None:
+    finding = MODULE.classify_path("PROPOSED_CODE_FILE_REORGANIZATION_PLAN.md")
+
+    assert finding.classification == "unknown"
+    assert finding.status == "unknown"
+    assert finding.code == "unknown_surface"
+    assert finding.blocking is True
+
+
+def test_hidden_root_migration_script_requires_relocation() -> None:
+    finding = MODULE.classify_path(".move.sh")
+
+    assert finding.classification == "unknown"
+    assert finding.status == "unknown"
+    assert finding.code == "unknown_surface"
+    assert finding.blocking is True
+
+
+def test_lowercase_docs_path_is_casing_drift() -> None:
+    finding = MODULE.classify_path("docs/goals/jsc-329/notes/gap-analysis.md")
+
+    assert finding.classification == "unknown"
+    assert finding.status == "violation"
+    assert finding.code == "lowercase_docs_drift"
+    assert finding.blocking is True
+
+
 def test_git_ls_files_omits_worktree_deleted_paths(monkeypatch, tmp_path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()

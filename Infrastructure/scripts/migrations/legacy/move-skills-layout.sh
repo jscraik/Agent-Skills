@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Legacy migration record retained for repository archaeology.
+# Do not run as a current layout command without first rewriting the paths and
+# validating the migration against ARCHITECTURE.md.
 set -ex
 
 cd /Users/jamiecraik/dev/Agent-Skills/Skills

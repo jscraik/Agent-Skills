@@ -1,0 +1,7 @@
+interface:
+  display_name: "Session Workflow Miner"
+  short_description: "$session-workflow-miner - Mine repeated workflows"
+  default_prompt: "$session-workflow-miner "
+
+policy:
+  allow_implicit_invocation: false

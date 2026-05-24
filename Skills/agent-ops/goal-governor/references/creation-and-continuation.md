@@ -26,12 +26,20 @@ Also state that this is a prompt convention and Codex must read the file.
 2. Inspect native goal state when tools or app-server access is available, including `goal_id`, objective, status, token budget, tokens used, elapsed seconds, and update timestamps.
 3. Reconcile native state and board state.
 4. If the board is invalid, route to repair.
-5. If native status is `budgetLimited`, route to PM or Judge classification before Worker work.
-6. If `/goal edit` or `objective_updated` changed the objective, route to PM or Judge reconciliation before continuing old work.
-7. If verification is stale or red, route to Scout/Judge recovery.
-8. If active task is Scout or Judge, keep work read-only and write a receipt.
-9. If active task is Worker, enforce `allowed_files`, `verify`, and `stop_if`.
-10. After task completion, append a receipt before selecting the next task.
+5. If native status is `blocked`, verify the repeated-blocker audit and route
+   to owner or PM/Judge recovery before Worker work.
+6. If native status is `usage_limited`, classify system usage stop-state
+   evidence and route to owner or PM/Judge recovery before Worker work.
+7. If native status is `budgetLimited` or `budget_limited`, route to PM or
+   Judge classification before Worker work.
+8. If `/goal edit` or `objective_updated` changed the objective, route to PM or Judge reconciliation before continuing old work.
+9. If verification is stale or red, route to Scout/Judge recovery.
+10. If active task is Scout or Judge, keep work read-only and write a receipt.
+11. If active task is Worker, enforce `allowed_files`, `verify`, and `stop_if`.
+12. After task completion, append a receipt before selecting the next task.
+13. For closeout, report local validation, generated artifacts, remote PR
+    checks, review threads, tracker state, and merge readiness as separate truth
+    lanes when those surfaces are involved.
 
 ## Doctor
 
@@ -42,6 +50,8 @@ Doctor should report:
 - Goal tools exposed for the current turn, with a materialized thread and state database when native inspection is required.
 - Native objective non-empty and within the current 4,000-character limit.
 - Native `goal_id`, objective, status, token budget, tokens used, elapsed seconds, and update timestamps captured when available.
+- Native stopped states `blocked`, `usage_limited`, and `budget_limited`
+  classified separately from validation failures and environment blockers.
 - Agent depth compatible with the task.
 - Scout/Judge/Worker roles installed or projected.
 - Goal board schema valid.

@@ -8,10 +8,12 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "check_goal_board.py"
-SKILL_PATH = Path(__file__).resolve().parents[1] / "SKILL.md"
-CONTRACT_PATH = Path(__file__).resolve().parents[1] / "references" / "contract.yaml"
-EVALS_PATH = Path(__file__).resolve().parents[1] / "references" / "evals.yaml"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+SKILL_ROOT = REPO_ROOT / "Skills" / "agent-ops" / "goal-governor"
+SCRIPT_PATH = SKILL_ROOT / "scripts" / "check_goal_board.py"
+SKILL_PATH = SKILL_ROOT / "SKILL.md"
+CONTRACT_PATH = SKILL_ROOT / "references" / "contract.yaml"
+EVALS_PATH = SKILL_ROOT / "references" / "evals.yaml"
 SPEC = importlib.util.spec_from_file_location("check_goal_board", SCRIPT_PATH)
 assert SPEC is not None
 assert SPEC.loader is not None

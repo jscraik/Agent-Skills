@@ -66,6 +66,14 @@ Redact secrets. Apply the context-disposition policy: move important still-valid
 - "CodeRabbit says this regression is still broken but CI is green; review the PR, reproduce or identify the missing proof loop, and separate the verdict from any autofix candidate."
 ## Assets
 Reference `assets/` only for skill packaging and browseability; review evidence belongs in findings, commands, and PR/thread links.
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 Read when:
 - mode selection, closure, execute, autonomous, plan-only, result-review, or security-review detail is needed: `../../references/skills/he-code-review/review-mode-contract.md`

@@ -142,6 +142,8 @@ Agent Skills Kit should expose a conformance path where `ask` proves whether a s
 
 User-facing solution: Linear now tracks the work as JSC-351 through JSC-356. Implementation begins at JSC-352, then proceeds through schema compatibility, Codex parity previews, service extraction, and conformance evidence. Project assignment is intentionally paused until the live project-state ambiguity is resolved.
 
+The intended service extraction is a Python-native Skills SDK module layout, not a repo-wide `codex-rs`-style workspace migration. By JSC-355, SDK/domain behavior touched by JSC-352 through JSC-354 should live under `Infrastructure/scripts/lib/ask/skills_sdk/**` or an explicitly approved equivalent ask package boundary, with `commands/skills_impl.py` reduced to CLI argument handling, service orchestration, output formatting, and exit-status behavior.
+
 Implementation sequencing rule: a later child issue may start discovery, but it must not claim completion until its upstream trust-boundary gates are green or explicitly blocked with evidence. JSC-352 is the minimum confidence gate for any later SDK expansion.
 
 ## Requirements
@@ -156,7 +158,7 @@ Implementation sequencing rule: a later child issue may start discovery, but it 
 - FR-006: Skill package readiness MUST have concrete versioned schemas for package metadata and readiness output.
 - FR-007: Compatibility snapshots MUST cover public JSON surfaces for doctor, package, proof, and command-handle outputs.
 - FR-008: Codex loader, renderer, config, explicit invocation, and implicit invocation previews MUST exist before broad SDK readiness is claimed.
-- FR-009: Skills SDK service boundaries MUST separate contracts, catalog, validation, packaging, runtime adapters, and evidence from CLI glue by the time JSC-355 is accepted; the exact module names remain fillable.
+- FR-009: Skills SDK service boundaries MUST separate contracts, catalog, validation, packaging, runtime adapters, evidence, and governance from CLI glue by the time JSC-355 is accepted. The expected target is `Infrastructure/scripts/lib/ask/skills_sdk/**` with subareas for `contracts`, `catalog`, `validation`, `packaging`, `runtime_adapters/codex`, `runtime_adapters/agents`, `evidence`, and `governance`, unless the governor records an equivalent Python-native ask package boundary with validation evidence.
 - FR-010: Conformance workouts and JSONL evidence MUST prove replayable runtime behavior before autonomous SDK generation expands.
 - FR-011: Live Linear issue state MUST remain traceable to source artifacts and validation commands.
 - FR-012: Each new command introduced by this spec MUST have parser coverage, implementation coverage, JSON contract coverage, and at least one failing fixture that proves the command blocks false success.
@@ -208,7 +210,7 @@ essential_decisions:
 - Public contract names and schema versions must not drift silently.
 
 fillable_gaps:
-- Exact Python module names under `Infrastructure/scripts/lib/ask/services/skills/`.
+- Exact Python module filenames under `Infrastructure/scripts/lib/ask/skills_sdk/**`, while preserving the required service areas from FR-009.
 - Fixture names and organization.
 - Snapshot storage path, as long as compatibility tests enforce it.
 - JSON field ordering, as long as machine-readable schema and compatibility are stable.
@@ -356,7 +358,7 @@ Current availability note: commands that this spec introduces are expected to be
 - SA-004: JSC-352 preserves machine-readable runtime surface failures, and a focused test proves validation failure state is not flattened into success.
 - SA-005: JSC-353 adds concrete package schemas and compatibility snapshots, and tests fail when required Codex ABI fields or public enums drift.
 - SA-006: JSC-354 adds Codex loader, renderer, config, explicit invocation, and implicit invocation parity previews, each with fixture evidence that cites the Codex source or fixture identity used.
-- SA-007: JSC-355 extracts a narrow service module boundary without changing public JSON contracts, and boundary tests prevent command modules from owning SDK logic directly.
+- SA-007: JSC-355 extracts a narrow service module boundary without changing public JSON contracts, reduces `commands/skills_impl.py` to a thin CLI facade for the SDK behavior touched by JSC-352 through JSC-354, and boundary tests prove `ask.skills_sdk` does not depend on `ask.commands` or command presentation code.
 - SA-008: JSC-356 emits replayable conformance evidence and adds package verification that rejects unsafe archives, symlink escapes, digest mismatches, and untrusted provenance.
 - SA-009: Project/cycle assignment remains absent until the Linear destination is confirmed; any later assignment is recorded on JSC-351 with the confirming evidence.
 - SA-010: This spec passes HE artifact identity, Linear traceability, BLUF, and generated-artifact-shape validators before it is used for implementation closeout.
@@ -382,6 +384,7 @@ flowchart TD
 - Implement JSC-352 before adding new SDK surfaces.
 - Preserve public JSON fields unless a compatibility snapshot and migration note are added.
 - Extract service modules only after behavior is protected by focused tests.
+- Treat the JSC-355 service extraction as a bounded Python package modularization under `ask/skills_sdk/**`, not as a repo-wide restructure or literal copy of the `codex-rs` crate layout.
 - Treat `skills-sdk.json` planning contract sections as evidence until validators map them to executable commands.
 
 ## Open Questions

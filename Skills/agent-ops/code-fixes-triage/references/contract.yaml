@@ -1,0 +1,39 @@
+schema_version: 1
+skill: code-fixes-triage
+purpose: "Classify Slack #code-fixes, review, and CI signals into a repo-and-PR action queue before implementation."
+triggers:
+  - "daily #code-fixes digest"
+  - "recent CodeRabbit or Codex Review noise triage"
+  - "what needs fixing across active engineering repos"
+  - "CI/check-status notifications need routing"
+inputs:
+  - signal_source
+  - time_window
+  - target_repos
+  - target_prs
+  - live_state_tools
+outputs:
+  - repo_and_pr_grouped_action_queue
+  - source_of_truth_gaps
+  - durable_followups
+non_goals:
+  - implementing fixes during the triage step
+  - claiming merge readiness from notifications alone
+  - resolving review threads or mutating trackers without explicit approval
+risks:
+  - stale_notification_state
+  - source_of_truth_blending
+  - duplicate_pr_sweep_or_heartbeat
+  - over-routing informational messages into implementation work
+side_effect_class: read-mostly
+allowed_side_effects:
+  - read_local_repo_state
+  - read_live_pr_ci_review_tracker_state_when_authorized
+blocked_side_effects:
+  - merge_pull_requests
+  - resolve_review_threads
+  - mutate_trackers
+  - post_external_comments
+validation_command: "./bin/ask skills audit Skills/agent-ops/code-fixes-triage --level strict --json --robot"
+observability: "Report inspected window, grouped source surfaces, live-state refreshes, unavailable source-of-truth gaps, and next owner lane for each item."
+rollback_procedure: "No external mutations are made by default; discard the generated queue and re-run with a narrower window or explicit repo list if the classification is wrong."

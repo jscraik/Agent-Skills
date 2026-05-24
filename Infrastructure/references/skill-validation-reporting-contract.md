@@ -64,7 +64,7 @@ for another:
 | --- | --- | --- | --- |
 | local evals | `./bin/ask evals run <path> --mode smoke\|release --json --robot` | dynamic skill behavior, run traces, command/artifact expectations, and release-mode gates | static readability or Tessl best-practice score |
 | Plugin Eval | `Infrastructure/bin/plugin-eval analyze <path> --format markdown` or `./bin/ask skills external-review <path> --json --robot` | budget, ergonomics, reviewability, and obvious packaging risks | runtime behavior, trigger realism, Snyk dependency posture, or Tessl quality |
-| Tessl lint | `./bin/ask skills external-review <path> --json --robot` | Tessl tile package-shape compatibility for a disposable local wrapper | direct content quality for the canonical `SKILL.md` source |
+| Tessl lint | `./bin/ask skills external-review <path> --json --robot` | Tessl tile package-shape compatibility for a stable staged local wrapper | direct content quality for the canonical `SKILL.md` source |
 | Tessl review | `./bin/ask skills external-review <path> --json --robot` | local best-practice/content review for a copied work-in-progress skill | publishing readiness or registry upload success |
 | Snyk dependency screening | `./bin/ask skills external-review <path> --include-snyk --json --robot` or release eval `security_dependency_screening` artifact | high-severity dependency vulnerability screening for supported manifests | prompt/security-policy correctness for pure instruction-only skills |
 | OTel-inspired observability | optional local eval observability artifacts or repo-owned export evidence | trace correlation, debugging, dataset creation, and scorer workflow support | skill correctness, deterministic pass/fail, local artifact existence, Braintrust integration, or release readiness unless explicitly required |
@@ -152,15 +152,20 @@ applicable` unless the user explicitly asks for the advisory lane.
   `SKILL.md`-first directories, so a direct `tessl skill lint <skill-dir>`
   failure about missing `tile.json` is a packaging-shape blocker, not a content
   finding.
-- The canonical repo command creates a disposable local `tile.json` wrapper
+- The canonical repo command creates a stable local `tile.json` wrapper
   around a copied `SKILL.md` before running Tessl lint. Report this as `Tessl
-  lint` and describe it as a temporary tile package-shape check.
+  lint` and describe it as a stable `/tmp/ask-tessl-reviews/<skill-path>-<sha12>`
+  tile package-shape check that preserves `tile.json`, `tessl.json`, copied
+  skill files, and included references for evidence.
 - Tessl review is the local best-practice/content reviewer for the skill copy.
-  Report it separately from Tessl lint.
+  Report it separately from Tessl lint. The accepted Tessl review floor is a
+  score of `95`; lower scores block release or completion claims for Tessl.
 - Do not use Tessl lint or review evidence to imply that a skill was published,
   registered, uploaded, or accepted by a registry.
-- If Tessl reports missing files or links outside the temporary tile, preserve
+- If Tessl reports missing files or links outside the staged tile, preserve
   those findings as package self-containment issues.
+- Plugin Eval remains a budget and ergonomics guardrail: `B+` or better with
+  zero failures is acceptable when strict audit, evals, and Tessl gates pass.
 
 ### `media artifact persistence`
 

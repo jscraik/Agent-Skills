@@ -217,3 +217,19 @@ Repo-specific agent knowledge base. Append-only.
 **2026-05-19 [Codex]:** PR green sweep repeated `gh` failures as if GitHub were down, but `gh api rate_limit` and `curl -I https://api.github.com` passed when the command was run with explicit Codex sandbox network permission; `gh run view --log-failed` also proved run-log caches default to `~/.cache/gh` unless `XDG_CACHE_HOME` is set. -> For all PR/CircleCI/Snyk live-state commands in this repo, use explicit network permission first and set `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, and `UV_CACHE_DIR` as applicable when `gh`, `mise`, or `uv` may run; after two equivalent failures, stop and refine the environment contract before retrying.
 
 **2026-05-19 [Codex]:** High-signal Jamie steering about agent behavior must stop the active delivery lane before more feature work. -> Use `Docs/agents/19-high-signal-steering-feedback.md`, record uptake in `.harness/quality/steering-uptake.md`, and run `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json` plus `python3 -m pytest Infrastructure/scripts/testing/test_validate_steering_uptake.py -q` before resuming.
+
+**2026-05-23 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1674806130)
+
+**2026-05-23 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3928164400)
+
+**2026-05-24 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:4290066598)
+
+**2026-05-24 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2247959536)
+
+**2026-05-24 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:495042441)
+
+**2026-05-24 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:607480773)
+
+**2026-05-24 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3127905167)
+
+**2026-05-24 [Codex]:** Bash command 'cat' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2263204724)

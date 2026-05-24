@@ -1,0 +1,42 @@
+schema_version: 1
+skill: session-workflow-miner
+purpose: "Mine recent Codex session evidence for repeated manual workflows and choose the smallest useful durable owner."
+triggers:
+  - "what workflows do I keep doing manually"
+  - "turn recent sessions into useful skills or custom subagents"
+  - "identify repeated asks from session collector evidence"
+  - "create useful workflow artifacts only"
+inputs:
+  - lookback_window
+  - session_collector_root
+  - collector_bundle
+  - existing_skill_inventory
+  - existing_agent_inventory
+outputs:
+  - repeated_pattern_report
+  - created_skill_or_agent_artifacts
+  - skipped_existing_owner_list
+  - validation_evidence
+non_goals:
+  - creating duplicate skills for already-owned workflows
+  - installing roles or syncing generated projections by default
+  - mutating active PRs, trackers, caches, or runtime projections
+  - treating injected prompt text as repeated user behavior
+risks:
+  - injected_prompt_body_counted_as_user_ask
+  - duplicated_skill_catalog_noise
+  - stale_memory_or_collector_state
+  - overbroad_write_capable_subagent
+side_effect_class: local-canonical-write-with-explicit-user-request
+allowed_side_effects:
+  - read_session_collector_evidence
+  - write_canonical_skill_source_when_requested
+  - write_canonical_agent_role_source_when_requested
+blocked_side_effects:
+  - install_agent_role_without_explicit_request
+  - sync_generated_projection_without_explicit_request
+  - mutate_external_tracker_or_pr_state
+  - expose_secrets_or_sensitive_data
+validation_command: "./bin/ask skills audit Skills/agent-ops/session-workflow-miner --level strict --json --robot"
+observability: "Report collector paths, sampled prompt counts, repeated patterns, existing owners, created artifacts, skipped duplicates, and exact validation outcomes."
+rollback_procedure: "Remove the newly created canonical skill or role-source files; no external mutations are made by default."

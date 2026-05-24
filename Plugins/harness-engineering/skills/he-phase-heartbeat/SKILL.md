@@ -113,6 +113,14 @@ is fixed, waived by an authorized gate, or reported as blocked.
   current phase and reuse the matching heartbeat only if authority and stop
   conditions are explicit; otherwise return blocked.
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 - Phase gate contract: `references/phase-gate-contract.md`
 - Local contract and evals: `references/contract.yaml`, `references/evals.yaml`

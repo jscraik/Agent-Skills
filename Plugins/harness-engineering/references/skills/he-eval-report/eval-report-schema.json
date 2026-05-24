@@ -19,6 +19,7 @@
     "Governance Simplicity Check",
     "Moat Protection Check",
     "Proof Artifacts",
+    "Runtime Persistence and Closure Boundary",
     "Failures / Regressions",
     "Linear Completion Recommendation",
     "Follow-Up Work",
@@ -98,6 +99,16 @@
     "medium",
     "low",
     "not-run"
+  ],
+  "runtime_persistence_fields": [
+    "Runtime Invocation Receipt:",
+    "Resumption Key:",
+    "Live State Refresh:",
+    "Session Evidence Status:",
+    "Closure Proof Boundary:",
+    "Coding Lens Status:",
+    "Testing Lens Status:",
+    "Blocks Completion:"
   ],
   "yes_no_values": [
     "yes",

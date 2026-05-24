@@ -1834,6 +1834,8 @@ def _classify_runner_blocker(
         "sandbox-exec",
         "operation not permitted",
         "ran out of room in the model's context window",
+        "selected model is at capacity",
+        "model is at capacity",
         "context window",
         "start a new thread",
         "blocked_runtime",
@@ -2494,6 +2496,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not skill_name:
         print(f"ERROR: SKILL.md frontmatter missing valid `name`: {skill_md}", file=sys.stderr)
         return 1
+    skill_contract_text = skill_md.read_text(encoding="utf-8")
 
     evals_path = skill_dir / "references" / "evals.yaml"
     if not evals_path.exists():
@@ -2742,7 +2745,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 return 1
 
         prompt_body = c.prompt.strip() + "\n"
-        composed_prompt = f"${skill_name}\n\n{prompt_body}" if c.prepend_skill else prompt_body
+        if c.prepend_skill:
+            composed_prompt = (
+                f"${skill_name}\n\n"
+                "The local skill handle may not expand inside this isolated eval runner. "
+                "Apply this SKILL.md content directly; do not try to read the skill file.\n\n"
+                f"<SKILL.md path=\"{skill_md}\">\n{skill_contract_text}\n</SKILL.md>\n\n"
+                f"Task:\n{prompt_body}"
+            )
+        else:
+            composed_prompt = prompt_body
         (case_dir / "prompt.txt").write_text(composed_prompt, encoding="utf-8")
         case_timeout_sec, case_timeout_profile = _resolve_case_timeout(
             c,

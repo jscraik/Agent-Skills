@@ -18,6 +18,7 @@ outputs:
   - "native goal identity and objective-edit reconciliation when available"
   - "next safe action"
   - "validation evidence"
+  - "truth lanes for local validation, generated artifacts, remote PR checks, review threads, tracker state, and merge readiness when closeout evidence is used"
   - "XP operating artifacts: blackboard delta and slack policy for long-running continuation"
   - "receipts or repair proposal"
 non_goals:
@@ -28,6 +29,8 @@ risks:
   - "stale board state can mislead continuation"
   - "prompt review can accidentally start native goal machinery without a review-mode guard"
   - "native /goal objective can drift from the repo-visible board"
+  - "native blocked and usage-limited stop states can be confused with ordinary validator or environment blockers"
+  - "stale local collector or PR evidence can be mistaken for live delivery truth"
   - "goal tools may be unavailable for ephemeral or state-less turns even when source support exists"
   - "unscoped workers can edit outside the intended boundary"
 output_contract:
@@ -48,6 +51,7 @@ output_contract:
     - "native_goal_status"
     - "board_status"
     - "next_action"
+    - "truth_lanes"
     - "validation_evidence"
     - "risks"
 review_mode_contract:

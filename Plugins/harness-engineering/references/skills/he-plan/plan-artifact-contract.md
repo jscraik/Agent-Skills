@@ -18,6 +18,7 @@ jsc-283-packaged-skill-behavior-assurance`, not the date.
 - Preserve source IDs from Linear, requirements, specs, actors, flows, acceptance examples, and UI validation criteria when supplied.
 - Include concrete test scenarios with input, action, and expected outcome. Feature-bearing units need test file paths.
 - Keep execution-time unknowns explicit. Do not pretend exact helper names, query shapes, or runtime discoveries are settled.
+- Use `Plugins/harness-engineering/references/spec-plan-runtime-boundary-contract.md` for strict scope/downscope authority, runtime persistence, proof boundaries, and coding/testing lens fields.
 - For tracked work, include a Linear/spec/plan/PR matrix with PR evidence left pending until delivery.
 - For tracked work, run `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <plan-path>` and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <plan-path>`.
 - For non-trivial generated plans, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <plan-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <plan-path> --kind plan --json` so the opening BLUF, execution-first body, Enforcement Contract, plan units, source mapping, rollback, handoff, and visual-reference decision are validated before handoff.
@@ -35,23 +36,26 @@ Use this default section order for standard durable plans:
 2. `Objective`
 3. `Source Contract`
 4. `Scope and Boundaries`
-5. `Current State / Evidence`
-6. `Implementation Strategy`
-7. `Enforcement Contract`
-8. `Work Units`
-9. `Dependencies and Sequencing`
-10. `Validation Gates`
-11. `Review Plan`
-12. `Rollback Plan`
-13. `Risk Register`
-14. `Observability and Evidence`
-15. `Visual References / Diagrams`
-16. `Accessibility and Operator Ergonomics`
-17. `Open Questions`
-18. `Final Decision`
-19. `Appendix A. Harness Metadata / Traceability`
-20. `Appendix B. Linear / Tracker Handoff`
-21. `Appendix C. Review Outcomes`
+5. `Authority and Scope Boundary`
+6. `Current State / Evidence`
+7. `Implementation Strategy`
+8. `Runtime Persistence and State`
+9. `Enforcement Contract`
+10. `Coding and Testing Lenses`
+11. `Work Units`
+12. `Dependencies and Sequencing`
+13. `Validation Gates`
+14. `Review Plan`
+15. `Rollback Plan`
+16. `Risk Register`
+17. `Observability and Evidence`
+18. `Visual References / Diagrams`
+19. `Accessibility and Operator Ergonomics`
+20. `Open Questions`
+21. `Final Decision`
+22. `Appendix A. Harness Metadata / Traceability`
+23. `Appendix B. Linear / Tracker Handoff`
+24. `Appendix C. Review Outcomes`
 
 For lightweight plans, keep the same reader path but collapse adjacent sections
 when that does not hide scope, validation, rollback, or handoff. For deep plans,
@@ -81,6 +85,30 @@ Plan unit contract:
   project it into `Validation Gates` and each affected `PU-*` as external
   behavior expectations, prior-art test families to inspect, exact commands when
   known, and stop conditions when confidence cannot be proven.
+
+Authority, runtime, and lens requirements:
+
+- `Authority and Scope Boundary` must include `requested_depth`,
+  `approved_execution_boundary`, `downscope_authority`,
+  `external_mutation_boundary`, `freshness_required`, and
+  `human_acceptance_boundary`, or an explicit `not_applicable` reason for each
+  field. A full-implementation request may be sequenced into units, but the
+  plan must preserve unfinished full scope unless downscope is explicitly
+  approved by the user or source artifact.
+- `Runtime Persistence and State` must include `runtime_state`,
+  `resumption_key`, `persistent_artifacts`, `live_state_refresh`,
+  `session_evidence_status`, and `proof_boundary`. It must say what survives
+  resume and what must be refreshed before implementation or closure.
+- `Coding and Testing Lenses` must include `coding_lens:` and `testing_lens:`
+  blocks. The coding lens names ownership, allowed and forbidden files or
+  modules, public contract/schema/API/CLI compatibility, failure/recovery,
+  generated-artifact boundaries, and complexity posture. The testing lens names
+  observable behavior, source acceptance IDs, prior-art test families, positive
+  and negative scenarios, exact validation commands when known, blocked gates,
+  and recovery ownership.
+- Missing specialist roles require inline coverage parity. Do not route to
+  `he-work` when coding/testing/correctness/adversarial coverage is absent or
+  only implied by a chat summary.
 
 Enforcement Contract requirements:
 
@@ -117,7 +145,8 @@ Validation and proof requirements:
   inspect, and the expected proof. Avoid tests that assert private implementation
   details unless the private contract is itself the approved behavior.
 - A plan is not ready for `he-work` when validation commands, rollback,
-  ownership, or source traceability are missing.
+  ownership, source traceability, strict boundary fields, runtime persistence,
+  or coding/testing lenses are missing.
 
 Visual reference requirements:
 

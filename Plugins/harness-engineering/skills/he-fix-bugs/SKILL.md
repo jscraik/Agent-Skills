@@ -128,6 +128,14 @@ unknowns. Do not claim fixed, ready, or closed from labels or unverified reports
 Reference `assets/` only for skill packaging and browseability. Bug evidence
 belongs in logs, tests, traces, `.harness/media/`, and handoff notes.
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 
 - Contract and eval routing: `references/contract.yaml`, `references/evals.yaml`.

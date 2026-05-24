@@ -177,6 +177,14 @@ Report confidence from evidence only. Cap confidence when runtime visibility,
 smoke or release evals, Plugin Eval cost, OpenClaw, source ownership, or
 supporting references are unverified.
 
+## Stage Arc Boundary
+Before artifact writes, mutation, scheduling, handoff, or closure claims, apply
+`../../references/stage-arc-boundary-contract.md`. Structured outputs and
+handoffs must include `stage_arc_boundary` with `left_arc`, `active_arc`,
+`right_arc`, `coding_lens`, and `testing_lens`; block when left evidence is
+stale, active mutation exceeds authority, right-side proof is missing, or a
+required persona lens is not covered.
+
 ## References
 
 - Program shape and acceptance: `../../references/skills/he-reframe/reframe-program-contract.md`
