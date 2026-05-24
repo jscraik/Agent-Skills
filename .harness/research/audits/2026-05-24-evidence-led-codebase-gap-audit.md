@@ -40,7 +40,7 @@ Runtime evidence sampled:
 
 Important current-state caveat:
 
-This is an audit artifact, not a repair patch. The repo is currently not clean from this audit lane because this file is newly created and the prior deep research evidence file remains untracked. The audit did not attempt to repair command-handle drift, sync runtime projections, or mutate user runtime links.
+This is an audit artifact, not a repair patch. The repo may still be non-clean in this audit lane due to newly added evidence artifacts and unresolved runtime blockers. The audit did not attempt to repair command-handle drift, sync runtime projections, or mutate user runtime links.
 
 ## 1. Executive Summary
 
