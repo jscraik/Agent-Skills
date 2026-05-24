@@ -1,7 +1,7 @@
 {
-  "generated_command_handle_count": 103,
+  "generated_command_handle_count": 104,
   "generated_from": "rooted_manifests",
-  "handle_count": 109,
+  "handle_count": 110,
   "handles": [
     {
       "command_handle_path": ".agents/skills/1password/SKILL.md",
@@ -13,9 +13,9 @@
       "owner": "security-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "c6e9035f9e7490eae4c427fa44c5cc295f77f7a46defc649e357fbc5be011e5a"
       },
       "runtime_visibility": "latent",
@@ -32,9 +32,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "199b94d66240cee10cba5080b3ef740ff1f8e15f465281f8acd4b899d99313d8"
       },
       "runtime_visibility": "latent",
@@ -51,9 +51,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "1e1a0ce52bfe5fc1ed37ed2e6dd0977bf7e836861b294777bf973faf8def0469"
       },
       "runtime_visibility": "latent",
@@ -70,9 +70,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "45ad1e393171053f4b8720a65e4f0b9a26acc1f5bc7d70b580e1af3b130326f1"
       },
       "runtime_visibility": "latent",
@@ -89,9 +89,9 @@
       "owner": "product-strategy",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "8729c59fc292fa6ad6801ef713e3dde5a15e6f8715d79ce00a2124b7eaf2900b"
       },
       "runtime_visibility": "latent",
@@ -108,9 +108,9 @@
       "owner": "mobile-native",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "7e6727a1165549906a09105a1d8ef047a7fe48ee2e8ae8d1582f555244b7d029"
       },
       "runtime_visibility": "latent",
@@ -127,9 +127,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "9347ca2014f24d539744d3d38959514fd4a30fc0e391a06796115c082a0e3101"
       },
       "runtime_visibility": "latent",
@@ -146,9 +146,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "7dc3c8f926490058c740c1a3aaba4479aa0d0d8b20cf2f89b582eab01c29884b"
       },
       "runtime_visibility": "latent",
@@ -165,9 +165,9 @@
       "owner": "backend-platform",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "67ba530c297e164e16e4f96b5f1ae36b8d0cbd9cf4d9567f2aa6ee58e26a4f55"
       },
       "runtime_visibility": "latent",
@@ -184,9 +184,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "f45033741643529e969a43392c687a33020babc4d2fd836e1076bba0f4bb7892"
       },
       "runtime_visibility": "latent",
@@ -203,9 +203,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "70e5db7d696d223a702c469355c8d06e4326aeb05593cdc76935c569aaadbfa2"
       },
       "runtime_visibility": "latent",
@@ -222,9 +222,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "7a8b0547dd60479c6ef9e08d5568de21d7ce45f1fdd471d63cfdcc6ab4d064e6"
       },
       "runtime_visibility": "latent",
@@ -241,9 +241,9 @@
       "owner": "security-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "4cbe0edd590175156c9f64853e3bc8b35c89d1f9611b38c704c7820da8f787eb"
       },
       "runtime_visibility": "latent",
@@ -260,9 +260,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "b2f17b3e9228203d7cf69d15dd77f15e05238bcc3694c0b80cdd462ff35f0f22"
       },
       "runtime_visibility": "latent",
@@ -278,9 +278,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "16f562ca095daf7afdfe5dcdc20149859fc0dedb1253635ee663c2981e3d493b"
       },
       "runtime_visibility": "latent",
@@ -297,9 +297,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "17d3430c36faa0fd192695d100d5def8aca1f5f18406e2cf524e813d5c89593a"
       },
       "runtime_visibility": "latent",
@@ -316,13 +316,32 @@
       "owner": "backend-platform",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "0f17d574224b5a6b3984f9581c403587ff6260bc7e67268998199012c0160e83"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/backend-platform/cli-spec/SKILL.md"
+    },
+    {
+      "command_handle_path": ".agents/skills/code-fixes-triage/SKILL.md",
+      "command_visibility": "target",
+      "description": "Turn Slack #code-fixes, CodeRabbit, Codex Review, CI, and check-status noise into a repo-and-PR action queue. Use when Jamie asks for a daily code-fixes digest, recent review-noise triage, or what needs fixing across active engineering repos.",
+      "handle": "code-fixes-triage",
+      "invoke_via": "agent-ops",
+      "kind": "skill",
+      "level": "molecule",
+      "owner": "agent-ops",
+      "provenance": {
+        "generator": "context-budgeted-skillsets.v1",
+        "policy_identity": "6c4a3a9db4f4d8f0",
+        "projection_mode": "rooted",
+        "source_revision": "83f7ab9ed",
+        "source_sha256": "9d850211dd92351d62813cf469780610601ac529f492f707f93e971792aa5be9"
+      },
+      "runtime_visibility": "latent",
+      "source_path": "Skills/agent-ops/code-fixes-triage/SKILL.md"
     },
     {
       "command_handle_path": ".agents/skills/codex-agent-creator/SKILL.md",
@@ -335,9 +354,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "5e6fd26df33d247f18e16e22c27b90b3c9824108ceda1b365a8490c195ffad6f"
       },
       "runtime_visibility": "latent",
@@ -354,9 +373,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "9021c11ad1bb56f794687db7aec51b530d24020d81cd37069adea10fd2a25a72"
       },
       "runtime_visibility": "latent",
@@ -373,9 +392,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "e4f4572fff638333e684626157169ae57c7a42e8f38843a9b7a8b4e774fe8fc6"
       },
       "runtime_visibility": "latent",
@@ -392,9 +411,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "f87d3957046fc8391ee0565f8b1356d42732ae1928031ad7dc572960c2968dc4"
       },
       "runtime_visibility": "latent",
@@ -411,9 +430,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "597ea9ad9bb5632acb880c6b3841f01889ebe6f542885fbe43da64a33c14d4c1"
       },
       "runtime_visibility": "latent",
@@ -430,9 +449,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "66bd3a408e651ee5a74bf027733720ca0b628b24d21fb71e5aebe36b6861a37d"
       },
       "runtime_visibility": "latent",
@@ -449,9 +468,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "67d695a6592f5ac4f6b340a1091ffdc120f8fbe299a35eade68ba54c0dd6a3a3"
       },
       "runtime_visibility": "latent",
@@ -468,9 +487,9 @@
       "owner": "security-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "f9aa4d76f1fd0f838905912bd26e0930f3c1390d960a2f25f5884b076bb5954b"
       },
       "runtime_visibility": "latent",
@@ -486,9 +505,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "f399e4786f69159c82957416a11d4496675b38f7ce6d516f8f6d40c0f8ae9055"
       },
       "runtime_visibility": "latent",
@@ -505,9 +524,9 @@
       "owner": "product-strategy",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "d342ca64d73145dac9dfdff4a81bf1214f02f588a6e8165bef142d41ebfdc1c4"
       },
       "runtime_visibility": "latent",
@@ -524,9 +543,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "d76c2a79a005e35a3e6b16678822f3ab8760cab484c9a6a6a32cde0628d59fba"
       },
       "runtime_visibility": "latent",
@@ -543,9 +562,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "cb52758f3ee6be7e3e07279bf19c177a25068231b0dee4eedf346c437a2be3a6"
       },
       "runtime_visibility": "latent",
@@ -561,9 +580,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "5aa9481dd64e1b20356e895822c9cb62c0ec4492f833373c79fedc04c7123a6c"
       },
       "runtime_visibility": "latent",
@@ -580,9 +599,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "e2ac15365a682efcaa88010cc1b80b29ceb92fcb3e27e88141fbc2b773711a26"
       },
       "runtime_visibility": "latent",
@@ -598,9 +617,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "41686d222504716183650f6faea1e7d6075d83771c708d054264a9008087d47e"
       },
       "runtime_visibility": "latent",
@@ -617,9 +636,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "5ec06ded5b9033c15d7004b11d5804c0fcc70cf7eecc46365df78d9be1406b5d"
       },
       "runtime_visibility": "latent",
@@ -636,9 +655,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "80cf4787e2f3df0aa445b393544ffbf4a1a449fe4ffbd26e369d06b8481d6559"
       },
       "runtime_visibility": "latent",
@@ -655,9 +674,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "4221b81eac687519529e59820eb4855f32d1670451e366bd5ed2406d4d9d45b9"
       },
       "runtime_visibility": "latent",
@@ -674,9 +693,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "e06a3f3e03929b7c18521842d63cf7a604fdb34865df87f03490af09e20b1145"
       },
       "runtime_visibility": "latent",
@@ -693,9 +712,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "4f55d73c8d1c7480ee7d11afc086c3f1f33af3a3dd371708b8f6e28de497bb95"
       },
       "runtime_visibility": "latent",
@@ -712,9 +731,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "3670d35a3c56a5d23bf703ab0cc9fb11a46f517f3f8d1accf1f2e0e1ab7451dc"
       },
       "runtime_visibility": "latent",
@@ -730,9 +749,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "34cd2819a9932a0a27ded10f866fb3fdcd8d5cf85e111615aee5d1fcc6281697"
       },
       "runtime_visibility": "latent",
@@ -749,9 +768,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "20fd6b5db8f8af1902ed5f174f629daedf61e2dbaf341f78b326debb955a5915"
       },
       "runtime_visibility": "latent",
@@ -768,9 +787,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "f28f755ab696241ce73efa9066b8010fb5eb1b657d3c7590c0644e3311f45864"
       },
       "runtime_visibility": "latent",
@@ -787,9 +806,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "fa85368416360fae77df59a428f2f31e7bf7e1dbb828c4e752d03cda113f5807"
       },
       "runtime_visibility": "latent",
@@ -806,9 +825,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "35d65151a4bb3a5e92c4a719025cd0183124172ba504f800e2184687bdca7456"
       },
       "runtime_visibility": "latent",
@@ -825,9 +844,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "57a398035e75111973ed286e33715b2bc12938407372663c87154a892189311f"
       },
       "runtime_visibility": "latent",
@@ -844,9 +863,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "409719215409574be8d93a5855198ab9799660ac8e194d836626a8cbce0db728"
       },
       "runtime_visibility": "latent",
@@ -863,9 +882,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "cc0159c8fab2be64ac9e3b5007a44476be517e377a431b7db67b9a28ddce22d9"
       },
       "runtime_visibility": "latent",
@@ -882,9 +901,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "d188a738ec339eaeb077d011a6e8ac84a2dbcca5564a60c239a290b64c05ac94"
       },
       "runtime_visibility": "latent",
@@ -901,9 +920,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "c0eb721cd9c4f2530f0174fafefb7204f4eeee4c620a40d16707717e53472608"
       },
       "runtime_visibility": "latent",
@@ -920,9 +939,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "c7866019187c5c5b400b3a9bbd4feb006fb0da474e3ef8d73a587df379665540"
       },
       "runtime_visibility": "latent",
@@ -939,9 +958,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "b31a4afe72ccbf796113be5c18921b25f5f7c9de4c035e053394d7a5fd4b15d0"
       },
       "runtime_visibility": "latent",
@@ -958,9 +977,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "d30b2d23a21ad00df252ecf083c8655cfacd296c267561340e9cb009d43a4cff"
       },
       "runtime_visibility": "latent",
@@ -976,9 +995,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "07d5f73809bed0d18a92a59a8e02f09729accc7ac3c311dd9809e57d78f7a09e"
       },
       "runtime_visibility": "latent",
@@ -995,9 +1014,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "d1d412a8390393fca277430e2825f698ae5aa41d7d564f530bcdea0cf7a54a07"
       },
       "runtime_visibility": "latent",
@@ -1014,9 +1033,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "83b384f38bd6a7c5a1b74a012bc098e00ed37981d466eb17d8bd758981af86a3"
       },
       "runtime_visibility": "latent",
@@ -1033,9 +1052,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "907ef516912a4a9f0b1a03353cae470557041bc8e205724d45da38558de169b7"
       },
       "runtime_visibility": "latent",
@@ -1051,9 +1070,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "59981d23519222bcecf1be48bb37730bbc50539ceb0e35ad09fcef98a3df19d3"
       },
       "runtime_visibility": "latent",
@@ -1070,9 +1089,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "dd4c8cccbbb81da5d3e5f012970f6d71a0c382eaddcb86c7cb83a0d1de7dcbc4"
       },
       "runtime_visibility": "latent",
@@ -1089,9 +1108,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "ad71bacb061bcd03aaaa514da373175a778771d42d55d04bf517b7172a831b16"
       },
       "runtime_visibility": "latent",
@@ -1108,9 +1127,9 @@
       "owner": "product-strategy",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "93ce2d2cebff874a8fef514afc7e8a2aedfb9eaa550d7a4eee2f948a432571a8"
       },
       "runtime_visibility": "latent",
@@ -1127,9 +1146,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "875bba0a46ee504e75ca92cb38fef3d2dcfa583c282f757c66b460d874378655"
       },
       "runtime_visibility": "latent",
@@ -1146,9 +1165,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "6e8794ead19ebb251dbfbe0426979a6075ac65504cae7794b3af03dfe493c7a6"
       },
       "runtime_visibility": "latent",
@@ -1164,9 +1183,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "585ed72c4c815716bd250519f1ecffc22a6646658f60098feec5a2158ba1dc27"
       },
       "runtime_visibility": "latent",
@@ -1183,9 +1202,9 @@
       "owner": "backend-platform",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "315a5b4e135cc1d7cf3ef0e095e13a3bdfbe55c912b997babb7a532c177d0d51"
       },
       "runtime_visibility": "latent",
@@ -1201,9 +1220,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "b456eb131c07d70093444da1024482257e0098d7ee5d6cff88d7b934b0fa9920"
       },
       "runtime_visibility": "latent",
@@ -1220,9 +1239,9 @@
       "owner": "backend-platform",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "9cd49fdc616c48b5b8ca1aca6327ab834bb205a4a498e2c7657c83396f35271d"
       },
       "runtime_visibility": "latent",
@@ -1238,9 +1257,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "1893bda07c801e0f701f669ee5b1474d172830c6e1028e7ac97b67d3028d09f6"
       },
       "runtime_visibility": "latent",
@@ -1256,9 +1275,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "1ee3c911a5c615c4f508e5611cb6e38548aba5ea12efb0c3e8838614cc6347b9"
       },
       "runtime_visibility": "latent",
@@ -1274,9 +1293,9 @@
       "owner": "plugin-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "0c8e91c614b0ca3197623398d379cdfeaad5157b600df21937a59f1258679b2a"
       },
       "runtime_visibility": "latent",
@@ -1292,9 +1311,9 @@
       "owner": "plugin-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "c7a7218e495db675154d621e3c40ab2996e17b3773b56e51627966fac9282678"
       },
       "runtime_visibility": "latent",
@@ -1310,9 +1329,9 @@
       "owner": "plugin-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "74d60090e1076cf57813d5f5d585b46509a6222ec30a15ec09651d8a6d688ba8"
       },
       "runtime_visibility": "latent",
@@ -1328,9 +1347,9 @@
       "owner": "plugin-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "745b8065408777001bb25f113df4e15f08ec47efd106a7f6d2030196962bb4fe"
       },
       "runtime_visibility": "latent",
@@ -1346,9 +1365,9 @@
       "owner": "plugin-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "50df52d860494e6627dfddfb635c4199291242652df9d8d4624b54b7e3dc9474"
       },
       "runtime_visibility": "latent",
@@ -1365,9 +1384,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "cc97dbab77263a9c09487697ebcdf5acc5d7d95d31ab2ef257f1c5da1a9cf8a8"
       },
       "runtime_visibility": "latent",
@@ -1384,9 +1403,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "36354979d37cd0d17cb3a818bcd7c60924621dd8d9503f6d017cafdd87dc0340"
       },
       "runtime_visibility": "latent",
@@ -1403,9 +1422,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "8402a01d6e7dc1bba9f119422a6ae5d65b41c87aefe2f6f8eca2cca55cc20b96"
       },
       "runtime_visibility": "latent",
@@ -1422,9 +1441,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "5d539b14e50dfa342bad18b959ddd550f5b850953c0334ba53c7c062801d2720"
       },
       "runtime_visibility": "latent",
@@ -1441,9 +1460,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "840025fc7052bb39f924306b2dfb99a25ad97264626d5d38172b0b5a684e66b4"
       },
       "runtime_visibility": "latent",
@@ -1459,9 +1478,9 @@
       "owner": "security-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "e89277ddcfbb425c0e85b5330da68a0597960ab60f458bd1dfc6dc153ef09684"
       },
       "runtime_visibility": "latent",
@@ -1478,9 +1497,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "8e0f5b39d2957fdb00f3e4c3258f3d9174e6dba033aa0a807b1d00cdfd66af3f"
       },
       "runtime_visibility": "latent",
@@ -1497,9 +1516,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "b63f8cf902c545d5d147ae2ef2a26c1cba5ed6889a99fd5179ed160e09efa7d4"
       },
       "runtime_visibility": "latent",
@@ -1516,9 +1535,9 @@
       "owner": "security-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "c4734389f6930fdb1f925619328aa21ca742600ca2d99f5f2338c84d2f3964cf"
       },
       "runtime_visibility": "latent",
@@ -1535,9 +1554,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "49b6f6c9cce3a7ff966279316f942fc5691d6d6d047a39c517614f2cbcd3b7be"
       },
       "runtime_visibility": "latent",
@@ -1553,9 +1572,9 @@
       "owner": "skill-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "5694878e2ab9f26ca9b5c8f671172ac2f4ad7350f19cb0cca616ad621be06487"
       },
       "runtime_visibility": "latent",
@@ -1571,9 +1590,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "da44c88f6b3845a8fa8c60792ec9a722110a55a9793c279757b48fefb11f819c"
       },
       "runtime_visibility": "latent",
@@ -1589,9 +1608,9 @@
       "owner": "skill-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "94861e0e1c9105ddfc727e8602cdb4b11b85428d6e0ebbdc0fa0d5f6c3a22c0b"
       },
       "runtime_visibility": "latent",
@@ -1607,9 +1626,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "09df0ea7921f63d51befae9fc8f71daece5ef49d7b96e35fff8b18d15d6afda7"
       },
       "runtime_visibility": "latent",
@@ -1626,9 +1645,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "1d703654582cb5a5543755e0c4544d6d10c246877b3ef4881cc57c31234a8fa1"
       },
       "runtime_visibility": "latent",
@@ -1644,9 +1663,9 @@
       "owner": "skill-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "ff519c8fa9edd2214caa8ad6804fadcfd09ba25808c7a938f5014d2227f6321d"
       },
       "runtime_visibility": "latent",
@@ -1662,9 +1681,9 @@
       "owner": "skill-factory",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "495cd1eaa088f9e971cb5d3b786ff9f67c2b7c1e5d8ffdf5db48854b10af6490"
       },
       "runtime_visibility": "latent",
@@ -1681,9 +1700,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "6c451fc0bcab80a8d8b7cbf8000dde19f2e3aae875c87d220d5cf144605d0279"
       },
       "runtime_visibility": "latent",
@@ -1700,9 +1719,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "d753276e3c327256fdd238fa8d3b54f56b71a446e981e5f178f1d6387217bef8"
       },
       "runtime_visibility": "latent",
@@ -1719,9 +1738,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "3e782c49a4c0507ea971ba32d7537d8a71d46a5466ccc101efb4167212a5097f"
       },
       "runtime_visibility": "latent",
@@ -1738,9 +1757,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "8d75fdb799f59b1761c5275a52e20ce6cb60072a0479147bda5a063c9d918b43"
       },
       "runtime_visibility": "latent",
@@ -1757,9 +1776,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "ae99841e3b5b54be711955d03f7d23c5fe157f98ddb9ca8e390117b4836b6533"
       },
       "runtime_visibility": "latent",
@@ -1776,9 +1795,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "8fd9ed5234fb832ab7910dcc233b8396b88aebe57dc253099e50635fd02b6088"
       },
       "runtime_visibility": "latent",
@@ -1795,9 +1814,9 @@
       "owner": "frontend-ui",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "ed0aae2dee45faa8439726122107c7f50f663af3c2de89429fb71901684de5a4"
       },
       "runtime_visibility": "latent",
@@ -1813,9 +1832,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "cb0a7835d221bdf91e77b686099ed9c55fc6331290eb9417098bca5ab6771c42"
       },
       "runtime_visibility": "flat",
@@ -1831,9 +1850,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "489d6270b69982cfe2ca6baa4f6a2fe466107a8512ce392a4c5218ffbf66233a"
       },
       "runtime_visibility": "latent",
@@ -1849,9 +1868,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "18f5adbf5e9f8077a476c9655a5b769ea7be0af306c2d35b48cc21a87d9abd22"
       },
       "runtime_visibility": "latent",
@@ -1868,9 +1887,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "c951dd58d34c0a710e570e53c51ff0855ab04ace61e6de431688958b18287ffc"
       },
       "runtime_visibility": "latent",
@@ -1887,9 +1906,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "add11e1f4d87fd2d05b51b9d7f6b80ca4a4dd52d736d2c5af5512745ad646dc1"
       },
       "runtime_visibility": "latent",
@@ -1906,9 +1925,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "6a12371f63c97bfce834292c2913ed82754fce248daaf912c7c0852c28cd193a"
       },
       "runtime_visibility": "latent",
@@ -1924,9 +1943,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "7b8b26a81ab54515e160979937fc435e4b9c7ab92191ab8c04c10d969c5b00f7"
       },
       "runtime_visibility": "latent",
@@ -1943,9 +1962,9 @@
       "owner": "content-publishing",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "a700e631c02271abeceb9d171a6d09625a53674b2bcfe1ba230a718536fbaf16"
       },
       "runtime_visibility": "latent",
@@ -1965,9 +1984,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "20fd6b5db8f8af1902ed5f174f629daedf61e2dbaf341f78b326debb955a5915"
       },
       "runtime_visibility": "latent",
@@ -1987,9 +2006,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "b31a4afe72ccbf796113be5c18921b25f5f7c9de4c035e053394d7a5fd4b15d0"
       },
       "runtime_visibility": "latent",
@@ -2009,9 +2028,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "409719215409574be8d93a5855198ab9799660ac8e194d836626a8cbce0db728"
       },
       "runtime_visibility": "latent",
@@ -2031,9 +2050,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "f28f755ab696241ce73efa9066b8010fb5eb1b657d3c7590c0644e3311f45864"
       },
       "runtime_visibility": "latent",
@@ -2053,9 +2072,9 @@
       "owner": "harness-engineering",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "9fe5ae918b2e606d",
+        "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "952c7ebdc",
+        "source_revision": "83f7ab9ed",
         "source_sha256": "f28f755ab696241ce73efa9066b8010fb5eb1b657d3c7590c0644e3311f45864"
       },
       "runtime_visibility": "latent",
@@ -2069,7 +2088,7 @@
     "Generated command handles are written only for handles absent from rooted runtime projection.",
     "Reviewer handles are intentionally kept outside the skill command surface."
   ],
-  "policy_identity": "9fe5ae918b2e606d",
+  "policy_identity": "6c4a3a9db4f4d8f0",
   "projection_path": ".skillsets/command-surface.json",
   "schema_version": "command-surface.v1",
   "status": "pass",

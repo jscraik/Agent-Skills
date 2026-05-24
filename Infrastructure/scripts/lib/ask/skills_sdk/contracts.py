@@ -302,12 +302,14 @@ def skill_doctor_check_summary(checks: dict[str, Any]) -> dict[str, Any]:
     status_counts: dict[str, int] = {}
     failed_checks: list[str] = []
     warning_checks: list[str] = []
+    failure_statuses = {"fail", "blocked", "missing", "error", "unknown"}
+    warning_statuses = {"warning", "available_not_run", "skipped"}
     for name, check in checks.items():
         status = str(check.get("status", "unknown")) if isinstance(check, dict) else "unknown"
         status_counts[status] = status_counts.get(status, 0) + 1
-        if status == "fail":
+        if status in failure_statuses:
             failed_checks.append(name)
-        elif status == "warning":
+        elif status in warning_statuses:
             warning_checks.append(name)
     return {
         "check_names": list(checks),

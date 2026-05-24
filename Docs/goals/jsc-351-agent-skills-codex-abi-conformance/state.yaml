@@ -1,16 +1,35 @@
 version: 2
 goal:
   slug: jsc-351-agent-skills-codex-abi-conformance
-  status: done
+  status: in_progress
   objective: "Fully implement the JSC-351 Agent Skills Codex ABI Conformance plan and spec through governed, validated, runtime-truth-first slices."
   native_objective: "Govern and fully implement the JSC-351 Agent Skills Codex ABI Conformance plan/spec in /Users/jamiecraik/dev/agent-skills, using bounded validated slices with runtime-truth-first proof, review-stack governance, implementation notes, tracker/PR/CI triage, and no unresolved blockers or unapproved future-work placeholders."
-  native_status: complete
+  native_status: blocked
   native_goal_id: 019e4cb4-62bd-7f93-8de8-6af42d620e70
   token_budget: null
   tokens_used: 9700
   time_used_seconds: 26
   native_created_at: "2026-05-23T14:28:16Z"
   native_updated_at: "2026-05-23T14:28:42Z"
+governance_evidence:
+  objective: "Fully implement the JSC-351 Agent Skills Codex ABI Conformance plan and spec through governed, validated, runtime-truth-first slices."
+  native_objective: "Govern and fully implement the JSC-351 Agent Skills Codex ABI Conformance plan/spec in /Users/jamiecraik/dev/agent-skills, using bounded validated slices with runtime-truth-first proof, review-stack governance, implementation notes, tracker/PR/CI triage, and no unresolved blockers or unapproved future-work placeholders."
+  outstanding_gates:
+    - id: PR-196-MERGE
+      kind: required_PR
+      status: blocked_until_verified
+      evidence: "https://github.com/jscraik/Agent-Skills/pull/196"
+      action: "Push the final closeout/remediation head, verify latest-head checks and review threads, then merge only after GitHub reports clean mergeability."
+    - id: PR-196-REVIEWS
+      kind: unresolved_reviewers
+      status: blocked_until_verified
+      evidence: "GitHub review threads for PR #196"
+      action: "Resolve or explicitly classify every active CodeRabbit/Codex review thread against the latest pushed head."
+    - id: PR-196-CI
+      kind: CI_checks
+      status: blocked_until_verified
+      evidence: "GitHub and CircleCI checks for PR #196 latest head"
+      action: "Wait for all latest-head required checks to pass; stale green checks do not satisfy this gate."
 completion_contract:
   outcome: "The JSC-351 plan and spec are fully implemented through operationally complete, independently validated slices that prove Codex ABI conformance without false readiness claims."
   verification_surface:

@@ -44,7 +44,7 @@ This artifact is committed as part of the final closeout-state change. Because a
 | Decision | Current State | Required Before Claiming Final Delivery |
 |---|---|---|
 | PR draft state | PR #196 is still a draft. | Owner or governor-authorized delivery action must undraft when final-head triage passes. |
-| GitHub review decision | `gh pr view` reports an empty review decision. | Treat independent CodeRabbit/governor/subagent evidence as review proof unless a repository owner requires a human approval. |
+| GitHub review decision | `gh pr view` reports an empty review decision. | Use repository-first evidence: package scripts, tracked docs, harness contracts, and validation wrappers. Independent CodeRabbit/governor/subagent evidence may supplement the record, but it is not a GitHub-native review substitute unless a repository owner explicitly waives that requirement; contradictions between code, docs, and workflow policy remain review-worthy unless waived by the owner. |
 | Linear project assignment | Not proven by `get_issue` refresh. | Do not assign or claim a project without Jamie or tracker-owner confirmation. |
 | Cycle authority | Cycle IDs exist on JSC-351 through JSC-356. | Report as live but authority-unverified unless the tracker owner confirms intent. |
 | Merge | Not performed. | Requires final-head green checks, no active review blockers, mergeability, and owner-governed delivery choice. |

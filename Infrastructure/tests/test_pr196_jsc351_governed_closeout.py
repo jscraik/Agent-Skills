@@ -47,6 +47,7 @@ from ask.commands.skills_impl import (  # noqa: E402
     _package_verify_rule_evidence,
     skills_package_verify,
 )
+from ask.skills_sdk.contracts import skill_doctor_check_summary  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -225,36 +226,38 @@ class TestNormalizeExpectedDigest(unittest.TestCase):
 class TestReadJsonl(unittest.TestCase):
     """Unit tests for the _read_jsonl rollback-journal reader."""
 
+    _test_jsonl_path = str(Path(tempfile.gettempdir()) / "test.jsonl")
+
     def test_valid_single_entry_with_action(self) -> None:
         text = json.dumps({"action": "verify", "decision": "rollback-ready", "status": "pass"}) + "\n"
-        result = _read_jsonl(text, "/tmp/test.jsonl")
+        result = _read_jsonl(text, self._test_jsonl_path)
         self.assertEqual(result["status"], "pass")
         self.assertEqual(len(result["entries"]), 1)
         self.assertTrue(result["entries"][0]["valid_json"])
 
     def test_valid_entry_with_decision_field(self) -> None:
         text = json.dumps({"decision": "approved"}) + "\n"
-        result = _read_jsonl(text, "/tmp/test.jsonl")
+        result = _read_jsonl(text, self._test_jsonl_path)
         self.assertEqual(result["status"], "pass")
 
     def test_invalid_json_line(self) -> None:
-        result = _read_jsonl("{not json}\n", "/tmp/test.jsonl")
+        result = _read_jsonl("{not json}\n", self._test_jsonl_path)
         self.assertNotEqual(result["status"], "pass")
         self.assertFalse(result["entries"][0]["valid_json"])
 
     def test_empty_text_blocked(self) -> None:
-        result = _read_jsonl("", "/tmp/test.jsonl")
+        result = _read_jsonl("", self._test_jsonl_path)
         self.assertNotEqual(result["status"], "pass")
 
     def test_blank_lines_ignored(self) -> None:
         text = "\n\n" + json.dumps({"action": "rollback", "status": "pass"}) + "\n\n"
-        result = _read_jsonl(text, "/tmp/test.jsonl")
+        result = _read_jsonl(text, self._test_jsonl_path)
         self.assertEqual(result["status"], "pass")
         self.assertEqual(len(result["entries"]), 1)
 
     def test_entry_without_decision_or_action_blocked(self) -> None:
         text = json.dumps({"key": "value"}) + "\n"
-        result = _read_jsonl(text, "/tmp/test.jsonl")
+        result = _read_jsonl(text, self._test_jsonl_path)
         # No action or decision field → has_decision is False → blocked_validation
         self.assertNotEqual(result["status"], "pass")
 
@@ -269,22 +272,44 @@ class TestVerifyArchivePackageMissingFile(unittest.TestCase):
     """Edge-case tests for verify_archive_package when the archive does not exist."""
 
     def test_missing_archive_returns_blocked(self) -> None:
-        missing = Path("/tmp/does-not-exist-archive-12345.zip")
+        missing = Path(tempfile.gettempdir()) / "does-not-exist-archive-12345.zip"
         result = verify_archive_package(missing)
         self.assertEqual(result["status"], "blocked")
         rule_ids = [item["rule_id"] for item in result["blockers"]]
         self.assertIn("blocked_missing_artifact", rule_ids)
 
     def test_missing_archive_mutation_status_false(self) -> None:
-        missing = Path("/tmp/does-not-exist-archive-99999.zip")
+        missing = Path(tempfile.gettempdir()) / "does-not-exist-archive-99999.zip"
         result = verify_archive_package(missing)
         self.assertFalse(result["mutation_status"]["mutated"])
         self.assertFalse(result["mutation_status"]["archive_extracted"])
 
     def test_missing_archive_has_schema_version(self) -> None:
-        missing = Path("/tmp/does-not-exist-archive-77777.zip")
+        missing = Path(tempfile.gettempdir()) / "does-not-exist-archive-77777.zip"
         result = verify_archive_package(missing)
         self.assertEqual(result["schema_version"], "skill-package-verify.v1")
+
+
+class TestSkillDoctorCheckSummary(unittest.TestCase):
+    """Verify doctor summaries surface degraded non-pass statuses."""
+
+    def test_degraded_statuses_are_actionable(self) -> None:
+        summary = skill_doctor_check_summary(
+            {
+                "schema": {"status": "pass"},
+                "runtime": {"status": "blocked"},
+                "proof": {"status": "missing"},
+                "optional": {"status": "available_not_run"},
+                "policy": {"status": "warning"},
+            }
+        )
+
+        self.assertEqual(summary["status_counts"]["blocked"], 1)
+        self.assertEqual(summary["status_counts"]["missing"], 1)
+        self.assertIn("runtime", summary["failed_checks"])
+        self.assertIn("proof", summary["failed_checks"])
+        self.assertIn("optional", summary["warning_checks"])
+        self.assertIn("policy", summary["warning_checks"])
 
 
 # ---------------------------------------------------------------------------
@@ -581,8 +606,7 @@ class TestSkillsPackageVerifyMissingTarget(unittest.TestCase):
 
     def test_completely_missing_nonexistent_handle_returns_error(self) -> None:
         result = skills_package_verify(REPO_ROOT, "completely-nonexistent-handle-xyz-99999")
-        # Result should be error or success depending on handle resolution, but must not crash
-        self.assertIn(result.status, {"success", "error"})
+        self.assertEqual(result.status, "error")
         self.assertIn("skill_package_verification", result.data)
 
     def test_completely_missing_returns_schema_version(self) -> None:
@@ -645,6 +669,32 @@ class TestSkillsPackageVerifyDirectoryTarget(unittest.TestCase):
         self.assertEqual(result.status, "error")
         verification = result.data["skill_package_verification"]
         self.assertNotEqual(verification["status"], "pass")
+
+    def test_directory_target_with_unknown_provenance_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            skill_dir = Path(tmp_dir) / "unknown-provenance-skill"
+            skill_dir.mkdir()
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                "---\n"
+                "name: unknown-provenance-skill\n"
+                "description: Unknown provenance fixture.\n"
+                "version: 1.0.0\n"
+                "compatible_roles: default\n"
+                "runtime_needs: local files\n"
+                "maturity: fixture\n"
+                "provenance: totally-unknown-source\n"
+                "share_readiness: ready\n"
+                "---\n",
+                encoding="utf-8",
+            )
+
+            result = skills_package_verify(REPO_ROOT, str(skill_dir))
+
+        self.assertEqual(result.status, "error")
+        verification = result.data["skill_package_verification"]
+        self.assertFalse(verification["provenance_identity"]["trusted"])
+        self.assertIn("provenance_trusted:false", verification["rule_evidence"])
 
     def test_directory_target_schema_version(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

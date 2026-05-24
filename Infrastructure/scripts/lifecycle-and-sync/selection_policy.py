@@ -69,6 +69,7 @@ DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "codex-automation-architect",
     "codex-hooks-builder",
     "codex-review",
+    "code-fixes-triage",
     "coding-harness",
     "context7",
     "docs-expert",

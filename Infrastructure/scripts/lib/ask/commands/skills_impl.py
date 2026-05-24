@@ -90,6 +90,7 @@ from ask.skills_sdk.package_contracts import (  # noqa: E402
 from ask.skills_sdk.conformance import run_skills_conformance as _run_skills_conformance  # noqa: E402
 from ask.skills_sdk.package_verify import (  # noqa: E402
     PACKAGE_VERIFY_SCHEMA_VERSION,
+    TRUSTED_PROVENANCE_SOURCES,
     verify_archive_package as _verify_archive_package,
     verify_skill_directory as _verify_skill_directory,
 )
@@ -2895,14 +2896,8 @@ def skills_package_verify(
             source.strip().lower()
             for source in (trusted_provenance or "").split(",")
             if source.strip()
-        } or None
-        provenance_trusted = bool(provenance_text) and normalized_provenance not in {
-            "unknown",
-            "untrusted",
-            "external-untrusted",
-        }
-        if trusted_sources is not None:
-            provenance_trusted = normalized_provenance in trusted_sources
+        } or set(TRUSTED_PROVENANCE_SOURCES)
+        provenance_trusted = bool(provenance_text) and normalized_provenance in trusted_sources
         if provenance_trusted:
             rule_evidence.append("provenance_trusted:true")
         else:
