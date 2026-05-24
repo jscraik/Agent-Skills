@@ -111,10 +111,10 @@ Fail fast at the first failed gate and classify the blocker before sync, commit,
 
 ## See Also
 
-| Skill or Agent | Use After Triage |
+| Skill | Use After Triage |
 | --- | --- |
-| 'pr-green-sweep' | Open PRs need until-green fix, merge, and cleanup follow-through. |
-| 'autofix' | Actionable CodeRabbit or Codex Review findings need implementation. |
-| 'testing' | Test or validation failure ownership needs proof or repair. |
-| 'release-notes' | The useful action is a changelog, release note, or publish handoff. |
-| 'delivery-state-auditor' | A read-only readiness audit is needed before claiming closeout. |
+| [[pr-green-sweep]] | Open PRs need until-green fix, merge, and cleanup follow-through. |
+| [[autofix]] | Actionable CodeRabbit or Codex Review findings need implementation. |
+| [[testing]] | Test or validation failure ownership needs proof or repair. |
+| [[release-notes]] | The useful action is a changelog, release note, or publish handoff. |
+| [[verification-before-completion]] | A read-only latest-head readiness check is needed before claiming closeout. |
