@@ -44,21 +44,21 @@ checks:
   last_verification:
     command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     outcome: pass
-    checked_at: "2026-05-24T02:27:20Z"
+    checked_at: "2026-05-24T02:50:11Z"
   last_delivery_attempt:
-    command: "PU-006 PR #196 review-comment remediation and deterministic triage runner hardening"
-    outcome: blocked_review_comments_present_until_remediation_pushed
-    checked_at: "2026-05-24T02:27:20Z"
-    detail: "The deterministic triage runner was hardened after CodeRabbit review. It now rejects relative worktrees, requires an independent submitted review by someone other than the PR author, and blocks when inline review comments require classification or remediation. Running it against PR #196 head a032eda8724d6ac1d47c18a7f75ea519746aab96 correctly produced artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-a032eda.md with status blocked because 9 inline review comments exist. Local remediation is validated but not yet committed or pushed."
+    command: "PU-006 PR #196 addressed-comment triage guardrail"
+    outcome: pending_guardrail_commit_and_push
+    checked_at: "2026-05-24T02:50:11Z"
+    detail: "The PR #196 remediation commit 9cf424ec4d9b99cf8d5657c9485531f5f0dd198f is pushed and all reported checks are green. CodeRabbit marked 8 inline comments as addressed and one old-head comment is stale with line:null. The deterministic triage runner now separates addressed, stale, and active inline comments; the live report artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-9cf424e.md passes with 0 active inline comments. This guardrail is validated locally but must be committed, pushed, and freshly retriaged before PU-007 can start."
   last_pr_state:
     url: "https://github.com/jscraik/Agent-Skills/pull/196"
     number: 196
     state: open
     draft: true
     mergeable: MERGEABLE
-    checked_at: "2026-05-24T02:27:20Z"
-    outcome: blocked_review_comments_present
-    detail: "PR #196 is open draft and mergeable at head a032eda8724d6ac1d47c18a7f75ea519746aab96 with one independent CodeRabbit review and 9 inline review comments. The live delivery lane remains blocked until the remediation commit is pushed, checks/reviews refresh, and a fresh subagent-managed triage artifact proves no unresolved review blocker."
+    checked_at: "2026-05-24T02:50:11Z"
+    outcome: pass_on_head_9cf424e_pending_guardrail_push
+    detail: "PR #196 is open draft and mergeable at head 9cf424ec4d9b99cf8d5657c9485531f5f0dd198f with one independent CodeRabbit review, all reported checks passing, 9 inline review comments, 8 addressed comments, 1 stale old-head comment, and 0 active inline review comments."
 continuation_gate:
   native_status: active
   goal_active: pass
@@ -66,7 +66,7 @@ continuation_gate:
   queued_user_input: unknown
   pending_work: present
   auto_continue_allowed: "no"
-  blocked_by: "pr_196_review_comments_present_until_remediation_pushed_and_retriaged"
+  blocked_by: "pr_196_triage_guardrail_pending_commit_push_and_fresh_retriage"
 claims:
   - id: C001
     claim: "JSC-351 plan and spec are the canonical local sources for the governed implementation lane."

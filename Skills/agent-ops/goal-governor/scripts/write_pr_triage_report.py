@@ -70,6 +70,20 @@ def parse_json_object(result: CommandResult) -> dict[str, object] | None:
     return parsed if isinstance(parsed, dict) else None
 
 
+def review_comment_marked_addressed(comment: object) -> bool:
+    if not isinstance(comment, dict):
+        return False
+    body = str(comment.get("body") or "")
+    return "addressed in commit " in body.lower()
+
+
+def review_comment_stale_for_head(comment: object, expected_head: str) -> bool:
+    if not isinstance(comment, dict):
+        return False
+    comment_head = str(comment.get("commit_id") or "")
+    return comment.get("line") is None and bool(comment_head) and comment_head != expected_head
+
+
 def collect_results(worktree: Path, repo: str, pr_number: str, runner: Runner) -> dict[str, CommandResult]:
     return {
         "pwd": runner(("pwd",), worktree),
@@ -166,11 +180,35 @@ def classify(
 
     if comments is None:
         facts["inline_comments"] = "unknown"
+        facts["addressed_inline_comments"] = "unknown"
+        facts["stale_inline_comments"] = "unknown"
+        facts["active_inline_comments"] = "unknown"
+        blockers.append("comments_unreadable")
     else:
+        addressed_comments = [
+            comment
+            for comment in comments
+            if review_comment_marked_addressed(comment)
+        ]
+        stale_comments = [
+            comment
+            for comment in comments
+            if not review_comment_marked_addressed(comment)
+            and review_comment_stale_for_head(comment, expected_head)
+        ]
+        active_comments = [
+            comment
+            for comment in comments
+            if not review_comment_marked_addressed(comment)
+            and not review_comment_stale_for_head(comment, expected_head)
+        ]
         facts["inline_comments"] = str(len(comments))
-        if comments:
+        facts["addressed_inline_comments"] = str(len(addressed_comments))
+        facts["stale_inline_comments"] = str(len(stale_comments))
+        facts["active_inline_comments"] = str(len(active_comments))
+        if active_comments:
             blockers.append(
-                f"review_comments_present: {len(comments)} inline review comments require classification or remediation"
+                f"review_comments_present: {len(active_comments)} inline review comments require classification or remediation"
             )
 
     return blockers, facts
@@ -223,6 +261,9 @@ def render_report(
         f"- submitted GitHub reviews: {facts.get('submitted_reviews', 'unknown')}",
         f"- independent GitHub reviews: {facts.get('independent_reviews', 'unknown')}",
         f"- inline review comments: {facts.get('inline_comments', 'unknown')}",
+        f"- addressed inline review comments: {facts.get('addressed_inline_comments', 'unknown')}",
+        f"- stale inline review comments: {facts.get('stale_inline_comments', 'unknown')}",
+        f"- active inline review comments: {facts.get('active_inline_comments', 'unknown')}",
         "",
         "## Blockers",
         "",

@@ -28,6 +28,7 @@ def make_runner(
     checks_exit: int = 0,
     reviews: list[object] | None = None,
     comments: list[object] | None = None,
+    comments_exit: int = 0,
     pr_head: str | None = None,
     pr_author: str = "jamiecraik",
 ) -> write_pr_triage_report.Runner:
@@ -76,7 +77,7 @@ def make_runner(
         if command[-1].endswith("/reviews"):
             return write_pr_triage_report.CommandResult(command, 0, json.dumps(actual_reviews), "")
         if command[-1].endswith("/comments"):
-            return write_pr_triage_report.CommandResult(command, 0, json.dumps(actual_comments), "")
+            return write_pr_triage_report.CommandResult(command, comments_exit, json.dumps(actual_comments), "")
         raise AssertionError(f"unexpected command: {command_text(command)}")
 
     return runner
@@ -211,6 +212,110 @@ def test_report_blocks_when_inline_review_comments_need_triage() -> None:
         assert "status: blocked" in report
         assert "review_comments_present: 1 inline review comments" in report
         assert "inline review comments: 1" in report
+        assert "active inline review comments: 1" in report
+
+
+def test_report_passes_when_inline_review_comments_are_addressed_for_head() -> None:
+    with TemporaryDirectory() as tmp:
+        worktree = Path(tmp).resolve()
+        report = write_pr_triage_report.write_report(
+            worktree=worktree,
+            repo="jscraik/Agent-Skills",
+            pr_number="196",
+            expected_head="9cf424ec4d9b99cf8d5657c9485531f5f0dd198f",
+            output_path=Path("artifacts/reviews/triage.md"),
+            runner=make_runner(
+                worktree=worktree,
+                expected_head="9cf424ec4d9b99cf8d5657c9485531f5f0dd198f",
+                reviews=[
+                    {
+                        "id": 1,
+                        "state": "COMMENTED",
+                        "user": {"login": "coderabbitai[bot]"},
+                    }
+                ],
+                comments=[
+                    {
+                        "id": 12,
+                        "path": "Skills/agent-ops/goal-governor/scripts/write_pr_triage_report.py",
+                        "body": "Addressed in commit 9cf424e",
+                    }
+                ],
+            ),
+            now=datetime(2026, 5, 24, tzinfo=UTC),
+        )
+
+        assert "status: pass" in report
+        assert "inline review comments: 1" in report
+        assert "addressed inline review comments: 1" in report
+        assert "active inline review comments: 0" in report
+        assert "review_comments_present" not in report
+
+
+def test_report_passes_when_inline_review_comments_are_stale_for_old_head() -> None:
+    with TemporaryDirectory() as tmp:
+        worktree = Path(tmp).resolve()
+        report = write_pr_triage_report.write_report(
+            worktree=worktree,
+            repo="jscraik/Agent-Skills",
+            pr_number="196",
+            expected_head="9cf424ec4d9b99cf8d5657c9485531f5f0dd198f",
+            output_path=Path("artifacts/reviews/triage.md"),
+            runner=make_runner(
+                worktree=worktree,
+                expected_head="9cf424ec4d9b99cf8d5657c9485531f5f0dd198f",
+                reviews=[
+                    {
+                        "id": 1,
+                        "state": "COMMENTED",
+                        "user": {"login": "coderabbitai[bot]"},
+                    }
+                ],
+                comments=[
+                    {
+                        "id": 12,
+                        "path": "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/receipts.jsonl",
+                        "line": None,
+                        "commit_id": "a032eda8724d6ac1d47c18a7f75ea519746aab96",
+                        "body": "Normalize receipt chronology.",
+                    }
+                ],
+            ),
+            now=datetime(2026, 5, 24, tzinfo=UTC),
+        )
+
+        assert "status: pass" in report
+        assert "stale inline review comments: 1" in report
+        assert "active inline review comments: 0" in report
+        assert "review_comments_present" not in report
+
+
+def test_report_blocks_when_comments_are_unreadable() -> None:
+    with TemporaryDirectory() as tmp:
+        worktree = Path(tmp).resolve()
+        report = write_pr_triage_report.write_report(
+            worktree=worktree,
+            repo="jscraik/Agent-Skills",
+            pr_number="196",
+            expected_head="abc123",
+            output_path=Path("artifacts/reviews/triage.md"),
+            runner=make_runner(
+                worktree=worktree,
+                reviews=[
+                    {
+                        "id": 1,
+                        "state": "COMMENTED",
+                        "user": {"login": "coderabbitai[bot]"},
+                    }
+                ],
+                comments_exit=1,
+            ),
+            now=datetime(2026, 5, 24, tzinfo=UTC),
+        )
+
+        assert "status: blocked" in report
+        assert "comments_unreadable" in report
+        assert "active inline review comments: unknown" in report
 
 
 def test_report_blocks_pr_head_mismatch() -> None:

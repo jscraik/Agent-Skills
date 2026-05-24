@@ -253,7 +253,10 @@ Use explicit Goal Governor vocabulary in every governed response:
   allowed to write a blocked artifact when checks, review state, or head
   identity are not safe. A safe PR triage report must prove that at least one
   submitted review is from someone other than the PR author, and it must block
-  when inline review comments still require classification or remediation.
+  when active inline review comments still require classification or
+  remediation. Addressed review comments and stale old-head comments must be
+  counted separately from active blockers so the lane does not retry already
+  remediated feedback or hide unresolved feedback.
 
 ## Anti-Patterns
 
