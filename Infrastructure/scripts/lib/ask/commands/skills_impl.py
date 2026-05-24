@@ -11,6 +11,7 @@ import sys
 import importlib.util
 import tempfile
 import difflib
+import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -583,18 +584,16 @@ def _safe_tessl_skill_key(raw_name: str) -> str:
     return key or "skill"
 
 
-def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root: Path) -> tuple[Path, dict[str, str]]:
+def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, stable_parent: Path) -> tuple[Path, dict[str, str]]:
     """Create a stable Tessl evidence wrapper for a SKILL.md-first local skill."""
     source_skill_dir = repo_root / audit_target_path
     source_skill = source_skill_dir / "SKILL.md"
     fields = _read_skill_frontmatter_fields(source_skill)
     skill_key = _safe_tessl_skill_key(fields.get("name") or Path(audit_target_path).name)
+    stable_parent.mkdir(parents=True, exist_ok=True)
+    run_id = str(uuid.uuid4())[:8]
+    temp_root = stable_parent / run_id
     temp_root.mkdir(parents=True, exist_ok=True)
-    for child in temp_root.iterdir():
-        if child.is_dir():
-            shutil.rmtree(child)
-        else:
-            child.unlink()
     tile_skill_dir = temp_root / "skills" / skill_key
     tile_skill_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source_skill, tile_skill_dir / "SKILL.md")
@@ -1510,7 +1509,7 @@ SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
         "required_evidence": [
             "eval_started event",
             "Codex smoke run uses [profiles.fast] via --profile fast",
-            "Tessl eval source staged under /tmp/ask-tessl-evals",
+            f"Tessl eval source staged under {os.path.join(tempfile.gettempdir(), 'ask-tessl-evals')}",
             "staged tessl.json project marker",
             "canonical references/evals.yaml copied into staged input",
             "eval_completed or eval_blocked event",
@@ -2097,7 +2096,7 @@ def _profiles_with_effective_roots(profiles: dict[str, dict[str, Any]]) -> dict[
                 "codex_profile": "fast",
                 "codex_profile_config": "[profiles.fast]",
                 "codex_runner_args": ["--profile", "fast"],
-                "tessl_eval_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+                "tessl_eval_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-evals')}/<skill-path>-<sha12>",
                 "tessl_project_marker": "tessl.json",
                 "staged_inputs": [
                     "SKILL.md",
@@ -2114,7 +2113,7 @@ def _profiles_with_effective_roots(profiles: dict[str, dict[str, Any]]) -> dict[
                 "plugin_eval_b_plus_is_acceptable": True,
                 "tessl_review_min_score": TESSL_REVIEW_MIN_SCORE,
                 "tessl_review_args": ["skill", "review", "--json", "--threshold", str(TESSL_REVIEW_MIN_SCORE)],
-                "tessl_review_staging_root": "/tmp/ask-tessl-reviews/<skill-path>-<sha12>",
+                "tessl_review_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-reviews')}/<skill-path>-<sha12>",
                 "tessl_project_marker": "tessl.json",
                 "evidence_retention": "stable tmp wrapper is intentionally left for post-run inspection",
             }
@@ -3962,13 +3961,13 @@ def external_review_skill(
         "external_quality_judge": "tessl_local_review",
         "tessl_review_min_score": TESSL_REVIEW_MIN_SCORE,
         "tessl_review_threshold_policy": f"Tessl review must return reviewScore >= {TESSL_REVIEW_MIN_SCORE}.",
-        "tessl_staging_root": "/tmp/ask-tessl-reviews/<skill-path>-<sha12>",
+        "tessl_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-reviews')}/<skill-path>-<sha12>",
         "tessl_project_marker": "tessl.json",
         "tessl_evidence_retention": "stable tmp wrapper is intentionally left for inspection and copied-input evidence",
         "tessl_lint_role": "stable_tile_packaging_shape_check",
         "tessl_lint_shape": (
             "Tessl lint expects a Tessl tile.json package. Canonical repo skills are "
-            "SKILL.md-first, so this command builds a stable local tile wrapper under /tmp before linting."
+            f"SKILL.md-first, so this command builds a stable local tile wrapper under {tempfile.gettempdir()} before linting."
         ),
         "tessl_review_role": "local_best_practice_content_review",
         "plugin_eval_role": "budget_and_ergonomics_guardrail",

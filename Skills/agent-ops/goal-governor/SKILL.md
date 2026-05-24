@@ -218,6 +218,7 @@ then rerun it before proceeding.
 PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q Infrastructure/tests/goal-governor/test_check_goal_board.py
 PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q Infrastructure/tests/goal-governor/test_write_subagent_handoff_report.py
 PYTHONDONTWRITEBYTECODE=1 python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py <goal-directory>
+vale Skills/agent-ops/goal-governor/**/*.md
 ./bin/ask skills audit Skills/agent-ops/goal-governor --level strict --json --robot
 ./bin/ask evals run Skills/agent-ops/goal-governor --mode smoke --json --robot
 ./bin/plugin-eval analyze Skills/agent-ops/goal-governor --format json

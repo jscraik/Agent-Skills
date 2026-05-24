@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -201,7 +202,8 @@ def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Pat
     assert "ask-tessl-evals" in tessl_eval["staged_source"]
     assert tessl_eval["staging_policy"] == "stable_tmp_evidence"
     assert tessl_eval["tessl_project_marker"].endswith("/tessl.json")
-    assert tessl_eval["policy"]["stable_staging_root"].startswith(f"{tempfile.gettempdir()}/ask-tessl-evals")
+    expected_staging_root = os.path.join(tempfile.gettempdir(), "ask-tessl-evals")
+    assert tessl_eval["policy"]["stable_staging_root"].startswith(expected_staging_root)
     assert tessl_eval["policy"]["no_registry_upload"] is True
     assert tessl_eval["policy"]["network_permission_required_by_repo"] is False
 

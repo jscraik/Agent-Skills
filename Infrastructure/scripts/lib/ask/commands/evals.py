@@ -796,7 +796,7 @@ def run_evals(
     result.data["profile_contract"] = {
         "codex_profile": SMOKE_EVAL_PROFILE if mode == "smoke" and runner == "codex" else None,
         "codex_profile_config": "[profiles.fast]" if mode == "smoke" and runner == "codex" else None,
-        "codex_profile_required_for_smoke": runner == "codex",
+        "codex_profile_required_for_smoke": mode == "smoke" and runner == "codex",
         "tessl_policy": _tessl_policy(),
     }
 

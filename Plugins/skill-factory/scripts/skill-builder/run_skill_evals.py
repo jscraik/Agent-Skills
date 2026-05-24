@@ -2764,11 +2764,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         prompt_body = c.prompt.strip() + "\n"
         if c.prepend_skill:
+            try:
+                skill_label = skill_md.relative_to(workspace_root)
+            except ValueError:
+                skill_label = skill_md.name
             composed_prompt = (
                 f"${skill_name}\n\n"
                 "The local skill handle may not expand inside this isolated eval runner. "
                 "Apply this SKILL.md content directly; do not try to read the skill file.\n\n"
-                f"<SKILL.md path=\"{skill_md}\">\n{skill_contract_text}\n</SKILL.md>\n\n"
+                f"<SKILL.md path=\"{skill_label}\">\n{skill_contract_text}\n</SKILL.md>\n\n"
                 f"Task:\n{prompt_body}"
             )
         else:
