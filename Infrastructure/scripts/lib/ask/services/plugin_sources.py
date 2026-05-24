@@ -40,6 +40,8 @@ def load_local_marketplace(repo_root: Path) -> tuple[Path, list[dict[str, Any]]]
 
 def copy_directory_contents(source_dir: Path, target_dir: Path) -> None:
     """Replace target_dir contents with a self-contained copy of source_dir entries."""
+    _assert_symlinks_resolve_inside_source(source_dir)
+
     target_dir.mkdir(parents=True, exist_ok=True)
     for child in list(target_dir.iterdir()):
         if child.is_symlink() or child.is_file():
@@ -47,7 +49,6 @@ def copy_directory_contents(source_dir: Path, target_dir: Path) -> None:
         else:
             shutil.rmtree(child)
 
-    _assert_symlinks_resolve_inside_source(source_dir)
     for child in source_dir.iterdir():
         destination = target_dir / child.name
         if child.is_symlink():

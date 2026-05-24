@@ -609,5 +609,24 @@
     </table>
     <p>Governor disposition: include this hook-recovery fix in the same PR #193 remediation commit because it is required for deterministic pre-commit validation. Continue only after the repository hook passes, the commit is pushed to PR #193, and a fresh post-push triage subagent artifact verifies live PR truth.</p>
   </section>
+  <section class="entry validation">
+    <h2>PR #194 Review-Comment Remediation Gate</h2>
+    <p>Runtime truth: PR #194 is the current live delivery surface for the bridge sync policy remediation. Live review comments identified two valid blockers before the governor can approve PU-006: plugin cache copying validated unsafe source symlinks only after clearing the target cache, and flat workspace sync dry-runs could report the same first-level system bridge alias delete twice.</p>
+    <p>Fix applied: <code>copy_directory_contents</code> now validates source symlink safety before mutating the target directory, preserving an existing cache if validation fails. Flat workspace sync now skips the early bridge-alias prune during dry-runs and keeps the later post-system-lane prune as the single dry-run report path while preserving non-dry-run cleanup before and after system-lane refresh.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_plugin_sources.py Infrastructure/tests/test_ask_skills_sync_security.py</code></td><td>Pass: 45 tests.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_plugin_sources.py Infrastructure/tests/test_local_plugin_picker_surface.py::LocalPluginPickerSurfaceTests::test_versioned_plugin_cache_does_not_duplicate_command_handle_skills Infrastructure/tests/test_update_readme_catalog_text.py Infrastructure/tests/test_skill_scope_precedence.py Infrastructure/tests/test_sync_skills_shell_projection.py Infrastructure/tests/test_ask_skills_sync_security.py</code></td><td>Pass: 75 tests.</td></tr>
+      <tr><td><code>./bin/ask runtime budget --json --robot</code></td><td>Pass: <code>first_level_bridge_skills</code> is empty and status is pass.</td></tr>
+      <tr><td><code>./bin/ask skills handles --check --check-projection --check-command-handles --no-handles --json --robot</code></td><td>Pass: 109 handles, 103 generated command handles, no violations.</td></tr>
+      <tr><td><code>python3 Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py verify --scope all</code></td><td>Pass.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+      <tr><td><code>bash scripts/validate-codestyle.sh</code></td><td>Pass: required failures 0, warn-only issues 0.</td></tr>
+      <tr><td><code>./bin/ask repo validate --json --robot</code></td><td>Pass: required failures 0, warn-only issues 0; refreshed repo-owned validation artifacts under <code>Infrastructure/artifacts/validation/20260524T000849Z</code>.</td></tr>
+      <tr><td><code>test -f memory.json &amp;&amp; jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json &gt;/dev/null</code></td><td>Pass.</td></tr>
+      <tr><td><code>git diff --check HEAD</code></td><td>Pass.</td></tr>
+    </table>
+    <p>Governor disposition: broaden local validation, commit and push this review-comment remediation, refresh PR #194 checks, verify review-thread state, update Linear, and run the subagent triage lane on the new head. No next implementation slice is approved while this PR review gate is unresolved.</p>
+  </section>
 </body>
 </html>

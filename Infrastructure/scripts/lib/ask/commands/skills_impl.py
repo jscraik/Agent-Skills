@@ -6846,13 +6846,14 @@ def sync_skills(
         for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
             plan["deletes"].append(log)
             logs.append(log)
-        for log in _prune_first_level_system_bridge_aliases(
-            skills_dir,
-            system_skills_dir,
-            dry_run=dry_run,
-        ):
-            plan["deletes"].append(log)
-            logs.append(log)
+        if not dry_run:
+            for log in _prune_first_level_system_bridge_aliases(
+                skills_dir,
+                system_skills_dir,
+                dry_run=False,
+            ):
+                plan["deletes"].append(log)
+                logs.append(log)
         for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run):
             plan["deletes"].append(log)
             logs.append(log)

@@ -44,21 +44,21 @@ checks:
   last_verification:
     command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     outcome: pass
-    checked_at: "2026-05-23T23:40:00Z"
+    checked_at: "2026-05-24T00:04:47Z"
   last_delivery_attempt:
-    command: "PR #193 review-stack remediation pre-commit hook recovery"
+    command: "PR #194 live review-comment remediation"
     outcome: ready_for_hook_backed_commit_and_post_push_triage
-    checked_at: "2026-05-23T23:40:00Z"
-    detail: "The first commit attempt exposed a deterministic pre-commit blocker: generated local plugin cache copies preserved a nested relative plugin.json symlink that became broken in the versioned cache. The second attempt confirmed the required order: run ask skills sync to refresh rooted/plugin-cache surfaces, then run sync_projection_trees all to restore mirror parity. Plugin cache copying now materializes safe source-internal symlinks and rejects broken or escaping symlinks, catalog freshness passes, projection integrity passes, and focused plugin cache tests pass. Next required action is hook-backed commit, push to PR #193, then subagent-managed post-push PR/CI/review/Linear triage before any PU-006 work."
+    checked_at: "2026-05-24T00:04:47Z"
+    detail: "Live PR #194 review comments identified two valid blockers: plugin cache copy validated source symlink safety after target mutation, and flat workspace sync dry-runs could report duplicate first-level system bridge alias deletes. Both are fixed locally with regression coverage. Focused and expanded tests, runtime budget, handle checks, projection integrity, goal-board validation, and diff whitespace checks pass. Next required action is hook-backed commit, push to PR #194, then subagent-managed post-push PR/CI/review/Linear triage before any PU-006 work."
   last_pr_state:
-    url: "https://github.com/jscraik/Agent-Skills/pull/193"
-    number: 193
+    url: "https://github.com/jscraik/Agent-Skills/pull/194"
+    number: 194
     state: open
-    draft: true
+    draft: false
     mergeable: MERGEABLE
-    checked_at: "2026-05-23T23:01:52Z"
-    outcome: checks_green_review_policy_blocked
-    detail: "PR #193 head efcade54646527beff3b60b37af898488e2df2a7 has passing required checks, no inline GitHub review comments, no submitted reviews, and local subagent triage artifact artifacts/reviews/jsc-351-pr193-triage-lane/post-push-efcade546.md. CodeRabbit status is green and a manual trigger was acknowledged, but the CodeRabbit issue comment reports review-limit/usage-credit exhaustion, so independent-review satisfaction remains ambiguous."
+    checked_at: "2026-05-24T00:04:47Z"
+    outcome: local_review_comment_remediation_ready_for_push
+    detail: "PR #194 head 636958a21fc40087d34b0b25024cf8b6235fef8a was open, ready, and mergeable before local remediation. CodeRabbit and Codex review comments remain unresolved until the local remediation commit is pushed and post-push review state is refreshed."
 continuation_gate:
   native_status: active
   goal_active: pass
@@ -66,7 +66,7 @@ continuation_gate:
   queued_user_input: unknown
   pending_work: present
   auto_continue_allowed: "no"
-  blocked_by: "pending_commit_push_and_post_push_pr193_triage_for_review_stack_remediation"
+  blocked_by: "pending_commit_push_and_post_push_pr194_triage_for_review_comment_remediation"
 claims:
   - id: C001
     claim: "JSC-351 plan and spec are the canonical local sources for the governed implementation lane."

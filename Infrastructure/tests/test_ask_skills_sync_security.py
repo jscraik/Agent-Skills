@@ -722,6 +722,44 @@ class TestAskSkillsSyncSecurity(TestCase):
             result.data["logs"],
         )
 
+    def test_sync_skills_workspace_dry_run_reports_bridge_symlink_prune_once(self) -> None:
+        skills_dir = self.repo_root / ".agents" / "skills"
+        system_source = self.repo_root / "skills-system" / "imagegen"
+        system_source.mkdir(parents=True)
+        (system_source / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
+        (skills_dir / ".system").symlink_to(Path("../../skills-system"))
+        bridge_link = skills_dir / "imagegen"
+        bridge_link.symlink_to(Path("../../skills-system/imagegen"))
+
+        fake_entry = SimpleNamespace(
+            name="imagegen",
+            source_dir=system_source,
+            category="skills-system",
+            description="Generate images.",
+        )
+        with mock.patch("ask.commands.skills_impl.discover_skill_entries", return_value=[fake_entry]):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=True,
+                projection="flat",
+            )
+
+        self.assertEqual(result.status, "success")
+        matching_deletes = [
+            item
+            for item in result.data["plan"]["deletes"]
+            if "Removed first-level system bridge alias" in item and "imagegen" in item
+        ]
+        matching_logs = [
+            item
+            for item in result.data["logs"]
+            if "Removed first-level system bridge alias" in item and "imagegen" in item
+        ]
+        self.assertEqual(matching_deletes, matching_logs)
+        self.assertEqual(len(matching_deletes), 1)
+        self.assertTrue(bridge_link.is_symlink())
+
     def test_create_symlink_preserves_current_target_without_unlinking(self) -> None:
         target = self.repo_root / ".agents" / "skills" / ".system"
         target.symlink_to(Path("../../skills-system"))

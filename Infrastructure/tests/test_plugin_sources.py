@@ -68,3 +68,20 @@ def test_copy_directory_contents_rejects_escaping_symlink(tmp_path: Path) -> Non
 
     with pytest.raises(ValueError, match="Unsafe plugin cache symlink"):
         copy_directory_contents(source, target)
+
+
+def test_copy_directory_contents_validates_before_replacing_target(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    target = tmp_path / "target"
+    outside = tmp_path / "outside.json"
+    existing = target / "existing.json"
+    source.mkdir()
+    target.mkdir()
+    outside.write_text("secret\n", encoding="utf-8")
+    existing.write_text("keep\n", encoding="utf-8")
+    (source / "plugin.json").symlink_to(os.path.relpath(outside, source))
+
+    with pytest.raises(ValueError, match="Unsafe plugin cache symlink"):
+        copy_directory_contents(source, target)
+
+    assert existing.read_text(encoding="utf-8") == "keep\n"
