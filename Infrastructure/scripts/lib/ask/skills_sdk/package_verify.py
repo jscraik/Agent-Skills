@@ -87,9 +87,9 @@ def _entry_is_symlink(info: zipfile.ZipInfo) -> bool:
 
 
 def _unsafe_archive_entry(name: str) -> str | None:
-    if not name or name.endswith("/") or "\x00" in name:
+    if not name or "\x00" in name:
         return None
-    normalized = name.replace("\\", "/")
+    normalized = name.replace("\\", "/").rstrip("/")
     path = PurePosixPath(normalized)
     if path.is_absolute():
         return "absolute_archive_path"
@@ -131,10 +131,9 @@ def _trusted_provenance(
     provenance = manifest.get("provenance") if isinstance(manifest, dict) else None
     if not isinstance(provenance, dict):
         return False, {}
-    if provenance.get("trusted") is True:
-        return True, provenance
     sources = normalized_list(provenance.get("source") or provenance.get("sources"))
-    trusted = any(source in trusted_sources for source in sources)
+    normalized_sources = {source.strip().lower() for source in sources if source.strip()}
+    trusted = any(source in trusted_sources for source in normalized_sources)
     return trusted, provenance
 
 
@@ -206,7 +205,7 @@ def verify_archive_package(
     manifest: dict[str, Any] | None = None
     manifest_path: str | None = None
     rollback_journal: dict[str, Any] = {"status": "missing", "path": None, "entries": []}
-    trusted_sources = trusted_sources or set(TRUSTED_PROVENANCE_SOURCES)
+    trusted_sources = {source.strip().lower() for source in (trusted_sources or TRUSTED_PROVENANCE_SOURCES)}
     runtime_before = _runtime_sentinels(repo_root)
     archive_sha256 = sha256_file(archive_path) if archive_path.is_file() else None
 
@@ -465,7 +464,7 @@ def verify_skill_directory(repo_root: Path, skill_md: Path, query: str) -> dict[
             )
         )
     provenance_values = normalized_list(values.get("provenance"))
-    provenance_trusted = bool(provenance_values)
+    provenance_trusted = any(value.strip().lower() in TRUSTED_PROVENANCE_SOURCES for value in provenance_values)
     if not provenance_trusted:
         blockers.append(
             _blocker(

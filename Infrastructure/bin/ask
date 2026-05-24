@@ -1253,9 +1253,23 @@ def main():
                     identity = package.get("target_identity") or {}
                     source = identity.get("path") or package.get("canonical_source_path") or package.get("query")
                     print(f"Source: {source}")
+                    event = package.get("lifecycle_event") or {}
+                    if event.get("event_type"):
+                        print(f"Event: {event.get('event_type')}")
+                    contract = package.get("package_contract") or {}
+                    values = contract.get("values") or {}
+                    if contract.get("readiness_level"):
+                        print(f"Readiness level: {contract.get('readiness_level')}")
+                    if values.get("compatible_roles"):
+                        print(f"Compatible roles: {', '.join(values.get('compatible_roles'))}")
+                    if values.get("runtime_needs"):
+                        print(f"Runtime needs: {len(values.get('runtime_needs'))} declared")
+                    if values.get("provenance"):
+                        print(f"Provenance: {values.get('provenance')}")
                     gate = package.get("gate_summary", {})
                     if gate:
                         print(f"Install ready: {gate.get('install_ready')}")
+                        print(f"Checkout test: {gate.get('checkout_test_status')}")
                         print(f"Promotion: {gate.get('promotion_status')}")
                     print_first_validation_command(package)
                     print(f"Next: {package.get('next_command')}")

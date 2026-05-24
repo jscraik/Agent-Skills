@@ -782,5 +782,24 @@
     </table>
     <p>Governor disposition: PU-007 local implementation, review stack, docs evidence, and repo validation are green. The slice is still not complete until this state is committed, pushed to PR #196, and a fresh post-push subagent-managed triage artifact proves the new head is safe.</p>
   </section>
+  <section class="entry validation">
+    <h2>PU-007 REVIEW REMEDIATION: Package Verification Trust Boundary</h2>
+    <p>Runtime truth: the retry post-push subagent wrote <code>artifacts/reviews/jsc-351-pu007-conformance/subagent-post-push-d3d14cd.md</code> from the correct worktree. Live checks on <code>d3d14cd7a1944cf6bcafc76bc67d9818a014622f</code> were green, including CodeRabbit, but the report blocked progression because CodeRabbit posted active inline comments against the PU-007 package verification implementation.</p>
+    <p>Findings accepted: <code>skills package verify</code> still invoked package readiness with checkout-test behavior for directory and handle targets, directory/handle verification did not normalize its payload before returning, archive traversal checks skipped directory entries ending in <code>/</code>, archive manifests could self-attest trust with <code>provenance.trusted</code>, directory verification trusted any non-empty provenance value, and CLI integration tests did not assert the stable machine payload shape. The package human renderer had also lost lifecycle/readiness lines during the prior facade-size fix.</p>
+    <p>Fix applied: package verification now keeps directory and handle verification read-only, normalizes the returned payload consistently, validates traversal directory entries, requires allowlisted archive provenance, requires trusted directory provenance values, restores package human-output lifecycle/readiness lines, and strengthens CLI-envelope tests. New tests cover directory traversal archive entries, manifest self-attestation rejection, directory provenance trust, and CLI payload shape.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>python3 -m py_compile Infrastructure/bin/ask Infrastructure/scripts/lib/ask/commands/skills_impl.py Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py Infrastructure/tests/test_ask_skills_conformance.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv python3 -m pytest Infrastructure/tests/test_ask_skills_conformance.py -q</code></td><td>Pass: 12 tests.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --with pytest --with pyyaml --python 3.12 python -m pytest Infrastructure/tests -q -k 'conformance or package_verify or package'</code></td><td>Pass: 99 tests, 1558 deselected, 6 subtests.</td></tr>
+      <tr><td><code>./bin/ask skills conformance run --suite codex-parity --json --robot --evidence-dir /private/tmp/jsc351-pu007-remediation-evidence-final</code></td><td>Pass: 12 cases, 12 passed, 0 blocked.</td></tr>
+      <tr><td><code>./bin/ask skills package verify skill-builder --json --robot</code></td><td>Pass: no install, extraction, network, or runtime-root mutation.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+      <tr><td><code>git diff --check</code></td><td>Pass.</td></tr>
+      <tr><td><code>bash scripts/validate-codestyle.sh</code></td><td>Pass: required failures 0, warn-only issues 0.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv ./bin/ask repo validate --json --robot</code></td><td>Pass: required failures 0, warn-only issues 0; logs at <code>Infrastructure/artifacts/validation/20260524T044528Z</code>.</td></tr>
+    </table>
+    <p>Governor disposition: PU-007 remains active. The safe next action is to commit and push this remediation, then rerun live checks and subagent-managed post-push triage on the new PR head. No next slice may start until that fresh triage reports no active review blockers.</p>
+  </section>
 </body>
 </html>

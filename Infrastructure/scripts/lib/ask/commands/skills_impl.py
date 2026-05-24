@@ -2830,7 +2830,7 @@ def skills_package_verify(
         warnings: list[dict[str, Any]] = []
         rule_evidence: list[str] = []
         if not candidate_path.exists():
-            package_result = skills_package(repo_root, query, strict=True, checkout_test=True)
+            package_result = skills_package(repo_root, query, strict=True, checkout_test=False)
             package_payload = package_result.data.get("skill_package", {})
             source_path_value = package_payload.get("canonical_source_path")
             if source_path_value:
@@ -2849,7 +2849,7 @@ def skills_package_verify(
             try:
                 audit_target = candidate_path.resolve().relative_to(repo_root.resolve()).as_posix()
                 target_identity["audit_target"] = audit_target
-                package_result = skills_package(repo_root, audit_target, strict=True, checkout_test=True)
+                package_result = skills_package(repo_root, audit_target, strict=True, checkout_test=False)
                 package_payload = package_result.data.get("skill_package", {})
             except ValueError:
                 package_payload = {}
@@ -2890,11 +2890,19 @@ def skills_package_verify(
             rule_evidence.append("skill_md_present:false")
 
         provenance_text = str(provenance or "").strip()
-        provenance_trusted = bool(provenance_text) and provenance_text.lower() not in {
+        normalized_provenance = provenance_text.lower()
+        trusted_sources = {
+            source.strip().lower()
+            for source in (trusted_provenance or "").split(",")
+            if source.strip()
+        } or None
+        provenance_trusted = bool(provenance_text) and normalized_provenance not in {
             "unknown",
             "untrusted",
             "external-untrusted",
         }
+        if trusted_sources is not None:
+            provenance_trusted = normalized_provenance in trusted_sources
         if provenance_trusted:
             rule_evidence.append("provenance_trusted:true")
         else:
@@ -2923,7 +2931,7 @@ def skills_package_verify(
                     "name": "package_readiness",
                     "status": "pass" if package_result is None or package_result.status == "success" else "fail",
                     "evidence": {
-                        "command": _skills_validation_command("package", query, "--strict", "--checkout-test"),
+                        "command": _skills_validation_command("package", query, "--strict"),
                     },
                 },
                 {
@@ -2955,6 +2963,11 @@ def skills_package_verify(
             "validation_commands": [validation_command],
             "next_command": validation_command,
         }
+        verification = _normalize_package_verification(
+            query=query,
+            validation_command=validation_command,
+            verification=verification,
+        )
         result.data["skill_package_verification"] = verification
         if verification["status"] == "blocked":
             result.status = "error"

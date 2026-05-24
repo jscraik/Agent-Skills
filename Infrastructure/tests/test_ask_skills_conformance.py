@@ -16,6 +16,7 @@ from ask.commands.skills_impl import (  # noqa: E402
     skills_conformance_run,
     skills_package_verify,
 )
+from ask.skills_sdk.package_verify import verify_skill_directory  # noqa: E402
 
 
 def _sha256(path: Path) -> str:
@@ -37,13 +38,17 @@ def _write_package_archive(
     path: Path,
     *,
     provenance_source: str = "agent-skills",
+    provenance_trusted: bool | None = None,
     rollback_path: str = "rollback.jsonl",
     skill_digest: str | None = None,
 ) -> str:
     skill_text = "---\nname: sample-skill\ndescription: Use when verifying sample packages.\n---\n"
     skill_bytes = skill_text.encode("utf-8")
+    provenance = {"source": provenance_source}
+    if provenance_trusted is not None:
+        provenance["trusted"] = provenance_trusted
     manifest = {
-        "provenance": {"source": provenance_source},
+        "provenance": provenance,
         "files": [{"path": "SKILL.md", "sha256": skill_digest or hashlib.sha256(skill_bytes).hexdigest()}],
         "rollback_journal": rollback_path,
     }
@@ -144,6 +149,53 @@ class TestAskSkillsConformance(unittest.TestCase):
         verification = result.data["skill_package_verification"]
         self.assertTrue(any(item["rule_id"] == "archive_path_traversal" for item in verification["blockers"]))
 
+    def test_package_verify_blocks_unsafe_archive_directory_member(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = Path(temp_dir) / "skill.zip"
+            rollback_journal = Path(temp_dir) / "rollback.jsonl"
+            directory_info = zipfile.ZipInfo("../escape/")
+            with zipfile.ZipFile(archive_path, "w") as archive:
+                archive.writestr(directory_info, "")
+                archive.writestr("rollback.jsonl", '{"action":"verify","decision":"blocked"}\n')
+                archive.writestr(
+                    "skill-package-manifest.json",
+                    json.dumps({"provenance": {"source": "agent-skills"}, "files": [], "rollback_journal": "rollback.jsonl"}),
+                )
+            _write_rollback_journal(rollback_journal)
+
+            result = skills_package_verify(
+                REPO_ROOT,
+                str(archive_path),
+                expected_sha256=_sha256(archive_path),
+                rollback_journal=str(rollback_journal),
+            )
+
+        self.assertEqual(result.status, "error")
+        verification = result.data["skill_package_verification"]
+        self.assertTrue(any(item["rule_id"] == "archive_path_traversal" for item in verification["blockers"]))
+
+    def test_package_verify_rejects_manifest_self_attested_trust(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            archive_path = Path(temp_dir) / "skill.zip"
+            rollback_journal = Path(temp_dir) / "rollback.jsonl"
+            expected_digest = _write_package_archive(
+                archive_path,
+                provenance_source="external-untrusted",
+                provenance_trusted=True,
+            )
+            _write_rollback_journal(rollback_journal)
+
+            result = skills_package_verify(
+                REPO_ROOT,
+                str(archive_path),
+                expected_sha256=expected_digest,
+                rollback_journal=str(rollback_journal),
+            )
+
+        self.assertEqual(result.status, "error")
+        verification = result.data["skill_package_verification"]
+        self.assertTrue(any(item["rule_id"] == "untrusted_provenance" for item in verification["blockers"]))
+
     def test_package_verify_blocks_symlink_escape(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             archive_path = Path(temp_dir) / "skill.zip"
@@ -184,6 +236,30 @@ class TestAskSkillsConformance(unittest.TestCase):
         self.assertEqual(result.status, "error")
         verification = result.data["skill_package_verification"]
         self.assertTrue(any(item["rule_id"] == "rollback_journal_missing" for item in verification["blockers"]))
+
+    def test_directory_verify_requires_trusted_provenance_value(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_md = Path(temp_dir) / "sample" / "SKILL.md"
+            skill_md.parent.mkdir()
+            skill_md.write_text(
+                "---\n"
+                "name: sample-skill\n"
+                "description: Use when verifying sample packages.\n"
+                "version: 1.0.0\n"
+                "compatible_roles: default\n"
+                "runtime_needs: local files\n"
+                "maturity: fixture\n"
+                "provenance: external-untrusted\n"
+                "share_readiness: ready\n"
+                "---\n",
+                encoding="utf-8",
+            )
+
+            verification = verify_skill_directory(REPO_ROOT, skill_md, str(skill_md.parent))
+
+        self.assertEqual(verification["status"], "blocked")
+        self.assertFalse(verification["provenance_identity"]["trusted"])
+        self.assertTrue(any(item["rule_id"] == "untrusted_provenance" for item in verification["blockers"]))
 
     def test_conformance_run_writes_replayable_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -229,7 +305,18 @@ class TestAskSkillsConformance(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertIn("trace_id", output)
+        self.assertIsInstance(output["metadata"], dict)
+        self.assertTrue(output["metadata"]["command"].startswith("skills package verify "))
+        self.assertIn("--expected-sha256", output["metadata"]["command"])
+        self.assertIn("--rollback-journal", output["metadata"]["command"])
+        self.assertIn("skill_package_verification", output["data"])
+        self.assertEqual(output["errors"], [])
         verification = output["data"]["skill_package_verification"]
+        self.assertEqual(verification["schema_version"], "skill-package-verify.v1")
+        self.assertIn("next_command", verification)
+        self.assertIn("checks", verification)
         self.assertEqual(verification["status"], "pass")
         self.assertFalse(verification["mutation_status"]["runtime_roots_mutated"])
 
@@ -252,7 +339,18 @@ class TestAskSkillsConformance(unittest.TestCase):
 
         self.assertIn(result.returncode, {0, 2}, result.stderr)
         output = json.loads(result.stdout)
-        self.assertIn(output["data"]["skills_conformance"]["status"], {"pass", "blocked"})
+        self.assertIn(output["status"], {"success", "error"})
+        self.assertIn("trace_id", output)
+        self.assertIsInstance(output["metadata"], dict)
+        self.assertTrue(output["metadata"]["command"].startswith("skills conformance run "))
+        self.assertIn("--suite codex-parity", output["metadata"]["command"])
+        self.assertIn("--evidence-dir", output["metadata"]["command"])
+        self.assertIn("skills_conformance", output["data"])
+        conformance = output["data"]["skills_conformance"]
+        self.assertEqual(conformance["schema_version"], "skills-conformance-evidence.v1")
+        self.assertIn("cases", conformance)
+        self.assertIn("checks", conformance)
+        self.assertIn(conformance["status"], {"pass", "blocked"})
 
 
 if __name__ == "__main__":
