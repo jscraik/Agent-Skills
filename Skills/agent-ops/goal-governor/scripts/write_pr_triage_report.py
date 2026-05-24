@@ -23,6 +23,15 @@ class CommandResult:
 
 Runner = Callable[[Sequence[str], Path], CommandResult]
 
+REVIEW_THREADS_QUERY = (
+    "query($owner:String!,$repo:String!,$number:Int!){"
+    "repository(owner:$owner,name:$repo){"
+    "pullRequest(number:$number){"
+    "reviewThreads(first:100){"
+    "nodes{id isResolved comments(first:50){nodes{databaseId}}}"
+    "}}}}"
+)
+
 
 def run_command(command: Sequence[str], cwd: Path) -> CommandResult:
     completed = subprocess.run(
@@ -84,7 +93,27 @@ def review_comment_stale_for_head(comment: object, expected_head: str) -> bool:
     return comment.get("line") is None and bool(comment_head) and comment_head != expected_head
 
 
+def resolved_review_thread_comment_ids(review_threads: object) -> set[int]:
+    if not isinstance(review_threads, dict):
+        return set()
+    try:
+        nodes = review_threads["data"]["repository"]["pullRequest"]["reviewThreads"]["nodes"]
+    except (KeyError, TypeError):
+        return set()
+    resolved_ids: set[int] = set()
+    for thread in nodes if isinstance(nodes, list) else []:
+        if not isinstance(thread, dict) or not thread.get("isResolved"):
+            continue
+        comments = thread.get("comments")
+        comment_nodes = comments.get("nodes") if isinstance(comments, dict) else []
+        for comment in comment_nodes if isinstance(comment_nodes, list) else []:
+            if isinstance(comment, dict) and isinstance(comment.get("databaseId"), int):
+                resolved_ids.add(comment["databaseId"])
+    return resolved_ids
+
+
 def collect_results(worktree: Path, repo: str, pr_number: str, runner: Runner) -> dict[str, CommandResult]:
+    owner, repo_name = repo.split("/", 1)
     return {
         "pwd": runner(("pwd",), worktree),
         "branch": runner(("git", "branch", "--show-current"), worktree),
@@ -106,6 +135,22 @@ def collect_results(worktree: Path, repo: str, pr_number: str, runner: Runner) -
         "checks": runner(("gh", "pr", "checks", pr_number, "--repo", repo, "--watch=false"), worktree),
         "reviews": runner(("gh", "api", f"repos/{repo}/pulls/{pr_number}/reviews"), worktree),
         "comments": runner(("gh", "api", f"repos/{repo}/pulls/{pr_number}/comments"), worktree),
+        "review_threads": runner(
+            (
+                "gh",
+                "api",
+                "graphql",
+                "-f",
+                f"owner={owner}",
+                "-f",
+                f"repo={repo_name}",
+                "-F",
+                f"number={pr_number}",
+                "-f",
+                f"query={REVIEW_THREADS_QUERY}",
+            ),
+            worktree,
+        ),
     }
 
 
@@ -124,6 +169,7 @@ def classify(
     pr_view = parse_json_object(results["pr_view"])
     reviews = parse_json_list(results["reviews"])
     comments = parse_json_list(results["comments"])
+    review_threads = parse_json_object(results["review_threads"])
 
     facts["pwd"] = pwd or "unknown"
     facts["branch"] = branch or "unknown"
@@ -181,31 +227,41 @@ def classify(
     if comments is None:
         facts["inline_comments"] = "unknown"
         facts["addressed_inline_comments"] = "unknown"
+        facts["resolved_thread_inline_comments"] = "unknown"
         facts["stale_inline_comments"] = "unknown"
         facts["active_inline_comments"] = "unknown"
         blockers.append("comments_unreadable")
     else:
+        resolved_comment_ids = resolved_review_thread_comment_ids(review_threads)
         addressed_comments = [
             comment
             for comment in comments
             if review_comment_marked_addressed(comment)
+            or (isinstance(comment, dict) and comment.get("id") in resolved_comment_ids)
         ]
         stale_comments = [
             comment
             for comment in comments
             if not review_comment_marked_addressed(comment)
+            and not (isinstance(comment, dict) and comment.get("id") in resolved_comment_ids)
             and review_comment_stale_for_head(comment, expected_head)
         ]
         active_comments = [
             comment
             for comment in comments
             if not review_comment_marked_addressed(comment)
+            and not (isinstance(comment, dict) and comment.get("id") in resolved_comment_ids)
             and not review_comment_stale_for_head(comment, expected_head)
         ]
         facts["inline_comments"] = str(len(comments))
         facts["addressed_inline_comments"] = str(len(addressed_comments))
+        facts["resolved_thread_inline_comments"] = str(len(resolved_comment_ids))
         facts["stale_inline_comments"] = str(len(stale_comments))
         facts["active_inline_comments"] = str(len(active_comments))
+        if active_comments and (results["review_threads"].returncode != 0 or review_threads is None):
+            blockers.append(
+                "review_threads_unreadable: unresolved inline comments could not be checked against review thread state"
+            )
         if active_comments:
             blockers.append(
                 f"review_comments_present: {len(active_comments)} inline review comments require classification or remediation"
@@ -262,6 +318,7 @@ def render_report(
         f"- independent GitHub reviews: {facts.get('independent_reviews', 'unknown')}",
         f"- inline review comments: {facts.get('inline_comments', 'unknown')}",
         f"- addressed inline review comments: {facts.get('addressed_inline_comments', 'unknown')}",
+        f"- resolved-thread inline comments: {facts.get('resolved_thread_inline_comments', 'unknown')}",
         f"- stale inline review comments: {facts.get('stale_inline_comments', 'unknown')}",
         f"- active inline review comments: {facts.get('active_inline_comments', 'unknown')}",
         "",

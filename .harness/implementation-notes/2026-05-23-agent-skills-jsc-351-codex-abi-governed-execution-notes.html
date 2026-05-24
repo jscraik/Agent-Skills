@@ -819,5 +819,20 @@
     </table>
     <p>Governor disposition: PU-007 remains active. The safe next action is to commit and push this final review remediation, wait for fresh PR checks, and require a latest-head subagent triage artifact before any next slice begins.</p>
   </section>
+  <section class="entry validation">
+    <h2>PU-007 GOVERNANCE REMEDIATION: Review Thread Resolution Truth</h2>
+    <p>Runtime truth: PR #196 checks were green on <code>51acc19c19877bee5a09ebca7cc6c9e3efaf9f92</code>, and GitHub GraphQL showed CodeRabbit comment <code>3293904018</code> belonged to resolved review thread <code>PRRT_kwDOQ6nR9s6EWtgK</code>. The existing governor triage report still blocked progression because it only recognized inline comment bodies containing <code>Addressed in commit</code>.</p>
+    <p>Failure category: weak observability and claim-vs-evidence verification. The runtime truth lived in GitHub review-thread state, but the local triage validator only consumed the lower-fidelity comments endpoint. That created a false blocker and would have caused repeated human steering or unsafe waiver pressure.</p>
+    <p>Fix applied: <code>write_pr_triage_report.py</code> now queries GitHub review threads through GraphQL, treats comments inside resolved review threads as addressed evidence, reports a resolved-thread inline comment count, and keeps unresolved comments blocked. Added a regression test for an unedited inline comment body inside a resolved thread.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>python3 -m py_compile Skills/agent-ops/goal-governor/scripts/write_pr_triage_report.py Skills/agent-ops/goal-governor/tests/test_write_pr_triage_report.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Skills/agent-ops/goal-governor/tests/test_write_pr_triage_report.py</code></td><td>Pass: 13 tests.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/write_pr_triage_report.py --worktree /private/tmp/agent-skills-jsc351-pu006 --repo jscraik/Agent-Skills --pr 196 --head 51acc19c19877bee5a09ebca7cc6c9e3efaf9f92 --output artifacts/reviews/jsc-351-pu007-conformance/governor-post-push-51acc19c.md</code></td><td>Pass: 19 addressed inline comments, 19 resolved-thread inline comments, 0 active comments, no blockers.</td></tr>
+      <tr><td><code>bash scripts/validate-codestyle.sh</code></td><td>Pass: required failures 0, warn-only issues 0.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv ./bin/ask repo validate --json --robot</code></td><td>Pass: required failures 0, warn-only issues 0; logs at <code>Infrastructure/artifacts/validation/20260524T052034Z</code>.</td></tr>
+    </table>
+    <p>Governor disposition: commit and push this governance hardening, then rerun latest-head checks and subagent-managed triage. No next slice may start until the pushed head passes with the updated triage truth model.</p>
+  </section>
 </body>
 </html>

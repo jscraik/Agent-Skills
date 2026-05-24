@@ -636,6 +636,8 @@ tasks:
       - "Infrastructure/scripts/lib/ask/**"
       - "Infrastructure/config/schemas/**"
       - "Infrastructure/tests/**"
+      - "Skills/agent-ops/goal-governor/scripts/write_pr_triage_report.py"
+      - "Skills/agent-ops/goal-governor/tests/test_write_pr_triage_report.py"
       - ".harness/evidence/**"
       - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
       - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
@@ -655,7 +657,7 @@ tasks:
       - "A check with missing runtime proof is represented as pass or warning instead of blocked."
       - "The implementation requires broad command rewrites unrelated to PU-007."
       - "Review stack finds unresolved blocker, architecture drift, or unsafe supply-chain behavior."
-    receipt_id: R047
+    receipt_id: R048
   - id: T016
     type: pm
     assignee: PM

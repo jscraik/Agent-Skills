@@ -29,6 +29,7 @@ def make_runner(
     reviews: list[object] | None = None,
     comments: list[object] | None = None,
     comments_exit: int = 0,
+    review_threads: list[object] | None = None,
     pr_head: str | None = None,
     pr_author: str = "jamiecraik",
 ) -> write_pr_triage_report.Runner:
@@ -36,6 +37,7 @@ def make_runner(
     actual_pr_head = pr_head or expected_head
     actual_reviews = [] if reviews is None else reviews
     actual_comments = [] if comments is None else comments
+    actual_review_threads = [] if review_threads is None else review_threads
 
     def runner(command: tuple[str, ...], cwd: Path) -> write_pr_triage_report.CommandResult:
         assert cwd == worktree
@@ -78,6 +80,25 @@ def make_runner(
             return write_pr_triage_report.CommandResult(command, 0, json.dumps(actual_reviews), "")
         if command[-1].endswith("/comments"):
             return write_pr_triage_report.CommandResult(command, comments_exit, json.dumps(actual_comments), "")
+        if command[:3] == ("gh", "api", "graphql"):
+            return write_pr_triage_report.CommandResult(
+                command,
+                0,
+                json.dumps(
+                    {
+                        "data": {
+                            "repository": {
+                                "pullRequest": {
+                                    "reviewThreads": {
+                                        "nodes": actual_review_threads,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ),
+                "",
+            )
         raise AssertionError(f"unexpected command: {command_text(command)}")
 
     return runner
@@ -248,6 +269,50 @@ def test_report_passes_when_inline_review_comments_are_addressed_for_head() -> N
         assert "status: pass" in report
         assert "inline review comments: 1" in report
         assert "addressed inline review comments: 1" in report
+        assert "active inline review comments: 0" in report
+        assert "review_comments_present" not in report
+
+
+def test_report_passes_when_inline_review_thread_is_resolved() -> None:
+    with TemporaryDirectory() as tmp:
+        worktree = Path(tmp).resolve()
+        report = write_pr_triage_report.write_report(
+            worktree=worktree,
+            repo="jscraik/Agent-Skills",
+            pr_number="196",
+            expected_head="abc123",
+            output_path=Path("artifacts/reviews/triage.md"),
+            runner=make_runner(
+                worktree=worktree,
+                reviews=[
+                    {
+                        "id": 1,
+                        "state": "COMMENTED",
+                        "user": {"login": "coderabbitai[bot]"},
+                    }
+                ],
+                comments=[
+                    {
+                        "id": 12,
+                        "path": "Infrastructure/bin/ask",
+                        "line": 162,
+                        "commit_id": "abc123",
+                        "body": "Restore parser-level validation.",
+                    }
+                ],
+                review_threads=[
+                    {
+                        "id": "thread-1",
+                        "isResolved": True,
+                        "comments": {"nodes": [{"databaseId": 12}]},
+                    }
+                ],
+            ),
+            now=datetime(2026, 5, 24, tzinfo=UTC),
+        )
+
+        assert "status: pass" in report
+        assert "resolved-thread inline comments: 1" in report
         assert "active inline review comments: 0" in report
         assert "review_comments_present" not in report
 
