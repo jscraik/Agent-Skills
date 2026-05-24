@@ -4,7 +4,8 @@
 # validating the migration against ARCHITECTURE.md.
 set -ex
 
-cd /Users/jamiecraik/dev/Agent-Skills/Skills
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT/Skills"
 
 # Move root skills-system
 mkdir -p skills-system
