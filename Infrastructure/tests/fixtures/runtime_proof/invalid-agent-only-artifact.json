@@ -1,0 +1,18 @@
+{
+  "artifact_id": "artifact-agent-only",
+  "artifact_type": "runtime_card",
+  "path": ".harness/evidence/agent-only.json",
+  "source_identity": {
+    "source_paths": [
+      "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+    ],
+    "source_hash": "fixture-sha"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "actor_type": "agent",
+  "mutation_scope": "evidence_write",
+  "visibility_status": "agent_only",
+  "generated_by": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+  "validation_status": "pass",
+  "consumer_contract": "runtime-card.v1"
+}

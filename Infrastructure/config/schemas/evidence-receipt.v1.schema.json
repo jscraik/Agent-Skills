@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-skills.local/schemas/evidence-receipt.v1.schema.json",
+  "title": "Evidence Receipt v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "receipt_id",
+    "claim",
+    "claim_status",
+    "runtime_target",
+    "evidence_type",
+    "source_paths",
+    "verifier",
+    "observed_at"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim_status": {
+      "$ref": "#/definitions/claimStatus"
+    },
+    "runtime_target": {
+      "$ref": "#/definitions/runtimeTarget"
+    },
+    "runtime_status": {
+      "$ref": "#/definitions/runtimeStatus"
+    },
+    "evidence_type": {
+      "type": "string",
+      "enum": ["test", "command", "runtime_event", "artifact", "schema_validation", "ci", "review_state"]
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exit_code": {
+      "type": "integer"
+    },
+    "probe_command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "probe_exit_code": {
+      "type": "integer"
+    },
+    "probe_artifact_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blocker_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_paths": {
+      "$ref": "#/definitions/stringList"
+    },
+    "verifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observed_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blocker": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["evidence_type"],
+        "properties": {
+          "evidence_type": {
+            "const": "command"
+          }
+        }
+      },
+      "then": {
+        "required": ["command", "exit_code"]
+      }
+    },
+    {
+      "if": {
+        "required": ["runtime_status"],
+        "properties": {
+          "runtime_status": {
+            "const": "blocked_runtime"
+          }
+        }
+      },
+      "then": {
+        "required": ["probe_command", "probe_exit_code", "probe_artifact_path", "blocker_class"]
+      }
+    },
+    {
+      "if": {
+        "required": ["claim_status"],
+        "properties": {
+          "claim_status": {
+            "enum": ["blocked", "partial"]
+          }
+        }
+      },
+      "then": {
+        "required": ["blocker"]
+      }
+    }
+  ],
+  "definitions": {
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "claimStatus": {
+      "type": "string",
+      "enum": ["pass", "fail", "blocked", "partial"]
+    },
+    "runtimeTarget": {
+      "type": "string",
+      "enum": ["codex", "agents", "local_model", "fixture"]
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": [
+        "implemented_enforced",
+        "implemented_not_enforced",
+        "scaffolded",
+        "modeled_only",
+        "partial",
+        "blocked_runtime",
+        "stale_or_drifted"
+      ]
+    }
+  }
+}

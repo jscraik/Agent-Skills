@@ -1,0 +1,9 @@
+{
+  "session_id": "fixture-session-invalid-001",
+  "runtime_target": "not-a-runtime",
+  "runtime_status": "modeled_only",
+  "created_at": "2026-05-24T22:45:00Z",
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "actor_type": "agent",
+  "visibility_status": "user_observable"
+}

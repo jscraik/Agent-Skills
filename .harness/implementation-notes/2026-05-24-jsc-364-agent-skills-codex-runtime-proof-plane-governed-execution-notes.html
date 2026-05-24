@@ -217,7 +217,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-24T22:18:32Z">2026-05-24T22:18:32Z</time>
+          <time datetime="2026-05-24T23:24:12Z">2026-05-24T23:24:12Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -225,7 +225,7 @@
         </div>
         <div class="pill">
           <span class="label">Active Task</span>
-          <code>Delivery</code> PU-001 branch and PR packaging
+          <code>T005</code> PU-003 active after PU-002 review closure
         </div>
       </div>
     </header>
@@ -343,9 +343,21 @@
           </tr>
           <tr>
             <td>PU-001</td>
-            <td><span class="status">passed, packaging</span></td>
+            <td><span class="status">passed, PR opened</span></td>
             <td>Command-handle drift repair and repo doctor baseline. Runtime projections were repaired through the generator, and runtime-target validation now stays inside the proof adapter.</td>
-            <td><code>skills handles</code>, <code>repo doctor</code>, doctor tests, CLI implementation tests, goal board validation, and six review artifacts pass. Broad PR gates currently hit pre-existing projection drift in plugin cache mirrors.</td>
+            <td><code>skills handles</code>, <code>repo doctor</code>, doctor tests, CLI implementation tests, goal board validation, and six review artifacts pass. PR 200 is open; broad PR gates currently hit projection drift and <code>pr-template</code>.</td>
+          </tr>
+          <tr>
+            <td>PU-002</td>
+            <td><span class="status">passed, pending delivery packaging</span></td>
+            <td>P0 RuntimeCard, EvidenceReceipt, ArtifactRecord, RuntimeSessionSummary, and RecoveryPlanSummary schemas plus dependency-free runtime proof validator.</td>
+            <td><code>validate_runtime_cards.py --help</code>, valid RuntimeCard fixture validation, runtime proof validation tests, doctor regression tests, py_compile, goal board validation, and final review artifacts pass.</td>
+          </tr>
+          <tr>
+            <td>PU-003</td>
+            <td><span class="status">active</span></td>
+            <td>Codex parity conformance status split: keep modeled conformance, live runtime parity, and blocked runtime separate.</td>
+            <td>Next validation target is <code>./bin/ask skills conformance run --suite codex-parity --evidence-dir /tmp/jsc-364-codex-parity --json --robot</code> plus focused tests.</td>
           </tr>
         </tbody>
       </table>
@@ -449,11 +461,65 @@
         </ul>
         <p><strong>Tradeoff:</strong> I am recording the broad-gate blocker as delivery truth rather than broadening PU-001 into plugin-cache projection repair. The focused PU-001 proof remains green.</p>
       </article>
+
+      <article class="entry">
+        <h3>PU-001 PR opened and green-sweep launched</h3>
+        <time datetime="2026-05-24T22:23:48Z">2026-05-24T22:23:48Z</time>
+        <p>PU-001 was committed, pushed, and opened as PR 200: <code>https://github.com/jscraik/Agent-Skills/pull/200</code>. A PR green-sweep worker is monitoring live PR truth while PU-002 continues on a stacked branch.</p>
+        <ul>
+          <li>Branch: <code>codex/jsc-364-runtime-proof-plane-pu001</code>.</li>
+          <li>Commit: <code>13a8f14dc</code>.</li>
+          <li>PR sweep result so far: CodeRabbit is passing; <code>pr-template</code> is failing; CodeQL/Semgrep were still pending at first sweep.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-002 implementation: runtime proof schemas and validator</h3>
+        <time datetime="2026-05-24T22:35:00Z">2026-05-24T22:35:00Z</time>
+        <p>Implemented the P0 schema layer as five schema files under <code>Infrastructure/config/schemas</code> and a dependency-free validator at <code>Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py</code>.</p>
+        <p><strong>Decision:</strong> use separate schema files for each deep evidence concept instead of one combined schema. That makes RuntimeCard, EvidenceReceipt, ArtifactRecord, RuntimeSessionSummary, and RecoveryPlanSummary independently reusable by later command paths.</p>
+        <p><strong>Tradeoff:</strong> the validator enforces the P0 trust fields directly instead of implementing a full JSON Schema engine. This keeps CI dependency-free and avoids P1 telemetry scope, but means schema evolution must update both schema files and the validator's explicit checks.</p>
+        <ul>
+          <li><code>python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py --help</code> passed.</li>
+          <li><code>python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py Infrastructure/tests/fixtures/runtime_proof/valid-runtime-card.json --require-shared-workspace --json</code> passed.</li>
+          <li><code>python3 -m pytest Infrastructure/tests/test_runtime_proof_validation.py -q</code> passed with 20 tests, including schema-backed enum/required-rule loading, explicit unknown JSON path coverage, operator-facing diagnostics, no-artifact directory false-success prevention, order-insensitive conditional enum matching, and single-value conditional enum matching.</li>
+          <li><code>python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q</code> passed with 17 tests and 15 subtests.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-002 review findings folded back</h3>
+        <time datetime="2026-05-24T23:14:47Z">2026-05-24T23:14:47Z</time>
+        <p>Reviewer artifacts landed for adversarial, agent-native, testing, simplify, unslopify, and HE code-review coverage. I accepted the concrete testing and maintenance findings rather than carrying them as notes.</p>
+        <ul>
+          <li>Added a negative test proving explicit unknown JSON paths fail while unrelated JSON discovered through <code>--evidence-dir</code> is skipped.</li>
+          <li>Added schema/validator parity coverage for runtime targets, statuses, evidence types, actor types, mutation scopes, visibility statuses, artifact types, and evidence-receipt conditional requirements.</li>
+          <li>Updated the goal receipt and state file so the validation evidence says <code>20 passed</code> instead of stale intermediate test counts.</li>
+          <li>Moved enum vocabularies, top-level required fields, command descriptors, and evidence-receipt conditional requirements out of duplicated Python constants; the validator now reads those values from the schema files and keeps direct checks for diagnostics and shared-workspace policy.</li>
+          <li>Fixed an adversarial false-success case where an evidence directory containing only unknown JSON could pass with <code>checked_count: 0</code>.</li>
+          <li>Fixed a second adversarial drift case where reordering <code>blocked</code>/<code>partial</code> in the schema conditional enum could disable the required <code>blocker</code> check.</li>
+          <li>Fixed the residual single-value enum conditional case so future schema changes using <code>enum: ["command"]</code> still match string markers correctly.</li>
+        </ul>
+        <p><strong>Tradeoff:</strong> I did not replace the validator with a full schema-first engine in this slice. The parity test is the smaller P0 guardrail; a schema-generation or schema-first refactor belongs in a later simplification slice if the contract expands.</p>
+      </article>
+
+      <article class="entry">
+        <h3>PU-002 closed after final review stack</h3>
+        <time datetime="2026-05-24T23:24:12Z">2026-05-24T23:24:12Z</time>
+        <p>Final current-state review artifacts are present for adversarial, agent-native, testing, simplify, unslopify, and HE code-review coverage. The current set reports no PU-002 P0 blockers, so I marked <code>T004</code> done and moved the board to <code>T005</code>.</p>
+        <ul>
+          <li><code>python3 -m pytest Infrastructure/tests/test_runtime_proof_validation.py -q</code> passed with 20 tests.</li>
+          <li><code>python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py Infrastructure/tests/fixtures/runtime_proof/valid-runtime-card.json --require-shared-workspace --json</code> passed.</li>
+          <li><code>python3 -m py_compile Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py Infrastructure/tests/test_runtime_proof_validation.py</code> passed.</li>
+          <li><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane</code> passed.</li>
+        </ul>
+        <p><strong>Remaining delivery note:</strong> PU-002 still needs slice packaging, push, PR creation or stacking decision, and PR green-sweep handoff before it should be described as delivered.</p>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>Stage and commit PU-001, open the PR with the projection-drift blocker called out, then continue PU-002 runtime evidence schemas and validator work inside the existing proof-plane module boundaries.</p>
+      <p>Package PU-002 safely, decide whether to open it as a stacked PR or first repair PR 200's template/projection blockers, then continue PU-003 without mixing delivery truth into local runtime proof.</p>
     </section>
   </main>
 </body>

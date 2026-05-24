@@ -1,0 +1,11 @@
+{
+  "receipt_id": "receipt-missing-runtime-target",
+  "claim": "Runtime target must be explicit",
+  "claim_status": "pass",
+  "evidence_type": "schema_validation",
+  "source_paths": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+  ],
+  "verifier": "validate_runtime_cards.py",
+  "observed_at": "2026-05-24T22:30:00Z"
+}

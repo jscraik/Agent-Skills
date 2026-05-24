@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-skills.local/schemas/artifact-record.v1.schema.json",
+  "title": "Artifact Record v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "artifact_id",
+    "artifact_type",
+    "path",
+    "source_identity",
+    "workspace_root",
+    "actor_type",
+    "mutation_scope",
+    "visibility_status",
+    "generated_by",
+    "validation_status",
+    "consumer_contract"
+  ],
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "type": "string",
+      "enum": ["runtime_card", "preview", "package", "schema_report", "trace", "verifier_output"]
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_identity": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["source_paths"],
+      "properties": {
+        "source_paths": {
+          "$ref": "#/definitions/stringList"
+        },
+        "source_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_mtime": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "workspace_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor_type": {
+      "$ref": "#/definitions/actorType"
+    },
+    "mutation_scope": {
+      "$ref": "#/definitions/mutationScope"
+    },
+    "visibility_status": {
+      "$ref": "#/definitions/visibilityStatus"
+    },
+    "generated_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validation_status": {
+      "$ref": "#/definitions/claimStatus"
+    },
+    "consumer_contract": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "definitions": {
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "actorType": {
+      "type": "string",
+      "enum": ["user", "agent", "system"]
+    },
+    "mutationScope": {
+      "type": "string",
+      "enum": ["read_only", "evidence_write", "repo_write", "tracker_mutation"]
+    },
+    "visibilityStatus": {
+      "type": "string",
+      "enum": ["user_observable", "agent_only"]
+    },
+    "claimStatus": {
+      "type": "string",
+      "enum": ["pass", "fail", "blocked", "partial"]
+    }
+  }
+}

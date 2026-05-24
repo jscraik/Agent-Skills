@@ -1,0 +1,19 @@
+{
+  "receipt_id": "receipt-missing-blocker-class",
+  "claim": "Blocked runtime evidence must include a typed blocker class",
+  "claim_status": "blocked",
+  "runtime_target": "codex",
+  "runtime_status": "blocked_runtime",
+  "evidence_type": "command",
+  "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+  "exit_code": 2,
+  "probe_command": "codex runtime probe",
+  "probe_exit_code": 127,
+  "probe_artifact_path": ".harness/evidence/runtime-probe.json",
+  "source_paths": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+  ],
+  "verifier": "validate_runtime_cards.py",
+  "observed_at": "2026-05-24T22:30:00Z",
+  "blocker": "Codex runtime probe unavailable in fixture mode"
+}

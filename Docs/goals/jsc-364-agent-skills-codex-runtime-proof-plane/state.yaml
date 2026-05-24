@@ -45,10 +45,10 @@ rules:
 checks:
   dirty_fingerprint: "main...origin/main with untracked governed prompt observed 2026-05-24T21:41:48Z"
   last_verification:
-    command: "PU-001 delivery packaging gates: branch creation, codestyle, repo validate, memory contract"
-    outcome: blocked_by_projection_drift
-    checked_at: "2026-05-24T22:18:32Z"
-    detail: "Dedicated branch codex/jsc-364-runtime-proof-plane-pu001 created; memory.json jq contract passes; bash scripts/validate-codestyle.sh and ./bin/ask repo validate --json --robot both fail on projection-integrity drift in cache-harness-engineering and cache-skill-factory, outside PU-001 touched files."
+    command: "PU-002 closure validation: runtime proof validator help, valid RuntimeCard fixture, schema/validator parity tests, doctor regression tests, mandatory review artifacts"
+    outcome: pass
+    checked_at: "2026-05-24T23:24:12Z"
+    detail: "validate_runtime_cards.py --help passes; valid runtime card fixture passes with --require-shared-workspace; runtime proof validation tests pass with 20 tests including schema-backed enum/required loading, operator-facing diagnostics, no-artifact directory false-success prevention, order-insensitive conditional enum matching, and single-value conditional enum matching; doctor regression tests pass with 17 tests and 15 subtests; final adversarial, agent-native, testing, simplify, unslopify, and HE code review artifacts report no PU-002 P0 blockers."
   last_scout:
     command: "PU-001 baseline: ./bin/ask skills handles --check --check-command-handles --no-handles --json --robot and ./bin/ask repo doctor --json --robot"
     outcome: "blocked_as_expected"
@@ -91,6 +91,20 @@ claims:
     status: supported
     remaining_uncertainty:
       - "Exact schema module names remain implementation choices"
+  - id: C004
+    claim: "PU-002 schemas and validator are implemented as repo-native validation surfaces rather than prompt-only proof."
+    evidence_surface:
+      - "Infrastructure/config/schemas/runtime-card.v1.schema.json"
+      - "Infrastructure/config/schemas/evidence-receipt.v1.schema.json"
+      - "Infrastructure/config/schemas/artifact-record.v1.schema.json"
+      - "Infrastructure/config/schemas/runtime-session-summary.v1.schema.json"
+      - "Infrastructure/config/schemas/recovery-plan-summary.v1.schema.json"
+      - "Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py"
+      - "Infrastructure/tests/test_runtime_proof_validation.py"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Delivery packaging remains before this slice is pushed or opened as a PR"
 tasks:
   - id: T001
     type: pm
@@ -185,7 +199,7 @@ tasks:
   - id: T004
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-002 P0 runtime evidence schemas and validator."
     inputs:
       - ".harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-plan.md"
@@ -210,11 +224,11 @@ tasks:
       - "P1 telemetry becomes required for P0 acceptance"
       - "Schema validation cannot run without new external dependencies"
       - "Schemas are not reachable from command or test paths"
-    receipt_id: null
+    receipt_id: R007
   - id: T005
     type: worker
     assignee: Worker
-    status: queued
+    status: active
     objective: "Implement PU-003 Codex parity conformance status split."
     inputs:
       - "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py"

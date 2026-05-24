@@ -1,0 +1,23 @@
+{
+  "recovery_status": "blocked_runtime",
+  "reason": "Codex runtime is unavailable in fixture mode",
+  "next_commands": [
+    {
+      "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "preconditions": [
+        "Codex runtime is reachable"
+      ],
+      "permission_profile": {
+        "network": "not_required"
+      },
+      "expected_outcome": "Runtime proof emits live evidence or typed blocked_runtime evidence"
+    }
+  ],
+  "preconditions": [
+    "Codex runtime is reachable"
+  ],
+  "permission_profile": {
+    "network": "not_required"
+  },
+  "expected_outcome": "Operator can rerun the proof command"
+}

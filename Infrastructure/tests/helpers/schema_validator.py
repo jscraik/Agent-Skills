@@ -77,12 +77,18 @@ def _validate_schema_subset(
         raise AssertionError(f"Unsupported schema keys at {path}: {sorted(unsupported)}")
 
     if "$ref" in schema:
+        resolved_root = root_schema
+        if schemas and schema["$ref"] in schemas:
+            resolved_root = schemas[schema["$ref"]]
+        elif schemas and "#" in schema["$ref"] and not schema["$ref"].startswith("#/"):
+            schema_name, _fragment = schema["$ref"].split("#", 1)
+            resolved_root = schemas[schema_name]
         _validate_schema_subset(
             _resolve_schema_ref(schema["$ref"], root_schema, schemas),
             value,
             schemas,
             path,
-            root_schema,
+            resolved_root,
         )
         return
 
