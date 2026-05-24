@@ -244,6 +244,14 @@ Use explicit Goal Governor vocabulary in every governed response:
 - If validation fails, record the exact failing command and outcome, fix only the scoped blocker, and rerun that command.
 - If instructions conflict, ask for owner direction before editing implementation files or native goal state.
 - If receipts, native metadata, or verification evidence are stale, route to Scout, Judge, or PM recovery before Worker work.
+- For PR delivery triage, prefer the deterministic artifact writer before
+  prose-only subagent instructions:
+  python3 Skills/agent-ops/goal-governor/scripts/write_pr_triage_report.py
+  --worktree <absolute-worktree> --repo <owner/repo> --pr <number>
+  --head <expected-head-sha> --output <relative-artifact-path>.
+  The report must prove worktree identity before PR-readiness claims and is
+  allowed to write a blocked artifact when checks, review state, or head
+  identity are not safe.
 
 ## Anti-Patterns
 
@@ -252,6 +260,8 @@ Use explicit Goal Governor vocabulary in every governed response:
 - Marking a goal complete without a Judge or PM completion receipt.
 - Broadening Worker scope silently.
 - Assuming Scout, Judge, Worker, app-server, or native goal tools exist without runtime evidence.
+- Accepting mailbox text or a prose triage summary as PR delivery evidence when
+  the required worktree-bound triage artifact is missing.
 
 ## Gotchas
 
