@@ -46,19 +46,19 @@ checks:
     outcome: pass
     checked_at: "2026-05-24T03:17:28Z"
   last_delivery_attempt:
-    command: "PU-006 PR #196 subagent handoff health guardrail"
-    outcome: blocked_subagent_handoff_artifact_missing
-    checked_at: "2026-05-24T03:17:28Z"
-    detail: "The PR #196 guardrail commit 952c7ebdc629ebb14e6f9dee408ca8f8c8eae8ec is pushed, and local deterministic triage artifact artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-952c7eb.md reports pass: green checks, one independent review, 9 inline comments, 8 addressed, 1 stale, and 0 active. However the required subagent witness artifact artifacts/reviews/jsc-351-pu006-triage-lane/subagent-witness-952c7eb.md was not produced by /root/jsc351_subagent_artifact_probe. The new handoff health report artifacts/reviews/jsc-351-pu006-triage-lane/subagent-handoff-health-952c7eb.md records status blocked with artifact_missing. The guardrail script, focused tests, projection freshness, codestyle, repo validation, and goal board validation pass locally. No PU-007 progression is approved until a valid subagent artifact, deterministic replacement proof, or explicit owner waiver is recorded."
+    command: "PU-006 PR #196 CodeRabbit fixture-path remediation"
+    outcome: blocked_review_comment_remediated_pending_push
+    checked_at: "2026-05-24T03:34:10Z"
+    detail: "PR #196 reached green remote checks at head 29e0c242ff881f5ff59542c7380c7046995fa916, including CodeRabbit, CircleCI, CodeQL, Semgrep, Snyk, docs, lint, typecheck, test, audit, and security scan. The required retry subagent wrote artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-29e0c24.md from the correct /private/tmp/agent-skills-jsc351-pu006 worktree, but that artifact reported one active CodeRabbit inline comment on Skills/agent-ops/goal-governor/tests/test_write_pr_triage_report.py for a user-specific fixture path. The fixture was remediated to /tmp/other-worktree/agent-skills and focused py_compile plus pytest passed. No PU-007 progression is approved until this remediation is committed, pushed, checks are green again, and a fresh subagent-managed triage artifact reports no active review blockers."
   last_pr_state:
     url: "https://github.com/jscraik/Agent-Skills/pull/196"
     number: 196
     state: open
     draft: true
     mergeable: MERGEABLE
-    checked_at: "2026-05-24T03:17:28Z"
-    outcome: pass_on_head_952c7eb_blocked_by_subagent_handoff
-    detail: "PR #196 is open draft and mergeable at head 952c7ebdc629ebb14e6f9dee408ca8f8c8eae8ec. The local deterministic report says PR checks and review state pass, but the mandatory subagent handoff witness artifact is missing."
+    checked_at: "2026-05-24T03:34:10Z"
+    outcome: blocked_active_review_comment_remediated_pending_push
+    detail: "PR #196 is open draft and mergeable at head 29e0c242ff881f5ff59542c7380c7046995fa916. Remote checks are green, but the fresh subagent artifact found one active CodeRabbit inline comment. The valid comment has been remediated locally and requires commit, push, refreshed checks, and fresh subagent triage before the next slice."
 continuation_gate:
   native_status: active
   goal_active: pass
@@ -66,7 +66,7 @@ continuation_gate:
   queued_user_input: unknown
   pending_work: present
   auto_continue_allowed: "no"
-  blocked_by: "pr_196_subagent_handoff_artifact_missing"
+  blocked_by: "pr_196_review_comment_remediated_pending_push"
 claims:
   - id: C001
     claim: "JSC-351 plan and spec are the canonical local sources for the governed implementation lane."

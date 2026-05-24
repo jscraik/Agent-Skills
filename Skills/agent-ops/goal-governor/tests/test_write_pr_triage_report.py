@@ -117,7 +117,7 @@ def test_report_blocks_wrong_worktree_identity() -> None:
             output_path=Path("artifacts/reviews/triage.md"),
             runner=make_runner(
                 worktree=worktree,
-                reported_pwd="/Users/jamiecraik/dev/agent-skills",
+                reported_pwd="/tmp/other-worktree/agent-skills",
             ),
             now=datetime(2026, 5, 24, tzinfo=UTC),
         )
