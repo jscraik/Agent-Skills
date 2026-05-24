@@ -149,6 +149,14 @@ validation:
 
 If collector execution, session access, or validation is blocked, report the blocker and stop artifact creation unless enough current evidence still proves a narrow artifact is needed. If validation fails, stop at the first failed gate, classify the failure, and do not proceed to sync, install, commit, publish, or runtime activation.
 
+## See Also
+
+| Skill | When to use together |
+| --- | --- |
+| [[pr-green-sweep]] | Repeated PR, CI, mergeability, and until-green follow-through should become delivery sweep work rather than a new mining artifact. |
+| [[code-fixes-triage]] | Repeated review noise or fix requests need a repo-and-PR action queue before deciding whether a new skill or validator is warranted. |
+| [[testing]] | Repeated validation failures need test ownership, proof commands, or deterministic gates. |
+
 ## Examples
 
 - Jamie asks: "Look through recent sessions and tell me what I keep doing manually." Refresh the collector bundle, cluster repeated asks, compare against existing skills and roles, then recommend only missing durable owners.
