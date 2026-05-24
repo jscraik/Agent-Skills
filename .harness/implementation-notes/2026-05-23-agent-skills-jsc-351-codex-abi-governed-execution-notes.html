@@ -834,5 +834,12 @@
     </table>
     <p>Governor disposition: commit and push this governance hardening, then rerun latest-head checks and subagent-managed triage. No next slice may start until the pushed head passes with the updated triage truth model.</p>
   </section>
+  <section class="entry validation">
+    <h2>PU-007 CLOSEOUT: Latest-Head Safe State And PU-008 Handoff</h2>
+    <p>Runtime truth: PR #196 is open draft and mergeable at <code>ab23f2e3facd36a51305c5180a09a42aac7cad93</code>. Live checks are green, including CodeRabbit, CircleCI, CodeQL, Semgrep, Snyk, docs, lint, typecheck, test, audit, and security scan. <code>eval-baseline</code> is reported as skipping, not pending or failing.</p>
+    <p>Subagent triage truth: the first <code>ab23f2e3</code> triage agent hung without writing the required artifact, so it was closed as a handoff-lane failure. A fresh artifact-only worker wrote <code>artifacts/reviews/jsc-351-pu007-conformance/subagent-post-push-ab23f2e3.md</code>; the artifact exists, is non-empty, reports <code>status: pass</code>, lists 19 addressed inline comments, 19 resolved-thread inline comments, 0 active comments, and ends with the required <code>WROTE:</code> line.</p>
+    <p>Decision: PU-007 is complete for the current pushed implementation head. The goal board now marks <code>T017</code> done and opens <code>T018</code> for PU-008 traceability, validation, and closeout control. The next slice is a governance/traceability slice, not new implementation code.</p>
+    <p>Invariant: committing this board transition creates a new PR head. Before any PU-008 work proceeds, that new head must be pushed, remote checks must refresh, and a new subagent-managed post-push triage artifact must prove the transition head is safe.</p>
+  </section>
 </body>
 </html>
