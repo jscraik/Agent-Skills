@@ -19,7 +19,7 @@ linear_team: JSC
 linear_workspace: Jscraik
 linear_status: Triage
 linear_priority: 2
-linear_labels: [agent-skills, Governance, Agent-Native, Reliability, Developer Experience, Roadmap: Now, Feature]
+linear_labels: [agent-skills, Governance, Agent-Native, Reliability, Developer Experience, "Roadmap: Now", Feature]
 linear_action_required: "Project and cycle assignment remain blocked until Jamie confirms whether JSC-351 through JSC-356 should attach to the canonical agent-skills project despite the live trashed:true signal."
 linear_parent_issue: JSC-351
 linear_child_issues:
