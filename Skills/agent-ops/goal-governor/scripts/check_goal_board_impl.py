@@ -240,7 +240,9 @@ def validate_receipts(path: Path) -> dict[str, dict[str, Any]]:
             if not isinstance(task_id, str) or not TASK_ID.match(task_id):
                 raise ValueError(f"receipts.jsonl:{line_number}: invalid task_id")
             if receipt_id in receipts:
-                raise ValueError(f"receipts.jsonl:{line_number}: duplicate id {receipt_id}")
+                raise ValueError(
+                    f"receipts.jsonl:{line_number}: duplicate receipt id {receipt_id}"
+                )
             receipts[receipt_id] = receipt
     return receipts
 
@@ -252,16 +254,19 @@ def validate_done_receipt_schema(task: dict[str, Any], receipt: dict[str, Any]) 
     if task_type == "worker":
         if not isinstance(receipt.get("summary"), str) or not receipt["summary"].strip():
             errors.append(f"{task_id} worker receipt missing summary")
-        if not as_list(receipt.get("changed_files")):
+        changed_files = as_list(receipt.get("changed_files"))
+        if not changed_files or not all(isinstance(x, str) and x.strip() for x in changed_files):
             errors.append(f"{task_id} worker receipt missing changed_files")
-        if not as_list(receipt.get("commands")):
+        commands = as_list(receipt.get("commands"))
+        if not commands or not all(isinstance(x, str) and x.strip() for x in commands):
             errors.append(f"{task_id} worker receipt missing commands")
     if task_type == "judge":
         if not isinstance(receipt.get("decision"), str) or not receipt["decision"].strip():
             errors.append(f"{task_id} judge receipt missing decision")
         if not isinstance(receipt.get("summary"), str) or not receipt["summary"].strip():
             errors.append(f"{task_id} judge receipt missing summary")
-        if not as_list(receipt.get("evidence")):
+        evidence = as_list(receipt.get("evidence"))
+        if not evidence or not all(isinstance(x, str) and x.strip() for x in evidence):
             errors.append(f"{task_id} judge receipt missing evidence")
     return errors
 
@@ -467,6 +472,7 @@ def validate_tasks_and_receipts(
 
     ids: set[str] = set()
     active_tasks: list[dict[str, Any]] = []
+    tasks_by_id: dict[str, dict[str, Any]] = {}
     for index, task in enumerate(tasks, start=1):
         if not isinstance(task, dict):
             errors.append(f"task {index} must be a mapping")
@@ -475,6 +481,9 @@ def validate_tasks_and_receipts(
         errors.extend(task_errors)
         if is_active:
             active_tasks.append(task)
+        task_id = task.get("id")
+        if task_id:
+            tasks_by_id[task_id] = task
 
     if goal_status != "done" and not active_tasks_are_parallel_workers(active_tasks, rules):
         errors.append(
@@ -484,13 +493,17 @@ def validate_tasks_and_receipts(
     if goal_status == "done":
         if active_tasks:
             errors.append("done goals cannot have active tasks")
-        final_receipts = [
-            receipt
-            for receipt in receipts.values()
-            if receipt.get("decision") == "complete"
-            and receipt.get("assignee") in {"Judge", "PM"}
-            and receipt.get("task_id") in ids
-        ]
+        final_receipts = []
+        for receipt_id, receipt in receipts.items():
+            if (
+                receipt.get("decision") == "complete"
+                and receipt.get("assignee") in {"Judge", "PM"}
+                and receipt.get("task_id") in ids
+            ):
+                task_id = receipt.get("task_id")
+                task = tasks_by_id.get(task_id)
+                if task and task.get("status") == "done" and task.get("receipt_id") == receipt_id:
+                    final_receipts.append(receipt)
         if not final_receipts:
             errors.append(
                 "done goal requires final Judge or PM receipt with decision=complete for an existing task"

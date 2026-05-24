@@ -431,11 +431,12 @@ def _runtime_handle_symlink_target(
         source_file = root / handle.source_path
         source_parent = source_file.resolve().parent
         source_parent.relative_to(root.resolve())
+        path.resolve().relative_to(source_parent)
     except (OSError, ValueError):
         return None
     if target != source_parent:
         return None
-    if not source_file.is_file() or not (handle_dir / "SKILL.md").is_file():
+    if not source_file.is_file() or not path.is_file():
         return None
     return target
 

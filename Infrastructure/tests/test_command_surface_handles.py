@@ -310,6 +310,9 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         source.parent.mkdir(parents=True)
         original_source = "---\nname: autofix\n---\n# Autofix\n"
         source.write_text(original_source, encoding="utf-8")
+        source_metadata = source.parent / "agents" / "openai.yaml"
+        source_metadata.parent.mkdir()
+        source_metadata.write_text("name: autofix\n", encoding="utf-8")
 
         runtime_handle = self.temp_dir / ".agents" / "skills" / "autofix"
         runtime_handle.parent.mkdir(parents=True)
@@ -352,17 +355,57 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         )
         self.assertEqual(source.read_text(encoding="utf-8"), original_source)
 
-        # Assert no generated sidecar files were written into the source tree
-        source_parent_files = list(source.parent.iterdir())
-        self.assertEqual(len(source_parent_files), 1, "Expected only SKILL.md in source directory")
-        self.assertEqual(source_parent_files[0].name, "SKILL.md", "Only SKILL.md should exist in source directory")
-        self.assertFalse((source.parent / "agents").exists(), "agents/ directory should not be created in source tree")
+        # Existing rooted files must be recognized without clobbering source content.
+        self.assertEqual(source.read_text(encoding="utf-8"), original_source)
+        self.assertEqual(source_metadata.read_text(encoding="utf-8"), "name: autofix\n")
+
+    def test_command_handle_write_generates_missing_symlinked_metadata(self) -> None:
+        source_path = "Skills/agent-ops/autofix/SKILL.md"
+        source = self.temp_dir / source_path
+        source.parent.mkdir(parents=True)
+        source.write_text("---\nname: autofix\n---\n# Autofix\n", encoding="utf-8")
+
+        runtime_handle = self.temp_dir / ".agents" / "skills" / "autofix"
+        runtime_handle.parent.mkdir(parents=True)
+        runtime_handle.symlink_to(source.parent)
+
+        handle = command_surface.CommandHandle(
+            handle="autofix",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path=source_path,
+            command_handle_path=".agents/skills/autofix/SKILL.md",
+            owner="agent-ops",
+            description="Autofix.",
+            invoke_via="agent-ops",
+        )
+
+        with mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]):
+            payload = command_surface.write_command_handles(repo_root_path=self.temp_dir, dry_run=False)
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(
+            payload["skipped"],
+            [
+                {
+                    "handle": "autofix",
+                    "kind": "skill_command_handle",
+                    "path": ".agents/skills/autofix/SKILL.md",
+                    "reason": "rooted_runtime_symlink",
+                }
+            ],
+        )
+        self.assertTrue((source.parent / "agents" / "openai.yaml").is_file())
 
     def test_command_handle_check_accepts_rooted_symlink_lane(self) -> None:
         source_path = "Skills/agent-ops/autofix/SKILL.md"
         source = self.temp_dir / source_path
         source.parent.mkdir(parents=True)
         source.write_text("---\nname: autofix\n---\n# Autofix\n", encoding="utf-8")
+        source_metadata = source.parent / "agents" / "openai.yaml"
+        source_metadata.parent.mkdir()
+        source_metadata.write_text("name: autofix\n", encoding="utf-8")
 
         runtime_handle = self.temp_dir / ".agents" / "skills" / "autofix"
         runtime_handle.parent.mkdir(parents=True)

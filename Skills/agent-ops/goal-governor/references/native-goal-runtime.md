@@ -2,8 +2,7 @@
 
 Read when reconciling Goal Governor boards with the live Codex `/goal` runtime.
 
-This reference was refreshed from `/Users/jamiecraik/dev/codex` and
-`openai/codex@main` through the codex-repo MCP on 2026-05-24.
+This reference was refreshed from `openai/codex@main` through the codex-repo MCP on 2026-05-24.
 
 ## Current Evidence Surfaces
 
