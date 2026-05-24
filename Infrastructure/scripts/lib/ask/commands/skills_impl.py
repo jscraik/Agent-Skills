@@ -6254,6 +6254,19 @@ def _prune_first_level_system_bridge_aliases(
     return logs
 
 
+def _is_system_bridge_entry(entry: Any, system_skills_dir: Path) -> bool:
+    """Return whether a discovered entry is owned by the hidden system lane."""
+    if entry.name not in SYSTEM_BRIDGE_SKILL_NAMES:
+        return False
+    try:
+        entry_source = entry.source_dir.resolve(strict=False)
+        system_root = system_skills_dir.resolve(strict=False)
+        entry_source.relative_to(system_root)
+    except (OSError, ValueError):
+        return False
+    return True
+
+
 def _public_root_report(report: dict) -> dict:
     return {
         **report,
@@ -6833,10 +6846,21 @@ def sync_skills(
         for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
             plan["deletes"].append(log)
             logs.append(log)
+        if not dry_run:
+            for log in _prune_first_level_system_bridge_aliases(
+                skills_dir,
+                system_skills_dir,
+                dry_run=False,
+            ):
+                plan["deletes"].append(log)
+                logs.append(log)
         for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run):
             plan["deletes"].append(log)
             logs.append(log)
         for entry in entries:
+            if _is_system_bridge_entry(entry, system_skills_dir):
+                logs.append(f"Skipped hidden system bridge from flat projection: {entry.name}")
+                continue
             skill_name = entry.name
             target_link = skills_dir / skill_name
             if not entry.source_dir.is_relative_to(repo_root):
@@ -6849,6 +6873,13 @@ def sync_skills(
         if system_lane_logs:
             plan["symlinks"].append({"from": str(skills_dir / ".system"), "to": "../../skills-system"})
             logs.extend(system_lane_logs)
+        for log in _prune_first_level_system_bridge_aliases(
+            skills_dir,
+            system_skills_dir,
+            dry_run=dry_run,
+        ):
+            plan["deletes"].append(log)
+            logs.append(log)
         projection_logs = _refresh_catalog_projections(repo_root, dry_run)
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)

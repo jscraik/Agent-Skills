@@ -567,5 +567,82 @@
     </table>
     <p>Governor disposition: commit and push this triage evidence, refresh PR #193 checks on the new evidence-only head, update Linear with the blocked review-policy state, and keep the goal active. No next implementation slice is approved while the independent-review ambiguity remains.</p>
   </section>
+  <section class="entry validation">
+    <h2>PR #193 Continuation Gate At Head efcade546</h2>
+    <p>Runtime truth: PR #193 is now at <code>efcade54646527beff3b60b37af898488e2df2a7</code>, the same SHA as the active rebuilt worktree and the remote branch <code>codex/jsc-351-post-merge-review-remediation</code>. The PR remains open, draft, and mergeable.</p>
+    <p>Check truth: <code>gh pr checks 193 --repo jscraik/Agent-Skills</code> returned exit 0 after the slow CodeQL analyze job completed. CircleCI, PR template, docs, structure, security, lint, typecheck, test, check, audit, memory, Linear gate, and CodeRabbit status contexts are green; <code>eval-baseline</code> is skipped/neutral.</p>
+    <p>Review truth: GitHub inline review comments and submitted reviews are empty. The governor posted <code>@coderabbitai review</code>; CodeRabbit replied that review was triggered and noted incremental review behavior, but no submitted review or actionable inline findings surfaced in the follow-up inspection window. The earlier CodeRabbit comment still reports review-limit and usage-credit exhaustion. This remains a review-policy ambiguity, not a CI failure.</p>
+    <p>Subagent truth: <code>artifacts/reviews/jsc-351-pr193-triage-lane/post-push-efcade546.md</code> exists locally and ends with the required <code>WROTE</code> line. It is intentionally not pushed because committing it would create a new PR head and make the artifact stale again. The artifact is retained as local triage evidence for the current head.</p>
+    <p>Governor disposition: do not undraft, merge, or start PU-006 until a maintainer/governor decision establishes that the current CodeRabbit state satisfies the independent-review requirement or explicitly waives that requirement. The goal remains active; the implementation lane is stopped at the review-governance gate.</p>
+  </section>
+  <section class="entry validation">
+    <h2>PR #193 Review-Stack Remediation Before Next Push</h2>
+    <p>Runtime truth: the mandatory PR #193 review stack completed with artifacts under <code>artifacts/reviews/jsc-351-pr193-review-stack/</code>. Correctness found no actionable blocker. Architecture, simplicity, and testing identified duplicated default-visible system bridge policy and an overbuilt shell-embedded README rewrite without fixture coverage. The governor accepted those findings as valid and stopped before pushing a new PR head.</p>
+    <p>Fix applied: <code>DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES</code> now lives in <code>selection_policy.py</code> and is consumed by both discovery and runtime-budget validation. README catalog text mutation moved from an embedded shell/Python block into <code>update_readme_catalog_text.py</code> with focused fixture tests. While regenerating the projection proof, runtime truth exposed a second gap: Python <code>ask skills sync --projection flat</code> could recreate first-level <code>imagegen</code> and <code>openai-docs</code> system bridge aliases. The Python sync path now skips hidden system bridge entries and prunes generated first-level bridge symlinks, matching the shell-path invariant.</p>
+    <p>Generated-surface handling: policy identity changed from <code>53abbc2e5c384b95</code> to <code>9fe5ae918b2e606d</code>. The governor refreshed generated proof surfaces through repo-owned commands only: rooted skill projection, skill-set manifests, command-surface projection, command handles, and runtime separation summary. No generated projection was hand-edited.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_command_surface_handles.py::TestCommittedCommandSurface::test_committed_command_surface_provenance_uses_current_policy_identity Infrastructure/tests/test_context_budgeted_skillsets.py::TestCommittedManifestProjection::test_committed_manifests_use_current_policy_identity Infrastructure/tests/test_pr_changes_validation.py::TestCommandSurfaceJsonStructure::test_all_handles_use_new_policy_identity Infrastructure/tests/test_pr_changes_validation.py::TestManifestJsonlStructure::test_all_manifests_use_new_policy_identity Infrastructure/tests/test_pr_changes_validation.py::TestRuntimeSeparationCurrentJson::test_summary_policy_identity_matches_pr_policy</code></td><td>Pass: 5 tests and 214 subtests.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_update_readme_catalog_text.py Infrastructure/tests/test_skill_scope_precedence.py Infrastructure/tests/test_sync_skills_shell_projection.py Infrastructure/tests/test_ask_skills_sync_security.py</code></td><td>Pass: 70 tests.</td></tr>
+      <tr><td><code>python3 -c "import py_compile; files=['Infrastructure/scripts/lifecycle-and-sync/update_readme_catalog_text.py','Infrastructure/scripts/lifecycle-and-sync/selection_policy.py','Infrastructure/scripts/lifecycle-and-sync/skill_discovery.py','Infrastructure/scripts/validation-and-linting/verify_runtime_budget.py','Infrastructure/scripts/lib/ask/commands/skills_impl.py']; [py_compile.compile(f, doraise=True) for f in files]; print('ok')"</code></td><td>Pass.</td></tr>
+      <tr><td><code>bash -n Infrastructure/scripts/lifecycle-and-sync/sync_skills_impl.sh</code></td><td>Pass.</td></tr>
+      <tr><td><code>./bin/ask runtime budget --json --robot</code></td><td>Pass: <code>first_level_bridge_skills</code> is empty and status is pass.</td></tr>
+      <tr><td><code>./bin/ask skills handles --check --check-projection --check-command-handles --no-handles --json --robot</code></td><td>Pass: 109 handles, 103 generated command handles, no violations.</td></tr>
+      <tr><td><code>python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json</code></td><td>Pass.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+      <tr><td><code>git diff --check HEAD</code></td><td>Pass.</td></tr>
+    </table>
+    <p>Governor disposition: commit and push this review-stack remediation to PR #193, then immediately run the mandatory post-push triage lane with a subagent artifact, live PR checks, review-thread inspection, CodeRabbit state, CircleCI/check state, mergeability, and Linear update. PU-006 remains blocked until PR #193 is safe.</p>
+  </section>
+  <section class="entry validation">
+    <h2>PR #193 Pre-Commit Hook Recovery For Plugin Cache Symlink Materialization</h2>
+    <p>Runtime truth: the first commit attempt for the review-stack remediation failed in the repository pre-commit hook. Focused validation had passed, but the full hook lane found two required failures: skill catalog freshness could not read a broken <code>Plugins/cache/agent-skills-local/plugin-factory/0.1.0</code> fixture <code>plugin.json</code> symlink, and projection integrity reported plugin-cache mirror drift. The governor stopped the commit lane and treated this as a deterministic validation blocker rather than bypassing hooks.</p>
+    <p>Fix applied: repo projection sync resolved the mirror drift. The remaining catalog failure came from the Python plugin-cache copy primitive preserving nested relative symlinks into a different cache depth. <code>copy_directory_contents</code> now produces self-contained plugin cache copies by materializing safe source-internal symlinks into real files and rejecting broken or escaping symlink entries. <code>test_plugin_sources.py</code> proves both safe materialization and symlink-escape rejection.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all</code></td><td>Pass: plugin-cache projection mirrors synced.</td></tr>
+      <tr><td><code>python3 Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py verify --scope all</code></td><td>Pass.</td></tr>
+      <tr><td><code>./bin/ask skills sync --scope workspace --projection rooted --json --robot</code></td><td>Pass: regenerated rooted projection and local plugin caches through the repo-owned sync command.</td></tr>
+      <tr><td><code>bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all</code> after <code>ask skills sync</code></td><td>Pass: restored projection mirror parity after plugin runtime cache refresh.</td></tr>
+      <tr><td><code>python3 Infrastructure/scripts/validation-and-linting/verify_skill_catalog_freshness.py</code></td><td>Pass: assets=45, healthy=45, degraded=0, blocked=0, duplicates=0.</td></tr>
+      <tr><td><code>uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_plugin_sources.py Infrastructure/tests/test_local_plugin_picker_surface.py::LocalPluginPickerSurfaceTests::test_versioned_plugin_cache_does_not_duplicate_command_handle_skills</code></td><td>Pass: 3 tests.</td></tr>
+    </table>
+    <p>Governor disposition: include this hook-recovery fix in the same PR #193 remediation commit because it is required for deterministic pre-commit validation. Continue only after the repository hook passes, the commit is pushed to PR #193, and a fresh post-push triage subagent artifact verifies live PR truth.</p>
+  </section>
+  <section class="entry validation">
+    <h2>PR #194 Review-Comment Remediation Gate</h2>
+    <p>Runtime truth: PR #194 is the current live delivery surface for the bridge sync policy remediation. Live review comments identified two valid blockers before the governor can approve PU-006: plugin cache copying validated unsafe source symlinks only after clearing the target cache, and flat workspace sync dry-runs could report the same first-level system bridge alias delete twice.</p>
+    <p>Fix applied: <code>copy_directory_contents</code> now validates source symlink safety before mutating the target directory, preserving an existing cache if validation fails. Flat workspace sync now skips the early bridge-alias prune during dry-runs and keeps the later post-system-lane prune as the single dry-run report path while preserving non-dry-run cleanup before and after system-lane refresh.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_plugin_sources.py Infrastructure/tests/test_ask_skills_sync_security.py</code></td><td>Pass: 45 tests.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_plugin_sources.py Infrastructure/tests/test_local_plugin_picker_surface.py::LocalPluginPickerSurfaceTests::test_versioned_plugin_cache_does_not_duplicate_command_handle_skills Infrastructure/tests/test_update_readme_catalog_text.py Infrastructure/tests/test_skill_scope_precedence.py Infrastructure/tests/test_sync_skills_shell_projection.py Infrastructure/tests/test_ask_skills_sync_security.py</code></td><td>Pass: 75 tests.</td></tr>
+      <tr><td><code>./bin/ask runtime budget --json --robot</code></td><td>Pass: <code>first_level_bridge_skills</code> is empty and status is pass.</td></tr>
+      <tr><td><code>./bin/ask skills handles --check --check-projection --check-command-handles --no-handles --json --robot</code></td><td>Pass: 109 handles, 103 generated command handles, no violations.</td></tr>
+      <tr><td><code>python3 Infrastructure/scripts/lifecycle-and-sync/projection_integrity.py verify --scope all</code></td><td>Pass.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+      <tr><td><code>bash scripts/validate-codestyle.sh</code></td><td>Pass: required failures 0, warn-only issues 0.</td></tr>
+      <tr><td><code>./bin/ask repo validate --json --robot</code></td><td>Pass: required failures 0, warn-only issues 0; refreshed repo-owned validation artifacts under <code>Infrastructure/artifacts/validation/20260524T000849Z</code>.</td></tr>
+      <tr><td><code>test -f memory.json &amp;&amp; jq -e '.meta.version == "1.0" and (.preamble.bootstrap | type == "boolean") and (.preamble.search | type == "boolean") and (.entries | type == "array")' memory.json &gt;/dev/null</code></td><td>Pass.</td></tr>
+      <tr><td><code>git diff --check HEAD</code></td><td>Pass.</td></tr>
+    </table>
+    <p>Governor disposition: broaden local validation, commit and push this review-comment remediation, refresh PR #194 checks, verify review-thread state, update Linear, and run the subagent triage lane on the new head. No next implementation slice is approved while this PR review gate is unresolved.</p>
+  </section>
+  <section class="entry validation">
+    <h2>PR #194 README Normalization Review Remediation</h2>
+    <p>Runtime truth: after commit <code>2b79b180d2e1ddef9b34eaf4cbef4726332bd9e3</code>, PR #194 checks were green but GitHub mergeability remained blocked by a fresh Codex P2 review thread on <code>Infrastructure/scripts/lifecycle-and-sync/update_readme_catalog_text.py</code>. The finding was valid: legacy README text of the form <code>A governed **Agent Skills Kit** repository of **&lt;n&gt; skills** for Codex and AI coding agents.</code> was not normalized, so sync could prepend the canonical intro while leaving a stale counted sentence behind.</p>
+    <p>Fix applied: <code>SUMMARY_PATTERNS</code> now includes the legacy counted Agent Skills Kit intro, and <code>test_normalizes_legacy_counted_agent_skills_kit_intro</code> proves the old count is removed while exactly one canonical intro remains.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_update_readme_catalog_text.py</code></td><td>Pass: 7 tests.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_update_readme_catalog_text.py Infrastructure/tests/test_sync_skills_shell_projection.py</code></td><td>Pass: 16 tests.</td></tr>
+      <tr><td><code>python3 -m py_compile Infrastructure/scripts/lifecycle-and-sync/update_readme_catalog_text.py Infrastructure/tests/test_update_readme_catalog_text.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>git diff --check HEAD</code></td><td>Pass.</td></tr>
+      <tr><td><code>bash scripts/validate-codestyle.sh</code></td><td>Pass: required failures 0, warn-only issues 0.</td></tr>
+      <tr><td><code>./bin/ask repo validate --json --robot</code></td><td>Pass: required failures 0, warn-only issues 0; refreshed repo-owned validation artifacts under <code>Infrastructure/artifacts/validation/20260524T002337Z</code>.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+    </table>
+    <p>Governor disposition: commit and push this targeted review remediation to PR #194, reply to the Codex review thread with validation evidence, resolve only threads proven fixed, update Linear, then run a fresh post-push triage subagent artifact before approving any next implementation slice.</p>
+  </section>
 </body>
 </html>

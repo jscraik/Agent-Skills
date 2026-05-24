@@ -13,6 +13,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
 
 import skill_discovery  # noqa: E402
+import selection_policy  # noqa: E402
 import verify_runtime_budget  # noqa: E402
 
 
@@ -170,6 +171,16 @@ class TestSkillScopePrecedence(unittest.TestCase):
                 "path": imagegen_dir.relative_to(self.repo_root).as_posix(),
             },
             report["hidden_system_entries"],
+        )
+
+    def test_default_visible_system_bridges_share_policy_source(self) -> None:
+        self.assertEqual(
+            skill_discovery.DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES,
+            set(selection_policy.DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES),
+        )
+        self.assertEqual(
+            verify_runtime_budget.DEFAULT_VISIBLE_BRIDGE_SKILLS,
+            set(selection_policy.DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES),
         )
 
     def test_runtime_budget_fails_unresolved_same_scope_collision(self) -> None:
