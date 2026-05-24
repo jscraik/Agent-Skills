@@ -50,6 +50,20 @@ class TestUpdateReadmeCatalogText(unittest.TestCase):
 
         self.assertIn(f"# Agent Skills\n\n{CURRENT_AGENT_SKILLS_KIT_SENTENCE}\n\nBody.", refreshed)
 
+    def test_normalizes_legacy_counted_agent_skills_kit_intro(self) -> None:
+        content = (
+            "# Agent Skills\n\n"
+            "A governed **Agent Skills Kit** repository of **123 skills** "
+            "for Codex and AI coding agents.\n\n"
+            "Body.\n"
+        )
+
+        refreshed = refresh_readme_catalog_text(content, 25)
+
+        self.assertEqual(refreshed.count(CURRENT_AGENT_SKILLS_KIT_SENTENCE), 1)
+        self.assertNotIn("**123 skills**", refreshed)
+        self.assertIn(f"# Agent Skills\n\n{CURRENT_AGENT_SKILLS_KIT_SENTENCE}\n\nBody.", refreshed)
+
     def test_collapses_duplicate_current_intro(self) -> None:
         content = (
             "# Agent Skills\n\n"

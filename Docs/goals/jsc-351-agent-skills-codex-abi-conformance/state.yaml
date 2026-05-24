@@ -44,21 +44,21 @@ checks:
   last_verification:
     command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     outcome: pass
-    checked_at: "2026-05-24T00:04:47Z"
+    checked_at: "2026-05-24T00:26:33Z"
   last_delivery_attempt:
-    command: "PR #194 live review-comment remediation"
+    command: "PR #194 Codex README normalization review remediation"
     outcome: ready_for_hook_backed_commit_and_post_push_triage
-    checked_at: "2026-05-24T00:04:47Z"
-    detail: "Live PR #194 review comments identified two valid blockers: plugin cache copy validated source symlink safety after target mutation, and flat workspace sync dry-runs could report duplicate first-level system bridge alias deletes. Both are fixed locally with regression coverage. Focused and expanded tests, runtime budget, handle checks, projection integrity, goal-board validation, and diff whitespace checks pass. Next required action is hook-backed commit, push to PR #194, then subagent-managed post-push PR/CI/review/Linear triage before any PU-006 work."
+    checked_at: "2026-05-24T00:23:59Z"
+    detail: "A fresh Codex PR #194 review thread identified that README catalog normalization missed the legacy counted Agent Skills Kit intro, allowing duplicate intro insertion and stale skill counts. The helper now normalizes that legacy sentence and focused regression coverage proves exactly one canonical intro remains. Focused README tests, adjacent sync tests, py_compile, diff check, codestyle, and repo validate pass. Next required action is hook-backed commit, push to PR #194, review-thread reply/resolution, Linear update, and subagent-managed post-push PR/CI/review triage before any PU-006 work."
   last_pr_state:
     url: "https://github.com/jscraik/Agent-Skills/pull/194"
     number: 194
     state: open
     draft: false
     mergeable: MERGEABLE
-    checked_at: "2026-05-24T00:04:47Z"
-    outcome: local_review_comment_remediation_ready_for_push
-    detail: "PR #194 head 636958a21fc40087d34b0b25024cf8b6235fef8a was open, ready, and mergeable before local remediation. CodeRabbit and Codex review comments remain unresolved until the local remediation commit is pushed and post-push review state is refreshed."
+    checked_at: "2026-05-24T00:23:59Z"
+    outcome: local_readme_normalization_remediation_ready_for_push
+    detail: "PR #194 head 2b79b180d2e1ddef9b34eaf4cbef4726332bd9e3 had green checks but mergeStateStatus BLOCKED with an unresolved Codex README normalization review thread. The fresh local remediation is validated but not yet pushed; review threads and mergeability remain unresolved until post-push triage completes."
 continuation_gate:
   native_status: active
   goal_active: pass
@@ -66,7 +66,7 @@ continuation_gate:
   queued_user_input: unknown
   pending_work: present
   auto_continue_allowed: "no"
-  blocked_by: "pending_commit_push_and_post_push_pr194_triage_for_review_comment_remediation"
+  blocked_by: "pending_commit_push_and_post_push_pr194_triage_for_readme_normalization_remediation"
 claims:
   - id: C001
     claim: "JSC-351 plan and spec are the canonical local sources for the governed implementation lane."

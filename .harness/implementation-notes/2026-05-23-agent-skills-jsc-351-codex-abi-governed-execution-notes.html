@@ -628,5 +628,21 @@
     </table>
     <p>Governor disposition: broaden local validation, commit and push this review-comment remediation, refresh PR #194 checks, verify review-thread state, update Linear, and run the subagent triage lane on the new head. No next implementation slice is approved while this PR review gate is unresolved.</p>
   </section>
+  <section class="entry validation">
+    <h2>PR #194 README Normalization Review Remediation</h2>
+    <p>Runtime truth: after commit <code>2b79b180d2e1ddef9b34eaf4cbef4726332bd9e3</code>, PR #194 checks were green but GitHub mergeability remained blocked by a fresh Codex P2 review thread on <code>Infrastructure/scripts/lifecycle-and-sync/update_readme_catalog_text.py</code>. The finding was valid: legacy README text of the form <code>A governed **Agent Skills Kit** repository of **&lt;n&gt; skills** for Codex and AI coding agents.</code> was not normalized, so sync could prepend the canonical intro while leaving a stale counted sentence behind.</p>
+    <p>Fix applied: <code>SUMMARY_PATTERNS</code> now includes the legacy counted Agent Skills Kit intro, and <code>test_normalizes_legacy_counted_agent_skills_kit_intro</code> proves the old count is removed while exactly one canonical intro remains.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_update_readme_catalog_text.py</code></td><td>Pass: 7 tests.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_update_readme_catalog_text.py Infrastructure/tests/test_sync_skills_shell_projection.py</code></td><td>Pass: 16 tests.</td></tr>
+      <tr><td><code>python3 -m py_compile Infrastructure/scripts/lifecycle-and-sync/update_readme_catalog_text.py Infrastructure/tests/test_update_readme_catalog_text.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>git diff --check HEAD</code></td><td>Pass.</td></tr>
+      <tr><td><code>bash scripts/validate-codestyle.sh</code></td><td>Pass: required failures 0, warn-only issues 0.</td></tr>
+      <tr><td><code>./bin/ask repo validate --json --robot</code></td><td>Pass: required failures 0, warn-only issues 0; refreshed repo-owned validation artifacts under <code>Infrastructure/artifacts/validation/20260524T002337Z</code>.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+    </table>
+    <p>Governor disposition: commit and push this targeted review remediation to PR #194, reply to the Codex review thread with validation evidence, resolve only threads proven fixed, update Linear, then run a fresh post-push triage subagent artifact before approving any next implementation slice.</p>
+  </section>
 </body>
 </html>

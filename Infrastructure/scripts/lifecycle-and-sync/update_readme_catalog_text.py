@@ -21,6 +21,10 @@ SUMMARY_PATTERNS: tuple[str, ...] = (
         r"routed skills and plugins into runtime projections through the `ask` CLI\."
     ),
     (
+        r"A governed \*\*Agent Skills Kit\*\* repository of \*\*\d+ skills\*\* "
+        r"for Codex and AI coding agents\."
+    ),
+    (
         r"A governed repository of \*\*skills\*\* for AI coding agents\. Built around "
         r"the \*\*Agent Skills Kit \(`ask`\)\*\* CLI\."
     ),
