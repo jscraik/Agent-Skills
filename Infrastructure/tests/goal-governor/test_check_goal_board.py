@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -19,6 +20,36 @@ assert SPEC is not None
 assert SPEC.loader is not None
 check_goal_board = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(check_goal_board)
+
+
+def test_check_goal_board_loads_from_copied_skill_root() -> None:
+    with TemporaryDirectory() as tmp:
+        copied_scripts = Path(tmp) / "goal-governor" / "scripts"
+        copied_scripts.mkdir(parents=True)
+        for filename in ("check_goal_board.py", "check_goal_board_impl.py"):
+            shutil.copy2(SKILL_ROOT / "scripts" / filename, copied_scripts / filename)
+
+        copied_spec = importlib.util.spec_from_file_location(
+            "copied_check_goal_board",
+            copied_scripts / "check_goal_board.py",
+        )
+        assert copied_spec is not None
+        assert copied_spec.loader is not None
+        copied_check_goal_board = importlib.util.module_from_spec(copied_spec)
+        copied_spec.loader.exec_module(copied_check_goal_board)
+
+        assert copied_check_goal_board.validate_goal_section(
+            {
+                "goal": {
+                    "status": "active",
+                    "native_objective": "/goal Follow docs/goals/current/goal.md",
+                    "native_status": "active",
+                    "token_budget": 1000,
+                    "tokens_used": 10,
+                    "time_used_seconds": 60,
+                }
+            }
+        ) == ([], "active")
 
 
 def test_goal_governor_review_mode_guard_is_documented() -> None:
