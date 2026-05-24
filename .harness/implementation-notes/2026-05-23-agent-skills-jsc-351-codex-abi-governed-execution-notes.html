@@ -801,5 +801,23 @@
     </table>
     <p>Governor disposition: PU-007 remains active. The safe next action is to commit and push this remediation, then rerun live checks and subagent-managed post-push triage on the new PR head. No next slice may start until that fresh triage reports no active review blockers.</p>
   </section>
+  <section class="entry validation">
+    <h2>PU-007 REVIEW REMEDIATION: Skills Package CLI Contract</h2>
+    <p>Runtime truth: after commit <code>85f13d8d788653567ca27c3440671bce5ca3143d</code> was pushed, live checks were green, including CodeRabbit, CircleCI, CodeQL, Semgrep, Snyk, docs, lint, typecheck, test, audit, and security scan. The governor post-push report <code>artifacts/reviews/jsc-351-pu007-conformance/governor-post-push-85f13d8.md</code> still blocked progression because one active CodeRabbit inline comment remained on <code>Infrastructure/bin/ask</code>.</p>
+    <p>Finding accepted: the new <code>skills package verify</code> positional shape made the ordinary <code>skills package</code> parser too permissive. Missing package targets, unexpected second positional arguments, and verify-only flags on the non-verify path could be parsed and routed instead of failing as public CLI contract errors.</p>
+    <p>Fix applied: the <code>skills package</code> dispatch now rejects a missing target, rejects missing <code>verify_target</code> in verify mode, rejects unexpected verify-only positionals and flags outside verify mode, and keeps ordinary package readiness limited to a single explicit target. Added regression tests for the three contract-drift cases.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv python3 -m pytest Infrastructure/tests/test_ask_cli_impl.py -q -k 'skills_package'</code></td><td>Pass: 7 tests.</td></tr>
+      <tr><td><code>python3 -m py_compile Infrastructure/bin/ask Infrastructure/scripts/lib/ask/commands/skills_impl.py Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py Infrastructure/tests/test_ask_skills_conformance.py Infrastructure/tests/test_ask_cli_impl.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv python3 -m pytest Infrastructure/tests/test_ask_skills_conformance.py -q</code></td><td>Pass: 12 tests.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --with pytest --with pyyaml --python 3.12 python -m pytest Infrastructure/tests -q -k 'conformance or package_verify or package'</code></td><td>Pass: 105 tests, 1558 deselected, 6 subtests.</td></tr>
+      <tr><td><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance</code></td><td>Pass.</td></tr>
+      <tr><td><code>git diff --check</code></td><td>Pass.</td></tr>
+      <tr><td><code>bash scripts/validate-codestyle.sh</code></td><td>First run blocked on ask CLI modularity at <code>1919 &gt; 1900</code>; after compressing the package dispatch branch, rerun passed with required failures 0 and warn-only issues 0.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv ./bin/ask repo validate --json --robot</code></td><td>Pass: required failures 0, warn-only issues 0; logs at <code>Infrastructure/artifacts/validation/20260524T050258Z</code>.</td></tr>
+    </table>
+    <p>Governor disposition: PU-007 remains active. The safe next action is to commit and push this final review remediation, wait for fresh PR checks, and require a latest-head subagent triage artifact before any next slice begins.</p>
+  </section>
 </body>
 </html>

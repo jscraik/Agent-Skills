@@ -655,7 +655,7 @@ tasks:
       - "A check with missing runtime proof is represented as pass or warning instead of blocked."
       - "The implementation requires broad command rewrites unrelated to PU-007."
       - "Review stack finds unresolved blocker, architecture drift, or unsafe supply-chain behavior."
-    receipt_id: R044
+    receipt_id: R046
   - id: T016
     type: pm
     assignee: PM

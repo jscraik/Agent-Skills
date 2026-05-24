@@ -569,24 +569,23 @@ def main():
         elif args.action == "doctor":
             result = skills_commands.skills_doctor(repo_root, target=args.target, strict=args.strict, codex_parity=args.codex_parity)
         elif args.action == "package":
-            if args.target == "verify":
-                if not args.verify_target:
-                    result = build_unknown_action_result("skills package", "verify")
-                else:
-                    result = skills_commands.skills_package_verify(
-                        repo_root,
-                        target=args.verify_target,
-                        expected_sha256=args.expected_sha256,
-                        trusted_provenance=args.trusted_provenance,
-                        rollback_journal=args.rollback_journal,
-                    )
-            else:
-                result = skills_commands.skills_package(
+            verify_flags_present = any([args.expected_sha256, args.trusted_provenance, args.rollback_journal])
+            if not args.target:
+                result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: target")
+            elif args.target == "verify" and not args.verify_target:
+                result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: verify_target")
+            elif args.target != "verify" and (args.verify_target or verify_flags_present):
+                result = build_argument_error("skills", "package", raw_args, parser_error="unexpected verify-only arguments")
+            elif args.target == "verify":
+                result = skills_commands.skills_package_verify(
                     repo_root,
-                    target=args.target or "",
-                    strict=args.strict,
-                    checkout_test=args.checkout_test,
+                    target=args.verify_target,
+                    expected_sha256=args.expected_sha256,
+                    trusted_provenance=args.trusted_provenance,
+                    rollback_journal=args.rollback_journal,
                 )
+            else:
+                result = skills_commands.skills_package(repo_root, target=args.target, strict=args.strict, checkout_test=args.checkout_test)
         elif args.action == "conformance":
             if args.conformance_action == "run":
                 result = skills_commands.skills_conformance_run(
