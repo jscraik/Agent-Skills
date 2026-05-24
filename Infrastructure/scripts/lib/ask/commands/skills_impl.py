@@ -15,11 +15,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, List, Optional
 
-try:
-    import yaml  # type: ignore
-except ImportError:  # pragma: no cover - exercised only in minimal runtimes
-    yaml = None
-
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 REPO_ROOT = SCRIPTS_ROOT.parents[1]
 if str(SCRIPTS_ROOT) not in sys.path:
@@ -53,6 +48,50 @@ from ask.services.codex_preview import (  # noqa: E402
     build_codex_inject_preview,
     build_codex_load_preview,
     build_codex_render_preview,
+)
+from ask.skills_sdk.contracts import (  # noqa: E402
+    DOCTOR_BLOCKER_TAXONOMY,
+    DOCTOR_SDK_LAYERS,
+    DOCTOR_WARNING_TAXONOMY,
+    EVAL_BLOCKER_CLASSES,
+    PACKAGE_CONTRACT_FIELDS,
+    ask_validation_command as _ask_validation_command,
+    doctor_blocker as _doctor_blocker,
+    doctor_contract_schema_refs as _doctor_contract_schema_refs,
+    doctor_contract_schema_versions as _doctor_contract_schema_versions,
+    doctor_sdk_layer_for as _doctor_sdk_layer_for,
+    doctor_warning as _doctor_warning,
+    read_skill_frontmatter_fields as _read_skill_frontmatter_fields,
+    skill_doctor_check_summary as _skill_doctor_check_summary,
+    skill_target_summary as _skill_target_summary,
+    skills_validation_command as _skills_validation_command,
+    status_from_bool as _status_from_bool,
+)
+from ask.skills_sdk.runtime_adapters import (  # noqa: E402
+    build_command_handle_proof,
+    normalize_runtime_target,
+)
+from ask.skills_sdk.package_contracts import (  # noqa: E402
+    SKILL_PACKAGE_READINESS_SCHEMA_PATH,
+    SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
+    SKILL_PACKAGE_SCHEMA_PATH,
+    SKILL_PACKAGE_SCHEMA_VERSION,
+    capability_metadata_status as _capability_metadata_status,
+    empty_skill_package_contract as _empty_skill_package_contract,
+    refresh_package_promotion_gate as _refresh_package_promotion_gate,
+    skill_package_checkout_test as _skill_package_checkout_test,
+    skill_package_compatibility_snapshot as _skill_package_compatibility_snapshot,
+    skill_package_contract as _skill_package_contract,
+    skill_package_contract_summary as _skill_package_contract_summary,
+    skill_package_gate_summary as _skill_package_gate_summary,
+    skill_package_readiness as _skill_package_readiness,
+    skill_package_readiness_summary as _skill_package_readiness_summary,
+)
+from ask.skills_sdk.conformance import run_skills_conformance as _run_skills_conformance  # noqa: E402
+from ask.skills_sdk.package_verify import (  # noqa: E402
+    PACKAGE_VERIFY_SCHEMA_VERSION,
+    verify_archive_package as _verify_archive_package,
+    verify_skill_directory as _verify_skill_directory,
 )
 from skill_discovery import (  # noqa: E402
     USER_SKILL_SCOPE_PRECEDENCE,
@@ -111,6 +150,7 @@ __all__ = [
     "skills_config_explain",
     "skills_implicit_preview",
     "skills_inject_preview",
+    "skills_conformance_run",
     "skills_doctor",
     "skills_events",
     "skills_explain_boundary",
@@ -118,6 +158,7 @@ __all__ = [
     "skills_load_preview",
     "skills_memory",
     "skills_package",
+    "skills_package_verify",
     "skills_parse",
     "skills_profiles",
     "skills_proof",
@@ -305,17 +346,6 @@ def _normalize_skill_target_path(skill_path: str) -> tuple[Path, str]:
     return audit_target, audit_target.as_posix()
 
 
-def _ask_validation_command(*args: str) -> str:
-    parts = ["./bin/ask"]
-    parts.extend(args)
-    parts.extend(["--json", "--robot"])
-    return " ".join(shlex.quote(part) for part in parts)
-
-
-def _skills_validation_command(action: str, *args: str) -> str:
-    return _ask_validation_command("skills", action, *args)
-
-
 def _run_validation_command(
     repo_root: Path,
     command: list[str],
@@ -363,6 +393,160 @@ def _completed_process_payload(proc: subprocess.CompletedProcess[str]) -> dict[s
     }
 
 
+def _call_result_payload(result: CallResult) -> dict[str, Any]:
+    """Return a JSON-serializable in-process command result."""
+    return {
+        "status": result.status,
+        "trace_id": result.trace_id,
+        "metadata": result.metadata,
+        "data": result.data,
+        "telemetry": result.telemetry,
+        "errors": [error.__dict__ for error in result.errors],
+    }
+
+
+def _package_verify_rule_evidence(verification: dict[str, Any]) -> list[str]:
+    """Return compact, replay-friendly rule evidence strings for package verification."""
+    evidence: list[str] = []
+    checks = verification.get("checks")
+    if isinstance(checks, list):
+        for check in checks:
+            if not isinstance(check, dict):
+                continue
+            name = str(check.get("name") or "unknown")
+            status = str(check.get("status") or "unknown")
+            value = "true" if status == "pass" else "false" if status in {"fail", "blocked"} else status
+            evidence.append(f"{name}:{value}")
+            if name == "trusted_provenance":
+                evidence.append(f"provenance_trusted:{value}")
+            check_evidence = check.get("evidence") if isinstance(check.get("evidence"), dict) else {}
+            for member in check_evidence.get("unsafe_members") or []:
+                if isinstance(member, dict) and member.get("name"):
+                    evidence.append(f"unsafe_member:{member['name']}")
+            for member in check_evidence.get("unsafe_links") or []:
+                if isinstance(member, dict) and member.get("name"):
+                    evidence.append(f"symlink_escape:{member['name']}")
+        return evidence
+
+    rule_results = verification.get("rule_results")
+    if isinstance(rule_results, list):
+        blocker_ids = {str(item.get("rule_id")) for item in rule_results if isinstance(item, dict)}
+        contract = verification.get("contract") if isinstance(verification.get("contract"), dict) else {}
+        missing = contract.get("required_fields", {}).get("missing", []) if contract else []
+        evidence.append(f"package_metadata_complete:{str(not missing).lower()}")
+        provenance = verification.get("provenance_identity")
+        trusted = provenance.get("trusted") if isinstance(provenance, dict) else False
+        evidence.append(f"provenance_trusted:{str(bool(trusted)).lower()}")
+        if "digest_mismatch" in blocker_ids:
+            evidence.append("digest_match:false")
+        mutation = verification.get("mutation_status")
+        evidence.append(f"no_runtime_mutation:{str(mutation == 'not_mutated').lower()}")
+        for blocker in rule_results:
+            if not isinstance(blocker, dict):
+                continue
+            if blocker.get("path"):
+                evidence.append(f"{blocker.get('rule_id')}:{blocker.get('path')}")
+                if blocker.get("rule_id") in {"absolute_archive_path", "archive_path_traversal"}:
+                    evidence.append(f"unsafe_member:{blocker.get('path')}")
+                if blocker.get("rule_id") == "archive_symlink_escape":
+                    evidence.append(f"symlink_escape:{blocker.get('path')}")
+            else:
+                evidence.append(str(blocker.get("rule_id") or "blocked_validation"))
+    return evidence
+
+
+def _package_verify_blockers(verification: dict[str, Any]) -> list[dict[str, Any]]:
+    blockers = verification.get("blockers")
+    if isinstance(blockers, list):
+        return [
+            {**item, "class": item.get("class") or item.get("rule_id")}
+            for item in blockers
+            if isinstance(item, dict)
+        ]
+    rule_results = verification.get("rule_results")
+    if isinstance(rule_results, list):
+        return [
+            {**item, "class": item.get("class") or item.get("rule_id")}
+            for item in rule_results
+            if isinstance(item, dict)
+        ]
+    return []
+
+
+def _package_verify_mutation_status(verification: dict[str, Any]) -> dict[str, Any]:
+    runtime_mutation = verification.get("runtime_mutation")
+    runtime_mutated = False
+    if isinstance(runtime_mutation, dict):
+        runtime_mutated = runtime_mutation.get("status") == "fail" or bool(runtime_mutation.get("mutations"))
+    mutation_status = verification.get("mutation_status")
+    mutation_payload = mutation_status if isinstance(mutation_status, dict) else {}
+    status_value = mutation_payload.get("status") if mutation_payload else mutation_status
+    return {
+        "mutated": runtime_mutated
+        or bool(mutation_payload.get("mutated"))
+        or status_value not in {None, "not_mutated", "pass"},
+        "runtime_roots_mutated": runtime_mutated or bool(mutation_payload.get("runtime_roots_mutated")),
+        "install_attempted": bool(mutation_payload.get("install_attempted")),
+        "archive_extracted": bool(mutation_payload.get("archive_extracted")),
+        "network_used": bool(mutation_payload.get("network_used")),
+        "raw": mutation_status or runtime_mutation or "not_mutated",
+    }
+
+
+def _normalize_package_verification(
+    *,
+    query: str,
+    validation_command: str,
+    verification: dict[str, Any],
+) -> dict[str, Any]:
+    archive = verification.get("archive")
+    archive_identity = verification.get("archive_identity")
+    if isinstance(archive, dict):
+        archive_identity = {
+            "path": archive.get("path"),
+            "sha256": archive.get("sha256"),
+            "type": archive.get("type"),
+            "member_count": archive.get("member_count"),
+        }
+    target_kind = verification.get("target_kind") or ("archive" if archive_identity else "skill_directory")
+    target_path = verification.get("target_path") or (archive.get("path") if isinstance(archive, dict) else query)
+    provenance_identity = verification.get("provenance_identity")
+    if not isinstance(provenance_identity, dict):
+        provenance = verification.get("provenance")
+        source = provenance.get("source") if isinstance(provenance, dict) else None
+        provenance_identity = {
+            "trusted": "trusted_provenance:true" in _package_verify_rule_evidence(verification),
+            "source": source,
+        }
+
+    normalized = {
+        **verification,
+        "schema_version": PACKAGE_VERIFY_SCHEMA_VERSION,
+        "query": query,
+        "status": verification.get("status", "blocked"),
+        "target_identity": {
+            "kind": target_kind,
+            "path": target_path,
+            "query": query,
+        },
+        "archive_identity": archive_identity,
+        "provenance_identity": provenance_identity,
+        "rule_evidence": _package_verify_rule_evidence(verification),
+        "blockers": _package_verify_blockers(verification),
+        "mutation_status": _package_verify_mutation_status(verification),
+        "rollback_hint": verification.get("rollback_hint")
+        or "No rollback is required because verification did not install, extract, or mutate runtime roots.",
+        "validation_commands": [validation_command],
+        "next_command": validation_command,
+    }
+    normalized["agent_summary"] = (
+        f"Package verification blocked: {normalized['blockers'][0].get('message', 'validation failed')}"
+        if normalized["status"] == "blocked" and normalized["blockers"]
+        else "Package verification passed without install, extraction, or runtime-root mutation."
+    )
+    return normalized
+
+
 def _run_captured_tool(
     *,
     repo_root: Path,
@@ -382,96 +566,6 @@ def _run_captured_tool(
         env=env,
         timeout=timeout_seconds,
     )
-
-
-def _parse_frontmatter_scalar(value: str) -> Any:
-    """Parse a conservative subset of YAML frontmatter scalar values."""
-    cleaned = value.strip().strip("\"'")
-    if cleaned.startswith("[") and cleaned.endswith("]"):
-        return [
-            item.strip().strip("\"'")
-            for item in cleaned[1:-1].split(",")
-            if item.strip()
-        ]
-    if cleaned.lower() in {"true", "false"}:
-        return cleaned.lower() == "true"
-    return cleaned
-
-
-CODEX_SKILL_PACKAGE_FIELDS: tuple[tuple[str, bool], ...] = (
-    ("name", True),
-    ("description", True),
-    ("short_description", False),
-    ("interface", False),
-    ("dependencies", False),
-    ("policy", False),
-    ("scope", False),
-    ("plugin_id", False),
-)
-CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS: tuple[str, ...] = tuple(
-    field for field, _required in CODEX_SKILL_PACKAGE_FIELDS
-)
-
-
-def _read_skill_frontmatter_fields(skill_md: Path) -> dict[str, Any]:
-    """Extract conservative scalar and one-level metadata fields from SKILL.md frontmatter."""
-    fields: dict[str, Any] = {}
-    text = skill_md.read_text(encoding="utf-8")
-    lines = text.splitlines()
-    if not lines or lines[0].strip() != "---":
-        return fields
-    current_map: str | None = None
-    current_list_key: str | None = None
-    for line in lines[1:]:
-        if line.strip() == "---":
-            break
-        stripped = line.strip()
-        if not stripped:
-            continue
-        indent = len(line) - len(line.lstrip(" "))
-        if stripped.startswith("- "):
-            item = _parse_frontmatter_scalar(stripped[2:])
-            if current_map == "metadata" and current_list_key:
-                nested = fields.setdefault(current_map, {})
-                if isinstance(nested, dict):
-                    values = nested.setdefault(current_list_key, [])
-                    if isinstance(values, list):
-                        values.append(item)
-                continue
-            if current_map and current_map != "metadata":
-                values = fields.setdefault(current_map, [])
-                if isinstance(values, list):
-                    values.append(item)
-                continue
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        key = key.strip()
-        value = value.strip()
-        if indent > 0 and current_map:
-            nested = fields.setdefault(current_map, {})
-            if isinstance(nested, dict):
-                if value:
-                    nested[key] = _parse_frontmatter_scalar(value)
-                    current_list_key = None
-                else:
-                    nested[key] = []
-                    current_list_key = key
-            continue
-        current_map = None
-        current_list_key = None
-        if not value:
-            fields[key] = [] if key in PACKAGE_CONTRACT_FIELDS else {}
-            current_map = key
-            continue
-        parsed_value = _parse_frontmatter_scalar(value)
-        if key in {
-            *CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS,
-            "metadata",
-            *PACKAGE_CONTRACT_FIELDS,
-        } and parsed_value:
-            fields[key] = parsed_value
-    return fields
 
 
 def _safe_tessl_skill_key(raw_name: str) -> str:
@@ -1152,204 +1246,32 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
     """Prove a command-visible skill handle reaches the workspace and user runtime surfaces."""
     result = CallResult()
     result.metadata["command"] = "skills proof"
-    runtime_target = runtime_target.strip().lower()
-    if runtime_target not in {"any", "codex", "agents"}:
-        recovery_guidance = "Use --runtime-target any, --runtime-target codex, or --runtime-target agents."
-        safe_handle = handle.strip().lstrip("$") or handle
-        result.data["runtime_failure"] = _runtime_failure_payload(
-            command="skills proof",
-            error_code="ERR_VALIDATION",
-            failed_check_id="runtime_target",
-            path="runtime_target",
-            message=f"Invalid runtime target '{runtime_target}'.",
-            recovery_guidance=recovery_guidance,
-            validation_commands=[
-                _skills_validation_command("proof", safe_handle, "--runtime-target", "any"),
-            ],
-        )
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message=f"Invalid runtime target '{runtime_target}'.",
-                fix_suggestion=recovery_guidance,
-            )
-        )
-        return result
-    resolution = resolve_skill_handle(handle, repo_root_path=repo_root)
-    normalized = resolution.get("handle", handle.lstrip("$"))
-    handle_check = check_command_handles(repo_root_path=repo_root)
-    workspace_handle = repo_root / str(resolution.get("command_handle_path", ""))
-    user_codex_handle = Path.home() / ".codex" / "skills" / str(normalized) / "SKILL.md"
-    user_agents_handle = Path.home() / ".agents" / "skills" / str(normalized) / "SKILL.md"
-    codex_skills = Path.home() / ".codex" / "skills"
-    agents_skills = Path.home() / ".agents" / "skills"
-    expected_runtime = repo_root / ".agents" / "skills"
-
-    handle_violations = [
-        v for v in handle_check.get("violations", [])
-        if v.get("handle") == normalized
-    ]
-    handle_check_ok = handle_check.get("status") == "pass" or not handle_violations
-
-    def _link_payload(path: Path) -> dict[str, object]:
-        payload: dict[str, object] = {
-            "path": str(path),
-            "exists": path.exists(),
-            "is_symlink": path.is_symlink(),
-        }
-        if path.is_symlink():
-            payload["target"] = str(path.resolve())
-            payload["points_to_workspace_runtime"] = path.resolve() == expected_runtime.resolve()
-        else:
-            payload["target"] = None
-            payload["points_to_workspace_runtime"] = False
-        return payload
-
-    gates = {
-        "resolver": resolution.get("status") == "ok",
-        "generated_command_handle_check": handle_check_ok,
-        "workspace_command_handle_exists": workspace_handle.is_file(),
-        "codex_user_link": codex_skills.is_symlink() and codex_skills.resolve() == expected_runtime.resolve(),
-        "agents_user_link": agents_skills.is_symlink() and agents_skills.resolve() == expected_runtime.resolve(),
-        "codex_user_command_handle_exists": user_codex_handle.is_file(),
-        "agents_user_command_handle_exists": user_agents_handle.is_file(),
-    }
-    core_gates = (
-        gates["resolver"],
-        gates["generated_command_handle_check"],
-        gates["workspace_command_handle_exists"],
+    runtime_target = normalize_runtime_target(runtime_target)
+    proof = build_command_handle_proof(
+        repo_root=repo_root,
+        handle=handle,
+        runtime_target=runtime_target,
+        resolve_skill_handle_fn=resolve_skill_handle,
+        check_command_handles_fn=check_command_handles,
+        home_path=Path.home(),
     )
-    codex_runtime_ready = (
-        gates["codex_user_link"] and gates["codex_user_command_handle_exists"]
-    )
-    agents_runtime_ready = (
-        gates["agents_user_link"] and gates["agents_user_command_handle_exists"]
-    )
-    user_runtime_ready = codex_runtime_ready or agents_runtime_ready
-    gates["codex_user_runtime_ready"] = codex_runtime_ready
-    gates["agents_user_runtime_ready"] = agents_runtime_ready
-    gates["user_runtime_ready"] = user_runtime_ready
-    required_runtime_gate = {
-        "any": "user_runtime_ready",
-        "codex": "codex_user_runtime_ready",
-        "agents": "agents_user_runtime_ready",
-    }[runtime_target]
-    required_runtime_ready = bool(gates[required_runtime_gate])
-    validation_args = [str(normalized)]
-    if runtime_target != "any":
-        validation_args.extend(["--runtime-target", runtime_target])
-    proof = {
-        "schema_version": "command-handle-proof.v2",
-        "handle": normalized,
-        "runtime_target": runtime_target,
-        "status": "pass" if all(core_gates) and required_runtime_ready else "fail",
-        "validation_commands": [
-            _skills_validation_command("proof", *validation_args),
-        ],
-        "gates": gates,
-        "gate_policy": {
-            "required": [
-                "resolver",
-                "generated_command_handle_check",
-                "workspace_command_handle_exists",
-                required_runtime_gate,
-            ],
-            "runtime_target": runtime_target,
-            "required_semantics": (
-                "user_runtime_ready accepts either supported user runtime link."
-                if runtime_target == "any"
-                else f"{required_runtime_gate} must be true for runtime_target={runtime_target}."
-            ),
-            "supporting_runtime_diagnostics": [
-                "codex_user_link",
-                "codex_user_command_handle_exists",
-                "codex_user_runtime_ready",
-                "agents_user_link",
-                "agents_user_command_handle_exists",
-                "agents_user_runtime_ready",
-            ],
-        },
-        "available_runtimes": [
-            runtime_name
-            for runtime_name, ready in (
-                ("codex_user_runtime", codex_runtime_ready),
-                ("agents_user_runtime", agents_runtime_ready),
-            )
-            if ready
-        ],
-        "runtime_satisfied_by": (
-            "codex_user_runtime"
-            if runtime_target in {"any", "codex"} and codex_runtime_ready
-            else "agents_user_runtime"
-            if runtime_target in {"any", "agents"} and agents_runtime_ready
-            else None
-        ),
-        "resolution": resolution,
-        "command_handle_check": {
-            key: value
-            for key, value in handle_check.items()
-            if key != "violations" or value
-        },
-        "workspace_runtime": {
-            "path": str(expected_runtime),
-            "command_handle_path": str(workspace_handle),
-            "command_handle_exists": workspace_handle.is_file(),
-        },
-        "user_runtime_links": {
-            "codex_skills": _link_payload(codex_skills),
-            "agents_skills": _link_payload(agents_skills),
-        },
-        "user_runtime_command_handles": {
-            "codex_handle": str(user_codex_handle),
-            "codex_handle_exists": user_codex_handle.is_file(),
-            "agents_handle": str(user_agents_handle),
-            "agents_handle_exists": user_agents_handle.is_file(),
-        },
-    }
+    normalized = proof["handle"]
     if proof["status"] != "pass":
-        failed_check_id = next(
-            (
-                check_id
-                for check_id in proof["gate_policy"]["required"]
-                if not gates.get(check_id)
-            ),
-            "runtime_reachability",
-        )
-        recovery_guidance = (
-            "Run ./bin/ask skills sync --scope workspace --projection rooted, "
-            "then ./bin/ask skills sync --scope user --projection rooted, and rerun proof."
-        )
-        proof["runtime_failure"] = _runtime_failure_payload(
-            command="skills proof",
-            error_code="ERR_VALIDATION",
-            failed_check_id=str(failed_check_id),
-            path=f"gates.{failed_check_id}",
-            message=f"Command handle proof failed for '{normalized}'.",
-            recovery_guidance=recovery_guidance,
-            validation_commands=proof["validation_commands"],
-        )
         result.data["runtime_failure"] = proof["runtime_failure"]
-    if required_runtime_ready:
-        runtime = proof["runtime_satisfied_by"]
-        operator_action = (
-            "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle."
-            if runtime == "codex_user_runtime"
-            else "Open or reload the Agents runtime and verify the handle is available there."
-        )
-        proof["live_runtime_invocation"] = {
-            "status": "manual_session_gate",
-            "runtime_satisfied_by": runtime,
-            "operator_action": operator_action,
-        }
     result.data["proof"] = proof
     if proof["status"] != "pass":
+        failure = proof["runtime_failure"]
+        message = (
+            f"Invalid runtime target '{runtime_target}'."
+            if failure.get("failed_check_id") == "runtime_target"
+            else f"Command handle proof failed for '{normalized}'."
+        )
         result.status = "error"
         result.errors.append(
             ErrorObject(
                 code="ERR_VALIDATION",
-                message=f"Command handle proof failed for '{normalized}'.",
-                fix_suggestion=proof["runtime_failure"]["recovery_guidance"],
+                message=message,
+                fix_suggestion=failure["recovery_guidance"],
             )
         )
     return result
@@ -1433,102 +1355,6 @@ def _repo_relative_path(repo_root: Path, path: Path) -> str | None:
         return path.resolve().relative_to(repo_root.resolve()).as_posix()
     except (OSError, ValueError):
         return None
-
-
-def _status_from_bool(value: bool) -> str:
-    return "pass" if value else "fail"
-
-
-DOCTOR_BLOCKER_TAXONOMY: dict[str, str] = {
-    "blocked_resolution": "The requested handle or path cannot be resolved to a repo-owned capability.",
-    "blocked_runtime": "The capability source exists, but the generated runtime handle is not reachable.",
-    "blocked_missing_source": "The resolved capability no longer has a canonical SKILL.md source file.",
-    "blocked_validation": "A structural or policy validation gate failed for the canonical capability source.",
-    "blocked_user_input": "The run requested user input and should not be classified as a hang.",
-    "blocked_auth": "A required credential, token, account, or OAuth grant is unavailable.",
-    "timeout_no_output": "A bounded run exceeded its timeout without producing usable output.",
-    "timeout_partial_output": "A bounded run exceeded its timeout after producing incomplete output.",
-    "blocked_missing_tool": "A required local command, runtime, package, or validator is unavailable.",
-    "blocked_missing_artifact": "An expected report, transcript, workout, or generated artifact is absent.",
-    "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
-}
-
-
-DOCTOR_WARNING_TAXONOMY: dict[str, str] = {
-    "metadata_incomplete": "Recommended capability metadata is absent or only partially declared.",
-    "capability_contract_incomplete": "The richer capability contract is not fully declared yet.",
-    "outcome_proof_missing": "No matching workout or proof artifact was found for outcome-level evidence.",
-    "strict_audit_not_run": "The doctor used compatibility audit mode; strict audit remains available.",
-}
-
-
-DOCTOR_SDK_LAYERS: tuple[str, ...] = (
-    "Contracts",
-    "Catalog",
-    "Authoring",
-    "Validation",
-    "Packaging",
-    "Runtime Adapters",
-    "Evidence",
-    "Memory",
-)
-
-
-DOCTOR_CHECK_SDK_LAYERS: dict[str, str] = {
-    "resolver": "Catalog",
-    "runtime_reachability": "Runtime Adapters",
-    "canonical_source": "Authoring",
-    "structural_audit": "Validation",
-    "capability_metadata": "Catalog",
-    "package_readiness": "Packaging",
-    "outcome_proof": "Evidence",
-}
-
-
-DOCTOR_BLOCKER_SDK_LAYERS: dict[str, str] = {
-    "blocked_resolution": "Catalog",
-    "blocked_runtime": "Runtime Adapters",
-    "blocked_missing_source": "Authoring",
-    "blocked_validation": "Validation",
-    "blocked_user_input": "Runtime Adapters",
-    "blocked_auth": "Runtime Adapters",
-    "timeout_no_output": "Runtime Adapters",
-    "timeout_partial_output": "Runtime Adapters",
-    "blocked_missing_tool": "Validation",
-    "blocked_missing_artifact": "Evidence",
-    "blocked_environment": "Runtime Adapters",
-}
-
-
-DOCTOR_WARNING_SDK_LAYERS: dict[str, str] = {
-    "metadata_incomplete": "Catalog",
-    "capability_contract_incomplete": "Packaging",
-    "outcome_proof_missing": "Evidence",
-    "strict_audit_not_run": "Validation",
-}
-
-
-DOCTOR_CONTRACT_SCHEMA_VERSIONS: dict[str, str] = {
-    "doctor": "skill-doctor.v1",
-    "events": "skill-events.v1",
-    "lifecycle_event": "capability-lifecycle-event.v1",
-    "profiles": "skill-operation-profiles.v1",
-    "package": "skill-package-readiness.v1",
-    "memory": "skill-memory-provider.v1",
-}
-
-
-EVAL_BLOCKER_CLASSES: list[str] = [
-    "blocked_user_input",
-    "blocked_auth",
-    "blocked_runtime",
-    "timeout_no_output",
-    "timeout_partial_output",
-    "blocked_missing_tool",
-    "blocked_missing_artifact",
-    "blocked_environment",
-    "blocked_validation",
-]
 
 
 CAPABILITY_LIFECYCLE_EVENT_TYPES: dict[str, str] = {
@@ -1629,101 +1455,6 @@ SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
         "stop_conditions": ["unclear target", "auth mismatch", "unrelated dirty worktree", "rollback unavailable"],
     },
 }
-
-
-def _doctor_contract_schema_refs() -> dict[str, dict[str, str]]:
-    """Return consumer-usable schema references for doctor payload surfaces."""
-    missing_schema_reason = (
-        "Governed inline contract; concrete schema file is deferred until "
-        "external consumers require it."
-    )
-    refs = {
-        schema_name: {
-            "name": schema_name,
-            "version": version,
-            "owner": "Agent Skills Kit",
-            "stability": "experimental",
-            "missing_schema_reason": missing_schema_reason,
-        }
-        for schema_name, version in DOCTOR_CONTRACT_SCHEMA_VERSIONS.items()
-    }
-    refs["doctor"].pop("missing_schema_reason", None)
-    refs["doctor"]["path"] = "Infrastructure/config/schemas/skill-doctor.v1.schema.json"
-    return refs
-
-
-def _doctor_contract_schema_versions() -> dict[str, str]:
-    """Return legacy scalar schema versions for existing doctor consumers."""
-    return dict(DOCTOR_CONTRACT_SCHEMA_VERSIONS)
-
-
-def _doctor_sdk_layer_for(kind: str, name: str) -> str:
-    """Return the public Skills SDK layer for a doctor contract object."""
-    layer_maps = {
-        "check": DOCTOR_CHECK_SDK_LAYERS,
-        "blocker": DOCTOR_BLOCKER_SDK_LAYERS,
-        "warning": DOCTOR_WARNING_SDK_LAYERS,
-    }
-    return layer_maps.get(kind, {}).get(name, "Contracts")
-
-
-def _doctor_blocker(blocker_class: str, message: str) -> dict[str, str]:
-    return {
-        "class": blocker_class,
-        "sdk_layer": _doctor_sdk_layer_for("blocker", blocker_class),
-        "message": message,
-        "definition": DOCTOR_BLOCKER_TAXONOMY.get(blocker_class, "Unclassified doctor blocker."),
-    }
-
-
-def _doctor_warning(warning_class: str, message: str) -> dict[str, str]:
-    return {
-        "class": warning_class,
-        "sdk_layer": _doctor_sdk_layer_for("warning", warning_class),
-        "message": message,
-        "definition": DOCTOR_WARNING_TAXONOMY.get(warning_class, "Unclassified doctor warning."),
-    }
-
-
-def _skill_target_summary(
-    *,
-    query: str,
-    target_kind: Any,
-    handle: Any,
-    source_path: Any,
-    audit_target: Any,
-) -> dict[str, Any]:
-    """Return compact target identity for readiness payload consumers."""
-    return {
-        "query": query,
-        "target_kind": target_kind,
-        "handle": handle,
-        "canonical_source_path": source_path,
-        "audit_target": audit_target,
-    }
-
-
-def _skill_doctor_check_summary(checks: dict[str, Any]) -> dict[str, Any]:
-    """Return compact doctor check counts for automation consumers."""
-    status_counts: dict[str, int] = {}
-    for check in checks.values():
-        status = str(check.get("status", "unknown")) if isinstance(check, dict) else "unknown"
-        status_counts[status] = status_counts.get(status, 0) + 1
-    return {
-        "check_names": list(checks),
-        "check_count": len(checks),
-        "status_counts": status_counts,
-        "failed_checks": [
-            name
-            for name, check in checks.items()
-            if isinstance(check, dict) and str(check.get("status")) in {"fail", "blocked"}
-        ],
-        "warning_checks": [
-            name
-            for name, check in checks.items()
-            if isinstance(check, dict) and str(check.get("status")) in {"warning", "available_not_run", "missing"}
-        ],
-    }
 
 
 def _skill_memory_operation_context() -> dict[str, Any]:
@@ -2622,28 +2353,6 @@ def _doctor_check(status: str, **details: Any) -> dict[str, Any]:
     return payload
 
 
-def _runtime_failure_payload(
-    *,
-    command: str,
-    error_code: str,
-    failed_check_id: str,
-    path: str,
-    message: str,
-    recovery_guidance: str,
-    validation_commands: list[str],
-) -> dict[str, Any]:
-    return {
-        "schema_version": "skill-runtime-failure.v1",
-        "command": command,
-        "error_code": error_code,
-        "failed_check_id": failed_check_id,
-        "path": path,
-        "message": message,
-        "recovery_guidance": recovery_guidance,
-        "validation_commands": validation_commands,
-    }
-
-
 def _skill_doctor_next_command_decision(
     *,
     blockers: list[dict[str, str]],
@@ -2762,90 +2471,6 @@ def _skill_doctor_next_command_decision(
     }
 
 
-def _capability_metadata_status(frontmatter: dict[str, Any]) -> dict[str, Any]:
-    """Return a non-blocking metadata readiness summary for one skill source."""
-    required_fields = ("name", "description")
-    capability_fields = (
-        "skill-type",
-        "lifecycle_state",
-        "maturity",
-        "owner",
-        "metadata_source",
-    )
-    metadata = frontmatter.get("metadata")
-    if not isinstance(metadata, dict):
-        metadata = {}
-
-    present_required = sorted(field for field in required_fields if frontmatter.get(field))
-    missing_required = sorted(field for field in required_fields if not frontmatter.get(field))
-    present_capability = sorted(field for field in capability_fields if metadata.get(field))
-    missing_capability = sorted(field for field in capability_fields if not metadata.get(field))
-
-    package_readiness = _skill_package_readiness(frontmatter)
-    package_fields = package_readiness["required_fields"]
-    missing_package = package_fields["missing"]
-
-    readiness_level = "package_ready" if not missing_package else "capability_declared"
-    if missing_capability:
-        readiness_level = "legacy_frontmatter"
-    if missing_required:
-        readiness_level = "incomplete"
-
-    return {
-        "status": "pass" if not missing_required else "warning",
-        "readiness_level": readiness_level,
-        "required_fields": {
-            "present": present_required,
-            "missing": missing_required,
-        },
-        "capability_contract": {
-            "present": present_capability,
-            "missing": missing_capability,
-            "values": {field: metadata.get(field) for field in present_capability},
-        },
-        "package_contract": _skill_package_contract_summary(package_readiness),
-        "package_readiness": package_readiness,
-        "note": "Package/share metadata gaps are reported as contract gaps, not current blockers.",
-    }
-
-
-PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
-    "version",
-    "compatible_roles",
-    "runtime_needs",
-    "maturity",
-    "provenance",
-    "share_readiness",
-)
-
-SKILL_PACKAGE_SCHEMA_VERSION = "skill-package.v1"
-SKILL_PACKAGE_READINESS_SCHEMA_VERSION = "skill-package-readiness.v1"
-SKILL_PACKAGE_COMPATIBILITY_SNAPSHOT_ID = "skill-package-readiness.v1.public-output.2026-05-23"
-SKILL_PACKAGE_SCHEMA_PATH = "Infrastructure/config/schemas/skill-package.v1.schema.json"
-SKILL_PACKAGE_READINESS_SCHEMA_PATH = "Infrastructure/config/schemas/skill-package-readiness.v1.schema.json"
-SKILL_PACKAGE_SNAPSHOT_PATH = (
-    "Infrastructure/tests/fixtures/skill_package_snapshots/"
-    "skill-package-readiness-public-output.v1.json"
-)
-CODEX_SKILL_PACKAGE_ABI_SOURCE_PATH = "codex-rs/core-skills/src/model.rs"
-CODEX_SKILL_PACKAGE_ABI_EVIDENCE_FIELDS: tuple[str, ...] = CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS
-CODEX_SKILL_PACKAGE_REQUIRED_FIELDS: tuple[str, ...] = tuple(
-    field for field, required in CODEX_SKILL_PACKAGE_FIELDS if required
-)
-CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS: tuple[str, ...] = tuple(
-    field for field, required in CODEX_SKILL_PACKAGE_FIELDS if not required
-)
-
-
-def _codex_skill_package_abi_source() -> dict[str, Any]:
-    """Return repo-neutral provenance for the Codex SkillMetadata ABI shape."""
-    return {
-        "path": CODEX_SKILL_PACKAGE_ABI_SOURCE_PATH,
-        "struct": "SkillMetadata",
-        "evidence_fields": list(CODEX_SKILL_PACKAGE_ABI_EVIDENCE_FIELDS),
-    }
-
-
 def skills_load_preview(repo_root: Path) -> CallResult:
     result = CallResult()
     result.metadata["command"] = "skills load-preview"
@@ -2879,380 +2504,6 @@ def skills_implicit_preview(repo_root: Path, command: str, workdir: str | None =
     result.metadata["command"] = "skills implicit-preview"
     result.data["codex_implicit_preview"] = build_codex_implicit_preview(repo_root, command, workdir)
     return result
-
-
-def _metadata_value(frontmatter: dict[str, Any], field: str) -> Any:
-    """Return a package field from top-level frontmatter or nested metadata."""
-    metadata = frontmatter.get("metadata")
-    if not isinstance(metadata, dict):
-        metadata = {}
-    if field == "version":
-        return frontmatter.get("version") or metadata.get("version")
-    return metadata.get(field) or frontmatter.get(field)
-
-
-def _normalized_list(value: Any) -> list[str]:
-    """Normalize package metadata values into a stable string list."""
-    if value is None or value == "":
-        return []
-    if isinstance(value, str):
-        return [value]
-    if isinstance(value, (list, tuple, set)):
-        return [str(item) for item in value if str(item).strip()]
-    return [str(value)]
-
-
-def _package_field_values(frontmatter: dict[str, Any]) -> dict[str, Any]:
-    """Extract package readiness metadata from skill frontmatter."""
-    values = {field: _metadata_value(frontmatter, field) for field in PACKAGE_CONTRACT_FIELDS}
-    return {
-        "version": values.get("version"),
-        "compatible_roles": _normalized_list(values.get("compatible_roles")),
-        "runtime_needs": _normalized_list(values.get("runtime_needs")),
-        "maturity": values.get("maturity"),
-        "provenance": values.get("provenance"),
-        "share_readiness": values.get("share_readiness"),
-    }
-
-
-def _read_agents_openai_yaml_fields(skill_md: Path | None) -> dict[str, Any]:
-    """Extract a conservative agents/openai.yaml contract view."""
-    if not skill_md:
-        return {}
-    agents_openai = skill_md.parent / "agents" / "openai.yaml"
-    if not agents_openai.is_file():
-        return {}
-    try:
-        text = agents_openai.read_text(encoding="utf-8")
-    except OSError:
-        return {}
-    if yaml is not None:
-        try:
-            loaded = yaml.safe_load(text) or {}
-        except yaml.YAMLError:
-            loaded = {}
-        if isinstance(loaded, dict):
-            return {str(key): value for key, value in loaded.items()}
-    fields: dict[str, Any] = {}
-    current_map: str | None = None
-    current_nested_key: str | None = None
-    current_list_item: dict[str, Any] | None = None
-    lines = text.splitlines()
-    for line in lines:
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        indent = len(line) - len(line.lstrip(" "))
-        if current_map and stripped.startswith("- "):
-            nested = fields.setdefault(current_map, {})
-            if not isinstance(nested, dict):
-                continue
-            item_text = stripped[2:].strip()
-            if not current_nested_key:
-                continue
-            values = nested.setdefault(current_nested_key, [])
-            if not isinstance(values, list):
-                values = []
-                nested[current_nested_key] = values
-            if ":" in item_text:
-                item_key, item_value = item_text.split(":", 1)
-                current_list_item = {
-                    item_key.strip(): _parse_frontmatter_scalar(item_value.strip())
-                }
-                values.append(current_list_item)
-            else:
-                values.append(_parse_frontmatter_scalar(item_text))
-                current_list_item = None
-            continue
-        if ":" not in stripped:
-            continue
-        key, value = stripped.split(":", 1)
-        key = key.strip()
-        value = value.strip()
-        if indent == 0:
-            if value:
-                fields[key] = _parse_frontmatter_scalar(value)
-                current_map = None
-                current_nested_key = None
-                current_list_item = None
-            else:
-                fields[key] = {}
-                current_map = key
-                current_nested_key = None
-                current_list_item = None
-            continue
-        if current_map:
-            nested = fields.setdefault(current_map, {})
-            if not isinstance(nested, dict):
-                continue
-            if current_list_item is not None and indent >= 4 and value:
-                current_list_item[key] = _parse_frontmatter_scalar(value)
-                continue
-            if value:
-                nested[key] = _parse_frontmatter_scalar(value)
-                current_nested_key = None
-                current_list_item = None
-            else:
-                nested[key] = []
-                current_nested_key = key
-                current_list_item = None
-    return fields
-
-
-def _skill_package_contract(
-    repo_root: Path,
-    source_path: Path | None,
-    frontmatter: dict[str, Any],
-) -> dict[str, Any]:
-    """Return the Codex-native package contract for SKILL.md plus agents/openai.yaml."""
-    openai_fields = _read_agents_openai_yaml_fields(source_path)
-    interface = frontmatter.get("interface")
-    if not isinstance(interface, dict):
-        interface = {}
-    openai_interface = openai_fields.get("interface")
-    if isinstance(openai_interface, dict):
-        interface = {**interface, **openai_interface}
-
-    dependencies = frontmatter.get("dependencies")
-    if not isinstance(dependencies, dict):
-        dependencies = {}
-    openai_dependencies = openai_fields.get("dependencies")
-    if isinstance(openai_dependencies, dict):
-        dependencies = {**dependencies, **openai_dependencies}
-    policy = frontmatter.get("policy")
-    if not isinstance(policy, dict):
-        policy = {}
-    openai_policy = openai_fields.get("policy")
-    if isinstance(openai_policy, dict):
-        policy = {**policy, **openai_policy}
-
-    codex_metadata = {
-        "name": frontmatter.get("name"),
-        "description": frontmatter.get("description"),
-        "short_description": frontmatter.get("short_description")
-        or interface.get("short_description"),
-        "interface": interface or None,
-        "dependencies": dependencies or None,
-        "policy": policy or None,
-        "scope": frontmatter.get("scope"),
-        "plugin_id": frontmatter.get("plugin_id"),
-    }
-    required_present = sorted(
-        field for field in CODEX_SKILL_PACKAGE_REQUIRED_FIELDS if codex_metadata.get(field)
-    )
-    required_missing = sorted(
-        field for field in CODEX_SKILL_PACKAGE_REQUIRED_FIELDS if not codex_metadata.get(field)
-    )
-    optional_present = sorted(
-        field for field in CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS if codex_metadata.get(field)
-    )
-    source_rel = _repo_relative_path(repo_root, source_path) if source_path else None
-    openai_rel = None
-    if source_path:
-        openai_path = source_path.parent / "agents" / "openai.yaml"
-        if openai_path.is_file():
-            openai_rel = _repo_relative_path(repo_root, openai_path)
-    return {
-        "schema_version": SKILL_PACKAGE_SCHEMA_VERSION,
-        "source_files": {
-            "skill_md": source_rel,
-            "agents_openai_yaml": openai_rel,
-        },
-        "codex_abi_source": _codex_skill_package_abi_source(),
-        "metadata": codex_metadata,
-        "required_fields": {
-            "present": required_present,
-            "missing": required_missing,
-        },
-        "optional_fields": {
-            "present": optional_present,
-        },
-        "compatibility_status": "blocked_validation" if required_missing else "compatible",
-    }
-
-
-def _empty_skill_package_contract() -> dict[str, Any]:
-    """Return a package contract for unresolved or missing source paths."""
-    return {
-        "schema_version": SKILL_PACKAGE_SCHEMA_VERSION,
-        "source_files": {
-            "skill_md": None,
-            "agents_openai_yaml": None,
-        },
-        "codex_abi_source": _codex_skill_package_abi_source(),
-        "metadata": {
-            "name": None,
-            "description": None,
-            "short_description": None,
-            "interface": None,
-            "dependencies": None,
-            "policy": None,
-            "scope": None,
-            "plugin_id": None,
-        },
-        "required_fields": {
-            "present": [],
-            "missing": list(CODEX_SKILL_PACKAGE_REQUIRED_FIELDS),
-        },
-        "optional_fields": {
-            "present": [],
-        },
-        "compatibility_status": "blocked_missing_source",
-    }
-
-
-def _skill_package_compatibility_snapshot() -> dict[str, Any]:
-    """Return the public package-output snapshot identity for drift tests."""
-    return {
-        "id": SKILL_PACKAGE_COMPATIBILITY_SNAPSHOT_ID,
-        "schema_version": SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
-        "path": SKILL_PACKAGE_SNAPSHOT_PATH,
-        "covers": [
-            "valid_share_ready_package",
-            "missing_source_package",
-            "strict_incomplete_package",
-        ],
-    }
-
-
-def _skill_package_readiness(frontmatter: dict[str, Any]) -> dict[str, Any]:
-    """Return version and role-aware package readiness for one skill."""
-    values = _package_field_values(frontmatter)
-    present = sorted(field for field, value in values.items() if bool(value))
-    missing = sorted(field for field in PACKAGE_CONTRACT_FIELDS if field not in present)
-    share_readiness = str(values.get("share_readiness") or "").strip().lower()
-    share_readiness_ready = share_readiness == "ready"
-    share_ready = False
-    missing_identity_fields = [
-        field
-        for field in ("name", "description")
-        if not str(frontmatter.get(field) or "").strip()
-    ]
-
-    if missing_identity_fields:
-        readiness_level = "incomplete_identity"
-    elif not values.get("version"):
-        readiness_level = "legacy_capability"
-    elif missing:
-        readiness_level = "versioned_capability"
-    elif not share_readiness_ready:
-        readiness_level = "share_readiness_blocked"
-    else:
-        readiness_level = "share_ready"
-        share_ready = True
-
-    blocked_reasons = list(missing)
-    if missing_identity_fields:
-        blocked_reasons.append("identity_incomplete")
-    if not missing and not share_readiness_ready:
-        blocked_reasons.append("share_readiness_not_ready")
-    recommended_next_fields = [
-        field
-        for field in ("compatible_roles", "runtime_needs", "provenance", "share_readiness")
-        if field in missing
-    ]
-    if not missing and not share_readiness_ready:
-        recommended_next_fields.append("share_readiness")
-    if "version" in missing:
-        recommended_next_fields.insert(0, "version")
-    recommended_next_fields = [*missing_identity_fields, *recommended_next_fields]
-    promotion_status = "ready_pending_checkout" if share_ready else "blocked_validation"
-
-    return {
-        "readiness_level": readiness_level,
-        "required_fields": {
-            "present": present,
-            "missing": missing,
-        },
-        "values": values,
-        "role_compatibility": {
-            "declared": bool(values["compatible_roles"]),
-            "roles": values["compatible_roles"],
-        },
-        "runtime_contract": {
-            "declared": bool(values["runtime_needs"]),
-            "needs": values["runtime_needs"],
-        },
-        "install_gate": {
-            "install_ready": share_ready,
-            "required_checks": list(PACKAGE_CONTRACT_FIELDS),
-            "blocked_reasons": blocked_reasons,
-            "checkout_test": {
-                "required": True,
-                "status": "not_run",
-                "evidence": [],
-            },
-        },
-        "promotion_gate": {
-            "status": promotion_status,
-            "promotion_ready": False,
-            "share_ready": share_ready,
-            "share_readiness": values["share_readiness"],
-            "checkout_test_status": "not_run",
-            "blocked_reasons": blocked_reasons,
-            "recommended_next_fields": recommended_next_fields,
-        },
-    }
-
-
-def _refresh_package_promotion_gate(package_contract: dict[str, Any]) -> None:
-    """Keep promotion readiness tied to metadata and checkout evidence."""
-    promotion_gate = package_contract["promotion_gate"]
-    checkout_status = package_contract["install_gate"]["checkout_test"]["status"]
-    promotion_gate["checkout_test_status"] = checkout_status
-
-    if promotion_gate["status"] == "blocked_missing_source":
-        promotion_gate["promotion_ready"] = False
-        return
-    if promotion_gate["blocked_reasons"]:
-        promotion_gate["status"] = "blocked_validation"
-        promotion_gate["promotion_ready"] = False
-        return
-    if not promotion_gate["share_ready"]:
-        promotion_gate["status"] = "blocked_validation"
-        promotion_gate["promotion_ready"] = False
-        return
-    if checkout_status == "pass":
-        promotion_gate["status"] = "ready"
-        promotion_gate["promotion_ready"] = True
-        return
-    if checkout_status == "not_run":
-        promotion_gate["status"] = "ready_pending_checkout"
-    else:
-        promotion_gate["status"] = checkout_status
-    promotion_gate["promotion_ready"] = False
-
-
-def _skill_package_gate_summary(package_contract: dict[str, Any]) -> dict[str, Any]:
-    """Return automation-facing package gate status without nested traversal."""
-    install_gate = package_contract["install_gate"]
-    promotion_gate = package_contract["promotion_gate"]
-    return {
-        "install_ready": install_gate["install_ready"],
-        "checkout_test_status": install_gate["checkout_test"]["status"],
-        "promotion_status": promotion_gate["status"],
-        "promotion_ready": promotion_gate["promotion_ready"],
-        "blocked_reasons": promotion_gate["blocked_reasons"],
-    }
-
-
-def _skill_package_readiness_summary(package_contract: dict[str, Any]) -> dict[str, Any]:
-    """Return a compact readiness summary for routing and dashboards."""
-    required_fields = package_contract["required_fields"]
-    present_fields = list(required_fields["present"])
-    missing_fields = list(required_fields["missing"])
-    return {
-        "readiness_level": package_contract["readiness_level"],
-        "present_fields": present_fields,
-        "missing_fields": missing_fields,
-        "present_field_count": len(present_fields),
-        "missing_field_count": len(missing_fields),
-        "role_compatible": package_contract["role_compatibility"]["declared"],
-        "runtime_contract_declared": package_contract["runtime_contract"]["declared"],
-        "share_ready": package_contract["promotion_gate"]["share_ready"],
-        "promotion_status": package_contract["promotion_gate"]["status"],
-        "recommended_next_fields": list(package_contract["promotion_gate"]["recommended_next_fields"]),
-    }
 
 
 def _skill_package_operation_context() -> dict[str, Any]:
@@ -3307,72 +2558,6 @@ def _skill_doctor_operation_context() -> dict[str, Any]:
             "./bin/ask skills audit <handle-or-path> --level strict --json --robot",
             _skills_validation_command("events", "skill_doctor_completed"),
         ],
-    }
-
-
-def _skill_package_contract_summary(package_readiness: dict[str, Any]) -> dict[str, Any]:
-    """Return the doctor-facing package contract view from package readiness."""
-    package_fields = package_readiness["required_fields"]
-    return {
-        "present": package_fields["present"],
-        "missing": package_fields["missing"],
-        "values": package_readiness["values"],
-        "role_compatibility": package_readiness["role_compatibility"],
-        "runtime_contract": package_readiness["runtime_contract"],
-        "install_gate": package_readiness["install_gate"],
-        "promotion_gate": package_readiness["promotion_gate"],
-    }
-
-
-def _skill_package_checkout_test(
-    repo_root: Path,
-    source_path: Path | None,
-    audit_target: str | None,
-    package_contract: dict[str, Any],
-) -> dict[str, Any]:
-    """Return read-only local checkout evidence for a package candidate."""
-    evidence: list[str] = []
-    if not source_path or not source_path.is_file():
-        return {
-            "required": True,
-            "status": "blocked_missing_source",
-            "evidence": evidence,
-        }
-
-    source_rel = _repo_relative_path(repo_root, source_path) or source_path.as_posix()
-    evidence.append(f"source_path:{source_rel}")
-    try:
-        source_path.read_text(encoding="utf-8")
-    except OSError as exc:
-        evidence.append("source_readable:false")
-        evidence.append(f"source_read_error:{exc.__class__.__name__}")
-        return {
-            "required": True,
-            "status": "blocked_missing_source",
-            "evidence": evidence,
-        }
-    evidence.append("source_readable:true")
-    if audit_target:
-        evidence.append(f"audit_target:{audit_target}")
-
-    missing_fields = package_contract["required_fields"]["missing"]
-    blocked_reasons = package_contract["install_gate"]["blocked_reasons"]
-    if blocked_reasons:
-        if missing_fields:
-            evidence.append(f"missing_package_metadata:{','.join(missing_fields)}")
-        else:
-            evidence.append(f"promotion_gate_blocked:{','.join(blocked_reasons)}")
-        return {
-            "required": True,
-            "status": "blocked_validation",
-            "evidence": evidence,
-        }
-
-    evidence.append("package_metadata_complete:true")
-    return {
-        "required": True,
-        "status": "pass",
-        "evidence": evidence,
     }
 
 
@@ -3605,6 +2790,140 @@ def skills_package(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion=payload["next_command"],
+            )
+        )
+    return result
+
+
+def skills_package_verify(
+    repo_root: Path,
+    target: str,
+    expected_sha256: str | None = None,
+    trusted_provenance: str | None = None,
+    rollback_journal: str | None = None,
+) -> CallResult:
+    """Verify a package candidate without installing, extracting, or mutating runtime roots."""
+    result = CallResult()
+    result.metadata["command"] = "skills package verify"
+    query = target.strip()
+    validation_args = ["verify", query]
+    if expected_sha256:
+        validation_args.extend(["--expected-sha256", expected_sha256])
+    if trusted_provenance:
+        validation_args.extend(["--trusted-provenance", trusted_provenance])
+    if rollback_journal:
+        validation_args.extend(["--rollback-journal", rollback_journal])
+    validation_command = _skills_validation_command("package", *validation_args)
+    target_path = Path(query)
+    candidate_path = target_path if target_path.is_absolute() else repo_root / target_path
+
+    trusted_sources = {
+        source.strip()
+        for source in (trusted_provenance or "").split(",")
+        if source.strip()
+    } or None
+    is_archive_target = candidate_path.name != "SKILL.md" and (
+        candidate_path.is_file() or candidate_path.suffix.lower() == ".zip"
+    )
+
+    if is_archive_target:
+        journal_path = Path(rollback_journal) if rollback_journal else None
+        if journal_path and not journal_path.is_absolute():
+            journal_path = repo_root / journal_path
+        verification = _verify_archive_package(
+            candidate_path,
+            expected_sha256=expected_sha256,
+            trusted_sources=trusted_sources,
+            rollback_journal_path=journal_path,
+            repo_root=repo_root,
+        )
+    else:
+        source_path: Path | None = None
+        if candidate_path.is_dir():
+            source_path = candidate_path / "SKILL.md"
+        elif candidate_path.is_file() and candidate_path.name == "SKILL.md":
+            source_path = candidate_path
+        else:
+            target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+            source_path_value = target_info.get("source_path")
+            if source_path_value:
+                source_path = Path(str(source_path_value))
+                if not source_path.is_absolute():
+                    source_path = repo_root / source_path
+        if source_path and source_path.is_file():
+            verification = _verify_skill_directory(repo_root, source_path, query, trusted_sources=trusted_sources)
+        else:
+            missing_path = (source_path or candidate_path).as_posix()
+            verification = {
+                "schema_version": PACKAGE_VERIFY_SCHEMA_VERSION,
+                "target_kind": "missing",
+                "target_path": missing_path,
+                "archive_identity": None,
+                "provenance_identity": {"trusted": False, "values": []},
+                "rule_results": [
+                    {
+                        "rule_id": "blocked_missing_artifact",
+                        "status": "blocked",
+                        "message": "Package verification target did not resolve to a skill source or archive.",
+                        "path": missing_path,
+                    }
+                ],
+                "mutation_status": "not_mutated",
+                "rollback_hint": "No rollback is required because verification did not install, extract, or mutate runtime roots.",
+                "status": "blocked",
+            }
+    verification = _normalize_package_verification(
+        query=query,
+        validation_command=validation_command,
+        verification=verification,
+    )
+
+    result.data["skill_package_verification"] = verification
+    if verification["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=verification["agent_summary"],
+                fix_suggestion=verification["next_command"],
+            )
+        )
+    return result
+
+
+def skills_conformance_run(
+    repo_root: Path,
+    *,
+    suite: str,
+    evidence_dir: str,
+) -> CallResult:
+    """Run deterministic Codex parity conformance checks and write replayable evidence."""
+    result = CallResult()
+    result.metadata["command"] = "skills conformance run"
+    validation_command = _skills_validation_command(
+        "conformance",
+        "run",
+        "--suite",
+        suite,
+        "--evidence-dir",
+        evidence_dir,
+    )
+    payload = _run_skills_conformance(repo_root, suite=suite, evidence_dir=evidence_dir)
+    payload["validation_commands"] = [validation_command]
+    payload["agent_summary"] = (
+        f"Conformance suite {suite} blocked: {payload['blockers'][0]['message']}"
+        if payload.get("blockers")
+        else f"Conformance suite {suite} passed with {payload.get('case_count', 0)} fixture cases."
+    )
+    payload["next_command"] = validation_command
+    result.data["skills_conformance"] = payload
+    if payload.get("blockers"):
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=validation_command,
             )
         )
     return result

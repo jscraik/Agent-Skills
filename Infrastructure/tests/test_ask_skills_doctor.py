@@ -1,4 +1,5 @@
 import json
+import inspect
 import subprocess
 import sys
 import tempfile
@@ -18,6 +19,7 @@ from ask.commands.skills_impl import (  # noqa: E402
     skills_doctor,
     skills_proof,
 )
+from ask.skills_sdk import runtime_adapters  # noqa: E402
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
 from helpers.schema_validator import (  # noqa: E402
     SUPPORTED_SCHEMA_KEYS as _SUPPORTED_SCHEMA_KEYS,
@@ -203,6 +205,16 @@ def _assert_consumer_usable_schema_refs(test_case: unittest.TestCase, schemas: d
 
 
 class TestAskSkillsDoctor(unittest.TestCase):
+    def test_runtime_adapter_service_is_not_owned_by_command_module(self) -> None:
+        command_source = inspect.getsource(skills_proof)
+        service_source = inspect.getsource(runtime_adapters)
+
+        self.assertIn("build_command_handle_proof", command_source)
+        self.assertNotIn("def _link_payload", command_source)
+        self.assertNotIn("resolve_skill_handle(", service_source)
+        self.assertNotIn("check_command_handles(", service_source)
+        self.assertNotIn("from ask.commands", service_source)
+
     def test_runtime_target_codex_fails_closed_when_only_agents_runtime_is_ready(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             sandbox = Path(tmp)
@@ -265,11 +277,17 @@ class TestAskSkillsDoctor(unittest.TestCase):
 
         self.assertEqual(result.status, "error")
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+        proof = result.data["proof"]
+        self.assertEqual(proof["schema_version"], "command-handle-proof.v2")
+        self.assertEqual(proof["status"], "fail")
+        self.assertEqual(proof["runtime_target"], "cloud")
+        self.assertEqual(proof["gate_policy"]["required"], ["runtime_target"])
         failure = result.data["runtime_failure"]
         self.assertEqual(failure["schema_version"], "skill-runtime-failure.v1")
         self.assertEqual(failure["error_code"], "ERR_VALIDATION")
         self.assertEqual(failure["failed_check_id"], "runtime_target")
         self.assertEqual(failure["path"], "runtime_target")
+        self.assertEqual(proof["runtime_failure"], failure)
         self.assertIn("--runtime-target any", failure["validation_commands"][0])
 
     def test_cli_runtime_target_rejects_invalid_value_with_runtime_failure_json(self) -> None:
@@ -293,8 +311,12 @@ class TestAskSkillsDoctor(unittest.TestCase):
 
         self.assertEqual(process.returncode, 2, process.stderr)
         payload = json.loads(process.stdout)
+        proof = payload["data"]["proof"]
         failure = payload["data"]["runtime_failure"]
         self.assertEqual(payload["status"], "error")
+        self.assertEqual(proof["schema_version"], "command-handle-proof.v2")
+        self.assertEqual(proof["status"], "fail")
+        self.assertEqual(proof["runtime_target"], "cloud")
         self.assertEqual(failure["schema_version"], "skill-runtime-failure.v1")
         self.assertEqual(failure["error_code"], "ERR_VALIDATION")
         self.assertEqual(failure["failed_check_id"], "runtime_target")

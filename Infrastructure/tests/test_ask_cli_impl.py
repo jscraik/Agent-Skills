@@ -1726,6 +1726,75 @@ class TestAskCLI(unittest.TestCase):
         )
         self.assertIn("package_readiness_checked", [event["event_type"] for event in package["lifecycle_events"]])
 
+    def test_skills_package_rejects_missing_target(self):
+        """Verify ask skills package preserves the required target contract."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "--json", "--robot"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("the following arguments are required: target", output["errors"][0]["message"])
+
+    def test_skills_package_rejects_extra_non_verify_target(self):
+        """Verify ask skills package does not ignore unexpected positional input."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "package",
+            "skill-builder",
+            "extra",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("unexpected verify-only arguments", output["errors"][0]["message"])
+
+    def test_skills_package_rejects_verify_flags_without_verify_mode(self):
+        """Verify verify-only flags cannot silently alter package readiness."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "package",
+            "skill-builder",
+            "--expected-sha256",
+            "0" * 64,
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("unexpected verify-only arguments", output["errors"][0]["message"])
+
+    def test_skills_package_verify_rejects_package_only_flags(self):
+        """Verify package-only flags cannot be ignored by verify mode."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "package",
+            "verify",
+            "skill-builder",
+            "--strict",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIn("unexpected package-only arguments", output["errors"][0]["message"])
+
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-builder", "--robot"]
