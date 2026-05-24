@@ -87,6 +87,12 @@ from ask.skills_sdk.package_contracts import (  # noqa: E402
     skill_package_readiness as _skill_package_readiness,
     skill_package_readiness_summary as _skill_package_readiness_summary,
 )
+from ask.skills_sdk.conformance import run_skills_conformance as _run_skills_conformance  # noqa: E402
+from ask.skills_sdk.package_verify import (  # noqa: E402
+    PACKAGE_VERIFY_SCHEMA_VERSION,
+    verify_archive_package as _verify_archive_package,
+    verify_skill_directory as _verify_skill_directory,
+)
 from skill_discovery import (  # noqa: E402
     USER_SKILL_SCOPE_PRECEDENCE,
     classify_skill_scope,
@@ -144,6 +150,7 @@ __all__ = [
     "skills_config_explain",
     "skills_implicit_preview",
     "skills_inject_preview",
+    "skills_conformance_run",
     "skills_doctor",
     "skills_events",
     "skills_explain_boundary",
@@ -151,6 +158,7 @@ __all__ = [
     "skills_load_preview",
     "skills_memory",
     "skills_package",
+    "skills_package_verify",
     "skills_parse",
     "skills_profiles",
     "skills_proof",
@@ -383,6 +391,158 @@ def _completed_process_payload(proc: subprocess.CompletedProcess[str]) -> dict[s
         "stdout": proc.stdout,
         "stderr": proc.stderr,
     }
+
+
+def _call_result_payload(result: CallResult) -> dict[str, Any]:
+    """Return a JSON-serializable in-process command result."""
+    return {
+        "status": result.status,
+        "trace_id": result.trace_id,
+        "metadata": result.metadata,
+        "data": result.data,
+        "telemetry": result.telemetry,
+        "errors": [error.__dict__ for error in result.errors],
+    }
+
+
+def _package_verify_rule_evidence(verification: dict[str, Any]) -> list[str]:
+    """Return compact, replay-friendly rule evidence strings for package verification."""
+    evidence: list[str] = []
+    checks = verification.get("checks")
+    if isinstance(checks, list):
+        for check in checks:
+            if not isinstance(check, dict):
+                continue
+            name = str(check.get("name") or "unknown")
+            status = str(check.get("status") or "unknown")
+            value = "true" if status == "pass" else "false" if status in {"fail", "blocked"} else status
+            evidence.append(f"{name}:{value}")
+            check_evidence = check.get("evidence") if isinstance(check.get("evidence"), dict) else {}
+            for member in check_evidence.get("unsafe_members") or []:
+                if isinstance(member, dict) and member.get("name"):
+                    evidence.append(f"unsafe_member:{member['name']}")
+            for member in check_evidence.get("unsafe_links") or []:
+                if isinstance(member, dict) and member.get("name"):
+                    evidence.append(f"symlink_escape:{member['name']}")
+        return evidence
+
+    rule_results = verification.get("rule_results")
+    if isinstance(rule_results, list):
+        blocker_ids = {str(item.get("rule_id")) for item in rule_results if isinstance(item, dict)}
+        contract = verification.get("contract") if isinstance(verification.get("contract"), dict) else {}
+        missing = contract.get("required_fields", {}).get("missing", []) if contract else []
+        evidence.append(f"package_metadata_complete:{str(not missing).lower()}")
+        provenance = verification.get("provenance_identity")
+        trusted = provenance.get("trusted") if isinstance(provenance, dict) else False
+        evidence.append(f"provenance_trusted:{str(bool(trusted)).lower()}")
+        if "digest_mismatch" in blocker_ids:
+            evidence.append("digest_match:false")
+        mutation = verification.get("mutation_status")
+        evidence.append(f"no_runtime_mutation:{str(mutation == 'not_mutated').lower()}")
+        for blocker in rule_results:
+            if not isinstance(blocker, dict):
+                continue
+            if blocker.get("path"):
+                evidence.append(f"{blocker.get('rule_id')}:{blocker.get('path')}")
+                if blocker.get("rule_id") in {"absolute_archive_path", "archive_path_traversal"}:
+                    evidence.append(f"unsafe_member:{blocker.get('path')}")
+                if blocker.get("rule_id") == "archive_symlink_escape":
+                    evidence.append(f"symlink_escape:{blocker.get('path')}")
+            else:
+                evidence.append(str(blocker.get("rule_id") or "blocked_validation"))
+    return evidence
+
+
+def _package_verify_blockers(verification: dict[str, Any]) -> list[dict[str, Any]]:
+    blockers = verification.get("blockers")
+    if isinstance(blockers, list):
+        return [
+            {**item, "class": item.get("class") or item.get("rule_id")}
+            for item in blockers
+            if isinstance(item, dict)
+        ]
+    rule_results = verification.get("rule_results")
+    if isinstance(rule_results, list):
+        return [
+            {**item, "class": item.get("class") or item.get("rule_id")}
+            for item in rule_results
+            if isinstance(item, dict)
+        ]
+    return []
+
+
+def _package_verify_mutation_status(verification: dict[str, Any]) -> dict[str, Any]:
+    runtime_mutation = verification.get("runtime_mutation")
+    runtime_mutated = False
+    if isinstance(runtime_mutation, dict):
+        runtime_mutated = runtime_mutation.get("status") == "fail" or bool(runtime_mutation.get("mutations"))
+    mutation_status = verification.get("mutation_status")
+    mutation_payload = mutation_status if isinstance(mutation_status, dict) else {}
+    status_value = mutation_payload.get("status") if mutation_payload else mutation_status
+    return {
+        "mutated": runtime_mutated
+        or bool(mutation_payload.get("mutated"))
+        or status_value not in {None, "not_mutated", "pass"},
+        "runtime_roots_mutated": runtime_mutated or bool(mutation_payload.get("runtime_roots_mutated")),
+        "install_attempted": bool(mutation_payload.get("install_attempted")),
+        "archive_extracted": bool(mutation_payload.get("archive_extracted")),
+        "network_used": bool(mutation_payload.get("network_used")),
+        "raw": mutation_status or runtime_mutation or "not_mutated",
+    }
+
+
+def _normalize_package_verification(
+    *,
+    query: str,
+    validation_command: str,
+    verification: dict[str, Any],
+) -> dict[str, Any]:
+    archive = verification.get("archive")
+    archive_identity = verification.get("archive_identity")
+    if isinstance(archive, dict):
+        archive_identity = {
+            "path": archive.get("path"),
+            "sha256": archive.get("sha256"),
+            "type": archive.get("type"),
+            "member_count": archive.get("member_count"),
+        }
+    target_kind = verification.get("target_kind") or ("archive" if archive_identity else "skill_directory")
+    target_path = verification.get("target_path") or (archive.get("path") if isinstance(archive, dict) else query)
+    provenance_identity = verification.get("provenance_identity")
+    if not isinstance(provenance_identity, dict):
+        provenance = verification.get("provenance")
+        source = provenance.get("source") if isinstance(provenance, dict) else None
+        provenance_identity = {
+            "trusted": "trusted_provenance:true" in _package_verify_rule_evidence(verification),
+            "source": source,
+        }
+
+    normalized = {
+        **verification,
+        "schema_version": PACKAGE_VERIFY_SCHEMA_VERSION,
+        "query": query,
+        "status": verification.get("status", "blocked"),
+        "target_identity": {
+            "kind": target_kind,
+            "path": target_path,
+            "query": query,
+        },
+        "archive_identity": archive_identity,
+        "provenance_identity": provenance_identity,
+        "rule_evidence": _package_verify_rule_evidence(verification),
+        "blockers": _package_verify_blockers(verification),
+        "mutation_status": _package_verify_mutation_status(verification),
+        "rollback_hint": verification.get("rollback_hint")
+        or "No rollback is required because verification did not install, extract, or mutate runtime roots.",
+        "validation_commands": [validation_command],
+        "next_command": validation_command,
+    }
+    normalized["agent_summary"] = (
+        f"Package verification blocked: {normalized['blockers'][0].get('message', 'validation failed')}"
+        if normalized["status"] == "blocked" and normalized["blockers"]
+        else "Package verification passed without install, extraction, or runtime-root mutation."
+    )
+    return normalized
 
 
 def _run_captured_tool(
@@ -2628,6 +2788,288 @@ def skills_package(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion=payload["next_command"],
+            )
+        )
+    return result
+
+
+def skills_package_verify(
+    repo_root: Path,
+    target: str,
+    expected_sha256: str | None = None,
+    trusted_provenance: str | None = None,
+    rollback_journal: str | None = None,
+) -> CallResult:
+    """Verify a package candidate without installing, extracting, or mutating runtime roots."""
+    result = CallResult()
+    result.metadata["command"] = "skills package verify"
+    query = target.strip()
+    validation_args = ["verify", query]
+    if expected_sha256:
+        validation_args.extend(["--expected-sha256", expected_sha256])
+    if trusted_provenance:
+        validation_args.extend(["--trusted-provenance", trusted_provenance])
+    if rollback_journal:
+        validation_args.extend(["--rollback-journal", rollback_journal])
+    validation_command = _skills_validation_command("package", *validation_args)
+    target_path = Path(query)
+    candidate_path = target_path if target_path.is_absolute() else repo_root / target_path
+
+    if candidate_path.is_dir() or candidate_path.name == "SKILL.md" or not candidate_path.exists():
+        package_result: CallResult | None = None
+        package_payload: dict[str, Any] = {}
+        source_path = candidate_path if candidate_path.name == "SKILL.md" else candidate_path / "SKILL.md"
+        target_identity: dict[str, Any] = {
+            "target": query,
+            "kind": "skill_file" if candidate_path.name == "SKILL.md" else "skill_directory",
+            "path": candidate_path.as_posix() if candidate_path.exists() else None,
+            "canonical_source_path": source_path.as_posix() if source_path.is_file() else None,
+            "audit_target": None,
+        }
+        blockers: list[dict[str, Any]] = []
+        warnings: list[dict[str, Any]] = []
+        rule_evidence: list[str] = []
+        if not candidate_path.exists():
+            package_result = skills_package(repo_root, query, strict=True, checkout_test=True)
+            package_payload = package_result.data.get("skill_package", {})
+            source_path_value = package_payload.get("canonical_source_path")
+            if source_path_value:
+                source_path = repo_root / str(source_path_value)
+                target_identity.update(
+                    {
+                        "kind": "command_handle",
+                        "canonical_source_path": str(source_path_value),
+                        "audit_target": package_payload.get("audit_target"),
+                        "handle": package_payload.get("handle"),
+                    }
+                )
+            blockers.extend(package_payload.get("blockers", []) if isinstance(package_payload, dict) else [])
+            warnings.extend(package_payload.get("warnings", []) if isinstance(package_payload, dict) else [])
+        elif candidate_path.exists():
+            try:
+                audit_target = candidate_path.resolve().relative_to(repo_root.resolve()).as_posix()
+                target_identity["audit_target"] = audit_target
+                package_result = skills_package(repo_root, audit_target, strict=True, checkout_test=True)
+                package_payload = package_result.data.get("skill_package", {})
+            except ValueError:
+                package_payload = {}
+
+        if source_path.is_file():
+            rule_evidence.extend(["skill_md_present:true", "frontmatter_read:true"])
+            try:
+                frontmatter = _read_skill_frontmatter_fields(source_path)
+            except OSError:
+                frontmatter = {}
+                rule_evidence.append("frontmatter_read:false")
+            package_contract = _skill_package_readiness(frontmatter)
+            values = package_contract.get("values", {})
+            provenance = values.get("provenance")
+            if package_contract.get("install_gate", {}).get("blocked_reasons"):
+                blockers.append(
+                    _doctor_blocker(
+                        "blocked_validation",
+                        "Package readiness metadata is incomplete.",
+                    )
+                )
+                rule_evidence.append(
+                    "package_readiness_blocked:"
+                    + ",".join(package_contract.get("install_gate", {}).get("blocked_reasons", []))
+                )
+            else:
+                rule_evidence.append("package_metadata_complete:true")
+        else:
+            package_contract = {}
+            values = {}
+            provenance = None
+            blockers.append(
+                _doctor_blocker(
+                    "blocked_missing_source",
+                    f"Package candidate has no readable SKILL.md: {query}.",
+                )
+            )
+            rule_evidence.append("skill_md_present:false")
+
+        provenance_text = str(provenance or "").strip()
+        provenance_trusted = bool(provenance_text) and provenance_text.lower() not in {
+            "unknown",
+            "untrusted",
+            "external-untrusted",
+        }
+        if provenance_trusted:
+            rule_evidence.append("provenance_trusted:true")
+        else:
+            blockers.append(
+                _doctor_blocker(
+                    "blocked_validation",
+                    "Package provenance is missing or untrusted.",
+                )
+            )
+            rule_evidence.append("provenance_trusted:false")
+        status = "blocked" if blockers or (package_result is not None and package_result.status != "success") else "pass"
+        verification = {
+            "schema_version": PACKAGE_VERIFY_SCHEMA_VERSION,
+            "query": query,
+            "status": status,
+            "target_kind": target_identity["kind"],
+            "target_identity": target_identity,
+            "provenance_identity": {
+                "trusted": provenance_trusted,
+                "source": "skill_package_readiness",
+                "provenance": provenance_text or None,
+            },
+            "rule_evidence": rule_evidence,
+            "checks": [
+                {
+                    "name": "package_readiness",
+                    "status": "pass" if package_result is None or package_result.status == "success" else "fail",
+                    "evidence": {
+                        "command": _skills_validation_command("package", query, "--strict", "--checkout-test"),
+                    },
+                },
+                {
+                    "name": "no_runtime_mutation",
+                    "status": "pass",
+                    "evidence": {"install_attempted": False, "archive_extracted": False},
+                },
+            ],
+            "blockers": blockers,
+            "warnings": warnings,
+            "package_readiness": package_payload,
+            "mutation_status": {
+                "status": "pass",
+                "mutated": False,
+                "runtime_roots_mutated": False,
+                "install_attempted": False,
+                "archive_extracted": False,
+                "network_used": False,
+            },
+            "rollback_journal": {
+                "status": "not_required",
+                "reason": "Handle and directory verification is read-only and performs no extraction or install.",
+            },
+            "agent_summary": (
+                f"Package verification blocked: {blockers[0]['message']}"
+                if status == "blocked" and blockers
+                else f"{query} package verification passed without runtime mutation."
+            ),
+            "validation_commands": [validation_command],
+            "next_command": validation_command,
+        }
+        result.data["skill_package_verification"] = verification
+        if verification["status"] == "blocked":
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=verification["agent_summary"],
+                    fix_suggestion=verification["next_command"],
+                )
+            )
+        return result
+
+    if candidate_path.is_file() and candidate_path.name != "SKILL.md":
+        trusted_sources = {
+            source.strip()
+            for source in (trusted_provenance or "").split(",")
+            if source.strip()
+        } or None
+        journal_path = Path(rollback_journal) if rollback_journal else None
+        if journal_path and not journal_path.is_absolute():
+            journal_path = repo_root / journal_path
+        verification = _verify_archive_package(
+            candidate_path,
+            expected_sha256=expected_sha256,
+            trusted_sources=trusted_sources,
+            rollback_journal_path=journal_path,
+            repo_root=repo_root,
+        )
+    else:
+        source_path: Path | None = None
+        if candidate_path.is_dir():
+            source_path = candidate_path / "SKILL.md"
+        elif candidate_path.is_file() and candidate_path.name == "SKILL.md":
+            source_path = candidate_path
+        else:
+            target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+            source_path_value = target_info.get("source_path")
+            if source_path_value:
+                source_path = Path(str(source_path_value))
+                if not source_path.is_absolute():
+                    source_path = repo_root / source_path
+        if source_path and source_path.is_file():
+            verification = _verify_skill_directory(repo_root, source_path, query)
+        else:
+            missing_path = (source_path or candidate_path).as_posix()
+            verification = {
+                "schema_version": PACKAGE_VERIFY_SCHEMA_VERSION,
+                "target_kind": "missing",
+                "target_path": missing_path,
+                "archive_identity": None,
+                "provenance_identity": {"trusted": False, "values": []},
+                "rule_results": [
+                    {
+                        "rule_id": "blocked_missing_artifact",
+                        "status": "blocked",
+                        "message": "Package verification target did not resolve to a skill source or archive.",
+                        "path": missing_path,
+                    }
+                ],
+                "mutation_status": "not_mutated",
+                "rollback_hint": "No rollback is required because verification did not install, extract, or mutate runtime roots.",
+                "status": "blocked",
+            }
+    verification = _normalize_package_verification(
+        query=query,
+        validation_command=validation_command,
+        verification=verification,
+    )
+
+    result.data["skill_package_verification"] = verification
+    if verification["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=verification["agent_summary"],
+                fix_suggestion=verification["next_command"],
+            )
+        )
+    return result
+
+
+def skills_conformance_run(
+    repo_root: Path,
+    *,
+    suite: str,
+    evidence_dir: str,
+) -> CallResult:
+    """Run deterministic Codex parity conformance checks and write replayable evidence."""
+    result = CallResult()
+    result.metadata["command"] = "skills conformance run"
+    validation_command = _skills_validation_command(
+        "conformance",
+        "run",
+        "--suite",
+        suite,
+        "--evidence-dir",
+        evidence_dir,
+    )
+    payload = _run_skills_conformance(repo_root, suite=suite, evidence_dir=evidence_dir)
+    payload["validation_commands"] = [validation_command]
+    payload["agent_summary"] = (
+        f"Conformance suite {suite} blocked: {payload['blockers'][0]['message']}"
+        if payload.get("blockers")
+        else f"Conformance suite {suite} passed with {payload.get('case_count', 0)} fixture cases."
+    )
+    payload["next_command"] = validation_command
+    result.data["skills_conformance"] = payload
+    if payload.get("blockers"):
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=validation_command,
             )
         )
     return result

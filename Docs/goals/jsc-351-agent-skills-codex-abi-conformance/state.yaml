@@ -44,29 +44,29 @@ checks:
   last_verification:
     command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     outcome: pass
-    checked_at: "2026-05-24T03:17:28Z"
+    checked_at: "2026-05-24T03:48:30Z"
   last_delivery_attempt:
-    command: "PU-006 PR #196 CodeRabbit fixture-path remediation"
-    outcome: blocked_review_comment_remediated_pending_push
-    checked_at: "2026-05-24T03:34:10Z"
-    detail: "PR #196 reached green remote checks at head 29e0c242ff881f5ff59542c7380c7046995fa916, including CodeRabbit, CircleCI, CodeQL, Semgrep, Snyk, docs, lint, typecheck, test, audit, and security scan. The required retry subagent wrote artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-29e0c24.md from the correct /private/tmp/agent-skills-jsc351-pu006 worktree, but that artifact reported one active CodeRabbit inline comment on Skills/agent-ops/goal-governor/tests/test_write_pr_triage_report.py for a user-specific fixture path. The fixture was remediated to /tmp/other-worktree/agent-skills and focused py_compile plus pytest passed. No PU-007 progression is approved until this remediation is committed, pushed, checks are green again, and a fresh subagent-managed triage artifact reports no active review blockers."
+    command: "PU-006 PR #196 latest-head delivery triage"
+    outcome: pass_ready_for_pu007_govern
+    checked_at: "2026-05-24T03:48:30Z"
+    detail: "PR #196 is open draft and mergeable at head 916f748f4dbb8faa9a36914d219743cabf1b79d6. Live checks are green, including CodeRabbit, CircleCI, CodeQL, Semgrep, Snyk, docs, lint, typecheck, test, audit, and security scan. The required subagent-managed triage artifact artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-916f748.md was written from /private/tmp/agent-skills-jsc351-pu006 and reports 2 submitted reviews, 2 independent reviews, 10 inline comments, 10 addressed comments, 0 stale comments, 0 active comments, and no blockers. Because post-push artifacts necessarily audit an already-pushed head, this artifact is live runtime evidence and cannot be committed into the same head it verifies without creating a new head requiring fresh triage."
   last_pr_state:
     url: "https://github.com/jscraik/Agent-Skills/pull/196"
     number: 196
     state: open
     draft: true
     mergeable: MERGEABLE
-    checked_at: "2026-05-24T03:34:10Z"
-    outcome: blocked_active_review_comment_remediated_pending_push
-    detail: "PR #196 is open draft and mergeable at head 29e0c242ff881f5ff59542c7380c7046995fa916. Remote checks are green, but the fresh subagent artifact found one active CodeRabbit inline comment. The valid comment has been remediated locally and requires commit, push, refreshed checks, and fresh subagent triage before the next slice."
+    checked_at: "2026-05-24T03:48:30Z"
+    outcome: pass_latest_head_safe
+    detail: "PR #196 is open draft and mergeable at head 916f748f4dbb8faa9a36914d219743cabf1b79d6. Remote checks are green, CodeRabbit reports review completed, and the latest required subagent artifact reports no active review blockers. PR remains draft because this is not final goal completion."
 continuation_gate:
   native_status: active
   goal_active: pass
   thread_idle: unknown
   queued_user_input: unknown
   pending_work: present
-  auto_continue_allowed: "no"
-  blocked_by: "pr_196_review_comment_remediated_pending_push"
+  auto_continue_allowed: "yes"
+  blocked_by: "none"
 claims:
   - id: C001
     claim: "JSC-351 plan and spec are the canonical local sources for the governed implementation lane."
@@ -566,7 +566,7 @@ tasks:
   - id: T015
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-006 / JSC-355 Skills SDK service boundary extraction after preview behavior has stabilized."
     inputs:
       - ".harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md"
@@ -608,6 +608,54 @@ tasks:
       - "Focused tests require conformance workouts, package verification, publishing, install mutation, or PR/CI delivery implementation outside PU-006."
       - "Review stack finds architecture drift or unnecessary abstraction that cannot be simplified within the slice."
     receipt_id: R032
+  - id: T017
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Implement PU-007 / JSC-356 conformance workouts, replayable evidence, and package verification without mutating runtime roots."
+    inputs:
+      - ".harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md"
+      - ".harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
+      - "PU-001 through PU-006 implementation and validation evidence."
+      - "PR #196 latest-head safe-state artifact artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-916f748.md"
+      - "Linear JSC-356 corrected from stale Done to In Progress on 2026-05-24T03:47:46Z."
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/scripts/lib/ask/skills_sdk/**"
+      - "Infrastructure/tests/**"
+    constraints:
+      - "Keep conformance and package verification deterministic, replayable, and fixture-backed."
+      - "Do not perform real installs, package publishing, network writes, global config writes, runtime-root mutation, or plugin cache mutation."
+      - "Do not claim full Codex ABI conformance from skipped, unavailable, or environment-blocked checks."
+      - "Every package verification result must include archive identity or target identity, provenance identity, rule evidence, mutation status, and rollback hint."
+      - "Every conformance run must emit reviewable evidence under a caller-provided evidence directory."
+    expected_output: "ask skills conformance run and ask skills package verify exist with JSON/robot output, focused fixtures, replayable evidence files, staged package safety checks, and tests for malformed frontmatter, invalid agents/openai.yaml, duplicate names, plugin namespace, disabled config, symlinked roots, thin handles, context truncation, unsafe archive traversal, symlink escape, digest mismatch, untrusted provenance, and rollback-journal evidence."
+    allowed_files:
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/scripts/lib/ask/**"
+      - "Infrastructure/config/schemas/**"
+      - "Infrastructure/tests/**"
+      - ".harness/evidence/**"
+      - ".harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
+      - "Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**"
+      - "artifacts/reviews/jsc-351-pu007-conformance/**"
+      - "artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-916f748.md"
+    verify:
+      - "python3 -m pytest Infrastructure/tests -q -k 'conformance or package_verify or package'"
+      - "./bin/ask skills conformance run --suite codex-parity --json --robot --evidence-dir /private/tmp/jsc351-pu007-evidence"
+      - "./bin/ask skills package verify <fixture-or-skill> --json --robot"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
+      - "git diff --check HEAD"
+      - "bash scripts/validate-codestyle.sh"
+      - "./bin/ask repo validate --json --robot"
+    stop_if:
+      - "Package verification requires a real install, external write, registry access, global config write, runtime-root mutation, or plugin-cache mutation."
+      - "Conformance evidence is not deterministic, not replayable, or does not include command evidence and blocker classification."
+      - "A check with missing runtime proof is represented as pass or warning instead of blocked."
+      - "The implementation requires broad command rewrites unrelated to PU-007."
+      - "Review stack finds unresolved blocker, architecture drift, or unsafe supply-chain behavior."
+    receipt_id: R043
   - id: T016
     type: pm
     assignee: PM
