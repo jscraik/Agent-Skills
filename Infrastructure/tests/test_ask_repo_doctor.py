@@ -16,6 +16,7 @@ from ask.envelope import CallResult, ErrorObject  # noqa: E402
 _ask_bootstrap_signal = repo_module._ask_bootstrap_signal
 repo_closeout = repo_module.repo_closeout
 repo_doctor = repo_module.repo_doctor
+COMMAND_HANDLE_CHECK_COMMAND = repo_module.COMMAND_HANDLE_CHECK_COMMAND
 
 
 def _result(status: str = "success", data: dict | None = None) -> CallResult:
@@ -74,15 +75,123 @@ def _budget_result(violations: int = 0) -> CallResult:
     )
 
 
-def _handles_result(violations: int = 0) -> CallResult:
+def _handles_result(violations: int = 0, generated_violations: int = 0) -> CallResult:
     return _result(
-        status="error" if violations else "success",
+        status="error" if violations or generated_violations else "success",
         data={
             "command_surface": {
                 "status": "fail" if violations else "pass",
                 "handle_count": 93,
                 "violations": [{} for _ in range(violations)],
+            },
+            "command_surface_projection_check": {
+                "status": "pass",
+                "path": ".skillsets/command-surface.json",
+                "violations": [],
+            },
+            "command_handle_check": {
+                "status": "fail" if generated_violations else "pass",
+                "command_handle_count": 7,
+                "checked_count": 14,
+                "violations": [
+                    {
+                        "code": "COMMAND_HANDLE_DRIFT",
+                        "handle": f"handle-{index}",
+                        "path": f".agents/skills/handle-{index}/SKILL.md",
+                    }
+                    for index in range(generated_violations)
+                ],
             }
+        },
+    )
+
+
+def _handles_projection_drift_result() -> CallResult:
+    return _result(
+        status="error",
+        data={
+            "command_surface": {
+                "status": "pass",
+                "handle_count": 93,
+                "violations": [],
+            },
+            "command_surface_projection_check": {
+                "status": "fail",
+                "path": ".skillsets/command-surface.json",
+                "violations": [{"code": "COMMAND_SURFACE_PROJECTION_DRIFT"}],
+            },
+            "command_handle_check": {
+                "status": "pass",
+                "command_handle_count": 7,
+                "checked_count": 14,
+                "violations": [],
+            },
+        },
+    )
+
+
+def _handles_generated_check_failed_without_violations_result() -> CallResult:
+    return _result(
+        status="error",
+        data={
+            "command_surface": {
+                "status": "pass",
+                "handle_count": 93,
+                "violations": [],
+            },
+            "command_surface_projection_check": {
+                "status": "pass",
+                "path": ".skillsets/command-surface.json",
+                "violations": [],
+            },
+            "command_handle_check": {
+                "status": "fail",
+                "command_handle_count": 7,
+                "checked_count": 14,
+                "violations": [],
+            },
+        },
+    )
+
+
+def _handles_projection_check_failed_without_violations_result() -> CallResult:
+    return _result(
+        status="error",
+        data={
+            "command_surface": {
+                "status": "pass",
+                "handle_count": 93,
+                "violations": [],
+            },
+            "command_surface_projection_check": {
+                "status": "fail",
+                "path": ".skillsets/command-surface.json",
+                "violations": [],
+            },
+            "command_handle_check": {
+                "status": "pass",
+                "command_handle_count": 7,
+                "checked_count": 14,
+                "violations": [],
+            },
+        },
+    )
+
+
+def _handles_missing_generated_subcheck_result() -> CallResult:
+    return _result(
+        data={
+            "command_surface": {
+                "status": "pass",
+                "handle_count": 93,
+                "violations": [],
+            },
+            "command_handle_check": {
+                "status": "pass",
+                "command_handle_count": 7,
+                "checked_count": 14,
+                "violations": [],
+            },
         },
     )
 
@@ -193,7 +302,7 @@ class TestAskRepoDoctor(unittest.TestCase):
         ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
             "ask.commands.repo_impl.skills_handles",
             return_value=_handles_result(),
-        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
+        ) as handles_mock, patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
             result = repo_doctor(REPO_ROOT)
 
         doctor = result.data["doctor"]
@@ -205,6 +314,12 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertFalse(doctor["next_command_blocks_task"])
         self.assertEqual(result.data["next_command_kind"], doctor["next_command_kind"])
         self.assertEqual(result.metadata["next_steps"], [])
+        handles_mock.assert_called_once_with(
+            REPO_ROOT,
+            check=True,
+            include_handles=False,
+            check_command_handle_files=True,
+        )
 
     def test_missing_path_shim_is_warning_not_false_pass(self) -> None:
         with patch(
@@ -378,11 +493,11 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(closeout["sync"]["commands"], [])
         self.assertEqual(
             closeout["sync"]["validation_commands"],
-            ["./bin/ask skills handles --check --json --robot"],
+            [COMMAND_HANDLE_CHECK_COMMAND],
         )
         self.assertEqual(
             closeout["next_command"],
-            "./bin/ask skills handles --check --json --robot",
+            COMMAND_HANDLE_CHECK_COMMAND,
         )
 
     def test_closeout_generated_projection_only_requires_handle_validation(self) -> None:
@@ -400,14 +515,14 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(closeout["sync"]["commands"], [])
         self.assertEqual(
             closeout["sync"]["validation_commands"],
-            ["./bin/ask skills handles --check --json --robot"],
+            [COMMAND_HANDLE_CHECK_COMMAND],
         )
         self.assertEqual(
             closeout["next_command"],
-            "./bin/ask skills handles --check --json --robot",
+            COMMAND_HANDLE_CHECK_COMMAND,
         )
         self.assertIn(
-            "./bin/ask skills handles --check --json --robot",
+            COMMAND_HANDLE_CHECK_COMMAND,
             [command["command"] for command in closeout["focused_validation"]],
         )
 
@@ -427,7 +542,7 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertFalse(closeout["sync"]["needed"])
         self.assertEqual(
             closeout["next_command"],
-            "./bin/ask skills handles --check --json --robot",
+            COMMAND_HANDLE_CHECK_COMMAND,
         )
         self.assertEqual(
             [command["id"] for command in closeout["focused_validation"]],
@@ -752,7 +867,7 @@ class TestAskRepoDoctor(unittest.TestCase):
         doctor = result.data["doctor"]
         self.assertEqual(result.status, "error")
         self.assertEqual(doctor["signals"]["command_handles"]["state"], "block")
-        self.assertEqual(doctor["next_command"], "./bin/ask skills handles --check --json --robot")
+        self.assertEqual(doctor["next_command"], COMMAND_HANDLE_CHECK_COMMAND)
 
     def test_command_handle_violations_keep_violation_summary(self) -> None:
         with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
@@ -770,6 +885,133 @@ class TestAskRepoDoctor(unittest.TestCase):
             doctor["signals"]["command_handles"]["summary"],
             "Command-handle validation found 3 violation(s).",
         )
+        self.assertEqual(
+            doctor["signals"]["command_handles"]["details"]["failure_code"],
+            "command_surface_validation_failed",
+        )
+
+    def test_generated_command_handle_violations_block_repo_doctor(self) -> None:
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
+            return_value=_handles_result(generated_violations=2),
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        command_signal = doctor["signals"]["command_handles"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(command_signal["state"], "block")
+        self.assertEqual(
+            command_signal["summary"],
+            "Generated command-handle check found 2 violation(s).",
+        )
+        self.assertEqual(doctor["next_command"], COMMAND_HANDLE_CHECK_COMMAND)
+        self.assertEqual(
+            command_signal["details"]["failure_code"],
+            "generated_command_handle_check_failed",
+        )
+        self.assertEqual(command_signal["details"]["generated_command_handles"]["violation_count"], 2)
+        self.assertEqual(
+            command_signal["details"]["generated_command_handles"]["violation_codes"],
+            ["COMMAND_HANDLE_DRIFT"],
+        )
+
+    def test_command_surface_projection_drift_is_classified_separately(self) -> None:
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
+            return_value=_handles_projection_drift_result(),
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        command_signal = doctor["signals"]["command_handles"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(
+            command_signal["summary"],
+            "Command-surface projection check found 1 violation(s).",
+        )
+        self.assertEqual(command_signal["details"]["failure_code"], "command_surface_projection_check_failed")
+        self.assertEqual(command_signal["details"]["command_surface_projection"]["violation_count"], 1)
+        self.assertEqual(command_signal["details"]["generated_command_handles"]["violation_count"], 0)
+
+    def test_generated_command_handle_check_failure_without_violations_blocks_repo_doctor(self) -> None:
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
+            return_value=_handles_generated_check_failed_without_violations_result(),
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        command_signal = doctor["signals"]["command_handles"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(command_signal["state"], "block")
+        self.assertEqual(
+            command_signal["details"]["failure_code"],
+            "generated_command_handle_check_status_failed",
+        )
+        self.assertEqual(
+            command_signal["summary"],
+            "Generated command-handle check failed without explicit violations.",
+        )
+        self.assertEqual(command_signal["details"]["generated_command_handles"]["status"], "fail")
+        self.assertEqual(command_signal["details"]["generated_command_handles"]["violation_count"], 0)
+        self.assertEqual(doctor["next_command"], COMMAND_HANDLE_CHECK_COMMAND)
+
+    def test_command_surface_projection_check_failure_without_violations_blocks_repo_doctor(self) -> None:
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
+            return_value=_handles_projection_check_failed_without_violations_result(),
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        command_signal = doctor["signals"]["command_handles"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(command_signal["state"], "block")
+        self.assertEqual(
+            command_signal["details"]["failure_code"],
+            "command_surface_projection_check_status_failed",
+        )
+        self.assertEqual(
+            command_signal["summary"],
+            "Command-surface projection check failed without explicit violations.",
+        )
+        self.assertEqual(command_signal["details"]["command_surface_projection"]["status"], "fail")
+        self.assertEqual(command_signal["details"]["command_surface_projection"]["violation_count"], 0)
+        self.assertEqual(doctor["next_command"], COMMAND_HANDLE_CHECK_COMMAND)
+
+    def test_missing_generated_command_handle_subcheck_blocks_repo_doctor(self) -> None:
+        with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
+            "ask.commands.repo_impl.doctor_catalog",
+            return_value=_catalog_result(),
+        ), patch("ask.commands.repo_impl.skills_budget", return_value=_budget_result()), patch(
+            "ask.commands.repo_impl.skills_handles",
+            return_value=_handles_missing_generated_subcheck_result(),
+        ), patch("ask.commands.repo_impl.repo_surface", return_value=_surface_result()):
+            result = repo_doctor(REPO_ROOT)
+
+        doctor = result.data["doctor"]
+        command_signal = doctor["signals"]["command_handles"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(command_signal["state"], "block")
+        self.assertEqual(command_signal["details"]["failure_code"], "command_handle_subcheck_missing")
+        self.assertEqual(
+            command_signal["details"]["missing_required_checks"],
+            ["command_surface_projection_check"],
+        )
+        self.assertEqual(doctor["next_command"], COMMAND_HANDLE_CHECK_COMMAND)
 
     def test_non_git_repo_status_gates_downstream_checks(self) -> None:
         with patch("ask.commands.repo_impl.repo_status", return_value=_status_result(is_git=False)), patch(

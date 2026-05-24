@@ -62,7 +62,7 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
                 self.assertEqual(payload["requested_handle"], alias)
                 self.assertEqual(payload["alias_resolution"], canonical)
 
-    def test_command_surface_builders_separate_canonical_and_visible_aliases(self) -> None:
+    def test_command_surface_builders_keep_folded_aliases_out_of_canonical_handles(self) -> None:
         canonical_handles = {row.handle for row in command_surface.build_skill_handles(repo_root_path=REPO_ROOT)}
         visible_handles = {row.handle for row in command_surface.build_command_surface_handles(repo_root_path=REPO_ROOT)}
 
@@ -88,6 +88,21 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
             handles[0].source_path,
             "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
         )
+        self.assertIsNone(handles[0].command_handle_path)
+        self.assertFalse(command_surface.requires_generated_command_handle(handles[0]))
+
+    def test_system_bridge_handles_do_not_require_first_level_generated_handles(self) -> None:
+        handles = {
+            row.handle: row
+            for row in command_surface.build_skill_handles(repo_root_path=REPO_ROOT)
+            if row.handle in command_surface.SYSTEM_BRIDGE_SKILL_NAMES
+        }
+
+        self.assertGreaterEqual(len(handles), 1)
+        for bridge_name, handle in handles.items():
+            with self.subTest(bridge_name=bridge_name):
+                self.assertIsNone(handle.command_handle_path)
+                self.assertFalse(command_surface.requires_generated_command_handle(handle))
 
     def test_command_surface_projection_is_generated_from_rooted_manifests(self) -> None:
         payload = command_surface.command_surface_projection(repo_root_path=REPO_ROOT)
@@ -289,7 +304,7 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
             [{"path": ".agents/skills/old-handle", "reason": "obsolete_generated_command_handle"}],
         )
 
-    def test_command_handle_write_rejects_symlink_lane_without_clobbering_source(self) -> None:
+    def test_command_handle_write_skips_rooted_symlink_lane_without_clobbering_source(self) -> None:
         source_path = "Skills/agent-ops/autofix/SKILL.md"
         source = self.temp_dir / source_path
         source.parent.mkdir(parents=True)
@@ -315,9 +330,26 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         with mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]):
             payload = command_surface.write_command_handles(repo_root_path=self.temp_dir, dry_run=False)
 
-        self.assertEqual(payload["status"], "fail")
+        self.assertEqual(payload["status"], "pass")
         self.assertTrue(runtime_handle.is_symlink())
-        self.assertIn("COMMAND_HANDLE_PARENT_SYMLINK", {violation["code"] for violation in payload["violations"]})
+        self.assertEqual(payload["violations"], [])
+        self.assertEqual(
+            payload["skipped"],
+            [
+                {
+                    "handle": "autofix",
+                    "kind": "skill_command_handle",
+                    "path": ".agents/skills/autofix/SKILL.md",
+                    "reason": "rooted_runtime_symlink",
+                },
+                {
+                    "handle": "autofix",
+                    "kind": "openai_metadata",
+                    "path": ".agents/skills/autofix/agents/openai.yaml",
+                    "reason": "rooted_runtime_symlink",
+                },
+            ],
+        )
         self.assertEqual(source.read_text(encoding="utf-8"), original_source)
 
         # Assert no generated sidecar files were written into the source tree
@@ -325,6 +357,155 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         self.assertEqual(len(source_parent_files), 1, "Expected only SKILL.md in source directory")
         self.assertEqual(source_parent_files[0].name, "SKILL.md", "Only SKILL.md should exist in source directory")
         self.assertFalse((source.parent / "agents").exists(), "agents/ directory should not be created in source tree")
+
+    def test_command_handle_check_accepts_rooted_symlink_lane(self) -> None:
+        source_path = "Skills/agent-ops/autofix/SKILL.md"
+        source = self.temp_dir / source_path
+        source.parent.mkdir(parents=True)
+        source.write_text("---\nname: autofix\n---\n# Autofix\n", encoding="utf-8")
+
+        runtime_handle = self.temp_dir / ".agents" / "skills" / "autofix"
+        runtime_handle.parent.mkdir(parents=True)
+        runtime_handle.symlink_to(source.parent)
+
+        handle = command_surface.CommandHandle(
+            handle="autofix",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path=source_path,
+            command_handle_path=".agents/skills/autofix/SKILL.md",
+            owner="agent-ops",
+            description="Autofix.",
+            invoke_via="agent-ops",
+        )
+
+        with mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]):
+            payload = command_surface.check_command_handles(repo_root_path=self.temp_dir)
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["violations"], [])
+        self.assertEqual(payload["checked_count"], 0)
+        self.assertEqual(
+            payload["skipped"],
+            [
+                {
+                    "handle": "autofix",
+                    "kind": "skill_command_handle",
+                    "path": ".agents/skills/autofix/SKILL.md",
+                    "reason": "rooted_runtime_symlink",
+                },
+                {
+                    "handle": "autofix",
+                    "kind": "openai_metadata",
+                    "path": ".agents/skills/autofix/agents/openai.yaml",
+                    "reason": "rooted_runtime_symlink",
+                },
+            ],
+        )
+
+    def test_command_handle_check_rejects_rooted_symlink_with_missing_skill_file(self) -> None:
+        source_path = "Skills/agent-ops/autofix/SKILL.md"
+        source_parent = self.temp_dir / "Skills" / "agent-ops" / "autofix"
+        source_parent.mkdir(parents=True)
+
+        runtime_handle = self.temp_dir / ".agents" / "skills" / "autofix"
+        runtime_handle.parent.mkdir(parents=True)
+        runtime_handle.symlink_to(source_parent)
+
+        handle = command_surface.CommandHandle(
+            handle="autofix",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path=source_path,
+            command_handle_path=".agents/skills/autofix/SKILL.md",
+            owner="agent-ops",
+            description="Autofix.",
+            invoke_via="agent-ops",
+        )
+
+        with mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]):
+            payload = command_surface.check_command_handles(repo_root_path=self.temp_dir)
+
+        self.assertEqual(payload["status"], "fail")
+        self.assertEqual(payload["skipped"], [])
+        self.assertEqual(payload["checked_count"], 2)
+        self.assertIn(
+            "COMMAND_HANDLE_MISSING",
+            {violation["code"] for violation in payload["violations"]},
+        )
+
+    def test_command_handle_check_rejects_wrong_rooted_symlink_target(self) -> None:
+        source_path = "Skills/agent-ops/autofix/SKILL.md"
+        source = self.temp_dir / source_path
+        source.parent.mkdir(parents=True)
+        source.write_text("---\nname: autofix\n---\n# Autofix\n", encoding="utf-8")
+        wrong_target = self.temp_dir / "Skills" / "agent-ops" / "wrong-skill"
+        wrong_target.mkdir(parents=True)
+        (wrong_target / "SKILL.md").write_text("# Wrong Skill\n", encoding="utf-8")
+
+        runtime_handle = self.temp_dir / ".agents" / "skills" / "autofix"
+        runtime_handle.parent.mkdir(parents=True)
+        runtime_handle.symlink_to(wrong_target)
+
+        handle = command_surface.CommandHandle(
+            handle="autofix",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path=source_path,
+            command_handle_path=".agents/skills/autofix/SKILL.md",
+            owner="agent-ops",
+            description="Autofix.",
+            invoke_via="agent-ops",
+        )
+
+        with mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]):
+            payload = command_surface.check_command_handles(repo_root_path=self.temp_dir)
+
+        self.assertEqual(payload["status"], "fail")
+        self.assertEqual(payload["skipped"], [])
+        self.assertEqual(payload["checked_count"], 2)
+        codes = {violation["code"] for violation in payload["violations"]}
+        self.assertIn("COMMAND_HANDLE_DRIFT", codes)
+        self.assertIn("COMMAND_HANDLE_MISSING", codes)
+
+    def test_command_handle_check_rejects_out_of_repo_symlink_target(self) -> None:
+        source_path = "Skills/agent-ops/autofix/SKILL.md"
+        source = self.temp_dir / source_path
+        source.parent.mkdir(parents=True)
+        source.write_text("---\nname: autofix\n---\n# Autofix\n", encoding="utf-8")
+        outside_target = self.temp_dir.parent / f"{self.temp_dir.name}-outside-target"
+        outside_target.mkdir(parents=True)
+        self.addCleanup(lambda: shutil.rmtree(outside_target, ignore_errors=True))
+        (outside_target / "SKILL.md").write_text("# Outside Skill\n", encoding="utf-8")
+
+        runtime_handle = self.temp_dir / ".agents" / "skills" / "autofix"
+        runtime_handle.parent.mkdir(parents=True)
+        runtime_handle.symlink_to(outside_target)
+
+        handle = command_surface.CommandHandle(
+            handle="autofix",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path=source_path,
+            command_handle_path=".agents/skills/autofix/SKILL.md",
+            owner="agent-ops",
+            description="Autofix.",
+            invoke_via="agent-ops",
+        )
+
+        with mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]):
+            payload = command_surface.check_command_handles(repo_root_path=self.temp_dir)
+
+        self.assertEqual(payload["status"], "fail")
+        self.assertEqual(payload["skipped"], [])
+        self.assertEqual(payload["checked_count"], 2)
+        codes = {violation["code"] for violation in payload["violations"]}
+        self.assertIn("COMMAND_HANDLE_DRIFT", codes)
+        self.assertIn("COMMAND_HANDLE_MISSING", codes)
 
     def test_command_handle_write_does_not_prune_when_validation_fails(self) -> None:
         stale = self.temp_dir / ".agents" / "skills" / "old-handle"
@@ -367,7 +548,24 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
         )
 
     def test_command_handle_check_detects_missing_runtime_handle(self) -> None:
-        payload = command_surface.check_command_handles(repo_root_path=self.temp_dir)
+        source_path = "Skills/agent-ops/autofix/SKILL.md"
+        source = self.temp_dir / source_path
+        source.parent.mkdir(parents=True)
+        source.write_text("---\nname: autofix\n---\n# Autofix\n", encoding="utf-8")
+        handle = command_surface.CommandHandle(
+            handle="autofix",
+            kind="skill",
+            command_visibility="target",
+            runtime_visibility="latent",
+            source_path=source_path,
+            command_handle_path=".agents/skills/autofix/SKILL.md",
+            owner="agent-ops",
+            description="Autofix.",
+            invoke_via="agent-ops",
+        )
+
+        with mock.patch.object(command_surface, "build_skill_handles", return_value=[handle]):
+            payload = command_surface.check_command_handles(repo_root_path=self.temp_dir)
 
         self.assertEqual(payload["status"], "fail")
         codes = {violation["code"] for violation in payload["violations"]}
@@ -422,9 +620,18 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
 
 
 class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
+    def _write_he_heartbeat_source(self, repo_root: Path) -> None:
+        source = repo_root / "Plugins" / "harness-engineering" / "skills" / "he-heartbeat"
+        source.mkdir(parents=True)
+        (source / "SKILL.md").write_text(
+            "---\nname: he-heartbeat\n---\n# HE Heartbeat\n",
+            encoding="utf-8",
+        )
+
     def test_skills_proof_requires_user_runtime_link(self) -> None:
         """skills_proof must fail when user runtime handles exist but are not symlinked to workspace."""
         repo_root = self.temp_dir / "repo"
+        self._write_he_heartbeat_source(repo_root)
         command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
 
         home = self.temp_dir / "home"
@@ -451,6 +658,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_passes_when_agents_runtime_is_linked(self) -> None:
         """Either supported user runtime link can satisfy command-handle reachability."""
         repo_root = self.temp_dir / "repo"
+        self._write_he_heartbeat_source(repo_root)
         command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
 
@@ -478,9 +686,39 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertIn("either supported user runtime link", proof["gate_policy"]["required_semantics"])
         self.assertIn("agents_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
 
+    def test_skills_proof_runtime_target_codex_rejects_agents_only_runtime(self) -> None:
+        """Codex-targeted proof must not pass because the agents runtime is linked."""
+        repo_root = self.temp_dir / "repo"
+        self._write_he_heartbeat_source(repo_root)
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
+        skills_dir = repo_root / ".agents" / "skills"
+
+        home = self.temp_dir / "home"
+        agents_skills = home / ".agents" / "skills"
+        agents_skills.parent.mkdir(parents=True)
+        agents_skills.symlink_to(skills_dir)
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat", runtime_target="codex")
+
+        proof = result.data["proof"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(proof["status"], "fail")
+        self.assertEqual(proof["runtime_target"], "codex")
+        self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
+        self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
+        self.assertEqual(proof["available_runtimes"], ["agents_user_runtime"])
+        self.assertIsNone(proof["runtime_satisfied_by"])
+        self.assertIn("codex_user_runtime_ready", proof["gate_policy"]["required"])
+        self.assertEqual(
+            proof["validation_commands"],
+            ["./bin/ask skills proof he-heartbeat --runtime-target codex --json --robot"],
+        )
+
     def test_skills_proof_passes_with_linked_codex_runtime(self) -> None:
         """skills_proof must pass when the Codex Desktop runtime link reaches the workspace."""
         repo_root = self.temp_dir / "repo"
+        self._write_he_heartbeat_source(repo_root)
         command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
         skills_dir = repo_root / ".agents" / "skills"
 
@@ -499,6 +737,28 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertTrue(proof["gates"]["workspace_command_handle_exists"])
         self.assertTrue(proof["gates"]["codex_user_link"])
         self.assertTrue(proof["gates"]["codex_user_command_handle_exists"])
+
+    def test_skills_proof_runtime_target_codex_passes_with_codex_runtime(self) -> None:
+        """Codex-targeted proof must pass when the Codex runtime link reaches the workspace."""
+        repo_root = self.temp_dir / "repo"
+        self._write_he_heartbeat_source(repo_root)
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
+        skills_dir = repo_root / ".agents" / "skills"
+
+        home = self.temp_dir / "home"
+        codex_skills = home / ".codex" / "skills"
+        codex_skills.parent.mkdir(parents=True)
+        codex_skills.symlink_to(skills_dir)
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat", runtime_target="codex")
+
+        proof = result.data["proof"]
+        self.assertEqual(result.status, "success")
+        self.assertEqual(proof["status"], "pass")
+        self.assertEqual(proof["runtime_target"], "codex")
+        self.assertEqual(proof["runtime_satisfied_by"], "codex_user_runtime")
+        self.assertIn("codex_user_runtime_ready", proof["gate_policy"]["required"])
 
 
 class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):

@@ -120,6 +120,17 @@ def main():
     skills_list_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
     skills_budget_parser = skills_subparsers.add_parser("budget", help="Verify default skill runtime budget", parents=[global_parser])
     skills_budget_parser.add_argument("--default-max", type=int, default=30, help="Maximum default-visible skills")
+    skills_load_preview_parser = skills_subparsers.add_parser("load-preview", help="Preview Codex skill loader behavior", parents=[global_parser])
+    skills_render_preview_parser = skills_subparsers.add_parser("render-preview", help="Preview Codex available-skills rendering", parents=[global_parser])
+    skills_render_preview_parser.add_argument("--context-window", type=int, help="Optional context window for Codex 2 percent metadata budget modeling")
+    skills_config_parser = skills_subparsers.add_parser("config", help="Explain Codex skill config rule behavior", parents=[global_parser])
+    skills_config_subparsers = skills_config_parser.add_subparsers(dest="config_action")
+    skills_config_subparsers.add_parser("explain", help="Explain Codex skills.config rule semantics", parents=[global_parser])
+    skills_inject_preview_parser = skills_subparsers.add_parser("inject-preview", help="Preview Codex explicit skill mention selection", parents=[global_parser])
+    skills_inject_preview_parser.add_argument("text", nargs="+", help="User text containing $skill mentions")
+    skills_implicit_preview_parser = skills_subparsers.add_parser("implicit-preview", help="Preview Codex implicit skill invocation attribution", parents=[global_parser])
+    skills_implicit_preview_parser.add_argument("--command", required=True, help="Shell command text to inspect")
+    skills_implicit_preview_parser.add_argument("--workdir", help="Working directory used to resolve relative command paths")
     skills_handles_parser = skills_subparsers.add_parser("handles", help="List or validate command-visible skill handles", parents=[global_parser])
     skills_handles_parser.add_argument("--check", action="store_true", help="Fail when command-handle validation finds drift")
     skills_handles_parser.add_argument("--no-handles", action="store_true", help="Omit the full handle list from JSON output")
@@ -132,16 +143,28 @@ def main():
     skills_resolve_parser.add_argument("handle", help="Skill handle to resolve, with or without leading $")
     skills_parse_parser = skills_subparsers.add_parser("parse", help="Parse and resolve $ skill and @ reviewer handles from a prompt", parents=[global_parser])
     skills_parse_parser.add_argument("request", nargs="+", help="Prompt text containing $ skill and @ reviewer handles")
-    skills_subparsers.add_parser("proof", help="Prove a command handle reaches workspace and user runtime surfaces", parents=[global_parser]).add_argument("handle", help="Skill handle to prove, with or without leading $")
+    skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove a command handle reaches workspace and user runtime surfaces", parents=[global_parser])
+    skills_proof_parser.add_argument("handle", help="Skill handle to prove, with or without leading $")
+    skills_proof_parser.add_argument("--runtime-target", default="any", help="Runtime that must satisfy proof: any, codex, or agents")
     skills_subparsers.add_parser("prove", help="Show a skill proof scorecard", parents=[global_parser]).add_argument("handle", nargs="+", help="Skill handle or goal to prove")
     skills_subparsers.add_parser("explain", help="Explain when and how to use a skill handle", parents=[global_parser]).add_argument("handle", help="Skill handle to explain")
     skills_doctor_parser = skills_subparsers.add_parser("doctor", help="Diagnose readiness for one skill handle or source path", parents=[global_parser])
     skills_doctor_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
     skills_doctor_parser.add_argument("--strict", action="store_true", help="Run strict audit instead of the default compat audit")
-    skills_package_parser = skills_subparsers.add_parser("package", help="Report version and role-aware package readiness for one skill", parents=[global_parser])
-    skills_package_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
+    skills_doctor_parser.add_argument("--codex-parity", action="store_true", help="Require Codex-targeted runtime proof before reporting SDK conformance")
+    skills_package_parser = skills_subparsers.add_parser("package", help="Report or verify package readiness for one skill", parents=[global_parser])
+    skills_package_parser.add_argument("target", help="Skill handle, repo-relative skill source path, or 'verify'")
+    skills_package_parser.add_argument("verify_target", nargs="?", help="Skill handle, source path, or package archive to verify when target is 'verify'")
     skills_package_parser.add_argument("--strict", action="store_true", help="Fail when package readiness metadata is incomplete")
     skills_package_parser.add_argument("--checkout-test", action="store_true", help="Run read-only local checkout evidence for the install gate")
+    skills_package_parser.add_argument("--expected-sha256", help="Expected package archive digest for verify mode")
+    skills_package_parser.add_argument("--trusted-provenance", help="Comma-separated trusted provenance sources for verify mode")
+    skills_package_parser.add_argument("--rollback-journal", help="Rollback journal JSONL evidence for verify mode")
+    skills_conformance_parser = skills_subparsers.add_parser("conformance", help="Run skill conformance suites with replayable evidence", parents=[global_parser])
+    skills_conformance_subparsers = skills_conformance_parser.add_subparsers(dest="conformance_action")
+    skills_conformance_run_parser = skills_conformance_subparsers.add_parser("run", help="Run a deterministic conformance suite", parents=[global_parser])
+    skills_conformance_run_parser.add_argument("--suite", default="codex-parity", choices=["codex-parity"], help="Conformance suite to run")
+    skills_conformance_run_parser.add_argument("--evidence-dir", required=True, help="Directory where JSON evidence files will be written")
     skills_profiles_parser = skills_subparsers.add_parser("profiles", help="Show skill operation profiles and readiness contracts", parents=[global_parser])
     skills_profiles_parser.add_argument("profile", nargs="?", help="Optional profile name")
     skills_events_parser = skills_subparsers.add_parser("events", help="Show skill lifecycle event contracts", parents=[global_parser])
@@ -509,6 +532,19 @@ def main():
             )
         elif args.action == "budget":
             result = skills_commands.skills_budget(repo_root, default_max=args.default_max)
+        elif args.action == "load-preview":
+            result = skills_commands.skills_load_preview(repo_root)
+        elif args.action == "render-preview":
+            result = skills_commands.skills_render_preview(repo_root, context_window=args.context_window)
+        elif args.action == "config":
+            if args.config_action == "explain":
+                result = skills_commands.skills_config_explain(repo_root)
+            else:
+                result = build_unknown_action_result("skills config", args.config_action)
+        elif args.action == "inject-preview":
+            result = skills_commands.skills_inject_preview(repo_root, text=" ".join(args.text))
+        elif args.action == "implicit-preview":
+            result = skills_commands.skills_implicit_preview(repo_root, command=args.command, workdir=args.workdir)
         elif args.action == "handles":
             result = skills_commands.skills_handles(
                 repo_root,
@@ -525,20 +561,41 @@ def main():
         elif args.action == "parse":
             result = skills_commands.skills_parse(repo_root, request_text=" ".join(args.request))
         elif args.action == "proof":
-            result = skills_commands.skills_proof(repo_root, handle=args.handle)
+            result = skills_commands.skills_proof(repo_root, handle=args.handle, runtime_target=args.runtime_target)
         elif args.action == "prove":
             result = skills_commands.skills_prove(repo_root, handle=" ".join(args.handle))
         elif args.action == "explain":
             result = skills_commands.explain_skill(repo_root, handle=args.handle)
         elif args.action == "doctor":
-            result = skills_commands.skills_doctor(repo_root, target=args.target, strict=args.strict)
+            result = skills_commands.skills_doctor(repo_root, target=args.target, strict=args.strict, codex_parity=args.codex_parity)
         elif args.action == "package":
-            result = skills_commands.skills_package(
-                repo_root,
-                target=args.target,
-                strict=args.strict,
-                checkout_test=args.checkout_test,
-            )
+            verify_flags_present = any([args.expected_sha256, args.trusted_provenance, args.rollback_journal])
+            package_flags_present = args.strict or args.checkout_test
+            if args.target == "verify" and not args.verify_target:
+                result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: verify_target")
+            elif args.target == "verify" and package_flags_present:
+                result = build_argument_error("skills", "package", raw_args, parser_error="unexpected package-only arguments")
+            elif args.target != "verify" and (args.verify_target or verify_flags_present):
+                result = build_argument_error("skills", "package", raw_args, parser_error="unexpected verify-only arguments")
+            elif args.target == "verify":
+                result = skills_commands.skills_package_verify(
+                    repo_root,
+                    target=args.verify_target,
+                    expected_sha256=args.expected_sha256,
+                    trusted_provenance=args.trusted_provenance,
+                    rollback_journal=args.rollback_journal,
+                )
+            else:
+                result = skills_commands.skills_package(repo_root, target=args.target, strict=args.strict, checkout_test=args.checkout_test)
+        elif args.action == "conformance":
+            if args.conformance_action == "run":
+                result = skills_commands.skills_conformance_run(
+                    repo_root,
+                    suite=args.suite,
+                    evidence_dir=args.evidence_dir,
+                )
+            else:
+                result = build_unknown_action_result("skills conformance", args.conformance_action)
         elif args.action == "profiles":
             result = skills_commands.skills_profiles(repo_root, profile=args.profile)
         elif args.action == "events":
@@ -1076,6 +1133,48 @@ def main():
                         f"{report.get('advanced_visible_count')} advanced"
                     )
                     print_first_validation_command(report)
+                elif args.topic == "skills" and args.action == "load-preview":
+                    preview = result.data.get("codex_load_preview", {})
+                    print(
+                        "Codex load preview: "
+                        f"{preview.get('skill_count', 0)} skill(s), status={preview.get('status')}"
+                    )
+                    if preview.get("blocked_checks"):
+                        print(f"Blocked fidelity checks: {len(preview.get('blocked_checks', []))}")
+                    print_first_validation_command(preview)
+                elif args.topic == "skills" and args.action == "render-preview":
+                    preview = result.data.get("codex_render_preview", {})
+                    rendered = preview.get("rendered", {})
+                    report = rendered.get("report", {})
+                    print(
+                        "Codex render preview: "
+                        f"{report.get('included_count', 0)}/{report.get('total_count', 0)} skill(s), "
+                        f"status={preview.get('status')}"
+                    )
+                    if rendered.get("warning_message"):
+                        print(f"Warning: {rendered.get('warning_message')}")
+                    print_first_validation_command(preview)
+                elif args.topic == "skills" and args.action == "config":
+                    preview = result.data.get("codex_config_explain", {})
+                    print(f"Codex config explain: status={preview.get('status')}")
+                    contract = preview.get("config_contract", {})
+                    if contract.get("selector_policy"):
+                        print(f"Selector policy: {contract.get('selector_policy')}")
+                    print_first_validation_command(preview)
+                elif args.topic == "skills" and args.action == "inject-preview":
+                    preview = result.data.get("codex_inject_preview", {})
+                    print(
+                        "Codex inject preview: "
+                        f"{preview.get('selected_count', 0)} selected, status={preview.get('status')}"
+                    )
+                    print_first_validation_command(preview)
+                elif args.topic == "skills" and args.action == "implicit-preview":
+                    preview = result.data.get("codex_implicit_preview", {})
+                    print(
+                        "Codex implicit preview: "
+                        f"{preview.get('attribution_status')}, status={preview.get('status')}"
+                    )
+                    print_first_validation_command(preview)
                 elif args.topic == "skills" and args.action == "handles":
                     surface = result.data.get("command_surface", {})
                     print(
@@ -1108,7 +1207,7 @@ def main():
                     for gate, passed in proof.get("gates", {}).items():
                         marker = "pass" if passed else "fail"
                         print(f"  {gate}: {marker}")
-                    live = proof.get("live_codex_invocation", {})
+                    live = proof.get("live_runtime_invocation", {})
                     if live.get("status"):
                         print(f"  live invocation: {live.get('status')}")
                     print_first_validation_command(proof)
@@ -1148,35 +1247,42 @@ def main():
                     print_first_validation_command(doctor)
                     print(f"Next: {doctor.get('next_command')}")
                 elif args.topic == "skills" and args.action == "package":
-                    package = result.data.get("skill_package", {})
-                    gate = package.get("gate_summary", {})
-                    contract = package.get("package_contract", {})
-                    values = contract.get("values", {})
-                    roles = (contract.get("role_compatibility") or {}).get("roles") or []
-                    runtime_needs = (contract.get("runtime_contract") or {}).get("needs") or []
+                    package = result.data.get("skill_package_verification") or result.data.get("skill_package", {})
                     print(f"Skill package: {package.get('query')} ({package.get('status')})")
                     print(package.get("agent_summary", ""))
-                    print(f"Source: {package.get('canonical_source_path')}")
+                    identity = package.get("target_identity") or {}
+                    source = identity.get("path") or package.get("canonical_source_path") or package.get("query")
+                    print(f"Source: {source}")
                     event = package.get("lifecycle_event") or {}
                     if event.get("event_type"):
                         print(f"Event: {event.get('event_type')}")
+                    contract = package.get("package_contract") or {}
+                    values = contract.get("values") or {}
                     if contract.get("readiness_level"):
                         print(f"Readiness level: {contract.get('readiness_level')}")
-                    if roles:
-                        print(f"Compatible roles: {', '.join(roles)}")
-                    if runtime_needs:
-                        print(f"Runtime needs: {len(runtime_needs)} declared")
+                    if values.get("compatible_roles"):
+                        print(f"Compatible roles: {', '.join(values.get('compatible_roles'))}")
+                    if values.get("runtime_needs"):
+                        print(f"Runtime needs: {len(values.get('runtime_needs'))} declared")
                     if values.get("provenance"):
                         print(f"Provenance: {values.get('provenance')}")
-                    print(f"Install ready: {gate.get('install_ready')}")
-                    if gate.get("checkout_test_status"):
+                    gate = package.get("gate_summary", {})
+                    if gate:
+                        print(f"Install ready: {gate.get('install_ready')}")
                         print(f"Checkout test: {gate.get('checkout_test_status')}")
-                    print(f"Promotion: {gate.get('promotion_status')}")
-                    blocked = gate.get("blocked_reasons") or []
-                    if blocked:
-                        print(f"Blocked reasons: {', '.join(blocked)}")
+                        print(f"Promotion: {gate.get('promotion_status')}")
                     print_first_validation_command(package)
                     print(f"Next: {package.get('next_command')}")
+                elif args.topic == "skills" and args.action == "conformance":
+                    conformance = result.data.get("skills_conformance", {})
+                    print(f"Skills conformance: {conformance.get('suite')} ({conformance.get('status')})")
+                    print(conformance.get("agent_summary", ""))
+                    print(f"Evidence dir: {conformance.get('evidence_dir')}")
+                    if conformance.get("evidence_jsonl"):
+                        print(f"Evidence JSONL: {conformance.get('evidence_jsonl')}")
+                    print(f"Checks: {len(conformance.get('checks') or [])}")
+                    print_first_validation_command(conformance)
+                    print(f"Next: {conformance.get('next_command')}")
                 elif args.topic == "skills" and args.action == "profiles":
                     profiles = result.data.get("skill_profiles", {})
                     print(f"Skill profiles: {profiles.get('status')}")

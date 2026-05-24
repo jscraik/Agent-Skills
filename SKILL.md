@@ -12,23 +12,16 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
-- [.Agents — Skills — .System](#.agents-skills-.system)
 - [Skills — Agent Ops](#skills-agent-ops)
+- [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 27
+- `total_skills`: 26
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: 53abbc2e5c384b95
+- `policy_identity`: 6c4a3a9db4f4d8f0
 
 ## Catalog
-
-## .Agents — Skills — .System
-
-- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
-- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
-- `skill-creator` — Create or update a skill
-- `skill-installer` — Install curated skills from openai/skills or other repos
 
 ## Skills — Agent Ops
 
@@ -36,6 +29,7 @@ Do not hand-edit runtime projections.
 - `autofix` — Apply approved fixes for unresolved CodeRabbit review comments, Codex P1-P3 findings, PR feedback, and code review issues with validation evidence. Use when asked to address review comments, fix review findings, clear unresolved comments, or autofix PR feedback.
 - `autoresearch` — Run bounded automated experiment iterations by recording baselines, applying hypothesis patches, comparing metrics, protecting regression guards, and deciding keep, discard, rollback, or block. Use when $autoresearch is named or a repo/skill needs evidence-backed research, metric tracking, or safe optimisation loops.
 - `bootstrap` — Create, diagnose, and validate a local dev bootstrap. Use when the user asks to clone a repo, install toolchains, install dependencies, and prove the project runs.
+- `code-fixes-triage` — Turn Slack #code-fixes, CodeRabbit, Codex Review, CI, and check-status noise into a repo-and-PR action queue. Use when Jamie asks for a daily code-fixes digest, recent review-noise triage, or what needs fixing across active engineering repos.
 - `codex-agent-creator` — Create, validate, install, fold, or troubleshoot Codex custom subagent roles, role TOML config files, agent configuration, custom roles, subagent setup, and discoverability wiring. Use when a user asks for a Codex agent role, reviewer agent, role config, TOML role file, or overlapping agents to merge.
 - `codex-automation-architect` — Use when designing, reviewing, or updating Codex app automations, cron jobs, scheduled tasks, recurring runs, or heartbeat follow-ups.
 - `codex-hooks-builder` — Scaffold hook packs, validate hooks.json schema, verify hook script permissions, migrate hook configuration, and troubleshoot Codex hook execution errors. Use when creating, auditing, upgrading, or validating Codex hook packs, hooks.json files, hook scripts, PreToolUse/PostToolUse/PreCompact hooks, or repo-local/user-level .codex hook installs.
@@ -55,3 +49,8 @@ Do not hand-edit runtime projections.
 - `ubiquitous-language` — Build shared project vocabulary, glossary terms, aliases, prompt translations, and agent instruction links when wording is fuzzy or overloaded.
 - `unslopify` — Audit unused functions, dead exports, orphaned modules, stale imports, unreachable code, and tech-debt cleanup candidates with evidence-backed removal guidance. Use when unused code, dead code, remove unused imports, stale-code checks, or scoped cleanup evidence are needed.
 - `verification-before-completion` — Review and validate completion claims. Use when you are about to say work is complete, fixed, passing, pushed, or ready for review.
+
+## Skills System
+
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.

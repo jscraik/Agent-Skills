@@ -17,6 +17,13 @@ SPEC.loader.exec_module(validate_steering_uptake)
 _VALID_DOC = (
     "# High-Signal Steering Feedback\n\n"
     "## Stop Rule\n\n"
+    "## Proof Before Proceeding\n\n"
+    "## Scope Closure Authority\n\n"
+    "full implementation\n"
+    "explicitly approves that scope change\n"
+    "claim-vs-evidence closeout check\n"
+    "closeout caveat\n"
+    "changes future behavior\n\n"
     "## Uptake Loop\n\n"
     "## Required Evidence\n\n"
     "validate_steering_uptake.py\n"
@@ -25,7 +32,7 @@ _VALID_LEDGER = (
     "# Steering Uptake Ledger\n\n"
     "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
     "| --- | --- | --- | --- | --- | --- | --- |\n"
-    "| 2026-05-19 | steering trigger | repeated behavior | missing guard | Docs/agents/19.md | python3 validate_steering_uptake.py --json | validated |\n"
+    "| 2026-05-19 | steering trigger | repeated behavior | missing guard. Category: missing guardrails. | Docs/agents/19.md Improvement type: validator. | python3 validate_steering_uptake.py --json | validated |\n"
 )
 _VALID_README = "[19-high-signal-steering-feedback](/Docs/agents/19-high-signal-steering-feedback.md)\n"
 
@@ -176,6 +183,70 @@ def test_rejects_doc_missing_stop_rule(tmp_path: Path) -> None:
 
     incomplete = [f for f in findings if f.code == "STEERING_DOC_INCOMPLETE"]
     assert any("Stop Rule" in f.message for f in incomplete)
+
+
+def test_rejects_doc_missing_scope_closure_authority(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / "Docs/agents/19-high-signal-steering-feedback.md",
+        "# High-Signal Steering Feedback\n\n"
+        "## Stop Rule\n\n"
+        "## Proof Before Proceeding\n\n"
+        "## Uptake Loop\n\n"
+        "## Required Evidence\n\n"
+        "validate_steering_uptake.py\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    incomplete = [f for f in findings if f.code == "STEERING_DOC_INCOMPLETE"]
+    assert any("Scope Closure Authority" in f.message for f in incomplete)
+
+
+def test_rejects_doc_missing_closeout_caveat_rule(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / "Docs/agents/19-high-signal-steering-feedback.md",
+        "# High-Signal Steering Feedback\n\n"
+        "## Stop Rule\n\n"
+        "## Proof Before Proceeding\n\n"
+        "## Scope Closure Authority\n\n"
+        "full implementation\n"
+        "explicitly approves that scope change\n"
+        "claim-vs-evidence closeout check\n"
+        "changes future behavior\n\n"
+        "## Uptake Loop\n\n"
+        "## Required Evidence\n\n"
+        "validate_steering_uptake.py\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    incomplete = [f for f in findings if f.code == "STEERING_DOC_INCOMPLETE"]
+    assert any("closeout caveat" in f.message for f in incomplete)
+
+
+def test_rejects_doc_missing_changed_future_behavior_rule(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / "Docs/agents/19-high-signal-steering-feedback.md",
+        "# High-Signal Steering Feedback\n\n"
+        "## Stop Rule\n\n"
+        "## Proof Before Proceeding\n\n"
+        "## Scope Closure Authority\n\n"
+        "full implementation\n"
+        "explicitly approves that scope change\n"
+        "claim-vs-evidence closeout check\n"
+        "closeout caveat\n\n"
+        "## Uptake Loop\n\n"
+        "## Required Evidence\n\n"
+        "validate_steering_uptake.py\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    incomplete = [f for f in findings if f.code == "STEERING_DOC_INCOMPLETE"]
+    assert any("changes future behavior" in f.message for f in incomplete)
 
 
 def test_rejects_doc_missing_uptake_loop(tmp_path: Path) -> None:
@@ -633,7 +704,7 @@ def test_validate_allows_escaped_inline_pipe_in_ledger_cell(tmp_path: Path) -> N
         "# Steering Uptake Ledger\n\n"
         "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
         "| --- | --- | --- | --- | --- | --- | --- |\n"
-        "| 2026-05-19 | retry \\| fallback | repeated behavior | missing guard | Docs/agents/19.md | python3 validate_steering_uptake.py --json | validated |\n",
+        "| 2026-05-19 | retry \\| fallback | repeated behavior | missing guard. Category: missing guardrails. | Docs/agents/19.md Improvement type: validator. | python3 validate_steering_uptake.py --json | validated |\n",
     )
 
     findings = validate_steering_uptake.validate(tmp_path)
@@ -648,7 +719,7 @@ def test_validate_accepts_ledger_table_without_edge_pipes(tmp_path: Path) -> Non
         "# Steering Uptake Ledger\n\n"
         "Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status\n"
         "--- | --- | --- | --- | --- | --- | ---\n"
-        "2026-05-19 | repeated warning | missed live thread | parser only accepted edge pipes | validate no-edge-pipe ledgers | python3 validate_steering_uptake.py --json | validated\n",
+        "2026-05-19 | repeated warning | missed live thread | parser only accepted edge pipes. Category: weak validation. | validate no-edge-pipe ledgers. Improvement type: validator. | python3 validate_steering_uptake.py --json | validated\n",
     )
 
     findings = validate_steering_uptake.validate(tmp_path)

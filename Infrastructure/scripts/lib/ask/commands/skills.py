@@ -33,7 +33,14 @@ globals().update({name: value for name, value in vars(_impl).items() if not (nam
 
 _PATCHABLE_IMPL_NAMES = (
     "audit_skill",
+    "discover_catalog_entries",
+    "discover_skill_entries",
+    "handles_report",
+    "route_skills",
     "improve_skills",
+    "install_skill",
+    "list_skills",
+    "goal_skills",
     "resolve_skill_handle",
     "sync_skills",
     "skill_invocation_analytics",
@@ -48,6 +55,7 @@ _ORIGINAL_IMPL_VALUES = {
     for name in _PATCHABLE_IMPL_NAMES
     if hasattr(_impl, name)
 }
+_FACADE_WRAPPERS: dict[str, object] = {}
 
 
 def _sync_patchable_impl_names() -> None:
@@ -55,12 +63,10 @@ def _sync_patchable_impl_names() -> None:
     for name in _PATCHABLE_IMPL_NAMES:
         if name in globals():
             value = globals()[name]
-            if (
-                name in _ORIGINAL_IMPL_VALUES
-                and getattr(value, "__module__", None) == __name__
-                and getattr(value, "__name__", None) == name
-            ):
-                value = _ORIGINAL_IMPL_VALUES[name]
+            if _FACADE_WRAPPERS.get(name) is value:
+                continue
+            if name in _ORIGINAL_IMPL_VALUES and value is _ORIGINAL_IMPL_VALUES[name]:
+                continue
             setattr(_impl, name, value)
 
 
@@ -94,54 +100,72 @@ def improve_skills(*args, **kwargs):
     return _call_impl("improve_skills", *args, **kwargs)
 
 
+def install_skill(*args, **kwargs):
+    return _call_impl("install_skill", *args, **kwargs)
+
+
+def list_skills(*args, **kwargs):
+    return _call_impl("list_skills", *args, **kwargs)
+
+
+def goal_skills(*args, **kwargs):
+    return _call_impl("goal_skills", *args, **kwargs)
+
+
 def sync_skills(*args, **kwargs):
     return _call_impl("sync_skills", *args, **kwargs)
 
 
+_FACADE_WRAPPERS.update(
+    {
+        "skills_proof": skills_proof,
+        "skills_prove": skills_prove,
+        "explain_skill": explain_skill,
+        "improve_skills": improve_skills,
+        "install_skill": install_skill,
+        "list_skills": list_skills,
+        "goal_skills": goal_skills,
+        "sync_skills": sync_skills,
+    }
+)
+
 _skill_sections = _impl._skill_sections
 _skill_workout_candidates = _impl._skill_workout_candidates
 
-__all__ = getattr(_impl, "__all__", [name for name in globals() if not name.startswith("_")])
-
-_IMPL_EXPLAIN_SKILL = _impl.explain_skill
-_IMPL_SKILLS_PROOF = _impl.skills_proof
-_IMPL_SKILLS_PROVE = _impl.skills_prove
-_FACADE_SKILLS_PROOF = None
-
-
-_PATCHABLE_IMPL_GLOBALS = (
+__all__ = [
     "audit_skill",
+    "explain_skill",
+    "extract_family_fail_lines",
+    "external_review_skill",
+    "fold_skills",
+    "goal_skills",
     "improve_skills",
-    "resolve_skill_handle",
+    "init_skill",
+    "install_skill",
+    "list_skills",
+    "reviewers_resolve",
+    "route_skills",
+    "skills_budget",
+    "skills_config_explain",
+    "skills_conformance_run",
+    "skills_implicit_preview",
+    "skills_inject_preview",
+    "skills_doctor",
+    "skills_events",
+    "skills_explain_boundary",
+    "skills_handles",
+    "skills_load_preview",
+    "skills_memory",
+    "skills_package",
+    "skills_package_verify",
+    "skills_parse",
+    "skills_profiles",
     "skills_proof",
-    "skill_invocation_analytics",
-    "_skill_sections",
-    "_skill_workout_candidates",
-)
-
-
-def _sync_patchable_impl_globals() -> None:
-    """Mirror facade monkeypatches into the implementation module before delegation."""
-    for name in _PATCHABLE_IMPL_GLOBALS:
-        if name in globals():
-            setattr(_impl, name, globals()[name])
-    if globals().get("skills_proof") is _FACADE_SKILLS_PROOF:
-        _impl.skills_proof = _IMPL_SKILLS_PROOF
-
-
-def explain_skill(repo_root: Path, handle: str):
-    _sync_patchable_impl_globals()
-    return _IMPL_EXPLAIN_SKILL(repo_root, handle)
-
-
-def skills_proof(repo_root: Path, handle: str):
-    _sync_patchable_impl_globals()
-    return _IMPL_SKILLS_PROOF(repo_root, handle)
-
-
-_FACADE_SKILLS_PROOF = skills_proof
-
-
-def skills_prove(repo_root: Path, handle: str):
-    _sync_patchable_impl_globals()
-    return _IMPL_SKILLS_PROVE(repo_root, handle)
+    "skills_prove",
+    "skills_render_preview",
+    "skills_resolve",
+    "sync_skills",
+    "validate_openai_skill_format",
+    "validate_skill_boundaries",
+    "validate_skill_gate",
+]

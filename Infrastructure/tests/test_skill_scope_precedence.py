@@ -13,6 +13,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
 
 import skill_discovery  # noqa: E402
+import selection_policy  # noqa: E402
 import verify_runtime_budget  # noqa: E402
 
 
@@ -50,10 +51,12 @@ class TestSkillScopePrecedence(unittest.TestCase):
             mock.patch.object(skill_discovery, "POLICY_PLUGIN_SKILL_ROOT_GLOB", "./Plugins/*/skills"),
             mock.patch.object(skill_discovery, "HIDDEN_FLAT_SKILL_NAMES", set()),
             mock.patch.object(skill_discovery, "DEFAULT_VISIBLE_FLAT_SKILL_NAMES", set(visible)),
+            mock.patch.object(skill_discovery, "DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES", {"imagegen"}),
             mock.patch.object(skill_discovery, "PLUGIN_VISIBLE_ROUTER_SKILL_NAMES", set(visible)),
             mock.patch.object(skill_discovery, "PLUGIN_HIDDEN_LANE_SKILL_NAMES", set()),
             mock.patch.object(verify_runtime_budget, "REPO_ROOT", self.repo_root),
             mock.patch.object(verify_runtime_budget, "DEFAULT_VISIBLE_FLAT_SKILL_NAMES", tuple(visible)),
+            mock.patch.object(verify_runtime_budget, "DEFAULT_VISIBLE_BRIDGE_SKILLS", {"imagegen"}),
         ):
             yield
 
@@ -108,6 +111,16 @@ class TestSkillScopePrecedence(unittest.TestCase):
         self.assertEqual(by_name["shared-skill"], repo_skill.resolve())
         self.assertEqual(by_name["imagegen"], system_dir.resolve())
 
+    def test_render_index_does_not_emit_blank_line_at_eof(self) -> None:
+        repo_skill = self._write_skill("Skills/agent-ops/shared-skill", "Canonical repo skill.")
+
+        with self._patched_repo(default_visible={"shared-skill"}):
+            [entry] = skill_discovery.discover_skill_entries(source="catalog", visibility="default")
+            rendered = skill_discovery.render_index([entry], source="catalog", visibility="default")
+
+        self.assertEqual(entry.source_dir, repo_skill.resolve())
+        self.assertFalse(rendered.endswith("\n\n"))
+
     def test_flat_runtime_system_lane_prefers_runtime_projection(self) -> None:
         runtime_system_dir = self._write_skill(".agents/skills/.system/imagegen", "Runtime system skill.")
         self._write_skill("skills-system/imagegen", "Tracked system skill.")
@@ -118,6 +131,17 @@ class TestSkillScopePrecedence(unittest.TestCase):
         selected = [entry for entry in entries if entry.name == "imagegen"]
         self.assertEqual(len(selected), 1)
         self.assertEqual(selected[0].source_dir, runtime_system_dir.resolve())
+
+    def test_default_discovery_hides_non_default_system_bridges(self) -> None:
+        imagegen_dir = self._write_skill("skills-system/imagegen", "Default visible system skill.")
+        self._write_skill("skills-system/skill-creator", "Hidden bridge skill.")
+
+        with self._patched_repo(default_visible={"imagegen"}):
+            entries = skill_discovery.discover_skill_entries(source="repo", visibility="default")
+
+        by_name = {entry.name: entry.source_dir for entry in entries}
+        self.assertEqual(sorted(by_name), ["imagegen"])
+        self.assertEqual(by_name["imagegen"], imagegen_dir.resolve())
 
     def test_runtime_budget_allows_default_visible_system_skill(self) -> None:
         imagegen_dir = self._write_skill("skills-system/imagegen", "Default visible system skill.")
@@ -147,6 +171,16 @@ class TestSkillScopePrecedence(unittest.TestCase):
                 "path": imagegen_dir.relative_to(self.repo_root).as_posix(),
             },
             report["hidden_system_entries"],
+        )
+
+    def test_default_visible_system_bridges_share_policy_source(self) -> None:
+        self.assertEqual(
+            skill_discovery.DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES,
+            set(selection_policy.DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES),
+        )
+        self.assertEqual(
+            verify_runtime_budget.DEFAULT_VISIBLE_BRIDGE_SKILLS,
+            set(selection_policy.DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES),
         )
 
     def test_runtime_budget_fails_unresolved_same_scope_collision(self) -> None:

@@ -28,6 +28,30 @@ artifact exists, the validation command has run, and the final report separates
 the operational failure from the original delivery task. Treat prompt-only intent,
 apologies, and conversational memory as insufficient proof.
 
+A closeout caveat is also a steering candidate when it names a repeated failure,
+validation blocker, stale runtime state, or workaround that still requires Jamie
+to steer source-of-truth behavior. Before final closeout, rerun the blocked
+command or record the blocker in the ledger, and either add a guardrail that
+changes future behavior or leave the item explicitly blocked.
+
+## Scope Closure Authority
+
+When Jamie asks for full implementation, agents must not relabel unfinished
+acceptance criteria as a smaller slice, follow-up, or future work unless Jamie
+explicitly approves that scope change. The authority for narrowing scope must be
+visible in the closeout evidence, not inferred from a local implementation plan.
+
+Before marking an issue, goal, PR, or implementation plan `Done`, `complete`, or
+equivalent, run a claim-vs-evidence closeout check:
+
+- enumerate the original acceptance criteria or planned requirements.
+- map each item to executable behavior, test evidence, artifact evidence, or a
+  concrete blocker.
+- classify every deferred or future-work item as either explicitly approved by
+  Jamie, out of scope by the original plan, or blocking completion.
+- leave the tracker or goal open when any planned current-scope item remains
+  absent, blocked, or deferred without explicit user approval.
+
 ## Uptake Loop
 
 For each high-signal steering item:

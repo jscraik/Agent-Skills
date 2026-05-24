@@ -38,12 +38,6 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
     },
 }
 
-EXPECTED_CACHE_PLUGIN_SKILLS = {
-    "harness-engineering": set(),
-    "plugin-factory": set(),
-    "skill-factory": set(),
-}
-
 EXPECTED_MARKETPLACE_SOURCE_PATHS = {
     "harness-engineering": "./Plugins/harness-engineering",
     "plugin-factory": "./Plugins/plugin-factory",
@@ -73,6 +67,15 @@ SYSTEM_BRIDGE_SKILL_NAMES = {
     "skill-installer",
 }
 
+HIDDEN_PICKER_COMPATIBILITY_SKILLS = {
+    "he-goal-governor-archive",
+    "he-ideate",
+    "he-phase-heartbeat",
+    "he-refactor",
+    "he-refine",
+    "he-reliability-review",
+    "he-technical-review",
+}
 
 def _read_frontmatter_text(skill_md: Path) -> str:
     raw = skill_md.read_text(encoding="utf-8")
@@ -103,6 +106,39 @@ def _direct_visible_skill_names(skills_root: Path) -> set[str]:
         and (child / "SKILL.md").exists()
         and not _is_hidden_skill(child / "SKILL.md")
     }
+
+
+def _existing_command_handle_skill_names(plugin_name: str) -> set[str]:
+    command_surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+    if not command_surface_path.is_file():
+        return set()
+    payload = json.loads(command_surface_path.read_text(encoding="utf-8"))
+    handles = payload.get("handles", [])
+    if not isinstance(handles, list):
+        return set()
+
+    names: set[str] = set()
+    for row in handles:
+        if not isinstance(row, dict) or row.get("owner") != plugin_name:
+            continue
+        handle = row.get("handle")
+        command_handle_path = row.get("command_handle_path")
+        if not isinstance(handle, str) or not isinstance(command_handle_path, str):
+            continue
+        if "/" in handle or ".." in handle:
+            continue
+        handle_file = REPO_ROOT / command_handle_path
+        if handle_file.exists() or handle_file.is_symlink():
+            names.add(handle)
+    return names
+
+
+def _expected_cache_skill_names(plugin_name: str) -> set[str]:
+    return (
+        EXPECTED_SOURCE_PLUGIN_SKILLS[plugin_name]
+        - _existing_command_handle_skill_names(plugin_name)
+        - HIDDEN_PICKER_COMPATIBILITY_SKILLS
+    )
 
 
 class LocalPluginPickerSurfaceTests(unittest.TestCase):
@@ -218,18 +254,19 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
 
     def test_runtime_cache_does_not_duplicate_command_handle_skills(self) -> None:
         """
-        Verify the generated local plugin cache cannot duplicate command handles.
+        Verify the generated local plugin cache cannot duplicate real command handles.
 
         The Codex picker has historically scanned plugin cache contents more broadly than
-        the manifest-declared skills root. This guard fails when the runtime cache contains
-        command-handle-owned skills, duplicate skill names inside a plugin, non-visible lanes,
-        or system bridge skills.
+        the manifest-declared skills root. This guard fails when the runtime cache prunes
+        plugin skills based on stale generated metadata, contains real command-handle-owned
+        skills, duplicates skill names inside a plugin, or exposes system bridge skills.
         """
         runtime_root = REPO_ROOT / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local"
         if not runtime_root.exists():
             self.skipTest("local plugin runtime cache has not been generated")
 
-        for plugin_name, expected_skill_names in EXPECTED_CACHE_PLUGIN_SKILLS.items():
+        for plugin_name in EXPECTED_SOURCE_PLUGIN_SKILLS:
+            expected_skill_names = _expected_cache_skill_names(plugin_name)
             plugin_root = runtime_root / plugin_name
             self.assertTrue(
                 plugin_root.is_dir(),
@@ -238,7 +275,7 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             discovered: dict[str, list[str]] = {}
             for skill_md in sorted(plugin_root.rglob("SKILL.md")):
                 rel = skill_md.relative_to(plugin_root).as_posix()
-                if rel.startswith(("fixtures/", "references/")):
+                if rel.startswith("references/"):
                     continue
                 discovered.setdefault(skill_md.parent.name, []).append(rel)
 
@@ -258,17 +295,18 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
 
     def test_versioned_plugin_cache_does_not_duplicate_command_handle_skills(self) -> None:
         """
-        Verify the local versioned plugin cache does not expose command-handle-owned skills.
+        Verify the local versioned plugin cache does not expose real command-handle-owned skills.
 
         Some picker paths still inspect Plugins/cache/agent-skills-local/<plugin>/<version>/skills.
-        This guard keeps that cache aligned with the first-level plugin surface so local plugins do
-        not duplicate the generated `.agents/skills/<handle>` command surface.
+        This guard keeps that cache aligned with the first-level plugin surface, except for
+        plugin skills that have an actual generated `.agents/skills/<handle>` command surface.
         """
         cache_root = REPO_ROOT / "Plugins" / "cache" / "agent-skills-local"
         if not cache_root.exists():
             self.skipTest("versioned local plugin cache has not been generated")
 
-        for plugin_name, expected_skill_names in EXPECTED_CACHE_PLUGIN_SKILLS.items():
+        for plugin_name in EXPECTED_SOURCE_PLUGIN_SKILLS:
+            expected_skill_names = _expected_cache_skill_names(plugin_name)
             plugin_cache_root = cache_root / plugin_name
             self.assertTrue(
                 plugin_cache_root.exists(),
@@ -288,14 +326,18 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 skills_root.is_dir(),
                 f"{plugin_name} should expose a versioned local cache skills root",
             )
-            discovered = {
-                child.name
-                for child in skills_root.iterdir()
-                if child.is_dir() and (child / "SKILL.md").exists()
+            discovered_paths: dict[str, list[str]] = {}
+            for skill_md in sorted(skills_root.rglob("SKILL.md")):
+                rel = skill_md.relative_to(skills_root).as_posix()
+                discovered_paths.setdefault(skill_md.parent.name, []).append(rel)
+
+            duplicates = {
+                name: paths for name, paths in discovered_paths.items() if len(paths) > 1
             }
+            self.assertEqual({}, duplicates, f"{plugin_name} versioned plugin cache exposes duplicate skill identities")
             self.assertEqual(
                 expected_skill_names,
-                discovered,
+                set(discovered_paths),
                 f"{plugin_name} versioned plugin cache picker surface drifted",
             )
 

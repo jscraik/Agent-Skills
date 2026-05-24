@@ -11,6 +11,7 @@ from typing import Dict, Iterable, List
 
 from selection_policy import (
     DEFAULT_VISIBLE_FLAT_SKILL_NAMES as POLICY_DEFAULT_VISIBLE_FLAT_SKILL_NAMES,
+    DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES as POLICY_DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES,
     EXCLUDED_SCAN_SEGMENTS as POLICY_EXCLUDED_SCAN_SEGMENTS,
     HIDDEN_FLAT_SKILL_NAMES as POLICY_HIDDEN_FLAT_SKILL_NAMES,
     PLUGIN_VISIBLE_ROUTER_SKILL_NAMES as POLICY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
@@ -36,6 +37,7 @@ EXCLUDED_REPO_SCAN_SEGMENTS = set(POLICY_EXCLUDED_SCAN_SEGMENTS)
 # Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh hidden_flat_skills.
 HIDDEN_FLAT_SKILL_NAMES = set(POLICY_HIDDEN_FLAT_SKILL_NAMES)
 DEFAULT_VISIBLE_FLAT_SKILL_NAMES = set(POLICY_DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
+DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES = set(POLICY_DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES)
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES = set(POLICY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES)
 PLUGIN_HIDDEN_LANE_SKILL_NAMES = set(POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES)
 PLUGIN_CACHE_SKILL_ROOT_GLOB = "./Plugins/cache/*/*/*/skills"
@@ -257,12 +259,13 @@ def is_skill_visible(name: str, source_dir: Path, visibility: str) -> bool:
     if visibility == "advanced":
         return name not in HIDDEN_FLAT_SKILL_NAMES
     plugin_owned = _is_plugin_owned_skill_dir(source_dir)
+    system_owned = classify_skill_scope(source_dir) == "system"
     if name in HIDDEN_FLAT_SKILL_NAMES:
         return False
     if (
         name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES
         and name not in ROOT_SKILL_SET_NAMES
-        and name not in SYSTEM_BRIDGE_SKILL_NAMES
+        and not (system_owned and name in DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES)
     ):
         return False
     if plugin_owned and name not in PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
@@ -511,8 +514,8 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
             # augments from plugin sources so lanes remain discoverable.
             skill_dirs.extend(_sort_for_user_scope_precedence(_iter_plugin_skill_dirs()))
         else:
-            # Keep governed system bridge skills visible from the default listing
-            # without forcing advanced-mode discovery.
+            # Include the system lane so policy-default bridge skills can remain
+            # visible without forcing advanced-mode discovery.
             skill_dirs.extend(_sort_for_user_scope_precedence(_iter_system_lane_skill_dirs()))
     elif source == "repo":
         skill_dirs = _sort_for_user_scope_precedence([
@@ -535,8 +538,8 @@ def discover_skill_entries(source: str = "auto", visibility: str = "default") ->
                     ])
                 )
             else:
-                # Keep governed system bridge skills visible from the default listing
-                # when flat discovery is present.
+                # Include the system lane so policy-default bridge skills can remain
+                # visible when flat discovery is present.
                 skill_dirs.extend(_sort_for_user_scope_precedence(_iter_system_lane_skill_dirs()))
         else:
             skill_dirs = _sort_for_user_scope_precedence([
@@ -670,7 +673,7 @@ def render_index(entries: List[SkillEntry], source: str = "auto", visibility: st
             lines.append(f"- `{entry.name}` — {entry.description}")
         lines.append("")
 
-    return "\n".join(lines)
+    return "\n".join(lines).rstrip()
 
 
 def parse_args() -> argparse.Namespace:

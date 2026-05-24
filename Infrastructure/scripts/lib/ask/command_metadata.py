@@ -18,6 +18,7 @@ VALID_ACTIONS = {
         "explain",
         "doctor",
         "package",
+        "conformance",
         "profiles",
         "events",
         "memory",
@@ -60,6 +61,8 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask skills explain he-heartbeat --json --robot",
         "ask skills doctor he-heartbeat --json --robot",
         "ask skills package he-heartbeat --json --robot",
+        "ask skills package verify he-heartbeat --json --robot",
+        "ask skills conformance run --suite codex-parity --evidence-dir /tmp/ask-conformance --json --robot",
         "ask skills profiles --json --robot",
         "ask skills profiles eval --json --robot",
         "ask skills events --json --robot",
@@ -176,6 +179,11 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask skills package he-heartbeat --json",
         "ask skills package he-heartbeat --checkout-test --json",
         "ask skills package Plugins/harness-engineering/skills/he-heartbeat --strict --json",
+        "ask skills package verify he-heartbeat --json",
+        "ask skills package verify ./package.zip --expected-sha256 <sha256> --json",
+    ],
+    ("skills", "conformance"): [
+        "ask skills conformance run --suite codex-parity --evidence-dir /tmp/ask-conformance --json",
     ],
     ("skills", "memory"): [
         "ask skills memory list --json",
