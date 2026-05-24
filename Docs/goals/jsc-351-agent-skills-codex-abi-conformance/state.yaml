@@ -46,19 +46,19 @@ checks:
     outcome: pass
     checked_at: "2026-05-24T03:48:30Z"
   last_delivery_attempt:
-    command: "PU-007 transition-head review remediation for PR #196"
-    outcome: blocked_review_remediation_in_progress
-    checked_at: "2026-05-24T05:55:00Z"
-    detail: "PR #196 reached green remote checks at head cd1a861c891f66d7660d02945324e2f4d190a540, including CodeRabbit. The required governor and subagent triage artifacts for that exact head both reported blocked because CodeRabbit opened 6 active inline review threads. Progression to PU-008 remains blocked until the review findings are remediated, committed, pushed, and a fresh latest-head triage artifact reports no active blockers."
+    command: "PU-008 transition-head post-push triage for PR #196"
+    outcome: latest_head_safe_metadata_commit_pending
+    checked_at: "2026-05-24T06:23:40Z"
+    detail: "PR #196 reached green remote checks at head 2295899be0a463f0aa28f97dbef5d448721afde7, including CodeRabbit and CircleCI. Governor and subagent triage artifacts for that exact head both report status pass with 25 addressed inline comments, 25 resolved-thread comments, 0 active comments, and no blockers. The governor removed a duplicate R049 receipt and is committing this metadata/artifact cleanup; progression still requires that metadata commit to be pushed and freshly triaged before PU-008 implementation resumes."
   last_pr_state:
     url: "https://github.com/jscraik/Agent-Skills/pull/196"
     number: 196
     state: open
     draft: true
     mergeable: MERGEABLE
-    checked_at: "2026-05-24T05:55:00Z"
-    outcome: blocked_active_review_comments
-    detail: "PR #196 is open draft and mergeable at head cd1a861c891f66d7660d02945324e2f4d190a540. Remote checks are green, but latest-head triage reports 25 inline review comments, 19 addressed or resolved-thread comments, and 6 active comments requiring classification or remediation before the governor may start PU-008."
+    checked_at: "2026-05-24T06:23:40Z"
+    outcome: pass_before_metadata_cleanup_push
+    detail: "PR #196 is open draft and mergeable at head 2295899be0a463f0aa28f97dbef5d448721afde7. Remote checks are green; latest-head triage reports 25 inline review comments, 25 addressed or resolved-thread comments, and 0 active comments. A metadata cleanup commit will create a new head and must be followed by fresh checks plus subagent triage before next implementation."
 continuation_gate:
   native_status: active
   goal_active: pass
