@@ -47,7 +47,7 @@ def command_text(command: Sequence[str]) -> str:
 def indented(text: str) -> str:
     if not text:
         return "    (empty)"
-    return "\n".join(f"    {line}" for line in text.rstrip().splitlines())
+    return "\n".join(f"    {line.rstrip()}" for line in text.rstrip().splitlines())
 
 
 def parse_json_list(result: CommandResult) -> list[object] | None:
@@ -256,7 +256,7 @@ def render_report(
         f"- PR state: {facts.get('pr_state', 'unknown')}",
         f"- draft: {facts.get('pr_draft', 'unknown')}",
         f"- mergeable: {facts.get('mergeable', 'unknown')}",
-        f"- review decision: {facts.get('review_decision', '')}",
+        f"- review decision: {facts.get('review_decision') or 'unknown'}",
         f"- PR author: {facts.get('pr_author', 'unknown')}",
         f"- submitted GitHub reviews: {facts.get('submitted_reviews', 'unknown')}",
         f"- independent GitHub reviews: {facts.get('independent_reviews', 'unknown')}",

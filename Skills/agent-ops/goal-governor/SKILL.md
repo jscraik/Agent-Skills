@@ -257,6 +257,19 @@ Use explicit Goal Governor vocabulary in every governed response:
   remediation. Addressed review comments and stale old-head comments must be
   counted separately from active blockers so the lane does not retry already
   remediated feedback or hide unresolved feedback.
+- For subagent-managed triage or review lanes, do not treat spawn success,
+  mailbox status, or elapsed wait time as completion evidence. If a required
+  subagent artifact is missing, empty, or lacks the exact final
+  `WROTE: <relative-artifact-path>` line, write a deterministic handoff health
+  report before continuing:
+  python3 Skills/agent-ops/goal-governor/scripts/write_subagent_handoff_report.py
+  --worktree <absolute-worktree> --expected-artifact <relative-artifact-path>
+  --output <relative-health-report-path> --attempt-label <label>
+  --agent-name <agent-task-name>.
+  A `blocked` handoff health report is runtime-truth evidence that the
+  subagent lane failed; it blocks the next implementation slice until the
+  artifact is produced, a deterministic replacement proof exists, or the owner
+  explicitly waives the subagent-lane requirement in the board and receipts.
 
 ## Anti-Patterns
 
@@ -267,6 +280,8 @@ Use explicit Goal Governor vocabulary in every governed response:
 - Assuming Scout, Judge, Worker, app-server, or native goal tools exist without runtime evidence.
 - Accepting mailbox text or a prose triage summary as PR delivery evidence when
   the required worktree-bound triage artifact is missing.
+- Continuing after a subagent artifact timeout without a deterministic handoff
+  health report or explicit owner waiver.
 
 ## Gotchas
 
@@ -310,6 +325,7 @@ Validate the skill package:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q Skills/agent-ops/goal-governor/tests/test_check_goal_board.py
+PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q Skills/agent-ops/goal-governor/tests/test_write_subagent_handoff_report.py
 PYTHONDONTWRITEBYTECODE=1 python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py <goal-directory>
 ./bin/ask skills audit Skills/agent-ops/goal-governor --level strict --json --robot
 ./bin/ask skills validate-skill-gate Skills/agent-ops/goal-governor --json --robot
