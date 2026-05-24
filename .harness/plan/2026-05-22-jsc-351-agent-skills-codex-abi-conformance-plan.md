@@ -26,7 +26,7 @@ linear_labels:
   - Agent-Native
   - Reliability
   - Developer Experience
-  - Roadmap: Now
+  - "Roadmap: Now"
   - Feature
 ---
 
