@@ -867,5 +867,12 @@
     <p>Fix applied: the plan table now matches <code>In Progress</code> and records project unresolved / cycle live but authority-unverified. The audit now scopes the older PR/check/review proof to capture time <code>2026-05-24T06:58:30Z</code> and exact head <code>9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246</code>, with explicit re-triage required for any later commit.</p>
     <p>Next gate: validate the minimal remediation, commit and push it, then rerun latest-head checks plus governor and subagent triage for the new head. No next implementation slice may start before the latest head has no active review blockers.</p>
   </section>
+  <section class="entry decision">
+    <h2>PU-008 CLOSEOUT: Final State Commit And Live Proof Boundary</h2>
+    <p>Runtime truth: remediation commit <code>e48b09fd6276537d19e86f47e75139ff58f9aaa7</code> was pushed to PR #196. GitHub checks, CircleCI, CodeRabbit, CodeQL, Semgrep, Snyk, docs, lint, typecheck, test, audit, security scan, and structure gates passed for that exact head; <code>eval-baseline</code> was reported as skipping. The governor report for <code>e48b09f</code> recorded 27 addressed inline comments, 27 resolved-thread comments, 0 active inline comments, and no blockers.</p>
+    <p>Subagent triage: the first post-push triage worker vanished without writing the required artifact, so the coordinator treated it as an artifact failure and retried with a narrower artifact-first contract. The retry worker wrote <code>artifacts/reviews/jsc-351-pu008-closeout/subagent-post-push-e48b09f.md</code> with the required <code>WROTE:</code> footer. It confirmed the exact local and PR head, passing checks, mergeable draft PR state, and no unresolved threads in the returned review-thread dataset.</p>
+    <p>Governor disposition: PU-008 is ready to close in the repo-visible goal board. The final closeout-state commit must not include the post-push pass artifacts, because committing latest-head proof creates a new head and repeats the stale-proof loop. Instead, the committed goal board now requires a fresh uncommitted governor and subagent triage report after the closeout-state commit is pushed.</p>
+    <p>Remaining owner-controlled decisions: PR #196 remains draft, GitHub <code>reviewDecision</code> is empty, Linear project assignment is unresolved, and cycle authority is live but unverified for intent. These are not hidden future implementation slices; they are delivery/ownership decisions that must stay separate from implementation readiness claims.</p>
+  </section>
 </body>
 </html>

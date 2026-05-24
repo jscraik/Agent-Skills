@@ -1,10 +1,10 @@
 version: 2
 goal:
   slug: jsc-351-agent-skills-codex-abi-conformance
-  status: active
+  status: done
   objective: "Fully implement the JSC-351 Agent Skills Codex ABI Conformance plan and spec through governed, validated, runtime-truth-first slices."
   native_objective: "Govern and fully implement the JSC-351 Agent Skills Codex ABI Conformance plan/spec in /Users/jamiecraik/dev/agent-skills, using bounded validated slices with runtime-truth-first proof, review-stack governance, implementation notes, tracker/PR/CI triage, and no unresolved blockers or unapproved future-work placeholders."
-  native_status: active
+  native_status: complete
   native_goal_id: 019e4cb4-62bd-7f93-8de8-6af42d620e70
   token_budget: null
   tokens_used: 9700
@@ -44,28 +44,28 @@ checks:
   last_verification:
     command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     outcome: pass
-    checked_at: "2026-05-24T06:54:19Z"
+    checked_at: "2026-05-24T07:34:06Z"
   last_delivery_attempt:
-    command: "PU-008 traceability correction local validation before commit/push"
-    outcome: validated_before_push
-    checked_at: "2026-05-24T06:54:19Z"
-    detail: "PU-008 refreshed live Linear truth and corrected plan/spec/traceability artifacts to distinguish unresolved project assignment from live cycleId 4a0b5dca-7936-482b-a46c-c55c33069f9d on JSC-351 through JSC-356. Artifact identity, Linear traceability, BLUF, generated-shape, goal-board, whitespace, codestyle, and repo validation gates passed locally. Progression remains blocked until this traceability commit is pushed and PR #196 receives fresh checks plus latest-head governor and subagent triage."
+    command: "PU-008 closeout governance commit prepared after review-remediation push and latest-head triage"
+    outcome: ready_for_final_push_triage
+    checked_at: "2026-05-24T07:34:06Z"
+    detail: "PU-008 review-remediation commit e48b09fd6276537d19e86f47e75139ff58f9aaa7 was pushed. PR #196 checks, CodeRabbit, CircleCI, mergeability, and review-thread state passed for that exact head in governor and subagent artifacts. This closeout-state commit intentionally excludes post-push proof artifacts because committing latest-head proof creates another head; after this commit is pushed, fresh uncommitted governor and subagent triage artifacts must verify the final head before final completion is claimed."
   last_pr_state:
     url: "https://github.com/jscraik/Agent-Skills/pull/196"
     number: 196
     state: open
     draft: true
     mergeable: MERGEABLE
-    checked_at: "2026-05-24T06:42:09Z"
-    outcome: pass_before_pu008_traceability_commit
-    detail: "PR #196 was open draft and mergeable at head 9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246 before local PU-008 traceability edits. Checks were green, CodeRabbit/CircleCI passed, and latest-head reports had 25 addressed inline comments, 25 resolved-thread comments, and 0 active comments. Any new commit must be pushed and freshly triaged before merge readiness is claimed."
+    checked_at: "2026-05-24T07:26:08Z"
+    outcome: pass_for_review_remediation_head_before_closeout_commit
+    detail: "PR #196 was open draft, mergeable, green, and had 0 active inline review comments at review-remediation head e48b09fd6276537d19e86f47e75139ff58f9aaa7. Draft state and empty GitHub reviewDecision remain final-delivery constraints; they do not invalidate implementation proof, but undraft/merge requires owner-governed delivery action. Any new commit must be pushed and freshly triaged before merge readiness is claimed."
 continuation_gate:
-  native_status: active
-  goal_active: pass
+  native_status: complete
+  goal_active: blocked
   thread_idle: unknown
-  queued_user_input: unknown
-  pending_work: present
-  auto_continue_allowed: "yes"
+  queued_user_input: absent
+  pending_work: absent
+  auto_continue_allowed: "no"
   blocked_by: "none"
 claims:
   - id: C001
@@ -661,7 +661,7 @@ tasks:
   - id: T018
     type: pm
     assignee: PM
-    status: active
+    status: done
     objective: "Implement PU-008 / JSC-351 traceability, validation, and closeout control without inventing tracker or merge readiness."
     inputs:
       - ".harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md"
@@ -702,7 +702,7 @@ tasks:
       - "PR #196 head, checks, review state, or mergeability become stale or blocked."
       - "Acceptance traceability cannot connect a requirement to validation evidence."
       - "A closeout claim would require implementation testing, runtime validation, or external approval not yet available."
-    receipt_id: R053
+    receipt_id: R054
   - id: T016
     type: pm
     assignee: PM
