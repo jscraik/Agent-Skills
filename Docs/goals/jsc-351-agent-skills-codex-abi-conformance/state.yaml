@@ -3,7 +3,7 @@ goal:
   slug: jsc-351-agent-skills-codex-abi-conformance
   status: in_progress
   objective: "Fully implement the JSC-351 Agent Skills Codex ABI Conformance plan and spec through governed, validated, runtime-truth-first slices."
-  native_objective: "Govern and fully implement the JSC-351 Agent Skills Codex ABI Conformance plan/spec in /Users/jamiecraik/dev/agent-skills, using bounded validated slices with runtime-truth-first proof, review-stack governance, implementation notes, tracker/PR/CI triage, and no unresolved blockers or unapproved future-work placeholders."
+  native_objective: "Govern and fully implement the JSC-351 Agent Skills Codex ABI Conformance plan/spec in /Users/jamiecraik/dev/Agent-Skills, using bounded validated slices with runtime-truth-first proof, review-stack governance, implementation notes, tracker/PR/CI triage, and no unresolved blockers or unapproved future-work placeholders."
   native_status: blocked
   native_goal_id: 019e4cb4-62bd-7f93-8de8-6af42d620e70
   token_budget: null
@@ -13,7 +13,7 @@ goal:
   native_updated_at: "2026-05-23T14:28:42Z"
 governance_evidence:
   objective: "Fully implement the JSC-351 Agent Skills Codex ABI Conformance plan and spec through governed, validated, runtime-truth-first slices."
-  native_objective: "Govern and fully implement the JSC-351 Agent Skills Codex ABI Conformance plan/spec in /Users/jamiecraik/dev/agent-skills, using bounded validated slices with runtime-truth-first proof, review-stack governance, implementation notes, tracker/PR/CI triage, and no unresolved blockers or unapproved future-work placeholders."
+  native_objective: "Govern and fully implement the JSC-351 Agent Skills Codex ABI Conformance plan/spec in /Users/jamiecraik/dev/Agent-Skills, using bounded validated slices with runtime-truth-first proof, review-stack governance, implementation notes, tracker/PR/CI triage, and no unresolved blockers or unapproved future-work placeholders."
   outstanding_gates:
     - id: PR-196-MERGE
       kind: required_PR
@@ -47,7 +47,7 @@ completion_contract:
     - "Do not edit generated runtime projections, plugin caches, user/global runtime config, or unrelated repos as manual implementation targets; generated projections may only change through repo-owned sync commands when validation requires a refreshed proof surface."
     - "Stop on unresolved blockers, stale validation, unclear blast radius, merge-safety ambiguity, or deterministic verification failure."
   boundaries:
-    - "Target repository is /Users/jamiecraik/dev/agent-skills."
+    - "Target repository is /Users/jamiecraik/dev/Agent-Skills."
     - "Canonical plan is .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md."
     - "Canonical spec is .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md."
     - "Implementation notes are .harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html."
@@ -184,7 +184,7 @@ tasks:
       - "python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md --kind plan --json"
       - "python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md --kind spec --json"
     stop_if:
-      - "Target repository is not /Users/jamiecraik/dev/agent-skills."
+      - "Target repository is not /Users/jamiecraik/dev/Agent-Skills."
       - "Plan/spec validators fail."
       - "Linear state cannot be refreshed but implementation depends on tracker truth."
       - "Parser or doctor runtime shape contradicts PU-001 scope."

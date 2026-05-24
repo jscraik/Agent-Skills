@@ -82,13 +82,14 @@ def _as_text(value, encoding="utf-8") -> str:
 
 def _tessl_policy() -> dict:
     """Return the repo's Tessl safety contract for eval runs."""
+    temp_root = tempfile.gettempdir()
     return {
         "native_tessl_only": True,
         "no_npx": True,
         "no_publish": True,
         "no_registry_upload": True,
         "temp_staged_project_input_only": True,
-        "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+        "stable_staging_root": f"{temp_root}/ask-tessl-evals/<skill-path>-<sha12>",
         "evidence_retention": "stable tmp staging is intentionally left for post-run inspection",
         "tessl_project_marker": "tessl.json",
         "staged_inputs": [
@@ -316,7 +317,7 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
         command_display = f"tessl eval run --json {staged_source}"
         cmd = [tessl_path, "eval", "run", "--json", str(staged_source)]
         tessl_env = dict(os.environ)
-        tessl_env.setdefault("TESSL_AUTO_UPDATE_INTERVAL_MINUTES", "0")
+        tessl_env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
         try:
             process = subprocess.run(
                 cmd,
@@ -335,7 +336,7 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
                 "staged_files": copied_files,
                 "staging_policy": "stable_tmp_evidence",
                 "tessl_project_marker": str(staged_source / "tessl.json"),
-                "evidence_retention": "staged directory is left under /tmp/ask-tessl-evals for inspection",
+                "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
                 "raw_output": _as_text(e.stdout),
                 "raw_error": _as_text(e.stderr),
                 "blocker": "Tessl eval timed out after 600 seconds.",
@@ -351,7 +352,7 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
                 "staged_files": copied_files,
                 "staging_policy": "stable_tmp_evidence",
                 "tessl_project_marker": str(staged_source / "tessl.json"),
-                "evidence_retention": "staged directory is left under /tmp/ask-tessl-evals for inspection",
+                "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
                 "raw_output": "",
                 "raw_error": str(e),
                 "blocker": f"Failed to run Tessl eval: {e}",
@@ -390,7 +391,7 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
             "staged_files": copied_files,
             "staging_policy": "stable_tmp_evidence",
             "tessl_project_marker": str(staged_source / "tessl.json"),
-            "evidence_retention": "staged directory is left under /tmp/ask-tessl-evals for inspection",
+            "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
             "exit_code": process.returncode,
             "raw_output": raw_output,
             "raw_error": raw_error,
@@ -674,6 +675,7 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
     review_root = repo_root / "Infrastructure" / "artifacts" / "skill-reviews"
     review_root.mkdir(parents=True, exist_ok=True)
     report_path = review_root / f"{_safe_slug(skill_name)}-eval-latest.json"
+    temp_root = tempfile.gettempdir()
     report = {
         "status": "success",
         "data": {
@@ -686,7 +688,7 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                 "plugin_eval_min_acceptable_grade": "B+",
                 "tessl_review_min_score": 95,
                 "codex_smoke_profile": "[profiles.fast]",
-                "tessl_eval_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+                "tessl_eval_staging_root": f"{temp_root}/ask-tessl-evals/<skill-path>-<sha12>",
                 "tessl_project_marker": "tessl.json",
                 "snyk_default": "disabled_until_requested",
                 "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
@@ -696,7 +698,7 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                     "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
                     "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates",
                     "profile": "[profiles.fast] for Codex smoke runs",
-                    "tessl_evidence": "stages copied eval inputs under /tmp/ask-tessl-evals with tessl.json",
+                    "tessl_evidence": f"stages copied eval inputs under {temp_root}/ask-tessl-evals with tessl.json",
                     "status": "run_for_this_dashboard",
                 },
                 "plugin_eval": {

@@ -118,6 +118,7 @@ def _existing_command_handle_skill_names(plugin_name: str) -> set[str]:
         return set()
 
     names: set[str] = set()
+    skillsets_root = (REPO_ROOT / ".skillsets").resolve()
     for row in handles:
         if not isinstance(row, dict) or row.get("owner") != plugin_name:
             continue
@@ -127,9 +128,17 @@ def _existing_command_handle_skill_names(plugin_name: str) -> set[str]:
             continue
         if "/" in handle or ".." in handle:
             continue
-        handle_file = REPO_ROOT / command_handle_path
-        if handle_file.exists() or handle_file.is_symlink():
+        try:
+            handle_file = (REPO_ROOT / command_handle_path).resolve()
+            if not handle_file.is_relative_to(skillsets_root):
+                continue
+            if not (handle_file.exists() or handle_file.is_symlink()):
+                continue
+            if not handle_file.is_file():
+                continue
             names.add(handle)
+        except (OSError, ValueError):
+            continue
     return names
 
 

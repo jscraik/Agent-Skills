@@ -295,7 +295,10 @@ print(f"[family-gate] contract/eval/security benchmarks passed: {skill_dir}")
 # SKILL_FAMILY_CODEX_PROFILE defaults to fast so every live skill-family eval
 # selects [profiles.fast] unless a caller explicitly pins a different profile.
 skill_family_codex_profile="${SKILL_FAMILY_CODEX_PROFILE:-fast}"
-codex_profile_args=(--profile "$skill_family_codex_profile")
+codex_profile_args=()
+if [[ "$runner_name" == "codex" ]]; then
+  codex_profile_args=(--profile "$skill_family_codex_profile")
+fi
 
 # ---------------------------------------------------------------------------
 # Release-readiness evidence setup

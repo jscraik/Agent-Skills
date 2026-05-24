@@ -35,7 +35,7 @@ stronger validation, lower stale-state risk, and safer autonomous operation.
 
 ## Target Repository
 
-/Users/jamiecraik/dev/agent-skills
+/Users/jamiecraik/dev/Agent-Skills
 
 ## Implementation Notes
 

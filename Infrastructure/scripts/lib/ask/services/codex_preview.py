@@ -3,7 +3,9 @@ from __future__ import annotations
 import os
 import re
 import shlex
+import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -202,6 +204,9 @@ def _repo_relative_path(repo_root: Path, path: Path) -> str | None:
 
 def _codex_runtime_source_identity(repo_root: Path) -> dict[str, Any]:
     """Return source identity for the local Codex core-skills model used by previews."""
+    git_path = shutil.which("git")
+    if git_path is None:
+        raise RuntimeError("git not found: blocked")
     codex_root = repo_root.parent / "codex"
     identity: dict[str, Any] = {
         "schema_version": "codex-runtime-source-identity.v1",
@@ -218,7 +223,7 @@ def _codex_runtime_source_identity(repo_root: Path) -> dict[str, Any]:
         return identity
     try:
         revision = subprocess.run(
-            ["git", "-C", str(codex_root), "rev-parse", "HEAD"],
+            [git_path, "-C", str(codex_root), "rev-parse", "HEAD"],
             capture_output=True,
             text=True,
             check=False,
@@ -236,7 +241,7 @@ def _codex_runtime_source_identity(repo_root: Path) -> dict[str, Any]:
     identity["revision"] = revision.stdout.strip()
     try:
         status = subprocess.run(
-            ["git", "-C", str(codex_root), "status", "--short", "--", *CODEX_PREVIEW_SOURCE_FILES],
+            [git_path, "-C", str(codex_root), "status", "--short", "--", *CODEX_PREVIEW_SOURCE_FILES],
             capture_output=True,
             text=True,
             check=False,

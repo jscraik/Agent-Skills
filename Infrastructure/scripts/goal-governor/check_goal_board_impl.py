@@ -239,6 +239,8 @@ def validate_receipts(path: Path) -> dict[str, dict[str, Any]]:
                 raise ValueError(f"receipts.jsonl:{line_number}: missing id")
             if not isinstance(task_id, str) or not TASK_ID.match(task_id):
                 raise ValueError(f"receipts.jsonl:{line_number}: invalid task_id")
+            if receipt_id in receipts:
+                raise ValueError(f"receipts.jsonl:{line_number}: duplicate id")
             receipts[receipt_id] = receipt
     return receipts
 

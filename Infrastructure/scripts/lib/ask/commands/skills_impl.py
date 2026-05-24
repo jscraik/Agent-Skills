@@ -589,13 +589,11 @@ def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root
     source_skill = source_skill_dir / "SKILL.md"
     fields = _read_skill_frontmatter_fields(source_skill)
     skill_key = _safe_tessl_skill_key(fields.get("name") or Path(audit_target_path).name)
-    temp_root.mkdir(parents=True, exist_ok=True)
-    for child in temp_root.iterdir():
-        if child.is_dir():
-            shutil.rmtree(child)
-        else:
-            child.unlink()
-    tile_skill_dir = temp_root / "skills" / skill_key
+    import uuid
+    run_id = uuid.uuid4().hex[:8]
+    per_run_root = temp_root / f"run-{run_id}"
+    per_run_root.mkdir(parents=True, exist_ok=True)
+    tile_skill_dir = per_run_root / "skills" / skill_key
     tile_skill_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source_skill, tile_skill_dir / "SKILL.md")
     for support_dir_name in ("references", "scripts", "assets", "evals"):
@@ -613,9 +611,9 @@ def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root
             },
         },
     }
-    tile_path = temp_root / "tile.json"
+    tile_path = per_run_root / "tile.json"
     tile_path.write_text(json.dumps(tile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    tessl_marker_path = temp_root / "tessl.json"
+    tessl_marker_path = per_run_root / "tessl.json"
     tessl_marker_path.write_text(
         json.dumps({"name": f"agent-skills-{skill_key}", "version": "0.0.0-local"}, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -623,7 +621,7 @@ def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root
     return tile_path, {
         "tile_path": str(tile_path),
         "tessl_project_marker": str(tessl_marker_path),
-        "staging_root": str(temp_root),
+        "staging_root": str(per_run_root),
         "review_path": str(tile_skill_dir),
         "skill_key": skill_key,
         "source_skill": audit_target_path,
