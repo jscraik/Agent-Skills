@@ -46,19 +46,19 @@ checks:
     outcome: pass
     checked_at: "2026-05-24T00:26:33Z"
   last_delivery_attempt:
-    command: "PU-006 Skills SDK service boundary extraction validation"
-    outcome: ready_for_hook_backed_commit_and_post_push_triage
-    checked_at: "2026-05-24T01:02:51Z"
-    detail: "PR #194 was merged at 31d1f4a91e40c5d3658593653336c3f4b13c17a8 before PU-006 began. The PU-006 branch codex/jsc-351-skills-sdk-service-boundary now extracts stable doctor/package/runtime responsibilities into ask.skills_sdk modules, leaves ask as the CLI facade, preserves public command behavior, and has focused boundary tests plus compile, focused/broader pytest, diff check, codestyle, and repo validate passing. Next required action is hook-backed commit, push, PR creation, Linear update, and subagent-managed post-push PR/CI/review triage."
+    command: "PU-006 PR #196 post-push triage gate"
+    outcome: blocked_subagent_triage_artifact_missing
+    checked_at: "2026-05-24T02:25:00Z"
+    detail: "PR #196 is open as a draft at head 27a6051baa2773dc5d03ab4b3261f8de03a7be72, GitHub reports MERGEABLE, and all reported checks pass. GitHub submitted reviews and inline review comments are empty; the CodeRabbit status context says review completed but no submitted GitHub review exists. Four subagent-managed triage attempts failed to produce the required PR #196 artifact; the latest completed in the wrong checkout (/Users/jamiecraik/dev/agent-skills on branch codex/code-fixes-triage-delivery) and did not write artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-27a6051.md."
   last_pr_state:
-    url: "https://github.com/jscraik/Agent-Skills/pull/194"
-    number: 194
-    state: merged
-    draft: false
+    url: "https://github.com/jscraik/Agent-Skills/pull/196"
+    number: 196
+    state: open
+    draft: true
     mergeable: MERGEABLE
-    checked_at: "2026-05-24T00:43:00Z"
-    outcome: merged_before_pu006
-    detail: "PR #194 merged into main at 31d1f4a91e40c5d3658593653336c3f4b13c17a8 before the fresh PU-006 worktree was created from origin/main."
+    checked_at: "2026-05-24T02:25:00Z"
+    outcome: blocked_missing_independent_review_and_subagent_triage_artifact
+    detail: "PR #196 checks pass at head 27a6051baa2773dc5d03ab4b3261f8de03a7be72, but the PR remains draft because independent GitHub review records are empty and the mandatory subagent triage artifact is missing."
 continuation_gate:
   native_status: active
   goal_active: pass
@@ -66,7 +66,7 @@ continuation_gate:
   queued_user_input: unknown
   pending_work: present
   auto_continue_allowed: "no"
-  blocked_by: "pending_hook_backed_commit_push_pr_creation_linear_update_and_post_push_triage_for_pu006_service_boundary"
+  blocked_by: "pr_196_missing_subagent_triage_artifact_and_independent_review_records"
 claims:
   - id: C001
     claim: "JSC-351 plan and spec are the canonical local sources for the governed implementation lane."

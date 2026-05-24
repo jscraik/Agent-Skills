@@ -660,5 +660,20 @@
     </table>
     <p>Governor disposition: PU-006 is locally validated and ready for hook-backed commit, push, PR creation, Linear update, and mandatory post-push PR/CI/review triage. No next implementation slice is approved until the delivery lane reaches a safe state.</p>
   </section>
+  <section class="entry validation">
+    <h2>PR #196 Post-Push Gate At Head 27a6051ba</h2>
+    <p>Runtime truth: PR #196 exists as the PU-006 draft delivery surface at <code>27a6051baa2773dc5d03ab4b3261f8de03a7be72</code>. The initial <code>pr-template</code> run failed because the PR body retained unchecked review items without explicit pending markers and contained the literal template phrase <code>pass/fail</code>. The body was corrected, then an empty delivery-state commit <code>27a6051ba</code> triggered a fresh synchronize event.</p>
+    <p>Check truth: <code>gh pr checks 196 --repo jscraik/Agent-Skills</code> passed on the fresh head. CircleCI, PR template, CodeRabbit status, CodeQL, Semgrep, Trivy, Snyk, docs, skill diagnostics, linear gate, lint, typecheck, test, audit, check, memory, and security-scan checks were green.</p>
+    <p>Review truth: GitHub inline review comments and submitted reviews are empty. The CodeRabbit status context says review completed, but no submitted GitHub review exists. The PR body still marks CodeRabbit/Codex independent review items as pending.</p>
+    <p>Subagent triage truth: three subagent attempts failed to produce the required artifact. The governor wrote <code>artifacts/reviews/jsc-351-pu006-triage-lane/post-push-27a6051-governor-fallback.md</code> so the live state is not lost, but this fallback is not a substitute for the required subagent-managed triage lane.</p>
+    <p>Governor disposition: keep PR #196 draft and do not start the next implementation slice until the missing subagent triage artifact is produced or explicitly waived, and independent review requirements are satisfied or explicitly waived.</p>
+  </section>
+  <section class="entry validation">
+    <h2>PR #196 Subagent Triage Misroute</h2>
+    <p>Runtime truth: an additional required triage attempt, <code>/root/pu006_live_triage_artifact</code>, completed but inspected the wrong checkout. It reported <code>/Users/jamiecraik/dev/agent-skills</code> on branch <code>codex/code-fixes-triage-delivery</code>, while the governed PU-006 worktree is <code>/private/tmp/agent-skills-jsc351-pu006</code> on <code>codex/jsc-351-skills-sdk-service-boundary</code>. It did not write <code>artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-27a6051.md</code>.</p>
+    <p>Failure classification: <code>poor task routing</code>, <code>weak observability</code>, and <code>stale-state execution risk</code>. The output looked like a triage result, but its worktree identity contradicted the required runtime surface.</p>
+    <p>Durable improvement: the goal board now records <code>blocked_subagent_triage_artifact_missing</code>, the PR #196 blocker note captures exact live PR/check/review truth, and future continuation must verify worktree identity and artifact existence before accepting subagent triage.</p>
+    <p>Governor disposition: no PU-007 implementation is approved. The only safe next actions are to obtain a valid subagent-managed triage artifact from the correct worktree, satisfy independent review requirements, or receive an explicit waiver that names the waived controls and residual risk.</p>
+  </section>
 </body>
 </html>
