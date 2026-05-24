@@ -65,7 +65,7 @@ The older T003 note says context7 doctor/proof remained blocked by runtime drift
 
 Evidence:
 
-- `docs/goals/jsc-329-skill-sdk-doctor-contract/notes/T003-doctor-contract-live-reconciliation.yaml` records `live_doctor.outcome: blocked_expected` and `live_proof.outcome: blocked`.
+- `Docs/goals/jsc-329-skill-sdk-doctor-contract/notes/T003-doctor-contract-live-reconciliation.yaml` records `live_doctor.outcome: blocked_expected` and `live_proof.outcome: blocked`.
 - `.harness/implementation-notes/2026-05-21-agent-skills-jsc-329-goal-kickoff.html` says the live context7 doctor still reports `blocked_runtime`.
 - Fresh live command evidence shows `skills proof context7` passes and `skills doctor context7` warns, not blocks.
 
@@ -77,7 +77,7 @@ This also preserves the original authority issue: if full implementation was req
 
 ### How To Implement
 
-1. Add a new current-state receipt under `docs/goals/jsc-329-skill-sdk-doctor-contract/receipts.jsonl` or a new note under `docs/goals/jsc-329-skill-sdk-doctor-contract/notes/`.
+1. Add a new current-state receipt under `Docs/goals/jsc-329-skill-sdk-doctor-contract/receipts.jsonl` or a new note under `Docs/goals/jsc-329-skill-sdk-doctor-contract/notes/`.
 2. Record the fresh live command outputs:
    - `ctx7 whoami` authenticated, redacted
    - `./bin/ask skills doctor context7 --json --robot`

@@ -12,8 +12,14 @@ metadata:
   review_cadence: quarterly
   last_reviewed: "2026-05-15"
   metadata_source: frontmatter
-  compatible_roles: "default, worker, skill-inspector"
-  runtime_needs: "repo-owned skill source path; ./bin/ask skills audit and eval wrappers; Python 3 standard library validators"
+  compatible_roles:
+    - default
+    - worker
+    - skill-inspector
+  runtime_needs:
+    - repo-owned skill source path
+    - ./bin/ask skills audit and eval wrappers
+    - Python 3 standard library validators
 ---
 
 # Skill Builder

@@ -164,8 +164,6 @@ FORJAMIE-*.md
 
 # Misc local throwaways
 /codex-scripts/
-/error.log
-/Untitled.base
 *.skill
 Docs/product/Archive.zip
 logs/

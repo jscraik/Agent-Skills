@@ -154,7 +154,7 @@ applicable` unless the user explicitly asks for the advisory lane.
   finding.
 - The canonical repo command creates a stable local `tile.json` wrapper
   around a copied `SKILL.md` before running Tessl lint. Report this as `Tessl
-  lint` and describe it as a stable `/tmp/ask-tessl-reviews/<skill-path>-<sha12>`
+  lint` and describe it as a stable `<tempdir>/ask-tessl-evals/<skill-path>-<sha12>`
   tile package-shape check that preserves `tile.json`, `tessl.json`, copied
   skill files, and included references for evidence.
 - Tessl review is the local best-practice/content reviewer for the skill copy.
