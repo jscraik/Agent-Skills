@@ -153,7 +153,7 @@ def main():
     skills_doctor_parser.add_argument("--strict", action="store_true", help="Run strict audit instead of the default compat audit")
     skills_doctor_parser.add_argument("--codex-parity", action="store_true", help="Require Codex-targeted runtime proof before reporting SDK conformance")
     skills_package_parser = skills_subparsers.add_parser("package", help="Report or verify package readiness for one skill", parents=[global_parser])
-    skills_package_parser.add_argument("target", nargs="?", help="Skill handle, repo-relative skill source path, or 'verify'")
+    skills_package_parser.add_argument("target", help="Skill handle, repo-relative skill source path, or 'verify'")
     skills_package_parser.add_argument("verify_target", nargs="?", help="Skill handle, source path, or package archive to verify when target is 'verify'")
     skills_package_parser.add_argument("--strict", action="store_true", help="Fail when package readiness metadata is incomplete")
     skills_package_parser.add_argument("--checkout-test", action="store_true", help="Run read-only local checkout evidence for the install gate")
@@ -570,9 +570,7 @@ def main():
             result = skills_commands.skills_doctor(repo_root, target=args.target, strict=args.strict, codex_parity=args.codex_parity)
         elif args.action == "package":
             verify_flags_present = any([args.expected_sha256, args.trusted_provenance, args.rollback_journal])
-            if not args.target:
-                result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: target")
-            elif args.target == "verify" and not args.verify_target:
+            if args.target == "verify" and not args.verify_target:
                 result = build_argument_error("skills", "package", raw_args, parser_error="the following arguments are required: verify_target")
             elif args.target != "verify" and (args.verify_target or verify_flags_present):
                 result = build_argument_error("skills", "package", raw_args, parser_error="unexpected verify-only arguments")
