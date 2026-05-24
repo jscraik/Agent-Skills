@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from unittest import mock
 
@@ -18,16 +19,6 @@ from ask.skill_review_dashboard import _parse_plugin_eval, render_skill_review_d
 
 
 def test_smoke_evals_use_codex_spark_and_fast_profile_without_reasoning_level(tmp_path: Path) -> None:
-    """
-    Verify that running smoke evals for a plugin selects the gpt-5.3-codex-spark model with the "fast" profile and omits reasoning flags.
-    
-    Asserts that:
-    - the constructed CLI includes `--model gpt-5.3-codex-spark`
-    - the constructed CLI includes `--profile fast` and the resulting `profile_contract` reflects the codex `fast` profile
-    - Tessl-related contract fields include a `tessl.json` project marker
-    - no `--reasoning` or `--reasoning-effort` flags are present
-    - the codex runner is passed the `--ignore-user-config` via `--codex-arg`
-    """
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
@@ -210,7 +201,7 @@ def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Pat
     assert "ask-tessl-evals" in tessl_eval["staged_source"]
     assert tessl_eval["staging_policy"] == "stable_tmp_evidence"
     assert tessl_eval["tessl_project_marker"].endswith("/tessl.json")
-    assert tessl_eval["policy"]["stable_staging_root"].startswith("/tmp/ask-tessl-evals")
+    assert tessl_eval["policy"]["stable_staging_root"].startswith(f"{tempfile.gettempdir()}/ask-tessl-evals")
     assert tessl_eval["policy"]["no_registry_upload"] is True
     assert tessl_eval["policy"]["network_permission_required_by_repo"] is False
 
@@ -220,21 +211,6 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
     skill_root = _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **kwargs: object) -> mock.Mock:
-        """
-        Validate a Tessl `eval run --json` invocation and the resulting staged project layout when used as a fake subprocess runner.
-        
-        This helper is intended for use as a mock replacement for subprocess.run in tests: when the command matches a Tessl eval invocation it asserts that the staged source is a temporary, relative directory containing the expected files and environment variables (including `TESSL_AUTO_UPDATE_INTERVAL_MINUTES == "0"`), and that sensitive files (e.g. `secret-not-staged.txt`) are not copied. For non-Tessl commands it is a no-op passthrough.
-        
-        Parameters:
-        	cmd (list[str]): The command and arguments passed to the subprocess runner; expected form begins with `... tessl eval run --json`.
-        	**kwargs: object: Keyword arguments forwarded to subprocess.run (notably `cwd` and `env`) used to validate staging and environment.
-        
-        Returns:
-        	mock.Mock: A mock representing a completed subprocess.run invocation.
-        
-        Raises:
-        	AssertionError: If the command matches the Tessl eval pattern but the staged project, files, or environment do not meet the expected conditions.
-        """
         if cmd[1:4] != ["eval", "run", "--json"]:
             return completed
 
