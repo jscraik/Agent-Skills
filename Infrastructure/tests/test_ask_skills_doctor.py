@@ -1,4 +1,5 @@
 import json
+import inspect
 import subprocess
 import sys
 import tempfile
@@ -18,6 +19,7 @@ from ask.commands.skills_impl import (  # noqa: E402
     skills_doctor,
     skills_proof,
 )
+from ask.skills_sdk import runtime_adapters  # noqa: E402
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
 from helpers.schema_validator import (  # noqa: E402
     SUPPORTED_SCHEMA_KEYS as _SUPPORTED_SCHEMA_KEYS,
@@ -203,6 +205,16 @@ def _assert_consumer_usable_schema_refs(test_case: unittest.TestCase, schemas: d
 
 
 class TestAskSkillsDoctor(unittest.TestCase):
+    def test_runtime_adapter_service_is_not_owned_by_command_module(self) -> None:
+        command_source = inspect.getsource(skills_proof)
+        service_source = inspect.getsource(runtime_adapters)
+
+        self.assertIn("build_command_handle_proof", command_source)
+        self.assertNotIn("def _link_payload", command_source)
+        self.assertNotIn("resolve_skill_handle(", service_source)
+        self.assertNotIn("check_command_handles(", service_source)
+        self.assertNotIn("from ask.commands", service_source)
+
     def test_runtime_target_codex_fails_closed_when_only_agents_runtime_is_ready(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             sandbox = Path(tmp)

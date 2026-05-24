@@ -644,5 +644,21 @@
     </table>
     <p>Governor disposition: commit and push this targeted review remediation to PR #194, reply to the Codex review thread with validation evidence, resolve only threads proven fixed, update Linear, then run a fresh post-push triage subagent artifact before approving any next implementation slice.</p>
   </section>
+  <section class="entry validation">
+    <h2>PU-006 Skills SDK Service Boundary Extraction</h2>
+    <p>Runtime truth: PR #194 merged before this slice began, and the fresh PU-006 worktree was created from <code>origin/main</code> on branch <code>codex/jsc-351-skills-sdk-service-boundary</code>. The slice does not continue stale PR #194 work; it is a new service-boundary extraction lane.</p>
+    <p>Implementation: stable doctor contract helpers, package contract/readiness helpers, YAML metadata fallback parsing, and command-handle proof logic moved out of <code>ask.commands.skills_impl</code> into <code>ask.skills_sdk</code> service modules. The command module remains the CLI facade and public command behavior is preserved. Boundary tests now enforce that <code>ask.skills_sdk</code> modules do not import <code>ask.commands</code> and that extracted helper definitions do not drift back into the command module.</p>
+    <p>Review stack: architecture and simplicity/unslopify artifacts were written by reviewers. Testing and language/docs reviewers returned mailbox-only output or instruction acknowledgements instead of artifact-first reports, so the governor recorded coordinator artifacts for those coverage gaps and accepted one testing finding: fallback branches for <code>agents/openai.yaml</code> metadata needed explicit coverage. That gap was fixed with tests for manual YAML fallback and malformed YAML fallback behavior.</p>
+    <p>Runtime discovery: <code>ask skills prove testing --json --robot</code> still reports <code>blocked_reachability</code> because the current user-runtime links are not ready. That is classified as pre-existing runtime projection readiness, not a service extraction regression; the slice validation relies on focused behavior tests, command smokes, and repo validation instead of claiming runtime reachability proof that the environment does not provide.</p>
+    <table>
+      <tr><th>Validation command</th><th>Outcome</th></tr>
+      <tr><td><code>python3 -m py_compile Infrastructure/scripts/lib/ask/commands/skills_impl.py Infrastructure/scripts/lib/ask/skills_sdk/contracts.py Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py Infrastructure/tests/test_skills_sdk_boundaries.py Infrastructure/tests/test_ask_skills_doctor.py Infrastructure/tests/test_ask_skills_package_contract.py</code></td><td>Pass.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv uv run --python 3.12 --with pytest --with pyyaml python -m pytest -q Infrastructure/tests/test_ask_skills_doctor.py Infrastructure/tests/test_ask_skills_package_contract.py Infrastructure/tests/test_ask_skills_package.py Infrastructure/tests/test_ask_skills_codex_preview.py Infrastructure/tests/test_command_surface_handles.py Infrastructure/tests/test_skills_sdk_boundaries.py</code></td><td>Pass: 99 tests and 26 subtests.</td></tr>
+      <tr><td><code>git diff --check HEAD</code></td><td>Pass.</td></tr>
+      <tr><td><code>bash scripts/validate-codestyle.sh</code></td><td>Pass: required failures 0, warn-only issues 0.</td></tr>
+      <tr><td><code>XDG_CACHE_HOME=/private/tmp/jsc351-uv-cache UV_CACHE_DIR=/private/tmp/jsc351-uv-cache/uv ./bin/ask repo validate --json --robot</code></td><td>Pass: required failures 0, warn-only issues 0; logs at <code>Infrastructure/artifacts/validation/20260524T010206Z</code>.</td></tr>
+    </table>
+    <p>Governor disposition: PU-006 is locally validated and ready for hook-backed commit, push, PR creation, Linear update, and mandatory post-push PR/CI/review triage. No next implementation slice is approved until the delivery lane reaches a safe state.</p>
+  </section>
 </body>
 </html>
