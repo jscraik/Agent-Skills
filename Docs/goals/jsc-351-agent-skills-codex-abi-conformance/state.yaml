@@ -44,21 +44,21 @@ checks:
   last_verification:
     command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     outcome: pass
-    checked_at: "2026-05-24T03:48:30Z"
+    checked_at: "2026-05-24T06:54:19Z"
   last_delivery_attempt:
-    command: "PU-008 transition-head post-push triage for PR #196"
-    outcome: latest_head_safe_metadata_commit_pending
-    checked_at: "2026-05-24T06:23:40Z"
-    detail: "PR #196 reached green remote checks at head 2295899be0a463f0aa28f97dbef5d448721afde7, including CodeRabbit and CircleCI. Governor and subagent triage artifacts for that exact head both report status pass with 25 addressed inline comments, 25 resolved-thread comments, 0 active comments, and no blockers. The governor removed a duplicate R049 receipt and is committing this metadata/artifact cleanup; progression still requires that metadata commit to be pushed and freshly triaged before PU-008 implementation resumes."
+    command: "PU-008 traceability correction local validation before commit/push"
+    outcome: validated_before_push
+    checked_at: "2026-05-24T06:54:19Z"
+    detail: "PU-008 refreshed live Linear truth and corrected plan/spec/traceability artifacts to distinguish unresolved project assignment from live cycleId 4a0b5dca-7936-482b-a46c-c55c33069f9d on JSC-351 through JSC-356. Artifact identity, Linear traceability, BLUF, generated-shape, goal-board, whitespace, codestyle, and repo validation gates passed locally. Progression remains blocked until this traceability commit is pushed and PR #196 receives fresh checks plus latest-head governor and subagent triage."
   last_pr_state:
     url: "https://github.com/jscraik/Agent-Skills/pull/196"
     number: 196
     state: open
     draft: true
     mergeable: MERGEABLE
-    checked_at: "2026-05-24T06:23:40Z"
-    outcome: pass_before_metadata_cleanup_push
-    detail: "PR #196 is open draft and mergeable at head 2295899be0a463f0aa28f97dbef5d448721afde7. Remote checks are green; latest-head triage reports 25 inline review comments, 25 addressed or resolved-thread comments, and 0 active comments. A metadata cleanup commit will create a new head and must be followed by fresh checks plus subagent triage before next implementation."
+    checked_at: "2026-05-24T06:42:09Z"
+    outcome: pass_before_pu008_traceability_commit
+    detail: "PR #196 was open draft and mergeable at head 9b2f95e1d1ce1035e5ddb24c1f242ccca0f38246 before local PU-008 traceability edits. Checks were green, CodeRabbit/CircleCI passed, and latest-head reports had 25 addressed inline comments, 25 resolved-thread comments, and 0 active comments. Any new commit must be pushed and freshly triaged before merge readiness is claimed."
 continuation_gate:
   native_status: active
   goal_active: pass
@@ -672,7 +672,7 @@ tasks:
       - "Implementation notes ledger .harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html"
     constraints:
       - "Keep local validation, tracker state, PR state, review-thread state, and merge readiness as separate truths."
-      - "Do not assign Linear project or cycle while the destination remains blocked by live evidence ambiguity."
+      - "Do not assign or change Linear project/cycle metadata while project destination and cycle authority remain unconfirmed."
       - "Do not undraft, merge, close the native goal, or claim final completion without a final Judge or PM audit receipt."
       - "Do not edit generated projections, plugin caches, user/global runtime config, or implementation code unless closeout validation proves a scoped defect."
       - "Post-push triage artifacts verify pushed heads; committing them creates a new head that requires fresh triage."
@@ -702,7 +702,7 @@ tasks:
       - "PR #196 head, checks, review state, or mergeability become stale or blocked."
       - "Acceptance traceability cannot connect a requirement to validation evidence."
       - "A closeout claim would require implementation testing, runtime validation, or external approval not yet available."
-    receipt_id: null
+    receipt_id: R052
   - id: T016
     type: pm
     assignee: PM

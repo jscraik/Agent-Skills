@@ -14,7 +14,7 @@ depth: deep
 ui: false
 traceability_required: true
 linear_mutation_status: already_linked
-linear_status: Triage
+linear_status: In Progress
 linear_issue: JSC-351
 linear_issue_url: https://linear.app/jscraik/issue/JSC-351/agent-skills-make-skills-sdk-prove-codex-abi-conformance
 linear_team: JSC
@@ -36,11 +36,11 @@ linear_labels:
 
 BLUF: This plan gives the implementing agent, developer, and reviewer a sequenced path for making agent-skills prove Codex ABI conformance before broader Skills SDK work expands. It matters because a false pass from .agents readiness would let the SDK claim runtime parity while Codex itself could still fail to load, render, invoke, or validate the same skill package. The immediate risk is trust-boundary drift, so the first work is runtime-targeted proof, doctor Codex parity, generated command-handle enforcement, and deterministic schema-backed failures.
 
-Decision Needed: Start with JSC-352 PU-001 and defer package schemas, preview commands, and service extraction until Codex-targeted proof can fail independently from .agents readiness.
+Decision Needed: Confirm the intended live Linear project for JSC-351 through JSC-356. The PU-008 refresh found live cycle assignment on the parent and child issues, so closeout must report cycle truth separately from unresolved project ownership.
 
 Top Risks: .agents readiness can mask absent Codex readiness; generated command handles can drift without blocking closeout; preview commands can overclaim parity without Codex source or fixture identity.
 
-Next Action: Implement PU-001, then validate with the focused doctor/proof tests before moving to repo doctor handle enforcement.
+Next Action: Complete PU-008 by refreshing Linear, PR, review-thread, and validation evidence, then report any remaining owner decisions without claiming unsupported final completion.
 
 ## Objective
 
@@ -75,7 +75,7 @@ The first implementation slice is JSC-352. It must close the false-success bound
 | The plan and associated spec are canonical local artifacts for JSC-351. | verified | Frontmatter paths and matching JSC-351 metadata in this plan and spec. | Low | Keep artifact identity and traceability validators green. |
 | Current ask parser lacks --runtime-target, --codex-parity, load-preview, render-preview, config explain, and conformance run. | verified from source inspection before plan creation | Infrastructure/bin/ask parser evidence captured in the spec. | Medium | Recheck source before implementing each command because parser state can drift. |
 | Doctor schema validation currently returns early when jsonschema is unavailable. | verified from source inspection before plan creation | Infrastructure/tests/test_ask_skills_doctor.py evidence captured in the spec. | High | PU-003 must make schema validation deterministic or explicitly blocked. |
-| Live Linear issues exist and project/cycle assignment is blocked by a trashed project signal. | verified in prior live mutation pass, drift-prone | Spec frontmatter and Linear Work Item Contract. | Medium | Recheck live Linear before closeout or assignment. |
+| Live Linear issues exist; current refresh shows JSC-351 through JSC-356 in the JSC team with cycleId `4a0b5dca-7936-482b-a46c-c55c33069f9d`; active project assignment remains unproven by this artifact. | verified live on 2026-05-24, drift-prone | Linear MCP get_issue for JSC-351 through JSC-356. | Medium | Report cycle assignment as runtime truth, keep project assignment unresolved, and avoid further tracker mutation without owner confirmation. |
 | Codex parity behavior can be modeled from source or fixtures. | assumption requiring implementation proof | Source and fixture identity are required but not yet selected. | High | PU-005 must choose and report the parity reference before claiming parity. |
 
 ## Scope and Boundaries
@@ -93,7 +93,7 @@ The first implementation slice is JSC-352. It must close the false-success bound
 
 - Editing .agents/** generated or runtime projection paths as a way to satisfy Codex runtime parity.
 - Editing Plugins/cache/**, global Codex config, user home config, or plugin runtime caches.
-- Assigning Linear project or cycle metadata while the current source evidence still marks that project state as blocked.
+- Assigning or changing Linear project/cycle metadata while project destination and cycle authority remain unconfirmed.
 - Building broad IR/emitter generation infrastructure before the Codex ABI command contracts and validators exist.
 - Treating documentation-only proof as implementation completion.
 
@@ -104,7 +104,7 @@ The first implementation slice is JSC-352. It must close the false-success bound
 | requested_depth | Deep implementation with governed slices, runtime truth, and deterministic validation. |
 | approved_execution_boundary | Implement the JSC-351 plan/spec in dependency order, starting with PU-001 / JSC-352, using only declared allowed paths per active slice. |
 | downscope_authority | The governor may narrow a slice to preserve safety, but may not recategorize required correctness as later scope without spec-owner approval. |
-| external_mutation_boundary | Linear, GitHub, CircleCI, CodeRabbit, package registries, user config, and runtime caches require explicit lane evidence and must not be used as speculative side effects. |
+| external_mutation_boundary | Linear, GitHub, CircleCI, CodeRabbit, package registries, user config, and runtime caches require explicit lane evidence and must not be used as speculative side effects. Live tracker state may be read for closeout truth, but project/cycle mutations remain blocked without owner confirmation. |
 | freshness_required | Repo state, plan/spec validator state, Linear state, parser/runtime behavior, PR state, and CI state must be refreshed before claims that depend on them. |
 | human_acceptance_boundary | Jamie or the delegated maintainer retains authority for project/cycle ambiguity, merge approval, public contract scope changes, and broad SDK architecture decisions. |
 
@@ -397,25 +397,25 @@ Source IDs: FR-011, NFR-004, NFR-005, NFR-007, SA-001, SA-009, SA-010.
 
 Objective: Keep Linear, spec, plan, PR, and validation truth aligned without inventing tracker readiness.
 
-Allowed path: .harness/plan/**, .harness/research/**, .harness/quality/steering-uptake.md, closeout docs generated by repo wrappers, PR description artifacts.
+Allowed path: .harness/plan/**, .harness/specs/**, .harness/research/**, .harness/quality/steering-uptake.md, .harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html, Docs/goals/jsc-351-agent-skills-codex-abi-conformance/**, artifacts/reviews/jsc-351-pu008-closeout/**, PR description artifacts.
 
-Forbidden path: Live Linear project or cycle assignment while blocked, external writes during plan execution, generated projection edits.
+Forbidden path: Live Linear project or cycle mutation without owner confirmation, unrelated implementation code, external writes outside declared delivery lanes, generated projection edits.
 
 Implementation steps:
 
 1. Verify the JSC-351 parent and child issue tree before claiming tracker readiness.
-2. Keep project/cycle assignment blocked until live Linear evidence confirms the intended active project and cycle.
+2. Report project and cycle state from live Linear separately: project assignment remains unresolved, while cycleId `4a0b5dca-7936-482b-a46c-c55c33069f9d` is already present and must not be mutated without owner confirmation.
 3. Run artifact validators for plan/spec identities and traceability before closeout.
 4. Record PR evidence by child issue and acceptance ID.
 5. Report local validation, tracker state, PR state, and remaining blockers as separate truths.
 
-Validation: python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md; python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md; python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md --json; python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md --kind plan --json.
+Validation: python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md; python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md; python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md --json; python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/plan/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-plan.md --kind plan --json; python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md --kind spec --json; python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance; git diff --check HEAD; bash scripts/validate-codestyle.sh; ./bin/ask repo validate --json --robot.
 
-Stop condition: Stop if live Linear state contradicts the spec's tracker tree or project/cycle blocker.
+Stop condition: Stop if live Linear state contradicts the JSC-351 through JSC-356 tracker tree, if project/cycle mutation would be required without owner confirmation, if PR/review/check truth is stale, or if acceptance traceability cannot connect requirement to validation evidence.
 
 Rollback: Revert traceability artifact edits and restore the previous plan artifact.
 
-Handoff: This unit hands implementation to JSC-352 PU-001 after validators pass.
+Handoff: This unit hands the goal to final Judge or PM closeout only after validators, live PR truth, review-thread truth, and tracker-state reporting pass without unresolved blockers.
 
 ## Dependencies and Sequencing
 
@@ -476,7 +476,7 @@ Handoff: This unit hands implementation to JSC-352 PU-001 after validators pass.
 | Preview commands overclaim parity against Codex. | High | Medium | PU-005 source or fixture identity in every result. |
 | Service extraction becomes a broad rewrite. | Medium | Medium | PU-006 after command stabilization only, with import boundary tests. |
 | Package verification mutates runtime state during validation. | High | Low | PU-007 staged fixture verification before install mutation. |
-| Linear project/cycle state is assigned from stale evidence. | Medium | Medium | PU-008 keeps assignment blocked until live evidence is active. |
+| Linear project/cycle state is assigned or changed from stale evidence. | Medium | Medium | PU-008 reads live tracker state, reports project and cycle truth separately, and keeps further mutation blocked until owner confirmation. |
 
 ## Observability and Evidence
 
@@ -495,7 +495,7 @@ Handoff: This unit hands implementation to JSC-352 PU-001 after validators pass.
 | Unit implementation | The unit's focused tests pass and at least one failing fixture proves the false-success class is blocked. | Prose summary or passing artifact validators. |
 | Command contract | Parser path, implementation path, JSON output, schema or snapshot, and robot-mode evidence exist. | Direct function tests alone. |
 | Runtime parity | Codex source or fixture identity is reported by the command output. | .agents readiness, projection success, or remembered Codex behavior. |
-| Tracker closeout | Live Linear state is rechecked and project/cycle blockers remain explicit. | Local plan/spec metadata alone. |
+| Tracker closeout | Live Linear state is rechecked, project assignment is reported separately from cycle assignment, and owner-decision blockers remain explicit. | Local plan/spec metadata alone. |
 | Blocked evidence | Blocked checks include blocker class, exact missing dependency or authority, next safe command, and owner. | Generic warning or skipped test. |
 
 ## Visual References / Diagrams
@@ -535,7 +535,7 @@ flowchart TD
 
 | Question | Owner | Impact | Handling |
 |---|---|---:|---|
-| Which live Linear project and cycle should own JSC-351 after the trashed-project signal is resolved? | Jamie or tracker owner | Medium | Keep project/cycle assignment blocked until confirmed. |
+| Which live Linear project should own JSC-351 after the trashed-project signal is resolved, and is the current cycleId `4a0b5dca-7936-482b-a46c-c55c33069f9d` intentional? | Jamie or tracker owner | Medium | Report current cycle truth and keep further project/cycle mutation blocked until confirmed. |
 | Should Codex parity preview fixtures pin to a Codex commit, bundled source snapshot, or local checkout source path? | Implementer with reviewer confirmation | High | PU-005 must choose one source identity model and report it in JSON. |
 | Should jsonschema become a required repo validation dependency or should schema validation use a repo-owned fallback? | Implementer with repo maintainer | Medium | PU-003 must classify and encode the chosen dependency contract. |
 

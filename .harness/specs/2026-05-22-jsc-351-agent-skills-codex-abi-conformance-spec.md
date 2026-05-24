@@ -17,10 +17,10 @@ linear_issue: JSC-351
 linear_issue_url: https://linear.app/jscraik/issue/JSC-351/agent-skills-make-skills-sdk-prove-codex-abi-conformance
 linear_team: JSC
 linear_workspace: Jscraik
-linear_status: Triage
+linear_status: In Progress
 linear_priority: 2
 linear_labels: [agent-skills, Governance, Agent-Native, Reliability, Developer Experience, Roadmap: Now, Feature]
-linear_action_required: "Project and cycle assignment remain blocked until Jamie confirms whether JSC-351 through JSC-356 should attach to the canonical agent-skills project despite the live trashed:true signal."
+linear_action_required: "Project assignment remains unresolved; live Linear now shows cycleId 4a0b5dca-7936-482b-a46c-c55c33069f9d on JSC-351 through JSC-356, so no further project or cycle mutation is allowed without owner confirmation."
 linear_parent_issue: JSC-351
 linear_child_issues:
   - JSC-352
@@ -40,9 +40,9 @@ source_artifacts:
 
 BLUF: This spec defines the behavior contract for making Agent Skills Kit prove Codex-native Skills SDK readiness through executable `ask` commands and live Linear-tracked work. It exists because the audit showed that doctor, package, proof, projection, and budget foundations are real, but success can still be reported without proving Codex loader, renderer, config, package, command-handle, and invocation truth. The decision is to treat Codex as the runtime ABI and make `ask` the conformance layer around that ABI, starting with false-success prevention before broader SDK generation or IR work. The main risk is that future agents will keep closing gaps as local warnings or planning slices unless schemas, parity previews, and validation gates make false readiness impossible. The next action is to implement JSC-352 first, then progress through JSC-353 to JSC-356 only as their dependency gates pass.
 
-Decision Needed: approve JSC-352 as the first implementation issue and confirm whether JSC-351 through JSC-356 should be assigned to the canonical `agent-skills` project despite the live `trashed:true` signal.
+Decision Needed: confirm the intended live Linear project for JSC-351 through JSC-356. Cycle assignment is no longer absent in runtime truth; live Linear reports cycleId `4a0b5dca-7936-482b-a46c-c55c33069f9d` on the parent and child issues, so closeout must preserve that fact instead of repeating the older blocked-cycle assumption.
 Top Risks: false-success readiness claims could recur; public JSON contracts could drift without schemas or snapshots; broad SDK generation could start before Codex runtime parity is executable.
-Next Action: begin JSC-352 with the focused validation gates in this spec, keeping project/cycle assignment blocked until Jamie confirms the live Linear destination.
+Next Action: complete PU-008 traceability by reporting local validation, live Linear state, PR state, review-thread state, and remaining owner decisions as separate truths.
 
 ## Purpose
 
@@ -82,8 +82,8 @@ Agent Skills Kit has the right direction for a Skills SDK, but the current execu
 |---|---|---|
 | Gap audit | Overall maturity `C-`, Codex ABI readiness `D+` | Start with trust-boundary fixes. |
 | Linear plan | One parent plus five sub-issues selected | Use JSC-351 through JSC-356 as live tracker scope. |
-| Live Linear mutation | JSC-351 through JSC-356 created | Issues exist, but no project assignment. |
-| Live project lookup | Canonical and duplicate `agent-skills` projects reported `trashed:true` | Project/cycle assignment remains blocked. |
+| Live Linear mutation | JSC-351 through JSC-356 created; 2026-05-24 refresh reports parent and child issues live with cycleId `4a0b5dca-7936-482b-a46c-c55c33069f9d` | Issues exist; cycle assignment is live tracker truth, not absent. |
+| Live project lookup | Canonical and duplicate `agent-skills` projects previously reported `trashed:true`; current issue refresh does not prove an active project assignment | Project assignment remains unresolved and must not be inferred from local artifacts. |
 | JSC-329 | Done | Existing doctor contract is a baseline, not the full ABI conformance endpoint. |
 | Current `ask` parser | `proof`, `doctor`, and `package` exist; `--runtime-target`, `--codex-parity`, `load-preview`, `render-preview`, `config explain`, and `conformance run` are absent from the current parser | Treat those commands as implementation targets and block acceptance until they exist and are validated. |
 | Doctor schema test | Current test returns early when `jsonschema` is unavailable | JSC-352 must make schema validation deterministic instead of dependency-optional. |
@@ -105,7 +105,8 @@ Agent Skills Kit has the right direction for a Skills SDK, but the current execu
 |---|---|---|
 | Canonical spec source | verified | This file is the canonical HE spec for JSC-351 through JSC-356. |
 | Live Linear issue existence | verified in the prior live mutation pass | Recheck live Linear state before implementation closeout because tracker state can drift. |
-| Project destination | unresolved | Do not assign project or cycle until Jamie confirms the intended destination. |
+| Project destination | unresolved | Do not assign or change project metadata until Jamie confirms the intended destination. |
+| Cycle destination | live but authority-unverified | Linear currently reports cycleId `4a0b5dca-7936-482b-a46c-c55c33069f9d` on JSC-351 through JSC-356; do not mutate cycle metadata further unless the tracker owner confirms it is intentional. |
 | Codex source behavior | evidence-backed but version-sensitive | Parity adapters must cite the checked Codex source or fixtures used by the implementation branch; do not rely on remembered behavior. |
 | Public JSON compatibility | required | Any public payload change needs a schema or compatibility snapshot before merge. |
 | Decision authority | Jamie / spec owner | Broad SDK architecture, project routing, and long-lived IR/emitter decisions require explicit acceptance outside this spec. |
@@ -118,11 +119,12 @@ Agent Skills Kit has the right direction for a Skills SDK, but the current execu
 | Linear parent issue | JSC-351 |
 | Parent URL | https://linear.app/jscraik/issue/JSC-351/agent-skills-make-skills-sdk-prove-codex-abi-conformance |
 | Team | JSC |
-| Status | Triage |
+| Status | In Progress |
 | Priority | High |
 | Mutation status | created |
-| Project status | unassigned because the canonical project reported `trashed:true` |
-| Required tracker behavior | Keep JSC-351 through JSC-356 aligned with this spec and do not assign project/cycle until Jamie confirms destination. |
+| Project status | unresolved; current issue refresh does not prove an active project assignment |
+| Cycle status | assigned in live Linear to cycleId `4a0b5dca-7936-482b-a46c-c55c33069f9d`; owner intent is not independently confirmed by this spec |
+| Required tracker behavior | Keep JSC-351 through JSC-356 aligned with this spec, preserve current cycle truth in reports, and do not assign or change project/cycle metadata until Jamie or the tracker owner confirms destination. |
 
 ## Linear Acceptance Traceability
 
@@ -134,13 +136,13 @@ Agent Skills Kit has the right direction for a Skills SDK, but the current execu
 | JSC-354 | SA-006 | Codex loader, renderer, config, and invocation parity previews. |
 | JSC-355 | SA-007 | Skills SDK service module extraction. |
 | JSC-356 | SA-008 | Conformance workouts, evidence stream, and package verify. |
-| JSC-351 through JSC-356 | SA-009 | Project/cycle assignment remains blocked until destination is confirmed. |
+| JSC-351 through JSC-356 | SA-009 | Project assignment remains unresolved; cycle assignment is live but authority-unverified, so closeout must report both facts separately. |
 
 ## Proposed Behavior
 
 Agent Skills Kit should expose a conformance path where `ask` proves whether a skill package is SDK-ready for Codex. The path must begin with existing doctor/proof/package surfaces and progressively add Codex-specific parity previews. A readiness claim is valid only when a command or validator proves the relevant runtime behavior, schema contract, compatibility snapshot, and conformance evidence.
 
-User-facing solution: Linear now tracks the work as JSC-351 through JSC-356. Implementation begins at JSC-352, then proceeds through schema compatibility, Codex parity previews, service extraction, and conformance evidence. Project assignment is intentionally paused until the live project-state ambiguity is resolved.
+User-facing solution: Linear tracks the work as JSC-351 through JSC-356. Implementation proceeds through schema compatibility, Codex parity previews, service extraction, conformance evidence, and PU-008 closeout control. Project assignment remains unresolved; cycle assignment already exists in live Linear and must be reported as runtime truth until the tracker owner confirms or changes it.
 
 Implementation sequencing rule: a later child issue may start discovery, but it must not claim completion until its upstream trust-boundary gates are green or explicitly blocked with evidence. JSC-352 is the minimum confidence gate for any later SDK expansion.
 
@@ -204,7 +206,7 @@ Implementation sequencing rule: a later child issue may start discovery, but it 
 essential_decisions:
 - Codex is the runtime ABI for SDK readiness.
 - JSC-352 is the first implementation issue.
-- Project assignment is blocked until the Linear project-state ambiguity is resolved.
+- Project assignment is blocked until the Linear project-state ambiguity is resolved; cycle assignment is already present in live Linear and must not be described as absent.
 - Public contract names and schema versions must not drift silently.
 
 fillable_gaps:
@@ -227,6 +229,7 @@ refusal_triggers:
 - A runtime readiness claim that can pass without Codex proof.
 - A broad IR/emitter implementation request before JSC-352 through JSC-354 gates are green.
 - A request to attach issues to a project while live Linear still reports ambiguous trashed state.
+- A request to change cycle metadata without owner confirmation, because the current cycle assignment exists but its intended authority is unverified by this spec.
 - A package trust decision without provenance and rollback policy.
 
 durable_memory:
@@ -302,7 +305,8 @@ Conformance evidence must be stored under a repo-owned path chosen during JSC-35
 | Generated command handles drift | Block repo doctor or classify accepted drift explicitly. |
 | Schema validation dependency missing | Treat contract validation as blocked, not skipped. |
 | Preview parity fixture missing | Block parity claim until fixture exists. |
-| Linear project reports `trashed:true` | Keep issues unprojected and ask for destination confirmation. |
+| Linear project reports `trashed:true` | Keep project assignment unresolved and ask for destination confirmation. |
+| Linear cycle assignment exists without source-of-truth confirmation | Report the cycle ID as live tracker truth, avoid further cycle mutation, and ask the tracker owner whether it is intentional. |
 | Codex source path unavailable | Mark parity evidence blocked and do not infer runtime behavior from projection policy. |
 | Public JSON snapshot mismatch | Block release or require an explicit compatibility migration decision. |
 | Evidence JSONL contains sensitive data | Quarantine the artifact, redact or regenerate it, and do not attach it to Linear. |
@@ -358,7 +362,7 @@ Current availability note: commands that this spec introduces are expected to be
 - SA-006: JSC-354 adds Codex loader, renderer, config, explicit invocation, and implicit invocation parity previews, each with fixture evidence that cites the Codex source or fixture identity used.
 - SA-007: JSC-355 extracts a narrow service module boundary without changing public JSON contracts, and boundary tests prevent command modules from owning SDK logic directly.
 - SA-008: JSC-356 emits replayable conformance evidence and adds package verification that rejects unsafe archives, symlink escapes, digest mismatches, and untrusted provenance.
-- SA-009: Project/cycle assignment remains absent until the Linear destination is confirmed; any later assignment is recorded on JSC-351 with the confirming evidence.
+- SA-009: Project assignment remains unresolved until the Linear destination is confirmed; cycle assignment exists in live Linear and must be reported separately until owner intent is confirmed.
 - SA-010: This spec passes HE artifact identity, Linear traceability, BLUF, and generated-artifact-shape validators before it is used for implementation closeout.
 - SA-011: JSC-352 adds doctor next-command precedence coverage so blocking Codex parity, generated-handle, or schema failures recommend the corrective command before generic advice.
 
