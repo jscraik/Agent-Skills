@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from ask.skills_sdk.contracts import runtime_failure_payload, skills_validation_command
 
 
 ResolveSkillHandle = Callable[..., dict[str, Any]]
 CheckCommandHandles = Callable[..., dict[str, Any]]
+SUPPORTED_RUNTIME_TARGETS = {"any", "codex", "agents"}
 
 
 def normalize_runtime_target(runtime_target: str) -> str:
@@ -42,8 +44,35 @@ def build_command_handle_proof(
 ) -> dict[str, Any]:
     """Build the runtime reachability proof for a generated skill command handle."""
     runtime_target = normalize_runtime_target(runtime_target)
+    normalized = handle.strip().lstrip("$") or handle
+    if runtime_target not in SUPPORTED_RUNTIME_TARGETS:
+        runtime_failure = invalid_runtime_target_failure(normalized, runtime_target)
+        return {
+            "schema_version": "command-handle-proof.v2",
+            "handle": normalized,
+            "runtime_target": runtime_target,
+            "status": "fail",
+            "validation_commands": runtime_failure["validation_commands"],
+            "gates": {
+                "runtime_target": False,
+            },
+            "gate_policy": {
+                "required": ["runtime_target"],
+                "runtime_target": runtime_target,
+                "required_semantics": runtime_failure["recovery_guidance"],
+                "supporting_runtime_diagnostics": [],
+            },
+            "available_runtimes": [],
+            "runtime_satisfied_by": None,
+            "resolution": None,
+            "command_handle_check": None,
+            "workspace_runtime": None,
+            "user_runtime_links": None,
+            "user_runtime_command_handles": None,
+            "runtime_failure": runtime_failure,
+        }
     resolution = resolve_skill_handle_fn(handle, repo_root_path=repo_root)
-    normalized = resolution.get("handle", handle.lstrip("$"))
+    normalized = str(resolution.get("handle", normalized))
     handle_check = check_command_handles_fn(repo_root_path=repo_root)
     workspace_handle = repo_root / str(resolution.get("command_handle_path", ""))
     user_codex_handle = home_path / ".codex" / "skills" / str(normalized) / "SKILL.md"
@@ -209,4 +238,3 @@ def build_command_handle_proof(
             "operator_action": operator_action,
         }
     return proof
-

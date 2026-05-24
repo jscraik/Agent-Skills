@@ -68,7 +68,9 @@ def normalized_list(value: Any) -> list[str]:
         return []
     if isinstance(value, str):
         return [value]
-    if isinstance(value, (list, tuple, set)):
+    if isinstance(value, set):
+        return sorted(str(item) for item in value if str(item).strip())
+    if isinstance(value, (list, tuple)):
         return [str(item) for item in value if str(item).strip()]
     return [str(value)]
 

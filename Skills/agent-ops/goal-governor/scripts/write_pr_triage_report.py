@@ -7,10 +7,10 @@ import argparse
 import json
 import subprocess
 import sys
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Callable, Sequence
 
 
 @dataclass(frozen=True)
@@ -30,8 +30,7 @@ def run_command(command: Sequence[str], cwd: Path) -> CommandResult:
         cwd=str(cwd),
         check=False,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
     )
     return CommandResult(
         command=tuple(command),
@@ -86,7 +85,7 @@ def collect_results(worktree: Path, repo: str, pr_number: str, runner: Runner) -
                 "--repo",
                 repo,
                 "--json",
-                "number,state,isDraft,mergeable,reviewDecision,headRefOid,headRefName,url,title",
+                "number,state,isDraft,mergeable,reviewDecision,headRefOid,headRefName,url,title,author",
             ),
             worktree,
         ),
@@ -132,6 +131,13 @@ def classify(
         facts["pr_draft"] = str(pr_view.get("isDraft"))
         facts["mergeable"] = str(pr_view.get("mergeable") or "unknown")
         facts["review_decision"] = str(pr_view.get("reviewDecision") or "")
+        author = pr_view.get("author")
+        author_login = ""
+        if isinstance(author, dict):
+            author_login = str(author.get("login") or "")
+        facts["pr_author"] = author_login or "unknown"
+        if not author_login:
+            blockers.append("pr_author_unreadable")
         if pr_head != expected_head:
             blockers.append(f"pr_head_mismatch: expected {expected_head}, got {pr_head or 'unknown'}")
 
@@ -141,15 +147,31 @@ def classify(
     if reviews is None:
         blockers.append("reviews_unreadable")
         facts["submitted_reviews"] = "unknown"
+        facts["independent_reviews"] = "unknown"
     else:
         facts["submitted_reviews"] = str(len(reviews))
-        if len(reviews) == 0:
-            blockers.append("independent_review_missing: submitted GitHub reviews returned []")
+        independent_reviews = [
+            review
+            for review in reviews
+            if isinstance(review, dict)
+            and isinstance(review.get("user"), dict)
+            and str(review["user"].get("login") or "")
+            and str(review["user"].get("login") or "") != facts.get("pr_author")
+        ]
+        facts["independent_reviews"] = str(len(independent_reviews))
+        if len(independent_reviews) == 0:
+            blockers.append(
+                "independent_review_missing: no submitted GitHub review by someone other than the PR author"
+            )
 
     if comments is None:
         facts["inline_comments"] = "unknown"
     else:
         facts["inline_comments"] = str(len(comments))
+        if comments:
+            blockers.append(
+                f"review_comments_present: {len(comments)} inline review comments require classification or remediation"
+            )
 
     return blockers, facts
 
@@ -197,7 +219,9 @@ def render_report(
         f"- draft: {facts.get('pr_draft', 'unknown')}",
         f"- mergeable: {facts.get('mergeable', 'unknown')}",
         f"- review decision: {facts.get('review_decision', '')}",
+        f"- PR author: {facts.get('pr_author', 'unknown')}",
         f"- submitted GitHub reviews: {facts.get('submitted_reviews', 'unknown')}",
+        f"- independent GitHub reviews: {facts.get('independent_reviews', 'unknown')}",
         f"- inline review comments: {facts.get('inline_comments', 'unknown')}",
         "",
         "## Blockers",
@@ -287,7 +311,10 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
         required=True,
         help="Artifact path relative to --worktree. The report always ends with a WROTE line for this path.",
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if not Path(args.worktree).is_absolute():
+        parser.error("--worktree must be an absolute path")
+    return args
 
 
 def main(argv: Sequence[str] | None = None) -> int:

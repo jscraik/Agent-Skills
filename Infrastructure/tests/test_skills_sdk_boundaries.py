@@ -17,8 +17,11 @@ def _imported_modules(path: Path) -> set[str]:
     for node in ast.walk(_module_ast(path)):
         if isinstance(node, ast.Import):
             modules.update(alias.name for alias in node.names)
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            modules.add(node.module)
+        elif isinstance(node, ast.ImportFrom):
+            if node.level:
+                modules.add("." * node.level + (node.module or ""))
+            if node.module:
+                modules.add(node.module)
     return modules
 
 
@@ -38,6 +41,17 @@ def test_skills_sdk_modules_do_not_import_command_layer() -> None:
         imported_modules = _imported_modules(module_path)
         assert "ask.commands" not in imported_modules
         assert not any(module.startswith("ask.commands.") for module in imported_modules)
+        assert not any(
+            module.startswith(".") and module.lstrip(".").startswith("commands")
+            for module in imported_modules
+        )
+
+
+def test_imported_modules_tracks_relative_import_boundaries(tmp_path: Path) -> None:
+    source = tmp_path / "module.py"
+    source.write_text("from ..commands import skills_impl\n", encoding="utf-8")
+
+    assert "..commands" in _imported_modules(source)
 
 
 def test_skills_impl_facades_extracted_sdk_helpers() -> None:

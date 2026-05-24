@@ -251,7 +251,9 @@ Use explicit Goal Governor vocabulary in every governed response:
   --head <expected-head-sha> --output <relative-artifact-path>.
   The report must prove worktree identity before PR-readiness claims and is
   allowed to write a blocked artifact when checks, review state, or head
-  identity are not safe.
+  identity are not safe. A safe PR triage report must prove that at least one
+  submitted review is from someone other than the PR author, and it must block
+  when inline review comments still require classification or remediation.
 
 ## Anti-Patterns
 

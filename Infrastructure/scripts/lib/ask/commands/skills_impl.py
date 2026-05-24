@@ -69,7 +69,6 @@ from ask.skills_sdk.contracts import (  # noqa: E402
 )
 from ask.skills_sdk.runtime_adapters import (  # noqa: E402
     build_command_handle_proof,
-    invalid_runtime_target_failure,
     normalize_runtime_target,
 )
 from ask.skills_sdk.package_contracts import (  # noqa: E402
@@ -1086,18 +1085,6 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
     result = CallResult()
     result.metadata["command"] = "skills proof"
     runtime_target = normalize_runtime_target(runtime_target)
-    if runtime_target not in {"any", "codex", "agents"}:
-        runtime_failure = invalid_runtime_target_failure(handle, runtime_target)
-        result.data["runtime_failure"] = runtime_failure
-        result.status = "error"
-        result.errors.append(
-            ErrorObject(
-                code="ERR_VALIDATION",
-                message=f"Invalid runtime target '{runtime_target}'.",
-                fix_suggestion=runtime_failure["recovery_guidance"],
-            )
-        )
-        return result
     proof = build_command_handle_proof(
         repo_root=repo_root,
         handle=handle,
@@ -1111,12 +1098,18 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
         result.data["runtime_failure"] = proof["runtime_failure"]
     result.data["proof"] = proof
     if proof["status"] != "pass":
+        failure = proof["runtime_failure"]
+        message = (
+            f"Invalid runtime target '{runtime_target}'."
+            if failure.get("failed_check_id") == "runtime_target"
+            else f"Command handle proof failed for '{normalized}'."
+        )
         result.status = "error"
         result.errors.append(
             ErrorObject(
                 code="ERR_VALIDATION",
-                message=f"Command handle proof failed for '{normalized}'.",
-                fix_suggestion=proof["runtime_failure"]["recovery_guidance"],
+                message=message,
+                fix_suggestion=failure["recovery_guidance"],
             )
         )
     return result

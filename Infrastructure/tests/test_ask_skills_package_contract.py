@@ -348,6 +348,38 @@ policy:
         self.assertIn("dependencies", contract["optional_fields"]["present"])
         self.assertIn("policy", contract["optional_fields"]["present"])
 
+    def test_skill_frontmatter_parser_preserves_nested_contract_lists(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_md = Path(temp_dir) / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: codex-package
+description: Codex package metadata fixture.
+dependencies:
+  required_skills:
+    - skill-builder
+  tools:
+    - browser
+policy:
+  permissions:
+    - network
+---
+
+# Codex Package
+""",
+                encoding="utf-8",
+            )
+
+            frontmatter = read_skill_frontmatter_fields(skill_md)
+
+        self.assertEqual(frontmatter["dependencies"]["required_skills"], ["skill-builder"])
+        self.assertEqual(frontmatter["dependencies"]["tools"], ["browser"])
+        self.assertEqual(frontmatter["policy"]["permissions"], ["network"])
+
+    def test_normalized_list_sorts_sets_without_reordering_lists(self) -> None:
+        self.assertEqual(package_contracts.normalized_list({"beta", "alpha"}), ["alpha", "beta"])
+        self.assertEqual(package_contracts.normalized_list(("beta", "alpha")), ["beta", "alpha"])
+
     def test_package_contract_manual_yaml_fallback_preserves_openai_fields(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)

@@ -44,21 +44,21 @@ checks:
   last_verification:
     command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-351-agent-skills-codex-abi-conformance"
     outcome: pass
-    checked_at: "2026-05-24T00:26:33Z"
+    checked_at: "2026-05-24T02:27:20Z"
   last_delivery_attempt:
-    command: "PU-006 PR #196 deterministic subagent triage runner"
-    outcome: blocked_independent_review_missing
-    checked_at: "2026-05-24T01:49:00Z"
-    detail: "The Goal Governor PR triage runner and a worker subagent wrote artifacts/reviews/jsc-351-pu006-triage-lane/subagent-runner-post-push-56b545ed.md for PR #196 at head 56b545ed3996aeeb12d1265fdcfea9b7217845b2. The report proves the intended worktree, branch, local head, PR head, green checks, draft state, and empty review/comment lists. Rooted projection freshness was restored through the repo-owned sync/projection path, and codestyle plus repo validation pass. Progression remains blocked only by independent_review_missing because submitted GitHub reviews returned []."
+    command: "PU-006 PR #196 review-comment remediation and deterministic triage runner hardening"
+    outcome: blocked_review_comments_present_until_remediation_pushed
+    checked_at: "2026-05-24T02:27:20Z"
+    detail: "The deterministic triage runner was hardened after CodeRabbit review. It now rejects relative worktrees, requires an independent submitted review by someone other than the PR author, and blocks when inline review comments require classification or remediation. Running it against PR #196 head a032eda8724d6ac1d47c18a7f75ea519746aab96 correctly produced artifacts/reviews/jsc-351-pu006-triage-lane/subagent-post-push-a032eda.md with status blocked because 9 inline review comments exist. Local remediation is validated but not yet committed or pushed."
   last_pr_state:
     url: "https://github.com/jscraik/Agent-Skills/pull/196"
     number: 196
     state: open
     draft: true
     mergeable: MERGEABLE
-    checked_at: "2026-05-24T02:25:00Z"
-    outcome: blocked_missing_independent_review_records
-    detail: "PR #196 checks pass at head 56b545ed3996aeeb12d1265fdcfea9b7217845b2 and the subagent-managed triage artifact exists, but the PR remains draft because independent GitHub review records are empty."
+    checked_at: "2026-05-24T02:27:20Z"
+    outcome: blocked_review_comments_present
+    detail: "PR #196 is open draft and mergeable at head a032eda8724d6ac1d47c18a7f75ea519746aab96 with one independent CodeRabbit review and 9 inline review comments. The live delivery lane remains blocked until the remediation commit is pushed, checks/reviews refresh, and a fresh subagent-managed triage artifact proves no unresolved review blocker."
 continuation_gate:
   native_status: active
   goal_active: pass
@@ -66,7 +66,7 @@ continuation_gate:
   queued_user_input: unknown
   pending_work: present
   auto_continue_allowed: "no"
-  blocked_by: "pr_196_missing_independent_review_records"
+  blocked_by: "pr_196_review_comments_present_until_remediation_pushed_and_retriaged"
 claims:
   - id: C001
     claim: "JSC-351 plan and spec are the canonical local sources for the governed implementation lane."

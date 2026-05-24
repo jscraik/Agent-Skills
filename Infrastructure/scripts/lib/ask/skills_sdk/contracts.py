@@ -156,7 +156,7 @@ def read_skill_frontmatter_fields(skill_md: Path) -> dict[str, Any]:
         indent = len(line) - len(line.lstrip(" "))
         if stripped.startswith("- "):
             item = parse_frontmatter_scalar(stripped[2:])
-            if current_map == "metadata" and current_list_key:
+            if current_map and current_list_key:
                 nested = fields.setdefault(current_map, {})
                 if isinstance(nested, dict):
                     values = nested.setdefault(current_list_key, [])

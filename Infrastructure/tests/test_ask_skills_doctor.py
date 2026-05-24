@@ -277,11 +277,17 @@ class TestAskSkillsDoctor(unittest.TestCase):
 
         self.assertEqual(result.status, "error")
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+        proof = result.data["proof"]
+        self.assertEqual(proof["schema_version"], "command-handle-proof.v2")
+        self.assertEqual(proof["status"], "fail")
+        self.assertEqual(proof["runtime_target"], "cloud")
+        self.assertEqual(proof["gate_policy"]["required"], ["runtime_target"])
         failure = result.data["runtime_failure"]
         self.assertEqual(failure["schema_version"], "skill-runtime-failure.v1")
         self.assertEqual(failure["error_code"], "ERR_VALIDATION")
         self.assertEqual(failure["failed_check_id"], "runtime_target")
         self.assertEqual(failure["path"], "runtime_target")
+        self.assertEqual(proof["runtime_failure"], failure)
         self.assertIn("--runtime-target any", failure["validation_commands"][0])
 
     def test_cli_runtime_target_rejects_invalid_value_with_runtime_failure_json(self) -> None:
@@ -305,8 +311,12 @@ class TestAskSkillsDoctor(unittest.TestCase):
 
         self.assertEqual(process.returncode, 2, process.stderr)
         payload = json.loads(process.stdout)
+        proof = payload["data"]["proof"]
         failure = payload["data"]["runtime_failure"]
         self.assertEqual(payload["status"], "error")
+        self.assertEqual(proof["schema_version"], "command-handle-proof.v2")
+        self.assertEqual(proof["status"], "fail")
+        self.assertEqual(proof["runtime_target"], "cloud")
         self.assertEqual(failure["schema_version"], "skill-runtime-failure.v1")
         self.assertEqual(failure["error_code"], "ERR_VALIDATION")
         self.assertEqual(failure["failed_check_id"], "runtime_target")

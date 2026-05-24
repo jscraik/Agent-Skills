@@ -24,16 +24,20 @@ def make_runner(
     *,
     worktree: Path,
     expected_head: str = "abc123",
-    pwd: str | None = None,
+    reported_pwd: str | None = None,
     checks_exit: int = 0,
     reviews: list[object] | None = None,
+    comments: list[object] | None = None,
     pr_head: str | None = None,
+    pr_author: str = "jamiecraik",
 ) -> write_pr_triage_report.Runner:
-    actual_pwd = str(worktree if pwd is None else pwd)
+    actual_pwd = str(worktree if reported_pwd is None else reported_pwd)
     actual_pr_head = pr_head or expected_head
     actual_reviews = [] if reviews is None else reviews
+    actual_comments = [] if comments is None else comments
 
     def runner(command: tuple[str, ...], cwd: Path) -> write_pr_triage_report.CommandResult:
+        assert cwd == worktree
         outputs = {
             ("pwd",): actual_pwd + "\n",
             ("git", "branch", "--show-current"): "codex/jsc-351-skills-sdk-service-boundary\n",
@@ -57,6 +61,7 @@ def make_runner(
                         "headRefName": "codex/jsc-351-skills-sdk-service-boundary",
                         "url": "https://github.com/jscraik/Agent-Skills/pull/196",
                         "title": "refactor(jsc-351): extract skills sdk service boundaries",
+                        "author": {"login": pr_author},
                     }
                 ),
                 "",
@@ -71,7 +76,7 @@ def make_runner(
         if command[-1].endswith("/reviews"):
             return write_pr_triage_report.CommandResult(command, 0, json.dumps(actual_reviews), "")
         if command[-1].endswith("/comments"):
-            return write_pr_triage_report.CommandResult(command, 0, "[]", "")
+            return write_pr_triage_report.CommandResult(command, 0, json.dumps(actual_comments), "")
         raise AssertionError(f"unexpected command: {command_text(command)}")
 
     return runner
@@ -109,7 +114,10 @@ def test_report_blocks_wrong_worktree_identity() -> None:
             pr_number="196",
             expected_head="abc123",
             output_path=Path("artifacts/reviews/triage.md"),
-            runner=make_runner(worktree=worktree, pwd="/Users/jamiecraik/dev/agent-skills"),
+            runner=make_runner(
+                worktree=worktree,
+                reported_pwd="/Users/jamiecraik/dev/agent-skills",
+            ),
             now=datetime(2026, 5, 24, tzinfo=UTC),
         )
 
@@ -128,7 +136,13 @@ def test_report_passes_when_worktree_head_checks_and_review_are_present() -> Non
             output_path=Path("artifacts/reviews/triage.md"),
             runner=make_runner(
                 worktree=worktree,
-                reviews=[{"id": 1, "state": "COMMENTED"}],
+                reviews=[
+                    {
+                        "id": 1,
+                        "state": "COMMENTED",
+                        "user": {"login": "coderabbitai[bot]"},
+                    }
+                ],
             ),
             now=datetime(2026, 5, 24, tzinfo=UTC),
         )
@@ -136,6 +150,67 @@ def test_report_passes_when_worktree_head_checks_and_review_are_present() -> Non
         assert "status: pass" in report
         assert "can progress under governed workflow: yes" in report
         assert "- none" in report
+        assert "independent GitHub reviews: 1" in report
+
+
+def test_report_blocks_when_only_self_review_is_present() -> None:
+    with TemporaryDirectory() as tmp:
+        worktree = Path(tmp).resolve()
+        report = write_pr_triage_report.write_report(
+            worktree=worktree,
+            repo="jscraik/Agent-Skills",
+            pr_number="196",
+            expected_head="abc123",
+            output_path=Path("artifacts/reviews/triage.md"),
+            runner=make_runner(
+                worktree=worktree,
+                reviews=[
+                    {
+                        "id": 1,
+                        "state": "COMMENTED",
+                        "user": {"login": "jamiecraik"},
+                    }
+                ],
+            ),
+            now=datetime(2026, 5, 24, tzinfo=UTC),
+        )
+
+        assert "status: blocked" in report
+        assert "independent_review_missing" in report
+        assert "independent GitHub reviews: 0" in report
+
+
+def test_report_blocks_when_inline_review_comments_need_triage() -> None:
+    with TemporaryDirectory() as tmp:
+        worktree = Path(tmp).resolve()
+        report = write_pr_triage_report.write_report(
+            worktree=worktree,
+            repo="jscraik/Agent-Skills",
+            pr_number="196",
+            expected_head="abc123",
+            output_path=Path("artifacts/reviews/triage.md"),
+            runner=make_runner(
+                worktree=worktree,
+                reviews=[
+                    {
+                        "id": 1,
+                        "state": "COMMENTED",
+                        "user": {"login": "coderabbitai[bot]"},
+                    }
+                ],
+                comments=[
+                    {
+                        "id": 12,
+                        "path": "Skills/agent-ops/goal-governor/scripts/write_pr_triage_report.py",
+                    }
+                ],
+            ),
+            now=datetime(2026, 5, 24, tzinfo=UTC),
+        )
+
+        assert "status: blocked" in report
+        assert "review_comments_present: 1 inline review comments" in report
+        assert "inline review comments: 1" in report
 
 
 def test_report_blocks_pr_head_mismatch() -> None:
@@ -164,7 +239,7 @@ def test_report_rejects_absolute_output_path() -> None:
                 repo="jscraik/Agent-Skills",
                 pr_number="196",
                 expected_head="abc123",
-                output_path=Path("/tmp/triage.md"),
+                output_path=worktree / "triage.md",
                 runner=make_runner(worktree=worktree),
                 now=datetime(2026, 5, 24, tzinfo=UTC),
             )
@@ -192,3 +267,25 @@ def test_report_rejects_output_path_escape() -> None:
             assert "inside" in str(exc)
         else:
             raise AssertionError("escaping output path was accepted")
+
+
+def test_parse_args_rejects_relative_worktree() -> None:
+    try:
+        write_pr_triage_report.parse_args(
+            [
+                "--worktree",
+                "relative/worktree",
+                "--repo",
+                "jscraik/Agent-Skills",
+                "--pr",
+                "196",
+                "--head",
+                "abc123",
+                "--output",
+                "artifacts/reviews/triage.md",
+            ]
+        )
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("relative worktree was accepted")

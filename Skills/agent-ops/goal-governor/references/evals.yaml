@@ -31,7 +31,7 @@ cases:
     deterministic_checks: *safe
     expected_route: "continue"
     acceptance:
-      - {type: regex, value: "(?is)read goal\.md and state\.yaml first|receipts\.jsonl"}
+      - {type: regex, value: '(?is)read goal\.md and state\.yaml first|receipts\.jsonl'}
       - {type: regex, value: "(?is)proceed with governed implementation|governed implementation"}
       - {type: not_regex, value: "(?is)PROMPT_REVIEW_ONLY.*do not start|not start yet"}
   - id: smoke-blocked-runtime-doctor
