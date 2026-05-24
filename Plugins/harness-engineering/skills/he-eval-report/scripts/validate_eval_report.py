@@ -28,11 +28,27 @@ TEMPLATE_PLACEHOLDER_RE = re.compile(r"\[[A-Z_ -]*REQUIRED[^\]]*\]|<(?:canonical
 
 
 def validate_unresolved_placeholders(text: str, errors: list[str]) -> None:
+    """
+    Detects unresolved template placeholders in the report text and records an error if any are found.
+    
+    Parameters:
+        text (str): Full markdown content of the report to scan.
+        errors (list[str]): Mutable list that will receive the error message "report contains unresolved required template placeholder" if a placeholder is detected.
+    """
     if TEMPLATE_PLACEHOLDER_RE.search(text):
         errors.append("report contains unresolved required template placeholder")
 
 
 def validate_not_run_pass_consistency(document: ReportDocument, warnings: list[str]) -> None:
+    """
+    Warns when a "Side-Effect Authorization" declares "Validator Decision: not-run" but the report indicates a passing status or a completing recommendation.
+    
+    If the "Side-Effect Authorization" section is present and its "Validator Decision:" field equals "not-run" (case-insensitive), appends NOT_RUN_PASS_WARNING to `warnings` when either the report's "Status:" field equals "pass" (case-insensitive) or the recommendation is "Complete" or "Complete with follow-up".
+    
+    Parameters:
+        document (ReportDocument): Parsed report document providing section and field lookup helpers.
+        warnings (list[str]): Mutable list of warning messages to which the function may append.
+    """
     if not document.section_present("Side-Effect Authorization"):
         return
     decision = document.field_value("Validator Decision:", section="Side-Effect Authorization")
@@ -48,6 +64,17 @@ def validate_not_run_pass_consistency(document: ReportDocument, warnings: list[s
 
 
 def validate(path: Path):
+    """
+    Validate an eval report Markdown file at the given filesystem path and collect validation issues.
+    
+    Performs a series of structural and content checks on the report (sections, fields, gate matrix, drift classifications, recommendation, consistency, side-effect authorization, and — unless the file is the template named "eval-report-template.md" — unresolved template placeholders and not-run/pass consistency). Returns any errors (fatal validation failures) and warnings (non-fatal issues) discovered.
+    
+    Parameters:
+        path (Path): Filesystem path to the eval report Markdown file to validate.
+    
+    Returns:
+        tuple[list[str], list[str]]: A pair (errors, warnings). `errors` is a list of validation error messages; `warnings` is a list of non-fatal warning messages.
+    """
     errors: list[str] = []
     warnings: list[str] = []
 

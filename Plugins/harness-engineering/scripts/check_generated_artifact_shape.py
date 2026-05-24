@@ -133,6 +133,17 @@ LENS_TERMS = ("coding_lens", "testing_lens")
 
 
 def strip_frontmatter(text: str) -> str:
+    """
+    Remove leading YAML frontmatter delimited by '---\\n' markers from the start of a markdown string.
+    
+    If the text begins with a YAML frontmatter block (starting with '---\\n' and containing a second '---\\n' delimiter), returns the text after that block; otherwise returns the original text.
+    
+    Parameters:
+        text (str): The input markdown text that may start with YAML frontmatter.
+    
+    Returns:
+        str: The input text with the leading YAML frontmatter removed when present, otherwise the original text.
+    """
     if text.startswith("---\n"):
         parts = text.split("---\n", 2)
         if len(parts) == 3:
@@ -165,6 +176,15 @@ def has_visual_decision(text: str) -> bool:
 
 
 def check_enforcement_contract(text: str) -> list[str]:
+    """
+    Validate the "Enforcement Contract" section of a markdown artifact for presence and required terms.
+    
+    Parameters:
+        text (str): Full markdown document to inspect.
+    
+    Returns:
+        list[str]: A list of error messages. Returns a single error "Enforcement Contract section is empty" if the section is missing or blank; otherwise returns one error per required enforcement term that is not present in the section (terms compared case-insensitively).
+    """
     errors: list[str] = []
     body = section_body(text, "Enforcement Contract")
     if not body.strip():
@@ -177,6 +197,20 @@ def check_enforcement_contract(text: str) -> list[str]:
 
 
 def check_required_terms(text: str, section: str, terms: tuple[str, ...], label: str) -> list[str]:
+    """
+    Validate that a named H2 section in the given markdown contains each required term and return descriptive errors for missing items.
+    
+    If the specified section is missing or empty, returns a single error indicating the section is empty. Otherwise returns one error message per term from `terms` that does not appear in the section body (search is case-insensitive); each message is prefixed using `label`.
+    
+    Parameters:
+        text (str): Full markdown document text to search.
+        section (str): Exact H2 section title to extract (e.g., "Authority and Scope Boundary").
+        terms (tuple[str, ...]): Required phrases to check for (matched case-insensitively).
+        label (str): Short label used in returned error messages for missing terms.
+    
+    Returns:
+        list[str]: Error messages describing the empty section or each missing required term.
+    """
     body = section_body(text, section)
     if not body.strip():
         return [f"{section} section is empty"]
@@ -185,6 +219,18 @@ def check_required_terms(text: str, section: str, terms: tuple[str, ...], label:
 
 
 def check_section_order(found: list[str], required: list[str]) -> list[str]:
+    """
+    Validate that each required section title appears in the list of found headings and that they appear in the specified order.
+    
+    Parameters:
+        found (list[str]): Headings discovered in the document, in occurrence order.
+        required (list[str]): Required section titles in the expected order.
+    
+    Returns:
+        list[str]: Error messages for violations. Each entry is either
+            "missing required section: <section>" when a required title is absent,
+            or "section out of order: <section>" when a required title appears before a previously matched required section.
+    """
     errors: list[str] = []
     cursor = -1
     for section in required:
@@ -200,6 +246,17 @@ def check_section_order(found: list[str], required: list[str]) -> list[str]:
 
 
 def validate_spec(text: str) -> list[str]:
+    """
+    Validate a spec markdown artifact for required sections, required terms, stable IDs, and other shape/contract rules.
+    
+    Performs checks on headings order, presence and required terms of enforcement/authority/runtime/lens sections, required narrative sections (Problem Statement, User / Operator Scenarios, Proposed Behavior), user-stories formatting and minimum count when requested, presence of stable requirement/acceptance IDs, conformance-rule triggers, forbidden pre-body harness sections, and presence of visual evidence (Mermaid/table/image or explicit "not needed" justification). Each detected rule violation is returned as a separate error message.
+    
+    Parameters:
+        text (str): The full markdown content of the spec to validate.
+    
+    Returns:
+        list[str]: A list of error message strings describing each violation; empty list if the spec passes all checks.
+    """
     errors = check_section_order(headings(text), SPEC_SECTIONS)
     errors.extend(check_enforcement_contract(text))
     errors.extend(check_required_terms(text, "Authority and Scope Boundary", AUTHORITY_TERMS, "Authority and Scope Boundary"))
@@ -245,6 +302,23 @@ def validate_spec(text: str) -> list[str]:
 
 
 def validate_plan(text: str) -> list[str]:
+    """
+    Validate a plan markdown document for required sections, terms, identifiers, and wiring.
+    
+    Performs a series of content checks on the provided plan text and returns any violations found. Checks include:
+    - Required H2 section ordering and presence.
+    - Presence and required terms within the "Enforcement Contract", "Authority and Scope Boundary", "Runtime Persistence and State", and "Coding and Testing Lenses" sections.
+    - "Work Units" section contains at least one stable PU-* ID and the required execution phrases: "allowed path", "forbidden path", "validation", "stop condition", "rollback", and "handoff".
+    - The document contains at least one source/acceptance mapping (FR-*, NFR-*, SA-*, or VAC-*).
+    - "Validation Gates" (when present) ties testing decisions to observable behavior, prior art, source requirement, or acceptance ID.
+    - Presence of a visual decision (Mermaid/table/image/"not needed") in the Visual References / Diagrams section.
+    
+    Parameters:
+        text (str): Markdown content of the plan to validate.
+    
+    Returns:
+        list[str]: A list of error messages describing each validation failure; empty if the plan passes all checks.
+    """
     errors = check_section_order(headings(text), PLAN_SECTIONS)
     errors.extend(check_enforcement_contract(text))
     errors.extend(check_required_terms(text, "Authority and Scope Boundary", AUTHORITY_TERMS, "Authority and Scope Boundary"))

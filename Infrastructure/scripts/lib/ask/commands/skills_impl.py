@@ -584,7 +584,31 @@ def _safe_tessl_skill_key(raw_name: str) -> str:
 
 
 def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root: Path) -> tuple[Path, dict[str, str]]:
-    """Create a stable Tessl evidence wrapper for a SKILL.md-first local skill."""
+    """
+    Create a stable local Tessl wrapper for a SKILL.md-based skill.
+    
+    This prepares a deterministic temporary "tile" package that copies the skill's SKILL.md
+    (and selected support directories) into a run-specific staging directory, writes a
+    tile.json manifest and a tessl.json marker, and returns the tile manifest path plus
+    metadata needed to run Tessl commands against the staged package.
+    
+    Parameters:
+        repo_root (Path): Repository root directory.
+        audit_target_path (str): Path (relative to repo_root) pointing at the skill directory
+            or a SKILL.md file to be wrapped.
+        temp_root (Path): Directory under which a per-run staging root will be created.
+    
+    Returns:
+        tuple[Path, dict[str, str]]: A tuple where the first element is the Path to the
+        generated tile.json manifest, and the second element is a metadata mapping with:
+            - tile_path: str path to the generated tile.json
+            - tessl_project_marker: str path to the generated tessl.json marker
+            - staging_root: str path to the per-run staging directory
+            - review_path: str path to the staged skill directory containing SKILL.md
+            - skill_key: stable safe key used for the staged skill name
+            - source_skill: the provided audit_target_path (repo-relative)
+            - evidence_retention: textual hint describing retention of the staging root
+    """
     source_skill_dir = repo_root / audit_target_path
     source_skill = source_skill_dir / "SKILL.md"
     fields = _read_skill_frontmatter_fields(source_skill)
@@ -630,12 +654,36 @@ def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, temp_root
 
 
 def _stable_tessl_review_root(audit_target_path: str) -> Path:
+    """
+    Constructs a deterministic temporary directory path used to stage Tessl reviews for a given audit target.
+    
+    Parameters:
+        audit_target_path (str): The audit target path (typically a repo-relative or absolute string) used to derive a stable directory name.
+    
+    Returns:
+        Path: A stable Path under the system temporary directory (TMPDIR) in ask-tessl-reviews, combining a filesystem-safe name and a 12-character SHA256 digest of the input.
+    """
     safe_name = audit_target_path.replace("/", "__").replace(" ", "_")
     digest = hashlib.sha256(audit_target_path.encode("utf-8")).hexdigest()[:12]
     return Path(tempfile.gettempdir()) / "ask-tessl-reviews" / f"{safe_name}-{digest}"
 
 
 def _parse_tessl_review_output(stdout: str, status: str = "") -> dict[str, Any]:
+    """
+    Parse Tessl command output and extract a structured review score payload.
+    
+    Parameters:
+        stdout (str): Full stdout from a Tessl invocation (may contain JSON or human-readable text).
+        status (str): Optional status string to include when JSON contains a score (defaults to "reported" when supplied).
+    
+    Returns:
+        dict[str, Any]: A normalized review payload with keys:
+            - review_score: numeric score if found, otherwise None or value extracted from human parse.
+            - minimum_score: configured minimum acceptable score (TESSL_REVIEW_MIN_SCORE).
+            - score_acceptable: `True` if `review_score` is a number >= `minimum_score`, `False` otherwise.
+            - status: provided `status` or a fallback ("reported" for JSON-based parse or value from human parse).
+            - raw: parsed JSON object when JSON was present, or the human-parse payload.
+    """
     json_start = stdout.find("{")
     if json_start >= 0:
         try:
@@ -2072,6 +2120,20 @@ def _skill_profile_workspace_roots(repo_root: Path) -> dict[str, Any]:
 
 
 def _profiles_with_effective_roots(profiles: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """
+    Enriches operation profile definitions with computed effective roots and profile-specific contract metadata.
+    
+    Parameters:
+        profiles (dict[str, dict]): Mapping of profile names to their declaration dictionaries; each profile may include keys such as
+            `allowed_roots` and `stop_conditions`.
+    
+    Returns:
+        dict[str, dict]: A new mapping where each profile value is the original profile merged with:
+            - `effective_roots`: list of allowed roots (copied from `allowed_roots`).
+            - `stop_condition_definitions`: optional mapping of stop condition ids to their taxonomy entries when stop conditions are known.
+            - For the "eval" profile: `eval_blocker_classes` and `eval_profile_contract` providing eval-specific blocker references and staging/config hints.
+            - For the "package-review" profile: `external_review_contract` containing plugin-eval / Tessl thresholds, args, staging hints, and evidence retention notes.
+    """
     enriched: dict[str, dict[str, Any]] = {}
     for name, profile in profiles.items():
         stop_conditions = list(profile.get("stop_conditions", []))
@@ -2458,7 +2520,26 @@ def _skill_doctor_next_command_decision(
     audit_target: str | None,
     strict: bool,
 ) -> dict[str, str | None]:
-    """Select the most actionable follow-up command from classified doctor evidence."""
+    """
+    Choose the most actionable next validation command based on doctor-generated blockers, warnings, and checks.
+    
+    Parameters:
+        blockers (list[dict[str, str]]): List of blocker objects; each should include a "class" key identifying the blocker category.
+        warnings (list[dict[str, str]]): List of warning objects; each should include a "class" key identifying the warning category.
+        checks (dict[str, Any]): Map of performed checks to their results; expected keys include "structural_audit" and "runtime_reachability" with optional "command" entries.
+        normalized_handle (Any): Normalized command handle when available; used to form follow-up commands targeting the capability.
+        query (str): Original user query or handle text used when no normalized handle exists.
+        audit_target (str | None): Repo-relative audit target path used to construct audit commands when needed.
+        strict (bool): When True, avoid recommending strict-audit follow-ups for warnings.
+    
+    Returns:
+        dict[str, str | None]: Decision object with keys:
+            - "command": shell command (string) or None.
+            - "precedence": one of "blocker", "warning", or "default".
+            - "source_class": originating blocker/warning class or None.
+            - "source_check": originating check name (e.g., "structural_audit") or None.
+            - "reason": short human-readable rationale for the recommendation.
+    """
     blocker_classes = [blocker.get("class") for blocker in blockers]
     if "blocked_validation" in blocker_classes:
         command = checks.get("structural_audit", {}).get("command")
@@ -2567,6 +2648,16 @@ def _skill_doctor_next_command_decision(
 
 
 def skills_load_preview(repo_root: Path) -> CallResult:
+    """
+    Produce a CallResult containing a codex load-preview payload for the given repository.
+    
+    Parameters:
+        repo_root (Path): Path to the repository root used to build the preview.
+    
+    Returns:
+        CallResult: A result whose metadata includes the command "skills load-preview" and whose
+        data contains a `codex_load_preview` entry with the generated preview payload.
+    """
     result = CallResult()
     result.metadata["command"] = "skills load-preview"
     result.data["codex_load_preview"] = build_codex_load_preview(repo_root)
@@ -2605,7 +2696,15 @@ CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS: tuple[str, ...] = (
 
 
 def _codex_skill_package_abi_source() -> dict[str, Any]:
-    """Return repo-neutral provenance for the Codex SkillMetadata ABI shape."""
+    """
+    Provide repository-neutral provenance for the Codex SkillMetadata ABI.
+    
+    Returns:
+        dict: A provenance mapping with keys:
+            - `path`: canonical source path for the ABI definition.
+            - `struct`: ABI struct name (`"SkillMetadata"`).
+            - `evidence_fields`: list of evidence field names required by the ABI.
+    """
     return {
         "path": CODEX_SKILL_PACKAGE_ABI_SOURCE_PATH,
         "struct": "SkillMetadata",
@@ -2614,6 +2713,16 @@ def _codex_skill_package_abi_source() -> dict[str, Any]:
 
 
 def skills_load_preview(repo_root: Path) -> CallResult:
+    """
+    Produce a CallResult containing a codex load-preview payload for the given repository.
+    
+    Parameters:
+        repo_root (Path): Path to the repository root used to build the preview.
+    
+    Returns:
+        CallResult: A result whose metadata includes the command "skills load-preview" and whose
+        data contains a `codex_load_preview` entry with the generated preview payload.
+    """
     result = CallResult()
     result.metadata["command"] = "skills load-preview"
     result.data["codex_load_preview"] = build_codex_load_preview(repo_root)
@@ -2642,6 +2751,17 @@ def skills_inject_preview(repo_root: Path, text: str) -> CallResult:
 
 
 def skills_implicit_preview(repo_root: Path, command: str, workdir: str | None = None) -> CallResult:
+    """
+    Create an implicit codex preview for a given command and return it wrapped in a CallResult.
+    
+    Parameters:
+    	repo_root (Path): Repository root used to resolve workspace context.
+    	command (str): The command text to build an implicit preview for.
+    	workdir (str | None): Optional working directory to use when generating the preview; when None, the repo root context is used.
+    
+    Returns:
+    	CallResult: A result whose metadata includes "command" set to "skills implicit-preview" and whose data["codex_implicit_preview"] contains the generated implicit preview payload.
+    """
     result = CallResult()
     result.metadata["command"] = "skills implicit-preview"
     result.data["codex_implicit_preview"] = build_codex_implicit_preview(repo_root, command, workdir)
@@ -2649,6 +2769,16 @@ def skills_implicit_preview(repo_root: Path, command: str, workdir: str | None =
 
 
 def skills_render_preview(repo_root: Path, context_window: int | None = None) -> CallResult:
+    """
+    Create a CallResult containing a Codex-rendered preview of skills for the repository.
+    
+    Parameters:
+    	repo_root (Path): Path to the repository root used to discover/render skills.
+    	context_window (int | None): Optional context window size passed to the renderer; when None the renderer's default is used.
+    
+    Returns:
+    	CallResult: Result with `data["codex_render_preview"]` set to the payload returned by build_codex_render_preview(repo_root, context_window).
+    """
     result = CallResult()
     result.metadata["command"] = "skills render-preview"
     result.data["codex_render_preview"] = build_codex_render_preview(repo_root, context_window)
@@ -2656,6 +2786,15 @@ def skills_render_preview(repo_root: Path, context_window: int | None = None) ->
 
 
 def skills_config_explain(repo_root: Path) -> CallResult:
+    """
+    Produce a codex configuration explanation for the repository.
+    
+    Parameters:
+        repo_root (Path): Path to the repository root to inspect.
+    
+    Returns:
+        CallResult: Result whose `data["codex_config_explain"]` contains a dict with the codex configuration explanation for the given repository.
+    """
     result = CallResult()
     result.metadata["command"] = "skills config explain"
     result.data["codex_config_explain"] = build_codex_config_explain(repo_root)
@@ -2663,6 +2802,16 @@ def skills_config_explain(repo_root: Path) -> CallResult:
 
 
 def skills_inject_preview(repo_root: Path, text: str) -> CallResult:
+    """
+    Construct a codex inject-preview payload for the repository and package it into a CallResult.
+    
+    Parameters:
+    	repo_root (Path): Repository root directory used to resolve repository context.
+    	text (str): Input text to generate the inject-preview content from.
+    
+    Returns:
+    	CallResult: Result with metadata["command"] set to "skills inject-preview" and data["codex_inject_preview"] containing the payload produced by build_codex_inject_preview(repo_root, text).
+    """
     result = CallResult()
     result.metadata["command"] = "skills inject-preview"
     result.data["codex_inject_preview"] = build_codex_inject_preview(repo_root, text)
@@ -2670,6 +2819,17 @@ def skills_inject_preview(repo_root: Path, text: str) -> CallResult:
 
 
 def skills_implicit_preview(repo_root: Path, command: str, workdir: str | None = None) -> CallResult:
+    """
+    Create an implicit codex preview for a given command and return it wrapped in a CallResult.
+    
+    Parameters:
+    	repo_root (Path): Repository root used to resolve workspace context.
+    	command (str): The command text to build an implicit preview for.
+    	workdir (str | None): Optional working directory to use when generating the preview; when None, the repo root context is used.
+    
+    Returns:
+    	CallResult: A result whose metadata includes "command" set to "skills implicit-preview" and whose data["codex_implicit_preview"] contains the generated implicit preview payload.
+    """
     result = CallResult()
     result.metadata["command"] = "skills implicit-preview"
     result.data["codex_implicit_preview"] = build_codex_implicit_preview(repo_root, command, workdir)
@@ -2677,7 +2837,18 @@ def skills_implicit_preview(repo_root: Path, command: str, workdir: str | None =
 
 
 def _skill_package_operation_context() -> dict[str, Any]:
-    """Return profile and event routing context for package readiness checks."""
+    """
+    Provide operation profiles, event routing, and validation commands used for package readiness checks.
+    
+    Returns:
+        context (dict): A mapping with keys:
+            - "primary_profile": primary profile name for the operation.
+            - "promotion_profile": profile name used for post-review promotion.
+            - "profiles": dict of profile-name → subset of profile metadata containing
+              "intent", "write_policy", and "required_evidence".
+            - "events": mapping of lifecycle event names to their consumer definitions.
+            - "validation_commands": list of validation command strings to run for this context.
+    """
     return {
         "primary_profile": "package-review",
         "promotion_profile": "plugin-share",
@@ -3998,12 +4169,46 @@ def external_review_skill(
     dashboard: bool = False,
     dashboard_path: Optional[str] = None,
 ) -> CallResult:
-    """Run the local-only second-review lane for one skill.
-
-    This command intentionally never publishes or registers a skill. Tessl is
-    used only as an installed local CLI, never through npx. Tessl describes
-    ``skill review`` as a local terminal review for private and work-in-progress
-    skills, so it is part of the default second-review lane.
+    """
+    Run a local-only second-review for a skill, aggregating audit, plugin-eval, Tessl lint/review, and optional Snyk results without publishing or invoking npx.
+    
+    Performs an internal-quality review of the skill at `skill_path` relative to `repo_root`. The command enforces a local-first policy (never publishes or uploads), runs the repository diagnostic audit, optionally runs plugin-eval (static ergonomics/budget checks), stages a stable temporary Tessl tile wrapper to run Tessl lint and an optional Tessl review threshold check, and optionally runs Snyk dependency scans. Produces an aggregated result payload and may write a JSON report and an HTML dashboard to repository paths when requested.
+    
+    Parameters:
+        repo_root (Path): Repository root used to resolve and validate skill and output paths.
+        skill_path (str): Repository-relative path to the skill directory or to SKILL.md; must resolve inside repo and contain SKILL.md.
+        audit_level (str): Audit strictness; `"strict"` runs the full strict audit flow, other values use compat/less-strict checks.
+        skip_plugin_eval (bool): If True, skip running the external plugin-eval analysis.
+        skip_tessl (bool): If True, skip both Tessl lint and Tessl review steps.
+        skip_tessl_review (bool): If True, run Tessl lint but skip the Tessl review step (useful when tessl is available but review is undesired).
+        include_snyk (bool): If True, run Snyk CLI dependency/advisory checks (opt-in; may require authentication).
+        timeout_seconds (int): Per-tool invocation timeout in seconds (applies to external tool subprocess calls).
+        report_path (Optional[str]): If provided, repository-relative path where a JSON summary report will be written.
+        dashboard (bool): If True, render an HTML dashboard from the generated JSON report and save it into the repo (writes a default report if no report_path provided).
+        dashboard_path (Optional[str]): If provided, repository-relative path for the rendered HTML dashboard.
+    
+    Returns:
+        CallResult: Aggregated review result. The returned object contains:
+          - status: overall status ("success" or "error") reflecting failing gates or runtime/tool failures.
+          - data: a dict with keys such as:
+              - "policy": review lane policy metadata,
+              - "review_mode_details": commands/roles for subtools,
+              - "target": normalized audit target path (repo-relative),
+              - "validation_commands": canonical validation invocation for reproducing the lane,
+              - "ask_audit": audit run payload (status/data/errors),
+              - "plugin_eval": plugin-eval subprocess payload and parsed summary (or skipped/blocked),
+              - "tessl_tile": information about the staged tile wrapper (when tessl used),
+              - "tessl_lint": tessl lint subprocess payload (or skipped/blocked),
+              - "tessl_review": tessl review payload and parsed summary (or skipped/blocked),
+              - "snyk": snyk subprocess payload and derived status (or skipped/blocked),
+              - "report_path": repository-relative JSON report path when written,
+              - "dashboard_path" / "dashboard_url": repository-relative rendered dashboard when produced.
+          - errors: list of ErrorObject entries for dependency, validation, or runtime failures.
+    
+    Side effects:
+        - May write a JSON report and an HTML dashboard to the repository when requested.
+        - May create a stable temporary Tessl wrapper under the system temp directory for linting/review evidence.
+    
     """
     result = CallResult()
     result.status = "success"

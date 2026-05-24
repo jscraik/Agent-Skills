@@ -75,11 +75,28 @@ def _is_governed_system_skill_surface(path: str) -> bool:
 
 
 def _matches_plugin_subpath(path: str, subpath: str) -> bool:
+    """
+    Determine whether a path identifies a Plugins entry whose third path component equals the given subpath.
+    
+    Parameters:
+        path (str): Repository-relative path string (should be normalized to POSIX form).
+        subpath (str): Expected value of the third path component.
+    
+    Returns:
+        bool: `True` if the path has at least three components, the first component is "Plugins", and the third component equals `subpath`, `False` otherwise.
+    """
     parts = _path_parts(path)
     return len(parts) >= 3 and parts[0] == "Plugins" and parts[2] == subpath
 
 
 def _is_root_front_door_doc(path: str) -> bool:
+    """
+    Determine whether a path is a top-level "front door" documentation filename.
+    
+    Returns:
+        True if `path` contains no directory separators and exactly matches one of the recognized
+        front-door documentation filenames (e.g., README.md, SECURITY.md), False otherwise.
+    """
     if "/" in path:
         return False
     names = {
@@ -101,6 +118,15 @@ def _is_root_front_door_doc(path: str) -> bool:
 
 
 def _is_root_config(path: str) -> bool:
+    """
+    Determine whether a path refers to a recognized top-level repository configuration or manifest filename.
+    
+    Parameters:
+        path (str): A single path segment (no directory separators) to test.
+    
+    Returns:
+        True if the given filename is one of the repository's known root-level config/manifest names, False otherwise.
+    """
     if "/" in path:
         return False
     names = {

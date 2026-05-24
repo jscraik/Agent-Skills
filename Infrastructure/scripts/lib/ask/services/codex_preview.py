@@ -203,7 +203,27 @@ def _repo_relative_path(repo_root: Path, path: Path) -> str | None:
 
 
 def _codex_runtime_source_identity(repo_root: Path) -> dict[str, Any]:
-    """Return source identity for the local Codex core-skills model used by previews."""
+    """
+    Assembles identity metadata describing the local Codex core-skills source used for previews.
+    
+    Parameters:
+        repo_root (Path): The repository root used to locate a sibling `../codex` directory.
+    
+    Returns:
+        dict: A structured identity record containing at least the following keys:
+            - `schema_version` (str): Fixed schema identifier.
+            - `source_repo` (str): Modeled remote repository identifier.
+            - `source_files` (list[str]): Files considered relevant for previews.
+            - `modeled_rule_version` (str): Modeled rule version.
+            - `status` (str): One of status indicators such as `"identified"`, `"blocked_missing_codex_repo"`, or `"blocked_git_error"`.
+            - `revision` (str | None): Git revision SHA when identified, otherwise `None`.
+            - `relevant_source_dirty` (bool | None): `True` if relevant files are dirty, `False` if clean, or `None` when unknown.
+            - `unavailable_reason` (str | None): Human-readable reason when the source is unavailable or blocked.
+            - Optional diagnostic keys when present (e.g., `dirty_files`, `stderr`).
+    
+    Raises:
+        RuntimeError: If the `git` executable cannot be found on PATH.
+    """
     git_path = shutil.which("git")
     if git_path is None:
         raise RuntimeError("git not found: blocked")

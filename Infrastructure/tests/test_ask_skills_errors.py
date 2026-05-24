@@ -683,6 +683,14 @@ class TestAskSkillsErrors(unittest.TestCase):
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")
     def test_external_review_can_skip_tessl_review(self, mock_which, mock_audit):
+        """
+        Verify that external_review_skill skips the tessl review when skip_tessl_review is True.
+        
+        Sets up a minimal skill directory, fakes plugin binaries and a successful audit, and asserts:
+        - overall result status is "success"
+        - the tessl_review entry in result.data is marked as "skipped"
+        - only the expected subprocess calls (plugin-eval and tessl lint) are made (call count == 2)
+        """
         skill_dir = "Skills/backend-platform/example-skill"
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)

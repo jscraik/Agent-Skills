@@ -21,11 +21,29 @@ REQUIRED_TERMS = (
 
 
 def skill_files(root: Path) -> list[Path]:
+    """
+    Finds SKILL.md entrypoint files under the plugin's skills directory.
+    
+    Parameters:
+        root (Path): Path to the plugin repository root; the function looks for files under root / "skills".
+    
+    Returns:
+        list[Path]: Sorted list of matching SKILL.md file paths (one per immediate subdirectory of skills).
+    """
     skills_root = root / "skills"
     return sorted(skills_root.glob("*/SKILL.md"))
 
 
 def validate(root: Path) -> list[str]:
+    """
+    Validate SKILL.md files under a plugin root for required stage-arc and persona-lens terms.
+    
+    Parameters:
+        root (Path): Path to the plugin repository root; the function looks for skill entrypoints under the "skills" subdirectory.
+    
+    Returns:
+        list[str]: A list of error messages. Returns an empty list when all SKILL.md files contain the required terms. If no skill entrypoints are found, returns a single-item list like "no skill entrypoints found under <root>/skills". For missing terms, each message is formatted as "<relative path> missing stage arc coverage: term1, term2".
+    """
     errors: list[str] = []
     files = skill_files(root)
     if not files:
@@ -41,6 +59,14 @@ def validate(root: Path) -> list[str]:
 
 
 def main() -> int:
+    """
+    Run the CLI that validates SKILL.md files under a plugin root and prints the results.
+    
+    Parses command-line arguments, checks discovered skills for the required stage-arc and persona-lens terms, emits either JSON or human-readable output, and returns an exit status code.
+    
+    Returns:
+        int: 0 if no validation errors were found, 1 if any validation errors occurred.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "plugin_root",

@@ -109,6 +109,15 @@ def _direct_visible_skill_names(skills_root: Path) -> set[str]:
 
 
 def _existing_command_handle_skill_names(plugin_name: str) -> set[str]:
+    """
+    Collect the command-handle names declared for a plugin that point to valid files under the repository's .skillsets directory.
+    
+    Parameters:
+        plugin_name (str): Plugin identifier used to filter `owner` entries in the command-surface manifest.
+    
+    Returns:
+        set[str]: Set of handle names owned by `plugin_name` whose `command_handle_path` resolves inside the repository's `.skillsets` directory and refers to an existing regular file.
+    """
     command_surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
     if not command_surface_path.is_file():
         return set()

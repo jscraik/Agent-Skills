@@ -1800,6 +1800,25 @@ def _classify_runner_blocker(
     stderr_text: str,
     exit_code: Optional[int] = None,
 ) -> Optional[str]:
+    """
+    Classify whether a runner's combined output indicates a runtime blocker and return the corresponding blocker taxonomy key.
+    
+    Scans the concatenated output, stdout, and stderr for known marker strings that map to blocker categories:
+    - user input required -> `blocked_user_input`
+    - authentication issues -> `blocked_auth`
+    - timeout (exit code 124) -> `timeout_partial_output` when any output is present, otherwise `timeout_no_output`
+    - runtime/sandbox/capacity/permission failures -> `blocked_runtime`
+    
+    Parameters:
+        output_text (str): Final output text or last message from the runner.
+        stdout_text (str): Captured standard output from the runner process.
+        stderr_text (str): Captured standard error from the runner process.
+        exit_code (Optional[int]): Process exit code; used to distinguish timeout classifications when equal to 124.
+    
+    Returns:
+        Optional[str]: One of `blocked_user_input`, `blocked_auth`, `timeout_partial_output`,
+        `timeout_no_output`, `blocked_runtime`, or `None` if no blocker markers are found.
+    """
     text = "\n".join([output_text or "", stdout_text or "", stderr_text or ""])
     low = text.lower()
 

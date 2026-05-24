@@ -174,6 +174,11 @@ class GeneratedArtifactShapeTests(unittest.TestCase):
         )
 
     def test_plan_validation_gates_require_observable_proof_language(self) -> None:
+        """
+        Verify that plan validation requires Validation Gates to reference observable behavior, source IDs, or explicit proof.
+        
+        Asserts that replacing an observable-proof requirement with a generic "run the unit test." causes validate_plan to return an error containing "Validation Gates must tie testing decisions to observable behavior, source IDs, or proof".
+        """
         invalid = VALID_PLAN.replace(
             "Required: observable behavior proof for SA-001 using prior-art account summary tests.",
             "Required: run the unit test.",

@@ -67,6 +67,15 @@ def test_stale_root_proposal_requires_relocation() -> None:
 
 
 def test_hidden_root_migration_script_requires_relocation() -> None:
+    """
+    Test that a hidden root migration script is classified as an unknown surface and treated as a blocking violation.
+    
+    Asserts the classifier marks ".move.sh" with:
+    - classification: "unknown"
+    - status: "unknown"
+    - code: "unknown_surface"
+    - blocking: True
+    """
     finding = MODULE.classify_path(".move.sh")
 
     assert finding.classification == "unknown"
