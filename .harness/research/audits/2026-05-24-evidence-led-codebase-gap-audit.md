@@ -2,9 +2,11 @@
 
 Date: 2026-05-24
 
-Project root: /Users/jamiecraik/dev/agent-skills
+Project root: <REPO_ROOT>
 
 Output target: .harness/research/audits/2026-05-24-evidence-led-codebase-gap-audit.md
+
+Path placeholders: <REPO_ROOT> means this repository checkout. <CODEX_SOURCE_ROOT> means the read-only sibling Codex source checkout used as evidence context. <CONFIG_CODEX_SKILLS_ROOT> means the user's external Codex skills configuration root observed during the audit.
 
 Primary skills used:
 - improve-codebase-architecture
@@ -23,8 +25,8 @@ Selected architecture lenses:
 
 Primary evidence documents:
 - .harness/research/deep/2026-05-24-jamie-craik-evidence.md
-- /Users/jamiecraik/dev/codex
-- /Users/jamiecraik/dev/codex/.harness/research/deep/2026-05-24-codex-ecosystem-operational-review.md
+- <CODEX_SOURCE_ROOT>
+- <CODEX_SOURCE_ROOT>/.harness/research/deep/2026-05-24-codex-ecosystem-operational-review.md
 
 Runtime evidence sampled:
 
@@ -304,7 +306,7 @@ python3 Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fi
 **Category:** runtime / recovery
 
 **Current State:**
-skills proof testing --runtime-target codex fails because ~/.codex/skills exists but points to /Users/jamiecraik/dev/configs/.codex/skills, not this workspace runtime, and the testing handle does not exist there. Agents runtime is ready, so runtime_target=any would be satisfied by agents_user_runtime.
+skills proof testing --runtime-target codex fails because ~/.codex/skills exists but points to <CONFIG_CODEX_SKILLS_ROOT>, not this workspace runtime, and the testing handle does not exist there. Agents runtime is ready, so runtime_target=any would be satisfied by agents_user_runtime.
 
 **Expected State:**
 For Codex-facing work, Codex runtime readiness should be a first-class gate with a clear recovery path and post-repair validation.
@@ -349,7 +351,7 @@ Runtime target policy file, proof gate in repo closeout strict mode, symlink cla
 **Category:** context / validation
 
 **Current State:**
-codex_preview._codex_runtime_source_identity checks that the sibling /Users/jamiecraik/dev/codex repo exists and git rev-parse succeeds. It does not verify every file listed in CODEX_PREVIEW_SOURCE_FILES exists. If git status fails for those paths, dirty_lines becomes empty and status can still become identified.
+codex_preview._codex_runtime_source_identity checks that the sibling <CODEX_SOURCE_ROOT> repo exists and git rev-parse succeeds. It does not verify every file listed in CODEX_PREVIEW_SOURCE_FILES exists. If git status fails for those paths, dirty_lines becomes empty and status can still become identified.
 
 **Expected State:**
 Source identity should fail or warn when any modeled Codex source file is missing, renamed, or unreadable.
@@ -950,4 +952,3 @@ This should be expanded to execute ./bin/ask directly and probe schema-backed hi
 Whether the project is ready for broader Codex autonomy:
 
 Not yet for broad autonomy. It is ready for bounded autonomy inside repo-native commands because blockers, next commands, schemas, and package verification are real. It is not ready for wider Codex-runtime autonomy until generated command handles are green, codex-parity pass semantics are tightened, public wrapper ABI is tested, and Codex runtime proof is required where Codex invocation is the actual target.
-

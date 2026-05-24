@@ -8,7 +8,7 @@ harness_stage: he-spec
 status: ready_for_plan
 date: 2026-05-24
 origin: "he-spec from evidence-led audit and Codex Skills SDK native integration analysis"
-source_artifacts: "/Users/jamiecraik/dev/agent-skills/.harness/research/audits/2026-05-24-evidence-led-codebase-gap-audit.md; /Users/jamiecraik/dev/codex/.harness/research/deep/2026-05-24-codex-skills-sdk-native-integration-analysis.md; /Users/jamiecraik/dev/agent-skills/.harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
+source_artifacts: "<REPO_ROOT>/.harness/research/audits/2026-05-24-evidence-led-codebase-gap-audit.md; <CODEX_SOURCE_ROOT>/.harness/research/deep/2026-05-24-codex-skills-sdk-native-integration-analysis.md; <REPO_ROOT>/.harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md"
 risk: high
 depth: full
 ui: false
@@ -468,11 +468,13 @@ Live Linear mutation receipt:
 
 ## Evidence and References
 
+Path placeholders: <REPO_ROOT> means this repository checkout. <CODEX_SOURCE_ROOT> means the read-only sibling Codex source checkout used as evidence context.
+
 | Source | Evidence used |
 |---|---|
-| /Users/jamiecraik/dev/agent-skills/.harness/research/audits/2026-05-24-evidence-led-codebase-gap-audit.md | Current repo maturity, gap register, runtime command evidence, and fix roadmap. |
-| /Users/jamiecraik/dev/codex/.harness/research/deep/2026-05-24-codex-skills-sdk-native-integration-analysis.md | Codex runtime primitives, proof-plane architecture, adapter roadmap, and native integration gaps. |
-| /Users/jamiecraik/dev/agent-skills/.harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md | Existing JSC-351 local spec lineage and Codex ABI conformance context. |
+| <REPO_ROOT>/.harness/research/audits/2026-05-24-evidence-led-codebase-gap-audit.md | Current repo maturity, gap register, runtime command evidence, and fix roadmap. |
+| <CODEX_SOURCE_ROOT>/.harness/research/deep/2026-05-24-codex-skills-sdk-native-integration-analysis.md | Codex runtime primitives, proof-plane architecture, adapter roadmap, and native integration gaps. |
+| <REPO_ROOT>/.harness/specs/2026-05-22-jsc-351-agent-skills-codex-abi-conformance-spec.md | Existing JSC-351 local spec lineage and Codex ABI conformance context. |
 
 ## Implementation Notes
 

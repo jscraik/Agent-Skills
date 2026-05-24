@@ -58,7 +58,7 @@ The plan prioritizes trust-boundary repair before feature expansion. The first p
 | JSC-364 Linear issue | live tracker source | Tracker status, parent link to JSC-351, priority, labels, and work item identity |
 | .harness/research/audits/2026-05-24-evidence-led-codebase-gap-audit.md | supporting evidence | Gap framing around runtime proof, claim verification, traces, recovery, governance |
 | .harness/research/deep/2026-05-24-jamie-craik-evidence.md | supporting evidence | Harness engineering patterns for proof surfaces, runtime truth, and agent-operable closeout |
-| /Users/jamiecraik/dev/codex | read-only source context | Codex runtime source identity and preview behavior reference; not an implementation target for this plan |
+| <CODEX_SOURCE_ROOT> | read-only source context | Codex runtime source identity and preview behavior reference; not an implementation target for this plan |
 | Infrastructure/scripts/lib/ask/commands/skills_impl.py | runtime source | Skills command implementation path for handles, conformance, capability discovery, proof |
 | Infrastructure/scripts/lib/ask/commands/repo_impl.py | runtime source | Repo doctor command-handle gate and next-command behavior |
 | Infrastructure/scripts/lib/ask/services/codex_preview.py | runtime source | Existing Codex preview source identity, truncation, and partial-depth behavior |
@@ -83,7 +83,7 @@ The plan prioritizes trust-boundary repair before feature expansion. The first p
 
 ### Out of Scope
 
-- Mutating /Users/jamiecraik/dev/codex or treating it as the delivery repo.
+- Mutating <CODEX_SOURCE_ROOT> or treating it as the delivery repo.
 - Editing global Codex config, user home runtime state, plugin caches, or runtime projections to force a proof pass.
 - Publishing packages, installing global tools, or using network writes as part of proof.
 - Building a broad new orchestration framework before the P0 proof plane is enforced.
@@ -129,19 +129,19 @@ The plan prioritizes trust-boundary repair before feature expansion. The first p
 - Exact module names for schema helpers, evidence writers, and runtime card validators can be chosen during implementation if they remain under Infrastructure-owned paths.
 - Evidence output path conventions can use a temporary directory for tests and .harness/evidence for durable local proof, provided commands report the path.
 - CapabilityDiscovery may be implemented as a skills subcommand or a proof-plane subcommand if ./bin/ask exposes the same machine-readable fields.
-- The Codex source reference can be live /Users/jamiecraik/dev/codex source or checked fixtures, but every preview result must report which basis was used.
+- The Codex source reference can be live <CODEX_SOURCE_ROOT> source or checked fixtures, but every preview result must report which basis was used.
 
 ### guardrails
 
 - Do not claim live Codex parity from source inspection, modeled conformance, or .agents readiness.
 - Do not create schemas that are not validated by a reachable command or test.
 - Do not silently downgrade runtime absence into success.
-- Do not mutate /Users/jamiecraik/dev/codex, global Codex config, plugin caches, or generated runtime projections as part of this implementation.
+- Do not mutate <CODEX_SOURCE_ROOT>, global Codex config, plugin caches, or generated runtime projections as part of this implementation.
 - Do not make P1 telemetry schemas required for P0 acceptance.
 
 ### refusal_triggers
 
-- A fix requires editing /Users/jamiecraik/dev/codex rather than reading it as source context.
+- A fix requires editing <CODEX_SOURCE_ROOT> rather than reading it as source context.
 - The proof command cannot produce either RuntimeCard proof or blocked_runtime evidence.
 - Repo doctor reports green while command-handle drift remains detectable.
 - Evidence receipts omit command, exit code, runtime target, source identity, or blocker fields needed by the spec.
@@ -169,7 +169,7 @@ Objective: Make command-handle drift mechanically visible and blocking before ru
 
 Allowed path: Infrastructure/scripts/lib/ask/commands/skills_impl.py, Infrastructure/scripts/lib/ask/commands/repo_impl.py, Infrastructure/tests/test_ask_skills_doctor.py, Infrastructure/tests/test_ask_cli_impl.py, generated command-handle fixtures owned by existing generators.
 
-Forbidden path: /Users/jamiecraik/dev/codex, .agents runtime projections, Plugins/cache, global Codex config, unrelated skill bodies.
+Forbidden path: <CODEX_SOURCE_ROOT>, .agents runtime projections, Plugins/cache, global Codex config, unrelated skill bodies.
 
 Implementation steps:
 
@@ -219,7 +219,7 @@ Objective: Make conformance output distinguish source-modeled compatibility from
 
 Allowed path: Infrastructure/scripts/lib/ask/skills_sdk/conformance.py, Infrastructure/scripts/lib/ask/commands/skills_impl.py, Infrastructure/tests/test_pr196_jsc351_governed_closeout.py, new focused conformance tests if needed.
 
-Forbidden path: /Users/jamiecraik/dev/codex mutation, broad SDK rewrites, generated runtime projections, unrelated package code.
+Forbidden path: <CODEX_SOURCE_ROOT> mutation, broad SDK rewrites, generated runtime projections, unrelated package code.
 
 Implementation steps:
 
@@ -269,7 +269,7 @@ Objective: Ensure Codex preview evidence reports source identity, partial-depth 
 
 Allowed path: Infrastructure/scripts/lib/ask/services/codex_preview.py, Infrastructure/tests/test_ask_skills_codex_preview.py, preview fixtures under Infrastructure/tests.
 
-Forbidden path: /Users/jamiecraik/dev/codex writes, vendored Codex source copies without approval, unrelated preview UI, global Codex config.
+Forbidden path: <CODEX_SOURCE_ROOT> writes, vendored Codex source copies without approval, unrelated preview UI, global Codex config.
 
 Implementation steps:
 
@@ -280,7 +280,7 @@ Implementation steps:
 
 Validation: python3 -m pytest Infrastructure/tests/test_ask_skills_codex_preview.py -q.
 
-Stop condition: Stop if source identity cannot be proven without mutating /Users/jamiecraik/dev/codex or adding unapproved vendored fixtures.
+Stop condition: Stop if source identity cannot be proven without mutating <CODEX_SOURCE_ROOT> or adding unapproved vendored fixtures.
 
 Rollback: Revert preview service and test changes from this unit.
 
@@ -294,7 +294,7 @@ Objective: Implement the core proof command that emits a RuntimeCard, EvidenceRe
 
 Allowed path: Infrastructure/scripts/lib/ask/commands/skills_impl.py, Infrastructure/scripts/lib/ask/commands/skills.py, Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py, Infrastructure/scripts/lib/ask/skills_sdk/contracts.py, Infrastructure/config/schemas, Infrastructure/tests.
 
-Forbidden path: /Users/jamiecraik/dev/codex mutation, global runtime caches, plugin cache, secret stores, publishing paths.
+Forbidden path: <CODEX_SOURCE_ROOT> mutation, global runtime caches, plugin cache, secret stores, publishing paths.
 
 Implementation steps:
 
@@ -389,12 +389,16 @@ Handoff: Handoff state is explicit_stop for this planning artifact; implementati
 | VAL-007 | post | FR-014, FR-015, FR-024, SA-005, SA-006, SA-016, SA-017 | python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py <proof-artifact-path> --json | Expected outcome: RuntimeCard and EvidenceReceipt fixtures pass and malformed evidence fails. |
 | VAL-008 | post | SA-012 | python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q | Observable behavior: doctor regressions and blocked_runtime paths stay enforced. |
 | VAL-009 | post | SA-012 | python3 -m pytest Infrastructure/tests/test_ask_cli_impl.py -q | Expected outcome: public CLI parser and wrapper behavior remain reachable. |
-| VAL-010 | post | SA-012, SA-013 | ./bin/ask repo closeout --changed --json --robot or documented repo closeout equivalent | Proof: changed files, validation evidence, and blockers are reported through the repo closeout surface. |
+| VAL-010 | post | SA-012, SA-013 | ./bin/ask repo closeout --changed --json --robot | Proof: changed files, validation evidence, and blockers are reported through the repo closeout surface. |
 | VAL-011 | review | SA-013 | reviewer artifacts under artifacts/reviews | Expected outcome: architecture, agent-native, and adversarial reviewers find no blocking false-success or reachability gaps. |
-| VAL-012 | post | FR-022, FR-026, SA-014 | ./bin/ask skills capabilities --runtime-target codex --json --robot or selected equivalent | Observable behavior: capability discovery reports runtime target support and limitations. |
+| VAL-012 | post | FR-022, FR-026, SA-014 | ./bin/ask skills capabilities --runtime-target codex --json --robot | Observable behavior: capability discovery reports runtime target support and limitations. |
 | VAL-013 | post | FR-023, FR-027, FR-028, SA-010, SA-015 | validate_runtime_cards.py <proof-artifact-path> --require-shared-workspace --json | Proof: runtime card artifacts are usable from the shared workspace and limitations are explicit. |
 | VAL-014 | pre and post | FR-010, SA-002 | ./bin/ask repo doctor --json --robot with before and after evidence | Expected outcome: unrelated failures are separated from command_handles and proof-plane checks. |
 | VAL-015 | closeout | JSC-364 tracker contract | Linear MCP get_issue JSC-364 | Expected outcome: live tracker state is refreshed and not confused with local validation. |
+
+### Non-Gating Validation Notes
+
+Documented repo closeout equivalents and capability-discovery aliases may remain useful for reviewer orientation, but they are not acceptance gates for this plan. VAL-010 and VAL-012 intentionally pin one canonical executable command each so automated validation can compare like with like.
 
 ## Review Plan
 
@@ -467,7 +471,7 @@ The proof plane should be operable from plain terminal commands and should not r
 |---|---|---:|---|
 | Should durable implementation evidence land in .harness/evidence or a more specific proof-plane subdirectory? | Implementer with maintainer review | No | Choose the smallest repo-owned path and report it in RuntimeCard. |
 | Should CapabilityDiscovery be a new subcommand or folded into an existing skills status/capability surface? | Implementer with reviewer input | No | Preserve required fields and wrapper reachability either way. |
-| Is live /Users/jamiecraik/dev/codex always expected in developer environments? | Jamie or repo maintainer | No | Treat absence as blocked_runtime or modeled_only with unavailable reason, not a hard implementation failure. |
+| Is live <CODEX_SOURCE_ROOT> always expected in developer environments? | Jamie or repo maintainer | No | Treat absence as blocked_runtime or modeled_only with unavailable reason, not a hard implementation failure. |
 | Should P1 schemas be created immediately after P0 lands? | Jamie or planner | No | Defer until P0 proof evidence exposes real telemetry needs. |
 
 ## Final Decision
@@ -480,11 +484,11 @@ Proceed with an execution-first P0 implementation of JSC-364 in the order define
 |---|---|
 | schema_version | 1 |
 | interactive_status | explicit_stop |
-| selection_evidence | User invoked he-plan for the JSC-364 runtime proof plane spec and supplied /Users/jamiecraik/dev/codex as source context. |
+| selection_evidence | User invoked he-plan for the JSC-364 runtime proof plane spec and supplied <CODEX_SOURCE_ROOT> as source context. |
 | route | he-plan |
 | stage | he-plan |
 | scope | Plan only; no code implementation, no commit, no Linear mutation. |
-| source | .harness/specs/2026-05-24-agent-skills-codex-runtime-proof-plane-spec.md; JSC-364; /Users/jamiecraik/dev/codex read-only context |
+| source | .harness/specs/2026-05-24-agent-skills-codex-runtime-proof-plane-spec.md; JSC-364; <CODEX_SOURCE_ROOT> read-only context |
 | plan_path | .harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-plan.md |
 | traceability | JSC-364 mapped to FR, SA, VAL, and PU identifiers below. |
 | validation | Plan artifact validators are listed in Appendix C after execution. |

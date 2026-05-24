@@ -7,7 +7,7 @@ Source material inspected:
 - .harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html
 - .harness/implementation-notes/2026-05-19-deep-module-plan.html
 - .harness/research/deep/2026-05-22-skills-sdk-oagen-analysis.md
-- .harness/research/audits/2026-05-22-evidence-led-codebase-gap-audit.md
+- .harness/research/audits/2026-05-24-evidence-led-codebase-gap-audit.md
 
 Source type: local implementation ledger, architecture plan, deep research artifact, and evidence-led gap audit.
 
@@ -35,11 +35,11 @@ The biggest risks are overclaiming parity, letting generated files become manual
 
 ### Pattern: Runtime Truth Over Surface Reachability
 
-#### Description
+**Description:**
 
 A skill or command is not considered ready merely because a projection exists, a handle resolves, or a non-Codex runtime can reach it. Runtime truth is target-specific. If the requested runtime is Codex, the proof must require Codex-specific readiness.
 
-#### Evidence
+**Evidence:**
 
 High confidence:
 
@@ -48,18 +48,18 @@ High confidence:
 - Codex-targeted proof intentionally exits with structured validation failure when only .agents is ready.
 - The audit names runtime proof passing without Codex readiness as a top gap.
 
-#### Why It Matters
+**Why It Matters:**
 
 Without target-specific runtime gates, a harness can certify the wrong thing. This is especially dangerous for agent systems because agents will propagate the status as truth and may proceed to publish, sync, or recommend follow-up work based on a false ready signal.
 
-#### Implementation Opportunities
+**Implementation Opportunities:**
 
 - Add runtime-target parameters to every proof command that can span multiple execution surfaces.
 - Make the default compatibility mode explicit rather than implicit.
 - Add schema fields such as runtime target, available runtimes, required gate, runtime satisfied by, and blocked checks.
 - Require Codex parity mode in closeout checks that claim Codex-native availability.
 
-#### Risks / Tradeoffs
+**Risks / Tradeoffs:**
 
 - Strict target modes can block workflows that were previously good enough.
 - Compatibility defaults must be preserved carefully so older callers do not break.
@@ -67,11 +67,11 @@ Without target-specific runtime gates, a harness can certify the wrong thing. Th
 
 ### Pattern: Doctor As Decision Packet, Not Status Summary
 
-#### Description
+**Description:**
 
 The doctor command should emit a structured decision packet: checks, blockers, warnings, runtime failure payloads, next-command precedence, and recovery guidance. It should not merely say pass, warning, or fail.
 
-#### Evidence
+**Evidence:**
 
 High confidence:
 
@@ -79,29 +79,29 @@ High confidence:
 - Doctor output preserves runtime failure context inside runtime reachability checks.
 - <code>next_command_decision</code> exposes blocker/warning/default precedence.
 
-#### Why It Matters
+**Why It Matters:**
 
 Agents need a next action, not just a diagnosis. A structured doctor packet lets agents route to repair, stop safely, or report a classified blocker without reinterpreting prose. It also makes regression tests possible for routing behavior.
 
-#### Implementation Opportunities
+**Implementation Opportunities:**
 
 - Standardize <code>next_command_decision</code> across repo, skill, package, runtime, and projection doctors.
 - Include precedence reasons and the exact failing check id.
 - Add tests for invalid argument paths that must reach structured command implementation logic rather than being swallowed by parser-level errors.
 - Snapshot doctor public output.
 
-#### Risks / Tradeoffs
+**Risks / Tradeoffs:**
 
 - Too many fields can create contract drift unless snapshots and schemas are mandatory.
 - Additive compatibility can leave permissive schema behavior in early versions; this should be a conscious compatibility tradeoff, not an accident.
 
 ### Pattern: Classified Blocked State
 
-#### Description
+**Description:**
 
 A blocked validation command can be successful evidence if it proves the intended guardrail and classifies the remaining blocker. The operating model distinguishes expected fail-closed behavior, pre-existing blockers, introduced failures, stale projection drift, environment failures, and review-system stale state.
 
-#### Evidence
+**Evidence:**
 
 High confidence:
 
@@ -110,29 +110,29 @@ High confidence:
 - Codex-targeted proof exiting 2 was recorded as pass because it proved fail-closed behavior.
 - Browser navigation to a local file report was classified as Browser policy blocker, not missing artifact.
 
-#### Why It Matters
+**Why It Matters:**
 
 Binary pass/fail thinking causes two opposite errors: claiming success when the wrong thing passed, or stopping useful work because an unrelated system is red. Classified blocked state lets work continue only when the remaining risk is understood and owned.
 
-#### Implementation Opportunities
+**Implementation Opportunities:**
 
 - Require every gate result to include outcome, classification, owner, and next action.
 - Treat expected negative tests as pass only when the exact structured failure payload is verified.
 - Persist blocker classifications in receipts or validation JSONL.
 - Add a validator that fails if closeout text says pass while the evidence contains unclassified exit 2 commands.
 
-#### Risks / Tradeoffs
+**Risks / Tradeoffs:**
 
 - Misclassification can hide real regressions.
 - Requires discipline to avoid turning pre-existing into an excuse; pre-existing blockers still need a later owner.
 
 ### Pattern: Bounded Slice Governance
 
-#### Description
+**Description:**
 
 Each implementation slice has an explicit objective, allowed file set, exclusions, validation commands, review stack, and closeout receipt. Scope expansion is allowed only when runtime discovery proves it necessary and the governor records the expansion before edits.
 
-#### Evidence
+**Evidence:**
 
 High confidence:
 
@@ -141,29 +141,29 @@ High confidence:
 - PU-003 explicitly avoided package schemas, preview commands, and service extraction.
 - PU-004 explicitly excluded preview commands, publishing workflows, global installs, plugin cache mutation, package registry integration, and runtime config writes.
 
-#### Why It Matters
+**Why It Matters:**
 
 Agent workflows drift easily. Bounded slices prevent "fix the found thing" from becoming uncontrolled architecture change. They also make review and rollback cheaper because each slice has a small intended behavior delta.
 
-#### Implementation Opportunities
+**Implementation Opportunities:**
 
 - Add a slice manifest with objective, allowed files, excluded surfaces, tests, reviewers, and closeout criteria.
 - Have validators compare changed files against allowed scope.
 - Require a recorded scope expansion event before modifying out-of-scope files.
 - Attach receipts to goal board state.
 
-#### Risks / Tradeoffs
+**Risks / Tradeoffs:**
 
 - Overly rigid boundaries can slow necessary cross-cutting fixes.
 - Scope manifests can become paperwork unless enforced by tooling.
 
 ### Pattern: Generated Surfaces Are Repaired By Generators
 
-#### Description
+**Description:**
 
 Generated projections, command surfaces, skillset manifests, runtime summaries, and root indexes must be refreshed through repo-owned commands, not hand-edited.
 
-#### Evidence
+**Evidence:**
 
 High confidence:
 
@@ -171,29 +171,29 @@ High confidence:
 - Generated-surface handling later refreshes .skillsets and SKILL.md through repo-owned sync.
 - The deep module plan has a "Files Not To Hand-Edit" section.
 
-#### Why It Matters
+**Why It Matters:**
 
 Generated files carry derived state and provenance. Hand edits can produce a superficially correct diff that is overwritten later or masks a bug in the generator. Repo-owned sync commands preserve source identity and make the repair reproducible.
 
-#### Implementation Opportunities
+**Implementation Opportunities:**
 
 - Put generated file ownership in a manifest.
 - Add headers or metadata that identify generator, source hash, config hash, and ownership class.
 - Make pre-commit fail when generated files change without a matching generator/source change or sync receipt.
 - Provide dry-run and actual sync commands with machine-readable deltas.
 
-#### Risks / Tradeoffs
+**Risks / Tradeoffs:**
 
 - Generator bugs can block urgent fixes.
 - Sync commands can touch many files, so review tooling must separate expected generated churn from human implementation.
 
 ### Pattern: Compatibility Snapshot Before Broad Autonomy
 
-#### Description
+**Description:**
 
 Public JSON, CLI payloads, schemas, command metadata, runtime cards, generated handles, and package readiness output should be protected with baseline-vs-candidate compatibility snapshots before broad autonomous generation is allowed.
 
-#### Evidence
+**Evidence:**
 
 High confidence:
 
@@ -201,29 +201,29 @@ High confidence:
 - PU-004 adds package schema files and a skill-package-readiness public-output fixture.
 - The gap audit says the project is not ready for broad autonomous Skills SDK generation until loader/render/injection/config parity, package schemas, compatibility snapshots, and conformance evidence are executable and enforced.
 
-#### Why It Matters
+**Why It Matters:**
 
 Agents can generate plausible public outputs quickly. Compatibility snapshots catch silent API drift that ordinary tests and manual review often miss.
 
-#### Implementation Opportunities
+**Implementation Opportunities:**
 
 - Create snapshot extractors for doctor, package, proof, handles, runtime preview, command metadata, and runtime cards.
 - Compare baseline and candidate snapshots in CI.
 - Classify changes as breaking, soft-risk, additive, or internal.
 - Require explicit approval records for breaking changes.
 
-#### Risks / Tradeoffs
+**Risks / Tradeoffs:**
 
 - Snapshot systems can become noisy if schemas are unstable.
 - Early snapshots should focus on public surface, not incidental ordering or timestamps.
 
 ### Pattern: Smoke Verification Separate From Compatibility
 
-#### Description
+**Description:**
 
 Compatibility checks protect public shape; smoke checks prove behavior. Neither replaces the other.
 
-#### Evidence
+**Evidence:**
 
 High confidence:
 
@@ -231,28 +231,28 @@ High confidence:
 - PU-004 uses schema and snapshot identity plus live package command smoke.
 - PU-005 validates preview commands with both tests and live CLI smoke.
 
-#### Why It Matters
+**Why It Matters:**
 
 A command can preserve public JSON shape while executing the wrong runtime behavior. Conversely, behavior can work while breaking consumers. Separate gates produce better failure labels.
 
-#### Implementation Opportunities
+**Implementation Opportunities:**
 
 - For every public command, maintain both schema/snapshot tests and live representative smoke commands.
 - Store smoke evidence in JSONL with command, exit code, expected outcome, payload path checks, and runtime environment.
 - Use smoke checks to validate next-command guidance after failure.
 
-#### Risks / Tradeoffs
+**Risks / Tradeoffs:**
 
 - More gates require maintenance.
 - Smoke tests can become flaky unless they avoid external dependencies or classify environment blockers.
 
 ### Pattern: Review Stack As Controlled Failure Injection
 
-#### Description
+**Description:**
 
 Reviews are used to find likely regressions before closeout, and re-reviews verify remediation. The review stack is not a vague quality ritual; it is a targeted adversarial system with artifact outputs.
 
-#### Evidence
+**Evidence:**
 
 High confidence:
 
@@ -260,29 +260,29 @@ High confidence:
 - T011 caught a simplification attempt that disabled folded compatibility handles, then restored compatibility-preserving policy.
 - Review artifacts are referenced as required closeout evidence.
 
-#### Why It Matters
+**Why It Matters:**
 
 Agent implementation can overfit the immediate failing test. Review stack catches second-order regressions such as compatibility breaks, insufficient assertions, weak schemas, and misleading docs.
 
-#### Implementation Opportunities
+**Implementation Opportunities:**
 
 - Require reviewer artifacts to include severity, file/line evidence, remediation suggestion, and final status.
 - Add a coordinator verification step that checks every expected artifact exists and is non-empty.
 - Classify review findings by introduced/current/pre-existing/environment.
 - Use targeted re-review after remediation rather than treating first review as final truth.
 
-#### Risks / Tradeoffs
+**Risks / Tradeoffs:**
 
 - Review swarms can become slow or expensive.
 - Without artifact verification, mailbox summaries can be mistaken for completed reviews.
 
 ### Pattern: Local Evidence Feedback Loop
 
-#### Description
+**Description:**
 
 Logs, metrics, traces, lifecycle events, validation outcomes, and session summaries become queryable evidence. Codex uses that evidence to find failing boundaries, patch owner modules, rerun workloads, and decide promotion or rollback.
 
-#### Evidence
+**Evidence:**
 
 High confidence:
 
@@ -290,18 +290,18 @@ High confidence:
 - It names session-collector and otel-collector as evidence services.
 - It frames eval findings as classified deltas, affected paths, rerun commands, and evidence.
 
-#### Why It Matters
+**Why It Matters:**
 
 Agent improvement without replayable evidence devolves into anecdotal prompt tweaking. A local evidence loop makes skill repair and harness repair observable and repeatable.
 
-#### Implementation Opportunities
+**Implementation Opportunities:**
 
 - Emit JSONL events for command lifecycle, validation lifecycle, projection lifecycle, package lifecycle, and subagent lifecycle.
 - Build evidence-provider interfaces over local logs, stats, traces, and session summaries.
 - Store before/after evidence for each repair.
 - Add promotion records that cite rerun proof and rollback criteria.
 
-#### Risks / Tradeoffs
+**Risks / Tradeoffs:**
 
 - Local telemetry can create privacy and retention concerns.
 - Evidence volume must be indexed and summarized; raw logs alone are not an operating system.
@@ -970,8 +970,8 @@ Only material evidence is included here.
 - "No generated projection was hand-edited." Evidence: .harness/implementation-notes/2026-05-23-agent-skills-jsc-351-codex-abi-governed-execution-notes.html:582.
 - "AI workflows that consume deterministic diffs and compatibility signals rather than replacing them." Evidence: .harness/research/deep/2026-05-22-skills-sdk-oagen-analysis.md:52.
 - "The WorkOS pattern is not 'AI generates everything.' It is 'deterministic systems make generation safe enough for AI to assist around the edges.'" Evidence: .harness/research/deep/2026-05-22-skills-sdk-oagen-analysis.md:472.
-- "Runtime proof can pass without Codex readiness." Evidence: .harness/research/audits/2026-05-22-evidence-led-codebase-gap-audit.md:50.
-- "Broad autonomous generation workflows before compatibility snapshots and deterministic validators exist." Evidence: .harness/research/audits/2026-05-22-evidence-led-codebase-gap-audit.md:1302.
+- "Runtime proof can pass without Codex readiness." Evidence: .harness/research/audits/2026-05-24-evidence-led-codebase-gap-audit.md:50.
+- "Broad autonomous generation workflows before compatibility snapshots and deterministic validators exist." Evidence: .harness/research/audits/2026-05-24-evidence-led-codebase-gap-audit.md:1302.
 - "Codex can then correlate failures, patch the owner module, rerun the workload, and improve the skill through eval feedback." Evidence: .harness/implementation-notes/2026-05-19-deep-module-plan.html:987-1016.
 
 ## Final Assessment
