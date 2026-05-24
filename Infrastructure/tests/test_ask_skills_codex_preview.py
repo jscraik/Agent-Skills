@@ -85,6 +85,33 @@ class CodexPreviewTests(unittest.TestCase):
         self.assertEqual(preview["skills"][0]["path"], ".agents/skills/alpha/SKILL.md")
         self.assertEqual(preview["blocked_checks"][0]["id"], "runtime_plugin_skill_roots")
 
+    def test_load_preview_preserves_list_valued_agents_openai_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            skill_md = _write_skill(repo_root, ".agents/skills/alpha", "alpha", "Alpha skill")
+            agents_dir = skill_md.parent / "agents"
+            agents_dir.mkdir()
+            (agents_dir / "openai.yaml").write_text(
+                """dependencies:
+  tools:
+    - type: mcp
+      name: browser
+policy:
+  allow_implicit_invocation: true
+""",
+                encoding="utf-8",
+            )
+            with (
+                patch.object(codex_preview, "_codex_runtime_source_identity", return_value=SOURCE_IDENTITY),
+                patch.object(codex_preview, "_codex_preview_root_candidates", side_effect=lambda root: self._patched_roots(root)),
+            ):
+                result = skills_impl.skills_load_preview(repo_root)
+
+        skill = result.data["codex_load_preview"]["skills"][0]
+        self.assertEqual(skill["dependencies"]["tools"][0]["type"], "mcp")
+        self.assertEqual(skill["dependencies"]["tools"][0]["name"], "browser")
+        self.assertIs(skill["policy"]["allow_implicit_invocation"], True)
+
     def test_render_preview_reports_budget_omissions(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
@@ -254,6 +281,23 @@ class CodexPreviewTests(unittest.TestCase):
         preview = result.data["codex_inject_preview"]
         self.assertEqual(result.status, "success")
         self.assertEqual(preview["selected_count"], 0)
+        self.assertEqual(preview["selection_notes"][0]["status"], "blocked_ambiguous_name")
+
+    def test_inject_preview_directory_skill_link_disambiguates_duplicate_names(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            _write_skill(repo_root, ".agents/skills/alpha-one", "alpha", "First alpha")
+            _write_skill(repo_root, ".agents/skills/alpha-two", "alpha", "Second alpha")
+            with (
+                patch.object(codex_preview, "_codex_runtime_source_identity", return_value=SOURCE_IDENTITY),
+                patch.object(codex_preview, "_codex_preview_root_candidates", side_effect=lambda root: self._patched_roots(root)),
+            ):
+                result = skills_impl.skills_inject_preview(repo_root, "[$alpha](skill://.agents/skills/alpha-two)")
+
+        preview = result.data["codex_inject_preview"]
+        self.assertEqual(result.status, "success")
+        self.assertEqual(preview["selected_count"], 1)
+        self.assertEqual(preview["selected_skills"][0]["path"], ".agents/skills/alpha-two/SKILL.md")
         self.assertEqual(preview["selection_notes"][0]["status"], "blocked_ambiguous_name")
 
     def test_implicit_preview_detects_skill_script_run(self) -> None:

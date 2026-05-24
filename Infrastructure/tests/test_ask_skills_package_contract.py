@@ -18,15 +18,18 @@ SUPPORTED_SCHEMA_KEYS = {
     "$ref",
     "$schema",
     "additionalProperties",
+    "allOf",
     "const",
     "definitions",
     "enum",
+    "if",
     "items",
     "minItems",
     "minLength",
     "oneOf",
     "properties",
     "required",
+    "then",
     "title",
     "type",
 }
@@ -102,6 +105,29 @@ def _validate_schema_subset(
             root_schema,
         )
         return
+
+    for subschema in schema.get("allOf", []):
+        _validate_schema_subset(subschema, value, schemas, path, root_schema)
+
+    if "if" in schema:
+        try:
+            _validate_schema_subset(schema["if"], value, schemas, path, root_schema)
+        except AssertionError:
+            pass
+        else:
+            if "then" in schema:
+                _validate_schema_subset(schema["then"], value, schemas, path, root_schema)
+
+    if "oneOf" in schema:
+        matches = 0
+        for option in schema["oneOf"]:
+            try:
+                _validate_schema_subset(option, value, schemas, path, root_schema)
+            except AssertionError:
+                continue
+            matches += 1
+        if matches != 1:
+            raise AssertionError(f"{path} expected exactly one oneOf match, got {matches}")
 
     if "type" in schema:
         expected_types = schema["type"]
@@ -230,6 +256,77 @@ class TestAskSkillsPackageContract(unittest.TestCase):
             contract["metadata"]["interface"]["display_name"],
             "Skill Builder",
         )
+
+    def test_skill_package_contract_merges_agents_openai_policy_and_dependencies(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "codex-package"
+            agents_dir = skill_dir / "agents"
+            agents_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: codex-package
+description: Codex package metadata fixture.
+dependencies:
+  frontmatter_tool: required
+policy:
+  frontmatter_policy: strict
+---
+
+# Codex Package
+""",
+                encoding="utf-8",
+            )
+            (agents_dir / "openai.yaml").write_text(
+                """interface:
+  short_description: OpenAI package fixture.
+dependencies:
+  openai_tool: required
+  required_skills:
+    - skill-builder
+  tools:
+    - type: mcp
+      name: browser
+policy:
+  openai_policy: strict
+""",
+                encoding="utf-8",
+            )
+
+            contract = skills_package(
+                repo_root,
+                "Skills/agent-ops/codex-package",
+            ).data["skill_package"]["skill_package_contract"]
+
+        self.assertEqual(
+            contract["metadata"]["dependencies"],
+            {
+                "frontmatter_tool": "required",
+                "openai_tool": "required",
+                "required_skills": [
+                    "skill-builder",
+                ],
+                "tools": [
+                    {
+                        "type": "mcp",
+                        "name": "browser",
+                    },
+                ],
+            },
+        )
+        self.assertEqual(
+            contract["metadata"]["policy"],
+            {
+                "frontmatter_policy": "strict",
+                "openai_policy": "strict",
+            },
+        )
+        self.assertEqual(
+            contract["metadata"]["short_description"],
+            "OpenAI package fixture.",
+        )
+        self.assertIn("dependencies", contract["optional_fields"]["present"])
+        self.assertIn("policy", contract["optional_fields"]["present"])
 
     def test_skill_package_schema_rejects_missing_identity_contract(self) -> None:
         schema = self.schemas["skill-package.v1.schema.json"]

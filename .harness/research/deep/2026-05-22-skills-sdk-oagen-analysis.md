@@ -17,8 +17,8 @@ Local Skills SDK planning surfaces inspected:
 - .harness/linear/2026-05-11-agent-skills-he-product-front-door-runtime-contract-linear-plan.md
 - .harness/linear/2026-05-17-agent-skills-skill-sdk-doctor-contract-linear-plan.md
 - .harness/implementation-notes/2026-05-21-agent-skills-jsc-329-goal-kickoff.html
-- docs/goals/jsc-329-skill-sdk-doctor-contract
-- docs/goals/jsc-329-skill-sdk-doctor-contract/notes/2026-05-22-gap-analysis.md
+- Docs/goals/jsc-329-skill-sdk-doctor-contract
+- Docs/goals/jsc-329-skill-sdk-doctor-contract/notes/2026-05-22-gap-analysis.md
 
 ## Executive Summary
 

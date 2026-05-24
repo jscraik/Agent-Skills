@@ -135,7 +135,7 @@ The first implementation slice is JSC-352. It must close the false-success bound
 | Field | Plan Contract |
 |---|---|
 | runtime_state | Runtime truth is read from executable commands, source code, focused tests, live tracker/PR/CI state, and validated goal-board receipts. |
-| resumption_key | Resume from docs/goals/jsc-351-agent-skills-codex-abi-conformance/state.yaml, the active task ID, and the latest receipt in receipts.jsonl. |
+| resumption_key | Resume from Docs/goals/jsc-351-agent-skills-codex-abi-conformance/state.yaml, the active task ID, and the latest receipt in receipts.jsonl. |
 | runtime_invocation_receipt | Every implemented slice records exact commands, outcomes, changed files, and blocker state in the goal receipt and implementation notes. |
 | artifact_chain_key | The canonical chain is spec to plan to goal board to slice receipt to validation evidence to review disposition to delivery state. |
 | persistent_artifacts | Persistent artifacts include the canonical spec, canonical plan, goal board, implementation notes, schemas, fixtures, tests, and conformance evidence files created by slices. |

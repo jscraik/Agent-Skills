@@ -1176,79 +1176,9 @@ python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py" 
 catalog_count="$(
   python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/skill_catalog.py" --source catalog --count
 )"
-python3 - "$repo_root/README.md" "$catalog_count" <<'PY'
-from pathlib import Path
-import re
-import sys
-
-readme_path = Path(sys.argv[1])
-catalog_count = sys.argv[2]
-content = readme_path.read_text(encoding="utf-8")
-current_agent_skills_kit_sentence = (
-    "A governed **Agent Skills Kit** repository for Codex and AI coding agents. "
-    "Author skills once, validate quality, expose `$` command handles, and sync "
-    "routed skills and plugins into runtime projections through the `ask` CLI."
-)
-content, replacements = re.subn(
-    r"A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\."
-    r" Author skills once, validate quality, expose `\$` command handles, and sync "
-    r"routed skills and plugins into runtime projections through the `ask` CLI\.",
-    current_agent_skills_kit_sentence,
-    content,
-    count=1,
-)
-if replacements == 0:
-    content, replacements = re.subn(
-        r"A governed repository of \*\*skills\*\* for AI coding agents\. Built around the \*\*Agent Skills Kit \(`ask`\)\*\* CLI\.",
-        current_agent_skills_kit_sentence,
-        content,
-        count=1,
-    )
-content, replacements = re.subn(
-    r"A governed repository of \*\*\d+(?: canonical)? skills\*\* for AI coding agents",
-    f"A governed repository of **{catalog_count} skills** for AI coding agents",
-    content,
-    count=1,
-)
-if replacements == 0:
-    content, replacements = re.subn(
-        r"A governed repository of AI coding skills\.",
-        f"A governed repository of **{catalog_count} skills** for AI coding agents.",
-        content,
-        count=1,
-    )
-if replacements == 0:
-    content, insertions = re.subn(
-        r"^(# Agent Skills\s*\n\s*)",
-        rf"\1{current_agent_skills_kit_sentence}\n\n",
-        content,
-        count=1,
-        flags=re.MULTILINE,
-    )
-    if insertions == 0:
-        raise SystemExit(
-            "Failed to refresh README governed-repository sentence; expected one of known patterns."
-        )
-content = re.sub(
-    r"A governed repository of \*\*skills\*\* for AI coding agents",
-    f"A governed repository of **{catalog_count} skills** for AI coding agents",
-    content,
-    count=1,
-)
-content = re.sub(
-    r"A governed \*\*Agent Skills Kit\*\* repository(?: of \*\*\d+(?: canonical)? skills\*\*)? for Codex and AI coding agents",
-    "A governed **Agent Skills Kit** repository for Codex and AI coding agents",
-    content,
-    count=1,
-)
-content = re.sub(
-    r"currently expects \*\*\d+\*\* skills",
-    f"currently expects **{catalog_count}** skills",
-    content,
-    count=1,
-)
-readme_path.write_text(content, encoding="utf-8")
-PY
+python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/update_readme_catalog_text.py" \
+  "$repo_root/README.md" \
+  "$catalog_count"
 generate_skill_type_index "$repo_root/docs/skills-by-type.md"
 
 # remove_legacy_symlink removes the symlink at the given path if it exists and echoes a confirmation.

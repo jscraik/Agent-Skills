@@ -1177,7 +1177,7 @@ def main():
                     for gate, passed in proof.get("gates", {}).items():
                         marker = "pass" if passed else "fail"
                         print(f"  {gate}: {marker}")
-                    live = proof.get("live_codex_invocation", {})
+                    live = proof.get("live_runtime_invocation", {})
                     if live.get("status"):
                         print(f"  live invocation: {live.get('status')}")
                     print_first_validation_command(proof)

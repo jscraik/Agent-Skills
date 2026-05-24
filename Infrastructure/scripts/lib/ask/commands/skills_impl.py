@@ -15,6 +15,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, List, Optional
 
+try:
+    import yaml  # type: ignore
+except ImportError:  # pragma: no cover - exercised only in minimal runtimes
+    yaml = None
+
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 REPO_ROOT = SCRIPTS_ROOT.parents[1]
 if str(SCRIPTS_ROOT) not in sys.path:
@@ -393,15 +398,18 @@ def _parse_frontmatter_scalar(value: str) -> Any:
     return cleaned
 
 
-CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS: tuple[str, ...] = (
-    "name",
-    "description",
-    "short_description",
-    "interface",
-    "dependencies",
-    "policy",
-    "scope",
-    "plugin_id",
+CODEX_SKILL_PACKAGE_FIELDS: tuple[tuple[str, bool], ...] = (
+    ("name", True),
+    ("description", True),
+    ("short_description", False),
+    ("interface", False),
+    ("dependencies", False),
+    ("policy", False),
+    ("scope", False),
+    ("plugin_id", False),
+)
+CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS: tuple[str, ...] = tuple(
+    field for field, _required in CODEX_SKILL_PACKAGE_FIELDS
 )
 
 
@@ -1322,11 +1330,17 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
             validation_commands=proof["validation_commands"],
         )
         result.data["runtime_failure"] = proof["runtime_failure"]
-    if user_runtime_ready:
-        proof["live_codex_invocation"] = {
+    if required_runtime_ready:
+        runtime = proof["runtime_satisfied_by"]
+        operator_action = (
+            "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle."
+            if runtime == "codex_user_runtime"
+            else "Open or reload the Agents runtime and verify the handle is available there."
+        )
+        proof["live_runtime_invocation"] = {
             "status": "manual_session_gate",
-            "runtime_satisfied_by": proof["runtime_satisfied_by"],
-            "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
+            "runtime_satisfied_by": runtime,
+            "operator_action": operator_action,
         }
     result.data["proof"] = proof
     if proof["status"] != "pass":
@@ -2814,25 +2828,12 @@ SKILL_PACKAGE_SNAPSHOT_PATH = (
     "skill-package-readiness-public-output.v1.json"
 )
 CODEX_SKILL_PACKAGE_ABI_SOURCE_PATH = "codex-rs/core-skills/src/model.rs"
-CODEX_SKILL_PACKAGE_ABI_EVIDENCE_FIELDS: tuple[str, ...] = (
-    "name",
-    "description",
-    "short_description",
-    "interface",
-    "dependencies",
-    "policy",
-    "scope",
-    "plugin_id",
+CODEX_SKILL_PACKAGE_ABI_EVIDENCE_FIELDS: tuple[str, ...] = CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS
+CODEX_SKILL_PACKAGE_REQUIRED_FIELDS: tuple[str, ...] = tuple(
+    field for field, required in CODEX_SKILL_PACKAGE_FIELDS if required
 )
-
-CODEX_SKILL_PACKAGE_REQUIRED_FIELDS: tuple[str, ...] = ("name", "description")
-CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS: tuple[str, ...] = (
-    "short_description",
-    "interface",
-    "dependencies",
-    "policy",
-    "scope",
-    "plugin_id",
+CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS: tuple[str, ...] = tuple(
+    field for field, required in CODEX_SKILL_PACKAGE_FIELDS if not required
 )
 
 
@@ -2915,23 +2916,54 @@ def _package_field_values(frontmatter: dict[str, Any]) -> dict[str, Any]:
 
 
 def _read_agents_openai_yaml_fields(skill_md: Path | None) -> dict[str, Any]:
-    """Extract a conservative one-level agents/openai.yaml contract view."""
+    """Extract a conservative agents/openai.yaml contract view."""
     if not skill_md:
         return {}
     agents_openai = skill_md.parent / "agents" / "openai.yaml"
     if not agents_openai.is_file():
         return {}
-    fields: dict[str, Any] = {}
-    current_map: str | None = None
     try:
-        lines = agents_openai.read_text(encoding="utf-8").splitlines()
+        text = agents_openai.read_text(encoding="utf-8")
     except OSError:
         return {}
+    if yaml is not None:
+        try:
+            loaded = yaml.safe_load(text) or {}
+        except yaml.YAMLError:
+            loaded = {}
+        if isinstance(loaded, dict):
+            return {str(key): value for key, value in loaded.items()}
+    fields: dict[str, Any] = {}
+    current_map: str | None = None
+    current_nested_key: str | None = None
+    current_list_item: dict[str, Any] | None = None
+    lines = text.splitlines()
     for line in lines:
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
         indent = len(line) - len(line.lstrip(" "))
+        if current_map and stripped.startswith("- "):
+            nested = fields.setdefault(current_map, {})
+            if not isinstance(nested, dict):
+                continue
+            item_text = stripped[2:].strip()
+            if not current_nested_key:
+                continue
+            values = nested.setdefault(current_nested_key, [])
+            if not isinstance(values, list):
+                values = []
+                nested[current_nested_key] = values
+            if ":" in item_text:
+                item_key, item_value = item_text.split(":", 1)
+                current_list_item = {
+                    item_key.strip(): _parse_frontmatter_scalar(item_value.strip())
+                }
+                values.append(current_list_item)
+            else:
+                values.append(_parse_frontmatter_scalar(item_text))
+                current_list_item = None
+            continue
         if ":" not in stripped:
             continue
         key, value = stripped.split(":", 1)
@@ -2941,14 +2973,29 @@ def _read_agents_openai_yaml_fields(skill_md: Path | None) -> dict[str, Any]:
             if value:
                 fields[key] = _parse_frontmatter_scalar(value)
                 current_map = None
+                current_nested_key = None
+                current_list_item = None
             else:
                 fields[key] = {}
                 current_map = key
+                current_nested_key = None
+                current_list_item = None
             continue
         if current_map:
             nested = fields.setdefault(current_map, {})
-            if isinstance(nested, dict) and value:
+            if not isinstance(nested, dict):
+                continue
+            if current_list_item is not None and indent >= 4 and value:
+                current_list_item[key] = _parse_frontmatter_scalar(value)
+                continue
+            if value:
                 nested[key] = _parse_frontmatter_scalar(value)
+                current_nested_key = None
+                current_list_item = None
+            else:
+                nested[key] = []
+                current_nested_key = key
+                current_list_item = None
     return fields
 
 
@@ -2969,9 +3016,15 @@ def _skill_package_contract(
     dependencies = frontmatter.get("dependencies")
     if not isinstance(dependencies, dict):
         dependencies = {}
+    openai_dependencies = openai_fields.get("dependencies")
+    if isinstance(openai_dependencies, dict):
+        dependencies = {**dependencies, **openai_dependencies}
     policy = frontmatter.get("policy")
     if not isinstance(policy, dict):
         policy = {}
+    openai_policy = openai_fields.get("policy")
+    if isinstance(openai_policy, dict):
+        policy = {**policy, **openai_policy}
 
     codex_metadata = {
         "name": frontmatter.get("name"),
@@ -6138,6 +6191,36 @@ def _prune_generated_root_skill_dirs(target_dir: Path, keep_names: set[str], *, 
     return logs
 
 
+SYSTEM_BRIDGE_ALIAS_MARKER = ".agent-skills-system-bridge-alias.json"
+
+
+def _is_generated_system_bridge_alias(item: Path, system_source: Path) -> bool:
+    if item.is_symlink():
+        try:
+            return item.resolve(strict=True) == system_source.resolve(strict=True)
+        except OSError:
+            return False
+
+    marker = (
+        item / SYSTEM_BRIDGE_ALIAS_MARKER
+        if item.is_dir()
+        else item.parent / f".{item.name}-{SYSTEM_BRIDGE_ALIAS_MARKER}"
+    )
+    if not marker.is_file():
+        return False
+    try:
+        payload = json.loads(marker.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if payload.get("kind") != "system_bridge_alias":
+        return False
+    try:
+        target = system_source.parent / str(payload.get("target", ""))
+        return target.resolve(strict=True) == system_source.resolve(strict=True)
+    except OSError:
+        return False
+
+
 def _prune_first_level_system_bridge_aliases(
     target_dir: Path,
     system_skills_dir: Path,
@@ -6157,6 +6240,10 @@ def _prune_first_level_system_bridge_aliases(
         if not (system_source / "SKILL.md").exists():
             continue
 
+        if not _is_generated_system_bridge_alias(item, system_source):
+            logs.append(f"Skipped first-level system bridge alias without generated provenance: {item}")
+            continue
+
         logs.append(f"Removed first-level system bridge alias: {item}")
         if dry_run:
             continue
@@ -6165,6 +6252,19 @@ def _prune_first_level_system_bridge_aliases(
         else:
             shutil.rmtree(item)
     return logs
+
+
+def _is_system_bridge_entry(entry: Any, system_skills_dir: Path) -> bool:
+    """Return whether a discovered entry is owned by the hidden system lane."""
+    if entry.name not in SYSTEM_BRIDGE_SKILL_NAMES:
+        return False
+    try:
+        entry_source = entry.source_dir.resolve(strict=False)
+        system_root = system_skills_dir.resolve(strict=False)
+        entry_source.relative_to(system_root)
+    except (OSError, ValueError):
+        return False
+    return True
 
 
 def _public_root_report(report: dict) -> dict:
@@ -6746,10 +6846,21 @@ def sync_skills(
         for log in _prune_first_level_symlinks(skills_dir, keep_names, dry_run):
             plan["deletes"].append(log)
             logs.append(log)
+        if not dry_run:
+            for log in _prune_first_level_system_bridge_aliases(
+                skills_dir,
+                system_skills_dir,
+                dry_run=False,
+            ):
+                plan["deletes"].append(log)
+                logs.append(log)
         for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run):
             plan["deletes"].append(log)
             logs.append(log)
         for entry in entries:
+            if _is_system_bridge_entry(entry, system_skills_dir):
+                logs.append(f"Skipped hidden system bridge from flat projection: {entry.name}")
+                continue
             skill_name = entry.name
             target_link = skills_dir / skill_name
             if not entry.source_dir.is_relative_to(repo_root):
@@ -6762,6 +6873,13 @@ def sync_skills(
         if system_lane_logs:
             plan["symlinks"].append({"from": str(skills_dir / ".system"), "to": "../../skills-system"})
             logs.extend(system_lane_logs)
+        for log in _prune_first_level_system_bridge_aliases(
+            skills_dir,
+            system_skills_dir,
+            dry_run=dry_run,
+        ):
+            plan["deletes"].append(log)
+            logs.append(log)
         projection_logs = _refresh_catalog_projections(repo_root, dry_run)
         plan["writes"].extend([str(repo_root / "SKILL.md"), str(repo_root / "README.md")])
         logs.extend(projection_logs)

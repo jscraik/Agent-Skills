@@ -393,10 +393,10 @@ class TestAskCLI(unittest.TestCase):
             proof["validation_commands"],
             ["./bin/ask skills proof he-heartbeat --json --robot"],
         )
-        if proof["gates"].get("codex_user_link") or proof["gates"].get("agents_user_link"):
-            self.assertEqual(proof["live_codex_invocation"]["status"], "manual_session_gate")
+        if proof["gates"].get("user_runtime_ready"):
+            self.assertEqual(proof["live_runtime_invocation"]["status"], "manual_session_gate")
         else:
-            self.assertNotIn("live_codex_invocation", proof)
+            self.assertNotIn("live_runtime_invocation", proof)
 
     def test_skills_proof_human_output(self):
         """Verify ask skills proof has a useful non-JSON success render."""
