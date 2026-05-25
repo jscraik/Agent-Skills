@@ -65,7 +65,7 @@ def _live_status(status: str, basis: str, blockers: list[dict[str, Any]]) -> dic
 
 def _blocked_runtime_status(blockers: list[dict[str, Any]]) -> dict[str, Any]:
     return {
-        "status": "blocked_runtime" if blockers else "not_applicable",
+        "status": "blocked_runtime" if blockers else "modeled_only",
         "blockers": blockers,
         "does_not_fail_model_contract": True,
     }
@@ -102,7 +102,7 @@ def _annotate_conformance_status(case: dict[str, Any]) -> None:
         "repo_contract_fixture",
     )
     case["live_runtime_parity"] = _live_status(
-        "blocked_runtime" if live_blockers else "not_checked",
+        "blocked_runtime" if live_blockers else "modeled_only",
         "codex_preview_limitations",
         live_blockers,
     )
@@ -397,7 +397,7 @@ def run_skills_conformance(repo_root: Path, suite: str = DEFAULT_SUITE, evidence
             "status": "blocked",
             **_conformance_status_payload(
                 "blocked",
-                "not_checked",
+                "modeled_only",
                 [],
                 "unknown_suite",
                 "suite_not_run",
@@ -481,7 +481,7 @@ def run_skills_conformance(repo_root: Path, suite: str = DEFAULT_SUITE, evidence
         if isinstance(blocker, dict)
     ]
     model_contract_status = "blocked" if blockers else "pass"
-    live_parity_status = "blocked_runtime" if live_blockers else "not_checked"
+    live_parity_status = "blocked_runtime" if live_blockers else "modeled_only"
     summary_path = evidence_path / "skills-conformance-summary.json"
     summary = {
         "schema_version": CONFORMANCE_SCHEMA_VERSION,
