@@ -265,12 +265,79 @@ class TestAskSkillsDoctor(unittest.TestCase):
                 ["./bin/ask skills proof autofix --runtime-target codex --json --robot"],
             )
             self.assertIn("codex_user_runtime_ready", codex_proof["gate_policy"]["required"])
+            self.assertEqual(
+                codex_proof["runtime_failure"]["failed_check_id"],
+                "codex_user_runtime_ready",
+            )
+            diagnostics = codex_proof["runtime_diagnostics"]
+            self.assertEqual(diagnostics["failed_gate"], "codex_user_runtime_ready")
+            self.assertEqual(
+                diagnostics["runtime_modes"]["codex_user_runtime"],
+                "missing_root",
+            )
+            self.assertEqual(
+                diagnostics["runtime_modes"]["agents_user_runtime"],
+                "root_symlink",
+            )
+            missing_paths = {
+                item["runtime"]: item["path"]
+                for item in diagnostics["missing_command_handles"]
+            }
+            self.assertIn("codex_user_runtime", missing_paths)
+            self.assertIn("preview_user_runtime_sync", [
+                item["kind"] for item in diagnostics["recovery_commands"]
+            ])
 
             agents_proof = agents_result.data["proof"]
             self.assertEqual(agents_result.status, "success")
             self.assertEqual(agents_proof["runtime_target"], "agents")
             self.assertEqual(agents_proof["runtime_satisfied_by"], "agents_user_runtime")
             self.assertIn("agents_user_runtime_ready", agents_proof["gate_policy"]["required"])
+
+    def test_runtime_target_codex_accepts_per_handle_workspace_bridge(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            sandbox = Path(tmp)
+            repo_root = sandbox / "repo"
+            workspace_handle = repo_root / ".agents" / "skills" / "autofix" / "SKILL.md"
+            workspace_handle.parent.mkdir(parents=True)
+            workspace_handle.write_text("---\nname: autofix\n---\n", encoding="utf-8")
+            home = sandbox / "home"
+            codex_root = home / ".codex" / "skills"
+            codex_root.mkdir(parents=True)
+            (codex_root / "autofix").symlink_to(workspace_handle.parent)
+            (home / ".agents").mkdir()
+
+            resolution = {
+                "status": "ok",
+                "handle": "autofix",
+                "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                "command_handle_path": ".agents/skills/autofix/SKILL.md",
+            }
+
+            with (
+                patch("ask.commands.skills_impl.Path.home", return_value=home),
+                patch("ask.commands.skills_impl.resolve_skill_handle", return_value=resolution),
+                patch(
+                    "ask.commands.skills_impl.check_command_handles",
+                    return_value={"status": "pass", "violations": []},
+                ),
+            ):
+                result = skills_proof(repo_root, "autofix", runtime_target="codex")
+
+            proof = result.data["proof"]
+            self.assertEqual(result.status, "success")
+            self.assertEqual(proof["status"], "pass")
+            self.assertEqual(proof["runtime_target"], "codex")
+            self.assertEqual(proof["runtime_satisfied_by"], "codex_user_runtime")
+            self.assertFalse(proof["gates"]["codex_user_link"])
+            self.assertTrue(proof["gates"]["codex_user_command_handle_exists"])
+            self.assertTrue(proof["gates"]["codex_user_command_handle_points_to_workspace"])
+            self.assertTrue(proof["gates"]["codex_user_runtime_ready"])
+            self.assertEqual(
+                proof["runtime_diagnostics"]["runtime_modes"]["codex_user_runtime"],
+                "handle_bridge",
+            )
+            self.assertNotIn("runtime_failure", proof)
 
     def test_runtime_target_rejects_invalid_value_before_resolution(self) -> None:
         result = skills_proof(REPO_ROOT, "autofix", runtime_target="cloud")
