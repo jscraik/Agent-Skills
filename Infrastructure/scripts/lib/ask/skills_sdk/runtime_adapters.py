@@ -458,7 +458,7 @@ def _runtime_card_payload(
     if context["claim_status"] == "blocked":
         runtime_session["unavailable_reason"] = context["blocker"]
     return {
-        "schema_version": 1,
+        "schema_version": "runtime-card.v1",
         "card_id": f"runtime-card-{context['handle']}-{context['runtime_target']}",
         "created_at": context["created_at"],
         "runtime_target": context["runtime_target"],
