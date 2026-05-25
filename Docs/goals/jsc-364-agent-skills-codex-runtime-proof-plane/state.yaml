@@ -398,7 +398,7 @@ tasks:
   - id: T009
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-007 shared workspace evidence and closeout integration."
     inputs:
       - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
@@ -420,11 +420,11 @@ tasks:
     stop_if:
       - "Closeout would conflate local proof with live PR or Linear truth"
       - "Shared workspace evidence cannot be written under repo-owned paths"
-    receipt_id: null
+    receipt_id: R020
   - id: T010
     type: judge
     assignee: Judge
-    status: queued
+    status: active
     objective: "Run PU-008 final validation, docs accuracy review, and delivery sweep before completion."
     inputs:
       - "All JSC-364 slice receipts"
