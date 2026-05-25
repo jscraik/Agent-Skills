@@ -2,7 +2,7 @@
   "command": "./bin/ask skills proof testing --runtime-target codex --json --robot",
   "exit_code": 2,
   "handle": "testing",
-  "observed_at": "2026-05-25T10:29:00Z",
+  "observed_at": "2026-05-25T12:07:35Z",
   "proof": {
     "available_runtimes": [
       "agents_user_runtime"
@@ -58,7 +58,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "08f580ad8",
+        "source_revision": "2830d0697",
         "source_sha256": "6c451fc0bcab80a8d8b7cbf8000dde19f2e3aae875c87d220d5cf144605d0279"
       },
       "runtime_visibility": "latent",

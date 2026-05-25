@@ -349,7 +349,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T11:58:02Z">2026-05-25T11:58:02Z</time>
+          <time datetime="2026-05-25T12:09:34Z">2026-05-25T12:09:34Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -357,7 +357,7 @@
         </div>
         <div class="pill">
           <span class="label">Active Task</span>
-          <code>T010</code> PU-008 active: final delivery truth, docs accuracy, and proof-plane placement audit
+          <code>T011</code> Delivery closure pending explicit merge/cleanup authority
         </div>
       </div>
     </header>
@@ -439,6 +439,8 @@
             <li><strong>PU-008</strong> is placing validation-led delivery evidence under <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/</code>, runtime probe output under <code>.harness/evidence/runtime-proof/testing/codex/</code> and <code>.harness/evidence/runtime-proof/autofix/codex/</code>, and the public capability-discovery command in <code>Infrastructure/bin/ask</code> plus <code>Infrastructure/scripts/lib/ask/commands/skills_impl.py</code>.</li>
             <li><strong>Review work</strong> lands in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/</code>, separate from runtime proof artifacts.</li>
             <li><strong>Delivery work</strong> lands in the stacked PR series <code>200-207</code>; PR <code>207</code> carries PU-008, with triage evidence in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/pr207-green-sweep.md</code>.</li>
+            <li><strong>Final audit work</strong> lands in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md</code>, with the goal-board state and receipts updated beside the implementation ledger.</li>
+            <li><strong>Not placed here:</strong> no durable implementation is being written into generated <code>.agents/skills/**</code> projections, plugin cache directories, global Codex state, or <code>/Users/jamiecraik/dev/codex</code>.</li>
           </ul>
         </aside>
       </div>
@@ -583,6 +585,7 @@
             <code>Infrastructure/tests/test_ask_skills_codex_preview.py</code>
             <code>.harness/evidence/runtime-proof/testing/codex/</code>
             <code>.harness/evidence/runtime-proof/autofix/codex/</code>
+            <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md</code>
           </div>
         </article>
         <article class="placement-card">
@@ -613,6 +616,26 @@
             <code>python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py .harness/evidence/runtime-proof --require-shared-workspace --json</code>
             <code>python3 -m pytest Infrastructure/tests/test_ask_cli_impl.py -q</code>
             <code>./bin/ask repo closeout --changed --json --robot</code>
+          </div>
+        </article>
+        <article class="placement-card">
+          <h3>External delivery path</h3>
+          <p>Delivery truth is tracked outside local proof and must be refreshed before any completion or merge claim.</p>
+          <div class="path-list">
+            <code>GitHub PRs 200-207</code>
+            <code>GitHub PR 207: codex/jsc-364-runtime-proof-plane-pu008</code>
+            <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/pr207-green-sweep.md</code>
+            <code>Linear JSC-364</code>
+          </div>
+        </article>
+        <article class="placement-card">
+          <h3>Explicit non-placement</h3>
+          <p>The proof-plane implementation is intentionally not being hidden in generated or external runtime surfaces.</p>
+          <div class="path-list">
+            <code>not .agents/skills/** generated projections</code>
+            <code>not Plugins/cache/** plugin copies</code>
+            <code>not /Users/jamiecraik/dev/codex</code>
+            <code>not global ~/.codex runtime state</code>
           </div>
         </article>
       </div>
@@ -1197,11 +1220,35 @@
           <li>The remaining boundary is authority, not technical readiness: I have not merged or cleaned up the stack without explicit current-turn merge authority.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>Final completion audit written</h3>
+        <time datetime="2026-05-25T12:09:34Z">2026-05-25T12:09:34Z</time>
+        <p>I ran the current SA/VAL gate audit against the live implementation, runtime evidence, GitHub stack, and Linear state. The P0 proof plane is implemented and validated, but the full goal is intentionally still active because delivery closure requires explicit merge/cleanup authority.</p>
+        <ul>
+          <li>Audit: <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md</code>.</li>
+          <li>Fresh gates passed for handles, repo doctor, conformance, wrapper fixtures, preview tests, runtime-card validation, doctor tests, CLI tests, closeout, and capability discovery.</li>
+          <li><code>./bin/ask skills proof testing --runtime-target codex --json --robot</code> exited <code>2</code> as expected and refreshed schema-valid <code>blocked_runtime</code> evidence instead of claiming live runtime parity.</li>
+          <li>PRs <code>200-207</code> remain ready, <code>MERGEABLE</code>, and have no visible failing or pending checks.</li>
+          <li>Linear <code>JSC-364</code> remains <code>In Progress</code>, so final completion is still pending merged PRs, cleanup, and tracker closeout.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>Placement visual made explicit</h3>
+        <time datetime="2026-05-25T12:18:40Z">2026-05-25T12:18:40Z</time>
+        <p>I tightened the deep-module visual so it shows both where the implementation work is being placed and where it is deliberately not being placed.</p>
+        <ul>
+          <li>The placement index now names the final audit artifact, goal-board state, receipts, and implementation ledger as separate governance surfaces.</li>
+          <li>The current PU-008 slice card now includes <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md</code>.</li>
+          <li>New delivery and non-placement cards show PR <code>207</code>, the PR green-sweep artifact, Linear <code>JSC-364</code>, and the excluded generated/global paths.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>PRs 200-207 are ready and mergeable in live GitHub; merge and cleanup still require explicit current-turn authority. Broad projection drift remains classified separately from focused PU-008 proof.</p>
+      <p>PRs 200-207 are ready and mergeable in live GitHub; merge and cleanup still require explicit current-turn authority. The implementation-ready audit is written, and Linear remains In Progress until delivery closure is authorized and completed.</p>
     </section>
   </main>
 </body>

@@ -42,7 +42,7 @@
   ],
   "card_id": "runtime-card-autofix-codex",
   "command_handle": "$autofix",
-  "created_at": "2026-05-25T10:29:11Z",
+  "created_at": "2026-05-25T12:07:43Z",
   "evidence_receipts": [
     {
       "artifact_path": ".harness/evidence/runtime-proof/autofix/codex/runtime-card.json",
@@ -53,7 +53,7 @@
       "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
       "evidence_type": "command",
       "exit_code": 2,
-      "observed_at": "2026-05-25T10:29:11Z",
+      "observed_at": "2026-05-25T12:07:43Z",
       "probe_artifact_path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
       "probe_command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
       "probe_exit_code": 2,
@@ -106,7 +106,7 @@
   },
   "runtime_session": {
     "actor_type": "agent",
-    "created_at": "2026-05-25T10:29:11Z",
+    "created_at": "2026-05-25T12:07:43Z",
     "runtime_status": "blocked_runtime",
     "runtime_target": "codex",
     "session_id": "runtime-proof-autofix-codex",

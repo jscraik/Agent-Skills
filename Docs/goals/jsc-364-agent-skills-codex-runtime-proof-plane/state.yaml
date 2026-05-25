@@ -45,10 +45,10 @@ rules:
 checks:
   dirty_fingerprint: "main...origin/main with untracked governed prompt observed 2026-05-24T21:41:48Z"
   last_verification:
-    command: "PU-008 final delivery and docs accuracy sweep: refreshed PR stack truth, Linear tracker truth, browser placement visual, goal board, and repo closeout"
-    outcome: pass_pr_stack_ready_pending_merge_authority
-    checked_at: "2026-05-25T11:58:02Z"
-    detail: "Focused PU-008 proof remains green and the browser implementation notes now show where all work is placed across public commands, deep modules, schemas, runtime evidence, review artifacts, goal receipts, GitHub PRs, and Linear JSC-364. Live GitHub truth shows PRs 200-207 are ready, MERGEABLE, and have no visible failing or pending status checks; PRs 200-203 pr-template blockers were resolved with body marker fixes and empty synchronize commits. Linear JSC-364 remains In Progress and has attachments for PRs 199-207, including PR 207. ./bin/ask repo closeout --changed --json --robot exits success with no changed files and repo_surface diagnostic warning only; goal board validator passes; browser-served HTML returns successfully. Runtime proof cards for context7/testing/autofix remain blocked_runtime by design and must not be claimed as live runtime parity. Broad local gates bash scripts/validate-codestyle.sh and ./bin/ask repo validate --json --robot remain blocked by pre-existing projection-integrity drift in cache-harness-engineering and cache-skill-factory. The PR stack is ready for merge consideration, but no merge or cleanup has been performed without explicit current-turn merge authority."
+    command: "Final completion audit: SA-001 through SA-016 and VAL-001 through VAL-015 checked against current runtime, PR, and Linear truth"
+    outcome: pass_implementation_ready_pending_delivery_authority
+    checked_at: "2026-05-25T12:09:34Z"
+    detail: "Final completion audit artifact written at artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md. Acceptance criteria SA-001 through SA-016 are proved for the implemented P0 proof plane or proved as explicit blocked_runtime where live Codex runtime is unavailable. Current gates pass: handles, repo doctor, codex-parity conformance, wrapper fixtures, codex preview tests, runtime proof blocked_runtime evidence, runtime-card validation with shared workspace, doctor tests, CLI tests, repo closeout, capabilities, PR stack truth, and Linear JSC-364 read truth. Runtime evidence for testing/autofix was refreshed to source revision 2830d0697 while preserving blocked_runtime semantics. PRs 200-207 remain ready, MERGEABLE, and have no visible failing or pending checks. Linear JSC-364 remains In Progress. The full goal is not complete because PRs remain open, cleanup has not run, and explicit current-turn merge/cleanup authority has not been granted."
   last_scout:
     command: "PU-001 baseline: ./bin/ask skills handles --check --check-command-handles --no-handles --json --robot and ./bin/ask repo doctor --json --robot"
     outcome: "blocked_as_expected"
@@ -61,7 +61,7 @@ continuation_gate:
   queued_user_input: absent
   pending_work: present
   auto_continue_allowed: yes
-  blocked_by: "none"
+  blocked_by: "explicit current-turn merge/cleanup authority required before delivery closure"
 claims:
   - id: C001
     claim: "JSC-364 is the active governed implementation lane after Jamie approved the mode switch."
@@ -424,7 +424,7 @@ tasks:
   - id: T010
     type: judge
     assignee: Judge
-    status: active
+    status: done
     objective: "Run PU-008 final validation, docs accuracy review, and delivery sweep before completion."
     inputs:
       - "All JSC-364 slice receipts"
@@ -454,4 +454,32 @@ tasks:
       - "Any mandatory review artifact is missing"
       - "Docs or AGENTS-facing guidance is stale"
       - "PRs are unmerged or CI is failing without owner-approved blocker classification"
-    receipt_id: R025
+    receipt_id: R029
+  - id: T011
+    type: pm
+    assignee: PM
+    status: active
+    objective: "Perform delivery closure after explicit merge/cleanup authority is granted."
+    inputs:
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md"
+      - "GitHub PRs 200-207"
+      - "Linear JSC-364"
+    constraints:
+      - "Do not merge without explicit current-turn authority"
+      - "Refresh PR checks and mergeability immediately before each merge"
+      - "Do not mark the native goal complete while PRs remain open or Linear remains In Progress"
+      - "Preserve blocked_runtime truth boundaries after merge"
+    expected_output: "Merged stack or owner-approved blocker classification, cleanup evidence, Linear truth, and final goal closeout receipt"
+    allowed_files:
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/**"
+    verify:
+      - "gh pr list --repo jscraik/Agent-Skills --state open --json number,headRefName,baseRefName,isDraft,mergeable,statusCheckRollup,url --limit 30"
+      - "mcp__linear__get_issue JSC-364"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane"
+    stop_if:
+      - "Merge authority is not explicit in the current turn"
+      - "Any PR loses mergeability or has failing/pending required checks"
+      - "Linear state cannot be refreshed"
+    receipt_id: R030
