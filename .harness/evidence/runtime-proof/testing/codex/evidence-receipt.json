@@ -7,7 +7,7 @@
   "command": "./bin/ask skills proof testing --runtime-target codex --json --robot",
   "evidence_type": "command",
   "exit_code": 2,
-  "observed_at": "2026-05-25T16:01:00Z",
+  "observed_at": "2026-05-25T16:32:16Z",
   "probe_artifact_path": ".harness/evidence/runtime-proof/testing/codex/probe.json",
   "probe_command": "./bin/ask skills proof testing --runtime-target codex --json --robot",
   "probe_exit_code": 2,

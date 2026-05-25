@@ -1,16 +1,16 @@
 version: 2
 goal:
   slug: "jsc-364-agent-skills-codex-runtime-proof-plane"
-  status: active
+  status: done
   objective: "Implement JSC-364 Codex Runtime Proof Plane through governed, validated, runtime-truth-first slices."
   native_objective: "/goal Follow Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/goal.md"
-  native_status: active
+  native_status: complete
   native_goal_id: null
   token_budget: null
   tokens_used: 0
   time_used_seconds: 0
   native_created_at: "2026-05-24T21:41:48Z"
-  native_updated_at: "2026-05-24T21:41:48Z"
+  native_updated_at: "2026-05-25T16:32:20Z"
 completion_contract:
   outcome: "JSC-364 is implemented with reachable Codex Runtime Proof Plane commands that emit schema-valid proof or blocked_runtime evidence without false parity claims."
   verification_surface:
@@ -45,23 +45,23 @@ rules:
 checks:
   dirty_fingerprint: "main...origin/main with untracked governed prompt observed 2026-05-24T21:41:48Z"
   last_verification:
-    command: "Final completion audit: SA-001 through SA-016 and VAL-001 through VAL-015 checked against current runtime, PR, and Linear truth"
-    outcome: pass_implementation_ready_pending_delivery_authority
-    checked_at: "2026-05-25T12:09:34Z"
-    detail: "Final completion audit artifact written at artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md. Acceptance criteria SA-001 through SA-016 are proved for the implemented P0 proof plane or proved as explicit blocked_runtime where live Codex runtime is unavailable. Current gates pass: handles, repo doctor, codex-parity conformance, wrapper fixtures, codex preview tests, runtime proof blocked_runtime evidence, runtime-card validation with shared workspace, doctor tests, CLI tests, repo closeout, capabilities, PR stack truth, and Linear JSC-364 read truth. Runtime evidence for testing/autofix was refreshed to source revision 2830d0697 while preserving blocked_runtime semantics. PRs 200-207 remain ready, MERGEABLE, and have no visible failing or pending checks. Linear JSC-364 remains In Progress. The full goal is not complete because PRs remain open, cleanup has not run, and explicit current-turn merge/cleanup authority has not been granted."
+    command: "Post-merge delivery closeout: PR 208, open PRs, branch/worktree cleanup, Linear JSC-364, runtime proof, runtime-card validation, repo closeout, and goal board checked against current truth"
+    outcome: pass_goal_complete
+    checked_at: "2026-05-25T16:32:20Z"
+    detail: "PR 208 is MERGED into main at merge commit 787e3d62041e80d400b28b1cff8a9ef9ce89eb11; GitHub reports no open PRs for jscraik/Agent-Skills. Local main tracks origin/main at 787e3d620 with no runtime-proof stack worktrees and no origin/codex/jsc-364-runtime-proof-plane refs remaining. Linear JSC-364 is Done with PR 208 attached. Runtime proof for testing on codex refreshed on merged main and remains schema-valid blocked_runtime evidence, not live runtime parity. Capability discovery, runtime-card validation, repo closeout, and the goal-board validator pass. Final closeout receipt R030 records delivery completion."
   last_scout:
     command: "PU-001 baseline: ./bin/ask skills handles --check --check-command-handles --no-handles --json --robot and ./bin/ask repo doctor --json --robot"
     outcome: "blocked_as_expected"
     checked_at: "2026-05-24T21:49:18Z"
     detail: "Generated command-handle check reports 6 violations; repo doctor blocks on command_handles with next command ./bin/ask skills handles --check --no-handles --check-command-handles --json --robot."
 continuation_gate:
-  native_status: active
+  native_status: complete
   goal_active: pass
   thread_idle: unknown
   queued_user_input: absent
-  pending_work: present
-  auto_continue_allowed: yes
-  blocked_by: "explicit current-turn merge/cleanup authority required before delivery closure"
+  pending_work: absent
+  auto_continue_allowed: no
+  blocked_by: null
 claims:
   - id: C001
     claim: "JSC-364 is the active governed implementation lane after Jamie approved the mode switch."
@@ -81,7 +81,7 @@ claims:
     route: reproduced
     status: supported
     remaining_uncertainty:
-      - "Delivery packaging remains before this slice is pushed or opened as a PR"
+      - "Resolved by merged integration PR 208 and post-merge closeout receipt R030"
   - id: C003
     claim: "The proof plane must preserve the difference between modeled conformance, live runtime parity, and blocked runtime evidence."
     evidence_surface:
@@ -104,7 +104,7 @@ claims:
     route: reproduced
     status: supported
     remaining_uncertainty:
-      - "Delivery packaging remains before this slice is pushed or opened as a PR"
+      - "Resolved by merged integration PR 208 and post-merge closeout receipt R030"
   - id: C005
     claim: "PU-003 separates source-modeled conformance from live Codex runtime parity instead of letting blocked live runtime fail or pass the model contract."
     evidence_surface:
@@ -114,7 +114,7 @@ claims:
     route: reproduced
     status: supported
     remaining_uncertainty:
-      - "PU-004 now validates public wrapper exposure, but downstream closeout and shared workspace consumers still need migration in PU-007 so top-level model pass is never mistaken for live runtime parity."
+      - "Resolved by PU-007 closeout integration and merged integration PR 208"
   - id: C006
     claim: "PU-004 validates proof-plane capability discovery through public ask wrapper surfaces rather than private helper-only assumptions."
     evidence_surface:
@@ -125,7 +125,7 @@ claims:
     route: reproduced
     status: supported
     remaining_uncertainty:
-      - "Full Infrastructure/tests remains blocked by unrelated/pre-existing local environment and broad-suite failures; PR/CI truth must refresh after packaging."
+      - "Resolved for this goal by PR 208 CI truth and post-merge closeout receipt R030"
   - id: C007
     claim: "PU-005 preview output now exposes explicit source-modeled basis and truncation status through reachable public ask surfaces without claiming live runtime parity."
     evidence_surface:
@@ -138,7 +138,7 @@ claims:
     route: reproduced
     status: supported
     remaining_uncertainty:
-      - "Delivery packaging remains before this slice is pushed or opened as a PR."
+      - "Resolved by merged integration PR 208 and post-merge closeout receipt R030"
   - id: C008
     claim: "PU-006 proof command now writes durable runtime evidence artifacts for explicit codex or agents runtime targets without converting runtime absence into success."
     evidence_surface:
@@ -152,9 +152,7 @@ claims:
     route: reproduced
     status: supported
     remaining_uncertainty:
-      - "Delivery packaging remains before this slice is pushed or opened as a PR."
-      - "Full Infrastructure/tests remains blocked by a local missing PyYAML dependency in unrelated modules."
-      - "Agent-native postfix artifact is substantively PASS but missed the required WROTE footer; retry failed to write a replacement artifact."
+      - "Resolved for this goal by PR 208 CI truth, schema validation, and post-merge closeout receipt R030"
   - id: C009
     claim: "PU-007 closeout now exposes shared workspace runtime evidence, separates changed-scope and workspace-scope findings, and blocks invalid changed runtime-card evidence without claiming unchecked PR, tracker, docs, or schema proof."
     evidence_surface:
@@ -167,8 +165,18 @@ claims:
     route: reproduced
     status: supported
     remaining_uncertainty:
-      - "Delivery packaging remains before this slice is pushed or opened as a PR."
-      - "Testing and unslopify post-fix artifact retries failed to write requested artifacts after their earlier mailbox findings were fixed."
+      - "Resolved for this goal by PR 208 merge, cleanup verification, and post-merge closeout receipt R030"
+  - id: C010
+    claim: "JSC-364 delivery closure is complete after merged PR 208, branch/worktree cleanup, Linear Done state, and refreshed runtime-proof evidence on main."
+    evidence_surface:
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/receipts.jsonl"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md"
+      - ".harness/evidence/runtime-proof/testing/codex/runtime-card.json"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    route: reproduced
+    status: confirmed
+    remaining_uncertainty:
+      - "No remaining goal-completion uncertainty; live Codex runtime parity remains explicitly not claimed."
 tasks:
   - id: T001
     type: pm
@@ -458,7 +466,7 @@ tasks:
   - id: T011
     type: pm
     assignee: PM
-    status: active
+    status: done
     objective: "Perform delivery closure after explicit merge/cleanup authority is granted."
     inputs:
       - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md"

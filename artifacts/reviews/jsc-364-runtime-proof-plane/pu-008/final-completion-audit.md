@@ -1,14 +1,14 @@
 # JSC-364 Final Completion Audit
 
-Status: pass_implementation_ready_pending_delivery_authority
+Status: complete
 
-Checked at: 2026-05-25T12:09:34Z
+Checked at: 2026-05-25T16:32:20Z
 
 ## Verdict
 
-The P0 Codex Runtime Proof Plane implementation is currently validated through the required executable gates, review artifacts, runtime evidence, PR checks, and Linear tracker inspection.
+The P0 Codex Runtime Proof Plane implementation is validated through the required executable gates, review artifacts, runtime evidence, PR checks, branch/worktree cleanup, and Linear tracker inspection.
 
-The full thread goal is not yet complete because delivery closure still requires explicit current-turn merge/cleanup authority. Live GitHub shows the PR stack is technically ready, but the active goal contract forbids merging without explicit authority, and Linear JSC-364 remains `In Progress`.
+The full thread goal is complete. PR 208 merged the stack into `main`, live GitHub reports no open PRs, runtime-proof stack refs and extra worktrees are cleaned up, Linear JSC-364 is `Done`, and the runtime proof still records live Codex runtime absence as schema-valid `blocked_runtime` evidence rather than false parity.
 
 ## Requirement Matrix
 
@@ -26,7 +26,7 @@ The full thread goal is not yet complete because delivery closure still requires
 | SA-010 | ArtifactRecord links runtime cards, previews, schema reports, and verifier outputs. | Runtime evidence validator checks `artifact-record.json` files in shared workspace; no findings. | proved |
 | SA-011 | P0 implementation does not mutate Codex config/session/plugin/automation state. | Changes are contained to agent-skills repo surfaces and generated runtime evidence; no `/Users/jamiecraik/dev/codex` mutation was made. | proved_by_scope |
 | SA-012 | Artifact validators VAL-008 through VAL-011 pass. | VAL-008 and VAL-009 pass; VAL-010 passes; VAL-011 review artifacts exist from PU-008 review stack and docs accuracy check. | proved_with_review_artifact_caveat |
-| SA-013 | Live Linear mapping confirmed before tracker mutation is claimed. | Linear MCP `get_issue JSC-364` shows parent `JSC-351`, status `In Progress`, High priority, required labels, and PR attachments 199-207. No new tracker mutation is claimed. | proved_for_read_truth |
+| SA-013 | Live Linear mapping confirmed before tracker mutation is claimed. | Linear MCP `get_issue JSC-364` shows parent `JSC-351`, status `Done`, completedAt `2026-05-25T16:26:17.001Z`, required labels, and PR attachment 208. | proved |
 | SA-014 | CapabilityDiscovery lets an agent discover support, blockers, and next action. | `./bin/ask skills capabilities --runtime-target codex --json --robot` exits 0 with schema `capability-discovery.v1`, supported commands, artifacts, known limitations, blocked checks, and next commands. | proved |
 | SA-015 | RuntimeCard and ArtifactRecord are user_observable in shared workspace and include workspace identity fields. | `validate_runtime_cards.py ... --require-shared-workspace` exits 0 with expected workspace root `/Users/jamiecraik/dev/agent-skills`. | proved |
 | SA-016 | blocked_runtime receipts require machine-verifiable probe command, exit code, artifact path, blocker_class. | Runtime-card validator exits 0 over blocked_runtime receipts for context7, testing, and autofix. | proved |
@@ -46,30 +46,31 @@ The full thread goal is not yet complete because delivery closure still requires
 | VAL-009 | `python3 -m pytest Infrastructure/tests/test_ask_cli_impl.py -q` | pass, 209 tests and 4 subtests |
 | VAL-010 | `./bin/ask repo closeout --changed --json --robot` | pass; changed runtime evidence visible |
 | VAL-012 | `./bin/ask skills capabilities --runtime-target codex --json --robot` | pass |
-| VAL-015 | Linear MCP `get_issue JSC-364` | pass; status In Progress, parent JSC-351, PR attachments 199-207 |
+| VAL-015 | Linear MCP `get_issue JSC-364` | pass; status Done, parent JSC-351, PR 208 attached |
 
 ## Live Delivery Truth
 
 | Surface | Evidence | Verdict |
 |---|---|---|
-| Local branch | `codex/jsc-364-runtime-proof-plane-pu008` is current. | clean except refreshed runtime evidence before this audit update |
-| PR stack | PRs 200-207 are ready, `MERGEABLE`, and have no visible failing or pending checks. | technically_ready |
-| PR 207 | Latest branch contains evidence commit `2830d0697); no failing/pending checks at last poll. | technically_ready |
-| Linear | JSC-364 remains `In Progress`; PR attachments 199-207 are present. | not_done |
-| Merge/cleanup | No merge or cleanup performed. | pending_explicit_authority |
+| Local branch | `main` tracks `origin/main` at merge commit `787e3d62041e80d400b28b1cff8a9ef9ce89eb11`. | complete |
+| Open PRs | `gh pr list --repo jscraik/Agent-Skills --state open --json number,title,headRefName` returns `[]`. | complete |
+| Integration PR | PR 208 is `MERGED` into `main` at `2026-05-25T16:26:11Z`. | complete |
+| Branch cleanup | No `origin/codex/jsc-364-runtime-proof-plane*` refs remain; only the main worktree is registered. | complete |
+| Linear | JSC-364 is `Done`, completed at `2026-05-25T16:26:17Z`, with PR 208 attached. | complete |
+| Runtime evidence | `./bin/ask skills proof testing --runtime-target codex --json --robot` exits 2 and refreshes schema-valid `blocked_runtime` evidence on merged main. | complete |
 
-## Remaining Work
+## Post-Merge Closeout
 
-1. Obtain explicit current-turn merge/cleanup authority.
-2. Merge the PR stack in dependency order only after refreshing mergeability and checks again.
-3. After merge, update local main, prune merged branches/worktrees if authorized, and verify no stale delivery refs remain.
-4. Refresh Linear JSC-364 and move/comment only with explicit tracker mutation authority.
-5. Run final goal closeout after merged code, tracker state, and cleanup evidence all align.
+1. PR 208 merged the JSC-364 stack and deleted the integration branch.
+2. Local `main` was reconciled to `origin/main`; stale stack refs and worktrees were pruned.
+3. Linear JSC-364 is Done and includes PR 208 as the integration attachment.
+4. Runtime proof remains intentionally `blocked_runtime` for live Codex runtime absence; no live runtime parity is claimed.
+5. Goal board receipt R030 records final delivery closure.
 
-## Do Not Claim Yet
+## Final Claim Boundary
 
-- Do not mark the native goal complete while PRs remain open and Linear remains In Progress.
-- Do not claim live Codex runtime parity; current Codex runtime proof is intentionally `blocked_runtime` with durable evidence.
-- Do not treat repo-surface diagnostic debt as a PU-008 regression; keep it classified separately unless it becomes a closeout blocker.
+- It is now valid to mark the JSC-364 goal complete.
+- It is still invalid to claim live Codex runtime parity; current Codex runtime proof is intentionally `blocked_runtime` with durable evidence.
+- Repo-surface diagnostic debt remains classified as warning-only pre-existing debt, not a JSC-364 regression.
 
 WROTE: artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md

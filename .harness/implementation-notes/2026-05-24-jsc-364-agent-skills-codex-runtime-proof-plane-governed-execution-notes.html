@@ -560,11 +560,11 @@
               <div class="placement">
                 <strong>Work lands in</strong>
                 <div class="path-list">
-                  <code>GitHub PRs 200-207 ready and mergeable</code>
-                  <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-007/pr-green-sweep-pr206.md</code>
-                  <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/pr207-green-sweep.md</code>
+                  <code>GitHub PR 208 merged into main</code>
+                  <code>no open Agent-Skills PRs</code>
+                  <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md</code>
                   <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/</code>
-                  <code>Linear JSC-364</code>
+                  <code>Linear JSC-364 Done</code>
                 </div>
               </div>
             </div>
@@ -573,8 +573,8 @@
       </div>
       <div class="placement-grid" aria-label="Current implementation placement">
         <article class="placement-card current">
-          <h3>Current slice: PU-008</h3>
-          <p>Validation and delivery evidence is being gathered without converting <code>blocked_runtime</code> artifacts into false success claims.</p>
+          <h3>Current slice: delivery closed</h3>
+          <p>PR 208 is merged, cleanup is complete, and the remaining proof surface preserves <code>blocked_runtime</code> truth without claiming live runtime parity.</p>
           <div class="path-list">
             <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/architecture-strategist.md</code>
             <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/agent-native-reviewer.md</code>
@@ -620,12 +620,12 @@
         </article>
         <article class="placement-card">
           <h3>External delivery path</h3>
-          <p>Delivery truth is tracked outside local proof and must be refreshed before any completion or merge claim.</p>
+          <p>Delivery truth is tracked outside local proof and was refreshed after merge before the goal was closed.</p>
           <div class="path-list">
-            <code>GitHub PRs 200-207</code>
-            <code>GitHub PR 207: codex/jsc-364-runtime-proof-plane-pu008</code>
-            <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/pr207-green-sweep.md</code>
-            <code>Linear JSC-364</code>
+            <code>GitHub PR 208: merged</code>
+            <code>gh pr list: [] open PRs</code>
+            <code>no origin/codex/jsc-364-runtime-proof-plane refs</code>
+            <code>Linear JSC-364: Done</code>
           </div>
         </article>
         <article class="placement-card">
@@ -1215,9 +1215,9 @@
         <ul>
           <li>PRs <code>200-207</code> are ready, <code>MERGEABLE</code>, and show no visible failing or pending checks.</li>
           <li>PRs <code>200-203</code> had stale <code>pr-template</code> blockers cleared by body-marker fixes and fresh synchronize commits.</li>
-          <li>Linear <code>JSC-364</code> is still <code>In Progress</code> and has attachments for PRs <code>199-207</code>, including PR <code>207</code>.</li>
+          <li>Historical snapshot: Linear <code>JSC-364</code> was then <code>In Progress</code> with attachments for PRs <code>199-207</code>, including PR <code>207</code>. This is superseded by the later PR 208 closeout entry.</li>
           <li><code>./bin/ask repo closeout --changed --json --robot</code>, the goal board validator, and the browser-served implementation notes all pass.</li>
-          <li>The remaining boundary is authority, not technical readiness: I have not merged or cleaned up the stack without explicit current-turn merge authority.</li>
+          <li>Historical snapshot: the remaining boundary was authority, not technical readiness. This is superseded by the later PR 208 closeout entry.</li>
         </ul>
       </article>
 
@@ -1230,7 +1230,7 @@
           <li>Fresh gates passed for handles, repo doctor, conformance, wrapper fixtures, preview tests, runtime-card validation, doctor tests, CLI tests, closeout, and capability discovery.</li>
           <li><code>./bin/ask skills proof testing --runtime-target codex --json --robot</code> exited <code>2</code> as expected and refreshed schema-valid <code>blocked_runtime</code> evidence instead of claiming live runtime parity.</li>
           <li>PRs <code>200-207</code> remain ready, <code>MERGEABLE</code>, and have no visible failing or pending checks.</li>
-          <li>Linear <code>JSC-364</code> remains <code>In Progress</code>, so final completion is still pending merged PRs, cleanup, and tracker closeout.</li>
+          <li>Historical snapshot: Linear <code>JSC-364</code> was still <code>In Progress</code>, so final completion was pending merged PRs, cleanup, and tracker closeout. This is superseded by the later PR 208 closeout entry.</li>
         </ul>
       </article>
 
@@ -1244,11 +1244,24 @@
           <li>New delivery and non-placement cards show PR <code>207</code>, the PR green-sweep artifact, Linear <code>JSC-364</code>, and the excluded generated/global paths.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>Delivery closed after PR 208 merge</h3>
+        <time datetime="2026-05-25T16:32:20Z">2026-05-25T16:32:20Z</time>
+        <p>The stack is now merged and the closeout proof has been refreshed against live GitHub, Linear, local branch/worktree state, and runtime-proof evidence on <code>main</code>.</p>
+        <ul>
+          <li>PR <code>208</code> is <code>MERGED</code> into <code>main</code> at merge commit <code>787e3d62041e80d400b28b1cff8a9ef9ce89eb11</code>.</li>
+          <li><code>gh pr list --repo jscraik/Agent-Skills --state open</code> returns no open PRs.</li>
+          <li>No <code>origin/codex/jsc-364-runtime-proof-plane*</code> refs remain and only the main worktree is registered.</li>
+          <li>Linear <code>JSC-364</code> is <code>Done</code> with PR <code>208</code> attached.</li>
+          <li>The refreshed <code>testing/codex</code> runtime card remains schema-valid <code>blocked_runtime</code> evidence on merged main.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>PRs 200-207 are ready and mergeable in live GitHub; merge and cleanup still require explicit current-turn authority. The implementation-ready audit is written, and Linear remains In Progress until delivery closure is authorized and completed.</p>
+      <p>JSC-364 is delivery-complete. The only remaining caution is semantic: the proof plane proves runtime absence as durable <code>blocked_runtime</code> evidence and still does not claim live Codex runtime parity.</p>
     </section>
   </main>
 </body>
