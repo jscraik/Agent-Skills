@@ -45,10 +45,10 @@ rules:
 checks:
   dirty_fingerprint: "main...origin/main with untracked governed prompt observed 2026-05-24T21:41:48Z"
   last_verification:
-    command: "PU-003 final validation: conformance status split tests, codex-parity ask command, py_compile, and mandatory review artifact verification"
+    command: "PU-004 final validation: public wrapper fixture verifier defaults, explicit fixture modes, focused tests, py_compile, goal board, and mandatory post-fix review artifacts"
     outcome: pass
-    checked_at: "2026-05-24T23:58:38Z"
-    detail: "test_pr196_jsc351_governed_closeout.py passes with 103 tests; skills conformance codex-parity command exits success with model_contract_status pass, live_parity_status blocked_runtime, blocked_runtime.does_not_fail_model_contract true, and three explicit live-runtime blockers; py_compile passes for conformance.py and the focused governed-closeout test module; six required PU-003 review artifacts are present and non-empty with WROTE footers."
+    checked_at: "2026-05-25T07:41:48Z"
+    detail: "verify_wrapper_contract_fixtures.py passes in default, --runtime-separation, and --runtime-proof modes; focused pytest passes with 13 tests; py_compile passes for the verifier and tests; the goal board validator passes; post-fix adversarial and agent-native review artifacts are present with WROTE footers. The broad Infrastructure/tests lane remains a pre-existing/environmental blocker in the available local Python lanes: default python lacks PyYAML, the PyYAML venv is Python 3.9 and misses Python 3.10+ APIs, and the uv PyYAML/pytest Python 3.12 run exposes unrelated existing failures outside PU-004 ownership."
   last_scout:
     command: "PU-001 baseline: ./bin/ask skills handles --check --check-command-handles --no-handles --json --robot and ./bin/ask repo doctor --json --robot"
     outcome: "blocked_as_expected"
@@ -114,7 +114,18 @@ claims:
     route: reproduced
     status: supported
     remaining_uncertainty:
-      - "Downstream consumers still need to migrate to the split fields in later slices so top-level model pass cannot be mistaken for live runtime parity"
+      - "PU-004 now validates public wrapper exposure, but downstream closeout and shared workspace consumers still need migration in PU-007 so top-level model pass is never mistaken for live runtime parity."
+  - id: C006
+    claim: "PU-004 validates proof-plane capability discovery through public ask wrapper surfaces rather than private helper-only assumptions."
+    evidence_surface:
+      - "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py"
+      - "Infrastructure/tests/test_verify_wrapper_contract_fixtures.py"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-004/adversarial-postfix-reviewer.md"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-004/agent-native-postfix-reviewer.md"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Full Infrastructure/tests remains blocked by unrelated/pre-existing local environment and broad-suite failures; PR/CI truth must refresh after packaging."
 tasks:
   - id: T001
     type: pm
@@ -263,7 +274,7 @@ tasks:
   - id: T006
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-004 capability discovery and public wrapper fixtures."
     inputs:
       - "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py"
@@ -284,11 +295,11 @@ tasks:
     stop_if:
       - "Capability discovery cannot be exposed without changing unrelated command families"
       - "Wrapper fixture updates cannot run from a clean public command path"
-    receipt_id: null
+    receipt_id: R013
   - id: T007
     type: worker
     assignee: Worker
-    status: queued
+    status: active
     objective: "Implement PU-005 Codex preview source identity and truncation hardening."
     inputs:
       - "Infrastructure/scripts/lib/ask/services/codex_preview.py"

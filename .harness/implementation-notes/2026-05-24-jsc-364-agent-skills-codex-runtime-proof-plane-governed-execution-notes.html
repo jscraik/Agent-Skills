@@ -217,7 +217,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T00:17:30Z">2026-05-25T00:17:30Z</time>
+          <time datetime="2026-05-25T07:41:48Z">2026-05-25T07:41:48Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -225,7 +225,7 @@
         </div>
         <div class="pill">
           <span class="label">Active Task</span>
-          <code>T006</code> PU-004 active after PU-003 review closure
+          <code>T007</code> PU-005 active after PU-004 wrapper fixture closure
         </div>
       </div>
     </header>
@@ -358,6 +358,12 @@
             <td><span class="status">passed, PR opened</span></td>
             <td>Codex parity conformance status split: keep modeled conformance, live runtime parity, and blocked runtime separate.</td>
             <td>Focused tests pass with 103 tests, the public conformance command exits success with <code>model_contract_status: pass</code>, and live runtime absence is reported separately as <code>live_parity_status: blocked_runtime</code>. Six final review artifacts are present with <code>WROTE:</code> footers. PR 202 is open as a draft stacked on PR 201.</td>
+          </tr>
+          <tr>
+            <td>PU-004</td>
+            <td><span class="status">passed, packaging next</span></td>
+            <td>Capability discovery and public wrapper fixtures for runtime-separation and runtime-proof command paths.</td>
+            <td>Default, runtime-separation-only, and runtime-proof-only wrapper fixture modes pass; focused pytest passes with 13 tests; py_compile and goal board validation pass; final post-fix adversarial and agent-native artifacts are present.</td>
           </tr>
         </tbody>
       </table>
@@ -568,11 +574,29 @@
           <li>Current sweep snapshot: checks green, no review comments, CodeRabbit skipped but green, mergeability fields absent from the connector payload.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>PU-004 closed: public wrapper fixtures and capability discovery</h3>
+        <time datetime="2026-05-25T07:41:48Z">2026-05-25T07:41:48Z</time>
+        <p>PU-004 is now closed with public wrapper-fixture verification wired through <code>Infrastructure/bin/ask</code> surfaces instead of private helper-only checks.</p>
+        <ul>
+          <li><code>python3 Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py</code> passed in default mode and validated both runtime-separation and runtime-proof fixture groups.</li>
+          <li><code>python3 Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py --runtime-separation</code> passed.</li>
+          <li><code>python3 Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py --runtime-proof</code> passed.</li>
+          <li><code>python3 -m unittest Infrastructure/tests/test_verify_wrapper_contract_fixtures.py</code> passed with 13 tests.</li>
+          <li><code>python3 -m pytest Infrastructure/tests/test_verify_wrapper_contract_fixtures.py -q</code> passed with 13 tests.</li>
+          <li><code>python3 -m py_compile Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py Infrastructure/tests/test_verify_wrapper_contract_fixtures.py</code> passed.</li>
+          <li><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane</code> passed.</li>
+          <li>The proof-plane fixture checks now reject truthy non-list blocker payloads and reject top-level <code>status: error</code> envelopes even when nested payload fields look structurally valid.</li>
+          <li>Final review artifacts are present for simplify, unslopify, HE code review, testing, adversarial post-fix, and agent-native post-fix under <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-004</code>.</li>
+        </ul>
+        <p><strong>Broad-gate blocker noted:</strong> the full <code>Infrastructure/tests</code> lane is not a PU-004 green proof in the current local environment. Default Python lacks PyYAML, the available PyYAML venv is Python 3.9 and misses Python 3.10+ APIs, and the dependency-injected Python 3.12 run exposes unrelated pre-existing failures across evals, generated manifest/source-revision checks, environment TOML assertions, and skill-installer/package provenance.</p>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>Let the PR 202 green-sweep worker report live delivery blockers while PU-004 capability discovery and public wrapper fixtures begin.</p>
+      <p>Begin PU-005 codex-preview source identity and truncation hardening while keeping PU-004 delivery packaging and PR triage in lockstep.</p>
     </section>
   </main>
 </body>
