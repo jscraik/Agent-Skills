@@ -17,6 +17,8 @@ EVIDENCE_RUNTIME_TARGETS = {"codex", "agents"}
 WORKSPACE_ROOT_MARKER = "${WORKSPACE_ROOT}"
 HOME_MARKER = "${HOME}"
 SAFE_EVIDENCE_SEGMENT_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
+CODEX_SESSION_LOOKBACK_LIMIT = 80
+CODEX_SESSION_TURN_EVENT_LIMIT = 8
 RUNTIME_REACHABILITY_FAILURES = {
     "user_runtime_ready",
     "codex_user_runtime_ready",
@@ -286,6 +288,150 @@ def _runtime_evidence_context(
     }
 
 
+def _safe_json_object(line: str) -> dict[str, Any] | None:
+    try:
+        payload = json.loads(line)
+    except json.JSONDecodeError:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _iter_recent_codex_rollouts(sessions_root: Path) -> list[Path]:
+    if not sessions_root.is_dir():
+        return []
+    candidates: list[tuple[float, Path]] = []
+    for path in sessions_root.rglob("*.jsonl"):
+        try:
+            candidates.append((path.stat().st_mtime, path))
+        except OSError:
+            continue
+    candidates.sort(reverse=True)
+    return [path for _mtime, path in candidates[:CODEX_SESSION_LOOKBACK_LIMIT]]
+
+
+def _session_cwd_matches_repo(cwd: object, repo_root: Path) -> bool:
+    if not isinstance(cwd, str) or not cwd:
+        return False
+    try:
+        return Path(cwd).resolve(strict=False) == repo_root.resolve(strict=False)
+    except OSError:
+        return False
+
+
+def _codex_session_summary_from_rollout(
+    path: Path,
+    *,
+    context: dict[str, Any],
+) -> dict[str, Any] | None:
+    repo_root = context["repo_root"]
+    session_meta: dict[str, Any] | None = None
+    matching_turn_ids: list[str] = []
+    turn_events: list[dict[str, Any]] = []
+    matched_cwd = False
+
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            for line_number, line in enumerate(file, start=1):
+                entry = _safe_json_object(line)
+                if not entry:
+                    continue
+                entry_type = entry.get("type")
+                payload = entry.get("payload")
+                if not isinstance(payload, dict):
+                    continue
+
+                if entry_type == "session_meta":
+                    raw_meta = payload.get("payload") if isinstance(payload.get("payload"), dict) else payload
+                    if isinstance(raw_meta, dict):
+                        session_meta = raw_meta
+                        matched_cwd = matched_cwd or _session_cwd_matches_repo(raw_meta.get("cwd"), repo_root)
+                elif entry_type == "turn_context":
+                    matched_turn = _session_cwd_matches_repo(payload.get("cwd"), repo_root)
+                    matched_cwd = matched_cwd or matched_turn
+                    turn_id = str(payload.get("turn_id") or "")
+                    if matched_turn and turn_id:
+                        matching_turn_ids.append(turn_id)
+                        if len(turn_events) < CODEX_SESSION_TURN_EVENT_LIMIT:
+                            turn_events.append(
+                                {
+                                    "event_type": "turn_context_observed",
+                                    "turn_id": turn_id,
+                                    "runtime_target": context["runtime_target"],
+                                    "cwd": WORKSPACE_ROOT_MARKER,
+                                    "observed_at": str(entry.get("timestamp") or context["created_at"]),
+                                    "source_line": line_number,
+                                }
+                            )
+                elif entry_type == "event_msg":
+                    event_type = payload.get("type")
+                    turn_id = str(payload.get("turn_id") or "")
+                    if (
+                        turn_id
+                        and turn_id in matching_turn_ids
+                        and len(turn_events) < CODEX_SESSION_TURN_EVENT_LIMIT
+                    ):
+                        turn_events.append(
+                            {
+                                "event_type": str(event_type or "event_msg_observed"),
+                                "turn_id": turn_id,
+                                "runtime_target": context["runtime_target"],
+                                "observed_at": str(entry.get("timestamp") or context["created_at"]),
+                                "source_line": line_number,
+                            }
+                        )
+    except OSError:
+        return None
+
+    if not matched_cwd or not session_meta:
+        return None
+
+    session_id = str(session_meta.get("id") or path.stem)
+    thread_source = str(session_meta.get("thread_source") or "unknown")
+    latest_turn_id = matching_turn_ids[-1] if matching_turn_ids else None
+    redacted_rollout_path = _redact_runtime_path(str(path), repo_root)
+    thread_run = {
+        "thread_id": session_id,
+        "session_id": session_id,
+        "runtime_target": context["runtime_target"],
+        "runtime_status": context["runtime_status"],
+        "source": "codex_rollout_jsonl",
+        "rollout_path": redacted_rollout_path,
+        "cwd": WORKSPACE_ROOT_MARKER,
+        "thread_source": thread_source,
+        "originator": str(session_meta.get("originator") or "unknown"),
+        "observed_at": context["created_at"],
+    }
+    if latest_turn_id:
+        thread_run["latest_turn_id"] = latest_turn_id
+
+    return {
+        "session_id": session_id,
+        "thread_run": thread_run,
+        "turn_events": turn_events,
+        "rollout_path": redacted_rollout_path,
+        "latest_turn_id": latest_turn_id,
+    }
+
+
+def _codex_runtime_observation(
+    context: dict[str, Any],
+    *,
+    codex_sessions_root: Path | None = None,
+) -> dict[str, Any]:
+    if context["runtime_target"] != "codex":
+        return {"thread_runs": [], "turn_events": [], "session": None}
+    sessions_root = codex_sessions_root or Path.home() / ".codex" / "sessions"
+    for path in _iter_recent_codex_rollouts(sessions_root):
+        summary = _codex_session_summary_from_rollout(path, context=context)
+        if summary:
+            return {
+                "thread_runs": [summary["thread_run"]],
+                "turn_events": summary["turn_events"],
+                "session": summary,
+            }
+    return {"thread_runs": [], "turn_events": [], "session": None}
+
+
 def _artifact_record(
     context: dict[str, Any],
     *,
@@ -519,6 +665,7 @@ def _runtime_card_payload(
     artifact_record: dict[str, Any],
     probe_record: dict[str, Any],
     receipt: dict[str, Any],
+    runtime_observation: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """
     Builds a RuntimeCard payload that aggregates runtime-proof metadata, artifacts, verifier results and a recovery plan for a skill handle.
@@ -552,6 +699,42 @@ def _runtime_card_payload(
     }
     if context["claim_status"] == "blocked":
         runtime_session["unavailable_reason"] = context["blocker"]
+    runtime_observation = runtime_observation or {"thread_runs": [], "turn_events": [], "session": None}
+    observed_session = runtime_observation.get("session")
+    if isinstance(observed_session, dict):
+        runtime_session["session_id"] = str(observed_session.get("session_id") or runtime_session["session_id"])
+        runtime_session["source"] = "codex_rollout_jsonl"
+        runtime_session["rollout_path"] = str(observed_session.get("rollout_path") or "")
+        latest_turn_id = observed_session.get("latest_turn_id")
+        if latest_turn_id:
+            runtime_session["latest_turn_id"] = str(latest_turn_id)
+    thread_runs = runtime_observation.get("thread_runs")
+    if not isinstance(thread_runs, list):
+        thread_runs = []
+    turn_events = runtime_observation.get("turn_events")
+    if not isinstance(turn_events, list):
+        turn_events = []
+    limitations = (
+        [
+            {
+                "class": "skill_invocation_not_asserted",
+                "message": (
+                    "Codex session metadata was observed for this workspace; this proof still verifies "
+                    "command-handle reachability rather than a dedicated skill tool invocation event."
+                ),
+            }
+        ]
+        if thread_runs
+        else [
+            {
+                "class": "manual_session_gate",
+                "message": (
+                    "Runtime reachability proves command-handle wiring; it does not execute an interactive "
+                    "Codex session."
+                ),
+            }
+        ]
+    )
     return {
         "schema_version": 1,
         "card_id": f"runtime-card-{context['handle']}-{context['runtime_target']}",
@@ -561,8 +744,8 @@ def _runtime_card_payload(
         "skill_handle": context["handle"],
         "command_handle": "$" + context["handle"],
         "runtime_session": runtime_session,
-        "thread_runs": [],
-        "turn_events": [],
+        "thread_runs": thread_runs,
+        "turn_events": turn_events,
         "artifacts": [artifact_record, probe_record],
         "evidence_receipts": [receipt],
         "verifier_results": [
@@ -587,15 +770,7 @@ def _runtime_card_payload(
         "actor_type": context["actor_type"],
         "mutation_scope": "evidence_write",
         "visibility_status": "user_observable",
-        "limitations": [
-            {
-                "class": "manual_session_gate",
-                "message": (
-                    "Runtime reachability proves command-handle wiring; it does not execute an interactive "
-                    "Codex session."
-                ),
-            }
-        ],
+        "limitations": limitations,
         "runtime_diagnostics": _redact_runtime_paths(
             context["runtime_diagnostics"],
             context["repo_root"],
@@ -609,6 +784,7 @@ def emit_command_handle_runtime_evidence(
     repo_root: Path,
     proof: dict[str, Any],
     actor_type: str = "agent",
+    codex_sessions_root: Path | None = None,
 ) -> dict[str, Any]:
     """
     Emit runtime-proof evidence files for an explicit 'codex' or 'agents' runtime target.
@@ -626,7 +802,8 @@ def emit_command_handle_runtime_evidence(
     		- "evidence_receipt_path": repository-relative path to the written receipt JSON.
     		- "artifact_record_path": repository-relative path to the written artifact record JSON.
     		- "probe_artifact_path": repository-relative path to the written probe JSON.
-    		- "validation_command": a CLI string that can be used to validate the emitted runtime card.
+		- "validation_command": a CLI string that can be used to validate the emitted runtime card.
+		- "runtime_session_status": whether Codex rollout session evidence was attached.
     	
     	If the proof's `runtime_target` is not "codex" or "agents", returns:
     		{"status": "skipped", "reason": "runtime evidence is only emitted for explicit codex or agents targets"}.
@@ -639,6 +816,10 @@ def emit_command_handle_runtime_evidence(
         }
 
     context = _runtime_evidence_context(repo_root=repo_root, proof=proof, actor_type=actor_type)
+    runtime_observation = _codex_runtime_observation(
+        context,
+        codex_sessions_root=codex_sessions_root,
+    )
     relative_card_path = _repo_relative(repo_root, context["card_path"])
     relative_receipt_path = _repo_relative(repo_root, context["receipt_path"])
     relative_artifact_path = _repo_relative(repo_root, context["artifact_path"])
@@ -666,6 +847,7 @@ def emit_command_handle_runtime_evidence(
         artifact_record=card_record,
         probe_record=probe_record,
         receipt=receipt,
+        runtime_observation=runtime_observation,
     )
 
     _write_json(context["probe_path"], probe)
@@ -675,6 +857,9 @@ def emit_command_handle_runtime_evidence(
 
     return {
         "status": context["runtime_status"],
+        "runtime_session_status": (
+            "observed" if runtime_observation.get("thread_runs") else "not_observed"
+        ),
         "evidence_dir": _repo_relative(repo_root, context["evidence_dir"]),
         "runtime_card_path": relative_card_path,
         "evidence_receipt_path": relative_receipt_path,
