@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Callable
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +12,16 @@ from ask.skills_sdk.contracts import runtime_failure_payload, skills_validation_
 ResolveSkillHandle = Callable[..., dict[str, Any]]
 CheckCommandHandles = Callable[..., dict[str, Any]]
 SUPPORTED_RUNTIME_TARGETS = {"any", "codex", "agents"}
+EVIDENCE_RUNTIME_TARGETS = {"codex", "agents"}
+RUNTIME_REACHABILITY_FAILURES = {
+    "user_runtime_ready",
+    "codex_user_runtime_ready",
+    "agents_user_runtime_ready",
+    "codex_user_link",
+    "agents_user_link",
+    "codex_user_command_handle_exists",
+    "agents_user_command_handle_exists",
+}
 
 
 def normalize_runtime_target(runtime_target: object) -> str:
@@ -31,6 +43,316 @@ def invalid_runtime_target_failure(handle: str, runtime_target: object) -> dict[
             skills_validation_command("proof", safe_handle, "--runtime-target", "any"),
         ],
     )
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _repo_relative(repo_root: Path, path: Path) -> str:
+    try:
+        return str(path.relative_to(repo_root))
+    except ValueError:
+        return str(path)
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _runtime_status_for_proof(proof: dict[str, Any]) -> str:
+    if proof.get("status") == "pass":
+        return "implemented_enforced"
+    runtime_failure = proof.get("runtime_failure")
+    failed_check_id = (
+        str(runtime_failure.get("failed_check_id"))
+        if isinstance(runtime_failure, dict) and runtime_failure.get("failed_check_id")
+        else "runtime_reachability"
+    )
+    return "blocked_runtime" if failed_check_id in RUNTIME_REACHABILITY_FAILURES else "stale_or_drifted"
+
+
+def _claim_status_for_runtime(runtime_status: str) -> str:
+    return "pass" if runtime_status == "implemented_enforced" else "blocked"
+
+
+def _runtime_display_name(runtime_target: str) -> str:
+    return "Codex" if runtime_target == "codex" else "Agents"
+
+
+def _runtime_evidence_context(
+    *,
+    repo_root: Path,
+    proof: dict[str, Any],
+    actor_type: str,
+) -> dict[str, Any]:
+    handle = str(proof.get("handle") or "unknown").strip().lstrip("$") or "unknown"
+    runtime_target = str(proof.get("runtime_target") or "")
+    resolution = proof.get("resolution") if isinstance(proof.get("resolution"), dict) else {}
+    source_path = str(resolution.get("source_path") or repo_root / ".agents" / "skills" / handle / "SKILL.md")
+    source = Path(source_path)
+    canonical_source_path = _repo_relative(repo_root, source if source.is_absolute() else repo_root / source_path)
+    evidence_dir = repo_root / ".harness" / "evidence" / "runtime-proof" / handle / runtime_target
+    runtime_status = _runtime_status_for_proof(proof)
+    runtime_failure = proof.get("runtime_failure") if isinstance(proof.get("runtime_failure"), dict) else {}
+    return {
+        "repo_root": repo_root,
+        "handle": handle,
+        "runtime_target": runtime_target,
+        "created_at": _utc_now(),
+        "evidence_dir": evidence_dir,
+        "card_path": evidence_dir / "runtime-card.json",
+        "receipt_path": evidence_dir / "evidence-receipt.json",
+        "artifact_path": evidence_dir / "artifact-record.json",
+        "probe_path": evidence_dir / "probe.json",
+        "command": skills_validation_command("proof", handle, "--runtime-target", runtime_target),
+        "runtime_status": runtime_status,
+        "claim_status": _claim_status_for_runtime(runtime_status),
+        "runtime_failure": runtime_failure,
+        "failed_check_id": str(runtime_failure.get("failed_check_id") or "runtime_reachability"),
+        "blocker": str(
+            runtime_failure.get("message")
+            or f"{_runtime_display_name(runtime_target)} runtime proof passed."
+        ),
+        "exit_code": 0 if proof.get("status") == "pass" else 2,
+        "source_paths": [
+            canonical_source_path,
+            "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+            "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+        ],
+        "actor_type": actor_type,
+    }
+
+
+def _artifact_record(
+    context: dict[str, Any],
+    *,
+    artifact_id: str,
+    artifact_type: str,
+    path: str,
+    consumer_contract: str,
+) -> dict[str, Any]:
+    return {
+        "artifact_id": artifact_id,
+        "artifact_type": artifact_type,
+        "path": path,
+        "source_identity": {"source_paths": context["source_paths"]},
+        "workspace_root": str(context["repo_root"].resolve()),
+        "actor_type": context["actor_type"],
+        "mutation_scope": "evidence_write",
+        "visibility_status": "user_observable",
+        "generated_by": context["command"],
+        "validation_status": context["claim_status"],
+        "consumer_contract": consumer_contract,
+    }
+
+
+def _probe_payload(context: dict[str, Any], proof: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "schema_version": "command-handle-runtime-probe.v1",
+        "handle": context["handle"],
+        "runtime_target": context["runtime_target"],
+        "runtime_status": context["runtime_status"],
+        "observed_at": context["created_at"],
+        "command": context["command"],
+        "exit_code": context["exit_code"],
+        "proof": proof,
+    }
+
+
+def _receipt_payload(context: dict[str, Any], relative_card_path: str, relative_probe_path: str) -> dict[str, Any]:
+    receipt = {
+        "receipt_id": f"runtime-proof-{context['handle']}-{context['runtime_target']}",
+        "claim": (
+            "$"
+            + context["handle"]
+            + f" is reachable in the {_runtime_display_name(context['runtime_target'])} runtime."
+        ),
+        "claim_status": context["claim_status"],
+        "runtime_target": context["runtime_target"],
+        "runtime_status": context["runtime_status"],
+        "evidence_type": "command",
+        "command": context["command"],
+        "exit_code": context["exit_code"],
+        "probe_command": context["command"],
+        "probe_exit_code": context["exit_code"],
+        "probe_artifact_path": relative_probe_path,
+        "blocker_class": context["runtime_status"] if context["runtime_status"] != "implemented_enforced" else "none",
+        "artifact_path": relative_card_path,
+        "source_paths": context["source_paths"],
+        "verifier": "ask.skills.proof",
+        "observed_at": context["created_at"],
+    }
+    if context["claim_status"] == "blocked":
+        receipt["blocker"] = context["blocker"]
+    return receipt
+
+
+def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
+    recovery_reason = (
+        str(context["runtime_failure"].get("recovery_guidance"))
+        if context["claim_status"] == "blocked"
+        else (
+            "$"
+            + context["handle"]
+            + f" is reachable in the {_runtime_display_name(context['runtime_target'])} runtime."
+        )
+    )
+    return {
+        "recovery_status": context["runtime_status"],
+        "reason": recovery_reason,
+        "next_commands": [
+            {
+                "command": context["command"],
+                "preconditions": [
+                    f"{_runtime_display_name(context['runtime_target'])} skill runtime points at "
+                    "the workspace command-handle projection."
+                ],
+                "permission_profile": {
+                    "filesystem": "read workspace and user runtime skill links",
+                    "network": "not required",
+                },
+                "expected_outcome": (
+                    "RuntimeCard is updated with implemented_enforced proof or typed blocked_runtime evidence."
+                ),
+            }
+        ],
+        "preconditions": [
+            "Run workspace and user skill sync if the runtime link or command handle is absent."
+        ],
+        "permission_profile": {
+            "filesystem": "workspace evidence write and user runtime link read",
+            "network": "not required",
+        },
+        "expected_outcome": "Operator can rerun the proof command and inspect schema-valid runtime evidence.",
+    }
+
+
+def _runtime_card_payload(
+    context: dict[str, Any],
+    *,
+    proof: dict[str, Any],
+    artifact_record: dict[str, Any],
+    probe_record: dict[str, Any],
+    receipt: dict[str, Any],
+) -> dict[str, Any]:
+    runtime_session = {
+        "session_id": f"runtime-proof-{context['handle']}-{context['runtime_target']}",
+        "runtime_target": context["runtime_target"],
+        "runtime_status": context["runtime_status"],
+        "created_at": context["created_at"],
+        "workspace_root": str(context["repo_root"].resolve()),
+        "actor_type": context["actor_type"],
+        "visibility_status": "user_observable",
+    }
+    if context["claim_status"] == "blocked":
+        runtime_session["unavailable_reason"] = context["blocker"]
+    return {
+        "schema_version": 1,
+        "card_id": f"runtime-card-{context['handle']}-{context['runtime_target']}",
+        "created_at": context["created_at"],
+        "runtime_target": context["runtime_target"],
+        "runtime_status": context["runtime_status"],
+        "skill_handle": context["handle"],
+        "command_handle": "$" + context["handle"],
+        "runtime_session": runtime_session,
+        "thread_runs": [],
+        "turn_events": [],
+        "artifacts": [artifact_record, probe_record],
+        "evidence_receipts": [receipt],
+        "verifier_results": [
+            {
+                "verifier": "ask.skills.proof",
+                "status": proof.get("status"),
+                "runtime_target": context["runtime_target"],
+                "required_gates": proof.get("gate_policy", {}).get("required", []),
+                "gates": proof.get("gates", {}),
+                "failed_check_id": context["failed_check_id"] if context["claim_status"] == "blocked" else None,
+            }
+        ],
+        "permission_profile": {
+            "filesystem": "workspace evidence write",
+            "network": "not required",
+        },
+        "workspace_root": str(context["repo_root"].resolve()),
+        "actor_type": context["actor_type"],
+        "mutation_scope": "evidence_write",
+        "visibility_status": "user_observable",
+        "limitations": [
+            {
+                "class": "manual_session_gate",
+                "message": (
+                    "Runtime reachability proves command-handle wiring; it does not execute an interactive "
+                    "Codex session."
+                ),
+            }
+        ],
+        "recovery_plan": _recovery_plan(context),
+    }
+
+
+def emit_command_handle_runtime_evidence(
+    *,
+    repo_root: Path,
+    proof: dict[str, Any],
+    actor_type: str = "agent",
+) -> dict[str, Any]:
+    """Write schema-valid runtime proof artifacts for an explicit runtime target."""
+    runtime_target = str(proof.get("runtime_target") or "")
+    if runtime_target not in EVIDENCE_RUNTIME_TARGETS:
+        return {
+            "status": "skipped",
+            "reason": "runtime evidence is only emitted for explicit codex or agents targets",
+        }
+
+    context = _runtime_evidence_context(repo_root=repo_root, proof=proof, actor_type=actor_type)
+    relative_card_path = _repo_relative(repo_root, context["card_path"])
+    relative_receipt_path = _repo_relative(repo_root, context["receipt_path"])
+    relative_artifact_path = _repo_relative(repo_root, context["artifact_path"])
+    relative_probe_path = _repo_relative(repo_root, context["probe_path"])
+
+    probe = _probe_payload(context, proof)
+    receipt = _receipt_payload(context, relative_card_path, relative_probe_path)
+    card_record = _artifact_record(
+        context,
+        artifact_id=f"runtime-card-{context['handle']}-{context['runtime_target']}",
+        artifact_type="runtime_card",
+        path=relative_card_path,
+        consumer_contract="RuntimeCard v1 consumed by validate_runtime_cards.py and governed closeout.",
+    )
+    probe_record = _artifact_record(
+        context,
+        artifact_id=f"runtime-probe-{context['handle']}-{context['runtime_target']}",
+        artifact_type="verifier_output",
+        path=relative_probe_path,
+        consumer_contract="Probe JSON records the raw command-handle proof used by the RuntimeCard.",
+    )
+    card = _runtime_card_payload(
+        context,
+        proof=proof,
+        artifact_record=card_record,
+        probe_record=probe_record,
+        receipt=receipt,
+    )
+
+    _write_json(context["probe_path"], probe)
+    _write_json(context["receipt_path"], receipt)
+    _write_json(context["artifact_path"], card_record)
+    _write_json(context["card_path"], card)
+
+    return {
+        "status": context["runtime_status"],
+        "evidence_dir": _repo_relative(repo_root, context["evidence_dir"]),
+        "runtime_card_path": relative_card_path,
+        "evidence_receipt_path": relative_receipt_path,
+        "artifact_record_path": relative_artifact_path,
+        "probe_artifact_path": relative_probe_path,
+        "validation_command": (
+            "python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py "
+            f"{relative_card_path} --require-shared-workspace --workspace-root {repo_root.resolve()} --json"
+        ),
+    }
 
 
 def build_command_handle_proof(

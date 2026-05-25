@@ -45,10 +45,10 @@ rules:
 checks:
   dirty_fingerprint: "main...origin/main with untracked governed prompt observed 2026-05-24T21:41:48Z"
   last_verification:
-    command: "PU-002 closure validation: runtime proof validator help, valid RuntimeCard fixture, schema/validator parity tests, doctor regression tests, mandatory review artifacts"
-    outcome: pass
-    checked_at: "2026-05-24T23:24:12Z"
-    detail: "validate_runtime_cards.py --help passes; valid runtime card fixture passes with --require-shared-workspace; runtime proof validation tests pass with 20 tests including schema-backed enum/required loading, operator-facing diagnostics, no-artifact directory false-success prevention, order-insensitive conditional enum matching, and single-value conditional enum matching; doctor regression tests pass with 17 tests and 15 subtests; final adversarial, agent-native, testing, simplify, unslopify, and HE code review artifacts report no PU-002 P0 blockers."
+    command: "Final completion audit: SA-001 through SA-016 and VAL-001 through VAL-015 checked against current runtime, PR, and Linear truth"
+    outcome: pass_implementation_ready_pending_delivery_authority
+    checked_at: "2026-05-25T12:09:34Z"
+    detail: "Final completion audit artifact written at artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md. Acceptance criteria SA-001 through SA-016 are proved for the implemented P0 proof plane or proved as explicit blocked_runtime where live Codex runtime is unavailable. Current gates pass: handles, repo doctor, codex-parity conformance, wrapper fixtures, codex preview tests, runtime proof blocked_runtime evidence, runtime-card validation with shared workspace, doctor tests, CLI tests, repo closeout, capabilities, PR stack truth, and Linear JSC-364 read truth. Runtime evidence for testing/autofix was refreshed to source revision 2830d0697 while preserving blocked_runtime semantics. PRs 200-207 remain ready, MERGEABLE, and have no visible failing or pending checks. Linear JSC-364 remains In Progress. The full goal is not complete because PRs remain open, cleanup has not run, and explicit current-turn merge/cleanup authority has not been granted."
   last_scout:
     command: "PU-001 baseline: ./bin/ask skills handles --check --check-command-handles --no-handles --json --robot and ./bin/ask repo doctor --json --robot"
     outcome: "blocked_as_expected"
@@ -61,7 +61,7 @@ continuation_gate:
   queued_user_input: absent
   pending_work: present
   auto_continue_allowed: yes
-  blocked_by: "none"
+  blocked_by: "explicit current-turn merge/cleanup authority required before delivery closure"
 claims:
   - id: C001
     claim: "JSC-364 is the active governed implementation lane after Jamie approved the mode switch."
@@ -105,6 +105,70 @@ claims:
     status: supported
     remaining_uncertainty:
       - "Delivery packaging remains before this slice is pushed or opened as a PR"
+  - id: C005
+    claim: "PU-003 separates source-modeled conformance from live Codex runtime parity instead of letting blocked live runtime fail or pass the model contract."
+    evidence_surface:
+      - "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py"
+      - "Infrastructure/tests/test_pr196_jsc351_governed_closeout.py"
+      - "/tmp/jsc-364-codex-parity/skills-conformance-summary.json"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "PU-004 now validates public wrapper exposure, but downstream closeout and shared workspace consumers still need migration in PU-007 so top-level model pass is never mistaken for live runtime parity."
+  - id: C006
+    claim: "PU-004 validates proof-plane capability discovery through public ask wrapper surfaces rather than private helper-only assumptions."
+    evidence_surface:
+      - "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py"
+      - "Infrastructure/tests/test_verify_wrapper_contract_fixtures.py"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-004/adversarial-postfix-reviewer.md"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-004/agent-native-postfix-reviewer.md"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Full Infrastructure/tests remains blocked by unrelated/pre-existing local environment and broad-suite failures; PR/CI truth must refresh after packaging."
+  - id: C007
+    claim: "PU-005 preview output now exposes explicit source-modeled basis and truncation status through reachable public ask surfaces without claiming live runtime parity."
+    evidence_surface:
+      - "Infrastructure/scripts/lib/ask/services/codex_preview.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/scripts/lib/ask/command_metadata.py"
+      - "Infrastructure/tests/test_ask_skills_codex_preview.py"
+      - "/tmp/jsc-364-pu005-render-preview.json"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Delivery packaging remains before this slice is pushed or opened as a PR."
+  - id: C008
+    claim: "PU-006 proof command now writes durable runtime evidence artifacts for explicit codex or agents runtime targets without converting runtime absence into success."
+    evidence_surface:
+      - "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/tests/test_command_surface_handles.py"
+      - ".harness/evidence/runtime-proof/context7/codex/runtime-card.json"
+      - ".harness/evidence/runtime-proof/context7/codex/evidence-receipt.json"
+      - ".harness/evidence/runtime-proof/context7/codex/artifact-record.json"
+      - ".harness/evidence/runtime-proof/context7/codex/probe.json"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Delivery packaging remains before this slice is pushed or opened as a PR."
+      - "Full Infrastructure/tests remains blocked by a local missing PyYAML dependency in unrelated modules."
+      - "Agent-native postfix artifact is substantively PASS but missed the required WROTE footer; retry failed to write a replacement artifact."
+  - id: C009
+    claim: "PU-007 closeout now exposes shared workspace runtime evidence, separates changed-scope and workspace-scope findings, and blocks invalid changed runtime-card evidence without claiming unchecked PR, tracker, docs, or schema proof."
+    evidence_surface:
+      - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/tests/test_ask_repo_doctor.py"
+      - "Infrastructure/tests/test_ask_cli_impl.py"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-007/adversarial-final-concrete-reviewer.md"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Delivery packaging remains before this slice is pushed or opened as a PR."
+      - "Testing and unslopify post-fix artifact retries failed to write requested artifacts after their earlier mailbox findings were fixed."
 tasks:
   - id: T001
     type: pm
@@ -215,6 +279,7 @@ tasks:
       - "Infrastructure/scripts/lib/ask/skills_sdk/**"
       - "Infrastructure/tests/**"
       - ".harness/evidence/**"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-007/**"
       - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
       - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
     verify:
@@ -228,7 +293,7 @@ tasks:
   - id: T005
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-003 Codex parity conformance status split."
     inputs:
       - "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py"
@@ -249,11 +314,11 @@ tasks:
     stop_if:
       - "Public suite semantics cannot preserve separate live and modeled statuses"
       - "Status split requires broad SDK rewrite"
-    receipt_id: null
+    receipt_id: R009
   - id: T006
     type: worker
     assignee: Worker
-    status: queued
+    status: done
     objective: "Implement PU-004 capability discovery and public wrapper fixtures."
     inputs:
       - "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py"
@@ -274,11 +339,11 @@ tasks:
     stop_if:
       - "Capability discovery cannot be exposed without changing unrelated command families"
       - "Wrapper fixture updates cannot run from a clean public command path"
-    receipt_id: null
+    receipt_id: R013
   - id: T007
     type: worker
     assignee: Worker
-    status: queued
+    status: done
     objective: "Implement PU-005 Codex preview source identity and truncation hardening."
     inputs:
       - "Infrastructure/scripts/lib/ask/services/codex_preview.py"
@@ -288,6 +353,9 @@ tasks:
       - "Preview cannot become live runtime parity proof by itself"
     expected_output: "Codex preview output names source identity, source basis, and truncation status"
     allowed_files:
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/scripts/lib/ask/command_metadata.py"
+      - "Infrastructure/scripts/lib/ask/commands/**"
       - "Infrastructure/scripts/lib/ask/services/codex_preview.py"
       - "Infrastructure/tests/test_ask_skills_codex_preview.py"
       - "Infrastructure/tests/**"
@@ -299,11 +367,11 @@ tasks:
     stop_if:
       - "Preview source identity cannot be determined without mutating Codex checkout"
       - "Truncation behavior becomes ambiguous"
-    receipt_id: null
+    receipt_id: R015
   - id: T008
     type: worker
     assignee: Worker
-    status: queued
+    status: done
     objective: "Implement PU-006 runtime proof command and blocked runtime receipts."
     inputs:
       - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
@@ -326,11 +394,11 @@ tasks:
     stop_if:
       - "Runtime absence cannot be captured as durable blocked_runtime evidence"
       - "Proof command cannot report artifact paths"
-    receipt_id: null
+    receipt_id: R018
   - id: T009
     type: worker
     assignee: Worker
-    status: queued
+    status: done
     objective: "Implement PU-007 shared workspace evidence and closeout integration."
     inputs:
       - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
@@ -352,11 +420,11 @@ tasks:
     stop_if:
       - "Closeout would conflate local proof with live PR or Linear truth"
       - "Shared workspace evidence cannot be written under repo-owned paths"
-    receipt_id: null
+    receipt_id: R020
   - id: T010
     type: judge
     assignee: Judge
-    status: queued
+    status: done
     objective: "Run PU-008 final validation, docs accuracy review, and delivery sweep before completion."
     inputs:
       - "All JSC-364 slice receipts"
@@ -364,11 +432,21 @@ tasks:
       - "GitHub PR truth"
       - "Linear JSC-364 truth"
     constraints:
-      - "Read-only except final notes and receipts"
+      - "Read-only except final notes, receipts, validation artifacts, review artifacts, and runtime evidence"
+      - "Do not edit implementation code in PU-008 unless a validated final-review blocker requires it"
       - "No cleanup announcement before docs-expert and agents-md checks"
       - "No completion claim before final PR and CI truth are refreshed"
     expected_output: "Final Judge decision with docs accuracy, review, validation, PR, CI, and tracker evidence"
-    allowed_files: []
+    allowed_files:
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+      - ".harness/evidence/runtime-proof/**"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/**"
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/scripts/lib/ask/command_metadata.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/tests/test_ask_skills_codex_preview.py"
     verify:
       - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane"
       - "./bin/ask repo closeout --changed --json --robot"
@@ -376,4 +454,32 @@ tasks:
       - "Any mandatory review artifact is missing"
       - "Docs or AGENTS-facing guidance is stale"
       - "PRs are unmerged or CI is failing without owner-approved blocker classification"
-    receipt_id: null
+    receipt_id: R029
+  - id: T011
+    type: pm
+    assignee: PM
+    status: active
+    objective: "Perform delivery closure after explicit merge/cleanup authority is granted."
+    inputs:
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md"
+      - "GitHub PRs 200-207"
+      - "Linear JSC-364"
+    constraints:
+      - "Do not merge without explicit current-turn authority"
+      - "Refresh PR checks and mergeability immediately before each merge"
+      - "Do not mark the native goal complete while PRs remain open or Linear remains In Progress"
+      - "Preserve blocked_runtime truth boundaries after merge"
+    expected_output: "Merged stack or owner-approved blocker classification, cleanup evidence, Linear truth, and final goal closeout receipt"
+    allowed_files:
+      - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/**"
+    verify:
+      - "gh pr list --repo jscraik/Agent-Skills --state open --json number,headRefName,baseRefName,isDraft,mergeable,statusCheckRollup,url --limit 30"
+      - "mcp__linear__get_issue JSC-364"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane"
+    stop_if:
+      - "Merge authority is not explicit in the current turn"
+      - "Any PR loses mergeability or has failing/pending required checks"
+      - "Linear state cannot be refreshed"
+    receipt_id: R030

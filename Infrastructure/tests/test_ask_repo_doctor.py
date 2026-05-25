@@ -1,4 +1,6 @@
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -557,6 +559,190 @@ class TestAskRepoDoctor(unittest.TestCase):
             ],
         )
 
+    def test_closeout_changed_runtime_evidence_exposes_shared_workspace_boundary(self) -> None:
+        changed_files = [".harness/evidence/runtime-proof/context7/codex/runtime-card.json"]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            card_path = repo_root / changed_files[0]
+            card_path.parent.mkdir(parents=True)
+            card_path.write_text(
+                json.dumps(
+                    {
+                        "card_id": "runtime-card-context7-codex",
+                        "created_at": "2026-05-25T09:00:00Z",
+                        "skill_handle": "context7",
+                        "command_handle": "$context7",
+                        "runtime_target": "codex",
+                        "runtime_status": "blocked_runtime",
+                        "workspace_root": str(repo_root.resolve()),
+                        "evidence_receipts": [{"receipt_id": "runtime-proof-context7-codex"}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+                "ask.commands.repo_impl.repo_doctor",
+                return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+            ):
+                result = repo_closeout(repo_root, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        runtime_evidence = closeout["runtime_evidence"]
+        self.assertEqual(runtime_evidence["status"], "present")
+        self.assertEqual(runtime_evidence["runtime_card_count"], 1)
+        self.assertEqual(runtime_evidence["runtime_cards"][0]["runtime_status"], "blocked_runtime")
+        self.assertEqual(runtime_evidence["truth_boundaries"]["pr_truth"], "not_checked_by_repo_closeout")
+        self.assertEqual(
+            runtime_evidence["truth_boundaries"]["schema_proof"],
+            "not_run_by_closeout_use_schema_validation_command",
+        )
+        self.assertIn(
+            "runtime_evidence_cards",
+            [command["id"] for command in closeout["focused_validation"]],
+        )
+        self.assertIn(
+            "validate_runtime_cards.py",
+            runtime_evidence["schema_validation"]["command"],
+        )
+
+    def test_closeout_changed_runtime_evidence_reports_invalid_card(self) -> None:
+        changed_files = [".harness/evidence/runtime-proof/context7/codex/runtime-card.json"]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            card_path = repo_root / changed_files[0]
+            card_path.parent.mkdir(parents=True)
+            card_path.write_text("{not json", encoding="utf-8")
+            with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+                "ask.commands.repo_impl.repo_doctor",
+                return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+            ):
+                result = repo_closeout(repo_root, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        runtime_evidence = closeout["runtime_evidence"]
+        self.assertEqual(runtime_evidence["status"], "invalid")
+        self.assertEqual(runtime_evidence["runtime_card_count"], 1)
+        self.assertEqual(runtime_evidence["invalid_runtime_card_count"], 1)
+        self.assertEqual(runtime_evidence["changed_scope"]["status"], "invalid")
+        self.assertEqual(runtime_evidence["workspace_scope"]["status"], "invalid")
+        self.assertEqual(runtime_evidence["runtime_cards"][0]["read_status"], "invalid")
+        self.assertIn("invalid JSON", runtime_evidence["runtime_cards"][0]["error"])
+        self.assertFalse(closeout["commit_readiness"]["ready"])
+        self.assertIn("runtime_evidence_invalid", closeout["commit_readiness"]["blockers"])
+        self.assertIn("validate_runtime_cards.py", closeout["next_command"])
+        self.assertEqual(runtime_evidence["truth_boundaries"]["pr_truth"], "not_checked_by_repo_closeout")
+        self.assertEqual(
+            runtime_evidence["truth_boundaries"]["schema_proof"],
+            "not_run_by_closeout_use_schema_validation_command",
+        )
+        self.assertIn(
+            "runtime_evidence_cards",
+            [command["id"] for command in closeout["focused_validation"]],
+        )
+
+    def test_closeout_changed_runtime_evidence_reports_invalid_absolute_card_path(self) -> None:
+        relative_card = ".harness/evidence/runtime-proof/context7/codex/runtime-card.json"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            card_path = repo_root / relative_card
+            card_path.parent.mkdir(parents=True)
+            card_path.write_text("{not json", encoding="utf-8")
+            changed_files = [str(card_path)]
+            with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+                "ask.commands.repo_impl.repo_doctor",
+                return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+            ):
+                result = repo_closeout(repo_root, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        runtime_evidence = closeout["runtime_evidence"]
+        self.assertEqual(runtime_evidence["status"], "invalid")
+        self.assertEqual(runtime_evidence["changed_scope"]["status"], "invalid")
+        self.assertIn("runtime_evidence_invalid", closeout["commit_readiness"]["blockers"])
+        self.assertIn(
+            "runtime_evidence_cards",
+            [command["id"] for command in closeout["focused_validation"]],
+        )
+
+    def test_closeout_changed_runtime_evidence_symlink_is_invalid(self) -> None:
+        relative_card = ".harness/evidence/runtime-proof/context7/codex/runtime-card.json"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir) / "repo"
+            outside_root = Path(tmpdir) / "outside"
+            card_path = repo_root / relative_card
+            outside_card = outside_root / "runtime-card.json"
+            card_path.parent.mkdir(parents=True)
+            outside_card.parent.mkdir(parents=True)
+            outside_card.write_text("{}", encoding="utf-8")
+            try:
+                card_path.symlink_to(outside_card)
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable: {exc}")
+            changed_files = [relative_card]
+            with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+                "ask.commands.repo_impl.repo_doctor",
+                return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+            ):
+                result = repo_closeout(repo_root, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "error")
+        runtime_evidence = closeout["runtime_evidence"]
+        self.assertEqual(runtime_evidence["status"], "invalid")
+        self.assertEqual(runtime_evidence["changed_scope"]["status"], "invalid")
+        self.assertEqual(runtime_evidence["runtime_cards"][0]["read_status"], "invalid")
+        self.assertIn("must not be a symlink", runtime_evidence["runtime_cards"][0]["error"])
+        self.assertIn("runtime_evidence_invalid", closeout["commit_readiness"]["blockers"])
+
+    def test_closeout_changed_code_is_not_blocked_by_unrelated_invalid_runtime_card(self) -> None:
+        changed_files = ["Infrastructure/bin/ask"]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            stale_card_path = repo_root / ".harness/evidence/runtime-proof/context7/codex/runtime-card.json"
+            stale_card_path.parent.mkdir(parents=True)
+            stale_card_path.write_text("{not json", encoding="utf-8")
+            with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+                "ask.commands.repo_impl.repo_doctor",
+                return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+            ):
+                result = repo_closeout(repo_root, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        runtime_evidence = closeout["runtime_evidence"]
+        self.assertEqual(runtime_evidence["status"], "not_applicable")
+        self.assertEqual(runtime_evidence["changed_scope"]["status"], "not_applicable")
+        self.assertEqual(runtime_evidence["workspace_scope"]["status"], "invalid")
+        self.assertTrue(closeout["commit_readiness"]["ready"])
+        self.assertNotIn("runtime_evidence_invalid", closeout["commit_readiness"]["blockers"])
+        self.assertNotIn(
+            "runtime_evidence_cards",
+            [command["id"] for command in closeout["focused_validation"]],
+        )
+
+    def test_closeout_changed_runtime_evidence_deletion_does_not_block_readiness(self) -> None:
+        changed_files = [".harness/evidence/runtime-proof/context7/codex/runtime-card.json"]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
+                "ask.commands.repo_impl.repo_doctor",
+                return_value=_result(data={"doctor": {"blocking": False, "diagnostic_debt": [], "signals": {}}}),
+            ):
+                result = repo_closeout(repo_root, changed=True)
+
+        closeout = result.data["repo_closeout"]
+        self.assertEqual(result.status, "success")
+        runtime_evidence = closeout["runtime_evidence"]
+        self.assertEqual(runtime_evidence["status"], "deleted")
+        self.assertEqual(runtime_evidence["changed_scope"]["status"], "deleted")
+        self.assertEqual(runtime_evidence["deleted_runtime_card_count"], 1)
+        self.assertEqual(runtime_evidence["runtime_cards"][0]["read_status"], "deleted")
+        self.assertTrue(closeout["commit_readiness"]["ready"])
+        self.assertNotIn("runtime_evidence_invalid", closeout["commit_readiness"]["blockers"])
+
     def test_closeout_skips_changed_file_detection_without_changed_flag(self) -> None:
         changed_files = ["Skills/product-strategy/example/SKILL.md"]
         with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files) as collect_mock, patch(
@@ -570,6 +756,11 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertFalse(closeout["changed_mode_requested"])
         self.assertEqual(closeout["changed_files"], [])
+        self.assertEqual(closeout["runtime_evidence"]["status"], "skipped")
+        self.assertEqual(
+            closeout["runtime_evidence"]["truth_boundaries"]["command_proof"],
+            "not_checked_by_repo_closeout",
+        )
         self.assertTrue(closeout["commit_readiness"]["ready"])
 
     def test_closeout_strict_diagnostic_debt_uses_doctor_next_command(self) -> None:

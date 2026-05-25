@@ -48,6 +48,87 @@ def _case(
     }
 
 
+def _preview_limitations(evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    limitations = evidence.get("preview_limitations", [])
+    if not isinstance(limitations, list):
+        return []
+    return [limitation for limitation in limitations if isinstance(limitation, dict)]
+
+
+def _model_status(status: str, basis: str, **extra: Any) -> dict[str, Any]:
+    return {"status": status, "basis": basis, **extra}
+
+
+def _live_status(status: str, basis: str, blockers: list[dict[str, Any]]) -> dict[str, Any]:
+    return {"status": status, "basis": basis, "blockers": blockers}
+
+
+def _blocked_runtime_status(blockers: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "status": "blocked_runtime" if blockers else "not_applicable",
+        "blockers": blockers,
+        "does_not_fail_model_contract": True,
+    }
+
+
+def _source_files(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, str)]
+
+
+def _case_live_runtime_blockers(case: dict[str, Any]) -> list[dict[str, Any]]:
+    blockers: list[dict[str, Any]] = []
+    for limitation in _preview_limitations(case.get("evidence", {})):
+        if limitation.get("status") != "blocked":
+            continue
+        blockers.append(
+            {
+                "case_id": case.get("case_id"),
+                "rule_id": limitation.get("id", "live_runtime_parity"),
+                "blocker_class": "blocked_runtime",
+                "message": limitation.get("reason", "Live Codex runtime parity is blocked."),
+                "source_files": _source_files(limitation.get("source_files")),
+            }
+        )
+    return blockers
+
+
+def _annotate_conformance_status(case: dict[str, Any]) -> None:
+    status = case.get("status")
+    live_blockers = _case_live_runtime_blockers(case)
+    case["modeled_conformance"] = _model_status(
+        "pass" if status == "pass" else "blocked",
+        "repo_contract_fixture",
+    )
+    case["live_runtime_parity"] = _live_status(
+        "blocked_runtime" if live_blockers else "not_checked",
+        "codex_preview_limitations",
+        live_blockers,
+    )
+
+
+def _conformance_status_payload(
+    model_contract_status: str,
+    live_parity_status: str,
+    live_blockers: list[dict[str, Any]],
+    model_basis: str,
+    live_basis: str,
+    **model_extra: Any,
+) -> dict[str, Any]:
+    return {
+        "model_contract_status": model_contract_status,
+        "live_parity_status": live_parity_status,
+        "modeled_conformance": _model_status(model_contract_status, model_basis, **model_extra),
+        "live_runtime_parity": _live_status(
+            live_parity_status,
+            live_basis,
+            live_blockers,
+        ),
+        "blocked_runtime": _blocked_runtime_status(live_blockers),
+    }
+
+
 def _case_malformed_frontmatter(repo_root: Path, workspace: Path) -> dict[str, Any]:
     skill_md = _write_skill(
         workspace / "malformed-frontmatter",
@@ -314,6 +395,13 @@ def run_skills_conformance(repo_root: Path, suite: str = DEFAULT_SUITE, evidence
             "schema_version": CONFORMANCE_SCHEMA_VERSION,
             "suite": suite,
             "status": "blocked",
+            **_conformance_status_payload(
+                "blocked",
+                "not_checked",
+                [],
+                "unknown_suite",
+                "suite_not_run",
+            ),
             "blockers": [
                 {
                     "rule_id": "unknown_suite",
@@ -343,6 +431,7 @@ def run_skills_conformance(repo_root: Path, suite: str = DEFAULT_SUITE, evidence
             )
         snapshot_path = snapshots_path / f"{_safe_case_id(case_id)}.json"
         case["snapshot_path"] = snapshot_path.as_posix()
+        _annotate_conformance_status(case)
         snapshot_path.write_text(
             json.dumps({"schema_version": CONFORMANCE_SCHEMA_VERSION, **case}, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
@@ -383,14 +472,34 @@ def run_skills_conformance(repo_root: Path, suite: str = DEFAULT_SUITE, evidence
         for entry in command_entries:
             handle.write(json.dumps(entry, sort_keys=True) + "\n")
 
+    passed_count = sum(1 for case in cases if case.get("status") == "pass")
+    blocked_count = len(blockers)
+    live_blockers = [
+        blocker
+        for case in cases
+        for blocker in case.get("live_runtime_parity", {}).get("blockers", [])
+        if isinstance(blocker, dict)
+    ]
+    model_contract_status = "blocked" if blockers else "pass"
+    live_parity_status = "blocked_runtime" if live_blockers else "not_checked"
     summary_path = evidence_path / "skills-conformance-summary.json"
     summary = {
         "schema_version": CONFORMANCE_SCHEMA_VERSION,
         "suite": suite,
-        "status": "blocked" if blockers else "pass",
+        "status": model_contract_status,
+        **_conformance_status_payload(
+            model_contract_status,
+            live_parity_status,
+            live_blockers,
+            "repo_contract_fixture_suite",
+            "codex_preview_limitations",
+            case_count=len(cases),
+            passed_count=passed_count,
+            blocked_count=blocked_count,
+        ),
         "case_count": len(cases),
-        "passed_count": len([case for case in cases if case.get("status") == "pass"]),
-        "blocked_count": len(blockers),
+        "passed_count": passed_count,
+        "blocked_count": blocked_count,
         "cases": cases,
         "checks": cases,
         "blockers": blockers,
