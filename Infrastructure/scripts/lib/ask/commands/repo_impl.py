@@ -38,6 +38,7 @@ GENERATED_SURFACE_PREFIXES = (
 CANONICAL_SKILL_PREFIXES = (
     "Skills/",
 )
+RUNTIME_EVIDENCE_ROOT = ".harness/evidence/runtime-proof"
 
 
 def _repo_validation_command(action: str, *args: str, **flags: bool) -> str:
@@ -1171,7 +1172,7 @@ def _closeout_package_readiness(doctor_payload: dict[str, Any]) -> dict[str, Any
     }
 
 
-def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any]]:
+def _closeout_focused_validation(repo_root: Path, changed_files: list[str]) -> list[dict[str, Any]]:
     commands = [
         {
             "id": "repo_doctor",
@@ -1210,6 +1211,14 @@ def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any
                 "command": COMMAND_HANDLE_CHECK_COMMAND,
             }
         )
+    if any(_is_runtime_evidence_path(repo_root, path) for path in changed_files):
+        commands.append(
+            {
+                "id": "runtime_evidence_cards",
+                "reason": "Validate changed shared-workspace runtime evidence artifacts.",
+                "command": _runtime_evidence_validation_command(repo_root),
+            }
+        )
     if changed_files:
         commands.append(
             {
@@ -1227,6 +1236,168 @@ def _closeout_focused_validation(changed_files: list[str]) -> list[dict[str, Any
             }
         )
     return commands
+
+
+def _runtime_evidence_validation_command(repo_root: Path) -> str:
+    return (
+        "python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py "
+        f"--evidence-dir {shlex.quote(RUNTIME_EVIDENCE_ROOT)} "
+        f"--require-shared-workspace --workspace-root {shlex.quote(str(repo_root.resolve()))} --json"
+    )
+
+
+def _normalize_changed_path(repo_root: Path, path: str) -> str:
+    path_obj = Path(path)
+    if path_obj.is_absolute():
+        try:
+            return path_obj.resolve().relative_to(repo_root.resolve()).as_posix()
+        except ValueError:
+            return str(path_obj)
+    return path.removeprefix("./")
+
+
+def _is_runtime_evidence_path(repo_root: Path, path: str) -> bool:
+    return _normalize_changed_path(repo_root, path).startswith(RUNTIME_EVIDENCE_ROOT + "/")
+
+
+def _changed_runtime_card_paths(repo_root: Path, changed_files: list[str]) -> list[Path]:
+    paths = []
+    for changed_file in changed_files:
+        normalized = _normalize_changed_path(repo_root, changed_file)
+        if normalized.startswith(RUNTIME_EVIDENCE_ROOT + "/") and normalized.endswith("/runtime-card.json"):
+            paths.append(repo_root / normalized)
+    return sorted(set(paths))
+
+
+def _runtime_card_summary(repo_root: Path, path: Path) -> dict[str, Any]:
+    relative_path = str(path.relative_to(repo_root))
+    if path.is_symlink():
+        return {
+            "path": relative_path,
+            "read_status": "invalid",
+            "error": "RuntimeCard path must not be a symlink.",
+        }
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        if not path.exists():
+            return {
+                "path": relative_path,
+                "read_status": "deleted",
+                "error": "RuntimeCard path no longer exists.",
+            }
+        return {
+            "path": relative_path,
+            "read_status": "invalid",
+            "error": f"RuntimeCard read failed: {exc}",
+        }
+    except json.JSONDecodeError as exc:
+        return {
+            "path": relative_path,
+            "read_status": "invalid",
+            "error": f"invalid JSON: {exc}",
+        }
+    if not isinstance(payload, dict):
+        return {
+            "path": relative_path,
+            "read_status": "invalid",
+            "error": "RuntimeCard payload is not a JSON object.",
+        }
+    receipts = payload.get("evidence_receipts")
+    receipt_count = len(receipts) if isinstance(receipts, list) else 0
+    return {
+        "path": relative_path,
+        "read_status": "readable",
+        "card_id": payload.get("card_id"),
+        "created_at": payload.get("created_at"),
+        "skill_handle": payload.get("skill_handle"),
+        "command_handle": payload.get("command_handle"),
+        "runtime_target": payload.get("runtime_target"),
+        "runtime_status": payload.get("runtime_status"),
+        "workspace_root": payload.get("workspace_root"),
+        "receipt_count": receipt_count,
+    }
+
+
+def _runtime_card_scope_summary(runtime_cards: list[dict[str, Any]], *, empty_status: str) -> dict[str, Any]:
+    invalid_cards = [
+        card for card in runtime_cards if card.get("read_status") not in {"readable", "deleted"}
+    ]
+    deleted_cards = [card for card in runtime_cards if card.get("read_status") == "deleted"]
+    status = empty_status
+    if runtime_cards:
+        if invalid_cards:
+            status = "invalid"
+        elif len(deleted_cards) == len(runtime_cards):
+            status = "deleted"
+        else:
+            status = "present"
+    return {
+        "status": status,
+        "runtime_card_count": len(runtime_cards),
+        "invalid_runtime_card_count": len(invalid_cards),
+        "deleted_runtime_card_count": len(deleted_cards),
+        "runtime_cards": runtime_cards,
+    }
+
+
+def _closeout_runtime_evidence(repo_root: Path, *, include_cards: bool, changed_files: list[str]) -> dict[str, Any]:
+    evidence_root = repo_root / RUNTIME_EVIDENCE_ROOT
+    validation_command = _runtime_evidence_validation_command(repo_root)
+    if not include_cards:
+        skipped_scope = _runtime_card_scope_summary([], empty_status="skipped")
+        return {
+            "status": "skipped",
+            "reason": "Runtime evidence discovery runs only for changed closeout.",
+            "evidence_root": RUNTIME_EVIDENCE_ROOT,
+            "runtime_card_count": 0,
+            "invalid_runtime_card_count": 0,
+            "deleted_runtime_card_count": 0,
+            "runtime_cards": [],
+            "changed_scope": skipped_scope,
+            "workspace_scope": skipped_scope,
+            "schema_validation": {
+                "status": "not_run",
+                "command": validation_command,
+            },
+            "truth_boundaries": {
+                "command_proof": "not_checked_by_repo_closeout",
+                "schema_proof": "not_run_by_closeout_use_schema_validation_command",
+                "pr_truth": "not_checked_by_repo_closeout",
+                "tracker_truth": "not_checked_by_repo_closeout",
+                "docs_truth": "not_checked_by_repo_closeout",
+            },
+        }
+    workspace_cards = (
+        [_runtime_card_summary(repo_root, path) for path in sorted(evidence_root.rglob("runtime-card.json"))]
+        if evidence_root.exists()
+        else []
+    )
+    changed_card_paths = _changed_runtime_card_paths(repo_root, changed_files)
+    changed_cards = [_runtime_card_summary(repo_root, path) for path in changed_card_paths]
+    changed_scope = _runtime_card_scope_summary(changed_cards, empty_status="not_applicable")
+    workspace_scope = _runtime_card_scope_summary(workspace_cards, empty_status="missing")
+    return {
+        "status": changed_scope["status"],
+        "evidence_root": RUNTIME_EVIDENCE_ROOT,
+        "runtime_card_count": changed_scope["runtime_card_count"],
+        "invalid_runtime_card_count": changed_scope["invalid_runtime_card_count"],
+        "deleted_runtime_card_count": changed_scope["deleted_runtime_card_count"],
+        "runtime_cards": changed_scope["runtime_cards"],
+        "changed_scope": changed_scope,
+        "workspace_scope": workspace_scope,
+        "schema_validation": {
+            "status": "not_run",
+            "command": validation_command,
+        },
+        "truth_boundaries": {
+            "command_proof": "workspace_runtime_evidence",
+            "schema_proof": "not_run_by_closeout_use_schema_validation_command",
+            "pr_truth": "not_checked_by_repo_closeout",
+            "tracker_truth": "not_checked_by_repo_closeout",
+            "docs_truth": "not_checked_by_repo_closeout",
+        },
+    }
 
 
 def _diagnostic_debt_next_command(diagnostic_debt: list[dict[str, Any]]) -> str | None:
@@ -1258,10 +1429,12 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
     if sync_report["needed"]:
         blockers.append("sync_required")
     diagnostic_debt = doctor_payload.get("diagnostic_debt", [])
+    focused_validation = _closeout_focused_validation(repo_root, changed_files)
+    runtime_evidence = _closeout_runtime_evidence(repo_root, include_cards=changed, changed_files=changed_files)
     if strict and diagnostic_debt:
         blockers.append("strict_diagnostic_debt")
-
-    focused_validation = _closeout_focused_validation(changed_files)
+    if runtime_evidence.get("changed_scope", {}).get("status") == "invalid":
+        blockers.append("runtime_evidence_invalid")
     ready = not blockers
     next_command: str | None
     if changed_files_error:
@@ -1276,6 +1449,8 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
             or doctor_payload.get("next_command")
             or _repo_validation_command("doctor")
         )
+    elif "runtime_evidence_invalid" in blockers:
+        next_command = runtime_evidence["schema_validation"]["command"]
     elif sync_report["validation_commands"]:
         next_command = sync_report["validation_commands"][0]
     elif changed_files:
@@ -1299,6 +1474,7 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
         "memory_readiness": _closeout_memory_readiness(doctor_payload),
         "package_readiness": _closeout_package_readiness(doctor_payload),
         "surface_policy": _closeout_surface_policy(doctor_payload),
+        "runtime_evidence": runtime_evidence,
         "focused_validation": focused_validation,
         "diagnostic_debt": diagnostic_debt,
         "commit_readiness": {
