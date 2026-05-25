@@ -217,7 +217,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-24T23:58:38Z">2026-05-24T23:58:38Z</time>
+          <time datetime="2026-05-25T00:13:00Z">2026-05-25T00:13:00Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -355,9 +355,9 @@
           </tr>
           <tr>
             <td>PU-003</td>
-            <td><span class="status">passed, packaging next</span></td>
+            <td><span class="status">passed, PR opened</span></td>
             <td>Codex parity conformance status split: keep modeled conformance, live runtime parity, and blocked runtime separate.</td>
-            <td>Focused tests pass with 103 tests, the public conformance command exits success with <code>model_contract_status: pass</code>, and live runtime absence is reported separately as <code>live_parity_status: blocked_runtime</code>. Six final review artifacts are present with <code>WROTE:</code> footers.</td>
+            <td>Focused tests pass with 103 tests, the public conformance command exits success with <code>model_contract_status: pass</code>, and live runtime absence is reported separately as <code>live_parity_status: blocked_runtime</code>. Six final review artifacts are present with <code>WROTE:</code> footers. PR 202 is open as a draft stacked on PR 201.</td>
           </tr>
         </tbody>
       </table>
@@ -555,11 +555,23 @@
         </ul>
         <p><strong>Accepted residual risk:</strong> downstream consumers that only read top-level <code>status</code> or <code>blockers</code> can miss live runtime blockers. PU-003 creates the split; PU-004 and PU-007 must migrate consumer surfaces so model-contract pass is not mistaken for live runtime parity.</p>
       </article>
+
+      <article class="entry">
+        <h3>PU-003 PR opened and green-sweep launched</h3>
+        <time datetime="2026-05-25T00:13:00Z">2026-05-25T00:13:00Z</time>
+        <p>PU-003 was committed, pushed, and opened as stacked draft PR 202: <code>https://github.com/jscraik/Agent-Skills/pull/202</code>.</p>
+        <ul>
+          <li>Branch: <code>codex/jsc-364-runtime-proof-plane-pu003</code>.</li>
+          <li>Commit: <code>700ebb7</code>.</li>
+          <li>Base: <code>codex/jsc-364-runtime-proof-plane-pu002</code>, because PR 201 is still open.</li>
+          <li>A PR green-sweep worker is triaging live checks and blockers for PR 202 while PU-004 starts.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>Package PU-003 as a stacked PR on top of PU-002, launch PR green-sweep, then govern PU-004 capability discovery and public wrapper fixtures.</p>
+      <p>Let the PR 202 green-sweep worker report live delivery blockers while PU-004 capability discovery and public wrapper fixtures begin.</p>
     </section>
   </main>
 </body>
