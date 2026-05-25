@@ -349,7 +349,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T17:23:00Z">2026-05-25T17:23:00Z</time>
+          <time datetime="2026-05-25T18:30:49Z">2026-05-25T18:30:49Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -357,7 +357,7 @@
         </div>
         <div class="pill">
           <span class="label">Active Task</span>
-          <code>T012</code> Runtime bridge diagnostics hardening in progress
+          <code>T013</code> Codex user runtime bridge proven
         </div>
       </div>
     </header>
@@ -440,8 +440,9 @@
             <li><strong>Review work</strong> lands in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/</code>, separate from runtime proof artifacts.</li>
             <li><strong>Delivery work</strong> lands in the stacked PR series <code>200-207</code>; PR <code>207</code> carries PU-008, with triage evidence in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/pr207-green-sweep.md</code>.</li>
             <li><strong>Final audit work</strong> lands in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md</code>, with the goal-board state and receipts updated beside the implementation ledger.</li>
-            <li><strong>Runtime bridge follow-up</strong> lands in <code>Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py</code> plus focused proof tests in <code>Infrastructure/tests/test_command_surface_handles.py</code>. It now distinguishes <code>root_symlink</code> vs <code>handle_bridge</code> runtime modes and emits explicit recovery command packets without mutating global Codex runtime links.</li>
-            <li><strong>Not placed here:</strong> no durable implementation is being written into generated <code>.agents/skills/**</code> projections, plugin cache directories, global Codex state, or <code>/Users/jamiecraik/dev/codex</code>.</li>
+            <li><strong>Runtime bridge follow-up</strong> lands in <code>Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py</code> plus focused proof tests in <code>Infrastructure/tests/test_command_surface_handles.py</code>. It now distinguishes <code>root_symlink</code> vs <code>handle_bridge</code> runtime modes and emits explicit recovery command packets.</li>
+            <li><strong>Runtime bridge state</strong> is now user-visible machine state: <code>~/.codex/skills</code> points to <code>/Users/jamiecraik/dev/agent-skills/.agents/skills</code>, which lets <code>$autofix</code> satisfy Codex-targeted runtime proof from the same workspace projection as <code>~/.agents/skills</code>.</li>
+            <li><strong>Not placed here:</strong> no durable implementation is being written into plugin cache directories or <code>/Users/jamiecraik/dev/codex</code>.</li>
           </ul>
         </aside>
       </div>
@@ -574,8 +575,8 @@
       </div>
       <div class="placement-grid" aria-label="Current implementation placement">
         <article class="placement-card current">
-          <h3>Current slice: runtime bridge diagnostics</h3>
-          <p>Delivery is closed, and this follow-up hardens the trust boundary: targeted Codex proof now accepts handle-level bridge reachability, while unresolved runtime states still emit durable <code>blocked_runtime</code> evidence with explicit operator recovery commands.</p>
+          <h3>Current slice: runtime bridge proven</h3>
+          <p>Delivery is closed, and this follow-up hardens the trust boundary: targeted Codex proof now accepts handle-level bridge reachability, while the local Codex user runtime is bridged to the workspace projection and <code>$autofix</code> now emits <code>implemented_enforced</code> evidence.</p>
           <div class="path-list">
             <code>Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py</code>
             <code>Infrastructure/tests/test_command_surface_handles.py</code>
@@ -634,12 +635,12 @@
         </article>
         <article class="placement-card">
           <h3>Explicit non-placement</h3>
-          <p>The proof-plane implementation is intentionally not being hidden in generated or external runtime surfaces.</p>
+          <p>The proof-plane implementation remains repo-owned; the only external runtime mutation in this slice is the explicit user-runtime bridge at <code>~/.codex/skills</code>.</p>
           <div class="path-list">
             <code>not .agents/skills/** generated projections</code>
             <code>not Plugins/cache/** plugin copies</code>
             <code>not /Users/jamiecraik/dev/codex</code>
-            <code>not global ~/.codex runtime state</code>
+            <code>not untracked global ~/.codex runtime state; ~/.codex/skills is the documented bridge</code>
           </div>
         </article>
       </div>
@@ -1274,11 +1275,24 @@
           <li>Truth boundary preserved: this does not claim live Codex parity while the user runtime remains unbridged; it makes the next safe action explicit and test-backed.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>Codex runtime bridge proven</h3>
+        <time datetime="2026-05-25T18:30:49Z">2026-05-25T18:30:49Z</time>
+        <p>I ran the recommended user-runtime sync preview, rejected the broad user-sync path because it also planned home plugin mirror refreshes, and applied the smallest runtime repair directly: <code>~/.codex/skills</code> now points at <code>/Users/jamiecraik/dev/agent-skills/.agents/skills</code>.</p>
+        <ul>
+          <li>Before: <code>~/.codex/skills</code> pointed at <code>/Users/jamiecraik/dev/configs/.codex/skills</code>, so <code>codex_user_runtime_ready</code> was false for <code>$autofix</code>.</li>
+          <li>After: <code>./bin/ask skills proof autofix --runtime-target codex --json --robot</code> exits <code>0</code> and reports <code>runtime_status: implemented_enforced</code>.</li>
+          <li>Runtime proof now reports <code>runtime_satisfied_by: codex_user_runtime</code>, <code>codex_user_runtime_ready: true</code>, and no missing command handles.</li>
+          <li>Refreshed evidence lives in <code>.harness/evidence/runtime-proof/autofix/codex/</code> and validates with <code>validate_runtime_cards.py --require-shared-workspace</code>.</li>
+          <li>Remaining manual gate: open or reload a Codex session and verify the handle appears in the picker or can be invoked as a <code>$</code> handle.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>JSC-364 is delivery-complete. The proof plane now gives a safer path out of <code>blocked_runtime</code>: preview user-runtime sync, apply only if the relink plan is acceptable, then rerun the Codex-targeted proof. Until that user-runtime bridge exists, the project still correctly avoids claiming live Codex runtime parity.</p>
+      <p>JSC-364 is delivery-complete and the local Codex user-runtime blocker is cleared for <code>$autofix</code>. The next useful check is interactive runtime observation: reload Codex and verify the handle appears or invokes from the actual Codex picker/session surface.</p>
     </section>
   </main>
 </body>
