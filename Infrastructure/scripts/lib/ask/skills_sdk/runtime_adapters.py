@@ -33,10 +33,10 @@ RUNTIME_REACHABILITY_FAILURES = {
 def normalize_runtime_target(runtime_target: object) -> str:
     """
     Normalize a runtime target value to a lowercase string with surrounding whitespace removed.
-    
+
     Parameters:
         runtime_target (object): The input value to normalize; it will be converted with `str()` before trimming and lowercasing.
-    
+
     Returns:
         The runtime target as a lowercase string with leading and trailing whitespace removed.
     """
@@ -46,11 +46,11 @@ def normalize_runtime_target(runtime_target: object) -> str:
 def invalid_runtime_target_failure(handle: str, runtime_target: object) -> dict[str, Any]:
     """
     Create a standardized runtime validation failure payload for an invalid runtime target.
-    
+
     Parameters:
         handle (str): Skill handle (may include a leading '$'); used to build suggested validation commands.
         runtime_target (object): The original runtime target value provided by the user; will be normalized for the failure message.
-    
+
     Returns:
         dict[str, Any]: A runtime failure payload describing the invalid `runtime_target`, including an error code, failed check id,
         recovery guidance, and suggested validation command(s).
@@ -74,7 +74,7 @@ def invalid_runtime_target_failure(handle: str, runtime_target: object) -> dict[
 def _utc_now() -> str:
     """
     Return the current UTC time formatted as an ISO-8601 timestamp without microseconds and with a trailing 'Z'.
-    
+
     Returns:
         str: ISO-8601 UTC timestamp (e.g. '2024-05-01T12:00:00Z')
     """
@@ -84,13 +84,13 @@ def _utc_now() -> str:
 def _repo_relative(repo_root: Path, path: Path) -> str:
     """
     Produce a repository-relative string for `path` when it is inside `repo_root`; otherwise return the original path string.
-    
+
     Parameters:
-    	repo_root (Path): Repository root path used as the base for relativization.
-    	path (Path): Path to be made relative to `repo_root` when possible.
-    
+        repo_root (Path): Repository root path used as the base for relativization.
+        path (Path): Path to be made relative to `repo_root` when possible.
+
     Returns:
-    	relative_path (str): `path` made relative to `repo_root` if `path` is beneath `repo_root`, otherwise `str(path)`.
+        relative_path (str): `path` made relative to `repo_root` if `path` is beneath `repo_root`, otherwise `str(path)`.
     """
     try:
         return str(path.relative_to(repo_root))
@@ -101,11 +101,11 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     """
     Ensure the parent directory exists and write the given payload to the specified path as pretty-printed JSON.
-    
+
     Parameters:
         path (Path): Filesystem path where the JSON will be written; parent directories are created if missing.
         payload (dict[str, Any]): JSON-serializable mapping to write.
-    
+
     Notes:
         The JSON is written with 2-space indentation, keys sorted, encoded as UTF-8, and terminated with a single trailing newline.
     """
@@ -140,16 +140,16 @@ def _redact_runtime_paths(value: Any, repo_root: Path) -> Any:
 def _runtime_status_for_proof(proof: dict[str, Any]) -> str:
     """
     Map a command-handle proof object to a runtime status label.
-    
+
     Examines `proof["status"]` and, when not `"pass"`, inspects
     `proof["runtime_failure"]["failed_check_id"]` (defaults to `"runtime_reachability"`).
     Returns `"implemented_enforced"` when the proof status is `"pass"`;
     returns `"blocked_runtime"` when the failed check id is one of
     `RUNTIME_REACHABILITY_FAILURES`; otherwise returns `"stale_or_drifted"`.
-    
+
     Parameters:
         proof (dict[str, Any]): The command-handle proof payload.
-    
+
     Returns:
         str: One of `"implemented_enforced"`, `"blocked_runtime"`, or `"stale_or_drifted"` describing runtime status.
     """
@@ -167,10 +167,10 @@ def _runtime_status_for_proof(proof: dict[str, Any]) -> str:
 def _claim_status_for_runtime(runtime_status: str) -> str:
     """
     Map a normalized runtime status to the claim status used in evidence artifacts.
-    
+
     Parameters:
         runtime_status (str): Runtime status string (e.g., "implemented_enforced" for a successful runtime proof).
-    
+
     Returns:
         str: "pass" when `runtime_status` is "implemented_enforced", "blocked" otherwise.
     """
@@ -180,7 +180,7 @@ def _claim_status_for_runtime(runtime_status: str) -> str:
 def _runtime_display_name(runtime_target: str) -> str:
     """
     Map a runtime target identifier to a human-friendly display name.
-    
+
     Returns:
         display_name (str): "Codex" when `runtime_target` is "codex", "Agents" otherwise.
     """
@@ -313,7 +313,16 @@ def _session_cwd_matches_repo(cwd: object, repo_root: Path) -> bool:
     if not isinstance(cwd, str) or not cwd:
         return False
     try:
-        return Path(cwd).resolve(strict=False) == repo_root.resolve(strict=False)
+        cwd_resolved = Path(cwd).resolve(strict=False)
+        repo_resolved = repo_root.resolve(strict=False)
+        if cwd_resolved == repo_resolved:
+            return True
+        # Check if cwd is a descendant of repo_root
+        try:
+            cwd_resolved.relative_to(repo_resolved)
+            return True
+        except ValueError:
+            return False
     except OSError:
         return False
 
@@ -420,8 +429,9 @@ def _codex_runtime_observation(
 ) -> dict[str, Any]:
     if context["runtime_target"] != "codex":
         return {"thread_runs": [], "turn_events": [], "session": None}
-    sessions_root = codex_sessions_root or Path.home() / ".codex" / "sessions"
-    for path in _iter_recent_codex_rollouts(sessions_root):
+    if not codex_sessions_root:
+        return {"thread_runs": [], "turn_events": [], "session": None}
+    for path in _iter_recent_codex_rollouts(codex_sessions_root):
         summary = _codex_session_summary_from_rollout(path, context=context)
         if summary:
             return {
@@ -714,12 +724,13 @@ def _runtime_card_payload(
     turn_events = runtime_observation.get("turn_events")
     if not isinstance(turn_events, list):
         turn_events = []
+    runtime_display = _runtime_display_name(context["runtime_target"])
     limitations = (
         [
             {
                 "class": "skill_invocation_not_asserted",
                 "message": (
-                    "Codex session metadata was observed for this workspace; this proof still verifies "
+                    f"{runtime_display} session metadata was observed for this workspace; this proof still verifies "
                     "command-handle reachability rather than a dedicated skill tool invocation event."
                 ),
             }
@@ -729,8 +740,7 @@ def _runtime_card_payload(
             {
                 "class": "manual_session_gate",
                 "message": (
-                    "Runtime reachability proves command-handle wiring; it does not execute an interactive "
-                    "Codex session."
+                    "Runtime reachability proves command-handle wiring; it does not execute an interactive session."
                 ),
             }
         ]
