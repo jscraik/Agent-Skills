@@ -260,7 +260,7 @@ policy:
         """
         Verify the human-readable output of the `ask skills capabilities` CLI for the `codex` runtime.
         
-        Runs the CLI and asserts it exits successfully and that stdout includes a summary line with the target and status, a live runtime parity indication of `not_claimed`, and a suggested "Next:" proof-testing command containing `--runtime-target codex`.
+        Runs the CLI and asserts it exits successfully and that stdout includes a summary line with the target and status, a live runtime parity indication of `not_claimed`, and a suggested "Next:" proof command with an unresolved handle placeholder.
         """
         result = subprocess.run(
             [sys.executable, "Infrastructure/bin/ask", "skills", "capabilities", "--runtime-target", "codex"],
@@ -273,7 +273,7 @@ policy:
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Skills capabilities: target=codex status=", result.stdout)
         self.assertIn("Live runtime parity: not_claimed", result.stdout)
-        self.assertIn("Next: ./bin/ask skills proof testing --runtime-target codex --json --robot", result.stdout)
+        self.assertIn("Next: ./bin/ask skills proof HANDLE --runtime-target codex --json --robot", result.stdout)
 
     def test_codex_preview_human_output_disclaims_validation_result(self) -> None:
         result = subprocess.run(
@@ -320,8 +320,9 @@ policy:
         self.assertEqual(result.status, "success")
         self.assertEqual(discovery["status"], "partial")
         self.assertEqual(discovery["truth_boundaries"]["live_runtime_parity"], "not_claimed")
-        self.assertIn("skills proof", commands)
-        self.assertIn("--runtime-target codex", commands["skills proof"])
+        self.assertIn("skills proof (codex)", commands)
+        self.assertIn("--runtime-target codex", commands["skills proof (codex)"])
+        self.assertIn(".harness/evidence/runtime-proof/<handle>/codex/probe.json", discovery["required_artifacts"])
         self.assertIn("runtime_plugin_skill_roots", [check["id"] for check in discovery["blocked_checks"]])
 
     def test_capabilities_any_routes_to_explicit_runtime_targets(self) -> None:
@@ -343,6 +344,7 @@ policy:
         self.assertIn("./bin/ask skills proof HANDLE --runtime-target codex --json --robot", runtime_commands)
         self.assertIn("./bin/ask skills proof HANDLE --runtime-target agents --json --robot", runtime_commands)
         self.assertTrue(all("/any/" not in artifact for artifact in discovery["required_artifacts"]))
+        self.assertIn(".harness/evidence/runtime-proof/<handle>/agents/probe.json", discovery["required_artifacts"])
 
     def test_capabilities_agents_carries_source_blockers(self) -> None:
         with (

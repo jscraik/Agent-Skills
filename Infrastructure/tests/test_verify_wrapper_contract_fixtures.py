@@ -87,18 +87,21 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
         return completed
 
     def test_no_flag_runs_all_public_wrapper_fixtures(self) -> None:
-        self.assertEqual(
-            self._run_main(),
-            ["runtime-separation", "runtime-proof:he-heartbeat:/tmp/jsc-364-wrapper-codex-parity"],
+        completed = self._run_main()
+
+        self.assertEqual(completed[0], "runtime-separation")
+        self.assertRegex(
+            completed[1],
+            r"^runtime-proof:he-heartbeat:/tmp/jsc-364-wrapper-codex-parity-.+",
         )
 
     def test_runtime_separation_flag_preserves_legacy_fixture_scope(self) -> None:
         self.assertEqual(self._run_main("--runtime-separation"), ["runtime-separation"])
 
     def test_runtime_proof_flag_runs_only_proof_plane_fixtures(self) -> None:
-        self.assertEqual(
-            self._run_main("--runtime-proof"),
-            ["runtime-proof:he-heartbeat:/tmp/jsc-364-wrapper-codex-parity"],
+        self.assertRegex(
+            self._run_main("--runtime-proof")[0],
+            r"^runtime-proof:he-heartbeat:/tmp/jsc-364-wrapper-codex-parity-.+",
         )
 
     def test_runtime_proof_fixture_target_can_be_overridden(self) -> None:
@@ -123,7 +126,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
         """
         calls, fake_assert_envelope = self._runtime_proof_envelope_stub(
             live_parity_status="blocked_runtime",
-            blocked_runtime={"blockers": [{"rule_id": "live_config_layer_stack"}]},
+            blocked_runtime={"blockers": [{"rule_id": "live_config_layer_stack", "message": "Live config layer is unavailable."}]},
         )
 
         with mock.patch.object(self.module, "_assert_envelope", fake_assert_envelope):

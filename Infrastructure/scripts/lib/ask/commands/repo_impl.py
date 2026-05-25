@@ -39,6 +39,7 @@ CANONICAL_SKILL_PREFIXES = (
     "Skills/",
 )
 RUNTIME_EVIDENCE_ROOT = ".harness/evidence/runtime-proof"
+RUNTIME_EVIDENCE_VALIDATOR = Path("Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py")
 
 
 def _repo_validation_command(action: str, *args: str, **flags: bool) -> str:
@@ -1286,7 +1287,7 @@ def _closeout_focused_validation(repo_root: Path, changed_files: list[str]) -> l
     return commands
 
 
-def _runtime_evidence_validation_command(repo_root: Path) -> str:
+def _runtime_evidence_validation_command(repo_root: Path, card_paths: list[Path] | None = None) -> str:
     """
     Builds the shell command to validate runtime evidence cards for the given repository.
     
@@ -1296,11 +1297,51 @@ def _runtime_evidence_validation_command(repo_root: Path) -> str:
     Returns:
         command (str): A single shell command string that invokes validate_runtime_cards.py with the evidence directory, `--require-shared-workspace`, the resolved workspace root, and `--json`. The command tokens are shell-quoted where appropriate.
     """
-    return (
-        "python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py "
-        f"--evidence-dir {shlex.quote(RUNTIME_EVIDENCE_ROOT)} "
-        f"--require-shared-workspace --workspace-root {shlex.quote(str(repo_root.resolve()))} --json"
+    validator_path = RUNTIME_EVIDENCE_VALIDATOR
+    if not (repo_root / validator_path).exists():
+        validator_path = Path(__file__).resolve().parents[4] / "scripts" / "validation-and-linting" / "validate_runtime_cards.py"
+    parts = ["python3", str(validator_path)]
+    if card_paths:
+        for card_path in card_paths:
+            try:
+                parts.append(str(card_path.relative_to(repo_root)))
+            except ValueError:
+                parts.append(str(card_path))
+    else:
+        parts.extend(["--evidence-dir", RUNTIME_EVIDENCE_ROOT])
+    parts.extend(["--require-shared-workspace", "--workspace-root", str(repo_root.resolve()), "--json"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _runtime_evidence_schema_validation(repo_root: Path, card_paths: list[Path]) -> dict[str, Any]:
+    command = _runtime_evidence_validation_command(repo_root, card_paths)
+    existing_cards = [path for path in card_paths if path.exists() and not path.is_symlink()]
+    if not existing_cards:
+        return {
+            "status": "not_run",
+            "command": command,
+            "reason": "No existing changed RuntimeCard files to schema-validate.",
+        }
+    process = subprocess.run(
+        shlex.split(command),
+        cwd=str(repo_root),
+        capture_output=True,
+        text=True,
+        timeout=SCRIPT_TIMEOUT_SECONDS,
+        check=False,
     )
+    try:
+        payload = json.loads(process.stdout) if process.stdout.strip() else {}
+    except json.JSONDecodeError:
+        payload = {"raw_stdout": process.stdout}
+    return {
+        "status": "pass" if process.returncode == 0 else "fail",
+        "command": command,
+        "returncode": process.returncode,
+        "findings": payload.get("findings", []) if isinstance(payload, dict) else [],
+        "checked": payload.get("checked", []) if isinstance(payload, dict) else [],
+        "stderr": process.stderr.strip(),
+    }
 
 
 def _normalize_changed_path(repo_root: Path, path: str) -> str:
@@ -1530,6 +1571,13 @@ def _closeout_runtime_evidence(repo_root: Path, *, include_cards: bool, changed_
     changed_card_paths = _changed_runtime_card_paths(repo_root, changed_files)
     changed_cards = [_runtime_card_summary(repo_root, path) for path in changed_card_paths]
     changed_scope = _runtime_card_scope_summary(changed_cards, empty_status="not_applicable")
+    schema_validation = _runtime_evidence_schema_validation(repo_root, changed_card_paths)
+    if changed_scope["status"] == "present" and schema_validation["status"] == "fail":
+        changed_scope = {
+            **changed_scope,
+            "status": "invalid",
+            "invalid_runtime_card_count": changed_scope["runtime_card_count"],
+        }
     workspace_scope = _runtime_card_scope_summary(workspace_cards, empty_status="missing")
     return {
         "status": changed_scope["status"],
@@ -1540,13 +1588,10 @@ def _closeout_runtime_evidence(repo_root: Path, *, include_cards: bool, changed_
         "runtime_cards": changed_scope["runtime_cards"],
         "changed_scope": changed_scope,
         "workspace_scope": workspace_scope,
-        "schema_validation": {
-            "status": "not_run",
-            "command": validation_command,
-        },
+        "schema_validation": schema_validation,
         "truth_boundaries": {
             "command_proof": "workspace_runtime_evidence",
-            "schema_proof": "not_run_by_closeout_use_schema_validation_command",
+            "schema_proof": "checked_by_repo_closeout" if schema_validation["status"] in {"pass", "fail"} else "not_run_by_closeout_use_schema_validation_command",
             "pr_truth": "not_checked_by_repo_closeout",
             "tracker_truth": "not_checked_by_repo_closeout",
             "docs_truth": "not_checked_by_repo_closeout",

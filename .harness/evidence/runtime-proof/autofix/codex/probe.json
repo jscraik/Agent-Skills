@@ -2,7 +2,7 @@
   "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
   "exit_code": 2,
   "handle": "autofix",
-  "observed_at": "2026-05-25T12:07:43Z",
+  "observed_at": "2026-05-25T16:00:59Z",
   "proof": {
     "available_runtimes": [
       "agents_user_runtime"
@@ -58,7 +58,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "2830d0697",
+        "source_revision": "123c0fe13",
         "source_sha256": "9347ca2014f24d539744d3d38959514fd4a30fc0e391a06796115c082a0e3101"
       },
       "runtime_visibility": "latent",
@@ -82,25 +82,25 @@
     "schema_version": "command-handle-proof.v2",
     "status": "fail",
     "user_runtime_command_handles": {
-      "agents_handle": "/Users/jamiecraik/.agents/skills/autofix/SKILL.md",
+      "agents_handle": "${HOME}/.agents/skills/autofix/SKILL.md",
       "agents_handle_exists": true,
-      "codex_handle": "/Users/jamiecraik/.codex/skills/autofix/SKILL.md",
+      "codex_handle": "${HOME}/.codex/skills/autofix/SKILL.md",
       "codex_handle_exists": false
     },
     "user_runtime_links": {
       "agents_skills": {
         "exists": true,
         "is_symlink": true,
-        "path": "/Users/jamiecraik/.agents/skills",
+        "path": "${HOME}/.agents/skills",
         "points_to_workspace_runtime": true,
-        "target": "/Users/jamiecraik/dev/agent-skills/.agents/skills"
+        "target": "${WORKSPACE_ROOT}/.agents/skills"
       },
       "codex_skills": {
         "exists": true,
         "is_symlink": true,
-        "path": "/Users/jamiecraik/.codex/skills",
+        "path": "${HOME}/.codex/skills",
         "points_to_workspace_runtime": false,
-        "target": "/Users/jamiecraik/dev/configs/.codex/skills"
+        "target": "${HOME}/dev/configs/.codex/skills"
       }
     },
     "validation_commands": [
@@ -108,8 +108,8 @@
     ],
     "workspace_runtime": {
       "command_handle_exists": true,
-      "command_handle_path": "/Users/jamiecraik/dev/agent-skills/.agents/skills/autofix/SKILL.md",
-      "path": "/Users/jamiecraik/dev/agent-skills/.agents/skills"
+      "command_handle_path": "${WORKSPACE_ROOT}/.agents/skills/autofix/SKILL.md",
+      "path": "${WORKSPACE_ROOT}/.agents/skills"
     }
   },
   "runtime_status": "blocked_runtime",

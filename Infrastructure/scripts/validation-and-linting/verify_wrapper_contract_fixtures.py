@@ -7,12 +7,13 @@ import argparse
 import json
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
 
 
 DEFAULT_RUNTIME_PROOF_HANDLE = "he-heartbeat"
-DEFAULT_RUNTIME_PROOF_EVIDENCE_DIR = "/tmp/jsc-364-wrapper-codex-parity"
+DEFAULT_RUNTIME_PROOF_EVIDENCE_DIR = ""
 
 
 def parse_args() -> argparse.Namespace:
@@ -210,7 +211,11 @@ def _assert_blockers(value: Any, command_label: str) -> None:
     for index, blocker in enumerate(value):
         if not isinstance(blocker, dict):
             raise SystemExit(f"{command_label} blocked_runtime.blockers[{index}] is not an object")
-        if not any(isinstance(blocker.get(key), str) and blocker.get(key, "").strip() for key in ("rule_id", "message")):
+        required_fields = ("rule_id", "message")
+        if not all(
+            isinstance(blocker.get(key), str) and blocker.get(key, "").strip()
+            for key in required_fields
+        ):
             raise SystemExit(f"{command_label} blocked_runtime.blockers[{index}] missing rule_id or message")
 
 
@@ -365,11 +370,14 @@ def main() -> int:
         _assert_runtime_separation_fixtures(repo_root, timeout_seconds)
         completed.append("runtime-separation")
     if run_runtime_proof:
+        runtime_proof_evidence_dir = args.runtime_proof_evidence_dir or tempfile.mkdtemp(
+            prefix="jsc-364-wrapper-codex-parity-"
+        )
         _assert_runtime_proof_fixtures(
             repo_root,
             timeout_seconds,
             handle=args.runtime_proof_handle,
-            evidence_dir=args.runtime_proof_evidence_dir,
+            evidence_dir=runtime_proof_evidence_dir,
         )
         completed.append("runtime-proof")
 

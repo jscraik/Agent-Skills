@@ -152,6 +152,8 @@ __all__ = [
     "extract_family_fail_lines",
     "external_review_skill",
     "fold_skills",
+    "format_capabilities_human",
+    "format_codex_preview_human",
     "goal_skills",
     "improve_skills",
     "init_skill",
@@ -160,7 +162,9 @@ __all__ = [
     "reviewers_resolve",
     "route_skills",
     "skills_budget",
+    "skills_capabilities",
     "skills_config_explain",
+    "skills_codex_preview",
     "skills_implicit_preview",
     "skills_inject_preview",
     "skills_conformance_run",
@@ -2681,7 +2685,7 @@ def skills_capabilities(repo_root: Path, runtime_target: str = "codex") -> CallR
     artifact_paths = [
         f".harness/evidence/runtime-proof/<handle>/{proof_target}/{artifact_name}"
         for proof_target in proof_targets
-        for artifact_name in ("runtime-card.json", "evidence-receipt.json", "artifact-record.json")
+        for artifact_name in ("runtime-card.json", "evidence-receipt.json", "artifact-record.json", "probe.json")
     ]
     result.data["capability_discovery"] = {
         "schema_version": "capability-discovery.v1",
@@ -2710,7 +2714,9 @@ def skills_capabilities(repo_root: Path, runtime_target: str = "codex") -> CallR
             },
         ],
         "supported_commands": [
-            {"name": "skills proof", "command": proof_commands[0]},
+            {"name": f"skills proof ({proof_target})", "command": proof_command}
+            for proof_target, proof_command in zip(proof_targets, proof_commands)
+        ] + [
             {"name": "skills conformance run", "command": _skills_validation_command("conformance", "run", "--suite", "codex-parity")},
             {"name": "skills codex-preview", "command": _skills_validation_command("codex-preview")},
             {"name": "repo closeout", "command": _ask_validation_command("repo", "closeout", "--changed")},
@@ -2731,7 +2737,7 @@ def skills_capabilities(repo_root: Path, runtime_target: str = "codex") -> CallR
         "blocked_checks": blockers,
         "source_basis": preview.get("source_basis"),
         "next_actions": [
-            _skills_validation_command("proof", "testing", "--runtime-target", proof_targets[0]),
+            _skills_validation_command("proof", "HANDLE", "--runtime-target", proof_targets[0]),
             _ask_validation_command("repo", "closeout", "--changed"),
         ],
         "truth_boundaries": {

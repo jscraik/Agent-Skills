@@ -17,6 +17,7 @@ SCHEMA_FILES = {
     "runtime_session_summary": "runtime-session-summary.v1.schema.json",
     "recovery_plan_summary": "recovery-plan-summary.v1.schema.json",
 }
+WORKSPACE_ROOT_MARKERS = {"${WORKSPACE_ROOT}"}
 
 
 @dataclass(frozen=True)
@@ -244,6 +245,8 @@ def _expected_workspace_finding(
     expected_workspace_root: str,
 ) -> list[Finding]:
     workspace_root = payload.get("workspace_root")
+    if workspace_root in WORKSPACE_ROOT_MARKERS:
+        return []
     if workspace_root != expected_workspace_root:
         return [
             Finding(

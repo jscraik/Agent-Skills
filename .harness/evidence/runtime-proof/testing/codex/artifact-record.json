@@ -15,5 +15,5 @@
   },
   "validation_status": "blocked",
   "visibility_status": "user_observable",
-  "workspace_root": "/Users/jamiecraik/dev/agent-skills"
+  "workspace_root": "${WORKSPACE_ROOT}"
 }

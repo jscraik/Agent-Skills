@@ -13,6 +13,8 @@ ResolveSkillHandle = Callable[..., dict[str, Any]]
 CheckCommandHandles = Callable[..., dict[str, Any]]
 SUPPORTED_RUNTIME_TARGETS = {"any", "codex", "agents"}
 EVIDENCE_RUNTIME_TARGETS = {"codex", "agents"}
+WORKSPACE_ROOT_MARKER = "${WORKSPACE_ROOT}"
+HOME_MARKER = "${HOME}"
 RUNTIME_REACHABILITY_FAILURES = {
     "user_runtime_ready",
     "codex_user_runtime_ready",
@@ -105,6 +107,30 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _redact_runtime_path(value: str, repo_root: Path) -> str:
+    repo_root_text = str(repo_root.resolve())
+    home_text = str(Path.home())
+    if value == repo_root_text:
+        return WORKSPACE_ROOT_MARKER
+    if value.startswith(repo_root_text + "/"):
+        return WORKSPACE_ROOT_MARKER + value[len(repo_root_text) :]
+    if value == home_text:
+        return HOME_MARKER
+    if value.startswith(home_text + "/"):
+        return HOME_MARKER + value[len(home_text) :]
+    return value
+
+
+def _redact_runtime_paths(value: Any, repo_root: Path) -> Any:
+    if isinstance(value, str):
+        return _redact_runtime_path(value, repo_root)
+    if isinstance(value, list):
+        return [_redact_runtime_paths(item, repo_root) for item in value]
+    if isinstance(value, dict):
+        return {key: _redact_runtime_paths(item, repo_root) for key, item in value.items()}
+    return value
 
 
 def _runtime_status_for_proof(proof: dict[str, Any]) -> str:
@@ -264,7 +290,7 @@ def _artifact_record(
         "artifact_type": artifact_type,
         "path": path,
         "source_identity": {"source_paths": context["source_paths"]},
-        "workspace_root": str(context["repo_root"].resolve()),
+        "workspace_root": WORKSPACE_ROOT_MARKER,
         "actor_type": context["actor_type"],
         "mutation_scope": "evidence_write",
         "visibility_status": "user_observable",
@@ -302,7 +328,7 @@ def _probe_payload(context: dict[str, Any], proof: dict[str, Any]) -> dict[str, 
         "observed_at": context["created_at"],
         "command": context["command"],
         "exit_code": context["exit_code"],
-        "proof": proof,
+        "proof": _redact_runtime_paths(proof, context["repo_root"]),
     }
 
 
@@ -378,15 +404,19 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
             - "permission_profile": required permissions for recovery actions
             - "expected_outcome": expected result after following the plan
     """
-    recovery_reason = (
-        str(context["runtime_failure"].get("recovery_guidance"))
-        if context["claim_status"] == "blocked"
-        else (
+    if context["claim_status"] == "blocked":
+        guidance = context["runtime_failure"].get("recovery_guidance")
+        recovery_reason = (
+            str(guidance)
+            if guidance
+            else f"Recovery guidance unavailable for blocked {context['runtime_target']} runtime."
+        )
+    else:
+        recovery_reason = (
             "$"
             + context["handle"]
             + f" is reachable in the {_runtime_display_name(context['runtime_target'])} runtime."
         )
-    )
     return {
         "recovery_status": context["runtime_status"],
         "reason": recovery_reason,
@@ -451,14 +481,14 @@ def _runtime_card_payload(
         "runtime_target": context["runtime_target"],
         "runtime_status": context["runtime_status"],
         "created_at": context["created_at"],
-        "workspace_root": str(context["repo_root"].resolve()),
+        "workspace_root": WORKSPACE_ROOT_MARKER,
         "actor_type": context["actor_type"],
         "visibility_status": "user_observable",
     }
     if context["claim_status"] == "blocked":
         runtime_session["unavailable_reason"] = context["blocker"]
     return {
-        "schema_version": "runtime-card.v1",
+        "schema_version": 1,
         "card_id": f"runtime-card-{context['handle']}-{context['runtime_target']}",
         "created_at": context["created_at"],
         "runtime_target": context["runtime_target"],
@@ -484,7 +514,7 @@ def _runtime_card_payload(
             "filesystem": "workspace evidence write",
             "network": "not required",
         },
-        "workspace_root": str(context["repo_root"].resolve()),
+        "workspace_root": WORKSPACE_ROOT_MARKER,
         "actor_type": context["actor_type"],
         "mutation_scope": "evidence_write",
         "visibility_status": "user_observable",
@@ -579,7 +609,7 @@ def emit_command_handle_runtime_evidence(
         "probe_artifact_path": relative_probe_path,
         "validation_command": (
             "python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py "
-            f"{relative_card_path} --require-shared-workspace --workspace-root {repo_root.resolve()} --json"
+            f"{relative_card_path} --require-shared-workspace --workspace-root {WORKSPACE_ROOT_MARKER} --json"
         ),
     }
 
