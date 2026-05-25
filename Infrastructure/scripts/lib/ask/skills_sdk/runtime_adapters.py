@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,7 @@ SUPPORTED_RUNTIME_TARGETS = {"any", "codex", "agents"}
 EVIDENCE_RUNTIME_TARGETS = {"codex", "agents"}
 WORKSPACE_ROOT_MARKER = "${WORKSPACE_ROOT}"
 HOME_MARKER = "${HOME}"
+SAFE_EVIDENCE_SEGMENT_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
 RUNTIME_REACHABILITY_FAILURES = {
     "user_runtime_ready",
     "codex_user_runtime_ready",
@@ -183,6 +185,11 @@ def _runtime_display_name(runtime_target: str) -> str:
     return "Codex" if runtime_target == "codex" else "Agents"
 
 
+def _runtime_evidence_path_segment(handle: str) -> str:
+    segment = SAFE_EVIDENCE_SEGMENT_PATTERN.sub("-", handle.strip().lstrip("$"))
+    return segment.strip(".-") or "unknown"
+
+
 def _runtime_evidence_context(
     *,
     repo_root: Path,
@@ -217,10 +224,14 @@ def _runtime_evidence_context(
     handle = str(proof.get("handle") or "unknown").strip().lstrip("$") or "unknown"
     runtime_target = str(proof.get("runtime_target") or "")
     resolution = proof.get("resolution") if isinstance(proof.get("resolution"), dict) else {}
-    source_path = str(resolution.get("source_path") or repo_root / ".agents" / "skills" / handle / "SKILL.md")
+    handle_path_segment = _runtime_evidence_path_segment(handle)
+    source_path = str(
+        resolution.get("source_path")
+        or repo_root / ".agents" / "skills" / handle_path_segment / "SKILL.md"
+    )
     source = Path(source_path)
     canonical_source_path = _repo_relative(repo_root, source if source.is_absolute() else repo_root / source_path)
-    evidence_dir = repo_root / ".harness" / "evidence" / "runtime-proof" / handle / runtime_target
+    evidence_dir = repo_root / ".harness" / "evidence" / "runtime-proof" / handle_path_segment / runtime_target
     runtime_status = _runtime_status_for_proof(proof)
     runtime_failure = proof.get("runtime_failure") if isinstance(proof.get("runtime_failure"), dict) else {}
     return {
