@@ -756,6 +756,17 @@
           <li>Environment blocker: broad <code>Infrastructure/tests</code> collection still hits unrelated local <code>ModuleNotFoundError: No module named 'yaml'</code>; focused proof-plane tests pass.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>PU-006 delivery package opened</h3>
+        <time datetime="2026-05-25T09:24:00Z">2026-05-25T09:24:00Z</time>
+        <p>PU-006 is committed and pushed as <code>3c9ae61</code> on <code>codex/jsc-364-runtime-proof-plane-pu006</code>. Draft PR <a href="https://github.com/jscraik/Agent-Skills/pull/205">#205</a> is stacked on <code>codex/jsc-364-runtime-proof-plane-pu005</code>.</p>
+        <ul>
+          <li>First push attempt hit the known sandboxed <code>prek</code> cache path problem; rerun with temp cache env passed pre-push diagnostics and pushed.</li>
+          <li>GitHub connector PR creation failed with transport closed; <code>gh pr create</code> fallback succeeded.</li>
+          <li>Receipt <code>R019</code> records the delivery package and leaves PR green-sweep as delegated follow-up while PU-007 becomes active.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
