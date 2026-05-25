@@ -745,7 +745,7 @@ class TestAskRepoDoctor(unittest.TestCase):
             [command["id"] for command in closeout["focused_validation"]],
         )
 
-    def test_closeout_changed_runtime_evidence_deletion_does_not_block_readiness(self) -> None:
+    def test_closeout_changed_runtime_evidence_deletion_blocks_readiness(self) -> None:
         changed_files = [".harness/evidence/runtime-proof/context7/codex/runtime-card.json"]
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
@@ -756,14 +756,16 @@ class TestAskRepoDoctor(unittest.TestCase):
                 result = repo_closeout(repo_root, changed=True)
 
         closeout = result.data["repo_closeout"]
-        self.assertEqual(result.status, "success")
+        self.assertEqual(result.status, "error")
         runtime_evidence = closeout["runtime_evidence"]
         self.assertEqual(runtime_evidence["status"], "deleted")
         self.assertEqual(runtime_evidence["changed_scope"]["status"], "deleted")
         self.assertEqual(runtime_evidence["deleted_runtime_card_count"], 1)
         self.assertEqual(runtime_evidence["runtime_cards"][0]["read_status"], "deleted")
-        self.assertTrue(closeout["commit_readiness"]["ready"])
+        self.assertFalse(closeout["commit_readiness"]["ready"])
+        self.assertIn("runtime_evidence_deleted", closeout["commit_readiness"]["blockers"])
         self.assertNotIn("runtime_evidence_invalid", closeout["commit_readiness"]["blockers"])
+        self.assertIn("validate_runtime_cards.py", closeout["next_command"])
 
     def test_closeout_skips_changed_file_detection_without_changed_flag(self) -> None:
         changed_files = ["Skills/product-strategy/example/SKILL.md"]

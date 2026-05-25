@@ -1618,8 +1618,11 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
     runtime_evidence = _closeout_runtime_evidence(repo_root, include_cards=changed, changed_files=changed_files)
     if strict and diagnostic_debt:
         blockers.append("strict_diagnostic_debt")
-    if runtime_evidence.get("changed_scope", {}).get("status") == "invalid":
+    runtime_evidence_status = runtime_evidence.get("changed_scope", {}).get("status")
+    if runtime_evidence_status == "invalid":
         blockers.append("runtime_evidence_invalid")
+    if runtime_evidence_status == "deleted":
+        blockers.append("runtime_evidence_deleted")
     ready = not blockers
     next_command: str | None
     if changed_files_error:
@@ -1634,7 +1637,7 @@ def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) 
             or doctor_payload.get("next_command")
             or _repo_validation_command("doctor")
         )
-    elif "runtime_evidence_invalid" in blockers:
+    elif "runtime_evidence_invalid" in blockers or "runtime_evidence_deleted" in blockers:
         next_command = runtime_evidence["schema_validation"]["command"]
     elif sync_report["validation_commands"]:
         next_command = sync_report["validation_commands"][0]
