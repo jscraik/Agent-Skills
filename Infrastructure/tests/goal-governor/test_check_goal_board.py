@@ -329,3 +329,246 @@ def test_claim_ledger_validates_research_status_shape() -> None:
     }
 
     assert check_goal_board.validate_claims(state) == []
+
+
+def test_worker_tasks_require_mdx_implementation_notes_artifact() -> None:
+    with TemporaryDirectory() as tmp:
+        project_dir = Path(tmp)
+        goal_dir = project_dir / "docs" / "goals" / "missing-implementation-notes"
+        goal_dir.mkdir(parents=True)
+        (goal_dir / "notes").mkdir()
+        (goal_dir / "goal.md").write_text("# Goal\n", encoding="utf-8")
+        (goal_dir / "state.yaml").write_text(
+            """\
+version: 2
+goal:
+  slug: missing-implementation-notes
+  status: active
+  objective: "Reject implementation work without MDX notes."
+completion_contract:
+  outcome: "Reject implementation work without MDX notes."
+  verification_surface:
+    - "Goal board validator output."
+  constraints:
+    - "Preserve implementation-note evidence."
+  boundaries:
+    - "Use only this temporary goal directory."
+  iteration_policy: "Fix the next validator blocker."
+  blocked_stop_condition: "Stop with the validator error."
+tasks:
+  - id: T001
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Implement the slice."
+    allowed_files:
+      - "src/example.ts"
+    verify:
+      - "pytest"
+    stop_if:
+      - "Validation fails."
+    receipt_id: null
+""",
+            encoding="utf-8",
+        )
+
+        assert (
+            "artifacts.implementation_notes is required when Worker tasks exist"
+            in check_goal_board.validate_board(goal_dir)
+        )
+
+
+def test_worker_tasks_require_live_browser_update_metadata() -> None:
+    with TemporaryDirectory() as tmp:
+        project_dir = Path(tmp)
+        goal_dir = project_dir / "docs" / "goals" / "missing-live-update"
+        goal_dir.mkdir(parents=True)
+        notes_path = (
+            project_dir
+            / ".harness"
+            / "implementation-notes"
+            / "2026-05-25-example-notes.mdx"
+        )
+        notes_path.parent.mkdir(parents=True, exist_ok=True)
+        notes_path.write_text(
+            """\
+---
+title: Example Notes
+schema_version: implementation-notes.mdx.v1
+---
+
+import {
+  BlastRadiusMap,
+  DeepModuleMap,
+  InsertionPoint,
+  RuntimeCardState,
+  ValidatorCoverage,
+} from "./components/implementation-notes";
+
+# Example Notes
+
+## Deep Module Topology
+<DeepModuleMap modules={[]} />
+
+## Current Slice Insertion Map
+<InsertionPoint changes={[]} />
+
+## Runtime Truth Surface
+<RuntimeCardState cards={[]} />
+
+## Blast Radius View
+<BlastRadiusMap boundaries={[]} />
+
+## Validation Coverage
+<ValidatorCoverage validators={[]} />
+""",
+            encoding="utf-8",
+        )
+        (goal_dir / "notes").mkdir()
+        (goal_dir / "goal.md").write_text("# Goal\n", encoding="utf-8")
+        (goal_dir / "state.yaml").write_text(
+            """\
+version: 2
+goal:
+  slug: missing-live-update
+  status: active
+  objective: "Reject implementation notes without live Browser update metadata."
+completion_contract:
+  outcome: "Reject implementation notes without live Browser update metadata."
+  verification_surface:
+    - "Goal board validator output."
+  constraints:
+    - "Preserve implementation-note evidence."
+  boundaries:
+    - "Use only this temporary goal directory."
+  iteration_policy: "Fix the next validator blocker."
+  blocked_stop_condition: "Stop with the validator error."
+artifacts:
+  implementation_notes:
+    path: ".harness/implementation-notes/2026-05-25-example-notes.mdx"
+    format: mdx
+    status: present
+    browser_preview:
+      surface: localhost
+      status: verified
+      url: "http://localhost:3000/implementation-notes/example"
+tasks:
+  - id: T001
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Implement the slice."
+    allowed_files:
+      - "src/example.ts"
+      - ".harness/implementation-notes/2026-05-25-example-notes.mdx"
+    verify:
+      - "pytest"
+    stop_if:
+      - "Validation fails."
+    receipt_id: null
+""",
+            encoding="utf-8",
+        )
+
+        assert (
+            "artifacts.implementation_notes.browser_preview.live_update must be a mapping"
+            in check_goal_board.validate_board(goal_dir)
+        )
+
+
+def test_worker_tasks_accept_present_mdx_implementation_notes_artifact() -> None:
+    with TemporaryDirectory() as tmp:
+        project_dir = Path(tmp)
+        goal_dir = project_dir / "docs" / "goals" / "valid-implementation-notes"
+        goal_dir.mkdir(parents=True)
+        notes_path = (
+            project_dir
+            / ".harness"
+            / "implementation-notes"
+            / "2026-05-25-example-notes.mdx"
+        )
+        notes_path.parent.mkdir(parents=True, exist_ok=True)
+        notes_path.write_text(
+            """\
+---
+title: Example Notes
+schema_version: implementation-notes.mdx.v1
+---
+
+import {
+  BlastRadiusMap,
+  DeepModuleMap,
+  InsertionPoint,
+  RuntimeCardState,
+  ValidatorCoverage,
+} from "./components/implementation-notes";
+
+# Example Notes
+
+## Deep Module Topology
+<DeepModuleMap modules={[]} />
+
+## Current Slice Insertion Map
+<InsertionPoint changes={[]} />
+
+## Runtime Truth Surface
+<RuntimeCardState cards={[]} />
+
+## Blast Radius View
+<BlastRadiusMap boundaries={[]} />
+
+## Validation Coverage
+<ValidatorCoverage validators={[]} />
+""",
+            encoding="utf-8",
+        )
+        (goal_dir / "notes").mkdir()
+        (goal_dir / "goal.md").write_text("# Goal\n", encoding="utf-8")
+        (goal_dir / "state.yaml").write_text(
+            """\
+version: 2
+goal:
+  slug: valid-implementation-notes
+  status: active
+  objective: "Accept implementation work with MDX notes."
+completion_contract:
+  outcome: "Accept implementation work with MDX notes."
+  verification_surface:
+    - "Goal board validator output."
+  constraints:
+    - "Preserve implementation-note evidence."
+  boundaries:
+    - "Use only this temporary goal directory."
+  iteration_policy: "Fix the next validator blocker."
+  blocked_stop_condition: "Stop with the validator error."
+artifacts:
+  implementation_notes:
+    path: ".harness/implementation-notes/2026-05-25-example-notes.mdx"
+    format: mdx
+    status: present
+    browser_preview:
+      surface: localhost
+      status: blocked
+      blocker: "Browser preview is unavailable in this fixture."
+      live_update:
+        status: blocked
+        blocker: "Browser preview is unavailable in this fixture."
+tasks:
+  - id: T001
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Implement the slice."
+    allowed_files:
+      - "src/example.ts"
+      - ".harness/implementation-notes/2026-05-25-example-notes.mdx"
+    verify:
+      - "pytest"
+    stop_if:
+      - "Validation fails."
+    receipt_id: null
+""",
+            encoding="utf-8",
+        )
+
+        assert check_goal_board.validate_board(goal_dir) == []

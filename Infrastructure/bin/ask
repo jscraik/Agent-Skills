@@ -51,7 +51,7 @@ from ask.commands.plugins import (
     doctor_plugins_state,
     uninstall_plugin,
 )
-from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report
+from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report, macro_eval_report
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 from ask.commands.mcp import sync_mcp
 from ask.commands.memory import memory_list, memory_read, memory_search
@@ -286,9 +286,15 @@ def main():
     evals_run_parser.add_argument("--case", action="append", default=[], help="Run matching eval case ids/names")
     evals_run_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl when policy or credentials block it")
     evals_run_parser.add_argument("--allow-tessl-project-save", action="store_true", help="Compatibility no-op for Tessl evals")
+    evals_run_parser.add_argument("--tessl-live-private", action="store_true", help="Use opt-in private Tessl tile eval staging")
+    evals_run_parser.add_argument("--tessl-workspace", help="Workspace namespace for private Tessl tile evals")
+    evals_run_parser.add_argument("--tessl-live-dry-run", action="store_true", help="Stage private Tessl tile eval inputs without invoking Tessl")
     evals_run_parser.add_argument("--no-dashboard", action="store_true", help="Skip rendering the local review dashboard after evals")
     evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
     evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
+    evals_macro_parser = evals_subparsers.add_parser("macro-report", help="Export deterministic macro-eval events from saved skill eval summaries", parents=[global_parser])
+    evals_macro_parser.add_argument("--output-dir", default=None, help="Directory for macro-eval artifacts")
+    evals_macro_parser.add_argument("--summaries-glob", default=None, help="Repo-relative glob for summary.json files")
     add_workouts_parser(subparsers, global_parser)
     graph_parser = subparsers.add_parser("graph", help="Skill graph navigation and discovery", parents=[global_parser])
     graph_subparsers = graph_parser.add_subparsers(dest="action")
@@ -746,6 +752,9 @@ def main():
                 runner=args.runner,
                 skip_tessl=args.skip_tessl,
                 allow_tessl_project_save=args.allow_tessl_project_save,
+                tessl_live_private=args.tessl_live_private,
+                tessl_workspace=args.tessl_workspace,
+                tessl_live_dry_run=args.tessl_live_dry_run,
                 model=args.model,
                 cases=args.case,
             )
@@ -753,6 +762,12 @@ def main():
             result = benchmark_portfolio(repo_root)
         elif args.action == "dashboard":
             result = dashboard_report(repo_root)
+        elif args.action == "macro-report":
+            result = macro_eval_report(
+                repo_root,
+                output_dir=args.output_dir,
+                summaries_glob=args.summaries_glob or "artifacts/reports/skills/*/*/summary.json",
+            )
         else:
             result = build_unknown_action_result(
                 "evals",
@@ -1782,12 +1797,9 @@ def main():
                     if args.action in {"fold", "init"}:
                         print_first_validation_command(result.data)
                     if args.action == "init":
-                        print("\n📚 Init examples:")
-                        print("   ask skills init my-skill --category frontend-ui --description 'Does X'")
-                        print("   ask skills init security-guard --category security-ops --description 'Validates Y'")
+                            print("\n📚 Init examples:\n   ask skills init my-skill --category frontend-ui --description 'Does X'\n   ask skills init security-guard --category security-ops --description 'Validates Y'")
                     elif args.action == "install":
-                        print("\n📚 Install examples:")
-                        print("   ask skills install https://github.com/user/repo --remediate")
+                            print("\n📚 Install examples:\n   ask skills install https://github.com/user/repo --remediate")
                 elif args.topic == "skills":
                     print_first_validation_command(result.data)
             elif args.topic == "plugins" and args.action in (
@@ -1818,11 +1830,7 @@ def main():
                                 print(f"  Stderr:\n{repr(run.get('stderr'))}")
                             else:
                                 print("  (Stderr elided. Use --verbose to view)")
-                print("\n📚 Plugin examples:")
-                print("   ask plugins init my-plugin --category third-party --with-marketplace")
-                print("   ask plugins install https://github.com/<owner>/<repo> --path Plugins/<name>")
-                print("   ask plugins harden Plugins/my-plugin")
-                print("   ask plugins sync-local-runtime")
+                    print("\n📚 Plugin examples:\n   ask plugins init my-plugin --category third-party --with-marketplace\n   ask plugins install https://github.com/<owner>/<repo> --path Plugins/<name>\n   ask plugins harden Plugins/my-plugin\n   ask plugins sync-local-runtime")
             elif args.topic == "plugins":
                 print_first_validation_command(result.data)
             elif args.topic == "reviewers":
@@ -1831,16 +1839,10 @@ def main():
                 if "raw_output" in result.data: print(result.data["raw_output"])
                 if "raw_error" in result.data: print(result.data["raw_error"])
                 print_first_validation_command(result.data)
-                print("\n📚 Eval examples:")
-                print("   ask evals run backend/cli-spec --mode smoke")
-                print("   ask evals run backend/cli-spec --mode release")
+                print("\n📚 Eval examples:\n   ask evals run backend/cli-spec --mode smoke\n   ask evals run backend/cli-spec --mode release")
             elif args.topic == "graph":
                 print_first_validation_command(result.data)
-                print("\n📚 Graph examples:")
-                print("   ask graph find security")
-                print("   ask graph related skill-builder --depth 2")
-                print("   ask graph chain skill-creator skill-installer")
-                print("   ask graph info cli-spec")
+                print("\n📚 Graph examples:\n   ask graph find security\n   ask graph related skill-builder --depth 2\n   ask graph chain skill-creator skill-installer\n   ask graph info cli-spec")
             elif args.topic == "repo":
                 print_first_validation_command(result.data)
                 if args.action == "validate":
@@ -1856,42 +1858,21 @@ def main():
                         print(line)
                 if args.action == "surface" and "repo_surface" in result.data:
                     summary = result.data["repo_surface"].get("summary", {})
-                    print(
-                        "   Surface summary: "
-                        f"{summary.get('total_paths', 0)} tracked path(s), "
-                        f"{summary.get('blocking_findings', 0)} blocking finding(s)"
-                    )
-                print("\n📚 Repo examples:")
-                print("   ask repo status")
-                print("   ask repo validate --ephemeral")
-                print("   ask repo doctor-catalog --strict")
-                print("   ask repo surface --json")
-                print("   ask repo check-stability --changed-files backend/cli-spec/SKILL.md")
+                    print("   Surface summary: " f"{summary.get('total_paths', 0)} tracked path(s), " f"{summary.get('blocking_findings', 0)} blocking finding(s)")
+                print("\n📚 Repo examples:\n   ask repo status\n   ask repo validate --ephemeral\n   ask repo doctor-catalog --strict\n   ask repo surface --json\n   ask repo check-stability --changed-files backend/cli-spec/SKILL.md")
             elif args.topic == "mcp":
                 print_first_validation_command(result.data)
-                print("\n📚 MCP examples:")
-                print("   ask mcp sync")
-                print("   ask mcp sync --dry-run")
+                print("\n📚 MCP examples:\n   ask mcp sync\n   ask mcp sync --dry-run")
             elif args.topic == "memory":
                 print_first_validation_command(result.data)
             elif args.topic == "runtime":
                 print_first_validation_command(result.data)
             elif args.topic == "wiki":
                 print_first_validation_command(result.data)
-                print("\n📚 Wiki examples:")
-                print("   ask wiki lint")
-                print("   ask wiki ingest 'Title' --summary 'Summary' --source '<source>'")
-                print("   ask wiki add --interactive")
-                print("   ask wiki query 'prompt injection'")
-                print("   ask wiki add-asset ./tmp/screenshot.png --title 'UI reference' --summary 'Capture for reuse'")
-                print("   ask wiki add-asset --interactive")
+                print("\n📚 Wiki examples:\n   ask wiki lint\n   ask wiki ingest 'Title' --summary 'Summary' --source '<source>'\n   ask wiki add --interactive\n   ask wiki query 'prompt injection'\n   ask wiki add-asset ./tmp/screenshot.png --title 'UI reference' --summary 'Capture for reuse'\n   ask wiki add-asset --interactive")
             elif args.topic == "workouts":
                 print_first_validation_command(result.data)
-                print("\n📚 Workout examples:")
-                print("   ask workouts list")
-                print("   ask workouts run agent-ops/verification-before-completion --attempts 2")
-                print("   ask workouts score agent-ops/verification-before-completion")
-                print("   ask workouts promote agent-ops/verification-before-completion --dry-run")
+                print("\n📚 Workout examples:\n   ask workouts list\n   ask workouts run agent-ops/verification-before-completion --attempts 2\n   ask workouts score agent-ops/verification-before-completion\n   ask workouts promote agent-ops/verification-before-completion --dry-run")
     if result.status == "success":
         sys.exit(0)
     else:

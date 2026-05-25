@@ -46,22 +46,39 @@ Skip quick questions, one-file fixes, and implementation without board ownership
    `receipts.jsonl`, run the validator, and compare board facts with native status.
 4. Repair invalid boards with the smallest scoped edit, rerun once, then classify
    any remaining blocker as validation, runtime, or owner input.
-5. For completion, return the YAML output contract with proven truth lanes and
+5. For governed implementation with any Worker task, create and maintain the
+   required MDX implementation notes artifact under
+   `.harness/implementation-notes/` before Worker work continues.
+6. For completion, return the YAML output contract with proven truth lanes and
    final Judge/PM audit status.
 
 For `~/dev/codex`, read `instructions/CODESTYLE.md` before technical edits.
 Detailed mode flow lives in [modes](./references/creation-and-continuation.md)
-and schema details live in [schema](./references/goal-contract.md).
+and schema details live in [schema](./references/goal-contract.md). MDX
+implementation-note requirements live in
+[implementation notes](./references/implementation-notes-contract.md).
 
 ## Required inputs
 
 - Input: project instructions plus a goal prompt or board path.
+
+## Discovery interview
+
+Use discovery only when the goal governance request is underspecified and
+interaction is available. Ask one round at a time, use a plain-language question,
+explain why this matters for the current goal decision, and avoid dumping the full interview plan at once.
+
+Discovery prompts and examples live in
+[discovery interview](./references/discovery-interview.md).
 
 ## Deliverables
 
 - Output: YAML with board health, native reconciliation, next action, truth
   lanes, validation evidence, risks, and launch safety. In `review`, return
   prompt readiness only.
+- For any governed implementation Worker lane: a produced MDX implementation
+  notes artifact at `.harness/implementation-notes/<date>-<work>-notes.mdx`,
+  referenced from `state.yaml` and protected by Worker `allowed_files`.
 
 ## Required Markers
 
@@ -102,6 +119,7 @@ config, credentials, packages, deployment state, or destructive commands.
 | owner stop | Queued owner input or audit-skip pressure closes the continuation gate. |
 | parser | Exact commands belong in `goal.md`; `state.yaml` `completion_contract.verification_surface` labels stay colon-free. |
 | native status | Report blocked, usage_limited, and budget_limited from native runtime even when board text sounds optimistic. |
+| implementation notes | Worker tasks require produced MDX implementation notes with Browser localhost preview and live-update status; prose-only notes or HTML dumps are invalid. |
 
 ## Failure Mode
 
@@ -111,6 +129,11 @@ config, credentials, packages, deployment state, or destructive commands.
 - If validation fails, record the exact failing command and outcome, fix only the scoped blocker, and rerun that command.
 - If instructions conflict, ask for owner direction before editing implementation files or native goal state.
 - If receipts, native metadata, or verification evidence are stale, route to Scout, Judge, or PM recovery before Worker work.
+- If Worker tasks exist and the MDX implementation notes artifact is missing,
+  malformed, outside `.harness/implementation-notes/`, not included in Worker
+  `allowed_files`, lacks Browser localhost preview status, or lacks Browser
+  live-update metadata, route to repair or Worker artifact creation before
+  continuing implementation.
 - For PR delivery triage, prefer the deterministic artifact writer before
   prose-only subagent instructions:
   python3 Skills/agent-ops/goal-governor/scripts/write_pr_triage_report.py
@@ -144,6 +167,8 @@ config, credentials, packages, deployment state, or destructive commands.
 - Continuing from conversation memory when board state or verification evidence is stale.
 - Marking a goal complete without a Judge or PM completion receipt.
 - Broadening Worker scope silently.
+- Continuing governed implementation while the required MDX implementation
+  notes artifact is missing or not referenced in `state.yaml`.
 - Assuming Scout, Judge, Worker, app-server, or native goal tools exist without runtime evidence.
 - Accepting mailbox text or a prose triage summary as PR delivery evidence when
   the required worktree-bound triage artifact is missing.
@@ -207,7 +232,9 @@ Full YAML examples live in [schema](./references/goal-contract.md).
 Load only when needed: [native runtime](./references/native-goal-runtime.md),
 [schema](./references/goal-contract.md), [modes](./references/creation-and-continuation.md),
 [markers](./references/markers.md), [evals](./references/evals.yaml),
-[session closeout](./references/session-evidence-closeout.md), Cookbook, or HE roles.
+[session closeout](./references/session-evidence-closeout.md),
+[implementation notes](./references/implementation-notes-contract.md),
+Cookbook, or HE roles.
 
 ## Validation
 

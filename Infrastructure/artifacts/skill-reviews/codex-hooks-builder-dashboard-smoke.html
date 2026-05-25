@@ -62,7 +62,14 @@ td span { color:var(--muted); }
 .suggestions li,.empty-state p { color:var(--muted); margin:10px 0; }
 .evidence-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .evidence-list a,.evidence-list div { border:1px solid var(--line); border-radius:8px; padding:14px; background:var(--panel); }
+.review-lanes { margin-top:24px; }
+.review-lane { display:grid; grid-template-columns:minmax(0,1fr) minmax(220px,420px); gap:18px; align-items:start; border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:16px; margin:12px 0; }
+.review-lane h3 { margin:0 0 4px; }
+.review-lane p { margin:0 0 10px; color:var(--muted); }
+.review-lane code { display:block; white-space:normal; overflow-wrap:anywhere; }
+.lane-badge { display:inline-flex; margin:0 6px 6px 0; border:1px solid #303641; border-radius:7px; padding:2px 7px; background:#171b22; color:var(--muted); font-size:12px; font-weight:800; }
 @media (max-width: 1100px) { .shell { grid-template-columns:1fr; } .sidebar { position:relative; height:auto; } .hero { grid-template-columns:1fr; } .grid,.evidence-list { grid-template-columns:1fr; } .tabs a { min-width:104px; } }
+@media (max-width: 900px) { .review-lane { grid-template-columns:1fr; } }
 @media (max-width: 700px) { .plugin-posture { grid-template-columns:1fr; } .plugin-score { justify-content:flex-start; } }
 </style>
 <script>
@@ -131,33 +138,33 @@ document.addEventListener('DOMContentLoaded', () => {
   <main class="main">
     <div class="breadcrumb"><span>Local / Skills / Skills/agent-ops/codex-hooks-builder / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">91</div></div>
+      <div><div class="hex">85</div></div>
       <div>
         <h1>codex-hooks-builder</h1>
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
-
+        
       <div class="metric">
-        <div class="metric-head"><span>Quality</span><strong class="warn">74%</strong></div>
-        <div class="bar"><span class="warn" style="width:74%"></span></div>
+        <div class="metric-head"><span>Quality</span><strong class="bad">56%</strong></div>
+        <div class="bar"><span class="bad" style="width:56%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>1/1 latest eval cases passed.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
       </div>
-
+    
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
@@ -165,11 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
     </nav>
 
     <section id="quality" class="tab-panel is-active" role="tabpanel">
-      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">74%</span></div>
+      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill bad">56%</span></div>
       <div class="grid">
-        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="good">100%</strong></div>
-        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="bad">35%</strong></div>
-        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="good">100%</strong></div>
+        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="warn">72%</strong></div>
+        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="bad">20%</strong></div>
+        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="warn">80%</strong></div>
       </div>
       <div class="panel plugin-posture">
         <div>
@@ -178,24 +185,24 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="plugin-score"><span class="pill warn">A</span><strong class="good">95%</strong></div>
         <p class="posture-detail warn">Acceptable as a budget guardrail when local audit and Tessl quality pass; track warnings as follow-up or prove observed usage.</p>
-        <ul><li>Score: 95/100</li><li>Grade: A</li><li>Risk: medium</li><li>Checks: 0 fail, 1 warn, 2 info</li><li>Active budget: 2421 tokens (heavy)</li><li>Observed usage: not supplied</li></ul>
+        <ul><li>Score: 95/100</li><li>Grade: A</li><li>Risk: medium</li><li>Checks: 0 fail, 1 warn, 2 info</li><li>Active budget: 1960 tokens (heavy)</li><li>Observed usage: not supplied</li></ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
-        <tbody><tr><td>Specificity</td><td>Lists multiple specific concrete actions: scaffold hook packs, validate hooks.json schema, verify hook script permissions, migrate hook configuration, and troubleshoot Codex hook execution errors.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Trigger Term Quality</td><td>Excellent coverage of natural terms a user would say: &#x27;hooks.json&#x27;, &#x27;hook packs&#x27;, &#x27;hook scripts&#x27;, &#x27;PreToolUse&#x27;, &#x27;PostToolUse&#x27;, &#x27;PreCompact&#x27;, &#x27;repo-local&#x27;, &#x27;user-level&#x27;, &#x27;.codex&#x27;, &#x27;hook installs&#x27;, &#x27;Codex hook&#x27;. These are the exact terms someone working with Codex hooks would use.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Completeness</td><td>Clearly answers both &#x27;what&#x27; (scaffold, validate, verify, migrate, troubleshoot hook-related tasks) and &#x27;when&#x27; with an explicit &#x27;Use when...&#x27; clause covering creating, auditing, upgrading, or validating various hook-related artifacts.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Distinctiveness Conflict Risk</td><td>Highly distinctive with a clear niche around Codex hook packs specifically. The domain-specific terminology (hooks.json, PreToolUse/PostToolUse/PreCompact, .codex hook installs) makes it very unlikely to conflict with other skills.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Conciseness</td><td>The skill is extremely verbose with many bullet points that explain internal runtime details Claude doesn&#x27;t need spelled out at this length. Sections like the extensive matcher-type breakdown, plugin substitution variables, compact hook stdout behavior, and managed-only mode caveats read like internal documentation rather than actionable skill instructions. Much of this could be condensed significantly.</td><td class="score bad">1 / 3</td></tr>
-<tr><td>Actionability</td><td>The hook pack JSON example and shell script are concrete and executable, and the validation command is specific. However, much of the workflow is described in abstract terms (&#x27;inspect existing hook config&#x27;, &#x27;model the supported events explicitly&#x27;) without concrete commands or code showing how to actually do those steps. The discovery interview section points to a reference file without inline guidance.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Workflow Clarity</td><td>The workflow section has a numbered sequence with a validation gate at step 7 (&#x27;if a gate fails, fix that failure class and rerun before continuing&#x27;), which is good. However, the numbered steps are followed by a long unordered list of additional considerations that blur the sequence. The mix of workflow steps and contextual notes makes it hard to follow the actual process. Validation checkpoints exist but are not consistently integrated into the flow.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Progressive Disclosure</td><td>The Progressive Disclosure section at the end clearly references multiple supporting files (contract.yaml, hook-examples.md, evals.yaml, task-profile.json, deferred context directory), which is well-structured. However, no bundle files were provided, so we can&#x27;t verify these references exist. More importantly, a large amount of detailed content that could live in reference files (gotchas, execution boundaries, failure modes, anti-patterns) is inlined in the main skill, making it monolithic.</td><td class="score bad">2 / 3</td></tr></tbody>
+        <tbody><tr><td>Specificity</td><td>The description names the domain (Codex hook packs) and lists several actions (creating, auditing, upgrading, validating), but these actions are somewhat generic verbs applied to the domain rather than concrete, detailed capabilities like &#x27;parse hooks.json schema&#x27;, &#x27;generate hook scripts&#x27;, or &#x27;migrate v1 to v2 format&#x27;.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Trigger Term Quality</td><td>Includes strong natural trigger terms that users would actually say: &#x27;hook packs&#x27;, &#x27;hooks.json&#x27;, &#x27;hook scripts&#x27;, &#x27;repo-local&#x27;, &#x27;user-level&#x27;, &#x27;.codex&#x27;, &#x27;hook installs&#x27;. These cover multiple variations of how a user might refer to this domain.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Completeness</td><td>The description is structured as a &#x27;Use when...&#x27; clause, which addresses the &#x27;when&#x27; clearly, but the &#x27;what does this do&#x27; part is weak — it only lists high-level verbs (creating, auditing, upgrading, validating) without explaining what concrete outputs or capabilities the skill provides.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Distinctiveness Conflict Risk</td><td>The description targets a very specific niche — Codex hook packs and related configuration files. This is unlikely to conflict with other skills due to the highly specific domain terminology like &#x27;hooks.json&#x27;, &#x27;.codex hook installs&#x27;, and &#x27;hook packs&#x27;.</td><td class="score good">3 / 3</td></tr>
+<tr><td>Conciseness</td><td>The skill is extremely verbose with many bullet points that describe internal runtime details Claude doesn&#x27;t need explained at this length. Sections like the lengthy workflow bullets about compact lifecycle hooks, plugin substitutions, and managed-only mode read like internal documentation rather than lean instructions. Much of this could be condensed significantly.</td><td class="score bad">1 / 3</td></tr>
+<tr><td>Actionability</td><td>Despite its length, the skill contains zero executable code, no concrete commands, no JSON schema examples, and no copy-paste-ready hook configurations. The examples section lists three vague one-liners (&#x27;Create a repo-local Codex hook pack for this validation flow&#x27;) with no corresponding input/output demonstrations. Everything is abstract description rather than concrete instruction.</td><td class="score bad">1 / 3</td></tr>
+<tr><td>Workflow Clarity</td><td>The Workflow section provides a reasonable sequence of steps (confirm ownership, inspect config, check docs, model events, validate), and the Failure Mode section adds some error recovery guidance. However, there are no explicit validation checkpoints with concrete commands, and the steps are described abstractly rather than as a clear numbered sequence with gates.</td><td class="score bad">2 / 3</td></tr>
+<tr><td>Progressive Disclosure</td><td>The Progressive Disclosure section references several supporting files (contract.yaml, hook-examples.md, evals.yaml, task-profile.json, deferred context directory), which is good structure. However, no bundle files were provided, so these references are unverifiable. The main body itself is monolithic and contains extensive inline detail that should arguably live in those referenced files instead.</td><td class="score bad">2 / 3</td></tr></tbody>
       </table>
-      <div class="suggestions"><h3>Suggestions</h3><ul><li>Move detailed runtime caveats (matcher types per event, plugin substitution variables, managed-only mode details, compact hook stdout behavior) into a reference file like references/runtime-caveats.md and link to it, keeping only the most critical 2-3 gotchas inline.</li><li>Make workflow steps more concrete by including actual commands for steps like &#x27;Inspect existing hook config&#x27; (e.g., `cat .codex/hooks.json`, `ls -la hooks/`) and &#x27;Confirm repo-local versus user-level ownership&#x27; (e.g., `find . -name hooks.json -path &#x27;*/.codex/*&#x27;`).</li><li>Consolidate the Gotchas, Anti-Patterns, Failure Mode, and Execution Boundaries sections into a single concise &#x27;Guardrails&#x27; section with the most critical items, moving the rest to a reference file.</li><li>Add a concrete end-to-end example showing the full workflow from scaffold to validation with actual commands and expected output at each step.</li></ul></div>
+      <div class="suggestions"><h3>Suggestions</h3><ul><li>Add a &#x27;what&#x27; clause before the &#x27;Use when&#x27; that describes concrete capabilities, e.g., &#x27;Generates hook pack scaffolding, validates hooks.json schema, migrates hook configurations between versions, and troubleshoots hook execution errors.&#x27;</li><li>Expand the action verbs into more specific outcomes — instead of &#x27;creating&#x27; say &#x27;scaffolding new hook packs with proper directory structure&#x27;; instead of &#x27;validating&#x27; say &#x27;checking hooks.json against the expected schema and verifying script permissions&#x27;.</li><li>Add concrete, executable examples: include a complete hooks.json file, a sample hook script, and the exact commands to validate and install them.</li><li>Drastically reduce the Workflow section by removing internal runtime implementation details (plugin substitutions, compact stdout behavior, managed-only mode nuances) and moving them to a referenced file.</li><li>Replace the vague Examples section with 1-2 full input/output demonstrations showing a hook pack creation from start to finish with actual file contents.</li><li>Consolidate the Gotchas, Anti-Patterns, Constraints, and Execution Boundaries sections—they overlap significantly and could be a single concise &#x27;Rules&#x27; section.</li></ul></div>
     </section>
 
     <section id="evals" class="tab-panel" role="tabpanel" hidden>
-
+      
       <section>
         <div class="section-head">
           <div><h2>Evaluation Results</h2><p>1/1 latest eval cases passed.</p></div>
@@ -206,12 +213,12 @@ document.addEventListener('DOMContentLoaded', () => {
           <tbody><tr><td><strong>discovery interview contract</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
         </table>
       </section>
-
+    
     </section>
 
     <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>Summary: 0 critical · 0 warn · 2 info</li></ul></div>
       <div class="panel plugin-posture">
         <div>
           <h3>Snyk Advisory</h3>
@@ -227,14 +234,15 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/agent-ops/20260516T-pass14-external/codex-hooks-builder.external-review.stdout.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/20260516T-pass14-external/codex-hooks-builder.external-review.stdout.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/codex-hooks-builder/20260516-160109-182795/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/codex-hooks-builder/20260516-160109-182795/scorecard.json</span></a>
+        <a href="agent-ops/codex-hooks-builder.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/codex-hooks-builder.json</span></a>
+        <a href="../skills/codex-hooks-builder/20260525-235138-580314/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/codex-hooks-builder/20260525-235138-580314/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
+      
     </section>
   </main>
 </div>

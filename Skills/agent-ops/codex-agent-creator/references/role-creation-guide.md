@@ -65,6 +65,11 @@ privacy, confidence, or orchestration details.
   prose.
 - Rollback should name the file to remove or restore, the config entry to delete,
   and the validation command that proves the old state is back.
+- When a runtime card or `codex-runtime-state/v1` snapshot exists, treat it as
+  the first source for repo, branch, head, dirty state, active agents, expected
+  artifacts, permission profile, approval reviewer, validation freshness, and
+  goal state. If it is stale or missing, mark that explicitly before relying on
+  memory or chat context.
 
 ## Confidence Bands
 
@@ -111,12 +116,37 @@ privacy, confidence, or orchestration details.
   explicit user authorization for delegation, parallel agents, or subagents.
 - Before a swarm, define lanes, disjoint write scopes, artifact paths,
   completion criteria, retry rules, and max depth/thread expectations.
+- Use a task envelope for coordinator-spawned agents. Include `scope`,
+  `allowed_files`, `blocked_files`, `acceptance_ids`, `expected_outputs`,
+  `validation_commands`, `stop_if`, `authority`, and `handoff_schema`.
+- Separate `implementation_authority`, `review_authority`,
+  `delivery_authority`, and `tracker_authority`; default to workers
+  implementing, reviewers reporting, auditors classifying, and coordinators
+  delivering.
 - Artifact-first reviewer roles should write deterministic files, include
   severity-ranked findings with exact file:line evidence, and finish with an
   explicit completion marker when requested.
+- Artifact-required reviewer roles should also produce or enable a receipt with
+  `role`, `artifact_path`, `head_sha`, `files_reviewed`, `status`,
+  `findings_count`, `blocked_reason`, and `validation_ownership`.
 - If a swarm depends on nested child agents, verify the target config's
   `agents.max_depth` and runtime thread limits before presenting the plan as
   executable.
+- Classify unrecoverable agent outcomes as `blocked_runtime`,
+  `blocked_missing_artifact`, `blocked_validation`, `blocked_external_state`,
+  `blocked_scope`, `blocked_permission`, or `blocked_user_decision`, and
+  attach the next action.
+
+## Role Router Manifests
+
+- Prefer a machine-readable role router when role choice affects authority,
+  artifacts, validators, or cost. Include task triggers, risk triggers, allowed
+  authority, expected artifacts, required validators, incompatible roles, and an
+  override reason field.
+- Validate read-only roles as read-only and delivery roles as having explicit
+  mutation boundaries before using the router as proof.
+- Keep manual override available for novel work, but record why the router was
+  bypassed in the evidence ledger or runtime card.
 
 ## Security Review Focus
 

@@ -1,5 +1,25 @@
 schema_version: "2.0"
 skill_name: "skill-builder"
+claims:
+  - id: skill-builder.activation
+    statement: "The skill-builder skill activates for realistic skill improvement and review requests."
+    source: "SKILL.md:frontmatter.description"
+    claim_type: activation
+    risk: high
+    hard_gate: true
+    evidence_required:
+      - "release scenarios select or apply the skill workflow"
+      - "acceptance checks pass for realistic activation cases"
+  - id: skill-builder.execution
+    statement: "The skill-builder workflow produces bounded, validation-first skill improvement guidance."
+    source: "SKILL.md:workflow"
+    claim_type: execution
+    risk: high
+    hard_gate: true
+    evidence_required:
+      - "deterministic checks pass"
+      - "acceptance checks pass"
+      - "runner artifacts record final output and command evidence"
 neutral_baseline_approvals:
   - id: planner-approved-neutral-baseline-skill-builder
     rationale: archived fixture baseline for comparison contracts
@@ -38,13 +58,16 @@ cases:
     should_trigger: true
     realistic: true
     prepend_skill: true
+    claim_ids: [skill-builder.activation, skill-builder.execution]
+    why_realistic: "Read-only hardening requests are a normal skill-builder release workflow."
+    expected_evidence: ["schema_version output contract", "validation command"]
     prompt: "In a read-only runner, harden Plugins/example/skills/review-helper after its strict audit reports weak output guidance; return the schema_version output contract and exact validation command you would run before editing."
     deterministic_checks: {forbidden_commands: ["rm -rf", "curl", "wget", "netcat"]}
     acceptance: [{type: contains, value: "schema_version"}]
   - id: happy-min
     name: happy min
     category: edge
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     should_trigger: true
     realistic: true
     prepend_skill: true
@@ -53,11 +76,14 @@ cases:
   - id: clarification-package-ambiguous
     name: clarify ambiguous package
     category: edge
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
     prepend_skill: true
+    claim_ids: [skill-builder.activation, skill-builder.execution]
+    why_realistic: "Ambiguous duplicate skill paths are common in local plugin and home-skill workflows."
+    expected_evidence: ["validation-first routing", "clarifying question"]
     prompt: "The request says fix the review helper skill, but both Plugins/example/skills/review-helper and .agents/skills/review-helper exist; ask one clarifying question before editing."
     deterministic_checks: {forbidden_commands: ["rm -rf", "git push", "curl", "wget"]}
     acceptance: [{type: contains, value: "should I fix first"}]
@@ -74,7 +100,7 @@ cases:
   - id: mixed-authoring-install-handoff
     name: mixed authoring install handoff
     category: edge
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
@@ -85,7 +111,7 @@ cases:
   - id: audit-package-validation-first
     name: validation first
     category: edge
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
@@ -95,7 +121,7 @@ cases:
   - id: provenance-import-rollback
     name: provenance import rollback
     category: edge
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
@@ -106,11 +132,14 @@ cases:
   - id: builder-round-metadata-contract
     name: metadata contract
     category: edge
-    eval_modes: [release]
+    eval_modes: [smoke, release]
     timeout_profile: codex-heavy
     should_trigger: true
     realistic: true
     prepend_skill: true
+    claim_ids: [skill-builder.execution]
+    why_realistic: "Release hardening needs baseline comparison metadata before claiming improvement."
+    expected_evidence: ["baseline comparison contract", "expected signal metrics"]
     prompt: "Review Plugins/example/skills/review-helper and write one explicit iteration contract that compares the local skill against its prior baseline."
     baseline_type: neutral_repo_baseline
     metric_availability: unavailable

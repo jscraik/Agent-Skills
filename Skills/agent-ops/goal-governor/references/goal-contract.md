@@ -31,6 +31,11 @@ Only these root entries are allowed. Keep supporting bulk evidence in `notes/`.
 
 ## state.yaml Schema
 
+Worker implementation requires a produced MDX implementation-notes artifact in
+the target project at `.harness/implementation-notes/<date>-<work>-notes.mdx`.
+Reference that artifact from `state.yaml`; do not add it as a fifth root entry
+beside `goal.md`, `state.yaml`, `receipts.jsonl`, and `notes/`.
+
 ```yaml
 version: 2
 goal:
@@ -55,6 +60,18 @@ checks:
     command: null
     outcome: unknown
     checked_at: null
+artifacts:
+  implementation_notes:
+    path: ".harness/implementation-notes/2026-05-25-example-notes.mdx"
+    format: mdx
+    status: present
+    browser_preview:
+      surface: localhost
+      status: blocked
+      blocker: "Browser preview has not been run in this environment."
+      live_update:
+        status: blocked
+        blocker: "Browser live update has not been run in this environment."
 tasks:
   - id: T001
     type: scout
@@ -80,7 +97,60 @@ tasks:
 - Status is `queued`, `active`, `blocked`, or `done`.
 - Exactly one task is active unless the user explicitly requests parallel Workers and each active Worker has disjoint `allowed_files`.
 - Worker tasks require non-empty `allowed_files`, `verify`, and `stop_if`.
+- Worker tasks require a produced MDX implementation-notes artifact under
+  `.harness/implementation-notes/`, referenced from
+  `artifacts.implementation_notes`, backed by Browser localhost preview and
+  live-update metadata, and included in Worker `allowed_files`.
 - Scout and Judge tasks are read-only; their `allowed_files` should be empty.
+
+## Implementation Notes Artifact
+
+`artifacts.implementation_notes` is mandatory when any task has
+`type: worker`.
+
+Required shape:
+
+```yaml
+artifacts:
+  implementation_notes:
+    path: ".harness/implementation-notes/2026-05-25-example-notes.mdx"
+    format: mdx
+    status: present # present | verified
+    browser_preview:
+      surface: localhost
+      status: verified # verified | blocked
+      url: "http://localhost:3000/implementation-notes/example"
+      live_update:
+        status: enabled # enabled | blocked
+        command: "pnpm dev --host 127.0.0.1"
+        watched_path: ".harness/implementation-notes/2026-05-25-example-notes.mdx"
+```
+
+If Browser preview cannot run, keep the artifact mandatory and record the
+preview lane as blocked:
+
+```yaml
+browser_preview:
+  surface: localhost
+  status: blocked
+  blocker: "Browser preview unavailable in this environment."
+  live_update:
+    status: blocked
+    blocker: "No localhost MDX renderer is available in this fixture."
+```
+
+A verified Browser preview must also prove live update is enabled. Record the
+localhost renderer or watch command and the MDX path it watches; the
+`watched_path` value must match `artifacts.implementation_notes.path`.
+
+The MDX file must include frontmatter with `schema_version`, embedded React
+component tags, and these visual sections:
+
+- Deep Module Topology
+- Current Slice Insertion Map
+- Runtime Truth Surface
+- Blast Radius View
+- Validation Coverage
 
 ## Receipt Rules
 

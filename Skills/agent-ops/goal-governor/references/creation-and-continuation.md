@@ -10,9 +10,14 @@ Read when selecting the next Goal Governor action.
 4. Choose a slug and create `docs/goals/<slug>/`.
 5. Write `goal.md` with objective, constraints, stop rules, and exit criteria.
 6. Write `state.yaml` with one active Scout task unless the starting evidence is already complete.
-7. Create an empty `receipts.jsonl` and `notes/`.
-8. Run `python3 scripts/check_goal_board.py <goal-directory>`.
-9. Print the exact command:
+7. For governed implementation goals that will include Worker tasks, create the
+   required MDX implementation notes artifact at
+   `.harness/implementation-notes/<date>-<work>-notes.mdx`, reference it from
+   `artifacts.implementation_notes`, record Browser localhost preview and
+   live-update metadata, and include it in Worker `allowed_files`.
+8. Create an empty `receipts.jsonl` and `notes/`.
+9. Run `python3 scripts/check_goal_board.py <goal-directory>`.
+10. Print the exact command:
 
 ```text
 /goal Follow docs/goals/<slug>/goal.md
@@ -35,7 +40,9 @@ Also state that this is a prompt convention and Codex must read the file.
 8. If `/goal edit` or `objective_updated` changed the objective, route to PM or Judge reconciliation before continuing old work.
 9. If verification is stale or red, route to Scout/Judge recovery.
 10. If active task is Scout or Judge, keep work read-only and write a receipt.
-11. If active task is Worker, enforce `allowed_files`, `verify`, and `stop_if`.
+11. If active task is Worker, enforce `allowed_files`, `verify`,
+    `stop_if`, and the required MDX implementation notes artifact before
+    implementation work continues.
 12. After task completion, append a receipt before selecting the next task.
 13. For closeout, report local validation, generated artifacts, remote PR
     checks, review threads, tracker state, and merge readiness as separate truth

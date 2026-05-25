@@ -121,6 +121,116 @@ def test_benchmark_portfolio_exposes_validation_command(tmp_path: Path) -> None:
     assert result.data["validation_commands"] == ["./bin/ask evals benchmark --json --robot"]
 
 
+def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
+    report_dir = tmp_path / "artifacts" / "reports" / "skills" / "demo-skill" / "run-1"
+    report_dir.mkdir(parents=True)
+    (report_dir / "summary.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "2.1",
+                "generated_at": "2026-05-25T10:00:00Z",
+                "skill": "demo-skill",
+                "run_id": "run-1",
+                "eval_mode": "release",
+                "runner_mode": "codex",
+                "decision": "fail",
+                "claim_to_evidence": {"passed": True, "blocking_gaps": []},
+                "cases": [
+                    {
+                        "id": "pricing-exception",
+                        "name": "Pricing exception",
+                        "category": "pricing",
+                        "passed": False,
+                        "tier1_failed": True,
+                        "tier1_failures": ["expected margin guardrail evidence"],
+                        "runners": {},
+                    },
+                    {
+                        "id": "clean-path",
+                        "category": "clean",
+                        "passed": True,
+                        "runners": {},
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (report_dir / "release_manifest.json").write_text('{"schema_version":"1.0"}\n', encoding="utf-8")
+    component_source = tmp_path / "Infrastructure" / "templates" / "components"
+    component_source.mkdir(parents=True)
+    (component_source / "eval-report.tsx").write_text("export function MacroEvalTotals() { return null; }\n", encoding="utf-8")
+
+    result = evals.macro_eval_report(tmp_path)
+
+    assert result.status == "success"
+    assert result.data["totals"]["summaries_scanned"] == 1
+    assert result.data["totals"]["events"] == 2
+    assert result.data["totals"]["behavior_patterns"] == 2
+    events_path = tmp_path / result.data["artifacts"]["events_jsonl"]
+    rows = [json.loads(line) for line in events_path.read_text(encoding="utf-8").splitlines()]
+    assert rows[0]["case_type"] == "pricing"
+    assert rows[0]["run_outcome"] == "failed"
+    assert rows[0]["eval_finding"] == "expected margin guardrail evidence"
+    assert rows[0]["behavior_pattern"] == "pricing:failed:expected-margin-guardrail-evidence"
+    assert rows[0]["summary_path"] == "artifacts/reports/skills/demo-skill/run-1/summary.json"
+    assert rows[0]["release_manifest_path"] == "artifacts/reports/skills/demo-skill/run-1/release_manifest.json"
+    assert rows[1]["case_type"] == "clean"
+    assert rows[1]["run_outcome"] == "passed"
+    assert rows[1]["eval_finding"] == "none"
+    assert (tmp_path / result.data["artifacts"]["report_json"]).is_file()
+    assert result.data["groups"]["by_skill_behavior_pattern"] == [
+        {
+            "skill": "demo-skill",
+            "behavior_pattern": "clean:passed:none",
+            "trace_count": 1,
+        },
+        {
+            "skill": "demo-skill",
+            "behavior_pattern": "pricing:failed:expected-margin-guardrail-evidence",
+            "trace_count": 1,
+        },
+    ]
+    assert (tmp_path / result.data["artifacts"]["report_components"]).is_file()
+    mdx_text = (tmp_path / result.data["artifacts"]["report_mdx"]).read_text(encoding="utf-8")
+    assert "schema_version: skill-macro-eval-report.mdx.v1" in mdx_text
+    assert "MacroEvalTotals" in mdx_text
+    assert "MacroEvalFlowTable rows={macroReport.groups.by_skill_behavior_pattern}" in mdx_text
+    assert "export const macroReport = {" in mdx_text
+
+
+def test_macro_eval_report_uses_claim_gap_when_case_has_no_finding(tmp_path: Path) -> None:
+    report_dir = tmp_path / "artifacts" / "reports" / "skills" / "demo-skill" / "run-2"
+    report_dir.mkdir(parents=True)
+    (report_dir / "summary.json").write_text(
+        json.dumps(
+            {
+                "skill": "demo-skill",
+                "run_id": "run-2",
+                "decision": "blocked",
+                "claim_to_evidence": {
+                    "passed": False,
+                    "blocking_gaps": [{"type": "claim_without_case", "claim_id": "demo.claim"}],
+                },
+                "cases": [{"id": "governance-case", "passed": False, "runners": {}}],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = evals.macro_eval_report(tmp_path, output_dir="macro-out")
+
+    assert result.status == "success"
+    events_path = tmp_path / "macro-out" / "macro-eval-events.jsonl"
+    row = json.loads(events_path.read_text(encoding="utf-8").splitlines()[0])
+    assert row["case_type"] == "governance"
+    assert row["run_outcome"] == "blocked"
+    assert row["eval_finding"] == "claim_without_case"
+    assert result.data["groups"]["by_eval_finding"] == [
+        {"eval_finding": "claim_without_case", "trace_count": 1}
+    ]
+
+
 def test_smoke_evals_can_use_discovery_smoke_without_codex_args(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
@@ -208,6 +318,19 @@ def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Pat
     assert tessl_eval["policy"]["network_permission_required_by_repo"] is False
 
 
+def test_eval_only_review_report_uses_stable_tessl_staging_template(tmp_path: Path) -> None:
+    report_path = evals._write_eval_only_review_report(tmp_path, "example-skill", "Skills/example-skill")
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+
+    expected_staging_root = os.path.join(tempfile.gettempdir(), "ask-tessl-evals")
+    policy = report["data"]["policy"]
+    assert policy["tessl_eval_staging_root"].startswith(expected_staging_root)
+    assert policy["tessl_eval_staging_root"].endswith("<skill-path>-<sha12>")
+    assert report["data"]["review_mode_details"]["local_evals"]["tessl_evidence"].startswith(
+        f"stages copied eval inputs under {expected_staging_root}"
+    )
+
+
 def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     skill_root = _write_example_skill(tmp_path)
@@ -267,6 +390,146 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
     assert result.data["tessl_eval"]["policy"]["temp_staged_project_input_only"] is True
     assert result.data["tessl_eval"]["policy"]["network_permission_required_by_repo"] is False
     assert result.data["tessl_eval"]["policy"]["project_save_default"] == "compatibility_flag_not_required"
+
+
+def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "SKILL.md").write_text(
+        "# Example Skill\n\nSee references/runtime-boundary.md for runtime details.\n",
+        encoding="utf-8",
+    )
+    (skill_root / "references" / "runtime-boundary.md").write_text(
+        "Runtime boundary details.\n",
+        encoding="utf-8",
+    )
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: smoke-example\n"
+            "    prompt: \"Do the example task.\"\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Uses the example skill.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+            tessl_live_dry_run=True,
+        )
+
+    assert result.status == "success"
+    assert run.call_count == 1
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "pass"
+    assert tessl_eval["dry_run"] is True
+    assert tessl_eval["live_private"] is True
+    assert "ask-tessl-live" in tessl_eval["staged_source"]
+    assert tessl_eval["visibility"] == "private"
+    assert tessl_eval["workspace"] == "jscraik"
+    assert tessl_eval["policy"]["no_publish"] is True
+    assert tessl_eval["policy"]["no_install"] is True
+    assert tessl_eval["policy"]["no_registry_upload"] is True
+    assert tessl_eval["policy"]["tile_private_required"] is True
+    assert tessl_eval["tessl_project_marker"].endswith("/tessl.json")
+
+    staged_source = Path(tessl_eval["staged_source"])
+    tile_manifest = json.loads((staged_source / "tile.json").read_text(encoding="utf-8"))
+    assert tile_manifest["name"] == "jscraik/example-skill"
+    assert tile_manifest["private"] is True
+    assert tile_manifest["skills"]["example-skill"]["path"] == "SKILL.md"
+    assert (staged_source / "evals" / "smoke-example" / "task.md").read_text(encoding="utf-8") == (
+        "Do the example task.\n"
+    )
+    criteria = json.loads((staged_source / "evals" / "smoke-example" / "criteria.json").read_text(encoding="utf-8"))
+    assert criteria["type"] == "weighted_checklist"
+    assert criteria["checklist"][0]["description"] == "Uses the example skill."
+    assert (staged_source / "references" / "runtime-boundary.md").read_text(encoding="utf-8") == (
+        "Runtime boundary details.\n"
+    )
+    assert (staged_source / "tessl.json").exists()
+    assert not (staged_source / "secret-not-staged.txt").exists()
+
+
+def test_evals_live_private_requires_workspace(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    _write_example_skill(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_live_dry_run=True,
+        )
+
+    assert result.status == "error"
+    assert run.call_count == 1
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_validation"
+    assert "--tessl-workspace" in tessl_eval["blocker"]
+
+
+def test_evals_live_private_rejects_invalid_workspace(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    _write_example_skill(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_workspace="bad/workspace",
+            tessl_live_dry_run=True,
+        )
+
+    assert result.status == "error"
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_validation"
+    assert "workspace" in tessl_eval["blocker"].lower()
+
+
+def test_evals_live_private_invokes_tessl_with_workspace_and_tile_manifest(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    _write_example_skill(tmp_path)
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", return_value=completed) as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+        )
+
+    assert result.status == "success"
+    assert run.call_count == 2
+    tessl_cmd = run.call_args_list[1].args[0]
+    assert tessl_cmd[:4] == ["/usr/local/bin/tessl", "eval", "run", "--json"]
+    assert tessl_cmd[4].endswith("/tile.json")
+    staged_manifest = json.loads(Path(tessl_cmd[4]).read_text(encoding="utf-8"))
+    assert staged_manifest["name"] == "jscraik/example-skill"
+    assert staged_manifest["private"] is True
+    assert "publish" not in tessl_cmd
+    assert "install" not in tessl_cmd
+    assert "registry" not in tessl_cmd
+    assert result.data["tessl_eval"]["policy"]["command_shape"] == (
+        "tessl eval run --json <staged-tile-json>"
+    )
 
 
 def test_evals_stage_folded_yaml_prompts_for_tessl(tmp_path: Path) -> None:

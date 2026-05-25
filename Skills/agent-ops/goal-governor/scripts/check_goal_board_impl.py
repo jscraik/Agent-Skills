@@ -19,6 +19,23 @@ ALLOWED_ROOT = {"goal.md", "state.yaml", "receipts.jsonl", "notes"}
 TASK_TYPES = {"scout", "judge", "worker", "pm"}
 ASSIGNEES = {"Scout", "Judge", "Worker", "PM"}
 STATUSES = {"queued", "active", "blocked", "done"}
+IMPLEMENTATION_NOTES_STATUSES = {"present", "verified"}
+IMPLEMENTATION_NOTES_PREVIEW_STATUSES = {"verified", "blocked"}
+IMPLEMENTATION_NOTES_LIVE_UPDATE_STATUSES = {"enabled", "blocked"}
+IMPLEMENTATION_NOTES_REQUIRED_HEADINGS = (
+    "Deep Module Topology",
+    "Current Slice Insertion Map",
+    "Runtime Truth Surface",
+    "Blast Radius View",
+    "Validation Coverage",
+)
+IMPLEMENTATION_NOTES_REQUIRED_COMPONENTS = (
+    "DeepModuleMap",
+    "InsertionPoint",
+    "RuntimeCardState",
+    "BlastRadiusMap",
+    "ValidatorCoverage",
+)
 NATIVE_STATUSES = {
     "active",
     "paused",
@@ -193,6 +210,21 @@ def load_yaml(path: Path) -> Any:
 
 def as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def board_project_root(goal_dir: Path) -> Path:
+    if goal_dir.parent.name == "goals" and goal_dir.parent.parent.name in {"docs", "Docs"}:
+        return goal_dir.parent.parent.parent
+    return goal_dir.parent
+
+
+def has_worker_task(tasks: Any) -> bool:
+    return any(isinstance(task, dict) and task.get("type") == "worker" for task in as_list(tasks))
+
+
+def safe_relative_path(value: str) -> bool:
+    path = Path(value)
+    return not path.is_absolute() and ".." not in path.parts
 
 
 def active_tasks_are_parallel_workers(
@@ -419,6 +451,145 @@ def validate_claims(state: dict[str, Any]) -> list[str]:
     return errors
 
 
+def validate_implementation_notes_artifact(
+    state: dict[str, Any],
+    goal_dir: Path,
+) -> list[str]:
+    tasks = state.get("tasks")
+    if not has_worker_task(tasks):
+        return []
+
+    errors: list[str] = []
+    artifacts = state.get("artifacts")
+    if not isinstance(artifacts, dict):
+        return ["artifacts.implementation_notes is required when Worker tasks exist"]
+
+    notes = artifacts.get("implementation_notes")
+    if not isinstance(notes, dict):
+        return ["artifacts.implementation_notes is required when Worker tasks exist"]
+
+    path_value = notes.get("path")
+    if not isinstance(path_value, str) or not path_value.strip():
+        errors.append("artifacts.implementation_notes.path must be a non-empty string")
+        path_value = ""
+    elif not safe_relative_path(path_value):
+        errors.append("artifacts.implementation_notes.path must be a safe relative path")
+    elif not path_value.startswith(".harness/implementation-notes/"):
+        errors.append("artifacts.implementation_notes.path must be under .harness/implementation-notes/")
+    elif not path_value.endswith(".mdx"):
+        errors.append("artifacts.implementation_notes.path must use .mdx")
+
+    if notes.get("format") != "mdx":
+        errors.append("artifacts.implementation_notes.format must be mdx")
+    if notes.get("status") not in IMPLEMENTATION_NOTES_STATUSES:
+        errors.append("artifacts.implementation_notes.status must be present or verified")
+
+    preview = notes.get("browser_preview")
+    if not isinstance(preview, dict):
+        errors.append("artifacts.implementation_notes.browser_preview must be a mapping")
+    else:
+        if preview.get("surface") != "localhost":
+            errors.append("artifacts.implementation_notes.browser_preview.surface must be localhost")
+        preview_status = preview.get("status")
+        if preview_status not in IMPLEMENTATION_NOTES_PREVIEW_STATUSES:
+            errors.append(
+                "artifacts.implementation_notes.browser_preview.status must be verified or blocked"
+            )
+        if preview_status == "verified":
+            require_non_empty_string(
+                preview,
+                "url",
+                "artifacts.implementation_notes.browser_preview",
+                errors,
+            )
+        if preview_status == "blocked":
+            require_non_empty_string(
+                preview,
+                "blocker",
+                "artifacts.implementation_notes.browser_preview",
+                errors,
+            )
+        live_update = preview.get("live_update")
+        if not isinstance(live_update, dict):
+            errors.append(
+                "artifacts.implementation_notes.browser_preview.live_update must be a mapping"
+            )
+        else:
+            live_status = live_update.get("status")
+            if live_status not in IMPLEMENTATION_NOTES_LIVE_UPDATE_STATUSES:
+                errors.append(
+                    "artifacts.implementation_notes.browser_preview.live_update.status must be enabled or blocked"
+                )
+            if preview_status == "verified" and live_status != "enabled":
+                errors.append(
+                    "verified browser preview requires live_update.status enabled"
+                )
+            if live_status == "enabled":
+                require_non_empty_string(
+                    live_update,
+                    "command",
+                    "artifacts.implementation_notes.browser_preview.live_update",
+                    errors,
+                )
+                require_non_empty_string(
+                    live_update,
+                    "watched_path",
+                    "artifacts.implementation_notes.browser_preview.live_update",
+                    errors,
+                )
+                if live_update.get("watched_path") != path_value:
+                    errors.append(
+                        "artifacts.implementation_notes.browser_preview.live_update.watched_path must match artifacts.implementation_notes.path"
+                    )
+            if live_status == "blocked":
+                require_non_empty_string(
+                    live_update,
+                    "blocker",
+                    "artifacts.implementation_notes.browser_preview.live_update",
+                    errors,
+                )
+
+    if path_value and safe_relative_path(path_value):
+        note_path = board_project_root(goal_dir) / path_value
+        if not note_path.is_file():
+            errors.append(f"implementation notes artifact missing: {path_value}")
+        else:
+            note_text = note_path.read_text(encoding="utf-8")
+            if "schema_version:" not in note_text[:500]:
+                errors.append("implementation notes artifact must declare schema_version frontmatter")
+            missing_headings = [
+                heading
+                for heading in IMPLEMENTATION_NOTES_REQUIRED_HEADINGS
+                if f"## {heading}" not in note_text and f"# {heading}" not in note_text
+            ]
+            if missing_headings:
+                errors.append(
+                    "implementation notes artifact missing required sections: "
+                    + ", ".join(missing_headings)
+                )
+            missing_components = [
+                component
+                for component in IMPLEMENTATION_NOTES_REQUIRED_COMPONENTS
+                if f"<{component}" not in note_text
+            ]
+            if missing_components:
+                errors.append(
+                    "implementation notes artifact missing required components: "
+                    + ", ".join(missing_components)
+                )
+
+    allowed_files = {
+        str(path)
+        for task in as_list(tasks)
+        if isinstance(task, dict) and task.get("type") == "worker"
+        for path in as_list(task.get("allowed_files"))
+    }
+    if path_value and path_value not in allowed_files:
+        errors.append("Worker allowed_files must include artifacts.implementation_notes.path")
+
+    return errors
+
+
 def validate_task(
     task: dict[str, Any],
     index: int,
@@ -532,6 +703,7 @@ def validate_board(goal_dir: Path) -> list[str]:
     errors.extend(validate_completion_contract(state))
     errors.extend(validate_continuation_gate(state))
     errors.extend(validate_claims(state))
+    errors.extend(validate_implementation_notes_artifact(state, goal_dir))
 
     rules = state.get("rules")
     if not isinstance(rules, dict):

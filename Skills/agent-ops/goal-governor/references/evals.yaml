@@ -8,6 +8,19 @@ x_negative: &negative {eval_modes: [smoke, release], category: negative, should_
 x_safe: &safe {forbidden_commands: ["curl", "wget", "rm -rf", "nc", "netcat"]}
 
 cases:
+  - id: smoke-discovery-contract
+    name: "Discovery Smoke Contract"
+    category: happy
+    realistic: true
+    why_realistic: "A user often asks Goal Governor to handle goal work before naming the exact board, authority boundary, runtime truth, or implementation-notes proof surface."
+    eval_modes: [smoke]
+    smoke_mode: discovery-round-one
+    should_trigger: true
+    prepend_skill: true
+    prompt: "Use $goal-governor to help with governed goal work, but I have not provided the target board, project root, primary audit document, or runtime truth yet. Ask the smallest useful discovery question first."
+    acceptance:
+      - {type: skill_selected, expected_skill: goal-governor}
+      - {type: regex, value: "(?is)(What should this skill help you do|Round 1 question|Why this matters)"}
   - id: review-goal-prompt-not-start-yet
     <<: *common
     name: "Review Goal Prompt Not Start Yet"
@@ -74,6 +87,20 @@ cases:
       - {type: regex, value: '(?is)(/goal Follow <path>|/goal Follow [^\\n]+|native_objective:.*?/goal Follow)'}
       - {type: regex, value: '(?is)(goals|features\\.goals|goal board|goal receipts).*verif'}
       - {type: regex, value: '(?is)(repo-canonical|canonical|verifier|verification).*(validation|command|bash scripts/codex-preflight\\.sh --mode optional)'}
+  - id: governed-implementation-notes-required
+    <<: *common
+    name: "Governed Implementation Notes Required"
+    category: happy
+    realistic: true
+    prompt: "Create a governed implementation goal for closing an evidence-led gap audit in this repo. It will have Worker implementation tasks, so include the required implementation notes artifact plus a Browser localhost preview and live-update lane."
+    deterministic_checks: *safe
+    expected_route: "create"
+    acceptance:
+      - {type: regex, value: '(?is)\\.harness/implementation-notes/[^\\s]+\\.mdx'}
+      - {type: regex, value: '(?is)artifacts\\.implementation_notes|implementation_notes'}
+      - {type: regex, value: '(?is)(Browser|browser).*localhost|localhost.*(Browser|browser)'}
+      - {type: regex, value: '(?is)live_update|live-update|watched_path|watch command'}
+      - {type: regex, value: '(?is)(Deep Module Topology|Current Slice Insertion Map|Runtime Truth Surface|Blast Radius View|Validation Coverage)'}
   - id: weak-goal-strengthening
     <<: *common
     name: "Weak Goal Strengthening"

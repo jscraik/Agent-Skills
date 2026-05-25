@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import json
+import io
+import os
 import sys
 import tempfile
 import textwrap
@@ -37,7 +39,11 @@ if existing_trace_checks is not None:
 from run_skill_evals import (
     EvalCase,
     _acceptance_skip_reason,
+    _attach_claim_execution_results,
     _classify_runner_blocker,
+    _claim_to_evidence_summary,
+    _case_has_executed_check_evidence,
+    _load_evals_document,
     _preflight_codex_live_runner,
     _filter_cases_for_eval_mode,
     _isolated_codex_home_for_eval,
@@ -258,10 +264,743 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             )
 
             cases = load_evals(evals_path)
+            self.assertEqual(cases[0].expected_signals["required_terms"], ["canonical source"])
+            self.assertEqual(cases[0].expected_signals["forbidden_terms"], ["runtime projection"])
+            self.assertEqual(cases[0].budgets["min_expected_signal_score"], 90)
 
-        self.assertEqual(cases[0].expected_signals["required_terms"], ["canonical source"])
-        self.assertEqual(cases[0].expected_signals["forbidden_terms"], ["runtime projection"])
-        self.assertEqual(cases[0].budgets["min_expected_signal_score"], 90)
+    def test_load_evals_parses_claim_coverage_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    claims:
+                      - id: demo.activation
+                        statement: Activates correctly.
+                        source: SKILL.md:description
+                        claim_type: activation
+                        risk: high
+                        hard_gate: true
+                        evidence_required: [selected]
+                    baselines:
+                      - id: previous-release
+                        baseline_type: previous_version
+                    reporting:
+                      preferred_source_format: mdx
+                      report_template: Infrastructure/templates/eval-report.mdx
+                    cases:
+                      - id: explicit
+                        name: Explicit
+                        prompt: Use the skill.
+                        claim_ids: [demo.activation]
+                        baseline_id: previous-release
+                        realistic: true
+                        why_realistic: Direct user invocation.
+                        hard_gates: [no_false_completion]
+                        expected_evidence: [selection signal]
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+
+            self.assertEqual(cases[0].claim_ids, ("demo.activation",))
+            self.assertEqual(cases[0].baseline_id, "previous-release")
+            self.assertTrue(cases[0].realistic)
+            self.assertEqual(cases[0].hard_gates, ("no_false_completion",))
+
+    def test_release_claim_gate_blocks_missing_realism(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    claims:
+                      - id: demo.execution
+                        statement: Executes correctly.
+                        source: SKILL.md:workflow
+                        claim_type: execution
+                        risk: high
+                        hard_gate: true
+                        evidence_required: [acceptance]
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        claim_ids: [demo.execution]
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                cases,
+                eval_mode="release",
+                skill_dir=Path(tmp),
+            )
+
+            self.assertFalse(summary["passed"])
+            self.assertIn(
+                "missing_realism_evidence",
+                {gap["type"] for gap in summary["blocking_gaps"]},
+            )
+
+    def test_release_claim_gate_blocks_missing_claim_registry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: unclaimed-release
+                        name: Unclaimed release
+                        prompt: Do the thing.
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                cases,
+                eval_mode="release",
+                skill_dir=Path(tmp),
+            )
+
+            self.assertFalse(summary["passed"])
+            self.assertIn(
+                "missing_claim_registry",
+                {gap["type"] for gap in summary["blocking_gaps"]},
+            )
+
+    def test_load_evals_rejects_duplicate_baseline_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    baselines:
+                      - id: previous-release
+                        baseline_type: previous_version
+                      - id: previous-release
+                        baseline_type: human_reference
+                    cases:
+                      - id: demo
+                        name: Demo
+                        prompt: Do the thing.
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "duplicate baseline id"):
+                load_evals(evals_path)
+
+    def test_neutral_baseline_approvals_reject_duplicate_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    neutral_baseline_approvals:
+                      - id: approved-baseline
+                        rationale: first
+                      - id: approved-baseline
+                        rationale: second
+                    cases:
+                      - id: demo
+                        name: Demo
+                        prompt: Do the thing.
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "duplicate neutral_baseline_approval id"):
+                load_neutral_baseline_approvals(evals_path)
+
+    def test_release_claim_gate_blocks_claim_without_evidence_surface(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    claims:
+                      - id: demo.execution
+                        statement: Executes correctly.
+                        source: SKILL.md:workflow
+                        claim_type: execution
+                        risk: high
+                        hard_gate: true
+                        evidence_required: [runner artifact]
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        claim_ids: [demo.execution]
+                        realistic: true
+                        why_realistic: Normal release request.
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                cases,
+                eval_mode="release",
+                skill_dir=Path(tmp),
+            )
+
+            self.assertFalse(summary["passed"])
+            self.assertIn(
+                "claim_without_evidence_surface",
+                {gap["type"] for gap in summary["blocking_gaps"]},
+            )
+
+    def test_release_hard_gate_requires_check_surface_for_bypass_gates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    claims:
+                      - id: demo.safety
+                        statement: Refuses unsafe bypass.
+                        source: SKILL.md:safety
+                        claim_type: safety
+                        risk: high
+                        hard_gate: true
+                        evidence_required: [forbidden command check]
+                    cases:
+                      - id: bypass
+                        name: Bypass
+                        prompt: Skip validation.
+                        claim_ids: [demo.safety]
+                        realistic: true
+                        why_realistic: Users may pressure the agent to skip checks.
+                        hard_gates: [no_unsafe_command]
+                        expected_evidence: [no unsafe command emitted]
+                        acceptance:
+                          - type: contains
+                            value: validation
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                cases,
+                eval_mode="release",
+                skill_dir=Path(tmp),
+            )
+
+            self.assertFalse(summary["passed"])
+            self.assertIn(
+                "hard_gate_without_required_evidence",
+                {gap["type"] for gap in summary["blocking_gaps"]},
+            )
+
+    def test_claim_execution_results_block_when_claim_has_no_passing_artifact_case(self) -> None:
+        claim_summary = {
+            "claims": [
+                {
+                    "id": "demo.execution",
+                    "risk": "high",
+                    "hard_gate": True,
+                    "cases": ["execution"],
+                }
+            ],
+            "gaps": [],
+            "blocking_gaps": [],
+            "passed": True,
+        }
+        _attach_claim_execution_results(
+            claim_summary,
+            [
+                {
+                    "id": "execution",
+                    "passed": False,
+                    "blocked": False,
+                    "tier1_failed": True,
+                    "tier2_failed": False,
+                    "runners": {
+                        "discovery-smoke": {
+                            "runner": "discovery-smoke",
+                            "artifacts": {"final": "reports/execution/final.txt"},
+                        }
+                    },
+                }
+            ],
+            eval_mode="release",
+        )
+
+        self.assertFalse(claim_summary["passed"])
+        self.assertIn(
+            "claim_without_passing_case",
+            {gap["type"] for gap in claim_summary["blocking_gaps"]},
+        )
+
+    def test_claim_execution_results_block_when_passing_case_has_only_generic_artifacts(self) -> None:
+        claim_summary = {
+            "claims": [
+                {
+                    "id": "demo.execution",
+                    "risk": "high",
+                    "hard_gate": True,
+                    "cases": ["execution"],
+                }
+            ],
+            "gaps": [],
+            "blocking_gaps": [],
+            "passed": True,
+        }
+        _attach_claim_execution_results(
+            claim_summary,
+            [
+                {
+                    "id": "execution",
+                    "passed": True,
+                    "blocked": False,
+                    "tier1_failed": False,
+                    "tier2_failed": False,
+                    "check_evidence": False,
+                    "evidence_surfaces": [],
+                    "runners": {
+                        "discovery-smoke": {
+                            "runner": "discovery-smoke",
+                            "artifacts": {"final": "reports/execution/final.txt"},
+                        }
+                    },
+                }
+            ],
+            eval_mode="release",
+        )
+
+        self.assertFalse(claim_summary["passed"])
+        self.assertIn(
+            "claim_without_passing_case",
+            {gap["type"] for gap in claim_summary["blocking_gaps"]},
+        )
+
+    def test_case_check_evidence_requires_executed_runner_metric(self) -> None:
+        case = EvalCase(
+            id="execution",
+            name="Execution",
+            prompt="Do the thing.",
+            acceptance=(),
+            deterministic_checks={"forbidden_commands": ["rm -rf"]},
+        )
+
+        self.assertFalse(
+            _case_has_executed_check_evidence(
+                case,
+                {
+                    "codex-kimi": {
+                        "passed": True,
+                        "blocked": False,
+                        "artifacts": {"final": "reports/execution/final.txt"},
+                        "metrics": {"selected_skill": True},
+                    }
+                },
+            )
+        )
+        self.assertTrue(
+            _case_has_executed_check_evidence(
+                case,
+                {
+                    "codex": {
+                        "passed": True,
+                        "blocked": False,
+                        "artifacts": {"final": "reports/execution/final.txt"},
+                        "metrics": {"trace": {"tool_calls": 0}},
+                    }
+                },
+            )
+        )
+
+    def test_release_mdx_reporting_requires_template_and_component_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    claims:
+                      - id: demo.execution
+                        statement: Executes correctly.
+                        source: SKILL.md:workflow
+                        claim_type: execution
+                        risk: high
+                        hard_gate: true
+                        evidence_required: [acceptance]
+                    reporting:
+                      preferred_source_format: MDX
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        claim_ids: [demo.execution]
+                        realistic: true
+                        why_realistic: Normal release request.
+                        expected_signals:
+                          required_terms: [done]
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                cases,
+                eval_mode="release",
+                skill_dir=Path(tmp),
+            )
+
+            self.assertFalse(summary["passed"])
+            gap_types = {gap["type"] for gap in summary["blocking_gaps"]}
+            self.assertIn("missing_report_template", gap_types)
+            self.assertIn("missing_report_component_bundle", gap_types)
+
+    def test_reporting_rejects_non_string_preferred_source_format(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    claims:
+                      - id: demo.execution
+                        statement: Executes correctly.
+                        source: SKILL.md:workflow
+                        claim_type: execution
+                        risk: high
+                        hard_gate: true
+                        evidence_required: [acceptance]
+                    reporting:
+                      preferred_source_format: [MDX]
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        claim_ids: [demo.execution]
+                        realistic: true
+                        why_realistic: Normal release request.
+                        expected_signals:
+                          required_terms: [done]
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+            with self.assertRaisesRegex(ValueError, "preferred_source_format"):
+                _claim_to_evidence_summary(
+                    _load_evals_document(evals_path),
+                    cases,
+                    eval_mode="release",
+                    skill_dir=Path(tmp),
+                )
+
+    def test_reporting_rejects_absolute_report_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    claims:
+                      - id: demo.execution
+                        statement: Executes correctly.
+                        source: SKILL.md:workflow
+                        claim_type: execution
+                        risk: high
+                        hard_gate: true
+                        evidence_required: [acceptance]
+                    reporting:
+                      preferred_source_format: mdx
+                      report_template: /etc/hosts
+                      component_bundle: Infrastructure/templates/components/eval-report.tsx
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        claim_ids: [demo.execution]
+                        realistic: true
+                        why_realistic: Normal release request.
+                        expected_signals:
+                          required_terms: [done]
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+            with self.assertRaisesRegex(ValueError, "repo-relative"):
+                _claim_to_evidence_summary(
+                    _load_evals_document(evals_path),
+                    cases,
+                    eval_mode="release",
+                    skill_dir=Path(tmp),
+                )
+
+    def test_reporting_rejects_path_traversal_report_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    claims:
+                      - id: demo.execution
+                        statement: Executes correctly.
+                        source: SKILL.md:workflow
+                        claim_type: execution
+                        risk: high
+                        hard_gate: true
+                        evidence_required: [acceptance]
+                    reporting:
+                      preferred_source_format: mdx
+                      report_template: Infrastructure/templates/eval-report.mdx
+                      component_bundle: ../components/eval-report.tsx
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        claim_ids: [demo.execution]
+                        realistic: true
+                        why_realistic: Normal release request.
+                        expected_signals:
+                          required_terms: [done]
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+            with self.assertRaisesRegex(ValueError, "path traversal"):
+                _claim_to_evidence_summary(
+                    _load_evals_document(evals_path),
+                    cases,
+                    eval_mode="release",
+                    skill_dir=Path(tmp),
+                )
+
+    def test_release_mdx_reporting_requires_file_artifacts_not_directories(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "skill"
+            skill_dir.mkdir()
+            (skill_dir / "report.mdx").mkdir()
+            (skill_dir / "component.tsx").mkdir()
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    reporting:
+                      preferred_source_format: mdx
+                      report_template: report.mdx
+                      component_bundle: component.tsx
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        realistic: true
+                        why_realistic: Normal release request.
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                load_evals(evals_path),
+                eval_mode="release",
+                skill_dir=skill_dir,
+            )
+
+            self.assertFalse(summary["report_template_exists"])
+            self.assertFalse(summary["component_bundle_exists"])
+            gap_types = {gap["type"] for gap in summary["blocking_gaps"]}
+            self.assertIn("missing_report_template", gap_types)
+            self.assertIn("missing_report_component_bundle", gap_types)
+
+    def test_release_mdx_reporting_rejects_wrong_file_types(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "skill"
+            skill_dir.mkdir()
+            (skill_dir / "report.md").write_text("# report\n", encoding="utf-8")
+            (skill_dir / "component.txt").write_text("component\n", encoding="utf-8")
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    reporting:
+                      preferred_source_format: mdx
+                      report_template: report.md
+                      component_bundle: component.txt
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        realistic: true
+                        why_realistic: Normal release request.
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                load_evals(evals_path),
+                eval_mode="release",
+                skill_dir=skill_dir,
+            )
+
+            gap_types = {gap["type"] for gap in summary["blocking_gaps"]}
+            self.assertIn("invalid_report_template_type", gap_types)
+            self.assertIn("invalid_report_component_bundle_type", gap_types)
+
+    def test_release_mdx_reporting_does_not_use_ambient_cwd_shadow_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "skill"
+            shadow_root = Path(tmp) / "shadow-cwd"
+            (shadow_root / "shadow").mkdir(parents=True)
+            skill_dir.mkdir()
+            (shadow_root / "shadow" / "report.mdx").write_text("# shadow\n", encoding="utf-8")
+            (shadow_root / "shadow" / "component.tsx").write_text("export {}\n", encoding="utf-8")
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    reporting:
+                      preferred_source_format: mdx
+                      report_template: shadow/report.mdx
+                      component_bundle: shadow/component.tsx
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        realistic: true
+                        why_realistic: Normal release request.
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            previous_cwd = Path.cwd()
+            try:
+                os.chdir(shadow_root)
+                summary = _claim_to_evidence_summary(
+                    _load_evals_document(evals_path),
+                    load_evals(evals_path),
+                    eval_mode="release",
+                    skill_dir=skill_dir,
+                )
+            finally:
+                os.chdir(previous_cwd)
+
+            self.assertFalse(summary["report_template_exists"])
+            self.assertFalse(summary["component_bundle_exists"])
+            gap_types = {gap["type"] for gap in summary["blocking_gaps"]}
+            self.assertIn("missing_report_template", gap_types)
+            self.assertIn("missing_report_component_bundle", gap_types)
+
+    def test_release_mdx_reporting_rejects_symlink_escape_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp) / "skill"
+            skill_dir.mkdir()
+            outside_dir = Path(tmp) / "outside"
+            outside_dir.mkdir()
+            (outside_dir / "report.mdx").write_text("# outside\n", encoding="utf-8")
+            (outside_dir / "component.tsx").write_text("export {}\n", encoding="utf-8")
+            (skill_dir / "report.mdx").symlink_to(outside_dir / "report.mdx")
+            (skill_dir / "component.tsx").symlink_to(outside_dir / "component.tsx")
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    reporting:
+                      preferred_source_format: mdx
+                      report_template: report.mdx
+                      component_bundle: component.tsx
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        realistic: true
+                        why_realistic: Normal release request.
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                load_evals(evals_path),
+                eval_mode="release",
+                skill_dir=skill_dir,
+            )
+
+            self.assertFalse(summary["report_template_exists"])
+            self.assertFalse(summary["component_bundle_exists"])
+            gap_types = {gap["type"] for gap in summary["blocking_gaps"]}
+            self.assertIn("missing_report_template", gap_types)
+            self.assertIn("missing_report_component_bundle", gap_types)
+
+    def test_mdx_eval_report_template_uses_report_binding_not_literal_placeholders(self) -> None:
+        template = (REPO_ROOT / "Infrastructure/templates/eval-report.mdx").read_text(encoding="utf-8")
+
+        self.assertIn("export const report", template)
+        self.assertIn("skill={report.skill}", template)
+        self.assertIn('from "./components/eval-report"', template)
+        self.assertNotIn('"{skill_name}"', template)
+        self.assertNotIn("{release_decision}", template)
 
     def test_expected_signals_score_missing_forbidden_and_flow_risk(self) -> None:
         result = evaluate_expected_signals(
@@ -863,6 +1602,54 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 1)
             self.assertIn("requires eval cases with `smoke_mode`", "".join(call.args[0] for call in stderr.write.call_args_list if call.args))
+
+    def test_main_reports_invalid_reporting_metadata_without_traceback(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_dir = Path(tmpdir) / "demo-skill"
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: demo-skill\n---\n\n# Demo\n",
+                encoding="utf-8",
+            )
+            (refs_dir / "evals.yaml").write_text(
+                textwrap.dedent(
+                    """
+                    schema_version: "2.0"
+                    reporting:
+                      preferred_source_format: [MDX]
+                    cases:
+                      - id: discovery-round-one
+                        name: discovery smoke
+                        prompt: Help define the skill.
+                        smoke_mode: discovery-round-one
+                        should_trigger: true
+                        acceptance:
+                          - contains: "Round 1 question:"
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            stderr = io.StringIO()
+            with unittest.mock.patch("sys.stderr", stderr):
+                exit_code = main(
+                    [
+                        str(skill_dir),
+                        "--runner",
+                        "discovery-smoke",
+                        "--reports-dir",
+                        str(Path(tmpdir) / "reports"),
+                        "--format",
+                        "json",
+                    ]
+                )
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("ERROR:", stderr.getvalue())
+        self.assertIn("preferred_source_format", stderr.getvalue())
+        self.assertNotIn("Traceback", stderr.getvalue())
 
     def test_discovery_smoke_uses_skill_specific_questions_and_canonical_sections(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

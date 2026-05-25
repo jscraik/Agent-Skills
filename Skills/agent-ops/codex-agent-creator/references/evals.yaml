@@ -196,6 +196,21 @@ cases:
     value: "(?i)(verified facts|assumptions|inferred risks|unknowns|unresolved)"
   realistic: true
   why_realistic: The prompt describes a concrete local agent-skills workflow with an action, artifact, or safety constraint that this skill is expected to handle.
+- id: edge-task-envelope-runtime-card
+  name: task envelope and runtime card
+  category: edge
+  eval_modes:
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: Review the role-router entry for a repo-local correctness reviewer in /Users/jamiecraik/dev/agent-skills. The primary surface is .skillsets/agent-ops/manifest.jsonl, the role source is Skills/agent-ops/codex-agent-creator/SKILL.md, and the expected reviewer artifact is artifacts/reviews/correctness-reviewer.md. Require a runtime card, task envelope, artifact receipt, authority fields, and blocker classes before any swarm is recommended.
+  acceptance:
+  - type: skill_selected
+    expected_skill: codex-agent-creator
+  - type: regex
+    value: "(?is)(?=.*runtime card)(?=.*task envelope)(?=.*artifact receipt)(?=.*authority)(?=.*blocked_)"
+  realistic: true
+  why_realistic: A repo maintainer is wiring one concrete reviewer route for agent-skills and must specify the manifest path, role source, review artifact, runtime card, task envelope, artifact receipt, authority fields, and blocker classes before allowing a swarm.
 - id: pressure-project-scope
   name: project scope ambiguity
   category: pressure
