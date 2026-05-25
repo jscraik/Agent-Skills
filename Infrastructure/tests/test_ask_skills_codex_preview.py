@@ -192,6 +192,37 @@ policy:
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("usage: ask skills codex-preview", result.stdout)
 
+    def test_capabilities_command_is_publicly_discoverable(self) -> None:
+        result = subprocess.run(
+            [sys.executable, "Infrastructure/bin/ask", "skills", "capabilities", "--runtime-target", "codex", "--json", "--robot"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        discovery = payload["data"]["capability_discovery"]
+        self.assertEqual(discovery["schema_version"], "capability-discovery.v1")
+        self.assertEqual(discovery["runtime_target"], "codex")
+        self.assertIn("runtime_evidence", {mode["mode"] for mode in discovery["evidence_modes"]})
+        self.assertIn("live_runtime_parity", discovery["truth_boundaries"])
+
+    def test_capabilities_command_has_human_output(self) -> None:
+        result = subprocess.run(
+            [sys.executable, "Infrastructure/bin/ask", "skills", "capabilities", "--runtime-target", "codex"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Skills capabilities: target=codex status=", result.stdout)
+        self.assertIn("Live runtime parity: not_claimed", result.stdout)
+        self.assertIn("Next: ./bin/ask skills proof testing --runtime-target codex --json --robot", result.stdout)
+
     def test_codex_preview_human_output_disclaims_validation_result(self) -> None:
         result = subprocess.run(
             [sys.executable, "Infrastructure/bin/ask", "skills", "codex-preview"],
@@ -224,6 +255,54 @@ policy:
         self.assertIn("load-preview", command_names)
         self.assertIn("config explain", command_names)
         self.assertEqual(preview["modeled_rule_version"], codex_preview.CODEX_PREVIEW_MODELED_RULE_VERSION)
+
+    def test_capabilities_reports_runtime_proof_commands(self) -> None:
+        with (
+            patch.object(codex_preview, "_codex_runtime_source_identity", return_value=SOURCE_IDENTITY),
+            patch.object(codex_preview, "_codex_preview_root_candidates", side_effect=lambda root: self._patched_roots(root)),
+        ):
+            result = skills_impl.skills_capabilities(REPO_ROOT, runtime_target="codex")
+
+        discovery = result.data["capability_discovery"]
+        commands = {command["name"]: command["command"] for command in discovery["supported_commands"]}
+        self.assertEqual(result.status, "success")
+        self.assertEqual(discovery["status"], "partial")
+        self.assertEqual(discovery["truth_boundaries"]["live_runtime_parity"], "not_claimed")
+        self.assertIn("skills proof", commands)
+        self.assertIn("--runtime-target codex", commands["skills proof"])
+        self.assertIn("runtime_plugin_skill_roots", [check["id"] for check in discovery["blocked_checks"]])
+
+    def test_capabilities_any_routes_to_explicit_runtime_targets(self) -> None:
+        with (
+            patch.object(codex_preview, "_codex_runtime_source_identity", return_value=SOURCE_IDENTITY),
+            patch.object(codex_preview, "_codex_preview_root_candidates", side_effect=lambda root: self._patched_roots(root)),
+        ):
+            result = skills_impl.skills_capabilities(REPO_ROOT, runtime_target="any")
+
+        discovery = result.data["capability_discovery"]
+        runtime_commands = [
+            command
+            for mode in discovery["evidence_modes"]
+            if mode["mode"] == "runtime_evidence"
+            for command in mode["commands"]
+        ]
+        self.assertEqual(discovery["status"], "discovery_only")
+        self.assertNotIn("./bin/ask skills proof HANDLE --runtime-target any --json --robot", runtime_commands)
+        self.assertIn("./bin/ask skills proof HANDLE --runtime-target codex --json --robot", runtime_commands)
+        self.assertIn("./bin/ask skills proof HANDLE --runtime-target agents --json --robot", runtime_commands)
+        self.assertTrue(all("/any/" not in artifact for artifact in discovery["required_artifacts"]))
+
+    def test_capabilities_agents_carries_source_blockers(self) -> None:
+        with (
+            patch.object(codex_preview, "_codex_runtime_source_identity", return_value=SOURCE_IDENTITY),
+            patch.object(codex_preview, "_codex_preview_root_candidates", side_effect=lambda root: self._patched_roots(root)),
+        ):
+            result = skills_impl.skills_capabilities(REPO_ROOT, runtime_target="agents")
+
+        discovery = result.data["capability_discovery"]
+        self.assertEqual(discovery["status"], "partial")
+        self.assertEqual(discovery["truth_boundaries"]["live_runtime_parity"], "not_claimed")
+        self.assertIn("runtime_plugin_skill_roots", [check["id"] for check in discovery["blocked_checks"]])
 
     def test_codex_preview_command_family_reports_source_identity_blocker(self) -> None:
         blocked_identity = {

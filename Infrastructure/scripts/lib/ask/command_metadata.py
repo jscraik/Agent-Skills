@@ -10,6 +10,7 @@ VALID_ACTIONS = {
     "skills": [
         "list",
         "budget",
+        "capabilities",
         "codex-preview",
         "load-preview",
         "render-preview",
@@ -147,6 +148,9 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("skills", "budget"): [
         "ask skills budget",
+    ],
+    ("skills", "capabilities"): [
+        "ask skills capabilities --runtime-target codex --json --robot",
     ],
     ("skills", "codex-preview"): [
         "ask skills codex-preview --json --robot",
@@ -302,6 +306,8 @@ FUZZY_MATCHES = {
     "resolve": "resolve",
     "prove": "prove",
     "explain": "explain",
+    "capability": "capabilities",
+    "capabilities": "capabilities",
     "handles": "handles",
     "init": "init",
     "create": "init",

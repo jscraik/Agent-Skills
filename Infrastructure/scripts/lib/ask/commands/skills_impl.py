@@ -70,6 +70,8 @@ from ask.skills_sdk.contracts import (  # noqa: E402
     status_from_bool as _status_from_bool,
 )
 from ask.skills_sdk.runtime_adapters import (  # noqa: E402
+    EVIDENCE_RUNTIME_TARGETS,
+    SUPPORTED_RUNTIME_TARGETS,
     build_command_handle_proof,
     emit_command_handle_runtime_evidence,
     normalize_runtime_target,
@@ -2622,6 +2624,112 @@ def skills_codex_preview(repo_root: Path) -> CallResult:
         "agent_summary": "Use the listed public skills preview commands for source-modeled Codex preview evidence; they do not claim live runtime parity.",
     }
     return result
+
+
+def skills_capabilities(repo_root: Path, runtime_target: str = "codex") -> CallResult:
+    """Report runtime proof-plane capability discovery for agents."""
+    target = normalize_runtime_target(runtime_target)
+    supported_targets = [runtime_target for runtime_target in ("any", "codex", "agents") if runtime_target in SUPPORTED_RUNTIME_TARGETS]
+    result = CallResult()
+    result.metadata["command"] = "skills capabilities"
+    if target not in supported_targets:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Invalid runtime target '{target}'.",
+                fix_suggestion="Use --runtime-target any, --runtime-target codex, or --runtime-target agents.",
+            )
+        )
+        return result
+    preview = build_codex_load_preview(repo_root)
+    proof_targets = [runtime_target for runtime_target in ("codex", "agents") if runtime_target in EVIDENCE_RUNTIME_TARGETS] if target == "any" else [target]
+    live_runtime_parity = "not_applicable_discovery_only" if target == "any" else "not_claimed"
+    blockers = list(preview.get("blocked_checks", []))
+    readiness = "discovery_only" if target == "any" else ("partial" if blockers else "available")
+    proof_commands = [_skills_validation_command("proof", "HANDLE", "--runtime-target", proof_target) for proof_target in proof_targets]
+    artifact_paths = [
+        f".harness/evidence/runtime-proof/<handle>/{proof_target}/{artifact_name}"
+        for proof_target in proof_targets
+        for artifact_name in ("runtime-card.json", "evidence-receipt.json", "artifact-record.json")
+    ]
+    result.data["capability_discovery"] = {
+        "schema_version": "capability-discovery.v1",
+        "command": "skills capabilities",
+        "runtime_target": target,
+        "status": readiness,
+        "runtime_target_support": {
+            "supported_targets": supported_targets,
+            "selected": target,
+            "evidence_targets": ["codex", "agents"],
+        },
+        "evidence_modes": [
+            {
+                "mode": "source_modeled",
+                "status": "available",
+                "commands": [
+                    _skills_validation_command("codex-preview"),
+                    _skills_validation_command("render-preview"),
+                    _skills_validation_command("conformance", "run", "--suite", "codex-parity"),
+                ],
+            },
+            {
+                "mode": "runtime_evidence",
+                "status": "available",
+                "commands": [*proof_commands, _ask_validation_command("repo", "closeout", "--changed")],
+            },
+        ],
+        "supported_commands": [
+            {"name": "skills proof", "command": proof_commands[0]},
+            {"name": "skills conformance run", "command": _skills_validation_command("conformance", "run", "--suite", "codex-parity")},
+            {"name": "skills codex-preview", "command": _skills_validation_command("codex-preview")},
+            {"name": "repo closeout", "command": _ask_validation_command("repo", "closeout", "--changed")},
+        ],
+        "required_artifacts": artifact_paths,
+        "known_limitations": [
+            {
+                "class": "live_runtime_parity_not_claimed",
+                "message": "Capability discovery reports available commands; it does not prove live runtime parity."
+                if target == "any"
+                else f"Capability discovery reports available commands; it does not prove live {target} runtime parity.",
+            },
+            {
+                "class": "explicit_runtime_required_for_artifacts",
+                "message": "Use an explicit runtime target before expecting runtime-card artifacts.",
+            }
+        ],
+        "blocked_checks": blockers,
+        "source_basis": preview.get("source_basis"),
+        "next_actions": [
+            _skills_validation_command("proof", "testing", "--runtime-target", proof_targets[0]),
+            _ask_validation_command("repo", "closeout", "--changed"),
+        ],
+        "truth_boundaries": {
+            "capability_discovery": "checked",
+            "live_runtime_parity": live_runtime_parity,
+            "schema_validation": "not_run_use_validate_runtime_cards",
+        },
+    }
+    return result
+
+
+def format_capabilities_human(discovery: dict[str, object]) -> list[str]:
+    boundaries = discovery.get("truth_boundaries") if isinstance(discovery.get("truth_boundaries"), dict) else {}
+    modes = discovery.get("evidence_modes") if isinstance(discovery.get("evidence_modes"), list) else []
+    mode_names = [mode.get("mode") for mode in modes if isinstance(mode, dict) and mode.get("mode")]
+    lines = [
+        "Skills capabilities: "
+        f"target={discovery.get('runtime_target')} status={discovery.get('status')}",
+        f"Live runtime parity: {boundaries.get('live_runtime_parity')}",
+        f"Evidence modes: {', '.join(mode_names) if mode_names else 'none'}",
+    ]
+    blocked_checks = discovery.get("blocked_checks") if isinstance(discovery.get("blocked_checks"), list) else []
+    if blocked_checks:
+        lines.append(f"Blocked fidelity checks: {len(blocked_checks)}")
+    next_actions = discovery.get("next_actions") if isinstance(discovery.get("next_actions"), list) else []
+    if next_actions:
+        lines.append(f"Next: {next_actions[0]}")
+    return lines
 
 
 def format_codex_preview_human(preview: dict[str, object]) -> list[str]:
