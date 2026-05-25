@@ -349,7 +349,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T10:36:36Z">2026-05-25T10:36:36Z</time>
+          <time datetime="2026-05-25T11:47:00Z">2026-05-25T11:47:00Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -357,7 +357,7 @@
         </div>
         <div class="pill">
           <span class="label">Active Task</span>
-          <code>T009</code> PU-008 active: validation-led delivery sweep and proof-plane placement audit
+          <code>T010</code> PU-008 active: validation-led delivery sweep and proof-plane placement audit
         </div>
       </div>
     </header>
@@ -438,7 +438,7 @@
             <li><strong>PU-007</strong> placed closeout discovery in <code>repo_impl.py</code>, browser-visible output in <code>Infrastructure/bin/ask</code>, and coverage in focused closeout tests.</li>
             <li><strong>PU-008</strong> is placing validation-led delivery evidence under <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/</code>, runtime probe output under <code>.harness/evidence/runtime-proof/testing/codex/</code> and <code>.harness/evidence/runtime-proof/autofix/codex/</code>, and the public capability-discovery command in <code>Infrastructure/bin/ask</code> plus <code>Infrastructure/scripts/lib/ask/commands/skills_impl.py</code>.</li>
             <li><strong>Review work</strong> lands in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/</code>, separate from runtime proof artifacts.</li>
-            <li><strong>Delivery work</strong> stays out of local proof until GitHub, CI, review, and Linear state are refreshed and recorded in the PU-008 ledger.</li>
+            <li><strong>Delivery work</strong> now lands in stacked draft PR <code>207</code>, with PR triage delegated to <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/pr207-green-sweep.md</code>.</li>
           </ul>
         </aside>
       </div>
@@ -558,8 +558,9 @@
               <div class="placement">
                 <strong>Work lands in</strong>
                 <div class="path-list">
-                  <code>GitHub PRs 200-206</code>
+                  <code>GitHub PRs 200-207</code>
                   <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-007/pr-green-sweep-pr206.md</code>
+                  <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/pr207-green-sweep.md</code>
                   <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/</code>
                   <code>Linear JSC-364</code>
                 </div>
@@ -1158,11 +1159,24 @@
           <li>This remains delivery debt, not evidence that the PU-008 capability command is failing.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>PU-008 packaged as PR 207</h3>
+        <time datetime="2026-05-25T11:47:00Z">2026-05-25T11:47:00Z</time>
+        <p>The current slice is now committed, pushed, and opened as a stacked draft PR. The placement visual now includes the PR-level delivery lane as well as the local code, evidence, review, and goal-board paths.</p>
+        <ul>
+          <li>Commit: <code>0b83d477c feat(skills): add runtime capability discovery</code>.</li>
+          <li>Branch: <code>codex/jsc-364-runtime-proof-plane-pu008</code>.</li>
+          <li>PR: <code>https://github.com/jscraik/Agent-Skills/pull/207</code>, stacked on <code>codex/jsc-364-runtime-proof-plane-pu007</code>.</li>
+          <li>PR-sweep worker launched for <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/pr207-green-sweep.md</code>.</li>
+          <li>The pre-commit hook is still blocked by the same broad projection-integrity drift; the pre-push hook passed after redirecting the <code>prek</code> cache.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>Package PU-008 for commit and stacked PR delivery with broad projection drift called out as the remaining external blocker.</p>
+      <p>Let the PR 207 sweep refresh GitHub, CI, review, and mergeability truth; keep broad projection drift classified separately from focused PU-008 proof.</p>
     </section>
   </main>
 </body>
