@@ -1,0 +1,19 @@
+{
+  "actor_type": "agent",
+  "artifact_id": "runtime-card-context7-codex",
+  "artifact_type": "runtime_card",
+  "consumer_contract": "RuntimeCard v1 consumed by validate_runtime_cards.py and governed closeout.",
+  "generated_by": "./bin/ask skills proof context7 --runtime-target codex --json --robot",
+  "mutation_scope": "evidence_write",
+  "path": ".harness/evidence/runtime-proof/context7/codex/runtime-card.json",
+  "source_identity": {
+    "source_paths": [
+      "Skills/agent-ops/context7/SKILL.md",
+      "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+      "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+    ]
+  },
+  "validation_status": "blocked",
+  "visibility_status": "user_observable",
+  "workspace_root": "${WORKSPACE_ROOT}"
+}

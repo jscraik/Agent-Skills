@@ -1,0 +1,151 @@
+{
+  "actor_type": "agent",
+  "artifacts": [
+    {
+      "actor_type": "agent",
+      "artifact_id": "runtime-card-autofix-codex",
+      "artifact_type": "runtime_card",
+      "consumer_contract": "RuntimeCard v1 consumed by validate_runtime_cards.py and governed closeout.",
+      "generated_by": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "mutation_scope": "evidence_write",
+      "path": ".harness/evidence/runtime-proof/autofix/codex/runtime-card.json",
+      "source_identity": {
+        "source_paths": [
+          "Skills/agent-ops/autofix/SKILL.md",
+          "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+          "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+        ]
+      },
+      "validation_status": "blocked",
+      "visibility_status": "user_observable",
+      "workspace_root": "${WORKSPACE_ROOT}"
+    },
+    {
+      "actor_type": "agent",
+      "artifact_id": "runtime-probe-autofix-codex",
+      "artifact_type": "verifier_output",
+      "consumer_contract": "Probe JSON records the raw command-handle proof used by the RuntimeCard.",
+      "generated_by": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "mutation_scope": "evidence_write",
+      "path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
+      "source_identity": {
+        "source_paths": [
+          "Skills/agent-ops/autofix/SKILL.md",
+          "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+          "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+        ]
+      },
+      "validation_status": "blocked",
+      "visibility_status": "user_observable",
+      "workspace_root": "${WORKSPACE_ROOT}"
+    }
+  ],
+  "card_id": "runtime-card-autofix-codex",
+  "command_handle": "$autofix",
+  "created_at": "2026-05-25T16:00:59Z",
+  "evidence_receipts": [
+    {
+      "artifact_path": ".harness/evidence/runtime-proof/autofix/codex/runtime-card.json",
+      "blocker": "Command handle proof failed for 'autofix'.",
+      "blocker_class": "blocked_runtime",
+      "claim": "$autofix is reachable in the Codex runtime.",
+      "claim_status": "blocked",
+      "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "evidence_type": "command",
+      "exit_code": 2,
+      "observed_at": "2026-05-25T16:00:59Z",
+      "probe_artifact_path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
+      "probe_command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "probe_exit_code": 2,
+      "receipt_id": "runtime-proof-autofix-codex",
+      "runtime_status": "blocked_runtime",
+      "runtime_target": "codex",
+      "source_paths": [
+        "Skills/agent-ops/autofix/SKILL.md",
+        "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+        "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      ],
+      "verifier": "ask.skills.proof"
+    }
+  ],
+  "limitations": [
+    {
+      "class": "manual_session_gate",
+      "message": "Runtime reachability proves command-handle wiring; it does not execute an interactive Codex session."
+    }
+  ],
+  "mutation_scope": "evidence_write",
+  "permission_profile": {
+    "filesystem": "workspace evidence write",
+    "network": "not required"
+  },
+  "recovery_plan": {
+    "expected_outcome": "Operator can rerun the proof command and inspect schema-valid runtime evidence.",
+    "next_commands": [
+      {
+        "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+        "expected_outcome": "RuntimeCard is updated with implemented_enforced proof or typed blocked_runtime evidence.",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime skill links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Codex skill runtime points at the workspace command-handle projection."
+        ]
+      }
+    ],
+    "permission_profile": {
+      "filesystem": "workspace evidence write and user runtime link read",
+      "network": "not required"
+    },
+    "preconditions": [
+      "Run workspace and user skill sync if the runtime link or command handle is absent."
+    ],
+    "reason": "Run ./bin/ask skills sync --scope workspace --projection rooted, then ./bin/ask skills sync --scope user --projection rooted, and rerun proof.",
+    "recovery_status": "blocked_runtime"
+  },
+  "runtime_session": {
+    "actor_type": "agent",
+    "created_at": "2026-05-25T16:00:59Z",
+    "runtime_status": "blocked_runtime",
+    "runtime_target": "codex",
+    "session_id": "runtime-proof-autofix-codex",
+    "unavailable_reason": "Command handle proof failed for 'autofix'.",
+    "visibility_status": "user_observable",
+    "workspace_root": "${WORKSPACE_ROOT}"
+  },
+  "runtime_status": "blocked_runtime",
+  "runtime_target": "codex",
+  "schema_version": 1,
+  "skill_handle": "autofix",
+  "thread_runs": [],
+  "turn_events": [],
+  "verifier_results": [
+    {
+      "failed_check_id": "codex_user_runtime_ready",
+      "gates": {
+        "agents_user_command_handle_exists": true,
+        "agents_user_link": true,
+        "agents_user_runtime_ready": true,
+        "codex_user_command_handle_exists": false,
+        "codex_user_link": false,
+        "codex_user_runtime_ready": false,
+        "generated_command_handle_check": true,
+        "resolver": true,
+        "user_runtime_ready": true,
+        "workspace_command_handle_exists": true
+      },
+      "required_gates": [
+        "resolver",
+        "generated_command_handle_check",
+        "workspace_command_handle_exists",
+        "codex_user_runtime_ready"
+      ],
+      "runtime_target": "codex",
+      "status": "fail",
+      "verifier": "ask.skills.proof"
+    }
+  ],
+  "visibility_status": "user_observable",
+  "workspace_root": "${WORKSPACE_ROOT}"
+}

@@ -130,9 +130,15 @@ def main() -> int:
     if not isinstance(plugin_package_root_parity, list):
         plugin_package_root_parity = []
 
+    computed_command_checks_digest = _json_digest(command_checks)
     command_checks_digest = summary.get("command_checks_digest")
     if not isinstance(command_checks_digest, str) or not command_checks_digest:
-        command_checks_digest = _json_digest(command_checks)
+        command_checks_digest = computed_command_checks_digest
+    elif command_checks_digest != computed_command_checks_digest:
+        raise SystemExit(
+            "runtime-separation profile-home: command_checks_digest does not match command_checks "
+            f"in {current_path}"
+        )
 
     payload = {
         "schema_version": "runtime-separation.profile-home.v1",

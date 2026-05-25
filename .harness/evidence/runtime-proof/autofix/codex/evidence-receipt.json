@@ -1,0 +1,23 @@
+{
+  "artifact_path": ".harness/evidence/runtime-proof/autofix/codex/runtime-card.json",
+  "blocker": "Command handle proof failed for 'autofix'.",
+  "blocker_class": "blocked_runtime",
+  "claim": "$autofix is reachable in the Codex runtime.",
+  "claim_status": "blocked",
+  "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+  "evidence_type": "command",
+  "exit_code": 2,
+  "observed_at": "2026-05-25T16:00:59Z",
+  "probe_artifact_path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
+  "probe_command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+  "probe_exit_code": 2,
+  "receipt_id": "runtime-proof-autofix-codex",
+  "runtime_status": "blocked_runtime",
+  "runtime_target": "codex",
+  "source_paths": [
+    "Skills/agent-ops/autofix/SKILL.md",
+    "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+  ],
+  "verifier": "ask.skills.proof"
+}

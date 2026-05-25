@@ -12,6 +12,10 @@ from helpers.schema_validator import _validate_schema_subset
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+
+from ask.skills_sdk import runtime_adapters  # noqa: E402
+
 SCHEMAS_DIR = REPO_ROOT / "Infrastructure" / "config" / "schemas"
 FIXTURES_DIR = REPO_ROOT / "Infrastructure" / "tests" / "fixtures" / "runtime_proof"
 VALIDATOR = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "validate_runtime_cards.py"
@@ -51,6 +55,41 @@ class TestRuntimeProofValidation(unittest.TestCase):
             text=True,
             capture_output=True,
         )
+
+    def test_runtime_evidence_writer_sanitizes_handle_path_segment(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            repo_root.mkdir()
+            proof = {
+                "schema_version": "command-handle-proof.v2",
+                "handle": "../escape",
+                "runtime_target": "codex",
+                "status": "fail",
+                "resolution": {},
+                "runtime_failure": {
+                    "failed_check_id": "codex_user_runtime_ready",
+                    "message": "Codex runtime handle is unavailable.",
+                    "recovery_guidance": "Refresh the Codex runtime projection.",
+                },
+            }
+
+            summary = runtime_adapters.emit_command_handle_runtime_evidence(
+                repo_root=repo_root,
+                proof=proof,
+                actor_type="agent",
+            )
+
+            self.assertEqual(summary["evidence_dir"], ".harness/evidence/runtime-proof/escape/codex")
+            self.assertTrue((repo_root / summary["runtime_card_path"]).is_file())
+            self.assertFalse((repo_root.parent / "escape").exists())
+            process = self.run_validator(
+                str(repo_root / summary["runtime_card_path"]),
+                "--require-shared-workspace",
+                "--workspace-root",
+                "${WORKSPACE_ROOT}",
+                "--json",
+            )
+            self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
 
     def test_schema_files_accept_valid_runtime_card_fixture(self) -> None:
         payload = json.loads((FIXTURES_DIR / "valid-runtime-card.json").read_text(encoding="utf-8"))

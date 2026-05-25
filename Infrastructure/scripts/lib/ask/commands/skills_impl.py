@@ -70,7 +70,10 @@ from ask.skills_sdk.contracts import (  # noqa: E402
     status_from_bool as _status_from_bool,
 )
 from ask.skills_sdk.runtime_adapters import (  # noqa: E402
+    EVIDENCE_RUNTIME_TARGETS,
+    SUPPORTED_RUNTIME_TARGETS,
     build_command_handle_proof,
+    emit_command_handle_runtime_evidence,
     normalize_runtime_target,
 )
 from ask.skills_sdk.package_contracts import (  # noqa: E402
@@ -149,6 +152,8 @@ __all__ = [
     "extract_family_fail_lines",
     "external_review_skill",
     "fold_skills",
+    "format_capabilities_human",
+    "format_codex_preview_human",
     "goal_skills",
     "improve_skills",
     "init_skill",
@@ -157,7 +162,9 @@ __all__ = [
     "reviewers_resolve",
     "route_skills",
     "skills_budget",
+    "skills_capabilities",
     "skills_config_explain",
+    "skills_codex_preview",
     "skills_implicit_preview",
     "skills_inject_preview",
     "skills_conformance_run",
@@ -1300,7 +1307,20 @@ def skills_parse(repo_root: Path, request_text: str) -> CallResult:
 
 
 def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> CallResult:
-    """Prove a command-visible skill handle reaches the workspace and user runtime surfaces."""
+    """
+    Prove that a command-handle is reachable from the workspace and user runtime targets.
+    
+    Parameters:
+        repo_root (Path): Repository root used to resolve skill sources and workspace context.
+        handle (str): Command-visible handle to prove (e.g., "$skill do something").
+        runtime_target (str): Runtime target to validate against; normalized values include `"any"` and `"codex"`.
+    
+    Returns:
+        CallResult: Result of the proof operation. On success `status` will be `"success"` and `data["proof"]`
+        contains the proof payload produced by `build_command_handle_proof`. `data["runtime_evidence"]` will
+        contain emitted runtime evidence. If the proof fails `status` will be `"error"`, `errors` will include an
+        `ErrorObject` with `code="ERR_VALIDATION"`, and `data["runtime_failure"]` will contain failure details.
+    """
     result = CallResult()
     result.metadata["command"] = "skills proof"
     runtime_target = normalize_runtime_target(runtime_target)
@@ -1313,6 +1333,9 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
         home_path=Path.home(),
     )
     normalized = proof["handle"]
+    runtime_evidence = emit_command_handle_runtime_evidence(repo_root=repo_root, proof=proof)
+    result.data["runtime_evidence"] = runtime_evidence
+    proof["runtime_evidence"] = runtime_evidence
     if proof["status"] != "pass":
         result.data["runtime_failure"] = proof["runtime_failure"]
     result.data["proof"] = proof
@@ -2568,13 +2591,240 @@ def _skill_doctor_next_command_decision(
 
 
 def skills_load_preview(repo_root: Path) -> CallResult:
+    """
+    Builds a Codex load preview for the repository.
+    
+    Parameters:
+    	repo_root (Path): Path to the repository root used to generate the preview.
+    
+    Returns:
+    	result (CallResult): A CallResult whose `data["codex_load_preview"]` contains the preview payload. The result.metadata includes `command = "skills load-preview"`.
+    """
     result = CallResult()
     result.metadata["command"] = "skills load-preview"
     result.data["codex_load_preview"] = build_codex_load_preview(repo_root)
     return result
 
 
+def skills_codex_preview(repo_root: Path) -> CallResult:
+    """
+    Builds a Codex-mode preview payload summarizing source-modeled skill discovery and available preview commands.
+    
+    The returned CallResult contains a `codex_preview` payload with keys such as `schema_version`, `command`, `status`, `source_identity`, `source_basis`, `blocked_checks`, `modeled_rule_version`, `source_files`, `commands` (each with `name`, `purpose`, and `validation_command`), and an `agent_summary`. The CallResult metadata will include `command = "skills codex-preview"`.
+    
+    Returns:
+        CallResult: A result whose `data["codex_preview"]` holds the structured Codex preview payload.
+    """
+    load_preview = build_codex_load_preview(repo_root)
+    result = CallResult()
+    result.metadata["command"] = "skills codex-preview"
+    result.data["codex_preview"] = {
+        "schema_version": CODEX_PREVIEW_SCHEMA_VERSION,
+        "command": "skills codex-preview",
+        "status": load_preview.get("status"),
+        "not_a_validation_result": True,
+        "source_identity": load_preview.get("source_identity"),
+        "source_basis": load_preview.get("source_basis"),
+        "blocked_checks": load_preview.get("blocked_checks", []),
+        "modeled_rule_version": CODEX_PREVIEW_MODELED_RULE_VERSION,
+        "source_files": list(CODEX_PREVIEW_SOURCE_FILES),
+        "commands": [
+            {
+                "name": "load-preview",
+                "purpose": "Model Codex skill-root loading and scan visible SKILL.md metadata.",
+                "validation_command": _skills_validation_command("load-preview"),
+            },
+            {
+                "name": "render-preview",
+                "purpose": "Model available-skill rendering, source basis, budget, and truncation status.",
+                "validation_command": _skills_validation_command("render-preview"),
+            },
+            {
+                "name": "config explain",
+                "purpose": "Explain source-backed Codex skills.config rule semantics and blocked live layers.",
+                "validation_command": _skills_validation_command("config", "explain"),
+            },
+            {
+                "name": "inject-preview",
+                "purpose": "Model explicit skill mention selection from prompt text.",
+                "validation_command": _skills_validation_command("inject-preview", "$skill"),
+            },
+            {
+                "name": "implicit-preview",
+                "purpose": "Model implicit invocation attribution from a shell command.",
+                "validation_command": _skills_validation_command("implicit-preview", "--command", "cat SKILL.md"),
+            },
+        ],
+        "agent_summary": "Use the listed public skills preview commands for source-modeled Codex preview evidence; they do not claim live runtime parity.",
+    }
+    return result
+
+
+def skills_capabilities(repo_root: Path, runtime_target: str = "codex") -> CallResult:
+    """Report runtime proof-plane capability discovery for agents."""
+    target = normalize_runtime_target(runtime_target)
+    supported_targets = [runtime_target for runtime_target in ("any", "codex", "agents") if runtime_target in SUPPORTED_RUNTIME_TARGETS]
+    result = CallResult()
+    result.metadata["command"] = "skills capabilities"
+    if target not in supported_targets:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Invalid runtime target '{target}'.",
+                fix_suggestion="Use --runtime-target any, --runtime-target codex, or --runtime-target agents.",
+            )
+        )
+        return result
+    preview = build_codex_load_preview(repo_root)
+    proof_targets = [runtime_target for runtime_target in ("codex", "agents") if runtime_target in EVIDENCE_RUNTIME_TARGETS] if target == "any" else [target]
+    live_runtime_parity = "not_applicable_discovery_only" if target == "any" else "not_claimed"
+    blockers = list(preview.get("blocked_checks", []))
+    readiness = "discovery_only" if target == "any" else ("partial" if blockers else "available")
+    proof_commands = [_skills_validation_command("proof", "HANDLE", "--runtime-target", proof_target) for proof_target in proof_targets]
+    artifact_paths = [
+        f".harness/evidence/runtime-proof/<handle>/{proof_target}/{artifact_name}"
+        for proof_target in proof_targets
+        for artifact_name in ("runtime-card.json", "evidence-receipt.json", "artifact-record.json", "probe.json")
+    ]
+    result.data["capability_discovery"] = {
+        "schema_version": "capability-discovery.v1",
+        "command": "skills capabilities",
+        "runtime_target": target,
+        "status": readiness,
+        "runtime_target_support": {
+            "supported_targets": supported_targets,
+            "selected": target,
+            "evidence_targets": ["codex", "agents"],
+        },
+        "evidence_modes": [
+            {
+                "mode": "source_modeled",
+                "status": "available",
+                "commands": [
+                    _skills_validation_command("codex-preview"),
+                    _skills_validation_command("render-preview"),
+                    _skills_validation_command("conformance", "run", "--suite", "codex-parity"),
+                ],
+            },
+            {
+                "mode": "runtime_evidence",
+                "status": "available",
+                "commands": [*proof_commands, _ask_validation_command("repo", "closeout", "--changed")],
+            },
+        ],
+        "supported_commands": [
+            {"name": f"skills proof ({proof_target})", "command": proof_command}
+            for proof_target, proof_command in zip(proof_targets, proof_commands)
+        ] + [
+            {"name": "skills conformance run", "command": _skills_validation_command("conformance", "run", "--suite", "codex-parity")},
+            {"name": "skills codex-preview", "command": _skills_validation_command("codex-preview")},
+            {"name": "repo closeout", "command": _ask_validation_command("repo", "closeout", "--changed")},
+        ],
+        "required_artifacts": artifact_paths,
+        "known_limitations": [
+            {
+                "class": "live_runtime_parity_not_claimed",
+                "message": "Capability discovery reports available commands; it does not prove live runtime parity."
+                if target == "any"
+                else f"Capability discovery reports available commands; it does not prove live {target} runtime parity.",
+            },
+            {
+                "class": "explicit_runtime_required_for_artifacts",
+                "message": "Use an explicit runtime target before expecting runtime-card artifacts.",
+            }
+        ],
+        "blocked_checks": blockers,
+        "source_basis": preview.get("source_basis"),
+        "next_actions": [
+            _skills_validation_command("proof", "HANDLE", "--runtime-target", proof_targets[0]),
+            _ask_validation_command("repo", "closeout", "--changed"),
+        ],
+        "truth_boundaries": {
+            "capability_discovery": "checked",
+            "live_runtime_parity": live_runtime_parity,
+            "schema_validation": "not_run_use_validate_runtime_cards",
+        },
+    }
+    return result
+
+
+def format_capabilities_human(discovery: dict[str, object]) -> list[str]:
+    """
+    Format a human-readable summary of a capability discovery payload.
+    
+    Parses the given discovery mapping for runtime target/status, truth boundaries (e.g. live_runtime_parity),
+    available evidence modes, blocked fidelity checks count, and the first next action, then returns a short
+    list of one-line summary strings suitable for display.
+    
+    Parameters:
+        discovery (dict): Capability discovery payload containing keys such as
+            'runtime_target', 'status', 'truth_boundaries', 'evidence_modes',
+            'blocked_checks', and 'next_actions'.
+    
+    Returns:
+        list[str]: One-line summary strings describing the capability discovery.
+    """
+    boundaries = discovery.get("truth_boundaries") if isinstance(discovery.get("truth_boundaries"), dict) else {}
+    modes = discovery.get("evidence_modes") if isinstance(discovery.get("evidence_modes"), list) else []
+    mode_names = [mode.get("mode") for mode in modes if isinstance(mode, dict) and mode.get("mode")]
+    lines = [
+        "Skills capabilities: "
+        f"target={discovery.get('runtime_target')} status={discovery.get('status')}",
+        f"Live runtime parity: {boundaries.get('live_runtime_parity')}",
+        f"Evidence modes: {', '.join(mode_names) if mode_names else 'none'}",
+    ]
+    blocked_checks = discovery.get("blocked_checks") if isinstance(discovery.get("blocked_checks"), list) else []
+    if blocked_checks:
+        lines.append(f"Blocked fidelity checks: {len(blocked_checks)}")
+    next_actions = discovery.get("next_actions") if isinstance(discovery.get("next_actions"), list) else []
+    if next_actions:
+        lines.append(f"Next: {next_actions[0]}")
+    return lines
+
+
+def format_codex_preview_human(preview: dict[str, object]) -> list[str]:
+    """
+    Format a Codex preview payload into a list of human-readable summary lines.
+    
+    Parameters:
+        preview (dict[str, object]): A Codex preview dictionary containing optional keys:
+            - "source_basis" (dict): source-derived metadata such as "live_runtime_parity".
+            - "commands" (list): list of command descriptor dicts with "name" and "validation_command".
+            - "blocked_checks" (list): list of blocked fidelity checks.
+            - "status" (str): overall preview status.
+            - "not_a_validation_result" (bool): when true, indicates the preview is source-modeled only.
+    
+    Returns:
+        list[str]: Ordered summary lines including a commands/count/status header, notes about
+        source-modeled vs runtime validation, live runtime parity when present, a blocked-checks
+        summary when present, and one line per command in the form "- <name>: <validation_command>".
+    """
+    source_basis = preview.get("source_basis") if isinstance(preview.get("source_basis"), dict) else {}
+    commands = preview.get("commands") if isinstance(preview.get("commands"), list) else []
+    blocked_checks = preview.get("blocked_checks") if isinstance(preview.get("blocked_checks"), list) else []
+    lines = [f"Codex preview commands: {len(commands)} command(s), status={preview.get('status')}"]
+    if preview.get("not_a_validation_result"):
+        lines.append("Preview basis: source-modeled only; not a runtime validation result")
+    if source_basis.get("live_runtime_parity"):
+        lines.append(f"Live runtime parity: {source_basis.get('live_runtime_parity')}")
+    if blocked_checks:
+        lines.append(f"Blocked fidelity checks: {len(blocked_checks)}")
+    lines.extend(f"- {command.get('name')}: {command.get('validation_command')}" for command in commands if isinstance(command, dict))
+    return lines
+
+
 def skills_render_preview(repo_root: Path, context_window: int | None = None) -> CallResult:
+    """
+    Produce a Codex-based render preview payload for the repository.
+    
+    Parameters:
+        repo_root (Path): Repository root used to discover and model skills.
+        context_window (int | None): Optional maximum context window size to use when building the preview; when omitted the default sizing is applied.
+    
+    Returns:
+        CallResult: A CallResult whose `data["codex_render_preview"]` contains the render preview payload.
+    """
     result = CallResult()
     result.metadata["command"] = "skills render-preview"
     result.data["codex_render_preview"] = build_codex_render_preview(repo_root, context_window)
