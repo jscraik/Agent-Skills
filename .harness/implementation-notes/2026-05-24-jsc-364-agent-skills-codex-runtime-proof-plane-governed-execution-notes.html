@@ -245,7 +245,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T08:44:13Z">2026-05-25T08:44:13Z</time>
+          <time datetime="2026-05-25T08:48:44Z">2026-05-25T08:48:44Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -714,11 +714,23 @@
           <li>A PR green-sweep worker is triaging live checks and blockers for PR 204 while PU-006 starts.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>PU-005 PR green-sweep result</h3>
+        <time datetime="2026-05-25T08:48:44Z">2026-05-25T08:48:44Z</time>
+        <p>The PR green-sweep worker wrote <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-005/pr-green-sweep-pr204.md</code> and found a PR-template blocker, not a scoped code regression.</p>
+        <ul>
+          <li>Live blocker: <code>pr-template</code> failed because unchecked checklist items lacked explicit <code>**(Pending)**</code> or <code>**(N/A)**</code> markers.</li>
+          <li>PR body was updated to mark CodeRabbit and branch cleanup items as pending for this stacked draft PR.</li>
+          <li>Existing failed workflow run remains stale until a rerun or the next pushed commit retriggers checks.</li>
+          <li>All other visible PR 204 checks were passing, skipped by policy, or CodeRabbit-skipped for the non-default-base stack.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>Package PU-005, launch PR green-sweep, and continue implementation with active task T008.</p>
+      <p>Push the PU-005 handoff and green-sweep artifact, then continue implementation with active task T008 on a new PU-006 branch.</p>
     </section>
   </main>
 </body>
