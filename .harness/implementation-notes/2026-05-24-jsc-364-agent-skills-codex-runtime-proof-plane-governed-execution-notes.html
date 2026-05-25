@@ -191,6 +191,34 @@
       margin-bottom: 0;
     }
 
+    .placement {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid color-mix(in srgb, var(--module-color) 44%, var(--line));
+    }
+
+    .placement strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .path-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .path-list code {
+      border-color: color-mix(in srgb, var(--module-color) 45%, var(--line));
+      background: color-mix(in srgb, var(--module-color) 10%, var(--code));
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
     .module-primary { --module-color: #2e9cf0; --module-height: 350px; }
     .module-command { --module-color: #ff6b12; --module-height: 168px; }
     .module-schema { --module-color: #33bf62; --module-height: 168px; }
@@ -217,7 +245,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T07:41:48Z">2026-05-25T07:41:48Z</time>
+          <time datetime="2026-05-25T08:48:44Z">2026-05-25T08:48:44Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -225,7 +253,7 @@
         </div>
         <div class="pill">
           <span class="label">Active Task</span>
-          <code>T007</code> PU-005 active after PU-004 wrapper fixture closure
+          <code>T008</code> PU-006 active: runtime proof command and blocked runtime receipts
         </div>
       </div>
     </header>
@@ -263,6 +291,15 @@
                 <li>Reports source identity, artifact paths, blocker class, and next operator command.</li>
                 <li>Hides probe sequencing, runtime availability checks, and evidence writing details.</li>
               </ul>
+              <div class="placement">
+                <strong>Work lands in</strong>
+                <div class="path-list">
+                  <code>Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py</code>
+                  <code>Infrastructure/scripts/lib/ask/skills_sdk/conformance.py</code>
+                  <code>Infrastructure/scripts/lib/ask/services/codex_preview.py</code>
+                  <code>Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py</code>
+                </div>
+              </div>
             </div>
           </article>
           <article class="module module-review">
@@ -274,6 +311,14 @@
                 <li>Allowed files and stop conditions.</li>
                 <li>Simplify, unslopify, HE code review, testing, adversarial, and agent-native review gates.</li>
               </ul>
+              <div class="placement">
+                <strong>Work lands in</strong>
+                <div class="path-list">
+                  <code>Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/state.yaml</code>
+                  <code>Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/receipts.jsonl</code>
+                  <code>.harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html</code>
+                </div>
+              </div>
             </div>
           </article>
         </div>
@@ -287,6 +332,15 @@
                 <li><code>repo doctor</code> names the next command.</li>
                 <li><code>skills proof</code> emits runtime-targeted evidence.</li>
               </ul>
+              <div class="placement">
+                <strong>Work lands in</strong>
+                <div class="path-list">
+                  <code>Infrastructure/bin/ask</code>
+                  <code>Infrastructure/scripts/lib/ask/commands/skills_impl.py</code>
+                  <code>Infrastructure/scripts/lib/ask/commands/repo_impl.py</code>
+                  <code>Infrastructure/scripts/lib/ask/command_metadata.py</code>
+                </div>
+              </div>
             </div>
           </article>
           <article class="module module-schema">
@@ -300,6 +354,14 @@
                 <li><code>RuntimeSessionSummary</code></li>
                 <li><code>RecoveryPlanSummary</code></li>
               </ul>
+              <div class="placement">
+                <strong>Work lands in</strong>
+                <div class="path-list">
+                  <code>Infrastructure/config/schemas/*.v1.schema.json</code>
+                  <code>Infrastructure/tests/fixtures/runtime_proof/**</code>
+                  <code>Infrastructure/tests/test_runtime_proof_validation.py</code>
+                </div>
+              </div>
             </div>
           </article>
           <article class="module module-evidence">
@@ -311,12 +373,28 @@
                 <li>Review artifacts under <code>artifacts/reviews</code>.</li>
                 <li>Implementation notes here.</li>
               </ul>
+              <div class="placement">
+                <strong>Work lands in</strong>
+                <div class="path-list">
+                  <code>.harness/evidence/**</code>
+                  <code>artifacts/reviews/jsc-364-runtime-proof-plane/**</code>
+                  <code>/tmp/jsc-364-*.json</code>
+                </div>
+              </div>
             </div>
           </article>
           <article class="module module-delivery">
             <h3>Delivery Truth</h3>
             <div class="body">
               <p>PR, CI, review, and Linear truth stay separate from local proof and must be refreshed before delivery claims.</p>
+              <div class="placement">
+                <strong>Work lands in</strong>
+                <div class="path-list">
+                  <code>GitHub PRs 200-203+</code>
+                  <code>PR green-sweep artifacts</code>
+                  <code>Linear JSC-364</code>
+                </div>
+              </div>
             </div>
           </article>
         </div>
@@ -364,6 +442,12 @@
             <td><span class="status">passed, packaging next</span></td>
             <td>Capability discovery and public wrapper fixtures for runtime-separation and runtime-proof command paths.</td>
             <td>Default, runtime-separation-only, and runtime-proof-only wrapper fixture modes pass; focused pytest passes with 13 tests; py_compile and goal board validation pass; final post-fix adversarial and agent-native artifacts are present.</td>
+          </tr>
+          <tr>
+            <td>PU-005</td>
+            <td><span class="status">passed, packaging next</span></td>
+            <td>Codex preview source basis, truncation reporting, and public <code>skills codex-preview</code> command-family discoverability.</td>
+            <td>Focused pytest passes with 25 tests after the human-output false-success, scan-error status, and blocker-sync fixes; public help, human output, JSON command-family output, render-preview jq proof, and py_compile pass. Final adversarial and agent-native artifacts report no blockers.</td>
           </tr>
         </tbody>
       </table>
@@ -592,11 +676,61 @@
         </ul>
         <p><strong>Broad-gate blocker noted:</strong> the full <code>Infrastructure/tests</code> lane is not a PU-004 green proof in the current local environment. Default Python lacks PyYAML, the available PyYAML venv is Python 3.9 and misses Python 3.10+ APIs, and the dependency-injected Python 3.12 run exposes unrelated pre-existing failures across evals, generated manifest/source-revision checks, environment TOML assertions, and skill-installer/package provenance.</p>
       </article>
+
+      <article class="entry">
+        <h3>PU-005 in progress: preview basis and truncation hardening</h3>
+        <time datetime="2026-05-25T08:03:53Z">2026-05-25T08:03:53Z</time>
+        <p>PU-005 now makes Codex preview output name its source-modeled basis and truncation state explicitly. This keeps preview evidence useful without letting it masquerade as live Codex runtime parity.</p>
+        <ul>
+          <li><code>codex_load_preview</code> and <code>codex_render_preview</code> include <code>source_basis</code> with <code>basis: source_modeled</code>, source revision, source files, blocked check ids, and <code>live_runtime_parity: not_claimed</code>.</li>
+          <li><code>codex_render_preview</code> includes a stable <code>truncation</code> object that records status, strategy, budget, included and omitted counts, description truncation counts, and warning text.</li>
+          <li>The public wrapper now exposes <code>./bin/ask skills codex-preview</code> as a command-family index, and <code>command_metadata.py</code> now lists preview commands so robot-mode guidance can recommend them.</li>
+          <li>Boundary expansion recorded: the slice needed <code>Infrastructure/bin/ask</code>, <code>Infrastructure/scripts/lib/ask/commands/**</code>, and <code>Infrastructure/scripts/lib/ask/command_metadata.py</code> because the planned verification command required a reachable public entrypoint, not only service-layer fields.</li>
+          <li>Focused validation passed after the adversarial fixes: <code>python3 -m pytest Infrastructure/tests/test_ask_skills_codex_preview.py -q</code> reported 25 passed, <code>./bin/ask skills codex-preview --help</code> exited 0, plain <code>./bin/ask skills codex-preview</code> printed the non-validation disclaimer and live parity line, <code>./bin/ask skills codex-preview --json --robot</code> emitted source-derived partial status plus <code>not_a_validation_result</code>, and py_compile passed for the touched Python modules.</li>
+        </ul>
+        <p><strong>Review state:</strong> the first PU-005 review swarm exited without writing required artifacts. Later adversarial passes found two real gaps: the human <code>skills codex-preview</code> output lacked the non-validation disclaimer, and command-specific preview builders could let <code>source_basis.blocked_check_ids</code> drift from <code>blocked_checks</code>. Both were fixed and covered. Final adversarial and agent-native artifacts now report no blockers, with residual risk limited to intentional source-modeled preview limits.</p>
+      </article>
+
+      <article class="entry">
+        <h3>PU-005 final review convergence</h3>
+        <time datetime="2026-05-25T08:30:57Z">2026-05-25T08:30:57Z</time>
+        <p>The final review loop converged after fixing the issues it found rather than carrying them as notes.</p>
+        <ul>
+          <li>Plain <code>skills codex-preview</code> now prints <code>Preview basis: source-modeled only; not a runtime validation result</code>, <code>Live runtime parity: not_claimed</code>, and blocked fidelity count.</li>
+          <li>Load-preview scan errors now add <code>preview_scan_errors</code>, degrade status to <code>partial</code>, and propagate into <code>source_basis.blocked_check_ids</code>.</li>
+          <li>A shared refresh helper keeps <code>status</code> and <code>source_basis.blocked_check_ids</code> synchronized after late blocker appends in config, inject, and implicit preview paths.</li>
+          <li>Final review artifacts: <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-005/adversarial-final2-reviewer.md</code> and <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-005/agent-native-final2-reviewer.md</code>.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-005 PR opened and green-sweep launched</h3>
+        <time datetime="2026-05-25T08:44:13Z">2026-05-25T08:44:13Z</time>
+        <p>PU-005 was committed, pushed, and opened as stacked draft PR 204: <code>https://github.com/jscraik/Agent-Skills/pull/204</code>.</p>
+        <ul>
+          <li>Branch: <code>codex/jsc-364-runtime-proof-plane-pu005</code>.</li>
+          <li>Commit: <code>8b6e594af</code>.</li>
+          <li>Base: <code>codex/jsc-364-runtime-proof-plane-pu004</code>, because PR 203 is still open.</li>
+          <li>A PR green-sweep worker is triaging live checks and blockers for PR 204 while PU-006 starts.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-005 PR green-sweep result</h3>
+        <time datetime="2026-05-25T08:48:44Z">2026-05-25T08:48:44Z</time>
+        <p>The PR green-sweep worker wrote <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-005/pr-green-sweep-pr204.md</code> and found a PR-template blocker, not a scoped code regression.</p>
+        <ul>
+          <li>Live blocker: <code>pr-template</code> failed because unchecked checklist items lacked explicit <code>**(Pending)**</code> or <code>**(N/A)**</code> markers.</li>
+          <li>PR body was updated to mark CodeRabbit and branch cleanup items as pending for this stacked draft PR.</li>
+          <li>Existing failed workflow run remains stale until a rerun or the next pushed commit retriggers checks.</li>
+          <li>All other visible PR 204 checks were passing, skipped by policy, or CodeRabbit-skipped for the non-default-base stack.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>Begin PU-005 codex-preview source identity and truncation hardening while keeping PU-004 delivery packaging and PR triage in lockstep.</p>
+      <p>Push the PU-005 handoff and green-sweep artifact, then continue implementation with active task T008 on a new PU-006 branch.</p>
     </section>
   </main>
 </body>

@@ -120,6 +120,7 @@ def main():
     skills_list_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
     skills_budget_parser = skills_subparsers.add_parser("budget", help="Verify default skill runtime budget", parents=[global_parser])
     skills_budget_parser.add_argument("--default-max", type=int, default=30, help="Maximum default-visible skills")
+    skills_subparsers.add_parser("codex-preview", help="Show Codex preview command family and source-model basis", parents=[global_parser])
     skills_load_preview_parser = skills_subparsers.add_parser("load-preview", help="Preview Codex skill loader behavior", parents=[global_parser])
     skills_render_preview_parser = skills_subparsers.add_parser("render-preview", help="Preview Codex available-skills rendering", parents=[global_parser])
     skills_render_preview_parser.add_argument("--context-window", type=int, help="Optional context window for Codex 2 percent metadata budget modeling")
@@ -532,6 +533,7 @@ def main():
             )
         elif args.action == "budget":
             result = skills_commands.skills_budget(repo_root, default_max=args.default_max)
+        elif args.action == "codex-preview": result = skills_commands.skills_codex_preview(repo_root)
         elif args.action == "load-preview":
             result = skills_commands.skills_load_preview(repo_root)
         elif args.action == "render-preview":
@@ -1133,6 +1135,8 @@ def main():
                         f"{report.get('advanced_visible_count')} advanced"
                     )
                     print_first_validation_command(report)
+                elif args.topic == "skills" and args.action == "codex-preview":
+                    print("\n".join(skills_commands.format_codex_preview_human(result.data.get("codex_preview", {}))))
                 elif args.topic == "skills" and args.action == "load-preview":
                     preview = result.data.get("codex_load_preview", {})
                     print(

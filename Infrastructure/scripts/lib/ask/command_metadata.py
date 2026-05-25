@@ -10,6 +10,12 @@ VALID_ACTIONS = {
     "skills": [
         "list",
         "budget",
+        "codex-preview",
+        "load-preview",
+        "render-preview",
+        "config",
+        "inject-preview",
+        "implicit-preview",
         "handles",
         "resolve",
         "parse",
@@ -63,6 +69,9 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask skills package he-heartbeat --json --robot",
         "ask skills package verify he-heartbeat --json --robot",
         "ask skills conformance run --suite codex-parity --evidence-dir /tmp/ask-conformance --json --robot",
+        "ask skills codex-preview --json --robot",
+        "ask skills render-preview --context-window 200000 --json --robot",
+        "ask skills config explain --json --robot",
         "ask skills profiles --json --robot",
         "ask skills profiles eval --json --robot",
         "ask skills events --json --robot",
@@ -138,6 +147,26 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("skills", "budget"): [
         "ask skills budget",
+    ],
+    ("skills", "codex-preview"): [
+        "ask skills codex-preview --json --robot",
+        "ask skills codex-preview",
+    ],
+    ("skills", "load-preview"): [
+        "ask skills load-preview --json --robot",
+    ],
+    ("skills", "render-preview"): [
+        "ask skills render-preview --json --robot",
+        "ask skills render-preview --context-window 200000 --json --robot",
+    ],
+    ("skills", "config"): [
+        "ask skills config explain --json --robot",
+    ],
+    ("skills", "inject-preview"): [
+        "ask skills inject-preview '$browser' --json --robot",
+    ],
+    ("skills", "implicit-preview"): [
+        "ask skills implicit-preview --command 'cat SKILL.md' --json --robot",
     ],
     ("skills", "handles"): [
         "ask skills handles --json",

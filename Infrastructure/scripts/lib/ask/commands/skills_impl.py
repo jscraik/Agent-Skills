@@ -2574,6 +2574,67 @@ def skills_load_preview(repo_root: Path) -> CallResult:
     return result
 
 
+def skills_codex_preview(repo_root: Path) -> CallResult:
+    load_preview = build_codex_load_preview(repo_root)
+    result = CallResult()
+    result.metadata["command"] = "skills codex-preview"
+    result.data["codex_preview"] = {
+        "schema_version": CODEX_PREVIEW_SCHEMA_VERSION,
+        "command": "skills codex-preview",
+        "status": load_preview.get("status"),
+        "not_a_validation_result": True,
+        "source_identity": load_preview.get("source_identity"),
+        "source_basis": load_preview.get("source_basis"),
+        "blocked_checks": load_preview.get("blocked_checks", []),
+        "modeled_rule_version": CODEX_PREVIEW_MODELED_RULE_VERSION,
+        "source_files": list(CODEX_PREVIEW_SOURCE_FILES),
+        "commands": [
+            {
+                "name": "load-preview",
+                "purpose": "Model Codex skill-root loading and scan visible SKILL.md metadata.",
+                "validation_command": _skills_validation_command("load-preview"),
+            },
+            {
+                "name": "render-preview",
+                "purpose": "Model available-skill rendering, source basis, budget, and truncation status.",
+                "validation_command": _skills_validation_command("render-preview"),
+            },
+            {
+                "name": "config explain",
+                "purpose": "Explain source-backed Codex skills.config rule semantics and blocked live layers.",
+                "validation_command": _skills_validation_command("config", "explain"),
+            },
+            {
+                "name": "inject-preview",
+                "purpose": "Model explicit skill mention selection from prompt text.",
+                "validation_command": _skills_validation_command("inject-preview", "$skill"),
+            },
+            {
+                "name": "implicit-preview",
+                "purpose": "Model implicit invocation attribution from a shell command.",
+                "validation_command": _skills_validation_command("implicit-preview", "--command", "cat SKILL.md"),
+            },
+        ],
+        "agent_summary": "Use the listed public skills preview commands for source-modeled Codex preview evidence; they do not claim live runtime parity.",
+    }
+    return result
+
+
+def format_codex_preview_human(preview: dict[str, object]) -> list[str]:
+    source_basis = preview.get("source_basis") if isinstance(preview.get("source_basis"), dict) else {}
+    commands = preview.get("commands") if isinstance(preview.get("commands"), list) else []
+    blocked_checks = preview.get("blocked_checks") if isinstance(preview.get("blocked_checks"), list) else []
+    lines = [f"Codex preview commands: {len(commands)} command(s), status={preview.get('status')}"]
+    if preview.get("not_a_validation_result"):
+        lines.append("Preview basis: source-modeled only; not a runtime validation result")
+    if source_basis.get("live_runtime_parity"):
+        lines.append(f"Live runtime parity: {source_basis.get('live_runtime_parity')}")
+    if blocked_checks:
+        lines.append(f"Blocked fidelity checks: {len(blocked_checks)}")
+    lines.extend(f"- {command.get('name')}: {command.get('validation_command')}" for command in commands if isinstance(command, dict))
+    return lines
+
+
 def skills_render_preview(repo_root: Path, context_window: int | None = None) -> CallResult:
     result = CallResult()
     result.metadata["command"] = "skills render-preview"
