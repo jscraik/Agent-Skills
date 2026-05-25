@@ -71,6 +71,7 @@ from ask.skills_sdk.contracts import (  # noqa: E402
 )
 from ask.skills_sdk.runtime_adapters import (  # noqa: E402
     build_command_handle_proof,
+    emit_command_handle_runtime_evidence,
     normalize_runtime_target,
 )
 from ask.skills_sdk.package_contracts import (  # noqa: E402
@@ -1313,6 +1314,9 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
         home_path=Path.home(),
     )
     normalized = proof["handle"]
+    runtime_evidence = emit_command_handle_runtime_evidence(repo_root=repo_root, proof=proof)
+    result.data["runtime_evidence"] = runtime_evidence
+    proof["runtime_evidence"] = runtime_evidence
     if proof["status"] != "pass":
         result.data["runtime_failure"] = proof["runtime_failure"]
     result.data["proof"] = proof

@@ -1,6 +1,7 @@
 # pylint: disable=import-error,import-outside-toplevel,wrong-import-position
 import json
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -671,6 +672,23 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
             encoding="utf-8",
         )
 
+    def _assert_runtime_card_valid(self, repo_root: Path, card_path: Path) -> None:
+        validation = subprocess.run(
+            [
+                sys.executable,
+                str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "validate_runtime_cards.py"),
+                str(card_path),
+                "--require-shared-workspace",
+                "--workspace-root",
+                str(repo_root),
+                "--json",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(validation.returncode, 0, validation.stdout + validation.stderr)
+
     def test_skills_proof_requires_user_runtime_link(self) -> None:
         """skills_proof must fail when user runtime handles exist but are not symlinked to workspace."""
         repo_root = self.temp_dir / "repo"
@@ -728,6 +746,46 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertIn("user_runtime_ready", proof["gate_policy"]["required"])
         self.assertIn("either supported user runtime link", proof["gate_policy"]["required_semantics"])
         self.assertIn("agents_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
+        self.assertEqual(result.data["runtime_evidence"]["status"], "skipped")
+        self.assertIn("explicit codex or agents", result.data["runtime_evidence"]["reason"])
+        self.assertFalse((repo_root / ".harness" / "evidence").exists())
+
+    def test_skills_proof_runtime_target_agents_writes_runtime_card(self) -> None:
+        """Explicit Agents-targeted proof writes schema-valid evidence artifacts."""
+        repo_root = self.temp_dir / "repo"
+        self._write_he_heartbeat_source(repo_root)
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
+        skills_dir = repo_root / ".agents" / "skills"
+
+        home = self.temp_dir / "home"
+        agents_skills = home / ".agents" / "skills"
+        agents_skills.parent.mkdir(parents=True)
+        agents_skills.symlink_to(skills_dir)
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat", runtime_target="agents")
+
+        runtime_evidence = result.data["runtime_evidence"]
+        card_path = repo_root / runtime_evidence["runtime_card_path"]
+        receipt_path = repo_root / runtime_evidence["evidence_receipt_path"]
+        artifact_path = repo_root / runtime_evidence["artifact_record_path"]
+        probe_path = repo_root / runtime_evidence["probe_artifact_path"]
+        self.assertEqual(result.status, "success")
+        self.assertEqual(runtime_evidence["status"], "implemented_enforced")
+        self.assertTrue(card_path.is_file())
+        self.assertTrue(receipt_path.is_file())
+        self.assertTrue(artifact_path.is_file())
+        self.assertTrue(probe_path.is_file())
+
+        card = json.loads(card_path.read_text(encoding="utf-8"))
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        self.assertEqual(card["runtime_target"], "agents")
+        self.assertEqual(card["runtime_status"], "implemented_enforced")
+        self.assertEqual(card["evidence_receipts"][0]["claim_status"], "pass")
+        self.assertEqual(receipt["runtime_target"], "agents")
+        self.assertEqual(receipt["probe_artifact_path"], runtime_evidence["probe_artifact_path"])
+
+        self._assert_runtime_card_valid(repo_root, card_path)
 
     def test_skills_proof_runtime_target_codex_rejects_agents_only_runtime(self) -> None:
         """Codex-targeted proof must not pass because the agents runtime is linked."""
@@ -757,6 +815,29 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
             proof["validation_commands"],
             ["./bin/ask skills proof he-heartbeat --runtime-target codex --json --robot"],
         )
+        runtime_evidence = result.data["runtime_evidence"]
+        card_path = repo_root / runtime_evidence["runtime_card_path"]
+        receipt_path = repo_root / runtime_evidence["evidence_receipt_path"]
+        probe_path = repo_root / runtime_evidence["probe_artifact_path"]
+        self.assertTrue(card_path.is_file())
+        self.assertTrue(receipt_path.is_file())
+        self.assertTrue(probe_path.is_file())
+
+        card = json.loads(card_path.read_text(encoding="utf-8"))
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        self.assertEqual(card["runtime_status"], "blocked_runtime")
+        self.assertEqual(card["runtime_target"], "codex")
+        self.assertEqual(card["visibility_status"], "user_observable")
+        self.assertEqual(
+            card["artifacts"][0]["source_identity"]["source_paths"][0],
+            "Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
+        )
+        self.assertEqual(receipt["claim_status"], "blocked")
+        self.assertEqual(receipt["runtime_status"], "blocked_runtime")
+        self.assertEqual(receipt["blocker_class"], "blocked_runtime")
+        self.assertEqual(receipt["probe_artifact_path"], runtime_evidence["probe_artifact_path"])
+
+        self._assert_runtime_card_valid(repo_root, card_path)
 
     def test_skills_proof_passes_with_linked_codex_runtime(self) -> None:
         """skills_proof must pass when the Codex Desktop runtime link reaches the workspace."""
@@ -802,6 +883,11 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertEqual(proof["runtime_target"], "codex")
         self.assertEqual(proof["runtime_satisfied_by"], "codex_user_runtime")
         self.assertIn("codex_user_runtime_ready", proof["gate_policy"]["required"])
+        runtime_evidence = result.data["runtime_evidence"]
+        card = json.loads((repo_root / runtime_evidence["runtime_card_path"]).read_text(encoding="utf-8"))
+        self.assertEqual(runtime_evidence["status"], "implemented_enforced")
+        self.assertEqual(card["runtime_status"], "implemented_enforced")
+        self.assertEqual(card["evidence_receipts"][0]["claim_status"], "pass")
 
 
 class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):

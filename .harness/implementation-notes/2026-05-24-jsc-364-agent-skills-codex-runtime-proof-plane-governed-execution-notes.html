@@ -245,7 +245,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T08:48:44Z">2026-05-25T08:48:44Z</time>
+          <time datetime="2026-05-25T08:55:51Z">2026-05-25T08:55:51Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -337,6 +337,7 @@
                 <div class="path-list">
                   <code>Infrastructure/bin/ask</code>
                   <code>Infrastructure/scripts/lib/ask/commands/skills_impl.py</code>
+                  <code>Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py</code>
                   <code>Infrastructure/scripts/lib/ask/commands/repo_impl.py</code>
                   <code>Infrastructure/scripts/lib/ask/command_metadata.py</code>
                 </div>
@@ -377,6 +378,7 @@
                 <strong>Work lands in</strong>
                 <div class="path-list">
                   <code>.harness/evidence/**</code>
+                  <code>.harness/evidence/runtime-proof/context7/codex/runtime-card.json</code>
                   <code>artifacts/reviews/jsc-364-runtime-proof-plane/**</code>
                   <code>/tmp/jsc-364-*.json</code>
                 </div>
@@ -726,11 +728,39 @@
           <li>All other visible PR 204 checks were passing, skipped by policy, or CodeRabbit-skipped for the non-default-base stack.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>PU-006 runtime evidence landed in deep modules</h3>
+        <time datetime="2026-05-25T08:55:51Z">2026-05-25T08:55:51Z</time>
+        <p>The runtime proof command now writes explicit workspace evidence for <code>./bin/ask skills proof context7 --runtime-target codex --json --robot</code>. The command still exits blocked because this checkout has Agents runtime reachability but no Codex runtime link; that absence is now captured as durable <code>blocked_runtime</code> evidence.</p>
+        <ul>
+          <li>Runtime writer: <code>Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py</code>.</li>
+          <li>Command wiring: <code>Infrastructure/scripts/lib/ask/commands/skills_impl.py</code>.</li>
+          <li>Focused tests: <code>Infrastructure/tests/test_command_surface_handles.py</code>.</li>
+          <li>Generated RuntimeCard: <code>.harness/evidence/runtime-proof/context7/codex/runtime-card.json</code>.</li>
+          <li>Generated receipt, artifact record, and probe: <code>.harness/evidence/runtime-proof/context7/codex/</code>.</li>
+          <li>Validator passed: <code>python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py .harness/evidence/runtime-proof/context7/codex/runtime-card.json --require-shared-workspace --workspace-root /Users/jamiecraik/dev/agent-skills --json</code>.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-006 review closure and placement truth</h3>
+        <time datetime="2026-05-25T09:15:06Z">2026-05-25T09:15:06Z</time>
+        <p>PU-006 is now closed locally with a focused validation envelope and explicit artifact placement. The runtime proof writer lives in the deep module layer, the public command returns the artifact paths, and the generated evidence lands under the shared workspace so closeout and later agents can inspect it without reconstructing the command run.</p>
+        <ul>
+          <li>Accepted testing gap: explicit <code>agents</code> proof and default <code>any</code> proof now have focused tests.</li>
+          <li>Accepted unslopify gap: evidence payload construction was split into smaller helpers in <code>runtime_adapters.py</code>.</li>
+          <li>Accepted HE review gap: non-runtime proof failures now map to <code>stale_or_drifted</code> instead of every non-pass becoming <code>blocked_runtime</code>.</li>
+          <li>Accepted agent-native gap: runtime evidence source identity now prefers canonical <code>resolution.source_path</code> and falls back to projection only when necessary.</li>
+          <li>Review coverage note: adversarial postfix review has the required footer and no blockers. Agent-native postfix review reports PASS but missed the in-artifact <code>WROTE</code> footer; the one retry failed to write a replacement artifact, so this is recorded in receipt <code>R018</code> as artifact-compliance coverage gap.</li>
+          <li>Environment blocker: broad <code>Infrastructure/tests</code> collection still hits unrelated local <code>ModuleNotFoundError: No module named 'yaml'</code>; focused proof-plane tests pass.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>Push the PU-005 handoff and green-sweep artifact, then continue implementation with active task T008 on a new PU-006 branch.</p>
+      <p>Package PU-006 into the stacked PR flow, launch PR green-sweep triage for the new draft PR, then continue with PU-007 shared workspace evidence and closeout integration.</p>
     </section>
   </main>
 </body>

@@ -1,0 +1,118 @@
+{
+  "command": "./bin/ask skills proof context7 --runtime-target codex --json --robot",
+  "exit_code": 2,
+  "handle": "context7",
+  "observed_at": "2026-05-25T09:11:06Z",
+  "proof": {
+    "available_runtimes": [
+      "agents_user_runtime"
+    ],
+    "command_handle_check": {
+      "checked_count": 210,
+      "command_handle_count": 105,
+      "schema_version": "command-handle-check.v1",
+      "skipped": [],
+      "status": "pass"
+    },
+    "gate_policy": {
+      "required": [
+        "resolver",
+        "generated_command_handle_check",
+        "workspace_command_handle_exists",
+        "codex_user_runtime_ready"
+      ],
+      "required_semantics": "codex_user_runtime_ready must be true for runtime_target=codex.",
+      "runtime_target": "codex",
+      "supporting_runtime_diagnostics": [
+        "codex_user_link",
+        "codex_user_command_handle_exists",
+        "codex_user_runtime_ready",
+        "agents_user_link",
+        "agents_user_command_handle_exists",
+        "agents_user_runtime_ready"
+      ]
+    },
+    "gates": {
+      "agents_user_command_handle_exists": true,
+      "agents_user_link": true,
+      "agents_user_runtime_ready": true,
+      "codex_user_command_handle_exists": false,
+      "codex_user_link": false,
+      "codex_user_runtime_ready": false,
+      "generated_command_handle_check": true,
+      "resolver": true,
+      "user_runtime_ready": true,
+      "workspace_command_handle_exists": true
+    },
+    "handle": "context7",
+    "resolution": {
+      "command_handle_path": ".agents/skills/context7/SKILL.md",
+      "command_visibility": "target",
+      "description": "Analyze current external library or API docs with Context7 when dependency behavior, version-sensitive references, or ctx7 CLI setup/install guidance is needed.",
+      "handle": "context7",
+      "invoke_via": "agent-ops",
+      "kind": "skill",
+      "level": "reference",
+      "owner": "agent-ops",
+      "provenance": {
+        "generator": "context-budgeted-skillsets.v1",
+        "policy_identity": "6c4a3a9db4f4d8f0",
+        "projection_mode": "rooted",
+        "source_revision": "db17ee247",
+        "source_sha256": "67d695a6592f5ac4f6b340a1091ffdc120f8fbe299a35eade68ba54c0dd6a3a3"
+      },
+      "runtime_visibility": "latent",
+      "source_path": "Skills/agent-ops/context7/SKILL.md",
+      "status": "ok"
+    },
+    "runtime_failure": {
+      "command": "skills proof",
+      "error_code": "ERR_VALIDATION",
+      "failed_check_id": "codex_user_runtime_ready",
+      "message": "Command handle proof failed for 'context7'.",
+      "path": "gates.codex_user_runtime_ready",
+      "recovery_guidance": "Run ./bin/ask skills sync --scope workspace --projection rooted, then ./bin/ask skills sync --scope user --projection rooted, and rerun proof.",
+      "schema_version": "skill-runtime-failure.v1",
+      "validation_commands": [
+        "./bin/ask skills proof context7 --runtime-target codex --json --robot"
+      ]
+    },
+    "runtime_satisfied_by": null,
+    "runtime_target": "codex",
+    "schema_version": "command-handle-proof.v2",
+    "status": "fail",
+    "user_runtime_command_handles": {
+      "agents_handle": "/Users/jamiecraik/.agents/skills/context7/SKILL.md",
+      "agents_handle_exists": true,
+      "codex_handle": "/Users/jamiecraik/.codex/skills/context7/SKILL.md",
+      "codex_handle_exists": false
+    },
+    "user_runtime_links": {
+      "agents_skills": {
+        "exists": true,
+        "is_symlink": true,
+        "path": "/Users/jamiecraik/.agents/skills",
+        "points_to_workspace_runtime": true,
+        "target": "/Users/jamiecraik/dev/agent-skills/.agents/skills"
+      },
+      "codex_skills": {
+        "exists": true,
+        "is_symlink": true,
+        "path": "/Users/jamiecraik/.codex/skills",
+        "points_to_workspace_runtime": false,
+        "target": "/Users/jamiecraik/dev/configs/.codex/skills"
+      }
+    },
+    "validation_commands": [
+      "./bin/ask skills proof context7 --runtime-target codex --json --robot"
+    ],
+    "workspace_runtime": {
+      "command_handle_exists": true,
+      "command_handle_path": "/Users/jamiecraik/dev/agent-skills/.agents/skills/context7/SKILL.md",
+      "path": "/Users/jamiecraik/dev/agent-skills/.agents/skills"
+    }
+  },
+  "runtime_status": "blocked_runtime",
+  "runtime_target": "codex",
+  "schema_version": "command-handle-runtime-probe.v1"
+}

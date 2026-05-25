@@ -45,10 +45,10 @@ rules:
 checks:
   dirty_fingerprint: "main...origin/main with untracked governed prompt observed 2026-05-24T21:41:48Z"
   last_verification:
-    command: "PU-005 focused validation: codex-preview tests, public wrapper help, human output, public JSON command-family output, render-preview source_basis/truncation jq check, py_compile, and final review artifacts"
-    outcome: pass
-    checked_at: "2026-05-25T08:30:57Z"
-    detail: "Focused pytest passes with 25 tests; ./bin/ask skills codex-preview --help exits 0; plain ./bin/ask skills codex-preview prints the non-validation disclaimer, live parity not_claimed, and blocked fidelity count; ./bin/ask skills codex-preview --json --robot emits source-derived partial status, source_identity, source_basis, blocked_checks, and not_a_validation_result; render-preview with context-window 50 emits source_basis.basis source_modeled, live_runtime_parity not_claimed, blocked_check_ids for live_config_layer_stack and runtime_plugin_skill_roots, and truncation.status truncated; py_compile passes for touched Python modules. Final adversarial-final2 and agent-native-final2 artifacts report no blocking findings."
+    command: "PU-006 focused validation: py_compile, command-handle proof tests, explicit codex blocked_runtime proof, RuntimeCard validator, source-provenance jq check, and mandatory review artifacts"
+    outcome: pass_with_environment_blocker
+    checked_at: "2026-05-25T09:15:06Z"
+    detail: "py_compile passes for runtime_adapters.py, skills_impl.py, and test_command_surface_handles.py; focused TestCommandHandleProof passes with 6 tests; ./bin/ask skills proof context7 --runtime-target codex --json --robot exits 2 as expected and writes RuntimeCard, EvidenceReceipt, ArtifactRecord, and probe artifacts; RuntimeCard validator passes with --require-shared-workspace; jq confirms canonical source paths include Skills/agent-ops/context7/SKILL.md and implementation modules. Full Infrastructure/tests remains blocked by local missing PyYAML in unrelated test modules. Mandatory review artifacts exist; agent-native postfix report is PASS but lacks an in-artifact WROTE footer, and the single retry failed to write a replacement artifact, so that is recorded as an artifact-compliance coverage gap rather than a technical blocker."
   last_scout:
     command: "PU-001 baseline: ./bin/ask skills handles --check --check-command-handles --no-handles --json --robot and ./bin/ask repo doctor --json --robot"
     outcome: "blocked_as_expected"
@@ -139,6 +139,22 @@ claims:
     status: supported
     remaining_uncertainty:
       - "Delivery packaging remains before this slice is pushed or opened as a PR."
+  - id: C008
+    claim: "PU-006 proof command now writes durable runtime evidence artifacts for explicit codex or agents runtime targets without converting runtime absence into success."
+    evidence_surface:
+      - "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+      - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      - "Infrastructure/tests/test_command_surface_handles.py"
+      - ".harness/evidence/runtime-proof/context7/codex/runtime-card.json"
+      - ".harness/evidence/runtime-proof/context7/codex/evidence-receipt.json"
+      - ".harness/evidence/runtime-proof/context7/codex/artifact-record.json"
+      - ".harness/evidence/runtime-proof/context7/codex/probe.json"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Delivery packaging remains before this slice is pushed or opened as a PR."
+      - "Full Infrastructure/tests remains blocked by a local missing PyYAML dependency in unrelated modules."
+      - "Agent-native postfix artifact is substantively PASS but missed the required WROTE footer; retry failed to write a replacement artifact."
 tasks:
   - id: T001
     type: pm
@@ -340,7 +356,7 @@ tasks:
   - id: T008
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-006 runtime proof command and blocked runtime receipts."
     inputs:
       - "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
@@ -363,11 +379,11 @@ tasks:
     stop_if:
       - "Runtime absence cannot be captured as durable blocked_runtime evidence"
       - "Proof command cannot report artifact paths"
-    receipt_id: null
+    receipt_id: R018
   - id: T009
     type: worker
     assignee: Worker
-    status: queued
+    status: active
     objective: "Implement PU-007 shared workspace evidence and closeout integration."
     inputs:
       - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
