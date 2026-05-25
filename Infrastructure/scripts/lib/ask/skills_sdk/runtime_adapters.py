@@ -25,10 +25,30 @@ RUNTIME_REACHABILITY_FAILURES = {
 
 
 def normalize_runtime_target(runtime_target: object) -> str:
+    """
+    Normalize a runtime target value to a lowercase string with surrounding whitespace removed.
+    
+    Parameters:
+        runtime_target (object): The input value to normalize; it will be converted with `str()` before trimming and lowercasing.
+    
+    Returns:
+        The runtime target as a lowercase string with leading and trailing whitespace removed.
+    """
     return str(runtime_target).strip().lower()
 
 
 def invalid_runtime_target_failure(handle: str, runtime_target: object) -> dict[str, Any]:
+    """
+    Create a standardized runtime validation failure payload for an invalid runtime target.
+    
+    Parameters:
+        handle (str): Skill handle (may include a leading '$'); used to build suggested validation commands.
+        runtime_target (object): The original runtime target value provided by the user; will be normalized for the failure message.
+    
+    Returns:
+        dict[str, Any]: A runtime failure payload describing the invalid `runtime_target`, including an error code, failed check id,
+        recovery guidance, and suggested validation command(s).
+    """
     normalized_target = normalize_runtime_target(runtime_target)
     safe_handle = handle.strip().lstrip("$") or handle
     recovery_guidance = "Use --runtime-target any, --runtime-target codex, or --runtime-target agents."
@@ -46,10 +66,26 @@ def invalid_runtime_target_failure(handle: str, runtime_target: object) -> dict[
 
 
 def _utc_now() -> str:
+    """
+    Return the current UTC time formatted as an ISO-8601 timestamp without microseconds and with a trailing 'Z'.
+    
+    Returns:
+        str: ISO-8601 UTC timestamp (e.g. '2024-05-01T12:00:00Z')
+    """
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _repo_relative(repo_root: Path, path: Path) -> str:
+    """
+    Produce a repository-relative string for `path` when it is inside `repo_root`; otherwise return the original path string.
+    
+    Parameters:
+    	repo_root (Path): Repository root path used as the base for relativization.
+    	path (Path): Path to be made relative to `repo_root` when possible.
+    
+    Returns:
+    	relative_path (str): `path` made relative to `repo_root` if `path` is beneath `repo_root`, otherwise `str(path)`.
+    """
     try:
         return str(path.relative_to(repo_root))
     except ValueError:
@@ -57,11 +93,36 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    """
+    Ensure the parent directory exists and write the given payload to the specified path as pretty-printed JSON.
+    
+    Parameters:
+        path (Path): Filesystem path where the JSON will be written; parent directories are created if missing.
+        payload (dict[str, Any]): JSON-serializable mapping to write.
+    
+    Notes:
+        The JSON is written with 2-space indentation, keys sorted, encoded as UTF-8, and terminated with a single trailing newline.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def _runtime_status_for_proof(proof: dict[str, Any]) -> str:
+    """
+    Map a command-handle proof object to a runtime status label.
+    
+    Examines `proof["status"]` and, when not `"pass"`, inspects
+    `proof["runtime_failure"]["failed_check_id"]` (defaults to `"runtime_reachability"`).
+    Returns `"implemented_enforced"` when the proof status is `"pass"`;
+    returns `"blocked_runtime"` when the failed check id is one of
+    `RUNTIME_REACHABILITY_FAILURES`; otherwise returns `"stale_or_drifted"`.
+    
+    Parameters:
+        proof (dict[str, Any]): The command-handle proof payload.
+    
+    Returns:
+        str: One of `"implemented_enforced"`, `"blocked_runtime"`, or `"stale_or_drifted"` describing runtime status.
+    """
     if proof.get("status") == "pass":
         return "implemented_enforced"
     runtime_failure = proof.get("runtime_failure")
@@ -74,10 +135,25 @@ def _runtime_status_for_proof(proof: dict[str, Any]) -> str:
 
 
 def _claim_status_for_runtime(runtime_status: str) -> str:
+    """
+    Map a normalized runtime status to the claim status used in evidence artifacts.
+    
+    Parameters:
+        runtime_status (str): Runtime status string (e.g., "implemented_enforced" for a successful runtime proof).
+    
+    Returns:
+        str: "pass" when `runtime_status` is "implemented_enforced", "blocked" otherwise.
+    """
     return "pass" if runtime_status == "implemented_enforced" else "blocked"
 
 
 def _runtime_display_name(runtime_target: str) -> str:
+    """
+    Map a runtime target identifier to a human-friendly display name.
+    
+    Returns:
+        display_name (str): "Codex" when `runtime_target` is "codex", "Agents" otherwise.
+    """
     return "Codex" if runtime_target == "codex" else "Agents"
 
 
@@ -87,6 +163,31 @@ def _runtime_evidence_context(
     proof: dict[str, Any],
     actor_type: str,
 ) -> dict[str, Any]:
+    """
+    Builds a standardized context object used to generate runtime-proof evidence artifacts.
+    
+    Parameters:
+    	repo_root (Path): Repository root used to resolve paths and write evidence files.
+    	proof (dict[str, Any]): Command-handle runtime proof object; fields inspected include `handle`, `runtime_target`, `resolution`, `status`, and `runtime_failure`.
+    	actor_type (str): Actor type to record in the context (e.g., "agent" or "user").
+    
+    Returns:
+    	dict[str, Any]: Context mapping containing:
+    		- repo_root: the given repo_root Path
+    		- handle: normalized skill handle (no leading `$`, fallback "unknown")
+    		- runtime_target: normalized runtime target string
+    		- created_at: ISO-8601 UTC timestamp string
+    		- evidence_dir, card_path, receipt_path, artifact_path, probe_path: Paths for output artifacts under `.harness/evidence/runtime-proof/...`
+    		- command: validation command string for reproducing the proof
+    		- runtime_status: normalized runtime status (e.g., "implemented_enforced", "blocked_runtime", "stale_or_drifted")
+    		- claim_status: derived claim status ("pass" or "blocked")
+    		- runtime_failure: runtime failure dict when present
+    		- failed_check_id: failed check identifier (defaults to "runtime_reachability")
+    		- blocker: human-readable blocker message or default passed message
+    		- exit_code: 0 for proof pass, 2 otherwise
+    		- source_paths: list of canonical source path plus related implementation paths
+    		- actor_type: the provided actor_type
+    """
     handle = str(proof.get("handle") or "unknown").strip().lstrip("$") or "unknown"
     runtime_target = str(proof.get("runtime_target") or "")
     resolution = proof.get("resolution") if isinstance(proof.get("resolution"), dict) else {}
@@ -133,6 +234,31 @@ def _artifact_record(
     path: str,
     consumer_contract: str,
 ) -> dict[str, Any]:
+    """
+    Builds a standardized artifact record describing a generated evidence artifact.
+    
+    Parameters:
+        context (dict): Execution context containing at least the keys
+            - "source_paths": list of source paths associated with the artifact
+            - "repo_root": repository root Path-like object
+            - "actor_type": actor type string
+            - "command": command string that generated the artifact
+            - "claim_status": validation status for the artifact
+        artifact_id (str): Stable identifier for the artifact.
+        artifact_type (str): Semantic type of the artifact (e.g. "runtime_card", "verifier_output").
+        path (str): Filesystem path to the artifact file.
+        consumer_contract (str): Identifier of the consumer contract that this artifact satisfies.
+    
+    Returns:
+        dict: Artifact record containing keys:
+            - "artifact_id", "artifact_type", "path"
+            - "source_identity": with "source_paths" from context
+            - "workspace_root": resolved repository root string
+            - "actor_type", "mutation_scope", "visibility_status"
+            - "generated_by": command from context
+            - "validation_status": claim status from context
+            - "consumer_contract"
+    """
     return {
         "artifact_id": artifact_id,
         "artifact_type": artifact_type,
@@ -149,6 +275,25 @@ def _artifact_record(
 
 
 def _probe_payload(context: dict[str, Any], proof: dict[str, Any]) -> dict[str, Any]:
+    """
+    Build the probe payload used as the verifier output for a command-handle runtime proof.
+    
+    Parameters:
+        context (dict[str, Any]): Runtime evidence context containing keys:
+            `handle`, `runtime_target`, `runtime_status`, `created_at`, `command`, and `exit_code`.
+        proof (dict[str, Any]): The command-handle proof object to embed in the probe.
+    
+    Returns:
+        dict[str, Any]: Probe payload with the following keys:
+            `schema_version` (str): Payload schema identifier (`"command-handle-runtime-probe.v1"`).
+            `handle` (str): Normalized skill handle.
+            `runtime_target` (str): Target runtime name (e.g., `"codex"`, `"agents"`).
+            `runtime_status` (str): Derived runtime status (e.g., `"implemented_enforced"`, `"blocked_runtime"`).
+            `observed_at` (str): ISO-8601 UTC timestamp when the probe was created.
+            `command` (str): Validation command used to produce or re-run the proof.
+            `exit_code` (int): Exit code from the validation command.
+            `proof` (dict[str, Any]): The embedded raw proof object.
+    """
     return {
         "schema_version": "command-handle-runtime-probe.v1",
         "handle": context["handle"],
@@ -162,6 +307,27 @@ def _probe_payload(context: dict[str, Any], proof: dict[str, Any]) -> dict[str, 
 
 
 def _receipt_payload(context: dict[str, Any], relative_card_path: str, relative_probe_path: str) -> dict[str, Any]:
+    """
+    Builds the runtime-proof receipt payload describing the claim, status, artifacts, verifier, and observed timestamp.
+    
+    Parameters:
+        context (dict[str, Any]): Evidence context (as produced by _runtime_evidence_context) containing at least:
+            - handle, runtime_target, claim_status, runtime_status
+            - command, exit_code, source_paths, created_at, blocker (when blocked)
+        relative_card_path (str): Repository-relative path to the runtime card artifact.
+        relative_probe_path (str): Repository-relative path to the probe artifact.
+    
+    Returns:
+        dict[str, Any]: A receipt dictionary including:
+            - `receipt_id`: deterministic id "runtime-proof-<handle>-<runtime_target>"
+            - `claim` and `claim_status`
+            - runtime fields (`runtime_target`, `runtime_status`)
+            - command/probe commands and exit codes
+            - `artifact_path` and `probe_artifact_path` (relative paths)
+            - `blocker_class`: equals the runtime status when not "implemented_enforced", otherwise "none"
+            - `source_paths`, `verifier`, and `observed_at`
+            - `blocker` present when `context["claim_status"] == "blocked"`
+    """
     receipt = {
         "receipt_id": f"runtime-proof-{context['handle']}-{context['runtime_target']}",
         "claim": (
@@ -190,6 +356,28 @@ def _receipt_payload(context: dict[str, Any], relative_card_path: str, relative_
 
 
 def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
+    """
+    Constructs a recovery plan describing actions and expectations to remediate or confirm a skill's runtime reachability.
+    
+    Parameters:
+        context (dict): Evidence context containing at least the keys:
+            - "runtime_failure": dict with optional "recovery_guidance"
+            - "claim_status": str, e.g. "blocked" or "pass"
+            - "handle": skill handle string
+            - "runtime_target": runtime target string (used for display)
+            - "runtime_status": overall runtime status string
+            - "command": validation command string to rerun
+    
+    Returns:
+        dict: A recovery plan with the following keys:
+            - "recovery_status": current runtime status
+            - "reason": human-readable reason or recovery guidance
+            - "next_commands": list of command steps (each with "command", "preconditions",
+              "permission_profile", and "expected_outcome")
+            - "preconditions": list of high-level preconditions for recovery
+            - "permission_profile": required permissions for recovery actions
+            - "expected_outcome": expected result after following the plan
+    """
     recovery_reason = (
         str(context["runtime_failure"].get("recovery_guidance"))
         if context["claim_status"] == "blocked"
@@ -237,6 +425,27 @@ def _runtime_card_payload(
     probe_record: dict[str, Any],
     receipt: dict[str, Any],
 ) -> dict[str, Any]:
+    """
+    Builds a RuntimeCard payload that aggregates runtime-proof metadata, artifacts, verifier results and a recovery plan for a skill handle.
+    
+    Parameters:
+        context (dict): Context produced by _runtime_evidence_context. Required keys used:
+            - 'handle', 'runtime_target', 'runtime_status', 'created_at',
+              'repo_root', 'actor_type', 'claim_status', 'blocker', 'failed_check_id'.
+        proof (dict): The original proof object; used for verifier status, required gates and gate details.
+        artifact_record (dict): Artifact record describing the generated runtime card.
+        probe_record (dict): Artifact record for the probe/verifier output.
+        receipt (dict): Evidence receipt associated with the runtime proof.
+    
+    Returns:
+        dict: A RuntimeCard payload (schema_version 1) containing:
+            - card and session identifiers and timestamps
+            - runtime and workspace metadata
+            - included artifacts and evidence receipts
+            - verifier_results (including failed_check_id when blocked)
+            - permission profile, mutation scope, visibility, limitations
+            - a recovery_plan produced from the provided context
+    """
     runtime_session = {
         "session_id": f"runtime-proof-{context['handle']}-{context['runtime_target']}",
         "runtime_target": context["runtime_target"],
@@ -298,7 +507,27 @@ def emit_command_handle_runtime_evidence(
     proof: dict[str, Any],
     actor_type: str = "agent",
 ) -> dict[str, Any]:
-    """Write schema-valid runtime proof artifacts for an explicit runtime target."""
+    """
+    Emit runtime-proof evidence files for an explicit 'codex' or 'agents' runtime target.
+    
+    Parameters:
+    	repo_root (Path): Repository root used to compute evidence output paths.
+    	proof (dict[str, Any]): Command-handle proof payload that must include a `runtime_target` entry.
+    	actor_type (str): Actor classification to include in generated evidence (default: "agent").
+    
+    Returns:
+    	dict[str, Any]: Result summary containing:
+    		- "status": runtime status string (e.g. "implemented_enforced", "blocked_runtime", "stale_or_drifted").
+    		- "evidence_dir": repository-relative evidence directory path.
+    		- "runtime_card_path": repository-relative path to the written runtime card JSON.
+    		- "evidence_receipt_path": repository-relative path to the written receipt JSON.
+    		- "artifact_record_path": repository-relative path to the written artifact record JSON.
+    		- "probe_artifact_path": repository-relative path to the written probe JSON.
+    		- "validation_command": a CLI string that can be used to validate the emitted runtime card.
+    	
+    	If the proof's `runtime_target` is not "codex" or "agents", returns:
+    		{"status": "skipped", "reason": "runtime evidence is only emitted for explicit codex or agents targets"}.
+    """
     runtime_target = str(proof.get("runtime_target") or "")
     if runtime_target not in EVIDENCE_RUNTIME_TARGETS:
         return {
@@ -364,7 +593,20 @@ def build_command_handle_proof(
     check_command_handles_fn: CheckCommandHandles,
     home_path: Path,
 ) -> dict[str, Any]:
-    """Build the runtime reachability proof for a generated skill command handle."""
+    """
+    Build a runtime reachability proof for a generated skill command handle.
+    
+    Parameters:
+    	repo_root (Path): Repository root used to resolve workspace paths.
+    	handle (str): Skill handle identifier (may include a leading `$`).
+    	runtime_target (object): Requested runtime target; will be normalized to a lowercase string (e.g. "any", "codex", "agents").
+    	resolve_skill_handle_fn (callable): Callable used to resolve the handle to repository resolution metadata.
+    	check_command_handles_fn (callable): Callable used to validate generated command handle(s) in the workspace.
+    	home_path (Path): User home path used to inspect user runtime projections under `.codex` and `.agents`.
+    
+    Returns:
+    	proof (dict[str, Any]): A proof payload (schema_version "command-handle-proof.v2") describing gate results, validation commands, resolution and workspace/user runtime state, available runtimes, and, on failure, a `runtime_failure` entry with recovery guidance. If required runtime gates are satisfied, the payload may include a `live_runtime_invocation` hint for manual verification.
+    """
     runtime_target = normalize_runtime_target(runtime_target)
     normalized = handle.strip().lstrip("$") or handle
     if runtime_target not in SUPPORTED_RUNTIME_TARGETS:

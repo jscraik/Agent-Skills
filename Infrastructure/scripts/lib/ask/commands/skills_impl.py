@@ -1303,7 +1303,20 @@ def skills_parse(repo_root: Path, request_text: str) -> CallResult:
 
 
 def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> CallResult:
-    """Prove a command-visible skill handle reaches the workspace and user runtime surfaces."""
+    """
+    Prove that a command-handle is reachable from the workspace and user runtime targets.
+    
+    Parameters:
+        repo_root (Path): Repository root used to resolve skill sources and workspace context.
+        handle (str): Command-visible handle to prove (e.g., "$skill do something").
+        runtime_target (str): Runtime target to validate against; normalized values include `"any"` and `"codex"`.
+    
+    Returns:
+        CallResult: Result of the proof operation. On success `status` will be `"success"` and `data["proof"]`
+        contains the proof payload produced by `build_command_handle_proof`. `data["runtime_evidence"]` will
+        contain emitted runtime evidence. If the proof fails `status` will be `"error"`, `errors` will include an
+        `ErrorObject` with `code="ERR_VALIDATION"`, and `data["runtime_failure"]` will contain failure details.
+    """
     result = CallResult()
     result.metadata["command"] = "skills proof"
     runtime_target = normalize_runtime_target(runtime_target)
@@ -2574,6 +2587,15 @@ def _skill_doctor_next_command_decision(
 
 
 def skills_load_preview(repo_root: Path) -> CallResult:
+    """
+    Builds a Codex load preview for the repository.
+    
+    Parameters:
+    	repo_root (Path): Path to the repository root used to generate the preview.
+    
+    Returns:
+    	result (CallResult): A CallResult whose `data["codex_load_preview"]` contains the preview payload. The result.metadata includes `command = "skills load-preview"`.
+    """
     result = CallResult()
     result.metadata["command"] = "skills load-preview"
     result.data["codex_load_preview"] = build_codex_load_preview(repo_root)
@@ -2581,6 +2603,14 @@ def skills_load_preview(repo_root: Path) -> CallResult:
 
 
 def skills_codex_preview(repo_root: Path) -> CallResult:
+    """
+    Builds a Codex-mode preview payload summarizing source-modeled skill discovery and available preview commands.
+    
+    The returned CallResult contains a `codex_preview` payload with keys such as `schema_version`, `command`, `status`, `source_identity`, `source_basis`, `blocked_checks`, `modeled_rule_version`, `source_files`, `commands` (each with `name`, `purpose`, and `validation_command`), and an `agent_summary`. The CallResult metadata will include `command = "skills codex-preview"`.
+    
+    Returns:
+        CallResult: A result whose `data["codex_preview"]` holds the structured Codex preview payload.
+    """
     load_preview = build_codex_load_preview(repo_root)
     result = CallResult()
     result.metadata["command"] = "skills codex-preview"
@@ -2714,6 +2744,21 @@ def skills_capabilities(repo_root: Path, runtime_target: str = "codex") -> CallR
 
 
 def format_capabilities_human(discovery: dict[str, object]) -> list[str]:
+    """
+    Format a human-readable summary of a capability discovery payload.
+    
+    Parses the given discovery mapping for runtime target/status, truth boundaries (e.g. live_runtime_parity),
+    available evidence modes, blocked fidelity checks count, and the first next action, then returns a short
+    list of one-line summary strings suitable for display.
+    
+    Parameters:
+        discovery (dict): Capability discovery payload containing keys such as
+            'runtime_target', 'status', 'truth_boundaries', 'evidence_modes',
+            'blocked_checks', and 'next_actions'.
+    
+    Returns:
+        list[str]: One-line summary strings describing the capability discovery.
+    """
     boundaries = discovery.get("truth_boundaries") if isinstance(discovery.get("truth_boundaries"), dict) else {}
     modes = discovery.get("evidence_modes") if isinstance(discovery.get("evidence_modes"), list) else []
     mode_names = [mode.get("mode") for mode in modes if isinstance(mode, dict) and mode.get("mode")]
@@ -2733,6 +2778,22 @@ def format_capabilities_human(discovery: dict[str, object]) -> list[str]:
 
 
 def format_codex_preview_human(preview: dict[str, object]) -> list[str]:
+    """
+    Format a Codex preview payload into a list of human-readable summary lines.
+    
+    Parameters:
+        preview (dict[str, object]): A Codex preview dictionary containing optional keys:
+            - "source_basis" (dict): source-derived metadata such as "live_runtime_parity".
+            - "commands" (list): list of command descriptor dicts with "name" and "validation_command".
+            - "blocked_checks" (list): list of blocked fidelity checks.
+            - "status" (str): overall preview status.
+            - "not_a_validation_result" (bool): when true, indicates the preview is source-modeled only.
+    
+    Returns:
+        list[str]: Ordered summary lines including a commands/count/status header, notes about
+        source-modeled vs runtime validation, live runtime parity when present, a blocked-checks
+        summary when present, and one line per command in the form "- <name>: <validation_command>".
+    """
     source_basis = preview.get("source_basis") if isinstance(preview.get("source_basis"), dict) else {}
     commands = preview.get("commands") if isinstance(preview.get("commands"), list) else []
     blocked_checks = preview.get("blocked_checks") if isinstance(preview.get("blocked_checks"), list) else []
@@ -2748,6 +2809,16 @@ def format_codex_preview_human(preview: dict[str, object]) -> list[str]:
 
 
 def skills_render_preview(repo_root: Path, context_window: int | None = None) -> CallResult:
+    """
+    Produce a Codex-based render preview payload for the repository.
+    
+    Parameters:
+        repo_root (Path): Repository root used to discover and model skills.
+        context_window (int | None): Optional maximum context window size to use when building the preview; when omitted the default sizing is applied.
+    
+    Returns:
+        CallResult: A CallResult whose `data["codex_render_preview"]` contains the render preview payload.
+    """
     result = CallResult()
     result.metadata["command"] = "skills render-preview"
     result.data["codex_render_preview"] = build_codex_render_preview(repo_root, context_window)

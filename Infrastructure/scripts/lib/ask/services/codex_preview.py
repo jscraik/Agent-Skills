@@ -278,7 +278,17 @@ def _codex_runtime_source_identity(repo_root: Path) -> dict[str, Any]:
 
 
 def _codex_preview_blocked_check(check_id: str, reason: str, source_files: list[str] | None = None) -> dict[str, Any]:
-    """Return a structured fidelity limit for Codex preview commands."""
+    """
+    Create a blocked-check dict describing why a Codex preview is blocked.
+    
+    Parameters:
+        check_id (str): Unique identifier for the blocked check.
+        reason (str): Human-readable explanation for the block.
+        source_files (list[str] | None): Optional list of repo-relative source file paths implicated in the block; defaults to an empty list.
+    
+    Returns:
+        dict: A mapping with keys `id` (the check_id), `status` set to `"blocked"`, `reason`, and `source_files` (a list).
+    """
     return {
         "id": check_id,
         "status": "blocked",
@@ -288,7 +298,29 @@ def _codex_preview_blocked_check(check_id: str, reason: str, source_files: list[
 
 
 def _codex_preview_source_basis(source_identity: dict[str, Any], blocked_checks: list[dict[str, Any]]) -> dict[str, Any]:
-    """Return explicit source-basis metadata for repo-side Codex previews."""
+    """
+    Builds a stable metadata object describing the modeled source basis for a Codex preview.
+    
+    Constructs a dict containing repository and revision identity, whether relevant source files are dirty, the modeled rule version, the list of source files used for modeling, a modeled-basis marker, and the list of blocked-check ids.
+    
+    Parameters:
+        source_identity (dict): Identity information returned by `_codex_runtime_source_identity`, expected to contain keys like
+            `source_repo`, `revision`, `status`, `relevant_source_dirty`, `modeled_rule_version`, and `source_files`.
+        blocked_checks (list[dict]): List of blocked-check objects; any `id` values present are included in the resulting `blocked_check_ids` list.
+    
+    Returns:
+        dict: A metadata dictionary with keys:
+            - `schema_version`: schema identifier string
+            - `basis`: modeling basis identifier (`"source_modeled"`)
+            - `source_repo`: repo path or identifier from `source_identity`
+            - `source_revision`: revision string from `source_identity`
+            - `source_identity_status`: status string from `source_identity`
+            - `relevant_source_dirty`: boolean indicating whether relevant source files are dirty
+            - `modeled_rule_version`: modeled rule version from `source_identity`
+            - `source_files`: list of source file paths included in modeling
+            - `live_runtime_parity`: parity claim marker (`"not_claimed"`)
+            - `blocked_check_ids`: list of stringified blocked-check ids
+    """
     return {
         "schema_version": "codex-preview-source-basis.v1",
         "basis": "source_modeled",
@@ -304,7 +336,23 @@ def _codex_preview_source_basis(source_identity: dict[str, Any], blocked_checks:
 
 
 def _codex_preview_base(repo_root: Path, command: str) -> dict[str, Any]:
-    """Return shared source-backed metadata for a Codex runtime preview."""
+    """
+    Builds the base metadata payload used by Codex preview builders.
+    
+    Parameters:
+        repo_root (Path): Repository root used to identify the local codex source and resolve paths.
+        command (str): The preview command being modeled (e.g., "skills load-preview").
+    
+    Returns:
+        dict: A metadata dictionary containing keys:
+            - `schema_version`: preview schema version identifier.
+            - `command`: the provided command string.
+            - `status`: `"partial"` if any source-based blocked checks exist, otherwise `"pass"`.
+            - `source_identity`: detailed identity of the local codex repo and its availability status.
+            - `source_basis`: derived source-basis metadata (modeled basis, revision, dirty flag, modeled rule version, and blocked check ids).
+            - `modeled_rules`: stable descriptions of modeling semantics (loader, render, config, invocation).
+            - `blocked_checks`: list of any source-related blocked check objects.
+    """
     source_identity = _codex_runtime_source_identity(repo_root)
     blocked_checks: list[dict[str, Any]] = []
     if source_identity.get("status") != "identified":
@@ -347,16 +395,44 @@ def _codex_preview_base(repo_root: Path, command: str) -> dict[str, Any]:
 
 
 def _preview_status_from_blockers(blocked_checks: list[dict[str, Any]]) -> str:
+    """
+    Determine the preview status based on whether any blocked checks are present.
+    
+    Parameters:
+        blocked_checks (list[dict[str, Any]]): List of blocked-check records to evaluate.
+    
+    Returns:
+        status (str): "partial" if `blocked_checks` contains one or more entries, "pass" otherwise.
+    """
     return "partial" if blocked_checks else "pass"
 
 
 def _refresh_preview_status_and_source_basis(payload: dict[str, Any]) -> None:
-    """Keep summary status and source-basis blocker ids synchronized."""
+    """
+    Update a preview payload in place so its source-basis and overall status reflect the current source identity and blocked checks.
+    
+    Parameters:
+        payload (dict): Preview payload object that will be mutated. The function sets:
+            - payload['source_basis'] to a summary derived from payload['source_identity'] and payload['blocked_checks'].
+            - payload['status'] to the value computed from payload['blocked_checks'].
+    
+    Notes:
+        This function mutates the given payload and does not return a value.
+    """
     payload["source_basis"] = _codex_preview_source_basis(payload["source_identity"], payload["blocked_checks"])
     payload["status"] = _preview_status_from_blockers(payload["blocked_checks"])
 
 
 def _skill_preview_default_name(skill_md: Path) -> str:
+    """
+    Determine a default preview name for a skill using its SKILL.md file path.
+    
+    Parameters:
+        skill_md (Path): Path to a SKILL.md file within the skill directory.
+    
+    Returns:
+        str: The name of the skill directory if present, otherwise the string "skill".
+    """
     return skill_md.parent.name or "skill"
 
 
@@ -542,6 +618,25 @@ def _scan_preview_skills(repo_root: Path, roots: list[dict[str, Any]]) -> tuple[
 
 
 def build_codex_load_preview(repo_root: Path) -> dict[str, Any]:
+    """
+    Builds a "skills load-preview" payload describing modeled skill roots and discovered SKILL.md files.
+    
+    Parameters:
+        repo_root (Path): Path to the repository root used to discover and scan modeled skill roots.
+    
+    Returns:
+        dict: A preview payload containing metadata and modeled results. Notable keys include:
+            - "roots": List of modeled root candidates (with existence/identity info).
+            - "root_summary": Counts and deduplication policy for roots.
+            - "skills": List of discovered skill metadata entries.
+            - "skill_count": Number of discovered skills.
+            - "errors": List of scan errors encountered while traversing roots.
+            - "disabled_paths": List of paths considered disabled (empty if none).
+            - "blocked_checks": List of blocked-check objects that affected preview status.
+            - "validation_commands": List of commands suitable for validation of the modeled load.
+            - "agent_summary": Human-readable summary of modeled skills/roots.
+            - "source_identity", "source_basis", "status": Source/revision identity and overall preview status derived from blocked checks.
+    """
     base = _codex_preview_base(repo_root, "skills load-preview")
     roots, root_blockers = _codex_preview_root_candidates(repo_root)
     skills, errors = _scan_preview_skills(repo_root, roots)
@@ -612,6 +707,25 @@ def _preview_cost(text: str, budget: dict[str, Any]) -> int:
 
 
 def _render_preview_lines(skills: list[dict[str, Any]], budget: dict[str, Any]) -> tuple[list[str], dict[str, Any], str | None]:
+    """
+    Render enabled skills into preview lines honoring the provided budget and report truncation and omission metrics.
+    
+    Parameters:
+        skills (list[dict[str, Any]]): Sequence of skill metadata dicts (each should include at least `name`, `path`, `description`, and optional `enabled`) from which enabled skills will be rendered.
+        budget (dict[str, Any]): Budget descriptor produced by `_preview_budget`, containing `kind` and numeric `limit` used to decide how much content can be included.
+    
+    Returns:
+        tuple[list[str], dict[str, Any], str | None]: A 3-tuple containing:
+            - rendered_lines (list[str]): The list of rendered skill lines chosen under the budget (each line is a display string).
+            - report (dict[str, Any]): Metrics about the rendering with keys:
+                - `total_count` (int): number of enabled skills considered.
+                - `included_count` (int): number of skills included in `rendered_lines`.
+                - `omitted_count` (int): number of enabled skills omitted because of budget limits.
+                - `truncated_description_chars` (int): total number of description characters removed due to truncation.
+                - `truncated_description_count` (int): number of descriptions that were truncated (or counted toward truncation metrics).
+                - `render_strategy` (str): one of `"full"`, `"shortened_descriptions"`, or `"minimum_lines_until_budget"` indicating the applied strategy.
+            - warning (str | None): Optional human-readable warning when truncation or omission is significant; `None` when no warning is applicable.
+    """
     lines = [_preview_skill_line(skill) for skill in skills if skill.get("enabled", True)]
     limit = int(budget["limit"])
     full_cost = sum(_preview_cost(line["full"], budget) for line in lines)
@@ -683,7 +797,24 @@ def _render_preview_lines(skills: list[dict[str, Any]], budget: dict[str, Any]) 
 
 
 def _preview_truncation_summary(budget: dict[str, Any], report: dict[str, Any], warning: str | None) -> dict[str, Any]:
-    """Return a stable truncation status object for agents and validators."""
+    """
+    Produce a stable summary object describing truncation and budget usage for a render preview.
+    
+    Parameters:
+        budget (dict): Budget descriptor with keys like `kind`, `limit`, `context_window`, and `context_window_percent`.
+        report (dict): Render report containing counts and metrics such as `render_strategy`, `total_count`, `included_count`, `omitted_count`, `truncated_description_count`, and `truncated_description_chars`.
+        warning (str | None): Optional warning message produced during rendering or truncation.
+    
+    Returns:
+        dict: A stable truncation summary with the following keys:
+            - `schema_version`: Fixed schema identifier.
+            - `status`: `"truncated"` if any items were omitted or descriptions truncated, otherwise `"none"`.
+            - `strategy`: The rendering strategy used.
+            - `budget_kind`, `budget_limit`, `context_window`, `context_window_percent`: Budget fields echoed from `budget`.
+            - `total_count`, `included_count`, `omitted_count`: Counts of skills considered, included, and omitted.
+            - `truncated_description_count`, `truncated_description_chars`: Truncation metrics for descriptions.
+            - `warning_message`: The provided warning or `None`.
+    """
     omitted_count = int(report.get("omitted_count") or 0)
     truncated_description_count = int(report.get("truncated_description_count") or 0)
     return {
@@ -704,6 +835,16 @@ def _preview_truncation_summary(budget: dict[str, Any], report: dict[str, Any], 
 
 
 def build_codex_render_preview(repo_root: Path, context_window: int | None = None) -> dict[str, Any]:
+    """
+    Builds a "skills render-preview" payload that includes budgeted rendering of modeled skill lines and truncation metadata.
+    
+    Parameters:
+    	repo_root (Path): Repository root used to locate modeled skills and skill metadata.
+    	context_window (int | None): Optional context window percentage used to compute a token-based budget; if `None` a fixed character budget is used.
+    
+    Returns:
+    	payload (dict): A preview payload containing keys such as `command`, `validation_commands`, `budget`, `rendered` (with `skill_lines`, `report`, and optional `warning_message`), `truncation` (summary object), and `agent_summary`.
+    """
     payload = build_codex_load_preview(repo_root)
     payload["command"] = "skills render-preview"
     payload["validation_commands"] = [_skills_validation_command("render-preview")]
@@ -721,6 +862,17 @@ def build_codex_render_preview(repo_root: Path, context_window: int | None = Non
 
 
 def build_codex_config_explain(repo_root: Path) -> dict[str, Any]:
+    """
+    Build a preview payload describing how Codex skill configuration rules are interpreted.
+    
+    Produces a preview payload that models the config-rule semantics for skills without reading or merging the live Codex ConfigLayerStack.
+    
+    Parameters:
+        repo_root (Path): Path to the repository root used to locate Codex sources and skills.
+    
+    Returns:
+        payload (dict): A preview payload containing base preview metadata, a blocked check indicating live config layers are not read, a `config_contract` describing recognized config keys and resolution policies, `validation_commands` for reproducing the check, and an `agent_summary`.
+    """
     payload = _codex_preview_base(repo_root, "skills config explain")
     payload["blocked_checks"].append(
         _codex_preview_blocked_check(
@@ -809,6 +961,24 @@ def _select_preview_explicit_mentions(skills: list[dict[str, Any]], text: str) -
 
 
 def build_codex_inject_preview(repo_root: Path, text: str) -> dict[str, Any]:
+    """
+    Builds a preview payload that identifies skills explicitly mentioned in the provided text and reports the selection results.
+    
+    Parameters:
+        repo_root (Path): Filesystem path to the repository root used to discover skills.
+        text (str): User-provided text containing explicit skill mentions (e.g. $name or [$name](...)).
+    
+    Returns:
+        dict: Preview payload including base load-preview metadata and these additional fields:
+            - command: the preview command string ("skills inject-preview").
+            - input_text: the original input `text`.
+            - mentions: dict with `names` (sorted list of mentioned names) and `paths` (sorted list of normalized skill path mentions).
+            - selected_skills: list of skill metadata objects selected from explicit mentions.
+            - selection_notes: notes about ambiguous or blocked selections.
+            - selected_count: integer count of selected skills.
+            - validation_commands: list of validation command strings for reproducing the preview.
+            - agent_summary: short human-readable summary of the selection outcome.
+    """
     payload = build_codex_load_preview(repo_root)
     payload["command"] = "skills inject-preview"
     payload["blocked_checks"].append(
@@ -892,6 +1062,17 @@ def _preview_implicit_match(repo_root: Path, skills: list[dict[str, Any]], comma
 
 
 def build_codex_implicit_preview(repo_root: Path, command: str, workdir: str | None = None) -> dict[str, Any]:
+    """
+    Builds a preview payload that attempts to attribute a shell command to a modeled skill using heuristic rules.
+    
+    Parameters:
+        repo_root (Path): Repository root used to locate modeled skills and to resolve relative paths.
+        command (str): Shell command text to analyze for implicit skill attribution.
+        workdir (str | None): Optional working directory used to resolve relative file/script paths; if omitted or relative, it is resolved against `repo_root`.
+    
+    Returns:
+        dict: Preview payload dictionary derived from the load-preview containing implicit-invocation fields. The payload includes the original load-preview metadata plus attribution results (`selected_skill`, `selected_count`, `attribution_status`), `command_text`, resolved `workdir`, `validation_commands`, `agent_summary`, and any appended `blocked_checks`; `source_basis` and `status` are refreshed before return.
+    """
     payload = build_codex_load_preview(repo_root)
     payload["command"] = "skills implicit-preview"
     payload["blocked_checks"].append(

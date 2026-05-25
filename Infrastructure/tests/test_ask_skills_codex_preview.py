@@ -44,10 +44,28 @@ def _write_skill(root: Path, rel_dir: str, name: str, description: str, script: 
 
 class CodexPreviewTests(unittest.TestCase):
     def _assert_source_basis_blockers_match(self, preview: dict) -> None:
+        """
+        Verify that the preview's source basis blocked_check_ids match the ids present in blocked_checks.
+        
+        Parameters:
+            preview (dict): The preview payload whose 'blocked_checks' and 'source_basis.blocked_check_ids' will be compared.
+        """
         blocker_ids = {check["id"] for check in preview["blocked_checks"]}
         self.assertEqual(set(preview["source_basis"]["blocked_check_ids"]), blocker_ids)
 
     def _patched_roots(self, repo_root: Path):
+        """
+        Return a pair of mocked skill-root descriptors and associated blocked-checks for tests.
+        
+        Parameters:
+            repo_root (Path): Repository root used to construct the mocked skill roots' paths.
+        
+        Returns:
+            tuple: (roots, blockers) where
+                - roots is a list containing a single root descriptor dict with keys:
+                    `id`, `path`, `scope`, `source`, `source_file`, `identity_path`, `deduped`, `order`, `exists`.
+                - blockers is a list containing blocked-check dict(s) produced for the preview, including an entry with id `runtime_plugin_skill_roots` and its related source file references.
+        """
         roots = [
             {
                 "id": "repo_agents_skills",
@@ -71,6 +89,11 @@ class CodexPreviewTests(unittest.TestCase):
         return roots, blockers
 
     def test_load_preview_scans_repo_agents_skill_root(self) -> None:
+        """
+        Verify that skills_load_preview scans the repository .agents/skills root and produces a successful codex load preview with expected metadata, blocked checks, and discovered skill entries.
+        
+        Asserts the result status is "success"; the preview schema version and source identity revision match the codex preview constants; source_basis fields (basis, source_revision, live_runtime_parity) are populated; the `runtime_plugin_skill_roots` blocker appears in both source_basis and blocked_checks; exactly one skill is discovered with the expected name and SKILL.md path.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
             _write_skill(repo_root, ".agents/skills/alpha", "alpha", "Alpha skill")
@@ -108,6 +131,11 @@ class CodexPreviewTests(unittest.TestCase):
         self.assertIn("preview_scan_errors", preview["source_basis"]["blocked_check_ids"])
 
     def test_load_preview_preserves_list_valued_agents_openai_metadata(self) -> None:
+        """
+        Verify that list-valued OpenAI metadata under a skill's agents/ directory is preserved when loading a codex preview.
+        
+        Asserts that list-valued `dependencies.tools` entries keep their `type` and `name` fields and that `policy.allow_implicit_invocation` is parsed as the boolean `True`.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
             skill_md = _write_skill(repo_root, ".agents/skills/alpha", "alpha", "Alpha skill")
@@ -162,6 +190,16 @@ policy:
         self.assertIn("Exceeded skills context budget", preview["rendered"]["warning_message"])
 
     def test_render_preview_reports_full_strategy_with_default_character_budget(self) -> None:
+        """
+        Verifies that rendering a single short skill uses the full render strategy with the default character budget.
+        
+        Creates a short skill fixture, patches source identity and root discovery, calls the render-preview command, and asserts:
+        - overall status is "success",
+        - budget kind is "characters",
+        - render strategy is "full" with no omitted items,
+        - truncation status is "none",
+        - no rendering warning message is produced.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
             _write_skill(repo_root, ".agents/skills/alpha", "alpha", "Short alpha skill")
@@ -193,6 +231,15 @@ policy:
         self.assertIn("usage: ask skills codex-preview", result.stdout)
 
     def test_capabilities_command_is_publicly_discoverable(self) -> None:
+        """
+        Ensure the `ask skills capabilities` CLI command is publicly discoverable and returns a valid capability discovery payload for the `codex` runtime.
+        
+        Asserts that the process exits successfully and that the parsed JSON payload contains:
+        - `schema_version` equal to `capability-discovery.v1`
+        - `runtime_target` equal to `codex`
+        - an evidence mode with `mode == "runtime_evidence"`
+        - a truth boundary entry `live_runtime_parity`
+        """
         result = subprocess.run(
             [sys.executable, "Infrastructure/bin/ask", "skills", "capabilities", "--runtime-target", "codex", "--json", "--robot"],
             cwd=REPO_ROOT,
@@ -210,6 +257,11 @@ policy:
         self.assertIn("live_runtime_parity", discovery["truth_boundaries"])
 
     def test_capabilities_command_has_human_output(self) -> None:
+        """
+        Verify the human-readable output of the `ask skills capabilities` CLI for the `codex` runtime.
+        
+        Runs the CLI and asserts it exits successfully and that stdout includes a summary line with the target and status, a live runtime parity indication of `not_claimed`, and a suggested "Next:" proof-testing command containing `--runtime-target codex`.
+        """
         result = subprocess.run(
             [sys.executable, "Infrastructure/bin/ask", "skills", "capabilities", "--runtime-target", "codex"],
             cwd=REPO_ROOT,
@@ -326,6 +378,11 @@ policy:
         self.assertIs(preview["not_a_validation_result"], True)
 
     def test_render_preview_shortens_descriptions_when_minimum_lines_fit(self) -> None:
+        """
+        Verifies that rendering shortens skill descriptions when the minimum-lines strategy fits the provided context window.
+        
+        Asserts that the render completes successfully, that the chosen render strategy is "shortened_descriptions", no skills are omitted (omitted_count == 0), and that the rendered skill lines include an entry for the "alpha" skill along with its SKILL.md file reference.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
             _write_skill(
@@ -424,6 +481,13 @@ policy:
         self.assertIn("codex_source_identity", [check["id"] for check in preview["blocked_checks"]])
 
     def test_inject_preview_selects_unique_plain_skill_mention(self) -> None:
+        """
+        Verifies that injecting a plain skill mention selects the unique matching skill.
+        
+        Asserts that the injection result reports success, exactly one selected skill named "alpha",
+        that a `structured_userinput_skill_selection` blocked check is present, and that the
+        preview's `source_basis.blocked_check_ids` matches the listed `blocked_checks`.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
             _write_skill(repo_root, ".agents/skills/alpha", "alpha", "Alpha skill")
@@ -572,6 +636,11 @@ policy:
         self._assert_source_basis_blockers_match(preview)
 
     def test_codex_preview_runtime_adapter_is_not_owned_by_command_module(self) -> None:
+        """
+        Ensure the Codex runtime adapter implementation resides in the service module and not in the command module.
+        
+        Asserts that the command module exposes the public builder names but does not define internal adapter helper functions, and that the service module defines the builder functions and does not import ask.commands.
+        """
         command_source = (REPO_ROOT / "Infrastructure/scripts/lib/ask/commands/skills_impl.py").read_text(encoding="utf-8")
         service_source = (REPO_ROOT / "Infrastructure/scripts/lib/ask/services/codex_preview.py").read_text(encoding="utf-8")
 
@@ -585,6 +654,11 @@ policy:
         self.assertNotIn("from ask.commands", service_source)
 
     def test_cli_skills_config_missing_and_unknown_actions_report_validation_errors(self) -> None:
+        """
+        Verifies the CLI reports validation errors when `ask skills config` is invoked with a missing action and with an unknown action.
+        
+        Runs the command without an action and with the invalid action `nope`, then asserts both processes exit with code 2, both JSON payloads have `"status": "error"`, and the error messages mention `config_action` for the missing action and `invalid choice: 'nope'` for the unknown action.
+        """
         missing = subprocess.run(
             [sys.executable, "Infrastructure/bin/ask", "skills", "config", "--json", "--robot"],
             cwd=REPO_ROOT,

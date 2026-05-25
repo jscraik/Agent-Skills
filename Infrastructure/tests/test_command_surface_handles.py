@@ -665,6 +665,14 @@ class TestCommandHandleGeneration(CommandSurfaceTempDirTestCase):
 
 class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def _write_he_heartbeat_source(self, repo_root: Path) -> None:
+        """
+        Create a minimal `he-heartbeat` skill source under `Plugins/harness-engineering/skills` in the given repository.
+        
+        Writes a `SKILL.md` file containing frontmatter with `name: he-heartbeat` and a heading, creating parent directories as needed.
+        
+        Parameters:
+        	repo_root (Path): Filesystem path to the repository root where the plugin source directory will be created.
+        """
         source = repo_root / "Plugins" / "harness-engineering" / "skills" / "he-heartbeat"
         source.mkdir(parents=True)
         (source / "SKILL.md").write_text(
@@ -673,6 +681,18 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         )
 
     def _assert_runtime_card_valid(self, repo_root: Path, card_path: Path) -> None:
+        """
+        Validate a runtime card file using the repository's runtime-card validator.
+        
+        Runs the project's validate_runtime_cards.py against card_path with the
+        --require-shared-workspace and --workspace-root set to repo_root, asserting
+        the validator exits with code 0. On failure the assertion message includes
+        the validator's combined stdout and stderr.
+        
+        Parameters:
+            repo_root (Path): Repository root used as the workspace root for validation.
+            card_path (Path): Path to the runtime card file to validate.
+        """
         validation = subprocess.run(
             [
                 sys.executable,
@@ -717,7 +737,16 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["agents_user_link"])
 
     def test_skills_proof_passes_when_agents_runtime_is_linked(self) -> None:
-        """Either supported user runtime link can satisfy command-handle reachability."""
+        """
+        Verify that an Agents user runtime symlink satisfies command-handle reachability.
+        
+        When the workspace `.agents/skills` is linked into the user's home, `skills_proof`
+        for the given handle reports passing gates for resolver, generated command-handle
+        check, and workspace/runtime handle existence; marks `agents_user_link` as true
+        and `codex_user_link` as false; records `schema_version` `"command-handle-proof.v2"`;
+        reports `runtime_evidence` as skipped with a reason mentioning explicit codex or agents;
+        and does not create a `.harness/evidence` directory in the repository.
+        """
         repo_root = self.temp_dir / "repo"
         self._write_he_heartbeat_source(repo_root)
         command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)

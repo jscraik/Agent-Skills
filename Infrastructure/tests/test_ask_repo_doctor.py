@@ -529,6 +529,11 @@ class TestAskRepoDoctor(unittest.TestCase):
         )
 
     def test_closeout_generated_projection_with_other_changes_prioritizes_handles(self) -> None:
+        """
+        Verify that when a generated command-surface projection is present alongside other changes, repo_closeout prioritizes command-handle validation.
+        
+        Asserts that sync is not needed, the chosen next command is the command-handle check, and the focused validation sequence places `skill_handles` before `changed_validation` (expected order: repo_doctor, skill_profiles_readiness, skill_events_readiness, skill_memory_readiness, skill_package_readiness, skill_handles, changed_validation).
+        """
         changed_files = [
             ".skillsets/command-surface.json",
             "Docs/agents/04-validation.md",
@@ -560,6 +565,14 @@ class TestAskRepoDoctor(unittest.TestCase):
         )
 
     def test_closeout_changed_runtime_evidence_exposes_shared_workspace_boundary(self) -> None:
+        """
+        Verify that when a runtime evidence card is changed and present, repo_closeout reports it and exposes shared-workspace truth boundaries and the schema validation command.
+        
+        Asserts that:
+        - runtime evidence status is "present" with a single runtime card and preserved `runtime_status`.
+        - truth boundaries indicate the PR and schema validation are not checked by closeout.
+        - focused validation includes a `runtime_evidence_cards` step and the schema validation command references `validate_runtime_cards.py`.
+        """
         changed_files = [".harness/evidence/runtime-proof/context7/codex/runtime-card.json"]
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
@@ -643,6 +656,15 @@ class TestAskRepoDoctor(unittest.TestCase):
         )
 
     def test_closeout_changed_runtime_evidence_reports_invalid_absolute_card_path(self) -> None:
+        """
+        Validate that repo_closeout marks an absolute-path runtime evidence card with invalid JSON as invalid and blocks commit readiness.
+        
+        Asserts that:
+        - the closeout runtime_evidence status is `"invalid"`,
+        - the changed_scope status is `"invalid"`,
+        - `"runtime_evidence_invalid"` appears in commit_readiness blockers,
+        - the focused_validation list includes a `runtime_evidence_cards` command.
+        """
         relative_card = ".harness/evidence/runtime-proof/context7/codex/runtime-card.json"
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)

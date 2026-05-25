@@ -42,6 +42,17 @@ RUNTIME_EVIDENCE_ROOT = ".harness/evidence/runtime-proof"
 
 
 def _repo_validation_command(action: str, *args: str, **flags: bool) -> str:
+    """
+    Builds a shell command string to run the `./bin/ask repo <action> ...` CLI with provided arguments and boolean flags.
+    
+    Parameters:
+        action (str): The repo subcommand/action to invoke (e.g., "validate", "status").
+        *args (str): Positional CLI arguments to append after the action.
+        **flags (bool): Boolean flags to include as `--flag-name` when True; underscores in flag names are converted to hyphens.
+    
+    Returns:
+        str: A single shell-quoted command string that includes the action, any provided args, enabled `--<flag>` entries, and always appends `--json --robot`.
+    """
     parts = ["./bin/ask", "repo", action, *args]
     for flag, enabled in flags.items():
         if enabled:
@@ -1153,6 +1164,28 @@ def _closeout_memory_readiness(doctor_payload: dict[str, Any]) -> dict[str, Any]
 
 
 def _closeout_package_readiness(doctor_payload: dict[str, Any]) -> dict[str, Any]:
+    """
+    Extract package readiness information from a doctor payload into a normalized closeout report.
+    
+    Parameters:
+        doctor_payload (dict[str, Any]): The payload returned by `repo_doctor` (typically `result.data`), expected to contain `signals.package_readiness`.
+    
+    Returns:
+        dict[str, Any]: A mapping with the following keys:
+            - status: The signal state (`"pass"`, `"warning"`, `"block"`, `"skipped"`, etc.).
+            - summary: Short human-readable summary of package readiness.
+            - target: The package target identifier or path the readiness report refers to.
+            - schema_version: Declared package schema/version when present.
+            - readiness_level: Contract-readiness classification from the package report.
+            - missing_fields: List of contract fields that are missing.
+            - missing_field_count: Integer count of missing contract fields (0 when absent).
+            - install_ready: Boolean indicating whether the package is installable.
+            - promotion_status: Current promotion classification or status string.
+            - promotion_ready: Boolean indicating whether the package is ready for promotion.
+            - checkout_test_status: Result of any checkout/test performed for the package.
+            - blocked_reasons: List of strings explaining why the package is blocked.
+            - validation_command: A recommended command string to run package readiness validation.
+    """
     signal = doctor_payload.get("signals", {}).get("package_readiness", {})
     details = signal.get("details", {})
     return {
@@ -1173,6 +1206,21 @@ def _closeout_package_readiness(doctor_payload: dict[str, Any]) -> dict[str, Any
 
 
 def _closeout_focused_validation(repo_root: Path, changed_files: list[str]) -> list[dict[str, Any]]:
+    """
+    Builds a prioritized list of validation commands to run for a focused closeout.
+    
+    Includes a core set of readiness checks (doctor, profiles, events, memory, package) and conditionally appends:
+    - a command-handle check when any changed path is within generated surface prefixes,
+    - a runtime-evidence schema validation when any changed path points under the repository's runtime evidence root,
+    - a scoped `repo validate` invocation when changed files are present, or a `repo status` check when none are present.
+    
+    Parameters:
+        repo_root (Path): Repository root used to normalize and evaluate runtime-evidence paths.
+        changed_files (list[str]): Changed-file paths (absolute or repo-relative) used to determine which conditional checks to include.
+    
+    Returns:
+        list[dict[str, Any]]: Ordered list of validation command descriptors, each containing `id`, `reason`, and `command`.
+    """
     commands = [
         {
             "id": "repo_doctor",
@@ -1239,6 +1287,15 @@ def _closeout_focused_validation(repo_root: Path, changed_files: list[str]) -> l
 
 
 def _runtime_evidence_validation_command(repo_root: Path) -> str:
+    """
+    Builds the shell command to validate runtime evidence cards for the given repository.
+    
+    Parameters:
+        repo_root (Path): Repository root used as the workspace root argument in the command; it will be resolved to an absolute path.
+    
+    Returns:
+        command (str): A single shell command string that invokes validate_runtime_cards.py with the evidence directory, `--require-shared-workspace`, the resolved workspace root, and `--json`. The command tokens are shell-quoted where appropriate.
+    """
     return (
         "python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py "
         f"--evidence-dir {shlex.quote(RUNTIME_EVIDENCE_ROOT)} "
@@ -1247,6 +1304,18 @@ def _runtime_evidence_validation_command(repo_root: Path) -> str:
 
 
 def _normalize_changed_path(repo_root: Path, path: str) -> str:
+    """
+    Normalize a changed-file path to a repository-relative POSIX path when possible.
+    
+    Parameters:
+        repo_root (Path): Repository root used to compute a relative path.
+        path (str): File path to normalize; may be absolute or relative.
+    
+    Returns:
+        str: If `path` is inside `repo_root`, a repository-relative POSIX path is returned.
+             If `path` is an absolute path not under `repo_root`, the original absolute path string is returned.
+             For relative inputs, a leading "./" is removed if present.
+    """
     path_obj = Path(path)
     if path_obj.is_absolute():
         try:
@@ -1257,10 +1326,31 @@ def _normalize_changed_path(repo_root: Path, path: str) -> str:
 
 
 def _is_runtime_evidence_path(repo_root: Path, path: str) -> bool:
+    """
+    Determine whether a changed-file path falls under the runtime evidence root.
+    
+    Parameters:
+        repo_root (Path): Repository root used to normalize absolute paths.
+        path (str): Changed-file path (absolute or relative) to normalize and test.
+    
+    Returns:
+        True if the normalized repo-relative path starts with '.harness/evidence/runtime-proof/', False otherwise.
+    """
     return _normalize_changed_path(repo_root, path).startswith(RUNTIME_EVIDENCE_ROOT + "/")
 
 
 def _changed_runtime_card_paths(repo_root: Path, changed_files: list[str]) -> list[Path]:
+    """
+    Return the list of runtime-card.json file paths that are affected by a set of changed files under the runtime evidence root.
+    
+    Parameters:
+        repo_root (Path): Repository root used to resolve relative changed-file paths.
+        changed_files (list[str]): Changed file paths (absolute or relative) to inspect.
+    
+    Returns:
+        list[Path]: Sorted, unique Paths for changed files whose normalized repo-relative path starts with
+        RUNTIME_EVIDENCE_ROOT + "/" and ends with "/runtime-card.json".
+    """
     paths = []
     for changed_file in changed_files:
         normalized = _normalize_changed_path(repo_root, changed_file)
@@ -1270,6 +1360,34 @@ def _changed_runtime_card_paths(repo_root: Path, changed_files: list[str]) -> li
 
 
 def _runtime_card_summary(repo_root: Path, path: Path) -> dict[str, Any]:
+    """
+    Summarizes a runtime-card.json file located under the repository root.
+    
+    Reads and parses the JSON file at `path` (relative to `repo_root`) and classifies its read status. Handles these cases:
+    - If `path` is a symlink: marks the card as invalid with an explanatory error.
+    - If the file cannot be read because it no longer exists: marks the card as deleted.
+    - If the file cannot be read for other I/O reasons or contains invalid JSON or is not a JSON object: marks the card as invalid and includes an error message.
+    - Otherwise extracts common card fields and counts `evidence_receipts`.
+    
+    Parameters:
+        repo_root (Path): Repository root used to produce a repo-relative `path` string in the summary.
+        path (Path): Absolute or resolved path to a runtime-card.json file.
+    
+    Returns:
+        dict: A summary dictionary containing at least:
+            - "path" (str): Repo-relative path to the file.
+            - "read_status" (str): One of "readable", "deleted", or "invalid".
+            - If "invalid" or "deleted": may include "error" (str) with a human-readable message.
+            - If "readable": may include the extracted card fields:
+                - "card_id"
+                - "created_at"
+                - "skill_handle"
+                - "command_handle"
+                - "runtime_target"
+                - "runtime_status"
+                - "workspace_root"
+                - "receipt_count" (int): number of items in `evidence_receipts` when present.
+    """
     relative_path = str(path.relative_to(repo_root))
     if path.is_symlink():
         return {
@@ -1320,6 +1438,21 @@ def _runtime_card_summary(repo_root: Path, path: Path) -> dict[str, Any]:
 
 
 def _runtime_card_scope_summary(runtime_cards: list[dict[str, Any]], *, empty_status: str) -> dict[str, Any]:
+    """
+    Builds an aggregate summary of a collection of runtime card summaries and classifies their overall scope status.
+    
+    Parameters:
+        runtime_cards (list[dict[str, Any]]): Per-card summaries each containing at least a `read_status` key.
+        empty_status (str): Status to use when `runtime_cards` is empty.
+    
+    Returns:
+        dict[str, Any]: Summary containing:
+            - `status` (str): One of `empty_status` (when no cards), `invalid` (any card not `readable` or `deleted`), `deleted` (all cards are `deleted`), or `present` (at least one readable card).
+            - `runtime_card_count` (int): Total number of cards examined.
+            - `invalid_runtime_card_count` (int): Number of cards whose `read_status` is neither `readable` nor `deleted`.
+            - `deleted_runtime_card_count` (int): Number of cards with `read_status == "deleted"`.
+            - `runtime_cards` (list[dict[str, Any]]): The original list of card summaries.
+    """
     invalid_cards = [
         card for card in runtime_cards if card.get("read_status") not in {"readable", "deleted"}
     ]
@@ -1342,6 +1475,27 @@ def _runtime_card_scope_summary(runtime_cards: list[dict[str, Any]], *, empty_st
 
 
 def _closeout_runtime_evidence(repo_root: Path, *, include_cards: bool, changed_files: list[str]) -> dict[str, Any]:
+    """
+    Summarize runtime-evidence ("runtime-card.json") files for closeout and optionally report only the changed subset.
+    
+    Parameters:
+        repo_root (Path): Repository root used to locate the runtime evidence directory.
+        include_cards (bool): When True, discover and summarize runtime-card files; when False, skip discovery and return a skipped report.
+        changed_files (list[str]): List of changed paths used to determine the changed-scope subset.
+    
+    Returns:
+        dict: A closeout report containing:
+            - status (str): One of "present", "invalid", "deleted", "not_applicable", or "skipped" describing the changed-scope outcome.
+            - evidence_root (str): Relative evidence root path constant used for discovery.
+            - runtime_card_count (int): Number of runtime cards in the reported (changed) scope.
+            - invalid_runtime_card_count (int): Number of runtime cards in the reported scope with invalid read/parse status.
+            - deleted_runtime_card_count (int): Number of runtime cards in the reported scope marked deleted.
+            - runtime_cards (list[dict]): List of per-card summaries for the reported (changed) scope.
+            - changed_scope (dict): Scope summary for changed cards (counts, status, and the `runtime_cards` list).
+            - workspace_scope (dict): Scope summary for all workspace cards discovered under the evidence root.
+            - schema_validation (dict): Contains `status` ("not_run") and the `command` string to validate runtime card schema.
+            - truth_boundaries (dict): Indicators describing which proofs are considered by closeout (e.g., command_proof, schema_proof, pr_truth, tracker_truth, docs_truth).
+    """
     evidence_root = repo_root / RUNTIME_EVIDENCE_ROOT
     validation_command = _runtime_evidence_validation_command(repo_root)
     if not include_cards:
@@ -1401,6 +1555,15 @@ def _closeout_runtime_evidence(repo_root: Path, *, include_cards: bool, changed_
 
 
 def _diagnostic_debt_next_command(diagnostic_debt: list[dict[str, Any]]) -> str | None:
+    """
+    Select the first non-empty `next_command` from a diagnostic-debt list.
+    
+    Parameters:
+        diagnostic_debt (list[dict[str, Any]]): Ordered diagnostic-debt entries; each entry may include a `next_command` string.
+    
+    Returns:
+        str | None: The first `next_command` that is a non-empty string, or `None` if none are present.
+    """
     for debt in diagnostic_debt:
         next_command = debt.get("next_command") if isinstance(debt, dict) else None
         if isinstance(next_command, str) and next_command.strip():
@@ -1409,7 +1572,29 @@ def _diagnostic_debt_next_command(diagnostic_debt: list[dict[str, Any]]) -> str 
 
 
 def repo_closeout(repo_root: Path, changed: bool = False, strict: bool = False) -> CallResult:
-    """Report completion readiness without editing, validating, or committing."""
+    """
+    Build a closeout readiness report describing detected blockers and a recommended next command.
+    
+    Parameters:
+        repo_root (Path): Repository root to analyze.
+        changed (bool): When True, detect changed files and run changed-scope validations including runtime-evidence checks.
+        strict (bool): When True, treat existing diagnostic debt as a blocker for closeout.
+    
+    Returns:
+        CallResult: Result whose `data["repo_closeout"]` contains the closeout payload with at least the following keys:
+            - agent_summary: human-readable readiness summary.
+            - changed_files, changed_file_count, changed_mode_requested, changed_files_error
+            - sync: sync report and suggested sync/validation commands.
+            - runtime_budget, capability_readiness, memory_readiness, package_readiness, surface_policy
+            - runtime_evidence: runtime-evidence closeout report (changed and workspace scope).
+            - focused_validation: list of focused validation commands for closeout.
+            - diagnostic_debt: diagnostic debt entries from the doctor payload.
+            - commit_readiness: { ready (bool), blockers (list[str]), strict (bool) }.
+            - doctor: original doctor payload used to build the report.
+            - next_command: suggested command to address the highest-priority blocker (or status command if ready).
+    
+        The CallResult `status` is set to "success" when ready (no blockers) and "error" otherwise; when blocked an ErrorObject with code `ERR_VALIDATION` is appended describing the blocking summary and suggested fix.
+    """
     result = CallResult()
     doctor_result = repo_doctor(repo_root)
     doctor_payload = doctor_result.data.get("doctor", {})

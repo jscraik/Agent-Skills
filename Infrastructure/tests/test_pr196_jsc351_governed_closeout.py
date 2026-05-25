@@ -374,6 +374,11 @@ class TestRunSkillsConformanceUnknownSuite(unittest.TestCase):
         self.assertTrue(result["validation_commands"])
 
     def test_unknown_suite_reports_separate_statuses(self) -> None:
+        """
+        Verify that run_skills_conformance reports separate model and live parity statuses for an unknown suite.
+        
+        Asserts that the overall `status` matches `model_contract_status` and is `"blocked"`, that `live_parity_status` is `"not_checked"`, and that `blocked_runtime["status"]` is `"not_applicable"`.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             result = run_skills_conformance(REPO_ROOT, suite="bad-suite", evidence_dir=tmp)
 
@@ -397,6 +402,15 @@ class TestRunSkillsConformanceEvidenceStructure(unittest.TestCase):
         self.assertIn(self._result["status"], {"pass", "blocked"})
 
     def test_model_and_live_status_are_separate(self) -> None:
+        """
+        Verify modeled (contract) and live runtime statuses are reported separately and consistently in the conformance result.
+        
+        Asserts that:
+        - the top-level `status` matches `model_contract_status` and the `modeled_conformance` status,
+        - `live_parity_status` is either `"blocked_runtime"` or `"not_checked"`,
+        - the `live_runtime_parity["status"]` equals `live_parity_status`,
+        - the result contains the keys `modeled_conformance`, `live_runtime_parity`, and `blocked_runtime`.
+        """
         self.assertEqual(self._result["model_contract_status"], self._result["status"])
         self.assertEqual(self._result["modeled_conformance"]["status"], self._result["status"])
         self.assertIn(self._result["live_parity_status"], {"blocked_runtime", "not_checked"})
@@ -472,6 +486,11 @@ class TestRunSkillsConformanceEvidenceStructure(unittest.TestCase):
         self.assertEqual(case["live_runtime_parity"]["blockers"], [])
 
     def test_schema_version(self) -> None:
+        """
+        Asserts the conformance run result uses the expected schema version.
+        
+        Checks that self._result["schema_version"] is exactly "skills-conformance-evidence.v1".
+        """
         self.assertEqual(self._result["schema_version"], "skills-conformance-evidence.v1")
 
     def test_suite_name(self) -> None:

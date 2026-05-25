@@ -39,6 +39,24 @@ def _case(
     evidence: dict[str, Any] | None = None,
     blockers: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    """
+    Create a standardized conformance case record.
+    
+    Parameters:
+        case_id (str): Unique identifier for the case.
+        status (str): Case status, e.g. "pass" or "blocked".
+        summary (str): Short human-readable summary of the case outcome.
+        evidence (dict[str, Any] | None): Optional evidence/details produced by the case; defaults to an empty dict when omitted.
+        blockers (list[dict[str, Any]] | None): Optional list of suite-level blocker entries associated with the case; defaults to an empty list when omitted.
+    
+    Returns:
+        dict[str, Any]: A dictionary with keys:
+            - "case_id": the provided case_id
+            - "status": the provided status
+            - "summary": the provided summary
+            - "evidence": the provided evidence or an empty dict
+            - "blockers": the provided blockers list or an empty list
+    """
     return {
         "case_id": case_id,
         "status": status,
@@ -49,6 +67,15 @@ def _case(
 
 
 def _preview_limitations(evidence: dict[str, Any]) -> list[dict[str, Any]]:
+    """
+    Extract preview limitation entries from an evidence dictionary.
+    
+    Parameters:
+    	evidence (dict[str, Any]): Evidence object that may contain a "preview_limitations" key.
+    
+    Returns:
+    	limitations (list[dict[str, Any]]): A list of items from `evidence["preview_limitations"]` that are dictionaries; returns an empty list if the key is missing or not a list.
+    """
     limitations = evidence.get("preview_limitations", [])
     if not isinstance(limitations, list):
         return []
@@ -56,14 +83,49 @@ def _preview_limitations(evidence: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _model_status(status: str, basis: str, **extra: Any) -> dict[str, Any]:
+    """
+    Create a modeled conformance status object.
+    
+    Parameters:
+        status (str): Modeled conformance status value (for example "pass" or "blocked").
+        basis (str): Identifier or short description of the evidence/basis for the status.
+        **extra: Additional key/value pairs to include in the resulting object.
+    
+    Returns:
+        dict: A dictionary containing `status`, `basis`, and any provided extra fields.
+    """
     return {"status": status, "basis": basis, **extra}
 
 
 def _live_status(status: str, basis: str, blockers: list[dict[str, Any]]) -> dict[str, Any]:
+    """
+    Constructs a live runtime parity status object for a case.
+    
+    Parameters:
+        status (str): The runtime parity status identifier (e.g., "blocked_runtime" or "not_checked").
+        basis (str): The source or rationale for the status (e.g., "codex_preview_limitations").
+        blockers (list[dict[str, Any]]): A list of blocker records describing runtime-blocking issues.
+    
+    Returns:
+        dict[str, Any]: A mapping containing `status`, `basis`, and `blockers`.
+    """
     return {"status": status, "basis": basis, "blockers": blockers}
 
 
 def _blocked_runtime_status(blockers: list[dict[str, Any]]) -> dict[str, Any]:
+    """
+    Determine the blocked-runtime status payload from a list of runtime blockers.
+    
+    Parameters:
+        blockers (list[dict[str, Any]]): A list of blocker records; each blocker is a dictionary
+            describing a runtime parity issue.
+    
+    Returns:
+        dict[str, Any]: A payload with:
+            - `status`: `"blocked_runtime"` if `blockers` is non-empty, otherwise `"not_applicable"`.
+            - `blockers`: the original list of blocker records.
+            - `does_not_fail_model_contract`: always `True`.
+    """
     return {
         "status": "blocked_runtime" if blockers else "not_applicable",
         "blockers": blockers,
@@ -72,12 +134,33 @@ def _blocked_runtime_status(blockers: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _source_files(value: Any) -> list[str]:
+    """
+    Extract string elements from a list-like value.
+    
+    Parameters:
+    	value (Any): Input value to inspect. If it is a list, only elements that are instances of `str` are returned; otherwise the function returns an empty list.
+    
+    Returns:
+    	list[str]: The list of string elements extracted from `value`, or an empty list if `value` is not a list.
+    """
     if not isinstance(value, list):
         return []
     return [item for item in value if isinstance(item, str)]
 
 
 def _case_live_runtime_blockers(case: dict[str, Any]) -> list[dict[str, Any]]:
+    """
+    Builds a list of runtime-parity blocker records derived from the case's preview limitations.
+    
+    Parameters:
+        case (dict): Case record that may contain an "evidence" mapping with a
+            "preview_limitations" list of limitation dictionaries.
+    
+    Returns:
+        list[dict]: A list of blocker objects. Each blocker contains the keys
+        `case_id`, `rule_id`, `blocker_class` (always `"blocked_runtime"`),
+        `message`, and `source_files` (a list of strings).
+    """
     blockers: list[dict[str, Any]] = []
     for limitation in _preview_limitations(case.get("evidence", {})):
         if limitation.get("status") != "blocked":
@@ -95,6 +178,15 @@ def _case_live_runtime_blockers(case: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _annotate_conformance_status(case: dict[str, Any]) -> None:
+    """
+    Annotates a conformance case dict with modeled and live runtime parity statuses.
+    
+    Adds the following keys to the provided `case` dictionary (mutates in place):
+    - `modeled_conformance`: an object with `status` set to `"pass"` when `case["status"] == "pass"`, otherwise `"blocked"`, and `basis = "repo_contract_fixture"`.
+    - `live_runtime_parity`: an object with `status` set to `"blocked_runtime"` if preview limitations produce runtime blockers, otherwise `"not_checked"`, `basis = "codex_preview_limitations"`, and a `blockers` list describing any live runtime blockers.
+    Parameters:
+        case (dict): Conformance case record to annotate; must be a mutable mapping representing a single case.
+    """
     status = case.get("status")
     live_blockers = _case_live_runtime_blockers(case)
     case["modeled_conformance"] = _model_status(
@@ -116,6 +208,25 @@ def _conformance_status_payload(
     live_basis: str,
     **model_extra: Any,
 ) -> dict[str, Any]:
+    """
+    Builds a structured conformance payload combining model contract and live runtime parity statuses.
+    
+    Parameters:
+        model_contract_status (str): Top-level model contract status (e.g., "pass" or "blocked").
+        live_parity_status (str): Top-level live runtime parity status (e.g., "not_checked" or "blocked_runtime").
+        live_blockers (list[dict]): List of live runtime blocker entries to include in parity details.
+        model_basis (str): Basis identifier describing how the modeled conformance was determined.
+        live_basis (str): Basis identifier describing how live runtime parity was determined.
+        **model_extra: Any: Additional fields to include in the modeled conformance object.
+    
+    Returns:
+        dict: A payload with these keys:
+            - "model_contract_status": the provided model_contract_status.
+            - "live_parity_status": the provided live_parity_status.
+            - "modeled_conformance": an object describing the modeled conformance (status, basis, plus any extra).
+            - "live_runtime_parity": an object describing live parity (status, basis, and blockers).
+            - "blocked_runtime": an object indicating whether runtime is blocked and including blockers.
+    """
     return {
         "model_contract_status": model_contract_status,
         "live_parity_status": live_parity_status,
@@ -130,6 +241,14 @@ def _conformance_status_payload(
 
 
 def _case_malformed_frontmatter(repo_root: Path, workspace: Path) -> dict[str, Any]:
+    """
+    Create a malformed SKILL.md fixture and verify that a missing required frontmatter field is detected.
+    
+    Writes a skill file with frontmatter that omits the required `name` field, builds a package contract from the written file, and checks the contract's `required_fields.missing` list for `"name"`.
+    
+    Returns:
+        dict: A case record with `case_id` `"malformed_frontmatter"`, `status` set to `"pass"` if `"name"` appears in the contract's missing fields or `"blocked"` otherwise, a human-readable `summary`, and `evidence` containing the `missing` fields list.
+    """
     skill_md = _write_skill(
         workspace / "malformed-frontmatter",
         "description: Missing required name\n",
@@ -390,6 +509,18 @@ def _prepare_evidence_dir(repo_root: Path, evidence_dir: str | None) -> Path:
 
 
 def run_skills_conformance(repo_root: Path, suite: str = DEFAULT_SUITE, evidence_dir: str | None = None) -> dict[str, Any]:
+    """
+    Run the skills conformance suite and produce evidence, snapshots, commands, and a summary.
+    
+    Parameters:
+    	repo_root (Path): Path to the repository root containing skills to test.
+    	suite (str): Name of the conformance suite to run; only the default suite (`codex-parity`) is executed — other values produce a blocked result.
+    	evidence_dir (str | None): Optional directory path to write evidence; if omitted a timestamped evidence directory under `.harness/evidence/skills-conformance/` in `repo_root` is created.
+    
+    Returns:
+    	summary (dict): A summary dictionary of the run containing keys including:
+    		`schema_version`, `suite`, `status` (model contract status), conformance payload fields (`modeled_conformance`, `live_runtime_parity`, `blocked_runtime`, etc.), `case_count`, `passed_count`, `blocked_count`, `cases` (list of per-case records with annotated `modeled_conformance` and `live_runtime_parity`), `blockers`, file paths (`evidence_dir`, `evidence_jsonl`, `commands_jsonl`, `snapshots_dir`, `summary_path`), `mutation_status`, and `validation_commands`.
+    """
     if suite != DEFAULT_SUITE:
         return {
             "schema_version": CONFORMANCE_SCHEMA_VERSION,
