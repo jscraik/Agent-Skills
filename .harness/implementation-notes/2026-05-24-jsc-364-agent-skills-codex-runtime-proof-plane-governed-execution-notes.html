@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="5">
+  <title>JSC-364 Runtime Proof Plane Notes</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7f7f4;
+      --panel: #ffffff;
+      --text: #171717;
+      --muted: #5f6368;
+      --line: #d8d6cf;
+      --accent: #11615c;
+      --warn: #8a4b10;
+      --code: #f0eee7;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111211;
+        --panel: #191a18;
+        --text: #eeeeea;
+        --muted: #b8bab3;
+        --line: #33352f;
+        --accent: #7ecfc6;
+        --warn: #e4ad63;
+        --code: #24251f;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    main {
+      width: min(1120px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 32px 0 56px;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.05;
+      margin: 0 0 12px;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin: 32px 0 12px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 17px;
+      margin: 22px 0 8px;
+      letter-spacing: 0;
+    }
+
+    p { margin: 0 0 12px; }
+    ul { margin: 8px 0 16px; padding-left: 22px; }
+    li { margin: 5px 0; }
+
+    code {
+      background: var(--code);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 20px;
+      background: var(--panel);
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 650;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .pill,
+    .entry {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+    }
+
+    .pill { padding: 9px 10px; }
+    .entry { padding: 16px; margin: 14px 0; }
+
+    .label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 3px;
+    }
+
+    .entry time {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .warning {
+      color: var(--warn);
+      font-weight: 700;
+    }
+
+    .module-map {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr);
+      gap: 18px;
+      margin: 16px 0 24px;
+      align-items: stretch;
+    }
+
+    .module-stack {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .module {
+      border: 4px solid var(--module-color);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--module-color) 6%, transparent);
+      min-height: var(--module-height);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    .module h3 {
+      margin: 0;
+      padding: 9px 12px;
+      border-bottom: 4px solid var(--module-color);
+      font-size: 15px;
+      color: var(--text);
+      background: color-mix(in srgb, var(--module-color) 12%, transparent);
+    }
+
+    .module .body {
+      padding: 12px;
+    }
+
+    .module p {
+      margin-bottom: 8px;
+    }
+
+    .module ul {
+      margin-bottom: 0;
+    }
+
+    .module-primary { --module-color: #2e9cf0; --module-height: 350px; }
+    .module-command { --module-color: #ff6b12; --module-height: 168px; }
+    .module-schema { --module-color: #33bf62; --module-height: 168px; }
+    .module-review { --module-color: #ef3838; --module-height: 290px; }
+    .module-evidence { --module-color: #a83dcc; --module-height: 176px; }
+    .module-delivery { --module-color: #ffc433; --module-height: 118px; }
+
+    @media (max-width: 760px) {
+      .module-map {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>JSC-364 Runtime Proof Plane Notes</h1>
+      <p>This is the running implementation ledger for the governed JSC-364 lane. It auto-refreshes every five seconds so updates appear while work continues.</p>
+      <div class="meta">
+        <div class="pill">
+          <span class="label">Mode</span>
+          <span class="status">GOVERNED_IMPLEMENTATION</span>
+        </div>
+        <div class="pill">
+          <span class="label">Last Updated</span>
+          <time datetime="2026-05-24T22:18:32Z">2026-05-24T22:18:32Z</time>
+        </div>
+        <div class="pill">
+          <span class="label">Active Board</span>
+          <code>Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/</code>
+        </div>
+        <div class="pill">
+          <span class="label">Active Task</span>
+          <code>Delivery</code> PU-001 branch and PR packaging
+        </div>
+      </div>
+    </header>
+
+    <section aria-labelledby="purpose">
+      <h2 id="purpose">Purpose</h2>
+      <p>Implement JSC-364 by adding a Codex Runtime Proof Plane to Agent Skills Kit. The proof plane must make <code>./bin/ask</code> produce durable runtime proof or durable <code>blocked_runtime</code> evidence for Codex-targeted checks.</p>
+      <p>The core trust boundary is that modeled Codex compatibility, generated projection readiness, docs, plans, and local intent must not be reported as live runtime proof.</p>
+    </section>
+
+    <section aria-labelledby="watch">
+      <h2 id="watch">What To Watch</h2>
+      <ul>
+        <li>Decisions not already specified by the plan or spec.</li>
+        <li>Implementation changes that alter the expected slice boundary.</li>
+        <li>Tradeoffs between smaller local fixes and broader architecture cleanup.</li>
+        <li>Validation commands, outcomes, and concrete blockers.</li>
+        <li>Review findings that are accepted, rejected, deferred, or escalated.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="deep-modules">
+      <h2 id="deep-modules">Deep Modules</h2>
+      <p>The JSC-364 implementation should behave like a small set of deep modules: each module owns a narrow public surface, hides its internal mechanics, and exports evidence that another agent can verify without reading private context.</p>
+      <p><strong>Architecture decision:</strong> this work should extend the project's current deep modules, not create a parallel proof framework. Command modules should orchestrate public <code>./bin/ask</code> behavior; <code>command_surface.py</code>, <code>skills_sdk/runtime_adapters.py</code>, <code>skills_sdk/conformance.py</code>, <code>services/codex_preview.py</code>, and schema validators should own the durable behavior.</p>
+      <div class="module-map" role="img" aria-label="Deep module map for the JSC-364 runtime proof plane">
+        <div class="module-stack">
+          <article class="module module-primary">
+            <h3>Runtime Proof Plane</h3>
+            <div class="body">
+              <p>This is the main deep module. Its public promise is simple: given a skill handle and runtime target, return proof or durable <code>blocked_runtime</code> evidence.</p>
+              <ul>
+                <li>Owns <code>RuntimeCard</code> and proof result assembly.</li>
+                <li>Separates modeled conformance from live runtime parity.</li>
+                <li>Reports source identity, artifact paths, blocker class, and next operator command.</li>
+                <li>Hides probe sequencing, runtime availability checks, and evidence writing details.</li>
+              </ul>
+            </div>
+          </article>
+          <article class="module module-review">
+            <h3>Governed Slice Loop</h3>
+            <div class="body">
+              <p>This module keeps work bounded and reviewable. It does not prove runtime truth itself; it decides when a slice is safe to start, commit, hand to PR triage, or stop.</p>
+              <ul>
+                <li>Goal board state and receipts.</li>
+                <li>Allowed files and stop conditions.</li>
+                <li>Simplify, unslopify, HE code review, testing, adversarial, and agent-native review gates.</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+        <div class="module-stack">
+          <article class="module module-command">
+            <h3>Command Surface</h3>
+            <div class="body">
+              <p>The CLI is the stable front door. Agents should call public <code>./bin/ask</code> commands, not private helpers.</p>
+              <ul>
+                <li><code>skills handles</code> blocks drift.</li>
+                <li><code>repo doctor</code> names the next command.</li>
+                <li><code>skills proof</code> emits runtime-targeted evidence.</li>
+              </ul>
+            </div>
+          </article>
+          <article class="module module-schema">
+            <h3>Evidence Schemas</h3>
+            <div class="body">
+              <p>Schemas make proof durable. The validator rejects missing runtime target, source identity, command, artifact visibility, or blocker fields.</p>
+              <ul>
+                <li><code>RuntimeCard</code></li>
+                <li><code>EvidenceReceipt</code></li>
+                <li><code>ArtifactRecord</code></li>
+                <li><code>RuntimeSessionSummary</code></li>
+                <li><code>RecoveryPlanSummary</code></li>
+              </ul>
+            </div>
+          </article>
+          <article class="module module-evidence">
+            <h3>Workspace Evidence</h3>
+            <div class="body">
+              <p>Artifacts live in repo-owned paths so another agent can find and verify them later. This prevents a private session summary from becoming the only proof.</p>
+              <ul>
+                <li>Evidence receipts under <code>.harness/evidence</code> or explicit test paths.</li>
+                <li>Review artifacts under <code>artifacts/reviews</code>.</li>
+                <li>Implementation notes here.</li>
+              </ul>
+            </div>
+          </article>
+          <article class="module module-delivery">
+            <h3>Delivery Truth</h3>
+            <div class="body">
+              <p>PR, CI, review, and Linear truth stay separate from local proof and must be refreshed before delivery claims.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="slice">
+      <h2 id="slice">Slice State</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Slice</th>
+            <th>Status</th>
+            <th>Current Boundary</th>
+            <th>Validation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Board setup</td>
+            <td><span class="status">passed</span></td>
+            <td>Create governed board and browser-readable notes.</td>
+            <td><code>check_goal_board.py</code> passed.</td>
+          </tr>
+          <tr>
+            <td>PU-001</td>
+            <td><span class="status">passed, packaging</span></td>
+            <td>Command-handle drift repair and repo doctor baseline. Runtime projections were repaired through the generator, and runtime-target validation now stays inside the proof adapter.</td>
+            <td><code>skills handles</code>, <code>repo doctor</code>, doctor tests, CLI implementation tests, goal board validation, and six review artifacts pass. Broad PR gates currently hit pre-existing projection drift in plugin cache mirrors.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section aria-labelledby="log">
+      <h2 id="log">Running Log</h2>
+
+      <article class="entry">
+        <h3>Mode switch and board creation</h3>
+        <time datetime="2026-05-24T21:41:48Z">2026-05-24T21:41:48Z</time>
+        <ul>
+          <li>Switched the launch package from <code>PROMPT_REVIEW_ONLY</code> to <code>GOVERNED_IMPLEMENTATION</code>.</li>
+          <li>Created the JSC-364 Goal Governor board.</li>
+          <li>Seeded receipt <code>R001</code>.</li>
+          <li>No implementation code was edited.</li>
+          <li>No Linear, GitHub, CircleCI, CodeRabbit, or PR state was mutated.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>Decision: use HTML as the primary notes ledger</h3>
+        <time datetime="2026-05-24T21:50:00Z">2026-05-24T21:50:00Z</time>
+        <p>Jamie asked for a running browser-visible implementation notes file. I changed the implementation-notes artifact from Markdown to this HTML ledger and made it auto-refresh every five seconds.</p>
+        <p><strong>Tradeoff:</strong> a single static HTML file is simpler and easier to keep browser-visible than a dev server or generated document pipeline. The cost is that updates happen through file edits, so the page refreshes rather than streaming.</p>
+      </article>
+
+      <article class="entry">
+        <h3>Decision: document the proof plane as deep modules</h3>
+        <time datetime="2026-05-24T21:49:18Z">2026-05-24T21:49:18Z</time>
+        <p>Jamie asked for a deep-module visual similar to the provided sketch. I added a module map to this report and tied each box to the planned runtime proof-plane boundaries.</p>
+        <p><strong>Tradeoff:</strong> the diagram is intentionally conceptual, not a final package layout. It should guide implementation pressure toward deep public surfaces without prematurely forcing module names before PU-001 runtime truth is refreshed.</p>
+      </article>
+
+      <article class="entry">
+        <h3>PU-001 scout baseline</h3>
+        <time datetime="2026-05-24T21:49:18Z">2026-05-24T21:49:18Z</time>
+        <p>The first runtime checks produced the expected blocker rather than a false green result.</p>
+        <ul>
+          <li><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane</code> passed.</li>
+          <li><code>./bin/ask skills handles --check --check-command-handles --no-handles --json --robot</code> failed with six generated command-handle violations.</li>
+          <li><code>./bin/ask repo doctor --json --robot</code> blocked on <code>command_handles</code> and selected the explicit repair command.</li>
+        </ul>
+        <p><strong>Implementation implication:</strong> PU-001 should repair command-handle drift first. That keeps the proof-plane work grounded in an existing mechanical blocker instead of adding new proof surfaces on top of a failing command surface.</p>
+      </article>
+
+      <article class="entry">
+        <h3>Decision: repair generated handles through the generator</h3>
+        <time datetime="2026-05-24T21:49:18Z">2026-05-24T21:49:18Z</time>
+        <p>The dry run for <code>./bin/ask skills handles --write-command-handles --check-command-handles --dry-run --no-handles --json --robot</code> reports a full generated command-handle write pass, while the validator reports six concrete violations.</p>
+        <p><strong>Tradeoff:</strong> running the generator may rewrite all command-handle files in place, but git should only retain content diffs where generated output changed. This is safer than hand-editing generated handles because it preserves the source-to-projection contract.</p>
+      </article>
+
+      <article class="entry">
+        <h3>Decision: build into existing deep modules</h3>
+        <time datetime="2026-05-24T22:00:23Z">2026-05-24T22:00:23Z</time>
+        <p>Jamie challenged whether this belongs inside the project's current deep modules. Yes. The implementation should strengthen the existing module boundaries instead of adding a separate harness layer that shadows them.</p>
+        <ul>
+          <li><code>Infrastructure/scripts/lifecycle-and-sync/command_surface.py</code> owns generated command-handle write and check behavior.</li>
+          <li><code>Infrastructure/scripts/lib/ask/commands/skills_impl.py</code> and <code>repo_impl.py</code> should stay as public command orchestrators.</li>
+          <li><code>Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py</code> already owns command-handle proof and runtime target behavior; if RuntimeCard assembly becomes too large, extract a small sibling module under <code>skills_sdk</code> rather than moving proof logic into CLI code.</li>
+          <li><code>Infrastructure/scripts/lib/ask/skills_sdk/conformance.py</code> owns modeled conformance evidence and should remain the boundary for the live-parity status split.</li>
+          <li><code>Infrastructure/scripts/lib/ask/services/codex_preview.py</code> owns Codex source preview, source identity, and truncation semantics.</li>
+        </ul>
+        <p><strong>Important constraint:</strong> <code>.agents/skills</code> is ignored generated runtime output. The generator can repair local projection drift, but durable code changes need to land in the source modules and validators above.</p>
+      </article>
+
+      <article class="entry">
+        <h3>PU-001 implementation: parser delegates runtime proof validation</h3>
+        <time datetime="2026-05-24T22:00:23Z">2026-05-24T22:00:23Z</time>
+        <p>The focused tests found that invalid <code>--runtime-target cloud</code> was being rejected by the public parser before the runtime proof module could emit structured evidence. I removed the argparse <code>choices</code> guard from <code>Infrastructure/bin/ask</code> so <code>skills_sdk/runtime_adapters.py</code> remains the owner of runtime-target validation.</p>
+        <p><strong>Why this matters:</strong> the CLI now returns <code>command-handle-proof.v2</code> and <code>skill-runtime-failure.v1</code> for invalid runtime targets. That is the proof-plane contract; plain parser prose is not durable runtime evidence.</p>
+        <ul>
+          <li><code>./bin/ask skills handles --check --check-command-handles --no-handles --json --robot</code> passed.</li>
+          <li><code>./bin/ask repo doctor --json --robot</code> passed with non-blocking <code>repo_surface</code> diagnostic debt.</li>
+          <li><code>python3 -m pytest Infrastructure/tests/test_ask_skills_doctor.py -q</code> passed.</li>
+          <li><code>python3 -m pytest Infrastructure/tests/test_ask_cli_impl.py -q</code> passed.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-001 review residuals fixed</h3>
+        <time datetime="2026-05-24T22:11:20Z">2026-05-24T22:11:20Z</time>
+        <p>The review stack found no blocking issues. The useful residual was that runtime target normalization assumed string input and lacked direct coverage for noncanonical values. I fixed that in the runtime adapter instead of the command parser.</p>
+        <ul>
+          <li><code>normalize_runtime_target</code> now uses <code>str(runtime_target).strip().lower()</code>.</li>
+          <li><code>test_runtime_target_normalizes_noncanonical_values</code> covers mixed-case/spaced <code>CoDeX</code> and <code>None</code> as a structured invalid target.</li>
+          <li>Artifacts exist for simplify, unslopify, HE code review, testing, adversarial, and agent-native review gates.</li>
+        </ul>
+        <p><strong>Remaining low risk:</strong> future parser refactors must preserve the pass-through contract so invalid runtime targets continue to emit structured runtime proof failures rather than argparse-only prose.</p>
+      </article>
+
+      <article class="entry">
+        <h3>PU-001 delivery packaging started</h3>
+        <time datetime="2026-05-24T22:18:32Z">2026-05-24T22:18:32Z</time>
+        <p>I paused deeper PU-002 code edits to honor the slice lifecycle: PU-001 is now on branch <code>codex/jsc-364-runtime-proof-plane-pu001</code> for staging, commit, push, and PR creation.</p>
+        <ul>
+          <li><code>bash scripts/validate-codestyle.sh</code> failed on projection drift in <code>cache-harness-engineering</code> and <code>cache-skill-factory</code>; this is outside the PU-001 touched files.</li>
+          <li><code>./bin/ask repo validate --json --robot</code> failed on the same projection integrity blocker and wrote logs under <code>Infrastructure/artifacts/validation/20260524T221832Z</code>.</li>
+          <li><code>test -f memory.json &amp;&amp; jq -e ... memory.json</code> passed.</li>
+        </ul>
+        <p><strong>Tradeoff:</strong> I am recording the broad-gate blocker as delivery truth rather than broadening PU-001 into plugin-cache projection repair. The focused PU-001 proof remains green.</p>
+      </article>
+    </section>
+
+    <section aria-labelledby="next">
+      <h2 id="next">Next</h2>
+      <p>Stage and commit PU-001, open the PR with the projection-drift blocker called out, then continue PU-002 runtime evidence schemas and validator work inside the existing proof-plane module boundaries.</p>
+    </section>
+  </main>
+</body>
+</html>

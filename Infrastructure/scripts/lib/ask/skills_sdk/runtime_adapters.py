@@ -12,11 +12,11 @@ CheckCommandHandles = Callable[..., dict[str, Any]]
 SUPPORTED_RUNTIME_TARGETS = {"any", "codex", "agents"}
 
 
-def normalize_runtime_target(runtime_target: str) -> str:
-    return runtime_target.strip().lower()
+def normalize_runtime_target(runtime_target: object) -> str:
+    return str(runtime_target).strip().lower()
 
 
-def invalid_runtime_target_failure(handle: str, runtime_target: str) -> dict[str, Any]:
+def invalid_runtime_target_failure(handle: str, runtime_target: object) -> dict[str, Any]:
     normalized_target = normalize_runtime_target(runtime_target)
     safe_handle = handle.strip().lstrip("$") or handle
     recovery_guidance = "Use --runtime-target any, --runtime-target codex, or --runtime-target agents."
@@ -37,7 +37,7 @@ def build_command_handle_proof(
     *,
     repo_root: Path,
     handle: str,
-    runtime_target: str,
+    runtime_target: object,
     resolve_skill_handle_fn: ResolveSkillHandle,
     check_command_handles_fn: CheckCommandHandles,
     home_path: Path,

@@ -290,6 +290,23 @@ class TestAskSkillsDoctor(unittest.TestCase):
         self.assertEqual(proof["runtime_failure"], failure)
         self.assertIn("--runtime-target any", failure["validation_commands"][0])
 
+    def test_runtime_target_normalizes_noncanonical_values(self) -> None:
+        spaced_result = skills_proof(REPO_ROOT, "autofix", runtime_target=" CoDeX ")
+        none_result = skills_proof(REPO_ROOT, "autofix", runtime_target=None)
+
+        spaced_proof = spaced_result.data["proof"]
+        self.assertEqual(spaced_proof["runtime_target"], "codex")
+        self.assertIn("codex_user_runtime_ready", spaced_proof["gate_policy"]["required"])
+
+        none_proof = none_result.data["proof"]
+        self.assertEqual(none_result.status, "error")
+        self.assertEqual(none_proof["runtime_target"], "none")
+        self.assertEqual(none_proof["gate_policy"]["required"], ["runtime_target"])
+        self.assertEqual(
+            none_result.data["runtime_failure"]["failed_check_id"],
+            "runtime_target",
+        )
+
     def test_cli_runtime_target_rejects_invalid_value_with_runtime_failure_json(self) -> None:
         process = subprocess.run(
             [
