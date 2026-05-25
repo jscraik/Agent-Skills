@@ -5,7 +5,7 @@ PR: https://github.com/jscraik/Agent-Skills/pull/207
 Repo: jscraik/Agent-Skills
 Branch: codex/jsc-364-runtime-proof-plane-pu008
 Base: codex/jsc-364-runtime-proof-plane-pu007
-Head SHA: 0b83d477c399e5da46adef0bf523444ce74f370f
+Head SHA: 58faba032c47d7ab8278e9d04725e8f753edb21b
 
 ## Scope Run
 - Live PR metadata, mergeability, checks, and review state inspected from GitHub.
@@ -25,7 +25,7 @@ Head SHA: 0b83d477c399e5da46adef0bf523444ce74f370f
   - CodeRabbit auto comment present: "Review skipped" on non-default base branch.
   - Snyk summary comment present (no issues).
 
-### Check state
+### Initial check state
 From `gh pr checks 207 --repo jscraik/Agent-Skills`:
 
 - Failing:
@@ -74,14 +74,29 @@ From `gh run view 26398378270 --log-failed`:
 
 ## Next Actions (ranked)
 
-1. Update PR 207 checklist lines to satisfy `pr-template` validation:
-- For each unchecked CodeRabbit line, add explicit marker `**(Pending)**` or `**(N/A)**`, or check the box with evidence.
-2. Re-run/refresh checks and confirm `pr-template` turns green.
+1. Completed by coordinator: PR 207 checklist lines were updated with explicit `**(Pending)**` / `**(N/A)**` markers.
+2. Completed by coordinator: branch was pushed again to trigger a fresh synchronize event and confirm `pr-template` turns green.
 3. If this stacked PR is intentionally waiting on parent/base flow, keep Draft status and retain explicit pending markers; otherwise request/trigger independent review path that satisfies team policy.
 4. Keep projection-integrity drift tracked as pre-existing blocker outside this PR’s single failing check.
 
+## Coordinator Refresh
+
+After this artifact identified the PR-template blocker, the coordinator updated the PR body and pushed commit `58faba032` to trigger a fresh check set.
+
+Fresh command:
+
+`gh pr checks 207 --repo jscraik/Agent-Skills --json name,state,link,completedAt`
+
+Fresh result:
+
+- `pr-template` is `SUCCESS`.
+- Harness PR Pipeline jobs are `SUCCESS` or expected policy-dependent `SKIPPED`.
+- CircleCI, Semgrep, Trivy, Snyk, Socket, docs, security, and skill diagnostics are `SUCCESS`.
+- CodeRabbit status context is `SUCCESS`, with review automation still marked as process/policy pending in the PR body because this is a stacked non-default-base PR.
+
 ## Merge Readiness (current)
-- Not merge-ready now due to failing required check `pr-template`.
-- All other visible security/CI contexts in snapshot are passing.
+- PR 207 has no visible failing checks in the refreshed snapshot.
+- PR 207 remains draft and stacked, so it is not cleanup or merge authority yet.
+- Broad local projection-integrity drift remains classified as pre-existing delivery debt outside the focused PU-008 implementation.
 
 WROTE: artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/pr207-green-sweep.md

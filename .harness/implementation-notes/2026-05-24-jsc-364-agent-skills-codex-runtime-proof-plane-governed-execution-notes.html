@@ -349,7 +349,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T11:47:00Z">2026-05-25T11:47:00Z</time>
+          <time datetime="2026-05-25T11:52:00Z">2026-05-25T11:52:00Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -1172,11 +1172,23 @@
           <li>The pre-commit hook is still blocked by the same broad projection-integrity drift; the pre-push hook passed after redirecting the <code>prek</code> cache.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>PR 207 green after template fix</h3>
+        <time datetime="2026-05-25T11:52:00Z">2026-05-25T11:52:00Z</time>
+        <p>The PR-sweep worker found a real template blocker in PR 207. I updated the PR body with explicit pending/N/A markers, pushed a fresh delivery-truth commit, and verified the refreshed check set.</p>
+        <ul>
+          <li><code>pr-template</code> is now <code>SUCCESS</code>.</li>
+          <li><code>gh pr checks 207 --repo jscraik/Agent-Skills --json name,state,link,completedAt</code> shows no visible failing checks.</li>
+          <li>CircleCI, docs, security scans, skill diagnostics, Semgrep, Trivy, Snyk, Socket, and CodeRabbit contexts are green.</li>
+          <li>PR 207 remains draft and stacked, so this is delivery-health evidence rather than merge or cleanup authority.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>Let the PR 207 sweep refresh GitHub, CI, review, and mergeability truth; keep broad projection drift classified separately from focused PU-008 proof.</p>
+      <p>Keep PR 207 draft/stacked until the parent flow is ready; broad projection drift remains classified separately from focused PU-008 proof.</p>
     </section>
   </main>
 </body>
