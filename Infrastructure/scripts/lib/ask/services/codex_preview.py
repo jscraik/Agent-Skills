@@ -287,6 +287,22 @@ def _codex_preview_blocked_check(check_id: str, reason: str, source_files: list[
     }
 
 
+def _codex_preview_source_basis(source_identity: dict[str, Any], blocked_checks: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return explicit source-basis metadata for repo-side Codex previews."""
+    return {
+        "schema_version": "codex-preview-source-basis.v1",
+        "basis": "source_modeled",
+        "source_repo": source_identity.get("source_repo"),
+        "source_revision": source_identity.get("revision"),
+        "source_identity_status": source_identity.get("status"),
+        "relevant_source_dirty": source_identity.get("relevant_source_dirty"),
+        "modeled_rule_version": source_identity.get("modeled_rule_version"),
+        "source_files": list(source_identity.get("source_files") or CODEX_PREVIEW_SOURCE_FILES),
+        "live_runtime_parity": "not_claimed",
+        "blocked_check_ids": [str(check.get("id")) for check in blocked_checks if check.get("id")],
+    }
+
+
 def _codex_preview_base(repo_root: Path, command: str) -> dict[str, Any]:
     """Return shared source-backed metadata for a Codex runtime preview."""
     source_identity = _codex_runtime_source_identity(repo_root)
@@ -304,6 +320,7 @@ def _codex_preview_base(repo_root: Path, command: str) -> dict[str, Any]:
         "command": command,
         "status": "partial" if blocked_checks else "pass",
         "source_identity": source_identity,
+        "source_basis": _codex_preview_source_basis(source_identity, blocked_checks),
         "modeled_rules": {
             "version": CODEX_PREVIEW_MODELED_RULE_VERSION,
             "loader": [
@@ -331,6 +348,12 @@ def _codex_preview_base(repo_root: Path, command: str) -> dict[str, Any]:
 
 def _preview_status_from_blockers(blocked_checks: list[dict[str, Any]]) -> str:
     return "partial" if blocked_checks else "pass"
+
+
+def _refresh_preview_status_and_source_basis(payload: dict[str, Any]) -> None:
+    """Keep summary status and source-basis blocker ids synchronized."""
+    payload["source_basis"] = _codex_preview_source_basis(payload["source_identity"], payload["blocked_checks"])
+    payload["status"] = _preview_status_from_blockers(payload["blocked_checks"])
 
 
 def _skill_preview_default_name(skill_md: Path) -> str:
@@ -523,7 +546,15 @@ def build_codex_load_preview(repo_root: Path) -> dict[str, Any]:
     roots, root_blockers = _codex_preview_root_candidates(repo_root)
     skills, errors = _scan_preview_skills(repo_root, roots)
     base["blocked_checks"].extend(root_blockers)
-    base["status"] = _preview_status_from_blockers(base["blocked_checks"])
+    if errors:
+        base["blocked_checks"].append(
+            _codex_preview_blocked_check(
+                "preview_scan_errors",
+                "One or more modeled Codex skill roots could not be scanned completely.",
+                ["codex-rs/core-skills/src/loader.rs"],
+            )
+        )
+    _refresh_preview_status_and_source_basis(base)
     base.update(
         {
             "roots": roots,
@@ -651,6 +682,27 @@ def _render_preview_lines(skills: list[dict[str, Any]], budget: dict[str, Any]) 
     return rendered, report, warning
 
 
+def _preview_truncation_summary(budget: dict[str, Any], report: dict[str, Any], warning: str | None) -> dict[str, Any]:
+    """Return a stable truncation status object for agents and validators."""
+    omitted_count = int(report.get("omitted_count") or 0)
+    truncated_description_count = int(report.get("truncated_description_count") or 0)
+    return {
+        "schema_version": "codex-preview-truncation.v1",
+        "status": "truncated" if omitted_count or truncated_description_count else "none",
+        "strategy": report.get("render_strategy"),
+        "budget_kind": budget.get("kind"),
+        "budget_limit": budget.get("limit"),
+        "context_window": budget.get("context_window"),
+        "context_window_percent": budget.get("context_window_percent"),
+        "total_count": report.get("total_count"),
+        "included_count": report.get("included_count"),
+        "omitted_count": omitted_count,
+        "truncated_description_count": truncated_description_count,
+        "truncated_description_chars": report.get("truncated_description_chars"),
+        "warning_message": warning,
+    }
+
+
 def build_codex_render_preview(repo_root: Path, context_window: int | None = None) -> dict[str, Any]:
     payload = build_codex_load_preview(repo_root)
     payload["command"] = "skills render-preview"
@@ -663,6 +715,7 @@ def build_codex_render_preview(repo_root: Path, context_window: int | None = Non
         "report": report,
         "warning_message": warning,
     }
+    payload["truncation"] = _preview_truncation_summary(budget, report, warning)
     payload["agent_summary"] = f"Rendered {report['included_count']} of {report['total_count']} modeled skill metadata line(s)."
     return payload
 
@@ -676,7 +729,7 @@ def build_codex_config_explain(repo_root: Path) -> dict[str, Any]:
             ["codex-rs/core-skills/src/config_rules.rs", "codex-rs/config/src/skills_config.rs"],
         )
     )
-    payload["status"] = _preview_status_from_blockers(payload["blocked_checks"])
+    _refresh_preview_status_and_source_basis(payload)
     payload.update(
         {
             "config_contract": {
@@ -765,7 +818,7 @@ def build_codex_inject_preview(repo_root: Path, text: str) -> dict[str, Any]:
             ["codex-rs/core-skills/src/injection.rs"],
         )
     )
-    payload["status"] = _preview_status_from_blockers(payload["blocked_checks"])
+    _refresh_preview_status_and_source_basis(payload)
     selected, notes = _select_preview_explicit_mentions(payload["skills"], text)
     mentions = _extract_preview_mentions(text)
     payload.update(
@@ -848,7 +901,7 @@ def build_codex_implicit_preview(repo_root: Path, command: str, workdir: str | N
             ["codex-rs/core-skills/src/invocation_utils.rs"],
         )
     )
-    payload["status"] = _preview_status_from_blockers(payload["blocked_checks"])
+    _refresh_preview_status_and_source_basis(payload)
     workdir_path = Path(workdir) if workdir else repo_root
     if not workdir_path.is_absolute():
         workdir_path = repo_root / workdir_path
@@ -861,7 +914,7 @@ def build_codex_implicit_preview(repo_root: Path, command: str, workdir: str | N
                 ["codex-rs/core-skills/src/invocation_utils.rs"],
             )
         )
-        payload["status"] = _preview_status_from_blockers(payload["blocked_checks"])
+        _refresh_preview_status_and_source_basis(payload)
     selected = _preview_implicit_match(repo_root, payload["skills"], command, workdir_path)
     payload.update(
         {
